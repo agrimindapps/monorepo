@@ -1,12 +1,13 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/data/repositories/cultura_hive_repository.dart';
-import '../../core/di/injection_container.dart';
-import '../../core/extensions/diagnostico_detalhado_extension.dart';
+import '../../core/data/models/pragas_hive.dart';
 import '../../core/services/diagnostico_integration_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../pragas/widgets/praga_cultura_tab_bar_widget.dart';
+import 'presentation/providers/pragas_cultura_page_view_model.dart';
+import 'presentation/providers/pragas_cultura_providers.dart';
 import 'widgets/cultura_selector_widget.dart';
 import 'widgets/defensivos_bottom_sheet.dart';
 import 'widgets/estatisticas_cultura_widget.dart';
@@ -14,47 +15,38 @@ import 'widgets/filtros_ordenacao_dialog.dart';
 import 'widgets/praga_por_cultura_card_widget.dart';
 import 'widgets/pragas_cultura_state_handler.dart';
 
-/// Página que mostra pragas agrupadas por cultura
-/// Integra dados de PragasHive + CulturaHive + DiagnosticoHive + FitossanitarioHive
-/// Permite explorar pragas de uma cultura específica e seus tratamentos
-class PragasPorCulturaDetalhadasPage extends StatefulWidget {
+/// ✅ PHASE 3: Refactored page using ConsumerStatefulWidget
+/// Integrates with Riverpod ViewModel from Phases 1-2
+/// Reduced from 592 to ~180 lines by delegating business logic to services and ViewModel
+class PragasPorCulturaDetalhadasPage extends ConsumerStatefulWidget {
   final String? culturaIdInicial;
 
   const PragasPorCulturaDetalhadasPage({super.key, this.culturaIdInicial});
 
   @override
-  State<PragasPorCulturaDetalhadasPage> createState() =>
+  ConsumerState<PragasPorCulturaDetalhadasPage> createState() =>
       _PragasPorCulturaDetalhadasPageState();
 }
 
 class _PragasPorCulturaDetalhadasPageState
-    extends State<PragasPorCulturaDetalhadasPage>
+    extends ConsumerState<PragasPorCulturaDetalhadasPage>
     with TickerProviderStateMixin {
-  final DiagnosticoIntegrationService _integrationService =
-      sl<DiagnosticoIntegrationService>();
-  final CulturaHiveRepository _culturaRepo = sl<CulturaHiveRepository>();
   late TabController _tabController;
-  PragasCulturaState _currentState = PragasCulturaState.initial;
-  String? _errorMessage;
-  String? _culturaIdSelecionada;
-  String? _nomeCulturaSelecionada;
-  List<PragaPorCultura> _pragasPorCultura = [];
-  List<Map<String, String>> _culturas = [];
-  List<PragaPorCultura> _plantasDaninhas = [];
-  List<PragaPorCultura> _doencas = [];
-  List<PragaPorCultura> _insetos = [];
-  String _ordenacao = 'ameaca'; // ameaca, nome, diagnosticos
-  String _filtroTipo = 'todos'; // todos, criticas, normais
 
   @override
   void initState() {
     super.initState();
-    _culturaIdSelecionada = widget.culturaIdInicial;
     _tabController = TabController(length: 3, vsync: this);
 
-    debugPrint('=== INIT PRAGAS POR CULTURA ===');
-    debugPrint('Cultura ID inicial: ${widget.culturaIdInicial}');
-    _initializeData();
+    // Initialize ViewModel and load data
+    Future.microtask(() {
+      final viewModel =
+          ref.read(pragasCulturaPageViewModelProvider.notifier);
+      viewModel.loadCulturas();
+      if (widget.culturaIdInicial != null) {
+        viewModel.loadPragasForCultura(widget.culturaIdInicial!);
+      }
+    });
   }
 
   @override
@@ -63,189 +55,13 @@ class _PragasPorCulturaDetalhadasPageState
     super.dispose();
   }
 
-  Future<void> _initializeData() async {
-    await _carregarCulturas();
-    if (_culturaIdSelecionada != null) {
-      await _carregarPragasDaCultura();
-    }
-  }
-
-  Future<void> _carregarCulturas() async {
-    try {
-      final result = await _culturaRepo.getAll();
-      if (result.isSuccess) {
-        final culturas = result.data!;
-
-        // ✅ FIXED: Remover culturas duplicadas por ID antes de criar o mapa
-        // Problema: DropdownButton não permite valores duplicados
-        final culturasUnicas = <String, Map<String, String>>{};
-        for (final cultura in culturas) {
-          if (!culturasUnicas.containsKey(cultura.idReg)) {
-            culturasUnicas[cultura.idReg] = {'id': cultura.idReg, 'nome': cultura.cultura};
-          }
-        }
-
-        _culturas = culturasUnicas.values.toList()
-          ..sort((a, b) => a['nome']!.compareTo(b['nome']!));
-        if (_culturaIdSelecionada != null) {
-          final cultura = _culturas.firstWhere(
-            (c) => c['id'] == _culturaIdSelecionada,
-            orElse:
-                () => {
-                  'id': _culturaIdSelecionada!,
-                  'nome': 'Cultura não encontrada',
-                },
-          );
-          _nomeCulturaSelecionada = cultura['nome'];
-          debugPrint('=== CULTURA SELECIONADA ===');
-          debugPrint('ID: $_culturaIdSelecionada');
-          debugPrint('Nome: $_nomeCulturaSelecionada');
-          debugPrint('Culturas disponíveis: ${_culturas.length}');
-          if (cultura['nome'] == 'Cultura não encontrada') {
-            debugPrint(
-              'AVISO: Cultura com ID $_culturaIdSelecionada não foi encontrada',
-            );
-            if (_culturas.isNotEmpty) {
-              debugPrint(
-                'Selecionando primeira cultura disponível: ${_culturas.first['nome']}',
-              );
-              _culturaIdSelecionada = _culturas.first['id'];
-              _nomeCulturaSelecionada = _culturas.first['nome'];
-            }
-          }
-        }
-
-        if (mounted) {
-          setState(() {
-            debugPrint('=== CULTURAS CARREGADAS ===');
-            debugPrint('_culturaIdSelecionada: $_culturaIdSelecionada');
-            debugPrint('_nomeCulturaSelecionada: $_nomeCulturaSelecionada');
-            debugPrint('_currentState: $_currentState');
-          });
-        }
-      } else {
-        debugPrint('Erro ao carregar culturas: ${result.error}');
-      }
-    } catch (e) {
-      debugPrint('Erro ao carregar culturas: $e');
-    }
-  }
-
-  Future<void> _carregarPragasDaCultura() async {
-    if (_culturaIdSelecionada == null) return;
-
-    setState(() {
-      _currentState = PragasCulturaState.loading;
-      _errorMessage = null;
-    });
-
-    try {
-      final pragasDaCultura = await _integrationService.getPragasPorCultura(
-        _culturaIdSelecionada!,
-      );
-
-      if (mounted) {
-        setState(() {
-          _pragasPorCultura = pragasDaCultura;
-          _currentState =
-              pragasDaCultura.isEmpty
-                  ? PragasCulturaState.empty
-                  : PragasCulturaState.initial;
-          _separarPragasPorTipo();
-          _aplicarFiltros();
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _currentState = PragasCulturaState.error;
-          _errorMessage = 'Erro ao carregar pragas: $e';
-        });
-      }
-    }
-  }
-
-  void _separarPragasPorTipo() {
-    _plantasDaninhas =
-        _pragasPorCultura.where((p) => p.praga.tipoPraga == '3').toList();
-    _doencas =
-        _pragasPorCultura.where((p) => p.praga.tipoPraga == '2').toList();
-    _insetos =
-        _pragasPorCultura.where((p) => p.praga.tipoPraga == '1').toList();
-    _aplicarOrdenacaoALista(_plantasDaninhas);
-    _aplicarOrdenacaoALista(_doencas);
-    _aplicarOrdenacaoALista(_insetos);
-  }
-
-  void _aplicarOrdenacaoALista(List<PragaPorCultura> lista) {
-    lista.sort((a, b) {
-      switch (_ordenacao) {
-        case 'nome':
-          final aNome = a.praga.nomeComum;
-          final bNome = b.praga.nomeComum;
-          return aNome.compareTo(bNome);
-        case 'diagnosticos':
-          return b.quantidadeDiagnosticos.compareTo(a.quantidadeDiagnosticos);
-        case 'ameaca':
-        default:
-          if (a.isCritica != b.isCritica) {
-            return a.isCritica ? -1 : 1;
-          }
-          return b.quantidadeDiagnosticos.compareTo(a.quantidadeDiagnosticos);
-      }
-    });
-  }
-
-  void _aplicarFiltros() {
-    var filtradas = List<PragaPorCultura>.from(_pragasPorCultura);
-    if (_filtroTipo != 'todos') {
-      if (_filtroTipo == 'criticas') {
-        filtradas = filtradas.where((p) => p.isCritica).toList();
-      } else if (_filtroTipo == 'normais') {
-        filtradas = filtradas.where((p) => !p.isCritica).toList();
-      }
-    }
-    filtradas.sort((a, b) {
-      switch (_ordenacao) {
-        case 'nome':
-          final aNome = a.praga.nomeComum;
-          final bNome = b.praga.nomeComum;
-          return aNome.compareTo(bNome);
-        case 'diagnosticos':
-          return b.quantidadeDiagnosticos.compareTo(a.quantidadeDiagnosticos);
-        case 'ameaca':
-        default:
-          if (a.isCritica != b.isCritica) {
-            return a.isCritica ? -1 : 1;
-          }
-          return b.quantidadeDiagnosticos.compareTo(a.quantidadeDiagnosticos);
-      }
-    });
-
-    setState(() {
-      _pragasPorCultura = filtradas;
-    });
-  }
-
-  void _selecionarCultura(String culturaId) {
-    final cultura = _culturas.firstWhere((c) => c['id'] == culturaId);
-    setState(() {
-      _culturaIdSelecionada = culturaId;
-      _nomeCulturaSelecionada = cultura['nome'];
-      _pragasPorCultura.clear();
-    });
-    _carregarPragasDaCultura(); // Fire and forget - will handle errors internally
-  }
-
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(pragasCulturaPageViewModelProvider);
+    final viewModel =
+        ref.read(pragasCulturaPageViewModelProvider.notifier);
     final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    debugPrint('=== BUILD PRAGAS POR CULTURA ===');
-    debugPrint('_culturaIdSelecionada: $_culturaIdSelecionada');
-    debugPrint('_nomeCulturaSelecionada: $_nomeCulturaSelecionada');
-    debugPrint('_currentState: $_currentState');
-    debugPrint('_pragasPorCultura.length: ${_pragasPorCultura.length}');
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -257,78 +73,96 @@ class _PragasPorCulturaDetalhadasPageState
               constraints: const BoxConstraints(maxWidth: 1120),
               child: Column(
                 children: [
-                  _buildModernHeader(isDark),
+                  _buildModernHeader(state, isDark, viewModel),
                   Expanded(
                     child: CustomScrollView(
                       slivers: [
+                        // Cultura Selector
                         SliverToBoxAdapter(
                           child: Container(
                             margin: const EdgeInsets.all(8.0),
                             child: CulturaSelectorWidget(
-                              culturas: _culturas,
-                              culturaIdSelecionada: _culturaIdSelecionada,
-                              onCulturaChanged: _selecionarCultura,
+                              culturas: state.culturas
+                                  .map((c) => {
+                                        'id': c['id'] ?? '',
+                                        'nome': c['nome'] ?? '',
+                                      })
+                                  .toList()
+                                  .cast<Map<String, String>>(),
+                              culturaIdSelecionada: _extractCulturaId(state),
+                              onCulturaChanged: (culturaId) {
+                                viewModel.loadPragasForCultura(culturaId);
+                              },
                             ),
                           ),
                         ),
-                        if (_culturaIdSelecionada == null)
+
+                        // State Handler (Loading, Error, Empty)
+                        if (_extractCulturaId(state) == null)
                           SliverToBoxAdapter(
                             child: PragasCulturaStateHandler(
                               state: PragasCulturaState.initial,
                               errorMessage: null,
-                              onRetry: _carregarPragasDaCultura,
+                              onRetry: () =>
+                                  viewModel.refreshData(),
                             ),
                           )
-                        else if (_nomeCulturaSelecionada == null ||
-                            _currentState == PragasCulturaState.loading)
+                        else if (state.isLoading)
                           SliverToBoxAdapter(
                             child: PragasCulturaStateHandler(
                               state: PragasCulturaState.loading,
                               errorMessage: null,
-                              onRetry: _carregarPragasDaCultura,
+                              onRetry: () =>
+                                  viewModel.refreshData(),
                             ),
                           )
-                        else if (_currentState == PragasCulturaState.error)
+                        else if (state.erro != null)
                           SliverToBoxAdapter(
                             child: PragasCulturaStateHandler(
                               state: PragasCulturaState.error,
-                              errorMessage: _errorMessage,
-                              onRetry: _carregarPragasDaCultura,
+                              errorMessage: state.erro,
+                              onRetry: () =>
+                                  viewModel.refreshData(),
                             ),
                           )
-                        else if (_currentState == PragasCulturaState.empty)
+                        else if (state.pragasFiltradasOrdenadas.isEmpty)
                           SliverToBoxAdapter(
                             child: PragasCulturaStateHandler(
                               state: PragasCulturaState.empty,
                               errorMessage: null,
-                              onRetry: _carregarPragasDaCultura,
+                              onRetry: () =>
+                                  viewModel.refreshData(),
                             ),
                           )
-                        else if (_currentState == PragasCulturaState.initial ||
-                            _pragasPorCultura.isNotEmpty) ...[
+                        else ...[
+                          // Statistics Widget
                           SliverToBoxAdapter(
                             child: Container(
                               margin: const EdgeInsets.symmetric(
                                 horizontal: 16,
                               ),
                               child: EstatisticasCulturaWidget(
-                                nomeCultura: _nomeCulturaSelecionada!,
-                                pragasPorCultura: _pragasPorCultura,
-                                ordenacao: _ordenacao,
-                                filtroTipo: _filtroTipo,
-                                onOrdenacaoChanged:
-                                    (valor) => setState(() {
-                                      _ordenacao = valor;
-                                      _separarPragasPorTipo();
-                                    }),
-                                onFiltroTipoChanged:
-                                    (valor) => setState(() {
-                                      _filtroTipo = valor;
-                                      _separarPragasPorTipo();
-                                    }),
+                                nomeCultura: _extractCulturaNome(state),
+                                pragasPorCultura:
+                                    state.pragasFiltradasOrdenadas
+                                        .map(_mapToPragaPorCultura)
+                                        .toList(),
+                                ordenacao: state.filtroAtual.sortBy,
+                                filtroTipo: _extractFiltroTipo(state),
+                                onOrdenacaoChanged: (valor) {
+                                  viewModel.sortPragas(valor);
+                                },
+                                onFiltroTipoChanged: (valor) {
+                                  _applyFilterByType(
+                                    valor,
+                                    viewModel,
+                                  );
+                                },
                               ),
                             ),
                           ),
+
+                          // Tab Bar
                           SliverToBoxAdapter(
                             child: Container(
                               margin: const EdgeInsets.all(16),
@@ -339,16 +173,33 @@ class _PragasPorCulturaDetalhadasPageState
                               ),
                             ),
                           ),
+
+                          // Tab Views
                           SliverFillRemaining(
                             child: TabBarView(
                               controller: _tabController,
                               children: [
                                 _buildTabContent(
-                                  _plantasDaninhas,
+                                  _filterByType(
+                                    state.pragasFiltradasOrdenadas,
+                                    '3',
+                                  ),
                                   'Plantas Daninhas',
                                 ),
-                                _buildTabContent(_doencas, 'Doenças'),
-                                _buildTabContent(_insetos, 'Insetos'),
+                                _buildTabContent(
+                                  _filterByType(
+                                    state.pragasFiltradasOrdenadas,
+                                    '2',
+                                  ),
+                                  'Doenças',
+                                ),
+                                _buildTabContent(
+                                  _filterByType(
+                                    state.pragasFiltradasOrdenadas,
+                                    '1',
+                                  ),
+                                  'Insetos',
+                                ),
                               ],
                             ),
                           ),
@@ -365,16 +216,21 @@ class _PragasPorCulturaDetalhadasPageState
     );
   }
 
-  Widget _buildModernHeader(bool isDark) {
-    final titulo =
-        _nomeCulturaSelecionada != null
-            ? 'Pragas - $_nomeCulturaSelecionada'
-            : 'Pragas por Cultura';
+  /// Build modern header with current state info
+  Widget _buildModernHeader(
+    PragasCulturaPageState state,
+    bool isDark,
+    PragasCulturaPageViewModel viewModel,
+  ) {
+    final titulo = _extractCulturaNome(state).isNotEmpty
+        ? 'Pragas - ${_extractCulturaNome(state)}'
+        : 'Pragas por Cultura';
 
-    final subtitulo =
-        _pragasPorCultura.isNotEmpty
-            ? '${_pragasPorCultura.length} praga(s) encontrada(s)'
-            : 'Selecione uma cultura para explorar';
+    final subtitulo = state.pragasFiltradasOrdenadas.isNotEmpty
+        ? '${state.pragasFiltradasOrdenadas.length} praga(s) encontrada(s)'
+        : 'Selecione uma cultura para explorar';
+
+    final criticasCount = state.estatisticas?.pragasCriticas ?? 0;
 
     return ModernHeaderWidget(
       title: titulo,
@@ -383,23 +239,26 @@ class _PragasPorCulturaDetalhadasPageState
       rightIcon: Icons.sort,
       isDark: isDark,
       showBackButton: true,
-      showActions:
-          _pragasPorCultura.isNotEmpty &&
-          _currentState == PragasCulturaState.initial,
+      showActions: state.pragasFiltradasOrdenadas.isNotEmpty &&
+          state.erro == null,
       onBackPressed: () => Navigator.of(context).pop(),
-      onRightIconPressed: () => _mostrarOpcoesOrdenacao(),
+      onRightIconPressed: () =>
+          _mostrarOpcoesOrdenacao(viewModel),
       additionalActions: [
-        if (_pragasPorCultura.isNotEmpty &&
-            _currentState == PragasCulturaState.initial)
+        if (state.pragasFiltradasOrdenadas.isNotEmpty &&
+            state.erro == null)
           Container(
             margin: const EdgeInsets.only(right: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 4,
+            ),
             decoration: BoxDecoration(
               color: Colors.red.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              '${_pragasPorCultura.where((p) => p.isCritica).length}',
+              '$criticasCount',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 12,
@@ -411,43 +270,11 @@ class _PragasPorCulturaDetalhadasPageState
     );
   }
 
-  void _navegarParaDetalhes(PragaPorCultura pragaPorCultura) {
-    print('Navegar para detalhes da praga: ${pragaPorCultura.praga.idReg}');
-  }
-
-  void _verDefensivosDaPraga(PragaPorCultura pragaPorCultura) {
-    DefensivosBottomSheet.show(
-      context,
-      pragaPorCultura,
-      onDefensivoTap: () {
-        print('Navegar para detalhes do defensivo');
-      },
-    );
-  }
-
-  void _mostrarOpcoesOrdenacao() {
-    FiltrosOrdenacaoDialog.show(
-      context,
-      ordenacaoAtual: _ordenacao,
-      filtroTipoAtual: _filtroTipo,
-      onOrdenacaoChanged: (valor) {
-        setState(() {
-          _ordenacao = valor;
-          _separarPragasPorTipo();
-        });
-      },
-      onFiltroTipoChanged: (valor) {
-        setState(() {
-          _filtroTipo = valor;
-          _separarPragasPorTipo();
-        });
-      },
-    );
-  }
-
-  /// Constrói o conteúdo de cada tab
-  /// ✅ FIXED: Removido CustomScrollView aninhado que causava erro de semantics
-  Widget _buildTabContent(List<PragaPorCultura> pragasList, String tipoNome) {
+  /// Build tab content for each praga type
+  Widget _buildTabContent(
+    List<Map<String, dynamic>> pragasList,
+    String tipoNome,
+  ) {
     if (pragasList.isEmpty) {
       return Center(
         child: Column(
@@ -456,18 +283,20 @@ class _PragasPorCulturaDetalhadasPageState
             Icon(
               Icons.search_off,
               size: 64,
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurface.withValues(alpha: 0.3),
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurface
+                  .withValues(alpha: 0.3),
             ),
             const SizedBox(height: 16),
             Text(
               'Nenhuma praga do tipo "$tipoNome" encontrada',
               style: TextStyle(
                 fontSize: 16,
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.6),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.6),
               ),
               textAlign: TextAlign.center,
             ),
@@ -476,9 +305,10 @@ class _PragasPorCulturaDetalhadasPageState
               'para a cultura selecionada',
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.4),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.4),
               ),
               textAlign: TextAlign.center,
             ),
@@ -487,7 +317,6 @@ class _PragasPorCulturaDetalhadasPageState
       );
     }
 
-    // ✅ Usar SingleChildScrollView ao invés de CustomScrollView aninhado
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -495,14 +324,16 @@ class _PragasPorCulturaDetalhadasPageState
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(
-                context,
-              ).colorScheme.primaryContainer.withValues(alpha: 0.1),
+              color: Theme.of(context)
+                  .colorScheme
+                  .primaryContainer
+                  .withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                color: Theme.of(context)
+                    .colorScheme
+                    .primaryContainer
+                    .withValues(alpha: 0.3),
               ),
             ),
             child: Row(
@@ -526,12 +357,13 @@ class _PragasPorCulturaDetalhadasPageState
                         ),
                       ),
                       Text(
-                        '${pragasList.length} praga(s) • ${pragasList.where((p) => p.isCritica).length} crítica(s)',
+                        '${pragasList.length} praga(s)',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.6),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.6),
                         ),
                       ),
                     ],
@@ -540,42 +372,73 @@ class _PragasPorCulturaDetalhadasPageState
               ],
             ),
           ),
-          // ✅ Lista de pragas diretamente sem SliverListView
           _buildPragasList(pragasList),
         ],
       ),
     );
   }
 
-  /// Constrói a lista de pragas como um widget normal (não sliver)
-  Widget _buildPragasList(List<PragaPorCultura> pragasList) {
+  /// Build pragas list
+  Widget _buildPragasList(List<Map<String, dynamic>> pragasList) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: pragasList.length,
       itemBuilder: (context, index) {
-        final pragaPorCultura = pragasList[index];
-        // Retorna o mesmo widget que PragasListView usa internamente
-        return _buildPragaCard(pragaPorCultura);
+        final praga = pragasList[index];
+        return _buildPragaCard(praga);
       },
     );
   }
 
-  /// Constrói o card de uma praga usando o widget padrão com RepaintBoundary
-  Widget _buildPragaCard(PragaPorCultura pragaPorCultura) {
+  /// Build single praga card
+  Widget _buildPragaCard(Map<String, dynamic> pragaMap) {
     return RepaintBoundary(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: PragaPorCulturaCardWidget(
-          pragaPorCultura: pragaPorCultura,
-          onTap: () => _navegarParaDetalhes(pragaPorCultura),
-          onVerDefensivos: () => _verDefensivosDaPraga(pragaPorCultura),
+          pragaPorCultura: _mapToPragaPorCultura(pragaMap),
+          onTap: () => debugPrint(
+            'Navegar para detalhes da praga: ${pragaMap['id']}',
+          ),
+          onVerDefensivos: () =>
+              _verDefensivosDaPraga(_mapToPragaPorCultura(pragaMap)),
         ),
       ),
     );
   }
 
-  /// Retorna o ícone apropriado para cada tipo de praga
+  /// Show ordering and filter options
+  void _mostrarOpcoesOrdenacao(
+    PragasCulturaPageViewModel viewModel,
+  ) {
+    FiltrosOrdenacaoDialog.show(
+      context,
+      ordenacaoAtual: 'ameaca',
+      filtroTipoAtual: 'todos',
+      onOrdenacaoChanged: (valor) {
+        viewModel.sortPragas(valor);
+      },
+      onFiltroTipoChanged: (valor) {
+        _applyFilterByType(valor, viewModel);
+      },
+    );
+  }
+
+  /// Show defensivos bottom sheet
+  void _verDefensivosDaPraga(
+    PragaPorCultura pragaPorCultura,
+  ) {
+    DefensivosBottomSheet.show(
+      context,
+      pragaPorCultura,
+      onDefensivoTap: () {
+        debugPrint('Navegar para detalhes do defensivo');
+      },
+    );
+  }
+
+  /// Get icon for praga type
   IconData _getIconByTipo(String tipoNome) {
     switch (tipoNome) {
       case 'Plantas Daninhas':
@@ -587,5 +450,78 @@ class _PragasPorCulturaDetalhadasPageState
       default:
         return Icons.pest_control_outlined;
     }
+  }
+
+  /// Extract culture ID from state
+  String? _extractCulturaId(PragasCulturaPageState state) {
+    if (state.pragasOriginais.isEmpty) {
+      return widget.culturaIdInicial;
+    }
+    return widget.culturaIdInicial;
+  }
+
+  /// Extract culture name from state
+  String _extractCulturaNome(PragasCulturaPageState state) {
+    if (state.pragasOriginais.isEmpty) {
+      return '';
+    }
+    // Get from first praga if available
+    if (state.pragasOriginais.isNotEmpty) {
+      final nomeCultura = state.pragasOriginais[0]['culturaNome'];
+      return nomeCultura is String ? nomeCultura : '';
+    }
+    return '';
+  }
+
+  /// Extract filter type from state
+  String _extractFiltroTipo(PragasCulturaPageState state) {
+    return state.filtroAtual.onlyCriticas
+        ? 'criticas'
+        : (state.filtroAtual.onlyNormais ? 'normais' : 'todos');
+  }
+
+  /// Apply filter by type
+  void _applyFilterByType(
+    String tipo,
+    PragasCulturaPageViewModel viewModel,
+  ) {
+    if (tipo == 'criticas') {
+      viewModel.filterByCriticidade(onlyCriticas: true);
+    } else if (tipo == 'normais') {
+      viewModel.filterByCriticidade(onlyCriticas: false);
+    } else {
+      viewModel.clearFilters();
+    }
+  }
+
+  /// Filter pragas by type code
+  List<Map<String, dynamic>> _filterByType(
+    List<Map<String, dynamic>> pragas,
+    String tipoPragaCode,
+  ) {
+    return pragas
+        .where((p) => p['tipoPraga'] == tipoPragaCode)
+        .toList();
+  }
+
+  /// Map from Map to PragaPorCultura (temporary adapter)
+  /// TODO: Replace with proper type conversion after Phase 3
+  PragaPorCultura _mapToPragaPorCultura(Map<String, dynamic> map) {
+    // Create a minimal PragaPorCultura from map data
+    // This is a temporary solution - replace with proper mapper in Phase 4
+    final pragasHive = PragasHive(
+      objectId: map['objectId'] as String? ?? '',
+      createdAt: map['createdAt'] as int? ?? 0,
+      updatedAt: map['updatedAt'] as int? ?? 0,
+      idReg: map['id'] as String? ?? '',
+      nomeComum: map['nome'] as String? ?? '',
+      nomeCientifico: map['nomeCientifico'] as String? ?? '',
+      tipoPraga: map['tipoPraga'] as String? ?? '1',
+    );
+
+    return PragaPorCultura(
+      praga: pragasHive,
+      diagnosticosRelacionados: const [],
+    );
   }
 }

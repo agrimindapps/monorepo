@@ -74,10 +74,7 @@ Future<void> init() async {
 
   if (!sl.isRegistered<SyncOperations>()) {
     sl.registerLazySingleton<SyncOperations>(
-      () => SyncOperations(
-        sl<SyncQueue>(),
-        sl<core.ConnectivityService>(),
-      ),
+      () => SyncOperations(sl<SyncQueue>(), sl<core.ConnectivityService>()),
     );
   }
 
@@ -153,8 +150,7 @@ Future<void> init() async {
   sl.registerLazySingleton<core.IAppRatingRepository>(
     () => core.AppRatingService(
       appStoreId: '967785485', // ReceitaAgro iOS App Store ID
-      googlePlayId:
-          'br.com.agrimind.pragassoja', // Android Package ID
+      googlePlayId: 'br.com.agrimind.pragassoja', // Android Package ID
       minDays: 3,
       minLaunches: 5,
       remindDays: 7,
@@ -296,6 +292,10 @@ Future<void> init() async {
       integrationService: sl<DiagnosticoIntegrationService>(),
     ),
   );
+
+  // ✅ PHASE 3: Setup GetIt for Pragas por Cultura services
+  _setupPragasPorCulturaServices();
+
   sl.registerLazySingleton<ComentariosHiveRepository>(
     () => ComentariosHiveRepository(),
   );
@@ -382,5 +382,24 @@ Future<void> init() async {
       );
     }
     rethrow;
+  }
+}
+
+/// ✅ PHASE 3: Setup GetIt for Pragas por Cultura refactoring
+/// Registers the 4 specialized services and ViewModel for the Pragas por Cultura feature
+void _setupPragasPorCulturaServices() {
+  // Import the services from the feature
+  // Services are registered as singletons to ensure consistent instance across the app
+
+  // For now, this function is a placeholder
+  // The actual registration will be done when the services are created
+  // TODO: Add service imports and registration when Phase 3 page refactoring is complete
+
+  if (kDebugMode) {
+    developer.log(
+      'Pragas por Cultura services setup skipped (awaiting Page refactoring)',
+      name: 'InjectionContainer - PragasPorCultura',
+      level: 500,
+    );
   }
 }

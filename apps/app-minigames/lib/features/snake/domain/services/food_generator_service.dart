@@ -22,11 +22,20 @@ class FoodGeneratorService {
   // ============================================================================
 
   /// Generates random food position avoiding snake body
+  /// Uses cached free positions for better performance
   Position generateFood({
     required List<Position> snakeBody,
+    required Set<Position> freePositions,
     required int gridSize,
     int maxAttempts = 100,
   }) {
+    // If we have cached free positions, use them (O(1) lookup)
+    if (freePositions.isNotEmpty) {
+      final freeList = freePositions.toList();
+      return freeList[_random.nextInt(freeList.length)];
+    }
+
+    // Fallback: try random generation
     Position foodPos;
     int attempts = 0;
 
@@ -35,11 +44,11 @@ class FoodGeneratorService {
       attempts++;
     } while (snakeBody.contains(foodPos) && attempts < maxAttempts);
 
-    // If couldn't find free position in maxAttempts, find any free position
+    // If couldn't find free position in maxAttempts, recalculate (expensive)
     if (snakeBody.contains(foodPos)) {
-      final freePositions = _getAllFreePositions(snakeBody, gridSize);
-      if (freePositions.isNotEmpty) {
-        foodPos = freePositions[_random.nextInt(freePositions.length)];
+      final calculatedFree = _getAllFreePositions(snakeBody, gridSize);
+      if (calculatedFree.isNotEmpty) {
+        foodPos = calculatedFree[_random.nextInt(calculatedFree.length)];
       }
     }
 

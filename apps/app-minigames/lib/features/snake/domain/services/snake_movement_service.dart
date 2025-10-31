@@ -186,6 +186,27 @@ class SnakeMovementService {
     return 1000 / ms;
   }
 
+  /// Calculates dynamic game speed based on score and base difficulty
+  /// Speed increases (time decreases) as player scores more points
+  /// Formula: baseSpeed * (1 - (score / 10) * 0.05)
+  /// Example: Every 10 points, speed increases by 5%
+  int calculateDynamicGameSpeed({
+    required SnakeDifficulty baseDifficulty,
+    required int score,
+  }) {
+    final baseSpeedMs = baseDifficulty.gameSpeed.inMilliseconds;
+
+    // Calculate speed multiplier: 5% increase per 10 points
+    // Max speed multiplier is 0.7x (30% faster) at 60+ points
+    final speedIncreases = (score ~/ 10).toDouble();
+    final speedMultiplier = (1 - (speedIncreases * 0.05)).clamp(0.7, 1.0);
+
+    final dynamicSpeedMs = (baseSpeedMs * speedMultiplier).toInt();
+
+    // Minimum speed: 8ms (125 moves/second)
+    return dynamicSpeedMs.clamp(8, baseSpeedMs);
+  }
+
   // ============================================================================
   // Statistics
   // ============================================================================

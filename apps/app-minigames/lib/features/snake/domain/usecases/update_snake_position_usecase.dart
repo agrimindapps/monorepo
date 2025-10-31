@@ -1,6 +1,3 @@
-// Dart imports:
-import 'dart:math';
-
 // Package imports:
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
@@ -12,11 +9,14 @@ import 'package:app_minigames/core/error/failures.dart';
 import '../entities/game_state.dart';
 import '../entities/position.dart';
 import '../entities/enums.dart';
+import '../services/food_generator_service.dart';
 
 /// Use case to update snake position (game physics)
 @injectable
 class UpdateSnakePositionUseCase {
-  UpdateSnakePositionUseCase();
+  final FoodGeneratorService _foodGeneratorService;
+
+  UpdateSnakePositionUseCase(this._foodGeneratorService);
 
   /// Execute the use case
   /// Moves snake, checks collisions, checks food
@@ -71,10 +71,22 @@ class UpdateSnakePositionUseCase {
       newSnake = newSnake.sublist(0, newSnake.length - 1);
     }
 
-    // 6. Generate new food position if ate
+    // 6. Generate new food position if ate (using cached free positions)
     Position newFoodPosition = currentState.foodPosition;
+    Set<Position> newFreePositions = currentState.freePositions;
+
     if (ateFood) {
-      newFoodPosition = _generateRandomFood(newSnake, currentState.gridSize);
+      // Remove eaten food position from free positions
+      newFreePositions = {...currentState.freePositions}..remove(currentState.foodPosition);
+
+      newFoodPosition = _foodGeneratorService.generateFood(
+        snakeBody: newSnake,
+        freePositions: newFreePositions,
+        gridSize: currentState.gridSize,
+      );
+
+      // Add new food position to occupied (removing from free)
+      newFreePositions.remove(newFoodPosition);
     }
 
     // 7. Update score
@@ -84,24 +96,7 @@ class UpdateSnakePositionUseCase {
       snake: newSnake,
       foodPosition: newFoodPosition,
       score: newScore,
+      freePositions: newFreePositions,
     ));
-  }
-
-  /// Generate random food position (avoiding snake body)
-  Position _generateRandomFood(List<Position> snake, int gridSize) {
-    final random = Random();
-    Position foodPos;
-
-    // Try to find a free position (max 100 attempts)
-    int attempts = 0;
-    do {
-      foodPos = Position(
-        random.nextInt(gridSize),
-        random.nextInt(gridSize),
-      );
-      attempts++;
-    } while (snake.contains(foodPos) && attempts < 100);
-
-    return foodPos;
   }
 }

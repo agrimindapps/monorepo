@@ -10,6 +10,8 @@ import 'package:app_minigames/core/di/injection.dart';
 // Domain imports:
 import '../../domain/entities/game_state.dart';
 import '../../domain/entities/enums.dart';
+import '../../domain/services/direction_queue.dart';
+import '../../domain/services/snake_movement_service.dart';
 import '../../domain/usecases/update_snake_position_usecase.dart';
 import '../../domain/usecases/change_direction_usecase.dart';
 import '../../domain/usecases/start_new_game_usecase.dart';
@@ -31,6 +33,9 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
   late final LoadHighScoreUseCase _loadHighScoreUseCase;
   late final SaveHighScoreUseCase _saveHighScoreUseCase;
 
+  // Services
+  late final SnakeMovementService _movementService;
+
   // Game loop timer
   Timer? _gameTimer;
 
@@ -39,6 +44,9 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
 
   // Mounted flag for race condition protection
   bool _isMounted = true;
+
+  // Input buffering for responsive controls
+  final DirectionQueue _directionQueue = DirectionQueue();
 
   @override
   FutureOr<SnakeGameState> build() async {
@@ -51,10 +59,14 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
     _loadHighScoreUseCase = getIt<LoadHighScoreUseCase>();
     _saveHighScoreUseCase = getIt<SaveHighScoreUseCase>();
 
+    // Inject services
+    _movementService = getIt<SnakeMovementService>();
+
     // Cleanup on dispose
     ref.onDispose(() {
       _isMounted = false;
       _gameTimer?.cancel();
+      _directionQueue.clear();
     });
 
     // Load high score
@@ -113,48 +125,83 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
   }
 
   /// Start game loop (Timer.periodic)
+  /// Uses dynamic game speed based on current score
   void _startGameLoop() {
     _gameTimer?.cancel();
+    _directionQueue.clear();
 
-    final currentState = state.valueOrNull;
-    if (currentState == null) return;
+    final initialState = state.valueOrNull;
+    if (initialState == null) return;
 
-    final gameSpeed = currentState.difficulty.gameSpeed;
+    // Calculate initial game speed with dynamic difficulty
+    final dynamicGameSpeed = _movementService.calculateDynamicGameSpeed(
+      baseDifficulty: initialState.difficulty,
+      score: initialState.score,
+    );
 
-    _gameTimer = Timer.periodic(gameSpeed, (_) async {
+    _gameTimer = Timer.periodic(Duration(milliseconds: dynamicGameSpeed), (_) async {
       if (!_isMounted) return;
 
-      final currentState = state.valueOrNull;
+      var currentState = state.valueOrNull;
       if (currentState == null || !currentState.gameStatus.isRunning) {
         _gameTimer?.cancel();
         return;
       }
 
+      // Process queued direction changes
+      while (!_directionQueue.isEmpty) {
+        final queuedDirection = _directionQueue.dequeue();
+        if (queuedDirection != null && currentState != null) {
+          final result = await _changeDirectionUseCase(
+            currentState: currentState!,
+            newDirection: queuedDirection,
+          );
+          result.fold(
+            (failure) {}, // Ignore invalid directions
+            (newState) => currentState = newState,
+          );
+        }
+      }
+
       // Update snake position
-      final result = await _updateSnakePositionUseCase(currentState: currentState);
-      if (!_isMounted) return;
+      if (currentState != null) {
+        final result = await _updateSnakePositionUseCase(currentState: currentState!);
+        if (!_isMounted) return;
 
-      result.fold(
-        (failure) {
-          if (!_isMounted) return;
-          state = AsyncValue.error(failure, StackTrace.current);
-          _gameTimer?.cancel();
-        },
-        (newState) {
-          if (!_isMounted) return;
-          state = AsyncValue.data(newState);
-
-          // Check game over
-          if (newState.gameStatus.isGameOver) {
+        result.fold(
+          (failure) {
+            if (!_isMounted) return;
+            state = AsyncValue.error(failure, StackTrace.current);
             _gameTimer?.cancel();
-            _saveHighScore();
-          }
-        },
-      );
+          },
+          (newState) {
+            if (!_isMounted) return;
+            state = AsyncValue.data(newState);
+
+            // Check game over
+            if (newState.gameStatus.isGameOver) {
+              _gameTimer?.cancel();
+              _saveHighScore();
+            } else {
+              // Recalculate game speed if score changed (dynamic difficulty)
+              final newDynamicSpeed = _movementService.calculateDynamicGameSpeed(
+                baseDifficulty: newState.difficulty,
+                score: newState.score,
+              );
+
+              if (newDynamicSpeed != dynamicGameSpeed) {
+                // Speed changed, restart timer with new speed
+                _startGameLoop();
+              }
+            }
+          },
+        );
+      }
     });
   }
 
-  /// Change direction
+  /// Change direction with input buffering
+  /// Queues direction changes if game is running for more responsive controls
   Future<void> changeDirection(Direction newDirection) async {
     if (!_isMounted) return;
 
@@ -186,6 +233,16 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
       return;
     }
 
+    // If game is running, queue the direction for next frame
+    if (currentState.gameStatus.isRunning) {
+      _directionQueue.enqueue(
+        newDirection: newDirection,
+        currentDirection: currentState.direction,
+      );
+      return;
+    }
+
+    // If game is paused, apply direction immediately
     final result = await _changeDirectionUseCase(
       currentState: currentState,
       newDirection: newDirection,

@@ -14,6 +14,7 @@ class SnakeGameState extends Equatable {
   final int gridSize;
   final SnakeGameStatus gameStatus;
   final SnakeDifficulty difficulty;
+  final Set<Position> freePositions; // Cached free positions for performance
 
   const SnakeGameState({
     required this.snake,
@@ -23,6 +24,7 @@ class SnakeGameState extends Equatable {
     required this.gridSize,
     required this.gameStatus,
     required this.difficulty,
+    required this.freePositions,
   });
 
   /// Initial state (not started)
@@ -31,15 +33,36 @@ class SnakeGameState extends Equatable {
     SnakeDifficulty difficulty = SnakeDifficulty.medium,
   }) {
     final center = gridSize ~/ 2;
+    final initialSnake = [Position(center, center)];
+    final freePositions = _calculateFreePositions(gridSize, initialSnake);
+
     return SnakeGameState(
-      snake: [Position(center, center)],
+      snake: initialSnake,
       foodPosition: Position(center + 5, center),
       direction: Direction.right,
       score: 0,
       gridSize: gridSize,
       gameStatus: SnakeGameStatus.notStarted,
       difficulty: difficulty,
+      freePositions: freePositions,
     );
+  }
+
+  /// Calculates all free positions in the grid (not occupied by snake)
+  static Set<Position> _calculateFreePositions(
+    int gridSize,
+    List<Position> snake,
+  ) {
+    final freePositions = <Position>{};
+    for (int x = 0; x < gridSize; x++) {
+      for (int y = 0; y < gridSize; y++) {
+        final pos = Position(x, y);
+        if (!snake.contains(pos)) {
+          freePositions.add(pos);
+        }
+      }
+    }
+    return freePositions;
   }
 
   /// Get snake head position
@@ -66,15 +89,22 @@ class SnakeGameState extends Equatable {
     int? gridSize,
     SnakeGameStatus? gameStatus,
     SnakeDifficulty? difficulty,
+    Set<Position>? freePositions,
   }) {
+    // Auto-calculate freePositions if snake changed but freePositions not provided
+    final newSnake = snake ?? this.snake;
+    final newFreePositions = freePositions ??
+        (snake != null ? _calculateFreePositions(gridSize ?? this.gridSize, newSnake) : this.freePositions);
+
     return SnakeGameState(
-      snake: snake ?? this.snake,
+      snake: newSnake,
       foodPosition: foodPosition ?? this.foodPosition,
       direction: direction ?? this.direction,
       score: score ?? this.score,
       gridSize: gridSize ?? this.gridSize,
       gameStatus: gameStatus ?? this.gameStatus,
       difficulty: difficulty ?? this.difficulty,
+      freePositions: newFreePositions,
     );
   }
 
@@ -87,5 +117,6 @@ class SnakeGameState extends Equatable {
         gridSize,
         gameStatus,
         difficulty,
+        freePositions,
       ];
 }

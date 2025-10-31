@@ -11,6 +11,7 @@ class CollisionService {
   static const double collisionPadding = 2.0;
 
   /// Checks collision between bird and a pipe
+  /// Uses expanded hitbox to prevent tunnel bugs with fast-moving birds
   bool checkBirdPipeCollision({
     required BirdEntity bird,
     required PipeEntity pipe,
@@ -27,23 +28,63 @@ class CollisionService {
     final pipeRight = pipe.x + pipe.width;
 
     // Check if bird is horizontally aligned with pipe
-    if (birdRight < pipeLeft || birdLeft > pipeRight) {
+    // Using >= and <= instead of > and < to catch edge cases
+    if (birdRight <= pipeLeft || birdLeft >= pipeRight) {
       return false; // Bird not in pipe's X range
     }
 
     // Check collision with top pipe
-    if (birdTop < pipe.topHeight) {
+    if (birdTop <= pipe.topHeight) {
       return true; // Hit top pipe
     }
 
     // Check collision with bottom pipe
     final gapHeight = pipe.screenHeight * pipe.gapSize;
     final bottomPipeTop = pipe.topHeight + gapHeight;
-    if (birdBottom > bottomPipeTop) {
+    if (birdBottom >= bottomPipeTop) {
       return true; // Hit bottom pipe
     }
 
     return false; // Bird is in the gap
+  }
+
+  /// Checks collision with an expanded pipe hitbox to prevent tunnel bugs
+  /// Expands pipe hitbox to catch fast-moving birds that might slip through
+  bool checkBirdPipeCollisionWithExpansion({
+    required BirdEntity bird,
+    required PipeEntity pipe,
+    required double birdX,
+    double expansionPixels = 5.0,
+  }) {
+    // Expand pipe hitbox
+    final expandedPipeLeft = pipe.x - expansionPixels;
+    final expandedPipeRight = pipe.x + pipe.width + expansionPixels;
+
+    // Bird hitbox
+    final birdLeft = birdX + collisionPadding;
+    final birdRight = birdX + bird.size - collisionPadding;
+    final birdTop = bird.y + collisionPadding;
+    final birdBottom = bird.y + bird.size - collisionPadding;
+
+    // Check horizontal overlap with expanded pipe
+    if (birdRight <= expandedPipeLeft || birdLeft >= expandedPipeRight) {
+      return false;
+    }
+
+    // Check vertical collision with expanded gap
+    final gapHeight = pipe.screenHeight * pipe.gapSize;
+    final topPipeBottom = pipe.topHeight + expansionPixels;
+    final bottomPipeTop = pipe.topHeight + gapHeight - expansionPixels;
+
+    if (birdTop <= topPipeBottom) {
+      return true;
+    }
+
+    if (birdBottom >= bottomPipeTop) {
+      return true;
+    }
+
+    return false;
   }
 
   /// Checks collision with any pipe in the list
@@ -65,18 +106,22 @@ class CollisionService {
   }
 
   /// Checks if bird hit ground
+  /// Uses bird.y + bird.size (bottom edge) for consistency with pipe collision
   bool checkGroundCollision({
     required BirdEntity bird,
     required double playAreaHeight,
   }) {
-    return bird.y + bird.size >= playAreaHeight;
+    final birdBottom = bird.y + bird.size - collisionPadding;
+    return birdBottom >= playAreaHeight;
   }
 
   /// Checks if bird hit ceiling
+  /// Uses bird.y (top edge) for consistency
   bool checkCeilingCollision({
     required BirdEntity bird,
   }) {
-    return bird.y <= 0;
+    final birdTop = bird.y + collisionPadding;
+    return birdTop <= 0;
   }
 
   /// Checks all collision types

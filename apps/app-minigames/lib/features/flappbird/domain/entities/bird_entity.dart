@@ -36,7 +36,9 @@ class BirdEntity extends Equatable {
     );
   }
 
-  /// Apply gravity to the bird (returns new state)
+  /// @deprecated Use PhysicsService.applyGravity() instead
+  /// This method is kept for backward compatibility but should not be used
+  @Deprecated('Use PhysicsService.applyGravity instead')
   BirdEntity applyGravity(double gravity) {
     final newVelocity = velocity + gravity;
     final newY = y + newVelocity;
@@ -51,7 +53,9 @@ class BirdEntity extends Equatable {
     );
   }
 
-  /// Apply flap/jump force (returns new state)
+  /// @deprecated Use PhysicsService.applyJump() instead
+  /// This method is kept for backward compatibility but should not be used
+  @Deprecated('Use PhysicsService.applyJump instead')
   BirdEntity flap(double jumpStrength) {
     return copyWith(
       velocity: jumpStrength,
@@ -60,13 +64,18 @@ class BirdEntity extends Equatable {
   }
 
   /// Check if bird is colliding with ground
+  /// @deprecated Use CollisionService.checkGroundCollision() instead
+  /// Note: This method used size/2 which was inconsistent with CollisionService
+  @Deprecated('Use CollisionService.checkGroundCollision instead')
   bool isCollidingWithGround(double groundY) {
-    return y + size / 2 >= groundY;
+    return y + size >= groundY;
   }
 
   /// Check if bird is colliding with ceiling
+  /// @deprecated Use CollisionService.checkCeilingCollision() instead
+  @Deprecated('Use CollisionService.checkCeilingCollision instead')
   bool isCollidingWithCeiling() {
-    return y - size / 2 <= 0;
+    return y <= 0;
   }
 
   /// Check collision with screen boundaries

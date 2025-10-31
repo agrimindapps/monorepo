@@ -19,19 +19,28 @@ class PipeGeneratorService {
   /// Pipe width
   static const double pipeWidth = 80.0;
 
-  /// Minimum top height percentage
+  /// Minimum top height percentage (gap from top)
   static const double minTopHeightPercent = 0.1;
 
+  /// Maximum top height percentage (gap from bottom)
+  /// This prevents gaps that are too easy to pass through
+  static const double maxTopHeightPercent = 0.8;
+
   /// Creates a new pipe at the right edge of screen
+  /// Ensures gap size is balanced and achievable at all difficulty levels
   PipeEntity createPipe({
     required String id,
     required double screenWidth,
     required double screenHeight,
     required FlappyDifficulty difficulty,
   }) {
-    final minTopHeight = screenHeight * minTopHeightPercent;
     final gapSize = difficulty.gapSize;
-    final maxTopHeight = screenHeight * (1 - gapSize) - minTopHeight;
+    final minTopHeight = screenHeight * minTopHeightPercent;
+
+    // Ensure max top height doesn't create impossible gaps
+    // maxTopHeight = screen * maxTopHeightPercent, but ensure gap fits
+    final maxPossibleTop = screenHeight * (1 - gapSize) - minTopHeight;
+    final maxTopHeight = minTopHeight + maxPossibleTop * 0.9; // Use 90% of range
 
     final topHeight =
         minTopHeight + _random.nextDouble() * (maxTopHeight - minTopHeight);

@@ -9,13 +9,50 @@ import 'package:core/core.dart';
 import '../entities/game_state_entity.dart';
 import '../entities/pipe_entity.dart';
 import '../entities/enums.dart';
+import '../services/physics_service.dart';
+import '../services/pipe_generator_service.dart';
 
 /// Use case to start a new game
+/// Validates physics and difficulty parameters before starting
 class StartGameUseCase {
+  final PhysicsService _physicsService;
+  final PipeGeneratorService _pipeGeneratorService;
+
+  StartGameUseCase(this._physicsService, this._pipeGeneratorService);
+
   Future<Either<Failure, FlappyGameState>> call({
     required FlappyGameState currentState,
   }) async {
     try {
+      // Validate physics parameters
+      final physicsValidation = _physicsService.validatePhysics(
+        gravity: PhysicsService.defaultGravity,
+        jumpStrength: PhysicsService.defaultJumpStrength,
+      );
+
+      if (!physicsValidation.isValid) {
+        return Left(
+          ValidationFailure(
+            'Invalid physics configuration: ${physicsValidation.errorMessage}',
+          ),
+        );
+      }
+
+      // Validate pipe configuration
+      final pipeValidation = _pipeGeneratorService.validatePipeConfig(
+        screenWidth: currentState.screenWidth,
+        screenHeight: currentState.playAreaHeight,
+        difficulty: currentState.difficulty,
+      );
+
+      if (!pipeValidation.isValid) {
+        return Left(
+          ValidationFailure(
+            'Invalid pipe configuration: ${pipeValidation.errorMessage}',
+          ),
+        );
+      }
+
       // Generate initial pipes
       final pipes = _generateInitialPipes(currentState);
 

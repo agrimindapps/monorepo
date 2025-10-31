@@ -4,40 +4,72 @@ import '../entities/bird_entity.dart';
 
 /// Service responsible for bird physics calculations
 /// Follows SRP by handling only physics operations
+/// Supports delta time for frame-rate independent movement
 @lazySingleton
 class PhysicsService {
-  /// Gravity constant (pixels per frame at 60fps)
-  static const double defaultGravity = 0.6;
+  /// Gravity constant (pixels per second²)
+  /// Adjusted for display: ~960 pixels/s² = 0.6 pixels/frame at 60fps
+  static const double defaultGravity = 960.0; // pixels per second²
 
-  /// Jump strength (negative velocity = upward)
-  static const double defaultJumpStrength = -10.0;
+  /// Jump strength (negative velocity = upward, pixels per second)
+  /// ~600 pixels/s = -10 pixels/frame at 60fps
+  static const double defaultJumpStrength = -600.0; // pixels per second
 
-  /// Terminal velocity (max falling speed)
-  static const double terminalVelocity = 12.0;
+  /// Terminal velocity (max falling speed, pixels per second)
+  /// ~720 pixels/s = 12 pixels/frame at 60fps
+  static const double terminalVelocity = 720.0; // pixels per second
 
-  /// Maximum upward velocity
-  static const double maxUpwardVelocity = -12.0;
+  /// Maximum upward velocity (pixels per second)
+  /// ~720 pixels/s = -12 pixels/frame at 60fps
+  static const double maxUpwardVelocity = -720.0; // pixels per second
 
-  /// Applies gravity to bird velocity and position
+  /// Default frame duration (1/60 second at 60fps)
+  /// Used as fallback if deltaTime is not provided
+  static const double defaultDeltaTime = 1.0 / 60.0;
+
+  /// Applies gravity to bird velocity and position, with rotation update
+  /// This is the unified method for applying physics to the bird
+  /// Supports delta time for frame-rate independent movement
+  ///
+  /// [deltaTimeSeconds] - Time elapsed since last frame in seconds (default: 1/60s)
+  /// [gravity] - Acceleration in pixels/second² (default: 960)
   BirdEntity applyGravity({
     required BirdEntity bird,
     double gravity = defaultGravity,
+    double deltaTimeSeconds = defaultDeltaTime,
   }) {
-    final newVelocity = _clampVelocity(bird.velocity + gravity);
-    final newY = bird.y + newVelocity;
+    // Apply gravity with delta time: a = g * dt
+    final gravityThisFrame = gravity * deltaTimeSeconds;
+    final newVelocity = _clampVelocity(bird.velocity + gravityThisFrame);
+
+    // Move bird based on velocity: d = v * dt
+    final newY = bird.y + (newVelocity * deltaTimeSeconds);
+    final newRotation = _calculateRotation(newVelocity);
 
     return bird.copyWith(
       velocity: newVelocity,
       y: newY,
+      rotation: newRotation,
     );
   }
 
-  /// Applies jump (flap) to bird
+  /// Applies jump (flap) to bird with instant rotation update
+  /// Velocity is set to jumpStrength and clamped to maxUpwardVelocity
+  ///
+  /// [deltaTimeSeconds] - Time elapsed since last frame in seconds (used for consistency)
+  /// [jumpStrength] - Velocity change in pixels/second (default: -600)
   BirdEntity applyJump({
     required BirdEntity bird,
     double jumpStrength = defaultJumpStrength,
+    double deltaTimeSeconds = defaultDeltaTime,
   }) {
-    return bird.copyWith(velocity: jumpStrength);
+    final clampedVelocity = _clampVelocity(jumpStrength);
+    final newRotation = _calculateRotation(clampedVelocity);
+
+    return bird.copyWith(
+      velocity: clampedVelocity,
+      rotation: newRotation,
+    );
   }
 
   /// Clamps velocity to prevent extreme speeds
@@ -56,10 +88,17 @@ class PhysicsService {
   }
 
   /// Gets bird rotation based on velocity (for visual effect)
+  /// @deprecated Use _calculateRotation() or let applyGravity/applyJump handle it
   double getBirdRotation(BirdEntity bird) {
-    // Rotate based on velocity (-45° to +90°)
-    final rotation = bird.velocity * 0.05;
-    return rotation.clamp(-0.785, 1.571); // -45° to 90° in radians
+    return _calculateRotation(bird.velocity);
+  }
+
+  /// Calculates bird rotation based on velocity
+  /// Unified rotation calculation: -90° to +45° (radians: -π/2 to π/4)
+  /// Sensitivity: 0.05 radians per pixel/frame velocity
+  double _calculateRotation(double velocity) {
+    final rotation = velocity * 0.05;
+    return rotation.clamp(-1.5708, 0.7854); // -90° to 45° in radians
   }
 
   /// Calculates falling distance in next frame

@@ -6,6 +6,9 @@ import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../features/game_2048/di/game_2048_injection.dart';
+import '../../features/memory/di/memory_injection.dart';
+import '../../features/soletrando/di/soletrando_injection.dart';
 import 'injection.config.dart';
 
 final getIt = GetIt.instance;
@@ -37,4 +40,9 @@ Future<void> configureDependencies({bool firebaseEnabled = false}) async {
 
   // Initialize generated dependencies
   getIt.init();
+
+  // Initialize feature modules
+  await initGame2048DI(getIt);
+  await initMemoryDI(getIt);
+  await initSoletrandoDI(getIt);
 }

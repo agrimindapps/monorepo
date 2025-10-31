@@ -236,6 +236,8 @@ class AdvancedSubscriptionSyncService implements ISubscriptionSyncService {
   Future<void> _initializeProvider(ISubscriptionDataProvider provider) async {
     _log('Initializing provider: ${provider.name}');
 
+    // Subscription is stored in _providerSubscriptions and cancelled in dispose()
+    // ignore: cancel_subscriptions
     final subscription = provider.updates.listen(
       (subscription) => _onProviderUpdate(provider, subscription),
       onError: (Object error) => _onProviderError(provider, error),

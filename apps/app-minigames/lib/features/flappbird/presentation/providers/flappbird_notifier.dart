@@ -40,6 +40,9 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
   // Mounted flag for race condition protection
   bool _isMounted = true;
 
+  // Last frame timestamp for delta time calculation
+  DateTime? _lastFrameTime;
+
   @override
   FutureOr<FlappyGameState> build() async {
     // Default screen dimensions (will be updated when page layout is known)
@@ -120,17 +123,19 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
     );
   }
 
-  /// Start 60fps game loop
+  /// Start 60fps game loop with delta time support
   void _startGameLoop() {
     _gameTimer?.cancel();
+    _lastFrameTime = DateTime.now();
 
     _gameTimer = Timer.periodic(
-      const Duration(milliseconds: 16), // 60fps
+      const Duration(milliseconds: 16), // Target 60fps
       (_) => _updateGame(),
     );
   }
 
   /// Update game (called every frame)
+  /// Calculates delta time and passes it to physics calculations
   Future<void> _updateGame() async {
     if (!_isMounted) return;
 
@@ -140,8 +145,21 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
       return;
     }
 
-    // 1. Update physics (gravity, bird position)
-    final physicsResult = await _updatePhysicsUseCase(currentState: currentState);
+    // Calculate delta time since last frame
+    final now = DateTime.now();
+    final deltaTime = _lastFrameTime != null
+        ? now.difference(_lastFrameTime!).inMilliseconds / 1000.0
+        : 1.0 / 60.0; // Fallback to 60fps if first frame
+    _lastFrameTime = now;
+
+    // Clamp delta time to prevent large jumps (e.g., device pause/resume)
+    final clampedDeltaTime = deltaTime.clamp(1.0 / 120.0, 0.1); // 8.3ms to 100ms
+
+    // 1. Update physics (gravity, bird position) with delta time
+    final physicsResult = await _updatePhysicsUseCase(
+      currentState: currentState,
+      deltaTimeSeconds: clampedDeltaTime,
+    );
     if (!_isMounted) return;
 
     var newState = currentState;

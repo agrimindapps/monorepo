@@ -78,9 +78,10 @@ void main() async {
   if (firebaseInitialized) {
     await PlantisSyncConfig.configure();
 
-    final simpleSubscriptionSyncService = di
-        .sl<SimpleSubscriptionSyncService>();
-    await simpleSubscriptionSyncService.initialize();
+    // Initialize the advanced subscription sync service
+    final subscriptionSyncService = di
+        .sl<ISubscriptionSyncService>();
+    await subscriptionSyncService.initialize();
     await SyncDIModule.initializeSyncService(di.sl);
   } else {
     SecureLogger.warning(

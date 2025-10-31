@@ -187,6 +187,7 @@ export 'src/riverpod/domain/device/device_management_providers.dart';
 export 'src/riverpod/domain/premium/subscription_providers.dart';
 export 'src/riverpod/domain/sync/sync_providers.dart';
 export 'src/riverpod/riverpod_utils.dart';
+export 'src/domain/services/i_subscription_sync_service.dart';
 export 'src/services/simple_subscription_sync_service.dart';
 export 'src/services/subscription/advanced_subscription_services.dart'
     hide CacheStatistics, ConflictResolutionStrategy;

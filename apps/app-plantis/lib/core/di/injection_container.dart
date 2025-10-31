@@ -293,6 +293,10 @@ void _initPremium() {
   //
   // Eliminou: 1,085 linhas de SubscriptionSyncService customizado
   // Ganhou: Multi-source sync, conflict resolution, retry, debounce, cache
+  //
+  // NOTE: AdvancedSubscriptionModule é registrado automaticamente via
+  // build_runner (@module annotation), não precisa chamar manualmente.
+  // O arquivo injection.config.dart inclui todos os providers.
 }
 
 void _initSettings() {

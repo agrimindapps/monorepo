@@ -105,7 +105,11 @@ void main() async {
       'Firebase services not initialized - running in local-first mode',
     );
   }
-  final prefs = await SharedPreferences.getInstance();
+
+  // Use the SharedPreferences instance already registered in GetIt
+  // to avoid duplicate registration during hot reload
+  final prefs = di.sl<SharedPreferences>();
+
   if (EnvironmentConfig.enableAnalytics) {
     runZonedGuarded<Future<void>>(
       () async {

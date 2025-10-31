@@ -80,7 +80,12 @@ Future<void> init({bool firebaseEnabled = false}) async {
 
 Future<void> _initExternal() async {
   final sharedPreferences = await SharedPreferences.getInstance();
-  sl.registerLazySingleton(() => sharedPreferences);
+
+  // Avoid duplicate registration during hot reload
+  // Check if SharedPreferences is already registered in GetIt
+  if (!sl.isRegistered<SharedPreferences>()) {
+    sl.registerLazySingleton(() => sharedPreferences);
+  }
 }
 
 void _initCoreServices({bool firebaseEnabled = false}) {

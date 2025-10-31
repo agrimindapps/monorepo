@@ -2,6 +2,8 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/providers/auth_providers.dart';
+import '../../core/services/data_sanitization_service.dart';
 import '../../core/theme/plantis_colors.dart';
 import 'main_scaffold.dart';
 
@@ -635,10 +637,23 @@ class _SidebarFooter extends StatelessWidget {
           ),
           child: Consumer(
             builder: (BuildContext context, WidgetRef ref, Widget? child) {
+              final authState = ref.watch(authProvider);
+
+              // Get user data from auth state
+              final displayName = authState.whenData((auth) {
+                return DataSanitizationService.sanitizeDisplayName(
+                  auth.currentUser,
+                  auth.isAnonymous,
+                );
+              }).value ?? 'Usuário Anônimo';
+
+              final statusText = authState.whenData((auth) {
+                return auth.isAnonymous ? 'Modo Offline' : 'Online';
+              }).value ?? 'Carregando...';
 
               if (!isExpanded) {
                 return Tooltip(
-                  message: 'Usuário Anônimo',
+                  message: displayName,
                   waitDuration: const Duration(milliseconds: 500),
                   child: Center(
                     child: Stack(
@@ -733,7 +748,7 @@ class _SidebarFooter extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Usuário Anônimo',
+                          displayName,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: theme.colorScheme.onSurface,
@@ -741,7 +756,7 @@ class _SidebarFooter extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          'Modo Offline',
+                          statusText,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                             fontSize: 11,

@@ -69,8 +69,21 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                     child: ListView(
                       padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                       children: [
-                        _buildUserSection(context, appTheme, user, authData),
-                        const SizedBox(height: 8),
+                        // Hide user section on desktop (>= 1200px) since sidebar shows user info
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final shouldHideUserSection = constraints.maxWidth >= 1200;
+                            if (shouldHideUserSection) {
+                              return const SizedBox.shrink();
+                            }
+                            return Column(
+                              children: [
+                                _buildUserSection(context, appTheme, user, authData),
+                                const SizedBox(height: 8),
+                              ],
+                            );
+                          },
+                        ),
                         _buildPremiumSectionCard(context, appTheme),
                         const SizedBox(height: 8),
                         settingsState.when(

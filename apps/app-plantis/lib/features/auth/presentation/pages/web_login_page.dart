@@ -468,46 +468,6 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage>
           onAnonymousLogin: _showAnonymousLoginDialog,
         ),
 
-        const SizedBox(height: 24),
-
-        // Registration message for web users
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: PlantisColors.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: PlantisColors.primary.withValues(alpha: 0.3),
-            ),
-          ),
-          child: Column(
-            children: [
-              const Icon(
-                Icons.info_outline,
-                color: PlantisColors.primary,
-                size: 32,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Novo por aqui?',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: PlantisColors.primary,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Para criar uma conta, baixe nosso app móvel disponível na App Store e Google Play.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade700,
-                ),
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }

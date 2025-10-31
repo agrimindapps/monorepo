@@ -60,9 +60,13 @@ import 'modules/tasks_module.dart';
 final sl = GetIt.instance;
 
 Future<void> init({bool firebaseEnabled = false}) async {
+  // IMPORTANT: configureDependencies() MUST be called first
+  // It registers all @module dependencies including SharedPreferences from ExternalModule
+  // Calling it first prevents duplicate registration errors during hot reload
+  await injectable.configureDependencies();
+
   await _initExternal();
   _initCoreServices(firebaseEnabled: firebaseEnabled);
-  await injectable.configureDependencies();
   _initAuth();
   _initAccount();
   _initAccountDeletion(); // NEW: Account Deletion Services
@@ -79,13 +83,9 @@ Future<void> init({bool firebaseEnabled = false}) async {
 }
 
 Future<void> _initExternal() async {
-  final sharedPreferences = await SharedPreferences.getInstance();
-
-  // Avoid duplicate registration during hot reload
-  // Check if SharedPreferences is already registered in GetIt
-  if (!sl.isRegistered<SharedPreferences>()) {
-    sl.registerLazySingleton(() => sharedPreferences);
-  }
+  // SharedPreferences is registered automatically via ExternalModule @preResolve
+  // The build_runner generated code in injection.config.dart handles this
+  // Do NOT register it manually here - it causes duplicate registration errors
 }
 
 void _initCoreServices({bool firebaseEnabled = false}) {

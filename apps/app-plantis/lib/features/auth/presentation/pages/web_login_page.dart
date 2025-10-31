@@ -164,13 +164,6 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage>
     );
   }
 
-  Future<void> _handleAnonymousLogin() async {
-    await _submitAuthAction(
-      loadingMessage: 'Entrando anonimamente...',
-      authFuture: () => ref.read(authProvider.notifier).signInAnonymously(),
-    );
-  }
-
   void _showSocialLoginDialog() {
     showDialog<void>(
       context: context,
@@ -191,51 +184,6 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage>
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAnonymousLoginDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Login Anônimo'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Como funciona o login anônimo:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Text('• Você pode usar o app sem criar conta'),
-            Text('• Seus dados ficam apenas no dispositivo'),
-            Text(
-              '• Limitação: dados podem ser perdidos se o app for desinstalado',
-            ),
-            Text('• Sem backup na nuvem'),
-            Text('• Sem sincronização entre dispositivos'),
-            SizedBox(height: 16),
-            Text(
-              'Deseja prosseguir?',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _handleAnonymousLogin();
-            },
-            child: const Text('Prosseguir'),
           ),
         ],
       ),
@@ -460,12 +408,6 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage>
           onGoogleLogin: _showSocialLoginDialog,
           onAppleLogin: _showSocialLoginDialog,
           onMicrosoftLogin: _showSocialLoginDialog,
-        ),
-        const SizedBox(height: 16),
-
-        // Anonymous Login
-        AnonymousLoginSection(
-          onAnonymousLogin: _showAnonymousLoginDialog,
         ),
 
       ],

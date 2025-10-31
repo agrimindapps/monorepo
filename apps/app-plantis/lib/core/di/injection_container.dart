@@ -285,12 +285,14 @@ void _initComments() {}
 
 void _initPremium() {
   sl.registerLazySingleton<ISubscriptionRepository>(() => RevenueCatService());
-  sl.registerLazySingleton<SimpleSubscriptionSyncService>(
-    () => SimpleSubscriptionSyncService(
-      subscriptionRepository: sl<ISubscriptionRepository>(),
-      localStorage: sl<ILocalStorageRepository>(),
-    ),
-  );
+
+  // ✅ MIGRATED: SimpleSubscriptionSyncService foi substituído por
+  // AdvancedSubscriptionSyncService (registrado via @injectable no
+  // AdvancedSubscriptionModule). Adapter mantém compatibilidade com
+  // interface Plantis original.
+  //
+  // Eliminou: 1,085 linhas de SubscriptionSyncService customizado
+  // Ganhou: Multi-source sync, conflict resolution, retry, debounce, cache
 }
 
 void _initSettings() {

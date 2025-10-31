@@ -1,4 +1,6 @@
 import 'package:core/core.dart';
+import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Módulo para registrar dependências externas (Firebase, Hive, Connectivity)
 /// IMPORTANTE: Não inclui IAuthRepository, ISubscriptionRepository, ILocalStorageRepository
@@ -20,4 +22,12 @@ abstract class ExternalModule {
   /// ConnectivityService (required by SyncOperations)
   @lazySingleton
   ConnectivityService get connectivityService => ConnectivityService.instance;
+
+  /// SharedPreferences (required by LocalSubscriptionProvider)
+  ///
+  /// Usado para cache offline de subscription status,
+  /// garantindo que plant limits funcionem sem internet.
+  @preResolve
+  Future<SharedPreferences> get sharedPreferences =>
+      SharedPreferences.getInstance();
 }

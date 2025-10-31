@@ -188,6 +188,8 @@ export 'src/riverpod/domain/premium/subscription_providers.dart';
 export 'src/riverpod/domain/sync/sync_providers.dart';
 export 'src/riverpod/riverpod_utils.dart';
 export 'src/services/simple_subscription_sync_service.dart';
+export 'src/services/subscription/advanced_subscription_services.dart'
+    hide CacheStatistics, ConflictResolutionStrategy;
 export 'src/shared/config/environment_config.dart';
 export 'src/shared/contracts/i_asset_loader.dart';
 export 'src/shared/contracts/i_version_manager.dart';
@@ -230,7 +232,8 @@ export 'src/sync/unified_sync_manager.dart';
 export 'src/sync/specialized/offline_sync_handler.dart';
 export 'src/sync/specialized/sync_coordinator.dart';
 export 'src/sync/specialized/sync_error_handler.dart';
-export 'src/sync/specialized/sync_state_machine.dart' hide AppSyncEvent, SyncAction;
+export 'src/sync/specialized/sync_state_machine.dart'
+    hide AppSyncEvent, SyncAction;
 export 'utils/core_icons.dart';
 export 'utils/random_selection_service.dart';
 export 'widgets/core_carousel_widget.dart';

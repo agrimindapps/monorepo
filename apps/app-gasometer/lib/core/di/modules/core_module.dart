@@ -55,7 +55,9 @@ class CoreModule implements DIModule {
         debugPrint('⚠️ Warning: Could not register core repositories: $e');
       }
     } else {
-      debugPrint('⚠️ Firebase services not registered (running in local-only mode)');
+      debugPrint(
+        '⚠️ Firebase services not registered (running in local-only mode)',
+      );
     }
   }
 
@@ -71,8 +73,11 @@ class CoreModule implements DIModule {
         );
         getIt.registerLazySingleton<core.FirebaseAnalyticsService>(
           () =>
-              getIt<core.IAnalyticsRepository>() as core.FirebaseAnalyticsService,
+              getIt<core.IAnalyticsRepository>()
+                  as core.FirebaseAnalyticsService,
         );
+        // Note: FirebaseDeviceService já implementa IDeviceRepository
+        // mas não podemos fazer cast direto, então criamos nova instância
       }
 
       // RevenueCat and local services (don't require Firebase)

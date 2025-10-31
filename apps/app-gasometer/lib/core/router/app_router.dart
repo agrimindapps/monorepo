@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/web_login_page.dart';
 import '../../features/expenses/presentation/pages/add_expense_page.dart';
 import '../../features/expenses/presentation/pages/expenses_page.dart';
 import '../../features/fuel/presentation/pages/add_fuel_page.dart';
@@ -130,7 +131,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         name: 'login',
-        builder: (context, state) => const LoginPage(),
+        builder: (context, state) {
+          // Web usa página sem opção de cadastro
+          // Mobile/Desktop usam página completa com cadastro
+          return kIsWeb ? const WebLoginPage() : const LoginPage();
+        },
       ),
       GoRoute(
         path: '/promo',

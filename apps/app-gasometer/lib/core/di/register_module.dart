@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:image_picker/image_picker.dart';
 
 @module
 abstract class RegisterModule {
@@ -14,11 +15,12 @@ abstract class RegisterModule {
   FirebaseAuth get firebaseAuth => FirebaseAuth.instance;
 
   @singleton
+  ImagePicker get imagePicker => ImagePicker();
+
+  @singleton
   GoogleSignIn get googleSignIn {
     if (kIsWeb) {
-      return GoogleSignIn(
-        signInOption: SignInOption.standard,
-      );
+      return GoogleSignIn(signInOption: SignInOption.standard);
     }
     return GoogleSignIn();
   }
@@ -43,5 +45,6 @@ abstract class RegisterModule {
   IAppRatingRepository get appRatingRepository => AppRatingService();
 
   @singleton
-  ImageCompressionService get imageCompressionService => ImageCompressionService();
+  ImageCompressionService get imageCompressionService =>
+      ImageCompressionService();
 }

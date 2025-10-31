@@ -2,13 +2,26 @@ import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/game_state.dart';
-import '../entities/block_data.dart';
+import '../services/overlap_calculation_service.dart';
+import '../services/scoring_service.dart';
+import '../services/physics_service.dart';
+import '../services/block_generation_service.dart';
 
 /// Use case for dropping the current block
-/// Contains core game logic: overlap calculation, precision, combo, and scoring
+/// Orchestrates services for overlap, scoring, and block generation
 @injectable
 class DropBlockUseCase {
-  DropBlockUseCase();
+  final OverlapCalculationService _overlapService;
+  final ScoringService _scoringService;
+  final PhysicsService _physicsService;
+  final BlockGenerationService _blockGenerationService;
+
+  DropBlockUseCase(
+    this._overlapService,
+    this._scoringService,
+    this._physicsService,
+    this._blockGenerationService,
+  );
 
   Future<Either<Failure, GameState>> call(GameState currentState) async {
     // Validate state
@@ -17,60 +30,68 @@ class DropBlockUseCase {
     }
 
     if (currentState.isGameOver) {
-      return const Left(GameLogicFailure('Cannot drop block when game is over'));
+      return const Left(
+          GameLogicFailure('Cannot drop block when game is over'));
     }
 
-    // Calculate overlap (how much the current block overlaps with the last one)
-    final overlap = currentState.currentBlockWidth -
-        (currentState.currentBlockPosX - currentState.lastBlockX).abs();
+    // Calculate overlap and precision using service
+    final overlapResult = _overlapService.calculateOverlap(
+      currentBlockWidth: currentState.currentBlockWidth,
+      currentBlockPosX: currentState.currentBlockPosX,
+      lastBlockX: currentState.lastBlockX,
+    );
 
-    // Game Over if no overlap
-    if (overlap <= 0) {
+    // Game over if no overlap
+    if (overlapResult.isGameOver) {
       return Right(currentState.copyWith(
         isGameOver: true,
         isPerfectPlacement: false,
       ));
     }
 
-    // Calculate precision (0.0 to 1.0)
-    final precision = overlap / currentState.currentBlockWidth;
-
-    // Base score from precision
-    var dropScore = (precision * 10).round();
-
-    // Check for perfect placement (>= 90% precision)
-    final isPerfect = precision >= 0.9;
-
-    // Update combo
-    final newCombo = isPerfect ? currentState.combo + 1 : 0;
-
-    // Apply combo multiplier to score
-    if (isPerfect && newCombo > 0) {
-      dropScore = dropScore * newCombo;
-    }
-
-    // Create new block with calculated width
-    final newBlock = BlockData(
-      width: overlap,
-      height: GameState.blockHeight,
-      posX: currentState.currentBlockPosX,
-      color: GameState.blockColors[
-          currentState.blocks.length % GameState.blockColors.length],
+    // Calculate score and combo using service
+    final scoreResult = _scoringService.calculateScore(
+      precision: overlapResult.precision,
+      isPerfect: overlapResult.isPerfect,
+      currentCombo: currentState.combo,
+      currentTotalScore: currentState.score,
     );
 
-    // Calculate speed increment based on difficulty
-    final speedIncrement = 0.2 * currentState.difficulty.speedMultiplier;
+    // Calculate aligned position for placed block
+    final alignedPosX = _overlapService.calculateAlignedPosition(
+      currentBlockPosX: currentState.currentBlockPosX,
+      lastBlockX: currentState.lastBlockX,
+      currentBlockWidth: currentState.currentBlockWidth,
+      overlap: overlapResult.overlap,
+    );
+
+    // Get next color index
+    final colorIndex =
+        _blockGenerationService.getNextColorIndex(currentState.blocks);
+
+    // Create placed block
+    final placedBlockResult = _blockGenerationService.createBlock(
+      width: overlapResult.overlap,
+      posX: alignedPosX,
+      colorIndex: colorIndex,
+    );
+
+    // Increase speed progressively using physics service
+    final speedResult = _physicsService.calculateSpeedIncrease(
+      currentSpeed: currentState.blockSpeed,
+      difficulty: currentState.difficulty,
+    );
 
     // Return new state
     return Right(currentState.copyWith(
-      blocks: [...currentState.blocks, newBlock],
-      currentBlockWidth: overlap,
-      lastBlockX: currentState.currentBlockPosX,
-      score: currentState.score + dropScore,
-      combo: newCombo,
-      lastDropScore: dropScore,
-      isPerfectPlacement: isPerfect,
-      blockSpeed: currentState.blockSpeed + speedIncrement,
+      blocks: [...currentState.blocks, placedBlockResult.block],
+      currentBlockWidth: overlapResult.overlap,
+      lastBlockX: alignedPosX,
+      score: scoreResult.totalScore,
+      combo: scoreResult.combo,
+      lastDropScore: scoreResult.dropScore,
+      isPerfectPlacement: overlapResult.isPerfect,
+      blockSpeed: speedResult.newSpeed,
     ));
   }
 }

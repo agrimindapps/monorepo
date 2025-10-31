@@ -4,233 +4,193 @@ import '../../../../core/error/exceptions.dart' as local_exceptions;
 import '../../domain/entities/report_comparison_entity.dart';
 import '../../domain/entities/report_summary_entity.dart';
 import '../../domain/repositories/reports_repository.dart';
+import '../../domain/validators/report_validator.dart';
 import '../datasources/reports_data_source.dart';
 
 @LazySingleton(as: ReportsRepository)
 class ReportsRepositoryImpl implements ReportsRepository {
 
-  ReportsRepositoryImpl(this._dataSource);
+  ReportsRepositoryImpl(this._dataSource, this._validator);
   final ReportsDataSource _dataSource;
+  final ReportValidator _validator;
 
-  @override
-  Future<Either<Failure, ReportSummaryEntity>> generateMonthlyReport(String vehicleId, DateTime month) async {
+  Future<Either<Failure, T>> _executeWithErrorHandling<T>(
+    Future<T> Function() operation,
+    String errorContext,
+  ) async {
     try {
-      if (vehicleId.isEmpty) {
-        return const Left(ValidationFailure('ID do veículo é obrigatório'));
-      }
-
-      final startDate = DateTime(month.year, month.month, 1);
-      final endDate = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
-
-      final report = await _dataSource.generateReport(vehicleId, startDate, endDate, 'month');
-      return Right(report);
+      final result = await operation();
+      return Right(result);
     } on local_exceptions.CacheException catch (e) {
       return Left(CacheFailure(e.message));
     } on local_exceptions.ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
-      return Left(UnexpectedFailure('Erro ao gerar relatório mensal: ${e.toString()}'));
+      return Left(UnexpectedFailure('$errorContext: ${e.toString()}'));
     }
+  }
+
+  Future<Either<Failure, ReportComparisonEntity>> _compareReports({
+    required String vehicleId,
+    required Future<Either<Failure, ReportSummaryEntity>> Function() getCurrentReport,
+    required Future<Either<Failure, ReportSummaryEntity>> Function() getPreviousReport,
+    required String comparisonType,
+  }) async {
+    final validationResult = _validator.validateVehicleId(vehicleId);
+    if (validationResult.isLeft()) {
+      return validationResult.fold((failure) => Left(failure), (_) => throw StateError('Unreachable'));
+    }
+
+    final results = await Future.wait([getCurrentReport(), getPreviousReport()]);
+    final currentResult = results[0];
+    final previousResult = results[1];
+
+    return currentResult.fold(
+      (failure) => Left(failure),
+      (currentReport) => previousResult.fold(
+        (failure) => Left(failure),
+        (previousReport) => _executeWithErrorHandling(
+          () => _dataSource.compareReports(vehicleId, currentReport, previousReport, comparisonType),
+          'Erro ao comparar relatórios',
+        ),
+      ),
+    );
+  }
+
+  @override
+  Future<Either<Failure, ReportSummaryEntity>> generateMonthlyReport(String vehicleId, DateTime month) async {
+    final validationResult = _validator.validateVehicleId(vehicleId);
+    if (validationResult.isLeft()) {
+      return validationResult.fold((failure) => Left(failure), (_) => throw StateError('Unreachable'));
+    }
+
+    final startDate = DateTime(month.year, month.month, 1);
+    final endDate = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
+
+    return _executeWithErrorHandling(
+      () => _dataSource.generateReport(vehicleId, startDate, endDate, 'month'),
+      'Erro ao gerar relatório mensal',
+    );
   }
 
   @override
   Future<Either<Failure, ReportSummaryEntity>> generateYearlyReport(String vehicleId, int year) async {
-    try {
-      if (vehicleId.isEmpty) {
-        return const Left(ValidationFailure('ID do veículo é obrigatório'));
-      }
-
-      if (year < 2000 || year > DateTime.now().year + 1) {
-        return const Left(ValidationFailure('Ano inválido'));
-      }
-
-      final startDate = DateTime(year, 1, 1);
-      final endDate = DateTime(year, 12, 31, 23, 59, 59);
-
-      final report = await _dataSource.generateReport(vehicleId, startDate, endDate, 'year');
-      return Right(report);
-    } on local_exceptions.CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } on local_exceptions.ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } catch (e) {
-      return Left(UnexpectedFailure('Erro ao gerar relatório anual: ${e.toString()}'));
+    final vehicleValidation = _validator.validateVehicleId(vehicleId);
+    if (vehicleValidation.isLeft()) {
+      return vehicleValidation.fold((failure) => Left(failure), (_) => throw StateError('Unreachable'));
     }
+
+    final yearValidation = _validator.validateYear(year);
+    if (yearValidation.isLeft()) {
+      return yearValidation.fold((failure) => Left(failure), (_) => throw StateError('Unreachable'));
+    }
+
+    final startDate = DateTime(year, 1, 1);
+    final endDate = DateTime(year, 12, 31, 23, 59, 59);
+
+    return _executeWithErrorHandling(
+      () => _dataSource.generateReport(vehicleId, startDate, endDate, 'year'),
+      'Erro ao gerar relatório anual',
+    );
   }
 
   @override
   Future<Either<Failure, ReportSummaryEntity>> generateCustomReport(String vehicleId, DateTime startDate, DateTime endDate) async {
-    try {
-      if (vehicleId.isEmpty) {
-        return const Left(ValidationFailure('ID do veículo é obrigatório'));
-      }
-
-      if (startDate.isAfter(endDate)) {
-        return const Left(ValidationFailure('Data inicial não pode ser posterior à data final'));
-      }
-
-      if (endDate.isAfter(DateTime.now())) {
-        return const Left(ValidationFailure('Data final não pode ser no futuro'));
-      }
-
-      final report = await _dataSource.generateReport(vehicleId, startDate, endDate, 'custom');
-      return Right(report);
-    } on local_exceptions.CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } on local_exceptions.ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } catch (e) {
-      return Left(UnexpectedFailure('Erro ao gerar relatório personalizado: ${e.toString()}'));
+    final vehicleValidation = _validator.validateVehicleId(vehicleId);
+    if (vehicleValidation.isLeft()) {
+      return vehicleValidation.fold((failure) => Left(failure), (_) => throw StateError('Unreachable'));
     }
+
+    final dateValidation = _validator.validateDateRange(startDate, endDate);
+    if (dateValidation.isLeft()) {
+      return dateValidation.fold((failure) => Left(failure), (_) => throw StateError('Unreachable'));
+    }
+
+    return _executeWithErrorHandling(
+      () => _dataSource.generateReport(vehicleId, startDate, endDate, 'custom'),
+      'Erro ao gerar relatório personalizado',
+    );
   }
 
   @override
   Future<Either<Failure, ReportComparisonEntity>> compareMonthlyReports(String vehicleId, DateTime currentMonth, DateTime previousMonth) async {
-    try {
-      if (vehicleId.isEmpty) {
-        return const Left(ValidationFailure('ID do veículo é obrigatório'));
-      }
-      final results = await Future.wait([
-        generateMonthlyReport(vehicleId, currentMonth),
-        generateMonthlyReport(vehicleId, previousMonth),
-      ]);
-      
-      final currentResult = results[0];
-      final previousResult = results[1];
-
-      return currentResult.fold(
-        (failure) => Left(failure),
-        (currentReport) => previousResult.fold(
-          (failure) => Left(failure),
-          (previousReport) async {
-            try {
-              final comparison = await _dataSource.compareReports(
-                vehicleId, 
-                currentReport, 
-                previousReport, 
-                'month_to_month'
-              );
-              return Right(comparison);
-            } catch (e) {
-              return Left(UnexpectedFailure('Erro ao comparar relatórios: ${e.toString()}'));
-            }
-          },
-        ),
-      );
-    } catch (e) {
-      return Left(UnexpectedFailure('Erro ao comparar relatórios mensais: ${e.toString()}'));
-    }
+    return _compareReports(
+      vehicleId: vehicleId,
+      getCurrentReport: () => generateMonthlyReport(vehicleId, currentMonth),
+      getPreviousReport: () => generateMonthlyReport(vehicleId, previousMonth),
+      comparisonType: 'month_to_month',
+    );
   }
 
   @override
   Future<Either<Failure, ReportComparisonEntity>> compareYearlyReports(String vehicleId, int currentYear, int previousYear) async {
-    try {
-      if (vehicleId.isEmpty) {
-        return const Left(ValidationFailure('ID do veículo é obrigatório'));
-      }
-      final results = await Future.wait([
-        generateYearlyReport(vehicleId, currentYear),
-        generateYearlyReport(vehicleId, previousYear),
-      ]);
-      
-      final currentResult = results[0];
-      final previousResult = results[1];
-
-      return currentResult.fold(
-        (failure) => Left(failure),
-        (currentReport) => previousResult.fold(
-          (failure) => Left(failure),
-          (previousReport) async {
-            try {
-              final comparison = await _dataSource.compareReports(
-                vehicleId, 
-                currentReport, 
-                previousReport, 
-                'year_to_year'
-              );
-              return Right(comparison);
-            } catch (e) {
-              return Left(UnexpectedFailure('Erro ao comparar relatórios: ${e.toString()}'));
-            }
-          },
-        ),
-      );
-    } catch (e) {
-      return Left(UnexpectedFailure('Erro ao comparar relatórios anuais: ${e.toString()}'));
-    }
+    return _compareReports(
+      vehicleId: vehicleId,
+      getCurrentReport: () => generateYearlyReport(vehicleId, currentYear),
+      getPreviousReport: () => generateYearlyReport(vehicleId, previousYear),
+      comparisonType: 'year_to_year',
+    );
   }
 
 
 
   @override
   Future<Either<Failure, Map<String, dynamic>>> getFuelEfficiencyTrends(String vehicleId, int months) async {
-    try {
-      if (vehicleId.isEmpty) {
-        return const Left(ValidationFailure('ID do veículo é obrigatório'));
-      }
-
-      if (months <= 0 || months > 24) {
-        return const Left(ValidationFailure('Número de meses deve ser entre 1 e 24'));
-      }
-
-      final trends = await _dataSource.getFuelEfficiencyTrends(vehicleId, months);
-      return Right(trends);
-    } on local_exceptions.CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } on local_exceptions.ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } catch (e) {
-      return Left(UnexpectedFailure('Erro ao calcular tendências: ${e.toString()}'));
+    final vehicleValidation = _validator.validateVehicleId(vehicleId);
+    if (vehicleValidation.isLeft()) {
+      return vehicleValidation.fold((failure) => Left(failure), (_) => throw StateError('Unreachable'));
     }
+
+    final monthsValidation = _validator.validateMonthsRange(months);
+    if (monthsValidation.isLeft()) {
+      return monthsValidation.fold((failure) => Left(failure), (_) => throw StateError('Unreachable'));
+    }
+
+    return _executeWithErrorHandling(
+      () => _dataSource.getFuelEfficiencyTrends(vehicleId, months),
+      'Erro ao calcular tendências',
+    );
   }
 
   @override
   Future<Either<Failure, Map<String, dynamic>>> getCostAnalysis(String vehicleId, DateTime startDate, DateTime endDate) async {
-    try {
-      if (vehicleId.isEmpty) {
-        return const Left(ValidationFailure('ID do veículo é obrigatório'));
-      }
-
-      if (startDate.isAfter(endDate)) {
-        return const Left(ValidationFailure('Data inicial não pode ser posterior à data final'));
-      }
-
-      final analysis = await _dataSource.getCostAnalysis(vehicleId, startDate, endDate);
-      return Right(analysis);
-    } on local_exceptions.CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } on local_exceptions.ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } catch (e) {
-      return Left(UnexpectedFailure('Erro ao analisar custos: ${e.toString()}'));
+    final vehicleValidation = _validator.validateVehicleId(vehicleId);
+    if (vehicleValidation.isLeft()) {
+      return vehicleValidation.fold((failure) => Left(failure), (_) => throw StateError('Unreachable'));
     }
+
+    final dateValidation = _validator.validateDateRange(startDate, endDate);
+    if (dateValidation.isLeft()) {
+      return dateValidation.fold((failure) => Left(failure), (_) => throw StateError('Unreachable'));
+    }
+
+    return _executeWithErrorHandling(
+      () => _dataSource.getCostAnalysis(vehicleId, startDate, endDate),
+      'Erro ao analisar custos',
+    );
   }
 
   @override
   Future<Either<Failure, Map<String, dynamic>>> getUsagePatterns(String vehicleId, int months) async {
-    try {
-      if (vehicleId.isEmpty) {
-        return const Left(ValidationFailure('ID do veículo é obrigatório'));
-      }
-
-      if (months <= 0 || months > 24) {
-        return const Left(ValidationFailure('Número de meses deve ser entre 1 e 24'));
-      }
-
-      final patterns = await _dataSource.getUsagePatterns(vehicleId, months);
-      return Right(patterns);
-    } on local_exceptions.CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } on local_exceptions.ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } catch (e) {
-      return Left(UnexpectedFailure('Erro ao analisar padrões de uso: ${e.toString()}'));
+    final vehicleValidation = _validator.validateVehicleId(vehicleId);
+    if (vehicleValidation.isLeft()) {
+      return vehicleValidation.fold((failure) => Left(failure), (_) => throw StateError('Unreachable'));
     }
+
+    final monthsValidation = _validator.validateMonthsRange(months);
+    if (monthsValidation.isLeft()) {
+      return monthsValidation.fold((failure) => Left(failure), (_) => throw StateError('Unreachable'));
+    }
+
+    return _executeWithErrorHandling(
+      () => _dataSource.getUsagePatterns(vehicleId, months),
+      'Erro ao analisar padrões de uso',
+    );
   }
 
   @override
   Future<Either<Failure, String>> exportReportToCSV(ReportSummaryEntity report) async {
-    try {
+    return _executeWithErrorHandling(() async {
       final csvContent = StringBuffer();
       csvContent.writeln('Relatório do Veículo,${report.vehicleId}');
       csvContent.writeln('Período,${report.periodDisplayName}');
@@ -245,16 +205,13 @@ class ReportsRepositoryImpl implements ReportsRepository {
       csvContent.writeln('Consumo Médio,${report.formattedAverageConsumption}');
       csvContent.writeln('Custo por Km,${report.formattedCostPerKm}');
       csvContent.writeln('Registros de Combustível,${report.fuelRecordsCount}');
-
-      return Right(csvContent.toString());
-    } catch (e) {
-      return Left(UnexpectedFailure('Erro ao exportar para CSV: ${e.toString()}'));
-    }
+      return csvContent.toString();
+    }, 'Erro ao exportar para CSV');
   }
 
   @override
   Future<Either<Failure, String>> exportReportToPDF(ReportSummaryEntity report) async {
-    try {
+    return _executeWithErrorHandling(() async {
       final pdfContent = StringBuffer();
       pdfContent.writeln('=== RELATÓRIO PDF DO VEÍCULO ${report.vehicleId} ===');
       pdfContent.writeln('');
@@ -272,11 +229,8 @@ class ReportsRepositoryImpl implements ReportsRepository {
       pdfContent.writeln('Número de Registros: ${report.fuelRecordsCount}');
       pdfContent.writeln('');
       pdfContent.writeln('=== FIM DO RELATÓRIO ===');
-
-      return Right(pdfContent.toString());
-    } catch (e) {
-      return Left(UnexpectedFailure('Erro ao exportar para PDF: ${e.toString()}'));
-    }
+      return pdfContent.toString();
+    }, 'Erro ao exportar para PDF');
   }
 
 }

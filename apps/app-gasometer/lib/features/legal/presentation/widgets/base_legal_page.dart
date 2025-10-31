@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/gasometer_colors.dart';
+import '../../data/services/legal_date_formatter.dart';
+import '../services/legal_scroll_controller_manager.dart';
 
 /// Base component for legal pages with common functionality
 abstract class BaseLegalPage extends StatefulWidget {
@@ -36,23 +39,29 @@ class LegalSection {
 }
 
 abstract class BaseLegalPageState<T extends BaseLegalPage> extends State<T> {
-  final ScrollController _scrollController = ScrollController();
+  late final LegalScrollControllerManager _scrollManager;
+  final LegalDateFormatter _dateFormatter = LegalDateFormatter();
   bool _showScrollToTopButton = false;
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(() {
-      final shouldShow = _scrollController.offset >= 400;
-      if (shouldShow != _showScrollToTopButton) {
-        setState(() => _showScrollToTopButton = shouldShow);
-      }
-    });
+    _scrollManager = LegalScrollControllerManager(
+      onScrollThresholdReached: _updateScrollButtonVisibility,
+    );
+    _scrollManager.startListening();
+  }
+
+  void _updateScrollButtonVisibility() {
+    final shouldShow = _scrollManager.shouldShowScrollButton();
+    if (shouldShow != _showScrollToTopButton) {
+      setState(() => _showScrollToTopButton = shouldShow);
+    }
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _scrollManager.dispose();
     super.dispose();
   }
 
@@ -73,7 +82,7 @@ abstract class BaseLegalPageState<T extends BaseLegalPage> extends State<T> {
       body: Stack(
         children: [
           SingleChildScrollView(
-            controller: _scrollController,
+            controller: _scrollManager.controller,
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
@@ -91,11 +100,7 @@ abstract class BaseLegalPageState<T extends BaseLegalPage> extends State<T> {
               right: 16,
               bottom: 16,
               child: FloatingActionButton.small(
-                onPressed: () => _scrollController.animateTo(
-                  0,
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.easeInOut,
-                ),
+                onPressed: () => _scrollManager.scrollToTop(),
                 backgroundColor: GasometerColors.primary,
                 foregroundColor: Colors.white,
                 child: const Icon(Icons.keyboard_arrow_up),
@@ -129,7 +134,7 @@ abstract class BaseLegalPageState<T extends BaseLegalPage> extends State<T> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Última atualização: ${_getFormattedDate()}',
+            'Última atualização: ${_dateFormatter.formatCurrentDate()}',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.9),
               fontSize: 14,
@@ -200,24 +205,5 @@ abstract class BaseLegalPageState<T extends BaseLegalPage> extends State<T> {
         textAlign: TextAlign.center,
       ),
     );
-  }
-
-  String _getFormattedDate() {
-    final now = DateTime.now();
-    final months = [
-      'Janeiro',
-      'Fevereiro',
-      'Março',
-      'Abril',
-      'Maio',
-      'Junho',
-      'Julho',
-      'Agosto',
-      'Setembro',
-      'Outubro',
-      'Novembro',
-      'Dezembro',
-    ];
-    return '${now.day} de ${months[now.month - 1]} de ${now.year}';
   }
 }

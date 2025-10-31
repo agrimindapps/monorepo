@@ -2,8 +2,14 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/extensions/user_entity_gasometer_extension.dart';
+import 'firebase_error_handler.dart';
+import 'firestore_user_repository.dart';
+import 'user_converter.dart';
 
+/// Interface para data source remoto de autenticação
+///
+/// Define contrato para operações de autenticação
+/// Aplica ISP (Interface Segregation Principle)
 abstract class AuthRemoteDataSource {
   Stream<UserEntity?> watchAuthState();
   Future<UserEntity?> getCurrentUser();
@@ -28,27 +34,38 @@ abstract class AuthRemoteDataSource {
   Future<UserEntity> linkAnonymousWithFacebook();
   Future<void> signOut();
   Future<void> deleteAccount();
-  Future<void> saveUserToFirestore(UserEntity user);
-  Future<UserEntity?> getUserFromFirestore(String userId);
 }
 
+/// Implementação do data source remoto de autenticação
+///
+/// Responsabilidades (refatorado para SRP):
+/// - Operações de autenticação via Firebase Auth
+/// - Integração com core auth repository para social login
+/// - Delegação de conversão para UserConverter
+/// - Delegação de persistência Firestore para FirestoreUserRepository
+/// - Delegação de tratamento de erros para FirebaseErrorHandler
 @LazySingleton(as: AuthRemoteDataSource)
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl(
     this._firebaseAuth,
-    this._firestore,
     this._coreAuthRepository,
+    this._userConverter,
+    this._firestoreUserRepository,
+    this._errorHandler,
   );
+
   final FirebaseAuth _firebaseAuth;
-  final FirebaseFirestore _firestore;
   final IAuthRepository _coreAuthRepository;
+  final UserConverter _userConverter;
+  final FirestoreUserRepository _firestoreUserRepository;
+  final FirebaseErrorHandler _errorHandler;
 
   @override
   Stream<UserEntity?> watchAuthState() {
     try {
       return _firebaseAuth.authStateChanges().map((user) {
         if (user == null) return null;
-        return UserEntityGasometerExtension.fromFirebaseUser(user);
+        return _userConverter.fromFirebaseUser(user);
       });
     } catch (e) {
       throw ServerException('Failed to watch auth state: $e');
@@ -61,7 +78,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final user = _firebaseAuth.currentUser;
       if (user == null) return null;
 
-      return UserEntityGasometerExtension.fromFirebaseUser(user);
+      return _userConverter.fromFirebaseUser(user);
     } catch (e) {
       throw ServerException('Failed to get current user: $e');
     }
@@ -75,68 +92,29 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         password: password,
       );
 
-      if (credential.user == null) {
-        throw const AuthenticationException('No user returned from sign in');
-      }
-
-      final userModel = UserEntityGasometerExtension.fromFirebaseUser(
-        credential.user!,
-      );
-      await saveUserToFirestore(userModel);
+      final user = _errorHandler.validateAuthResult(credential, 'sign in');
+      final userModel = _userConverter.fromFirebaseUser(user);
+      await _firestoreUserRepository.saveUser(userModel);
 
       return userModel;
-    } on FirebaseAuthException catch (e) {
-      if (kDebugMode) {
-        debugPrint(
-          '🔥 Firebase Auth Error - Code: ${e.code}, Message: ${e.message}',
-        );
-      }
-      switch (e.code) {
-        case 'too-many-requests':
-          if (kDebugMode) {
-            debugPrint(
-              '🔥 Firebase rate limiting detected - too-many-requests',
-            );
-          }
-          throw const AuthenticationException(
-            'FIREBASE BLOQUEIO: Muitas tentativas. Tente novamente mais tarde.',
-          );
-        case 'user-disabled':
-          throw const AuthenticationException('Esta conta foi desabilitada.');
-        case 'user-not-found':
-          throw const AuthenticationException('Email não encontrado.');
-        case 'wrong-password':
-          throw const AuthenticationException('Senha incorreta.');
-        case 'invalid-email':
-          throw const AuthenticationException('Email inválido.');
-        case 'operation-not-allowed':
-          throw const AuthenticationException('Operação não permitida.');
-        default:
-          throw AuthenticationException('Erro de autenticação: ${e.message}');
-      }
     } catch (e) {
-      throw ServerException('Unexpected sign in error: $e');
+      _errorHandler.handleAuthError(e, 'sign in');
+      rethrow; // Never reached, but needed for type safety
     }
   }
 
   @override
   Future<UserEntity> signInAnonymously() async {
     try {
-      final userCredential = await _firebaseAuth.signInAnonymously();
-
-      if (userCredential.user == null) {
-        throw const AuthenticationException(
-          'No user returned from anonymous sign in',
-        );
-      }
-
-      return UserEntityGasometerExtension.fromFirebaseUser(
-        userCredential.user!,
+      final credential = await _firebaseAuth.signInAnonymously();
+      final user = _errorHandler.validateAuthResult(
+        credential,
+        'anonymous sign in',
       );
-    } on FirebaseAuthException catch (e) {
-      throw AuthenticationException('Anonymous sign in failed: ${e.message}');
+      return _userConverter.fromFirebaseUser(user);
     } catch (e) {
-      throw ServerException('Unexpected anonymous sign in error: $e');
+      _errorHandler.handleAuthError(e, 'anonymous sign in');
+      rethrow;
     }
   }
 
@@ -152,24 +130,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         password: password,
       );
 
-      if (credential.user == null) {
-        throw const AuthenticationException('No user returned from sign up');
-      }
+      var user = _errorHandler.validateAuthResult(credential, 'sign up');
+
       if (displayName != null) {
-        await credential.user!.updateDisplayName(displayName);
-        await credential.user!.reload();
+        await user.updateDisplayName(displayName);
+        await user.reload();
+        user = _firebaseAuth.currentUser!;
       }
 
-      final userModel = UserEntityGasometerExtension.fromFirebaseUser(
-        credential.user!,
-      );
-      await saveUserToFirestore(userModel);
+      final userModel = _userConverter.fromFirebaseUser(user);
+      await _firestoreUserRepository.saveUser(userModel);
 
       return userModel;
-    } on FirebaseAuthException catch (e) {
-      throw AuthenticationException('Sign up failed: ${e.message}');
     } catch (e) {
-      throw ServerException('Unexpected sign up error: $e');
+      _errorHandler.handleAuthError(e, 'sign up');
+      rethrow;
     }
   }
 
@@ -180,25 +155,20 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   ) async {
     try {
       final user = _firebaseAuth.currentUser;
-      if (user == null) {
-        throw const AuthenticationException('No user signed in');
-      }
+      _errorHandler.ensureUserAuthenticated(user, 'update profile');
 
-      await user.updateDisplayName(displayName);
+      await user!.updateDisplayName(displayName);
       await user.updatePhotoURL(photoUrl);
       await user.reload();
 
       final updatedUser = _firebaseAuth.currentUser!;
-      final userModel = UserEntityGasometerExtension.fromFirebaseUser(
-        updatedUser,
-      );
-      await saveUserToFirestore(userModel);
+      final userModel = _userConverter.fromFirebaseUser(updatedUser);
+      await _firestoreUserRepository.saveUser(userModel);
 
       return userModel;
-    } on FirebaseAuthException catch (e) {
-      throw AuthenticationException('Profile update failed: ${e.message}');
     } catch (e) {
-      throw ServerException('Unexpected profile update error: $e');
+      _errorHandler.handleAuthError(e, 'profile update');
+      rethrow;
     }
   }
 
@@ -206,15 +176,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> updateEmail(String newEmail) async {
     try {
       final user = _firebaseAuth.currentUser;
-      if (user == null) {
-        throw const AuthenticationException('No user signed in');
-      }
-
-      await user.verifyBeforeUpdateEmail(newEmail);
-    } on FirebaseAuthException catch (e) {
-      throw AuthenticationException('Email update failed: ${e.message}');
+      _errorHandler.ensureUserAuthenticated(user, 'update email');
+      await user!.verifyBeforeUpdateEmail(newEmail);
     } catch (e) {
-      throw ServerException('Unexpected email update error: $e');
+      _errorHandler.handleAuthError(e, 'email update');
+      rethrow;
     }
   }
 
@@ -222,15 +188,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> updatePassword(String newPassword) async {
     try {
       final user = _firebaseAuth.currentUser;
-      if (user == null) {
-        throw const AuthenticationException('No user signed in');
-      }
-
-      await user.updatePassword(newPassword);
-    } on FirebaseAuthException catch (e) {
-      throw AuthenticationException('Password update failed: ${e.message}');
+      _errorHandler.ensureUserAuthenticated(user, 'update password');
+      await user!.updatePassword(newPassword);
     } catch (e) {
-      throw ServerException('Unexpected password update error: $e');
+      _errorHandler.handleAuthError(e, 'password update');
+      rethrow;
     }
   }
 
@@ -238,15 +200,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> sendEmailVerification() async {
     try {
       final user = _firebaseAuth.currentUser;
-      if (user == null) {
-        throw const AuthenticationException('No user signed in');
-      }
-
-      await user.sendEmailVerification();
-    } on FirebaseAuthException catch (e) {
-      throw AuthenticationException('Email verification failed: ${e.message}');
+      _errorHandler.ensureUserAuthenticated(user, 'send email verification');
+      await user!.sendEmailVerification();
     } catch (e) {
-      throw ServerException('Unexpected email verification error: $e');
+      _errorHandler.handleAuthError(e, 'email verification');
+      rethrow;
     }
   }
 
@@ -254,113 +212,34 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _firebaseAuth.sendPasswordResetEmail(email: email);
-    } on FirebaseAuthException catch (e) {
-      throw AuthenticationException('Password reset failed: ${e.message}');
     } catch (e) {
-      throw ServerException('Unexpected password reset error: $e');
+      _errorHandler.handleAuthError(e, 'password reset');
+      rethrow;
     }
   }
 
   @override
   Future<UserEntity> signInWithGoogle() async {
-    try {
-      if (kDebugMode) {
-        debugPrint('🔄 Gasometer: Attempting Google Sign In via core...');
-      }
-
-      final result = await _coreAuthRepository.signInWithGoogle();
-
-      return result.fold(
-        (failure) {
-          if (kDebugMode) {
-            debugPrint('❌ Gasometer: Google Sign In failed - ${failure.message}');
-          }
-          throw AuthenticationException(failure.message);
-        },
-        (coreUser) async {
-          if (kDebugMode) {
-            debugPrint('✅ Gasometer: Google Sign In successful, converting to app entity...');
-          }
-          final appUser = UserEntityGasometerExtension.fromCoreUserEntity(coreUser);
-          await saveUserToFirestore(appUser);
-
-          return appUser;
-        },
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ Gasometer: Unexpected error in Google Sign In: $e');
-      }
-      throw ServerException('Unexpected Google Sign In error: $e');
-    }
+    return _handleSocialAuth(
+      () => _coreAuthRepository.signInWithGoogle(),
+      'Google Sign In',
+    );
   }
 
   @override
   Future<UserEntity> signInWithApple() async {
-    try {
-      if (kDebugMode) {
-        debugPrint('🔄 Gasometer: Attempting Apple Sign In via core...');
-      }
-
-      final result = await _coreAuthRepository.signInWithApple();
-
-      return result.fold(
-        (failure) {
-          if (kDebugMode) {
-            debugPrint('❌ Gasometer: Apple Sign In failed - ${failure.message}');
-          }
-          throw AuthenticationException(failure.message);
-        },
-        (coreUser) async {
-          if (kDebugMode) {
-            debugPrint('✅ Gasometer: Apple Sign In successful, converting to app entity...');
-          }
-          final appUser = UserEntityGasometerExtension.fromCoreUserEntity(coreUser);
-          await saveUserToFirestore(appUser);
-
-          return appUser;
-        },
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ Gasometer: Unexpected error in Apple Sign In: $e');
-      }
-      throw ServerException('Unexpected Apple Sign In error: $e');
-    }
+    return _handleSocialAuth(
+      () => _coreAuthRepository.signInWithApple(),
+      'Apple Sign In',
+    );
   }
 
   @override
   Future<UserEntity> signInWithFacebook() async {
-    try {
-      if (kDebugMode) {
-        debugPrint('🔄 Gasometer: Attempting Facebook Sign In via core...');
-      }
-
-      final result = await _coreAuthRepository.signInWithFacebook();
-
-      return result.fold(
-        (failure) {
-          if (kDebugMode) {
-            debugPrint('❌ Gasometer: Facebook Sign In failed - ${failure.message}');
-          }
-          throw AuthenticationException(failure.message);
-        },
-        (coreUser) async {
-          if (kDebugMode) {
-            debugPrint('✅ Gasometer: Facebook Sign In successful, converting to app entity...');
-          }
-          final appUser = UserEntityGasometerExtension.fromCoreUserEntity(coreUser);
-          await saveUserToFirestore(appUser);
-
-          return appUser;
-        },
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ Gasometer: Unexpected error in Facebook Sign In: $e');
-      }
-      throw ServerException('Unexpected Facebook Sign In error: $e');
-    }
+    return _handleSocialAuth(
+      () => _coreAuthRepository.signInWithFacebook(),
+      'Facebook Sign In',
+    );
   }
 
   @override
@@ -379,124 +258,43 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         password: password,
       );
       final userCredential = await user.linkWithCredential(credential);
-
-      if (userCredential.user == null) {
-        throw const AuthenticationException('No user returned from linking');
-      }
-
-      final userModel = UserEntityGasometerExtension.fromFirebaseUser(
-        userCredential.user!,
+      final linkedUser = _errorHandler.validateAuthResult(
+        userCredential,
+        'account linking',
       );
-      await saveUserToFirestore(userModel);
+
+      final userModel = _userConverter.fromFirebaseUser(linkedUser);
+      await _firestoreUserRepository.saveUser(userModel);
 
       return userModel;
-    } on FirebaseAuthException catch (e) {
-      throw AuthenticationException('Account linking failed: ${e.message}');
     } catch (e) {
-      throw ServerException('Unexpected account linking error: $e');
+      _errorHandler.handleAuthError(e, 'account linking');
+      rethrow;
     }
   }
 
   @override
   Future<UserEntity> linkAnonymousWithGoogle() async {
-    try {
-      if (kDebugMode) {
-        debugPrint('🔄 Gasometer: Attempting to link anonymous account with Google...');
-      }
-
-      final result = await _coreAuthRepository.linkWithGoogle();
-
-      return result.fold(
-        (failure) {
-          if (kDebugMode) {
-            debugPrint('❌ Gasometer: Google account linking failed - ${failure.message}');
-          }
-          throw AuthenticationException(failure.message);
-        },
-        (coreUser) async {
-          if (kDebugMode) {
-            debugPrint('✅ Gasometer: Google account linking successful, converting to app entity...');
-          }
-          final appUser = UserEntityGasometerExtension.fromCoreUserEntity(coreUser);
-          await saveUserToFirestore(appUser);
-
-          return appUser;
-        },
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ Gasometer: Unexpected error linking with Google: $e');
-      }
-      throw ServerException('Unexpected Google linking error: $e');
-    }
+    return _handleSocialAuth(
+      () => _coreAuthRepository.linkWithGoogle(),
+      'Google linking',
+    );
   }
 
   @override
   Future<UserEntity> linkAnonymousWithApple() async {
-    try {
-      if (kDebugMode) {
-        debugPrint('🔄 Gasometer: Attempting to link anonymous account with Apple...');
-      }
-
-      final result = await _coreAuthRepository.linkWithApple();
-
-      return result.fold(
-        (failure) {
-          if (kDebugMode) {
-            debugPrint('❌ Gasometer: Apple account linking failed - ${failure.message}');
-          }
-          throw AuthenticationException(failure.message);
-        },
-        (coreUser) async {
-          if (kDebugMode) {
-            debugPrint('✅ Gasometer: Apple account linking successful, converting to app entity...');
-          }
-          final appUser = UserEntityGasometerExtension.fromCoreUserEntity(coreUser);
-          await saveUserToFirestore(appUser);
-
-          return appUser;
-        },
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ Gasometer: Unexpected error linking with Apple: $e');
-      }
-      throw ServerException('Unexpected Apple linking error: $e');
-    }
+    return _handleSocialAuth(
+      () => _coreAuthRepository.linkWithApple(),
+      'Apple linking',
+    );
   }
 
   @override
   Future<UserEntity> linkAnonymousWithFacebook() async {
-    try {
-      if (kDebugMode) {
-        debugPrint('🔄 Gasometer: Attempting to link anonymous account with Facebook...');
-      }
-
-      final result = await _coreAuthRepository.linkWithFacebook();
-
-      return result.fold(
-        (failure) {
-          if (kDebugMode) {
-            debugPrint('❌ Gasometer: Facebook account linking failed - ${failure.message}');
-          }
-          throw AuthenticationException(failure.message);
-        },
-        (coreUser) async {
-          if (kDebugMode) {
-            debugPrint('✅ Gasometer: Facebook account linking successful, converting to app entity...');
-          }
-          final appUser = UserEntityGasometerExtension.fromCoreUserEntity(coreUser);
-          await saveUserToFirestore(appUser);
-
-          return appUser;
-        },
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ Gasometer: Unexpected error linking with Facebook: $e');
-      }
-      throw ServerException('Unexpected Facebook linking error: $e');
-    }
+    return _handleSocialAuth(
+      () => _coreAuthRepository.linkWithFacebook(),
+      'Facebook linking',
+    );
   }
 
   @override
@@ -512,40 +310,59 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> deleteAccount() async {
     try {
       final user = _firebaseAuth.currentUser;
-      if (user == null) {
-        throw const AuthenticationException('No user signed in');
-      }
-      await _firestore.collection('users').doc(user.uid).delete();
+      _errorHandler.ensureUserAuthenticated(user, 'delete account');
+
+      await _firestoreUserRepository.deleteUser(user!.uid);
       await user.delete();
-    } on FirebaseAuthException catch (e) {
-      throw AuthenticationException('Account deletion failed: ${e.message}');
     } catch (e) {
-      throw ServerException('Unexpected account deletion error: $e');
+      _errorHandler.handleAuthError(e, 'account deletion');
+      rethrow;
     }
   }
 
-  @override
-  Future<void> saveUserToFirestore(UserEntity user) async {
+  // ============================================================================
+  // PRIVATE HELPER METHODS - Reduzir código duplicado (DRY)
+  // ============================================================================
+
+  /// Helper method para autenticação social (Google, Apple, Facebook)
+  /// Aplica Template Method Pattern para eliminar duplicação
+  Future<UserEntity> _handleSocialAuth(
+    Future<Either<Failure, UserEntity>> Function() authMethod,
+    String operationName,
+  ) async {
     try {
-      await _firestore
-          .collection('users')
-          .doc(user.id)
-          .set(user.toGasometerFirestore(), SetOptions(merge: true));
+      if (kDebugMode) {
+        debugPrint('🔄 Gasometer: Attempting $operationName via core...');
+      }
+
+      final result = await authMethod();
+
+      return result.fold(
+        (failure) {
+          if (kDebugMode) {
+            debugPrint(
+              '❌ Gasometer: $operationName failed - ${failure.message}',
+            );
+          }
+          throw AuthenticationException(failure.message);
+        },
+        (coreUser) async {
+          if (kDebugMode) {
+            debugPrint(
+              '✅ Gasometer: $operationName successful, converting to app entity...',
+            );
+          }
+          final appUser = _userConverter.fromCoreUserEntity(coreUser);
+          await _firestoreUserRepository.saveUser(appUser);
+          return appUser;
+        },
+      );
     } catch (e) {
-      throw ServerException('Failed to save user to Firestore: $e');
-    }
-  }
-
-  @override
-  Future<UserEntity?> getUserFromFirestore(String userId) async {
-    try {
-      final doc = await _firestore.collection('users').doc(userId).get();
-
-      if (!doc.exists) return null;
-
-      return UserEntityGasometerExtension.fromFirestore(doc);
-    } catch (e) {
-      throw ServerException('Failed to get user from Firestore: $e');
+      if (kDebugMode) {
+        debugPrint('❌ Gasometer: Unexpected error in $operationName: $e');
+      }
+      if (e is AuthenticationException) rethrow;
+      throw ServerException('Unexpected $operationName error: $e');
     }
   }
 }

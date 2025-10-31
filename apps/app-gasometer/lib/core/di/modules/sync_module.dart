@@ -11,22 +11,28 @@ import '../../../features/vehicles/domain/repositories/vehicle_repository.dart';
 /// Registra o GasometerSyncService do core package
 abstract class SyncDIModule {
   static void init(GetIt sl) {
-    // TODO: Implement GasometerSyncServiceFactory or instantiate GasometerSyncService directly
-    // The factory pattern was planned but not implemented yet
-    //
-    // Option 1: Create factory class
-    // Option 2: Direct instantiation: GasometerSyncService(repositories...)
-    // Option 3: Wait for core package to provide sync implementation
-    /*
-    sl.registerLazySingleton<GasometerSyncService>(
-      () => GasometerSyncServiceFactory.create(
-        vehicleRepository: sl<VehicleRepository>(),
-        fuelRepository: sl<FuelRepository>(),
-        maintenanceRepository: sl<MaintenanceRepository>(),
-        expensesRepository: null,
-      ),
-    );
-    */
+    if (kDebugMode) {
+      print('📦 Registering GasometerSyncService...');
+    }
+    
+    try {
+      sl.registerLazySingleton<GasometerSyncService>(
+        () => GasometerSyncService(
+          vehicleRepository: sl<VehicleRepository>(),
+          fuelRepository: sl<FuelRepository>(),
+          maintenanceRepository: sl<MaintenanceRepository>(),
+          expensesRepository: null,
+        ),
+      );
+      
+      if (kDebugMode) {
+        print('✅ GasometerSyncService registered successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ Failed to register GasometerSyncService: $e');
+      }
+    }
   }
 
   /// Inicializa o sync service após o app estar pronto

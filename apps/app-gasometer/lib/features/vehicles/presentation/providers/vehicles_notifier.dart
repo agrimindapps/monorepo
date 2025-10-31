@@ -4,6 +4,7 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/error/app_error.dart' as local_error;
+import '../../../../core/error/error_mapper.dart';
 import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../../domain/repositories/vehicle_repository.dart';
@@ -13,6 +14,7 @@ import '../../domain/usecases/get_all_vehicles.dart';
 import '../../domain/usecases/get_vehicle_by_id.dart';
 import '../../domain/usecases/search_vehicles.dart';
 import '../../domain/usecases/update_vehicle.dart';
+import 'vehicle_services_providers.dart';
 
 part 'vehicles_notifier.g.dart';
 
@@ -27,9 +29,13 @@ class VehiclesNotifier extends _$VehiclesNotifier {
 
   String get notifierName => 'VehiclesNotifier';
 
+  late final ErrorMapper _errorMapper;
+
   @override
   Future<List<VehicleEntity>> build() async {
     await _vehicleSubscription?.cancel();
+    _errorMapper = ref.read(errorMapperProvider);
+
     final currentUser = ref.read(currentUserProvider);
     if (currentUser == null) {
       _logInfo('User not authenticated, returning empty list');
@@ -44,7 +50,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
 
       return result.fold(
         (failure) {
-          final error = _mapFailureToError(failure);
+          final error = _errorMapper.mapFailureToError(failure);
           throw error;
         },
         (vehicles) {
@@ -116,7 +122,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
 
       return result.fold(
         (failure) {
-          final error = _mapFailureToError(failure);
+          final error = _errorMapper.mapFailureToError(failure);
           throw error;
         },
         (added) {
@@ -150,7 +156,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
 
       return result.fold(
         (failure) {
-          final error = _mapFailureToError(failure);
+          final error = _errorMapper.mapFailureToError(failure);
           throw error;
         },
         (updated) {
@@ -188,7 +194,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
 
       return result.fold(
         (failure) {
-          final error = _mapFailureToError(failure);
+          final error = _errorMapper.mapFailureToError(failure);
           throw error;
         },
         (_) {
@@ -225,7 +231,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
 
         return result.fold(
           (failure) {
-            final error = _mapFailureToError(failure);
+            final error = _errorMapper.mapFailureToError(failure);
             throw error;
           },
           (vehicle) {
@@ -262,7 +268,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
 
         return result.fold(
           (failure) {
-            final error = _mapFailureToError(failure);
+            final error = _errorMapper.mapFailureToError(failure);
             throw error;
           },
           (vehicles) {
@@ -289,64 +295,6 @@ class VehiclesNotifier extends _$VehiclesNotifier {
     _logInfo('Refreshing vehicles');
     ref.invalidateSelf();
     await future;
-  }
-
-  /// Filtra veículos por tipo
-  List<VehicleEntity> getVehiclesByType(VehicleType type) {
-    final vehicles = state.when(
-      data: (data) => data,
-      loading: () => <VehicleEntity>[],
-      error: (_, __) => <VehicleEntity>[],
-    );
-    return vehicles
-        .where((VehicleEntity v) => v.type == type && v.isActive)
-        .toList();
-  }
-
-  /// Filtra veículos por tipo de combustível
-  List<VehicleEntity> getVehiclesByFuelType(FuelType fuelType) {
-    final vehicles = state.when(
-      data: (data) => data,
-      loading: () => <VehicleEntity>[],
-      error: (_, __) => <VehicleEntity>[],
-    );
-    return vehicles
-        .where(
-          (VehicleEntity v) =>
-              v.supportedFuels.contains(fuelType) && v.isActive,
-        )
-        .toList();
-  }
-
-  /// Mapeia Failure para AppError
-  local_error.AppError _mapFailureToError(dynamic failure) {
-    if (failure.toString().contains('network') ||
-        failure.toString().contains('connection')) {
-      return local_error.NetworkError(
-        message: 'Erro de conexão. Verifique sua internet.',
-        technicalDetails: failure.toString(),
-      );
-    } else if (failure.toString().contains('server')) {
-      return local_error.ServerError(
-        message: 'Erro do servidor. Tente novamente mais tarde.',
-        technicalDetails: failure.toString(),
-      );
-    } else if (failure.toString().contains('cache')) {
-      return local_error.CacheError(
-        message: 'Erro de cache local.',
-        technicalDetails: failure.toString(),
-      );
-    } else if (failure.toString().contains('not found')) {
-      return local_error.NotFoundError(
-        message: 'Veículo não encontrado.',
-        technicalDetails: failure.toString(),
-      );
-    } else {
-      return local_error.UnexpectedError(
-        message: 'Erro inesperado. Tente novamente.',
-        technicalDetails: failure.toString(),
-      );
-    }
   }
 
   void _logInfo(String message) {

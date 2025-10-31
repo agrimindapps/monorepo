@@ -1,9 +1,7 @@
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/theme_settings_entity.dart';
-import '../../domain/usecases/update_user_settings_usecase.dart';
 import '../../domain/interfaces/segregated_settings_interfaces.dart';
 
 part 'theme_notifier_refactored.g.dart';
@@ -38,9 +36,9 @@ class ThemeNotifier extends _$ThemeNotifier {
 
   /// Update dark theme setting
   Future<void> setDarkTheme(bool isDark) async {
-    state = const AsyncValue.loading();
+    state = const AsyncValue<IThemeSettings>.loading();
 
-    state = await AsyncValue.guard(() async {
+    state = await AsyncValue.guard<IThemeSettings>(() async {
       // Aqui você atualizaria via use case
       // final updateUseCase = ref.read(updateUserSettingsProvider);
       // await updateUseCase(...);
@@ -55,9 +53,9 @@ class ThemeNotifier extends _$ThemeNotifier {
 
   /// Update language
   Future<void> setLanguage(String languageCode) async {
-    state = const AsyncValue.loading();
+    state = const AsyncValue<IThemeSettings>.loading();
 
-    state = await AsyncValue.guard(() async {
+    state = await AsyncValue.guard<IThemeSettings>(() async {
       final updated = ThemeSettingsEntity.defaults().copyWith(
         language: languageCode,
       );

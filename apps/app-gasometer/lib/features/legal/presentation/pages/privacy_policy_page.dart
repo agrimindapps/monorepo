@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/gasometer_colors.dart';
-import '../../data/legal_content_service.dart';
+import '../../data/services/privacy_policy_content_provider.dart';
 import '../widgets/base_legal_page.dart';
 
 class PrivacyPolicyPage extends BaseLegalPage {
@@ -20,7 +20,8 @@ class PrivacyPolicyPage extends BaseLegalPage {
 
   @override
   List<LegalSection> buildSections(BuildContext context, ThemeData theme) {
-    return LegalContentService.getPrivacyPolicySections();
+    final provider = PrivacyPolicyContentProvider();
+    return provider.getSections();
   }
 }
 

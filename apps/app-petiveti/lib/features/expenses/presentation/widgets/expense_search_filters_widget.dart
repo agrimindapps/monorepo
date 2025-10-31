@@ -112,7 +112,7 @@ class _ExpenseSearchFiltersWidgetState extends State<ExpenseSearchFiltersWidget>
         Switch.adaptive(
           value: widget.showFilters,
           onChanged: widget.onFiltersToggled,
-          activeColor: theme.colorScheme.primary,
+          activeThumbColor: theme.colorScheme.primary,
         ),
       ],
     );
@@ -134,7 +134,7 @@ class _ExpenseSearchFiltersWidgetState extends State<ExpenseSearchFiltersWidget>
 
   Widget _buildCategoryFilter(ThemeData theme) {
     return DropdownButtonFormField<ExpenseCategory?>(
-      value: widget.filterCategory,
+      initialValue: widget.filterCategory,
       decoration: InputDecoration(
         labelText: 'Categoria',
         prefixIcon: const Icon(Icons.category),

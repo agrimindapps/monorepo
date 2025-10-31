@@ -1,10 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/plantis_colors.dart';
-import '../presentation/builders/upgrade_prompt_builder.dart';
-import '../presentation/managers/premium_feature_access_manager.dart';
-
 /// Features que requerem premium
 enum PremiumFeature {
   cloudSync,
@@ -48,11 +44,10 @@ class PremiumFeatureGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final accessManager = PremiumFeatureAccessManager();
-
     // For now, returning child directly
     // In production, would integrate with actual license provider
     return child;
+  }
 }
 
 /// Simplified version for basic premium checks

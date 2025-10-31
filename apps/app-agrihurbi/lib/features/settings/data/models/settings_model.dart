@@ -2,10 +2,8 @@
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
 import 'package:core/core.dart' hide NotificationSettings, PrivacySettings;
 
-part 'settings_model.g.dart';
 
 /// Settings Model with Hive Serialization
-@HiveType(typeId: 23)
 class SettingsModel extends SettingsEntity {
   @HiveField(0)
   @override
@@ -143,7 +141,6 @@ class SettingsModel extends SettingsEntity {
 }
 
 
-@HiveType(typeId: 25)
 class NotificationSettingsModel extends NotificationSettings {
   @HiveField(0)
   @override
@@ -236,7 +233,6 @@ class NotificationSettingsModel extends NotificationSettings {
     };
   }
 }
-@HiveType(typeId: 26)
 class DataSettingsModel extends DataSettings {
   @HiveField(0)
   @override
@@ -314,7 +310,6 @@ class DataSettingsModel extends DataSettings {
     };
   }
 }
-@HiveType(typeId: 28)
 class PrivacySettingsModel extends PrivacySettings {
   @HiveField(0)
   @override
@@ -375,7 +370,6 @@ class PrivacySettingsModel extends PrivacySettings {
       };
 }
 
-@HiveType(typeId: 29)
 class DisplaySettingsModel extends DisplaySettings {
   const DisplaySettingsModel({
     super.fontSize = 1.0,
@@ -422,7 +416,6 @@ class DisplaySettingsModel extends DisplaySettings {
       };
 }
 
-@HiveType(typeId: 30)
 class SecuritySettingsModel extends SecuritySettings {
   const SecuritySettingsModel({
     super.biometricAuth = false,
@@ -457,7 +450,6 @@ class SecuritySettingsModel extends SecuritySettings {
       };
 }
 
-@HiveType(typeId: 31)
 class BackupSettingsModel extends BackupSettings {
   const BackupSettingsModel({
     super.autoBackup = true,

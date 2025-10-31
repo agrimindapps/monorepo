@@ -122,7 +122,7 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<Animal>(
-                value: _selectedAnimal,
+                initialValue: _selectedAnimal,
                 decoration: InputDecoration(
                   hintText: 'Selecione um animal',
                   prefixIcon: const Icon(Icons.pets),
@@ -310,7 +310,7 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<VaccineStatus>(
-                        value: _status,
+                        initialValue: _status,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),

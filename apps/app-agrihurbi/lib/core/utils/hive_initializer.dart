@@ -1,14 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../features/livestock/data/models/livestock_enums_adapter.dart';
-import '../../features/markets/data/models/market_enums_adapter.dart';
-import '../../features/news/data/models/commodity_price_model.dart';
-import '../../features/news/data/models/news_article_model.dart';
-import '../../features/weather/data/models/rain_gauge_model.dart';
-import '../../features/weather/data/models/weather_measurement_model.dart';
-import '../../features/weather/data/models/weather_statistics_model.dart';
-
 /// Inicializador do Hive para configuração de adapters
 /// 
 /// Centraliza o registro de todos os adapters Hive do app
@@ -59,19 +51,9 @@ class HiveInitializer {
   
   /// Registra adapters de enums
   static void _registerEnumAdapters() {
-    try {
-      if (!Hive.isAdapterRegistered(10)) {
-        Hive.registerAdapter(BovineAptitudeAdapter());
-        debugPrint('HiveInitializer: BovineAptitudeAdapter registrado (TypeId: 10)');
-      }
-      if (!Hive.isAdapterRegistered(11)) {
-        Hive.registerAdapter(BreedingSystemAdapter());
-        debugPrint('HiveInitializer: BreedingSystemAdapter registrado (TypeId: 11)');
-      }
-    } catch (e) {
-      debugPrint('HiveInitializer: Erro ao registrar adapters de enums - $e');
-      rethrow;
-    }
+    // ⚠️ TEMPORARIAMENTE DESABILITADO: Enum adapters removidos devido a conflito
+    // com riverpod_generator (incompatibilidade hive_generator)
+    debugPrint('HiveInitializer: Enum adapters skipped (awaiting manual implementation)');
   }
   
   /// Limpa todos os dados do Hive (apenas para desenvolvimento)
@@ -90,25 +72,8 @@ class HiveInitializer {
   
   /// Registra adapters relacionados ao weather
   static void _registerWeatherAdapters() {
-    try {
-      if (!Hive.isAdapterRegistered(51)) {
-        Hive.registerAdapter<RainGaugeModel>(RainGaugeModelAdapter());
-        debugPrint('HiveInitializer: RainGaugeModelAdapter registrado (TypeId: 51)');
-      }
-      if (!Hive.isAdapterRegistered(50)) {
-        Hive.registerAdapter<WeatherMeasurementModel>(WeatherMeasurementModelAdapter());
-        debugPrint('HiveInitializer: WeatherMeasurementModelAdapter registrado (TypeId: 50)');
-      }
-      if (!Hive.isAdapterRegistered(52)) {
-        Hive.registerAdapter<WeatherStatisticsModel>(WeatherStatisticsModelAdapter());
-        debugPrint('HiveInitializer: WeatherStatisticsModelAdapter registrado (TypeId: 52)');
-      }
-      
-      debugPrint('HiveInitializer: Weather adapters registrados');
-    } catch (e) {
-      debugPrint('HiveInitializer: Erro ao registrar adapters de weather - $e');
-      rethrow;
-    }
+    // ⚠️ TEMPORARIAMENTE DESABILITADO
+    debugPrint('HiveInitializer: Weather adapters skipped (awaiting manual implementation)');
   }
   
   /// Registra adapters relacionados à subscription
@@ -124,33 +89,14 @@ class HiveInitializer {
   
   /// Registra adapters relacionados ao news
   static void _registerNewsAdapters() {
-    try {
-      if (!Hive.isAdapterRegistered(30)) {
-        Hive.registerAdapter<CommodityPriceModel>(CommodityPriceModelAdapter());
-        debugPrint('HiveInitializer: CommodityPriceModelAdapter registrado (TypeId: 30)');
-      }
-      if (!Hive.isAdapterRegistered(31)) {
-        Hive.registerAdapter<NewsArticleModel>(NewsArticleModelAdapter());
-        debugPrint('HiveInitializer: NewsArticleModelAdapter registrado (TypeId: 31)');
-      }
-      
-      debugPrint('HiveInitializer: News adapters registrados');
-    } catch (e) {
-      debugPrint('HiveInitializer: Erro ao registrar adapters de news - $e');
-      rethrow;
-    }
+    // ⚠️ TEMPORARIAMENTE DESABILITADO
+    debugPrint('HiveInitializer: News adapters skipped (awaiting manual implementation)');
   }
 
   /// Registra adapters relacionados aos markets
   static void _registerMarketsAdapters() {
-    try {
-      registerMarketAdapters();
-      
-      debugPrint('HiveInitializer: Markets adapters registrados');
-    } catch (e) {
-      debugPrint('HiveInitializer: Erro ao registrar adapters de markets - $e');
-      rethrow;
-    }
+    // ⚠️ TEMPORARIAMENTE DESABILITADO: Enum adapters + JSON serialization conflicts
+    debugPrint('HiveInitializer: Markets adapters skipped (awaiting manual implementation)');
   }
 
   /// Fecha todas as boxes abertas

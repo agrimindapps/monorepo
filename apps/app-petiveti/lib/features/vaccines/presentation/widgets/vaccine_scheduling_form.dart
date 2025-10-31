@@ -128,7 +128,7 @@ class _VaccineSchedulingFormState extends State<VaccineSchedulingForm> {
               subtitle: const Text('Aplicação em múltiplas doses'),
               value: widget.isSeriesVaccine,
               onChanged: widget.onIsSeriesChanged,
-              activeColor: theme.colorScheme.primary,
+              activeThumbColor: theme.colorScheme.primary,
             ),
             if (widget.isSeriesVaccine) ...[
               const Divider(),
@@ -202,7 +202,7 @@ class _VaccineSchedulingFormState extends State<VaccineSchedulingForm> {
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int>(
-                    value: widget.seriesIntervalDays,
+                    initialValue: widget.seriesIntervalDays,
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12,

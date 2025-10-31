@@ -16,7 +16,7 @@ class MedicationFilters extends ConsumerWidget {
       children: [
         Expanded(
           child: DropdownButtonFormField<MedicationType?>(
-            value: typeFilter,
+            initialValue: typeFilter,
             decoration: const InputDecoration(
               labelText: 'Tipo',
               border: OutlineInputBorder(),
@@ -41,7 +41,7 @@ class MedicationFilters extends ConsumerWidget {
         const SizedBox(width: 12),
         Expanded(
           child: DropdownButtonFormField<MedicationStatus?>(
-            value: statusFilter,
+            initialValue: statusFilter,
             decoration: const InputDecoration(
               labelText: 'Status',
               border: OutlineInputBorder(),

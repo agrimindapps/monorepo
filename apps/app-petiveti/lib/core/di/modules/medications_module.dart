@@ -2,7 +2,9 @@ import 'package:core/core.dart' show GetIt;
 
 import '../../../features/medications/data/datasources/medication_local_datasource.dart';
 import '../../../features/medications/data/repositories/medication_repository_impl.dart';
+import '../../../features/medications/data/services/medication_error_handling_service.dart';
 import '../../../features/medications/domain/repositories/medication_repository.dart';
+import '../../../features/medications/domain/services/medication_validation_service.dart';
 import '../../../features/medications/domain/usecases/add_medication.dart';
 import '../../../features/medications/domain/usecases/check_medication_conflicts.dart';
 import '../../../features/medications/domain/usecases/delete_medication.dart';
@@ -22,21 +24,38 @@ import '../di_module.dart';
 class MedicationsModule implements DIModule {
   @override
   Future<void> register(GetIt getIt) async {
+    // Services
+    getIt.registerLazySingleton<MedicationValidationService>(
+      () => MedicationValidationService(),
+    );
+
+    getIt.registerLazySingleton<MedicationErrorHandlingService>(
+      () => MedicationErrorHandlingService(),
+    );
+
+    // Data Sources
     getIt.registerLazySingleton<MedicationLocalDataSource>(
       () => MedicationLocalDataSourceImpl(),
     );
 
+    // Repository
     getIt.registerLazySingleton<MedicationRepository>(
       () => MedicationRepositoryImpl(
         getIt<MedicationLocalDataSource>(),
+        getIt<MedicationErrorHandlingService>(),
       ),
     );
+
+    // Use Cases (Read)
     getIt.registerLazySingleton<GetMedications>(
       () => GetMedications(getIt<MedicationRepository>()),
     );
 
     getIt.registerLazySingleton<GetMedicationById>(
-      () => GetMedicationById(getIt<MedicationRepository>()),
+      () => GetMedicationById(
+        getIt<MedicationRepository>(),
+        getIt<MedicationValidationService>(),
+      ),
     );
 
     getIt.registerLazySingleton<GetMedicationsByAnimalId>(
@@ -55,23 +74,34 @@ class MedicationsModule implements DIModule {
       () => CheckMedicationConflicts(getIt<MedicationRepository>()),
     );
 
+    // Use Cases (Write)
     getIt.registerLazySingleton<AddMedication>(
       () => AddMedication(
         getIt<MedicationRepository>(),
         getIt<CheckMedicationConflicts>(),
+        getIt<MedicationValidationService>(),
       ),
     );
 
     getIt.registerLazySingleton<UpdateMedication>(
-      () => UpdateMedication(getIt<MedicationRepository>()),
+      () => UpdateMedication(
+        getIt<MedicationRepository>(),
+        getIt<MedicationValidationService>(),
+      ),
     );
 
     getIt.registerLazySingleton<DeleteMedication>(
-      () => DeleteMedication(getIt<MedicationRepository>()),
+      () => DeleteMedication(
+        getIt<MedicationRepository>(),
+        getIt<MedicationValidationService>(),
+      ),
     );
 
     getIt.registerLazySingleton<DiscontinueMedication>(
-      () => DiscontinueMedication(getIt<MedicationRepository>()),
+      () => DiscontinueMedication(
+        getIt<MedicationRepository>(),
+        getIt<MedicationValidationService>(),
+      ),
     );
   }
 }

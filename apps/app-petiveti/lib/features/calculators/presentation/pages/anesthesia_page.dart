@@ -167,7 +167,7 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedSpecies,
+              initialValue: _selectedSpecies,
               decoration: const InputDecoration(
                 labelText: 'Espécie',
                 border: OutlineInputBorder(),
@@ -213,7 +213,7 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedProcedureType,
+              initialValue: _selectedProcedureType,
               decoration: const InputDecoration(
                 labelText: 'Duração e Complexidade',
                 border: OutlineInputBorder(),
@@ -265,7 +265,7 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedAgeGroup,
+              initialValue: _selectedAgeGroup,
               decoration: const InputDecoration(
                 labelText: 'Faixa Etária',
                 border: OutlineInputBorder(),
@@ -297,7 +297,7 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedHealthStatus,
+              initialValue: _selectedHealthStatus,
               decoration: const InputDecoration(
                 labelText: 'Estado de Saúde (ASA)',
                 border: OutlineInputBorder(),

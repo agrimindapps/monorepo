@@ -4,6 +4,7 @@ import '../../../features/expenses/data/datasources/expense_local_datasource.dar
 import '../../../features/expenses/data/datasources/expense_remote_datasource.dart';
 import '../../../features/expenses/data/repositories/expense_repository_hybrid_impl.dart';
 import '../../../features/expenses/domain/repositories/expense_repository.dart';
+import '../../../features/expenses/domain/services/expense_validation_service.dart';
 import '../../../features/expenses/domain/usecases/add_expense.dart';
 import '../../../features/expenses/domain/usecases/delete_expense.dart';
 import '../../../features/expenses/domain/usecases/get_expense_summary.dart';
@@ -21,6 +22,12 @@ import '../di_module.dart';
 class ExpensesModule implements DIModule {
   @override
   Future<void> register(GetIt getIt) async {
+    // Services
+    getIt.registerLazySingleton<ExpenseValidationService>(
+      () => ExpenseValidationService(),
+    );
+
+    // Data Sources
     getIt.registerLazySingleton<ExpenseLocalDataSource>(
       () => ExpenseLocalDataSourceImpl(),
     );
@@ -28,6 +35,8 @@ class ExpensesModule implements DIModule {
     getIt.registerLazySingleton<ExpenseRemoteDataSource>(
       () => ExpenseRemoteDataSourceImpl(),
     );
+
+    // Repository
     getIt.registerLazySingleton<ExpenseRepository>(
       () => ExpenseRepositoryHybridImpl(
         localDataSource: getIt<ExpenseLocalDataSource>(),
@@ -35,6 +44,8 @@ class ExpensesModule implements DIModule {
         connectivity: getIt(),
       ),
     );
+
+    // Use Cases (Read)
     getIt.registerLazySingleton<GetExpenses>(
       () => GetExpenses(getIt<ExpenseRepository>()),
     );
@@ -51,16 +62,26 @@ class ExpensesModule implements DIModule {
       () => GetExpenseSummary(getIt<ExpenseRepository>()),
     );
 
+    // Use Cases (Write)
     getIt.registerLazySingleton<AddExpense>(
-      () => AddExpense(getIt<ExpenseRepository>()),
+      () => AddExpense(
+        getIt<ExpenseRepository>(),
+        getIt<ExpenseValidationService>(),
+      ),
     );
 
     getIt.registerLazySingleton<UpdateExpense>(
-      () => UpdateExpense(getIt<ExpenseRepository>()),
+      () => UpdateExpense(
+        getIt<ExpenseRepository>(),
+        getIt<ExpenseValidationService>(),
+      ),
     );
 
     getIt.registerLazySingleton<DeleteExpense>(
-      () => DeleteExpense(getIt<ExpenseRepository>()),
+      () => DeleteExpense(
+        getIt<ExpenseRepository>(),
+        getIt<ExpenseValidationService>(),
+      ),
     );
   }
 }

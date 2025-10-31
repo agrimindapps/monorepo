@@ -218,7 +218,7 @@ class _HydrationPageState extends ConsumerState<HydrationPage> {
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<BodyCondition>(
-          value: _selectedBodyCondition,
+          initialValue: _selectedBodyCondition,
           decoration: const InputDecoration(
             labelText: 'Condição Corporal',
             border: OutlineInputBorder(),
@@ -248,7 +248,7 @@ class _HydrationPageState extends ConsumerState<HydrationPage> {
     return Column(
       children: [
         DropdownButtonFormField<DehydrationLevel>(
-          value: _selectedDehydrationLevel,
+          initialValue: _selectedDehydrationLevel,
           decoration: const InputDecoration(
             labelText: 'Nível de Desidratação',
             border: OutlineInputBorder(),
@@ -329,7 +329,7 @@ class _HydrationPageState extends ConsumerState<HydrationPage> {
     return Column(
       children: [
         DropdownButtonFormField<ActivityLevel>(
-          value: _selectedActivityLevel,
+          initialValue: _selectedActivityLevel,
           decoration: const InputDecoration(
             labelText: 'Nível de Atividade',
             border: OutlineInputBorder(),
@@ -353,7 +353,7 @@ class _HydrationPageState extends ConsumerState<HydrationPage> {
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<EnvironmentTemp>(
-          value: _selectedEnvironmentTemp,
+          initialValue: _selectedEnvironmentTemp,
           decoration: const InputDecoration(
             labelText: 'Temperatura Ambiente',
             border: OutlineInputBorder(),

@@ -2,11 +2,9 @@ import 'package:core/core.dart';
 
 import '../../domain/entities/weather_measurement_entity.dart';
 
-part 'weather_measurement_model.g.dart';
 
 /// Weather measurement model with Hive serialization
 /// Converts between domain entity and data model for persistence
-@HiveType(typeId: 50) // Unique typeId for weather measurements
 class WeatherMeasurementModel extends Equatable {
   @HiveField(0)
   final String id;

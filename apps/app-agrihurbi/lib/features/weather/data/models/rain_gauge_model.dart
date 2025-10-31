@@ -2,11 +2,9 @@ import 'package:core/core.dart';
 
 import '../../domain/entities/rain_gauge_entity.dart';
 
-part 'rain_gauge_model.g.dart';
 
 /// Rain gauge model with Hive serialization
 /// Converts between domain entity and data model for persistence
-@HiveType(typeId: 51) // Unique typeId for rain gauges
 class RainGaugeModel extends Equatable {
   @HiveField(0)
   final String id;

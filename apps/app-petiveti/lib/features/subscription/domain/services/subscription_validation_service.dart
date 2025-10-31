@@ -86,7 +86,7 @@ class SubscriptionValidationService {
 
     final planIdValidation = validatePlanId(newPlanId);
     if (planIdValidation.isLeft()) {
-      return Left(
+      return const Left(
         ValidationFailure(message: 'ID do novo plano é obrigatório'),
       );
     }

@@ -149,7 +149,7 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedSpecies,
+              initialValue: _selectedSpecies,
               decoration: const InputDecoration(
                 labelText: 'Espécie',
                 border: OutlineInputBorder(),
@@ -179,7 +179,7 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedBreed,
+              initialValue: _selectedBreed,
               decoration: const InputDecoration(
                 labelText: 'Raça/Porte',
                 border: OutlineInputBorder(),
@@ -206,7 +206,7 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedSex,
+              initialValue: _selectedSex,
               decoration: const InputDecoration(
                 labelText: 'Sexo',
                 border: OutlineInputBorder(),

@@ -2,13 +2,11 @@
 import 'package:app_agrihurbi/features/news/domain/entities/commodity_price_entity.dart';
 import 'package:core/core.dart';
 
-part 'commodity_price_model.g.dart';
 
 /// Commodity Price Model with Hive Serialization
 /// 
 /// Represents current and historical pricing data
 /// for agricultural commodities and products
-@HiveType(typeId: 12)
 class CommodityPriceModel extends CommodityPriceEntity {
   @override
   @HiveField(0)
@@ -168,7 +166,6 @@ class CommodityPriceModel extends CommodityPriceEntity {
 }
 
 /// Commodity Type Model with Hive Serialization
-@HiveType(typeId: 13)
 enum CommodityTypeModel {
   @HiveField(0)
   grains,
@@ -335,7 +332,6 @@ enum CommodityTypeModel {
 }
 
 /// Historical Price Model with Hive Serialization
-@HiveType(typeId: 14)
 class HistoricalPriceModel extends HistoricalPrice {
   @override
   @HiveField(0)
@@ -388,8 +384,7 @@ class HistoricalPriceModel extends HistoricalPrice {
 }
 
 /// Market Summary Model with Hive Serialization
-@HiveType(typeId: 15)
-class MarketSummaryModel extends MarketSummaryEntity {
+class CommodityMarketSummaryModel extends MarketSummaryEntity {
   @override
   @HiveField(0)
   final String marketName;
@@ -414,7 +409,7 @@ class MarketSummaryModel extends MarketSummaryEntity {
   @HiveField(5)
   final double marketIndexChange;
 
-  const MarketSummaryModel({
+  const CommodityMarketSummaryModel({
     required this.marketName,
     required this.lastUpdated,
     required this.topGainers,
@@ -431,8 +426,8 @@ class MarketSummaryModel extends MarketSummaryEntity {
         );
 
   /// Create from Entity
-  factory MarketSummaryModel.fromEntity(MarketSummaryEntity entity) {
-    return MarketSummaryModel(
+  factory CommodityMarketSummaryModel.fromEntity(MarketSummaryEntity entity) {
+    return CommodityMarketSummaryModel(
       marketName: entity.marketName,
       lastUpdated: entity.lastUpdated,
       topGainers: entity.topGainers.map((c) => CommodityPriceModel.fromEntity(c)).toList(),
@@ -443,8 +438,8 @@ class MarketSummaryModel extends MarketSummaryEntity {
   }
 
   /// Create from JSON
-  factory MarketSummaryModel.fromJson(Map<String, dynamic> json) {
-    return MarketSummaryModel(
+  factory CommodityMarketSummaryModel.fromJson(Map<String, dynamic> json) {
+    return CommodityMarketSummaryModel(
       marketName: (json['marketName'] as String?) ?? '',
       lastUpdated: DateTime.tryParse((json['lastUpdated'] as String?) ?? '') ?? DateTime.now(),
       topGainers: (json['topGainers'] as List<dynamic>?)

@@ -186,7 +186,7 @@ class _VaccineBasicInfoFormState extends State<VaccineBasicInfoForm> {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<VaccineStatus>(
-          value: widget.status,
+          initialValue: widget.status,
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -224,7 +224,7 @@ class _VaccineBasicInfoFormState extends State<VaccineBasicInfoForm> {
       subtitle: const Text('Vacinas obrigatórias têm prioridade nos lembretes'),
       value: widget.isRequired,
       onChanged: widget.onRequiredChanged,
-      activeColor: theme.colorScheme.primary,
+      activeThumbColor: theme.colorScheme.primary,
     );
   }
 

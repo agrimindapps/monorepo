@@ -8,6 +8,7 @@ import 'package:core/core.dart'
         RevokeAllOtherDevicesParams,
         DeviceValidationResult;
 
+import '../../data/models/device_model.dart';
 import '../../domain/usecases/revoke_device_usecase.dart';
 import '../../domain/usecases/validate_device_usecase.dart';
 
@@ -27,8 +28,13 @@ class DeviceActionService {
        _revokeAllOtherDevicesUseCase = revokeAllOtherDevicesUseCase;
 
   /// Valida o dispositivo atual
-  Future<Either<Failure, void>> validateCurrentDevice(String deviceUuid) async {
-    return _validateDeviceUseCase(ValidateDeviceParams(deviceUuid: deviceUuid));
+  Future<Either<Failure, DeviceValidationResult>> validateCurrentDevice({
+    DeviceModel? device,
+    bool forceValidation = false,
+  }) async {
+    return _validateDeviceUseCase(
+      ValidateDeviceParams(device: device, forceValidation: forceValidation),
+    );
   }
 
   /// Revoga um dispositivo específico

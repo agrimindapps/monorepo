@@ -3,8 +3,8 @@ import 'package:core/core.dart';
 
 part 'market_model.g.dart';
 
+
 /// Hive Adapter for MarketType enum
-@HiveType(typeId: 7)
 enum MarketTypeAdapter {
   @HiveField(0)
   grains,
@@ -33,7 +33,6 @@ enum MarketTypeAdapter {
 }
 
 /// Hive Adapter for MarketStatus enum
-@HiveType(typeId: 8)
 enum MarketStatusAdapter {
   @HiveField(0)
   open,
@@ -51,7 +50,6 @@ enum MarketStatusAdapter {
 ///
 /// Extends MarketEntity with JSON serialization and Hive persistence
 @JsonSerializable(explicitToJson: true)
-@HiveType(typeId: 5) // Ensure unique typeId across the app
 class MarketModel {
   @HiveField(0)
   final String id;
@@ -221,16 +219,15 @@ class MarketModel {
 
 /// Price History Model
 @JsonSerializable(explicitToJson: true)
-@HiveType(typeId: 6)
 class PriceHistoryModel extends PriceHistory {
   const PriceHistoryModel({
-    @HiveField(0) required super.date,
-    @HiveField(1) required super.price,
-    @HiveField(2) required super.volume,
-    @HiveField(3) required super.high,
-    @HiveField(4) required super.low,
-    @HiveField(5) required super.open,
-    @HiveField(6) required super.close,
+    required super.date,
+    required super.price,
+    required super.volume,
+    required super.high,
+    required super.low,
+    required super.open,
+    required super.close,
   });
 
   /// Create from JSON
@@ -269,7 +266,6 @@ class PriceHistoryModel extends PriceHistory {
 
 /// Market Summary Model
 @JsonSerializable(explicitToJson: true)
-@HiveType(typeId: 16)
 class MarketSummaryModel {
   @HiveField(0)
   final String marketName;

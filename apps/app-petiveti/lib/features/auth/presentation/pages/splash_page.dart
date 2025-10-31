@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/splash_constants.dart';
-import '../providers/auth_provider.dart';
+import '../notifiers/auth_notifier.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -52,27 +52,29 @@ class _SplashPageState extends ConsumerState<SplashPage>
   void _checkAuthState() {
     Future.delayed(SplashConstants.splashMinimumDuration, () async {
       if (!mounted) return; // Check if widget is still mounted
-      
+
       try {
-        final authState = ref.read(authProvider);
-        
+        final authState = ref.read(authNotifierProvider);
+
         if (authState.isAuthenticated) {
           context.go(SplashConstants.homeRoute);
         } else {
           context.go(SplashConstants.promoRoute);
         }
       } catch (e) {
+        print('❌ SPLASH: First auth check failed: $e');
         await Future<void>.delayed(const Duration(milliseconds: 500));
         if (!mounted) return;
-        
+
         try {
-          final authState = ref.read(authProvider);
+          final authState = ref.read(authNotifierProvider);
           if (authState.isAuthenticated) {
             context.go(SplashConstants.homeRoute);
           } else {
             context.go(SplashConstants.promoRoute);
           }
         } catch (e2) {
+          print('❌ SPLASH: Second auth check failed: $e2');
           if (mounted) {
             context.go(SplashConstants.promoRoute);
           }

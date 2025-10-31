@@ -3,31 +3,29 @@ import 'package:core/core.dart';
 
 import '../../domain/entities/equine_entity.dart';
 
-part 'equine_model.g.dart';
 
 /// Model de dados para equinos com suporte ao Hive
 /// 
 /// Implementa serialização local (Hive) e conversões para entidades do domínio
 /// TypeId: 1 - Reservado para equinos no sistema Hive
-@HiveType(typeId: 1)
 class EquineModel extends EquineEntity {
   const EquineModel({
-    @HiveField(0) required super.id,
-    @HiveField(1) super.createdAt,
-    @HiveField(2) super.updatedAt,
-    @HiveField(3) required super.isActive,
-    @HiveField(4) required super.registrationId,
-    @HiveField(5) required super.commonName,
-    @HiveField(6) required super.originCountry,
-    @HiveField(7) required super.imageUrls,
-    @HiveField(8) super.thumbnailUrl,
-    @HiveField(9) required super.history,
-    @HiveField(10) required super.temperament,
-    @HiveField(11) required super.coat,
-    @HiveField(12) required super.primaryUse,
-    @HiveField(13) required super.geneticInfluences,
-    @HiveField(14) required super.height,
-    @HiveField(15) required super.weight,
+    required super.id,
+    super.createdAt,
+    super.updatedAt,
+    required super.isActive,
+    required super.registrationId,
+    required super.commonName,
+    required super.originCountry,
+    required super.imageUrls,
+    super.thumbnailUrl,
+    required super.history,
+    required super.temperament,
+    required super.coat,
+    required super.primaryUse,
+    required super.geneticInfluences,
+    required super.height,
+    required super.weight,
   });
 
   /// Converte o EquineModel para EquineEntity do domínio

@@ -99,6 +99,7 @@ class CalorieActivityConditionStep extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
+                        // ignore: deprecated_member_use
                         Radio<ActivityLevel>(
                           value: level,
                           groupValue: input.activityLevel,
@@ -202,6 +203,7 @@ class CalorieActivityConditionStep extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
+                        // ignore: deprecated_member_use
                         Radio<BodyConditionScore>(
                           value: bcs,
                           groupValue: input.bodyConditionScore,

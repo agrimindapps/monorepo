@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 /// Implementação mock do repositório de analytics para desenvolvimento
 /// Não envia dados reais, apenas simula as operações

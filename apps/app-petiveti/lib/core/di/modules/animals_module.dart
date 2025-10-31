@@ -2,13 +2,15 @@ import 'package:core/core.dart' show GetIt;
 
 import '../../../features/animals/data/datasources/animal_local_datasource.dart';
 import '../../../features/animals/data/repositories/animal_repository_impl.dart';
+import '../../../features/animals/data/services/animal_error_handling_service.dart';
 import '../../../features/animals/domain/repositories/animal_repository.dart';
+import '../../../features/animals/domain/repositories/isync_manager.dart';
+import '../../../features/animals/domain/services/animal_validation_service.dart';
 import '../../../features/animals/domain/usecases/add_animal.dart';
 import '../../../features/animals/domain/usecases/delete_animal.dart';
 import '../../../features/animals/domain/usecases/get_animal_by_id.dart';
 import '../../../features/animals/domain/usecases/get_animals.dart';
 import '../../../features/animals/domain/usecases/update_animal.dart';
-import '../../services/data_integrity_service.dart';
 import '../di_module.dart';
 
 /// Animals module responsible for animals feature dependencies
@@ -24,9 +26,13 @@ import '../di_module.dart';
 class AnimalsModule implements DIModule {
   @override
   Future<void> register(GetIt getIt) async {
-    // Data Integrity Service
-    getIt.registerLazySingleton<DataIntegrityService>(
-      () => DataIntegrityService(getIt<AnimalLocalDataSource>()),
+    // Services
+    getIt.registerLazySingleton<AnimalValidationService>(
+      () => AnimalValidationService(),
+    );
+
+    getIt.registerLazySingleton<AnimalErrorHandlingService>(
+      () => AnimalErrorHandlingService(),
     );
 
     // Data Source (local only - UnifiedSyncManager handles remote)
@@ -38,27 +44,42 @@ class AnimalsModule implements DIModule {
     getIt.registerLazySingleton<AnimalRepository>(
       () => AnimalRepositoryImpl(
         getIt<AnimalLocalDataSource>(),
-        getIt<DataIntegrityService>(),
+        getIt<ISyncManager>(),
+        getIt<AnimalErrorHandlingService>(),
       ),
     );
+
+    // Use Cases
     getIt.registerLazySingleton<GetAnimals>(
       () => GetAnimals(getIt<AnimalRepository>()),
     );
 
     getIt.registerLazySingleton<GetAnimalById>(
-      () => GetAnimalById(getIt<AnimalRepository>()),
+      () => GetAnimalById(
+        getIt<AnimalRepository>(),
+        getIt<AnimalValidationService>(),
+      ),
     );
 
     getIt.registerLazySingleton<AddAnimal>(
-      () => AddAnimal(getIt<AnimalRepository>()),
+      () => AddAnimal(
+        getIt<AnimalRepository>(),
+        getIt<AnimalValidationService>(),
+      ),
     );
 
     getIt.registerLazySingleton<UpdateAnimal>(
-      () => UpdateAnimal(getIt<AnimalRepository>()),
+      () => UpdateAnimal(
+        getIt<AnimalRepository>(),
+        getIt<AnimalValidationService>(),
+      ),
     );
 
     getIt.registerLazySingleton<DeleteAnimal>(
-      () => DeleteAnimal(getIt<AnimalRepository>()),
+      () => DeleteAnimal(
+        getIt<AnimalRepository>(),
+        getIt<AnimalValidationService>(),
+      ),
     );
   }
 }

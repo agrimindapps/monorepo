@@ -211,7 +211,7 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
     return Column(
       children: [
         DropdownButtonFormField<String>(
-          value: _selectedDehydrationPercentage,
+          initialValue: _selectedDehydrationPercentage,
           decoration: const InputDecoration(
             labelText: 'Grau de Desidratação',
             border: OutlineInputBorder(),
@@ -274,7 +274,7 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
     return Column(
       children: [
         DropdownButtonFormField<String>(
-          value: _selectedVomitingFrequency,
+          initialValue: _selectedVomitingFrequency,
           decoration: const InputDecoration(
             labelText: 'Frequência de Vômitos',
             border: OutlineInputBorder(),
@@ -297,7 +297,7 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
-          value: _selectedDiarrheaSeverity,
+          initialValue: _selectedDiarrheaSeverity,
           decoration: const InputDecoration(
             labelText: 'Severidade da Diarreia',
             border: OutlineInputBorder(),
@@ -346,7 +346,7 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
 
   Widget _buildTreatmentSection() {
     return DropdownButtonFormField<String>(
-      value: _selectedCorrectionHours,
+      initialValue: _selectedCorrectionHours,
       decoration: const InputDecoration(
         labelText: 'Tempo para Correção do Déficit',
         border: OutlineInputBorder(),

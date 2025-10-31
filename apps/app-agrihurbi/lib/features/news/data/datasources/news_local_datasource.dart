@@ -26,7 +26,7 @@ class NewsLocalDataSource {
   Box<CommodityPriceModel> get _commoditiesBox => Hive.box<CommodityPriceModel>(_commoditiesBoxName);
 
   /// Get market summary box
-  Box<MarketSummaryModel> get _marketSummaryBox => Hive.box<MarketSummaryModel>(_marketSummaryBoxName);
+  Box<CommodityMarketSummaryModel> get _marketSummaryBox => Hive.box<CommodityMarketSummaryModel>(_marketSummaryBoxName);
 
   /// Get RSS feeds box
   Box<String> get _rssFeedsBox => Hive.box<String>(_rssFeedsBoxName);
@@ -39,7 +39,7 @@ class NewsLocalDataSource {
     await Hive.openBox<NewsArticleModel>(_articlesBoxName);
     await Hive.openBox<String>(_favoritesBoxName);
     await Hive.openBox<CommodityPriceModel>(_commoditiesBoxName);
-    await Hive.openBox<MarketSummaryModel>(_marketSummaryBoxName);
+    await Hive.openBox<CommodityMarketSummaryModel>(_marketSummaryBoxName);
     await Hive.openBox<String>(_rssFeedsBoxName);
     await Hive.openBox<Map<String, dynamic>>(_priceAlertsBoxName);
   }
@@ -218,7 +218,7 @@ class NewsLocalDataSource {
   }
 
   /// Cache market summary
-  Future<void> cacheMarketSummary(MarketSummaryModel summary) async {
+  Future<void> cacheMarketSummary(CommodityMarketSummaryModel summary) async {
     try {
       await _marketSummaryBox.put('current', summary);
     } catch (e) {
@@ -227,7 +227,7 @@ class NewsLocalDataSource {
   }
 
   /// Get cached market summary
-  Future<MarketSummaryModel?> getCachedMarketSummary() async {
+  Future<CommodityMarketSummaryModel?> getCachedMarketSummary() async {
     try {
       return _marketSummaryBox.get('current');
     } catch (e) {

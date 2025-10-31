@@ -2,11 +2,11 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/error/failures.dart' as local_failures;
+import '../../domain/entities/sync/weight_sync_entity.dart' hide WeightTrend, BodyCondition;
 import '../../domain/entities/weight.dart';
 import '../../domain/repositories/weight_repository.dart';
 import '../datasources/weight_local_datasource.dart';
 import '../models/weight_model.dart';
-import '../../domain/entities/sync/weight_sync_entity.dart' hide WeightTrend, BodyCondition;
 
 /// WeightRepository implementation using UnifiedSyncManager for offline-first sync
 ///
@@ -198,7 +198,9 @@ class WeightRepositoryImpl implements WeightRepository {
         if (startDate != null && weight.date.isBefore(startDate)) return false;
         if (endDate != null && weight.date.isAfter(endDate)) return false;
         if (bodyConditionScore != null &&
-            weight.bodyConditionScore != bodyConditionScore) return false;
+            weight.bodyConditionScore != bodyConditionScore) {
+          return false;
+        }
 
         return true;
       }).toList();

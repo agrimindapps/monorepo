@@ -2,33 +2,31 @@ import 'package:core/core.dart';
 
 import '../../domain/entities/bovine_entity.dart';
 
-part 'bovine_model.g.dart';
 
 /// Model de dados para bovinos com suporte ao Hive
 /// 
 /// Implementa serialização local (Hive) e conversões para entidades do domínio
 /// TypeId: 0 - Reservado para bovinos no sistema Hive
-@HiveType(typeId: 0)
 class BovineModel extends BovineEntity {
   const BovineModel({
-    @HiveField(0) required super.id,
-    @HiveField(1) super.createdAt,
-    @HiveField(2) super.updatedAt,
-    @HiveField(3) required super.isActive,
-    @HiveField(4) required super.registrationId,
-    @HiveField(5) required super.commonName,
-    @HiveField(6) required super.originCountry,
-    @HiveField(7) required super.imageUrls,
-    @HiveField(8) super.thumbnailUrl,
-    @HiveField(9) required super.animalType,
-    @HiveField(10) required super.origin,
-    @HiveField(11) required super.characteristics,
-    @HiveField(12) required super.breed,
-    @HiveField(13) required super.aptitude,
-    @HiveField(14) required super.tags,
-    @HiveField(15) required super.breedingSystem,
-    @HiveField(16) required super.purpose,
-    @HiveField(17) super.notes,
+    required super.id,
+    super.createdAt,
+    super.updatedAt,
+    required super.isActive,
+    required super.registrationId,
+    required super.commonName,
+    required super.originCountry,
+    required super.imageUrls,
+    super.thumbnailUrl,
+    required super.animalType,
+    required super.origin,
+    required super.characteristics,
+    required super.breed,
+    required super.aptitude,
+    required super.tags,
+    required super.breedingSystem,
+    required super.purpose,
+    super.notes,
   });
 
   /// Converte o BovineModel para BovineEntity do domínio

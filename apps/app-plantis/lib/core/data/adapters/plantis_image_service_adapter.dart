@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 import '../../services/image_preloader_service.dart';
 

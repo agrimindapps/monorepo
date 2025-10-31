@@ -299,9 +299,9 @@ Future<void> init() async {
   // ✅ PHASE 3: Setup GetIt for Pragas por Cultura services
   _setupPragasPorCulturaServices();
 
-  sl.registerLazySingleton<ComentariosHiveRepository>(
-    () => ComentariosHiveRepository(),
-  );
+  // ✅ ComentariosHiveRepository now registered via @LazySingleton in the repository file
+  // ❌ REMOVIDO: Manual registration to avoid duplicate with Injectable
+
   sl.registerLazySingleton<PremiumHiveRepository>(
     () => PremiumHiveRepository(),
   );

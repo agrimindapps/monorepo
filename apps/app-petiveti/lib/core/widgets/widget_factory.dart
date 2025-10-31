@@ -111,7 +111,7 @@ class WidgetFactory {
       subtitle: subtitle != null ? Text(subtitle) : null,
       value: value,
       onChanged: onChanged,
-      activeColor: activeColor,
+      activeThumbColor: activeColor,
     );
   }
 

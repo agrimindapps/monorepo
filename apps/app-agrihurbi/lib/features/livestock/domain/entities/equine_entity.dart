@@ -1,11 +1,18 @@
+import 'package:core/core.dart';
 import 'animal_base_entity.dart';
+
 
 /// Enumeração para temperamento equino
 enum EquineTemperament {
+  @HiveField(0)
   calm('Calmo'),
+  @HiveField(1)
   spirited('Vivaz'),
+  @HiveField(2)
   gentle('Dócil'),
+  @HiveField(3)
   energetic('Energético'),
+  @HiveField(4)
   docile('Manso');
 
   const EquineTemperament(this.displayName);
@@ -14,12 +21,19 @@ enum EquineTemperament {
 
 /// Enumeração para pelagem equina
 enum CoatColor {
+  @HiveField(0)
   bay('Baio'),
+  @HiveField(1)
   chestnut('Alazão'),
+  @HiveField(2)
   black('Preto'),
+  @HiveField(3)
   gray('Tordilho'),
+  @HiveField(4)
   palomino('Palomino'),
+  @HiveField(5)
   pinto('Pampa'),
+  @HiveField(6)
   roan('Rosilho');
 
   const CoatColor(this.displayName);
@@ -28,10 +42,15 @@ enum CoatColor {
 
 /// Enumeração para uso principal do equino
 enum EquinePrimaryUse {
+  @HiveField(0)
   riding('Montaria'),
+  @HiveField(1)
   sport('Esporte'),
+  @HiveField(2)
   work('Trabalho'),
+  @HiveField(3)
   breeding('Reprodução'),
+  @HiveField(4)
   leisure('Lazer');
 
   const EquinePrimaryUse(this.displayName);

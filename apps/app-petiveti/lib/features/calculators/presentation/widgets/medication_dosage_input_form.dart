@@ -99,7 +99,7 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<Species>(
-                        value: provider.input.species,
+                        initialValue: provider.input.species,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -186,7 +186,7 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<AgeGroup>(
-                  value: provider.input.ageGroup,
+                  initialValue: provider.input.ageGroup,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -288,7 +288,7 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                         ),
                         const SizedBox(height: 8),
                         DropdownButtonFormField<double>(
-                          value: provider.input.concentration,
+                          initialValue: provider.input.concentration,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
@@ -322,7 +322,7 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<AdministrationFrequency>(
-                        value: provider.input.frequency,
+                        initialValue: provider.input.frequency,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -359,7 +359,7 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
-                    value: provider.input.pharmaceuticalForm,
+                    initialValue: provider.input.pharmaceuticalForm,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),

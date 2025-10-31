@@ -170,7 +170,7 @@ class _AnimalSelectorFieldState extends ConsumerState<AnimalSelectorField> {
 
   Widget _buildAnimalDropdown(List<Animal> animals) {
     return DropdownButtonFormField<String>(
-      value: widget.value,
+      initialValue: widget.value,
       onChanged: widget.enabled ? widget.onChanged : null,
       validator: widget.validator,
       decoration: InputDecoration(

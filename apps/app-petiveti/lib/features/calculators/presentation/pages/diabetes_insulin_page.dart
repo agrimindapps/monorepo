@@ -245,7 +245,7 @@ class _DiabetesInsulinPageState extends ConsumerState<DiabetesInsulinPage> {
     return Column(
       children: [
         DropdownButtonFormField<String>(
-          value: _selectedInsulinType,
+          initialValue: _selectedInsulinType,
           decoration: const InputDecoration(
             labelText: 'Tipo de Insulina',
             border: OutlineInputBorder(),
@@ -267,7 +267,7 @@ class _DiabetesInsulinPageState extends ConsumerState<DiabetesInsulinPage> {
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
-          value: _selectedDiabetesType,
+          initialValue: _selectedDiabetesType,
           decoration: const InputDecoration(
             labelText: 'Tipo de Diabetes',
             border: OutlineInputBorder(),

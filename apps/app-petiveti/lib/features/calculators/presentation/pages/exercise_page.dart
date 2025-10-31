@@ -153,7 +153,7 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedSpecies,
+              initialValue: _selectedSpecies,
               decoration: const InputDecoration(
                 labelText: 'Espécie',
                 border: OutlineInputBorder(),
@@ -185,7 +185,7 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedBreedGroup,
+              initialValue: _selectedBreedGroup,
               decoration: const InputDecoration(
                 labelText: 'Grupo da Raça',
                 border: OutlineInputBorder(),
@@ -273,7 +273,7 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedHealthConditions,
+              initialValue: _selectedHealthConditions,
               decoration: const InputDecoration(
                 labelText: 'Condições de Saúde',
                 border: OutlineInputBorder(),
@@ -327,7 +327,7 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedActivityLevel,
+              initialValue: _selectedActivityLevel,
               decoration: const InputDecoration(
                 labelText: 'Nível de Atividade Atual',
                 border: OutlineInputBorder(),
@@ -400,7 +400,7 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedExerciseGoal,
+              initialValue: _selectedExerciseGoal,
               decoration: const InputDecoration(
                 labelText: 'Objetivo Principal',
                 border: OutlineInputBorder(),

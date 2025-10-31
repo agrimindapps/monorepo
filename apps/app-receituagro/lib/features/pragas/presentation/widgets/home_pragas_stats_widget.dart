@@ -109,7 +109,7 @@ class HomePragasStatsWidget extends StatelessWidget {
           children: [
             _buildCategoryButton(
               context: context,
-              count: state.isLoading ? '...' : '${state.stats?.insetos ?? 0}',
+              count: state.isLoading ? '...' : '${state.stats?['insetos'] ?? 0}',
               title: 'Insetos',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'insetos'),
@@ -118,7 +118,7 @@ class HomePragasStatsWidget extends StatelessWidget {
             const SizedBox(width: 4),
             _buildCategoryButton(
               context: context,
-              count: state.isLoading ? '...' : '${state.stats?.doencas ?? 0}',
+              count: state.isLoading ? '...' : '${state.stats?['doencas'] ?? 0}',
               title: 'Doenças',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'doencas'),
@@ -127,7 +127,7 @@ class HomePragasStatsWidget extends StatelessWidget {
             const SizedBox(width: 4),
             _buildCategoryButton(
               context: context,
-              count: state.isLoading ? '...' : '${state.stats?.plantas ?? 0}',
+              count: state.isLoading ? '...' : '${state.stats?['plantas'] ?? 0}',
               title: 'Plantas',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'plantas'),
@@ -162,7 +162,7 @@ class HomePragasStatsWidget extends StatelessWidget {
           children: [
             _buildCategoryButton(
               context: context,
-              count: state.isLoading ? '...' : '${state.stats?.insetos ?? 0}',
+              count: state.isLoading ? '...' : '${state.stats?['insetos'] ?? 0}',
               title: 'Insetos',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'insetos'),
@@ -171,7 +171,7 @@ class HomePragasStatsWidget extends StatelessWidget {
             const SizedBox(width: 4),
             _buildCategoryButton(
               context: context,
-              count: state.isLoading ? '...' : '${state.stats?.doencas ?? 0}',
+              count: state.isLoading ? '...' : '${state.stats?['doencas'] ?? 0}',
               title: 'Doenças',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'doencas'),
@@ -180,7 +180,7 @@ class HomePragasStatsWidget extends StatelessWidget {
             const SizedBox(width: 4),
             _buildCategoryButton(
               context: context,
-              count: state.isLoading ? '...' : '${state.stats?.plantas ?? 0}',
+              count: state.isLoading ? '...' : '${state.stats?['plantas'] ?? 0}',
               title: 'Plantas',
               width: buttonWidth,
               onTap: () => _navigateToCategory(context, 'plantas'),

@@ -136,6 +136,13 @@ class HomePragasNotifier extends _$HomePragasNotifier {
       final totalCulturas = await _loadCulturaData();
       final pragasState = await ref.watch(pragasNotifierProvider.future);
 
+      // Criar objeto de estatísticas com contagens por tipo
+      final stats = {
+        'insetos': pragasState.insetos.length,
+        'doencas': pragasState.doencas.length,
+        'plantas': pragasState.plantas.length,
+      };
+
       return HomePragasState(
         isInitializing: false,
         initializationFailed: false,
@@ -143,6 +150,7 @@ class HomePragasNotifier extends _$HomePragasNotifier {
         totalCulturas: totalCulturas,
         currentCarouselIndex: 0,
         isLoading: false,
+        stats: stats,
         errorMessage: pragasState.errorMessage,
         suggestedPragas: pragasState.suggestedPragas,
         recentPragas: pragasState.recentPragas,
@@ -192,9 +200,17 @@ class HomePragasNotifier extends _$HomePragasNotifier {
     if (currentState == null) return;
     final pragasState = ref.read(pragasNotifierProvider).value;
 
+    // Atualizar estatísticas com contagens por tipo
+    final stats = pragasState != null ? {
+      'insetos': pragasState.insetos.length,
+      'doencas': pragasState.doencas.length,
+      'plantas': pragasState.plantas.length,
+    } : currentState.stats;
+
     state = AsyncValue.data(
       currentState.copyWith(
         isLoading: pragasState?.isLoading ?? false,
+        stats: stats,
         errorMessage: pragasState?.errorMessage,
         suggestedPragas: pragasState?.suggestedPragas ?? [],
         recentPragas: pragasState?.recentPragas ?? [],

@@ -228,7 +228,7 @@ class _WeightGoalFormState extends State<WeightGoalForm> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _priority,
+              initialValue: _priority,
               decoration: const InputDecoration(
                 labelText: 'Prioridade',
                 prefixIcon: Icon(Icons.priority_high),
@@ -247,14 +247,14 @@ class _WeightGoalFormState extends State<WeightGoalForm> {
               subtitle: const Text('Notificações sobre evolução da meta'),
               value: _enableProgressAlerts,
               onChanged: (value) => setState(() => _enableProgressAlerts = value),
-              activeColor: theme.colorScheme.primary,
+              activeThumbColor: theme.colorScheme.primary,
             ),
             SwitchListTile.adaptive(
               title: const Text('Lembretes Semanais'),
               subtitle: const Text('Lembrete para registrar peso semanalmente'),
               value: _enableWeeklyReminders,
               onChanged: (value) => setState(() => _enableWeeklyReminders = value),
-              activeColor: theme.colorScheme.primary,
+              activeThumbColor: theme.colorScheme.primary,
             ),
           ],
         ),

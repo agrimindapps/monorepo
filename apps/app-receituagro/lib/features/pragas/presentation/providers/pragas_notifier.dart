@@ -2,6 +2,7 @@ import 'package:app_receituagro/core/di/injection.dart' as di;
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/data/repositories/pragas_hive_repository.dart';
 import '../../../../core/services/access_history_service.dart';
 import '../../domain/entities/praga_entity.dart';
 import '../services/pragas_error_message_service.dart';
@@ -15,19 +16,30 @@ part 'pragas_notifier.g.dart';
 class PragasNotifier extends _$PragasNotifier {
   late final AccessHistoryService _historyService;
   late final PragasErrorMessageService _errorService;
+  late final PragasHiveRepository _pragasRepository;
 
   @override
   Future<PragasState> build() async {
     _historyService = AccessHistoryService();
     _errorService = di.getIt<PragasErrorMessageService>();
+    _pragasRepository = GetIt.instance<PragasHiveRepository>();
     return await _loadInitialData();
   }
 
   /// Load initial data
   Future<PragasState> _loadInitialData() async {
     try {
+      // Carregar todas as pragas
+      final pragasResult = await _pragasRepository.getAll();
+      final pragas = pragasResult.fold(
+        (failure) => <PragaEntity>[],
+        (hiveList) => hiveList
+            .map((hive) => PragaEntity.fromHive(hive))
+            .toList(),
+      );
+
       return PragasState(
-        pragas: const [],
+        pragas: pragas,
         recentPragas: const [],
         suggestedPragas: const [],
         isLoading: false,
@@ -162,13 +174,29 @@ class PragasNotifier extends _$PragasNotifier {
     }
   }
 
-  /// Carrega estatísticas
+  /// Carrega estatísticas (pragas por tipo)
   Future<void> loadStats() async {
     final currentState = state.value;
     if (currentState == null) return;
 
     try {
-      state = AsyncValue.data(currentState);
+      // Se pragas já foram carregadas, apenas atualiza o estado
+      // As propriedades computed (insetos, doencas, plantas) são calculadas automaticamente
+      if (currentState.pragas.isEmpty) {
+        final pragasResult = await _pragasRepository.getAll();
+        final pragas = pragasResult.fold(
+          (failure) => <PragaEntity>[],
+          (hiveList) => hiveList
+              .map((hive) => PragaEntity.fromHive(hive))
+              .toList(),
+        );
+
+        state = AsyncValue.data(
+          currentState.copyWith(pragas: pragas),
+        );
+      } else {
+        state = AsyncValue.data(currentState);
+      }
     } catch (e) {
       state = AsyncValue.data(
         currentState.copyWith(errorMessage: e.toString()),

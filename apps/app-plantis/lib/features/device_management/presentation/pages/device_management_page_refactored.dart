@@ -1,15 +1,12 @@
-import 'package:core/core.dart'
-    hide deviceManagementNotifierProvider, DeviceManagementState;
+import 'package:core/core.dart' hide DeviceManagementState;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/providers/device_management_providers.dart';
 import '../../presentation/managers/device_dialog_manager.dart';
 import '../../presentation/managers/device_feedback_builder.dart';
 import '../../presentation/managers/device_menu_action_handler.dart';
 import '../../presentation/managers/device_status_builder.dart';
 import '../../presentation/providers/device_management_notifier.dart';
-import '../widgets/device_actions_widget.dart';
 import '../widgets/device_list_widget.dart';
 import '../widgets/device_statistics_widget.dart';
 
@@ -43,20 +40,23 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
   Widget build(BuildContext context) {
     final deviceManagementAsync = ref.watch(deviceManagementNotifierProvider);
     final dialogManager = DeviceDialogManager();
+    final menuActionHandler = DeviceMenuActionHandler(
+      ref: ref,
+      dialogManager: dialogManager,
+    );
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gerenciar Dispositivos'),
         elevation: 0,
         actions: [
-          deviceManagementAsync.whenData(
-            (deviceState) => PopupMenuButton<String>(
+          if (deviceManagementAsync.hasValue)
+            PopupMenuButton<String>(
               onSelected: (value) async =>
-                  await DeviceMenuActionHandler.handleMenuAction(
+                  await menuActionHandler.handleMenuAction(
                     context,
                     value,
-                    deviceState.activeDeviceCount,
-                    dialogManager,
+                    deviceManagementAsync.value!.activeDeviceCount,
                   ),
               itemBuilder: (context) => [
                 const PopupMenuItem(
@@ -67,7 +67,8 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
                     dense: true,
                   ),
                 ),
-                if (deviceState.hasDevices && deviceState.activeDeviceCount > 1)
+                if (deviceManagementAsync.value!.hasDevices == true &&
+                    deviceManagementAsync.value!.activeDeviceCount > 1)
                   const PopupMenuItem(
                     value: 'revoke_all',
                     child: ListTile(
@@ -86,7 +87,6 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
                 ),
               ],
             ),
-          ),
         ],
         bottom: TabBar(
           controller: _tabController,
@@ -97,7 +97,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
         ),
       ),
       body: deviceManagementAsync.when(
-        data: (deviceState) => Column(
+        data: (DeviceManagementState deviceState) => Column(
           children: [
             DeviceFeedbackBuilder.buildFeedbackMessages(deviceState, ref),
             DeviceStatusBuilder.buildGeneralStatus(deviceState, context),
@@ -113,7 +113,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
           ],
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) =>
+        error: (Object error, StackTrace stack) =>
             Center(child: Text('Erro ao carregar: $error')),
       ),
       floatingActionButton: _buildFloatingActionButton(context),
@@ -121,17 +121,11 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
   }
 
   Widget _buildDevicesTab(DeviceManagementState deviceState) {
-    return DeviceListWidget(
-      devices: deviceState.devices,
-      currentDevice: deviceState.currentDevice,
-      onDeviceSelected: (device) {
-        // Handle device selection
-      },
-    );
+    return const DeviceListWidget();
   }
 
   Widget _buildStatisticsTab(DeviceManagementState deviceState) {
-    return DeviceStatisticsWidget(statistics: deviceState.statistics);
+    return const DeviceStatisticsWidget();
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {

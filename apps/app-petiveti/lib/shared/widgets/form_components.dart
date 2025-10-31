@@ -222,7 +222,7 @@ class FormComponents {
       label: label,
       hint: hint,
       child: DropdownButtonFormField<T>(
-        value: value,
+        initialValue: value,
         items: items,
         onChanged: enabled ? onChanged : null,
         validator: validator,

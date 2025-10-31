@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'app.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/di/modules/account_deletion_module.dart';
+import 'core/di/modules/auth_module.dart';
 import 'core/di/modules/sync_module.dart';
 import 'firebase_options.dart';
 late ICrashlyticsRepository _crashlyticsRepository;
@@ -45,12 +46,20 @@ Future<void> main() async {
       print('❌ MAIN: Account deletion initialization failed: $e');
     }
     try {
-      print('🔄 MAIN: Forcing Petiveti sync initialization...');
+      print('🔄 MAIN: Initializing Petiveti sync module...');
       PetivetiSyncDIModule.init();
-      await PetivetiSyncDIModule.initializeSyncService();
-      print('✅ MAIN: Petiveti sync initialization completed successfully');
+      // NOTE: initializeSyncService() is commented out in sync_module.dart
+      // await PetivetiSyncDIModule.initializeSyncService();
+      print('✅ MAIN: Petiveti sync module initialized');
     } catch (e) {
-      print('❌ MAIN: Sync initialization failed: $e');
+      print('❌ MAIN: Sync module initialization failed: $e');
+    }
+    try {
+      print('🔐 MAIN: Initializing auth module...');
+      await AuthModule().register(di.getIt);
+      print('✅ MAIN: Auth module initialized successfully');
+    } catch (e) {
+      print('❌ MAIN: Auth module initialization failed: $e');
     }
     await _initializeFirebaseServices();
 

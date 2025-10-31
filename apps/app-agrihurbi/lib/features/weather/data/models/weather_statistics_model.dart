@@ -2,11 +2,9 @@ import 'package:core/core.dart';
 
 import '../../domain/entities/weather_statistics_entity.dart';
 
-part 'weather_statistics_model.g.dart';
 
 /// Weather statistics model with Hive serialization
 /// Converts between domain entity and data model for persistence
-@HiveType(typeId: 52) // Unique typeId for weather statistics
 class WeatherStatisticsModel extends Equatable {
   @HiveField(0)
   final String id;

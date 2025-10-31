@@ -438,7 +438,7 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
             if (_isRecurring) ...[
               const SizedBox(height: 16),
               DropdownButtonFormField<RecurrenceType>(
-                value: _recurrenceType,
+                initialValue: _recurrenceType,
                 decoration: const InputDecoration(
                   labelText: 'Frequência',
                   border: OutlineInputBorder(),

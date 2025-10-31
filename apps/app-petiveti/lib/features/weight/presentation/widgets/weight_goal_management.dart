@@ -353,7 +353,7 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: _priority,
+                      initialValue: _priority,
                       decoration: const InputDecoration(
                         labelText: 'Prioridade',
                         prefixIcon: Icon(Icons.priority_high),

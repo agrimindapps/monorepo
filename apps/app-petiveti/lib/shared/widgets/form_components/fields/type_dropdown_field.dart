@@ -114,7 +114,7 @@ class TypeDropdownField<T> extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         DropdownButtonFormField<T>(
-          value: value,
+          initialValue: value,
           onChanged: enabled ? onChanged : null,
           validator: _buildValidator(),
           decoration: InputDecoration(

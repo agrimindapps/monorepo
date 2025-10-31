@@ -240,7 +240,7 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                   const SizedBox(height: 16),
                   if (widget.isEditing) ...[
                     DropdownButtonFormField<AppointmentStatus>(
-                      value: _selectedStatus,
+                      initialValue: _selectedStatus,
                       decoration: const InputDecoration(
                         labelText: 'Status',
                         prefixIcon: Icon(Icons.flag),

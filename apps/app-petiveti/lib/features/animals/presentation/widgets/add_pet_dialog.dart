@@ -136,7 +136,7 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
           children: [
             Expanded(
               child: DropdownButtonFormField<AnimalSpecies>(
-                value: _selectedSpecies,
+                initialValue: _selectedSpecies,
                 decoration: const InputDecoration(
                   labelText: 'Espécie *',
                   border: OutlineInputBorder(),
@@ -159,7 +159,7 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
             const SizedBox(width: 12),
             Expanded(
               child: DropdownButtonFormField<AnimalGender>(
-                value: _selectedGender,
+                initialValue: _selectedGender,
                 decoration: const InputDecoration(
                   labelText: 'Gênero *',
                   border: OutlineInputBorder(),

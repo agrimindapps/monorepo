@@ -179,7 +179,7 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
 
   Widget _buildSpeciesDropdown(AnimalSpecies currentSpecies) {
     return DropdownButtonFormField<AnimalSpecies>(
-      value: currentSpecies,
+      initialValue: currentSpecies,
       decoration: const InputDecoration(
         labelText: 'Espécie *',
         border: OutlineInputBorder(),
@@ -266,7 +266,7 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
 
   Widget _buildRibPalpationDropdown(RibPalpation current) {
     return DropdownButtonFormField<RibPalpation>(
-      value: current,
+      initialValue: current,
       decoration: const InputDecoration(
         labelText: 'Palpação das Costelas *',
         border: OutlineInputBorder(),
@@ -289,7 +289,7 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
 
   Widget _buildWaistVisibilityDropdown(WaistVisibility current) {
     return DropdownButtonFormField<WaistVisibility>(
-      value: current,
+      initialValue: current,
       decoration: const InputDecoration(
         labelText: 'Cintura (Vista de Cima) *',
         border: OutlineInputBorder(),
@@ -312,7 +312,7 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
 
   Widget _buildAbdominalProfileDropdown(AbdominalProfile current) {
     return DropdownButtonFormField<AbdominalProfile>(
-      value: current,
+      initialValue: current,
       decoration: const InputDecoration(
         labelText: 'Perfil Abdominal *',
         border: OutlineInputBorder(),

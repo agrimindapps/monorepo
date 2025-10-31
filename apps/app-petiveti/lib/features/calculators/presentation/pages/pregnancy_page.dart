@@ -148,7 +148,7 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedSpecies,
+              initialValue: _selectedSpecies,
               decoration: const InputDecoration(
                 labelText: 'Espécie',
                 border: OutlineInputBorder(),
@@ -180,7 +180,7 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedBreedSize,
+              initialValue: _selectedBreedSize,
               decoration: const InputDecoration(
                 labelText: 'Porte da Raça',
                 border: OutlineInputBorder(),

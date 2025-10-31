@@ -1,6 +1,5 @@
 import 'package:core/core.dart' hide subscriptionProvider, SubscriptionState;
 import 'package:flutter/material.dart';
-import '../../features/auth/presentation/notifiers/auth_notifier.dart' hide isAuthenticatedProvider;
 import '../../features/subscription/presentation/providers/subscription_provider.dart';
 import '../logging/entities/log_entry.dart';
 import '../logging/services/logging_service.dart';

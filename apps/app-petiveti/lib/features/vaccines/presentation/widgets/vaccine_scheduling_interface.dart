@@ -239,7 +239,7 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<VaccineStatus>(
-                    value: _status,
+                    initialValue: _status,
                     decoration: const InputDecoration(
                       labelText: 'Status Atual',
                       prefixIcon: Icon(Icons.flag),
@@ -496,7 +496,7 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
                   if (_enableSeasonalReminders) ...[
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: _selectedSeason,
+                      initialValue: _selectedSeason,
                       decoration: const InputDecoration(
                         labelText: 'Época Preferencial',
                         prefixIcon: Icon(Icons.wb_sunny),

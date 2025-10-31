@@ -1,30 +1,34 @@
 import 'dart:convert';
+
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+
 import '../models/favorito_item_hive.dart';
+import 'base/typed_box_adapter.dart';
 
 /// Repositório para gerenciar favoritos usando Hive com type-safe boxes.
-/// ✅ MIGRATED: Using `IHiveManager.getBox<T>()` para type safety com cast seguro
-/// BENEFIT: Funciona com `Box<dynamic>` já aberta pelo BoxRegistryService
+/// ✅ FIXED (P0.3): Using `TypedBoxAdapter<FavoritoItemHive>` para compatibilidade
+/// com boxes abertas como `Box<dynamic>` pelo BoxRegistryService
+/// BENEFIT: Não tenta reabrir a box com tipo diferente - usa adapter type-safe
 class FavoritosHiveRepository {
   final IHiveManager _hiveManager;
   final String boxName = 'favoritos';
-  Box<FavoritoItemHive>? _box;
+  TypedBoxAdapter<FavoritoItemHive>? _adapter;
 
   FavoritosHiveRepository()
     : _hiveManager = GetIt.instance<IHiveManager>();
 
-  /// Obtém a box tipada `Box<FavoritoItemHive>` com safe cast
-  /// Se a box já está aberta como `Box<dynamic>`, faz cast seguro
-  Future<Box<FavoritoItemHive>> get box async {
-    if (_box != null && _box!.isOpen) return _box!;
+  /// Obtém o adapter type-safe para `Box<dynamic>` já aberta pelo BoxRegistryService
+  /// Retorna TypedBoxAdapter<FavoritoItemHive> para operações type-safe
+  Future<TypedBoxAdapter<FavoritoItemHive>> get adapter async {
+    if (_adapter != null && _adapter!.isOpen) return _adapter!;
 
-    final result = await _hiveManager.getBox<FavoritoItemHive>(boxName);
+    final result = await _hiveManager.getBox<dynamic>(boxName);
     return result.fold(
       (failure) => throw Exception('Failed to open Hive box: ${failure.message}'),
-      (typedBox) {
-        _box = typedBox;
-        return typedBox;
+      (dynamicBox) {
+        _adapter = TypedBoxAdapter<FavoritoItemHive>(dynamicBox);
+        return _adapter!;
       },
     );
   }
@@ -32,11 +36,11 @@ class FavoritosHiveRepository {
   /// Busca favoritos por tipo
   Future<List<FavoritoItemHive>> getFavoritosByTipo(String tipo) async {
     try {
-      final hiveBox = await box;
+      final typedAdapter = await adapter;
       final items = <FavoritoItemHive>[];
 
-      // ✅ box.values já é Iterable<FavoritoItemHive> (type-safe)
-      items.addAll(hiveBox.values.where((item) => item.tipo == tipo));
+      // ✅ adapter.values já é Iterable<FavoritoItemHive> (type-safe)
+      items.addAll(typedAdapter.values.where((item) => item.tipo == tipo));
 
       return items;
     } catch (e) {
@@ -50,11 +54,11 @@ class FavoritosHiveRepository {
   /// Versão async para garantir que o box esteja aberto
   Future<List<FavoritoItemHive>> getAllAsync() async {
     try {
-      final hiveBox = await box;
+      final typedAdapter = await adapter;
       final items = <FavoritoItemHive>[];
 
-      // ✅ box.values já é Iterable<FavoritoItemHive> (type-safe)
-      items.addAll(hiveBox.values);
+      // ✅ adapter.values já é Iterable<FavoritoItemHive> (type-safe)
+      items.addAll(typedAdapter.values);
 
       return items;
     } catch (e) {
@@ -84,8 +88,8 @@ class FavoritosHiveRepository {
   Future<bool> isFavorito(String tipo, String itemId) async {
     try {
       final key = '${tipo}_$itemId';
-      final hiveBox = await box;
-      return hiveBox.containsKey(key);
+      final typedAdapter = await adapter;
+      return typedAdapter.containsKey(key);
     } catch (e) {
       if (kDebugMode) {
         print('❌ [isFavorito] Erro: $e');
@@ -116,8 +120,8 @@ class FavoritosHiveRepository {
       );
 
       final key = '${tipo}_$itemId';
-      final hiveBox = await box;
-      await hiveBox.put(key, favorito);
+      final typedAdapter = await adapter;
+      await typedAdapter.put(key, favorito);
       return true;
     } catch (e) {
       if (kDebugMode) {
@@ -131,8 +135,8 @@ class FavoritosHiveRepository {
   Future<bool> removeFavorito(String tipo, String itemId) async {
     try {
       final key = '${tipo}_$itemId';
-      final hiveBox = await box;
-      await hiveBox.delete(key);
+      final typedAdapter = await adapter;
+      await typedAdapter.delete(key);
       return true;
     } catch (e) {
       if (kDebugMode) {
@@ -149,10 +153,10 @@ class FavoritosHiveRepository {
   ) async {
     try {
       final key = '${tipo}_$itemId';
-      final hiveBox = await box;
-      final value = hiveBox.get(key);
+      final typedAdapter = await adapter;
+      final value = typedAdapter.get(key);
 
-      // ✅ box.get() já retorna FavoritoItemHive? (type-safe)
+      // ✅ adapter.get() já retorna FavoritoItemHive? (type-safe)
       if (value != null && value.itemData.isNotEmpty) {
         return jsonDecode(value.itemData) as Map<String, dynamic>;
       }
@@ -177,10 +181,10 @@ class FavoritosHiveRepository {
   Future<void> clearFavoritosByTipo(String tipo) async {
     try {
       final favoritos = await getFavoritosByTipo(tipo);
-      final hiveBox = await box;
+      final typedAdapter = await adapter;
       for (final favorito in favoritos) {
         final key = '${favorito.tipo}_${favorito.itemId}';
-        await hiveBox.delete(key);
+        await typedAdapter.delete(key);
       }
     } catch (e) {
       if (kDebugMode) {
@@ -230,5 +234,19 @@ class FavoritosHiveRepository {
     }
 
     return results;
+  }
+
+  /// Fecha o adapter (liberando recursos se necessário)
+  Future<void> close() async {
+    try {
+      if (_adapter != null && _adapter!.isOpen) {
+        await _adapter!.close();
+        _adapter = null;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ [close] Erro ao fechar adapter: $e');
+      }
+    }
   }
 }

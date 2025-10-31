@@ -2,88 +2,31 @@
 import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
 import 'package:core/core.dart';
 
-part 'news_article_model.g.dart';
 
 /// News Article Model with Hive Serialization
-/// 
+///
 /// Represents a news article with complete information
 /// for RSS feeds and agriculture news display
-@HiveType(typeId: 10)
 class NewsArticleModel extends NewsArticleEntity {
-  @override
-  @HiveField(0)
-  final String id;
-  
-  @override
-  @HiveField(1)
-  final String title;
-  
-  @override
-  @HiveField(2)
-  final String description;
-  
-  @override
-  @HiveField(3)
-  final String content;
-  
-  @override
-  @HiveField(4)
-  final String author;
-  
-  @override
-  @HiveField(5)
-  final String sourceUrl;
-  
-  @override
-  @HiveField(6)
-  final String imageUrl;
-  
-  @override
-  @HiveField(7)
-  final DateTime publishedAt;
-  
   @HiveField(8)
   final NewsCategoryModel _category;
-  
-  @override
-  @HiveField(9)
-  final List<String> tags;
-  
-  @override
-  @HiveField(10)
-  final bool isPremium;
-  
-  @override
-  @HiveField(11)
-  final int readTimeMinutes;
 
   const NewsArticleModel({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.content,
-    required this.author,
-    required this.sourceUrl,
-    required this.imageUrl,
-    required this.publishedAt,
+    required super.id,
+    required super.title,
+    required super.description,
+    required super.content,
+    required super.author,
+    required super.sourceUrl,
+    required super.imageUrl,
+    required super.publishedAt,
     required NewsCategoryModel category,
-    required this.tags,
-    this.isPremium = false,
-    this.readTimeMinutes = 3,
+    required super.tags,
+    super.isPremium = false,
+    super.readTimeMinutes = 3,
   }) : _category = category,
        super(
-          id: id,
-          title: title,
-          description: description,
-          content: content,
-          author: author,
-          sourceUrl: sourceUrl,
-          imageUrl: imageUrl,
-          publishedAt: publishedAt,
           category: NewsCategory.crops, // placeholder, será sobrescrito pelo getter
-          tags: tags,
-          isPremium: isPremium,
-          readTimeMinutes: readTimeMinutes,
         );
 
   /// Override getter to convert model category to domain category
@@ -177,7 +120,6 @@ class NewsArticleModel extends NewsArticleEntity {
 }
 
 /// News Category Model with Hive Serialization
-@HiveType(typeId: 11)
 enum NewsCategoryModel {
   @HiveField(0)
   crops,

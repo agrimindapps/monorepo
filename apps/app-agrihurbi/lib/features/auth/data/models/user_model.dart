@@ -1,13 +1,11 @@
 import 'package:app_agrihurbi/core/utils/typedef.dart';
 import 'package:core/core.dart';
 
-part 'user_model.g.dart';
 
 /// Model de dados para usuários com suporte ao Hive
 /// 
 /// Implementa serialização local (Hive) e conversões para entidades do domínio
 /// TypeId: 1 - Reservado para usuários no sistema Hive
-@HiveType(typeId: 1)
 class UserModel extends UserEntity {
   @HiveField(0)
   final String userModelId;

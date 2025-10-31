@@ -67,7 +67,7 @@ class _VaccineRemindersFormState extends State<VaccineRemindersForm> {
               subtitle: const Text('Sistema automático baseado no tipo de vacina'),
               value: widget.enableSmartReminders,
               onChanged: widget.onSmartRemindersChanged,
-              activeColor: theme.colorScheme.primary,
+              activeThumbColor: theme.colorScheme.primary,
             ),
             if (widget.enableSmartReminders) ...[
               const SizedBox(height: 16),
@@ -207,12 +207,12 @@ class _VaccineRemindersFormState extends State<VaccineRemindersForm> {
               subtitle: const Text('Para vacinas anuais como antirrábica'),
               value: widget.enableSeasonalReminders,
               onChanged: widget.onSeasonalRemindersChanged,
-              activeColor: theme.colorScheme.primary,
+              activeThumbColor: theme.colorScheme.primary,
             ),
             if (widget.enableSeasonalReminders) ...[
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: widget.selectedSeason,
+                initialValue: widget.selectedSeason,
                 decoration: InputDecoration(
                   labelText: 'Época Preferencial',
                   prefixIcon: const Icon(Icons.wb_sunny),

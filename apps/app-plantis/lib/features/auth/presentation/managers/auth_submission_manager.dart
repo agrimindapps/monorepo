@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Manager for handling auth submission actions
 /// Centralizes login, register, and anonymous login logic
 class AuthSubmissionManager {
-  final WidgetRef ref;
+  final Ref ref;
 
   AuthSubmissionManager({required this.ref});
 

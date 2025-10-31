@@ -196,7 +196,7 @@ class _VaccineAdvancedOptionsState extends State<VaccineAdvancedOptions> {
                 setState(() => _enableCalendarSync = value);
                 _handleCalendarSync(value);
               },
-              activeColor: theme.colorScheme.primary,
+              activeThumbColor: theme.colorScheme.primary,
             ),
             if (_enableCalendarSync) ...[
               const SizedBox(height: 8),

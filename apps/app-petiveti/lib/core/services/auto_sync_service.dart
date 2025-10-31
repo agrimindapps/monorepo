@@ -33,9 +33,6 @@ class AutoSyncService {
 
   AutoSyncService._();
 
-  /// UnifiedSyncManager instance
-  UnifiedSyncManager? _syncManager;
-
   /// Configuração atual
   PetivetiSyncConfig? _currentConfig;
 
@@ -73,15 +70,15 @@ class AutoSyncService {
         debugPrint(_currentConfig!.toDebugMap().toString());
       }
 
-      // 2. Obter UnifiedSyncManager instance
-      _syncManager = UnifiedSyncManager.instance;
+      // 2. TODO: Integrar UnifiedSyncManager quando API estiver disponível
+      // final syncManager = UnifiedSyncManager.instance;
 
       // 3. TODO: Registrar configuração do app quando API estiver disponível
-      // await _syncManager!.registerApp(_currentConfig!.appSyncConfig);
+      // await syncManager.registerApp(_currentConfig!.appSyncConfig);
 
       // 4. TODO: Registrar entidades quando API estiver disponível
       // for (final registration in _currentConfig!.entityRegistrations) {
-      //   await _syncManager!.registerEntity(
+      //   await syncManager.registerEntity(
       //     _currentConfig!.appSyncConfig.appName,
       //     registration,
       //   );

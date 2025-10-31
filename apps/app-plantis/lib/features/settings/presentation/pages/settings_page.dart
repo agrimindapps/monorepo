@@ -2,17 +2,14 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/auth_providers.dart' as auth;
 import '../../../../core/providers/settings_providers.dart';
 import '../../../../core/providers/theme_providers.dart' as theme;
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/base_page_scaffold.dart';
-import '../dialogs/feedback_dialog.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
 import '../managers/settings_sections_builder.dart';
-import '../managers/notification_settings_builder.dart';
 import '../managers/settings_dialog_manager.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
@@ -393,146 +390,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
     dialogManager.showThemeDialog();
   }
 
-  Future<void> _handleRateApp(BuildContext context) async {
-    try {
-      final appRatingService = di.sl<IAppRatingRepository>();
-      final success = await appRatingService.showRatingDialog(context: context);
-      if (!context.mounted) return;
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Obrigado pelo feedback!'),
-            backgroundColor: PlantisColors.primary,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro inesperado: $e'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
-
-  void _showFeedbackDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (context) => const FeedbackDialog(),
-    );
-  }
-
-  void _showAboutDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFFFFFFF),
-        title: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: PlantisColors.primaryGradient,
-              ),
-              child: const Icon(Icons.eco, color: Colors.white, size: 24),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Plantis',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Seu companheiro para cuidar de plantas',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildInfoRow(context, 'Versão', '1.0.0'),
-            _buildInfoRow(context, 'Build', '1'),
-            _buildInfoRow(context, 'Plataforma', 'Flutter'),
-            const SizedBox(height: 16),
-            Text(
-              'Sistema inteligente de lembretes e cuidados para suas plantas, com sincronização automática e recursos premium.',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                const Icon(
-                  Icons.favorite,
-                  color: PlantisColors.flower,
-                  size: 16,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'Feito com carinho para amantes de plantas',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontSize: 12,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(BuildContext context, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontSize: 14,
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   String _getThemeDescription(ThemeMode themeMode) {
     switch (themeMode) {
       case ThemeMode.light:
@@ -542,116 +399,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
       case ThemeMode.system:
         return 'Automático (Sistema)';
     }
-  }
-
-  void _showThemeDialog(BuildContext context, WidgetRef ref) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFFFFFFF),
-        title: const Text('Escolher Tema'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildThemeOption(
-              context,
-              ref,
-              ThemeMode.system,
-              'Automático (Sistema)',
-              'Segue a configuração do sistema',
-              Icons.brightness_auto,
-            ),
-            _buildThemeOption(
-              context,
-              ref,
-              ThemeMode.light,
-              'Claro',
-              'Tema claro sempre ativo',
-              Icons.brightness_high,
-            ),
-            _buildThemeOption(
-              context,
-              ref,
-              ThemeMode.dark,
-              'Escuro',
-              'Tema escuro sempre ativo',
-              Icons.brightness_2,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildThemeOption(
-    BuildContext context,
-    WidgetRef ref,
-    ThemeMode mode,
-    String title,
-    String subtitle,
-    IconData icon,
-  ) {
-    final currentThemeMode = ref.watch(theme.themeModeProvider);
-    final isSelected = currentThemeMode == mode;
-
-    return InkWell(
-      onTap: () {
-        ref.read(theme.themeProvider.notifier).setThemeMode(mode);
-        Navigator.of(context).pop();
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected
-                  ? PlantisColors.primary
-                  : Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.normal,
-                      color: isSelected
-                          ? PlantisColors.primary
-                          : Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (isSelected)
-              const Icon(Icons.check, color: PlantisColors.primary, size: 20),
-          ],
-        ),
-      ),
-    );
   }
 }
 

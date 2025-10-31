@@ -111,7 +111,7 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _selectedSpecies,
+              initialValue: _selectedSpecies,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.pets),
@@ -154,7 +154,7 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _conversionType,
+              initialValue: _conversionType,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.swap_horiz),

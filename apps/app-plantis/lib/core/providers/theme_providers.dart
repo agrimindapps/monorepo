@@ -33,15 +33,24 @@ class Theme extends _$Theme {
 
   @override
   ThemeState build() {
-    _loadTheme();
+    // Carrega o tema de forma assíncrona após inicialização
+    _initializeTheme();
     return ThemeState.initial();
+  }
+
+  /// Inicializa o tema de forma segura durante build
+  void _initializeTheme() {
+    // Agenda o carregamento para após o build estar completo
+    Future.microtask(() async {
+      await _loadTheme();
+    });
   }
 
   /// Carrega o tema das preferências
   Future<void> _loadTheme() async {
-    state = state.copyWith(isLoading: true, errorMessage: null);
-
     try {
+      state = state.copyWith(isLoading: true, errorMessage: null);
+
       final prefs = await SharedPreferences.getInstance();
       final savedTheme = prefs.getString(_themeKey);
       ThemeMode themeMode = ThemeMode.system;

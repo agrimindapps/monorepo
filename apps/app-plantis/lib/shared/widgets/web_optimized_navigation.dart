@@ -304,13 +304,6 @@ class _NavigationList extends StatelessWidget {
                     shortcut: '2',
                     isExpanded: isExpanded,
                   ),
-                  _NavigationItem(
-                    icon: Icons.person_outline,
-                    label: 'Perfil',
-                    route: '/account-profile',
-                    shortcut: '3',
-                    isExpanded: isExpanded,
-                  ),
                 ],
               );
             },
@@ -349,7 +342,7 @@ class _BottomNavigationSection extends StatelessWidget {
             icon: Icons.settings_outlined,
             label: 'Configurações',
             route: '/settings',
-            shortcut: '4',
+            shortcut: '3',
             isExpanded: isExpanded,
           ),
 

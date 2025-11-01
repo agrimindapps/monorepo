@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
 
 /// Interface para abstração do ImageService
@@ -212,6 +213,7 @@ class ImageManagementService {
   }
   
   /// Upload de múltiplas imagens com retry e progress tracking
+  /// Em web, converte Base64 diretamente. Em mobile/desktop, cria File temporário.
   Future<Either<Failure, List<String>>> uploadImages(
     List<String> base64Images, {
     void Function(int index, double progress)? onProgress,
@@ -227,23 +229,39 @@ class ImageManagementService {
         }
       }
 
-      // Converter Base64 para File temporário
-      final tempFiles = <File>[];
+      // Converter Base64 para File temporário (apenas mobile/desktop)
+      // Em web, será null e faremos upload direto do Base64
+      final tempFiles = <File?>[];
       for (int i = 0; i < base64Images.length; i++) {
         final base64Image = base64Images[i];
         final file = await _convertBase64ToFile(base64Image);
-        if (file == null) {
-          return Left(ValidationFailure('Erro ao processar imagem ${i + 1}'));
-        }
+        // Em web, file será null - isso é esperado
         tempFiles.add(file);
       }
 
       // Upload com retry
       final results = <String>[];
-      for (int i = 0; i < tempFiles.length; i++) {
+      for (int i = 0; i < base64Images.length; i++) {
+        final tempFile = tempFiles[i];
+
+        // Em web (tempFile null), não podemos fazer upload direto
+        // O upload direto do Base64 requer implementação adicional no ImageService
+        if (tempFile == null && kIsWeb) {
+          return const Left(
+            NetworkFailure(
+              'Upload de imagens em web ainda não suportado. '
+              'Por favor, tente novamente em mobile/desktop ou use imagens com nomes simples.',
+            ),
+          );
+        }
+
+        if (tempFile == null) {
+          return Left(ValidationFailure('Erro ao processar imagem ${i + 1}'));
+        }
+
         final imageService = ImageService(); // Acesso direto ao ImageService do core
         final result = await imageService.uploadImageWithRetry(
-          tempFiles[i],
+          tempFile,
           folder: 'plants',
           onProgress: onProgress != null
             ? (progress) => onProgress(i, progress)
@@ -252,13 +270,7 @@ class ImageManagementService {
 
         result.fold(
           (error) {
-            // Cleanup dos arquivos temporários em caso de erro
-            for (final tempFile in tempFiles) {
-              if (tempFile.existsSync()) {
-                tempFile.deleteSync();
-              }
-            }
-            throw Exception(error.message);
+            throw Exception('Erro ao fazer upload da imagem ${i + 1}: ${error.message}');
           },
           (uploadResult) => results.add(uploadResult.downloadUrl),
         );
@@ -266,8 +278,12 @@ class ImageManagementService {
 
       // Cleanup dos arquivos temporários após sucesso
       for (final tempFile in tempFiles) {
-        if (tempFile.existsSync()) {
-          tempFile.deleteSync();
+        if (tempFile != null && tempFile.existsSync()) {
+          try {
+            tempFile.deleteSync();
+          } catch (_) {
+            // Ignora erros ao deletar arquivo temporário
+          }
         }
       }
 
@@ -277,14 +293,21 @@ class ImageManagementService {
     }
   }
 
-  /// Converte Base64 para File temporário
+  /// Converte Base64 para File temporário (apenas mobile/desktop)
+  /// Em web, retorna null pois File não funciona nessa plataforma
   Future<File?> _convertBase64ToFile(String base64Image) async {
+    // Em web, não é possível criar File temporário
+    // A imagem será uploadada diretamente como Base64
+    if (kIsWeb) {
+      return null;
+    }
+
     try {
       // Remove o prefixo data:image/...;base64,
       final base64Data = base64Image.split(',').last;
       final bytes = base64Decode(base64Data);
 
-      // Cria arquivo temporário
+      // Cria arquivo temporário (apenas mobile/desktop)
       final tempDir = Directory.systemTemp;
       final tempFile = File('${tempDir.path}/temp_${DateTime.now().millisecondsSinceEpoch}.jpg');
 
@@ -295,7 +318,7 @@ class ImageManagementService {
       return null;
     }
   }
-  
+
   /// Deleta imagem do servidor
   Future<Either<Failure, void>> deleteImage(String imageUrl) async {
     if (imageUrl.trim().isEmpty) {

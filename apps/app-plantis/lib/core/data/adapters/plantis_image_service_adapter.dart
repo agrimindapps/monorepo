@@ -29,6 +29,31 @@ class PlantisImageServiceAdapter {
   }) : _coreImageService = coreImageService,
        _preloaderService = preloaderService ?? ImagePreloaderService.instance;
 
+  /// Sanitiza nome de arquivo removendo espaços e caracteres especiais
+  /// Essencial para compatibilidade com Firebase Storage em web
+  static String _sanitizeFileName(String fileName) {
+    // Remove espaços e substitui por underscore
+    String sanitized = fileName.replaceAll(RegExp(r'\s+'), '_');
+
+    // Remove caracteres especiais mantendo apenas alphanumericos, pontos, hífens e underscores
+    sanitized = sanitized.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '');
+
+    // Remove múltiplos underscores consecutivos
+    sanitized = sanitized.replaceAll(RegExp(r'_+'), '_');
+
+    // Remove pontos no início
+    while (sanitized.startsWith('.')) {
+      sanitized = sanitized.substring(1);
+    }
+
+    // Se ficou vazio, usa um padrão
+    if (sanitized.isEmpty) {
+      sanitized = 'image_${DateTime.now().millisecondsSinceEpoch}';
+    }
+
+    return sanitized;
+  }
+
   /// Pick single image from gallery (backward compatible)
   Future<Result<File>> pickImageFromGallery() {
     return _coreImageService.pickImageFromGallery();
@@ -52,10 +77,13 @@ class PlantisImageServiceAdapter {
     String? uploadType,
     void Function(double progress)? onProgress,
   }) {
+    // Sanitiza o nome do arquivo se fornecido
+    final sanitizedFileName = fileName != null ? _sanitizeFileName(fileName) : null;
+
     return _coreImageService.uploadImage(
       imageFile,
       folder: folder,
-      fileName: fileName,
+      fileName: sanitizedFileName,
       uploadType: uploadType,
       onProgress: onProgress,
     );

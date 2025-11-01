@@ -57,7 +57,13 @@ class _DesktopLayout extends StatelessWidget {
                   topLeft: Radius.circular(20),
                   bottomLeft: Radius.circular(20),
                 ),
-                child: child,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40.0,
+                    vertical: 24.0,
+                  ),
+                  child: child,
+                ),
               ),
             ),
           ),

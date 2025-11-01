@@ -243,37 +243,66 @@ class ImageManagementService {
       final results = <String>[];
       for (int i = 0; i < base64Images.length; i++) {
         final tempFile = tempFiles[i];
+        final base64Image = base64Images[i];
+        final imageService = ImageService(); // Acesso direto ao ImageService do core
 
-        // Em web (tempFile null), não podemos fazer upload direto
-        // O upload direto do Base64 requer implementação adicional no ImageService
+        // Em web (tempFile null), faz upload direto de Base64
         if (tempFile == null && kIsWeb) {
-          return const Left(
-            NetworkFailure(
-              'Upload de imagens em web ainda não suportado. '
-              'Por favor, tente novamente em mobile/desktop ou use imagens com nomes simples.',
-            ),
+          // Extrai MIME type do Base64 ou usa padrão
+          String mimeType = 'image/jpeg';
+          if (base64Image.contains('data:')) {
+            final mimeMatch =
+                RegExp(r'data:([^;]+)').firstMatch(base64Image);
+            if (mimeMatch != null) {
+              mimeType = mimeMatch.group(1) ?? 'image/jpeg';
+            }
+          }
+
+          // Sanitiza o nome do arquivo
+          final fileName = _sanitizeFileName(
+            'image_${DateTime.now().millisecondsSinceEpoch}',
+          );
+
+          // Upload direto de Base64
+          final result = await imageService.uploadImageFromBase64(
+            base64Image,
+            folder: 'plants',
+            fileName: fileName,
+            mimeType: mimeType,
+            onProgress: onProgress != null
+              ? (progress) => onProgress(i, progress)
+              : null,
+          );
+
+          result.fold(
+            (error) {
+              throw Exception(
+                'Erro ao fazer upload da imagem ${i + 1}: ${error.message}',
+              );
+            },
+            (uploadResult) => results.add(uploadResult.downloadUrl),
+          );
+        } else if (tempFile == null) {
+          return Left(ValidationFailure('Erro ao processar imagem ${i + 1}'));
+        } else {
+          // Mobile/Desktop: Upload normal com File
+          final result = await imageService.uploadImageWithRetry(
+            tempFile,
+            folder: 'plants',
+            onProgress: onProgress != null
+              ? (progress) => onProgress(i, progress)
+              : null,
+          );
+
+          result.fold(
+            (error) {
+              throw Exception(
+                'Erro ao fazer upload da imagem ${i + 1}: ${error.message}',
+              );
+            },
+            (uploadResult) => results.add(uploadResult.downloadUrl),
           );
         }
-
-        if (tempFile == null) {
-          return Left(ValidationFailure('Erro ao processar imagem ${i + 1}'));
-        }
-
-        final imageService = ImageService(); // Acesso direto ao ImageService do core
-        final result = await imageService.uploadImageWithRetry(
-          tempFile,
-          folder: 'plants',
-          onProgress: onProgress != null
-            ? (progress) => onProgress(i, progress)
-            : null,
-        );
-
-        result.fold(
-          (error) {
-            throw Exception('Erro ao fazer upload da imagem ${i + 1}: ${error.message}');
-          },
-          (uploadResult) => results.add(uploadResult.downloadUrl),
-        );
       }
 
       // Cleanup dos arquivos temporários após sucesso
@@ -319,15 +348,39 @@ class ImageManagementService {
     }
   }
 
+  /// Sanitiza nome de arquivo removendo espaços e caracteres especiais
+  String _sanitizeFileName(String fileName) {
+    // Remove espaços e substitui por underscore
+    String sanitized = fileName.replaceAll(RegExp(r'\s+'), '_');
+
+    // Remove caracteres especiais mantendo apenas alphanumericos, pontos, hífens e underscores
+    sanitized = sanitized.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '');
+
+    // Remove múltiplos underscores consecutivos
+    sanitized = sanitized.replaceAll(RegExp(r'_+'), '_');
+
+    // Remove pontos no início
+    while (sanitized.startsWith('.')) {
+      sanitized = sanitized.substring(1);
+    }
+
+    // Se ficou vazio, usa um padrão
+    if (sanitized.isEmpty) {
+      sanitized = 'image_${DateTime.now().millisecondsSinceEpoch}';
+    }
+
+    return sanitized;
+  }
+
   /// Deleta imagem do servidor
   Future<Either<Failure, void>> deleteImage(String imageUrl) async {
     if (imageUrl.trim().isEmpty) {
       return const Left(ValidationFailure('URL da imagem é obrigatória'));
     }
-    
+
     try {
       final result = await _imageService.deleteImage(imageUrl);
-      
+
       return result.fold(
         (failure) => Left(_mapImageFailure(failure, 'Erro ao deletar imagem')),
         (success) => const Right(null),
@@ -336,7 +389,7 @@ class ImageManagementService {
       return Left(NetworkFailure('Erro inesperado ao deletar: $e'));
     }
   }
-  
+
   /// Valida se uma imagem base64 é válida
   bool _isValidBase64Image(String base64Image) {
     if (base64Image.trim().isEmpty) return false;

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -286,6 +287,133 @@ class ImageService {
     );
   }
 
+  /// Upload de imagem diretamente de Base64 (ideal para web)
+  /// Não requer conversão para File, upload direto de bytes
+  Future<Result<ImageUploadResult>> uploadImageFromBase64(
+    String base64Data, {
+    String? folder,
+    String? fileName,
+    String? uploadType,
+    String mimeType = 'image/jpeg',
+    void Function(double)? onProgress,
+  }) async {
+    return ResultUtils.tryExecuteAsync(() async {
+      try {
+        // Remove prefixo data:image/...;base64, se existir
+        final base64String = base64Data.contains(',')
+            ? base64Data.split(',').last
+            : base64Data;
+
+        // Decodifica Base64 para bytes
+        final bytes = base64Decode(base64String);
+
+        // Validações básicas
+        if (bytes.isEmpty) {
+          return Future.error(
+            ValidationError(
+              message: 'Imagem Base64 é vazia',
+            ),
+          );
+        }
+
+        // Verifica tamanho máximo
+        final maxSizeBytes = config.maxFileSizeInMB * 1024 * 1024;
+        if (bytes.length > maxSizeBytes) {
+          return Future.error(
+            ValidationError(
+              message: 'Imagem excede tamanho máximo de ${config.maxFileSizeInMB}MB',
+            ),
+          );
+        }
+
+        // Determina folder e nome do arquivo
+        final targetFolder = _determineFolder(folder, uploadType);
+        final extension = _getExtensionFromMimeType(mimeType);
+        final finalFileName =
+            fileName ?? '${_generateFirebaseId()}$extension';
+
+        // Cria referência no Firebase Storage
+        final Reference storageRef = _storage.ref().child(
+          '$targetFolder/$finalFileName',
+        );
+
+        // Cria metadados
+        final SettableMetadata metadata = SettableMetadata(
+          contentType: mimeType,
+          customMetadata: {
+            'uploadedAt': DateTime.now().toIso8601String(),
+            'uploadType': uploadType ?? 'general',
+            'originalSize': bytes.length.toString(),
+            'uploadMethod': 'base64_web',
+          },
+        );
+
+        // Upload dos bytes
+        final UploadTask uploadTask = storageRef.putData(bytes, metadata);
+
+        // Monitora progresso se callback fornecido
+        if (onProgress != null) {
+          uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+            final progress = snapshot.bytesTransferred / snapshot.totalBytes;
+            onProgress(progress);
+          });
+        }
+
+        // Aguarda conclusão do upload
+        final TaskSnapshot snapshot = await uploadTask;
+        final downloadUrl = await snapshot.ref.getDownloadURL();
+
+        return ImageUploadResult(
+          downloadUrl: downloadUrl,
+          fileName: finalFileName,
+          folder: targetFolder,
+          uploadedAt: DateTime.now(),
+        );
+      } catch (e) {
+        return Future.error(
+          ExternalServiceError(
+            message: 'Erro ao fazer upload de Base64',
+            details: e.toString(),
+            serviceName: 'Firebase Storage',
+          ),
+        );
+      }
+    });
+  }
+
+  /// Upload múltiplo de Base64 (web)
+  Future<Result<MultipleImageUploadResult>> uploadMultipleImagesFromBase64(
+    List<String> base64Images, {
+    String? folder,
+    String? uploadType,
+    String mimeType = 'image/jpeg',
+    void Function(int index, double progress)? onProgress,
+  }) async {
+    return ResultUtils.tryExecuteAsync(() async {
+      final List<ImageUploadResult> successful = [];
+      final List<AppError> failed = [];
+
+      for (int i = 0; i < base64Images.length; i++) {
+        final uploadResult = await uploadImageFromBase64(
+          base64Images[i],
+          folder: folder,
+          uploadType: uploadType,
+          mimeType: mimeType,
+          onProgress:
+              onProgress != null ? (progress) => onProgress(i, progress) : null,
+        );
+
+        if (uploadResult.isSuccess) {
+          successful.add(uploadResult.data!);
+        } else {
+          failed.add(uploadResult.error!);
+        }
+      }
+
+      return MultipleImageUploadResult(successful: successful, failed: failed);
+    });
+  }
+
   /// Upload de múltiplas imagens
   Future<Result<MultipleImageUploadResult>> uploadMultipleImages(
     List<File> imageFiles, {
@@ -435,6 +563,25 @@ class ImageService {
   /// Substitui o uso de UUID por IDs nativos do Firebase
   String _generateFirebaseId() {
     return _firestore.collection('_').doc().id;
+  }
+
+  /// Converter MIME type para extensão de arquivo
+  String _getExtensionFromMimeType(String mimeType) {
+    switch (mimeType.toLowerCase()) {
+      case 'image/jpeg':
+      case 'image/jpg':
+        return '.jpg';
+      case 'image/png':
+        return '.png';
+      case 'image/webp':
+        return '.webp';
+      case 'image/gif':
+        return '.gif';
+      case 'image/bmp':
+        return '.bmp';
+      default:
+        return '.jpg';
+    }
   }
 
   /// Comprimir imagem (placeholder para implementação futura)

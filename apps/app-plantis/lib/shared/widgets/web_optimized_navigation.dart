@@ -786,7 +786,11 @@ class _SidebarFooter extends StatelessWidget {
                 child: GestureDetector(
                   onTap: () {
                     HapticFeedback.lightImpact();
-                    context.go('/account-profile');
+                    Future.microtask(() {
+                      if (context.mounted) {
+                        context.go('/account-profile');
+                      }
+                    });
                   },
                   child: footerContent,
                 ),

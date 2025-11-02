@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as flutter show FormState;
 import 'package:flutter/material.dart' hide FormState;
 
@@ -114,7 +115,8 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
     final imagePath = vehicle.metadata['foto'] as String?;
     if (imagePath != null && imagePath.isNotEmpty) {
       final imageFile = File(imagePath);
-      if (imageFile.existsSync()) {
+      // Em web, não podemos verificar existência de arquivo sincronamente
+      if (kIsWeb || imageFile.existsSync()) {
         state = state.copyWith(vehicleImage: imageFile);
       }
     }
@@ -163,8 +165,16 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
   Future<void> removeVehicleImage() async {
     try {
       final currentImage = state.vehicleImage;
-      if (currentImage != null && currentImage.existsSync()) {
-        if (await _isFileOwnedByUser(currentImage)) {
+      // Em web, não podemos deletar arquivos, então apenas limpar do estado
+      if (currentImage != null && (kIsWeb || currentImage.existsSync())) {
+        if (kIsWeb) {
+          // Na web, apenas remover do estado (arquivo já foi enviado/deletado pelo servidor)
+          state = state.copyWith(
+            clearImage: true,
+            hasChanges: true,
+            clearError: true,
+          );
+        } else if (await _isFileOwnedByUser(currentImage)) {
           await currentImage.delete();
           state = state.copyWith(
             clearImage: true,

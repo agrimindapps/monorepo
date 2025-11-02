@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class FormDialog extends StatelessWidget {
-
   const FormDialog({
     super.key,
     required this.title,
@@ -14,6 +13,7 @@ class FormDialog extends StatelessWidget {
     this.onConfirm,
     this.isLoading = false,
     this.showCloseButton = true,
+    this.errorMessage,
   });
   final String title;
   final String subtitle;
@@ -25,6 +25,7 @@ class FormDialog extends StatelessWidget {
   final VoidCallback? onConfirm;
   final bool isLoading;
   final bool showCloseButton;
+  final String? errorMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -100,13 +101,36 @@ class FormDialog extends StatelessWidget {
           const SizedBox(height: 4),
           Align(
             alignment: Alignment.centerLeft,
-            child: Text(
-              subtitle,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                fontSize: 14,
-              ),
-            ),
+            child: errorMessage != null
+                ? Row(
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        color: Theme.of(context).colorScheme.error,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          errorMessage!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.7),
+                      fontSize: 14,
+                    ),
+                  ),
           ),
         ],
       ),
@@ -120,7 +144,9 @@ class FormDialog extends StatelessWidget {
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: isLoading ? null : (onCancel ?? () => Navigator.of(context).pop()),
+              onPressed: isLoading
+                  ? null
+                  : (onCancel ?? () => Navigator.of(context).pop()),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Theme.of(context).colorScheme.onSurface,
                 side: BorderSide(color: Theme.of(context).colorScheme.outline),
@@ -157,7 +183,9 @@ class FormDialog extends StatelessWidget {
                       width: 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onPrimary),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).colorScheme.onPrimary,
+                        ),
                       ),
                     )
                   : Text(

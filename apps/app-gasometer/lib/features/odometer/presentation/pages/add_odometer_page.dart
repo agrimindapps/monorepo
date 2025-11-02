@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/datetime_field.dart';
+import '../../../../core/widgets/error_header.dart';
 import '../../../../core/widgets/form_dialog.dart';
 import '../../../../core/widgets/form_section_header.dart';
 import '../../../../core/widgets/notes_form_field.dart';
@@ -24,7 +25,8 @@ class AddOdometerPage extends ConsumerStatefulWidget {
   ConsumerState<AddOdometerPage> createState() => _AddOdometerPageState();
 }
 
-class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
+class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
+    with FormErrorHandlerMixin {
   final _formKey = GlobalKey<FormState>();
   bool _isInitialized = false;
   bool _isSubmitting = false;
@@ -37,7 +39,7 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
   void initState() {
     super.initState();
   }
-  
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -57,10 +59,7 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
       final selectedVehicleId = widget.vehicleId ?? '';
       if (selectedVehicleId.isNotEmpty) {
         final notifier = ref.read(odometerFormNotifierProvider.notifier);
-        await notifier.initialize(
-          vehicleId: selectedVehicleId,
-          userId: userId,
-        );
+        await notifier.initialize(vehicleId: selectedVehicleId, userId: userId);
       } else {
         debugPrint('Warning: No vehicle selected for new odometer record');
       }
@@ -71,8 +70,6 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
       }
     });
   }
-
-
 
   @override
   void dispose() {
@@ -89,7 +86,8 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
     if (formState.hasVehicle) {
       final vehicle = formState.vehicle!;
       final odometer = vehicle.currentOdometer;
-      subtitle = '${vehicle.brand} ${vehicle.model} • ${_formatOdometer(odometer)} km';
+      subtitle =
+          '${vehicle.brand} ${vehicle.model} • ${_formatOdometer(odometer)} km';
     }
 
     return FormDialog(
@@ -98,8 +96,13 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
       headerIcon: Icons.speed,
       isLoading: formState.isLoading || _isSubmitting,
       confirmButtonText: 'Salvar',
-      onCancel: () => Navigator.of(context).pop(),
+      onCancel: () {
+        final formNotifier = ref.read(odometerFormNotifierProvider.notifier);
+        formNotifier.clearForm();
+        Navigator.of(context).pop();
+      },
       onConfirm: _submitFormWithRateLimit,
+      errorMessage: formErrorMessage,
       content: Form(
         key: _formKey,
         child: Column(
@@ -120,7 +123,6 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
       (Match m) => '${m[1]}.',
     );
   }
-
 
   Widget _buildBasicInfoSection() {
     return FormSectionHeader(
@@ -159,13 +161,10 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
     return FormSectionHeader(
       title: 'Adicionais',
       icon: Icons.more_horiz,
-      child: Column(
-        children: [
-          _buildDescriptionField(),
-        ],
-      ),
+      child: Column(children: [_buildDescriptionField()]),
     );
   }
+
   Widget _buildOdometerField() {
     final formState = ref.watch(odometerFormNotifierProvider);
     final notifier = ref.read(odometerFormNotifierProvider.notifier);
@@ -176,8 +175,7 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
       hint: '45234',
       currentOdometer: formState.vehicle?.currentOdometer,
       lastReading: null,
-      onChanged: (value) {
-      },
+      onChanged: (value) {},
     );
   }
 
@@ -191,9 +189,7 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
         labelText: OdometerConstants.fieldLabels['tipoRegistro'],
         hintText: OdometerConstants.fieldHints['tipoRegistro'],
         prefixIcon: Icon(OdometerConstants.sectionIcons['tipoRegistro']),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         filled: true,
         fillColor: Colors.white,
       ),
@@ -209,7 +205,9 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
         }
       },
       validator: (value) {
-        return value == null ? OdometerConstants.validationMessages['tipoObrigatorio'] : null;
+        return value == null
+            ? OdometerConstants.validationMessages['tipoObrigatorio']
+            : null;
       },
     );
   }
@@ -222,8 +220,7 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
       label: OdometerConstants.fieldLabels['descricao'],
       hint: OdometerConstants.fieldHints['descricao'],
       required: false,
-      onChanged: (value) {
-      },
+      onChanged: (value) {},
     );
   }
 
@@ -264,25 +261,20 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
           setState(() {
             _isSubmitting = false;
           });
-          _showErrorDialog(
-            'Timeout',
+          setFormError(
             'A operação demorou muito para ser concluída. Tente novamente.',
           );
         }
       });
       if (mounted) {
-        _showErrorDialog(
-          'Implementação Pendente',
+        setFormError(
           'A funcionalidade de salvar odômetro precisa de um provider Riverpod global (odometerRiverpodProvider).\n\nMigração pendente.',
         );
       }
     } catch (e) {
       debugPrint('Error submitting form: $e');
       if (mounted) {
-        _showErrorDialog(
-          OdometerConstants.dialogMessages['erro']!,
-          'Erro inesperado: $e',
-        );
+        setFormError('Erro inesperado: $e');
       }
     } finally {
       _timeoutTimer?.cancel();
@@ -292,21 +284,5 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
         });
       }
     }
-  }
-  
-  void _showErrorDialog(String title, String message) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 }

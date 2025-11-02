@@ -1,4 +1,5 @@
 import 'package:core/core.dart' show Hive, HiveX, Box;
+
 import '../../core/data/models/category_model.dart';
 import '../../core/logging/entities/log_entry.dart';
 import '../../features/expenses/data/models/expense_model.dart';

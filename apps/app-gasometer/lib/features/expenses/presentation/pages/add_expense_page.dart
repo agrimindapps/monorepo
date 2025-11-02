@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/error_header.dart';
 import '../../../../core/widgets/form_dialog.dart';
 import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../models/expense_form_model.dart';
@@ -13,12 +14,7 @@ import '../widgets/expense_form_view.dart';
 
 /// Dialog modal para adicionar/editar despesas
 class AddExpensePage extends ConsumerStatefulWidget {
-  
-  const AddExpensePage({
-    super.key,
-    this.vehicleId,
-    this.editExpenseId,
-  });
+  const AddExpensePage({super.key, this.vehicleId, this.editExpenseId});
   final String? vehicleId;
   final String? editExpenseId;
 
@@ -26,7 +22,8 @@ class AddExpensePage extends ConsumerStatefulWidget {
   ConsumerState<AddExpensePage> createState() => _AddExpensePageState();
 }
 
-class _AddExpensePageState extends ConsumerState<AddExpensePage> {
+class _AddExpensePageState extends ConsumerState<AddExpensePage>
+    with FormErrorHandlerMixin {
   bool _isInitialized = false;
   bool _isSubmitting = false;
   Timer? _debounceTimer;
@@ -82,14 +79,13 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
       throw Exception('Erro ao carregar registro para edição: $e');
     }
   }
-  
+
   @override
   void dispose() {
     _debounceTimer?.cancel();
     _timeoutTimer?.cancel();
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +95,8 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
     if (isInitialized && formState.vehicle != null) {
       final vehicle = formState.vehicle!;
       final odometer = vehicle.currentOdometer;
-      subtitle = '${vehicle.brand} ${vehicle.model} • ${_formatOdometer(odometer)} km';
+      subtitle =
+          '${vehicle.brand} ${vehicle.model} • ${_formatOdometer(odometer)} km';
     }
 
     return FormDialog(
@@ -108,8 +105,13 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
       headerIcon: Icons.attach_money,
       isLoading: formState.isLoading || _isSubmitting,
       confirmButtonText: 'Salvar',
-      onCancel: () => Navigator.of(context).pop(),
+      onCancel: () {
+        final formNotifier = ref.read(expenseFormNotifierProvider.notifier);
+        formNotifier.clearForm();
+        Navigator.of(context).pop();
+      },
       onConfirm: _submitFormWithRateLimit,
+      errorMessage: formErrorMessage,
       content: !isInitialized
           ? const Center(child: CircularProgressIndicator())
           : const ExpenseFormView(),
@@ -160,8 +162,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
           setState(() {
             _isSubmitting = false;
           });
-          _showErrorDialog(
-            'Timeout',
+          setFormError(
             'A operação demorou muito para ser concluída. Tente novamente.',
           );
         }
@@ -188,16 +189,13 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
         if (mounted) {
           final expensesState = ref.read(expensesNotifierProvider);
           final errorMessage = expensesState.error ?? 'Erro ao salvar despesa';
-          _showErrorDialog('Erro', errorMessage);
+          setFormError(errorMessage);
         }
       }
     } catch (e) {
       debugPrint('Error submitting form: $e');
       if (mounted) {
-        _showErrorDialog(
-          'Erro',
-          'Erro inesperado: $e',
-        );
+        setFormError('Erro inesperado: $e');
       }
     } finally {
       _timeoutTimer?.cancel();
@@ -207,22 +205,6 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
         });
       }
     }
-  }
-
-  void _showErrorDialog(String title, String message) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 
   /// Converte ExpenseFormState para ExpenseFormModel

@@ -65,16 +65,11 @@ Future<void> main() async {
     }
 
     // Sync config only if Firebase is available
+    // UNIFIED ENVIRONMENT: Single configuration for all environments
     if (firebaseInitialized) {
-      if (kDebugMode) {
-        SecureLogger.info(
-          'Initializing GasometerSyncConfig (development mode)',
-        );
-        await GasometerSyncConfig.configureDevelopment();
-        SecureLogger.info('GasometerSyncConfig initialized successfully');
-      } else {
-        await GasometerSyncConfig.configure();
-      }
+      SecureLogger.info('Initializing GasometerSyncConfig (unified environment)');
+      await GasometerSyncConfig.initialize();
+      SecureLogger.info('GasometerSyncConfig initialized successfully');
       await SyncDIModule.initializeSyncService(di.sl);
     } else {
       SecureLogger.warning(

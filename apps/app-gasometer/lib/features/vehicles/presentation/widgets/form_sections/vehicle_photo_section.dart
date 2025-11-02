@@ -1,5 +1,6 @@
-import 'dart:io';
+import 'dart:io' as io;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,9 +17,9 @@ class VehiclePhotoSection extends ConsumerWidget {
     final formState = ref.watch(vehicleFormNotifierProvider);
     final notifier = ref.read(vehicleFormNotifierProvider.notifier);
 
-    final currentImagePath = formState.vehicleImage?.existsSync() == true
-        ? formState.vehicleImage!.path
-        : null;
+    // Check if file exists only on mobile/desktop platforms
+    // Web doesn't support dart:io File operations
+    final currentImagePath = _getImagePath(formState.vehicleImage);
 
     return FormSectionHeader(
       title: 'Foto do Veículo',
@@ -27,7 +28,7 @@ class VehiclePhotoSection extends ConsumerWidget {
         currentImagePath: currentImagePath,
         onImageChanged: (imagePath) {
           if (imagePath != null) {
-            notifier.updateVehicleImage(File(imagePath));
+            notifier.updateVehicleImage(io.File(imagePath));
           } else {
             notifier.removeVehicleImage();
           }
@@ -42,5 +43,25 @@ class VehiclePhotoSection extends ConsumerWidget {
         emptyStateText: 'Adicionar foto do veículo',
       ),
     );
+  }
+
+  /// Get image path, checking existence only on non-web platforms
+  String? _getImagePath(io.File? file) {
+    if (file == null) return null;
+
+    // On web, just return the path without checking existence
+    // (dart:io operations are not supported on web)
+    if (kIsWeb) {
+      return file.path;
+    }
+
+    // On mobile/desktop, check if file exists
+    try {
+      return file.existsSync() ? file.path : null;
+    } catch (e) {
+      // If any error occurs, return null to be safe
+      debugPrint('Error checking file existence: $e');
+      return null;
+    }
   }
 }

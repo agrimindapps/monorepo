@@ -11,6 +11,9 @@ import '../domain/usecases/update_pipes_usecase.dart';
 import '../domain/usecases/check_collision_usecase.dart';
 import '../domain/usecases/load_high_score_usecase.dart';
 import '../domain/usecases/save_high_score_usecase.dart';
+import '../domain/services/physics_service.dart';
+import '../domain/services/pipe_generator_service.dart';
+import '../domain/services/collision_service.dart';
 
 // Data imports:
 import '../data/datasources/flappbird_local_datasource.dart';
@@ -31,12 +34,22 @@ abstract class FlappbirdModule {
   ) =>
       FlappbirdRepositoryImpl(dataSource);
 
-  // Use cases (stateless - no singleton needed)
-  StartGameUseCase get startGameUseCase => StartGameUseCase();
+  // Services are already registered as @lazySingleton, no need to register here
+
+  // Use cases
+  StartGameUseCase startGameUseCase(
+    PhysicsService physicsService,
+    PipeGeneratorService pipeGeneratorService,
+  ) =>
+      StartGameUseCase(physicsService, pipeGeneratorService);
 
   FlapBirdUseCase get flapBirdUseCase => FlapBirdUseCase();
 
-  UpdatePhysicsUseCase get updatePhysicsUseCase => UpdatePhysicsUseCase();
+  UpdatePhysicsUseCase updatePhysicsUseCase(
+    PhysicsService physicsService,
+    CollisionService collisionService,
+  ) =>
+      UpdatePhysicsUseCase(physicsService, collisionService);
 
   UpdatePipesUseCase get updatePipesUseCase => UpdatePipesUseCase();
 

@@ -92,9 +92,6 @@ class LoginFormWidget extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           const SocialLoginButtonsWidget(),
-
-          const SizedBox(height: 16),
-          _buildAnonymousLoginButton(context, ref),
         ],
       ),
     );
@@ -178,67 +175,6 @@ class LoginFormWidget extends ConsumerWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildAnonymousLoginButton(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
-    final formNotifier = ref.watch(loginFormNotifierProvider.notifier);
-
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: OutlinedButton(
-        onPressed:
-            authState.isLoading
-                ? null
-                : () async {
-                  final success = await formNotifier.signInAnonymously();
-                  if (context.mounted && success && onLoginSuccess != null) {
-                    onLoginSuccess!();
-                  }
-                },
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Theme.of(context).primaryColor,
-          side: BorderSide(
-            color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        child:
-            authState.isLoading
-                ? SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Theme.of(context).primaryColor,
-                    ),
-                  ),
-                )
-                : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.person_outline,
-                      size: 20,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Continuar sem conta',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                  ],
-                ),
       ),
     );
   }

@@ -1,4 +1,6 @@
-import 'dart:io';
+import 'dart:io' as io;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -156,8 +158,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
           height: double.infinity,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(11),
-            child: Image.file(
-              File(currentImagePath!),
+            child: _buildImageWidget(
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return _buildErrorPreview();
@@ -249,8 +250,7 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(7),
-              child: Image.file(
-                File(currentImagePath!),
+              child: _buildImageWidget(
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Icon(
@@ -575,5 +575,38 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
     });
     widget.onImageChanged(null);
     showInfo('Imagem removida');
+  }
+
+  /// Constrói imagem de forma multiplataforma
+  /// Na web, usa Image.memory ou Image.network
+  /// Em mobile/desktop, usa Image.file
+  Widget _buildImageWidget({
+    required BoxFit fit,
+    required ImageErrorWidgetBuilder errorBuilder,
+  }) {
+    final imagePath = currentImagePath!;
+
+    // Na web, não podemos usar Image.file, então usamos uma imagem placeholder
+    if (kIsWeb) {
+      // Na web, o path é um data URL ou arquivo já foi enviado ao servidor
+      // Tentamos carregar como asset ou network se disponível
+      if (imagePath.startsWith('http')) {
+        return Image.network(
+          imagePath,
+          fit: fit,
+          errorBuilder: errorBuilder,
+        );
+      }
+      // Se é um data URL ou path local, não conseguimos renderizar
+      // Mostrar erro genérico
+      return errorBuilder(context, Exception('Image.file não suportado na web'), null);
+    }
+
+    // Em mobile/desktop, usamos File normalmente
+    return Image.file(
+      io.File(imagePath),
+      fit: fit,
+      errorBuilder: errorBuilder,
+    );
   }
 }

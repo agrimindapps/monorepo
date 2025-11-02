@@ -122,13 +122,18 @@ class GasometerProfileImageService {
   }
 
   /// Valida imagem antes do processamento
+  /// Em web, pula validação de existência e tamanho síncronos (não suportados)
   Result<void> validateImageFile(File imageFile) {
     try {
-      if (!imageFile.existsSync()) {
-        return Result.failure(
-          const ValidationFailure('Arquivo não encontrado'),
-        );
+      // Em web, dart:io não é suportado, então apenas validamos a extensão
+      if (!kIsWeb) {
+        if (!imageFile.existsSync()) {
+          return Result.failure(
+            const ValidationFailure('Arquivo não encontrado'),
+          );
+        }
       }
+
       final extension = imageFile.path.toLowerCase();
       final validExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
 
@@ -140,17 +145,27 @@ class GasometerProfileImageService {
           ),
         );
       }
-      final fileSizeInBytes = imageFile.lengthSync();
-      const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
 
-      if (fileSizeInBytes > maxSizeInBytes) {
-        return Result.failure(
-          const ValidationFailure('Arquivo muito grande. Máximo: 5MB'),
-        );
-      }
+      // Em web, não podemos validar tamanho sincronamente
+      if (!kIsWeb) {
+        try {
+          final fileSizeInBytes = imageFile.lengthSync();
+          const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
 
-      if (fileSizeInBytes == 0) {
-        return Result.failure(const ValidationFailure('Arquivo está vazio'));
+          if (fileSizeInBytes > maxSizeInBytes) {
+            return Result.failure(
+              const ValidationFailure('Arquivo muito grande. Máximo: 5MB'),
+            );
+          }
+
+          if (fileSizeInBytes == 0) {
+            return Result.failure(const ValidationFailure('Arquivo está vazio'));
+          }
+        } catch (e) {
+          return Result.failure(
+            ValidationFailure('Erro ao validar tamanho: ${e.toString()}'),
+          );
+        }
       }
 
       return Result.success(null);

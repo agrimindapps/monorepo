@@ -109,19 +109,25 @@ class EnhancedEmptyState extends StatelessWidget {
     return SizedBox(
       height: height,
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildIconContainer(context),
-            const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-            _buildTitle(context),
-            const SizedBox(height: GasometerDesignTokens.spacingSm),
-            _buildDescription(context),
-            if (actionLabel != null || secondaryActionLabel != null)
-              const SizedBox(height: GasometerDesignTokens.spacingXxxl),
-            if (actionLabel != null || secondaryActionLabel != null)
-              _buildActions(context),
-          ],
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 360),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildIconContainer(context),
+                const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+                _buildTitle(context),
+                const SizedBox(height: GasometerDesignTokens.spacingSm),
+                _buildDescription(context),
+                if (actionLabel != null || secondaryActionLabel != null)
+                  const SizedBox(height: GasometerDesignTokens.spacingXxxl),
+                if (actionLabel != null || secondaryActionLabel != null)
+                  _buildActions(context),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -159,18 +165,13 @@ class EnhancedEmptyState extends StatelessWidget {
   }
 
   Widget _buildDescription(BuildContext context) {
-    return Padding(
-      padding: GasometerDesignTokens.paddingHorizontal(
-        GasometerDesignTokens.spacingXxxl,
+    return Text(
+      description,
+      style: TextStyle(
+        fontSize: GasometerDesignTokens.fontSizeMd,
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
       ),
-      child: Text(
-        description,
-        style: TextStyle(
-          fontSize: GasometerDesignTokens.fontSizeMd,
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
-        ),
-        textAlign: TextAlign.center,
-      ),
+      textAlign: TextAlign.center,
     );
   }
 
@@ -241,11 +242,6 @@ class EnhancedEmptyState extends StatelessWidget {
       );
     }
 
-    return Padding(
-      padding: GasometerDesignTokens.paddingHorizontal(
-        GasometerDesignTokens.spacingXxxl,
-      ),
-      child: Row(children: actions),
-    );
+    return Row(children: actions);
   }
 }

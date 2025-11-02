@@ -215,7 +215,7 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
       NavigationRailDestination(
         icon: Icon(Icons.bar_chart_outlined),
         selectedIcon: Icon(Icons.bar_chart),
-        label: Text('Relatórios'),
+        label: Text('Estatísticas'),
       ),
       NavigationRailDestination(
         icon: Icon(Icons.settings_outlined),
@@ -256,7 +256,7 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
       BottomNavigationBarItem(
         icon: Icon(Icons.bar_chart_outlined),
         activeIcon: Icon(Icons.bar_chart),
-        label: 'Relatórios',
+        label: 'Estatísticas',
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.settings_outlined),
@@ -310,7 +310,7 @@ class NavigationUtils {
       case '/maintenance':
         return 'Manutenção';
       case '/reports':
-        return 'Relatórios';
+        return 'Estatísticas';
       case '/settings':
         return 'Configurações';
       default:

@@ -205,39 +205,6 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage>
                 ),
               ),
               const SizedBox(height: 20),
-              // Aviso sobre criação de contas
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.3),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.info_outline,
-                      color: Colors.white70,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Novas contas devem ser criadas através do aplicativo móvel',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.white.withValues(alpha: 0.9),
-                          height: 1.3,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -281,41 +248,6 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage>
         ),
         const SizedBox(height: 5),
         Container(width: 50, height: 4, color: Theme.of(context).primaryColor),
-        const SizedBox(height: 16),
-        // Aviso para mobile
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: isDark
-                ? Colors.blue.shade900.withValues(alpha: 0.2)
-                : Colors.blue.shade50,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isDark ? Colors.blue.shade700 : Colors.blue.shade200,
-              width: 1,
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.info_outline,
-                color: isDark ? Colors.blue.shade300 : Colors.blue.shade700,
-                size: 18,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'Crie sua conta através do app móvel',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark ? Colors.blue.shade200 : Colors.blue.shade800,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }

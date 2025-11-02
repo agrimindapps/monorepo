@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/error_header.dart';
 import '../../../../core/widgets/form_dialog.dart';
 import '../../../auth/presentation/notifiers/auth_notifier.dart';
 import '../providers/fuel_form_notifier.dart';
@@ -10,12 +11,7 @@ import '../providers/fuel_riverpod_notifier.dart';
 import '../widgets/fuel_form_view.dart';
 
 class AddFuelPage extends ConsumerStatefulWidget {
-  
-  const AddFuelPage({
-    super.key,
-    this.vehicleId,
-    this.editFuelRecordId,
-  });
+  const AddFuelPage({super.key, this.vehicleId, this.editFuelRecordId});
   final String? vehicleId;
   final String? editFuelRecordId;
 
@@ -23,7 +19,8 @@ class AddFuelPage extends ConsumerStatefulWidget {
   ConsumerState<AddFuelPage> createState() => _AddFuelPageState();
 }
 
-class _AddFuelPageState extends ConsumerState<AddFuelPage> {
+class _AddFuelPageState extends ConsumerState<AddFuelPage>
+    with FormErrorHandlerMixin {
   bool _isInitialized = false;
   bool _isSubmitting = false;
   Timer? _debounceTimer;
@@ -56,18 +53,14 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
       return;
     }
     final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
-    await notifier.initialize(
-      vehicleId: vehicleId,
-      userId: authState.userId,
-    );
+    await notifier.initialize(vehicleId: vehicleId, userId: authState.userId);
 
     if (widget.editFuelRecordId != null) {
       await _loadFuelRecordForEdit(vehicleId);
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        setState(() {
-        });
+        setState(() {});
       }
     });
   }
@@ -78,7 +71,9 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
       final record = fuelNotifier.getFuelRecordById(widget.editFuelRecordId!);
 
       if (record != null) {
-        final formNotifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+        final formNotifier = ref.read(
+          fuelFormNotifierProvider(vehicleId).notifier,
+        );
         await formNotifier.loadFromFuelRecord(record);
       } else {
         throw Exception('Registro de abastecimento não encontrado');
@@ -101,9 +96,7 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
 
     if (vehicleId.isEmpty) {
       return const Scaffold(
-        body: Center(
-          child: Text('Nenhum veículo selecionado'),
-        ),
+        body: Center(child: Text('Nenhum veículo selecionado')),
       );
     }
 
@@ -112,7 +105,8 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
     if (formState.isInitialized && formState.formModel.vehicle != null) {
       final vehicle = formState.formModel.vehicle!;
       final odometer = vehicle.currentOdometer;
-      subtitle = '${vehicle.brand} ${vehicle.model} • ${_formatOdometer(odometer)} km';
+      subtitle =
+          '${vehicle.brand} ${vehicle.model} • ${_formatOdometer(odometer)} km';
     }
 
     return FormDialog(
@@ -121,8 +115,13 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
       headerIcon: Icons.local_gas_station,
       isLoading: formState.isLoading || _isSubmitting,
       confirmButtonText: 'Salvar',
-      onCancel: () => Navigator.of(context).pop(),
+      onCancel: () {
+        final formNotifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+        formNotifier.clearForm();
+        Navigator.of(context).pop();
+      },
       onConfirm: _submitFormWithRateLimit,
+      errorMessage: formErrorMessage,
       content: !formState.isInitialized
           ? const Center(child: CircularProgressIndicator())
           : FuelFormView(
@@ -143,7 +142,9 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
   void _submitFormWithRateLimit() {
     debugPrint('[FUEL DEBUG] Submit button clicked - Rate limit check');
     if (_isSubmitting) {
-      debugPrint('[FUEL DEBUG] Submit already in progress, ignoring duplicate request');
+      debugPrint(
+        '[FUEL DEBUG] Submit already in progress, ignoring duplicate request',
+      );
       return;
     }
 
@@ -154,7 +155,9 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
         debugPrint('[FUEL DEBUG] Debounce timer fired, calling _submitForm()');
         _submitForm();
       } else {
-        debugPrint('[FUEL DEBUG] Debounce timer fired but widget unmounted or already submitting');
+        debugPrint(
+          '[FUEL DEBUG] Debounce timer fired but widget unmounted or already submitting',
+        );
       }
     });
   }
@@ -170,12 +173,16 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
     }
 
     final formNotifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+    clearFormError();
     if (!formNotifier.validateForm()) {
       debugPrint('[FUEL DEBUG] Form validation FAILED - submission aborted');
+      setFormError('Por favor, preencha todos os campos obrigatórios');
       return;
     }
 
-    debugPrint('[FUEL DEBUG] Form validation PASSED - proceeding with submission');
+    debugPrint(
+      '[FUEL DEBUG] Form validation PASSED - proceeding with submission',
+    );
     if (_isSubmitting) {
       debugPrint('Submit already in progress, aborting duplicate submission');
       return;
@@ -193,8 +200,7 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
           setState(() {
             _isSubmitting = false;
           });
-          _showErrorDialog(
-            'Timeout',
+          setFormError(
             'A operação demorou muito para ser concluída. Tente novamente.',
           );
         }
@@ -224,21 +230,19 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
           });
         }
       } else {
-        debugPrint('[FUEL DEBUG] FAILURE - Showing error dialog');
+        debugPrint('[FUEL DEBUG] FAILURE - Showing error');
         if (mounted) {
           final fuelState = await ref.read(fuelRiverpodProvider.future);
-          final errorMessage = fuelState.errorMessage ?? 'Erro ao salvar abastecimento';
+          final errorMessage =
+              fuelState.errorMessage ?? 'Erro ao salvar abastecimento';
           debugPrint('[FUEL DEBUG] Provider error message: $errorMessage');
-          _showErrorDialog('Erro', errorMessage);
+          setFormError(errorMessage);
         }
       }
     } catch (e) {
       debugPrint('Error submitting form: $e');
       if (mounted) {
-        _showErrorDialog(
-          'Erro',
-          'Erro inesperado: $e',
-        );
+        setFormError('Erro inesperado: $e');
       }
     } finally {
       _timeoutTimer?.cancel();
@@ -249,21 +253,4 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
       }
     }
   }
-  
-  void _showErrorDialog(String title, String message) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
 }

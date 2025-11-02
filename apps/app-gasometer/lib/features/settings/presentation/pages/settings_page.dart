@@ -5,6 +5,12 @@ import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../dialogs/feedback_dialog.dart';
 import '../providers/settings_notifier.dart';
+import '../widgets/sections/about_section.dart';
+import '../widgets/sections/account_section.dart';
+import '../widgets/sections/app_section.dart';
+import '../widgets/sections/legal_section.dart';
+import '../widgets/sections/notification_section.dart';
+import '../widgets/sections/support_section.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -119,245 +125,48 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Widget _buildContent(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 768; // < 768px = mobile
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          _buildAccountSection(),
+          // AccountSection - Ocultado em tablets/desktop (> 768px)
+          // Justificativa: Em telas maiores, logout é acessível via menu lateral
+          if (isMobile) ...[
+            AccountSection(
+              onLogoutTap: _showLogoutDialog,
+            ),
+            const SizedBox(height: 24),
+          ],
+          const NotificationSection(),
           const SizedBox(height: 24),
-          _buildNotificationSection(),
+          AppSection(
+            onThemeTap: () => _showThemeDialog(context),
+            onLanguageTap: () => _showSnackBar(
+              'Seleção de idioma estará disponível em breve!',
+            ),
+            onStorageTap: () => _showSnackBar(
+              'Gerenciamento de armazenamento estará disponível em breve!',
+            ),
+          ),
           const SizedBox(height: 24),
-          _buildAppSection(),
+          const LegalSection(),
           const SizedBox(height: 24),
-          _buildSupportSection(),
+          SupportSection(
+            onHelpTap: () => _showSnackBar(
+              'Central de ajuda estará disponível em breve!',
+            ),
+            onFeedbackTap: _showFeedbackDialog,
+            onRateTap: _showRateAppDialog,
+          ),
           const SizedBox(height: 24),
-          _buildAboutSection(),
+          AboutSection(
+            onVersionTap: () => _showSnackBar('GasOMeter v1.0.0'),
+          ),
         ],
       ),
-    );
-  }
-
-  Widget _buildAccountSection() {
-    return _buildSection(
-      title: 'Conta',
-      icon: Icons.person,
-      children: [
-        _buildSettingItem(
-          icon: Icons.account_circle,
-          title: 'Perfil',
-          subtitle: 'Gerenciar informações da conta',
-          onTap: () {
-            _showSnackBar(
-              'Gerenciamento de perfil estará disponível em breve!',
-            );
-          },
-        ),
-        _buildSettingItem(
-          icon: Icons.logout,
-          title: 'Sair',
-          subtitle: 'Fazer logout da conta',
-          onTap: () {
-            _showLogoutDialog();
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNotificationSection() {
-    final settingsAsync = ref.watch(settingsNotifierProvider);
-    final notificationsEnabled =
-        settingsAsync.valueOrNull?.notificationsEnabled ?? true;
-    final fuelAlertsEnabled =
-        settingsAsync.valueOrNull?.fuelAlertsEnabled ?? true;
-
-    return _buildSection(
-      title: 'Notificações',
-      icon: Icons.notifications,
-      children: [
-        _buildSettingItem(
-          icon: Icons.notifications_active,
-          title: 'Notificações Push',
-          subtitle: 'Receber alertas e lembretes',
-          trailing: Switch(
-            value: notificationsEnabled,
-            onChanged: settingsAsync.isLoading
-                ? null
-                : (value) {
-                    ref
-                        .read(settingsNotifierProvider.notifier)
-                        .toggleNotifications(value);
-                  },
-          ),
-        ),
-        _buildSettingItem(
-          icon: Icons.local_gas_station,
-          title: 'Alertas de Combustível',
-          subtitle: 'Notificações sobre abastecimento',
-          trailing: Switch(
-            value: fuelAlertsEnabled,
-            onChanged: settingsAsync.isLoading
-                ? null
-                : (value) {
-                    ref
-                        .read(settingsNotifierProvider.notifier)
-                        .toggleFuelAlerts(value);
-                  },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAppSection() {
-    return _buildSection(
-      title: 'Aplicativo',
-      icon: Icons.apps,
-      children: [
-        _buildSettingItem(
-          icon: Icons.palette,
-          title: 'Tema',
-          subtitle: 'Escolher aparência do aplicativo',
-          onTap: () => _showThemeDialog(context),
-        ),
-        _buildSettingItem(
-          icon: Icons.language,
-          title: 'Idioma',
-          subtitle: 'Português (Brasil)',
-          onTap: () {
-            _showSnackBar('Seleção de idioma estará disponível em breve!');
-          },
-        ),
-        _buildSettingItem(
-          icon: Icons.storage,
-          title: 'Armazenamento',
-          subtitle: 'Gerenciar dados locais',
-          onTap: () {
-            _showSnackBar(
-              'Gerenciamento de armazenamento estará disponível em breve!',
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSupportSection() {
-    return _buildSection(
-      title: 'Suporte',
-      icon: Icons.help,
-      children: [
-        _buildSettingItem(
-          icon: Icons.help_outline,
-          title: 'Central de Ajuda',
-          subtitle: 'Perguntas frequentes',
-          onTap: () {
-            _showSnackBar('Central de ajuda estará disponível em breve!');
-          },
-        ),
-        _buildSettingItem(
-          icon: Icons.feedback,
-          title: 'Enviar Feedback',
-          subtitle: 'Ajude-nos a melhorar o app',
-          onTap: () => _showFeedbackDialog(),
-        ),
-        _buildSettingItem(
-          icon: Icons.star_rate,
-          title: 'Avaliar o App',
-          subtitle: 'Deixe sua avaliação',
-          onTap: () => _showRateAppDialog(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAboutSection() {
-    return _buildSection(
-      title: 'Sobre',
-      icon: Icons.info,
-      children: [
-        _buildSettingItem(
-          icon: Icons.info_outline,
-          title: 'Versão do App',
-          subtitle: '1.0.0',
-          onTap: () {
-            _showSnackBar('GasOMeter v1.0.0');
-          },
-        ),
-        _buildSettingItem(
-          icon: Icons.description,
-          title: 'Termos de Uso',
-          subtitle: 'Leia os termos de uso',
-          onTap: () => context.push('/terms-of-service'),
-        ),
-        _buildSettingItem(
-          icon: Icons.privacy_tip,
-          title: 'Política de Privacidade',
-          subtitle: 'Como tratamos seus dados',
-          onTap: () => context.push('/privacy-policy'),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSection({
-    required String title,
-    required IconData icon,
-    required List<Widget> children,
-  }) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).primaryColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: Theme.of(context).primaryColor,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            ...children,
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSettingItem({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    Widget? trailing,
-    VoidCallback? onTap,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: Theme.of(context).textTheme.bodyMedium?.color),
-      title: Text(title),
-      subtitle: Text(subtitle),
-      trailing: trailing ?? const Icon(Icons.chevron_right),
-      onTap: onTap,
-      contentPadding: EdgeInsets.zero,
     );
   }
 
@@ -409,7 +218,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   void _changeTheme(ThemeMode mode) {
     ref.read(settingsNotifierProvider.notifier).changeTheme(mode);
-    Navigator.of(context).pop();
   }
 
   Widget _buildThemeOption(

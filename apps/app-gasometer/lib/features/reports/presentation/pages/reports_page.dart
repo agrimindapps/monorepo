@@ -1,7 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
@@ -25,19 +24,13 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
         child: Column(
           children: [
             _buildHeader(context),
+            // Mostrar seletor de veículos se houver veículos cadastrados
             if (vehiclesAsync.value?.isNotEmpty ?? false)
               _buildVehicleSelector(context),
+            // Sempre mostrar conteúdo, independentemente de ter veículos ou não
             Expanded(
               child: vehiclesAsync.when(
-                data: (vehicles) {
-                  if (vehicles.isEmpty) {
-                    return _buildNoVehiclesState();
-                  }
-                  if (_selectedVehicleId == null) {
-                    return _buildSelectVehicleState();
-                  }
-                  return _buildContent(context);
-                },
+                data: (_) => _buildContent(context),
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (_, __) => _buildContent(context),
               ),
@@ -69,7 +62,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
         child: Row(
           children: [
             Semantics(
-              label: 'Seção de relatórios',
+              label: 'Seção de estatísticas',
               hint: 'Página principal para visualizar estatísticas e gráficos',
               child: Container(
                 padding: const EdgeInsets.all(9),
@@ -91,7 +84,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SemanticText.heading(
-                    'Relatórios',
+                    'Estatísticas',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 17,
@@ -134,29 +127,12 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
     );
   }
 
-  Widget _buildNoVehiclesState() {
-    return EnhancedEmptyState(
-      title: 'Nenhum veículo cadastrado',
-      description: 'Cadastre seu primeiro veículo para visualizar relatórios.',
-      icon: Icons.directions_car_outlined,
-      actionLabel: 'Cadastrar veículo',
-      onAction: () => context.push('/vehicles'),
-    );
-  }
-
-  Widget _buildSelectVehicleState() {
-    return const EnhancedEmptyState(
-      title: 'Selecione um veículo',
-      description: 'Escolha um veículo acima para visualizar os relatórios e estatísticas.',
-      icon: Icons.bar_chart_outlined,
-    );
-  }
 
   Widget _buildContent(BuildContext context) {
-    return _buildReportsContent();
+    return _buildStatisticsContent();
   }
 
-  Widget _buildReportsContent() {
+  Widget _buildStatisticsContent() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(

@@ -58,6 +58,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
     _fieldKeys['chassi'] = GlobalKey();
     _fieldKeys['renavam'] = GlobalKey();
     _fieldKeys['observacoes'] = GlobalKey();
+    _fieldKeys['combustivel'] = GlobalKey();
     _formValidator.addFields([
       FormFieldConfig(
         fieldId: 'marca',
@@ -151,6 +152,18 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
     super.dispose();
   }
 
+  Future<void> _scrollToField(String fieldId) async {
+    final key = _fieldKeys[fieldId];
+    if (key?.currentContext != null && key!.currentContext!.mounted) {
+      await Scrollable.ensureVisible(
+        key.currentContext!,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        alignment: 0.1,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.vehicle != null;
@@ -170,16 +183,18 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
       headerIcon: Icons.directions_car,
       isLoading: formState.isLoading,
       confirmButtonText: isEditing ? 'Salvar' : 'Salvar',
-      onCancel: () => Navigator.of(context).pop(),
+      onCancel: () {
+        notifier.clearForm();
+        _observacoesController.clear();
+        Navigator.of(context).pop();
+      },
       onConfirm: _submitForm,
+      errorMessage: formErrorMessage,
       content: Form(
         key: notifier.formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            buildFormErrorHeader(),
-            if (formErrorMessage != null)
-              const SizedBox(height: GasometerDesignTokens.spacingMd),
             VehicleBasicInfoSection(
               brandController: notifier.brandController,
               modelController: notifier.modelController,
@@ -197,7 +212,10 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
             const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
             const VehiclePhotoSection(),
             const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-            const VehicleTechnicalSection(),
+            Container(
+              key: _fieldKeys['combustivel'],
+              child: const VehicleTechnicalSection(),
+            ),
             const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
             VehicleDocumentationSection(
               odometerController: notifier.odometerController,
@@ -232,6 +250,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
     final validationResult = await _formValidator.validateAll();
     if (formState.selectedFuel.isEmpty) {
       setFormError('Selecione o tipo de combustível');
+      await _scrollToField('combustivel');
       return;
     }
     if (!validationResult.isValid) {

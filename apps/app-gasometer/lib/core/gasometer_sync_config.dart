@@ -27,12 +27,15 @@ UserEntity _userEntityFromFirebaseMap(Map<String, dynamic> map) {
 
 /// Configuração de sincronização específica do Gasometer
 /// Controle veicular com veículos e manutenções
+/// UNIFIED ENVIRONMENT: Uma única configuração para dev e prod
 abstract final class GasometerSyncConfig {
   const GasometerSyncConfig._();
 
   /// Configura o sistema de sincronização para o Gasometer
-  /// Configuração específica para dados financeiros com sync mais frequente
-  static Future<void> configure() async {
+  /// Configuração unificada com sync frequente para dados financeiros críticos
+  /// Firebase Firestore collections: vehicles, fuel, expenses, maintenance, users, subscriptions
+  /// Hive boxes: vehicles, fuel_supplies, expenses, maintenance (sem prefixos)
+  static Future<void> initialize() async {
     await UnifiedSyncManager.instance.initializeApp(
       appName: 'gasometer',
       config: AppSyncConfig.simple(
@@ -41,39 +44,45 @@ abstract final class GasometerSyncConfig {
         conflictStrategy: ConflictStrategy.timestamp,
       ),
       entities: [
+        // Veículos: dados críticos, sync frequente
         EntitySyncRegistration<VehicleEntity>.simple(
           entityType: VehicleEntity,
-          collectionName: 'vehicles',
+          collectionName: 'vehicles', // Firebase collection
           fromMap: _vehicleFromFirebaseMap,
           toMap: (vehicle) => vehicle.toFirebaseMap(),
         ),
+        // Combustível: dados financeiros, resolução manual para precisão
         EntitySyncRegistration<FuelRecordEntity>.simple(
           entityType: FuelRecordEntity,
-          collectionName: 'fuel',
+          collectionName: 'fuel', // Firebase collection
           fromMap: _fuelRecordFromFirebaseMap,
           toMap: (fuelRecord) => fuelRecord.toFirebaseMap(),
         ),
+        // Despesas: dados monetários, resolução manual
         EntitySyncRegistration<ExpenseEntity>.simple(
           entityType: ExpenseEntity,
-          collectionName: 'expenses',
+          collectionName: 'expenses', // Firebase collection
           fromMap: _expenseFromFirebaseMap,
           toMap: (expense) => expense.toFirebaseMap(),
         ),
+        // Manutenção: dados críticos do veículo
         EntitySyncRegistration<MaintenanceEntity>.simple(
           entityType: MaintenanceEntity,
-          collectionName: 'maintenance',
+          collectionName: 'maintenance', // Firebase collection
           fromMap: _maintenanceFromFirebaseMap,
           toMap: (maintenance) => maintenance.toFirebaseMap(),
         ),
+        // Usuário: sincronização por login
         EntitySyncRegistration<UserEntity>.simple(
           entityType: UserEntity,
-          collectionName: 'users',
+          collectionName: 'users', // Firebase collection
           fromMap: _userEntityFromFirebaseMap,
           toMap: (user) => user.toFirebaseMap(),
         ),
+        // Assinatura: dados de billing
         EntitySyncRegistration<SubscriptionEntity>.simple(
           entityType: SubscriptionEntity,
-          collectionName: 'subscriptions',
+          collectionName: 'subscriptions', // Firebase collection
           fromMap: SubscriptionEntity.fromFirebaseMap,
           toMap: (subscription) => subscription.toFirebaseMap(),
         ),
@@ -81,134 +90,24 @@ abstract final class GasometerSyncConfig {
     );
   }
 
-  /// Configuração para desenvolvimento com sync em tempo real
+  /// Deprecated: Use initialize() instead
+  /// Kept for backward compatibility during transition
+  @Deprecated('Use GasometerSyncConfig.initialize() instead')
+  static Future<void> configure() async {
+    await initialize();
+  }
+
+  /// Deprecated: Use initialize() instead
+  /// Single environment - development mode is no longer separated
+  @Deprecated('Use GasometerSyncConfig.initialize() instead')
   static Future<void> configureDevelopment() async {
-    await UnifiedSyncManager.instance.initializeApp(
-      appName: 'gasometer',
-      config: AppSyncConfig.development(
-        appName: 'gasometer',
-        syncInterval: const Duration(minutes: 2), // Sync mais frequente para desenvolvimento
-      ),
-      entities: [
-        EntitySyncRegistration<VehicleEntity>.simple(
-          entityType: VehicleEntity,
-          collectionName: 'dev_vehicles',
-          fromMap: _vehicleFromFirebaseMap,
-          toMap: (vehicle) => vehicle.toFirebaseMap(),
-        ),
-
-        EntitySyncRegistration<FuelRecordEntity>.simple(
-          entityType: FuelRecordEntity,
-          collectionName: 'dev_fuel',
-          fromMap: _fuelRecordFromFirebaseMap,
-          toMap: (fuelRecord) => fuelRecord.toFirebaseMap(),
-        ),
-
-        EntitySyncRegistration<ExpenseEntity>.simple(
-          entityType: ExpenseEntity,
-          collectionName: 'dev_expenses',
-          fromMap: _expenseFromFirebaseMap,
-          toMap: (expense) => expense.toFirebaseMap(),
-        ),
-
-        EntitySyncRegistration<MaintenanceEntity>.simple(
-          entityType: MaintenanceEntity,
-          collectionName: 'dev_maintenance',
-          fromMap: _maintenanceFromFirebaseMap,
-          toMap: (maintenance) => maintenance.toFirebaseMap(),
-        ),
-
-        EntitySyncRegistration<UserEntity>.simple(
-          entityType: UserEntity,
-          collectionName: 'dev_users',
-          fromMap: _userEntityFromFirebaseMap,
-          toMap: (user) => user.toFirebaseMap(),
-        ),
-
-        EntitySyncRegistration<SubscriptionEntity>.simple(
-          entityType: SubscriptionEntity,
-          collectionName: 'dev_subscriptions',
-          fromMap: SubscriptionEntity.fromFirebaseMap,
-          toMap: (subscription) => subscription.toFirebaseMap(),
-        ),
-      ],
-    );
+    await initialize();
   }
 
-  /// Configuração offline-first para áreas com internet limitada
-  /// Otimizada para dados financeiros com batch sizes menores
+  /// Deprecated: Use initialize() instead
+  /// All sync strategies are now unified in single initialize() method
+  @Deprecated('Use GasometerSyncConfig.initialize() instead')
   static Future<void> configureOfflineFirst() async {
-    await UnifiedSyncManager.instance.initializeApp(
-      appName: 'gasometer',
-      config: AppSyncConfig.offlineFirst(
-        appName: 'gasometer',
-        syncInterval: const Duration(hours: 4), // Sync esporádico para economizar bateria
-      ),
-      entities: [
-        EntitySyncRegistration<VehicleEntity>(
-          entityType: VehicleEntity,
-          collectionName: 'vehicles',
-          fromMap: _vehicleFromFirebaseMap,
-          toMap: (VehicleEntity vehicle) => vehicle.toFirebaseMap(),
-          conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
-          enableRealtime: false, // Sem tempo real para economizar bateria
-          syncInterval: const Duration(hours: 8),
-          batchSize: 30, // Menor batch para dados críticos
-        ),
-        EntitySyncRegistration<FuelRecordEntity>(
-          entityType: FuelRecordEntity,
-          collectionName: 'fuel',
-          fromMap: _fuelRecordFromFirebaseMap,
-          toMap: (FuelRecordEntity fuelRecord) => fuelRecord.toFirebaseMap(),
-          conflictStrategy: ConflictStrategy.manual, // Resolução manual para dados financeiros
-          enableRealtime: false,
-          syncInterval: const Duration(hours: 6), // Sync mais frequente para dados financeiros
-          batchSize: 15, // Batch pequeno para dados financeiros críticos
-        ),
-        EntitySyncRegistration<ExpenseEntity>(
-          entityType: ExpenseEntity,
-          collectionName: 'expenses',
-          fromMap: _expenseFromFirebaseMap,
-          toMap: (ExpenseEntity expense) => expense.toFirebaseMap(),
-          conflictStrategy: ConflictStrategy.manual, // Resolução manual para dados monetários
-          enableRealtime: false,
-          syncInterval: const Duration(hours: 6), // Sync mais frequente para dados financeiros
-          batchSize: 15, // Batch pequeno para garantir precisão
-        ),
-
-        EntitySyncRegistration<MaintenanceEntity>(
-          entityType: MaintenanceEntity,
-          collectionName: 'maintenance',
-          fromMap: _maintenanceFromFirebaseMap,
-          toMap: (MaintenanceEntity maintenance) => maintenance.toFirebaseMap(),
-          conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
-          enableRealtime: false, // Sem tempo real para economizar bateria
-          syncInterval: const Duration(hours: 8),
-          batchSize: 25, // Batch médio para manutenções
-        ),
-
-        EntitySyncRegistration<UserEntity>(
-          entityType: UserEntity,
-          collectionName: 'users',
-          fromMap: _userEntityFromFirebaseMap,
-          toMap: (UserEntity user) => user.toFirebaseMap(),
-          conflictStrategy: ConflictStrategy.remoteWins, // Remote vence para usuários
-          enableRealtime: false, // Sem tempo real para economizar bateria
-          syncInterval: const Duration(hours: 24),
-          batchSize: 10,
-        ),
-
-        EntitySyncRegistration<SubscriptionEntity>(
-          entityType: SubscriptionEntity,
-          collectionName: 'subscriptions',
-          fromMap: SubscriptionEntity.fromFirebaseMap,
-          toMap: (SubscriptionEntity subscription) => subscription.toFirebaseMap(),
-          conflictStrategy: ConflictStrategy.remoteWins, // Remote sempre vence para assinaturas
-          enableRealtime: false, // Sem tempo real para economizar bateria
-          syncInterval: const Duration(hours: 24),
-          batchSize: 5,
-        ),
-      ],
-    );
+    await initialize();
   }
 }

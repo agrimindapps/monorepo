@@ -113,7 +113,7 @@ class SyncProgressController {
       ),
       const SyncStep(
         id: 'reports_data',
-        title: 'Sincronizando Relatórios',
+        title: 'Sincronizando Estatísticas',
         description: 'Atualizando análises e estatísticas...',
         icon: Icons.analytics,
         color: GasometerColors.info,

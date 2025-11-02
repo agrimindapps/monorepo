@@ -8,8 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/responsive_constants.dart';
-import '../../core/theme/design_tokens.dart';
-import '../../features/auth/presentation/notifiers/auth_notifier.dart';
+import '../../features/auth/presentation/notifiers/notifiers.dart';
 
 /// Main responsive sidebar widget with collapse/expand functionality
 class ResponsiveSidebar extends ConsumerWidget {
@@ -215,7 +214,7 @@ class _SidebarNavigationItems extends StatelessWidget {
         _SidebarNavigationItem(
           icon: Icons.bar_chart_outlined,
           activeIcon: Icons.bar_chart,
-          label: 'Relatórios',
+          label: 'Estatísticas',
           route: '/reports',
           isActive: currentLocation.startsWith('/reports'),
           isCollapsed: isCollapsed,
@@ -328,6 +327,93 @@ class _SidebarNavigationItemState extends State<_SidebarNavigationItem> {
   }
 }
 
+/// Action item for sidebar (logout, etc) - similar to navigation item but with callback
+class _SidebarActionItem extends StatefulWidget {
+  const _SidebarActionItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    required this.isCollapsed,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool isCollapsed;
+
+  @override
+  State<_SidebarActionItem> createState() => _SidebarActionItemState();
+}
+
+class _SidebarActionItemState extends State<_SidebarActionItem> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            padding: EdgeInsets.symmetric(
+              horizontal: widget.isCollapsed ? 12 : 12,
+              vertical: 12,
+            ),
+            decoration: BoxDecoration(
+              color: _isHovered
+                  ? Theme.of(context).colorScheme.error.withValues(alpha: 0.08)
+                  : null,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                if (widget.isCollapsed)
+                  Expanded(
+                    child: Center(
+                      child: Icon(
+                        widget.icon,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.error.withValues(
+                          alpha: _isHovered ? 1 : 0.6,
+                        ),
+                      ),
+                    ),
+                  )
+                else ...[
+                  Icon(
+                    widget.icon,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.error.withValues(
+                      alpha: _isHovered ? 1 : 0.6,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      widget.label,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.error.withValues(
+                          alpha: _isHovered ? 1 : 0.7,
+                        ),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// User and settings section grouped together
 class _SidebarFooter extends StatelessWidget {
 
@@ -338,7 +424,7 @@ class _SidebarFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentLocation = GoRouterState.of(context).uri.toString();
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -360,230 +446,154 @@ class _SidebarFooter extends StatelessWidget {
             isActive: currentLocation.startsWith('/settings'),
             isCollapsed: isCollapsed,
           ),
-          
+
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.person_outline,
-                  size: 16,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-              ),
-              if (!isCollapsed) ...[
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Usuário',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w400,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => _showUserMenu(context),
-                  icon: Icon(
-                    Icons.more_horiz,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
-                    size: 20,
-                  ),
-                  tooltip: 'Menu do usuário',
-                ),
-              ],
-            ],
+
+          _SidebarNavigationItem(
+            icon: Icons.person_outlined,
+            activeIcon: Icons.person,
+            label: 'Usuário',
+            route: '/profile',
+            isActive: currentLocation.startsWith('/profile'),
+            isCollapsed: isCollapsed,
+          ),
+
+          const SizedBox(height: 12),
+
+          _SidebarActionItem(
+            icon: Icons.logout,
+            label: 'Sair',
+            isCollapsed: isCollapsed,
+            onTap: () => _showLogoutDialog(context),
           ),
         ],
       ),
     );
   }
-  
-  void _showUserMenu(BuildContext context) {
-    final authState = ref.read(authProvider);
-    final isAnonymous = authState.isAnonymous;
 
-    showMenu(
+  void _showLogoutDialog(BuildContext context) {
+    showDialog<bool>(
       context: context,
-      position: const RelativeRect.fromLTRB(0, 0, 0, 80),
-      items: [
-        PopupMenuItem<void>(
-          child: const ListTile(
-            leading: Icon(Icons.person_outlined),
-            title: Text('Perfil'),
-            dense: true,
-          ),
-          onTap: () {
-          },
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
-        if (!isAnonymous)
-          PopupMenuItem<void>(
-            child: const ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Sair'),
-              dense: true,
+        title: Row(
+          children: [
+            Icon(
+              Icons.logout,
+              color: Theme.of(context).colorScheme.primary,
+              size: 24,
             ),
-            onTap: () {
-              _handleLogout(context);
-            },
+            const SizedBox(width: 12),
+            Text(
+              'Sair da Conta',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Tem certeza que deseja sair da sua conta?',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildLogoutInfoItem(
+                    context,
+                    icon: Icons.cleaning_services,
+                    text: 'Seus dados locais serão removidos',
+                  ),
+                  const SizedBox(height: 8),
+                  _buildLogoutInfoItem(
+                    context,
+                    icon: Icons.sync_disabled,
+                    text: 'Sincronização será interrompida',
+                  ),
+                  const SizedBox(height: 8),
+                  _buildLogoutInfoItem(
+                    context,
+                    icon: Icons.login,
+                    text: 'Você poderá fazer login novamente',
+                    isPositive: true,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
           ),
-      ],
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _performLogout(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Sair'),
+          ),
+        ],
+      ),
     );
   }
 
-  /// Handle logout with enhanced dialog
-  Future<void> _handleLogout(BuildContext context) async {
-    final authNotifier = ref.read(authProvider.notifier);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => _buildEnhancedLogoutDialog(context),
-    );
-
-    if (confirmed == true && context.mounted) {
-      await authNotifier.logoutWithLoadingDialog(context);
-      final authState = ref.read(authProvider);
-      if (context.mounted && authState.errorMessage != null) {
-        _showSnackBar(context, authState.errorMessage!);
-      } else if (context.mounted) {
-        _showSnackBar(context, 'Logout realizado com sucesso');
+  void _performLogout(BuildContext context) async {
+    try {
+      await ref.read(authProvider.notifier).logout();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Logout realizado com sucesso'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao fazer logout: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
       }
     }
   }
 
-  /// Builds an enhanced logout dialog with detailed information
-  Widget _buildEnhancedLogoutDialog(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
-      ),
-      contentPadding: const EdgeInsets.all(24),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.logout,
-              size: 32,
-              color: Theme.of(context).colorScheme.error,
-            ),
-          ),
-          
-          const SizedBox(height: 24),
-          Text(
-            'Sair da Conta',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusSm),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Ao sair da sua conta:',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                
-                _buildLogoutInfoItem(
-                  context,
-                  icon: Icons.delete_sweep,
-                  text: 'Todos os dados serão removidos deste dispositivo',
-                ),
-                const SizedBox(height: 8),
-                
-                _buildLogoutInfoItem(
-                  context,
-                  icon: Icons.link_off,
-                  text: 'O dispositivo será desconectado da sua conta',
-                ),
-                const SizedBox(height: 8),
-                
-                _buildLogoutInfoItem(
-                  context,
-                  icon: Icons.login,
-                  text: 'Você pode fazer login novamente a qualquer momento',
-                  isPositive: true,
-                ),
-              ],
-            ),
-          ),
-          
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Text('Cancelar'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Text('Sair'),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Builds individual info items for the logout dialog
   Widget _buildLogoutInfoItem(
     BuildContext context, {
     required IconData icon,
     required String text,
     bool isPositive = false,
   }) {
-    final color = isPositive 
+    final color = isPositive
         ? Theme.of(context).colorScheme.primary
         : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7);
-        
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: color,
-        ),
+        Icon(icon, size: 16, color: color),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
@@ -591,20 +601,11 @@ class _SidebarFooter extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               color: color,
-              height: 1.4,
+              height: 1.3,
             ),
           ),
         ),
       ],
-    );
-  }
-
-  void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      ),
     );
   }
 }

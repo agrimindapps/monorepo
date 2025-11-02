@@ -45,18 +45,8 @@ class _DesktopLayout extends StatelessWidget {
           const ModernSidebar(),
           Expanded(
             child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: PlantisColors.getPageBackgroundColor(context),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  bottomLeft: Radius.circular(20),
-                ),
-              ),
+              decoration: BoxDecoration(color: Color(0xFFE8ECEF)),
               child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  bottomLeft: Radius.circular(20),
-                ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40.0),
                   child: child,
@@ -106,15 +96,13 @@ class _ModernSidebarState extends State<ModernSidebar>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _widthAnimation = Tween<double>(
-      begin: _expandedWidth,
-      end: _expandedWidth,
-    ).animate(
-      CurvedAnimation(
-        parent: _widthAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
+    _widthAnimation = Tween<double>(begin: _expandedWidth, end: _expandedWidth)
+        .animate(
+          CurvedAnimation(
+            parent: _widthAnimationController,
+            curve: Curves.easeInOut,
+          ),
+        );
 
     _fadeAnimationController.forward();
     _widthAnimationController.forward();
@@ -132,15 +120,16 @@ class _ModernSidebarState extends State<ModernSidebar>
       _isExpanded = !_isExpanded;
     });
 
-    _widthAnimation = Tween<double>(
-      begin: _isExpanded ? _collapsedWidth : _expandedWidth,
-      end: _isExpanded ? _expandedWidth : _collapsedWidth,
-    ).animate(
-      CurvedAnimation(
-        parent: _widthAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
+    _widthAnimation =
+        Tween<double>(
+          begin: _isExpanded ? _collapsedWidth : _expandedWidth,
+          end: _isExpanded ? _expandedWidth : _collapsedWidth,
+        ).animate(
+          CurvedAnimation(
+            parent: _widthAnimationController,
+            curve: Curves.easeInOut,
+          ),
+        );
 
     _widthAnimationController.reset();
     _widthAnimationController.forward();
@@ -158,10 +147,9 @@ class _ModernSidebarState extends State<ModernSidebar>
           return Container(
             width: _widthAnimation.value,
             decoration: BoxDecoration(
-              color:
-                  theme.brightness == Brightness.dark
-                      ? Colors.grey.shade900.withValues(alpha: 0.95)
-                      : Colors.grey.shade50,
+              color: theme.brightness == Brightness.dark
+                  ? Colors.grey.shade900.withValues(alpha: 0.95)
+                  : Colors.grey.shade50,
               border: Border(
                 right: BorderSide(
                   color: theme.dividerColor.withValues(alpha: 0.15),
@@ -403,8 +391,9 @@ class _NavigationItemState extends State<_NavigationItem>
   }
 
   bool get _isActive {
-    final currentRoute =
-        GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
+    final currentRoute = GoRouter.of(
+      context,
+    ).routerDelegate.currentConfiguration.uri.path;
     if (widget.route == '/') {
       return currentRoute == '/';
     }
@@ -413,10 +402,9 @@ class _NavigationItemState extends State<_NavigationItem>
     }
 
     if (currentRoute.startsWith(widget.route)) {
-      final nextChar =
-          currentRoute.length > widget.route.length
-              ? currentRoute[widget.route.length]
-              : '';
+      final nextChar = currentRoute.length > widget.route.length
+          ? currentRoute[widget.route.length]
+          : '';
       return nextChar == '/' || nextChar == '?' || nextChar == '#';
     }
 
@@ -459,35 +447,31 @@ class _NavigationItemState extends State<_NavigationItem>
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeInOut,
                     padding: EdgeInsets.symmetric(
-                      horizontal:
-                          widget.isExpanded
-                              ? 16
-                              : 0, // Sem padding horizontal quando colapsado
+                      horizontal: widget.isExpanded
+                          ? 16
+                          : 0, // Sem padding horizontal quando colapsado
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
-                      color:
-                          isActive
-                              ? PlantisColors.primary.withValues(alpha: 0.1)
-                              : _isHovering
-                              ? theme.colorScheme.surfaceContainerHighest
-                                  .withValues(alpha: 0.5)
-                              : Colors.transparent,
+                      color: isActive
+                          ? PlantisColors.primary.withValues(alpha: 0.1)
+                          : _isHovering
+                          ? theme.colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.5)
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
-                      border:
-                          isActive
-                              ? Border.all(
-                                color: PlantisColors.primary.withValues(
-                                  alpha: 0.3,
-                                ),
-                                width: 1,
-                              )
-                              : null,
+                      border: isActive
+                          ? Border.all(
+                              color: PlantisColors.primary.withValues(
+                                alpha: 0.3,
+                              ),
+                              width: 1,
+                            )
+                          : null,
                     ),
-                    child:
-                        widget.isExpanded
-                            ? _buildExpandedContent(theme, isActive)
-                            : _buildCollapsedContent(theme, isActive),
+                    child: widget.isExpanded
+                        ? _buildExpandedContent(theme, isActive)
+                        : _buildCollapsedContent(theme, isActive),
                   ),
                 ),
               ),
@@ -505,10 +489,9 @@ class _NavigationItemState extends State<_NavigationItem>
         Icon(
           widget.icon,
           size: 20,
-          color:
-              isActive
-                  ? PlantisColors.primary
-                  : theme.colorScheme.onSurfaceVariant,
+          color: isActive
+              ? PlantisColors.primary
+              : theme.colorScheme.onSurfaceVariant,
         ),
 
         const SizedBox(width: 16),
@@ -517,10 +500,9 @@ class _NavigationItemState extends State<_NavigationItem>
             widget.label,
             style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-              color:
-                  isActive
-                      ? PlantisColors.primary
-                      : theme.colorScheme.onSurface,
+              color: isActive
+                  ? PlantisColors.primary
+                  : theme.colorScheme.onSurface,
             ),
           ),
         ),
@@ -572,10 +554,9 @@ class _NavigationItemState extends State<_NavigationItem>
           child: Icon(
             widget.icon,
             size: 22,
-            color:
-                isActive
-                    ? PlantisColors.primary
-                    : theme.colorScheme.onSurfaceVariant,
+            color: isActive
+                ? PlantisColors.primary
+                : theme.colorScheme.onSurfaceVariant,
           ),
         ),
         if (widget.badge != null)
@@ -636,16 +617,20 @@ class _SidebarFooter extends StatelessWidget {
               final authState = ref.watch(authProvider);
 
               // Get user data from auth state
-              final displayName = authState.whenData((auth) {
-                return DataSanitizationService.sanitizeDisplayName(
-                  auth.currentUser,
-                  auth.isAnonymous,
-                );
-              }).value ?? 'Usuário Anônimo';
+              final displayName =
+                  authState.whenData((auth) {
+                    return DataSanitizationService.sanitizeDisplayName(
+                      auth.currentUser,
+                      auth.isAnonymous,
+                    );
+                  }).value ??
+                  'Usuário Anônimo';
 
-              final statusText = authState.whenData((auth) {
-                return auth.isAnonymous ? 'Modo Offline' : 'Online';
-              }).value ?? 'Carregando...';
+              final statusText =
+                  authState.whenData((auth) {
+                    return auth.isAnonymous ? 'Modo Offline' : 'Online';
+                  }).value ??
+                  'Carregando...';
 
               Widget footerContent;
               if (!isExpanded) {
@@ -867,28 +852,25 @@ class _ToggleButtonState extends State<_ToggleButton> {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color:
-                _isHovered
-                    ? PlantisColors.primary.withValues(alpha: 0.2)
-                    : PlantisColors.primary.withValues(alpha: 0.1),
+            color: _isHovered
+                ? PlantisColors.primary.withValues(alpha: 0.2)
+                : PlantisColors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color:
-                  _isHovered
-                      ? PlantisColors.primary.withValues(alpha: 0.5)
-                      : PlantisColors.primary.withValues(alpha: 0.3),
+              color: _isHovered
+                  ? PlantisColors.primary.withValues(alpha: 0.5)
+                  : PlantisColors.primary.withValues(alpha: 0.3),
               width: _isHovered ? 1.5 : 1,
             ),
-            boxShadow:
-                _isHovered
-                    ? [
-                      BoxShadow(
-                        color: PlantisColors.primary.withValues(alpha: 0.2),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                    : null,
+            boxShadow: _isHovered
+                ? [
+                    BoxShadow(
+                      color: PlantisColors.primary.withValues(alpha: 0.2),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
           child: AnimatedRotation(
             turns: widget.isExpanded ? 0.0 : 0.5,
@@ -896,10 +878,9 @@ class _ToggleButtonState extends State<_ToggleButton> {
             child: Icon(
               Icons.chevron_left,
               size: 18,
-              color:
-                  _isHovered
-                      ? PlantisColors.primary
-                      : PlantisColors.primary.withValues(alpha: 0.8),
+              color: _isHovered
+                  ? PlantisColors.primary
+                  : PlantisColors.primary.withValues(alpha: 0.8),
             ),
           ),
         ),

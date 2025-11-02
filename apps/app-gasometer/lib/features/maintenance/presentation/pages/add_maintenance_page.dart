@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/interfaces/validation_result.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/datetime_field.dart';
+import '../../../../core/widgets/error_header.dart';
 import '../../../../core/widgets/form_dialog.dart';
 import '../../../../core/widgets/form_section_header.dart';
 import '../../../../core/widgets/money_form_field.dart';
@@ -22,12 +23,7 @@ import '../notifiers/maintenance_form_notifier.dart';
 import '../notifiers/maintenances_notifier.dart';
 
 class AddMaintenancePage extends ConsumerStatefulWidget {
-
-  const AddMaintenancePage({
-    super.key,
-    this.maintenanceToEdit,
-    this.vehicleId,
-  });
+  const AddMaintenancePage({super.key, this.maintenanceToEdit, this.vehicleId});
   final MaintenanceEntity? maintenanceToEdit;
   final String? vehicleId;
 
@@ -35,7 +31,8 @@ class AddMaintenancePage extends ConsumerStatefulWidget {
   ConsumerState<AddMaintenancePage> createState() => _AddMaintenancePageState();
 }
 
-class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
+class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
+    with FormErrorHandlerMixin {
   final Map<String, ValidationResult> _validationResults = {};
   bool _isInitialized = false;
   bool _isSubmitting = false;
@@ -74,8 +71,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        setState(() {
-        });
+        setState(() {});
       }
     });
   }
@@ -94,7 +90,8 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
     if (formState.isInitialized && formState.vehicle != null) {
       final vehicle = formState.vehicle!;
       final odometer = vehicle.currentOdometer;
-      subtitle = '${vehicle.brand} ${vehicle.model} • ${_formatOdometer(odometer)} km';
+      subtitle =
+          '${vehicle.brand} ${vehicle.model} • ${_formatOdometer(odometer)} km';
     }
 
     return FormDialog(
@@ -103,8 +100,13 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
       headerIcon: Icons.build,
       isLoading: formState.isLoading || _isSubmitting,
       confirmButtonText: 'Salvar',
-      onCancel: () => Navigator.of(context).pop(),
+      onCancel: () {
+        final formNotifier = ref.read(maintenanceFormNotifierProvider.notifier);
+        formNotifier.clearForm();
+        Navigator.of(context).pop();
+      },
       onConfirm: _submitFormWithRateLimit,
+      errorMessage: formErrorMessage,
       content: !formState.isInitialized
           ? const Center(child: CircularProgressIndicator())
           : _buildFormContent(),
@@ -135,6 +137,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
       ],
     );
   }
+
   Widget _buildServiceInfoSection() {
     final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
     final formState = ref.watch(maintenanceFormNotifierProvider);
@@ -151,34 +154,49 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
             validationType: ValidationType.length,
             minLength: 3,
             maxLengthValidation: 100,
-            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-\.,\(\)]'))],
-            decoration: formState.fieldErrors['title'] != null ? InputDecoration(
-              errorText: formState.fieldErrors['title'],
-            ) : null,
-            onValidationChanged: (result) => _validationResults['type'] = result,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(
+                RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-\.,\(\)]'),
+              ),
+            ],
+            decoration: formState.fieldErrors['title'] != null
+                ? InputDecoration(errorText: formState.fieldErrors['title'])
+                : null,
+            onValidationChanged: (result) =>
+                _validationResults['type'] = result,
           ),
           const SizedBox(height: GasometerDesignTokens.spacingMd),
           ValidatedDropdownField<MaintenanceType>(
             label: 'Categoria',
             value: formState.type,
             prefixIcon: Icons.category,
-            items: MaintenanceType.values.map((type) => ValidatedDropdownItem<MaintenanceType>(
-              value: type,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(type.displayName, style: const TextStyle(
-                    fontWeight: GasometerDesignTokens.fontWeightMedium,
-                    color: GasometerDesignTokens.colorTextPrimary,
-                  )),
-                  Text(type.description, style: const TextStyle(
-                    fontSize: GasometerDesignTokens.fontSizeCaption,
-                    color: GasometerDesignTokens.colorTextSecondary,
-                  )),
-                ],
-              ),
-            )).toList(),
+            items: MaintenanceType.values
+                .map(
+                  (type) => ValidatedDropdownItem<MaintenanceType>(
+                    value: type,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          type.displayName,
+                          style: const TextStyle(
+                            fontWeight: GasometerDesignTokens.fontWeightMedium,
+                            color: GasometerDesignTokens.colorTextPrimary,
+                          ),
+                        ),
+                        Text(
+                          type.description,
+                          style: const TextStyle(
+                            fontSize: GasometerDesignTokens.fontSizeCaption,
+                            color: GasometerDesignTokens.colorTextSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+                .toList(),
             onChanged: (value) => notifier.updateType(value!),
             required: true,
             hint: 'Selecione a categoria da manutenção',
@@ -195,6 +213,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
       ),
     );
   }
+
   Widget _buildServiceDetailsSection() {
     final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
     return FormSectionHeader(
@@ -207,8 +226,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
             label: 'Oficina/Local',
             hint: 'Nome da oficina ou local da manutenção',
             required: true,
-            onChanged: (value) {
-            },
+            onChanged: (value) {},
           ),
           const SizedBox(height: GasometerDesignTokens.spacingMd),
           DescriptionField(
@@ -216,13 +234,13 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
             label: 'Descrição dos Serviços',
             hint: 'Descreva os serviços realizados, peças trocadas, etc.',
             required: true,
-            onChanged: (value) {
-            },
+            onChanged: (value) {},
           ),
         ],
       ),
     );
   }
+
   Widget _buildFinancialInfoSection() {
     final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
     final formState = ref.watch(maintenanceFormNotifierProvider);
@@ -235,8 +253,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
             controller: notifier.costController,
             label: 'Custo Total',
             required: true,
-            onChanged: (value) {
-            },
+            onChanged: (value) {},
           ),
           const SizedBox(height: GasometerDesignTokens.spacingMd),
           OdometerField(
@@ -244,13 +261,13 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
             label: 'Quilometragem Atual',
             hint: '0,0',
             currentOdometer: formState.vehicle?.currentOdometer,
-            onChanged: (value) => _validationResults['odometer'] = ValidationResult.success(),
+            onChanged: (value) =>
+                _validationResults['odometer'] = ValidationResult.success(),
           ),
         ],
       ),
     );
   }
-
 
   Widget _buildReceiptImageSection() {
     final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
@@ -267,6 +284,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
       description: 'Anexe uma foto do comprovante da manutenção (opcional)',
     );
   }
+
   Widget _buildNextServiceDate() {
     final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
     final formState = ref.watch(maintenanceFormNotifierProvider);
@@ -295,7 +313,9 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
           ),
           if (formState.nextServiceDate != null)
             Padding(
-              padding: const EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
+              padding: const EdgeInsets.only(
+                top: GasometerDesignTokens.spacingSm,
+              ),
               child: TextButton.icon(
                 onPressed: () => notifier.updateNextServiceDate(null),
                 icon: const Icon(Icons.clear, size: 16),
@@ -310,13 +330,13 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
     );
   }
 
-
-
   /// Rate-limited submit method that implements debouncing and prevents rapid clicks
   void _submitFormWithRateLimit() {
     debugPrint('[MAINTENANCE DEBUG] Submit button clicked - Rate limit check');
     if (_isSubmitting) {
-      debugPrint('[MAINTENANCE DEBUG] Submit already in progress, ignoring duplicate request');
+      debugPrint(
+        '[MAINTENANCE DEBUG] Submit already in progress, ignoring duplicate request',
+      );
       return;
     }
 
@@ -324,25 +344,35 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(_debounceDuration, () {
       if (mounted && !_isSubmitting) {
-        debugPrint('[MAINTENANCE DEBUG] Debounce timer fired, calling _submitForm()');
+        debugPrint(
+          '[MAINTENANCE DEBUG] Debounce timer fired, calling _submitForm()',
+        );
         _submitForm();
       } else {
-        debugPrint('[MAINTENANCE DEBUG] Debounce timer fired but widget unmounted or already submitting');
+        debugPrint(
+          '[MAINTENANCE DEBUG] Debounce timer fired but widget unmounted or already submitting',
+        );
       }
     });
   }
 
   /// Internal submit method with enhanced protection and timeout handling
   Future<void> _submitForm() async {
-    debugPrint('[MAINTENANCE DEBUG] _submitForm() called - Starting validation');
+    debugPrint(
+      '[MAINTENANCE DEBUG] _submitForm() called - Starting validation',
+    );
 
     final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
     if (!notifier.validateForm()) {
-      debugPrint('[MAINTENANCE DEBUG] Form validation FAILED - submission aborted');
+      debugPrint(
+        '[MAINTENANCE DEBUG] Form validation FAILED - submission aborted',
+      );
       return;
     }
 
-    debugPrint('[MAINTENANCE DEBUG] Form validation PASSED - proceeding with submission');
+    debugPrint(
+      '[MAINTENANCE DEBUG] Form validation PASSED - proceeding with submission',
+    );
     if (_isSubmitting) {
       debugPrint('Submit already in progress, aborting duplicate submission');
       return;
@@ -351,7 +381,9 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
       _isSubmitting = true;
     });
 
-    final maintenancesNotifier = ref.read(maintenancesNotifierProvider.notifier);
+    final maintenancesNotifier = ref.read(
+      maintenancesNotifierProvider.notifier,
+    );
 
     try {
       _timeoutTimer = Timer(_submitTimeout, () {
@@ -360,8 +392,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
           setState(() {
             _isSubmitting = false;
           });
-          _showErrorDialog(
-            'Timeout',
+          setFormError(
             'A operação demorou muito para ser concluída. Tente novamente.',
           );
         }
@@ -373,7 +404,9 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
         if (formState.receiptImagePath != null) formState.receiptImagePath!,
       ];
       final MaintenanceEntity tempEntity = MaintenanceEntity(
-        id: widget.maintenanceToEdit?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        id:
+            widget.maintenanceToEdit?.id ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
         vehicleId: formState.vehicleId,
         userId: formState.userId,
         type: formState.type,
@@ -382,9 +415,15 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
         description: formState.description,
         cost: formState.cost,
         odometer: formState.odometer,
-        workshopName: formState.workshopName.isNotEmpty ? formState.workshopName : null,
-        workshopPhone: formState.workshopPhone.isNotEmpty ? formState.workshopPhone : null,
-        workshopAddress: formState.workshopAddress.isNotEmpty ? formState.workshopAddress : null,
+        workshopName: formState.workshopName.isNotEmpty
+            ? formState.workshopName
+            : null,
+        workshopPhone: formState.workshopPhone.isNotEmpty
+            ? formState.workshopPhone
+            : null,
+        workshopAddress: formState.workshopAddress.isNotEmpty
+            ? formState.workshopAddress
+            : null,
         serviceDate: formState.serviceDate ?? DateTime.now(),
         nextServiceDate: formState.nextServiceDate,
         nextServiceOdometer: formState.nextServiceOdometer,
@@ -396,9 +435,12 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
         updatedAt: DateTime.now(),
         metadata: const {},
       );
-      final MaintenanceFormModel formModel = MaintenanceFormModel.fromMaintenanceEntity(tempEntity);
+      final MaintenanceFormModel formModel =
+          MaintenanceFormModel.fromMaintenanceEntity(tempEntity);
 
-      debugPrint('[MAINTENANCE DEBUG] Created maintenance form model: ${formModel.toString()}');
+      debugPrint(
+        '[MAINTENANCE DEBUG] Created maintenance form model: ${formModel.toString()}',
+      );
 
       bool success;
       if (widget.maintenanceToEdit != null) {
@@ -421,10 +463,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
     } catch (e) {
       debugPrint('Error submitting form: $e');
       if (mounted) {
-        _showErrorDialog(
-          'Erro',
-          'Erro inesperado: $e',
-        );
+        setFormError('Erro inesperado: $e');
       }
     } finally {
       _timeoutTimer?.cancel();
@@ -435,24 +474,4 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
       }
     }
   }
-  
-  void _showErrorDialog(String title, String message) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-
-  /// ✅ REMOVED: Old dropdown method no longer needed with EnhancedDropdown
-
 }

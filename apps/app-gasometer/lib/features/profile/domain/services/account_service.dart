@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../auth/presentation/notifiers/notifiers.dart';
 
@@ -18,6 +19,7 @@ abstract class AccountService {
 }
 
 /// Implementação do serviço de conta
+@Injectable(as: AccountService)
 class AccountServiceImpl implements AccountService {
   @override
   Future<void> logout(WidgetRef ref) async {

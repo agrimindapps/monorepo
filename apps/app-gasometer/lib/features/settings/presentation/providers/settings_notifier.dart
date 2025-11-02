@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
@@ -158,21 +160,27 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     });
   }
 
-  /// Change theme mode
-  Future<void> changeTheme(ThemeMode newTheme) async {
+  /// Change theme mode (synchronous to avoid dialog rebuild issues)
+  void changeTheme(ThemeMode newTheme) {
     final currentState = state.valueOrNull;
     if (currentState == null) return;
     if (currentState.themeMode == newTheme) return;
 
-    state = const AsyncValue.loading();
-
-    state = await AsyncValue.guard(() async {
-      await _preferences.setInt('theme_mode', newTheme.index);
-
-      return currentState.copyWith(
+    // Update state immediately without AsyncValue.loading()
+    // This prevents dialog from being destroyed during theme change
+    state = AsyncValue.data(
+      currentState.copyWith(
         themeMode: newTheme,
-      );
-    });
+      ),
+    );
+
+    // Save to preferences in background without blocking UI
+    unawaited(
+      _preferences.setInt('theme_mode', newTheme.index).catchError((Object e) {
+        debugPrint('Error saving theme preference: $e');
+        return false;
+      }),
+    );
   }
 
   /// Handle app rating with business logic

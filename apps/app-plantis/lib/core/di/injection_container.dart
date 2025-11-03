@@ -12,18 +12,7 @@ import '../../features/data_export/domain/usecases/delete_export_usecase.dart';
 import '../../features/data_export/domain/usecases/download_export_usecase.dart';
 import '../../features/data_export/domain/usecases/get_export_history_usecase.dart';
 import '../../features/data_export/domain/usecases/request_export_usecase.dart';
-import '../../features/device_management/data/datasources/device_local_datasource.dart';
-import '../../features/device_management/data/datasources/device_remote_datasource.dart';
-import '../../features/device_management/data/repositories/device_repository_impl.dart';
-import '../../features/device_management/domain/repositories/device_repository.dart';
-import '../../features/device_management/domain/usecases/get_device_statistics_usecase.dart';
-import '../../features/device_management/domain/usecases/get_user_devices_usecase.dart'
-    as local;
-import '../../features/device_management/domain/usecases/revoke_device_usecase.dart'
-    as local;
-import '../../features/device_management/domain/usecases/update_device_activity_usecase.dart';
-import '../../features/device_management/domain/usecases/validate_device_usecase.dart'
-    as local;
+import '../../features/settings/di/device_management_di.dart';
 import '../../features/plants/domain/repositories/plant_comments_repository.dart';
 import '../../features/plants/domain/repositories/plants_repository.dart';
 import '../../features/plants/domain/repositories/spaces_repository.dart';
@@ -70,7 +59,7 @@ Future<void> init({bool firebaseEnabled = false}) async {
   _initAuth();
   _initAccount();
   _initAccountDeletion(); // NEW: Account Deletion Services
-  _initDeviceManagement();
+  await _initDeviceManagement(); // Device Management for Settings
   _initPlants();
   _initTasks();
   _initSpaces();
@@ -211,67 +200,10 @@ void _initAccountDeletion() {
   AccountDeletionModule.init(sl);
 }
 
-void _initDeviceManagement() {
-  sl.registerLazySingleton<FirebaseDeviceService>(
-    () => FirebaseDeviceService(
-      functions: sl<FirebaseFunctions>(),
-      firestore: sl<FirebaseFirestore>(),
-    ),
-  );
-  sl.registerLazySingleton<DeviceRemoteDataSource>(
-    () => DeviceRemoteDataSourceImpl(
-      firebaseDeviceService: sl<FirebaseDeviceService>(),
-    ),
-  );
-  sl.registerLazySingleton<DeviceLocalDataSource>(
-    () => DeviceLocalDataSourceImpl(
-      storageService: sl<ILocalStorageRepository>(),
-    ),
-  );
-  sl.registerLazySingleton<DeviceRepository>(
-    () => DeviceRepositoryImpl(
-      remoteDataSource: sl<DeviceRemoteDataSource>(),
-      localDataSource: sl<DeviceLocalDataSource>(),
-    ),
-  );
-  sl.registerLazySingleton<local.GetUserDevicesUseCase>(
-    () => local.GetUserDevicesUseCase(
-      sl<DeviceRepository>(),
-      sl<AuthStateNotifier>(),
-    ),
-  );
-
-  sl.registerLazySingleton<local.ValidateDeviceUseCase>(
-    () => local.ValidateDeviceUseCase(
-      sl<DeviceRepository>(),
-      sl<AuthStateNotifier>(),
-    ),
-  );
-
-  sl.registerLazySingleton<local.RevokeDeviceUseCase>(
-    () => local.RevokeDeviceUseCase(
-      sl<DeviceRepository>(),
-      sl<AuthStateNotifier>(),
-    ),
-  );
-
-  sl.registerLazySingleton<local.RevokeAllOtherDevicesUseCase>(
-    () => local.RevokeAllOtherDevicesUseCase(
-      sl<DeviceRepository>(),
-      sl<AuthStateNotifier>(),
-    ),
-  );
-
-  sl.registerLazySingleton<GetDeviceStatisticsUseCase>(
-    () => GetDeviceStatisticsUseCase(
-      sl<DeviceRepository>(),
-      sl<AuthStateNotifier>(),
-    ),
-  );
-
-  sl.registerLazySingleton<UpdateDeviceActivityUseCase>(
-    () => UpdateDeviceActivityUseCase(sl<DeviceRepository>()),
-  );
+Future<void> _initDeviceManagement() async {
+  // Device Management DI é registrado via DeviceManagementDI.registerPhase1
+  // que foi chamado antes do @InjectableInit
+  await DeviceManagementDI.registerPhase1(sl);
 }
 
 void _initPlants() {

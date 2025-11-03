@@ -5,11 +5,15 @@ class LandingContentModel {
   final HeroContentModel hero;
   final List<FeatureItemModel> features;
   final CTAContentModel cta;
+  final bool comingSoon;
+  final DateTime? launchDate;
 
   const LandingContentModel({
     required this.hero,
     required this.features,
     required this.cta,
+    this.comingSoon = false,
+    this.launchDate,
   });
 
   /// Convert to domain entity
@@ -18,6 +22,8 @@ class LandingContentModel {
       hero: hero.toEntity(),
       features: features.map((f) => f.toEntity()).toList(),
       cta: cta.toEntity(),
+      comingSoon: comingSoon,
+      launchDate: launchDate,
     );
   }
 
@@ -29,6 +35,10 @@ class LandingContentModel {
           .map((e) => FeatureItemModel.fromJson(e as Map<String, dynamic>))
           .toList(),
       cta: CTAContentModel.fromJson(json['cta'] as Map<String, dynamic>),
+      comingSoon: json['comingSoon'] as bool? ?? false,
+      launchDate: json['launchDate'] != null
+          ? DateTime.parse(json['launchDate'] as String)
+          : null,
     );
   }
 
@@ -38,6 +48,8 @@ class LandingContentModel {
       'hero': hero.toJson(),
       'features': features.map((f) => f.toJson()).toList(),
       'cta': cta.toJson(),
+      'comingSoon': comingSoon,
+      'launchDate': launchDate?.toIso8601String(),
     };
   }
 }
@@ -49,6 +61,7 @@ class HeroContentModel {
   final String ctaText;
   final String ctaSemanticLabel;
   final String ctaTooltip;
+  final String? comingSoonLabel;
 
   const HeroContentModel({
     required this.title,
@@ -56,6 +69,7 @@ class HeroContentModel {
     required this.ctaText,
     required this.ctaSemanticLabel,
     required this.ctaTooltip,
+    this.comingSoonLabel,
   });
 
   HeroContent toEntity() {
@@ -65,6 +79,7 @@ class HeroContentModel {
       ctaText: ctaText,
       ctaSemanticLabel: ctaSemanticLabel,
       ctaTooltip: ctaTooltip,
+      comingSoonLabel: comingSoonLabel,
     );
   }
 
@@ -75,6 +90,7 @@ class HeroContentModel {
       ctaText: json['ctaText'] as String,
       ctaSemanticLabel: json['ctaSemanticLabel'] as String,
       ctaTooltip: json['ctaTooltip'] as String,
+      comingSoonLabel: json['comingSoonLabel'] as String?,
     );
   }
 
@@ -85,6 +101,7 @@ class HeroContentModel {
       'ctaText': ctaText,
       'ctaSemanticLabel': ctaSemanticLabel,
       'ctaTooltip': ctaTooltip,
+      'comingSoonLabel': comingSoonLabel,
     };
   }
 }

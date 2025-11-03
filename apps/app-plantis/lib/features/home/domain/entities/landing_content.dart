@@ -12,10 +12,18 @@ class LandingContent extends Equatable {
   /// Call to action content
   final CTAContent cta;
 
+  /// Whether the app is coming soon (not launched yet)
+  final bool comingSoon;
+
+  /// Launch date for countdown timer (used when comingSoon is true)
+  final DateTime? launchDate;
+
   const LandingContent({
     required this.hero,
     required this.features,
     required this.cta,
+    this.comingSoon = false,
+    this.launchDate,
   });
 
   /// Default landing content
@@ -24,11 +32,13 @@ class LandingContent extends Equatable {
       hero: HeroContent.defaultHero(),
       features: FeatureItem.defaultFeatures(),
       cta: CTAContent.defaultCTA(),
+      comingSoon: true,
+      launchDate: DateTime(2026, 1, 1), // Lançamento: 01 de Janeiro de 2026
     );
   }
 
   @override
-  List<Object?> get props => [hero, features, cta];
+  List<Object?> get props => [hero, features, cta, comingSoon, launchDate];
 }
 
 /// Hero section content
@@ -38,6 +48,7 @@ class HeroContent extends Equatable {
   final String ctaText;
   final String ctaSemanticLabel;
   final String ctaTooltip;
+  final String? comingSoonLabel; // Label for "Em Breve" banner
 
   const HeroContent({
     required this.title,
@@ -45,6 +56,7 @@ class HeroContent extends Equatable {
     required this.ctaText,
     required this.ctaSemanticLabel,
     required this.ctaTooltip,
+    this.comingSoonLabel,
   });
 
   factory HeroContent.defaultHero() {
@@ -54,6 +66,7 @@ class HeroContent extends Equatable {
       ctaText: 'Começar Agora',
       ctaSemanticLabel: 'Botão para começar a usar o Plantis',
       ctaTooltip: 'Toque para criar sua conta ou fazer login',
+      comingSoonLabel: 'Em Breve',
     );
   }
 
@@ -64,6 +77,7 @@ class HeroContent extends Equatable {
     ctaText,
     ctaSemanticLabel,
     ctaTooltip,
+    comingSoonLabel,
   ];
 }
 

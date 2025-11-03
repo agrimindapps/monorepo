@@ -11,10 +11,10 @@ class PromoStatisticsSection extends StatelessWidget {
     final isMobile = screenSize.width < 800;
 
     final statistics = [
-      {'number': '50K+', 'label': 'Plantas Cadastradas', 'icon': Icons.eco},
-      {'number': '10K+', 'label': 'Jardineiros Ativos', 'icon': Icons.people},
-      {'number': '500K+', 'label': 'Lembretes Enviados', 'icon': Icons.notifications},
-      {'number': '4.8★', 'label': 'Avaliação Média', 'icon': Icons.star},
+      {'number': '0', 'label': 'Plantas Cadastradas', 'icon': Icons.eco},
+      {'number': '0', 'label': 'Jardineiros Ativos', 'icon': Icons.people},
+      {'number': '0', 'label': 'Lembretes Enviados', 'icon': Icons.notifications},
+      {'number': '0', 'label': 'Avaliação Média', 'icon': Icons.star},
     ];
 
     return Container(

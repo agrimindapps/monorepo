@@ -2,23 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/plantis_colors.dart';
 
-class PromoFeaturesCarousel extends StatefulWidget {
+/// Features section with grid layout showing 4 feature cards side by side
+/// Replaces carousel for better visibility when features are few
+class PromoFeaturesCarousel extends StatelessWidget {
   const PromoFeaturesCarousel({super.key});
 
-  @override
-  State<PromoFeaturesCarousel> createState() => _PromoFeaturesCarouselState();
-}
-
-class _PromoFeaturesCarouselState extends State<PromoFeaturesCarousel>
-    with SingleTickerProviderStateMixin {
-  int _currentPage = 0;
-  final PageController _pageController = PageController(
-    initialPage: 0,
-    viewportFraction: 0.85,
-  );
-  late final AnimationController _animationController;
-
-  final List<Map<String, dynamic>> _features = [
+  final List<Map<String, dynamic>> _features = const [
     {
       'icon': Icons.eco,
       'title': 'Registro Completo',
@@ -50,30 +39,15 @@ class _PromoFeaturesCarouselState extends State<PromoFeaturesCarousel>
   ];
 
   @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 6),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final isMobile = screenSize.width < 800;
+    final isMobile = screenSize.width < 600;
+    final isTablet = screenSize.width < 1024;
 
     return Container(
       padding: EdgeInsets.symmetric(
         vertical: 80,
-        horizontal: isMobile ? 20 : screenSize.width * 0.08,
+        horizontal: isMobile ? 16 : 40,
       ),
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -119,59 +93,20 @@ class _PromoFeaturesCarouselState extends State<PromoFeaturesCarousel>
             ),
           ),
           const SizedBox(height: 48),
-          SizedBox(
-            height: isMobile ? 320 : 350,
-            child: PageView.builder(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentPage = index;
-                });
-              },
-              itemCount: _features.length,
-              itemBuilder: (context, index) {
-                final feature = _features[index];
-                return AnimatedBuilder(
-                  animation: _pageController,
-                  builder: (context, child) {
-                    double value = 0.0;
-                    if (_pageController.position.haveDimensions) {
-                      value = index.toDouble() - (_pageController.page ?? 0);
-                      value = (value * 0.038).clamp(-1, 1);
-                    }
-                    return Center(
-                      child: Transform.rotate(
-                        angle: value,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: _buildFeatureCard(
-                    feature,
-                    index == _currentPage,
-                    isMobile,
-                  ),
-                );
-              },
-            ),
-          ),
-
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              _features.length,
-              (index) => AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                width: _currentPage == index ? 32 : 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: _currentPage == index
-                      ? PlantisColors.primary
-                      : PlantisColors.primary.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(4),
-                ),
+          // Responsive grid layout
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1400),
+              child: GridView.count(
+                crossAxisCount: isMobile ? 1 : (isTablet ? 2 : 4),
+                mainAxisSpacing: 24,
+                crossAxisSpacing: 24,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                childAspectRatio: 1.0, // Square cards with equal sizing
+                children: _features.map((feature) {
+                  return _buildFeatureCard(feature, isMobile);
+                }).toList(),
               ),
             ),
           ),
@@ -182,15 +117,9 @@ class _PromoFeaturesCarouselState extends State<PromoFeaturesCarousel>
 
   Widget _buildFeatureCard(
     Map<String, dynamic> feature,
-    bool isActive,
     bool isMobile,
   ) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      margin: EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: isActive ? 0 : 20,
-      ),
+    return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -205,8 +134,8 @@ class _PromoFeaturesCarouselState extends State<PromoFeaturesCarousel>
         boxShadow: [
           BoxShadow(
             color: (feature['color'] as Color).withValues(alpha: 0.4),
-            blurRadius: isActive ? 30 : 15,
-            offset: Offset(0, isActive ? 15 : 8),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -229,23 +158,25 @@ class _PromoFeaturesCarouselState extends State<PromoFeaturesCarousel>
           Text(
             feature['title'] as String,
             style: TextStyle(
-              fontSize: isMobile ? 22 : 26,
+              fontSize: isMobile ? 18 : 22,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
-          Text(
-            feature['description'] as String,
-            style: TextStyle(
-              fontSize: isMobile ? 14 : 16,
-              color: Colors.white.withValues(alpha: 0.9),
-              height: 1.5,
+          Expanded(
+            child: Text(
+              feature['description'] as String,
+              style: TextStyle(
+                fontSize: isMobile ? 13 : 15,
+                color: Colors.white.withValues(alpha: 0.9),
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 6,
             ),
-            textAlign: TextAlign.center,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

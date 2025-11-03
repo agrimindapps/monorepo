@@ -7,7 +7,6 @@ import '../../features/auth/presentation/pages/auth_page.dart';
 import '../../features/auth/presentation/pages/web_login_page.dart';
 import '../../features/data_export/presentation/pages/data_export_page.dart';
 import '../../features/device_management/presentation/pages/device_management_page.dart';
-import '../../features/home/pages/landing_page.dart';
 import '../../features/legal/presentation/pages/account_deletion_page.dart';
 import '../../features/legal/presentation/pages/privacy_policy_page.dart';
 import '../../features/legal/presentation/pages/promotional_page.dart';
@@ -130,7 +129,7 @@ class AppRouter {
         GoRoute(
           path: landing,
           name: 'landing',
-          builder: (context, state) => const LandingPage(),
+          builder: (context, state) => const PromotionalPage(),
         ),
         GoRoute(
           path: home,

@@ -11,12 +11,16 @@ class PromoNavigationBar extends StatelessWidget {
     this.featuresKey,
     this.howItWorksKey,
     this.testimonialsKey,
+    this.comingSoon = false,
+    this.launchDate,
   });
 
   final void Function(GlobalKey)? onNavigate;
   final GlobalKey? featuresKey;
   final GlobalKey? howItWorksKey;
   final GlobalKey? testimonialsKey;
+  final bool comingSoon;
+  final DateTime? launchDate;
 
   @override
   Widget build(BuildContext context) {

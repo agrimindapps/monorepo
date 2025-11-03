@@ -8,6 +8,7 @@ class LandingContentDataSource {
   /// Get landing page content
   ///
   /// Returns [LandingContentModel] with hero, features, and CTA content
+  /// Currently configured for "Coming Soon" state
   LandingContentModel getLandingContent() {
     return LandingContentModel(
       hero: HeroContentModel(
@@ -17,6 +18,7 @@ class LandingContentDataSource {
         ctaText: 'Entrar',
         ctaSemanticLabel: 'Botão para entrar no aplicativo',
         ctaTooltip: 'Fazer login no Plantis',
+        comingSoonLabel: 'Em Breve',
       ),
       features: [
         FeatureItemModel(
@@ -55,6 +57,8 @@ class LandingContentDataSource {
         description: 'Junte-se a milhares de cultivadores',
         buttonText: 'Criar conta grátis',
       ),
+      comingSoon: true,
+      launchDate: DateTime(2026, 1, 1), // Lançamento: 01 de Janeiro de 2026
     );
   }
 

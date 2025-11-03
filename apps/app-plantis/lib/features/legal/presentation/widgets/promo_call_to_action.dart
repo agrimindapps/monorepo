@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/plantis_colors.dart';
 
 class PromoCallToAction extends StatelessWidget {
@@ -59,36 +57,6 @@ class PromoCallToAction extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: () => context.go(AppRouter.login),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: PlantisColors.primary,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isMobile ? 32 : 48,
-                    vertical: isMobile ? 16 : 20,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 8,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Criar Minha Conta Grátis',
-                      style: TextStyle(
-                        fontSize: isMobile ? 16 : 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    const Icon(Icons.arrow_forward, size: 20),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
               Text(
                 'Gratuito para sempre • Sem cartão de crédito',
                 style: TextStyle(
@@ -96,8 +64,84 @@ class PromoCallToAction extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.8),
                 ),
               ),
+              const SizedBox(height: 32),
+              // Store download buttons (disabled)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildStoreButton(
+                    icon: Icons.android,
+                    label: 'Google Play',
+                    enabled: false,
+                    isMobile: isMobile,
+                  ),
+                  SizedBox(width: isMobile ? 12 : 16),
+                  _buildStoreButton(
+                    icon: Icons.apple,
+                    label: 'App Store',
+                    enabled: false,
+                    isMobile: isMobile,
+                  ),
+                ],
+              ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStoreButton({
+    required IconData icon,
+    required String label,
+    required bool enabled,
+    required bool isMobile,
+  }) {
+    return Opacity(
+      opacity: enabled ? 1.0 : 0.5,
+      child: Container(
+        height: isMobile ? 44 : 52,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: enabled ? 0.2 : 0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: enabled ? 0.3 : 0.15),
+            width: 1,
+          ),
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 16 : 20,
+          vertical: 8,
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.white, size: isMobile ? 20 : 24),
+            SizedBox(width: isMobile ? 8 : 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'DISPONÍVEL NA',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: enabled ? 0.8 : 0.5),
+                    fontSize: isMobile ? 8 : 9,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: isMobile ? 12 : 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

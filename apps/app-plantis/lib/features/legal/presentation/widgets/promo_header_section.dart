@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/plantis_colors.dart';
+import 'promo_hero_countdown_badge.dart';
 
 class PromoHeaderSection extends StatelessWidget {
-  const PromoHeaderSection({super.key});
+  final bool comingSoon;
+  final DateTime? launchDate;
+
+  const PromoHeaderSection({
+    this.comingSoon = false,
+    this.launchDate,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -53,9 +59,10 @@ class PromoHeaderSection extends StatelessWidget {
             children: [
               _buildHeaderText(),
               const SizedBox(height: 32),
-              _buildActionButtons(context),
-              const SizedBox(height: 24),
-              _buildDownloadBadges(context),
+              if (comingSoon && launchDate != null) ...[
+                PromoHeroCountdownBadge(launchDate: launchDate!),
+                const SizedBox(height: 32),
+              ],
             ],
           ),
         ),
@@ -73,9 +80,10 @@ class PromoHeaderSection extends StatelessWidget {
       children: [
         _buildHeaderText(),
         const SizedBox(height: 24),
-        _buildActionButtons(context),
-        const SizedBox(height: 20),
-        _buildDownloadBadges(context),
+        if (comingSoon && launchDate != null) ...[
+          PromoHeroCountdownBadge(launchDate: launchDate!),
+          const SizedBox(height: 24),
+        ],
         const SizedBox(height: 48),
         _buildAppShowcase(),
       ],
@@ -110,119 +118,6 @@ class PromoHeaderSection extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
-    return Wrap(
-      spacing: 16,
-      runSpacing: 16,
-      children: [
-        ElevatedButton(
-          onPressed: () => context.go(AppRouter.login),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: PlantisColors.primary,
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            elevation: 4,
-            shadowColor: Colors.black.withValues(alpha: 0.3),
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Começar Agora',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(width: 8),
-              Icon(Icons.arrow_forward, size: 18),
-            ],
-          ),
-        ),
-        OutlinedButton(
-          onPressed: () {
-          },
-          style: OutlinedButton.styleFrom(
-            foregroundColor: Colors.white,
-            side: const BorderSide(color: Colors.white, width: 2),
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: const Text(
-            'Ver Como Funciona',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDownloadBadges(BuildContext context) {
-    return Row(
-      children: [
-        _buildStoreBadge(
-          icon: Icons.android,
-          storeName: 'Google Play',
-        ),
-        const SizedBox(width: 12),
-        _buildStoreBadge(
-          icon: Icons.apple,
-          storeName: 'App Store',
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStoreBadge({required IconData icon, required String storeName}) {
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white, size: 24),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'DISPONÍVEL NA',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 8,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                storeName,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildAppShowcase() {
     return Stack(

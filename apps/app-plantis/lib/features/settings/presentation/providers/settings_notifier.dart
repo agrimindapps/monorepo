@@ -16,6 +16,8 @@ class SettingsState {
   final bool isInitialized;
   final String? errorMessage;
   final String? successMessage;
+  final DeviceEntity? currentDevice;
+  final List<DeviceEntity> connectedDevices;
 
   const SettingsState({
     required this.settings,
@@ -23,6 +25,8 @@ class SettingsState {
     this.isInitialized = false,
     this.errorMessage,
     this.successMessage,
+    this.currentDevice,
+    this.connectedDevices = const [],
   });
 
   factory SettingsState.initial() {
@@ -30,6 +34,7 @@ class SettingsState {
       settings: SettingsEntity.defaults(),
       isLoading: false,
       isInitialized: false,
+      connectedDevices: const [],
     );
   }
 
@@ -39,8 +44,11 @@ class SettingsState {
     bool? isInitialized,
     String? errorMessage,
     String? successMessage,
+    DeviceEntity? currentDevice,
+    List<DeviceEntity>? connectedDevices,
     bool clearError = false,
     bool clearSuccess = false,
+    bool clearDevice = false,
   }) {
     return SettingsState(
       settings: settings ?? this.settings,
@@ -49,6 +57,8 @@ class SettingsState {
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       successMessage:
           clearSuccess ? null : (successMessage ?? this.successMessage),
+      currentDevice: clearDevice ? null : (currentDevice ?? this.currentDevice),
+      connectedDevices: connectedDevices ?? this.connectedDevices,
     );
   }
 
@@ -63,6 +73,43 @@ class SettingsState {
   bool get followSystemTheme => settings.theme.followSystemTheme;
   bool get notificationsEnabled => settings.notifications.taskRemindersEnabled;
   bool get isWebPlatform => kIsWeb;
+
+  // Device management getters
+  int get deviceCount => connectedDevices.length;
+  int get activeDeviceCount => connectedDevices.where((d) => d.isActive).length;
+  bool get hasDevices => connectedDevices.isNotEmpty;
+  String get deviceCountText => '$activeDeviceCount/${connectedDevices.length} dispositivos';
+
+  String get currentDeviceInfo {
+    if (currentDevice == null) return 'Dispositivo atual desconhecido';
+    return '${currentDevice!.name} (${currentDevice!.platform})';
+  }
+
+  List<Map<String, String>> get connectedDevicesInfo {
+    return connectedDevices.map((device) {
+      return {
+        'uuid': device.uuid,
+        'name': device.name,
+        'model': device.model,
+        'platform': device.platform,
+        'lastActive': _formatLastActive(device.lastActiveAt),
+        'isCurrent': (currentDevice?.uuid == device.uuid).toString(),
+        'isActive': device.isActive.toString(),
+      };
+    }).toList();
+  }
+
+  String _formatLastActive(DateTime lastActive) {
+    final now = DateTime.now();
+    final difference = now.difference(lastActive);
+
+    if (difference.inMinutes < 1) return 'Agora';
+    if (difference.inHours < 1) return '${difference.inMinutes}m atrás';
+    if (difference.inDays < 1) return '${difference.inHours}h atrás';
+    if (difference.inDays < 7) return '${difference.inDays}d atrás';
+    if (difference.inDays < 30) return '${(difference.inDays / 7).floor()}sem atrás';
+    return '${(difference.inDays / 30).floor()}m atrás';
+  }
 }
 
 @riverpod
@@ -94,6 +141,7 @@ class SettingsNotifier extends _$SettingsNotifier {
     try {
       await _loadSettings();
       await _syncWithServices();
+      await _loadDeviceInfo();
 
       final currentState = state.valueOrNull ?? SettingsState.initial();
       return currentState.copyWith(isInitialized: true);
@@ -491,6 +539,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   Future<void> refresh() async {
     await _loadSettings();
     await _syncWithServices();
+    await _loadDeviceInfo();
   }
 
   /// Limpa mensagens de erro/sucesso
@@ -501,6 +550,48 @@ class SettingsNotifier extends _$SettingsNotifier {
         clearSuccess: true,
       ),
     );
+  }
+
+  // ============================================================================
+  // DEVICE MANAGEMENT METHODS
+  // ============================================================================
+
+  /// Carrega informações de dispositivos do usuário
+  /// Nota: Implementação futura quando o userId puder ser obtido do auth state
+  Future<void> _loadDeviceInfo() async {
+    try {
+      // TODO: Implementar carregamento de dispositivos
+      // Requer obter userId do auth state/provider
+      if (kDebugMode) {
+        debugPrint('ℹ️ Settings: Device loading não implementado ainda');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('⚠️ Settings: Erro ao carregar dispositivos - $e');
+      }
+    }
+  }
+
+  /// Revoga um dispositivo específico
+  /// Nota: Implementação futura quando o userId puder ser obtido do auth state
+  Future<void> revokeDevice(String deviceUuid) async {
+    if (kDebugMode) {
+      debugPrint('ℹ️ Settings: Device revoke não implementado ainda - $deviceUuid');
+    }
+  }
+
+  /// Revoga todos os outros dispositivos exceto o atual
+  /// Nota: Implementação futura
+  Future<void> revokeAllOtherDevices() async {
+    if (kDebugMode) {
+      debugPrint('ℹ️ Settings: Revoke all devices não implementado ainda');
+    }
+  }
+
+  /// Recarrega lista de dispositivos
+  /// Nota: Implementação futura
+  Future<void> refreshDevices() async {
+    await _loadDeviceInfo();
   }
 }
 

@@ -78,12 +78,18 @@ class _LandingPageState extends ConsumerState<LandingPage>
                   content: content.hero,
                   onCtaPressed: () =>
                       LandingAuthRedirectManager.goToLogin(context),
+                  comingSoon: content.comingSoon,
+                  launchDate: content.launchDate,
                 ),
-                LandingFeaturesSection(features: content.features),
+                LandingFeaturesSection(
+                  features: content.features,
+                  comingSoon: content.comingSoon,
+                ),
                 LandingCtaSection(
                   content: content.cta,
                   onPressed: () =>
                       LandingAuthRedirectManager.goToRegister(context),
+                  comingSoon: content.comingSoon,
                 ),
                 LandingFooterBuilder.buildFooter(),
               ],

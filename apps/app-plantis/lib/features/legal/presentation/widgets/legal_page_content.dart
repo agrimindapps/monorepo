@@ -72,6 +72,11 @@ class _BaseLegalPageContentState extends State<BaseLegalPageContent> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 800;
+
+    // Only apply horizontal padding on mobile/tablet, remove for large screens
+    final horizontalPadding = isMobile ? 16.0 : 0.0;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -99,7 +104,10 @@ class _BaseLegalPageContentState extends State<BaseLegalPageContent> {
         children: [
           SingleChildScrollView(
             controller: _scrollManager.scrollController,
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: 0,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

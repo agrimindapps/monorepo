@@ -11,6 +11,7 @@ import '../../../../shared/widgets/loading/loading_components.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
 import '../managers/settings_sections_builder.dart';
 import '../managers/settings_dialog_manager.dart';
+import '../widgets/sections/device_management_section.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -69,10 +70,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                     child: ListView(
                       padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                       children: [
-                        // Hide user section on desktop (>= 1200px) since sidebar shows user info
+                        // Hide user section on screens >= 768px (tablet and larger)
                         LayoutBuilder(
                           builder: (context, constraints) {
-                            final shouldHideUserSection = constraints.maxWidth >= 1200;
+                            final shouldHideUserSection = constraints.maxWidth >= 768;
                             if (shouldHideUserSection) {
                               return const SizedBox.shrink();
                             }
@@ -145,13 +146,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
         _buildSectionHeader(context, 'Configurações'),
         _buildSettingsCard(context, [
           _buildNotificationSwitchItem(context, settingsState),
-          _buildSettingsItem(
-            context,
-            icon: Icons.devices,
-            title: 'Dispositivos Conectados',
-            subtitle: 'Gerencie aparelhos com acesso à conta',
-            onTap: () => context.push('/device-management'),
-          ),
+          const DeviceManagementSection(),
         ]),
       ],
     );
@@ -174,8 +169,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
             context,
             icon: Icons.feedback,
             title: 'Enviar Feedback',
-            subtitle: 'Nos ajude a melhorar o app',
-            onTap: () => _showAboutDialog(context),
+            subtitle: 'Ajude-nos a melhorar o app',
+            onTap: () => _showFeedbackDialog(),
           ),
         ]),
       ],
@@ -188,13 +183,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
       children: [
         _buildSectionHeader(context, 'Sobre o Plantis'),
         _buildSettingsCard(context, [
-          _buildSettingsItem(
-            context,
-            icon: Icons.feedback,
-            title: 'Enviar Feedback',
-            subtitle: 'Ajude-nos a melhorar o app',
-            onTap: () => _showFeedbackDialog(),
-          ),
           _buildSettingsItem(
             context,
             icon: Icons.info,

@@ -1,6 +1,7 @@
 import 'package:core/core.dart' show Hive, HiveX, Box;
 
 import '../../core/data/models/category_model.dart';
+import '../../core/data/models/pending_image_upload.dart';
 import '../../core/logging/entities/log_entry.dart';
 import '../../features/expenses/data/models/expense_model.dart';
 import '../../features/fuel/data/models/fuel_supply_model.dart';
@@ -43,6 +44,10 @@ class HiveService {
     }
     if (!Hive.isAdapterRegistered(20)) {
       Hive.registerAdapter(LogEntryAdapter());
+    }
+    // ✅ NOVO: Adapter para fila de uploads de imagens pendentes
+    if (!Hive.isAdapterRegistered(50)) {
+      Hive.registerAdapter(PendingImageUploadAdapter());
     }
   }
 

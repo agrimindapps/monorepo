@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide AuthProvider;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'core/providers/dependency_providers.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/gasometer_theme.dart';
 import 'main.dart' as main;
@@ -29,6 +30,9 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
         SecureLogger.warning('Failed to start auto-sync service', error: e);
       }
     }
+
+    // ✅ NOVO: Sincronizar imagens pendentes ao abrir o app
+    _syncPendingImages();
   }
 
   @override
@@ -51,6 +55,8 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
         case AppLifecycleState.resumed:
           // App returning to foreground - resume auto-sync
           main.autoSyncService.resume();
+          // ✅ NOVO: Sincronizar imagens pendentes ao voltar ao app
+          _syncPendingImages();
           break;
         case AppLifecycleState.detached:
         case AppLifecycleState.hidden:
@@ -60,6 +66,26 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
     } catch (e) {
       if (kDebugMode) {
         SecureLogger.warning('Error handling lifecycle state change', error: e);
+      }
+    }
+  }
+
+  /// Sincroniza imagens pendentes de upload (offline → online)
+  Future<void> _syncPendingImages() async {
+    try {
+      final imageSyncService = ref.read(imageSyncServiceProvider);
+      final result = await imageSyncService.syncPendingImages();
+
+      if (result.hasSuccess && kDebugMode) {
+        SecureLogger.info('📤 Synced ${result.successful} pending images');
+      }
+
+      if (result.hasErrors && kDebugMode) {
+        SecureLogger.warning('⚠️ Failed to sync ${result.failed} images');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        SecureLogger.warning('Failed to sync pending images', error: e);
       }
     }
   }

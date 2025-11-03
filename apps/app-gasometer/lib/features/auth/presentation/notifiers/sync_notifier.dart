@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container_modular.dart';
 import '../../../../core/services/gasometer_analytics_service.dart';
+import '../state/auth_state.dart' as gasometer_auth;
 import '../state/sync_state.dart';
 import 'auth_notifier.dart';
 
@@ -16,6 +17,7 @@ part 'sync_notifier.g.dart';
 /// - Data synchronization com UnifiedSync
 /// - Sync state management
 ///
+/// REFATORADO: Agora usa listener reativo (stream-based) similar ao ReceitaAgro
 /// Separado do AuthNotifier para aplicar SRP (Single Responsibility Principle)
 @Riverpod(keepAlive: true)
 class Sync extends _$Sync {
@@ -25,10 +27,66 @@ class Sync extends _$Sync {
   GasometerSyncState build() {
     _analytics = sl<GasometerAnalyticsService>();
 
+    // Setup reactive listener para auth state changes
+    _setupAuthListener();
+
     return const GasometerSyncState.initial();
   }
 
-  /// LOGIN WITH SYNC - Executa login e depois sincronização
+  /// Configura listener reativo para mudanças de autenticação
+  /// Substitui o delay de 500ms por uma abordagem stream-based
+  void _setupAuthListener() {
+    ref.listen(authProvider, (previous, next) {
+      // Detecta quando usuário faz login (transição de não-autenticado para autenticado)
+      final wasUnauthenticated = previous?.isAuthenticated != true;
+      final isNowAuthenticated = next.isAuthenticated && !next.isAnonymous;
+
+      if (wasUnauthenticated &&
+          isNowAuthenticated &&
+          next.currentUser != null) {
+        if (kDebugMode) {
+          debugPrint(
+            '🔄 [Sync] Auth state changed: user logged in, triggering sync',
+          );
+        }
+
+        // Trigger sync automático após login
+        _triggerPostAuthSync(next);
+      }
+
+      // Detecta quando usuário faz logout
+      if (previous?.isAuthenticated == true && !next.isAuthenticated) {
+        if (kDebugMode) {
+          debugPrint('🔄 [Sync] Auth state changed: user logged out');
+        }
+
+        // Clear sync state
+        state = const GasometerSyncState.initial();
+      }
+    });
+  }
+
+  /// Trigger sync após autenticação (similar ao ReceitaAgro)
+  Future<void> _triggerPostAuthSync(gasometer_auth.AuthState authState) async {
+    try {
+      if (kDebugMode) {
+        debugPrint(
+          '🔄 [Sync] Triggering post-auth sync for user: ${authState.currentUser?.id}',
+        );
+      }
+
+      // Pequeno delay para não bloquear navegação
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+
+      await _startBackgroundDataSync();
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ [Sync] Error in post-auth sync: $e');
+      }
+    }
+  }
+
+  /// LOGIN WITH SYNC - Mantido para compatibilidade, mas agora usa listener reativo
   Future<void> loginAndSync(String email, String password) async {
     try {
       state = state.copyWith(
@@ -38,18 +96,21 @@ class Sync extends _$Sync {
       );
 
       // Delega login para AuthNotifier
+      // O listener reativo irá disparar o sync automaticamente
       await ref.read(authProvider.notifier).login(email, password);
 
       final authState = ref.read(authProvider);
 
-      // Não sincroniza se houve erro no login
-      if (!authState.isAuthenticated || authState.errorMessage != null) {
+      // Verificação de erro
+      if (authState.errorMessage != null) {
+        state = state.copyWith(syncMessage: 'Erro no login', hasError: true);
         return;
       }
 
-      // Não sincroniza para usuários anônimos
-      if (!authState.isAnonymous) {
-        _performBackgroundSync();
+      if (kDebugMode) {
+        debugPrint(
+          '🔄 [Sync] Login completed, sync will be triggered by listener',
+        );
       }
     } catch (e) {
       state = state.copyWith(
@@ -63,17 +124,6 @@ class Sync extends _$Sync {
         reason: 'loginAndSync_error',
       );
     }
-  }
-
-  /// Executa sincronização em background sem bloquear navegação
-  void _performBackgroundSync() {
-    Future.delayed(const Duration(milliseconds: 500), () {
-      final authState = ref.read(authProvider);
-
-      if (authState.isAuthenticated && !authState.isAnonymous) {
-        _startBackgroundDataSync();
-      }
-    });
   }
 
   /// Sincronização de dados em background (padrão app-plantis)
@@ -93,9 +143,7 @@ class Sync extends _$Sync {
 
       await _syncGasometerData();
 
-      state = state.copyWith(
-        syncMessage: 'Sincronização concluída',
-      );
+      state = state.copyWith(syncMessage: 'Sincronização concluída');
 
       await _analytics.log('gasometer_background_sync_completed');
     } catch (e) {
@@ -136,7 +184,9 @@ class Sync extends _$Sync {
         },
         (_) {
           if (kDebugMode) {
-            debugPrint('✅ [Sync] Sincronização UnifiedSync concluída com sucesso');
+            debugPrint(
+              '✅ [Sync] Sincronização UnifiedSync concluída com sucesso',
+            );
           }
         },
       );
@@ -154,7 +204,8 @@ class Sync extends _$Sync {
 
     if (!authState.isAuthenticated || authState.isAnonymous) {
       state = state.copyWith(
-        syncMessage: 'Sincronização disponível apenas para usuários autenticados',
+        syncMessage:
+            'Sincronização disponível apenas para usuários autenticados',
         hasError: true,
       );
       return;

@@ -7,10 +7,13 @@ import 'validated_form_field.dart';
 enum MoneyFieldType {
   /// Valor total/gasto (ex: despesas, manutenção)
   amount,
+
   /// Preço por unidade (ex: preço por litro)
   price,
+
   /// Custo de serviço (ex: mão de obra)
   cost,
+
   /// Valor genérico monetário
   generic,
 }
@@ -36,10 +39,10 @@ enum MoneyFieldType {
 /// )
 /// ```
 class MoneyFormField extends StatelessWidget {
-
   const MoneyFormField({
     super.key,
     required this.controller,
+    this.focusNode,
     required this.type,
     this.customLabel,
     this.customHint,
@@ -52,8 +55,12 @@ class MoneyFormField extends StatelessWidget {
     this.customHelperText,
     this.enableRealTimeFormatting = true,
   });
+
   /// Controller do campo de texto
   final TextEditingController controller;
+
+  /// FocusNode do campo (opcional)
+  final FocusNode? focusNode;
 
   /// Tipo do campo monetário (define configurações padrão)
   final MoneyFieldType type;
@@ -94,6 +101,7 @@ class MoneyFormField extends StatelessWidget {
 
     return ValidatedFormField(
       controller: controller,
+      focusNode: focusNode,
       label: customLabel ?? config.label,
       hint: customHint ?? config.hint,
       prefixIcon: config.icon,
@@ -143,9 +151,7 @@ class MoneyFormField extends StatelessWidget {
   /// Constrói formatadores baseados no tipo
   List<TextInputFormatter> _buildFormatters() {
     if (!enableRealTimeFormatting) {
-      return [
-        FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
-      ];
+      return [FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]'))];
     }
     switch (type) {
       case MoneyFieldType.price:
@@ -224,7 +230,6 @@ class MoneyFormField extends StatelessWidget {
 
 /// Configuração interna para tipos de campo
 class _MoneyFieldConfig {
-
   const _MoneyFieldConfig({
     required this.label,
     required this.hint,
@@ -237,7 +242,6 @@ class _MoneyFieldConfig {
 
 /// Formatador customizado para entrada de dinheiro
 class _MoneyInputFormatter extends TextInputFormatter {
-
   _MoneyInputFormatter({this.decimalPlaces = 2});
   final int decimalPlaces;
 
@@ -264,7 +268,6 @@ class _MoneyInputFormatter extends TextInputFormatter {
 
 /// Variações pré-configuradas para casos específicos
 class AmountFormField extends StatelessWidget {
-
   const AmountFormField({
     super.key,
     required this.controller,
@@ -290,15 +293,16 @@ class AmountFormField extends StatelessWidget {
 }
 
 class PriceFormField extends StatelessWidget {
-
   const PriceFormField({
     super.key,
     required this.controller,
+    this.focusNode,
     this.label,
     this.required = true,
     this.onChanged,
   });
   final TextEditingController controller;
+  final FocusNode? focusNode;
   final String? label;
   final bool required;
   final void Function(String?)? onChanged;
@@ -307,6 +311,7 @@ class PriceFormField extends StatelessWidget {
   Widget build(BuildContext context) {
     return MoneyFormField(
       controller: controller,
+      focusNode: focusNode,
       type: MoneyFieldType.price,
       customLabel: label,
       required: required,
@@ -317,7 +322,6 @@ class PriceFormField extends StatelessWidget {
 }
 
 class CostFormField extends StatelessWidget {
-
   const CostFormField({
     super.key,
     required this.controller,

@@ -65,8 +65,9 @@ class AuthState {
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       isInitialized: isInitialized ?? this.isInitialized,
       isPremium: isPremium ?? this.isPremium,
-      currentOperation:
-          clearOperation ? null : (currentOperation ?? this.currentOperation),
+      currentOperation: clearOperation
+          ? null
+          : (currentOperation ?? this.currentOperation),
       isValidatingDevice: isValidatingDevice ?? this.isValidatingDevice,
       deviceValidationError:
           deviceValidationError ?? this.deviceValidationError,
@@ -484,6 +485,10 @@ class AuthNotifier extends _$AuthNotifier {
     );
 
     await _performDeviceCleanupOnLogout();
+
+    // Clear sync data before logout
+    await _clearSyncDataOnLogout();
+
     final result = await _logoutUseCase();
 
     result.fold(
@@ -684,6 +689,47 @@ class AuthNotifier extends _$AuthNotifier {
         'context': 'logout',
         'error': e.toString(),
         'user_id': state.value?.currentUser?.id ?? 'unknown',
+      });
+    }
+  }
+
+  /// Clear sync data on logout
+  /// Similar ao padrão do Gasometer e ReceitaAgro
+  Future<void> _clearSyncDataOnLogout() async {
+    try {
+      if (kDebugMode) {
+        debugPrint('🗑️ Clearing sync data on logout...');
+      }
+
+      // Usar UnifiedSyncManager para limpar dados locais do app
+      final result = await UnifiedSyncManager.instance.clearAppData('plantis');
+
+      result.fold(
+        (Failure failure) {
+          if (kDebugMode) {
+            debugPrint('⚠️ Failed to clear sync data: ${failure.message}');
+          }
+          _analytics?.logEvent('sync_data_clear_failed', {
+            'context': 'logout',
+            'error': failure.message,
+          });
+        },
+        (_) {
+          if (kDebugMode) {
+            debugPrint('✅ Sync data cleared successfully');
+          }
+          _analytics?.logEvent('sync_data_clear_success', {
+            'context': 'logout',
+          });
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ Error clearing sync data: $e');
+      }
+      _analytics?.logEvent('sync_data_clear_error', {
+        'context': 'logout',
+        'error': e.toString(),
       });
     }
   }

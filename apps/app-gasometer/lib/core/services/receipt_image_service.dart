@@ -3,10 +3,10 @@ import 'dart:typed_data';
 import 'package:core/core.dart' as core;
 import 'package:injectable/injectable.dart';
 import 'firebase_storage_service.dart';
+import 'image_sync_service.dart';
 
 /// Result of image processing operation
 class ImageProcessingResult {
-
   const ImageProcessingResult({
     required this.localPath,
     this.downloadUrl,
@@ -23,15 +23,16 @@ class ImageProcessingResult {
 /// Combines compression and upload in a single operation
 @lazySingleton
 class ReceiptImageService {
-
   ReceiptImageService(
     this._compressionService,
     this._storageService,
     this._connectivityService,
+    this._imageSyncService,
   );
   final core.ImageCompressionService _compressionService;
   final FirebaseStorageService _storageService;
   final core.ConnectivityService _connectivityService;
+  final ImageSyncService _imageSyncService;
 
   /// Process and upload fuel receipt image
   Future<ImageProcessingResult> processFuelReceiptImage({
@@ -101,18 +102,27 @@ class ReceiptImageService {
       Map<String, dynamic> compressionStats = {};
       bool wasCompressed = false;
       bool shouldAggressivelyCompress = false;
-      final connectivityResult = await _connectivityService.getConnectivityType();
+      final connectivityResult = await _connectivityService
+          .getConnectivityType();
       connectivityResult.fold(
-        (failure) => print('🔌 Erro ao verificar conectividade: ${failure.message}'),
+        (failure) =>
+            print('🔌 Erro ao verificar conectividade: ${failure.message}'),
         (connectivityType) {
-          shouldAggressivelyCompress = connectivityType == core.ConnectivityType.mobile;
-          print('🔌 Conexão: $connectivityType, compressão agressiva: $shouldAggressivelyCompress');
+          shouldAggressivelyCompress =
+              connectivityType == core.ConnectivityType.mobile;
+          print(
+            '🔌 Conexão: $connectivityType, compressão agressiva: $shouldAggressivelyCompress',
+          );
         },
       );
       if (compressImage) {
-        final needsCompression = await _compressionService.needsCompression(imagePath);
+        final needsCompression = await _compressionService.needsCompression(
+          imagePath,
+        );
         if (needsCompression || shouldAggressivelyCompress) {
-          final compressedPath = await _compressionService.compressImage(imagePath);
+          final compressedPath = await _compressionService.compressImage(
+            imagePath,
+          );
           compressionStats = await _compressionService.getCompressionStats(
             imagePath,
             compressedPath,
@@ -124,7 +134,10 @@ class ReceiptImageService {
 
       String? downloadUrl;
       final isOnlineResult = await _connectivityService.isOnline();
-      final isOnline = isOnlineResult.fold((failure) => false, (online) => online);
+      final isOnline = isOnlineResult.fold(
+        (failure) => false,
+        (online) => online,
+      );
       if (uploadToFirebase && isOnline) {
         print('🔌 Uploading receipt online...');
         switch (category) {
@@ -153,7 +166,18 @@ class ReceiptImageService {
             throw Exception('Invalid category: $category');
         }
       } else if (uploadToFirebase && !isOnline) {
-        print('🔌 Offline - receipt saved locally, will upload when online');
+        print('🔌 Offline - adding to sync queue...');
+
+        // ✅ NOVO: Adiciona à fila de sincronização
+        await _imageSyncService.addPendingUpload(
+          localPath: finalImagePath,
+          userId: userId,
+          recordId: recordId,
+          category: category,
+          collectionPath: _getCollectionPath(category),
+        );
+
+        print('📤 Image queued for upload when online');
       }
 
       return ImageProcessingResult(
@@ -186,7 +210,9 @@ class ReceiptImageService {
       Map<String, dynamic> compressionStats = {};
       bool wasCompressed = false;
       if (compressImage) {
-        final compressedBytes = await _compressionService.compressImageBytes(imageBytes);
+        final compressedBytes = await _compressionService.compressImageBytes(
+          imageBytes,
+        );
         if (compressedBytes.length < imageBytes.length) {
           finalImageBytes = compressedBytes;
           wasCompressed = true;
@@ -194,7 +220,11 @@ class ReceiptImageService {
             'originalSize': imageBytes.length,
             'compressedSize': compressedBytes.length,
             'spaceSaved': imageBytes.length - compressedBytes.length,
-            'spaceSavedPercent': ((imageBytes.length - compressedBytes.length) / imageBytes.length * 100).round(),
+            'spaceSavedPercent':
+                ((imageBytes.length - compressedBytes.length) /
+                        imageBytes.length *
+                        100)
+                    .round(),
           };
         }
       }
@@ -222,7 +252,10 @@ class ReceiptImageService {
   }
 
   /// Save image bytes to local storage
-  Future<String> _saveImageBytesLocally(Uint8List bytes, String recordId) async {
+  Future<String> _saveImageBytesLocally(
+    Uint8List bytes,
+    String recordId,
+  ) async {
     try {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final fileName = '${recordId}_$timestamp.webp';
@@ -232,7 +265,7 @@ class ReceiptImageService {
       if (await tempFile.exists()) {
         await tempFile.delete();
       }
-      
+
       return finalPath;
     } catch (e) {
       throw Exception('Failed to save image locally: $e');
@@ -281,7 +314,7 @@ class ReceiptImageService {
       _compressionService.cleanupOldImages(),
       _storageService.cleanupOldImages(userId, daysOld: daysOld),
     ];
-    
+
     await Future.wait(futures, eagerError: false);
   }
 
@@ -308,24 +341,34 @@ class ReceiptImageService {
     try {
       final localStats = await _getLocalStorageStats();
       final remoteStats = await _storageService.getUserStorageUsage(userId);
-      
+
       return {
         'localUsage': localStats,
         'remoteUsage': remoteStats,
         'totalUsage': localStats + remoteStats,
       };
     } catch (e) {
-      return {
-        'localUsage': 0,
-        'remoteUsage': 0,
-        'totalUsage': 0,
-      };
+      return {'localUsage': 0, 'remoteUsage': 0, 'totalUsage': 0};
     }
   }
 
   /// Get local storage usage
   Future<int> _getLocalStorageStats() async {
     return 0;
+  }
+
+  /// Helper para obter o caminho da coleção no Firestore
+  String _getCollectionPath(String category) {
+    switch (category) {
+      case 'fuel':
+        return 'fuel_supplies';
+      case 'maintenance':
+        return 'maintenance_records';
+      case 'expenses':
+        return 'expenses';
+      default:
+        throw Exception('Invalid category: $category');
+    }
   }
 
   /// Sync local images to Firebase (for offline scenarios)
@@ -340,7 +383,7 @@ class ReceiptImageService {
     }
 
     final downloadUrls = <String>[];
-    
+
     for (int i = 0; i < localPaths.length; i++) {
       try {
         final downloadUrl = await _storageService.uploadReceiptImageBytes(
@@ -354,7 +397,7 @@ class ReceiptImageService {
         downloadUrls.add('');
       }
     }
-    
+
     return downloadUrls;
   }
 }

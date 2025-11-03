@@ -46,6 +46,7 @@ class ValidatedFormField extends StatefulWidget {
   const ValidatedFormField({
     super.key,
     this.controller,
+    this.focusNode,
     this.label,
     this.hint,
     this.helperText,
@@ -82,6 +83,7 @@ class ValidatedFormField extends StatefulWidget {
     this.textStyle,
   });
   final TextEditingController? controller;
+  final FocusNode? focusNode;
   final String? label;
   final String? hint;
   final String? helperText;
@@ -205,10 +207,9 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
       ValidationResult result;
       if (widget.customValidator != null) {
         final error = widget.customValidator!(text);
-        result =
-            error != null
-                ? ValidationResult.error(error)
-                : ValidationResult.success();
+        result = error != null
+            ? ValidationResult.error(error)
+            : ValidationResult.success();
       } else {
         result = _getValidationForType(text);
       }
@@ -437,6 +438,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
       children: [
         TextFormField(
           controller: _controller,
+          focusNode: widget.focusNode,
           enabled: widget.enabled,
           keyboardType: widget.keyboardType,
           inputFormatters: widget.inputFormatters,
@@ -462,20 +464,18 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
               _performValidation(text);
             }
           },
-          validator:
-              (_) =>
-                  _lastValidationResult.isValid
-                      ? null
-                      : _lastValidationResult.message,
+          validator: (_) => _lastValidationResult.isValid
+              ? null
+              : _lastValidationResult.message,
           decoration:
               widget.decoration?.copyWith(
-                labelText:
-                    widget.required && widget.label != null
-                        ? '${widget.label} *'
-                        : widget.label,
+                labelText: widget.required && widget.label != null
+                    ? '${widget.label} *'
+                    : widget.label,
                 hintText: widget.hint,
-                prefixIcon:
-                    widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
+                prefixIcon: widget.prefixIcon != null
+                    ? Icon(widget.prefixIcon)
+                    : null,
                 suffixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -487,35 +487,33 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
                     const SizedBox(width: 12),
                   ],
                 ),
-                enabledBorder:
-                    borderColor != null
-                        ? OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: borderColor),
-                        )
-                        : null,
-                focusedBorder:
-                    borderColor != null
-                        ? OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: borderColor, width: 2),
-                        )
-                        : null,
+                enabledBorder: borderColor != null
+                    ? OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: borderColor),
+                      )
+                    : null,
+                focusedBorder: borderColor != null
+                    ? OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: borderColor, width: 2),
+                      )
+                    : null,
                 helperText: _displayHelperText,
                 helperStyle: TextStyle(color: _helperTextColor),
                 counterText:
                     widget.showCharacterCount && widget.maxLength != null
-                        ? null
-                        : '', // Esconder contador padrão se não queremos
+                    ? null
+                    : '', // Esconder contador padrão se não queremos
               ) ??
               InputDecoration(
-                labelText:
-                    widget.required && widget.label != null
-                        ? '${widget.label} *'
-                        : widget.label,
+                labelText: widget.required && widget.label != null
+                    ? '${widget.label} *'
+                    : widget.label,
                 hintText: widget.hint,
-                prefixIcon:
-                    widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
+                prefixIcon: widget.prefixIcon != null
+                    ? Icon(widget.prefixIcon)
+                    : null,
                 suffixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -530,39 +528,37 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                enabledBorder:
-                    borderColor != null
-                        ? OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: borderColor),
-                        )
-                        : OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
+                enabledBorder: borderColor != null
+                    ? OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: borderColor),
+                      )
+                    : OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.outline,
                         ),
-                focusedBorder:
-                    borderColor != null
-                        ? OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: borderColor, width: 2),
-                        )
-                        : OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.outline,
-                            width: 2,
-                          ),
+                      ),
+                focusedBorder: borderColor != null
+                    ? OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: borderColor, width: 2),
+                      )
+                    : OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.outline,
+                          width: 2,
                         ),
+                      ),
                 filled: true,
                 fillColor: Colors.white,
                 helperText: _displayHelperText,
                 helperStyle: TextStyle(color: _helperTextColor),
                 counterText:
                     widget.showCharacterCount && widget.maxLength != null
-                        ? null
-                        : '',
+                    ? null
+                    : '',
               ),
         ),
         if (_validationState == ValidationState.validating)
@@ -570,8 +566,9 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
             padding: const EdgeInsets.only(top: 4.0),
             child: LinearProgressIndicator(
               color: Theme.of(context).colorScheme.onSurface,
-              backgroundColor:
-                  Theme.of(context).colorScheme.surfaceContainerHighest,
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest,
             ),
           ),
       ],

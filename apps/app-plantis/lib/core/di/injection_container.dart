@@ -266,6 +266,14 @@ void _initAppServices() {
       deletePlantUseCase: sl(),
     ),
   );
+
+  // EnhancedAccountDeletionService para delete account seguro
+  sl.registerLazySingleton<EnhancedAccountDeletionService>(
+    () => EnhancedAccountDeletionService(
+      authRepository: sl<IAuthRepository>(),
+      appDataCleaner: sl<DataCleanerService>(),
+    ),
+  );
 }
 
 void _initDataExport() {

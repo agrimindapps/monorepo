@@ -6,12 +6,16 @@ import 'validated_form_field.dart';
 enum NotesFieldType {
   /// Campo de observações gerais
   notes,
+
   /// Campo de descrição detalhada
   description,
+
   /// Campo de localização/endereço
   location,
+
   /// Campo de comentários
   comments,
+
   /// Campo genérico de texto
   generic,
 }
@@ -37,10 +41,10 @@ enum NotesFieldType {
 /// )
 /// ```
 class NotesFormField extends StatelessWidget {
-
   const NotesFormField({
     super.key,
     required this.controller,
+    this.focusNode,
     required this.type,
     this.customLabel,
     this.customHint,
@@ -52,8 +56,12 @@ class NotesFormField extends StatelessWidget {
     this.showCharacterCount = true,
     this.customHelperText,
   });
+
   /// Controller do campo de texto
   final TextEditingController controller;
+
+  /// FocusNode do campo (opcional)
+  final FocusNode? focusNode;
 
   /// Tipo do campo de texto (define configurações padrão)
   final NotesFieldType type;
@@ -91,6 +99,7 @@ class NotesFormField extends StatelessWidget {
 
     return ValidatedFormField(
       controller: controller,
+      focusNode: focusNode,
       label: customLabel ?? config.label,
       hint: customHint ?? config.hint,
       prefixIcon: config.icon,
@@ -193,7 +202,6 @@ class NotesFormField extends StatelessWidget {
 
 /// Configuração interna para tipos de campo
 class _NotesFieldConfig {
-
   const _NotesFieldConfig({
     required this.label,
     required this.hint,
@@ -212,16 +220,17 @@ class _NotesFieldConfig {
 
 /// Variações pré-configuradas para casos específicos
 class ObservationsField extends StatelessWidget {
-
   const ObservationsField({
     super.key,
     required this.controller,
+    this.focusNode,
     this.label,
     this.hint,
     this.required = false,
     this.onChanged,
   });
   final TextEditingController controller;
+  final FocusNode? focusNode;
   final String? label;
   final String? hint;
   final bool required;
@@ -231,6 +240,7 @@ class ObservationsField extends StatelessWidget {
   Widget build(BuildContext context) {
     return NotesFormField(
       controller: controller,
+      focusNode: focusNode,
       type: NotesFieldType.notes,
       customLabel: label,
       customHint: hint,
@@ -241,7 +251,6 @@ class ObservationsField extends StatelessWidget {
 }
 
 class DescriptionField extends StatelessWidget {
-
   const DescriptionField({
     super.key,
     required this.controller,
@@ -270,7 +279,6 @@ class DescriptionField extends StatelessWidget {
 }
 
 class LocationField extends StatelessWidget {
-
   const LocationField({
     super.key,
     required this.controller,
@@ -299,7 +307,6 @@ class LocationField extends StatelessWidget {
 }
 
 class CommentsField extends StatelessWidget {
-
   const CommentsField({
     super.key,
     required this.controller,

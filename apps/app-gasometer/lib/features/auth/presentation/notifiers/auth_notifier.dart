@@ -470,6 +470,38 @@ class Auth extends _$Auth {
             }
           }
 
+          // Limpar TODOS os dados locais do app no logout
+          try {
+            if (kDebugMode) {
+              debugPrint('🗑️ Limpando dados locais no logout...');
+            }
+
+            final clearResult = await UnifiedSyncManager.instance.clearAppData(
+              'gasometer',
+            );
+
+            clearResult.fold(
+              (failure) {
+                if (kDebugMode) {
+                  debugPrint(
+                    '⚠️ Falha ao limpar dados locais: ${failure.message}',
+                  );
+                }
+              },
+              (_) {
+                if (kDebugMode) {
+                  debugPrint(
+                    '✅ Dados locais limpos com sucesso (veículos, abastecimentos, manutenções)',
+                  );
+                }
+              },
+            );
+          } catch (e) {
+            if (kDebugMode) {
+              debugPrint('❌ Erro ao limpar dados locais: $e');
+            }
+          }
+
           state = state.copyWith(
             currentUser: null,
             isAuthenticated: false,

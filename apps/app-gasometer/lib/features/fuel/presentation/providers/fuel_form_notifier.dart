@@ -75,13 +75,16 @@ class FuelFormState {
       isLoading: isLoading ?? this.isLoading,
       lastError: clearError ? null : (lastError ?? this.lastError),
       lastOdometerReading: lastOdometerReading ?? this.lastOdometerReading,
-      receiptImagePath:
-          clearImagePaths ? null : (receiptImagePath ?? this.receiptImagePath),
-      receiptImageUrl:
-          clearImagePaths ? null : (receiptImageUrl ?? this.receiptImageUrl),
+      receiptImagePath: clearImagePaths
+          ? null
+          : (receiptImagePath ?? this.receiptImagePath),
+      receiptImageUrl: clearImagePaths
+          ? null
+          : (receiptImageUrl ?? this.receiptImageUrl),
       isUploadingImage: isUploadingImage ?? this.isUploadingImage,
-      imageUploadError:
-          clearImageError ? null : (imageUploadError ?? this.imageUploadError),
+      imageUploadError: clearImageError
+          ? null
+          : (imageUploadError ?? this.imageUploadError),
     );
   }
 }
@@ -124,6 +127,24 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
   Timer? _litersDebounceTimer;
   Timer? _priceDebounceTimer;
   Timer? _odometerDebounceTimer;
+
+  // FocusNodes for field focus management
+  final FocusNode litersFocusNode = FocusNode();
+  final FocusNode pricePerLiterFocusNode = FocusNode();
+  final FocusNode odometerFocusNode = FocusNode();
+  final FocusNode gasStationFocusNode = FocusNode();
+  final FocusNode gasStationBrandFocusNode = FocusNode();
+  final FocusNode notesFocusNode = FocusNode();
+
+  /// Map of field names to their corresponding FocusNodes
+  Map<String, FocusNode> get fieldFocusNodes => {
+    'liters': litersFocusNode,
+    'pricePerLiter': pricePerLiterFocusNode,
+    'odometer': odometerFocusNode,
+    'gasStationName': gasStationFocusNode,
+    'gasStationBrand': gasStationBrandFocusNode,
+    'notes': notesFocusNode,
+  };
 
   Future<void> initialize({String? vehicleId, String? userId}) async {
     try {
@@ -174,10 +195,9 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
           formModel: state.formModel.copyWith(
             vehicle: vehicle,
             odometer: vehicle.currentOdometer,
-            fuelType:
-                vehicle.supportedFuels.isNotEmpty
-                    ? vehicle.supportedFuels.first
-                    : FuelType.gasoline,
+            fuelType: vehicle.supportedFuels.isNotEmpty
+                ? vehicle.supportedFuels.first
+                : FuelType.gasoline,
           ),
           lastOdometerReading: lastOdometer,
         );
@@ -193,20 +213,17 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
   }
 
   void _updateTextControllers() {
-    litersController.text =
-        state.formModel.liters > 0
-            ? _formatter.formatLiters(state.formModel.liters)
-            : '';
+    litersController.text = state.formModel.liters > 0
+        ? _formatter.formatLiters(state.formModel.liters)
+        : '';
 
-    pricePerLiterController.text =
-        state.formModel.pricePerLiter > 0
-            ? _formatter.formatPricePerLiter(state.formModel.pricePerLiter)
-            : '';
+    pricePerLiterController.text = state.formModel.pricePerLiter > 0
+        ? _formatter.formatPricePerLiter(state.formModel.pricePerLiter)
+        : '';
 
-    odometerController.text =
-        state.formModel.odometer > 0
-            ? _formatter.formatOdometer(state.formModel.odometer)
-            : '';
+    odometerController.text = state.formModel.odometer > 0
+        ? _formatter.formatOdometer(state.formModel.odometer)
+        : '';
 
     gasStationController.text = state.formModel.gasStationName;
     gasStationBrandController.text = state.formModel.gasStationBrand;
@@ -397,7 +414,12 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     }
   }
 
-  bool validateForm() {
+  /// Validates the complete form and returns validation result with first error field
+  ///
+  /// Returns a record with:
+  /// - bool: whether the form is valid
+  /// - String?: the key of the first field with an error (null if valid)
+  (bool, String?) validateForm() {
     if (kDebugMode) {
       debugPrint('[FUEL VALIDATION] Starting form validation...');
       debugPrint('[FUEL VALIDATION] liters: "${litersController.text}"');
@@ -428,7 +450,38 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
 
     state = state.copyWith(formModel: state.formModel.copyWith(errors: errors));
 
-    return errors.isEmpty;
+    if (errors.isEmpty) {
+      return (true, null);
+    }
+
+    // Priority order for field focus (most important fields first)
+    const fieldPriority = [
+      'liters',
+      'pricePerLiter',
+      'odometer',
+      'fuelType',
+      'gasStationName',
+      'notes',
+    ];
+
+    // Find first error field according to priority
+    for (final field in fieldPriority) {
+      if (errors.containsKey(field)) {
+        if (kDebugMode) {
+          debugPrint('[FUEL VALIDATION] First error field: $field');
+        }
+        return (false, field);
+      }
+    }
+
+    // If no priority field has error, return first error found
+    final firstErrorField = errors.keys.first;
+    if (kDebugMode) {
+      debugPrint(
+        '[FUEL VALIDATION] First error field (fallback): $firstErrorField',
+      );
+    }
+    return (false, firstErrorField);
   }
 
   void clearForm() {
@@ -626,6 +679,14 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     gasStationController.dispose();
     gasStationBrandController.dispose();
     notesController.dispose();
+
+    // Dispose FocusNodes
+    litersFocusNode.dispose();
+    pricePerLiterFocusNode.dispose();
+    odometerFocusNode.dispose();
+    gasStationFocusNode.dispose();
+    gasStationBrandFocusNode.dispose();
+    notesFocusNode.dispose();
 
     super.dispose();
   }

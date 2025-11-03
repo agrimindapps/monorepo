@@ -116,7 +116,9 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage>
       isLoading: formState.isLoading || _isSubmitting,
       confirmButtonText: 'Salvar',
       onCancel: () {
-        final formNotifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+        final formNotifier = ref.read(
+          fuelFormNotifierProvider(vehicleId).notifier,
+        );
         formNotifier.clearForm();
         Navigator.of(context).pop();
       },
@@ -174,9 +176,45 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage>
 
     final formNotifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
     clearFormError();
-    if (!formNotifier.validateForm()) {
-      debugPrint('[FUEL DEBUG] Form validation FAILED - submission aborted');
-      setFormError('Por favor, preencha todos os campos obrigatórios');
+
+    final (isValid, firstErrorField) = formNotifier.validateForm();
+
+    if (!isValid) {
+      debugPrint(
+        '[FUEL DEBUG] Form validation FAILED - Field: $firstErrorField',
+      );
+
+      // Focus on the first field with error
+      if (firstErrorField != null) {
+        final focusNode = formNotifier.fieldFocusNodes[firstErrorField];
+        if (focusNode != null) {
+          // Wait for next frame to ensure field is rendered
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              // Request focus on the error field
+              focusNode.requestFocus();
+
+              // Scroll to make the field visible if it's outside viewport
+              if (focusNode.context != null) {
+                Scrollable.ensureVisible(
+                  focusNode.context!,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  alignment: 0.2, // Position field at 20% from top of viewport
+                );
+              }
+            }
+          });
+        }
+
+        // Get specific error message for the field
+        final formState = ref.read(fuelFormNotifierProvider(vehicleId));
+        final errorMessage = formState.formModel.errors[firstErrorField];
+        setFormError(errorMessage ?? 'Por favor, corrija os campos destacados');
+      } else {
+        setFormError('Por favor, preencha todos os campos obrigatórios');
+      }
+
       return;
     }
 

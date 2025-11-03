@@ -25,10 +25,10 @@ import 'validated_form_field.dart';
 /// )
 /// ```
 class OdometerField extends StatelessWidget {
-
   const OdometerField({
     super.key,
     required this.controller,
+    this.focusNode,
     this.label,
     this.hint,
     this.required = true,
@@ -40,8 +40,12 @@ class OdometerField extends StatelessWidget {
     this.minValue = 0.0,
     this.maxValue = 9999999.0,
   });
+
   /// Controller do campo de texto
   final TextEditingController controller;
+
+  /// FocusNode do campo (opcional)
+  final FocusNode? focusNode;
 
   /// Label do campo (padrão: "Quilometragem Atual")
   final String? label;
@@ -77,6 +81,7 @@ class OdometerField extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValidatedFormField(
       controller: controller,
+      focusNode: focusNode,
       label: label ?? 'Quilometragem Atual${required ? ' *' : ''}',
       hint: hint ?? _buildDefaultHint(),
       prefixIcon: Icons.speed,
@@ -87,9 +92,7 @@ class OdometerField extends StatelessWidget {
       minValue: minValue,
       maxValue: maxValue,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      inputFormatters: [
-        FuelFormatterService().odometerFormatter,
-      ],
+      inputFormatters: [FuelFormatterService().odometerFormatter],
       suffix: const Text(
         'km',
         style: TextStyle(
@@ -159,7 +162,6 @@ class OdometerField extends StatelessWidget {
 
 /// Variação do OdometerField para casos específicos onde é opcional
 class OptionalOdometerField extends StatelessWidget {
-
   const OptionalOdometerField({
     super.key,
     required this.controller,
@@ -193,7 +195,6 @@ class OptionalOdometerField extends StatelessWidget {
 
 /// Variação simplificada do OdometerField para casos básicos
 class SimpleOdometerField extends StatelessWidget {
-
   const SimpleOdometerField({
     super.key,
     required this.controller,

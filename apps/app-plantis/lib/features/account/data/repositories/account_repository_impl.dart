@@ -10,15 +10,18 @@ import '../datasources/account_remote_datasource.dart';
 
 /// Implementação do AccountRepository
 /// Coordena entre data sources local e remoto
+/// Usa EnhancedAccountDeletionService para delete account seguro
 class AccountRepositoryImpl implements AccountRepository {
   final AccountRemoteDataSource remoteDataSource;
   final AccountLocalDataSource localDataSource;
   final fb.FirebaseAuth firebaseAuth;
+  final EnhancedAccountDeletionService enhancedDeletionService;
 
   const AccountRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
     required this.firebaseAuth,
+    required this.enhancedDeletionService,
   });
 
   @override
@@ -105,13 +108,28 @@ class AccountRepositoryImpl implements AccountRepository {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
 
-      // Deleta conta remota (isso já limpa os dados)
-      await remoteDataSource.deleteAccount(userEntity.id);
+      // Usa EnhancedAccountDeletionService com todos os recursos de segurança:
+      // - Re-autenticação obrigatória (será solicitada pela UI)
+      // - Rate limiting
+      // - Verificação de assinaturas RevenueCat
+      // - Limpeza completa Firestore + Storage
+      // - Limpeza local via DataCleanerService
+      // - Auditoria e logging
+      final result = await enhancedDeletionService.deleteAccount(
+        userId: userEntity.id,
+        isAnonymous: userEntity.provider == AuthProvider.anonymous,
+        // Nota: password será solicitada pela UI antes de chamar este método
+      );
 
-      // Limpa dados locais
-      await localDataSource.clearAccountData();
-
-      return const Right(null);
+      return result.fold((error) => Left(AuthFailure(error.message)), (
+        deletionResult,
+      ) {
+        if (deletionResult.isSuccess) {
+          return const Right(null);
+        } else {
+          return Left(AuthFailure(deletionResult.userMessage));
+        }
+      });
     } on Failure catch (failure) {
       return Left(failure);
     } catch (e) {

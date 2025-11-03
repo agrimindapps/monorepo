@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:core/core.dart' hide DeleteAccountUseCase;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/services/data_cleaner_service.dart';
 import '../../data/datasources/account_local_datasource.dart';
 import '../../data/datasources/account_remote_datasource.dart';
 import '../../data/repositories/account_repository_impl.dart';
@@ -38,6 +40,22 @@ AccountLocalDataSource accountLocalDataSource(AccountLocalDataSourceRef ref) {
 }
 
 // ============================================================================
+// Services
+// ============================================================================
+
+@riverpod
+EnhancedAccountDeletionService enhancedAccountDeletionService(Ref ref) {
+  // Obtém dependências via GetIt (injetadas no DI principal)
+  final authRepository = di.sl<IAuthRepository>();
+  final appDataCleaner = di.sl<DataCleanerService>();
+
+  return EnhancedAccountDeletionService(
+    authRepository: authRepository,
+    appDataCleaner: appDataCleaner,
+  );
+}
+
+// ============================================================================
 // Repository
 // ============================================================================
 
@@ -46,11 +64,15 @@ AccountRepository accountRepository(AccountRepositoryRef ref) {
   final remoteDataSource = ref.watch(accountRemoteDataSourceProvider);
   final localDataSource = ref.watch(accountLocalDataSourceProvider);
   final firebaseAuth = fb.FirebaseAuth.instance;
+  final enhancedDeletionService = ref.watch(
+    enhancedAccountDeletionServiceProvider,
+  );
 
   return AccountRepositoryImpl(
     remoteDataSource: remoteDataSource,
     localDataSource: localDataSource,
     firebaseAuth: firebaseAuth,
+    enhancedDeletionService: enhancedDeletionService,
   );
 }
 

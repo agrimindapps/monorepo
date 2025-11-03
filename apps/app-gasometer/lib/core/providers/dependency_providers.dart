@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 
+import '../services/image_sync_service.dart';
 import '../../features/fuel/domain/repositories/fuel_repository.dart';
 import '../../features/fuel/domain/usecases/add_fuel_record.dart';
 import '../../features/fuel/domain/usecases/delete_fuel_record.dart';
@@ -12,6 +13,7 @@ import '../../features/vehicles/domain/usecases/delete_vehicle.dart';
 import '../../features/vehicles/domain/usecases/get_all_vehicles.dart';
 import '../../features/vehicles/domain/usecases/get_vehicle_by_id.dart';
 import '../../features/vehicles/domain/usecases/update_vehicle.dart';
+
 final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
   return GetIt.instance<FirebaseAuthService>();
 });
@@ -20,17 +22,26 @@ final hiveStorageServiceProvider = Provider<HiveStorageService>((ref) {
   return GetIt.instance<HiveStorageService>();
 });
 
-final firebaseAnalyticsServiceProvider = Provider<FirebaseAnalyticsService>((ref) {
+final firebaseAnalyticsServiceProvider = Provider<FirebaseAnalyticsService>((
+  ref,
+) {
   return GetIt.instance<FirebaseAnalyticsService>();
 });
 
-final firebaseCrashlyticsServiceProvider = Provider<FirebaseCrashlyticsService>((ref) {
-  return GetIt.instance<FirebaseCrashlyticsService>();
-});
+final firebaseCrashlyticsServiceProvider = Provider<FirebaseCrashlyticsService>(
+  (ref) {
+    return GetIt.instance<FirebaseCrashlyticsService>();
+  },
+);
 
 final connectivityServiceProvider = Provider<ConnectivityService>((ref) {
   return GetIt.instance<ConnectivityService>();
 });
+
+final imageSyncServiceProvider = Provider<ImageSyncService>((ref) {
+  return GetIt.instance<ImageSyncService>();
+});
+
 final vehicleRepositoryProvider = Provider<VehicleRepository>((ref) {
   return GetIt.instance<VehicleRepository>();
 });
@@ -61,7 +72,9 @@ final getAllFuelRecordsProvider = Provider<GetAllFuelRecords>((ref) {
   return GetIt.instance<GetAllFuelRecords>();
 });
 
-final getFuelRecordsByVehicleProvider = Provider<GetFuelRecordsByVehicle>((ref) {
+final getFuelRecordsByVehicleProvider = Provider<GetFuelRecordsByVehicle>((
+  ref,
+) {
   return GetIt.instance<GetFuelRecordsByVehicle>();
 });
 
@@ -83,6 +96,8 @@ final appRatingRepositoryProvider = Provider<IAppRatingRepository>((ref) {
   try {
     return GetIt.instance<IAppRatingRepository>();
   } catch (e) {
-    throw Exception('IAppRatingRepository not registered in GetIt. Please register it in your dependency injection setup.');
+    throw Exception(
+      'IAppRatingRepository not registered in GetIt. Please register it in your dependency injection setup.',
+    );
   }
 });

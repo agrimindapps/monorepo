@@ -20,12 +20,7 @@ import '../../domain/services/fuel_formatter_service.dart';
 import '../providers/fuel_form_notifier.dart';
 
 class FuelFormView extends ConsumerWidget {
-
-  const FuelFormView({
-    super.key,
-    required this.vehicleId,
-    this.onSubmit,
-  });
+  const FuelFormView({super.key, required this.vehicleId, this.onSubmit});
   final String vehicleId;
   final VoidCallback? onSubmit;
 
@@ -90,8 +85,6 @@ class FuelFormView extends ConsumerWidget {
     );
   }
 
-
-
   Widget _buildFuelInfoSection(BuildContext context, WidgetRef ref) {
     final state = ref.watch(fuelFormNotifierProvider(vehicleId));
     final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
@@ -145,9 +138,12 @@ class FuelFormView extends ConsumerWidget {
     final supportedFuels = vehicle.supportedFuels;
 
     return ValidatedDropdownField<FuelType>(
-      items: supportedFuels.map((fuelType) =>
-        ValidatedDropdownItem.text(fuelType, fuelType.displayName)
-      ).toList(),
+      items: supportedFuels
+          .map(
+            (fuelType) =>
+                ValidatedDropdownItem.text(fuelType, fuelType.displayName),
+          )
+          .toList(),
       value: state.formModel.fuelType,
       label: FuelConstants.fuelTypeLabel,
       hint: 'Selecione o tipo de combustível',
@@ -179,25 +175,26 @@ class FuelFormView extends ConsumerWidget {
   }
 
   Widget _buildLitersField(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final state = ref.watch(fuelFormNotifierProvider(vehicleId));
     final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
-    final vehicle = state.formModel.vehicle;
 
     return ValidatedFormField(
       controller: notifier.litersController,
-      label: FuelConstants.litersLabel,
-      hint: FuelConstants.litersPlaceholder,
+      focusNode: notifier.litersFocusNode,
+      label: 'Litros',
+      hint: 'Ex: 45.50',
       prefixIcon: Icons.local_gas_station,
-      required: true,
-      validationType: ValidationType.fuelLiters,
-      tankCapacity: vehicle?.tankCapacity,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      inputFormatters: [FuelFormatterService().litersFormatter],
-      suffix: const Text(
-        'L',
-        style: TextStyle(fontSize: 14, color: Colors.grey),
+      validationType: ValidationType.fuelLiters,
+      tankCapacity: state.formModel.vehicle?.tankCapacity,
+      required: true,
+      validateOnChange: false,
+      validateOnFocusOut: true,
+      decoration: InputDecoration(
+        fillColor: theme.colorScheme.surfaceContainerHighest,
+        filled: true,
       ),
-      onValidationChanged: (result) {},
     );
   }
 
@@ -206,10 +203,10 @@ class FuelFormView extends ConsumerWidget {
 
     return PriceFormField(
       controller: notifier.pricePerLiterController,
+      focusNode: notifier.pricePerLiterFocusNode,
       label: FuelConstants.pricePerLiterLabel,
       required: true,
-      onChanged: (value) {
-      },
+      onChanged: (value) {},
     );
   }
 
@@ -245,26 +242,25 @@ class FuelFormView extends ConsumerWidget {
 
     return OdometerField(
       controller: notifier.odometerController,
+      focusNode: notifier.odometerFocusNode,
       label: FuelConstants.odometerLabel,
       hint: FuelConstants.odometerPlaceholder,
       currentOdometer: vehicle?.currentOdometer,
       lastReading: state.lastOdometerReading,
-      onChanged: (value) {
-      },
+      onChanged: (value) {},
     );
   }
-
 
   Widget _buildNotesField(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
 
     return ObservationsField(
       controller: notifier.notesController,
+      focusNode: notifier.notesFocusNode,
       label: FuelConstants.notesLabel,
       hint: FuelConstants.notesHint,
       required: false,
-      onChanged: (value) {
-      },
+      onChanged: (value) {},
     );
   }
 
@@ -284,7 +280,4 @@ class FuelFormView extends ConsumerWidget {
       description: 'Anexe uma foto do comprovante de abastecimento (opcional)',
     );
   }
-
-
-
 }

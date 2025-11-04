@@ -4,14 +4,19 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../domain/entities/device_entity.dart';
+import '../../domain/repositories/i_device_repository.dart';
 import '../../shared/utils/failure.dart';
 
 /// Serviço para integração com Firebase Cloud Functions e Firestore
 /// Responsável por operações de dispositivos no backend
-class FirebaseDeviceService {
+class FirebaseDeviceService implements IDeviceRepository {
+  /// Instância do Firebase Functions para executar cloud functions
   final FirebaseFunctions _functions;
+
+  /// Instância do Firestore para operações de banco de dados
   final FirebaseFirestore _firestore;
 
+  /// Cria uma instância de FirebaseDeviceService
   FirebaseDeviceService({
     FirebaseFunctions? functions,
     FirebaseFirestore? firestore,
@@ -19,6 +24,7 @@ class FirebaseDeviceService {
        _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Valida um dispositivo via Cloud Function
+  @override
   Future<Either<Failure, DeviceEntity>> validateDevice({
     required String userId,
     required DeviceEntity device,
@@ -92,6 +98,7 @@ class FirebaseDeviceService {
   }
 
   /// Revoga um dispositivo via Cloud Function
+  @override
   Future<Either<Failure, void>> revokeDevice({
     required String userId,
     required String deviceUuid,
@@ -159,6 +166,13 @@ class FirebaseDeviceService {
     }
   }
 
+  @override
+  Future<Either<Failure, List<DeviceEntity>>> getUserDevices(
+    String userId,
+  ) async {
+    return getDevicesFromFirestore(userId);
+  }
+
   /// Obtém dispositivos diretamente do Firestore
   Future<Either<Failure, List<DeviceEntity>>> getDevicesFromFirestore(
     String userId,
@@ -220,6 +234,271 @@ class FirebaseDeviceService {
         ),
       );
     }
+  }
+
+  @override
+  Future<Either<Failure, DeviceEntity?>> getDeviceByUuid(String deviceUuid) async {
+    try {
+      if (kDebugMode) {
+        debugPrint('🔄 FirebaseDevice: Getting device by UUID $deviceUuid');
+      }
+
+      // Note: This requires knowing the userId or doing a collection group query
+      // For now, returning not implemented as this would require additional context
+      return const Left(
+        ServerFailure(
+          'getDeviceByUuid requires userId context',
+          code: 'NOT_IMPLEMENTED',
+        ),
+      );
+    } catch (e) {
+      return Left(
+        ServerFailure(
+          'Erro ao buscar dispositivo por UUID',
+          code: 'GET_DEVICE_ERROR',
+          details: e,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> revokeAllOtherDevices({
+    required String userId,
+    required String currentDeviceUuid,
+  }) async {
+    try {
+      if (kDebugMode) {
+        debugPrint(
+          '🔄 FirebaseDevice: Revoking all devices except $currentDeviceUuid',
+        );
+      }
+
+      final devicesResult = await getUserDevices(userId);
+
+      return devicesResult.fold(
+        (failure) => Left(failure),
+        (devices) async {
+          for (final device in devices) {
+            if (device.uuid != currentDeviceUuid) {
+              final result = await revokeDevice(
+                userId: userId,
+                deviceUuid: device.uuid,
+              );
+
+              if (result.isLeft()) {
+                if (kDebugMode) {
+                  debugPrint(
+                    '⚠️ FirebaseDevice: Failed to revoke device ${device.uuid}',
+                  );
+                }
+              }
+            }
+          }
+
+          if (kDebugMode) {
+            debugPrint('✅ FirebaseDevice: All other devices revoked');
+          }
+
+          return const Right(null);
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ FirebaseDevice: Error revoking devices - $e');
+      }
+
+      return Left(
+        ServerFailure(
+          'Erro ao revogar dispositivos',
+          code: 'REVOKE_ALL_ERROR',
+          details: e,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, DeviceEntity>> updateLastActivity({
+    required String userId,
+    required String deviceUuid,
+  }) async {
+    return updateDeviceLastActivity(userId: userId, deviceUuid: deviceUuid);
+  }
+
+  @override
+  Future<Either<Failure, bool>> canAddMoreDevices(String userId) async {
+    try {
+      final countResult = await getActiveDeviceCount(userId);
+      final limitResult = await getDeviceLimit(userId);
+
+      return countResult.fold(
+        (failure) => Left(failure),
+        (deviceCount) => limitResult.fold(
+          (failure) => Left(failure),
+          (limit) => Right(deviceCount < limit),
+        ),
+      );
+    } catch (e) {
+      return Left(
+        ServerFailure(
+          'Erro ao verificar limite de dispositivos',
+          code: 'CHECK_LIMIT_ERROR',
+          details: e,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, int>> getDeviceLimit(String userId) async {
+    // Default limit - should be fetched from subscription status
+    // For now returning a default value
+    return const Right(5); // Default: 5 devices
+  }
+
+  @override
+  Future<Either<Failure, List<String>>> cleanupInactiveDevices({
+    required String userId,
+    required int inactiveDays,
+  }) async {
+    try {
+      if (kDebugMode) {
+        debugPrint(
+          '🧹 FirebaseDevice: Cleaning up devices inactive for $inactiveDays days',
+        );
+      }
+
+      final cutoffDate = DateTime.now().subtract(Duration(days: inactiveDays));
+
+      final querySnapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('devices')
+          .where('isActive', isEqualTo: true)
+          .get();
+
+      final deletedDevices = <String>[];
+
+      for (final doc in querySnapshot.docs) {
+        final data = doc.data();
+        final lastActiveStr = data['lastActiveAt'] as String?;
+
+        if (lastActiveStr != null) {
+          final lastActive = DateTime.parse(lastActiveStr);
+
+          if (lastActive.isBefore(cutoffDate)) {
+            await doc.reference.update({
+              'isActive': false,
+              'updatedAt': DateTime.now().toIso8601String(),
+            });
+            deletedDevices.add(data['uuid'] as String? ?? doc.id);
+          }
+        }
+      }
+
+      if (kDebugMode) {
+        debugPrint(
+          '✅ FirebaseDevice: Cleaned up ${deletedDevices.length} devices',
+        );
+      }
+
+      return Right(deletedDevices);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ FirebaseDevice: Cleanup error - $e');
+      }
+
+      return Left(
+        ServerFailure(
+          'Erro ao limpar dispositivos inativos',
+          code: 'CLEANUP_ERROR',
+          details: e,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, DeviceStatistics>> getDeviceStatistics(
+    String userId,
+  ) async {
+    try {
+      final devicesResult = await getUserDevices(userId);
+
+      return devicesResult.fold(
+        (failure) => Left(failure),
+        (devices) {
+          final platformCounts = <String, int>{};
+          DeviceEntity? lastActive;
+          DeviceEntity? oldest;
+          DeviceEntity? newest;
+
+          for (final device in devices) {
+            // Count by platform
+            platformCounts[device.platform] =
+                (platformCounts[device.platform] ?? 0) + 1;
+
+            // Find last active device
+            if (lastActive == null) {
+              lastActive = device;
+            } else if (device.lastActiveAt != null &&
+                lastActive.lastActiveAt != null &&
+                device.lastActiveAt.isAfter(lastActive.lastActiveAt)) {
+              lastActive = device;
+            }
+
+            // Find oldest device
+            if (oldest == null) {
+              oldest = device;
+            } else if (device.createdAt != null) {
+              final oldestCreated = oldest.createdAt;
+              if (oldestCreated != null &&
+                  device.createdAt!.isBefore(oldestCreated)) {
+                oldest = device;
+              }
+            }
+
+            // Find newest device
+            if (newest == null) {
+              newest = device;
+            } else if (device.createdAt != null) {
+              final newestCreated = newest.createdAt;
+              if (newestCreated != null &&
+                  device.createdAt!.isAfter(newestCreated)) {
+                newest = device;
+              }
+            }
+          }
+
+          final stats = DeviceStatistics(
+            totalDevices: devices.length,
+            activeDevices: devices.length,
+            devicesByPlatform: platformCounts,
+            lastActiveDevice: lastActive,
+            oldestDevice: oldest,
+            newestDevice: newest,
+          );
+
+          return Right(stats);
+        },
+      );
+    } catch (e) {
+      return Left(
+        ServerFailure(
+          'Erro ao obter estatísticas de dispositivos',
+          code: 'STATS_ERROR',
+          details: e,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<DeviceEntity>>> syncDevices(String userId) async {
+    // For Firebase-based implementation, sync is automatic
+    // Just return current devices
+    return getUserDevices(userId);
   }
 
   /// Atualiza última atividade de um dispositivo diretamente no Firestore
@@ -300,6 +579,7 @@ class FirebaseDeviceService {
   }
 
   /// Obtém contagem de dispositivos ativos
+  @override
   Future<Either<Failure, int>> getActiveDeviceCount(String userId) async {
     try {
       final querySnapshot =
@@ -366,13 +646,27 @@ class FirebaseDeviceService {
 }
 
 /// Resultado de operação do Firebase
+///
+/// Encapsula o resultado de uma operação Firebase com suporte para
+/// dados de sucesso, mensagens de erro, códigos e detalhes adicionais.
+/// Usado internamente para padronizar respostas de operações Firebase.
 class FirebaseOperationResult<T> {
+  /// Indica se a operação foi bem-sucedida
   final bool success;
+
+  /// Dados retornados em caso de sucesso (null se falha)
   final T? data;
+
+  /// Mensagem de erro em caso de falha (null se sucesso)
   final String? error;
+
+  /// Código de erro para categorização (null se sucesso)
   final String? errorCode;
+
+  /// Detalhes adicionais da operação (exceções, stack traces, etc)
   final Map<String, dynamic>? details;
 
+  /// Cria uma instância de FirebaseOperationResult
   const FirebaseOperationResult({
     required this.success,
     this.data,

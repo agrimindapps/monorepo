@@ -14,17 +14,14 @@ import 'gasometer_migration_data_source.dart';
 /// gasometer-specific data during migration operations.
 @LazySingleton(as: GasometerMigrationDataSource)
 class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
-  GasometerMigrationDataSourceImpl({
-    FirebaseAuth? firebaseAuth,
-    FirebaseFirestore? firestore,
-    required VehicleRepository vehicleRepository,
-    required FuelRepository fuelRepository,
-    required DataCleanerService dataCleanerService,
-  }) : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-       _firestore = firestore ?? FirebaseFirestore.instance,
-       _vehicleRepository = vehicleRepository,
-       _fuelRepository = fuelRepository,
-       _dataCleanerService = dataCleanerService;
+  GasometerMigrationDataSourceImpl(
+    this._firebaseAuth,
+    this._firestore,
+    this._vehicleRepository,
+    this._fuelRepository,
+    this._dataCleanerService,
+  );
+
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
   final VehicleRepository _vehicleRepository;
@@ -66,11 +63,11 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
             'count': userSupplies.length,
             'totalCost': userSupplies.fold<double>(
               0.0,
-              (sum, s) => sum + s.totalPrice,
+              (acc, s) => acc + s.totalPrice,
             ),
             'totalDistance': userSupplies.fold<double>(
               0.0,
-              (sum, s) => sum + s.odometer,
+              (acc, s) => acc + s.odometer,
             ),
           };
         },

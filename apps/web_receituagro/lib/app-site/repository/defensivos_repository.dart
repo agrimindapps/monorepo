@@ -235,6 +235,11 @@ class DefensivosRepository extends GetxController {
   }
 
   List<int> get pageNumbers {
+    // Proteção para quando o contexto ainda não está disponível
+    if (Get.context == null) {
+      return [];
+    }
+
     double tam = MediaQuery.of(Get.context!).size.width;
 
     int start = currentPage.value - (tam < 600 ? 1 : 2);

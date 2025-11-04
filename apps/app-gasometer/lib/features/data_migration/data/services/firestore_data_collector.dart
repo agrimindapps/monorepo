@@ -7,8 +7,7 @@ import 'package:flutter/foundation.dart';
 /// Aplica SRP (Single Responsibility Principle)
 @injectable
 class FirestoreDataCollector {
-  FirestoreDataCollector({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance;
+  FirestoreDataCollector(this._firestore);
 
   final FirebaseFirestore _firestore;
 

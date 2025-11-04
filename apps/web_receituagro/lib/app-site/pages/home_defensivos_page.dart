@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
@@ -61,6 +60,38 @@ class _DefensivosListarPageState extends State<DefensivosListarPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 60,
+        backgroundColor: Colors.white.withOpacity(0.95),
+        elevation: 1,
+        centerTitle: false,
+        title: Row(
+          children: [
+            Image.asset(
+              'lib/assets/logo_menu.png',
+              height: 40,
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Agrimind',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(width: 4),
+            const Text(
+              'Apps',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w300,
+                color: Colors.black54,
+              ),
+            ),
+          ],
+        ),
+      ),
       body: SingleChildScrollView(
         child: Center(
           child: SizedBox(
@@ -69,6 +100,7 @@ class _DefensivosListarPageState extends State<DefensivosListarPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                const SizedBox(height: 30),
                 _menuPromo(),
                 const SizedBox(height: 30),
                 _columnTituloDescricao(),
@@ -126,51 +158,79 @@ class _DefensivosListarPageState extends State<DefensivosListarPage> {
   Widget _buttonsNavigation() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Obx(() {
-        if (DefensivosRepository().filteredDefensivos.isEmpty) {
-          return const SizedBox.shrink();
-        }
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Obx(() {
+            if (DefensivosRepository().filteredDefensivos.isEmpty) {
+              return const SizedBox.shrink();
+            }
 
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              onPressed: DefensivosRepository().firstPage,
-              icon: const Icon(Icons.first_page),
-            ),
-            IconButton(
-              onPressed: DefensivosRepository().previousPage,
-              icon: const Icon(Icons.chevron_left),
-            ),
-            ...DefensivosRepository().pageNumbers.map((page) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        page == DefensivosRepository().currentPage.value
-                            ? Colors.green
-                            : Colors.grey,
-                  ),
-                  onPressed: () {
-                    DefensivosRepository().currentPage.value = page;
-                    DefensivosRepository().currentItems();
-                  },
-                  child: Text((page + 1).toString()),
+            // Calcular os números das páginas aqui com acesso ao context
+            final repository = DefensivosRepository();
+            final currentPage = repository.currentPage.value;
+            final totalPages = repository.totalPages;
+
+            // Calcular range de páginas baseado no tamanho da tela
+            final screenWidth = MediaQuery.of(context).size.width;
+            final maxButtons = screenWidth < 600 ? 3 : 5;
+
+            int start = currentPage - (maxButtons ~/ 2);
+            int end = currentPage + (maxButtons ~/ 2);
+
+            if (start < 0) {
+              end += (0 - start);
+              start = 0;
+            }
+
+            if (end >= totalPages) {
+              end = totalPages - 1;
+            }
+
+            final pageNumbers = List.generate(
+              end - start + 1,
+              (index) => start + index,
+            );
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  onPressed: repository.firstPage,
+                  icon: const Icon(Icons.first_page),
                 ),
-              );
-            }),
-            IconButton(
-              onPressed: DefensivosRepository().nextPage,
-              icon: const Icon(Icons.chevron_right),
-            ),
-            IconButton(
-              onPressed: DefensivosRepository().lastPage,
-              icon: const Icon(Icons.last_page),
-            ),
-          ],
-        );
-      }),
+                IconButton(
+                  onPressed: repository.previousPage,
+                  icon: const Icon(Icons.chevron_left),
+                ),
+                ...pageNumbers.map((page) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            page == currentPage ? Colors.green : Colors.grey,
+                      ),
+                      onPressed: () {
+                        repository.currentPage.value = page;
+                        repository.currentItems();
+                      },
+                      child: Text((page + 1).toString()),
+                    ),
+                  );
+                }),
+                IconButton(
+                  onPressed: repository.nextPage,
+                  icon: const Icon(Icons.chevron_right),
+                ),
+                IconButton(
+                  onPressed: repository.lastPage,
+                  icon: const Icon(Icons.last_page),
+                ),
+              ],
+            );
+          });
+        },
+      ),
     );
   }
 
@@ -514,7 +574,8 @@ class _DefensivoCard extends StatelessWidget {
               children: [
                 Text(
                   item['nomecomum'] ?? 'Nome do defensivo',
-                  maxLines: 1,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize:
                         context.responsiveFontSize(type: FontSizeType.title),

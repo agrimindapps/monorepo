@@ -12,36 +12,84 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
 
+  # Core Package
+  core:
+    path: ../../packages/core
+
+  # UI Components
   cupertino_icons: ^1.0.8
   icons_plus: ^5.0.0
-  share_plus: ^11.0.0
-  intl: ^0.20.2
-  shared_preferences: ^2.5.3
-  html_unescape: ^2.0.0 
+  google_fonts: ^6.2.1
   carousel_slider: ^5.1.1
-  firebase_analytics: ^11.5.2
-  firebase_core: ^3.15.1
+  flutter_staggered_grid_view: ^0.7.0
+  skeletonizer: ^2.1.0
+
+  # State Management
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Dependency Injection
+  get_it: ^8.2.0
+  injectable: ^2.4.4
+
+  # Functional Programming
+  dartz: ^0.10.1
+
+  # Immutability
+  freezed_annotation: ^2.4.1
+
+  # Utils
+  equatable: ^2.0.5
+  uuid: ^4.5.1
+
+  # Firebase & Database
+  firebase_analytics: ^12.0.2
+  firebase_core: ^4.1.1
+  cloud_firestore: ^6.0.2
+  supabase_flutter: ^2.9.1
+
+  # Utilities
+  share_plus: ^12.0.0
+  intl: any
+  shared_preferences: ^2.5.3
+  html_unescape: ^2.0.0
   package_info_plus: ^8.3.0
   logger: ^2.6.0
   url_launcher: ^6.3.2
-  provider: ^6.1.5
   app_settings: ^6.1.1
-  flutter_staggered_grid_view: ^0.7.0
-  cloud_firestore: ^5.6.11
   device_info_plus: ^11.5.0
-  get: ^4.7.2
-  flutter_localization: ^0.2.3
+
+  # Localization
+  flutter_localization: ^0.3.3
   flutter_localizations:
     sdk: flutter
-  google_fonts: ^6.2.1
-  supabase_flutter: ^2.9.1
+  get: ^4.7.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^4.0.0
+  # Linting
+  flutter_lints: ^5.0.0
+  # custom_lint: ^0.7.3  # Temporarily disabled due to analyzer_plugin compatibility issue
+  # riverpod_lint: ^2.3.13  # Temporarily disabled due to analyzer_plugin compatibility issue
+
+  # Code Generation
+  build_runner: ^2.4.13
+  riverpod_generator: ^2.4.3
+  # injectable_generator: ^2.6.2  # Temporarily disabled due to analyzer compatibility issue
+  freezed: ^2.5.2
+  json_serializable: ^6.8.0
+
+  # Testing
+  mocktail: ^1.0.4
+
+# dependency_overrides:
+#   analyzer: 6.10.0
+#   analyzer_plugin: 0.12.0
 
 flutter:
   uses-material-design: true

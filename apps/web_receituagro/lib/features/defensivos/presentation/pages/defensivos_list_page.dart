@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/web_internal_layout.dart';
 import '../../domain/entities/defensivo.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../providers/defensivos_providers.dart';
-import '../widgets/defensivo_card.dart';
 
 /// Defensivos list page with Riverpod
 class DefensivosListPage extends ConsumerStatefulWidget {
   const DefensivosListPage({super.key});
 
   @override
-  ConsumerState<DefensivosListPage> createState() =>
-      _DefensivosListPageState();
+  ConsumerState<DefensivosListPage> createState() => _DefensivosListPageState();
 }
 
 class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
@@ -289,9 +288,7 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
               ),
               onSubmitted: (value) {
                 if (value.trim().isNotEmpty) {
-                  ref
-                      .read(defensivosNotifierProvider.notifier)
-                      .search(value);
+                  ref.read(defensivosNotifierProvider.notifier).search(value);
                 }
               },
             ),
@@ -471,39 +468,150 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
   }
 }
 
-/// Grid widget optimized for rebuilds
+/// DataTable widget for defensivos
 class _DefensivosGrid extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final paginatedDefensivos = ref.watch(paginatedDefensivosProvider);
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = _calculateCrossAxisCount(constraints.maxWidth);
-
-        return GridView.builder(
-          padding: const EdgeInsets.all(16),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            childAspectRatio: 1.5,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: DataTable(
+            headingRowColor: MaterialStateProperty.all(Colors.green.shade50),
+            border: TableBorder.all(
+              color: Colors.grey.shade300,
+              width: 1,
+            ),
+            columns: const [
+              DataColumn(
+                label: Text(
+                  'Nome Comum',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'Fabricante',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'Ingrediente Ativo',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'Classe Agronômica',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'Ações',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+            rows: paginatedDefensivos.map((defensivo) {
+              return DataRow(
+                cells: [
+                  DataCell(
+                    SizedBox(
+                      width: 200,
+                      child: Text(
+                        defensivo.nomeComum,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    SizedBox(
+                      width: 150,
+                      child: Text(
+                        defensivo.fabricante.isEmpty
+                            ? '-'
+                            : defensivo.fabricante,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    SizedBox(
+                      width: 180,
+                      child: Text(
+                        defensivo.ingredienteAtivo.isEmpty
+                            ? '-'
+                            : defensivo.ingredienteAtivo,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    SizedBox(
+                      width: 150,
+                      child: Text(
+                        defensivo.classeAgronomica?.isEmpty ?? true
+                            ? '-'
+                            : defensivo.classeAgronomica!,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // View button
+                        IconButton(
+                          icon: const Icon(Icons.visibility, size: 20),
+                          tooltip: 'Ver detalhes',
+                          onPressed: () {
+                            Navigator.of(context).pushNamed(
+                              '/defensivo',
+                              arguments: {'id': defensivo.id},
+                            );
+                          },
+                        ),
+                        // Edit button (only for writers)
+                        Consumer(
+                          builder: (context, ref, _) {
+                            final authState = ref.watch(authNotifierProvider);
+                            return authState.when(
+                              data: (user) {
+                                if (user?.canWrite == true) {
+                                  return IconButton(
+                                    icon: const Icon(Icons.edit, size: 20),
+                                    tooltip: 'Editar',
+                                    onPressed: () {
+                                      Navigator.of(context).pushNamed(
+                                        '/defensivo/edit',
+                                        arguments: {'id': defensivo.id},
+                                      );
+                                    },
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                              loading: () => const SizedBox.shrink(),
+                              error: (_, __) => const SizedBox.shrink(),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
           ),
-          itemCount: paginatedDefensivos.length,
-          itemBuilder: (context, index) {
-            final defensivo = paginatedDefensivos[index];
-            return DefensivoCard(defensivo: defensivo);
-          },
-        );
-      },
+        ),
+      ),
     );
-  }
-
-  int _calculateCrossAxisCount(double width) {
-    if (width < 600) return 1;
-    if (width < 900) return 2;
-    if (width < 1200) return 3;
-    return 4;
   }
 }
 

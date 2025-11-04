@@ -118,28 +118,51 @@ class _DefensivosDetalhesPageState extends State<DefensivosDetalhesPage> {
   }
 
   void _fetchDefensivo() async {
-    isLoading = true;
-    final response = await DefensivosRepository().fetchDefensivoView(widget.id);
+    setState(() {
+      isLoading = true;
+    });
 
-    for (var element in response) {
-      defensivo = element;
-    }
+    try {
+      debugPrint('Carregando defensivo com ID: ${widget.id}');
+      final response =
+          await DefensivosRepository().fetchDefensivoView(widget.id);
+      debugPrint('Response recebido: ${response.length} itens');
 
-    List<String> ingredientes =
-        defensivo['ingredienteativo'].toString().split('+');
-    List<String> dosagens = defensivo['quantproduto'].toString().split('+');
+      if (response.isNotEmpty) {
+        for (var element in response) {
+          defensivo = element;
+          debugPrint('Defensivo carregado: ${defensivo['nomecomum']}');
+        }
 
-    for (var i = 0; i < ingredientes.length; i++) {
-      ingredienteAtivo.add({
-        'ingrediente': ingredientes[i],
-        'dosagem': dosagens[i],
-        'title': false
+        List<String> ingredientes =
+            defensivo['ingredienteativo'].toString().split('+');
+        List<String> dosagens = defensivo['quantproduto'].toString().split('+');
+
+        ingredienteAtivo.clear();
+        ingredienteAtivo.add({
+          'ingrediente': 'Ingrediente',
+          'dosagem': 'Dosagem',
+          'title': true
+        });
+
+        for (var i = 0; i < ingredientes.length; i++) {
+          ingredienteAtivo.add({
+            'ingrediente': ingredientes[i],
+            'dosagem': dosagens[i],
+            'title': false
+          });
+        }
+
+        culturas = defensivo['culturas'] as List<dynamic>;
+        culturas.sort((a, b) => a['cultura'].compareTo(b['cultura']));
+      }
+    } catch (e) {
+      debugPrint('Erro ao carregar defensivo: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
       });
     }
-    culturas = defensivo['culturas'] as List<dynamic>;
-    culturas.sort((a, b) => a['cultura'].compareTo(b['cultura']));
-
-    isLoading = false;
   }
 
   @override

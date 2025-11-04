@@ -1,18 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 import 'package:core/src/domain/services/i_subscription_sync_service.dart';
-import 'package:core/src/services/subscription/advanced/advanced_subscription_sync_service.dart';
-import 'package:core/src/services/subscription/advanced/subscription_cache_service.dart';
-import 'package:core/src/services/subscription/advanced/subscription_conflict_resolver.dart';
-import 'package:core/src/services/subscription/advanced/subscription_debounce_manager.dart';
-import 'package:core/src/services/subscription/advanced/subscription_retry_manager.dart';
-import 'package:core/src/services/subscription/providers/firebase_subscription_provider.dart';
-import 'package:core/src/services/subscription/providers/local_subscription_provider.dart';
-import 'package:core/src/services/subscription/providers/revenuecat_subscription_provider.dart';
 import 'package:core/src/services/subscription/subscription_sync_models.dart'
     as subscription_models;
-import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Módulo de injeção de dependências para o sistema avançado de subscription
 ///
@@ -36,6 +26,8 @@ abstract class AdvancedSubscriptionModule {
 
   /// Provider RevenueCat (Priority: 100)
   /// Fonte primária de verdade para in-app purchases
+  ///
+  /// NOTE: ISubscriptionRepository is now registered in ExternalModule
   @lazySingleton
   RevenueCatSubscriptionProvider revenueCatProvider(
     ISubscriptionRepository subscriptionRepository,
@@ -50,6 +42,8 @@ abstract class AdvancedSubscriptionModule {
   ///
   /// Essencial para Plantis: permite sincronizar plant limits e
   /// premium features entre múltiplos dispositivos
+  ///
+  /// NOTE: IAuthRepository is now registered in ExternalModule
   @lazySingleton
   FirebaseSubscriptionProvider firebaseProvider(
     FirebaseFirestore firestore,
@@ -78,7 +72,7 @@ abstract class AdvancedSubscriptionModule {
   /// Importante para Plantis: garante que RevenueCat sempre vence
   @lazySingleton
   SubscriptionConflictResolver conflictResolver() {
-    return SubscriptionConflictResolver(
+    return const SubscriptionConflictResolver(
       strategy: subscription_models.ConflictResolutionStrategy.priorityBased,
     );
   }

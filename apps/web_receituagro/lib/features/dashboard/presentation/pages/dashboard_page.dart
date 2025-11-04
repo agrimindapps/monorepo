@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/widgets/internal_page_layout.dart';
+import '../../../../core/widgets/web_internal_layout.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 
 /// Dashboard page - Internal home after login
@@ -12,7 +12,7 @@ class DashboardPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authNotifierProvider);
 
-    return InternalPageLayout(
+    return WebInternalLayout(
       title: 'Dashboard',
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -21,13 +21,14 @@ class DashboardPage extends ConsumerWidget {
           children: [
             // Welcome header
             authState.whenOrNull(
-              data: (user) {
-                if (user != null) {
-                  return _buildWelcomeHeader(context, user.name);
-                }
-                return null;
-              },
-            ) ?? const SizedBox.shrink(),
+                  data: (user) {
+                    if (user != null) {
+                      return _buildWelcomeHeader(context, user.name);
+                    }
+                    return null;
+                  },
+                ) ??
+                const SizedBox.shrink(),
 
             const SizedBox(height: 32),
 
@@ -43,7 +44,8 @@ class DashboardPage extends ConsumerWidget {
 
             LayoutBuilder(
               builder: (context, constraints) {
-                final crossAxisCount = _calculateCrossAxisCount(constraints.maxWidth);
+                final crossAxisCount =
+                    _calculateCrossAxisCount(constraints.maxWidth);
 
                 return GridView.count(
                   shrinkWrap: true,
@@ -58,7 +60,8 @@ class DashboardPage extends ConsumerWidget {
                       title: 'Defensivos',
                       subtitle: 'Gerenciar defensivos agrícolas',
                       color: Colors.green,
-                      onTap: () => Navigator.of(context).pushNamed('/defensivos'),
+                      onTap: () =>
+                          Navigator.of(context).pushNamed('/defensivos'),
                     ),
                     _QuickAccessCard(
                       icon: Icons.grass,
@@ -76,19 +79,21 @@ class DashboardPage extends ConsumerWidget {
                     ),
                     // Admin card (only for admins)
                     authState.whenOrNull(
-                      data: (user) {
-                        if (user?.isAdmin == true) {
-                          return _QuickAccessCard(
-                            icon: Icons.admin_panel_settings,
-                            title: 'Admin',
-                            subtitle: 'Painel administrativo',
-                            color: Colors.blue,
-                            onTap: () => Navigator.of(context).pushNamed('/admin'),
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ) ?? const SizedBox.shrink(),
+                          data: (user) {
+                            if (user?.isAdmin == true) {
+                              return _QuickAccessCard(
+                                icon: Icons.admin_panel_settings,
+                                title: 'Admin',
+                                subtitle: 'Painel administrativo',
+                                color: Colors.blue,
+                                onTap: () =>
+                                    Navigator.of(context).pushNamed('/admin'),
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ) ??
+                        const SizedBox.shrink(),
                   ],
                 );
               },

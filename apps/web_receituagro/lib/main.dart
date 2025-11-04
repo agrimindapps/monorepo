@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'app.dart';
 import 'app-site/const/firebase_const.dart';
@@ -15,9 +16,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // DartPluginRegistrant.ensureInitialized(); // Not supported on web
 
-  InfoDeviceService().setProduction();
+  // Configura URLs limpas sem # na web
+  usePathUrlStrategy();
 
-  ThemeData currentTheme = ThemeManager().currentTheme;
+  InfoDeviceService().setProduction();
 
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -30,20 +32,7 @@ void main() async {
 
   runApp(
     const ProviderScope(
-      child: MyApp(),
+      child: App(),
     ),
   );
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeManager().currentTheme,
-      home: const App(),
-    );
-  }
 }

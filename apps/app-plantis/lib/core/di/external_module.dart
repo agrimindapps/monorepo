@@ -30,4 +30,18 @@ abstract class ExternalModule {
   @preResolve
   Future<SharedPreferences> get sharedPreferences =>
       SharedPreferences.getInstance();
+
+  /// IAuthRepository - registered manually in injection_container.dart, but needs to be
+  /// accessible via Injectable for module dependencies
+  @lazySingleton
+  IAuthRepository get authRepository => FirebaseAuthService();
+
+  /// ISubscriptionRepository - registered manually in injection_container.dart, but needs to be
+  /// accessible via Injectable for module dependencies
+  @lazySingleton
+  ISubscriptionRepository get subscriptionRepository => RevenueCatService();
+
+  /// FirebaseFirestore instance for Firebase providers
+  @lazySingleton
+  FirebaseFirestore get firebaseFirestore => FirebaseFirestore.instance;
 }

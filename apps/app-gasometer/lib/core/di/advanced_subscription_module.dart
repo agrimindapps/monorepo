@@ -3,8 +3,6 @@ import 'package:core/core.dart';
 import 'package:core/src/domain/services/i_subscription_sync_service.dart';
 import 'package:core/src/services/subscription/subscription_sync_models.dart'
     as subscription_models;
-import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Módulo de injeção de dependências para o sistema avançado de subscription
 ///
@@ -15,6 +13,8 @@ abstract class AdvancedSubscriptionModule {
   // ==================== Data Providers ====================
 
   /// Provider RevenueCat (Priority: 100)
+  ///
+  /// NOTE: ISubscriptionRepository is now registered in RegisterModule
   @lazySingleton
   RevenueCatSubscriptionProvider revenueCatProvider(
     ISubscriptionRepository subscriptionRepository,
@@ -25,6 +25,8 @@ abstract class AdvancedSubscriptionModule {
   }
 
   /// Provider Firebase (Priority: 80)
+  ///
+  /// NOTE: IAuthRepository is now registered in RegisterModule
   @lazySingleton
   FirebaseSubscriptionProvider firebaseProvider(
     FirebaseFirestore firestore,
@@ -47,7 +49,7 @@ abstract class AdvancedSubscriptionModule {
   /// Conflict resolver com estratégia baseada em prioridade
   @lazySingleton
   SubscriptionConflictResolver conflictResolver() {
-    return SubscriptionConflictResolver(
+    return const SubscriptionConflictResolver(
       strategy: subscription_models.ConflictResolutionStrategy.priorityBased,
     );
   }

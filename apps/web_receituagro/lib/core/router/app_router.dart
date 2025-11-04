@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app-site/pages/detalhes_defensivos_page.dart';
+import '../../app-site/pages/home_defensivos_page.dart';
 import '../../features/auth/domain/entities/user_role.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/culturas/presentation/pages/cultura_cadastro_page.dart';
@@ -21,9 +22,9 @@ class AppRouter {
 
       case '/':
       case '/home':
-        // Public - Lista de defensivos (qualquer pessoa pode ver)
+        // Public - Página inicial do site público
         return MaterialPageRoute(
-          builder: (_) => const DefensivosListPage(),
+          builder: (_) => const DefensivosListarPage(),
         );
 
       case '/defensivo':
@@ -182,7 +183,8 @@ class AppRouter {
               const SizedBox(height: 16),
               Text(
                 'Página não encontrada',
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(

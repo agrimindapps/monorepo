@@ -1,20 +1,21 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'services/firebase_analytics_service.dart';
 
 import 'themes/manager.dart';
 import 'app-site/router.dart';
 
-class App extends StatefulWidget {
+class App extends ConsumerStatefulWidget {
   const App({super.key});
 
   @override
-  State<App> createState() => _MyApp();
+  ConsumerState<App> createState() => _MyApp();
 }
 
-class _MyApp extends State<App> {
+class _MyApp extends ConsumerState<App> {
   Timer? _timer, _timerTheme;
   ThemeData currentTheme = ThemeManager().currentTheme;
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -42,7 +43,7 @@ class _MyApp extends State<App> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ReceituAgro Web',
+      title: 'Agrimind Web',
       debugShowCheckedModeBanner: false,
       theme: currentTheme,
       home: Scaffold(

@@ -47,7 +47,7 @@ class ResponsiveHelper {
       case DeviceType.desktop:
         return 3;
       case DeviceType.largeDesktop:
-        return 4;
+        return 3; // Mantém 3 colunas mesmo em telas grandes
     }
   }
 
@@ -114,13 +114,13 @@ class ResponsiveHelper {
   static EdgeInsets _getSmallPadding(DeviceType deviceType) {
     switch (deviceType) {
       case DeviceType.mobile:
-        return const EdgeInsets.all(8);
+        return const EdgeInsets.all(4);
       case DeviceType.tablet:
-        return const EdgeInsets.all(12);
+        return const EdgeInsets.all(6);
       case DeviceType.desktop:
-        return const EdgeInsets.all(16);
+        return const EdgeInsets.all(8);
       case DeviceType.largeDesktop:
-        return const EdgeInsets.all(20);
+        return const EdgeInsets.all(8);
     }
   }
 
@@ -156,13 +156,13 @@ class ResponsiveHelper {
   static EdgeInsets _getContainerPadding(DeviceType deviceType) {
     switch (deviceType) {
       case DeviceType.mobile:
-        return const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
+        return const EdgeInsets.symmetric(horizontal: 12, vertical: 8);
       case DeviceType.tablet:
-        return const EdgeInsets.symmetric(horizontal: 24, vertical: 12);
+        return const EdgeInsets.symmetric(horizontal: 16, vertical: 10);
       case DeviceType.desktop:
-        return const EdgeInsets.symmetric(horizontal: 32, vertical: 16);
+        return const EdgeInsets.symmetric(horizontal: 16, vertical: 12);
       case DeviceType.largeDesktop:
-        return const EdgeInsets.symmetric(horizontal: 48, vertical: 24);
+        return const EdgeInsets.symmetric(horizontal: 16, vertical: 12);
     }
   }
 

@@ -70,4 +70,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'plantis-72458.firebasestorage.app',
     iosBundleId: 'br.com.agrimind.especiesorquideas',
   );
+
 }

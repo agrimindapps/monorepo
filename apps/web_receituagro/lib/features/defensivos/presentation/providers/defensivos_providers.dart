@@ -5,6 +5,7 @@ import '../../../../core/interfaces/usecase.dart';
 import '../../domain/entities/defensivo.dart';
 import '../../domain/services/defensivos_filter_service.dart';
 import '../../domain/services/defensivos_pagination_service.dart';
+import '../../domain/usecases/delete_defensivo_usecase.dart';
 import '../../domain/usecases/get_all_defensivos_usecase.dart';
 import '../../domain/usecases/search_defensivos_usecase.dart';
 
@@ -24,6 +25,11 @@ SearchDefensivosUseCase searchDefensivosUseCase(
   SearchDefensivosUseCaseRef ref,
 ) {
   return getIt<SearchDefensivosUseCase>();
+}
+
+@riverpod
+DeleteDefensivoUseCase deleteDefensivoUseCase(DeleteDefensivoUseCaseRef ref) {
+  return getIt<DeleteDefensivoUseCase>();
 }
 
 // ========== Services Providers ==========
@@ -96,6 +102,24 @@ class DefensivosNotifier extends _$DefensivosNotifier {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() => _fetchDefensivos());
     ref.read(currentPageProvider.notifier).state = 0;
+  }
+
+  /// Delete a defensivo by ID
+  Future<bool> deleteDefensivo(String id) async {
+    final useCase = ref.read(deleteDefensivoUseCaseProvider);
+    final result = await useCase(id);
+
+    return result.fold(
+      (failure) {
+        // Handle error - could show snackbar here
+        return false;
+      },
+      (_) {
+        // Success - refresh the list
+        refresh();
+        return true;
+      },
+    );
   }
 }
 

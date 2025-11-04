@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/widgets/web_internal_layout.dart';
 import '../../domain/entities/defensivo.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../providers/defensivos_providers.dart';
@@ -186,7 +185,8 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
                             builder: (context) => AlertDialog(
                               title: const Text('Sair'),
                               content: const Text(
-                                  'Deseja realmente sair do sistema?'),
+                                'Deseja realmente sair do sistema?',
+                              ),
                               actions: [
                                 TextButton(
                                   onPressed: () =>
@@ -249,9 +249,7 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
           Expanded(
             child: defensivosAsync.when(
               data: (defensivos) => _buildContent(defensivos),
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => _buildError(error.toString()),
             ),
           ),
@@ -338,7 +336,10 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
       children: [
         // Grid
         Expanded(
-          child: _DefensivosGrid(),
+          child: _DefensivosGrid(
+            onCopyName: _copyDefensivoName,
+            onDelete: _confirmDeleteDefensivo,
+          ),
         ),
 
         // Pagination
@@ -466,10 +467,89 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
       ),
     );
   }
+
+  /// Copy defensivo name to clipboard
+  void _copyDefensivoName(BuildContext context, String name) {
+    // For web, we show a snackbar with the name
+    // User can select and copy from the snackbar
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: SelectableText('Nome: $name'),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: 'OK',
+          textColor: Colors.white,
+          onPressed: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
+        ),
+      ),
+    );
+  }
+
+  /// Confirm delete defensivo dialog
+  Future<void> _confirmDeleteDefensivo(
+    BuildContext context,
+    WidgetRef ref,
+    Defensivo defensivo,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Excluir Defensivo'),
+        content: Text(
+          'Deseja realmente excluir o defensivo "${defensivo.nomeComum}"?\n\n'
+          'Esta ação não pode ser desfeita e todos os dados relacionados '
+          '(diagnósticos, informações técnicas, etc.) também serão excluídos.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      final success = await ref
+          .read(defensivosNotifierProvider.notifier)
+          .deleteDefensivo(defensivo.id);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success
+                  ? 'Defensivo excluído com sucesso'
+                  : 'Erro ao excluir defensivo',
+            ),
+            backgroundColor: success ? Colors.green : Colors.red,
+          ),
+        );
+      }
+    }
+  }
 }
 
 /// DataTable widget for defensivos
 class _DefensivosGrid extends ConsumerWidget {
+  final void Function(BuildContext context, String name) onCopyName;
+  final Future<void> Function(
+    BuildContext context,
+    WidgetRef ref,
+    Defensivo defensivo,
+  )
+  onDelete;
+
+  const _DefensivosGrid({required this.onCopyName, required this.onDelete});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final paginatedDefensivos = ref.watch(paginatedDefensivosProvider);
@@ -481,10 +561,7 @@ class _DefensivosGrid extends ConsumerWidget {
           padding: const EdgeInsets.all(16.0),
           child: DataTable(
             headingRowColor: MaterialStateProperty.all(Colors.green.shade50),
-            border: TableBorder.all(
-              color: Colors.grey.shade300,
-              width: 1,
-            ),
+            border: TableBorder.all(color: Colors.grey.shade300, width: 1),
             columns: const [
               DataColumn(
                 label: Text(
@@ -602,6 +679,40 @@ class _DefensivosGrid extends ConsumerWidget {
                             );
                           },
                         ),
+                        // Copy button
+                        IconButton(
+                          icon: const Icon(Icons.copy, size: 20),
+                          tooltip: 'Copiar nome',
+                          onPressed: () {
+                            onCopyName(context, defensivo.nomeComum);
+                          },
+                        ),
+                        // Delete button (only for admin)
+                        Consumer(
+                          builder: (context, ref, _) {
+                            final authState = ref.watch(authNotifierProvider);
+                            return authState.when(
+                              data: (user) {
+                                if (user?.isAdmin == true) {
+                                  return IconButton(
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      size: 20,
+                                      color: Colors.red,
+                                    ),
+                                    tooltip: 'Excluir',
+                                    onPressed: () {
+                                      onDelete(context, ref, defensivo);
+                                    },
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                              loading: () => const SizedBox.shrink(),
+                              error: (_, __) => const SizedBox.shrink(),
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -626,9 +737,9 @@ class _TotalCount extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Text(
           'Total de registros: ${defensivos.length}',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
         ),
       ),
       loading: () => const SizedBox.shrink(),

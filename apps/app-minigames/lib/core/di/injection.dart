@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -37,6 +39,9 @@ Future<void> configureDependencies({bool firebaseEnabled = false}) async {
   }
 
   getIt.registerSingleton<Logger>(Logger());
+
+  // Register Random for game services
+  getIt.registerSingleton<Random>(Random());
 
   // Initialize generated dependencies
   getIt.init();

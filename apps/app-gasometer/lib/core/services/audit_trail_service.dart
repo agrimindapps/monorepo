@@ -1,10 +1,13 @@
 /// Audit Trail Service for Financial Data
 /// Tracks changes in financial data for compliance and debugging
 library;
+
 import 'package:core/core.dart';
 
 import '../../features/expenses/data/models/expense_model.dart';
 import '../../features/fuel/data/models/fuel_supply_model.dart';
+
+part 'audit_trail_service.g.dart';
 
 /// Audit event types
 enum AuditEventType {
@@ -21,7 +24,8 @@ enum AuditEventType {
 
 /// Audit trail entry for financial operations
 @HiveType(typeId: 50)
-class FinancialAuditEntry extends HiveObject { // 'local', 'remote', 'conflict_resolution'
+class FinancialAuditEntry extends HiveObject {
+  // 'local', 'remote', 'conflict_resolution'
 
   FinancialAuditEntry({
     required this.id,
@@ -121,7 +125,8 @@ class FinancialAuditEntry extends HiveObject { // 'local', 'remote', 'conflict_r
 /// Financial Audit Trail Service
 class FinancialAuditTrailService {
   static const String _boxName = 'financial_audit_trail';
-  static const int _maxEntriesPerEntity = 100; // Keep last 100 entries per entity
+  static const int _maxEntriesPerEntity =
+      100; // Keep last 100 entries per entity
   static const int _retentionDays = 365; // Keep entries for 1 year
 
   Box<FinancialAuditEntry>? _auditBox;
@@ -315,9 +320,7 @@ class FinancialAuditTrailService {
     final cutoff = DateTime.now().subtract(Duration(days: days));
 
     return _auditBox!.values
-        .where((entry) =>
-            entry.isHighValue &&
-            entry.dateTime.isAfter(cutoff))
+        .where((entry) => entry.isHighValue && entry.dateTime.isAfter(cutoff))
         .toList()
       ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
   }
@@ -329,13 +332,15 @@ class FinancialAuditTrailService {
   }) {
     if (_auditBox == null) return {};
 
-    final start = startDate ?? DateTime.now().subtract(const Duration(days: 30));
+    final start =
+        startDate ?? DateTime.now().subtract(const Duration(days: 30));
     final end = endDate ?? DateTime.now();
 
     final entries = _auditBox!.values
-        .where((entry) =>
-            entry.dateTime.isAfter(start) &&
-            entry.dateTime.isBefore(end))
+        .where(
+          (entry) =>
+              entry.dateTime.isAfter(start) && entry.dateTime.isBefore(end),
+        )
         .toList();
 
     final summary = <String, dynamic>{
@@ -366,7 +371,9 @@ class FinancialAuditTrailService {
   Future<void> _cleanOldEntries() async {
     if (_auditBox == null) return;
 
-    final cutoff = DateTime.now().subtract(const Duration(days: _retentionDays));
+    final cutoff = DateTime.now().subtract(
+      const Duration(days: _retentionDays),
+    );
     final keysToDelete = <dynamic>[];
 
     for (final entry in _auditBox!.values) {
@@ -455,7 +462,10 @@ class FinancialAuditTrailService {
   }
 
   /// Check if there are financial changes between states
-  bool _hasFinancialChanges(Map<String, dynamic> before, Map<String, dynamic> after) {
+  bool _hasFinancialChanges(
+    Map<String, dynamic> before,
+    Map<String, dynamic> after,
+  ) {
     final financialKeys = ['total_price', 'liters', 'price_per_liter', 'valor'];
 
     for (final key in financialKeys) {

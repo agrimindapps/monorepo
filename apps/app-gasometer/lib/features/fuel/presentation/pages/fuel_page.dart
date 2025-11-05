@@ -44,10 +44,9 @@ class _FuelPageState extends ConsumerState<FuelPage> {
             _buildHeader(context),
             if (!isOnline || pendingCount > 0)
               _buildOfflineIndicator(isOnline, pendingCount, isSyncing),
-            if (vehiclesAsync.value?.isNotEmpty ?? false) ...[
-              _buildVehicleSelector(context),
-              if (_selectedVehicleId != null) _buildMonthSelector(),
-            ],
+            _buildVehicleSelector(context),
+            if (_selectedVehicleId != null && (vehiclesAsync.value?.isNotEmpty ?? false))
+              _buildMonthSelector(),
             Expanded(
               child: vehiclesAsync.when(
                 data: (vehicles) {

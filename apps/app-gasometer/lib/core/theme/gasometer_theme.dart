@@ -124,6 +124,31 @@ class GasometerTheme {
       iconColor: Color(0xFF1A1C1E),
       textColor: Color(0xFF1A1C1E),
     ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: const Color(0xFFF8F9FA),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: GasometerColors.primary, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFF44336)),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFF44336), width: 2),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    ),
   );
   
   /// Tema escuro simplificado
@@ -242,6 +267,34 @@ class GasometerTheme {
     listTileTheme: const ListTileThemeData(
       iconColor: Color(0xFFE2E3E3),
       textColor: Color(0xFFE2E3E3),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: const Color(0xFF2D2D2D), // surfaceContainerHighest from dark colorScheme
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFF4A4A4A)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFF4A4A4A)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: GasometerColors.primaryLight, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFF44336)),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFF44336), width: 2),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      // Ensure text color is white in dark mode
+      labelStyle: const TextStyle(color: Color(0xFFE2E3E3)),
+      hintStyle: TextStyle(color: Colors.grey.shade600),
     ),
   );
   

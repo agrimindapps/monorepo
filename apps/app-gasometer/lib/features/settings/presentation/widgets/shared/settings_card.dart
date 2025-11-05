@@ -26,7 +26,7 @@ class SettingsCard extends StatelessWidget {
           children: [
             _buildHeader(context),
             const SizedBox(height: 16),
-            ..._buildChildrenWithDividers(),
+            ..._buildChildrenWithDividers(context),
           ],
         ),
       ),
@@ -62,7 +62,7 @@ class SettingsCard extends StatelessWidget {
 
   /// Constrói children com dividers entre items
   /// (exceto antes do primeiro e depois do último)
-  List<Widget> _buildChildrenWithDividers() {
+  List<Widget> _buildChildrenWithDividers(BuildContext context) {
     final List<Widget> result = [];
 
     for (int i = 0; i < children.length; i++) {
@@ -75,7 +75,7 @@ class SettingsCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Divider(
               height: 1,
-              color: Colors.grey.withValues(alpha: 0.3),
+              color: Theme.of(context).colorScheme.outlineVariant,
             ),
           ),
         );

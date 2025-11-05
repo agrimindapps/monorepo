@@ -14,8 +14,6 @@ class NotificationSection extends ConsumerWidget {
     final settingsAsync = ref.watch(settingsNotifierProvider);
     final notificationsEnabled =
         settingsAsync.valueOrNull?.notificationsEnabled ?? true;
-    final fuelAlertsEnabled =
-        settingsAsync.valueOrNull?.fuelAlertsEnabled ?? true;
 
     return SettingsCard(
       title: 'Notificações',
@@ -23,8 +21,8 @@ class NotificationSection extends ConsumerWidget {
       children: [
         SettingsItem(
           icon: Icons.notifications_active,
-          title: 'Notificações Push',
-          subtitle: 'Receber alertas e lembretes',
+          title: 'Receber Notificações',
+          subtitle: 'Ativar ou desativar todas as notificações',
           trailing: Switch(
             value: notificationsEnabled,
             onChanged: settingsAsync.isLoading
@@ -33,21 +31,6 @@ class NotificationSection extends ConsumerWidget {
                     ref
                         .read(settingsNotifierProvider.notifier)
                         .toggleNotifications(value);
-                  },
-          ),
-        ),
-        SettingsItem(
-          icon: Icons.local_gas_station,
-          title: 'Alertas de Combustível',
-          subtitle: 'Notificações sobre abastecimento',
-          trailing: Switch(
-            value: fuelAlertsEnabled,
-            onChanged: settingsAsync.isLoading
-                ? null
-                : (value) {
-                    ref
-                        .read(settingsNotifierProvider.notifier)
-                        .toggleFuelAlerts(value);
                   },
           ),
         ),

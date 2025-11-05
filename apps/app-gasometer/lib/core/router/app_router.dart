@@ -8,6 +8,7 @@ import '../../features/expenses/presentation/pages/add_expense_page.dart';
 import '../../features/expenses/presentation/pages/expenses_page.dart';
 import '../../features/fuel/presentation/pages/add_fuel_page.dart';
 import '../../features/fuel/presentation/pages/fuel_page.dart';
+import '../../features/legal/presentation/pages/account_deletion_policy_page.dart';
 import '../../features/legal/presentation/pages/privacy_policy_page.dart';
 import '../../features/legal/presentation/pages/terms_of_service_page.dart';
 import '../../features/maintenance/presentation/pages/add_maintenance_page.dart';
@@ -115,6 +116,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: '/terms-of-service',
             name: 'terms-of-service',
             builder: (context, state) => const TermsOfServicePage(),
+          ),
+          GoRoute(
+            path: '/account-deletion-policy',
+            name: 'account-deletion-policy',
+            builder: (context, state) => const AccountDeletionPolicyPage(),
           ),
           GoRoute(
             path: '/profile',

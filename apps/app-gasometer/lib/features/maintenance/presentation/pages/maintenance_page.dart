@@ -33,9 +33,6 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
             Expanded(
               child: vehiclesAsync.when(
                 data: (vehicles) {
-                  if (vehicles.isEmpty) {
-                    return _buildNoVehiclesState();
-                  }
                   if (_selectedVehicleId == null) {
                     return _buildSelectVehicleState();
                   }
@@ -236,13 +233,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
     );
   }
 
-  Widget _buildNoVehiclesState() {
-    return const EnhancedEmptyState(
-      title: 'Nenhum veículo cadastrado',
-      description: 'Acesse a página de Veículos para cadastrar seu primeiro veículo e começar a registrar manutenções.',
-      icon: Icons.directions_car_outlined,
-    );
-  }
+
 
   Widget _buildSelectVehicleState() {
     return const EnhancedEmptyState(

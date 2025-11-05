@@ -81,7 +81,7 @@ class UnifiedFormDialog extends StatelessWidget {
           maxHeight: screenSize.height * 0.9,
         ),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(UnifiedDesignTokens.radiusDialog),
           boxShadow: [
             BoxShadow(
@@ -122,7 +122,7 @@ class UnifiedFormDialog extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(UnifiedDesignTokens.spacingDialogPadding),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: theme.colorScheme.surfaceContainerHigh,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(UnifiedDesignTokens.radiusDialog),
           topRight: Radius.circular(UnifiedDesignTokens.radiusDialog),

@@ -20,10 +20,11 @@ class SettingsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return ListTile(
       leading: Icon(
         icon,
-        color: Theme.of(context).primaryColor,
+        color: theme.listTileTheme.iconColor ?? theme.primaryColor,
         size: 20,
       ),
       title: Text(
@@ -34,8 +35,8 @@ class SettingsItem extends StatelessWidget {
       ),
       subtitle: Text(
         subtitle,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Colors.grey,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
         ),
       ),
       trailing: trailing ?? (
@@ -43,7 +44,7 @@ class SettingsItem extends StatelessWidget {
           ? Icon(
               Icons.chevron_right,
               size: 20,
-              color: Colors.grey[400],
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
             )
           : null
       ),

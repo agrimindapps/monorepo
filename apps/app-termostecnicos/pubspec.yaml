@@ -81,8 +81,7 @@ dev_dependencies:
   json_serializable: ^6.8.0
 
   # Custom Linting
-  custom_lint: ^0.6.4
-  riverpod_lint: ^2.3.10
+  # riverpod_lint removed - conflicts with hive_generator
 
 flutter:
   uses-material-design: true

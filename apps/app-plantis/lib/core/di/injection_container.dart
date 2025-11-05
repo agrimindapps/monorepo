@@ -81,17 +81,30 @@ void _initCoreServices({bool firebaseEnabled = false}) {
   // Register Firebase services only if Firebase is initialized
   if (firebaseEnabled) {
     try {
-      sl.registerLazySingleton(() => FirebaseFirestore.instance);
-      sl.registerLazySingleton(() => FirebaseFunctions.instance);
-      sl.registerLazySingleton<IAuthRepository>(
-        () => PlantisSecurityConfig.createEnhancedAuthService(),
-      );
-      sl.registerLazySingleton<IAnalyticsRepository>(
-        () => FirebaseAnalyticsService(),
-      );
-      sl.registerLazySingleton<ICrashlyticsRepository>(
-        () => FirebaseCrashlyticsService(),
-      );
+      // NOTE: FirebaseFirestore and FirebaseFunctions are already registered
+      // via @injectable in injection.config.dart by build_runner.
+      // Try registering only if not already present to avoid duplicate registration
+      if (!sl.isRegistered<FirebaseFirestore>()) {
+        sl.registerLazySingleton(() => FirebaseFirestore.instance);
+      }
+      if (!sl.isRegistered<FirebaseFunctions>()) {
+        sl.registerLazySingleton(() => FirebaseFunctions.instance);
+      }
+      if (!sl.isRegistered<IAuthRepository>()) {
+        sl.registerLazySingleton<IAuthRepository>(
+          () => PlantisSecurityConfig.createEnhancedAuthService(),
+        );
+      }
+      if (!sl.isRegistered<IAnalyticsRepository>()) {
+        sl.registerLazySingleton<IAnalyticsRepository>(
+          () => FirebaseAnalyticsService(),
+        );
+      }
+      if (!sl.isRegistered<ICrashlyticsRepository>()) {
+        sl.registerLazySingleton<ICrashlyticsRepository>(
+          () => FirebaseCrashlyticsService(),
+        );
+      }
       if (kDebugMode) {
         SecureLogger.info('Firebase services registered in DI');
       }
@@ -221,8 +234,10 @@ void _initSpaces() {
 void _initComments() {}
 
 void _initPremium() {
-  sl.registerLazySingleton<ISubscriptionRepository>(() => RevenueCatService());
-
+  // NOTE: ISubscriptionRepository is already registered via @injectable
+  // in injection.config.dart by build_runner. Do NOT register manually here
+  // to avoid duplicate registration errors.
+  //
   // ✅ MIGRATED: SimpleSubscriptionSyncService foi substituído por
   // AdvancedSubscriptionSyncService (registrado via @injectable no
   // AdvancedSubscriptionModule). Adapter mantém compatibilidade com
@@ -268,12 +283,15 @@ void _initAppServices() {
   );
 
   // EnhancedAccountDeletionService para delete account seguro
-  sl.registerLazySingleton<EnhancedAccountDeletionService>(
-    () => EnhancedAccountDeletionService(
-      authRepository: sl<IAuthRepository>(),
-      appDataCleaner: sl<DataCleanerService>(),
-    ),
-  );
+  // Check if not already registered via @injectable to avoid duplicate registration
+  if (!sl.isRegistered<EnhancedAccountDeletionService>()) {
+    sl.registerLazySingleton<EnhancedAccountDeletionService>(
+      () => EnhancedAccountDeletionService(
+        authRepository: sl<IAuthRepository>(),
+        appDataCleaner: sl<DataCleanerService>(),
+      ),
+    );
+  }
 }
 
 void _initDataExport() {

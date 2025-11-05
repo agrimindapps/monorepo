@@ -59,8 +59,11 @@ class HomePragasPage extends ConsumerWidget {
     if (state.initializationFailed) {
       subtitle = 'Erro ao carregar dados';
     } else if (!state.isLoading && state.stats != null) {
-      final stats = state.stats;
-      final total = (stats?.insetos ?? 0) + (stats?.doencas ?? 0) + (stats?.plantas ?? 0);
+      final stats = state.stats as Map<String, int>?;
+      final insetos = stats?['insetos'] ?? 0;
+      final doencas = stats?['doencas'] ?? 0;
+      final plantas = stats?['plantas'] ?? 0;
+      final total = insetos + doencas + plantas;
       subtitle = 'Identifique e controle $total pragas';
     }
 

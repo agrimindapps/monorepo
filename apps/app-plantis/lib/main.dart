@@ -54,12 +54,15 @@ void main() async {
     );
   }
 
-  await Hive.initFlutter();
-  Hive.registerAdapter(LicenseModelAdapter()); // TypeId: 10
-  Hive.registerAdapter(LicenseTypeAdapter()); // TypeId: 11
+  // Initialize Hive only on non-web platforms
+  if (!kIsWeb) {
+    await Hive.initFlutter();
+    Hive.registerAdapter(LicenseModelAdapter()); // TypeId: 10
+    Hive.registerAdapter(LicenseTypeAdapter()); // TypeId: 11
 
-  // Run schema migrations
-  await HiveSchemaManager.migrate();
+    // Run schema migrations
+    await HiveSchemaManager.migrate();
+  }
 
   await di.init(firebaseEnabled: firebaseInitialized);
 
@@ -72,7 +75,11 @@ void main() async {
   SolidDIConfigurator.configure(
     kDebugMode ? DIMode.development : DIMode.production,
   );
-  await PlantisBoxesSetup.registerPlantisBoxes();
+
+  // Register Plantis boxes only on non-web platforms
+  if (!kIsWeb) {
+    await PlantisBoxesSetup.registerPlantisBoxes();
+  }
 
   // Initialize UnifiedSyncManager with Plantis configuration (only if Firebase is available)
   if (firebaseInitialized) {

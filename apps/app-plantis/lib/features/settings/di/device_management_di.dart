@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 
 import '../data/datasources/device_local_datasource.dart';
 import '../data/datasources/device_remote_datasource.dart';
@@ -15,7 +16,10 @@ class DeviceManagementDI {
   static Future<void> registerPhase1(GetIt getIt) async {
     // Data Sources
     final deviceLocalDataSource = DeviceLocalDataSource();
-    await deviceLocalDataSource.init(); // Inicializa o Hive box
+    // Initialize Hive box only on non-web platforms
+    if (!kIsWeb) {
+      await deviceLocalDataSource.init(); // Inicializa o Hive box
+    }
     getIt.registerLazySingleton<DeviceLocalDataSource>(
       () => deviceLocalDataSource,
     );

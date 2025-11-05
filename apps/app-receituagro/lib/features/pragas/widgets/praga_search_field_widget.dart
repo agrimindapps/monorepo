@@ -60,6 +60,13 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
       curve: Curves.easeOutBack,
     );
 
+    _elevationAnimation = Tween<double>(begin: 0, end: 8).animate(
+      CurvedAnimation(
+        parent: _focusController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
     _focusNode.addListener(_onFocusChange);
 
     // Start entry animation

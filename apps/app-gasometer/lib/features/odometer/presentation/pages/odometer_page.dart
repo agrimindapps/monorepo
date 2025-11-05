@@ -207,6 +207,10 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
+    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+    final hasVehicles = vehiclesAsync.value?.isNotEmpty ?? false;
+    final isEnabled = hasVehicles && _selectedVehicleId != null;
+
     return FloatingActionButton(
       onPressed: () {
         if (_selectedVehicleId == null) {
@@ -228,18 +232,17 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
           }
         });
       },
+      backgroundColor: isEnabled ? null : Colors.grey,
       tooltip: 'Adicionar leitura',
       child: const Icon(Icons.add),
     );
   }
 
   Widget _buildNoVehiclesState() {
-    return EnhancedEmptyState(
+    return const EnhancedEmptyState(
       title: 'Nenhum veículo cadastrado',
-      description: 'Cadastre seu primeiro veículo para começar a registrar leituras de odômetro.',
+      description: 'Acesse a página de Veículos para cadastrar seu primeiro veículo e começar a registrar leituras de odômetro.',
       icon: Icons.directions_car_outlined,
-      actionLabel: 'Cadastrar veículo',
-      onAction: () => context.push('/vehicles'),
     );
   }
 

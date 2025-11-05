@@ -210,6 +210,10 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
+    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+    final hasVehicles = vehiclesAsync.value?.isNotEmpty ?? false;
+    final isEnabled = hasVehicles && _selectedVehicleId != null;
+
     return FloatingActionButton(
       onPressed: () {
         if (_selectedVehicleId == null) {
@@ -231,18 +235,17 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
           }
         });
       },
+      backgroundColor: isEnabled ? null : Colors.grey,
       tooltip: 'Adicionar despesa',
       child: const Icon(Icons.add),
     );
   }
 
   Widget _buildNoVehiclesState() {
-    return EnhancedEmptyState(
+    return const EnhancedEmptyState(
       title: 'Nenhum veículo cadastrado',
-      description: 'Cadastre seu primeiro veículo para começar a registrar despesas.',
+      description: 'Acesse a página de Veículos para cadastrar seu primeiro veículo e começar a registrar despesas.',
       icon: Icons.directions_car_outlined,
-      actionLabel: 'Cadastrar veículo',
-      onAction: () => context.push('/vehicles'),
     );
   }
 

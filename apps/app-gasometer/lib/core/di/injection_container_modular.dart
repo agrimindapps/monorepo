@@ -26,13 +26,18 @@ class ModularInjectionContainer {
       print('📦 Initializing Hive...');
       await HiveService.instance.init();
       print('✅ Hive initialized');
+
+      // Configure injectable dependencies FIRST
+      // This registers all @injectable dependencies from build_runner
+      print('📦 Configuring injectable dependencies...');
+      await configureDependencies();
+
       print('📦 Registering core modules...');
       final modules = _createModules(firebaseEnabled: firebaseEnabled);
       for (final module in modules) {
         await module.register(_getIt);
       }
-      print('📦 Configuring injectable dependencies...');
-      await configureDependencies();
+
       print('📦 Initializing account deletion module...');
       AccountDeletionModule.init(_getIt);
       print('📦 Initializing sync module...');

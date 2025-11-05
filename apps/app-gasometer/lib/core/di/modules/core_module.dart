@@ -24,31 +24,44 @@ class CoreModule implements DIModule {
     // Register Firebase services only if Firebase is initialized
     if (firebaseEnabled) {
       try {
-        getIt.registerLazySingleton<core.IAuthRepository>(
-          () => core.FirebaseAuthService(),
-        );
+        // NOTE: These may already be registered via @injectable in injection.config.dart
+        // Only register if not already present to avoid duplicate registration errors
+        if (!getIt.isRegistered<core.IAuthRepository>()) {
+          getIt.registerLazySingleton<core.IAuthRepository>(
+            () => core.FirebaseAuthService(),
+          );
+        }
 
-        getIt.registerLazySingleton<core.IAnalyticsRepository>(
-          () => core.FirebaseAnalyticsService(),
-        );
+        if (!getIt.isRegistered<core.IAnalyticsRepository>()) {
+          getIt.registerLazySingleton<core.IAnalyticsRepository>(
+            () => core.FirebaseAnalyticsService(),
+          );
+        }
 
-        getIt.registerLazySingleton<core.ICrashlyticsRepository>(
-          () => core.FirebaseCrashlyticsService(),
-        );
+        if (!getIt.isRegistered<core.ICrashlyticsRepository>()) {
+          getIt.registerLazySingleton<core.ICrashlyticsRepository>(
+            () => core.FirebaseCrashlyticsService(),
+          );
+        }
 
-        getIt.registerLazySingleton<core.IPerformanceRepository>(
-          () => core.PerformanceService(),
-        );
-        getIt.registerLazySingleton<core.EnhancedAnalyticsService>(
-          () => core.EnhancedAnalyticsService(
-            analytics: getIt<core.IAnalyticsRepository>(),
-            crashlytics: getIt<core.ICrashlyticsRepository>(),
-            config: core.AnalyticsConfig.forApp(
-              appId: 'gasometer',
-              version: '1.0.0',
+        if (!getIt.isRegistered<core.IPerformanceRepository>()) {
+          getIt.registerLazySingleton<core.IPerformanceRepository>(
+            () => core.PerformanceService(),
+          );
+        }
+
+        if (!getIt.isRegistered<core.EnhancedAnalyticsService>()) {
+          getIt.registerLazySingleton<core.EnhancedAnalyticsService>(
+            () => core.EnhancedAnalyticsService(
+              analytics: getIt<core.IAnalyticsRepository>(),
+              crashlytics: getIt<core.ICrashlyticsRepository>(),
+              config: core.AnalyticsConfig.forApp(
+                appId: 'gasometer',
+                version: '1.0.0',
+              ),
             ),
-          ),
-        );
+          );
+        }
 
         debugPrint('✅ Core package repositories registered successfully');
       } catch (e) {

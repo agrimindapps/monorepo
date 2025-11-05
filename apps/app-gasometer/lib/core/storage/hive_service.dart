@@ -1,4 +1,5 @@
 import 'package:core/core.dart' show Hive, HiveX, Box;
+import 'package:flutter/foundation.dart';
 
 import '../../core/data/models/category_model.dart';
 import '../../core/data/models/pending_image_upload.dart';
@@ -17,9 +18,15 @@ class HiveService {
 
   /// Inicializa o Hive e registra todos os adapters
   Future<void> init() async {
-    await Hive.initFlutter();
-    _registerGeneratedAdapters();
-    await _openEssentialBoxes();
+    // Only initialize Hive on non-web platforms
+    // Web doesn't support Hive.initFlutter()
+    if (!kIsWeb) {
+      await Hive.initFlutter();
+      _registerGeneratedAdapters();
+      await _openEssentialBoxes();
+    } else {
+      print('⚠️ Hive not initialized on web platform');
+    }
   }
 
   /// Registra todos os adapters gerados pelo build_runner

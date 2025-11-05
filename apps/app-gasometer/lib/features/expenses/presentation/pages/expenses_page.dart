@@ -27,10 +27,9 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
         child: Column(
           children: [
             _buildHeader(context),
-            if (vehiclesAsync.value?.isNotEmpty ?? false) ...[
-              _buildVehicleSelector(context),
-              if (_selectedVehicleId != null) _buildMonthSelector(),
-            ],
+            _buildVehicleSelector(context),
+            if (_selectedVehicleId != null && (vehiclesAsync.value?.isNotEmpty ?? false))
+              _buildMonthSelector(),
             Expanded(
               child: vehiclesAsync.when(
                 data: (vehicles) {

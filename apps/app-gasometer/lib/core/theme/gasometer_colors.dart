@@ -65,6 +65,16 @@ class GasometerColors {
     end: Alignment.bottomRight,
     colors: [diesel, dieselLight],
   );
+  
+  static const Color error = Color(0xFFF44336);         // Red for errors
+  static const Color errorLight = Color(0xFFEF5350);    // Light red
+  
+  static const LinearGradient errorGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [error, errorLight],
+  );
+  
   static const List<Color> chartColors = [
     Color(0xFFFF5722), // Orange
     Color(0xFF2196F3), // Blue

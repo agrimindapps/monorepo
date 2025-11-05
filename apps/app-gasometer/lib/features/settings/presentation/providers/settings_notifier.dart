@@ -13,25 +13,21 @@ class SettingsState {
   const SettingsState({
     this.globalErrorBoundaryEnabled = true,
     this.notificationsEnabled = true,
-    this.fuelAlertsEnabled = true,
     this.themeMode = ThemeMode.system,
   });
   final bool globalErrorBoundaryEnabled;
   final bool notificationsEnabled;
-  final bool fuelAlertsEnabled;
   final ThemeMode themeMode;
 
   SettingsState copyWith({
     bool? globalErrorBoundaryEnabled,
     bool? notificationsEnabled,
-    bool? fuelAlertsEnabled,
     ThemeMode? themeMode,
   }) {
     return SettingsState(
       globalErrorBoundaryEnabled:
           globalErrorBoundaryEnabled ?? this.globalErrorBoundaryEnabled,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
-      fuelAlertsEnabled: fuelAlertsEnabled ?? this.fuelAlertsEnabled,
       themeMode: themeMode ?? this.themeMode,
     );
   }
@@ -43,21 +39,18 @@ class SettingsState {
           runtimeType == other.runtimeType &&
           globalErrorBoundaryEnabled == other.globalErrorBoundaryEnabled &&
           notificationsEnabled == other.notificationsEnabled &&
-          fuelAlertsEnabled == other.fuelAlertsEnabled &&
           themeMode == other.themeMode;
 
   @override
   int get hashCode =>
       globalErrorBoundaryEnabled.hashCode ^
       notificationsEnabled.hashCode ^
-      fuelAlertsEnabled.hashCode ^
       themeMode.hashCode;
 
   @override
   String toString() =>
       'SettingsState(globalErrorBoundaryEnabled: $globalErrorBoundaryEnabled, '
       'notificationsEnabled: $notificationsEnabled, '
-      'fuelAlertsEnabled: $fuelAlertsEnabled, '
       'themeMode: $themeMode)';
 }
 
@@ -84,8 +77,6 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
           _preferences.getBool('global_error_boundary_enabled') ?? true;
       final notificationsEnabled =
           _preferences.getBool('notifications_enabled') ?? true;
-      final fuelAlertsEnabled =
-          _preferences.getBool('fuel_alerts_enabled') ?? true;
       final themeIndex =
           _preferences.getInt('theme_mode') ?? ThemeMode.system.index;
       final themeMode = ThemeMode.values[themeIndex];
@@ -93,7 +84,6 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       return SettingsState(
         globalErrorBoundaryEnabled: globalErrorBoundaryEnabled,
         notificationsEnabled: notificationsEnabled,
-        fuelAlertsEnabled: fuelAlertsEnabled,
         themeMode: themeMode,
       );
     } catch (e, stackTrace) {
@@ -139,23 +129,6 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
 
       return currentState.copyWith(
         notificationsEnabled: enabled,
-      );
-    });
-  }
-
-  /// Toggle fuel alerts setting
-  Future<void> toggleFuelAlerts(bool enabled) async {
-    final currentState = state.valueOrNull;
-    if (currentState == null) return;
-    if (currentState.fuelAlertsEnabled == enabled) return;
-
-    state = const AsyncValue.loading();
-
-    state = await AsyncValue.guard(() async {
-      await _preferences.setBool('fuel_alerts_enabled', enabled);
-
-      return currentState.copyWith(
-        fuelAlertsEnabled: enabled,
       );
     });
   }
@@ -236,12 +209,6 @@ final themeModeProvider = Provider<ThemeMode>((ref) {
 final notificationsEnabledProvider = Provider<bool>((ref) {
   final settingsAsync = ref.watch(settingsNotifierProvider);
   return settingsAsync.valueOrNull?.notificationsEnabled ?? true;
-});
-
-/// Provider para acessar fuel alerts enabled
-final fuelAlertsEnabledProvider = Provider<bool>((ref) {
-  final settingsAsync = ref.watch(settingsNotifierProvider);
-  return settingsAsync.valueOrNull?.fuelAlertsEnabled ?? true;
 });
 
 /// Provider para acessar error boundary enabled

@@ -144,12 +144,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           const SizedBox(height: 24),
           AppSection(
             onThemeTap: () => _showThemeDialog(context),
-            onLanguageTap: () => _showSnackBar(
-              'Seleção de idioma estará disponível em breve!',
-            ),
-            onStorageTap: () => _showSnackBar(
-              'Gerenciamento de armazenamento estará disponível em breve!',
-            ),
           ),
           const SizedBox(height: 24),
           const LegalSection(),

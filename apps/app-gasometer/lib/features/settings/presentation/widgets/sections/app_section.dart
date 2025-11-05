@@ -7,14 +7,10 @@ import '../shared/settings_item.dart';
 class AppSection extends StatelessWidget {
   const AppSection({
     this.onThemeTap,
-    this.onLanguageTap,
-    this.onStorageTap,
     super.key,
   });
 
   final VoidCallback? onThemeTap;
-  final VoidCallback? onLanguageTap;
-  final VoidCallback? onStorageTap;
 
   @override
   Widget build(BuildContext context) {
@@ -27,18 +23,6 @@ class AppSection extends StatelessWidget {
           title: 'Tema',
           subtitle: 'Escolher aparência do aplicativo',
           onTap: onThemeTap,
-        ),
-        SettingsItem(
-          icon: Icons.language,
-          title: 'Idioma',
-          subtitle: 'Português (Brasil)',
-          onTap: onLanguageTap,
-        ),
-        SettingsItem(
-          icon: Icons.storage,
-          title: 'Armazenamento',
-          subtitle: 'Gerenciar dados locais',
-          onTap: onStorageTap,
         ),
       ],
     );

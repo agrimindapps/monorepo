@@ -53,24 +53,34 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
             onToggle: () => setState(() => _sidebarCollapsed = !_sidebarCollapsed),
           ),
           Expanded(
-            child: DecoratedBox(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xFFF0F2F5), // Cinza claro igual ao Plantis
-                    Color(0xFFE8ECEF), // Cinza levemente mais escuro
-                  ],
-                ),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  bottomLeft: Radius.circular(20),
-                ),
-              ),
-              child: ResponsiveContentArea(
-                child: widget.child,
-              ),
+            child: Builder(
+              builder: (context) {
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                return DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: isDark
+                          ? [
+                              const Color(0xFF1C1C1E), // Dark surface color
+                              const Color(0xFF0F0F0F), // Darker shade
+                            ]
+                          : [
+                              const Color(0xFFF0F2F5), // Light gray (Plantis style)
+                              const Color(0xFFE8ECEF), // Slightly darker gray
+                            ],
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      bottomLeft: Radius.circular(20),
+                    ),
+                  ),
+                  child: ResponsiveContentArea(
+                    child: widget.child,
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -87,7 +97,7 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
             selectedIndex: _getCurrentNavigationIndex(context),
             onDestinationSelected: _onNavigationSelected,
             labelType: NavigationRailLabelType.selected,
-            backgroundColor: Theme.of(context).colorScheme.surface, // Fundo branco para contraste
+            backgroundColor: Theme.of(context).colorScheme.surface, // Theme-aware surface
             indicatorColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
             selectedIconTheme: IconThemeData(
               color: Theme.of(context).colorScheme.primary,
@@ -103,22 +113,32 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
           ),
           const VerticalDivider(thickness: 1, width: 1),
           Expanded(
-            child: DecoratedBox(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xFFF0F2F5), // Cinza claro igual ao Plantis
-                    Color(0xFFE8ECEF), // Cinza levemente mais escuro
-                  ],
-                ),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  bottomLeft: Radius.circular(20),
-                ),
-              ),
-              child: ResponsiveContentArea(child: widget.child),
+            child: Builder(
+              builder: (context) {
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                return DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: isDark
+                          ? [
+                              const Color(0xFF1C1C1E), // Dark surface color
+                              const Color(0xFF0F0F0F), // Darker shade
+                            ]
+                          : [
+                              const Color(0xFFF0F2F5), // Light gray (Plantis style)
+                              const Color(0xFFE8ECEF), // Slightly darker gray
+                            ],
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      bottomLeft: Radius.circular(20),
+                    ),
+                  ),
+                  child: ResponsiveContentArea(child: widget.child),
+                );
+              },
             ),
           ),
         ],

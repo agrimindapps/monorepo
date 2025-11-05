@@ -272,66 +272,93 @@ class _EnhancedVehicleSelectorState
     return Semantics(
       label: 'Nenhum veículo cadastrado. Adicione um veículo para continuar',
       button: false,
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.xxlarge),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-            width: 1.5,
-          ),
-          borderRadius: BorderRadius.circular(AppRadius.large),
-          color: Theme.of(context).colorScheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurface.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.medium),
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppRadius.round),
+      child: AnimatedBuilder(
+        animation: _scaleAnimation,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                    width: 1.5,
+                  ),
+                  borderRadius: BorderRadius.circular(AppRadius.large),
+                  color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 64),
+                    child: DropdownButtonFormField<String>(
+                      value: null,
+                      isDense: true,
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.medium,
+                          vertical: AppSpacing.xxlarge,
+                        ),
+                        border: InputBorder.none,
+                        hintText: widget.hintText ?? 'Selecione um veículo',
+                        hintStyle: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface
+                              .withValues(alpha: AppOpacity.disabled),
+                          fontSize: AppFontSizes.medium,
+                          fontWeight: AppFontWeights.regular,
+                        ),
+                        prefixIcon: Container(
+                          margin: const EdgeInsets.only(
+                            left: AppSpacing.medium,
+                          ),
+                          child: Icon(
+                            Icons.directions_car,
+                            color: Theme.of(context).colorScheme.onSurface
+                                .withValues(alpha: AppOpacity.disabled),
+                            size: AppSizes.iconM,
+                          ),
+                        ),
+                      ),
+                      items: const [],
+                      onChanged: null,
+                      isExpanded: true,
+                      icon: Icon(
+                        Icons.expand_more,
+                        color: Theme.of(context).colorScheme.onSurface
+                            .withValues(alpha: AppOpacity.disabled),
+                        size: AppSizes.iconM,
+                      ),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface
+                            .withValues(alpha: AppOpacity.disabled),
+                        fontSize: AppFontSizes.medium,
+                      ),
+                      disabledHint: Text(
+                        widget.hintText ?? 'Selecione um veículo',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface
+                              .withValues(alpha: AppOpacity.disabled),
+                          fontSize: AppFontSizes.medium,
+                          fontWeight: AppFontWeights.regular,
+                        ),
+                      ),
+                      dropdownColor: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(AppRadius.large),
+                    ),
+                  ),
+                ),
               ),
-              child: Icon(
-                Icons.directions_car_outlined,
-                color: Theme.of(context).colorScheme.primary,
-                size: AppSizes.iconL,
-              ),
             ),
-            const SizedBox(height: AppSpacing.large),
-            Text(
-              'Nenhum veículo cadastrado',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: AppFontWeights.semiBold,
-                fontSize: AppFontSizes.large,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.small),
-            Text(
-              'Adicione seu primeiro veículo para começar\na gerenciar combustível e despesas',
-              style: TextStyle(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
-                fontSize: AppFontSizes.body,
-                height: 1.4,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

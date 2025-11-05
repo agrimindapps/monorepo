@@ -33,9 +33,6 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
             Expanded(
               child: vehiclesAsync.when(
                 data: (vehicles) {
-                  if (vehicles.isEmpty) {
-                    return _buildNoVehiclesState();
-                  }
                   if (_selectedVehicleId == null) {
                     return _buildSelectVehicleState();
                   }
@@ -237,13 +234,7 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
     );
   }
 
-  Widget _buildNoVehiclesState() {
-    return const EnhancedEmptyState(
-      title: 'Nenhum veículo cadastrado',
-      description: 'Acesse a página de Veículos para cadastrar seu primeiro veículo e começar a registrar leituras de odômetro.',
-      icon: Icons.directions_car_outlined,
-    );
-  }
+
 
   Widget _buildSelectVehicleState() {
     return const EnhancedEmptyState(

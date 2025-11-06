@@ -135,30 +135,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           // AccountSection - Ocultado em tablets/desktop (> 768px)
           // Justificativa: Em telas maiores, logout é acessível via menu lateral
           if (isMobile) ...[
-            AccountSection(
-              onLogoutTap: _showLogoutDialog,
-            ),
+            AccountSection(onLogoutTap: _showLogoutDialog),
             const SizedBox(height: 24),
           ],
           const NotificationSection(),
           const SizedBox(height: 24),
-          AppSection(
-            onThemeTap: () => _showThemeDialog(context),
-          ),
+          AppSection(onThemeTap: () => _showThemeDialog(context)),
           const SizedBox(height: 24),
           const LegalSection(),
           const SizedBox(height: 24),
           SupportSection(
-            onHelpTap: () => _showSnackBar(
-              'Central de ajuda estará disponível em breve!',
-            ),
+            onHelpTap: () =>
+                _showSnackBar('Central de ajuda estará disponível em breve!'),
             onFeedbackTap: _showFeedbackDialog,
             onRateTap: _showRateAppDialog,
           ),
           const SizedBox(height: 24),
-          AboutSection(
-            onVersionTap: () => _showSnackBar('GasOMeter v1.0.0'),
-          ),
+          AboutSection(onVersionTap: () => _showSnackBar('GasOMeter v1.0.0')),
         ],
       ),
     );
@@ -224,8 +217,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   ) {
     return InkWell(
       onTap: () {
-        onTap();
+        // ✅ CRÍTICO: Fechar dialog ANTES de mudar tema
+        // Isso previne problemas de navegação quando o app rebuilda
         Navigator.of(context).pop();
+
+        // ✅ Aguardar um frame antes de mudar tema
+        // Garante que o dialog foi completamente removido da árvore
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          onTap();
+        });
       },
       borderRadius: BorderRadius.circular(8),
       child: Padding(

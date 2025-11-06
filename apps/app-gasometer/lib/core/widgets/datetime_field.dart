@@ -72,7 +72,9 @@ class DateTimeField extends StatelessWidget {
             suffixIcon: Icon(suffixIcon, size: 24),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: Theme.of(context).brightness == Brightness.dark
+                ? Theme.of(context).colorScheme.surfaceContainerHighest
+                : Theme.of(context).colorScheme.surface,
             helperText: helperText,
           ),
           child: Row(
@@ -201,7 +203,9 @@ class FutureDateTimeField extends StatelessWidget {
             suffixIcon: Icon(suffixIcon, size: 24),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: Theme.of(context).brightness == Brightness.dark
+                ? Theme.of(context).colorScheme.surfaceContainerHighest
+                : Theme.of(context).colorScheme.surface,
             helperText: helperText,
           ),
           child: Row(
@@ -214,12 +218,11 @@ class FutureDateTimeField extends StatelessWidget {
                       : placeholder,
                   style: TextStyle(
                     fontSize: 16,
-                    color:
-                        value != null
-                            ? Theme.of(context).colorScheme.onSurface
-                            : Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: value != null
+                        ? Theme.of(context).colorScheme.onSurface
+                        : Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ),
@@ -271,10 +274,9 @@ class FutureDateTimeField extends StatelessWidget {
     );
 
     if (date != null && context.mounted) {
-      final currentTime =
-          value != null
-              ? TimeOfDay.fromDateTime(value!)
-              : const TimeOfDay(hour: 9, minute: 0); // Default to 9:00 AM
+      final currentTime = value != null
+          ? TimeOfDay.fromDateTime(value!)
+          : const TimeOfDay(hour: 9, minute: 0); // Default to 9:00 AM
 
       final time = await showTimePicker(
         context: context,

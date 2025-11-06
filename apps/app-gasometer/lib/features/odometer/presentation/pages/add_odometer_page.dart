@@ -44,12 +44,13 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_isInitialized) {
-      _initializeProviders();
       _isInitialized = true;
+      // Use Future.microtask to run async initialization without blocking
+      Future.microtask(() => _initializeProviders());
     }
   }
 
-  void _initializeProviders() async {
+  Future<void> _initializeProviders() async {
     final authState = ref.read(authProvider);
     final userId = authState.userId;
     if (widget.odometer != null) {
@@ -191,7 +192,9 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
         prefixIcon: Icon(OdometerConstants.sectionIcons['tipoRegistro']),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: Theme.of(context).brightness == Brightness.dark
+            ? Theme.of(context).colorScheme.surfaceContainerHighest
+            : Theme.of(context).colorScheme.surface,
       ),
       items: OdometerType.allTypes.map((type) {
         return DropdownMenuItem<OdometerType>(

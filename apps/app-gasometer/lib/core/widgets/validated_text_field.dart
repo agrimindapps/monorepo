@@ -296,8 +296,9 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
               widget.decoration?.copyWith(
                 labelText: widget.label,
                 hintText: widget.hint,
-                prefixIcon:
-                    widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
+                prefixIcon: widget.prefixIcon != null
+                    ? Icon(widget.prefixIcon)
+                    : null,
                 suffixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -329,19 +330,22 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
                   ),
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Theme.of(context).brightness == Brightness.dark
+                    ? Theme.of(context).colorScheme.surfaceContainerHighest
+                    : Theme.of(context).colorScheme.surface,
                 helperText: _displayHelperText,
                 helperStyle: TextStyle(color: _helperTextColor),
                 counterText:
                     widget.showCharacterCount && widget.maxLength != null
-                        ? null
-                        : '', // Esconder contador padrão se não queremos
+                    ? null
+                    : '', // Esconder contador padrão se não queremos
               ) ??
               InputDecoration(
                 labelText: widget.label,
                 hintText: widget.hint,
-                prefixIcon:
-                    widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
+                prefixIcon: widget.prefixIcon != null
+                    ? Icon(widget.prefixIcon)
+                    : null,
                 suffixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -373,13 +377,15 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
                   ),
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Theme.of(context).brightness == Brightness.dark
+                    ? Theme.of(context).colorScheme.surfaceContainerHighest
+                    : Theme.of(context).colorScheme.surface,
                 helperText: _displayHelperText,
                 helperStyle: TextStyle(color: _helperTextColor),
                 counterText:
                     widget.showCharacterCount && widget.maxLength != null
-                        ? null
-                        : '',
+                    ? null
+                    : '',
               ),
         ),
         if (_validationState == ValidationState.validating)
@@ -387,8 +393,9 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
             padding: const EdgeInsets.only(top: 4.0),
             child: LinearProgressIndicator(
               color: Theme.of(context).colorScheme.onSurface,
-              backgroundColor:
-                  Theme.of(context).colorScheme.surfaceContainerHighest,
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest,
             ),
           ),
       ],

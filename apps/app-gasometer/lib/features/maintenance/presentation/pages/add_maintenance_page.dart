@@ -52,8 +52,9 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_isInitialized) {
-      _initializeNotifier();
       _isInitialized = true;
+      // Use Future.microtask to run async initialization without blocking
+      Future.microtask(() => _initializeNotifier());
     }
   }
 

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'core/providers/dependency_providers.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/gasometer_theme.dart';
+import 'features/settings/presentation/providers/settings_notifier.dart';
 import 'main.dart' as main;
 import 'shared/widgets/connectivity_banner.dart';
 
@@ -93,10 +94,13 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
   @override
   Widget build(BuildContext context) {
     final GoRouter router = ref.watch(appRouterProvider);
+    final ThemeMode themeMode = ref.watch(themeModeProvider);
+
     return MaterialApp.router(
       title: 'GasOMeter - Controle de Veículos',
       theme: GasometerTheme.lightTheme,
       darkTheme: GasometerTheme.darkTheme,
+      themeMode: themeMode,
       routerConfig: router,
       debugShowCheckedModeBanner: false,
       builder: (context, child) {

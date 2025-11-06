@@ -116,8 +116,9 @@ class VehicleBasicInfoSection extends StatelessWidget {
       (index) => currentYear - index,
     );
     final yearText = yearController.text;
-    final currentValue =
-        yearText.trim().isNotEmpty ? int.tryParse(yearText) : null;
+    final currentValue = yearText.trim().isNotEmpty
+        ? int.tryParse(yearText)
+        : null;
 
     return DropdownButtonFormField<int>(
       value: currentValue,
@@ -139,7 +140,9 @@ class VehicleBasicInfoSection extends StatelessWidget {
           ),
         ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: Theme.of(context).brightness == Brightness.dark
+            ? Theme.of(context).colorScheme.surfaceContainerHighest
+            : Theme.of(context).colorScheme.surface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 12,
@@ -147,10 +150,7 @@ class VehicleBasicInfoSection extends StatelessWidget {
       ),
       validator: (value) => value == null ? 'Campo obrigatório' : null,
       items: years.map((year) {
-        return DropdownMenuItem<int>(
-          value: year,
-          child: Text(year.toString()),
-        );
+        return DropdownMenuItem<int>(value: year, child: Text(year.toString()));
       }).toList(),
       onChanged: onYearChanged,
     );

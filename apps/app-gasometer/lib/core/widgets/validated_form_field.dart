@@ -552,7 +552,9 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
                         ),
                       ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Theme.of(context).brightness == Brightness.dark
+                    ? Theme.of(context).colorScheme.surfaceContainerHighest
+                    : Theme.of(context).colorScheme.surface,
                 helperText: _displayHelperText,
                 helperStyle: TextStyle(color: _helperTextColor),
                 counterText:

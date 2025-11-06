@@ -39,12 +39,13 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_isInitialized) {
-      _initializeProviders();
       _isInitialized = true;
+      // Use Future.microtask to run async initialization without blocking
+      Future.microtask(() => _initializeProviders());
     }
   }
 
-  void _initializeProviders() async {
+  Future<void> _initializeProviders() async {
     final authState = ref.read(authProvider);
     final vehicleId = widget.vehicleId ?? '';
 

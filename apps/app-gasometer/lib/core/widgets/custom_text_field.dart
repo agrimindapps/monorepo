@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 
 /// Campo de texto customizado com validação e formatação
 class CustomTextField extends StatefulWidget {
-
   const CustomTextField({
     super.key,
     this.controller,
@@ -123,9 +122,9 @@ class CustomTextField extends StatefulWidget {
       enabled: enabled,
       keyboardType: TextInputType.number,
       textInputAction: TextInputAction.next,
-      inputFormatters: inputFormatters ?? [
-        FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-      ],
+      inputFormatters:
+          inputFormatters ??
+          [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
       validator: validator,
       onChanged: onChanged,
       prefixIcon: prefixIcon,
@@ -155,10 +154,7 @@ class CustomTextField extends StatefulWidget {
       onSubmitted: onSubmitted,
       prefixIcon: const Icon(Icons.search),
       suffixIcon: onClear != null
-          ? IconButton(
-              icon: const Icon(Icons.clear),
-              onPressed: onClear,
-            )
+          ? IconButton(icon: const Icon(Icons.clear), onPressed: onClear)
           : null,
     );
   }
@@ -241,13 +237,16 @@ class _CustomTextFieldState extends State<CustomTextField> {
         suffix: widget.suffix,
         prefixText: widget.prefixText,
         suffixText: widget.suffixText,
-        contentPadding: widget.contentPadding ?? 
+        contentPadding:
+            widget.contentPadding ??
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: widget.border ?? _defaultBorder(context),
         enabledBorder: widget.enabledBorder ?? _defaultEnabledBorder(context),
         focusedBorder: widget.focusedBorder ?? _defaultFocusedBorder(context),
         errorBorder: widget.errorBorder ?? _defaultErrorBorder(context),
-        fillColor: Colors.white,
+        fillColor: Theme.of(context).brightness == Brightness.dark
+            ? Theme.of(context).colorScheme.surfaceContainerHighest
+            : Theme.of(context).colorScheme.surface,
         filled: widget.filled,
       ),
     );

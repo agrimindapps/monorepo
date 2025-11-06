@@ -43,7 +43,7 @@ class OdometerFormModel extends Equatable {
   factory OdometerFormModel.fromOdometerEntity(OdometerEntity reading) {
     return OdometerFormModel(
       id: reading.id,
-      userId: reading.userId,
+      userId: reading.userId ?? '',
       vehicleId: reading.vehicleId,
       vehicle: null, // Will be loaded separately
       value: reading.value,
@@ -221,12 +221,11 @@ class OdometerFormModel extends Equatable {
       registrationDate: registrationDate,
       description: sanitizedDescription,
       type: type,
-      createdAt:
-          id.isEmpty
-              ? now
-              : DateTime.fromMillisecondsSinceEpoch(
-                int.tryParse(id) ?? now.millisecondsSinceEpoch,
-              ),
+      createdAt: id.isEmpty
+          ? now
+          : DateTime.fromMillisecondsSinceEpoch(
+              int.tryParse(id) ?? now.millisecondsSinceEpoch,
+            ),
       updatedAt: now,
       metadata: const {},
     );

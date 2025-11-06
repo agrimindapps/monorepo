@@ -36,12 +36,15 @@ abstract class RegisterModule {
   @singleton
   Connectivity get connectivity => Connectivity();
 
-  @singleton
-  IBoxRegistryService get boxRegistryService => BoxRegistryService();
+  // ❌ REMOVIDO: BoxRegistryService já é registrado no core package
+  // Não devemos registrar novamente aqui para evitar múltiplas instâncias
 
-  @singleton
+  // ✅ IMPORTANTE: Usar @lazySingleton para evitar erro de "não registrado"
+  // O BoxRegistryService só é registrado DEPOIS pelo CoreModule
+  // LazySingleton adia a criação até o primeiro uso
+  @lazySingleton
   ILocalStorageRepository get localStorageRepository =>
-      HiveStorageService(boxRegistryService);
+      HiveStorageService(GetIt.I<IBoxRegistryService>());
 
   @singleton
   IAppRatingRepository get appRatingRepository => AppRatingService();
@@ -50,15 +53,15 @@ abstract class RegisterModule {
   ImageCompressionService get imageCompressionService =>
       ImageCompressionService();
 
-  /// IAuthRepository - registered manually in CoreModule, but needs to be
-  /// accessible via Injectable for module dependencies
-  @lazySingleton
-  IAuthRepository get authRepository => FirebaseAuthService();
+  // ❌ REMOVIDO: IAuthRepository já é registrado pelo core package
+  // Manter aqui causa erro "already registered"
+  // @lazySingleton
+  // IAuthRepository get authRepository => FirebaseAuthService();
 
-  /// ISubscriptionRepository - registered manually in CoreModule, but needs to be
-  /// accessible via Injectable for module dependencies
-  @lazySingleton
-  ISubscriptionRepository get subscriptionRepository => RevenueCatService();
+  // ❌ REMOVIDO: ISubscriptionRepository já é registrado pelo core package
+  // Manter aqui causa erro "already registered"
+  // @lazySingleton
+  // ISubscriptionRepository get subscriptionRepository => RevenueCatService();
 
   /// DataCleanerService for migration services
   @lazySingleton
@@ -72,10 +75,7 @@ abstract class RegisterModule {
       return EnhancedAnalyticsService(
         analytics: FirebaseAnalyticsService(),
         crashlytics: FirebaseCrashlyticsService(),
-        config: AnalyticsConfig.forApp(
-          appId: 'gasometer',
-          version: '1.0.0',
-        ),
+        config: AnalyticsConfig.forApp(appId: 'gasometer', version: '1.0.0'),
       );
     } catch (e) {
       // Return a stub if Firebase is not initialized

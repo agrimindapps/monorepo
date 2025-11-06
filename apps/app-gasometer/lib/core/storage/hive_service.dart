@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 
 import '../../core/data/models/category_model.dart';
 import '../../core/data/models/pending_image_upload.dart';
-import '../../core/logging/entities/log_entry.dart';
 import '../../features/expenses/data/models/expense_model.dart';
 import '../../features/fuel/data/models/fuel_supply_model.dart';
 import '../../features/maintenance/data/models/maintenance_model.dart';
@@ -18,15 +17,18 @@ class HiveService {
 
   /// Inicializa o Hive e registra todos os adapters
   Future<void> init() async {
-    // Only initialize Hive on non-web platforms
-    // Web doesn't support Hive.initFlutter()
-    if (!kIsWeb) {
+    // Inicializar Hive em todas as plataformas
+    if (kIsWeb) {
+      // Na web, usar Hive.init() sem path
       await Hive.initFlutter();
-      _registerGeneratedAdapters();
-      await _openEssentialBoxes();
+      print('✅ Hive initialized for web platform');
     } else {
-      print('⚠️ Hive not initialized on web platform');
+      // Mobile/Desktop usa initFlutter()
+      await Hive.initFlutter();
     }
+
+    _registerGeneratedAdapters();
+    await _openEssentialBoxes();
   }
 
   /// Registra todos os adapters gerados pelo build_runner
@@ -49,9 +51,6 @@ class HiveService {
     if (!Hive.isAdapterRegistered(5)) {
       Hive.registerAdapter(CategoryModelAdapter());
     }
-    if (!Hive.isAdapterRegistered(20)) {
-      Hive.registerAdapter(LogEntryAdapter());
-    }
     // ✅ NOVO: Adapter para fila de uploads de imagens pendentes
     if (!Hive.isAdapterRegistered(50)) {
       Hive.registerAdapter(PendingImageUploadAdapter());
@@ -59,17 +58,22 @@ class HiveService {
   }
 
   /// Abre boxes essenciais que são usados frequentemente
+  /// ✅ IMPORTANTE: Todas as boxes são abertas como Box<dynamic>
+  /// Isso garante compatibilidade com UnifiedSyncManager e evita conflitos de tipo
   Future<void> _openEssentialBoxes() async {
     try {
-      await Hive.openBox<VehicleModel>(HiveBoxNames.vehicles);
-      await Hive.openBox<FuelSupplyModel>(HiveBoxNames.fuelSupplies);
-      await Hive.openBox<OdometerModel>(HiveBoxNames.odometer);
-      await Hive.openBox<ExpenseModel>(HiveBoxNames.expenses);
-      await Hive.openBox<MaintenanceModel>(HiveBoxNames.maintenance);
-      await Hive.openBox<CategoryModel>(HiveBoxNames.categories);
-      await Hive.openBox<Map<dynamic, dynamic>>(HiveBoxNames.settings);
-      await Hive.openBox<Map<dynamic, dynamic>>(HiveBoxNames.cache);
-      await Hive.openBox<LogEntry>(HiveBoxNames.logs);
+      // ✅ MUDANÇA: Abrir TODAS as boxes como Box<dynamic>
+      // Antes: Box<VehicleModel>, Box<ExpenseModel>, etc.
+      // Agora: Box<dynamic> para todas
+      // Os adapters continuam registrados e funcionam normalmente
+      await Hive.openBox<dynamic>(HiveBoxNames.vehicles);
+      await Hive.openBox<dynamic>(HiveBoxNames.fuelSupplies);
+      await Hive.openBox<dynamic>(HiveBoxNames.odometer);
+      await Hive.openBox<dynamic>(HiveBoxNames.expenses);
+      await Hive.openBox<dynamic>(HiveBoxNames.maintenance);
+      await Hive.openBox<dynamic>(HiveBoxNames.categories);
+      await Hive.openBox<dynamic>(HiveBoxNames.settings);
+      await Hive.openBox<dynamic>(HiveBoxNames.cache);
     } catch (e) {
       print('Erro ao abrir boxes: $e');
     }
@@ -153,7 +157,6 @@ class HiveBoxNames {
   static const String cache = 'cache';
   static const String userPreferences = 'user_preferences';
   static const String syncQueue = 'sync_queue';
-  static const String logs = 'logs';
   static const String auth = 'auth';
   static const String subscription = 'subscription';
 
@@ -169,7 +172,6 @@ class HiveBoxNames {
     cache,
     userPreferences,
     syncQueue,
-    logs,
     auth,
     subscription,
   ];

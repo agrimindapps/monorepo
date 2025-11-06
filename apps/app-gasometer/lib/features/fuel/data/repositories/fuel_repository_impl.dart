@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 
-import '../../../../core/logging/entities/log_entry.dart';
-import '../../../../core/logging/services/logging_service.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../../domain/repositories/fuel_repository.dart';
 
@@ -21,12 +19,7 @@ import '../../domain/repositories/fuel_repository.dart';
 /// - Relacionamento com Vehicle (chave estrangeira)
 @LazySingleton(as: FuelRepository)
 class FuelRepositoryImpl implements FuelRepository {
-  FuelRepositoryImpl({
-    required this.loggingService,
-  });
-
-  final LoggingService loggingService;
-
+  FuelRepositoryImpl();
   static const _appName = 'gasometer';
 
   @override
@@ -51,12 +44,6 @@ class FuelRepositoryImpl implements FuelRepository {
         },
       );
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.fuel,
-        operation: LogOperation.read,
-        message: 'Error getting all fuel records',
-        error: e,
-      );
       return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
     }
   }
@@ -92,13 +79,6 @@ class FuelRepositoryImpl implements FuelRepository {
         },
       );
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.fuel,
-        operation: LogOperation.read,
-        message: 'Error getting fuel records by vehicle',
-        error: e,
-        metadata: {'vehicle_id': vehicleId},
-      );
       return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
     }
   }
@@ -128,13 +108,6 @@ class FuelRepositoryImpl implements FuelRepository {
         },
       );
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.fuel,
-        operation: LogOperation.read,
-        message: 'Error getting fuel record by id',
-        error: e,
-        metadata: {'fuel_record_id': id},
-      );
       return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
     }
   }
@@ -143,20 +116,6 @@ class FuelRepositoryImpl implements FuelRepository {
   Future<Either<Failure, FuelRecordEntity>> addFuelRecord(
     FuelRecordEntity fuelRecord,
   ) async {
-    await loggingService.logOperationStart(
-      category: LogCategory.fuel,
-      operation: LogOperation.create,
-      message:
-          'Starting fuel record creation for vehicle ${fuelRecord.vehicleId}',
-      metadata: {
-        'vehicle_id': fuelRecord.vehicleId,
-        'fuel_type': fuelRecord.fuelType.toString(),
-        'liters': fuelRecord.liters.toString(),
-        'cost': fuelRecord.totalPrice.toString(),
-        'odometer_reading': fuelRecord.odometer.toString(),
-        'is_full_tank': fuelRecord.fullTank.toString(),
-      },
-    );
 
     try {
       final result =
@@ -167,45 +126,14 @@ class FuelRepositoryImpl implements FuelRepository {
 
       return result.fold(
         (failure) {
-          loggingService.logOperationError(
-            category: LogCategory.fuel,
-            operation: LogOperation.create,
-            message: 'Failed to create fuel record',
-            error: failure,
-            metadata: {
-              'fuel_id': fuelRecord.id,
-              'vehicle_id': fuelRecord.vehicleId,
-            },
-          );
           return Left(failure);
         },
         (id) async {
-          await loggingService.logOperationSuccess(
-            category: LogCategory.fuel,
-            operation: LogOperation.create,
-            message: 'Fuel record creation completed successfully',
-            metadata: {
-              'fuel_id': id,
-              'vehicle_id': fuelRecord.vehicleId,
-              'saved_locally': true,
-              'remote_sync': 'automatic',
-            },
-          );
 
           return Right(fuelRecord.copyWith(id: id));
         },
       );
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.fuel,
-        operation: LogOperation.create,
-        message: 'Unexpected error during fuel record creation',
-        error: e,
-        metadata: {
-          'fuel_id': fuelRecord.id,
-          'vehicle_id': fuelRecord.vehicleId,
-        },
-      );
       return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
     }
   }
@@ -214,15 +142,6 @@ class FuelRepositoryImpl implements FuelRepository {
   Future<Either<Failure, FuelRecordEntity>> updateFuelRecord(
     FuelRecordEntity fuelRecord,
   ) async {
-    await loggingService.logOperationStart(
-      category: LogCategory.fuel,
-      operation: LogOperation.update,
-      message: 'Starting fuel record update (ID: ${fuelRecord.id})',
-      metadata: {
-        'fuel_id': fuelRecord.id,
-        'vehicle_id': fuelRecord.vehicleId,
-      },
-    );
 
     try {
       final updatedRecord = fuelRecord.markAsDirty().incrementVersion();
@@ -236,57 +155,20 @@ class FuelRepositoryImpl implements FuelRepository {
 
       return result.fold(
         (failure) {
-          loggingService.logOperationError(
-            category: LogCategory.fuel,
-            operation: LogOperation.update,
-            message: 'Failed to update fuel record',
-            error: failure,
-            metadata: {
-              'fuel_id': fuelRecord.id,
-              'vehicle_id': fuelRecord.vehicleId,
-            },
-          );
           return Left(failure);
         },
         (_) async {
-          await loggingService.logOperationSuccess(
-            category: LogCategory.fuel,
-            operation: LogOperation.update,
-            message: 'Fuel record update completed successfully',
-            metadata: {
-              'fuel_id': fuelRecord.id,
-              'vehicle_id': fuelRecord.vehicleId,
-              'saved_locally': true,
-              'remote_sync': 'automatic',
-            },
-          );
 
           return Right(updatedRecord);
         },
       );
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.fuel,
-        operation: LogOperation.update,
-        message: 'Unexpected error during fuel record update',
-        error: e,
-        metadata: {
-          'fuel_id': fuelRecord.id,
-          'vehicle_id': fuelRecord.vehicleId,
-        },
-      );
       return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
   Future<Either<Failure, Unit>> deleteFuelRecord(String id) async {
-    await loggingService.logOperationStart(
-      category: LogCategory.fuel,
-      operation: LogOperation.delete,
-      message: 'Starting fuel record deletion (ID: $id)',
-      metadata: {'fuel_id': id},
-    );
 
     try {
       final result =
@@ -297,38 +179,14 @@ class FuelRepositoryImpl implements FuelRepository {
 
       return result.fold(
         (failure) {
-          loggingService.logOperationError(
-            category: LogCategory.fuel,
-            operation: LogOperation.delete,
-            message: 'Failed to delete fuel record',
-            error: failure,
-            metadata: {'fuel_id': id},
-          );
           return Left(failure);
         },
         (_) async {
-          await loggingService.logOperationSuccess(
-            category: LogCategory.fuel,
-            operation: LogOperation.delete,
-            message: 'Fuel record deletion completed successfully',
-            metadata: {
-              'fuel_id': id,
-              'deleted_locally': true,
-              'remote_sync': 'automatic',
-            },
-          );
 
           return const Right(unit);
         },
       );
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.fuel,
-        operation: LogOperation.delete,
-        message: 'Unexpected error during fuel record deletion',
-        error: e,
-        metadata: {'fuel_id': id},
-      );
       return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
     }
   }
@@ -356,13 +214,6 @@ class FuelRepositoryImpl implements FuelRepository {
         },
       );
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.fuel,
-        operation: LogOperation.read,
-        message: 'Error searching fuel records',
-        error: e,
-        metadata: {'query': query},
-      );
       return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
     }
   }
@@ -381,23 +232,11 @@ class FuelRepositoryImpl implements FuelRepository {
       yield* stream.map<Either<Failure, List<FuelRecordEntity>>>(
         (records) => Right(records),
       ).handleError((Object error) {
-        loggingService.logOperationError(
-          category: LogCategory.fuel,
-          operation: LogOperation.read,
-          message: 'Error watching fuel records stream',
-          error: error,
-        );
         return Left<Failure, List<FuelRecordEntity>>(
           UnexpectedFailure('Erro ao observar registros: ${error.toString()}'),
         );
       });
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.fuel,
-        operation: LogOperation.read,
-        message: 'Error setting up fuel records watch stream',
-        error: e,
-      );
       yield Left(
         UnexpectedFailure('Erro ao observar registros: ${e.toString()}'),
       );
@@ -427,13 +266,6 @@ class FuelRepositoryImpl implements FuelRepository {
 
         return Right(filteredRecords);
       }).handleError((Object error) {
-        loggingService.logOperationError(
-          category: LogCategory.fuel,
-          operation: LogOperation.read,
-          message: 'Error watching fuel records by vehicle stream',
-          error: error,
-          metadata: {'vehicle_id': vehicleId},
-        );
         return Left<Failure, List<FuelRecordEntity>>(
           UnexpectedFailure(
             'Erro ao observar registros por veículo: ${error.toString()}',
@@ -441,13 +273,6 @@ class FuelRepositoryImpl implements FuelRepository {
         );
       });
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.fuel,
-        operation: LogOperation.read,
-        message: 'Error setting up fuel records by vehicle watch stream',
-        error: e,
-        metadata: {'vehicle_id': vehicleId},
-      );
       yield Left(
         UnexpectedFailure(
           'Erro ao observar registros por veículo: ${e.toString()}',
@@ -486,13 +311,6 @@ class FuelRepositoryImpl implements FuelRepository {
         return Right(average);
       });
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.fuel,
-        operation: LogOperation.read,
-        message: 'Error calculating average consumption',
-        error: e,
-        metadata: {'vehicle_id': vehicleId},
-      );
       return Left(
         UnexpectedFailure('Erro ao calcular consumo médio: ${e.toString()}'),
       );
@@ -537,17 +355,6 @@ class FuelRepositoryImpl implements FuelRepository {
         return Right(totalSpent);
       });
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.fuel,
-        operation: LogOperation.read,
-        message: 'Error calculating total spent',
-        error: e,
-        metadata: {
-          'vehicle_id': vehicleId,
-          'start_date': startDate?.toIso8601String(),
-          'end_date': endDate?.toIso8601String(),
-        },
-      );
       return Left(
         UnexpectedFailure('Erro ao calcular total gasto: ${e.toString()}'),
       );
@@ -568,16 +375,6 @@ class FuelRepositoryImpl implements FuelRepository {
         return Right(recentRecords);
       });
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.fuel,
-        operation: LogOperation.read,
-        message: 'Error getting recent fuel records',
-        error: e,
-        metadata: {
-          'vehicle_id': vehicleId,
-          'limit': limit.toString(),
-        },
-      );
       return Left(
         UnexpectedFailure('Erro ao buscar registros recentes: ${e.toString()}'),
       );

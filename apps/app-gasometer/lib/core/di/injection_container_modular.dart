@@ -1,4 +1,4 @@
-import 'package:core/core.dart' show GetIt;
+import 'package:core/core.dart' show GetIt, InjectionContainer;
 
 import '../storage/hive_service.dart';
 import 'di_module.dart';
@@ -23,6 +23,13 @@ class ModularInjectionContainer {
   static Future<void> init({bool firebaseEnabled = false}) async {
     try {
       print('🚀 Starting GasOMeter dependency initialization...');
+
+      // ✅ IMPORTANTE: Inicializar core package DI PRIMEIRO
+      // Isso registra BoxRegistryService e outros serviços essenciais
+      print('📦 Initializing core package DI...');
+      await InjectionContainer.init();
+      print('✅ Core package DI initialized');
+
       print('📦 Initializing Hive...');
       await HiveService.instance.init();
       print('✅ Hive initialized');
@@ -58,7 +65,9 @@ class ModularInjectionContainer {
   /// Follows Dependency Inversion Principle - high level depends on abstraction
   static List<DIModule> _createModules({bool firebaseEnabled = false}) {
     return [
-      CoreModule(firebaseEnabled: firebaseEnabled), // External services and core infrastructure
+      CoreModule(
+        firebaseEnabled: firebaseEnabled,
+      ), // External services and core infrastructure
       ConnectivityModule(), // Connectivity monitoring services
     ];
   }

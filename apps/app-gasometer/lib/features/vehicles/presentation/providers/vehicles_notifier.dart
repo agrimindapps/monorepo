@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/error/app_error.dart' as local_error;
 import '../../../../core/error/error_mapper.dart';
 import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../../domain/entities/vehicle_entity.dart';
@@ -29,12 +28,12 @@ class VehiclesNotifier extends _$VehiclesNotifier {
 
   String get notifierName => 'VehiclesNotifier';
 
-  late final ErrorMapper _errorMapper;
+  ErrorMapper? _errorMapper;
 
   @override
   Future<List<VehicleEntity>> build() async {
     await _vehicleSubscription?.cancel();
-    _errorMapper = ref.read(errorMapperProvider);
+    _errorMapper ??= ref.read(errorMapperProvider);
 
     final currentUser = ref.read(currentUserProvider);
     if (currentUser == null) {
@@ -50,7 +49,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
 
       return result.fold(
         (failure) {
-          final error = _errorMapper.mapFailureToError(failure);
+          final error = _errorMapper!.mapFailureToError(failure);
           throw error;
         },
         (vehicles) {
@@ -122,7 +121,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
 
       return result.fold(
         (failure) {
-          final error = _errorMapper.mapFailureToError(failure);
+          final error = _errorMapper!.mapFailureToError(failure);
           throw error;
         },
         (added) {
@@ -156,7 +155,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
 
       return result.fold(
         (failure) {
-          final error = _errorMapper.mapFailureToError(failure);
+          final error = _errorMapper!.mapFailureToError(failure);
           throw error;
         },
         (updated) {
@@ -167,10 +166,9 @@ class VehiclesNotifier extends _$VehiclesNotifier {
             loading: () => <VehicleEntity>[],
             error: (_, __) => <VehicleEntity>[],
           );
-          final updatedList =
-              currentList.map((VehicleEntity v) {
-                return v.id == updated.id ? updated : v;
-              }).toList();
+          final updatedList = currentList.map((VehicleEntity v) {
+            return v.id == updated.id ? updated : v;
+          }).toList();
 
           state = AsyncValue.data(updatedList);
 
@@ -194,7 +192,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
 
       return result.fold(
         (failure) {
-          final error = _errorMapper.mapFailureToError(failure);
+          final error = _errorMapper!.mapFailureToError(failure);
           throw error;
         },
         (_) {
@@ -204,10 +202,9 @@ class VehiclesNotifier extends _$VehiclesNotifier {
             loading: () => <VehicleEntity>[],
             error: (_, __) => <VehicleEntity>[],
           );
-          final updatedList =
-              currentList
-                  .where((VehicleEntity v) => v.id != vehicleId)
-                  .toList();
+          final updatedList = currentList
+              .where((VehicleEntity v) => v.id != vehicleId)
+              .toList();
           state = AsyncValue.data(updatedList);
 
           return currentList; // Return list to satisfy executeOperation type
@@ -231,7 +228,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
 
         return result.fold(
           (failure) {
-            final error = _errorMapper.mapFailureToError(failure);
+            final error = _errorMapper!.mapFailureToError(failure);
             throw error;
           },
           (vehicle) {
@@ -268,7 +265,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
 
         return result.fold(
           (failure) {
-            final error = _errorMapper.mapFailureToError(failure);
+            final error = _errorMapper!.mapFailureToError(failure);
             throw error;
           },
           (vehicles) {
@@ -376,15 +373,13 @@ AsyncValue<List<VehicleEntity>> filteredVehicles(Ref ref) {
   }
 
   return vehiclesAsync.when(
-    data:
-        (vehicles) => AsyncValue.data(
-          vehicles.where((v) {
-            final searchText =
-                '${v.name} ${v.brand} ${v.model} ${v.licensePlate}'
-                    .toLowerCase();
-            return searchText.contains(query);
-          }).toList(),
-        ),
+    data: (vehicles) => AsyncValue.data(
+      vehicles.where((v) {
+        final searchText = '${v.name} ${v.brand} ${v.model} ${v.licensePlate}'
+            .toLowerCase();
+        return searchText.contains(query);
+      }).toList(),
+    ),
     loading: () => const AsyncValue.loading(),
     error: (error, stack) => AsyncValue.error(error, stack),
   );
@@ -396,9 +391,8 @@ AsyncValue<List<VehicleEntity>> activeVehicles(Ref ref) {
   final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
 
   return vehiclesAsync.when(
-    data:
-        (vehicles) =>
-            AsyncValue.data(vehicles.where((v) => v.isActive).toList()),
+    data: (vehicles) =>
+        AsyncValue.data(vehicles.where((v) => v.isActive).toList()),
     loading: () => const AsyncValue.loading(),
     error: (error, stack) => AsyncValue.error(error, stack),
   );
@@ -432,4 +426,3 @@ bool hasVehicles(Ref ref) {
   final count = ref.watch(vehicleCountProvider);
   return count > 0;
 }
-

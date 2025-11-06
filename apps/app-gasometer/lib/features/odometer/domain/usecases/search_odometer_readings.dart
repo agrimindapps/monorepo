@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 
-import '../../data/repositories/odometer_repository.dart';
+import '../repositories/odometer_repository.dart';
 import '../entities/odometer_entity.dart';
 
 /// UseCase para buscar leituras de odômetro por texto
@@ -10,7 +10,8 @@ import '../entities/odometer_entity.dart';
 /// - Retornar ordenadas por data (mais recente primeiro)
 /// - Filtrar registros deletados
 @injectable
-class SearchOdometerReadingsUseCase implements UseCase<List<OdometerEntity>, String> {
+class SearchOdometerReadingsUseCase
+    implements UseCase<List<OdometerEntity>, String> {
   const SearchOdometerReadingsUseCase(this._repository);
 
   final OdometerRepository _repository;
@@ -18,14 +19,13 @@ class SearchOdometerReadingsUseCase implements UseCase<List<OdometerEntity>, Str
   @override
   Future<Either<Failure, List<OdometerEntity>>> call(String query) async {
     try {
-      final readings = await _repository.searchOdometerReadings(query);
-      return Right(readings);
-    } on CacheFailure catch (e) {
-      return Left(e);
-    } catch (e) {
-      return Left(
-        UnknownFailure('Erro ao buscar leituras: ${e.toString()}'),
+      final result = await _repository.searchOdometerReadings(query);
+      return result.fold(
+        (failure) => Left(failure),
+        (readings) => Right(readings),
       );
+    } catch (e) {
+      return Left(UnknownFailure('Erro ao buscar leituras: ${e.toString()}'));
     }
   }
 }

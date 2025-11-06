@@ -1,26 +1,12 @@
-import 'package:core/core.dart' show Equatable;
+import 'package:core/core.dart';
 
 /// Represents an odometer reading record
-class OdometerEntity extends Equatable {
-  const OdometerEntity({
-    required this.id,
-    required this.vehicleId,
-    required this.userId,
-    required this.value,
-    required this.registrationDate,
-    required this.description,
-    required this.type,
-    required this.createdAt,
-    required this.updatedAt,
-    this.metadata,
-  });
-
+class OdometerEntity extends BaseSyncEntity {
   /// Creates an entity from a map
   factory OdometerEntity.fromMap(Map<String, dynamic> map) {
     return OdometerEntity(
       id: map['id']?.toString() ?? '',
       vehicleId: map['vehicleId']?.toString() ?? '',
-      userId: map['userId']?.toString() ?? '',
       value: (map['value'] as num?)?.toDouble() ?? 0.0,
       registrationDate: DateTime.fromMillisecondsSinceEpoch(
         (map['registrationDate'] as int?) ??
@@ -28,50 +14,127 @@ class OdometerEntity extends Equatable {
       ),
       description: map['description']?.toString() ?? '',
       type: OdometerType.fromString(map['type']?.toString() ?? 'other'),
-      createdAt: DateTime.fromMillisecondsSinceEpoch(
-        (map['createdAt'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
-      ),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch(
-        (map['updatedAt'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
-      ),
-      metadata: map['metadata'] as Map<String, dynamic>?,
+      metadata: map['metadata'] as Map<String, dynamic>? ?? {},
+      createdAt: map['createdAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int)
+          : null,
+      updatedAt: map['updatedAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int)
+          : null,
+      lastSyncAt: map['lastSyncAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['lastSyncAt'] as int)
+          : null,
+      isDirty: map['isDirty'] as bool? ?? false,
+      isDeleted: map['isDeleted'] as bool? ?? false,
+      version: map['version'] as int? ?? 1,
+      userId: map['userId']?.toString(),
+      moduleName: map['moduleName']?.toString(),
     );
   }
-  final String id;
+
+  const OdometerEntity({
+    required super.id,
+    required this.vehicleId,
+    required this.value,
+    required this.registrationDate,
+    required this.description,
+    required this.type,
+    this.metadata = const {},
+    super.createdAt,
+    super.updatedAt,
+    super.lastSyncAt,
+    super.isDirty,
+    super.isDeleted,
+    super.version,
+    super.userId,
+    super.moduleName,
+  });
+
   final String vehicleId;
-  final String userId;
   final double value;
   final DateTime registrationDate;
   final String description;
   final OdometerType type;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final Map<String, dynamic>? metadata;
+  final Map<String, dynamic> metadata;
+
+  @override
+  Map<String, dynamic> toFirebaseMap() {
+    return {
+      ...baseFirebaseFields,
+      'vehicleId': vehicleId,
+      'value': value,
+      'registrationDate': registrationDate.millisecondsSinceEpoch,
+      'description': description,
+      'type': type.name,
+      'metadata': metadata,
+    };
+  }
+
+  @override
+  BaseSyncEntity markAsDirty() {
+    return copyWith(isDirty: true, version: version + 1);
+  }
+
+  @override
+  BaseSyncEntity markAsSynced({DateTime? syncTime}) {
+    return copyWith(isDirty: false, lastSyncAt: syncTime ?? DateTime.now());
+  }
+
+  @override
+  BaseSyncEntity markAsDeleted() {
+    return copyWith(isDeleted: true, version: version + 1);
+  }
+
+  @override
+  BaseSyncEntity incrementVersion() {
+    return copyWith(version: version + 1);
+  }
+
+  @override
+  BaseSyncEntity withUserId(String userId) {
+    return copyWith(userId: userId);
+  }
+
+  @override
+  BaseSyncEntity withModule(String moduleName) {
+    return copyWith(moduleName: moduleName);
+  }
 
   /// Creates a copy of this entity with the given fields replaced
+  @override
   OdometerEntity copyWith({
     String? id,
     String? vehicleId,
-    String? userId,
     double? value,
     DateTime? registrationDate,
     String? description,
     OdometerType? type,
+    Map<String, dynamic>? metadata,
     DateTime? createdAt,
     DateTime? updatedAt,
-    Map<String, dynamic>? metadata,
+    DateTime? lastSyncAt,
+    bool? isDirty,
+    bool? isDeleted,
+    int? version,
+    String? userId,
+    String? moduleName,
   }) {
     return OdometerEntity(
       id: id ?? this.id,
       vehicleId: vehicleId ?? this.vehicleId,
-      userId: userId ?? this.userId,
       value: value ?? this.value,
       registrationDate: registrationDate ?? this.registrationDate,
       description: description ?? this.description,
       type: type ?? this.type,
+      metadata: metadata ?? this.metadata,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      metadata: metadata ?? this.metadata,
+      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+      isDirty: isDirty ?? this.isDirty,
+      isDeleted: isDeleted ?? this.isDeleted,
+      version: version ?? this.version,
+      userId: userId ?? this.userId,
+      moduleName: moduleName ?? this.moduleName,
     );
   }
 
@@ -80,28 +143,30 @@ class OdometerEntity extends Equatable {
     return {
       'id': id,
       'vehicleId': vehicleId,
-      'userId': userId,
       'value': value,
       'registrationDate': registrationDate.millisecondsSinceEpoch,
       'description': description,
       'type': type.name,
-      'createdAt': createdAt.millisecondsSinceEpoch,
-      'updatedAt': updatedAt.millisecondsSinceEpoch,
       'metadata': metadata,
+      'createdAt': createdAt?.millisecondsSinceEpoch,
+      'updatedAt': updatedAt?.millisecondsSinceEpoch,
+      'lastSyncAt': lastSyncAt?.millisecondsSinceEpoch,
+      'isDirty': isDirty,
+      'isDeleted': isDeleted,
+      'version': version,
+      'userId': userId,
+      'moduleName': moduleName,
     };
   }
 
   @override
   List<Object?> get props => [
-    id,
+    ...super.props,
     vehicleId,
-    userId,
     value,
     registrationDate,
     description,
     type,
-    createdAt,
-    updatedAt,
     metadata,
   ];
 

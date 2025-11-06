@@ -107,10 +107,27 @@ class BoxRegistryService implements IBoxRegistryService {
   @override
   Future<Either<Failure, Box<dynamic>>> getBox(String boxName) async {
     try {
+      if (kDebugMode) {
+        debugPrint(
+          '📦 [BoxRegistryService.getBox] Solicitação para box "$boxName"...',
+        );
+        debugPrint(
+          '📦 [BoxRegistryService.getBox] Boxes registradas: ${_boxConfigurations.keys.join(", ")}',
+        );
+        debugPrint(
+          '📦 [BoxRegistryService.getBox] Hive.isBoxOpen("$boxName"): ${Hive.isBoxOpen(boxName)}',
+        );
+      }
+
       await _ensureInitialized();
 
       // 1. Verificar se box está registrada
       if (!_boxConfigurations.containsKey(boxName)) {
+        if (kDebugMode) {
+          debugPrint(
+            '❌ [BoxRegistryService.getBox] Box "$boxName" NÃO encontrada nas configurações!',
+          );
+        }
         return Left(CacheFailure('Box "$boxName" não está registrada'));
       }
 
@@ -122,9 +139,36 @@ class BoxRegistryService implements IBoxRegistryService {
       // 3. ✅ Verificar se box JÁ está aberta (SEMPRE PRIMEIRO)
       //    Isso resolve race condition com outros gerenciadores
       if (Hive.isBoxOpen(boxName)) {
-        final box = Hive.box<dynamic>(boxName);
-        _openBoxes[boxName] = box;
-        return Right(box);
+        try {
+          if (kDebugMode) {
+            debugPrint(
+              '🔍 [BoxRegistryService.getBox] Box "$boxName" detectada como aberta. Tentando obter...',
+            );
+          }
+
+          // ✅ Agora funciona! HiveService abre todas as boxes como Box<dynamic>
+          final box = Hive.box<dynamic>(boxName);
+          _openBoxes[boxName] = box;
+
+          if (kDebugMode) {
+            debugPrint(
+              '♻️ [BoxRegistryService.getBox] Box "$boxName" já está aberta. '
+              'Sincronizando cache (${box.length} items)',
+            );
+          }
+
+          return Right(box);
+        } catch (e) {
+          // Se falhar, box pode estar aberta com tipo incompatível
+          if (kDebugMode) {
+            debugPrint(
+              '⚠️ [BoxRegistryService.getBox] Box "$boxName" aberta mas não pode ser acessada: $e',
+            );
+          }
+          return Left(
+            CacheFailure('Box "$boxName" está aberta mas inacessível: $e'),
+          );
+        }
       }
 
       // 4. Box não está aberta, verificar se devemos abrir

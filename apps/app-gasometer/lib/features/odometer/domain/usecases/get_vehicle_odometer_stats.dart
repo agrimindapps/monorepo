@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 
-import '../../data/repositories/odometer_repository.dart';
+import '../repositories/odometer_repository.dart';
 
 /// UseCase para buscar estatísticas de odômetro de um veículo
 ///
@@ -10,7 +10,8 @@ import '../../data/repositories/odometer_repository.dart';
 /// - Identificar primeira e última leitura
 /// - Calcular distância total percorrida
 @injectable
-class GetVehicleOdometerStatsUseCase implements UseCase<Map<String, dynamic>, String> {
+class GetVehicleOdometerStatsUseCase
+    implements UseCase<Map<String, dynamic>, String> {
   const GetVehicleOdometerStatsUseCase(this._repository);
 
   final OdometerRepository _repository;
@@ -18,13 +19,13 @@ class GetVehicleOdometerStatsUseCase implements UseCase<Map<String, dynamic>, St
   @override
   Future<Either<Failure, Map<String, dynamic>>> call(String vehicleId) async {
     try {
-      final stats = await _repository.getVehicleStats(vehicleId);
-      return Right(stats);
-    } on CacheFailure catch (e) {
-      return Left(e);
+      final result = await _repository.getVehicleStats(vehicleId);
+      return result.fold((failure) => Left(failure), (stats) => Right(stats));
     } catch (e) {
       return Left(
-        UnknownFailure('Erro ao buscar estatísticas do veículo: ${e.toString()}'),
+        UnknownFailure(
+          'Erro ao buscar estatísticas do veículo: ${e.toString()}',
+        ),
       );
     }
   }

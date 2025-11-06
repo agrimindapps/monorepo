@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 
-import '../../data/repositories/odometer_repository.dart';
+import '../repositories/odometer_repository.dart';
 
 /// UseCase para deletar uma leitura de odômetro
 ///
@@ -17,21 +17,25 @@ class DeleteOdometerReadingUseCase implements UseCase<bool, String> {
   Future<Either<Failure, bool>> call(String readingId) async {
     try {
       if (readingId.trim().isEmpty) {
-        return const Left(
-          ValidationFailure('ID da leitura é obrigatório'),
-        );
+        return const Left(ValidationFailure('ID da leitura é obrigatório'));
       }
-      final existing = await _repository.getOdometerReadingById(readingId);
-      if (existing == null) {
-        return const Left(
-          ValidationFailure('Leitura de odômetro não encontrada'),
-        );
-      }
-      final success = await _repository.deleteOdometerReading(readingId);
 
-      return Right(success);
-    } on CacheFailure catch (e) {
-      return Left(e);
+      final existingResult = await _repository.getOdometerReadingById(
+        readingId,
+      );
+      return existingResult.fold((failure) => Left(failure), (existing) async {
+        if (existing == null) {
+          return const Left(
+            ValidationFailure('Leitura de odômetro não encontrada'),
+          );
+        }
+
+        final deleteResult = await _repository.deleteOdometerReading(readingId);
+        return deleteResult.fold(
+          (failure) => Left(failure),
+          (success) => Right(success),
+        );
+      });
     } catch (e) {
       return Left(
         UnknownFailure('Erro inesperado ao deletar leitura: ${e.toString()}'),

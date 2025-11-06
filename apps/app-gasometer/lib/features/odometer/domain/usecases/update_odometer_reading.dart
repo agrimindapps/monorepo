@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 
-import '../../data/repositories/odometer_repository.dart';
+import '../repositories/odometer_repository.dart';
 import '../entities/odometer_entity.dart';
 
 /// UseCase para atualizar uma leitura de odômetro existente
@@ -10,7 +10,8 @@ import '../entities/odometer_entity.dart';
 /// - Atualizar localmente
 /// - Sincronizar com Firebase em background
 @injectable
-class UpdateOdometerReadingUseCase implements UseCase<OdometerEntity?, OdometerEntity> {
+class UpdateOdometerReadingUseCase
+    implements UseCase<OdometerEntity?, OdometerEntity> {
   const UpdateOdometerReadingUseCase(this._repository);
 
   final OdometerRepository _repository;
@@ -22,27 +23,27 @@ class UpdateOdometerReadingUseCase implements UseCase<OdometerEntity?, OdometerE
       if (validation != null) {
         return Left(ValidationFailure(validation));
       }
-      final existing = await _repository.getOdometerReadingById(params.id);
-      if (existing == null) {
-        return const Left(
-          ValidationFailure('Leitura de odômetro não encontrada'),
-        );
-      }
-      final updatedReading = params.copyWith(
-        updatedAt: DateTime.now(),
+
+      final existingResult = await _repository.getOdometerReadingById(
+        params.id,
       );
+      return existingResult.fold((failure) => Left(failure), (existing) async {
+        if (existing == null) {
+          return const Left(
+            ValidationFailure('Leitura de odômetro não encontrada'),
+          );
+        }
 
-      final result = await _repository.updateOdometerReading(updatedReading);
+        final updatedReading = params.copyWith(updatedAt: DateTime.now());
 
-      if (result == null) {
-        return const Left(
-          CacheFailure('Falha ao atualizar leitura de odômetro'),
+        final updateResult = await _repository.updateOdometerReading(
+          updatedReading,
         );
-      }
-
-      return Right(result);
-    } on CacheFailure catch (e) {
-      return Left(e);
+        return updateResult.fold(
+          (failure) => Left(failure),
+          (result) => Right(result),
+        );
+      });
     } catch (e) {
       return Left(
         UnknownFailure('Erro inesperado ao atualizar leitura: ${e.toString()}'),

@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 
-import '../../data/repositories/odometer_repository.dart';
+import '../repositories/odometer_repository.dart';
 import '../entities/odometer_entity.dart';
 
 /// UseCase para buscar leituras de odômetro por veículo
@@ -10,7 +10,8 @@ import '../entities/odometer_entity.dart';
 /// - Retornar ordenadas por data (mais recente primeiro)
 /// - Utilizar cache quando disponível
 @injectable
-class GetOdometerReadingsByVehicleUseCase implements UseCase<List<OdometerEntity>, String> {
+class GetOdometerReadingsByVehicleUseCase
+    implements UseCase<List<OdometerEntity>, String> {
   const GetOdometerReadingsByVehicleUseCase(this._repository);
 
   final OdometerRepository _repository;
@@ -19,15 +20,14 @@ class GetOdometerReadingsByVehicleUseCase implements UseCase<List<OdometerEntity
   Future<Either<Failure, List<OdometerEntity>>> call(String vehicleId) async {
     try {
       if (vehicleId.trim().isEmpty) {
-        return const Left(
-          ValidationFailure('ID do veículo é obrigatório'),
-        );
+        return const Left(ValidationFailure('ID do veículo é obrigatório'));
       }
 
-      final readings = await _repository.getOdometerReadingsByVehicle(vehicleId);
-      return Right(readings);
-    } on CacheFailure catch (e) {
-      return Left(e);
+      final result = await _repository.getOdometerReadingsByVehicle(vehicleId);
+      return result.fold(
+        (failure) => Left(failure),
+        (readings) => Right(readings),
+      );
     } catch (e) {
       return Left(
         UnknownFailure('Erro ao buscar leituras do veículo: ${e.toString()}'),

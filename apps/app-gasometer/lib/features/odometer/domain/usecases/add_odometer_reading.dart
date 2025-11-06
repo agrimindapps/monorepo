@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 
-import '../../data/repositories/odometer_repository.dart';
+import '../repositories/odometer_repository.dart';
 import '../entities/odometer_entity.dart';
 
 /// UseCase para adicionar uma nova leitura de odômetro
@@ -10,7 +10,8 @@ import '../entities/odometer_entity.dart';
 /// - Persistir localmente (Hive)
 /// - Sincronizar com Firebase em background
 @injectable
-class AddOdometerReadingUseCase implements UseCase<OdometerEntity?, OdometerEntity> {
+class AddOdometerReadingUseCase
+    implements UseCase<OdometerEntity?, OdometerEntity> {
   const AddOdometerReadingUseCase(this._repository);
 
   final OdometerRepository _repository;
@@ -22,15 +23,12 @@ class AddOdometerReadingUseCase implements UseCase<OdometerEntity?, OdometerEnti
       if (validation != null) {
         return Left(ValidationFailure(validation));
       }
-      final result = await _repository.saveOdometerReading(params);
+      final result = await _repository.addOdometerReading(params);
 
-      if (result == null) {
-        return const Left(
-          CacheFailure('Falha ao salvar leitura de odômetro'),
-        );
-      }
-
-      return Right(result);
+      return result.fold(
+        (failure) => Left(failure),
+        (savedReading) => Right(savedReading),
+      );
     } on CacheFailure catch (e) {
       return Left(e);
     } catch (e) {

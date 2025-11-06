@@ -7,7 +7,6 @@ import '../../domain/entities/odometer_entity.dart';
 ///
 /// Segue o padrão Dart Style Guide: Constructors primeiro, fields depois, methods por último
 class OdometerFormState extends Equatable {
-
   const OdometerFormState({
     this.id = '',
     this.userId = '',
@@ -40,7 +39,7 @@ class OdometerFormState extends Equatable {
   factory OdometerFormState.fromOdometer(OdometerEntity odometer) {
     return OdometerFormState(
       id: odometer.id,
-      userId: odometer.userId,
+      userId: odometer.userId ?? '',
       vehicleId: odometer.vehicleId,
       odometerValue: odometer.value,
       registrationDate: odometer.registrationDate,

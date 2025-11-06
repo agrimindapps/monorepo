@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 
-import '../../../../core/logging/entities/log_entry.dart';
-import '../../../../core/logging/services/logging_service.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../../domain/repositories/maintenance_repository.dart';
 
@@ -23,12 +21,7 @@ import '../../domain/repositories/maintenance_repository.dart';
 /// - Upcoming/Overdue maintenance tracking
 @LazySingleton(as: MaintenanceRepository)
 class MaintenanceRepositoryImpl implements MaintenanceRepository {
-  MaintenanceRepositoryImpl({
-    required this.loggingService,
-  });
-
-  final LoggingService loggingService;
-
+  MaintenanceRepositoryImpl();
   static const _appName = 'gasometer';
 
   @override
@@ -54,12 +47,6 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
         },
       );
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.maintenance,
-        operation: LogOperation.read,
-        message: 'Error getting all maintenance records',
-        error: e,
-      );
       return Left(UnexpectedFailure(e.toString()));
     }
   }
@@ -93,13 +80,6 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
         },
       );
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.maintenance,
-        operation: LogOperation.read,
-        message: 'Error getting maintenance records by vehicle',
-        error: e,
-        metadata: {'vehicle_id': vehicleId},
-      );
       return Left(UnexpectedFailure(e.toString()));
     }
   }
@@ -129,13 +109,6 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
         },
       );
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.maintenance,
-        operation: LogOperation.read,
-        message: 'Error getting maintenance record by id',
-        error: e,
-        metadata: {'maintenance_id': id},
-      );
       return Left(UnexpectedFailure(e.toString()));
     }
   }
@@ -144,21 +117,6 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
   Future<Either<Failure, MaintenanceEntity>> addMaintenanceRecord(
     MaintenanceEntity maintenance,
   ) async {
-    await loggingService.logOperationStart(
-      category: LogCategory.maintenance,
-      operation: LogOperation.create,
-      message:
-          'Starting maintenance record creation for vehicle ${maintenance.vehicleId}',
-      metadata: {
-        'maintenance_id': maintenance.id,
-        'vehicle_id': maintenance.vehicleId,
-        'maintenance_type': maintenance.type.displayName,
-        'cost': maintenance.cost.toString(),
-        'odometer_reading': maintenance.odometer.toString(),
-        'service_date': maintenance.serviceDate.toIso8601String(),
-        'status': maintenance.status.displayName,
-      },
-    );
 
     try {
       final result =
@@ -169,45 +127,14 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
 
       return result.fold(
         (failure) {
-          loggingService.logOperationError(
-            category: LogCategory.maintenance,
-            operation: LogOperation.create,
-            message: 'Failed to create maintenance record',
-            error: failure,
-            metadata: {
-              'maintenance_id': maintenance.id,
-              'vehicle_id': maintenance.vehicleId,
-            },
-          );
           return Left(failure);
         },
         (id) async {
-          await loggingService.logOperationSuccess(
-            category: LogCategory.maintenance,
-            operation: LogOperation.create,
-            message: 'Maintenance record creation completed successfully',
-            metadata: {
-              'maintenance_id': id,
-              'vehicle_id': maintenance.vehicleId,
-              'saved_locally': true,
-              'remote_sync': 'automatic',
-            },
-          );
 
           return Right(maintenance.copyWith(id: id));
         },
       );
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.maintenance,
-        operation: LogOperation.create,
-        message: 'Unexpected error during maintenance record creation',
-        error: e,
-        metadata: {
-          'maintenance_id': maintenance.id,
-          'vehicle_id': maintenance.vehicleId,
-        },
-      );
       return Left(UnexpectedFailure(e.toString()));
     }
   }
@@ -216,15 +143,6 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
   Future<Either<Failure, MaintenanceEntity>> updateMaintenanceRecord(
     MaintenanceEntity maintenance,
   ) async {
-    await loggingService.logOperationStart(
-      category: LogCategory.maintenance,
-      operation: LogOperation.update,
-      message: 'Starting maintenance record update (ID: ${maintenance.id})',
-      metadata: {
-        'maintenance_id': maintenance.id,
-        'vehicle_id': maintenance.vehicleId,
-      },
-    );
 
     try {
       final updatedRecord = maintenance.markAsDirty().incrementVersion();
@@ -238,57 +156,20 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
 
       return result.fold(
         (failure) {
-          loggingService.logOperationError(
-            category: LogCategory.maintenance,
-            operation: LogOperation.update,
-            message: 'Failed to update maintenance record',
-            error: failure,
-            metadata: {
-              'maintenance_id': maintenance.id,
-              'vehicle_id': maintenance.vehicleId,
-            },
-          );
           return Left(failure);
         },
         (_) async {
-          await loggingService.logOperationSuccess(
-            category: LogCategory.maintenance,
-            operation: LogOperation.update,
-            message: 'Maintenance record update completed successfully',
-            metadata: {
-              'maintenance_id': maintenance.id,
-              'vehicle_id': maintenance.vehicleId,
-              'saved_locally': true,
-              'remote_sync': 'automatic',
-            },
-          );
 
           return Right(updatedRecord);
         },
       );
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.maintenance,
-        operation: LogOperation.update,
-        message: 'Unexpected error during maintenance record update',
-        error: e,
-        metadata: {
-          'maintenance_id': maintenance.id,
-          'vehicle_id': maintenance.vehicleId,
-        },
-      );
       return Left(UnexpectedFailure(e.toString()));
     }
   }
 
   @override
   Future<Either<Failure, Unit>> deleteMaintenanceRecord(String id) async {
-    await loggingService.logOperationStart(
-      category: LogCategory.maintenance,
-      operation: LogOperation.delete,
-      message: 'Starting maintenance record deletion (ID: $id)',
-      metadata: {'maintenance_id': id},
-    );
 
     try {
       final result =
@@ -299,38 +180,14 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
 
       return result.fold(
         (failure) {
-          loggingService.logOperationError(
-            category: LogCategory.maintenance,
-            operation: LogOperation.delete,
-            message: 'Failed to delete maintenance record',
-            error: failure,
-            metadata: {'maintenance_id': id},
-          );
           return Left(failure);
         },
         (_) async {
-          await loggingService.logOperationSuccess(
-            category: LogCategory.maintenance,
-            operation: LogOperation.delete,
-            message: 'Maintenance record deletion completed successfully',
-            metadata: {
-              'maintenance_id': id,
-              'deleted_locally': true,
-              'remote_sync': 'automatic',
-            },
-          );
 
           return const Right(unit);
         },
       );
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.maintenance,
-        operation: LogOperation.delete,
-        message: 'Unexpected error during maintenance record deletion',
-        error: e,
-        metadata: {'maintenance_id': id},
-      );
       return Left(UnexpectedFailure(e.toString()));
     }
   }
@@ -356,13 +213,6 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
         },
       );
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.maintenance,
-        operation: LogOperation.read,
-        message: 'Error searching maintenance records',
-        error: e,
-        metadata: {'query': query},
-      );
       return Left(UnexpectedFailure(e.toString()));
     }
   }
@@ -382,21 +232,9 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
       yield* stream.map<Either<Failure, List<MaintenanceEntity>>>(
         (records) => Right(records),
       ).handleError((Object error) {
-        loggingService.logOperationError(
-          category: LogCategory.maintenance,
-          operation: LogOperation.read,
-          message: 'Error watching maintenance records stream',
-          error: error,
-        );
         return Left<Failure, List<MaintenanceEntity>>(ServerFailure(error.toString()));
       });
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.maintenance,
-        operation: LogOperation.read,
-        message: 'Error setting up maintenance records watch stream',
-        error: e,
-      );
       yield Left(UnexpectedFailure(e.toString()));
     }
   }
@@ -423,24 +261,9 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
 
         return Right(filteredRecords);
       }).handleError((Object error) {
-        loggingService.logOperationError(
-          category: LogCategory.maintenance,
-          operation: LogOperation.read,
-          message: 'Error watching maintenance records by vehicle stream',
-          error: error,
-          metadata: {'vehicle_id': vehicleId},
-        );
         return Left<Failure, List<MaintenanceEntity>>(ServerFailure(error.toString()));
       });
     } catch (e) {
-      await loggingService.logOperationError(
-        category: LogCategory.maintenance,
-        operation: LogOperation.read,
-        message:
-            'Error setting up maintenance records by vehicle watch stream',
-        error: e,
-        metadata: {'vehicle_id': vehicleId},
-      );
       yield Left(UnexpectedFailure(e.toString()));
     }
   }

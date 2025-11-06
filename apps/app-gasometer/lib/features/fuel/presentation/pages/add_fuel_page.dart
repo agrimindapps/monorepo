@@ -185,33 +185,29 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage>
         '[FUEL DEBUG] Form validation FAILED - Field: $firstErrorField',
       );
 
-      // Focus on the first field with error
+      // Get specific error message for the field
       if (firstErrorField != null) {
+        final formState = ref.read(fuelFormNotifierProvider(vehicleId));
+        final errorMessage = formState.formModel.errors[firstErrorField];
+        setFormError(errorMessage ?? 'Por favor, corrija os campos destacados');
+
+        // Focus on the first field with error
         final focusNode = formNotifier.fieldFocusNodes[firstErrorField];
         if (focusNode != null) {
-          // Wait for next frame to ensure field is rendered
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              // Request focus on the error field
               focusNode.requestFocus();
-
-              // Scroll to make the field visible if it's outside viewport
               if (focusNode.context != null) {
                 Scrollable.ensureVisible(
                   focusNode.context!,
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
-                  alignment: 0.2, // Position field at 20% from top of viewport
+                  alignment: 0.2,
                 );
               }
             }
           });
         }
-
-        // Get specific error message for the field
-        final formState = ref.read(fuelFormNotifierProvider(vehicleId));
-        final errorMessage = formState.formModel.errors[firstErrorField];
-        setFormError(errorMessage ?? 'Por favor, corrija os campos destacados');
       } else {
         setFormError('Por favor, preencha todos os campos obrigatórios');
       }
@@ -230,8 +226,6 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage>
       _isSubmitting = true;
     });
 
-    final fuelNotifier = ref.read(fuelRiverpodProvider.notifier);
-
     try {
       _timeoutTimer = Timer(_submitTimeout, () {
         if (mounted && _isSubmitting) {
@@ -245,38 +239,23 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage>
         }
       });
 
-      final formState = ref.read(fuelFormNotifierProvider(vehicleId));
-      final fuelRecord = formState.formModel.toFuelRecord();
-      debugPrint('[FUEL DEBUG] Created fuel record: ${fuelRecord.toString()}');
+      // Salva o registro usando o UseCase
+      final result = await formNotifier.saveFuelRecord();
 
-      bool success;
-      if (widget.editFuelRecordId != null) {
-        debugPrint('[FUEL DEBUG] Calling updateFuelRecord()');
-        success = await fuelNotifier.updateFuelRecord(fuelRecord);
-      } else {
-        debugPrint('[FUEL DEBUG] Calling addFuelRecord()');
-        success = await fuelNotifier.addFuelRecord(fuelRecord);
-      }
-
-      debugPrint('[FUEL DEBUG] Provider operation result: $success');
-
-      if (success) {
-        debugPrint('[FUEL DEBUG] SUCCESS - Closing dialog');
-        if (mounted) {
-          Navigator.of(context).pop({
-            'success': true,
-            'action': widget.editFuelRecordId != null ? 'edit' : 'create',
-          });
-        }
-      } else {
-        debugPrint('[FUEL DEBUG] FAILURE - Showing error');
-        if (mounted) {
-          final fuelState = await ref.read(fuelRiverpodProvider.future);
-          final errorMessage =
-              fuelState.errorMessage ?? 'Erro ao salvar abastecimento';
-          debugPrint('[FUEL DEBUG] Provider error message: $errorMessage');
-          setFormError(errorMessage);
-        }
+      if (mounted) {
+        result.fold(
+          (failure) {
+            debugPrint('[FUEL DEBUG] FAILURE - ${failure.message}');
+            setFormError(failure.message);
+          },
+          (success) {
+            debugPrint('[FUEL DEBUG] SUCCESS - Closing dialog');
+            Navigator.of(context).pop({
+              'success': true,
+              'action': widget.editFuelRecordId != null ? 'edit' : 'create',
+            });
+          },
+        );
       }
     } catch (e) {
       debugPrint('Error submitting form: $e');

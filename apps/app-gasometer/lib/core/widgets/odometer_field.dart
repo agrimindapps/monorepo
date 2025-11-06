@@ -79,6 +79,8 @@ class OdometerField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return ValidatedFormField(
       controller: controller,
       focusNode: focusNode,
@@ -93,11 +95,11 @@ class OdometerField extends StatelessWidget {
       maxValue: maxValue,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [FuelFormatterService().odometerFormatter],
-      suffix: const Text(
+      suffix: Text(
         'km',
         style: TextStyle(
           fontSize: 14,
-          color: Colors.grey,
+          color: theme.colorScheme.onSurfaceVariant,
           fontWeight: FontWeight.w500,
         ),
       ),

@@ -28,7 +28,8 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
           children: [
             _buildHeader(context),
             _buildVehicleSelector(context),
-            if (_selectedVehicleId != null && (vehiclesAsync.value?.isNotEmpty ?? false))
+            if (_selectedVehicleId != null &&
+                (vehiclesAsync.value?.isNotEmpty ?? false))
               _buildMonthSelector(),
             Expanded(
               child: vehiclesAsync.when(
@@ -155,30 +156,26 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
               margin: const EdgeInsets.only(right: 12),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color:
-                    isSelected
-                        ? Theme.of(context).primaryColor
-                        : Theme.of(context).cardColor,
+                color: isSelected
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color:
-                      isSelected
-                          ? Theme.of(context).primaryColor
-                          : Theme.of(
-                            context,
-                          ).dividerColor.withValues(alpha: 0.2),
+                  color: isSelected
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).dividerColor.withValues(alpha: 0.2),
                 ),
               ),
               child: Center(
                 child: Text(
                   months[index],
                   style: TextStyle(
-                    color:
-                        isSelected
-                            ? Colors.white
-                            : Theme.of(context).textTheme.bodyMedium?.color,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color: isSelected
+                        ? Colors.white
+                        : Theme.of(context).textTheme.bodyMedium?.color,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
                   ),
                 ),
               ),
@@ -190,14 +187,11 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
   }
 
   Widget _buildContent(BuildContext context) {
-    return EnhancedEmptyState(
+    return const EnhancedEmptyState(
       title: 'Nenhuma manutenção',
       description:
           'Adicione sua primeira manutenção para começar a acompanhar o histórico de manutenções.',
       icon: Icons.build_outlined,
-      actionLabel: 'Adicionar manutenção',
-      onAction: () {
-      },
     );
   }
 
@@ -219,7 +213,8 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
         }
         showDialog<bool>(
           context: context,
-          builder: (context) => AddMaintenancePage(vehicleId: _selectedVehicleId),
+          builder: (context) =>
+              AddMaintenancePage(vehicleId: _selectedVehicleId),
         ).then((result) {
           if (result == true) {
             // Refresh maintenance list when ready
@@ -232,8 +227,6 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
       child: const Icon(Icons.add),
     );
   }
-
-
 
   Widget _buildSelectVehicleState() {
     return const EnhancedEmptyState(

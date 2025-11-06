@@ -2,6 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../features/auth/presentation/notifiers/auth_notifier.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/web_login_page.dart';
 import '../../features/expenses/presentation/pages/add_expense_page.dart';
@@ -23,13 +24,56 @@ import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/vehicles/presentation/pages/add_vehicle_page.dart';
 import '../../features/vehicles/presentation/pages/vehicles_page.dart';
 import '../../shared/widgets/adaptive_main_navigation.dart';
+import 'auth_state_notifier.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   const initialRoute = kIsWeb ? '/promo' : '/login';
 
+  // Cria um notifier para mudanças de autenticação
+  final authStateNotifier = AuthStateNotifier();
+
+  // Observa mudanças no estado de autenticação
+  ref.listen(authProvider, (previous, next) {
+    authStateNotifier.updateAuthState(next.isAuthenticated);
+  });
+
+  // Inicializa com o estado atual
+  authStateNotifier.updateAuthState(ref.read(authProvider).isAuthenticated);
+
   return GoRouter(
     initialLocation: initialRoute,
     debugLogDiagnostics: true,
+    refreshListenable: authStateNotifier,
+    redirect: (context, state) {
+      // Rotas públicas que não precisam de autenticação
+      const publicRoutes = [
+        '/login',
+        '/promo',
+        '/privacy-policy',
+        '/terms-of-service',
+        '/account-deletion-policy',
+      ];
+
+      // Se estiver em uma rota pública, permite
+      if (publicRoutes.contains(state.matchedLocation)) {
+        return null;
+      }
+
+      // Apenas protege rotas no Web
+      if (!kIsWeb) {
+        return null;
+      }
+
+      // Verifica se está autenticado
+      final isAuthenticated = authStateNotifier.isAuthenticated;
+
+      // Se não está autenticado e está tentando acessar rota protegida, redireciona para login
+      if (!isAuthenticated) {
+        return '/login';
+      }
+
+      return null;
+    },
     routes: [
       ShellRoute(
         builder: (context, state, child) {

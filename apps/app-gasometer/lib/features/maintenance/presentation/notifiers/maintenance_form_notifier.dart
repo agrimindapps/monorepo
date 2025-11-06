@@ -1,10 +1,11 @@
 import 'dart:async';
 
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection.dart';
+import '../../../../core/di/injection.dart' as local_di;
 import '../../../../core/services/input_sanitizer.dart';
 import '../../../../core/services/receipt_image_service.dart';
 import '../../../vehicles/domain/usecases/get_vehicle_by_id.dart';
@@ -12,6 +13,8 @@ import '../../core/constants/maintenance_constants.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../../domain/services/maintenance_formatter_service.dart';
 import '../../domain/services/maintenance_validator_service.dart';
+import '../../domain/usecases/add_maintenance_record.dart';
+import '../../domain/usecases/update_maintenance_record.dart';
 import 'maintenance_form_state.dart';
 
 part 'maintenance_form_notifier.g.dart';
@@ -111,20 +114,16 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     required String userId,
   }) async {
     if (vehicleId.isEmpty) {
-      Future.microtask(() {
-        state = state.copyWith(
-          errorMessage: () => 'Nenhum veículo selecionado',
-        );
-      });
+      state = state.copyWith(errorMessage: () => 'Nenhum veículo selecionado');
       return;
     }
 
-    Future.microtask(() {
-      state = state.copyWith(isLoading: true);
-    });
+    state = state.copyWith(isLoading: true);
 
     try {
-      final vehicleResult = await _getVehicleById(GetVehicleByIdParams(vehicleId: vehicleId));
+      final vehicleResult = await _getVehicleById(
+        GetVehicleByIdParams(vehicleId: vehicleId),
+      );
 
       await vehicleResult.fold(
         (failure) async {
@@ -134,14 +133,16 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
           );
         },
         (vehicle) async {
-          state = MaintenanceFormState.initial(
-            vehicleId: vehicleId,
-            userId: userId,
-          ).copyWith(
-            vehicle: vehicle,
-            odometer: vehicle.currentOdometer,
-            isLoading: false,
-          );
+          state =
+              MaintenanceFormState.initial(
+                vehicleId: vehicleId,
+                userId: userId,
+              ).copyWith(
+                vehicle: vehicle,
+                odometer: vehicle.currentOdometer,
+                isLoading: false,
+                isInitialized: true, // ✅ CRITICAL: Mark as initialized
+              );
 
           _updateTextControllers();
         },
@@ -156,12 +157,12 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
 
   /// Inicializa com manutenção existente para edição
   Future<void> initializeWithMaintenance(MaintenanceEntity maintenance) async {
-    Future.microtask(() {
-      state = state.copyWith(isLoading: true);
-    });
+    state = state.copyWith(isLoading: true);
 
     try {
-      final vehicleResult = await _getVehicleById(GetVehicleByIdParams(vehicleId: maintenance.vehicleId));
+      final vehicleResult = await _getVehicleById(
+        GetVehicleByIdParams(vehicleId: maintenance.vehicleId),
+      );
 
       await vehicleResult.fold(
         (failure) async {
@@ -174,6 +175,7 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
           state = MaintenanceFormState.fromMaintenance(maintenance).copyWith(
             vehicle: vehicle,
             isLoading: false,
+            isInitialized: true, // ✅ CRITICAL: Mark as initialized
           );
 
           _updateTextControllers();
@@ -192,9 +194,13 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     titleController.text = state.title;
     descriptionController.text = state.description;
 
-    costController.text = state.cost > 0 ? _formatter.formatAmount(state.cost) : '';
+    costController.text = state.cost > 0
+        ? _formatter.formatAmount(state.cost)
+        : '';
 
-    odometerController.text = state.odometer > 0 ? _formatter.formatOdometer(state.odometer) : '';
+    odometerController.text = state.odometer > 0
+        ? _formatter.formatOdometer(state.odometer)
+        : '';
 
     workshopNameController.text = state.workshopName;
     workshopPhoneController.text = state.workshopPhone;
@@ -214,12 +220,13 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
       () {
         final sanitized = InputSanitizer.sanitize(titleController.text);
 
-        state = state.copyWith(
-          title: sanitized,
-          hasChanges: true,
-        ).clearFieldError('title');
+        state = state
+            .copyWith(title: sanitized, hasChanges: true)
+            .clearFieldError('title');
         if (sanitized.isNotEmpty && state.type == MaintenanceType.preventive) {
-          final suggestedType = _validator.suggestTypeFromDescription(sanitized);
+          final suggestedType = _validator.suggestTypeFromDescription(
+            sanitized,
+          );
           if (suggestedType != MaintenanceType.preventive) {
             updateType(suggestedType);
           }
@@ -233,12 +240,13 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     _descriptionDebounceTimer = Timer(
       const Duration(milliseconds: MaintenanceConstants.descriptionDebounceMs),
       () {
-        final sanitized = InputSanitizer.sanitizeDescription(descriptionController.text);
+        final sanitized = InputSanitizer.sanitizeDescription(
+          descriptionController.text,
+        );
 
-        state = state.copyWith(
-          description: sanitized,
-          hasChanges: true,
-        ).clearFieldError('description');
+        state = state
+            .copyWith(description: sanitized, hasChanges: true)
+            .clearFieldError('description');
       },
     );
   }
@@ -250,10 +258,9 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
       () {
         final value = _formatter.parseFormattedAmount(costController.text);
 
-        state = state.copyWith(
-          cost: value,
-          hasChanges: true,
-        ).clearFieldError('cost');
+        state = state
+            .copyWith(cost: value, hasChanges: true)
+            .clearFieldError('cost');
       },
     );
   }
@@ -263,12 +270,13 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     _odometerDebounceTimer = Timer(
       const Duration(milliseconds: MaintenanceConstants.odometerDebounceMs),
       () {
-        final value = _formatter.parseFormattedOdometer(odometerController.text);
+        final value = _formatter.parseFormattedOdometer(
+          odometerController.text,
+        );
 
-        state = state.copyWith(
-          odometer: value,
-          hasChanges: true,
-        ).clearFieldError('odometer');
+        state = state
+            .copyWith(odometer: value, hasChanges: true)
+            .clearFieldError('odometer');
       },
     );
   }
@@ -276,10 +284,9 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
   void _onWorkshopNameChanged() {
     final sanitized = InputSanitizer.sanitizeName(workshopNameController.text);
 
-    state = state.copyWith(
-      workshopName: sanitized,
-      hasChanges: true,
-    ).clearFieldError('workshopName');
+    state = state
+        .copyWith(workshopName: sanitized, hasChanges: true)
+        .clearFieldError('workshopName');
   }
 
   void _onWorkshopPhoneChanged() {
@@ -291,77 +298,74 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
       );
     }
 
-    state = state.copyWith(
-      workshopPhone: formatted,
-      hasChanges: true,
-    ).clearFieldError('workshopPhone');
+    state = state
+        .copyWith(workshopPhone: formatted, hasChanges: true)
+        .clearFieldError('workshopPhone');
   }
 
   void _onWorkshopAddressChanged() {
     final sanitized = InputSanitizer.sanitize(workshopAddressController.text);
 
-    state = state.copyWith(
-      workshopAddress: sanitized,
-      hasChanges: true,
-    ).clearFieldError('workshopAddress');
+    state = state
+        .copyWith(workshopAddress: sanitized, hasChanges: true)
+        .clearFieldError('workshopAddress');
   }
 
   void _onNextOdometerChanged() {
-    final value = _formatter.parseFormattedOdometer(nextOdometerController.text);
+    final value = _formatter.parseFormattedOdometer(
+      nextOdometerController.text,
+    );
 
-    state = state.copyWith(
-      nextServiceOdometer: value > 0 ? value : null,
-      hasChanges: true,
-    ).clearFieldError('nextServiceOdometer');
+    state = state
+        .copyWith(
+          nextServiceOdometer: value > 0 ? value : null,
+          hasChanges: true,
+        )
+        .clearFieldError('nextServiceOdometer');
   }
 
   void _onNotesChanged() {
     final sanitized = InputSanitizer.sanitizeDescription(notesController.text);
 
-    state = state.copyWith(
-      notes: sanitized,
-      hasChanges: true,
-    ).clearFieldError('notes');
+    state = state
+        .copyWith(notes: sanitized, hasChanges: true)
+        .clearFieldError('notes');
   }
 
   /// Atualiza tipo de manutenção
   void updateType(MaintenanceType type) {
     if (state.type == type) return;
 
-    state = state.copyWith(
-      type: type,
-      hasChanges: true,
-    ).clearFieldError('type');
+    state = state
+        .copyWith(type: type, hasChanges: true)
+        .clearFieldError('type');
   }
 
   /// Atualiza status da manutenção
   void updateStatus(MaintenanceStatus status) {
     if (state.status == status) return;
 
-    state = state.copyWith(
-      status: status,
-      hasChanges: true,
-    ).clearFieldError('status');
+    state = state
+        .copyWith(status: status, hasChanges: true)
+        .clearFieldError('status');
   }
 
   /// Atualiza data do serviço
   void updateServiceDate(DateTime date) {
     if (state.serviceDate == date) return;
 
-    state = state.copyWith(
-      serviceDate: date,
-      hasChanges: true,
-    ).clearFieldError('serviceDate');
+    state = state
+        .copyWith(serviceDate: date, hasChanges: true)
+        .clearFieldError('serviceDate');
   }
 
   /// Atualiza data da próxima manutenção
   void updateNextServiceDate(DateTime? date) {
     if (state.nextServiceDate == date) return;
 
-    state = state.copyWith(
-      nextServiceDate: date,
-      hasChanges: true,
-    ).clearFieldError('nextServiceDate');
+    state = state
+        .copyWith(nextServiceDate: date, hasChanges: true)
+        .clearFieldError('nextServiceDate');
   }
 
   /// Adiciona foto
@@ -378,15 +382,10 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
         final newPaths = List<String>.from(state.photosPaths);
         newPaths.add(image.path);
 
-        state = state.copyWith(
-          photosPaths: newPaths,
-          hasChanges: true,
-        );
+        state = state.copyWith(photosPaths: newPaths, hasChanges: true);
       }
     } catch (e) {
-      state = state.copyWith(
-        errorMessage: () => 'Erro ao adicionar foto: $e',
-      );
+      state = state.copyWith(errorMessage: () => 'Erro ao adicionar foto: $e');
     }
   }
 
@@ -395,10 +394,7 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     final newPaths = List<String>.from(state.photosPaths);
     newPaths.remove(photoPath);
 
-    state = state.copyWith(
-      photosPaths: newPaths,
-      hasChanges: true,
-    );
+    state = state.copyWith(photosPaths: newPaths, hasChanges: true);
   }
 
   /// Limpa mensagem de erro
@@ -443,17 +439,33 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     debugPrint('[MAINTENANCE VALIDATION] Starting form validation...');
     debugPrint('[MAINTENANCE VALIDATION] type: ${state.type}');
     debugPrint('[MAINTENANCE VALIDATION] title: "${titleController.text}"');
-    debugPrint('[MAINTENANCE VALIDATION] description: "${descriptionController.text}"');
+    debugPrint(
+      '[MAINTENANCE VALIDATION] description: "${descriptionController.text}"',
+    );
     debugPrint('[MAINTENANCE VALIDATION] cost: "${costController.text}"');
-    debugPrint('[MAINTENANCE VALIDATION] odometer: "${odometerController.text}"');
+    debugPrint(
+      '[MAINTENANCE VALIDATION] odometer: "${odometerController.text}"',
+    );
     debugPrint('[MAINTENANCE VALIDATION] serviceDate: ${state.serviceDate}');
-    debugPrint('[MAINTENANCE VALIDATION] workshopName: "${workshopNameController.text}"');
-    debugPrint('[MAINTENANCE VALIDATION] workshopPhone: "${workshopPhoneController.text}"');
-    debugPrint('[MAINTENANCE VALIDATION] workshopAddress: "${workshopAddressController.text}"');
-    debugPrint('[MAINTENANCE VALIDATION] nextServiceDate: ${state.nextServiceDate}');
-    debugPrint('[MAINTENANCE VALIDATION] nextServiceOdometer: "${nextOdometerController.text}"');
+    debugPrint(
+      '[MAINTENANCE VALIDATION] workshopName: "${workshopNameController.text}"',
+    );
+    debugPrint(
+      '[MAINTENANCE VALIDATION] workshopPhone: "${workshopPhoneController.text}"',
+    );
+    debugPrint(
+      '[MAINTENANCE VALIDATION] workshopAddress: "${workshopAddressController.text}"',
+    );
+    debugPrint(
+      '[MAINTENANCE VALIDATION] nextServiceDate: ${state.nextServiceDate}',
+    );
+    debugPrint(
+      '[MAINTENANCE VALIDATION] nextServiceOdometer: "${nextOdometerController.text}"',
+    );
     debugPrint('[MAINTENANCE VALIDATION] notes: "${notesController.text}"');
-    debugPrint('[MAINTENANCE VALIDATION] vehicle: ${state.vehicle?.displayName ?? "null"}');
+    debugPrint(
+      '[MAINTENANCE VALIDATION] vehicle: ${state.vehicle?.displayName ?? "null"}',
+    );
 
     final errors = _validator.validateCompleteForm(
       type: state.type,
@@ -472,7 +484,9 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     );
 
     debugPrint('[MAINTENANCE VALIDATION] Validation errors: $errors');
-    debugPrint('[MAINTENANCE VALIDATION] Form is ${errors.isEmpty ? "VALID" : "INVALID"}');
+    debugPrint(
+      '[MAINTENANCE VALIDATION] Form is ${errors.isEmpty ? "VALID" : "INVALID"}',
+    );
 
     state = state.copyWith(fieldErrors: errors);
 
@@ -484,18 +498,20 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     final date = await showDatePicker(
       context: context,
       initialDate: state.serviceDate ?? DateTime.now(),
-      firstDate: DateTime.now().subtract(const Duration(days: 365 * MaintenanceConstants.maxYearsBack)),
+      firstDate: DateTime.now().subtract(
+        const Duration(days: 365 * MaintenanceConstants.maxYearsBack),
+      ),
       lastDate: DateTime.now(),
       locale: const Locale('pt', 'BR'),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: Colors.grey.shade800,
-                  onPrimary: Colors.white,
-                  surface: Colors.white,
-                  onSurface: Colors.black,
-                ),
+              primary: Colors.grey.shade800,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
           ),
           child: child!,
         );
@@ -503,7 +519,9 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     );
 
     if (date != null) {
-      final currentTime = TimeOfDay.fromDateTime(state.serviceDate ?? DateTime.now());
+      final currentTime = TimeOfDay.fromDateTime(
+        state.serviceDate ?? DateTime.now(),
+      );
       final newDateTime = DateTime(
         date.year,
         date.month,
@@ -529,8 +547,8 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
             child: Theme(
               data: Theme.of(context).copyWith(
                 colorScheme: Theme.of(context).colorScheme.copyWith(
-                      primary: Theme.of(context).colorScheme.primary,
-                    ),
+                  primary: Theme.of(context).colorScheme.primary,
+                ),
               ),
               child: child!,
             ),
@@ -556,19 +574,23 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
   Future<void> pickNextServiceDate(BuildContext context) async {
     final date = await showDatePicker(
       context: context,
-      initialDate: state.nextServiceDate ?? (state.serviceDate ?? DateTime.now()).add(const Duration(days: 180)),
+      initialDate:
+          state.nextServiceDate ??
+          (state.serviceDate ?? DateTime.now()).add(const Duration(days: 180)),
       firstDate: state.serviceDate ?? DateTime.now(),
-      lastDate: (state.serviceDate ?? DateTime.now()).add(const Duration(days: 365 * MaintenanceConstants.maxYearsForward)),
+      lastDate: (state.serviceDate ?? DateTime.now()).add(
+        const Duration(days: 365 * MaintenanceConstants.maxYearsForward),
+      ),
       locale: const Locale('pt', 'BR'),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: Colors.grey.shade800,
-                  onPrimary: Colors.white,
-                  surface: Colors.white,
-                  onSurface: Colors.black,
-                ),
+              primary: Colors.grey.shade800,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
           ),
           child: child!,
         );
@@ -627,9 +649,7 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
   /// Processa e faz upload da imagem do comprovante
   Future<void> _processReceiptImage(String imagePath) async {
     try {
-      state = state.copyWith(
-        isUploadingImage: true,
-      ).clearImageError();
+      state = state.copyWith(isUploadingImage: true).clearImageError();
       final isValid = await _receiptImageService.isValidImage(imagePath);
       if (!isValid) {
         throw Exception('Arquivo de imagem inválido');
@@ -671,11 +691,13 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
         );
       }
 
-      state = state.copyWith(
-        hasChanges: true,
-        clearReceiptImage: true,
-        clearReceiptUrl: true,
-      ).clearImageError();
+      state = state
+          .copyWith(
+            hasChanges: true,
+            clearReceiptImage: true,
+            clearReceiptUrl: true,
+          )
+          .clearImageError();
     } catch (e) {
       state = state.copyWith(
         imageUploadError: () => 'Erro ao remover imagem: $e',
@@ -705,7 +727,9 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
         isUploadingImage: false,
       );
 
-      debugPrint('[MAINTENANCE FORM] Image synced to Firebase: ${result.downloadUrl}');
+      debugPrint(
+        '[MAINTENANCE FORM] Image synced to Firebase: ${result.downloadUrl}',
+      );
     } catch (e) {
       debugPrint('[MAINTENANCE FORM] Failed to sync image: $e');
       state = state.copyWith(isUploadingImage: false);
@@ -715,6 +739,137 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
   /// Gera ID temporário para processar imagem antes do save
   String _generateTemporaryId() {
     return 'temp_${DateTime.now().millisecondsSinceEpoch}';
+  }
+
+  /// Salva o registro de manutenção (criar ou atualizar)
+  Future<Either<Failure, MaintenanceEntity?>> saveMaintenanceRecord() async {
+    try {
+      // Valida antes de salvar
+      if (!validateForm()) {
+        // Pega a primeira mensagem de erro
+        final firstError = state.fieldErrors.values.isNotEmpty
+            ? state.fieldErrors.values.first
+            : 'Formulário inválido';
+        return Left(ValidationFailure(firstError));
+      }
+
+      state = state.copyWith(isLoading: true, errorMessage: () => null);
+
+      // Cria entidade a partir do formulário
+      final maintenanceEntity = _buildMaintenanceEntity();
+
+      // Decide se é criar ou atualizar
+      final Either<Failure, MaintenanceEntity> result;
+
+      if (state.id.isEmpty) {
+        // Criar novo
+        final addUseCase = local_di.getIt<AddMaintenanceRecord>();
+        result = await addUseCase(
+          AddMaintenanceRecordParams(maintenance: maintenanceEntity),
+        );
+      } else {
+        // Atualizar existente
+        final updateUseCase = local_di.getIt<UpdateMaintenanceRecord>();
+        result = await updateUseCase(
+          UpdateMaintenanceRecordParams(maintenance: maintenanceEntity),
+        );
+      }
+
+      state = state.copyWith(isLoading: false);
+
+      return result.fold((failure) => Left(failure), (entity) => Right(entity));
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: () => 'Erro ao salvar: ${e.toString()}',
+      );
+      return Left(UnexpectedFailure('Erro ao salvar: ${e.toString()}'));
+    }
+  }
+
+  /// Constrói a entidade de manutenção a partir do estado atual
+  MaintenanceEntity _buildMaintenanceEntity() {
+    final sanitizedTitle = InputSanitizer.sanitize(titleController.text);
+    final sanitizedDescription = InputSanitizer.sanitizeDescription(
+      descriptionController.text,
+    );
+    final sanitizedWorkshopName = InputSanitizer.sanitizeName(
+      workshopNameController.text,
+    );
+    final sanitizedWorkshopPhone = InputSanitizer.sanitize(
+      workshopPhoneController.text,
+    );
+    final sanitizedWorkshopAddress = InputSanitizer.sanitize(
+      workshopAddressController.text,
+    );
+    final sanitizedNotes = InputSanitizer.sanitizeDescription(
+      notesController.text,
+    );
+
+    final cost =
+        double.tryParse(
+          costController.text
+              .replaceAll(RegExp(r'[^\d,.]'), '')
+              .replaceAll(',', '.'),
+        ) ??
+        0.0;
+
+    final odometer =
+        double.tryParse(
+          odometerController.text
+              .replaceAll(RegExp(r'[^\d,.]'), '')
+              .replaceAll(',', '.'),
+        ) ??
+        0.0;
+
+    final nextOdometer = nextOdometerController.text.isNotEmpty
+        ? double.tryParse(
+            nextOdometerController.text
+                .replaceAll(RegExp(r'[^\d,.]'), '')
+                .replaceAll(',', '.'),
+          )
+        : null;
+
+    final now = DateTime.now();
+    final allPhotosPaths = [
+      ...state.photosPaths,
+      if (state.receiptImagePath != null) state.receiptImagePath!,
+    ];
+
+    return MaintenanceEntity(
+      id: state.id.isEmpty ? now.millisecondsSinceEpoch.toString() : state.id,
+      vehicleId: state.vehicleId,
+      userId: state.userId,
+      type: state.type,
+      status: state.status,
+      title: sanitizedTitle,
+      description: sanitizedDescription,
+      cost: cost,
+      odometer: odometer,
+      workshopName: sanitizedWorkshopName.isNotEmpty
+          ? sanitizedWorkshopName
+          : null,
+      workshopPhone: sanitizedWorkshopPhone.isNotEmpty
+          ? sanitizedWorkshopPhone
+          : null,
+      workshopAddress: sanitizedWorkshopAddress.isNotEmpty
+          ? sanitizedWorkshopAddress
+          : null,
+      serviceDate: state.serviceDate ?? now,
+      nextServiceDate: state.nextServiceDate,
+      nextServiceOdometer: nextOdometer,
+      photosPaths: allPhotosPaths,
+      invoicesPaths: state.invoicesPaths,
+      parts: state.parts,
+      notes: sanitizedNotes.isNotEmpty ? sanitizedNotes : null,
+      createdAt: state.id.isEmpty
+          ? now
+          : DateTime.fromMillisecondsSinceEpoch(
+              int.tryParse(state.id) ?? now.millisecondsSinceEpoch,
+            ),
+      updatedAt: now,
+      metadata: const {},
+    );
   }
 
   /// Limpa formulário
@@ -732,9 +887,7 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     state = MaintenanceFormState.initial(
       vehicleId: state.vehicleId,
       userId: state.userId,
-    ).copyWith(
-      vehicle: state.vehicle,
-    );
+    ).copyWith(vehicle: state.vehicle);
   }
 
   /// Reseta formulário

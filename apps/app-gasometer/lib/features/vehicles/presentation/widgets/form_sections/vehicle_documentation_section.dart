@@ -38,6 +38,8 @@ class VehicleDocumentationSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return FormSectionHeader(
       title: 'Documentação',
       icon: Icons.description,
@@ -60,9 +62,12 @@ class VehicleDocumentationSection extends StatelessWidget {
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
               ],
-              suffix: const Text(
+              suffix: Text(
                 'km',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
               onChanged: onOdometerChanged,
             ),

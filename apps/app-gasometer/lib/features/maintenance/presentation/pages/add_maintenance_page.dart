@@ -18,9 +18,7 @@ import '../../../../core/widgets/validated_dropdown_field.dart';
 import '../../../../core/widgets/validated_form_field.dart';
 import '../../../auth/presentation/notifiers/auth_notifier.dart';
 import '../../domain/entities/maintenance_entity.dart';
-import '../models/maintenance_form_model.dart';
 import '../notifiers/maintenance_form_notifier.dart';
-import '../notifiers/maintenances_notifier.dart';
 
 class AddMaintenancePage extends ConsumerStatefulWidget {
   const AddMaintenancePage({super.key, this.maintenanceToEdit, this.vehicleId});
@@ -142,6 +140,8 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
   Widget _buildServiceInfoSection() {
     final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
     final formState = ref.watch(maintenanceFormNotifierProvider);
+    final theme = Theme.of(context);
+
     return FormSectionHeader(
       title: 'Informações do Serviço',
       icon: Icons.build_circle,
@@ -181,16 +181,16 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
                       children: [
                         Text(
                           type.displayName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: GasometerDesignTokens.fontWeightMedium,
-                            color: GasometerDesignTokens.colorTextPrimary,
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
                         Text(
                           type.description,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: GasometerDesignTokens.fontSizeCaption,
-                            color: GasometerDesignTokens.colorTextSecondary,
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -289,17 +289,19 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
   Widget _buildNextServiceDate() {
     final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
     final formState = ref.watch(maintenanceFormNotifierProvider);
+    final theme = Theme.of(context);
+
     return FormSectionHeader(
       title: 'Programação de Próxima Manutenção',
       icon: Icons.schedule,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Defina quando será necessária a próxima manutenção (opcional)',
             style: TextStyle(
               fontSize: GasometerDesignTokens.fontSizeCaption,
-              color: GasometerDesignTokens.colorTextSecondary,
+              color: theme.colorScheme.onSurfaceVariant,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -364,10 +366,19 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
     );
 
     final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
+    clearFormError();
+
     if (!notifier.validateForm()) {
       debugPrint(
         '[MAINTENANCE DEBUG] Form validation FAILED - submission aborted',
       );
+      // Pega o primeiro erro para exibir
+      final formState = ref.read(maintenanceFormNotifierProvider);
+      if (formState.fieldErrors.isNotEmpty) {
+        setFormError(formState.fieldErrors.values.first);
+      } else {
+        setFormError('Por favor, corrija os campos destacados');
+      }
       return;
     }
 
@@ -382,10 +393,6 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
       _isSubmitting = true;
     });
 
-    final maintenancesNotifier = ref.read(
-      maintenancesNotifierProvider.notifier,
-    );
-
     try {
       _timeoutTimer = Timer(_submitTimeout, () {
         if (mounted && _isSubmitting) {
@@ -399,67 +406,23 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
         }
       });
 
-      final formState = ref.read(maintenanceFormNotifierProvider);
-      final List<String> allPhotosPaths = [
-        ...formState.photosPaths,
-        if (formState.receiptImagePath != null) formState.receiptImagePath!,
-      ];
-      final MaintenanceEntity tempEntity = MaintenanceEntity(
-        id:
-            widget.maintenanceToEdit?.id ??
-            DateTime.now().millisecondsSinceEpoch.toString(),
-        vehicleId: formState.vehicleId,
-        userId: formState.userId,
-        type: formState.type,
-        status: formState.status,
-        title: formState.title,
-        description: formState.description,
-        cost: formState.cost,
-        odometer: formState.odometer,
-        workshopName: formState.workshopName.isNotEmpty
-            ? formState.workshopName
-            : null,
-        workshopPhone: formState.workshopPhone.isNotEmpty
-            ? formState.workshopPhone
-            : null,
-        workshopAddress: formState.workshopAddress.isNotEmpty
-            ? formState.workshopAddress
-            : null,
-        serviceDate: formState.serviceDate ?? DateTime.now(),
-        nextServiceDate: formState.nextServiceDate,
-        nextServiceOdometer: formState.nextServiceOdometer,
-        photosPaths: allPhotosPaths,
-        invoicesPaths: formState.invoicesPaths,
-        parts: formState.parts,
-        notes: formState.notes.isNotEmpty ? formState.notes : null,
-        createdAt: widget.maintenanceToEdit?.createdAt ?? DateTime.now(),
-        updatedAt: DateTime.now(),
-        metadata: const {},
-      );
-      final MaintenanceFormModel formModel =
-          MaintenanceFormModel.fromMaintenanceEntity(tempEntity);
+      // Salva o registro usando o UseCase
+      final result = await notifier.saveMaintenanceRecord();
 
-      debugPrint(
-        '[MAINTENANCE DEBUG] Created maintenance form model: ${formModel.toString()}',
-      );
-
-      bool success;
-      if (widget.maintenanceToEdit != null) {
-        debugPrint('[MAINTENANCE DEBUG] Calling updateMaintenance()');
-        success = await maintenancesNotifier.updateMaintenance(formModel);
-      } else {
-        debugPrint('[MAINTENANCE DEBUG] Calling addMaintenance()');
-        success = await maintenancesNotifier.addMaintenance(formModel);
-      }
-
-      debugPrint('[MAINTENANCE DEBUG] Operation result: $success');
-
-      if (success && mounted) {
-        debugPrint('[MAINTENANCE DEBUG] SUCCESS - Closing dialog');
-        Navigator.of(context).pop({
-          'success': true,
-          'action': widget.maintenanceToEdit != null ? 'edit' : 'create',
-        });
+      if (mounted) {
+        result.fold(
+          (failure) {
+            debugPrint('[MAINTENANCE DEBUG] FAILURE - ${failure.message}');
+            setFormError(failure.message);
+          },
+          (success) {
+            debugPrint('[MAINTENANCE DEBUG] SUCCESS - Closing dialog');
+            Navigator.of(context).pop({
+              'success': true,
+              'action': widget.maintenanceToEdit != null ? 'edit' : 'create',
+            });
+          },
+        );
       }
     } catch (e) {
       debugPrint('Error submitting form: $e');

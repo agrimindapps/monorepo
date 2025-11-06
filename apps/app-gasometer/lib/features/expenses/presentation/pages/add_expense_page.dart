@@ -6,10 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/widgets/error_header.dart';
 import '../../../../core/widgets/form_dialog.dart';
 import '../../../auth/presentation/notifiers/notifiers.dart';
-import '../models/expense_form_model.dart';
 import '../notifiers/expense_form_notifier.dart';
-import '../notifiers/expense_form_state.dart';
-import '../notifiers/expenses_notifier.dart';
 import '../widgets/expense_form_view.dart';
 
 /// Dialog modal para adicionar/editar despesas
@@ -56,29 +53,23 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage>
         userId: authState.userId,
       );
 
-      if (widget.editExpenseId != null) {
-        await _loadExpenseForEdit();
-      }
+      // TODO: Implementar carga de despesa para edição
+      // if (widget.editExpenseId != null) {
+      //   await _loadExpenseForEdit();
+      // }
     });
   }
 
-  Future<void> _loadExpenseForEdit() async {
-    try {
-      final expensesNotifier = ref.read(expensesNotifierProvider.notifier);
-      final formNotifier = ref.read(expenseFormNotifierProvider.notifier);
-      await expensesNotifier.loadExpenses();
-
-      final expensesState = ref.read(expensesNotifierProvider);
-      final expense = expensesState.expenses.firstWhere(
-        (e) => e.id == widget.editExpenseId,
-        orElse: () => throw Exception('Registro de despesa não encontrado'),
-      );
-
-      await formNotifier.initializeWithExpense(expense);
-    } catch (e) {
-      throw Exception('Erro ao carregar registro para edição: $e');
-    }
-  }
+  // TODO: Implementar carga de despesa para edição
+  // Future<void> _loadExpenseForEdit() async {
+  //   try {
+  //     final formNotifier = ref.read(expenseFormNotifierProvider.notifier);
+  //     // Carregar despesa aqui
+  //     // await formNotifier.initializeWithExpense(expense);
+  //   } catch (e) {
+  //     throw Exception('Erro ao carregar registro para edição: $e');
+  //   }
+  // }
 
   @override
   void dispose() {
@@ -142,9 +133,19 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage>
   /// Internal submit method with enhanced protection and timeout handling
   Future<void> _submitForm() async {
     final formNotifier = ref.read(expenseFormNotifierProvider.notifier);
+    clearFormError();
+
     if (!formNotifier.validateForm()) {
+      // Pega o primeiro erro para exibir
+      final formState = ref.read(expenseFormNotifierProvider);
+      if (formState.fieldErrors.isNotEmpty) {
+        setFormError(formState.fieldErrors.values.first);
+      } else {
+        setFormError('Por favor, corrija os campos destacados');
+      }
       return;
     }
+
     if (_isSubmitting) {
       debugPrint('Submit already in progress, aborting duplicate submission');
       return;
@@ -152,8 +153,6 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage>
     setState(() {
       _isSubmitting = true;
     });
-
-    final expensesNotifier = ref.read(expensesNotifierProvider.notifier);
 
     try {
       _timeoutTimer = Timer(_submitTimeout, () {
@@ -168,29 +167,23 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage>
         }
       });
 
-      final formState = ref.read(expenseFormNotifierProvider);
-      final formModel = _stateToModel(formState);
+      // Salva o registro usando o UseCase
+      final result = await formNotifier.saveExpenseRecord();
 
-      bool success;
-      if (widget.editExpenseId != null) {
-        success = await expensesNotifier.updateExpense(formModel);
-      } else {
-        success = await expensesNotifier.addExpense(formModel);
-      }
-
-      if (success) {
-        if (mounted) {
-          Navigator.of(context).pop({
-            'success': true,
-            'action': widget.editExpenseId != null ? 'edit' : 'create',
-          });
-        }
-      } else {
-        if (mounted) {
-          final expensesState = ref.read(expensesNotifierProvider);
-          final errorMessage = expensesState.error ?? 'Erro ao salvar despesa';
-          setFormError(errorMessage);
-        }
+      if (mounted) {
+        result.fold(
+          (failure) {
+            debugPrint('[EXPENSE DEBUG] FAILURE - ${failure.message}');
+            setFormError(failure.message);
+          },
+          (success) {
+            debugPrint('[EXPENSE DEBUG] SUCCESS - Closing dialog');
+            Navigator.of(context).pop({
+              'success': true,
+              'action': widget.editExpenseId != null ? 'edit' : 'create',
+            });
+          },
+        );
       }
     } catch (e) {
       debugPrint('Error submitting form: $e');
@@ -205,27 +198,5 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage>
         });
       }
     }
-  }
-
-  /// Converte ExpenseFormState para ExpenseFormModel
-  ExpenseFormModel _stateToModel(ExpenseFormState state) {
-    return ExpenseFormModel(
-      id: state.id,
-      userId: state.userId,
-      vehicleId: state.vehicleId,
-      vehicle: state.vehicle,
-      expenseType: state.expenseType,
-      description: state.description,
-      amount: state.amount,
-      odometer: state.odometer,
-      date: state.date ?? DateTime.now(),
-      location: state.location,
-      notes: state.notes,
-      receiptImagePath: state.receiptImagePath,
-      isLoading: state.isLoading,
-      hasChanges: state.hasChanges,
-      errors: state.fieldErrors,
-      lastError: state.errorMessage,
-    );
   }
 }

@@ -1,14 +1,16 @@
 import 'dart:async';
 
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../../../core/services/input_sanitizer.dart';
 import '../../../vehicles/domain/usecases/get_vehicle_by_id.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../../domain/services/odometer_formatter.dart';
 import '../../domain/services/odometer_validator.dart';
+import '../../domain/usecases/add_odometer_reading.dart';
+import '../../domain/usecases/update_odometer_reading.dart';
 import 'odometer_form_state.dart';
 
 part 'odometer_form_notifier.g.dart';
@@ -74,7 +76,9 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
     });
 
     try {
-      final vehicleResult = await _getVehicleById(GetVehicleByIdParams(vehicleId: vehicleId));
+      final vehicleResult = await _getVehicleById(
+        GetVehicleByIdParams(vehicleId: vehicleId),
+      );
 
       await vehicleResult.fold(
         (failure) async {
@@ -84,14 +88,15 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
           );
         },
         (vehicle) async {
-          state = OdometerFormState.initial(
-            vehicleId: vehicleId,
-            userId: userId,
-          ).copyWith(
-            vehicle: vehicle,
-            odometerValue: vehicle.currentOdometer,
-            isLoading: false,
-          );
+          state =
+              OdometerFormState.initial(
+                vehicleId: vehicleId,
+                userId: userId,
+              ).copyWith(
+                vehicle: vehicle,
+                odometerValue: vehicle.currentOdometer,
+                isLoading: false,
+              );
 
           _updateTextControllers();
         },
@@ -109,7 +114,9 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
     state = state.copyWith(isLoading: true);
 
     try {
-      final vehicleResult = await _getVehicleById(GetVehicleByIdParams(vehicleId: odometer.vehicleId));
+      final vehicleResult = await _getVehicleById(
+        GetVehicleByIdParams(vehicleId: odometer.vehicleId),
+      );
 
       await vehicleResult.fold(
         (failure) async {
@@ -119,10 +126,9 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
           );
         },
         (vehicle) async {
-          state = OdometerFormState.fromOdometer(odometer).copyWith(
-            vehicle: vehicle,
-            isLoading: false,
-          );
+          state = OdometerFormState.fromOdometer(
+            odometer,
+          ).copyWith(vehicle: vehicle, isLoading: false);
 
           _updateTextControllers();
         },
@@ -137,10 +143,9 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
 
   /// Atualiza controllers com valores do estado
   void _updateTextControllers() {
-    odometerController.text =
-        state.odometerValue > 0
-            ? OdometerFormatter.formatOdometer(state.odometerValue)
-            : '';
+    odometerController.text = state.odometerValue > 0
+        ? OdometerFormatter.formatOdometer(state.odometerValue)
+        : '';
 
     descriptionController.text = state.description;
   }
@@ -152,18 +157,22 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
       () {
         final value = OdometerFormatter.parseOdometer(odometerController.text);
 
-        state = state.copyWith(
-          odometerValue: value,
-          hasChanges: true,
-        ).clearFieldError('odometerValue');
+        state = state
+            .copyWith(odometerValue: value, hasChanges: true)
+            .clearFieldError('odometerValue');
         if (state.hasVehicle && value > 0) {
-          final validationResult = OdometerValidator.validateOdometerWithVehicle(
-            value,
-            state.vehicle!,
-          );
+          final validationResult =
+              OdometerValidator.validateOdometerWithVehicle(
+                value,
+                state.vehicle!,
+              );
 
-          if (!validationResult.isValid && validationResult.errorMessage != null) {
-            state = state.setFieldError('odometerValue', validationResult.errorMessage!);
+          if (!validationResult.isValid &&
+              validationResult.errorMessage != null) {
+            state = state.setFieldError(
+              'odometerValue',
+              validationResult.errorMessage!,
+            );
           }
         }
       },
@@ -175,12 +184,13 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
     _descriptionDebounceTimer = Timer(
       const Duration(milliseconds: _descriptionDebounceMs),
       () {
-        final sanitized = InputSanitizer.sanitizeDescription(descriptionController.text);
+        final sanitized = InputSanitizer.sanitizeDescription(
+          descriptionController.text,
+        );
 
-        state = state.copyWith(
-          description: sanitized,
-          hasChanges: true,
-        ).clearFieldError('description');
+        state = state
+            .copyWith(description: sanitized, hasChanges: true)
+            .clearFieldError('description');
       },
     );
   }
@@ -189,25 +199,25 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
   void updateRegistrationType(OdometerType registrationType) {
     if (state.registrationType == registrationType) return;
 
-    state = state.copyWith(
-      registrationType: registrationType,
-      hasChanges: true,
-    ).clearFieldError('registrationType');
+    state = state
+        .copyWith(registrationType: registrationType, hasChanges: true)
+        .clearFieldError('registrationType');
   }
 
   /// Atualiza data de registro
   void updateRegistrationDate(DateTime date) {
     if (state.registrationDate == date) return;
 
-    state = state.copyWith(
-      registrationDate: date,
-      hasChanges: true,
-    ).clearFieldError('registrationDate');
+    state = state
+        .copyWith(registrationDate: date, hasChanges: true)
+        .clearFieldError('registrationDate');
   }
 
   /// Atualiza apenas a data (mantém hora)
   void setDate(DateTime date) {
-    final currentTime = TimeOfDay.fromDateTime(state.registrationDate ?? DateTime.now());
+    final currentTime = TimeOfDay.fromDateTime(
+      state.registrationDate ?? DateTime.now(),
+    );
     final newDateTime = DateTime(
       date.year,
       date.month,
@@ -285,11 +295,11 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: Colors.grey.shade800,
-                  onPrimary: Colors.white,
-                  surface: Colors.white,
-                  onSurface: Colors.black,
-                ),
+              primary: Colors.grey.shade800,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
           ),
           child: child!,
         );
@@ -305,7 +315,9 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
   Future<void> pickTime(BuildContext context) async {
     final time = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(state.registrationDate ?? DateTime.now()),
+      initialTime: TimeOfDay.fromDateTime(
+        state.registrationDate ?? DateTime.now(),
+      ),
       builder: (context, child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
@@ -315,8 +327,8 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
             child: Theme(
               data: Theme.of(context).copyWith(
                 colorScheme: Theme.of(context).colorScheme.copyWith(
-                      primary: Theme.of(context).colorScheme.primary,
-                    ),
+                  primary: Theme.of(context).colorScheme.primary,
+                ),
               ),
               child: child!,
             ),
@@ -338,9 +350,7 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
     state = OdometerFormState.initial(
       vehicleId: state.vehicleId,
       userId: state.userId,
-    ).copyWith(
-      vehicle: state.vehicle,
-    );
+    ).copyWith(vehicle: state.vehicle);
   }
 
   /// Reseta formulário
@@ -354,12 +364,11 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
   }
 
   /// Cria OdometerEntity a partir do estado atual do formulário
-  OdometerEntity toOdometerEntity({
-    String? id,
-    DateTime? createdAt,
-  }) {
+  OdometerEntity toOdometerEntity({String? id}) {
     final now = DateTime.now();
-    final sanitizedDescription = InputSanitizer.sanitizeDescription(state.description);
+    final sanitizedDescription = InputSanitizer.sanitizeDescription(
+      state.description,
+    );
 
     return OdometerEntity(
       id: id ?? now.millisecondsSinceEpoch.toString(),
@@ -369,22 +378,58 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
       registrationDate: state.registrationDate ?? now,
       description: sanitizedDescription,
       type: state.registrationType,
-      createdAt: createdAt ?? now,
+      createdAt: now,
       updatedAt: now,
-      metadata: const {
-        'source': 'mobile_app',
-        'version': '1.0.0',
-      },
+      metadata: const {'source': 'mobile_app', 'version': '1.0.0'},
     );
   }
 
   /// Limpa o valor do odômetro
   void clearOdometer() {
     odometerController.clear();
-    state = state.copyWith(
-      odometerValue: 0.0,
-      hasChanges: true,
-    ).clearFieldError('odometerValue');
+    state = state
+        .copyWith(odometerValue: 0.0, hasChanges: true)
+        .clearFieldError('odometerValue');
+  }
+
+  /// Salva o registro de odômetro (criar ou atualizar)
+  Future<Either<Failure, OdometerEntity?>> saveOdometerReading() async {
+    try {
+      // Valida antes de salvar
+      if (!validateForm()) {
+        return Left(ValidationFailure('Formulário inválido'));
+      }
+
+      state = state.copyWith(isLoading: true);
+
+      // Cria entidade a partir do formulário
+      final odometerEntity = toOdometerEntity(
+        id: state.id.isEmpty ? null : state.id,
+      );
+
+      // Decide se é criar ou atualizar
+      final Either<Failure, OdometerEntity?> result;
+
+      if (state.id.isEmpty) {
+        // Criar novo
+        final addUseCase = getIt<AddOdometerReadingUseCase>();
+        result = await addUseCase(odometerEntity);
+      } else {
+        // Atualizar existente
+        final updateUseCase = getIt<UpdateOdometerReadingUseCase>();
+        result = await updateUseCase(odometerEntity);
+      }
+
+      state = state.copyWith(isLoading: false);
+
+      return result;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: () => 'Erro ao salvar: $e',
+      );
+      return Left(UnknownFailure('Erro inesperado: $e'));
+    }
   }
 
   /// Obtém tipos de registro disponíveis

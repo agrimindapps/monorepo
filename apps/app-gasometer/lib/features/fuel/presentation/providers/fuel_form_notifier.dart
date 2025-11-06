@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../../core/di/injection_container_modular.dart';
+import '../../../../core/di/injection_container_modular.dart' as local_di;
 import '../../../../core/services/input_sanitizer.dart';
 import '../../../../core/services/receipt_image_service.dart';
 import '../../../auth/presentation/notifiers/notifiers.dart';
@@ -15,6 +15,8 @@ import '../../core/constants/fuel_constants.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../../domain/services/fuel_formatter_service.dart';
 import '../../domain/services/fuel_validator_service.dart';
+import '../../domain/usecases/add_fuel_record.dart';
+import '../../domain/usecases/update_fuel_record.dart';
 import '../models/fuel_form_model.dart';
 
 /// Form state for fuel record creation/editing
@@ -484,6 +486,50 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     return (false, firstErrorField);
   }
 
+  /// Salva o registro de abastecimento (criar ou atualizar)
+  Future<Either<Failure, FuelRecordEntity?>> saveFuelRecord() async {
+    try {
+      // Valida antes de salvar
+      final (isValid, firstErrorField) = validateForm();
+      if (!isValid) {
+        final errorMsg = firstErrorField != null
+            ? state.formModel.errors[firstErrorField] ?? 'Formulário inválido'
+            : 'Formulário inválido';
+        return Left(ValidationFailure(errorMsg));
+      }
+
+      state = state.copyWith(isLoading: true, clearError: true);
+
+      // Cria entidade a partir do formulário
+      final fuelEntity = state.formModel.toFuelRecord();
+
+      // Decide se é criar ou atualizar
+      final Either<Failure, FuelRecordEntity> result;
+
+      if (state.formModel.id.isEmpty) {
+        // Criar novo
+        final addUseCase = local_di.getIt<AddFuelRecord>();
+        result = await addUseCase(AddFuelRecordParams(fuelRecord: fuelEntity));
+      } else {
+        // Atualizar existente
+        final updateUseCase = local_di.getIt<UpdateFuelRecord>();
+        result = await updateUseCase(
+          UpdateFuelRecordParams(fuelRecord: fuelEntity),
+        );
+      }
+
+      state = state.copyWith(isLoading: false);
+
+      return result.fold((failure) => Left(failure), (entity) => Right(entity));
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        lastError: 'Erro ao salvar: ${e.toString()}',
+      );
+      return Left(UnexpectedFailure('Erro ao salvar: ${e.toString()}'));
+    }
+  }
+
   void clearForm() {
     litersController.clear();
     pricePerLiterController.clear();
@@ -702,7 +748,7 @@ final fuelFormNotifierProvider =
       return FuelFormNotifier(
         initialVehicleId: vehicleId,
         userId: userId,
-        receiptImageService: sl<ReceiptImageService>(),
+        receiptImageService: local_di.getIt<ReceiptImageService>(),
         ref: ref,
       );
     });

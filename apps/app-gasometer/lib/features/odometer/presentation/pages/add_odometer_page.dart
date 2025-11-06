@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -185,7 +186,7 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
     final notifier = ref.read(odometerFormNotifierProvider.notifier);
 
     return DropdownButtonFormField<OdometerType>(
-      value: formState.registrationType,
+      initialValue: formState.registrationType,
       decoration: InputDecoration(
         labelText: OdometerConstants.fieldLabels['tipoRegistro'],
         hintText: OdometerConstants.fieldHints['tipoRegistro'],
@@ -257,6 +258,7 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
     setState(() {
       _isSubmitting = true;
     });
+
     try {
       _timeoutTimer = Timer(_submitTimeout, () {
         if (mounted && _isSubmitting) {
@@ -269,9 +271,19 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
           );
         }
       });
+
+      // Salva o registro de odômetro
+      final result = await formNotifier.saveOdometerReading();
+
       if (mounted) {
-        setFormError(
-          'A funcionalidade de salvar odômetro precisa de um provider Riverpod global (odometerRiverpodProvider).\n\nMigração pendente.',
+        result.fold(
+          (failure) {
+            setFormError(failure.message);
+          },
+          (success) {
+            // Sucesso - fecha o dialog
+            Navigator.of(context).pop(true);
+          },
         );
       }
     } catch (e) {

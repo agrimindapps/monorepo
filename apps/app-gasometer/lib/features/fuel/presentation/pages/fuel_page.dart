@@ -45,7 +45,8 @@ class _FuelPageState extends ConsumerState<FuelPage> {
             if (!isOnline || pendingCount > 0)
               _buildOfflineIndicator(isOnline, pendingCount, isSyncing),
             _buildVehicleSelector(context),
-            if (_selectedVehicleId != null && (vehiclesAsync.value?.isNotEmpty ?? false))
+            if (_selectedVehicleId != null &&
+                (vehiclesAsync.value?.isNotEmpty ?? false))
               _buildMonthSelector(),
             Expanded(
               child: vehiclesAsync.when(
@@ -65,7 +66,9 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                       icon: Icons.error_outline,
                       actionLabel: 'Tentar novamente',
                       onAction: () {
-                        ref.read(fuelRiverpodProvider.notifier).loadFuelRecords();
+                        ref
+                            .read(fuelRiverpodProvider.notifier)
+                            .loadFuelRecords();
                       },
                     ),
                   );
@@ -104,10 +107,9 @@ class _FuelPageState extends ConsumerState<FuelPage> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color:
-            isOnline
-                ? Colors.orange.withValues(alpha: 0.1)
-                : Colors.red.withValues(alpha: 0.1),
+        color: isOnline
+            ? Colors.orange.withValues(alpha: 0.1)
+            : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isOnline ? Colors.orange : Colors.red,
@@ -266,30 +268,26 @@ class _FuelPageState extends ConsumerState<FuelPage> {
               margin: const EdgeInsets.only(right: 12),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color:
-                    isSelected
-                        ? Theme.of(context).primaryColor
-                        : Theme.of(context).cardColor,
+                color: isSelected
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color:
-                      isSelected
-                          ? Theme.of(context).primaryColor
-                          : Theme.of(
-                            context,
-                          ).dividerColor.withValues(alpha: 0.2),
+                  color: isSelected
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).dividerColor.withValues(alpha: 0.2),
                 ),
               ),
               child: Center(
                 child: Text(
                   months[index],
                   style: TextStyle(
-                    color:
-                        isSelected
-                            ? Colors.white
-                            : Theme.of(context).textTheme.bodyMedium?.color,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color: isSelected
+                        ? Colors.white
+                        : Theme.of(context).textTheme.bodyMedium?.color,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
                   ),
                 ),
               ),
@@ -325,21 +323,14 @@ class _FuelPageState extends ConsumerState<FuelPage> {
     if (records.isEmpty) {
       return EnhancedEmptyState(
         title: 'Nenhum abastecimento',
-        description:
-            fuelState.hasActiveFilters
-                ? 'Nenhum registro encontrado com os filtros aplicados.'
-                : 'Adicione seu primeiro abastecimento para começar a acompanhar seus gastos com combustível.',
+        description: fuelState.hasActiveFilters
+            ? 'Nenhum registro encontrado com os filtros aplicados.'
+            : 'Adicione seu primeiro abastecimento para começar a acompanhar seus gastos com combustível.',
         icon: Icons.local_gas_station_outlined,
-        actionLabel:
-            fuelState.hasActiveFilters
-                ? 'Limpar filtros'
-                : 'Adicionar abastecimento',
-        onAction: () {
-          if (fuelState.hasActiveFilters) {
-            ref.read(fuelRiverpodProvider.notifier).clearAllFilters();
-          } else {
-          }
-        },
+        actionLabel: fuelState.hasActiveFilters ? 'Limpar filtros' : null,
+        onAction: fuelState.hasActiveFilters
+            ? () => ref.read(fuelRiverpodProvider.notifier).clearAllFilters()
+            : null,
       );
     }
 
@@ -470,12 +461,11 @@ class _FuelPageState extends ConsumerState<FuelPage> {
     );
   }
 
-
-
   Widget _buildSelectVehicleState() {
     return const EnhancedEmptyState(
       title: 'Selecione um veículo',
-      description: 'Escolha um veículo acima para visualizar seus abastecimentos.',
+      description:
+          'Escolha um veículo acima para visualizar seus abastecimentos.',
       icon: Icons.local_gas_station_outlined,
     );
   }

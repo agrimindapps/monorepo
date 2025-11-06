@@ -28,7 +28,8 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
           children: [
             _buildHeader(context),
             _buildVehicleSelector(context),
-            if (_selectedVehicleId != null && (vehiclesAsync.value?.isNotEmpty ?? false))
+            if (_selectedVehicleId != null &&
+                (vehiclesAsync.value?.isNotEmpty ?? false))
               _buildMonthSelector(),
             Expanded(
               child: vehiclesAsync.when(
@@ -156,30 +157,26 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
               margin: const EdgeInsets.only(right: 12),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color:
-                    isSelected
-                        ? Theme.of(context).primaryColor
-                        : Theme.of(context).cardColor,
+                color: isSelected
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color:
-                      isSelected
-                          ? Theme.of(context).primaryColor
-                          : Theme.of(
-                            context,
-                          ).dividerColor.withValues(alpha: 0.2),
+                  color: isSelected
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).dividerColor.withValues(alpha: 0.2),
                 ),
               ),
               child: Center(
                 child: Text(
                   months[index],
                   style: TextStyle(
-                    color:
-                        isSelected
-                            ? Colors.white
-                            : Theme.of(context).textTheme.bodyMedium?.color,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color: isSelected
+                        ? Colors.white
+                        : Theme.of(context).textTheme.bodyMedium?.color,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
                   ),
                 ),
               ),
@@ -191,14 +188,11 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
   }
 
   Widget _buildContent(BuildContext context) {
-    return EnhancedEmptyState(
+    return const EnhancedEmptyState(
       title: 'Nenhum registro',
       description:
           'Adicione sua primeira leitura de odômetro para começar a acompanhar a quilometragem.',
       icon: Icons.speed_outlined,
-      actionLabel: 'Adicionar leitura',
-      onAction: () {
-      },
     );
   }
 
@@ -234,12 +228,11 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
     );
   }
 
-
-
   Widget _buildSelectVehicleState() {
     return const EnhancedEmptyState(
       title: 'Selecione um veículo',
-      description: 'Escolha um veículo acima para visualizar suas leituras de odômetro.',
+      description:
+          'Escolha um veículo acima para visualizar suas leituras de odômetro.',
       icon: Icons.speed_outlined,
     );
   }

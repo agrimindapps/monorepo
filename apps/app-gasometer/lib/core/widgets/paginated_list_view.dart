@@ -200,10 +200,9 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
     }
     return RefreshIndicator(
       onRefresh: refresh,
-      child:
-          widget.enableVirtualization
-              ? _buildVirtualizedList()
-              : _buildRegularList(),
+      child: widget.enableVirtualization
+          ? _buildVirtualizedList()
+          : _buildRegularList(),
     );
   }
 
@@ -269,12 +268,11 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
     return Container(
       padding: const EdgeInsets.all(16),
       alignment: Alignment.center,
-      child:
-          _isLoadingMore
-              ? const CircularProgressIndicator()
-              : _error != null
-              ? _buildRetryButton()
-              : const SizedBox.shrink(),
+      child: _isLoadingMore
+          ? const CircularProgressIndicator()
+          : _error != null
+          ? _buildRetryButton()
+          : const SizedBox.shrink(),
     );
   }
 
@@ -293,7 +291,11 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.grey),
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(height: 16),
             Text(
               'Erro ao carregar dados',

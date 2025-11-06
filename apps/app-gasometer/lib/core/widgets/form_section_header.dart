@@ -60,32 +60,38 @@ class FormSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Theme.of(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: EdgeInsets.symmetric(
-            vertical:
-                applyVerticalPadding ? GasometerDesignTokens.spacingMd : 0,
+            vertical: applyVerticalPadding
+                ? GasometerDesignTokens.spacingMd
+                : 0,
           ),
           child: Row(
             children: [
               Icon(
                 icon,
                 size: iconSize ?? GasometerDesignTokens.iconSizeSm,
-                color: iconColor ?? Colors.grey.shade600,
+                color:
+                    iconColor ??
+                    (isDark
+                        ? theme.colorScheme.onSurfaceVariant
+                        : Colors.grey.shade600),
               ),
               const SizedBox(width: GasometerDesignTokens.spacingSm),
               Text(
                 title,
                 style:
                     titleStyle ??
-                    const TextStyle(
+                    TextStyle(
                       fontSize: GasometerDesignTokens.fontSizeLg,
                       fontWeight: GasometerDesignTokens.fontWeightMedium,
-                      color: GasometerDesignTokens.colorTextPrimary,
+                      color: theme.colorScheme.onSurface,
                     ),
               ),
             ],

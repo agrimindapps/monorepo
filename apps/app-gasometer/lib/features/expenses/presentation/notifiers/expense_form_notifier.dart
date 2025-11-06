@@ -1,10 +1,11 @@
 import 'dart:async';
 
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection.dart';
+import '../../../../core/di/injection.dart' as local_di;
 import '../../../../core/services/input_sanitizer.dart';
 import '../../../../core/services/receipt_image_service.dart';
 import '../../../vehicles/domain/usecases/get_vehicle_by_id.dart';
@@ -12,6 +13,8 @@ import '../../core/constants/expense_constants.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../../domain/services/expense_formatter_service.dart';
 import '../../domain/services/expense_validation_service.dart';
+import '../../domain/usecases/add_expense.dart';
+import '../../domain/usecases/update_expense.dart';
 import 'expense_form_state.dart';
 
 part 'expense_form_notifier.g.dart';
@@ -101,7 +104,9 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     });
 
     try {
-      final vehicleResult = await _getVehicleById(GetVehicleByIdParams(vehicleId: vehicleId));
+      final vehicleResult = await _getVehicleById(
+        GetVehicleByIdParams(vehicleId: vehicleId),
+      );
 
       await vehicleResult.fold(
         (failure) async {
@@ -111,14 +116,12 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
           );
         },
         (vehicle) async {
-          state = ExpenseFormState.initial(
-            vehicleId: vehicleId,
-            userId: userId,
-          ).copyWith(
-            vehicle: vehicle,
-            odometer: vehicle.currentOdometer,
-            isLoading: false,
-          );
+          state = ExpenseFormState.initial(vehicleId: vehicleId, userId: userId)
+              .copyWith(
+                vehicle: vehicle,
+                odometer: vehicle.currentOdometer,
+                isLoading: false,
+              );
 
           _updateTextControllers();
         },
@@ -138,7 +141,9 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     });
 
     try {
-      final vehicleResult = await _getVehicleById(GetVehicleByIdParams(vehicleId: expense.vehicleId));
+      final vehicleResult = await _getVehicleById(
+        GetVehicleByIdParams(vehicleId: expense.vehicleId),
+      );
 
       await vehicleResult.fold(
         (failure) async {
@@ -148,10 +153,9 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
           );
         },
         (vehicle) async {
-          state = ExpenseFormState.fromExpense(expense).copyWith(
-            vehicle: vehicle,
-            isLoading: false,
-          );
+          state = ExpenseFormState.fromExpense(
+            expense,
+          ).copyWith(vehicle: vehicle, isLoading: false);
 
           _updateTextControllers();
         },
@@ -168,11 +172,13 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
   void _updateTextControllers() {
     descriptionController.text = state.description;
 
-    amountController.text =
-        state.amount > 0 ? _formatter.formatAmount(state.amount) : '';
+    amountController.text = state.amount > 0
+        ? _formatter.formatAmount(state.amount)
+        : '';
 
-    odometerController.text =
-        state.odometer > 0 ? _formatter.formatOdometer(state.odometer) : '';
+    odometerController.text = state.odometer > 0
+        ? _formatter.formatOdometer(state.odometer)
+        : '';
 
     locationController.text = state.location;
     notesController.text = state.notes;
@@ -183,16 +189,17 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     _descriptionDebounceTimer = Timer(
       const Duration(milliseconds: ExpenseConstants.descriptionDebounceMs),
       () {
-        final sanitized =
-            InputSanitizer.sanitizeDescription(descriptionController.text);
+        final sanitized = InputSanitizer.sanitizeDescription(
+          descriptionController.text,
+        );
 
-        state = state.copyWith(
-          description: sanitized,
-          hasChanges: true,
-        ).clearFieldError('description');
+        state = state
+            .copyWith(description: sanitized, hasChanges: true)
+            .clearFieldError('description');
         if (sanitized.isNotEmpty && state.expenseType == ExpenseType.other) {
-          final suggestedType =
-              _validator.suggestCategoryFromDescription(sanitized);
+          final suggestedType = _validator.suggestCategoryFromDescription(
+            sanitized,
+          );
           if (suggestedType != ExpenseType.other) {
             updateExpenseType(suggestedType);
           }
@@ -208,10 +215,9 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
       () {
         final value = _formatter.parseFormattedAmount(amountController.text);
 
-        state = state.copyWith(
-          amount: value,
-          hasChanges: true,
-        ).clearFieldError('amount');
+        state = state
+            .copyWith(amount: value, hasChanges: true)
+            .clearFieldError('amount');
       },
     );
   }
@@ -221,13 +227,13 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     _odometerDebounceTimer = Timer(
       const Duration(milliseconds: ExpenseConstants.odometerDebounceMs),
       () {
-        final value =
-            _formatter.parseFormattedOdometer(odometerController.text);
+        final value = _formatter.parseFormattedOdometer(
+          odometerController.text,
+        );
 
-        state = state.copyWith(
-          odometer: value,
-          hasChanges: true,
-        ).clearFieldError('odometer');
+        state = state
+            .copyWith(odometer: value, hasChanges: true)
+            .clearFieldError('odometer');
       },
     );
   }
@@ -235,40 +241,35 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
   void _onLocationChanged() {
     final sanitized = InputSanitizer.sanitize(locationController.text);
 
-    state = state.copyWith(
-      location: sanitized,
-      hasChanges: true,
-    ).clearFieldError('location');
+    state = state
+        .copyWith(location: sanitized, hasChanges: true)
+        .clearFieldError('location');
   }
 
   void _onNotesChanged() {
-    final sanitized =
-        InputSanitizer.sanitizeDescription(notesController.text);
+    final sanitized = InputSanitizer.sanitizeDescription(notesController.text);
 
-    state = state.copyWith(
-      notes: sanitized,
-      hasChanges: true,
-    ).clearFieldError('notes');
+    state = state
+        .copyWith(notes: sanitized, hasChanges: true)
+        .clearFieldError('notes');
   }
 
   /// Atualiza tipo de despesa
   void updateExpenseType(ExpenseType expenseType) {
     if (state.expenseType == expenseType) return;
 
-    state = state.copyWith(
-      expenseType: expenseType,
-      hasChanges: true,
-    ).clearFieldError('expenseType');
+    state = state
+        .copyWith(expenseType: expenseType, hasChanges: true)
+        .clearFieldError('expenseType');
   }
 
   /// Atualiza data
   void updateDate(DateTime date) {
     if (state.date == date) return;
 
-    state = state.copyWith(
-      date: date,
-      hasChanges: true,
-    ).clearFieldError('date');
+    state = state
+        .copyWith(date: date, hasChanges: true)
+        .clearFieldError('date');
   }
 
   /// Limpa mensagem de erro
@@ -287,10 +288,7 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
       case 'description':
         return _validator.validateDescription(value);
       case 'amount':
-        return _validator.validateAmount(
-          value,
-          expenseType: state.expenseType,
-        );
+        return _validator.validateAmount(value, expenseType: state.expenseType);
       case 'odometer':
         return _validator.validateOdometer(
           value,
@@ -328,19 +326,20 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     final date = await showDatePicker(
       context: context,
       initialDate: state.date ?? DateTime.now(),
-      firstDate: DateTime.now()
-          .subtract(const Duration(days: 365 * ExpenseConstants.maxYearsBack)),
+      firstDate: DateTime.now().subtract(
+        const Duration(days: 365 * ExpenseConstants.maxYearsBack),
+      ),
       lastDate: DateTime.now(),
       locale: const Locale('pt', 'BR'),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: Colors.grey.shade800,
-                  onPrimary: Colors.white,
-                  surface: Colors.white,
-                  onSurface: Colors.black,
-                ),
+              primary: Colors.grey.shade800,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
           ),
           child: child!,
         );
@@ -374,8 +373,8 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
             child: Theme(
               data: Theme.of(context).copyWith(
                 colorScheme: Theme.of(context).colorScheme.copyWith(
-                      primary: Theme.of(context).colorScheme.primary,
-                    ),
+                  primary: Theme.of(context).colorScheme.primary,
+                ),
               ),
               child: child!,
             ),
@@ -444,9 +443,7 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
   /// Processa e faz upload da imagem do comprovante
   Future<void> _processReceiptImage(String imagePath) async {
     try {
-      state = state.copyWith(
-        isUploadingImage: true,
-      ).clearImageError();
+      state = state.copyWith(isUploadingImage: true).clearImageError();
       final isValid = await _receiptImageService.isValidImage(imagePath);
       if (!isValid) {
         throw Exception('Arquivo de imagem inválido');
@@ -488,11 +485,13 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
         );
       }
 
-      state = state.copyWith(
-        hasChanges: true,
-        clearReceiptImage: true,
-        clearReceiptUrl: true,
-      ).clearImageError();
+      state = state
+          .copyWith(
+            hasChanges: true,
+            clearReceiptImage: true,
+            clearReceiptUrl: true,
+          )
+          .clearImageError();
     } catch (e) {
       state = state.copyWith(
         imageUploadError: () => 'Erro ao remover imagem: $e',
@@ -522,7 +521,9 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
         isUploadingImage: false,
       );
 
-      debugPrint('[EXPENSE FORM] Image synced to Firebase: ${result.downloadUrl}');
+      debugPrint(
+        '[EXPENSE FORM] Image synced to Firebase: ${result.downloadUrl}',
+      );
     } catch (e) {
       debugPrint('[EXPENSE FORM] Failed to sync image: $e');
       state = state.copyWith(isUploadingImage: false);
@@ -532,6 +533,97 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
   /// Gera ID temporário para processar imagem antes do save
   String _generateTemporaryId() {
     return 'temp_${DateTime.now().millisecondsSinceEpoch}';
+  }
+
+  /// Salva o registro de despesa (criar ou atualizar)
+  Future<Either<Failure, ExpenseEntity?>> saveExpenseRecord() async {
+    try {
+      // Valida antes de salvar
+      if (!validateForm()) {
+        // Pega a primeira mensagem de erro
+        final firstError = state.fieldErrors.values.isNotEmpty
+            ? state.fieldErrors.values.first
+            : 'Formulário inválido';
+        return Left(ValidationFailure(firstError));
+      }
+
+      state = state.copyWith(isLoading: true, errorMessage: () => null);
+
+      // Cria entidade a partir do formulário
+      final expenseEntity = _buildExpenseEntity();
+
+      // Decide se é criar ou atualizar
+      final Either<Failure, ExpenseEntity?> result;
+
+      if (state.id.isEmpty) {
+        // Criar novo
+        final addUseCase = local_di.getIt<AddExpenseUseCase>();
+        result = await addUseCase(expenseEntity);
+      } else {
+        // Atualizar existente
+        final updateUseCase = local_di.getIt<UpdateExpenseUseCase>();
+        result = await updateUseCase(expenseEntity);
+      }
+
+      state = state.copyWith(isLoading: false);
+
+      return result;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: () => 'Erro ao salvar: ${e.toString()}',
+      );
+      return Left(UnexpectedFailure('Erro ao salvar: ${e.toString()}'));
+    }
+  }
+
+  /// Constrói a entidade de despesa a partir do estado atual
+  ExpenseEntity _buildExpenseEntity() {
+    final sanitizedDescription = InputSanitizer.sanitizeDescription(
+      descriptionController.text,
+    );
+    final sanitizedLocation = InputSanitizer.sanitize(locationController.text);
+    final sanitizedNotes = InputSanitizer.sanitizeDescription(
+      notesController.text,
+    );
+
+    final amount =
+        double.tryParse(
+          amountController.text
+              .replaceAll(RegExp(r'[^\d,.]'), '')
+              .replaceAll(',', '.'),
+        ) ??
+        0.0;
+
+    final odometer =
+        double.tryParse(
+          odometerController.text
+              .replaceAll(RegExp(r'[^\d,.]'), '')
+              .replaceAll(',', '.'),
+        ) ??
+        0.0;
+
+    final now = DateTime.now();
+
+    return ExpenseEntity(
+      id: state.id.isEmpty ? now.millisecondsSinceEpoch.toString() : state.id,
+      vehicleId: state.vehicleId,
+      userId: state.userId,
+      type: state.expenseType,
+      description: sanitizedDescription,
+      amount: amount,
+      odometer: odometer,
+      date: state.date ?? now,
+      location: sanitizedLocation.isNotEmpty ? sanitizedLocation : null,
+      notes: sanitizedNotes.isNotEmpty ? sanitizedNotes : null,
+      receiptImagePath: state.receiptImagePath,
+      createdAt: state.id.isEmpty
+          ? now
+          : DateTime.fromMillisecondsSinceEpoch(
+              int.tryParse(state.id) ?? now.millisecondsSinceEpoch,
+            ),
+      updatedAt: now,
+    );
   }
 
   /// Limpa formulário
@@ -545,9 +637,7 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     state = ExpenseFormState.initial(
       vehicleId: state.vehicleId,
       userId: state.userId,
-    ).copyWith(
-      vehicle: state.vehicle,
-    );
+    ).copyWith(vehicle: state.vehicle);
   }
 
   /// Reseta formulário

@@ -1,5 +1,3 @@
-import 'package:core/core.dart' hide LoggingService;
-
 import '../sync/conflict_resolution_strategy.dart';
 import '../data/models/base_sync_model.dart';
 
@@ -104,7 +102,9 @@ class ConflictAuditService {
       remoteVersion: _extractVersion(remoteEntity),
       localData: _extractRelevantData(localEntity),
       remoteData: _extractRelevantData(remoteEntity),
-      mergedData: mergedEntity != null ? _extractRelevantData(mergedEntity) : null,
+      mergedData: mergedEntity != null
+          ? _extractRelevantData(mergedEntity)
+          : null,
       notes: additionalNotes,
     );
 
@@ -162,7 +162,11 @@ class ConflictAuditService {
   Local value: R\$ ${localValue?.toStringAsFixed(2) ?? 'N/A'}
   Remote value: R\$ ${remoteValue?.toStringAsFixed(2) ?? 'N/A'}
   ${mergedValue != null ? 'Merged value: R\$ ${mergedValue.toStringAsFixed(2)}' : ''}
-  Resolution: ${entry.resolution == ConflictAction.keepLocal ? 'KEPT LOCAL' : entry.resolution == ConflictAction.keepRemote ? 'KEPT REMOTE' : 'MERGED'}
+  Resolution: ${entry.resolution == ConflictAction.keepLocal
+        ? 'KEPT LOCAL'
+        : entry.resolution == ConflictAction.keepRemote
+        ? 'KEPT REMOTE'
+        : 'MERGED'}
   ⚠️ Financial data conflict requires attention!
 ''');
 
@@ -229,17 +233,13 @@ class ConflictAuditService {
 
   /// Retorna conflitos de um tipo específico de entidade
   List<ConflictAuditEntry> getConflictsByEntityType(String entityType) {
-    return _auditLog
-        .where((entry) => entry.entityType == entityType)
-        .toList()
+    return _auditLog.where((entry) => entry.entityType == entityType).toList()
       ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
   }
 
   /// Retorna conflitos de uma entidade específica (por ID)
   List<ConflictAuditEntry> getConflictsByEntityId(String entityId) {
-    return _auditLog
-        .where((entry) => entry.entityId == entityId)
-        .toList()
+    return _auditLog.where((entry) => entry.entityId == entityId).toList()
       ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
   }
 
@@ -258,14 +258,15 @@ class ConflictAuditService {
       totalConflicts: total,
       conflictsByAction: byAction,
       conflictsByType: byType,
-      lastConflictAt:
-          _auditLog.isNotEmpty ? _auditLog.last.timestamp : null,
+      lastConflictAt: _auditLog.isNotEmpty ? _auditLog.last.timestamp : null,
     );
   }
 
   /// Limpa o log de auditoria
   void clearAuditLog() {
-    _logger.info('[ConflictAudit] Clearing audit log (${_auditLog.length} entries)');
+    _logger.info(
+      '[ConflictAudit] Clearing audit log (${_auditLog.length} entries)',
+    );
     _auditLog.clear();
   }
 

@@ -34,7 +34,7 @@ class PendingImageUpload extends Equatable {
   /// Timestamp da última tentativa
   final int? lastAttemptMs;
 
-  PendingImageUpload({
+  const PendingImageUpload({
     required this.id,
     required this.localPath,
     required this.userId,

@@ -1,7 +1,6 @@
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
-import '../../../fuel/domain/entities/fuel_record_entity.dart';
 import '../../../fuel/domain/repositories/fuel_repository.dart';
 import '../../domain/entities/report_comparison_entity.dart';
 import '../../domain/entities/report_summary_entity.dart';
@@ -11,10 +10,27 @@ import '../../domain/services/report_generation_service.dart';
 import '../../domain/services/usage_pattern_analyzer.dart';
 
 abstract class ReportsDataSource {
-  Future<ReportSummaryEntity> generateReport(String vehicleId, DateTime startDate, DateTime endDate, String period);
-  Future<ReportComparisonEntity> compareReports(String vehicleId, ReportSummaryEntity current, ReportSummaryEntity previous, String comparisonType);
-  Future<Map<String, dynamic>> getFuelEfficiencyTrends(String vehicleId, int months);
-  Future<Map<String, dynamic>> getCostAnalysis(String vehicleId, DateTime startDate, DateTime endDate);
+  Future<ReportSummaryEntity> generateReport(
+    String vehicleId,
+    DateTime startDate,
+    DateTime endDate,
+    String period,
+  );
+  Future<ReportComparisonEntity> compareReports(
+    String vehicleId,
+    ReportSummaryEntity current,
+    ReportSummaryEntity previous,
+    String comparisonType,
+  );
+  Future<Map<String, dynamic>> getFuelEfficiencyTrends(
+    String vehicleId,
+    int months,
+  );
+  Future<Map<String, dynamic>> getCostAnalysis(
+    String vehicleId,
+    DateTime startDate,
+    DateTime endDate,
+  );
   Future<Map<String, dynamic>> getUsagePatterns(String vehicleId, int months);
 }
 
@@ -35,12 +51,21 @@ class ReportsDataSourceImpl implements ReportsDataSource {
   final UsagePatternAnalyzer _usagePatternAnalyzer;
 
   @override
-  Future<ReportSummaryEntity> generateReport(String vehicleId, DateTime startDate, DateTime endDate, String period) async {
+  Future<ReportSummaryEntity> generateReport(
+    String vehicleId,
+    DateTime startDate,
+    DateTime endDate,
+    String period,
+  ) async {
     try {
-      final fuelRecordsResult = await _fuelRepository.getFuelRecordsByVehicle(vehicleId);
-      
+      final fuelRecordsResult = await _fuelRepository.getFuelRecordsByVehicle(
+        vehicleId,
+      );
+
       return await fuelRecordsResult.fold(
-        (failure) => throw CacheException('Erro ao buscar registros de combustível: ${failure.message}'),
+        (failure) => throw CacheException(
+          'Erro ao buscar registros de combustível: ${failure.message}',
+        ),
         (fuelRecords) => _reportGenerationService.generateReport(
           vehicleId,
           startDate,
@@ -55,7 +80,12 @@ class ReportsDataSourceImpl implements ReportsDataSource {
   }
 
   @override
-  Future<ReportComparisonEntity> compareReports(String vehicleId, ReportSummaryEntity current, ReportSummaryEntity previous, String comparisonType) async {
+  Future<ReportComparisonEntity> compareReports(
+    String vehicleId,
+    ReportSummaryEntity current,
+    ReportSummaryEntity previous,
+    String comparisonType,
+  ) async {
     try {
       return ReportComparisonEntity(
         vehicleId: vehicleId,
@@ -68,15 +98,25 @@ class ReportsDataSourceImpl implements ReportsDataSource {
     }
   }
 
-
   @override
-  Future<Map<String, dynamic>> getFuelEfficiencyTrends(String vehicleId, int months) async {
+  Future<Map<String, dynamic>> getFuelEfficiencyTrends(
+    String vehicleId,
+    int months,
+  ) async {
     try {
-      final fuelRecordsResult = await _fuelRepository.getFuelRecordsByVehicle(vehicleId);
-      
+      final fuelRecordsResult = await _fuelRepository.getFuelRecordsByVehicle(
+        vehicleId,
+      );
+
       return await fuelRecordsResult.fold(
-        (failure) => throw CacheException('Erro ao buscar registros: ${failure.message}'),
-        (fuelRecords) => _fuelEfficiencyAnalyzer.analyzeTrends(vehicleId, months, fuelRecords),
+        (failure) => throw CacheException(
+          'Erro ao buscar registros: ${failure.message}',
+        ),
+        (fuelRecords) => _fuelEfficiencyAnalyzer.analyzeTrends(
+          vehicleId,
+          months,
+          fuelRecords,
+        ),
       );
     } catch (e) {
       throw CacheException('Erro ao calcular tendências: ${e.toString()}');
@@ -84,13 +124,26 @@ class ReportsDataSourceImpl implements ReportsDataSource {
   }
 
   @override
-  Future<Map<String, dynamic>> getCostAnalysis(String vehicleId, DateTime startDate, DateTime endDate) async {
+  Future<Map<String, dynamic>> getCostAnalysis(
+    String vehicleId,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
     try {
-      final fuelRecordsResult = await _fuelRepository.getFuelRecordsByVehicle(vehicleId);
-      
+      final fuelRecordsResult = await _fuelRepository.getFuelRecordsByVehicle(
+        vehicleId,
+      );
+
       return await fuelRecordsResult.fold(
-        (failure) => throw CacheException('Erro ao buscar registros: ${failure.message}'),
-        (fuelRecords) => _costAnalysisService.analyzeCosts(vehicleId, startDate, endDate, fuelRecords),
+        (failure) => throw CacheException(
+          'Erro ao buscar registros: ${failure.message}',
+        ),
+        (fuelRecords) => _costAnalysisService.analyzeCosts(
+          vehicleId,
+          startDate,
+          endDate,
+          fuelRecords,
+        ),
       );
     } catch (e) {
       throw CacheException('Erro ao analisar custos: ${e.toString()}');
@@ -98,13 +151,24 @@ class ReportsDataSourceImpl implements ReportsDataSource {
   }
 
   @override
-  Future<Map<String, dynamic>> getUsagePatterns(String vehicleId, int months) async {
+  Future<Map<String, dynamic>> getUsagePatterns(
+    String vehicleId,
+    int months,
+  ) async {
     try {
-      final fuelRecordsResult = await _fuelRepository.getFuelRecordsByVehicle(vehicleId);
-      
+      final fuelRecordsResult = await _fuelRepository.getFuelRecordsByVehicle(
+        vehicleId,
+      );
+
       return await fuelRecordsResult.fold(
-        (failure) => throw CacheException('Erro ao buscar registros: ${failure.message}'),
-        (fuelRecords) => _usagePatternAnalyzer.analyzePatterns(vehicleId, months, fuelRecords),
+        (failure) => throw CacheException(
+          'Erro ao buscar registros: ${failure.message}',
+        ),
+        (fuelRecords) => _usagePatternAnalyzer.analyzePatterns(
+          vehicleId,
+          months,
+          fuelRecords,
+        ),
       );
     } catch (e) {
       throw CacheException('Erro ao analisar padrões de uso: ${e.toString()}');

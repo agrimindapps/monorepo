@@ -11,7 +11,6 @@ import '../../../../core/services/auth_rate_limiter.dart';
 import '../../../../core/services/gasometer_analytics_service.dart';
 import '../../../../core/services/platform_service.dart';
 import '../../../../core/widgets/logout_loading_dialog.dart';
-import '../../data/datasources/auth_local_data_source.dart';
 import '../../domain/entities/user_entity.dart' as gasometer_auth;
 import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/send_password_reset.dart';

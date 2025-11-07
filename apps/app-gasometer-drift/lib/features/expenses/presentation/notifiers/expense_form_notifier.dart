@@ -90,19 +90,11 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     required String userId,
   }) async {
     if (vehicleId.isEmpty) {
-      Future.microtask(() {
-        // ignore: unawaited_futures
-        state = state.copyWith(
-          errorMessage: () => 'Nenhum veículo selecionado',
-        );
-      });
+      state = state.copyWith(errorMessage: () => 'Nenhum veículo selecionado');
       return;
     }
 
-    Future.microtask(() {
-      // ignore: unawaited_futures
-      state = state.copyWith(isLoading: true);
-    });
+    state = state.copyWith(isLoading: true);
 
     try {
       final vehicleResult = await _getVehicleById(
@@ -137,10 +129,7 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
 
   /// Inicializa com despesa existente para edição
   Future<void> initializeWithExpense(ExpenseEntity expense) async {
-    Future.microtask(() {
-      // ignore: unawaited_futures
-      state = state.copyWith(isLoading: true);
-    });
+    state = state.copyWith(isLoading: true);
 
     try {
       final vehicleResult = await _getVehicleById(

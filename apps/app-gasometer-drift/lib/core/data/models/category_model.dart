@@ -1,5 +1,3 @@
-import 'package:core/core.dart';
-
 import 'base_sync_model.dart';
 
 /// Category model with Firebase sync support

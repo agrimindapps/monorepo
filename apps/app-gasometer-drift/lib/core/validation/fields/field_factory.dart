@@ -5,94 +5,112 @@ import '../architecture/i_field_factory.dart';
 import 'base_form_field.dart';
 
 /// Concrete implementation of field factory for Material Design
-/// 
+///
 /// This factory creates Material Design form fields following the
 /// Abstract Factory pattern. It's easily extensible for custom field types.
 class MaterialFieldFactory implements IFieldFactory {
   final Map<String, FieldCreator> _customCreators = {};
-  
+
   @override
   Widget createTextField(TextFieldConfig config) {
     return _MaterialTextField(config: config);
   }
-  
+
   @override
   Widget createDropdownField(DropdownFieldConfig config) {
     return _MaterialDropdownField(config: config);
   }
-  
+
   @override
   Widget createNumberField(NumberFieldConfig config) {
     return _MaterialNumberField(config: config);
   }
-  
+
   @override
   Widget createDateField(DateFieldConfig config) {
     return _MaterialDateField(config: config);
   }
-  
+
   @override
   Widget createTimeField(TimeFieldConfig config) {
     return _MaterialTimeField(config: config);
   }
-  
+
   @override
   Widget createSwitchField(SwitchFieldConfig config) {
     return _MaterialSwitchField(config: config);
   }
-  
+
   @override
   Widget createCheckboxField(CheckboxFieldConfig config) {
     return _MaterialCheckboxField(config: config);
   }
-  
+
   @override
   Widget createRadioGroupField(RadioGroupFieldConfig config) {
     return _MaterialRadioGroupField(config: config);
   }
-  
+
   @override
   Widget createMultiSelectField(MultiSelectFieldConfig config) {
     return _MaterialMultiSelectField(config: config);
   }
-  
+
   @override
   Widget createFileField(FileFieldConfig config) {
     return _MaterialFileField(config: config);
   }
-  
+
   @override
   Widget createCustomField(CustomFieldConfig config) {
     final creator = _customCreators[config.customType];
     if (creator == null) {
-      throw UnsupportedError('Custom field type ${config.customType} not registered');
+      throw UnsupportedError(
+        'Custom field type ${config.customType} not registered',
+      );
     }
     return creator(config);
   }
-  
+
   @override
   void registerCustomFieldCreator(String fieldType, FieldCreator creator) {
     _customCreators[fieldType] = creator;
   }
-  
+
   @override
   bool supportsFieldType(String fieldType) {
     const supportedTypes = {
-      'text', 'dropdown', 'number', 'date', 'time',
-      'switch', 'checkbox', 'radio_group', 'multi_select', 'file'
+      'text',
+      'dropdown',
+      'number',
+      'date',
+      'time',
+      'switch',
+      'checkbox',
+      'radio_group',
+      'multi_select',
+      'file',
     };
-    
-    return supportedTypes.contains(fieldType) || 
-           _customCreators.containsKey(fieldType);
+
+    return supportedTypes.contains(fieldType) ||
+        _customCreators.containsKey(fieldType);
   }
-  
+
   @override
   List<String> getSupportedFieldTypes() {
     const builtInTypes = [
-      'text', 'dropdown', 'number', 'date', 'time',
-      'switch', 'checkbox', 'radio_group', 'multi_select', 'file'
+      'text',
+      'dropdown',
+      'number',
+      'date',
+      'time',
+      'switch',
+      'checkbox',
+      'radio_group',
+      'multi_select',
+      'file',
     ];
-    
+
     return [...builtInTypes, ..._customCreators.keys];
   }
 }
@@ -100,15 +118,15 @@ class MaterialFieldFactory implements IFieldFactory {
 /// Material Design text field implementation
 class _MaterialTextField extends BaseFormField {
   const _MaterialTextField({required super.config});
-  
+
   @override
   BaseFormFieldState createState() => _MaterialTextFieldState();
-  
+
   @override
   Widget buildField(BuildContext context, BaseFormFieldState state) {
     final textState = state as _MaterialTextFieldState;
     final config = this.config as TextFieldConfig;
-    
+
     return TextField(
       controller: textState.textController,
       focusNode: textState.focusNode,
@@ -123,13 +141,13 @@ class _MaterialTextField extends BaseFormField {
       onTap: config.onTap,
     );
   }
-  
+
   @override
   dynamic getCurrentValue(BaseFormFieldState state) {
     final textState = state as _MaterialTextFieldState;
     return textState.currentText;
   }
-  
+
   @override
   void setFieldValue(BaseFormFieldState state, dynamic value) {
     final textState = state as _MaterialTextFieldState;
@@ -143,17 +161,17 @@ class _MaterialTextFieldState extends BaseFormFieldState<_MaterialTextField>
 /// Material Design dropdown field implementation
 class _MaterialDropdownField extends BaseFormField {
   const _MaterialDropdownField({required super.config});
-  
+
   @override
   BaseFormFieldState createState() => _MaterialDropdownFieldState();
-  
+
   @override
   Widget buildField(BuildContext context, BaseFormFieldState state) {
     final dropdownState = state as _MaterialDropdownFieldState;
     final config = this.config as DropdownFieldConfig;
-    
+
     return DropdownButtonFormField<dynamic>(
-      value: dropdownState.selectedValue,
+      initialValue: dropdownState.selectedValue,
       decoration: dropdownState.getInputDecoration(),
       items: config.options.map((option) {
         return DropdownMenuItem<dynamic>(
@@ -174,13 +192,13 @@ class _MaterialDropdownField extends BaseFormField {
       focusNode: dropdownState.focusNode,
     );
   }
-  
+
   @override
   dynamic getCurrentValue(BaseFormFieldState state) {
     final dropdownState = state as _MaterialDropdownFieldState;
     return dropdownState.selectedValue;
   }
-  
+
   @override
   void setFieldValue(BaseFormFieldState state, dynamic value) {
     final dropdownState = state as _MaterialDropdownFieldState;
@@ -188,21 +206,22 @@ class _MaterialDropdownField extends BaseFormField {
   }
 }
 
-class _MaterialDropdownFieldState extends BaseFormFieldState<_MaterialDropdownField>
+class _MaterialDropdownFieldState
+    extends BaseFormFieldState<_MaterialDropdownField>
     with SelectionMixin<_MaterialDropdownField> {}
 
 /// Material Design number field implementation
 class _MaterialNumberField extends BaseFormField {
   const _MaterialNumberField({required super.config});
-  
+
   @override
   BaseFormFieldState createState() => _MaterialNumberFieldState();
-  
+
   @override
   Widget buildField(BuildContext context, BaseFormFieldState state) {
     final numberState = state as _MaterialNumberFieldState;
     final config = this.config as NumberFieldConfig;
-    
+
     return TextField(
       controller: numberState.textController,
       focusNode: numberState.focusNode,
@@ -216,21 +235,23 @@ class _MaterialNumberField extends BaseFormField {
       onTap: config.onTap,
     );
   }
-  
+
   List<TextInputFormatter> _buildNumberFormatters(NumberFieldConfig config) {
     final formatters = <TextInputFormatter>[];
     if (config.allowNegative) {
-      formatters.add(FilteringTextInputFormatter.allow(RegExp(r'^-?\d*\.?\d*')));
+      formatters.add(
+        FilteringTextInputFormatter.allow(RegExp(r'^-?\d*\.?\d*')),
+      );
     } else {
       formatters.add(FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')));
     }
     if (config.decimalPlaces != null) {
       formatters.add(_DecimalTextInputFormatter(config.decimalPlaces!));
     }
-    
+
     return formatters;
   }
-  
+
   @override
   dynamic getCurrentValue(BaseFormFieldState state) {
     final numberState = state as _MaterialNumberFieldState;
@@ -238,7 +259,7 @@ class _MaterialNumberField extends BaseFormField {
     if (text.isEmpty) return null;
     return num.tryParse(text);
   }
-  
+
   @override
   void setFieldValue(BaseFormFieldState state, dynamic value) {
     final numberState = state as _MaterialNumberFieldState;
@@ -252,15 +273,15 @@ class _MaterialNumberFieldState extends BaseFormFieldState<_MaterialNumberField>
 /// Material Design date field implementation
 class _MaterialDateField extends BaseFormField {
   const _MaterialDateField({required super.config});
-  
+
   @override
   BaseFormFieldState createState() => _MaterialDateFieldState();
-  
+
   @override
   Widget buildField(BuildContext context, BaseFormFieldState state) {
     final dateState = state as _MaterialDateFieldState;
     final config = this.config as DateFieldConfig;
-    
+
     return TextField(
       controller: dateState.textController,
       focusNode: dateState.focusNode,
@@ -269,17 +290,19 @@ class _MaterialDateField extends BaseFormField {
       ),
       readOnly: true,
       enabled: config.isEnabled,
-      onTap: config.isEnabled ? () => _selectDate(context, dateState, config) : null,
+      onTap: config.isEnabled
+          ? () => _selectDate(context, dateState, config)
+          : null,
     );
   }
-  
+
   Future<void> _selectDate(
     BuildContext context,
     _MaterialDateFieldState state,
     DateFieldConfig config,
   ) async {
     final initialDate = state.selectedValue as DateTime? ?? DateTime.now();
-    
+
     final date = await showDatePicker(
       context: context,
       initialDate: initialDate,
@@ -299,13 +322,13 @@ class _MaterialDateField extends BaseFormField {
         );
       },
     );
-    
+
     if (date != null) {
       state.setSelectedValue(date);
       state.setText(_formatDate(date, config.dateFormat));
     }
   }
-  
+
   String _formatDate(DateTime date, String? format) {
     if (format != null) {
       return format
@@ -313,16 +336,16 @@ class _MaterialDateField extends BaseFormField {
           .replaceAll('MM', date.month.toString().padLeft(2, '0'))
           .replaceAll('yyyy', date.year.toString());
     }
-    
+
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
-  
+
   @override
   dynamic getCurrentValue(BaseFormFieldState state) {
     final dateState = state as _MaterialDateFieldState;
     return dateState.selectedValue;
   }
-  
+
   @override
   void setFieldValue(BaseFormFieldState state, dynamic value) {
     final dateState = state as _MaterialDateFieldState;
@@ -338,20 +361,22 @@ class _MaterialDateField extends BaseFormField {
 }
 
 class _MaterialDateFieldState extends BaseFormFieldState<_MaterialDateField>
-    with TextInputMixin<_MaterialDateField>, SelectionMixin<_MaterialDateField> {}
+    with
+        TextInputMixin<_MaterialDateField>,
+        SelectionMixin<_MaterialDateField> {}
 
 /// Material Design time field implementation
 class _MaterialTimeField extends BaseFormField {
   const _MaterialTimeField({required super.config});
-  
+
   @override
   BaseFormFieldState createState() => _MaterialTimeFieldState();
-  
+
   @override
   Widget buildField(BuildContext context, BaseFormFieldState state) {
     final timeState = state as _MaterialTimeFieldState;
     final config = this.config as TimeFieldConfig;
-    
+
     return TextField(
       controller: timeState.textController,
       focusNode: timeState.focusNode,
@@ -360,17 +385,19 @@ class _MaterialTimeField extends BaseFormField {
       ),
       readOnly: true,
       enabled: config.isEnabled,
-      onTap: config.isEnabled ? () => _selectTime(context, timeState, config) : null,
+      onTap: config.isEnabled
+          ? () => _selectTime(context, timeState, config)
+          : null,
     );
   }
-  
+
   Future<void> _selectTime(
     BuildContext context,
     _MaterialTimeFieldState state,
     TimeFieldConfig config,
   ) async {
     final initialTime = state.selectedValue as TimeOfDay? ?? TimeOfDay.now();
-    
+
     final time = await showTimePicker(
       context: context,
       initialTime: initialTime,
@@ -385,21 +412,21 @@ class _MaterialTimeField extends BaseFormField {
             ),
           ),
           child: MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              alwaysUse24HourFormat: config.use24HourFormat,
-            ),
+            data: MediaQuery.of(
+              context,
+            ).copyWith(alwaysUse24HourFormat: config.use24HourFormat),
             child: child!,
           ),
         );
       },
     );
-    
+
     if (time != null) {
       state.setSelectedValue(time);
       state.setText(_formatTime(time, config));
     }
   }
-  
+
   String _formatTime(TimeOfDay time, TimeFieldConfig config) {
     if (config.use24HourFormat) {
       return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
@@ -409,13 +436,13 @@ class _MaterialTimeField extends BaseFormField {
       return '${hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} $period';
     }
   }
-  
+
   @override
   dynamic getCurrentValue(BaseFormFieldState state) {
     final timeState = state as _MaterialTimeFieldState;
     return timeState.selectedValue;
   }
-  
+
   @override
   void setFieldValue(BaseFormFieldState state, dynamic value) {
     final timeState = state as _MaterialTimeFieldState;
@@ -431,36 +458,40 @@ class _MaterialTimeField extends BaseFormField {
 }
 
 class _MaterialTimeFieldState extends BaseFormFieldState<_MaterialTimeField>
-    with TextInputMixin<_MaterialTimeField>, SelectionMixin<_MaterialTimeField> {}
+    with
+        TextInputMixin<_MaterialTimeField>,
+        SelectionMixin<_MaterialTimeField> {}
 
 /// Material Design switch field implementation
 class _MaterialSwitchField extends BaseFormField {
   const _MaterialSwitchField({required super.config});
-  
+
   @override
   BaseFormFieldState createState() => _MaterialSwitchFieldState();
-  
+
   @override
   Widget buildField(BuildContext context, BaseFormFieldState state) {
     final switchState = state as _MaterialSwitchFieldState;
     final config = this.config as SwitchFieldConfig;
-    
+
     return SwitchListTile(
       title: config.label != null ? Text(config.label!) : null,
       subtitle: config.hint != null ? Text(config.hint!) : null,
       value: switchState.booleanValue,
-      onChanged: config.isEnabled ? (bool? value) => switchState.setBooleanValue(value ?? false) : null,
+      onChanged: config.isEnabled
+          ? (bool? value) => switchState.setBooleanValue(value ?? false)
+          : null,
       secondary: config.prefixIcon,
       contentPadding: EdgeInsets.zero,
     );
   }
-  
+
   @override
   dynamic getCurrentValue(BaseFormFieldState state) {
     final switchState = state as _MaterialSwitchFieldState;
     return switchState.booleanValue;
   }
-  
+
   @override
   void setFieldValue(BaseFormFieldState state, dynamic value) {
     final switchState = state as _MaterialSwitchFieldState;
@@ -474,31 +505,33 @@ class _MaterialSwitchFieldState extends BaseFormFieldState<_MaterialSwitchField>
 /// Material Design checkbox field implementation
 class _MaterialCheckboxField extends BaseFormField {
   const _MaterialCheckboxField({required super.config});
-  
+
   @override
   BaseFormFieldState createState() => _MaterialCheckboxFieldState();
-  
+
   @override
   Widget buildField(BuildContext context, BaseFormFieldState state) {
     final checkboxState = state as _MaterialCheckboxFieldState;
     final config = this.config as CheckboxFieldConfig;
-    
+
     return CheckboxListTile(
       title: config.label != null ? Text(config.label!) : null,
       subtitle: config.hint != null ? Text(config.hint!) : null,
       value: checkboxState.booleanValue,
-      onChanged: config.isEnabled ? (bool? value) => checkboxState.setBooleanValue(value ?? false) : null,
+      onChanged: config.isEnabled
+          ? (bool? value) => checkboxState.setBooleanValue(value ?? false)
+          : null,
       secondary: config.prefixIcon,
       contentPadding: EdgeInsets.zero,
     );
   }
-  
+
   @override
   dynamic getCurrentValue(BaseFormFieldState state) {
     final checkboxState = state as _MaterialCheckboxFieldState;
     return checkboxState.booleanValue;
   }
-  
+
   @override
   void setFieldValue(BaseFormFieldState state, dynamic value) {
     final checkboxState = state as _MaterialCheckboxFieldState;
@@ -506,64 +539,67 @@ class _MaterialCheckboxField extends BaseFormField {
   }
 }
 
-class _MaterialCheckboxFieldState extends BaseFormFieldState<_MaterialCheckboxField>
+class _MaterialCheckboxFieldState
+    extends BaseFormFieldState<_MaterialCheckboxField>
     with BooleanMixin<_MaterialCheckboxField> {}
 
 /// Placeholder implementations for remaining field types
 class _MaterialRadioGroupField extends BaseFormField {
   const _MaterialRadioGroupField({required super.config});
-  
+
   @override
   BaseFormFieldState createState() => _MaterialRadioGroupFieldState();
-  
+
   @override
   Widget buildField(BuildContext context, BaseFormFieldState state) {
     return const Placeholder();
   }
-  
+
   @override
   dynamic getCurrentValue(BaseFormFieldState state) => null;
-  
+
   @override
   void setFieldValue(BaseFormFieldState state, dynamic value) {}
 }
 
-class _MaterialRadioGroupFieldState extends BaseFormFieldState<_MaterialRadioGroupField> {}
+class _MaterialRadioGroupFieldState
+    extends BaseFormFieldState<_MaterialRadioGroupField> {}
 
 class _MaterialMultiSelectField extends BaseFormField {
   const _MaterialMultiSelectField({required super.config});
-  
+
   @override
   BaseFormFieldState createState() => _MaterialMultiSelectFieldState();
-  
+
   @override
   Widget buildField(BuildContext context, BaseFormFieldState state) {
     return const Placeholder();
   }
-  
+
   @override
   dynamic getCurrentValue(BaseFormFieldState state) => null;
-  
+
   @override
   void setFieldValue(BaseFormFieldState state, dynamic value) {}
 }
 
-class _MaterialMultiSelectFieldState extends BaseFormFieldState<_MaterialMultiSelectField> {}
+class _MaterialMultiSelectFieldState
+    extends BaseFormFieldState<_MaterialMultiSelectField> {}
 
 class _MaterialFileField extends BaseFormField {
   const _MaterialFileField({required super.config});
-  
+
   @override
   BaseFormFieldState createState() => _MaterialFileFieldState();
-  
+
   @override
   Widget buildField(BuildContext context, BaseFormFieldState state) {
     return const Placeholder();
   }
-  
+
   @override
   dynamic getCurrentValue(BaseFormFieldState state) => null;
-  
+
   @override
   void setFieldValue(BaseFormFieldState state, dynamic value) {}
 }
@@ -572,19 +608,18 @@ class _MaterialFileFieldState extends BaseFormFieldState<_MaterialFileField> {}
 
 /// Custom text input formatter for decimal places
 class _DecimalTextInputFormatter extends TextInputFormatter {
-  
   _DecimalTextInputFormatter(this.decimalPlaces);
   final int decimalPlaces;
-  
+
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
     final text = newValue.text;
-    
+
     if (text.isEmpty) return newValue;
-    
+
     final dotIndex = text.indexOf('.');
     if (dotIndex != -1) {
       final afterDot = text.substring(dotIndex + 1);
@@ -596,7 +631,7 @@ class _DecimalTextInputFormatter extends TextInputFormatter {
         );
       }
     }
-    
+
     return newValue;
   }
 }

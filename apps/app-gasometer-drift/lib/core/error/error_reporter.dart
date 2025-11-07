@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:core/core.dart' as core;
 import 'package:core/core.dart' show injectable;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -134,8 +133,9 @@ class ErrorReporter {
       additionalData: {
         'endpoint': endpoint,
         'method': method,
-        'status_code':
-            error is ServerError ? (error as ServerError).statusCode : null,
+        'status_code': error is ServerError
+            ? (error as ServerError).statusCode
+            : null,
         'request_data': requestData,
       },
     );

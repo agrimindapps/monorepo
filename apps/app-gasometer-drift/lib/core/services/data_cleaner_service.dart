@@ -84,11 +84,14 @@ class DataCleanerService {
           (await _database.select(_database.vehicles).get()).length;
       await _database.delete(_database.vehicles).go();
       results['clearedTables'].add('vehicles');
-      if (kDebugMode)
+      if (kDebugMode) {
         debugPrint('   ✅ Tabela "vehicles" limpa ($vehicleCount registros)');
+      }
     } catch (e) {
       results['errors'].add('Erro ao limpar tabela "vehicles": $e');
-      if (kDebugMode) debugPrint('   ❌ Erro ao limpar tabela "vehicles": $e');
+      if (kDebugMode) {
+        debugPrint('   ❌ Erro ao limpar tabela "vehicles": $e');
+      }
     }
 
     try {
@@ -97,12 +100,14 @@ class DataCleanerService {
           (await _database.select(_database.fuelSupplies).get()).length;
       await _database.delete(_database.fuelSupplies).go();
       results['clearedTables'].add('fuel_supplies');
-      if (kDebugMode)
+      if (kDebugMode) {
         debugPrint('   ✅ Tabela "fuel_supplies" limpa ($fuelCount registros)');
+      }
     } catch (e) {
       results['errors'].add('Erro ao limpar tabela "fuel_supplies": $e');
-      if (kDebugMode)
+      if (kDebugMode) {
         debugPrint('   ❌ Erro ao limpar tabela "fuel_supplies": $e');
+      }
     }
 
     try {
@@ -111,14 +116,16 @@ class DataCleanerService {
           (await _database.select(_database.maintenances).get()).length;
       await _database.delete(_database.maintenances).go();
       results['clearedTables'].add('maintenances');
-      if (kDebugMode)
+      if (kDebugMode) {
         debugPrint(
           '   ✅ Tabela "maintenances" limpa ($maintenanceCount registros)',
         );
+      }
     } catch (e) {
       results['errors'].add('Erro ao limpar tabela "maintenances": $e');
-      if (kDebugMode)
+      if (kDebugMode) {
         debugPrint('   ❌ Erro ao limpar tabela "maintenances": $e');
+      }
     }
 
     try {
@@ -127,11 +134,14 @@ class DataCleanerService {
           (await _database.select(_database.expenses).get()).length;
       await _database.delete(_database.expenses).go();
       results['clearedTables'].add('expenses');
-      if (kDebugMode)
+      if (kDebugMode) {
         debugPrint('   ✅ Tabela "expenses" limpa ($expenseCount registros)');
+      }
     } catch (e) {
       results['errors'].add('Erro ao limpar tabela "expenses": $e');
-      if (kDebugMode) debugPrint('   ❌ Erro ao limpar tabela "expenses": $e');
+      if (kDebugMode) {
+        debugPrint('   ❌ Erro ao limpar tabela "expenses": $e');
+      }
     }
 
     try {
@@ -140,14 +150,16 @@ class DataCleanerService {
           (await _database.select(_database.odometerReadings).get()).length;
       await _database.delete(_database.odometerReadings).go();
       results['clearedTables'].add('odometer_readings');
-      if (kDebugMode)
+      if (kDebugMode) {
         debugPrint(
           '   ✅ Tabela "odometer_readings" limpa ($odometerCount registros)',
         );
+      }
     } catch (e) {
       results['errors'].add('Erro ao limpar tabela "odometer_readings": $e');
-      if (kDebugMode)
+      if (kDebugMode) {
         debugPrint('   ❌ Erro ao limpar tabela "odometer_readings": $e');
+      }
     }
 
     try {
@@ -156,12 +168,14 @@ class DataCleanerService {
           (await _database.select(_database.auditTrail).get()).length;
       await _database.delete(_database.auditTrail).go();
       results['clearedTables'].add('audit_trail');
-      if (kDebugMode)
+      if (kDebugMode) {
         debugPrint('   ✅ Tabela "audit_trail" limpa ($auditCount registros)');
+      }
     } catch (e) {
       results['errors'].add('Erro ao limpar tabela "audit_trail": $e');
-      if (kDebugMode)
+      if (kDebugMode) {
         debugPrint('   ❌ Erro ao limpar tabela "audit_trail": $e');
+      }
     }
 
     return results;

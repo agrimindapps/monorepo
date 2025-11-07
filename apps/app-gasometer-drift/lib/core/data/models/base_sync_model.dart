@@ -3,7 +3,7 @@ import 'package:core/core.dart';
 /// Base sync model for all Hive models in the GasOMeter app
 /// Integrates with core package's BaseSyncEntity for Firebase sync
 abstract class BaseSyncModel extends BaseSyncEntity {
-  BaseSyncModel({
+  const BaseSyncModel({
     required super.id,
     super.createdAt,
     super.updatedAt,
@@ -35,18 +35,15 @@ abstract class BaseSyncModel extends BaseSyncEntity {
   static Map<String, dynamic> parseBaseHiveFields(Map<String, dynamic> map) {
     return {
       'id': map['id'] as String,
-      'createdAt':
-          map['createdAt'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int)
-              : null,
-      'updatedAt':
-          map['updatedAt'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int)
-              : null,
-      'lastSyncAt':
-          map['lastSyncAt'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(map['lastSyncAt'] as int)
-              : null,
+      'createdAt': map['createdAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int)
+          : null,
+      'updatedAt': map['updatedAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int)
+          : null,
+      'lastSyncAt': map['lastSyncAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['lastSyncAt'] as int)
+          : null,
       'isDirty': map['isDirty'] as bool? ?? false,
       'isDeleted': map['isDeleted'] as bool? ?? false,
       'version': map['version'] as int? ?? 1,

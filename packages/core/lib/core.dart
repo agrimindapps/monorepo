@@ -26,6 +26,12 @@ export 'package:icons_plus/icons_plus.dart';
 export 'package:injectable/injectable.dart' hide Environment, order;
 export 'package:intl/intl.dart';
 export 'package:json_annotation/json_annotation.dart';
+
+// Drift - Sistema de persistência SQL
+export 'package:drift/drift.dart'
+    hide JsonKey, Index, VerificationResult, Query;
+export 'services/drift/drift.dart';
+
 export 'package:package_info_plus/package_info_plus.dart';
 export 'package:purchases_flutter/purchases_flutter.dart' hide LogLevel, Store;
 export 'package:riverpod/riverpod.dart'

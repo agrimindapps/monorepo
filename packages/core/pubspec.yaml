@@ -28,6 +28,11 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   
+  # Drift para storage local SQL
+  drift: ^2.20.3
+  drift_flutter: ^0.2.0
+  sqlite3_flutter_libs: ^0.5.24
+  
   # SharedPreferences para cache cross-module
   shared_preferences: ^2.4.0
   
@@ -135,6 +140,7 @@ dev_dependencies:
   hive_generator: ^2.0.1
   json_serializable: ^6.8.0
   freezed: ^2.5.2
+  drift_dev: ^2.20.3
   
   # Testing
   mockito: ^5.4.4

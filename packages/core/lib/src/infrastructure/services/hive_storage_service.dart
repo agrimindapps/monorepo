@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -6,6 +8,39 @@ import '../../domain/repositories/i_local_storage_repository.dart';
 import '../../domain/services/i_box_registry_service.dart';
 import '../../shared/utils/failure.dart';
 import '../models/box_configuration.dart';
+
+/// Helper function to safely convert any value to Map<String, dynamic>
+/// Handles LinkedMap, IdentityMap, String JSON, and other Hive internal types
+Map<String, dynamic>? _safeConvertToMap(dynamic value) {
+  if (value == null) return null;
+  if (value is Map<String, dynamic>) return value;
+  if (value is String) {
+    // Try to decode JSON string
+    try {
+      final decoded = jsonDecode(value);
+      if (decoded is Map) {
+        return Map<String, dynamic>.from(decoded);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Warning: Failed to decode JSON string: $e');
+      }
+    }
+    return null;
+  }
+  if (value is Map) {
+    try {
+      return Map<String, dynamic>.from(value);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint(
+          'Warning: Failed to convert map of type ${value.runtimeType}: $e',
+        );
+      }
+    }
+  }
+  return null;
+}
 
 /// Implementação concreta do repositório de storage local usando Hive
 /// Agora utiliza BoxRegistryService para gerenciamento dinâmico de boxes
@@ -169,10 +204,12 @@ class HiveStorageService implements ILocalStorageRepository {
 
       for (final dynamic value in targetBox.values) {
         try {
-          // Handle Map types - convert any Map to Map<String, dynamic>
-          if (value is Map) {
-            final converted = Map<String, dynamic>.from(value);
-            values.add(converted as T);
+          // Handle Map types and JSON strings - safely convert to Map<String, dynamic>
+          if (value is Map || value is String) {
+            final converted = _safeConvertToMap(value);
+            if (converted != null) {
+              values.add(converted as T);
+            }
           } else if (value is T) {
             // For other types, attempt direct cast
             values.add(value);

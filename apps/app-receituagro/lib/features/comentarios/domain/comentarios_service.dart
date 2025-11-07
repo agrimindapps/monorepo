@@ -2,7 +2,6 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart' as core;
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/interfaces/i_premium_service.dart';
@@ -28,12 +27,15 @@ class ComentariosService {
   ComentariosService({
     IComentariosRepository? repository,
     IPremiumService? premiumService,
-  })  : _repository = repository,
-        _premiumService = premiumService;
+  }) : _repository = repository,
+       _premiumService = premiumService;
 
-  Future<List<ComentarioModel>> getAllComentarios({String? pkIdentificador}) async {
+  Future<List<ComentarioModel>> getAllComentarios({
+    String? pkIdentificador,
+  }) async {
     try {
-      final comentarios = await _repository?.getAllComentarios() ?? <ComentarioModel>[];
+      final comentarios =
+          await _repository?.getAllComentarios() ?? <ComentarioModel>[];
       comentarios.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       if (pkIdentificador != null && pkIdentificador.isNotEmpty) {
         return comentarios
@@ -141,18 +143,19 @@ class ComentariosService {
         level: 500,
       );
       await _queueSyncOperation(
-          'delete',
-          ComentarioModel(
-            id: id,
-            idReg: '',
-            titulo: '',
-            conteudo: '',
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-            ferramenta: '',
-            pkIdentificador: '',
-            status: false,
-          ));
+        'delete',
+        ComentarioModel(
+          id: id,
+          idReg: '',
+          titulo: '',
+          conteudo: '',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          ferramenta: '',
+          pkIdentificador: '',
+          status: false,
+        ),
+      );
     } catch (e) {
       developer.log(
         'Error deleting comentario',
@@ -175,8 +178,12 @@ class ComentariosService {
     return comentarios.where((comentario) {
       if (searchText.isNotEmpty) {
         final searchLower = _sanitizeSearchText(searchText);
-        final contentMatch = comentario.conteudo.toLowerCase().contains(searchLower);
-        final toolMatch = comentario.ferramenta.toLowerCase().contains(searchLower);
+        final contentMatch = comentario.conteudo.toLowerCase().contains(
+          searchLower,
+        );
+        final toolMatch = comentario.ferramenta.toLowerCase().contains(
+          searchLower,
+        );
 
         if (!contentMatch && !toolMatch) return false;
       }
@@ -241,7 +248,10 @@ class ComentariosService {
   }
 
   /// Sincroniza comentário usando sistema core
-  Future<void> _queueSyncOperation(String operation, ComentarioModel comentario) async {
+  Future<void> _queueSyncOperation(
+    String operation,
+    ComentarioModel comentario,
+  ) async {
     developer.log(
       'Iniciando operação de sync - operation=$operation, comentario_id=${comentario.id}',
       name: 'ComentarioService',
@@ -310,8 +320,8 @@ class ComentariosService {
           name: 'ComentarioService',
           level: 500,
         );
-        final result =
-            await core.UnifiedSyncManager.instance.create<ComentarioSyncEntity>('receituagro', syncEntity);
+        final result = await core.UnifiedSyncManager.instance
+            .create<ComentarioSyncEntity>('receituagro', syncEntity);
         result.fold(
           (core.Failure failure) {
             developer.log(
@@ -335,8 +345,8 @@ class ComentariosService {
           name: 'ComentarioService',
           level: 500,
         );
-        final result =
-            await core.UnifiedSyncManager.instance.delete<ComentarioSyncEntity>('receituagro', syncEntity.id);
+        final result = await core.UnifiedSyncManager.instance
+            .delete<ComentarioSyncEntity>('receituagro', syncEntity.id);
         result.fold(
           (core.Failure failure) {
             developer.log(
@@ -361,7 +371,11 @@ class ComentariosService {
           level: 500,
         );
         final result = await core.UnifiedSyncManager.instance
-            .update<ComentarioSyncEntity>('receituagro', syncEntity.id, syncEntity);
+            .update<ComentarioSyncEntity>(
+              'receituagro',
+              syncEntity.id,
+              syncEntity,
+            );
         result.fold(
           (core.Failure failure) {
             developer.log(

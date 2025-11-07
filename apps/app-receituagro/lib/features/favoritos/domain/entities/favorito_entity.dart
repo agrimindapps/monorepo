@@ -125,6 +125,8 @@ class FavoritoCulturaEntity extends FavoritoEntity {
 
 /// Value Object para tipos de favorito
 class TipoFavorito {
+  const TipoFavorito._();
+
   static const String defensivo = 'defensivo';
   static const String praga = 'praga';
   static const String diagnostico = 'diagnostico';

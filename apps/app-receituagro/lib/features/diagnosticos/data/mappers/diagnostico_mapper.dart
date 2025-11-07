@@ -2,6 +2,8 @@ import '../../../../core/data/models/diagnostico_hive.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 
 class DiagnosticoMapper {
+  const DiagnosticoMapper._();
+
   static DiagnosticoEntity fromHive(DiagnosticoHive hive) {
     return DiagnosticoEntity(
       id: hive.objectId,
@@ -17,14 +19,14 @@ class DiagnosticoMapper {
         unidadeMedida: hive.um,
       ),
       aplicacao: AplicacaoEntity(
-        terrestre: hive.minAplicacaoT != null 
+        terrestre: hive.minAplicacaoT != null
             ? AplicacaoTerrestrefEntity(
                 volumeMinimo: double.tryParse(hive.minAplicacaoT!),
                 volumeMaximo: double.tryParse(hive.maxAplicacaoT ?? '0'),
                 unidadeMedida: hive.umT,
               )
             : null,
-        aerea: hive.minAplicacaoA != null 
+        aerea: hive.minAplicacaoA != null
             ? AplicacaoAereaEntity(
                 volumeMinimo: double.tryParse(hive.minAplicacaoA!),
                 volumeMaximo: double.tryParse(hive.maxAplicacaoA ?? '0'),
@@ -43,8 +45,12 @@ class DiagnosticoMapper {
   static DiagnosticoHive toHive(DiagnosticoEntity entity) {
     return DiagnosticoHive(
       objectId: entity.id,
-      createdAt: entity.createdAt?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch,
-      updatedAt: entity.updatedAt?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch,
+      createdAt:
+          entity.createdAt?.millisecondsSinceEpoch ??
+          DateTime.now().millisecondsSinceEpoch,
+      updatedAt:
+          entity.updatedAt?.millisecondsSinceEpoch ??
+          DateTime.now().millisecondsSinceEpoch,
       idReg: entity.id,
       fkIdDefensivo: entity.idDefensivo,
       nomeDefensivo: entity.nomeDefensivo,

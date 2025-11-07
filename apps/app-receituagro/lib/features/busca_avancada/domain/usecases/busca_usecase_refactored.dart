@@ -21,8 +21,9 @@ class BuscaUseCase implements UseCase<dynamic, BuscaParams> {
       final result = await repository.buscarComFiltros(params.filters);
       result.fold(
         (failure) => null,
-        (resultados) =>
-            repository.salvarHistoricoBusca(params.filters, resultados),
+        (resultados) => unawaited(
+          repository.salvarHistoricoBusca(params.filters, resultados),
+        ),
       );
       return result;
     }

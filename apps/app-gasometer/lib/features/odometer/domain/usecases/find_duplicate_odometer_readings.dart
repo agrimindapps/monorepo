@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 
-import '../repositories/odometer_repository.dart';
 import '../entities/odometer_entity.dart';
+import '../repositories/odometer_repository.dart';
 
 /// UseCase para encontrar leituras de odômetro duplicadas
 ///

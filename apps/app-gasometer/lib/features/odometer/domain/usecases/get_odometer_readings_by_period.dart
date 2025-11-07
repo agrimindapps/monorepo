@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 
-import '../repositories/odometer_repository.dart';
 import '../entities/odometer_entity.dart';
+import '../repositories/odometer_repository.dart';
 
 /// Parâmetros para buscar leituras por período
 class OdometerPeriodParams {

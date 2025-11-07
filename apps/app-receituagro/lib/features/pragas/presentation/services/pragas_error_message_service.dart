@@ -81,38 +81,32 @@ class PragasErrorMessageService {
 
   /// Get error message for recent pragas loading
   String getFetchRecentError([String? details]) {
-    return 'Erro ao buscar pragas recentes' +
-        (details != null ? ': $details' : '');
+    return 'Erro ao buscar pragas recentes${details != null ? ': $details' : ''}';
   }
 
   /// Get error message for stats calculation
   String getFetchStatsError([String? details]) {
-    return 'Erro ao buscar estatísticas das pragas' +
-        (details != null ? ': $details' : '');
+    return 'Erro ao buscar estatísticas das pragas${details != null ? ': $details' : ''}';
   }
 
   /// Get error message for type fetching
   String getFetchTiposError([String? details]) {
-    return 'Erro ao buscar tipos de pragas' +
-        (details != null ? ': $details' : '');
+    return 'Erro ao buscar tipos de pragas${details != null ? ': $details' : ''}';
   }
 
   /// Get error message for families fetching
   String getFetchFamiliasError([String? details]) {
-    return 'Erro ao buscar famílias de pragas' +
-        (details != null ? ': $details' : '');
+    return 'Erro ao buscar famílias de pragas${details != null ? ': $details' : ''}';
   }
 
   /// Get error message for marking as accessed
   String getMarkAccessedError([String? details]) {
-    return 'Erro ao marcar praga como acessada' +
-        (details != null ? ': $details' : '');
+    return 'Erro ao marcar praga como acessada${details != null ? ': $details' : ''}';
   }
 
   /// Get error message for suggested pragas
   String getFetchSuggestedError([String? details]) {
-    return 'Erro ao buscar pragas sugeridas' +
-        (details != null ? ': $details' : '');
+    return 'Erro ao buscar pragas sugeridas${details != null ? ': $details' : ''}';
   }
 
   /// Get error message for loading recent pragas

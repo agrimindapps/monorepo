@@ -7,7 +7,7 @@ enum FuelType {
   gas,
   hybrid,
   electric;
-  
+
   String get displayName {
     switch (this) {
       case FuelType.gasoline:
@@ -24,7 +24,7 @@ enum FuelType {
         return 'Elétrico';
     }
   }
-  
+
   static FuelType fromString(String value) {
     return FuelType.values.firstWhere(
       (e) => e.name == value,
@@ -39,7 +39,7 @@ enum VehicleType {
   truck,
   van,
   bus;
-  
+
   String get displayName {
     switch (this) {
       case VehicleType.car:
@@ -54,7 +54,7 @@ enum VehicleType {
         return 'Ônibus';
     }
   }
-  
+
   static VehicleType fromString(String value) {
     return VehicleType.values.firstWhere(
       (e) => e.name == value,
@@ -64,7 +64,6 @@ enum VehicleType {
 }
 
 class VehicleEntity extends BaseSyncEntity {
-  
   const VehicleEntity({
     required super.id,
     required this.name,
@@ -106,7 +105,7 @@ class VehicleEntity extends BaseSyncEntity {
   final double? averageConsumption;
   final bool isActive;
   final Map<String, dynamic> metadata;
-  
+
   @override
   List<Object?> get props => [
     ...super.props,
@@ -126,7 +125,7 @@ class VehicleEntity extends BaseSyncEntity {
     isActive,
     metadata,
   ];
-  
+
   @override
   VehicleEntity copyWith({
     String? id,
@@ -181,17 +180,17 @@ class VehicleEntity extends BaseSyncEntity {
       metadata: metadata ?? this.metadata,
     );
   }
-  
+
   String get displayName => '$brand $model ($year)';
-  
+
   bool get isEmpty => name.isEmpty || brand.isEmpty || model.isEmpty;
-  
+
   bool get supportsMultipleFuels => supportedFuels.length > 1;
-  
-  String get primaryFuelType => supportedFuels.isNotEmpty 
-      ? supportedFuels.first.displayName 
+
+  String get primaryFuelType => supportedFuels.isNotEmpty
+      ? supportedFuels.first.displayName
       : 'Não definido';
-  
+
   bool supportsFuelType(FuelType fuelType) => supportedFuels.contains(fuelType);
 
   @override
@@ -220,65 +219,58 @@ class VehicleEntity extends BaseSyncEntity {
     final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
     return VehicleEntity(
       id: baseFields['id'] as String,
-      name: map['name'] as String,
-      brand: map['brand'] as String,
-      model: map['model'] as String,
-      year: map['year'] as int,
-      color: map['color'] as String,
-      licensePlate: map['license_plate'] as String,
-      type: VehicleType.fromString(map['type'] as String),
-      supportedFuels: (map['supported_fuels'] as List<dynamic>)
-          .map((e) => FuelType.fromString(e as String))
-          .toList(),
+      name: map['name'] as String? ?? '',
+      brand: map['brand'] as String? ?? '',
+      model: map['model'] as String? ?? '',
+      year: map['year'] as int? ?? 0,
+      color: map['color'] as String? ?? '',
+      licensePlate: map['license_plate'] as String? ?? '',
+      type: map['type'] != null
+          ? VehicleType.fromString(map['type'] as String)
+          : VehicleType.car,
+      supportedFuels: map['supported_fuels'] != null
+          ? (map['supported_fuels'] as List<dynamic>)
+                .map((e) => FuelType.fromString(e as String))
+                .toList()
+          : [FuelType.gasoline],
       tankCapacity: map['tank_capacity'] as double?,
       engineSize: map['engine_size'] as double?,
       photoUrl: map['photo_url'] as String?,
-      currentOdometer: (map['current_odometer'] as num).toDouble(),
+      currentOdometer: (map['current_odometer'] as num?)?.toDouble() ?? 0.0,
       averageConsumption: map['average_consumption'] as double?,
       createdAt: baseFields['createdAt'] as DateTime?,
       updatedAt: baseFields['updatedAt'] as DateTime?,
       lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
-      isDirty: baseFields['isDirty'] as bool,
-      isDeleted: baseFields['isDeleted'] as bool,
-      version: baseFields['version'] as int,
+      isDirty: baseFields['isDirty'] as bool? ?? false,
+      isDeleted: baseFields['isDeleted'] as bool? ?? false,
+      version: baseFields['version'] as int? ?? 1,
       userId: baseFields['userId'] as String?,
-      moduleName: baseFields['moduleName'] as String?,
+      moduleName: baseFields['moduleName'] as String? ?? 'gasometer',
       isActive: map['is_active'] as bool? ?? true,
-      metadata: Map<String, dynamic>.from(map['metadata'] as Map? ?? {}),
+      metadata: map['metadata'] != null
+          ? Map<String, dynamic>.from(map['metadata'] as Map)
+          : {},
     );
   }
 
   @override
   VehicleEntity markAsDirty() {
-    return copyWith(
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(isDirty: true, updatedAt: DateTime.now());
   }
 
   @override
   VehicleEntity markAsSynced({DateTime? syncTime}) {
-    return copyWith(
-      isDirty: false,
-      lastSyncAt: syncTime ?? DateTime.now(),
-    );
+    return copyWith(isDirty: false, lastSyncAt: syncTime ?? DateTime.now());
   }
 
   @override
   VehicleEntity markAsDeleted() {
-    return copyWith(
-      isDeleted: true,
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(isDeleted: true, isDirty: true, updatedAt: DateTime.now());
   }
 
   @override
   VehicleEntity incrementVersion() {
-    return copyWith(
-      version: version + 1,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(version: version + 1, updatedAt: DateTime.now());
   }
 
   @override

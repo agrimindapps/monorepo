@@ -23,7 +23,8 @@ class BuscarComFiltrosUseCase
     final result = await repository.buscarComFiltros(filters);
     result.fold(
       (failure) => null,
-      (resultados) => repository.salvarHistoricoBusca(filters, resultados),
+      (resultados) =>
+          unawaited(repository.salvarHistoricoBusca(filters, resultados)),
     );
 
     return result;

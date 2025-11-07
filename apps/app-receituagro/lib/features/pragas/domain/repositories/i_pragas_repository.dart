@@ -4,24 +4,26 @@ import '../entities/praga_entity.dart';
 
 /// Interface do repositório de pragas (Domain Layer)
 /// Princípios: Dependency Inversion + Interface Segregation
-/// Segue padrão Either<Failure, T> para error handling consistente
+/// Segue padrão Either&lt;Failure, T&gt; para error handling consistente
 abstract class IPragasRepository {
   /// Operações básicas de consulta
   Future<Either<Failure, List<PragaEntity>>> getAll();
   Future<Either<Failure, PragaEntity?>> getById(String id);
   Future<Either<Failure, List<PragaEntity>>> getByTipo(String tipo);
-  
+
   /// Busca e filtros
   Future<Either<Failure, List<PragaEntity>>> searchByName(String searchTerm);
   Future<Either<Failure, List<PragaEntity>>> getByFamilia(String familia);
   Future<Either<Failure, List<PragaEntity>>> getByCultura(String culturaId);
-  
+
   /// Operações de contagem
   Future<Either<Failure, int>> getCountByTipo(String tipo);
   Future<Either<Failure, int>> getTotalCount();
-  
+
   /// Operações avançadas
-  Future<Either<Failure, List<PragaEntity>>> getPragasRecentes({int limit = 10});
+  Future<Either<Failure, List<PragaEntity>>> getPragasRecentes({
+    int limit = 10,
+  });
   Future<Either<Failure, Map<String, int>>> getPragasStats();
   Future<Either<Failure, List<String>>> getTiposPragas();
   Future<Either<Failure, List<String>>> getFamiliasPragas();
@@ -36,7 +38,7 @@ abstract class IPragasHistoryRepository {
 }
 
 /// Interface para formatação de dados
-/// Princípio: Interface Segregation - Responsabilidade específica  
+/// Princípio: Interface Segregation - Responsabilidade específica
 abstract class IPragasFormatter {
   String formatImageName(String nomeCientifico);
   Map<String, dynamic> formatForDisplay(PragaEntity praga);

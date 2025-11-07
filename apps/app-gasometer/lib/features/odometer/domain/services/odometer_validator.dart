@@ -9,10 +9,10 @@ import 'odometer_formatter.dart';
 class OdometerValidator {
   /// Minimum allowed odometer value
   static const double minOdometer = 0.0;
-  
+
   /// Maximum allowed odometer value (999,999 km)
   static const double maxOdometer = 999999.0;
-  
+
   /// Maximum description length
   static const int maxDescriptionLength = 255;
 
@@ -32,7 +32,7 @@ class OdometerValidator {
     if (numericValue < minOdometer) {
       return 'O valor não pode ser negativo';
     }
-    
+
     if (numericValue > maxOdometer) {
       return 'Valor máximo excedido (${OdometerFormatter.formatOdometerWithUnit(maxOdometer)})';
     }
@@ -70,7 +70,7 @@ class OdometerValidator {
   static bool validateOdometerValue(double value) {
     return value >= minOdometer && value <= maxOdometer;
   }
-  
+
   /// Validates odometer value against vehicle's initial odometer
   ///
   /// Returns validation result with error message if invalid
@@ -84,17 +84,19 @@ class OdometerValidator {
         errorMessage: 'O valor não pode ser negativo',
       );
     }
-    
+
     if (odometerValue > maxOdometer) {
       return OdometerValidationResult(
         isValid: false,
-        errorMessage: 'Valor máximo excedido (${OdometerFormatter.formatOdometerWithUnit(maxOdometer)})',
+        errorMessage:
+            'Valor máximo excedido (${OdometerFormatter.formatOdometerWithUnit(maxOdometer)})',
       );
     }
     if (odometerValue < vehicle.currentOdometer) {
       return OdometerValidationResult(
         isValid: false,
-        errorMessage: 'O valor não pode ser menor que a quilometragem atual do veículo (${OdometerFormatter.formatOdometerWithUnit(vehicle.currentOdometer)})',
+        errorMessage:
+            'O valor não pode ser menor que a quilometragem atual do veículo (${OdometerFormatter.formatOdometerWithUnit(vehicle.currentOdometer)})',
       );
     }
 
@@ -143,7 +145,8 @@ class OdometerValidator {
     }
     final odometerError = validateOdometer(odometerText);
     if (odometerError != null) {
-      errors['odometer'] = odometerError;
+      errors['odometerValue'] =
+          odometerError; // Changed from 'odometer' to 'odometerValue'
       isValid = false;
     }
     if (!validateDate(registrationDate)) {
@@ -156,35 +159,25 @@ class OdometerValidator {
       isValid = false;
     }
     if (!validateRegistrationType(type)) {
-      errors['type'] = 'Tipo de registro é obrigatório';
+      errors['registrationType'] =
+          'Tipo de registro é obrigatório'; // Changed from 'type' to 'registrationType'
       isValid = false;
     }
 
-    return FormValidationResult(
-      isValid: isValid,
-      errors: errors,
-    );
+    return FormValidationResult(isValid: isValid, errors: errors);
   }
 }
 
 /// Result of odometer validation with vehicle context
 class OdometerValidationResult {
-
-  const OdometerValidationResult({
-    required this.isValid,
-    this.errorMessage,
-  });
+  const OdometerValidationResult({required this.isValid, this.errorMessage});
   final bool isValid;
   final String? errorMessage;
 }
 
 /// Result of complete form validation
 class FormValidationResult {
-
-  const FormValidationResult({
-    required this.isValid,
-    required this.errors,
-  });
+  const FormValidationResult({required this.isValid, required this.errors});
   final bool isValid;
   final Map<String, String> errors;
 }

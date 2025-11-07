@@ -18,6 +18,7 @@ import '../presentation/services/pragas_type_service.dart';
 ///
 /// Princípio: Dependency Inversion
 class PragasDI {
+  const PragasDI._();
   static void configure() {
     final sl = GetIt.instance;
 

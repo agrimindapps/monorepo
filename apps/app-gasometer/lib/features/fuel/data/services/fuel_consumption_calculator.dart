@@ -60,12 +60,12 @@ class FuelConsumptionCalculator {
 
     final totalCost = periodRecords.fold<double>(
       0.0,
-      (sum, record) => sum + record.totalPrice,
+      (total, record) => total + record.totalPrice,
     );
 
     final totalLiters = periodRecords.fold<double>(
       0.0,
-      (sum, record) => sum + record.liters,
+      (total, record) => total + record.liters,
     );
 
     final averageConsumption = calculateAverageConsumption(periodRecords);
@@ -202,7 +202,7 @@ class FuelConsumptionCalculator {
 
     final totalPrice = records.fold<double>(
       0.0,
-      (sum, record) => sum + record.pricePerLiter,
+      (total, record) => total + record.pricePerLiter,
     );
 
     return totalPrice / records.length;
@@ -249,14 +249,6 @@ class ConsumptionResult {
     required this.period,
   });
 
-  final double averageConsumptionKmL;
-  final double totalCost;
-  final double totalLiters;
-  final double totalDistance;
-  final int refuelCount;
-  final double averageCostPerLiter;
-  final DatePeriod period;
-
   factory ConsumptionResult.empty() {
     return ConsumptionResult(
       averageConsumptionKmL: 0,
@@ -268,6 +260,14 @@ class ConsumptionResult {
       period: DatePeriod(start: DateTime.now(), end: DateTime.now()),
     );
   }
+
+  final double averageConsumptionKmL;
+  final double totalCost;
+  final double totalLiters;
+  final double totalDistance;
+  final int refuelCount;
+  final double averageCostPerLiter;
+  final DatePeriod period;
 
   @override
   String toString() {

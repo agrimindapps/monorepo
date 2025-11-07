@@ -157,6 +157,7 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
       }
 
       final formModel = FuelFormModel.initial(selectedVehicleId, userId ?? '');
+      // ignore: unawaited_futures
       Future.microtask(() {
         state = state.copyWith(formModel: formModel, isLoading: true);
       });

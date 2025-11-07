@@ -1,6 +1,27 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
+/// Helper function to safely convert any Map to Map<String, dynamic>
+/// Handles LinkedMap, IdentityMap, and other Hive internal map types
+Map<String, dynamic> _safeConvertToMap(dynamic value) {
+  if (value == null) return {};
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) {
+    try {
+      return Map<String, dynamic>.from(value);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint(
+          'Warning: Failed to convert map of type ${value.runtimeType}: $e',
+        );
+      }
+      // Return empty map as fallback
+      return {};
+    }
+  }
+  return {};
+}
+
 /// Serviço responsável por gerenciar dados locais
 /// Usado especialmente para o modo anônimo onde os dados não são sincronizados com o Firebase
 @singleton
@@ -65,19 +86,13 @@ class LocalDataService {
   Map<String, dynamic>? getVehicle(String id) {
     _ensureInitialized();
     final data = _vehiclesBox.get(id);
-    return data != null
-        ? Map<String, dynamic>.from(data as Map<dynamic, dynamic>? ?? {})
-        : null;
+    return data != null ? _safeConvertToMap(data) : null;
   }
 
   /// Obtém todos os veículos
   List<Map<String, dynamic>> getAllVehicles() {
     _ensureInitialized();
-    return _vehiclesBox.values
-        .map(
-          (v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}),
-        )
-        .toList();
+    return _vehiclesBox.values.map(_safeConvertToMap).toList();
   }
 
   /// Remove um veículo
@@ -96,19 +111,13 @@ class LocalDataService {
   Map<String, dynamic>? getFuelRecord(String id) {
     _ensureInitialized();
     final data = _fuelRecordsBox.get(id);
-    return data != null
-        ? Map<String, dynamic>.from(data as Map<dynamic, dynamic>? ?? {})
-        : null;
+    return data != null ? _safeConvertToMap(data) : null;
   }
 
   /// Obtém todos os registros de combustível
   List<Map<String, dynamic>> getAllFuelRecords() {
     _ensureInitialized();
-    return _fuelRecordsBox.values
-        .map(
-          (v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}),
-        )
-        .toList();
+    return _fuelRecordsBox.values.map(_safeConvertToMap).toList();
   }
 
   /// Obtém registros de combustível por veículo
@@ -116,15 +125,9 @@ class LocalDataService {
     _ensureInitialized();
     return _fuelRecordsBox.values
         .where(
-          (record) =>
-              Map<String, dynamic>.from(
-                record as Map<dynamic, dynamic>? ?? {},
-              )['vehicleId'] ==
-              vehicleId,
+          (record) => _safeConvertToMap(record)['vehicleId'] == vehicleId,
         )
-        .map(
-          (v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}),
-        )
+        .map(_safeConvertToMap)
         .toList();
   }
 
@@ -147,19 +150,13 @@ class LocalDataService {
   Map<String, dynamic>? getMaintenanceRecord(String id) {
     _ensureInitialized();
     final data = _maintenanceBox.get(id);
-    return data != null
-        ? Map<String, dynamic>.from(data as Map<dynamic, dynamic>? ?? {})
-        : null;
+    return data != null ? _safeConvertToMap(data) : null;
   }
 
   /// Obtém todos os registros de manutenção
   List<Map<String, dynamic>> getAllMaintenanceRecords() {
     _ensureInitialized();
-    return _maintenanceBox.values
-        .map(
-          (v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}),
-        )
-        .toList();
+    return _maintenanceBox.values.map(_safeConvertToMap).toList();
   }
 
   /// Obtém registros de manutenção por veículo
@@ -167,15 +164,9 @@ class LocalDataService {
     _ensureInitialized();
     return _maintenanceBox.values
         .where(
-          (record) =>
-              Map<String, dynamic>.from(
-                record as Map<dynamic, dynamic>? ?? {},
-              )['vehicleId'] ==
-              vehicleId,
+          (record) => _safeConvertToMap(record)['vehicleId'] == vehicleId,
         )
-        .map(
-          (v) => Map<String, dynamic>.from(v as Map<dynamic, dynamic>? ?? {}),
-        )
+        .map(_safeConvertToMap)
         .toList();
   }
 

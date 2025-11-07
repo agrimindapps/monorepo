@@ -4,6 +4,16 @@ import '../../../../core/data/models/base_sync_model.dart';
 
 part 'fuel_supply_model.g.dart';
 
+/// Helper function to safely convert dynamic values to bool
+bool? _parseBoolNullable(dynamic value) {
+  if (value is bool) return value;
+  if (value is String) {
+    return value.toLowerCase() == 'true' || value == '1';
+  }
+  if (value is int) return value != 0;
+  return null;
+}
+
 /// Fuel Supply (Abastecimento) model with Firebase sync support
 /// TypeId: 11 - Gasometer range (10-19) to avoid conflicts with other apps
 @HiveType(typeId: 11)
@@ -87,7 +97,7 @@ class FuelSupplyModel extends BaseSyncModel {
   /// Create from Hive map
   factory FuelSupplyModel.fromHiveMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncModel.parseBaseHiveFields(map);
-    
+
     return FuelSupplyModel(
       id: baseFields['id'] as String,
       createdAtMs: map['createdAt'] as int?,
@@ -103,7 +113,7 @@ class FuelSupplyModel extends BaseSyncModel {
       odometer: (map['odometer'] as num? ?? 0.0).toDouble(),
       liters: (map['liters'] as num? ?? 0.0).toDouble(),
       totalPrice: (map['totalPrice'] as num? ?? 0.0).toDouble(),
-      fullTank: map['fullTank'] as bool?,
+      fullTank: _parseBoolNullable(map['fullTank']),
       pricePerLiter: (map['pricePerLiter'] as num? ?? 0.0).toDouble(),
       gasStationName: map['gasStationName']?.toString(),
       notes: map['notes']?.toString(),
@@ -117,7 +127,7 @@ class FuelSupplyModel extends BaseSyncModel {
   factory FuelSupplyModel.fromFirebaseMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
     final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
-    
+
     return FuelSupplyModel(
       id: baseFields['id'] as String,
       createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
@@ -133,7 +143,7 @@ class FuelSupplyModel extends BaseSyncModel {
       odometer: (map['odometer'] as num? ?? 0.0).toDouble(),
       liters: (map['liters'] as num? ?? 0.0).toDouble(),
       totalPrice: (map['total_price'] as num? ?? 0.0).toDouble(),
-      fullTank: map['full_tank'] as bool?,
+      fullTank: _parseBoolNullable(map['full_tank']),
       pricePerLiter: (map['price_per_liter'] as num? ?? 0.0).toDouble(),
       gasStationName: map['gas_station_name']?.toString(),
       notes: map['notes']?.toString(),

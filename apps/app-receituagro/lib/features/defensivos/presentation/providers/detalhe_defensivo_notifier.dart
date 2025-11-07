@@ -8,8 +8,8 @@ import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/premium_notifier.dart';
 import '../../../comentarios/data/comentario_model.dart';
 import '../../../comentarios/domain/comentarios_service.dart';
-import '../../../favoritos/favoritos_di.dart';
 import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
+import '../../../favoritos/favoritos_di.dart';
 
 part 'detalhe_defensivo_notifier.g.dart';
 

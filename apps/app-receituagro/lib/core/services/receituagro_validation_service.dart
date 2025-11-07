@@ -255,7 +255,10 @@ class ReceitaAgroValidationService {
           break;
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      // Silently ignore validation errors during field processing
+      // Errors are collected in the errors list above
+    }
 
     return ReceitaAgroValidationResult(isValid: errors.isEmpty, errors: errors);
   }

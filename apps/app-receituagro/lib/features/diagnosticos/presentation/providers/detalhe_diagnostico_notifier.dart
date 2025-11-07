@@ -12,8 +12,8 @@ import '../../../../core/providers/premium_notifier.dart';
 import '../../../diagnosticos/data/mappers/diagnostico_mapper.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
-import '../../../favoritos/favoritos_di.dart';
 import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
+import '../../../favoritos/favoritos_di.dart';
 
 part 'detalhe_diagnostico_notifier.g.dart';
 
@@ -100,7 +100,7 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     _favoritosRepository = FavoritosDI.get<FavoritosRepositorySimplified>();
 
     // Setup listener APÓS o estado inicial ser retornado
-    Future.microtask(() => _setupPremiumStatusListener());
+    unawaited(Future.microtask(() => _setupPremiumStatusListener()));
 
     return DetalheDiagnosticoState.initial();
   }

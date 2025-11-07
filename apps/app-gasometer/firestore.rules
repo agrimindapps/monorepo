@@ -57,6 +57,19 @@ service cloud.firestore {
         allow delete: if isOwner(userId);
       }
 
+      // ===== ODÔMETRO =====
+      match /odometer/{recordId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) &&
+          hasValidSyncFields() &&
+          request.resource.data.user_id == userId &&
+          request.resource.data.module_name == 'gasometer' &&
+          request.resource.data.keys().hasAll(['vehicle_id', 'odometer_reading']);
+        allow update: if isOwner(userId) &&
+          request.resource.data.user_id == userId;
+        allow delete: if isOwner(userId);
+      }
+
       // ===== MANUTENÇÕES =====
       match /maintenance/{recordId} {
         allow read: if isOwner(userId);

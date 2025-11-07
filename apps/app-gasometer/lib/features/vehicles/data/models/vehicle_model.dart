@@ -6,6 +6,18 @@ import '../../domain/entities/vehicle_entity.dart';
 
 part 'vehicle_model.g.dart';
 
+/// Helper function to safely convert dynamic values to bool
+bool _parseBool(dynamic value) {
+  if (value is bool) return value;
+  if (value is String) {
+    return value.toLowerCase() == 'true' || value == '1';
+  }
+  if (value is int) return value != 0;
+  if (value == null) return false;
+  // If it's a Map or any other type, treat as false
+  return false;
+}
+
 /// Vehicle model with Firebase sync support
 /// TypeId: 10 - Gasometer range (10-19) to avoid conflicts with other apps
 @HiveType(typeId: 10)
@@ -113,7 +125,7 @@ class VehicleModel extends BaseSyncModel {
       renavan: map['renavan']?.toString() ?? '',
       chassi: map['chassi']?.toString() ?? '',
       cor: map['cor']?.toString() ?? '',
-      vendido: map['vendido'] as bool? ?? false,
+      vendido: _parseBool(map['vendido']),
       valorVenda: (map['valorVenda'] as num? ?? 0.0).toDouble(),
       odometroAtual: (map['odometroAtual'] as num? ?? 0.0).toDouble(),
       foto: map['foto']?.toString(),
@@ -146,7 +158,7 @@ class VehicleModel extends BaseSyncModel {
       renavan: map['renavan']?.toString() ?? '',
       chassi: map['chassi']?.toString() ?? '',
       cor: map['cor']?.toString() ?? '',
-      vendido: map['vendido'] as bool? ?? false,
+      vendido: _parseBool(map['vendido']),
       valorVenda: (map['valor_venda'] as num?)?.toDouble() ?? 0.0,
       odometroAtual: (map['odometro_atual'] as num?)?.toDouble() ?? 0.0,
       foto: map['foto']?.toString(),
@@ -179,7 +191,7 @@ class VehicleModel extends BaseSyncModel {
       renavan: entity.metadata['renavan']?.toString() ?? '',
       chassi: entity.metadata['chassi']?.toString() ?? '',
       cor: entity.color,
-      vendido: entity.metadata['vendido'] as bool? ?? false,
+      vendido: _parseBool(entity.metadata['vendido']),
       valorVenda: (entity.metadata['valorVenda'] as num?)?.toDouble() ?? 0.0,
       odometroAtual: entity.currentOdometer,
       foto: entity.metadata['foto']?.toString(),

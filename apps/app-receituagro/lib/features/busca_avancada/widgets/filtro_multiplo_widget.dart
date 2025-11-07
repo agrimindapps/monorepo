@@ -36,12 +36,10 @@ class FiltroMultiploWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -80,11 +78,7 @@ class FiltroMultiploWidget extends StatelessWidget {
             ),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Icon(
-            Icons.tune,
-            color: Colors.white,
-            size: 24,
-          ),
+          child: const Icon(Icons.tune, color: Colors.white, size: 24),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -186,13 +180,13 @@ class FiltroMultiploWidget extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(
-          color: selectedValue != null 
+          color: selectedValue != null
               ? color.withValues(alpha: 0.5)
               : theme.colorScheme.outline.withValues(alpha: 0.3),
           width: selectedValue != null ? 2 : 1,
         ),
         borderRadius: BorderRadius.circular(12),
-        color: selectedValue != null 
+        color: selectedValue != null
             ? color.withValues(alpha: 0.05)
             : theme.cardColor,
       ),
@@ -202,7 +196,7 @@ class FiltroMultiploWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: selectedValue != null 
+              color: selectedValue != null
                   ? color.withValues(alpha: 0.1)
                   : theme.colorScheme.surfaceContainerLow,
               borderRadius: const BorderRadius.only(
@@ -215,16 +209,12 @@ class FiltroMultiploWidget extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: selectedValue != null 
-                        ? color 
+                    color: selectedValue != null
+                        ? color
                         : theme.colorScheme.onSurfaceVariant,
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Icon(
-                    icon,
-                    size: 14,
-                    color: Colors.white,
-                  ),
+                  child: Icon(icon, size: 14, color: Colors.white),
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -232,8 +222,8 @@ class FiltroMultiploWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: selectedValue != null 
-                        ? color 
+                    color: selectedValue != null
+                        ? color
                         : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -260,7 +250,7 @@ class FiltroMultiploWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: DropdownButtonFormField<String>(
-              value: selectedValue,
+              initialValue: selectedValue,
               decoration: InputDecoration(
                 hintText: hint,
                 hintStyle: TextStyle(
@@ -297,7 +287,8 @@ class FiltroMultiploWidget extends StatelessWidget {
   }
 
   Widget _buildBotoes(ThemeData theme) {
-    final temFiltroAtivo = culturaIdSelecionada != null ||
+    final temFiltroAtivo =
+        culturaIdSelecionada != null ||
         pragaIdSelecionada != null ||
         defensivoIdSelecionado != null;
 
@@ -311,22 +302,19 @@ class FiltroMultiploWidget extends StatelessWidget {
               label: const Text('Limpar Filtros'),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                side: BorderSide(
-                  color: theme.colorScheme.outline,
-                  width: 1,
-                ),
+                side: BorderSide(color: theme.colorScheme.outline, width: 1),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
           ),
-        
+
         if (temFiltroAtivo) const SizedBox(width: 16),
         Expanded(
           child: ElevatedButton.icon(
             onPressed: (!temFiltroAtivo || isLoading) ? null : onBuscarPressed,
-            icon: isLoading 
+            icon: isLoading
                 ? SizedBox(
                     width: 16,
                     height: 16,

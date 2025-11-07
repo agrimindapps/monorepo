@@ -120,7 +120,7 @@ class FuelAnomalyDetector {
 
       // Distância suspeita
       if (distance <= 0) {
-        return FuelAnomaly(
+        return const FuelAnomaly(
           type: AnomalyType.invalidOdometer,
           severity: AnomalySeverity.error,
           message: 'Odômetro menor ou igual ao anterior',
@@ -221,7 +221,7 @@ class FuelAnomalyDetector {
     });
 
     if (duplicates.isNotEmpty) {
-      return FuelAnomaly(
+      return const FuelAnomaly(
         type: AnomalyType.possibleDuplicate,
         severity: AnomalySeverity.warning,
         message: 'Possível registro duplicado',
@@ -252,10 +252,15 @@ class FuelAnomalyDetector {
     }
 
     // Bonus por ter todos os campos preenchidos
-    if (record.odometer > 0) score += 5;
-    if (record.gasStationName != null && record.gasStationName!.isNotEmpty)
+    if (record.odometer > 0) {
       score += 5;
-    if (record.notes != null && record.notes!.isNotEmpty) score += 5;
+    }
+    if (record.gasStationName != null && record.gasStationName!.isNotEmpty) {
+      score += 5;
+    }
+    if (record.notes != null && record.notes!.isNotEmpty) {
+      score += 5;
+    }
 
     return score.clamp(0, 100);
   }

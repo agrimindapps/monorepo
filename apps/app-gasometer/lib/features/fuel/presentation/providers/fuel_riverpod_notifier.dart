@@ -7,7 +7,6 @@ import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../../domain/services/fuel_calculation_service.dart';
 import '../../domain/services/fuel_connectivity_service.dart';
-import '../../domain/services/fuel_filter_service.dart';
 import '../../domain/services/fuel_offline_queue_service.dart';
 import '../../domain/usecases/add_fuel_record.dart';
 import '../../domain/usecases/delete_fuel_record.dart';
@@ -125,10 +124,9 @@ class FuelState {
       isLoading: isLoading ?? this.isLoading,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       isInitialized: isInitialized ?? this.isInitialized,
-      selectedVehicleId:
-          clearVehicleFilter
-              ? null
-              : (selectedVehicleId ?? this.selectedVehicleId),
+      selectedVehicleId: clearVehicleFilter
+          ? null
+          : (selectedVehicleId ?? this.selectedVehicleId),
       searchQuery: clearSearchQuery ? '' : (searchQuery ?? this.searchQuery),
       statistics: statistics ?? this.statistics,
       analytics: analytics ?? this.analytics,
@@ -153,7 +151,6 @@ class FuelRiverpod extends _$FuelRiverpod {
 
   // Specialized Services (SRP)
   late FuelCalculationService _calculationService;
-  late FuelFilterService _filterService;
   late FuelOfflineQueueService _offlineQueueService;
   late FuelConnectivityService _connectivityService;
 
@@ -175,7 +172,6 @@ class FuelRiverpod extends _$FuelRiverpod {
 
     // Initialize specialized services
     _calculationService = getIt<FuelCalculationService>();
-    _filterService = getIt<FuelFilterService>();
     _offlineQueueService = getIt<FuelOfflineQueueService>();
     _connectivityService = getIt<FuelConnectivityService>();
 
@@ -204,8 +200,7 @@ class FuelRiverpod extends _$FuelRiverpod {
 
     state = AsyncValue.data(const FuelState().copyWith(isOnline: isOnline));
 
-    _connectivitySubscription =
-        _connectivityService.addConnectivityListener(
+    _connectivitySubscription = _connectivityService.addConnectivityListener(
       _onConnectivityChanged,
       onError: (error) {
         if (kDebugMode) {
@@ -357,7 +352,9 @@ class FuelRiverpod extends _$FuelRiverpod {
             currentState.copyWith(
               fuelRecords: updatedRecords,
               isLoading: false,
-              statistics: _calculationService.calculateStatistics(updatedRecords),
+              statistics: _calculationService.calculateStatistics(
+                updatedRecords,
+              ),
               pendingRecords: [...currentState.pendingRecords, record],
             ),
           );
@@ -374,7 +371,9 @@ class FuelRiverpod extends _$FuelRiverpod {
             currentState.copyWith(
               fuelRecords: updatedRecords,
               isLoading: false,
-              statistics: _calculationService.calculateStatistics(updatedRecords),
+              statistics: _calculationService.calculateStatistics(
+                updatedRecords,
+              ),
             ),
           );
 
@@ -465,8 +464,9 @@ class FuelRiverpod extends _$FuelRiverpod {
         return false;
       },
       (_) {
-        final updatedRecords =
-            currentState.fuelRecords.where((r) => r.id != recordId).toList();
+        final updatedRecords = currentState.fuelRecords
+            .where((r) => r.id != recordId)
+            .toList();
         state = AsyncValue.data(
           currentState.copyWith(
             fuelRecords: updatedRecords,
@@ -488,7 +488,9 @@ class FuelRiverpod extends _$FuelRiverpod {
     final currentState = state.value;
     if (currentState == null ||
         !currentState.isOnline ||
-        !currentState.hasPendingRecords) return;
+        !currentState.hasPendingRecords) {
+      return;
+    }
 
     state = AsyncValue.data(currentState.copyWith(isSyncing: true));
 
@@ -731,7 +733,9 @@ class FuelRiverpod extends _$FuelRiverpod {
 /// Filtered records provider
 @riverpod
 List<FuelRecordEntity> filteredFuelRecords(Ref ref) {
-  return ref.watch(fuelRiverpodProvider).when(
+  return ref
+      .watch(fuelRiverpodProvider)
+      .when(
         data: (state) => state.filteredRecords,
         loading: () => [],
         error: (_, __) => [],
@@ -741,7 +745,9 @@ List<FuelRecordEntity> filteredFuelRecords(Ref ref) {
 /// Selected vehicle ID provider
 @riverpod
 String? selectedFuelVehicleId(Ref ref) {
-  return ref.watch(fuelRiverpodProvider).when(
+  return ref
+      .watch(fuelRiverpodProvider)
+      .when(
         data: (state) => state.selectedVehicleId,
         loading: () => null,
         error: (_, __) => null,
@@ -751,7 +757,9 @@ String? selectedFuelVehicleId(Ref ref) {
 /// Search query provider
 @riverpod
 String fuelSearchQuery(Ref ref) {
-  return ref.watch(fuelRiverpodProvider).when(
+  return ref
+      .watch(fuelRiverpodProvider)
+      .when(
         data: (state) => state.searchQuery,
         loading: () => '',
         error: (_, __) => '',
@@ -761,7 +769,9 @@ String fuelSearchQuery(Ref ref) {
 /// Statistics provider
 @riverpod
 FuelStatistics? fuelStatistics(Ref ref) {
-  return ref.watch(fuelRiverpodProvider).when(
+  return ref
+      .watch(fuelRiverpodProvider)
+      .when(
         data: (state) => state.statistics,
         loading: () => null,
         error: (_, __) => null,
@@ -771,7 +781,9 @@ FuelStatistics? fuelStatistics(Ref ref) {
 /// Offline queue providers
 @riverpod
 int fuelPendingCount(Ref ref) {
-  return ref.watch(fuelRiverpodProvider).when(
+  return ref
+      .watch(fuelRiverpodProvider)
+      .when(
         data: (state) => state.pendingRecordsCount,
         loading: () => 0,
         error: (_, __) => 0,
@@ -780,7 +792,9 @@ int fuelPendingCount(Ref ref) {
 
 @riverpod
 bool fuelHasPendingRecords(Ref ref) {
-  return ref.watch(fuelRiverpodProvider).when(
+  return ref
+      .watch(fuelRiverpodProvider)
+      .when(
         data: (state) => state.hasPendingRecords,
         loading: () => false,
         error: (_, __) => false,
@@ -789,7 +803,9 @@ bool fuelHasPendingRecords(Ref ref) {
 
 @riverpod
 bool fuelIsOnline(Ref ref) {
-  return ref.watch(fuelRiverpodProvider).when(
+  return ref
+      .watch(fuelRiverpodProvider)
+      .when(
         data: (state) => state.isOnline,
         loading: () => true,
         error: (_, __) => true,
@@ -798,7 +814,9 @@ bool fuelIsOnline(Ref ref) {
 
 @riverpod
 bool fuelIsSyncing(Ref ref) {
-  return ref.watch(fuelRiverpodProvider).when(
+  return ref
+      .watch(fuelRiverpodProvider)
+      .when(
         data: (state) => state.isSyncing,
         loading: () => false,
         error: (_, __) => false,
@@ -808,7 +826,9 @@ bool fuelIsSyncing(Ref ref) {
 /// Loading and error providers
 @riverpod
 bool fuelIsLoading(Ref ref) {
-  return ref.watch(fuelRiverpodProvider).when(
+  return ref
+      .watch(fuelRiverpodProvider)
+      .when(
         data: (state) => state.isLoading,
         loading: () => true,
         error: (_, __) => false,
@@ -817,7 +837,9 @@ bool fuelIsLoading(Ref ref) {
 
 @riverpod
 String? fuelErrorMessage(Ref ref) {
-  return ref.watch(fuelRiverpodProvider).when(
+  return ref
+      .watch(fuelRiverpodProvider)
+      .when(
         data: (state) => state.errorMessage,
         loading: () => null,
         error: (error, _) => error.toString(),
@@ -826,7 +848,9 @@ String? fuelErrorMessage(Ref ref) {
 
 @riverpod
 bool fuelHasError(Ref ref) {
-  return ref.watch(fuelRiverpodProvider).when(
+  return ref
+      .watch(fuelRiverpodProvider)
+      .when(
         data: (state) => state.hasError,
         loading: () => false,
         error: (_, __) => true,

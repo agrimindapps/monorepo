@@ -2,6 +2,24 @@ import 'package:core/core.dart';
 
 /// Represents an odometer reading record
 class OdometerEntity extends BaseSyncEntity {
+  const OdometerEntity({
+    required super.id,
+    required this.vehicleId,
+    required this.value,
+    required this.registrationDate,
+    required this.description,
+    required this.type,
+    this.metadata = const {},
+    super.createdAt,
+    super.updatedAt,
+    super.lastSyncAt,
+    super.isDirty,
+    super.isDeleted,
+    super.version,
+    super.userId,
+    super.moduleName,
+  });
+
   /// Creates an entity from a map
   factory OdometerEntity.fromMap(Map<String, dynamic> map) {
     return OdometerEntity(
@@ -32,23 +50,35 @@ class OdometerEntity extends BaseSyncEntity {
     );
   }
 
-  const OdometerEntity({
-    required super.id,
-    required this.vehicleId,
-    required this.value,
-    required this.registrationDate,
-    required this.description,
-    required this.type,
-    this.metadata = const {},
-    super.createdAt,
-    super.updatedAt,
-    super.lastSyncAt,
-    super.isDirty,
-    super.isDeleted,
-    super.version,
-    super.userId,
-    super.moduleName,
-  });
+  /// Creates an entity from Firebase map
+  factory OdometerEntity.fromFirebaseMap(Map<String, dynamic> map) {
+    return OdometerEntity(
+      id: map['id']?.toString() ?? '',
+      vehicleId: map['vehicleId']?.toString() ?? '',
+      value: (map['value'] as num?)?.toDouble() ?? 0.0,
+      registrationDate: DateTime.fromMillisecondsSinceEpoch(
+        (map['registrationDate'] as int?) ??
+            DateTime.now().millisecondsSinceEpoch,
+      ),
+      description: map['description']?.toString() ?? '',
+      type: OdometerType.fromString(map['type']?.toString() ?? 'other'),
+      metadata: map['metadata'] as Map<String, dynamic>? ?? {},
+      createdAt: map['created_at'] != null
+          ? DateTime.parse(map['created_at'] as String)
+          : null,
+      updatedAt: map['updated_at'] != null
+          ? DateTime.parse(map['updated_at'] as String)
+          : null,
+      lastSyncAt: map['last_sync_at'] != null
+          ? DateTime.parse(map['last_sync_at'] as String)
+          : null,
+      isDirty: map['is_dirty'] as bool? ?? false,
+      isDeleted: map['is_deleted'] as bool? ?? false,
+      version: map['version'] as int? ?? 1,
+      userId: map['user_id']?.toString(),
+      moduleName: map['module_name']?.toString(),
+    );
+  }
 
   final String vehicleId;
   final double value;

@@ -72,8 +72,9 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       final allDefensivos = result.data ?? [];
 
       // Convert to entities and use search service
-      final defensivosEntities =
-          DefensivoMapper.fromHiveToEntityList(allDefensivos);
+      final defensivosEntities = DefensivoMapper.fromHiveToEntityList(
+        allDefensivos,
+      );
       final defensivosFiltrados = _searchService.searchAdvanced(
         defensivosEntities,
         classeQuery: classe,
@@ -126,8 +127,9 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       }
 
       final allDefensivos = result.data ?? [];
-      final defensivosEntities =
-          DefensivoMapper.fromHiveToEntityList(allDefensivos);
+      final defensivosEntities = DefensivoMapper.fromHiveToEntityList(
+        allDefensivos,
+      );
 
       // Delegate search to service
       final defensivosFiltrados = _searchService.search(
@@ -156,8 +158,9 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       }
 
       final allDefensivos = result.data ?? [];
-      final defensivosEntities =
-          DefensivoMapper.fromHiveToEntityList(allDefensivos);
+      final defensivosEntities = DefensivoMapper.fromHiveToEntityList(
+        allDefensivos,
+      );
 
       // Delegate search to service
       final defensivosFiltrados = _searchService.searchAdvanced(
@@ -188,14 +191,16 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       }
 
       final allDefensivos = result.data ?? [];
-      final defensivosEntities =
-          DefensivoMapper.fromHiveToEntityList(allDefensivos);
+      final defensivosEntities = DefensivoMapper.fromHiveToEntityList(
+        allDefensivos,
+      );
 
       // Note: Should have a dedicated filter for modoAcao in future
       // For now use custom search
       final defensivosFiltrados = _searchService.searchCustom(
         defensivosEntities,
-        (d) => d.modoAcao?.toLowerCase().contains(modoAcao.toLowerCase()) == true,
+        (d) =>
+            d.modoAcao?.toLowerCase().contains(modoAcao.toLowerCase()) == true,
       );
 
       return Right(defensivosFiltrados);
@@ -219,8 +224,9 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       }
 
       final allDefensivos = result.data ?? [];
-      final defensivosEntities =
-          DefensivoMapper.fromHiveToEntityList(allDefensivos);
+      final defensivosEntities = DefensivoMapper.fromHiveToEntityList(
+        allDefensivos,
+      );
 
       // Delegate to query service
       final classes = _queryService.getClassesAgronomicas(defensivosEntities);
@@ -243,8 +249,9 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       }
 
       final allDefensivos = result.data ?? [];
-      final defensivosEntities =
-          DefensivoMapper.fromHiveToEntityList(allDefensivos);
+      final defensivosEntities = DefensivoMapper.fromHiveToEntityList(
+        allDefensivos,
+      );
 
       // Delegate to query service
       final fabricantes = _queryService.getFabricantes(defensivosEntities);
@@ -265,14 +272,15 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       }
 
       final allDefensivos = result.data ?? [];
-      final defensivosEntities =
-          DefensivoMapper.fromHiveToEntityList(allDefensivos);
+      final defensivosEntities = DefensivoMapper.fromHiveToEntityList(
+        allDefensivos,
+      );
 
       // Delegate to query service
       final modosAcao = _queryService.getModosAcao(defensivosEntities);
       return Right(modosAcao);
     } catch (e) {
-      return Left(
+      return const Left(
         CacheFailure('Erro ao buscar modos de ação: {{e.toString()}}'),
       );
     }
@@ -291,16 +299,19 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       }
 
       final allDefensivos = result.data ?? [];
-      final defensivosEntities =
-          DefensivoMapper.fromHiveToEntityList(allDefensivos);
+      final defensivosEntities = DefensivoMapper.fromHiveToEntityList(
+        allDefensivos,
+      );
 
       // Delegate to query service
-      final defensivosRecentes =
-          _queryService.getRecentes(defensivosEntities, limit: limit);
+      final defensivosRecentes = _queryService.getRecentes(
+        defensivosEntities,
+        limit: limit,
+      );
 
       return Right(defensivosRecentes);
     } catch (e) {
-      return Left(
+      return const Left(
         CacheFailure('Erro ao buscar defensivos recentes: {{e.toString()}}'),
       );
     }
@@ -317,8 +328,9 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       }
 
       final allDefensivos = result.data ?? [];
-      final defensivosEntities =
-          DefensivoMapper.fromHiveToEntityList(allDefensivos);
+      final defensivosEntities = DefensivoMapper.fromHiveToEntityList(
+        allDefensivos,
+      );
 
       // Delegate to stats service
       final stats = _statsService.calculateStats(defensivosEntities);
@@ -352,17 +364,14 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
 
       final defensivoEntity = DefensivoMapper.fromHiveToEntity(defensivo);
       // Delegate to query service
-      final isActive = _queryService.isDefensivoActive(
-        [defensivoEntity],
-        defensivoId,
-      );
+      final isActive = _queryService.isDefensivoActive([
+        defensivoEntity,
+      ], defensivoId);
 
       return Right(isActive);
     } catch (e) {
       return Left(
-        CacheFailure(
-          'Erro ao verificar status do defensivo: {{e.toString()}}',
-        ),
+        CacheFailure('Erro ao verificar status do defensivo: {{e.toString()}}'),
       );
     }
   }
@@ -389,8 +398,9 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
         '✅ [REPO AGRUPADOS] Defensivos retornados do Hive: ${allDefensivos.length} itens',
       );
 
-      final defensivosEntities =
-          DefensivoMapper.fromHiveToEntityList(allDefensivos);
+      final defensivosEntities = DefensivoMapper.fromHiveToEntityList(
+        allDefensivos,
+      );
 
       // Apply text filter if provided
       var defensivosFiltrados = defensivosEntities;
@@ -430,15 +440,14 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
         );
       }
       final allDefensivos = result.data ?? [];
-      final defensivosEntities =
-          allDefensivos.map((hive) {
-            return DefensivoMapper.fromHiveToEntity(hive).copyWith(
-              quantidadeDiagnosticos: 0,
-              nivelPrioridade: 1,
-              isComercializado: hive.status,
-              isElegivel: hive.status,
-            );
-          }).toList();
+      final defensivosEntities = allDefensivos.map((hive) {
+        return DefensivoMapper.fromHiveToEntity(hive).copyWith(
+          quantidadeDiagnosticos: 0,
+          nivelPrioridade: 1,
+          isComercializado: hive.status,
+          isElegivel: hive.status,
+        );
+      }).toList();
 
       return Right(defensivosEntities);
     } catch (e) {
@@ -465,8 +474,9 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       }
 
       final allDefensivos = result.data ?? [];
-      final defensivosEntities =
-          DefensivoMapper.fromHiveToEntityList(allDefensivos);
+      final defensivosEntities = DefensivoMapper.fromHiveToEntityList(
+        allDefensivos,
+      );
 
       // Delegate all filtering and sorting to service
       final defensivosFiltrados = _filterService.filterAndSort(
@@ -481,9 +491,7 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       return Right(defensivosFiltrados);
     } catch (e) {
       return Left(
-        CacheFailure(
-          'Erro ao buscar defensivos com filtros: {{e.toString()}}',
-        ),
+        CacheFailure('Erro ao buscar defensivos com filtros: {{e.toString()}}'),
       );
     }
   }

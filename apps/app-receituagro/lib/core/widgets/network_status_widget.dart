@@ -4,7 +4,7 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 /// Network Status Widget
-/// 
+///
 /// Features:
 /// - Real-time network connectivity monitoring
 /// - Connection type indicators (WiFi, Mobile, None)
@@ -15,16 +15,16 @@ import 'package:flutter/material.dart';
 class NetworkStatusWidget extends StatefulWidget {
   /// Display variant: compact (just icon/indicator) or detailed (with text)
   final NetworkStatusVariant variant;
-  
+
   /// Whether to show connection type (WiFi/Mobile)
   final bool showConnectionType;
-  
+
   /// Whether to show connection quality indicator
   final bool showQualityIndicator;
-  
+
   /// Callback when network status changes
   final void Function(NetworkStatus)? onStatusChanged;
-  
+
   /// Custom styling
   final NetworkStatusStyle? style;
 
@@ -56,18 +56,14 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
   @override
   void initState() {
     super.initState();
-    
+
     _pulseController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
     );
-    _pulseAnimation = Tween<double>(
-      begin: 0.7,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
+    _pulseAnimation = Tween<double>(begin: 0.7, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
 
     _initializeNetworkMonitoring();
   }
@@ -83,12 +79,14 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
   void _initializeNetworkMonitoring() async {
     _connectivityService = ConnectivityService.instance;
     await _connectivityService.initialize();
-    _connectivitySubscription = _connectivityService.connectivityStream.listen((isOnline) async {
+    _connectivitySubscription = _connectivityService.connectivityStream.listen((
+      isOnline,
+    ) async {
       await _updateNetworkStatus(isOnline);
       setState(() {});
       widget.onStatusChanged?.call(_currentStatus);
     });
-    _checkInitialNetworkStatus();
+    unawaited(_checkInitialNetworkStatus());
   }
 
   /// Check initial network status
@@ -113,7 +111,8 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
   /// Update network status based on connectivity
   Future<void> _updateNetworkStatus(bool isOnline) async {
     if (isOnline) {
-      final connectivityResult = await _connectivityService.getConnectivityType();
+      final connectivityResult = await _connectivityService
+          .getConnectivityType();
       final connectivityType = connectivityResult.fold(
         (failure) => ConnectivityType.none,
         (type) => type,
@@ -194,7 +193,9 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
       animation: _pulseAnimation,
       builder: (context, child) {
         return Transform.scale(
-          scale: _currentStatus == NetworkStatus.limited ? _pulseAnimation.value : 1.0,
+          scale: _currentStatus == NetworkStatus.limited
+              ? _pulseAnimation.value
+              : 1.0,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -204,13 +205,9 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
                   size: 14,
                   color: _getStatusColor(context),
                 ),
-              
+
               const SizedBox(width: 4),
-              Icon(
-                _getStatusIcon(),
-                size: 16,
-                color: _getStatusColor(context),
-              ),
+              Icon(_getStatusIcon(), size: 16, color: _getStatusColor(context)),
               if (widget.showQualityIndicator) ...[
                 const SizedBox(width: 4),
                 _buildQualityIndicator(context),
@@ -226,7 +223,7 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
   Widget _buildDetailedIndicator(BuildContext context) {
     final theme = Theme.of(context);
     final style = widget.style ?? NetworkStatusStyle.defaultStyle(theme);
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
@@ -244,7 +241,9 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
             animation: _pulseAnimation,
             builder: (context, child) {
               return Transform.scale(
-                scale: _currentStatus == NetworkStatus.limited ? _pulseAnimation.value : 1.0,
+                scale: _currentStatus == NetworkStatus.limited
+                    ? _pulseAnimation.value
+                    : 1.0,
                 child: Icon(
                   _getStatusIcon(),
                   size: 14,
@@ -253,7 +252,7 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
               );
             },
           ),
-          
+
           const SizedBox(width: 6),
           Text(
             _getStatusText(),
@@ -263,7 +262,8 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
               fontSize: style.fontSize,
             ),
           ),
-          if (widget.showConnectionType && _connectionType != ConnectivityType.none) ...[
+          if (widget.showConnectionType &&
+              _connectionType != ConnectivityType.none) ...[
             const SizedBox(width: 4),
             Text(
               '•',
@@ -279,11 +279,13 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
               color: _getStatusColor(context).withValues(alpha: 0.7),
             ),
           ],
-          if (widget.showQualityIndicator && _connectionQuality != ConnectionQuality.none) ...[
+          if (widget.showQualityIndicator &&
+              _connectionQuality != ConnectionQuality.none) ...[
             const SizedBox(width: 6),
             _buildQualityIndicator(context),
           ],
-          if (_currentStatus == NetworkStatus.disconnected && _retryAttempts > 0) ...[
+          if (_currentStatus == NetworkStatus.disconnected &&
+              _retryAttempts > 0) ...[
             const SizedBox(width: 6),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
@@ -310,14 +312,14 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
   Widget _buildQualityIndicator(BuildContext context) {
     final color = _getStatusColor(context);
     final barCount = _getQualityBarCount();
-    
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: List.generate(4, (index) {
         final isActive = index < barCount;
         final height = 6.0 + (index * 2);
-        
+
         return Container(
           width: 2,
           height: height,
@@ -416,27 +418,11 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
 }
 
 /// Network Status Enums and Classes
-enum NetworkStatus {
-  unknown,
-  connected,
-  limited,
-  disconnected,
-}
+enum NetworkStatus { unknown, connected, limited, disconnected }
 
+enum ConnectionQuality { unknown, none, poor, fair, good, excellent }
 
-enum ConnectionQuality {
-  unknown,
-  none,
-  poor,
-  fair,
-  good,
-  excellent,
-}
-
-enum NetworkStatusVariant {
-  compact,
-  detailed,
-}
+enum NetworkStatusVariant { compact, detailed }
 
 /// Network Status Styling Configuration
 class NetworkStatusStyle {
@@ -444,14 +430,14 @@ class NetworkStatusStyle {
   final FontWeight fontWeight;
   final EdgeInsets padding;
   final BorderRadius borderRadius;
-  
+
   const NetworkStatusStyle({
     this.fontSize = 10,
     this.fontWeight = FontWeight.w500,
     this.padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
     this.borderRadius = const BorderRadius.all(Radius.circular(8)),
   });
-  
+
   static NetworkStatusStyle defaultStyle(ThemeData theme) {
     return const NetworkStatusStyle();
   }

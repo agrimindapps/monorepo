@@ -15,7 +15,7 @@ class OdometerFormState extends Equatable {
     this.odometerValue = 0.0,
     this.registrationDate,
     this.description = '',
-    this.registrationType = OdometerType.other,
+    this.registrationType = OdometerType.trip, // Changed default to trip
     this.currentOdometer,
     this.isLoading = false,
     this.hasChanges = false,
@@ -32,6 +32,7 @@ class OdometerFormState extends Equatable {
       vehicleId: vehicleId,
       userId: userId,
       registrationDate: DateTime.now(),
+      registrationType: OdometerType.trip, // Default to trip type
     );
   }
 

@@ -1,7 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../domain/entities/praga_entity.dart';
-import '../../domain/usecases/get_pragas_usecase.dart';
 
 part 'pragas_state.freezed.dart';
 

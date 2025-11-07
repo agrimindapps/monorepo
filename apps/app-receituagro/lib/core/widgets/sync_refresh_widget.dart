@@ -223,7 +223,7 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
     });
 
     _updateRefreshPhase(RefreshPhase.refreshing);
-    _rotationController.repeat();
+    unawaited(_rotationController.repeat());
 
     try {
       await widget.onRefresh();

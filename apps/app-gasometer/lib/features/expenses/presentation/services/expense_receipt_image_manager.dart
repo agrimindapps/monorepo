@@ -152,7 +152,15 @@ class ExpenseReceiptImageManager {
 
 /// Resultado da seleção de imagem
 class ImageSelectionResult {
-  const ImageSelectionResult({
+  final bool isSuccess;
+  final String? path;
+  final int? sizeBytes;
+  final String? format;
+  final String? errorMessage;
+  final bool isCancelled;
+
+  ImageSelectionResult._({
+    // ignore: sort_constructors_first
     required this.isSuccess,
     this.path,
     this.sizeBytes,
@@ -161,20 +169,14 @@ class ImageSelectionResult {
     this.isCancelled = false,
   });
 
-  final bool isSuccess;
-  final String? path;
-  final int? sizeBytes;
-  final String? format;
-  final String? errorMessage;
-  final bool isCancelled;
-
   /// Criação de resultado bem-sucedido
   factory ImageSelectionResult.success({
+    // ignore: sort_constructors_first
     required String path,
     required int sizeBytes,
     required String format,
   }) {
-    return ImageSelectionResult(
+    return ImageSelectionResult._(
       isSuccess: true,
       path: path,
       sizeBytes: sizeBytes,
@@ -184,12 +186,14 @@ class ImageSelectionResult {
 
   /// Criação de resultado com erro
   factory ImageSelectionResult.error(String message) {
-    return ImageSelectionResult(isSuccess: false, errorMessage: message);
+    // ignore: sort_constructors_first
+    return ImageSelectionResult._(isSuccess: false, errorMessage: message);
   }
 
   /// Criação de resultado cancelado
   factory ImageSelectionResult.cancelled() {
-    return const ImageSelectionResult(isSuccess: false, isCancelled: true);
+    // ignore: sort_constructors_first
+    return ImageSelectionResult._(isSuccess: false, isCancelled: true);
   }
 
   @override

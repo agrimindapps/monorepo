@@ -121,7 +121,7 @@ class VehicleBasicInfoSection extends StatelessWidget {
         : null;
 
     return DropdownButtonFormField<int>(
-      value: currentValue,
+      initialValue: currentValue,
       decoration: InputDecoration(
         labelText: 'Ano',
         border: OutlineInputBorder(

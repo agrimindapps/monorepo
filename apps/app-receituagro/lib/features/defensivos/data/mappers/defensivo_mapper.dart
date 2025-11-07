@@ -7,6 +7,8 @@ import '../../domain/entities/defensivo_entity.dart';
 /// Segue padrão Clean Architecture - isolamento entre camadas
 /// Consolida funcionalidades dos mappers antigos eliminando duplicação
 class DefensivoMapper {
+  const DefensivoMapper._();
+
   /// Converte DefensivoModel para Entity
   static DefensivoEntity toEntity(DefensivoModel model) {
     return DefensivoEntity(

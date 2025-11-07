@@ -1,5 +1,3 @@
-import 'package:core/core.dart';
-
 import '../entities/vehicle_entity.dart';
 
 /// Service para filtros de veículos (SRP - Single Responsibility)
@@ -55,8 +53,8 @@ class VehicleFilterServiceImpl implements VehicleFilterService {
 
     final normalizedQuery = query.toLowerCase().trim();
     return vehicles.where((v) {
-      final searchText =
-          '${v.name} ${v.brand} ${v.model} ${v.licensePlate}'.toLowerCase();
+      final searchText = '${v.name} ${v.brand} ${v.model} ${v.licensePlate}'
+          .toLowerCase();
       return searchText.contains(normalizedQuery);
     }).toList();
   }

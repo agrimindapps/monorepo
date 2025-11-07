@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/data/models/fitossanitario_hive.dart';
 import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
@@ -66,8 +65,10 @@ class HomeDefensivosState {
       totalDefensivos: totalDefensivos ?? this.totalDefensivos,
       totalFabricantes: totalFabricantes ?? this.totalFabricantes,
       totalModoAcao: totalModoAcao ?? this.totalModoAcao,
-      totalIngredienteAtivo: totalIngredienteAtivo ?? this.totalIngredienteAtivo,
-      totalClasseAgronomica: totalClasseAgronomica ?? this.totalClasseAgronomica,
+      totalIngredienteAtivo:
+          totalIngredienteAtivo ?? this.totalIngredienteAtivo,
+      totalClasseAgronomica:
+          totalClasseAgronomica ?? this.totalClasseAgronomica,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage ?? this.errorMessage,
     );
@@ -76,10 +77,12 @@ class HomeDefensivosState {
   HomeDefensivosState clearError() {
     return copyWith(errorMessage: null);
   }
+
   bool get hasData => totalDefensivos > 0;
   bool get hasRecentDefensivos => recentDefensivos.isNotEmpty;
   bool get hasNewDefensivos => newDefensivos.isNotEmpty;
-  String get subtitleText => isLoading ? 'Carregando...' : '$totalDefensivos Registros Disponíveis';
+  String get subtitleText =>
+      isLoading ? 'Carregando...' : '$totalDefensivos Registros Disponíveis';
   String get headerSubtitle => subtitleText;
   bool get shouldShowContent => !isLoading || hasData;
 
@@ -106,30 +109,22 @@ class DefensivosStatistics {
   });
 
   DefensivosStatistics.empty()
-      : totalDefensivos = 0,
-        totalFabricantes = 0,
-        totalModoAcao = 0,
-        totalIngredienteAtivo = 0,
-        totalClasseAgronomica = 0;
+    : totalDefensivos = 0,
+      totalFabricantes = 0,
+      totalModoAcao = 0,
+      totalIngredienteAtivo = 0,
+      totalClasseAgronomica = 0;
 }
 
 /// View states for UI
-enum HomeDefensivosViewState {
-  initial,
-  loading,
-  loaded,
-  error,
-}
+enum HomeDefensivosViewState { initial, loading, loaded, error }
 
 /// History data container
 class _HistoryData {
   final List<FitossanitarioHive> recentDefensivos;
   final List<FitossanitarioHive> newDefensivos;
 
-  _HistoryData({
-    required this.recentDefensivos,
-    required this.newDefensivos,
-  });
+  _HistoryData({required this.recentDefensivos, required this.newDefensivos});
 }
 
 /// Notifier para gerenciar estado da Home Defensivos (Presentation Layer)
@@ -212,10 +207,7 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
       final allDefensivos = await _repository.getActiveDefensivos();
 
       if (allDefensivos.isEmpty) {
-        return _HistoryData(
-          recentDefensivos: [],
-          newDefensivos: [],
-        );
+        return _HistoryData(recentDefensivos: [], newDefensivos: []);
       }
 
       final historyItems = await _historyService.getDefensivosHistory();
@@ -245,14 +237,18 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
 
       // SEMPRE retorna exatamente 7 registros
       // Se histórico < 7, completa com aleatórios excluindo os do histórico
-      final recentDefensivos = RandomSelectionService.fillHistoryToCount<FitossanitarioHive>(
-        historyItems: historicDefensivos,
-        allItems: allDefensivos,
-        targetCount: 7,
-        areEqual: (a, b) => a.idReg == b.idReg,
-      );
+      final recentDefensivos =
+          RandomSelectionService.fillHistoryToCount<FitossanitarioHive>(
+            historyItems: historicDefensivos,
+            allItems: allDefensivos,
+            targetCount: 7,
+            areEqual: (a, b) => a.idReg == b.idReg,
+          );
 
-      final newDefensivos = ReceitaAgroRandomExtensions.selectNewDefensivos(allDefensivos, count: 7);
+      final newDefensivos = ReceitaAgroRandomExtensions.selectNewDefensivos(
+        allDefensivos,
+        count: 7,
+      );
 
       return _HistoryData(
         recentDefensivos: recentDefensivos,
@@ -262,10 +258,16 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
       // Em caso de erro, usa fallback aleatório para boa experiência inicial
       final allDefensivos = await _repository.getActiveDefensivos();
       final recentDefensivos = allDefensivos.isNotEmpty
-          ? ReceitaAgroRandomExtensions.selectRandomDefensivos(allDefensivos, count: 7)
+          ? ReceitaAgroRandomExtensions.selectRandomDefensivos(
+              allDefensivos,
+              count: 7,
+            )
           : <FitossanitarioHive>[];
       final newDefensivos = allDefensivos.isNotEmpty
-          ? ReceitaAgroRandomExtensions.selectNewDefensivos(allDefensivos, count: 7)
+          ? ReceitaAgroRandomExtensions.selectNewDefensivos(
+              allDefensivos,
+              count: 7,
+            )
           : <FitossanitarioHive>[];
 
       return _HistoryData(
@@ -280,13 +282,12 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     try {
-      await Future.wait([
-        _loadStatistics(),
-        _loadHistory(),
-      ]);
+      await Future.wait([_loadStatistics(), _loadHistory()]);
     } catch (e) {
       state = AsyncValue.data(
         currentState.copyWith(
@@ -315,7 +316,8 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
             state = AsyncValue.data(
               currentState.copyWith(
                 isLoading: false,
-                errorMessage: 'Dados não disponíveis no momento.\n\nPor favor, reinicie o aplicativo se o problema persistir.',
+                errorMessage:
+                    'Dados não disponíveis no momento.\n\nPor favor, reinicie o aplicativo se o problema persistir.',
               ),
             );
             return;
@@ -325,14 +327,16 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
       final stats = _calculateStatistics(defensivos);
 
       state = AsyncValue.data(
-        currentState.copyWith(
-          totalDefensivos: stats.totalDefensivos,
-          totalFabricantes: stats.totalFabricantes,
-          totalModoAcao: stats.totalModoAcao,
-          totalIngredienteAtivo: stats.totalIngredienteAtivo,
-          totalClasseAgronomica: stats.totalClasseAgronomica,
-          isLoading: false,
-        ).clearError(),
+        currentState
+            .copyWith(
+              totalDefensivos: stats.totalDefensivos,
+              totalFabricantes: stats.totalFabricantes,
+              totalModoAcao: stats.totalModoAcao,
+              totalIngredienteAtivo: stats.totalIngredienteAtivo,
+              totalClasseAgronomica: stats.totalClasseAgronomica,
+              isLoading: false,
+            )
+            .clearError(),
       );
     } catch (e) {
       state = AsyncValue.data(
@@ -354,10 +358,7 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
 
       if (allDefensivos.isEmpty) {
         state = AsyncValue.data(
-          currentState.copyWith(
-            recentDefensivos: [],
-            newDefensivos: [],
-          ),
+          currentState.copyWith(recentDefensivos: [], newDefensivos: []),
         );
         return;
       }
@@ -366,10 +367,16 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
     } catch (e) {
       final allDefensivos = await _repository.getActiveDefensivos();
       final recentDefensivos = allDefensivos.isNotEmpty
-          ? ReceitaAgroRandomExtensions.selectRandomDefensivos(allDefensivos, count: 7)
+          ? ReceitaAgroRandomExtensions.selectRandomDefensivos(
+              allDefensivos,
+              count: 7,
+            )
           : <FitossanitarioHive>[];
       final newDefensivos = allDefensivos.isNotEmpty
-          ? ReceitaAgroRandomExtensions.selectNewDefensivos(allDefensivos, count: 7)
+          ? ReceitaAgroRandomExtensions.selectNewDefensivos(
+              allDefensivos,
+              count: 7,
+            )
           : <FitossanitarioHive>[];
 
       state = AsyncValue.data(
@@ -382,7 +389,9 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
   }
 
   /// Load history data and combine with random selection
-  Future<void> _loadHistoryIntoState(List<FitossanitarioHive> allDefensivos) async {
+  Future<void> _loadHistoryIntoState(
+    List<FitossanitarioHive> allDefensivos,
+  ) async {
     final currentState = state.value;
     if (currentState == null) return;
 
@@ -391,10 +400,7 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
 
       if (allDefensivos.isEmpty) {
         state = AsyncValue.data(
-          currentState.copyWith(
-            recentDefensivos: [],
-            newDefensivos: [],
-          ),
+          currentState.copyWith(recentDefensivos: [], newDefensivos: []),
         );
         return;
       }
@@ -425,13 +431,17 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
 
       // SEMPRE retorna exatamente 7 registros
       // Se histórico < 7, completa com aleatórios excluindo os do histórico
-      final recentDefensivos = RandomSelectionService.fillHistoryToCount<FitossanitarioHive>(
-        historyItems: historicDefensivos,
-        allItems: allDefensivos,
-        targetCount: 7,
-        areEqual: (a, b) => a.idReg == b.idReg,
+      final recentDefensivos =
+          RandomSelectionService.fillHistoryToCount<FitossanitarioHive>(
+            historyItems: historicDefensivos,
+            allItems: allDefensivos,
+            targetCount: 7,
+            areEqual: (a, b) => a.idReg == b.idReg,
+          );
+      final newDefensivos = ReceitaAgroRandomExtensions.selectNewDefensivos(
+        allDefensivos,
+        count: 7,
       );
-      final newDefensivos = ReceitaAgroRandomExtensions.selectNewDefensivos(allDefensivos, count: 7);
 
       state = AsyncValue.data(
         currentState.copyWith(
@@ -443,10 +453,16 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
       // Em caso de erro, usa fallback aleatório para boa experiência
       final allDefensivos = await _repository.getActiveDefensivos();
       final recentDefensivos = allDefensivos.isNotEmpty
-          ? ReceitaAgroRandomExtensions.selectRandomDefensivos(allDefensivos, count: 7)
+          ? ReceitaAgroRandomExtensions.selectRandomDefensivos(
+              allDefensivos,
+              count: 7,
+            )
           : <FitossanitarioHive>[];
       final newDefensivos = allDefensivos.isNotEmpty
-          ? ReceitaAgroRandomExtensions.selectNewDefensivos(allDefensivos, count: 7)
+          ? ReceitaAgroRandomExtensions.selectNewDefensivos(
+              allDefensivos,
+              count: 7,
+            )
           : <FitossanitarioHive>[];
 
       state = AsyncValue.data(
@@ -459,7 +475,9 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
   }
 
   /// Calculate statistics from defensivos list
-  DefensivosStatistics _calculateStatistics(List<FitossanitarioHive> defensivos) {
+  DefensivosStatistics _calculateStatistics(
+    List<FitossanitarioHive> defensivos,
+  ) {
     final totalDefensivos = defensivos.length;
 
     // Fabricantes: valor único (normalizado para lowercase)
@@ -486,7 +504,9 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
     // Exclui "não informado" da contagem
     final ingredientesSet = <String>{};
     for (final defensivo in defensivos) {
-      final ingredientes = _extrairIngredientesAtivos(defensivo.displayIngredient);
+      final ingredientes = _extrairIngredientesAtivos(
+        defensivo.displayIngredient,
+      );
       ingredientesSet.addAll(
         ingredientes
             .where((i) => i.toLowerCase() != 'não informado')
@@ -519,7 +539,8 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
 
   /// Extrai ingredientes ativos individuais separados por "+"
   List<String> _extrairIngredientesAtivos(String ingredientesText) {
-    if (ingredientesText.isEmpty || ingredientesText == 'Sem ingrediente ativo') {
+    if (ingredientesText.isEmpty ||
+        ingredientesText == 'Sem ingrediente ativo') {
       return ['Não informado'];
     }
 
@@ -568,10 +589,7 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
     if (currentState == null) return;
 
     try {
-      await Future.wait([
-        _loadStatistics(),
-        _loadHistory(),
-      ]);
+      await Future.wait([_loadStatistics(), _loadHistory()]);
     } catch (e) {
       state = AsyncValue.data(
         currentState.copyWith(errorMessage: 'Erro ao atualizar dados: $e'),

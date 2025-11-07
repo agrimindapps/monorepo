@@ -191,10 +191,9 @@ class ReceitaAgroFirebaseMessagingService {
       priority: Priority.high,
       icon: '@mipmap/ic_launcher',
       color: const Color(0xFF4CAF50), // Verde ReceitaAgro
-      largeIcon:
-          notification.imageUrl != null
-              ? const DrawableResourceAndroidBitmap('@mipmap/ic_launcher')
-              : null,
+      largeIcon: notification.imageUrl != null
+          ? const DrawableResourceAndroidBitmap('@mipmap/ic_launcher')
+          : null,
     );
 
     const iosDetails = DarwinNotificationDetails(

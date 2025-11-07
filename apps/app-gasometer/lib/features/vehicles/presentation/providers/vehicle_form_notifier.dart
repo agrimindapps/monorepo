@@ -14,7 +14,6 @@ import 'vehicles_notifier.dart';
 
 /// Estado do formulário de veículo
 class VehicleFormState {
-
   const VehicleFormState({
     this.editingVehicle,
     this.isLoading = false,
@@ -47,7 +46,9 @@ class VehicleFormState {
     bool clearEditingVehicle = false,
   }) {
     return VehicleFormState(
-      editingVehicle: clearEditingVehicle ? null : (editingVehicle ?? this.editingVehicle),
+      editingVehicle: clearEditingVehicle
+          ? null
+          : (editingVehicle ?? this.editingVehicle),
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
       hasChanges: hasChanges ?? this.hasChanges,
@@ -139,10 +140,7 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
   /// Atualiza tipo de combustível selecionado
   void updateSelectedFuelType(String fuelType) {
     if (state.selectedFuelType != fuelType) {
-      state = state.copyWith(
-        selectedFuelType: fuelType,
-        hasChanges: true,
-      );
+      state = state.copyWith(selectedFuelType: fuelType, hasChanges: true);
     }
   }
 
@@ -154,10 +152,7 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
   /// Atualiza imagem do veículo
   void updateVehicleImage(File? image) {
     if (state.vehicleImage != image) {
-      state = state.copyWith(
-        vehicleImage: image,
-        hasChanges: true,
-      );
+      state = state.copyWith(vehicleImage: image, hasChanges: true);
     }
   }
 
@@ -190,10 +185,7 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
           );
         }
       } else {
-        state = state.copyWith(
-          clearImage: true,
-          hasChanges: true,
-        );
+        state = state.copyWith(clearImage: true, hasChanges: true);
       }
     } catch (e) {
       state = state.copyWith(
@@ -208,16 +200,20 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
   Future<bool> _isFileOwnedByUser(File file) async {
     try {
       final filePath = file.path;
-      if (filePath.contains('cache') || filePath.contains('tmp') || filePath.contains('TemporaryItems')) {
+      if (filePath.contains('cache') ||
+          filePath.contains('tmp') ||
+          filePath.contains('TemporaryItems')) {
         return true;
       }
       final allowedDirectories = ['tmp', 'cache', 'Documents', 'files'];
-      final isInAllowedDir = allowedDirectories.any((dir) => filePath.contains(dir));
+      final isInAllowedDir = allowedDirectories.any(
+        (dir) => filePath.contains(dir),
+      );
 
       if (!isInAllowedDir) {
         return false;
       }
-      final fileStats = await file.stat();
+      final fileStats = await file.stat(); // ignore: avoid_slow_async_io
       final now = DateTime.now();
       final fileAge = now.difference(fileStats.modified);
       return fileAge.inHours < 24;
@@ -280,7 +276,8 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
     if (missingFields.isNotEmpty) {
       state = state.copyWith(
         error: local_error.ValidationError(
-          message: 'Por favor, preencha os seguintes campos obrigatórios: ${missingFields.join(', ')}',
+          message:
+              'Por favor, preencha os seguintes campos obrigatórios: ${missingFields.join(', ')}',
         ),
       );
       return false;
@@ -313,16 +310,23 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
     }
 
     final fuelType = FuelTypeMapper.fromString(state.selectedFuelType);
-    final odometerValue = double.tryParse(odometerController.text.replaceAll(',', '.')) ?? 0.0;
+    final odometerValue =
+        double.tryParse(odometerController.text.replaceAll(',', '.')) ?? 0.0;
     final sanitizedBrand = InputSanitizer.sanitizeName(brandController.text);
     final sanitizedModel = InputSanitizer.sanitizeName(modelController.text);
     final sanitizedColor = InputSanitizer.sanitizeName(colorController.text);
-    final sanitizedPlate = InputSanitizer.sanitize(plateController.text).toUpperCase();
+    final sanitizedPlate = InputSanitizer.sanitize(
+      plateController.text,
+    ).toUpperCase();
     final sanitizedChassis = InputSanitizer.sanitize(chassisController.text);
-    final sanitizedRenavam = InputSanitizer.sanitizeNumeric(renavamController.text);
+    final sanitizedRenavam = InputSanitizer.sanitizeNumeric(
+      renavamController.text,
+    );
 
     return VehicleEntity(
-      id: state.editingVehicle?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id:
+          state.editingVehicle?.id ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
       userId: effectiveUserId,
       name: '$sanitizedBrand $sanitizedModel',
       brand: sanitizedBrand,
@@ -355,10 +359,7 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
       return false;
     }
 
-    state = state.copyWith(
-      isLoading: true,
-      clearError: true,
-    );
+    state = state.copyWith(isLoading: true, clearError: true);
 
     try {
       final vehicle = buildVehicleEntity();
@@ -370,10 +371,7 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
         await notifier.addVehicle(vehicle);
       }
 
-      state = state.copyWith(
-        isLoading: false,
-        hasChanges: false,
-      );
+      state = state.copyWith(isLoading: false, hasChanges: false);
 
       return true;
     } catch (e) {
@@ -383,10 +381,7 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
               message: 'Erro ao salvar veículo: ${e.toString()}',
             );
 
-      state = state.copyWith(
-        isLoading: false,
-        error: error,
-      );
+      state = state.copyWith(isLoading: false, error: error);
 
       return false;
     }
@@ -405,9 +400,10 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
 }
 
 /// Provider principal do formulário de veículos
-final vehicleFormNotifierProvider = StateNotifierProvider<VehicleFormNotifier, VehicleFormState>((ref) {
-  return VehicleFormNotifier(ref);
-});
+final vehicleFormNotifierProvider =
+    StateNotifierProvider<VehicleFormNotifier, VehicleFormState>((ref) {
+      return VehicleFormNotifier(ref);
+    });
 
 /// Provider para verificar se pode submeter
 final canSubmitVehicleFormProvider = Provider<bool>((ref) {

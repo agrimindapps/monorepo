@@ -15,8 +15,18 @@ dependencies:
   core:
     path: ../../packages/core
   
-  firebase_messaging: ^16.0.0
+  collection: ^1.18.0
   flutter_riverpod: ^2.6.1
+  
+  # Dependencies inherited from core package (declared here to satisfy linter)
+  dartz: ^0.10.1
+  injectable: ^2.4.4
+  equatable: ^2.0.6
+  riverpod_annotation: ^2.6.1
+  freezed_annotation: ^2.4.4
+  get_it: ^8.2.0
+  cloud_firestore: ^5.0.1
+  shared_preferences: ^2.2.3
 
 dev_dependencies:
   flutter_test:

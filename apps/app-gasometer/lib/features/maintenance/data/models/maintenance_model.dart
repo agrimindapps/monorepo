@@ -4,6 +4,18 @@ import '../../../../core/data/models/base_sync_model.dart';
 
 part 'maintenance_model.g.dart';
 
+/// Helper function to safely convert dynamic values to bool
+bool _parseBool(dynamic value) {
+  if (value is bool) return value;
+  if (value is String) {
+    return value.toLowerCase() == 'true' || value == '1';
+  }
+  if (value is int) return value != 0;
+  if (value == null) return false;
+  // If it's a Map or any other type, treat as false
+  return false;
+}
+
 /// Maintenance (Manutenção) model with Firebase sync support
 /// TypeId: 14 - Gasometer range (10-19) to avoid conflicts with other apps
 @HiveType(typeId: 14)
@@ -81,7 +93,7 @@ class MaintenanceModel extends BaseSyncModel {
   /// Create from Hive map
   factory MaintenanceModel.fromHiveMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncModel.parseBaseHiveFields(map);
-    
+
     return MaintenanceModel(
       id: baseFields['id'] as String,
       createdAtMs: map['createdAt'] as int?,
@@ -99,7 +111,7 @@ class MaintenanceModel extends BaseSyncModel {
       data: (map['data'] as num?)?.toInt() ?? 0,
       odometro: (map['odometro'] as num?)?.toInt() ?? 0,
       proximaRevisao: (map['proximaRevisao'] as num?)?.toInt(),
-      concluida: map['concluida'] as bool? ?? false,
+      concluida: _parseBool(map['concluida']),
       receiptImageUrl: map['receiptImageUrl']?.toString(),
       receiptImagePath: map['receiptImagePath']?.toString(),
     );
@@ -109,7 +121,7 @@ class MaintenanceModel extends BaseSyncModel {
   factory MaintenanceModel.fromFirebaseMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
     final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
-    
+
     return MaintenanceModel(
       id: baseFields['id'] as String,
       createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
@@ -127,7 +139,7 @@ class MaintenanceModel extends BaseSyncModel {
       data: (map['data'] as num?)?.toInt() ?? 0,
       odometro: (map['odometro'] as num?)?.toInt() ?? 0,
       proximaRevisao: (map['proxima_revisao'] as num?)?.toInt(),
-      concluida: map['concluida'] as bool? ?? false,
+      concluida: _parseBool(map['concluida']),
       receiptImageUrl: map['receipt_image_url']?.toString(),
       receiptImagePath: map['receipt_image_path']?.toString(),
     );

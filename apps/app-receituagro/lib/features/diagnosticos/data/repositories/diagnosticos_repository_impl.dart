@@ -30,7 +30,9 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     try {
       final result = await _hiveRepository.getAll();
       if (result.isError) {
-        return Left(CacheFailure('Erro ao buscar diagnósticos: ${result.error?.message}'));
+        return Left(
+          CacheFailure('Erro ao buscar diagnósticos: ${result.error?.message}'),
+        );
       }
 
       var diagnosticosHive = result.data!;
@@ -81,7 +83,9 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         name: 'DiagnosticosRepository',
       );
 
-      final diagnosticosHive = await _hiveRepository.findByDefensivo(idDefensivo);
+      final diagnosticosHive = await _hiveRepository.findByDefensivo(
+        idDefensivo,
+      );
 
       developer.log(
         '✅ queryByDefensivo (Repository) - ${diagnosticosHive.length} registros Hive encontrados',
@@ -89,9 +93,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
       );
 
       final entities = diagnosticosHive
-          .map<DiagnosticoEntity>(
-            (hive) => DiagnosticoMapper.fromHive(hive),
-          )
+          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
           .toList();
 
       developer.log(
@@ -120,9 +122,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     try {
       final diagnosticosHive = await _hiveRepository.findByCultura(idCultura);
       final entities = diagnosticosHive
-          .map<DiagnosticoEntity>(
-            (hive) => DiagnosticoMapper.fromHive(hive),
-          )
+          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
           .toList();
 
       return Right(entities);
@@ -138,9 +138,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     try {
       final diagnosticosHive = await _hiveRepository.findByPraga(idPraga);
       final entities = diagnosticosHive
-          .map<DiagnosticoEntity>(
-            (hive) => DiagnosticoMapper.fromHive(hive),
-          )
+          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
           .toList();
 
       return Right(entities);
@@ -162,9 +160,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         pragaId: idPraga,
       );
       final entities = diagnosticosHive
-          .map<DiagnosticoEntity>(
-            (hive) => DiagnosticoMapper.fromHive(hive),
-          )
+          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
           .toList();
 
       return Right(entities);
@@ -186,7 +182,9 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
 
       final result = await _hiveRepository.getAll();
       if (result.isError) {
-        return Left(CacheFailure('Erro na busca por padrão: ${result.error?.message}'));
+        return Left(
+          CacheFailure('Erro na busca por padrão: ${result.error?.message}'),
+        );
       }
 
       final allDiagnosticos = result.data!;
@@ -200,9 +198,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
           .toList();
 
       final entities = matchingDiagnosticos
-          .map<DiagnosticoEntity>(
-            (hive) => DiagnosticoMapper.fromHive(hive),
-          )
+          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
           .toList();
 
       return Right(entities);
@@ -218,7 +214,9 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     try {
       final result = await _hiveRepository.getAll();
       if (result.isError) {
-        return Left(CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'));
+        return Left(
+          CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'),
+        );
       }
 
       final diagnosticos = result.data!;
@@ -244,7 +242,9 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     try {
       final result = await _hiveRepository.getAll();
       if (result.isError) {
-        return Left(CacheFailure('Erro ao buscar culturas: ${result.error?.message}'));
+        return Left(
+          CacheFailure('Erro ao buscar culturas: ${result.error?.message}'),
+        );
       }
 
       final diagnosticos = result.data!;
@@ -270,7 +270,9 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     try {
       final result = await _hiveRepository.getAll();
       if (result.isError) {
-        return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
+        return Left(
+          CacheFailure('Erro ao buscar pragas: ${result.error?.message}'),
+        );
       }
 
       final diagnosticos = result.data!;
@@ -278,10 +280,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
 
       for (final d in diagnosticos) {
         if (!pragasMap.containsKey(d.fkIdPraga)) {
-          pragasMap[d.fkIdPraga] = {
-            'id': d.fkIdPraga,
-            'nome': d.fkIdPraga,
-          };
+          pragasMap[d.fkIdPraga] = {'id': d.fkIdPraga, 'nome': d.fkIdPraga};
         }
       }
 
@@ -296,7 +295,9 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     try {
       final result = await _hiveRepository.getAll();
       if (result.isError) {
-        return Left(CacheFailure('Erro ao buscar unidades: ${result.error?.message}'));
+        return Left(
+          CacheFailure('Erro ao buscar unidades: ${result.error?.message}'),
+        );
       }
 
       final diagnosticos = result.data!;
@@ -333,7 +334,9 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
 
       return Right(entities);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar recomendações: ${e.toString()}'));
+      return Left(
+        CacheFailure('Erro ao buscar recomendações: ${e.toString()}'),
+      );
     }
   }
 
@@ -382,7 +385,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     try {
       final diagnosticoResult = await getById(idDiagnostico);
       if (diagnosticoResult.isLeft()) {
-        return Left(CacheFailure('Diagnóstico não encontrado'));
+        return const Left(CacheFailure('Diagnóstico não encontrado'));
       }
 
       final diagnostico = diagnosticoResult.getOrElse(() => null);
@@ -392,7 +395,9 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
 
       final result = await _hiveRepository.getAll();
       if (result.isError) {
-        return Left(CacheFailure('Erro ao buscar similares: ${result.error?.message}'));
+        return Left(
+          CacheFailure('Erro ao buscar similares: ${result.error?.message}'),
+        );
       }
 
       final allDiagnosticos = result.data!;
@@ -430,13 +435,18 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     try {
       final result = await _hiveRepository.getAll();
       if (result.isError) {
-        return Left(CacheFailure('Erro ao buscar estatísticas: ${result.error?.message}'));
+        return Left(
+          CacheFailure('Erro ao buscar estatísticas: ${result.error?.message}'),
+        );
       }
 
       final diagnosticos = result.data!;
       final stats = {
         'total': diagnosticos.length,
-        'totalDefensivos': diagnosticos.map((e) => e.fkIdDefensivo).toSet().length,
+        'totalDefensivos': diagnosticos
+            .map((e) => e.fkIdDefensivo)
+            .toSet()
+            .length,
         'totalCulturas': diagnosticos.map((e) => e.fkIdCultura).toSet().length,
         'totalPragas': diagnosticos.map((e) => e.fkIdPraga).toSet().length,
       };
@@ -454,7 +464,9 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     try {
       final result = await _hiveRepository.getAll();
       if (result.isError) {
-        return Left(CacheFailure('Erro ao buscar populares: ${result.error?.message}'));
+        return Left(
+          CacheFailure('Erro ao buscar populares: ${result.error?.message}'),
+        );
       }
 
       final diagnosticos = result.data!.take(limit).toList();
@@ -500,7 +512,9 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
       final diagnostico = result.getOrElse(() => null);
       return Right(diagnostico != null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao verificar existência: ${e.toString()}'));
+      return Left(
+        CacheFailure('Erro ao verificar existência: ${e.toString()}'),
+      );
     }
   }
 
@@ -519,7 +533,9 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
 
       return Right(diagnosticosHive.isNotEmpty);
     } catch (e) {
-      return Left(CacheFailure('Erro ao validar compatibilidade: ${e.toString()}'));
+      return Left(
+        CacheFailure('Erro ao validar compatibilidade: ${e.toString()}'),
+      );
     }
   }
 

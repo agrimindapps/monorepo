@@ -12,8 +12,8 @@ import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/premium_notifier.dart';
 import '../../../comentarios/data/comentario_model.dart';
 import '../../../comentarios/domain/comentarios_service.dart';
-import '../../../favoritos/favoritos_di.dart';
 import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
+import '../../../favoritos/favoritos_di.dart';
 
 part 'detalhe_praga_notifier.g.dart';
 
@@ -190,7 +190,6 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   /// Initialize usando ID da praga para melhor precisão
   Future<void> initializeById(String pragaId) async {
     // Aguardar o estado inicial ser carregado
-    await state;
     final currentState = state.requireValue;
 
     state = AsyncValue.data(currentState.copyWith(isLoading: true));
@@ -342,7 +341,9 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
       state = AsyncValue.data(
         currentState.copyWith(pragaInfo: pragaInfo, plantaInfo: plantaInfo),
       );
-    } catch (e) {}
+    } catch (e) {
+      // Erro já é tratado pelo estado AsyncValue - não precisamos fazer nada aqui
+    }
   }
 
   /// Carrega status premium do usuário

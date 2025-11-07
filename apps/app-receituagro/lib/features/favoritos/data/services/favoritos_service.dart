@@ -73,14 +73,16 @@ class FavoritosService {
 
     try {
       if (!_validator.isValidTipo(tipo)) {
-        if (kDebugMode)
+        if (kDebugMode) {
           developer.log('Tipo inválido: $tipo', name: 'FavoritosService');
+        }
         return false;
       }
 
       if (!await _validator.canAddToFavorites(tipo, id)) {
-        if (kDebugMode)
+        if (kDebugMode) {
           developer.log('Validação falhou', name: 'FavoritosService');
+        }
         return false;
       }
 
@@ -131,8 +133,9 @@ class FavoritosService {
 
     try {
       if (!_validator.isValidTipo(tipo)) {
-        if (kDebugMode)
+        if (kDebugMode) {
           developer.log('Tipo inválido: $tipo', name: 'FavoritosService');
+        }
         return false;
       }
 

@@ -11,6 +11,7 @@ import '../../../../core/widgets/form_dialog.dart';
 import '../../../../core/widgets/form_section_header.dart';
 import '../../../../core/widgets/notes_form_field.dart';
 import '../../../../core/widgets/odometer_field.dart';
+import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../auth/presentation/notifiers/auth_notifier.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../constants/odometer_constants.dart';
@@ -59,9 +60,17 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
       await notifier.initializeWithOdometer(widget.odometer!);
     } else {
       final selectedVehicleId = widget.vehicleId ?? '';
+      debugPrint(
+        'Initializing odometer form with vehicleId: "$selectedVehicleId"',
+      );
       if (selectedVehicleId.isNotEmpty) {
         final notifier = ref.read(odometerFormNotifierProvider.notifier);
+        // Limpar o formulário antes de inicializar com novo veículo
+        notifier.clearForm();
         await notifier.initialize(vehicleId: selectedVehicleId, userId: userId);
+        debugPrint(
+          'Odometer form initialized successfully with vehicleId: $selectedVehicleId',
+        );
       } else {
         debugPrint('Warning: No vehicle selected for new odometer record');
       }
@@ -92,6 +101,32 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
           '${vehicle.brand} ${vehicle.model} • ${_formatOdometer(odometer)} km';
     }
 
+    // Se não há vehicleId passado, mostrar seletor de veículo
+    if (widget.vehicleId == null || widget.vehicleId!.isEmpty) {
+      return FormDialog(
+        title: 'Selecionar Veículo',
+        subtitle: 'Escolha o veículo para registrar a leitura do odômetro',
+        headerIcon: Icons.directions_car,
+        confirmButtonText: 'Continuar',
+        onCancel: () => Navigator.of(context).pop(),
+        onConfirm: () {
+          final selectedVehicleId = ref
+              .read(odometerFormNotifierProvider)
+              .vehicleId;
+          if (selectedVehicleId.isNotEmpty) {
+            // Reabrir o formulário com o veículo selecionado
+            Navigator.of(context).pop();
+            showDialog<bool>(
+              context: context,
+              builder: (context) =>
+                  AddOdometerPage(vehicleId: selectedVehicleId),
+            );
+          }
+        },
+        content: _buildVehicleSelector(),
+      );
+    }
+
     return FormDialog(
       title: 'Odômetro',
       subtitle: subtitle,
@@ -103,7 +138,10 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
         formNotifier.clearForm();
         Navigator.of(context).pop();
       },
-      onConfirm: _submitFormWithRateLimit,
+      // Só permite confirmar se tiver veículo carregado
+      onConfirm: formState.hasVehicle && !formState.isLoading
+          ? _submitFormWithRateLimit
+          : null,
       errorMessage: formErrorMessage,
       content: Form(
         key: _formKey,
@@ -116,6 +154,22 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildVehicleSelector() {
+    return EnhancedVehicleSelector(
+      selectedVehicleId: null, // Nenhum veículo selecionado inicialmente
+      onVehicleChanged: (String? vehicleId) {
+        if (vehicleId != null && vehicleId.isNotEmpty) {
+          // Reabrir o formulário com o veículo selecionado
+          Navigator.of(context).pop();
+          showDialog<bool>(
+            context: context,
+            builder: (context) => AddOdometerPage(vehicleId: vehicleId),
+          );
+        }
+      },
     );
   }
 
@@ -178,6 +232,10 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
       currentOdometer: formState.vehicle?.currentOdometer,
       lastReading: null,
       onChanged: (value) {},
+      // Integra erros do estado do formulário
+      additionalValidator: (value) {
+        return formState.getFieldError('odometerValue');
+      },
     );
   }
 
@@ -196,6 +254,8 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
         fillColor: Theme.of(context).brightness == Brightness.dark
             ? Theme.of(context).colorScheme.surfaceContainerHighest
             : Theme.of(context).colorScheme.surface,
+        // Mostra erro do estado se existir
+        errorText: formState.getFieldError('registrationType'),
       ),
       items: OdometerType.allTypes.map((type) {
         return DropdownMenuItem<OdometerType>(
@@ -209,6 +269,11 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
         }
       },
       validator: (value) {
+        // Primeiro verifica erro do estado
+        final stateError = formState.getFieldError('registrationType');
+        if (stateError != null) return stateError;
+
+        // Depois validação local
         return value == null
             ? OdometerConstants.validationMessages['tipoObrigatorio']
             : null;

@@ -30,9 +30,10 @@ class DiagnosticoEntity {
   });
 
   /// Helpers de negócio
-  bool get isValid => id.isNotEmpty && 
-      idDefensivo.isNotEmpty && 
-      idCultura.isNotEmpty && 
+  bool get isValid =>
+      id.isNotEmpty &&
+      idDefensivo.isNotEmpty &&
+      idCultura.isNotEmpty &&
       idPraga.isNotEmpty;
 
   bool get hasDefensivoInfo => nomeDefensivo?.isNotEmpty == true;
@@ -44,10 +45,12 @@ class DiagnosticoEntity {
   /// ⚠️ DEPRECATED: Usar DiagnosticoEntityResolver para obter nomes atualizados
   /// Estes getters usam campos cached que podem estar desatualizados
   @Deprecated('Use DiagnosticoEntityResolver.resolveDefensivoNome() instead')
-  String get displayDefensivo => nomeDefensivo ?? 'Defensivo ${idDefensivo.substring(0, 8)}';
+  String get displayDefensivo =>
+      nomeDefensivo ?? 'Defensivo ${idDefensivo.substring(0, 8)}';
 
   @Deprecated('Use DiagnosticoEntityResolver.resolveCulturaNome() instead')
-  String get displayCultura => nomeCultura ?? 'Cultura ${idCultura.substring(0, 8)}';
+  String get displayCultura =>
+      nomeCultura ?? 'Cultura ${idCultura.substring(0, 8)}';
 
   @Deprecated('Use DiagnosticoEntityResolver.resolvePragaNome() instead')
   String get displayPraga => nomePraga ?? 'Praga ${idPraga.substring(0, 8)}';
@@ -61,7 +64,7 @@ class DiagnosticoEntity {
   /// Nível de completude dos dados
   DiagnosticoCompletude get completude {
     int score = 0;
-    
+
     if (hasDefensivoInfo) score++;
     if (hasCulturaInfo) score++;
     if (hasPragaInfo) score++;
@@ -115,7 +118,7 @@ class DiagnosticoEntity {
 
   @override
   String toString() {
-    return 'DiagnosticoEntity{id: $id, defensivo: $displayDefensivo, cultura: $displayCultura, praga: $displayPraga}';
+    return 'DiagnosticoEntity{id: $id, defensivo: ${nomeDefensivo ?? 'N/A'}, cultura: ${nomeCultura ?? 'N/A'}, praga: ${nomePraga ?? 'N/A'}}';
   }
 }
 
@@ -132,12 +135,12 @@ class DosagemEntity {
   });
 
   bool get isValid => dosagemMaxima > 0 && unidadeMedida.isNotEmpty;
-  
+
   bool get hasRange => dosagemMinima != null && dosagemMinima! < dosagemMaxima;
 
   /// Compatibilidade - alias para unidadeMedida
   String get unidade => unidadeMedida;
-  
+
   String get displayDosagem {
     if (hasRange) {
       return '${dosagemMinima!.toStringAsFixed(2)} - ${dosagemMaxima.toStringAsFixed(2)} $unidadeMedida';
@@ -145,9 +148,8 @@ class DosagemEntity {
     return '${dosagemMaxima.toStringAsFixed(2)} $unidadeMedida';
   }
 
-  double get dosageAverage => hasRange 
-      ? (dosagemMinima! + dosagemMaxima) / 2
-      : dosagemMaxima;
+  double get dosageAverage =>
+      hasRange ? (dosagemMinima! + dosagemMaxima) / 2 : dosagemMaxima;
 
   @override
   bool operator ==(Object other) =>
@@ -185,7 +187,7 @@ class AplicacaoEntity {
   });
 
   bool get isValid => terrestre != null || aerea != null;
-  
+
   bool get hasTerrestre => terrestre != null;
   bool get hasAerea => aerea != null;
   bool get hasIntervalo => intervaloReaplicacao?.isNotEmpty == true;
@@ -229,13 +231,15 @@ class AplicacaoTerrestrefEntity {
   });
 
   bool get isValid => volumeMaximo != null && volumeMaximo! > 0;
-  
-  bool get hasRange => volumeMinimo != null && volumeMaximo != null && 
-                       volumeMinimo! < volumeMaximo!;
-  
+
+  bool get hasRange =>
+      volumeMinimo != null &&
+      volumeMaximo != null &&
+      volumeMinimo! < volumeMaximo!;
+
   String get displayVolume {
     if (!isValid) return 'Volume não especificado';
-    
+
     final unit = unidadeMedida ?? 'L/ha';
     if (hasRange) {
       return '${volumeMinimo!.toStringAsFixed(1)} - ${volumeMaximo!.toStringAsFixed(1)} $unit';
@@ -267,13 +271,15 @@ class AplicacaoAereaEntity {
   });
 
   bool get isValid => volumeMaximo != null && volumeMaximo! > 0;
-  
-  bool get hasRange => volumeMinimo != null && volumeMaximo != null && 
-                       volumeMinimo! < volumeMaximo!;
-  
+
+  bool get hasRange =>
+      volumeMinimo != null &&
+      volumeMaximo != null &&
+      volumeMinimo! < volumeMaximo!;
+
   String get displayVolume {
     if (!isValid) return 'Volume não especificado';
-    
+
     final unit = unidadeMedida ?? 'L/ha';
     if (hasRange) {
       return '${volumeMinimo!.toStringAsFixed(1)} - ${volumeMaximo!.toStringAsFixed(1)} $unit';
@@ -380,23 +386,24 @@ class DiagnosticosStats {
 
   double get percentualCompletos => total > 0 ? (completos / total) * 100 : 0;
   double get percentualParciais => total > 0 ? (parciais / total) * 100 : 0;
-  double get percentualIncompletos => total > 0 ? (incompletos / total) * 100 : 0;
+  double get percentualIncompletos =>
+      total > 0 ? (incompletos / total) * 100 : 0;
 
   String get defensivoMaisComum {
     if (porDefensivo.isEmpty) return '';
-    
+
     final sorted = porDefensivo.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-    
+
     return sorted.first.key;
   }
 
   String get culturaMaisComum {
     if (porCultura.isEmpty) return '';
-    
+
     final sorted = porCultura.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-    
+
     return sorted.first.key;
   }
 
@@ -483,17 +490,17 @@ class DiagnosticoSearchFilters {
   String? get praga => nomePraga ?? idPraga;
 
   bool get hasFilters =>
-    idDefensivo != null ||
-    idCultura != null ||
-    idPraga != null ||
-    nomeDefensivo != null ||
-    nomeCultura != null ||
-    nomePraga != null ||
-    tipoAplicacao != null ||
-    completude != null ||
-    dosagemMinima != null ||
-    dosagemMaxima != null ||
-    limit != null;
+      idDefensivo != null ||
+      idCultura != null ||
+      idPraga != null ||
+      nomeDefensivo != null ||
+      nomeCultura != null ||
+      nomePraga != null ||
+      tipoAplicacao != null ||
+      completude != null ||
+      dosagemMinima != null ||
+      dosagemMaxima != null ||
+      limit != null;
 
   DiagnosticoSearchFilters copyWith({
     String? idDefensivo,
@@ -536,7 +543,14 @@ class DiagnosticoSearchFilters {
           nomePraga == other.nomePraga;
 
   @override
-  int get hashCode => Object.hash(idDefensivo, idCultura, idPraga, nomeDefensivo, nomeCultura, nomePraga);
+  int get hashCode => Object.hash(
+    idDefensivo,
+    idCultura,
+    idPraga,
+    nomeDefensivo,
+    nomeCultura,
+    nomePraga,
+  );
 }
 
 /// Value Object para dados dos filtros de diagnósticos
@@ -555,9 +569,9 @@ class DiagnosticoFiltersData {
     required this.tiposAplicacao,
   });
 
-  bool get isEmpty => 
-      defensivos.isEmpty && 
-      culturas.isEmpty && 
+  bool get isEmpty =>
+      defensivos.isEmpty &&
+      culturas.isEmpty &&
       pragas.isEmpty &&
       unidadesMedida.isEmpty &&
       tiposAplicacao.isEmpty;
@@ -570,14 +584,21 @@ class DiagnosticoFiltersData {
           const ListEquality<String>().equals(defensivos, other.defensivos) &&
           const ListEquality<String>().equals(culturas, other.culturas) &&
           const ListEquality<String>().equals(pragas, other.pragas) &&
-          const ListEquality<String>().equals(unidadesMedida, other.unidadesMedida) &&
-          const ListEquality<TipoAplicacao>().equals(tiposAplicacao, other.tiposAplicacao);
+          const ListEquality<String>().equals(
+            unidadesMedida,
+            other.unidadesMedida,
+          ) &&
+          const ListEquality<TipoAplicacao>().equals(
+            tiposAplicacao,
+            other.tiposAplicacao,
+          );
 
   @override
   int get hashCode => Object.hash(
-      const ListEquality<String>().hash(defensivos),
-      const ListEquality<String>().hash(culturas),
-      const ListEquality<String>().hash(pragas),
-      const ListEquality<String>().hash(unidadesMedida),
-      const ListEquality<TipoAplicacao>().hash(tiposAplicacao));
+    const ListEquality<String>().hash(defensivos),
+    const ListEquality<String>().hash(culturas),
+    const ListEquality<String>().hash(pragas),
+    const ListEquality<String>().hash(unidadesMedida),
+    const ListEquality<TipoAplicacao>().hash(tiposAplicacao),
+  );
 }

@@ -5,13 +5,14 @@ import '../entities/maintenance_entity.dart';
 class MaintenanceFormatterService {
   factory MaintenanceFormatterService() => _instance;
   MaintenanceFormatterService._internal();
-  static final MaintenanceFormatterService _instance = MaintenanceFormatterService._internal();
+  static final MaintenanceFormatterService _instance =
+      MaintenanceFormatterService._internal();
   final NumberFormat _currencyFormatter = NumberFormat.currency(
     locale: 'pt_BR',
     symbol: 'R\$',
     decimalDigits: 2,
   );
-  
+
   final NumberFormat _odometerFormatter = NumberFormat('#,##0.0', 'pt_BR');
   final DateFormat _dateFormatter = DateFormat('dd/MM/yyyy', 'pt_BR');
   final DateFormat _timeFormatter = DateFormat('HH:mm', 'pt_BR');
@@ -58,22 +59,22 @@ class MaintenanceFormatterService {
 
   /// Formatar com cache para otimização
   String _formatWithCache(
-    num value, 
-    int decimals, 
-    String type, 
+    num value,
+    int decimals,
+    String type,
     String Function() formatter,
   ) {
     final key = '${type}_${value}_$decimals';
-    
+
     if (_formatCache.containsKey(key)) {
       return _formatCache[key]!;
     }
-    
+
     final formatted = formatter();
     if (_formatCache.length >= maxCacheSize) {
       _formatCache.clear();
     }
-    
+
     _formatCache[key] = formatted;
     return formatted;
   }
@@ -86,7 +87,7 @@ class MaintenanceFormatterService {
         .replaceAll('.', '') // Remove separador de milhares
         .replaceAll(',', '.') // Converte decimal
         .trim();
-    
+
     return double.tryParse(cleaned) ?? 0.0;
   }
 
@@ -98,7 +99,7 @@ class MaintenanceFormatterService {
         .replaceAll('.', '') // Remove separador de milhares
         .replaceAll(',', '.') // Converte decimal
         .trim();
-    
+
     return double.tryParse(cleaned) ?? 0.0;
   }
 
@@ -110,13 +111,13 @@ class MaintenanceFormatterService {
   /// Formata telefone brasileiro
   String formatPhone(String phone) {
     final cleaned = phone.replaceAll(RegExp(r'[^\d]'), '');
-    
+
     if (cleaned.length == 10) {
       return '(${cleaned.substring(0, 2)}) ${cleaned.substring(2, 6)}-${cleaned.substring(6)}';
     } else if (cleaned.length == 11) {
       return '(${cleaned.substring(0, 2)}) ${cleaned.substring(2, 7)}-${cleaned.substring(7)}';
     }
-    
+
     return phone; // Retorna original se não conseguir formatar
   }
 
@@ -159,7 +160,7 @@ class MaintenanceFormatterService {
   /// Formatar período entre manutenções
   String formatServiceInterval(DateTime from, DateTime to) {
     final difference = to.difference(from);
-    
+
     if (difference.inDays < 1) {
       return 'Mesmo dia';
     } else if (difference.inDays < 7) {
@@ -173,10 +174,11 @@ class MaintenanceFormatterService {
     } else {
       final years = (difference.inDays / 365).round();
       final remainingMonths = ((difference.inDays % 365) / 30).round();
-      
+
       String result = '$years ${years == 1 ? 'ano' : 'anos'}';
       if (remainingMonths > 0) {
-        result += ' e $remainingMonths ${remainingMonths == 1 ? 'mês' : 'meses'}';
+        result +=
+            ' e $remainingMonths ${remainingMonths == 1 ? 'mês' : 'meses'}';
       }
       return result;
     }
@@ -185,7 +187,7 @@ class MaintenanceFormatterService {
   /// Formatar quilometragem entre manutenções
   String formatOdometerInterval(double from, double to) {
     final difference = to - from;
-    
+
     if (difference < 1000) {
       return '${difference.toStringAsFixed(0)} km';
     } else {
@@ -201,36 +203,43 @@ class MaintenanceFormatterService {
       formatAmount(maintenance.cost),
       formatDate(maintenance.serviceDate),
     ];
-    
+
     if (maintenance.hasWorkshopInfo) {
       parts.add(maintenance.workshopName!);
     }
-    
+
     return parts.join(' • ');
   }
 
   /// Formatar lista de peças
   String formatPartsList(Map<String, String> parts) {
     if (parts.isEmpty) return 'Nenhuma peça registrada';
-    
-    return parts.entries.map((entry) {
-      final partName = entry.key;
-      final partInfo = entry.value;
-      return partInfo.isNotEmpty ? '$partName ($partInfo)' : partName;
-    }).join(', ');
+
+    return parts.entries
+        .map((entry) {
+          final partName = entry.key;
+          final partInfo = entry.value;
+          return partInfo.isNotEmpty ? '$partName ($partInfo)' : partName;
+        })
+        .join(', ');
   }
 
   /// Formatar próxima manutenção
-  String formatNextService(MaintenanceEntity maintenance, double currentOdometer) {
+  String formatNextService(
+    MaintenanceEntity maintenance,
+    double currentOdometer,
+  ) {
     final List<String> nextService = [];
-    
+
     if (maintenance.nextServiceDate != null) {
       nextService.add('Data: ${formatDate(maintenance.nextServiceDate!)}');
     }
-    
+
     if (maintenance.nextServiceOdometer != null) {
-      nextService.add('Odômetro: ${formatOdometer(maintenance.nextServiceOdometer!)}');
-      
+      nextService.add(
+        'Odômetro: ${formatOdometer(maintenance.nextServiceOdometer!)}',
+      );
+
       final remaining = maintenance.nextServiceOdometer! - currentOdometer;
       if (remaining > 0) {
         nextService.add('Faltam: ${formatOdometer(remaining)}');
@@ -238,7 +247,7 @@ class MaintenanceFormatterService {
         nextService.add('Atrasada em: ${formatOdometer(-remaining)}');
       }
     }
-    
+
     return nextService.isEmpty ? 'Não programada' : nextService.join(' • ');
   }
 

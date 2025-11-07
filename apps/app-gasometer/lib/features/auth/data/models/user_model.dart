@@ -3,6 +3,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../domain/entities/user_entity.dart';
 
+/// Helper function to safely convert dynamic values to bool
+bool _parseBool(dynamic value) {
+  if (value is bool) return value;
+  if (value is String) {
+    return value.toLowerCase() == 'true' || value == '1';
+  }
+  if (value is int) return value != 0;
+  if (value == null) return false;
+  // If it's a Map or any other type, treat as false
+  return false;
+}
+
 class UserModel extends UserEntity {
   const UserModel({
     required super.id,
@@ -57,7 +69,7 @@ class UserModel extends UserEntity {
   }
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    
+
     return UserModel(
       id: doc.id,
       email: data['email'] as String?,
@@ -65,12 +77,13 @@ class UserModel extends UserEntity {
       photoUrl: data['photoUrl'] as String?,
       avatarBase64: null, // Local avatars are not stored in Firestore
       type: UserType.values[data['type'] as int? ?? 0],
-      isEmailVerified: data['isEmailVerified'] as bool? ?? false,
+      isEmailVerified: _parseBool(data['isEmailVerified']),
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       lastSignInAt: (data['lastSignInAt'] as Timestamp?)?.toDate(),
       metadata: Map<String, dynamic>.from(data['metadata'] as Map? ?? {}),
     );
   }
+
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'] as String,
@@ -79,9 +92,9 @@ class UserModel extends UserEntity {
       photoUrl: json['photoUrl'] as String?,
       avatarBase64: json['avatarBase64'] as String?,
       type: UserType.values[json['type'] as int? ?? 0],
-      isEmailVerified: json['isEmailVerified'] as bool? ?? false,
+      isEmailVerified: _parseBool(json['isEmailVerified']),
       createdAt: DateTime.parse(json['createdAt'] as String),
-      lastSignInAt: json['lastSignInAt'] != null 
+      lastSignInAt: json['lastSignInAt'] != null
           ? DateTime.parse(json['lastSignInAt'] as String)
           : null,
       metadata: Map<String, dynamic>.from(json['metadata'] as Map? ?? {}),

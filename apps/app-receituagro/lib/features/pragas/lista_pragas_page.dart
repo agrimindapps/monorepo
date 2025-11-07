@@ -43,7 +43,9 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
       try {
         await notifier.loadStats();
         await notifier.loadPragasByTipo(_currentPragaType);
-      } catch (e) {}
+      } catch (e) {
+        // Erro já é tratado pelo notifier - não precisamos fazer nada aqui
+      }
     });
   }
 

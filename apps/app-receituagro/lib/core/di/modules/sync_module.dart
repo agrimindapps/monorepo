@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
 
 import '../../services/receita_agro_sync_service.dart';
 
@@ -9,9 +8,7 @@ import '../../services/receita_agro_sync_service.dart';
 abstract class SyncDIModule {
   static void init(GetIt sl) {
     sl.registerLazySingleton<ReceitaAgroSyncService>(
-      () => ReceitaAgroSyncServiceFactory.create(
-        unifiedSyncManager: UnifiedSyncManager.instance,
-      ),
+      () => ReceitaAgroSyncServiceFactory.create(),
     );
   }
 
@@ -102,9 +99,7 @@ abstract class SyncDIModule {
 
       // Sync de dados do usuário (comentários e favoritos) - pós-login
       // Executado após sync geral mas não aguardado (non-blocking)
-      unawaited(
-        _syncUserDataAfterLogin(sl),
-      );
+      unawaited(_syncUserDataAfterLogin(sl));
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error during initial sync: $e');

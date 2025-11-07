@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/services/input_sanitizer.dart';
 import '../../../vehicles/domain/usecases/get_vehicle_by_id.dart';
@@ -64,6 +63,7 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
   }) async {
     if (vehicleId.isEmpty) {
       Future.microtask(() {
+        // ignore: unawaited_futures
         state = state.copyWith(
           errorMessage: () => 'Nenhum veículo selecionado',
         );
@@ -72,22 +72,28 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
     }
 
     Future.microtask(() {
+      // ignore: unawaited_futures
       state = state.copyWith(isLoading: true);
     });
 
     try {
+      debugPrint('Fetching vehicle with ID: $vehicleId');
       final vehicleResult = await _getVehicleById(
         GetVehicleByIdParams(vehicleId: vehicleId),
       );
 
       await vehicleResult.fold(
         (failure) async {
+          debugPrint('Failed to fetch vehicle: ${failure.message}');
           state = state.copyWith(
             isLoading: false,
             errorMessage: () => failure.message,
           );
         },
         (vehicle) async {
+          debugPrint(
+            'Vehicle fetched successfully: ${vehicle.brand} ${vehicle.model}',
+          );
           state =
               OdometerFormState.initial(
                 vehicleId: vehicleId,
@@ -102,6 +108,7 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
         },
       );
     } catch (e) {
+      debugPrint('Error initializing odometer form: $e');
       state = state.copyWith(
         isLoading: false,
         errorMessage: () => 'Erro ao inicializar formulário: $e',
@@ -270,6 +277,14 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
 
     state = state.copyWith(fieldErrors: result.errors);
 
+    // Debug logging for validation failures
+    if (!result.isValid) {
+      debugPrint('Form validation failed with errors: ${result.errors}');
+      debugPrint(
+        'Current state - vehicleId: ${state.vehicleId}, odometer: ${odometerController.text}, type: ${state.registrationType}',
+      );
+    }
+
     return result.isValid;
   }
 
@@ -348,9 +363,9 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
     descriptionController.clear();
 
     state = OdometerFormState.initial(
-      vehicleId: state.vehicleId,
+      vehicleId: '', // Limpar completamente o vehicleId
       userId: state.userId,
-    ).copyWith(vehicle: state.vehicle);
+    ); // Não manter o vehicle anterior
   }
 
   /// Reseta formulário
@@ -397,7 +412,7 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
     try {
       // Valida antes de salvar
       if (!validateForm()) {
-        return Left(ValidationFailure('Formulário inválido'));
+        return const Left(ValidationFailure('Formulário inválido'));
       }
 
       state = state.copyWith(isLoading: true);

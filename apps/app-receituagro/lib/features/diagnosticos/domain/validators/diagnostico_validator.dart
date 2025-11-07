@@ -4,6 +4,8 @@ import '../entities/diagnostico_entity.dart';
 /// Extrai toda lógica de validação da entity
 /// Segue Single Responsibility Principle (SOLID)
 class DiagnosticoValidator {
+  const DiagnosticoValidator._();
+
   /// Valida se diagnóstico tem todos os IDs obrigatórios
   static bool isValid(DiagnosticoEntity diagnostico) {
     return diagnostico.id.isNotEmpty &&

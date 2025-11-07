@@ -39,20 +39,23 @@ class FavoritosNavigationService {
         final navigationService =
             GetIt.instance<ReceitaAgroNavigationService>();
         await navigationService.navigateToDetalheDefensivo(
-          defensivoName:
-              defensivoReal.nomeComum.isNotEmpty == true
-                  ? defensivoReal.nomeComum
-                  : defensivoReal.nomeTecnico,
+          defensivoName: defensivoReal.nomeComum.isNotEmpty == true
+              ? defensivoReal.nomeComum
+              : defensivoReal.nomeTecnico,
           extraData: {
             'fabricante':
                 defensivoReal.fabricante ?? 'Fabricante não informado',
           },
         );
       } else {
-        _showNotFoundError(context, 'Defensivo não encontrado');
+        if (context.mounted) {
+          _showNotFoundError(context, 'Defensivo não encontrado');
+        }
       }
     } catch (e) {
-      _showNavigationError(context, 'Erro ao abrir detalhes do defensivo');
+      if (context.mounted) {
+        _showNavigationError(context, 'Erro ao abrir detalhes do defensivo');
+      }
     }
   }
 
@@ -71,16 +74,19 @@ class FavoritosNavigationService {
         await navigationService.navigateToDetalhePraga(
           pragaName: pragaReal.nomeComum,
           pragaId: pragaReal.objectId, // Use objectId for better precision
-          pragaScientificName:
-              pragaReal.nomeCientifico.isNotEmpty == true
-                  ? pragaReal.nomeCientifico
-                  : 'Nome científico não disponível',
+          pragaScientificName: pragaReal.nomeCientifico.isNotEmpty == true
+              ? pragaReal.nomeCientifico
+              : 'Nome científico não disponível',
         );
       } else {
-        _showNotFoundError(context, 'Praga não encontrada');
+        if (context.mounted) {
+          _showNotFoundError(context, 'Praga não encontrada');
+        }
       }
     } catch (e) {
-      _showNavigationError(context, 'Erro ao abrir detalhes da praga');
+      if (context.mounted) {
+        _showNavigationError(context, 'Erro ao abrir detalhes da praga');
+      }
     }
   }
 
@@ -95,23 +101,28 @@ class FavoritosNavigationService {
           .getDiagnosticoCompleto(diagnostico.idReg);
 
       if (diagnosticoCompleto != null) {
-        await Navigator.push<void>(
-          context,
-          MaterialPageRoute<void>(
-            builder:
-                (context) => DetalheDiagnosticoPage(
-                  diagnosticoId: diagnosticoCompleto.diagnostico.objectId,
-                  nomeDefensivo: diagnosticoCompleto.nomeDefensivo,
-                  nomePraga: diagnosticoCompleto.nomePraga,
-                  cultura: diagnosticoCompleto.nomeCultura,
-                ),
-          ),
-        );
+        if (context.mounted) {
+          await Navigator.push<void>(
+            context,
+            MaterialPageRoute<void>(
+              builder: (context) => DetalheDiagnosticoPage(
+                diagnosticoId: diagnosticoCompleto.diagnostico.objectId,
+                nomeDefensivo: diagnosticoCompleto.nomeDefensivo,
+                nomePraga: diagnosticoCompleto.nomePraga,
+                cultura: diagnosticoCompleto.nomeCultura,
+              ),
+            ),
+          );
+        }
       } else {
-        _showNotFoundError(context, 'Diagnóstico não encontrado');
+        if (context.mounted) {
+          _showNotFoundError(context, 'Diagnóstico não encontrado');
+        }
       }
     } catch (e) {
-      _showNavigationError(context, 'Erro ao abrir detalhes do diagnóstico');
+      if (context.mounted) {
+        _showNavigationError(context, 'Erro ao abrir detalhes do diagnóstico');
+      }
     }
   }
 
@@ -122,21 +133,22 @@ class FavoritosNavigationService {
     String culturaNome,
   ) async {
     try {
-      showDialog<dynamic>(
-        context: context,
-        builder:
-            (context) => AlertDialog(
-              title: Text('Cultura: $culturaNome'),
-              content: Text(
-                'Navegação para detalhes da cultura $culturaNome\n\nID: $culturaId',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('OK'),
-                ),
-              ],
+      unawaited(
+        showDialog<dynamic>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Cultura: $culturaNome'),
+            content: Text(
+              'Navegação para detalhes da cultura $culturaNome\n\nID: $culturaId',
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        ),
       );
     } catch (e) {
       _showNavigationError(context, 'Erro ao abrir página da cultura');
@@ -158,27 +170,26 @@ class FavoritosNavigationService {
 
       showDialog<dynamic>(
         context: context,
-        builder:
-            (context) => AlertDialog(
-              title: const Text('Busca Avançada'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Navegação para busca avançada com filtros:'),
-                  const SizedBox(height: 8),
-                  ...filtros.entries.map(
-                    (entry) => Text('• ${entry.key}: ${entry.value}'),
-                  ),
-                ],
+        builder: (context) => AlertDialog(
+          title: const Text('Busca Avançada'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Navegação para busca avançada com filtros:'),
+              const SizedBox(height: 8),
+              ...filtros.entries.map(
+                (entry) => Text('• ${entry.key}: ${entry.value}'),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('OK'),
-                ),
-              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
             ),
+          ],
+        ),
       );
     } catch (e) {
       _showNavigationError(context, 'Erro ao abrir busca avançada');
@@ -220,10 +231,9 @@ class FavoritosNavigationService {
           final item = result.isSuccess ? result.data : null;
           if (item != null) {
             return {
-              'nome':
-                  item.nomeComum.isNotEmpty == true
-                      ? item.nomeComum
-                      : (item.nomeTecnico),
+              'nome': item.nomeComum.isNotEmpty == true
+                  ? item.nomeComum
+                  : (item.nomeTecnico),
               'subtitulo': item.ingredienteAtivo ?? 'Ingrediente não informado',
               'detalhes':
                   '${item.fabricante ?? ''} • ${item.classeAgronomica ?? ''}',
@@ -236,10 +246,9 @@ class FavoritosNavigationService {
           if (item != null) {
             return {
               'nome': item.nomeComum,
-              'subtitulo':
-                  item.nomeCientifico.isNotEmpty == true
-                      ? item.nomeCientifico
-                      : 'Nome científico não disponível',
+              'subtitulo': item.nomeCientifico.isNotEmpty == true
+                  ? item.nomeCientifico
+                  : 'Nome científico não disponível',
               'detalhes': 'Praga agrícola',
             };
           }

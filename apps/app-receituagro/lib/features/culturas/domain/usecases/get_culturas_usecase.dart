@@ -108,33 +108,33 @@ class GetAllCulturasUseCase implements UseCase<List<CulturaEntity>, NoParams> {
 }
 
 /// Use case para buscar culturas por grupo [DEPRECATED]
-@deprecated
+@Deprecated('Use GetCulturasUseCase com GetCulturasByGrupoParams')
 @injectable
 class GetCulturasByGrupoUseCase
     implements UseCase<List<CulturaEntity>, String> {
   final ICulturasRepository repository;
 
-  @deprecated
+  @Deprecated('Use GetCulturasUseCase com GetCulturasByGrupoParams')
   GetCulturasByGrupoUseCase(this.repository);
 
   @override
-  @deprecated
+  @Deprecated('Use GetCulturasUseCase com GetCulturasByGrupoParams')
   Future<Either<Failure, List<CulturaEntity>>> call(String grupo) async {
     return await repository.getCulturasByGrupo(grupo);
   }
 }
 
 /// Use case para pesquisar culturas [DEPRECATED]
-@deprecated
+@Deprecated('Use GetCulturasUseCase com SearchCulturasParams')
 @injectable
 class SearchCulturasUseCase implements UseCase<List<CulturaEntity>, String> {
   final ICulturasRepository repository;
 
-  @deprecated
+  @Deprecated('Use GetCulturasUseCase com SearchCulturasParams')
   SearchCulturasUseCase(this.repository);
 
   @override
-  @deprecated
+  @Deprecated('Use GetCulturasUseCase com SearchCulturasParams')
   Future<Either<Failure, List<CulturaEntity>>> call(String query) async {
     if (query.trim().isEmpty) {
       return await repository.getAllCulturas();
@@ -144,16 +144,16 @@ class SearchCulturasUseCase implements UseCase<List<CulturaEntity>, String> {
 }
 
 /// Use case para buscar grupos de culturas [DEPRECATED]
-@deprecated
+@Deprecated('Use GetCulturasUseCase com GetGruposCulturasParams')
 @injectable
 class GetGruposCulturasUseCase implements UseCase<List<String>, NoParams> {
   final ICulturasRepository repository;
 
-  @deprecated
+  @Deprecated('Use GetCulturasUseCase com GetGruposCulturasParams')
   GetGruposCulturasUseCase(this.repository);
 
   @override
-  @deprecated
+  @Deprecated('Use GetCulturasUseCase com GetGruposCulturasParams')
   Future<Either<Failure, List<String>>> call(NoParams params) async {
     return await repository.getGruposCulturas();
   }

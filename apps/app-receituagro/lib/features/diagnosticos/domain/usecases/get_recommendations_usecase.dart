@@ -18,7 +18,7 @@ class GetRecommendationsUseCase {
   /// - [idPraga]: ID da praga
   /// - [limit]: Limite de recomendações (padrão: 10)
   ///
-  /// Retorna: Either com List<DiagnosticoEntity> ou Failure
+  /// Retorna: Either com List&lt;DiagnosticoEntity&gt; ou Failure
   Future<Either<Failure, List<DiagnosticoEntity>>> call({
     required String idCultura,
     required String idPraga,

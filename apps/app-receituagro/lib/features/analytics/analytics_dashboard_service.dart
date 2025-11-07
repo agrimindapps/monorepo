@@ -20,7 +20,6 @@ import 'services/analytics_metrics_calculation_service.dart';
 /// - Or ensure ReceituagroEnvironmentConfig.DEBUG_ANALYTICS_MOCK_DATA is false in production
 
 import '../../core/constants/receituagro_environment_config.dart';
-import 'analytics_service.dart' show ReceitaAgroAnalyticsEvent;
 
 /// 🔄 DEPRECATED: Use ReceitaAgroAnalyticsEvent instead
 /// This enum is kept for backward compatibility only

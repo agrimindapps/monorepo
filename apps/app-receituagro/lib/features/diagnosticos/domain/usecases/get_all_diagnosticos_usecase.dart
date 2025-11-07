@@ -17,7 +17,7 @@ class GetAllDiagnosticosUseCase {
   /// - [limit]: Quantidade máxima de registros a retornar (opcional)
   /// - [offset]: Número de registros a pular para paginação (opcional)
   ///
-  /// Retorna: Either com List<DiagnosticoEntity> ou Failure
+  /// Retorna: Either com List&lt;DiagnosticoEntity&gt; ou Failure
   Future<Either<Failure, List<DiagnosticoEntity>>> call({
     int? limit,
     int? offset,

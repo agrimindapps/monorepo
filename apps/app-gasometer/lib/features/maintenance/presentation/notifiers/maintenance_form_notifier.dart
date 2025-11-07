@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection.dart' as local_di;
 import '../../../../core/services/input_sanitizer.dart';

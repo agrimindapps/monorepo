@@ -1,10 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
-import 'package:core/src/domain/services/i_subscription_sync_service.dart';
 import 'package:core/src/services/subscription/subscription_sync_models.dart'
     as subscription_models;
-import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Módulo de injeção de dependências para o sistema avançado de subscription
 ///
@@ -58,7 +54,7 @@ abstract class AdvancedSubscriptionModule {
   /// Priority order: RevenueCat (100) > Firebase (80) > Local (40)
   @lazySingleton
   SubscriptionConflictResolver conflictResolver() {
-    return SubscriptionConflictResolver(
+    return const SubscriptionConflictResolver(
       strategy: subscription_models.ConflictResolutionStrategy.priorityBased,
     );
   }

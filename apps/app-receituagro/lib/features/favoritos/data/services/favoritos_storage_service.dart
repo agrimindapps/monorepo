@@ -176,7 +176,9 @@ class FavoritosCacheService implements IFavoritosCache {
     try {
       _memoryCache[key] = data;
       _cacheTimestamps[key] = DateTime.now();
-    } catch (e) {}
+    } catch (e) {
+      // Erro de cache não crítico - operação continua normalmente
+    }
   }
 
   @override
@@ -184,7 +186,9 @@ class FavoritosCacheService implements IFavoritosCache {
     try {
       _memoryCache.remove(key);
       _cacheTimestamps.remove(key);
-    } catch (e) {}
+    } catch (e) {
+      // Erro de cache não crítico - operação continua normalmente
+    }
   }
 
   @override
@@ -197,7 +201,9 @@ class FavoritosCacheService implements IFavoritosCache {
       for (final key in keysToRemove) {
         await remove(key);
       }
-    } catch (e) {}
+    } catch (e) {
+      // Erro de cache não crítico - operação continua normalmente
+    }
   }
 
   @override
@@ -205,7 +211,9 @@ class FavoritosCacheService implements IFavoritosCache {
     try {
       _memoryCache.clear();
       _cacheTimestamps.clear();
-    } catch (e) {}
+    } catch (e) {
+      // Erro de cache não crítico - operação continua normalmente
+    }
   }
 
   @override

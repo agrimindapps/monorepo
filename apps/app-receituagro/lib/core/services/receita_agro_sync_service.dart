@@ -8,8 +8,6 @@ import '../../features/favoritos/data/repositories/favoritos_repository_simplifi
 /// Implementação do serviço de sincronização para o ReceitaAgro
 /// Implementa ISyncService para integrar com o sistema de sync do core
 class ReceitaAgroSyncService implements ISyncService {
-  final UnifiedSyncManager _unifiedSyncManager;
-
   final _statusController = StreamController<SyncServiceStatus>.broadcast();
   final _progressController = StreamController<ServiceProgress>.broadcast();
 
@@ -17,8 +15,7 @@ class ReceitaAgroSyncService implements ISyncService {
   bool _isInitialized = false;
   StreamSubscription<dynamic>? _connectivitySubscription;
 
-  ReceitaAgroSyncService({required UnifiedSyncManager unifiedSyncManager})
-    : _unifiedSyncManager = unifiedSyncManager;
+  ReceitaAgroSyncService();
 
   @override
   String get serviceId => 'receituagro';
@@ -172,7 +169,6 @@ class ReceitaAgroSyncService implements ISyncService {
         ),
       );
     } catch (e) {
-      final duration = DateTime.now().difference(startTime);
       _updateStatus(SyncServiceStatus.failed);
 
       return Left(ServerFailure('Sync failed: $e'));
@@ -272,7 +268,8 @@ class ReceitaAgroSyncService implements ISyncService {
       favoritosResult.fold(
         (failure) {
           totalFailed++;
-          if (kDebugMode) print('⚠️ Falha ao sincronizar favoritos: ${failure.message}');
+          if (kDebugMode)
+            print('⚠️ Falha ao sincronizar favoritos: ${failure.message}');
         },
         (count) {
           totalSynced += count;
@@ -302,7 +299,6 @@ class ReceitaAgroSyncService implements ISyncService {
         ),
       );
     } catch (e) {
-      final duration = DateTime.now().difference(startTime);
       _updateStatus(SyncServiceStatus.failed);
       if (kDebugMode) print('❌ Erro ao sincronizar dados do usuário: $e');
 
@@ -364,7 +360,10 @@ class ReceitaAgroSyncService implements ISyncService {
         // Obtém estatísticas para contar
         final stats = await favoritosRepo.getStats();
         final totalFavoritos =
-            stats.totalDefensivos + stats.totalPragas + stats.totalDiagnosticos + stats.totalCulturas;
+            stats.totalDefensivos +
+            stats.totalPragas +
+            stats.totalDiagnosticos +
+            stats.totalCulturas;
 
         if (kDebugMode) {
           print('✅ Favoritos sincronizados - Total: $totalFavoritos');
@@ -398,9 +397,7 @@ class ReceitaAgroSyncService implements ISyncService {
 
 /// Factory para criar instâncias do ReceitaAgroSyncService
 class ReceitaAgroSyncServiceFactory {
-  static ReceitaAgroSyncService create({
-    required UnifiedSyncManager unifiedSyncManager,
-  }) {
-    return ReceitaAgroSyncService(unifiedSyncManager: unifiedSyncManager);
+  static ReceitaAgroSyncService create() {
+    return ReceitaAgroSyncService();
   }
 }

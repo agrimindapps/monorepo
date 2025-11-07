@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide AuthProvider;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/providers/dependency_providers.dart';
 import 'core/router/app_router.dart';
@@ -103,6 +104,15 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
       themeMode: themeMode,
       routerConfig: router,
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('pt', 'BR'),
+        Locale('en', 'US'),
+      ],
       builder: (context, child) {
         return Column(
           children: [

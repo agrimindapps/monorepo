@@ -1,6 +1,5 @@
 import 'package:app_receituagro/core/di/injection.dart' as di;
 import 'package:core/core.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/data/repositories/pragas_hive_repository.dart';
 import '../../../../core/services/access_history_service.dart';
@@ -33,9 +32,8 @@ class PragasNotifier extends _$PragasNotifier {
       final pragasResult = await _pragasRepository.getAll();
       final pragas = pragasResult.fold(
         (failure) => <PragaEntity>[],
-        (hiveList) => hiveList
-            .map((hive) => PragaEntity.fromHive(hive))
-            .toList(),
+        (hiveList) =>
+            hiveList.map((hive) => PragaEntity.fromHive(hive)).toList(),
       );
 
       return PragasState(
@@ -186,14 +184,11 @@ class PragasNotifier extends _$PragasNotifier {
         final pragasResult = await _pragasRepository.getAll();
         final pragas = pragasResult.fold(
           (failure) => <PragaEntity>[],
-          (hiveList) => hiveList
-              .map((hive) => PragaEntity.fromHive(hive))
-              .toList(),
+          (hiveList) =>
+              hiveList.map((hive) => PragaEntity.fromHive(hive)).toList(),
         );
 
-        state = AsyncValue.data(
-          currentState.copyWith(pragas: pragas),
-        );
+        state = AsyncValue.data(currentState.copyWith(pragas: pragas));
       } else {
         state = AsyncValue.data(currentState);
       }

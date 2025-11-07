@@ -80,7 +80,7 @@ class FavoritosCacheServiceInline {
 
   /// Verifica se uma chave existe no cache (válida)
   Future<bool> has(String key) async {
-    final value = await get(key);
+    final value = await get<Object?>(key);
     return value != null;
   }
 }

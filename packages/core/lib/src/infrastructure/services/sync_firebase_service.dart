@@ -353,16 +353,14 @@ class SyncFirebaseService<T extends BaseSyncEntity>
     try {
       await _ensureInitialized();
 
-      final cutoff =
-          since != null
-              ? DateTime.now().subtract(since)
-              : DateTime.now().subtract(const Duration(days: 30));
+      final cutoff = since != null
+          ? DateTime.now().subtract(since)
+          : DateTime.now().subtract(const Duration(days: 30));
 
-      var results =
-          _localData.where((item) => !item.isDeleted).where((item) {
-            final updatedAt = item.updatedAt ?? item.createdAt;
-            return updatedAt != null && updatedAt.isAfter(cutoff);
-          }).toList();
+      var results = _localData.where((item) => !item.isDeleted).where((item) {
+        final updatedAt = item.updatedAt ?? item.createdAt;
+        return updatedAt != null && updatedAt.isAfter(cutoff);
+      }).toList();
       results.sort((a, b) {
         final aDate =
             a.updatedAt ??
@@ -616,7 +614,14 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       return result.fold((failure) => Left(failure), (data) {
         if (data == null) return const Right(null);
         try {
-          final item = fromMap(data);
+          // ✅ FIXED: Safely handle LinkedMap, IdentityMap and other Hive internal types
+          // Always convert to new Map to handle LinkedMap<dynamic, dynamic> from Hive
+          final castedData = <String, dynamic>{};
+          (data as Map).forEach((key, value) {
+            castedData[key.toString()] = value;
+          });
+
+          final item = fromMap(castedData);
           return Right(item);
         } catch (e) {
           return Left(CacheFailure('Erro ao deserializar item: $e'));
@@ -639,22 +644,27 @@ class SyncFirebaseService<T extends BaseSyncEntity>
           name: 'SyncService',
         ),
         (dataMaps) {
-          _localData =
-              dataMaps
-                  .map((dataMap) {
-                    try {
-                      return fromMap(dataMap);
-                    } catch (e) {
-                      developer.log(
-                        'Erro ao deserializar item: $e',
-                        name: 'SyncService',
-                      );
-                      return null;
-                    }
-                  })
-                  .where((item) => item != null)
-                  .cast<T>()
-                  .toList();
+          _localData = dataMaps
+              .map((dataMap) {
+                try {
+                  // ✅ FIXED: Safely handle LinkedMap, IdentityMap and other Hive internal types
+                  // Always convert to new Map to handle LinkedMap<dynamic, dynamic> from Hive
+                  final castedData = <String, dynamic>{};
+                  (dataMap as Map).forEach((key, value) {
+                    castedData[key.toString()] = value;
+                  });
+                  return fromMap(castedData);
+                } catch (e) {
+                  developer.log(
+                    'Erro ao deserializar item: $e',
+                    name: 'SyncService',
+                  );
+                  return null;
+                }
+              })
+              .where((item) => item != null)
+              .cast<T>()
+              .toList();
 
           _dataController.add(
             _localData.where((item) => !item.isDeleted).toList(),
@@ -749,8 +759,11 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       bool hasChanges = false;
 
       for (final change in snapshot.docChanges) {
-        final data = change.doc.data() as Map<String, dynamic>?;
-        if (data == null) continue;
+        final rawData = change.doc.data();
+        if (rawData == null || rawData is! Map) continue;
+
+        // Firebase returns LinkedMap<dynamic, dynamic>, ensure proper casting
+        final data = Map<String, dynamic>.from(rawData);
 
         switch (change.type) {
           case DocumentChangeType.added:
@@ -1021,11 +1034,20 @@ class SyncFirebaseService<T extends BaseSyncEntity>
 
       for (final doc in snapshot.docs) {
         try {
-          final data = doc.data() as Map<String, dynamic>;
-          // Ensure id is present in the data
-          data['id'] ??= doc.id;
-          final remoteItem = fromMap(data);
-          await _mergeRemoteItem(remoteItem);
+          // Firebase returns LinkedMap<dynamic, dynamic>, ensure proper casting
+          final rawData = doc.data();
+          if (rawData is Map) {
+            final data = Map<String, dynamic>.from(rawData);
+            // Ensure id is present in the data
+            data['id'] ??= doc.id;
+            final remoteItem = fromMap(data);
+            await _mergeRemoteItem(remoteItem);
+          } else {
+            developer.log(
+              'Documento ${doc.id} não contém dados válidos',
+              name: 'SyncService',
+            );
+          }
         } catch (e) {
           developer.log(
             'Erro ao processar documento ${doc.id}: $e',
@@ -1069,7 +1091,10 @@ class SyncFirebaseService<T extends BaseSyncEntity>
     try {
       await _authSubscription?.cancel();
     } catch (e) {
-      developer.log('Error canceling auth subscription: $e', name: 'SyncService');
+      developer.log(
+        'Error canceling auth subscription: $e',
+        name: 'SyncService',
+      );
     }
 
     try {
@@ -1112,10 +1137,9 @@ extension SyncFirebaseServiceExtensions<T extends BaseSyncEntity>
     return SyncMetrics(
       collectionName: debug['collection_name'] as String,
       localItemsCount: debug['local_items_count'] as int,
-      lastSyncAt:
-          debug['last_sync_time'] != null
-              ? DateTime.parse(debug['last_sync_time'] as String)
-              : null,
+      lastSyncAt: debug['last_sync_time'] != null
+          ? DateTime.parse(debug['last_sync_time'] as String)
+          : null,
       syncStatus: SyncStatus.values.firstWhere(
         (s) => s.name == debug['current_status'],
       ),

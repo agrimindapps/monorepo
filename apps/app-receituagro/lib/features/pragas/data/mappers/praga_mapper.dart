@@ -6,6 +6,8 @@ import '../../domain/entities/praga_entity.dart';
 /// Segue padrão Clean Architecture - isolamento entre camadas
 /// Consolida funcionalidades eliminando duplicação
 class PragaMapper {
+  const PragaMapper._();
+
   /// Converte PragaModel para Entity
   static PragaEntity toEntity(PragaModel model) {
     return PragaEntity(

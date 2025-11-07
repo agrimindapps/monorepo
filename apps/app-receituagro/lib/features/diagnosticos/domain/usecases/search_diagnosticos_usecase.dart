@@ -16,7 +16,7 @@ class SearchDiagnosticosUseCase {
   /// Parâmetros:
   /// - [filters]: Objeto com critérios de filtro (defensivo, cultura, praga, etc)
   ///
-  /// Retorna: Either com List<DiagnosticoEntity> ou Failure
+  /// Retorna: Either com List&lt;DiagnosticoEntity&gt; ou Failure
   Future<Either<Failure, List<DiagnosticoEntity>>> call(
     DiagnosticoSearchFilters filters,
   ) async {
@@ -36,7 +36,7 @@ class SearchDiagnosticosUseCase {
   /// Parâmetros:
   /// - [pattern]: Texto para buscar (será procurado em defensivo, cultura, praga)
   ///
-  /// Retorna: Either com List<DiagnosticoEntity> ou Failure
+  /// Retorna: Either com List&lt;DiagnosticoEntity&gt; ou Failure
   Future<Either<Failure, List<DiagnosticoEntity>>> searchByPattern(
     String pattern,
   ) async {

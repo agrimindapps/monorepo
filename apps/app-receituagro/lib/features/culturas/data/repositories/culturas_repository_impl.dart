@@ -36,11 +36,13 @@ class CulturasRepositoryImpl implements ICulturasRepository {
     try {
       final result = await _hiveRepository.getAll();
       if (result.isFailure) {
-        return Left(CacheFailure('Erro ao buscar culturas: ${result.error?.message}'));
+        return Left(
+          CacheFailure('Erro ao buscar culturas: ${result.error?.message}'),
+        );
       }
       final culturasHive = result.data ?? [];
       final culturasEntities = CulturaMapper.fromHiveToEntityList(culturasHive);
-      
+
       return Right(culturasEntities);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar culturas: ${e.toString()}'));
@@ -48,22 +50,31 @@ class CulturasRepositoryImpl implements ICulturasRepository {
   }
 
   @override
-  Future<Either<Failure, List<CulturaEntity>>> getCulturasByGrupo(String grupo) async {
+  Future<Either<Failure, List<CulturaEntity>>> getCulturasByGrupo(
+    String grupo,
+  ) async {
     try {
       final result = await _hiveRepository.getAll();
       if (result.isFailure) {
-        return Left(CacheFailure('Erro ao buscar culturas: ${result.error?.message}'));
+        return Left(
+          CacheFailure('Erro ao buscar culturas: ${result.error?.message}'),
+        );
       }
 
       final allCulturas = result.data ?? [];
       final culturasEntities = CulturaMapper.fromHiveToEntityList(allCulturas);
 
       // Delegate to query service
-      final culturasFiltradas = _queryService.getByGrupo(culturasEntities, grupo);
+      final culturasFiltradas = _queryService.getByGrupo(
+        culturasEntities,
+        grupo,
+      );
 
       return Right(culturasFiltradas);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar culturas por grupo: ${e.toString()}'));
+      return Left(
+        CacheFailure('Erro ao buscar culturas por grupo: ${e.toString()}'),
+      );
     }
   }
 
@@ -72,27 +83,37 @@ class CulturasRepositoryImpl implements ICulturasRepository {
     try {
       final result = await _hiveRepository.getByKey(id);
       if (result.isFailure) {
-        return Left(CacheFailure('Erro ao buscar cultura por ID: ${result.error?.message}'));
+        return Left(
+          CacheFailure(
+            'Erro ao buscar cultura por ID: ${result.error?.message}',
+          ),
+        );
       }
       final cultura = result.data;
-      
+
       if (cultura == null) {
         return const Right(null);
       }
-      
+
       final culturaEntity = CulturaMapper.fromHiveToEntity(cultura);
       return Right(culturaEntity);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar cultura por ID: ${e.toString()}'));
+      return Left(
+        CacheFailure('Erro ao buscar cultura por ID: ${e.toString()}'),
+      );
     }
   }
 
   @override
-  Future<Either<Failure, List<CulturaEntity>>> searchCulturas(String query) async {
+  Future<Either<Failure, List<CulturaEntity>>> searchCulturas(
+    String query,
+  ) async {
     try {
       final result = await _hiveRepository.getAll();
       if (result.isFailure) {
-        return Left(CacheFailure('Erro ao buscar culturas: ${result.error?.message}'));
+        return Left(
+          CacheFailure('Erro ao buscar culturas: ${result.error?.message}'),
+        );
       }
 
       final allCulturas = result.data ?? [];
@@ -113,7 +134,9 @@ class CulturasRepositoryImpl implements ICulturasRepository {
       final result = await _hiveRepository.getAll();
       if (result.isFailure) {
         return Left(
-          CacheFailure('Erro ao buscar grupos de culturas: ${result.error?.message}'),
+          CacheFailure(
+            'Erro ao buscar grupos de culturas: ${result.error?.message}',
+          ),
         );
       }
 
@@ -125,7 +148,9 @@ class CulturasRepositoryImpl implements ICulturasRepository {
 
       return Right(grupos);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar grupos de culturas: {{e.toString()}}'));
+      return Left(
+        CacheFailure('Erro ao buscar grupos de culturas: {{e.toString()}}'),
+      );
     }
   }
 
@@ -134,8 +159,10 @@ class CulturasRepositoryImpl implements ICulturasRepository {
     try {
       final result = await _hiveRepository.getAll();
       if (result.isFailure) {
-        return Left(
-          CacheFailure('Erro ao verificar status da cultura: {{result.error?.message}}'),
+        return const Left(
+          CacheFailure(
+            'Erro ao verificar status da cultura: {{result.error?.message}}',
+          ),
         );
       }
 
@@ -143,11 +170,14 @@ class CulturasRepositoryImpl implements ICulturasRepository {
       final culturasEntities = CulturaMapper.fromHiveToEntityList(allCulturas);
 
       // Delegate to query service
-      final isActive = _queryService.isCulturaActive(culturasEntities, culturaId);
+      final isActive = _queryService.isCulturaActive(
+        culturasEntities,
+        culturaId,
+      );
 
       return Right(isActive);
     } catch (e) {
-      return Left(
+      return const Left(
         CacheFailure('Erro ao verificar status da cultura: {{e.toString()}}'),
       );
     }

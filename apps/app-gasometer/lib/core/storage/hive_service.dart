@@ -67,6 +67,7 @@ class HiveService {
       // Agora: Box<dynamic> para todas
       // Os adapters continuam registrados e funcionam normalmente
       await Hive.openBox<dynamic>(HiveBoxNames.vehicles);
+      await Hive.openBox<dynamic>(HiveBoxNames.fuel);
       await Hive.openBox<dynamic>(HiveBoxNames.fuelSupplies);
       await Hive.openBox<dynamic>(HiveBoxNames.odometer);
       await Hive.openBox<dynamic>(HiveBoxNames.expenses);
@@ -148,6 +149,7 @@ class HiveService {
 /// Nomes de todas as boxes utilizadas no app
 class HiveBoxNames {
   static const String vehicles = 'vehicles';
+  static const String fuel = 'fuel'; // UnifiedSync compatibility
   static const String fuelSupplies = 'fuel_supplies';
   static const String odometer = 'odometer';
   static const String expenses = 'expenses';
@@ -163,6 +165,7 @@ class HiveBoxNames {
   /// Lista de todas as boxes para operações em lote
   static const List<String> allBoxes = [
     vehicles,
+    fuel,
     fuelSupplies,
     odometer,
     expenses,

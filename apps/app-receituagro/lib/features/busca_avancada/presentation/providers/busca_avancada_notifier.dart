@@ -121,9 +121,9 @@ class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
 
       state = AsyncValue.data(
         currentState.copyWith(
-          culturas: dropdownData['culturas']!,
-          pragas: dropdownData['pragas']!,
-          defensivos: dropdownData['defensivos']!,
+          culturas: dropdownData['culturas'],
+          pragas: dropdownData['pragas'],
+          defensivos: dropdownData['defensivos'],
           dadosCarregados: true,
         ),
       );

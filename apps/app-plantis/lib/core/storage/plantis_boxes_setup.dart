@@ -6,29 +6,89 @@ import '../constants/plantis_environment_config.dart';
 class PlantisBoxesSetup {
   /// Registra todas as boxes específicas do Plantis
   static Future<void> registerPlantisBoxes() async {
+    print('🔧 [PlantisBoxesSetup] Iniciando registro de boxes do Plantis...');
     final boxRegistry = GetIt.I<IBoxRegistryService>();
 
+    // ✅ IMPORTANTE: Marcar como persistent: true para garantir que as boxes
+    // sejam abertas pelo BoxRegistry e registradas corretamente
+    // Mesmo que já estejam abertas pelos local data sources, isso garante
+    // compatibilidade com UnifiedSync e evita erros de tipo
     final plantisBoxes = [
-      BoxConfiguration.basic(name: PlantisBoxes.main, appId: 'plantis'),
-      BoxConfiguration.basic(name: PlantisBoxes.reminders, appId: 'plantis'),
-      BoxConfiguration.basic(name: PlantisBoxes.careLogs, appId: 'plantis'),
-      BoxConfiguration.basic(name: PlantisBoxes.backups, appId: 'plantis'),
-      BoxConfiguration.basic(name: 'plants', appId: 'plantis'),
-      BoxConfiguration.basic(name: 'spaces', appId: 'plantis'),
-      BoxConfiguration.basic(name: 'tasks', appId: 'plantis'),
-      BoxConfiguration.basic(name: 'comments', appId: 'plantis'),
-      BoxConfiguration.basic(name: 'comentarios', appId: 'plantis'),
-      BoxConfiguration.basic(name: 'users', appId: 'plantis'),
-      BoxConfiguration.basic(name: 'subscriptions', appId: 'plantis'),
+      const BoxConfiguration(
+        name: PlantisBoxes.main,
+        appId: 'plantis',
+        persistent: true,
+      ),
+      const BoxConfiguration(
+        name: PlantisBoxes.reminders,
+        appId: 'plantis',
+        persistent: true,
+      ),
+      const BoxConfiguration(
+        name: PlantisBoxes.careLogs,
+        appId: 'plantis',
+        persistent: true,
+      ),
+      const BoxConfiguration(
+        name: PlantisBoxes.backups,
+        appId: 'plantis',
+        persistent: true,
+      ),
+      const BoxConfiguration(
+        name: 'plants',
+        appId: 'plantis',
+        persistent: true,
+      ),
+      const BoxConfiguration(
+        name: 'spaces',
+        appId: 'plantis',
+        persistent: true,
+      ),
+      const BoxConfiguration(
+        name: 'tasks',
+        appId: 'plantis',
+        persistent: true,
+      ),
+      const BoxConfiguration(
+        name: 'comments',
+        appId: 'plantis',
+        persistent: true,
+      ),
+      const BoxConfiguration(
+        name: 'comentarios',
+        appId: 'plantis',
+        persistent: true,
+      ),
+      const BoxConfiguration(
+        name: 'users',
+        appId: 'plantis',
+        persistent: true,
+      ),
+      const BoxConfiguration(
+        name: 'subscriptions',
+        appId: 'plantis',
+        persistent: true,
+      ),
     ];
+
+    print(
+      '🔧 [PlantisBoxesSetup] Registrando ${plantisBoxes.length} boxes...',
+    );
 
     for (final config in plantisBoxes) {
       final result = await boxRegistry.registerBox(config);
-      if (result.isLeft()) {
-        print(
-          'Warning: Failed to register plantis box "${config.name}": ${result.fold((f) => f.message, (_) => '')}',
-        );
-      }
+      result.fold(
+        (failure) {
+          print(
+            '❌ [PlantisBoxesSetup] ERRO ao registrar box "${config.name}": ${failure.message}',
+          );
+        },
+        (_) {
+          print('✅ [PlantisBoxesSetup] Box "${config.name}" registrada com sucesso');
+        },
+      );
     }
+
+    print('✅ [PlantisBoxesSetup] Registro de boxes do Plantis concluído');
   }
 }

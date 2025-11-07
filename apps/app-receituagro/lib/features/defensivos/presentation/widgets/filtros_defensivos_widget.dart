@@ -32,12 +32,10 @@ class FiltrosDefensivosWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ExpansionTile(
         leading: Container(
           padding: const EdgeInsets.all(8),
@@ -49,18 +47,11 @@ class FiltrosDefensivosWidget extends StatelessWidget {
             ),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Icon(
-            Icons.filter_list,
-            color: Colors.white,
-            size: 20,
-          ),
+          child: const Icon(Icons.filter_list, color: Colors.white, size: 20),
         ),
         title: const Text(
           'Filtros Avançados',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
         ),
         subtitle: Text(
           _buildSubtitleText(),
@@ -89,11 +80,12 @@ class FiltrosDefensivosWidget extends StatelessWidget {
 
   String _buildSubtitleText() {
     final filtros = <String>[];
-    if (filtroToxicidade != 'todos') filtros.add('Toxicidade: $filtroToxicidade');
+    if (filtroToxicidade != 'todos')
+      filtros.add('Toxicidade: $filtroToxicidade');
     if (filtroTipo != 'todos') filtros.add('Tipo: $filtroTipo');
     if (apenasComercializados) filtros.add('Comercializados');
     if (apenasElegiveis) filtros.add('Elegíveis');
-    
+
     return filtros.isEmpty ? 'Sem filtros aplicados' : filtros.join(' • ');
   }
 
@@ -110,12 +102,13 @@ class FiltrosDefensivosWidget extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: ordenacao,
+          initialValue: ordenacao,
           decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
             ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           ),
           items: const [
             DropdownMenuItem(value: 'prioridade', child: Text('Prioridade')),
@@ -149,19 +142,31 @@ class FiltrosDefensivosWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
-                    value: filtroToxicidade,
+                    initialValue: filtroToxicidade,
                     decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                     items: const [
                       DropdownMenuItem(value: 'todos', child: Text('Todos')),
-                      DropdownMenuItem(value: 'baixa', child: Text('Baixa (IV)')),
-                      DropdownMenuItem(value: 'media', child: Text('Média (III)')),
+                      DropdownMenuItem(
+                        value: 'baixa',
+                        child: Text('Baixa (IV)'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'media',
+                        child: Text('Média (III)'),
+                      ),
                       DropdownMenuItem(value: 'alta', child: Text('Alta (II)')),
-                      DropdownMenuItem(value: 'extrema', child: Text('Extrema (I)')),
+                      DropdownMenuItem(
+                        value: 'extrema',
+                        child: Text('Extrema (I)'),
+                      ),
                     ],
                     onChanged: (value) {
                       if (value != null) onToxicidadeChanged(value);
@@ -184,19 +189,34 @@ class FiltrosDefensivosWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
-                    value: filtroTipo,
+                    initialValue: filtroTipo,
                     decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                     items: const [
                       DropdownMenuItem(value: 'todos', child: Text('Todos')),
-                      DropdownMenuItem(value: 'fungicida', child: Text('Fungicida')),
-                      DropdownMenuItem(value: 'inseticida', child: Text('Inseticida')),
-                      DropdownMenuItem(value: 'herbicida', child: Text('Herbicida')),
-                      DropdownMenuItem(value: 'acaricida', child: Text('Acaricida')),
+                      DropdownMenuItem(
+                        value: 'fungicida',
+                        child: Text('Fungicida'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'inseticida',
+                        child: Text('Inseticida'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'herbicida',
+                        child: Text('Herbicida'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'acaricida',
+                        child: Text('Acaricida'),
+                      ),
                     ],
                     onChanged: (value) {
                       if (value != null) onTipoChanged(value);

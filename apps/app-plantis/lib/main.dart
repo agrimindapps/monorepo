@@ -64,22 +64,49 @@ void main() async {
     await HiveSchemaManager.migrate();
   }
 
-  await di.init(firebaseEnabled: firebaseInitialized);
+  print('🔧 [MAIN] Iniciando DI initialization...');
+  try {
+    await di.init(firebaseEnabled: firebaseInitialized);
+    print('✅ [MAIN] DI initialization completo');
+  } catch (e) {
+    print('❌ [MAIN] ERRO no DI initialization: $e');
+    rethrow;
+  }
+
+  // Register Plantis boxes IMMEDIATELY after DI init, before any other service is used
+  // This ensures boxes are registered before HiveStorageService or SyncQueue try to use them
+  // ✅ IMPORTANTE: Registrar em TODAS as plataformas (incluindo Web!)
+  print('🔧 [MAIN] ===== INICIANDO REGISTRO DE BOXES DO PLANTIS (Platform: Web=$kIsWeb) =====');
+  try {
+    print('🔧 [MAIN] Chamando PlantisBoxesSetup.registerPlantisBoxes()...');
+    await PlantisBoxesSetup.registerPlantisBoxes();
+    print('✅ [MAIN] ===== BOXES DO PLANTIS REGISTRADOS COM SUCESSO =====');
+  } catch (e, stackTrace) {
+    print('❌ [MAIN] ===== ERRO CRÍTICO AO REGISTRAR BOXES =====');
+    print('❌ [MAIN] Erro: $e');
+    print('❌ [MAIN] Stack trace:\n$stackTrace');
+    SecureLogger.error('Failed to register Plantis boxes', error: e);
+    // Não fazer rethrow - continuar mesmo com erro no registro
+    // rethrow;
+  }
 
   // Initialize SyncQueue before other sync services
+  print('🔧 [MAIN] Inicializando SyncQueue...');
   final syncQueue = di.sl<local_sync.SyncQueue>();
   await syncQueue.initialize();
+  print('✅ [MAIN] SyncQueue inicializado');
+
   // Initialize SyncOperations after SyncQueue
+  print('🔧 [MAIN] Inicializando SyncOperations...');
   final syncOperations = di.sl<local_sync.SyncOperations>();
   await syncOperations.initialize();
+  print('✅ [MAIN] SyncOperations inicializado');
+
+  print('🔧 [MAIN] Configurando SolidDI...');
   SolidDIConfigurator.configure(
     kDebugMode ? DIMode.development : DIMode.production,
   );
-
-  // Register Plantis boxes only on non-web platforms
-  if (!kIsWeb) {
-    await PlantisBoxesSetup.registerPlantisBoxes();
-  }
+  print('✅ [MAIN] SolidDI configurado');
 
   // Initialize UnifiedSyncManager with Plantis configuration (only if Firebase is available)
   if (firebaseInitialized) {

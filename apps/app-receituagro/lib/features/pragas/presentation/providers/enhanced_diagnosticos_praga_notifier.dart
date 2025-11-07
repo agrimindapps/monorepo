@@ -125,22 +125,19 @@ class EnhancedDiagnosticosPragaState {
   List<DiagnosticoEntity> _applyFilters() {
     var filtered = List<DiagnosticoEntity>.from(diagnosticos);
     if (searchQuery.isNotEmpty) {
-      filtered =
-          filtered.where((diag) {
-            final query = searchQuery.toLowerCase();
-            return (diag.nomeDefensivo?.toLowerCase().contains(query) ??
-                    false) ||
-                (diag.nomeCultura?.toLowerCase().contains(query) ?? false) ||
-                (diag.nomePraga?.toLowerCase().contains(query) ?? false) ||
-                diag.idDefensivo.toLowerCase().contains(query);
-          }).toList();
+      filtered = filtered.where((diag) {
+        final query = searchQuery.toLowerCase();
+        return (diag.nomeDefensivo?.toLowerCase().contains(query) ?? false) ||
+            (diag.nomeCultura?.toLowerCase().contains(query) ?? false) ||
+            (diag.nomePraga?.toLowerCase().contains(query) ?? false) ||
+            diag.idDefensivo.toLowerCase().contains(query);
+      }).toList();
     }
     if (selectedCultura != 'Todas') {
-      filtered =
-          filtered.where((diag) {
-            final culturaNome = diag.nomeCultura ?? '';
-            return culturaNome == selectedCultura;
-          }).toList();
+      filtered = filtered.where((diag) {
+        final culturaNome = diag.nomeCultura ?? '';
+        return culturaNome == selectedCultura;
+      }).toList();
     }
 
     return filtered;
@@ -158,13 +155,10 @@ class EnhancedDiagnosticosPragaState {
       total: totalDiagnosticos,
       filtered: filteredCount,
       groups: grouping.length,
-      avgGroupSize:
-          grouping.isNotEmpty
-              ? grouping.values
-                      .map((list) => list.length)
-                      .reduce((a, b) => a + b) /
-                  grouping.length
-              : 0.0,
+      avgGroupSize: grouping.isNotEmpty
+          ? grouping.values.map((list) => list.length).reduce((a, b) => a + b) /
+                grouping.length
+          : 0.0,
       hasFilters: hasFilters,
       cacheHitRate: 0.0,
     );
@@ -199,7 +193,11 @@ class EnhancedDiagnosticosPragaNotifier
 
   /// Inicializa o provider
   Future<void> initialize() async {
-    try {} catch (e) {}
+    try {
+      // Inicialização futura - por enquanto não faz nada
+    } catch (e) {
+      // Erro de inicialização não crítico
+    }
   }
 
   /// Carrega diagnósticos para uma praga específica por ID
@@ -383,8 +381,10 @@ class EnhancedDiagnosticosPragaNotifier
     DiagnosticoEntity diagnostico,
   ) async {
     final currentState = state.value;
-    if (currentState == null || currentState.currentPragaId?.isNotEmpty != true)
+    if (currentState == null ||
+        currentState.currentPragaId?.isNotEmpty != true) {
       return null;
+    }
 
     try {
       return await _compatibilityService.validateFullCompatibility(
@@ -435,8 +435,10 @@ class EnhancedDiagnosticosPragaNotifier
   /// Força recarregamento dos dados
   Future<void> refresh() async {
     final currentState = state.value;
-    if (currentState == null || currentState.currentPragaId?.isNotEmpty != true)
+    if (currentState == null ||
+        currentState.currentPragaId?.isNotEmpty != true) {
       return;
+    }
 
     await loadDiagnosticos(currentState.currentPragaId!);
   }

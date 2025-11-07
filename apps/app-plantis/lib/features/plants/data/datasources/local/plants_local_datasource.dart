@@ -7,6 +7,26 @@ import '../../../domain/entities/plant.dart';
 import '../../models/plant_model.dart';
 import 'plants_search_service.dart';
 
+/// Helper function to safely convert any Map to Map<String, dynamic>
+/// Handles LinkedMap, IdentityMap, and other Hive internal map types
+Map<String, dynamic> _safeConvertToMap(dynamic value) {
+  if (value == null) return {};
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) {
+    try {
+      return Map<String, dynamic>.from(value);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint(
+          'Warning: Failed to convert map of type ${value.runtimeType}: $e',
+        );
+      }
+      return {};
+    }
+  }
+  return {};
+}
+
 abstract class PlantsLocalDatasource {
   Future<List<Plant>> getPlants();
   Future<Plant?> getPlantById(String id);
@@ -65,7 +85,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
             if (plantData is String) {
               plantJson = jsonDecode(plantData) as Map<String, dynamic>;
             } else if (plantData is Map) {
-              plantJson = Map<String, dynamic>.from(plantData);
+              plantJson = _safeConvertToMap(plantData);
 
               // Migrate old format to new format
               if (kDebugMode) {
@@ -132,7 +152,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
         if (plantData is String) {
           plantJson = jsonDecode(plantData) as Map<String, dynamic>;
         } else if (plantData is Map) {
-          plantJson = Map<String, dynamic>.from(plantData);
+          plantJson = _safeConvertToMap(plantData);
 
           // Migrate old format to new format
           if (kDebugMode) {

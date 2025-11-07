@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
@@ -18,10 +17,15 @@ class DriftDatabaseConfig {
     required String databaseName,
     bool logStatements = false,
   }) {
-    return driftDatabase(
-      name: databaseName,
-      native: DriftNativeOptions(shareAcrossIsolates: true),
-    );
+    return LazyDatabase(() async {
+      final dbFolder = await getApplicationDocumentsDirectory();
+      final file = File(p.join(dbFolder.path, databaseName));
+
+      return NativeDatabase.createInBackground(
+        file,
+        logStatements: logStatements,
+      );
+    });
   }
 
   /// Cria um executor customizado para casos especiais

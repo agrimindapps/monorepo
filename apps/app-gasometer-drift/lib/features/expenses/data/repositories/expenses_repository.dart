@@ -16,7 +16,7 @@ import '../../domain/entities/expense_entity.dart';
 /// - Validações de valores monetários
 /// - Ordenação por data (mais recente primeiro)
 /// - Relacionamento com Vehicle (chave estrangeira)
-@Injectable(as: IExpensesRepository)
+// @Injectable(as: IExpensesRepository)
 class ExpensesRepository implements IExpensesRepository {
   ExpensesRepository();
   static const _appName = 'gasometer';

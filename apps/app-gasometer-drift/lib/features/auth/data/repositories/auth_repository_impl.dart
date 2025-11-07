@@ -14,9 +14,11 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
+    required this.dataCleanerService,
   });
   final AuthRemoteDataSource remoteDataSource;
   final AuthLocalDataSource localDataSource;
+  final DataCleanerService dataCleanerService;
 
   @override
   Future<Either<Failure, UserEntity?>> getCurrentUser() async {
@@ -393,7 +395,6 @@ class AuthRepositoryImpl implements AuthRepository {
   /// Clears all local gasometer-specific data after account deletion
   Future<void> _clearGasometerLocalData() async {
     try {
-      final dataCleanerService = DataCleanerService.instance;
       final clearResult = await dataCleanerService.clearAllData();
 
       if (clearResult['success'] == true) {
@@ -402,7 +403,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
         if (kDebugMode) {
           debugPrint('✅ Gasometer local data cleared successfully:');
-          debugPrint('   - Hive boxes: $clearedBoxes');
+          debugPrint('   - Database entries: $clearedBoxes');
           debugPrint('   - SharedPreferences: $clearedPrefs');
         }
       } else {

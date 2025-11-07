@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -49,13 +49,12 @@ class _EnhancedLoginFormState extends ConsumerState<EnhancedLoginForm> {
               if (snapshot.hasData) {
                 return RateLimitInfoWidget(
                   rateLimitInfo: snapshot.data!,
-                  onReset:
-                      kDebugMode
-                          ? () async {
-                            await authNotifier.resetRateLimit();
-                            setState(() {}); // Rebuild to show updated info
-                          }
-                          : null,
+                  onReset: kDebugMode
+                      ? () async {
+                          await authNotifier.resetRateLimit();
+                          setState(() {}); // Rebuild to show updated info
+                        }
+                      : null,
                 );
               }
               return const SizedBox.shrink();
@@ -127,18 +126,16 @@ class _EnhancedLoginFormState extends ConsumerState<EnhancedLoginForm> {
               final canAttempt = snapshot.data ?? true;
 
               return ElevatedButton(
-                onPressed:
-                    canAttempt && !authState.isLoading
-                        ? () => _handleLogin()
-                        : null,
-                child:
-                    authState.isLoading
-                        ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                        : const Text('Entrar'),
+                onPressed: canAttempt && !authState.isLoading
+                    ? () => _handleLogin()
+                    : null,
+                child: authState.isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Entrar'),
               );
             },
           ),

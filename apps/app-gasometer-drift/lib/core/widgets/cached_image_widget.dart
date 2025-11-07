@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../constants/ui_constants.dart';
@@ -8,7 +8,6 @@ import '../constants/ui_constants.dart';
 /// Widget reutilizável para carregamento otimizado de imagens
 /// com cache, shimmer loading e error handling
 class CachedImageWidget extends StatelessWidget {
-
   const CachedImageWidget({
     super.key,
     this.networkUrl,
@@ -27,11 +26,11 @@ class CachedImageWidget extends StatelessWidget {
     this.excludeFromSemantics = false,
     this.isFullScreen = false,
   }) : assert(
-         (networkUrl != null) || 
-         (localPath != null) || 
-         (imageFile != null) || 
-         (assetPath != null),
-         'Pelo menos uma fonte de imagem deve ser fornecida'
+         (networkUrl != null) ||
+             (localPath != null) ||
+             (imageFile != null) ||
+             (assetPath != null),
+         'Pelo menos uma fonte de imagem deve ser fornecida',
        );
 
   /// Factory para imagens de rede
@@ -110,48 +109,49 @@ class CachedImageWidget extends StatelessWidget {
       excludeFromSemantics: excludeFromSemantics,
     );
   }
+
   /// URL da imagem de rede
   final String? networkUrl;
-  
+
   /// Caminho da imagem local
   final String? localPath;
-  
+
   /// Arquivo de imagem local
   final File? imageFile;
-  
+
   /// Caminho do asset
   final String? assetPath;
-  
+
   /// Altura da imagem
   final double? height;
-  
+
   /// Largura da imagem
   final double? width;
-  
+
   /// Como ajustar a imagem
   final BoxFit fit;
-  
+
   /// Border radius personalizado
   final BorderRadiusGeometry? borderRadius;
-  
+
   /// Widget de placeholder personalizado
   final Widget? placeholder;
-  
+
   /// Widget de erro personalizado
   final Widget? errorWidget;
-  
+
   /// Ícone para placeholder padrão
   final IconData? placeholderIcon;
-  
+
   /// Cor base do shimmer
   final Color? shimmerBaseColor;
-  
+
   /// Cor de highlight do shimmer
   final Color? shimmerHighlightColor;
-  
+
   /// Se deve excluir da semântica
   final bool excludeFromSemantics;
-  
+
   /// Se é uma visualização em tela cheia
   final bool isFullScreen;
 
@@ -170,10 +170,7 @@ class CachedImageWidget extends StatelessWidget {
       imageWidget = _buildErrorWidget(context);
     }
     if (borderRadius != null) {
-      imageWidget = ClipRRect(
-        borderRadius: borderRadius!,
-        child: imageWidget,
-      );
+      imageWidget = ClipRRect(borderRadius: borderRadius!, child: imageWidget);
     }
 
     return imageWidget;
@@ -197,11 +194,11 @@ class CachedImageWidget extends StatelessWidget {
   Widget _buildFileImage(BuildContext context, [File? file]) {
     final targetFile = file ?? imageFile!;
     final screenSize = MediaQuery.of(context).size;
-    final cacheHeight = isFullScreen 
-        ? (screenSize.height * 0.8).toInt() 
+    final cacheHeight = isFullScreen
+        ? (screenSize.height * 0.8).toInt()
         : height?.toInt() ?? AppSizes.imagePreviewHeight.toInt();
-    final cacheWidth = isFullScreen 
-        ? (screenSize.width * 0.9).toInt() 
+    final cacheWidth = isFullScreen
+        ? (screenSize.width * 0.9).toInt()
         : width?.toInt() ?? screenSize.width.toInt();
 
     return Image.file(
@@ -263,7 +260,9 @@ class CachedImageWidget extends StatelessWidget {
               Text(
                 'Carregando...',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.5,
+                  ),
                 ),
               ),
             ],

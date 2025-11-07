@@ -2,7 +2,6 @@ import 'package:core/core.dart' as core;
 import 'package:core/core.dart' show GetIt;
 import 'package:flutter/foundation.dart';
 
-import '../../services/data_cleaner_service.dart';
 import '../di_module.dart';
 
 /// Core module responsible for external services and core infrastructure
@@ -97,9 +96,7 @@ class CoreModule implements DIModule {
       getIt.registerLazySingleton<core.ISubscriptionRepository>(
         () => core.RevenueCatService(),
       );
-      getIt.registerLazySingleton<DataCleanerService>(
-        () => DataCleanerService.instance,
-      );
+      // DataCleanerService is registered via Injectable (@lazySingleton)
 
       debugPrint(
         '✅ Core package services registered for Injectable dependencies',

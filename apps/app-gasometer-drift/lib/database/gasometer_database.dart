@@ -31,7 +31,14 @@ part 'gasometer_database.g.dart';
 /// });
 /// ```
 @DriftDatabase(
-  tables: [Vehicles, FuelSupplies, Maintenances, Expenses, OdometerReadings],
+  tables: [
+    Vehicles,
+    FuelSupplies,
+    Maintenances,
+    Expenses,
+    OdometerReadings,
+    AuditTrail,
+  ],
 )
 @lazySingleton
 class GasometerDatabase extends _$GasometerDatabase with BaseDriftDatabase {

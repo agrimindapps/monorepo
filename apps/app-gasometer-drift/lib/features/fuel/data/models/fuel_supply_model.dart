@@ -15,15 +15,15 @@ bool? _parseBoolNullable(dynamic value) {
 /// Fuel Supply (Abastecimento) model with Firebase sync support
 class FuelSupplyModel extends BaseSyncModel {
   FuelSupplyModel({
-    required this.id,
-    this.createdAtMs,
-    this.updatedAtMs,
-    this.lastSyncAtMs,
-    this.isDirty = false,
-    this.isDeleted = false,
-    this.version = 1,
-    this.userId,
-    this.moduleName = 'gasometer',
+    required String id,
+    int? createdAtMs,
+    int? updatedAtMs,
+    int? lastSyncAtMs,
+    bool isDirty = false,
+    bool isDeleted = false,
+    int version = 1,
+    String? userId,
+    String? moduleName = 'gasometer',
     this.vehicleId = '',
     this.date = 0,
     this.odometer = 0.0,
@@ -53,6 +53,20 @@ class FuelSupplyModel extends BaseSyncModel {
          userId: userId,
          moduleName: moduleName,
        );
+
+  // Field declarations
+  final String vehicleId;
+  final int date;
+  final double odometer;
+  final double liters;
+  final double totalPrice;
+  final bool? fullTank;
+  final double pricePerLiter;
+  final String? gasStationName;
+  final String? notes;
+  final int fuelType;
+  final String? receiptImageUrl;
+  final String? receiptImagePath;
 
   /// Factory constructor for creating new fuel supply
   factory FuelSupplyModel.create({
@@ -95,35 +109,6 @@ class FuelSupplyModel extends BaseSyncModel {
     );
   }
 
-  /// Create from Hive map
-  factory FuelSupplyModel.fromHiveMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncModel.parseBaseHiveFields(map);
-
-    return FuelSupplyModel(
-      id: baseFields['id'] as String,
-      createdAtMs: map['createdAt'] as int?,
-      updatedAtMs: map['updatedAt'] as int?,
-      lastSyncAtMs: map['lastSyncAt'] as int?,
-      isDirty: baseFields['isDirty'] as bool,
-      isDeleted: baseFields['isDeleted'] as bool,
-      version: baseFields['version'] as int,
-      userId: baseFields['userId'] as String?,
-      moduleName: baseFields['moduleName'] as String?,
-      vehicleId: map['vehicleId']?.toString() ?? '',
-      date: (map['date'] as num?)?.toInt() ?? 0,
-      odometer: (map['odometer'] as num? ?? 0.0).toDouble(),
-      liters: (map['liters'] as num? ?? 0.0).toDouble(),
-      totalPrice: (map['totalPrice'] as num? ?? 0.0).toDouble(),
-      fullTank: _parseBoolNullable(map['fullTank']),
-      pricePerLiter: (map['pricePerLiter'] as num? ?? 0.0).toDouble(),
-      gasStationName: map['gasStationName']?.toString(),
-      notes: map['notes']?.toString(),
-      fuelType: (map['fuelType'] as num?)?.toInt() ?? 0,
-      receiptImageUrl: map['receiptImageUrl']?.toString(),
-      receiptImagePath: map['receiptImagePath']?.toString(),
-    );
-  }
-
   /// Create from Firebase map
   factory FuelSupplyModel.fromFirebaseMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
@@ -154,40 +139,13 @@ class FuelSupplyModel extends BaseSyncModel {
     );
   }
 
-  /// FIXED: fromJson now correctly handles Firebase Timestamp objects
+  /// Create from JSON map (Firebase format)
   factory FuelSupplyModel.fromJson(Map<String, dynamic> json) {
-    final hasTimestamp = json.values.any((value) => value is Timestamp);
-
-    if (hasTimestamp ||
-        json.containsKey('created_at') ||
-        json.containsKey('updated_at')) {
-      return FuelSupplyModel.fromFirebaseMap(json);
-    } else {
-      return FuelSupplyModel.fromHiveMap(json);
-    }
+    return FuelSupplyModel.fromFirebaseMap(json);
   }
 
   @override
   String get collectionName => 'fuel_supplies';
-
-  /// Convert to Hive map
-  @override
-  Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()..addAll({
-      'vehicleId': vehicleId,
-      'date': date,
-      'odometer': odometer,
-      'liters': liters,
-      'totalPrice': totalPrice,
-      'fullTank': fullTank,
-      'pricePerLiter': pricePerLiter,
-      'gasStationName': gasStationName,
-      'notes': notes,
-      'fuelType': fuelType,
-      'receiptImageUrl': receiptImageUrl,
-      'receiptImagePath': receiptImagePath,
-    });
-  }
 
   /// Convert to Firebase map
   @override
@@ -237,9 +195,15 @@ class FuelSupplyModel extends BaseSyncModel {
   }) {
     return FuelSupplyModel(
       id: id ?? this.id,
-      createdAtMs: createdAt?.millisecondsSinceEpoch ?? createdAtMs,
-      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? updatedAtMs,
-      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? lastSyncAtMs,
+      createdAtMs:
+          createdAt?.millisecondsSinceEpoch ??
+          this.createdAt?.millisecondsSinceEpoch,
+      updatedAtMs:
+          updatedAt?.millisecondsSinceEpoch ??
+          this.updatedAt?.millisecondsSinceEpoch,
+      lastSyncAtMs:
+          lastSyncAt?.millisecondsSinceEpoch ??
+          this.lastSyncAt?.millisecondsSinceEpoch,
       isDirty: isDirty ?? this.isDirty,
       isDeleted: isDeleted ?? this.isDeleted,
       version: version ?? this.version,

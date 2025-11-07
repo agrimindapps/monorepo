@@ -3,8 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../services/data_cleaner_service.dart';
-
 @module
 abstract class RegisterModule {
   @preResolve
@@ -63,9 +61,7 @@ abstract class RegisterModule {
   // @lazySingleton
   // ISubscriptionRepository get subscriptionRepository => RevenueCatService();
 
-  /// DataCleanerService for migration services
-  @lazySingleton
-  DataCleanerService get dataCleanerService => DataCleanerService.instance;
+  /// DataCleanerService is registered via @lazySingleton annotation on the class
 
   /// EnhancedAnalyticsService for GasometerAnalyticsService
   /// NOTE: This requires Firebase to be initialized. Will be null in local-only mode.

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/services/data_cleaner_service.dart';
+import '../../../../core/di/injection.dart' as gasometer_di;
 
 /// 🏗️ REFACTORED COMPONENT: Extracted from SettingsPage monolith
-/// 
+///
 /// Handles data clearing functionality with proper state management
 /// and memory leak prevention.
 class ClearDataDialog extends StatefulWidget {
@@ -14,8 +15,8 @@ class ClearDataDialog extends StatefulWidget {
 }
 
 class _ClearDataDialogState extends State<ClearDataDialog> {
-  final _dataCleaner = DataCleanerService.instance;
-  
+  final _dataCleaner = gasometer_di.getIt<DataCleanerService>();
+
   bool _isLoading = true;
   bool _isClearing = false;
   Map<String, dynamic>? _currentStats;
@@ -35,7 +36,7 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
 
   Future<void> _loadCurrentStats() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final stats = await _dataCleaner.getDataStatsBeforeCleaning();
       setState(() {
@@ -55,7 +56,10 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          Icon(Icons.cleaning_services, color: Theme.of(context).colorScheme.error),
+          Icon(
+            Icons.cleaning_services,
+            color: Theme.of(context).colorScheme.error,
+          ),
           const SizedBox(width: 8),
           const Text('Limpar Dados'),
         ],
@@ -71,13 +75,13 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
               style: TextStyle(fontSize: 14, color: Colors.orange),
             ),
             const SizedBox(height: 20),
-            
+
             if (_isLoading)
               const Center(child: CircularProgressIndicator())
             else ...[
               if (_currentStats != null)
                 _CurrentStatsCard(stats: _currentStats!),
-              
+
               const SizedBox(height: 16),
               _ClearTypeSelector(
                 selectedType: _selectedClearType,
@@ -88,7 +92,7 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
                   selectedModules: _selectedModules,
                   onModuleToggle: _toggleModule,
                 ),
-              
+
               const SizedBox(height: 16),
               if (_lastClearResult != null)
                 _ClearResults(results: _lastClearResult!),
@@ -106,14 +110,16 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
             backgroundColor: Colors.red,
             foregroundColor: Colors.white,
           ),
-          onPressed: _isClearing || _isLoading || !_canClear() ? null : _performClear,
+          onPressed: _isClearing || _isLoading || !_canClear()
+              ? null
+              : _performClear,
           child: _isClearing
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Text('Limpar Dados'),
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Limpar Dados'),
         ),
       ],
     );
@@ -139,10 +145,10 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
     if (!confirmed) return;
 
     setState(() => _isClearing = true);
-    
+
     try {
       Map<String, dynamic> result;
-      
+
       if (_selectedClearType == 'all') {
         result = await _dataCleaner.clearAllData();
         if (mounted) {
@@ -159,18 +165,23 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
           'errors': <String>[],
           'duration': 0,
         };
-        
+
         final startTime = DateTime.now();
-        
+
         for (final module in _selectedModules) {
           final moduleResult = await _dataCleaner.clearModuleData(module);
-          result['totalClearedBoxes'] += (moduleResult['clearedBoxes'] as List).length;
+          result['totalClearedBoxes'] +=
+              (moduleResult['clearedBoxes'] as List).length;
           if (moduleResult['errors'] != null) {
-            (result['errors'] as List).addAll(moduleResult['errors'] as Iterable? ?? []);
+            (result['errors'] as List).addAll(
+              moduleResult['errors'] as Iterable? ?? [],
+            );
           }
         }
-        
-        result['duration'] = DateTime.now().difference(startTime).inMilliseconds;
+
+        result['duration'] = DateTime.now()
+            .difference(startTime)
+            .inMilliseconds;
         if (mounted) {
           _showSnackBar(
             'Limpeza seletiva concluída! '
@@ -186,7 +197,6 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
         });
       }
       await _loadCurrentStats();
-      
     } catch (e) {
       if (mounted) {
         setState(() => _isClearing = false);
@@ -197,40 +207,39 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
 
   Future<bool> _showConfirmationDialog() async {
     return await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirmar Limpeza'),
-        content: Text(
-          _selectedClearType == 'all'
-            ? 'Tem certeza que deseja remover TODOS os dados? Esta ação é irreversível.'
-            : 'Tem certeza que deseja limpar os módulos selecionados: ${_selectedModules.join(", ")}?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Confirmar Limpeza'),
+            content: Text(
+              _selectedClearType == 'all'
+                  ? 'Tem certeza que deseja remover TODOS os dados? Esta ação é irreversível.'
+                  : 'Tem certeza que deseja limpar os módulos selecionados: ${_selectedModules.join(", ")}?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Confirmar'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Confirmar'),
-          ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
     if (!mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: isError ? Colors.red : Colors.green,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
@@ -238,7 +247,6 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
 
 /// 🎯 Component to display current data statistics
 class _CurrentStatsCard extends StatelessWidget {
-
   const _CurrentStatsCard({required this.stats});
   final Map<String, dynamic> stats;
 
@@ -277,7 +285,6 @@ class _CurrentStatsCard extends StatelessWidget {
 
 /// 🎯 Component for clear type selection
 class _ClearTypeSelector extends StatelessWidget {
-
   const _ClearTypeSelector({
     required this.selectedType,
     required this.onChanged,
@@ -290,7 +297,10 @@ class _ClearTypeSelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Tipo de limpeza:', style: TextStyle(fontWeight: FontWeight.w500)),
+        const Text(
+          'Tipo de limpeza:',
+          style: TextStyle(fontWeight: FontWeight.w500),
+        ),
         const SizedBox(height: 8),
         RadioListTile<String>(
           title: const Text('Limpeza completa'),
@@ -313,7 +323,6 @@ class _ClearTypeSelector extends StatelessWidget {
 
 /// 🎯 Component for module selection
 class _ModuleSelector extends StatelessWidget {
-
   const _ModuleSelector({
     required this.selectedModules,
     required this.onModuleToggle,
@@ -337,11 +346,13 @@ class _ModuleSelector extends StatelessWidget {
       children: [
         const Text('Módulos:', style: TextStyle(fontWeight: FontWeight.w500)),
         const SizedBox(height: 8),
-        ..._availableModules.map((module) => CheckboxListTile(
-          title: Text(module),
-          value: selectedModules.contains(module),
-          onChanged: (_) => onModuleToggle(module),
-        )),
+        ..._availableModules.map(
+          (module) => CheckboxListTile(
+            title: Text(module),
+            value: selectedModules.contains(module),
+            onChanged: (_) => onModuleToggle(module),
+          ),
+        ),
       ],
     );
   }
@@ -349,7 +360,6 @@ class _ModuleSelector extends StatelessWidget {
 
 /// 🎯 Component to display clear results
 class _ClearResults extends StatelessWidget {
-
   const _ClearResults({required this.results});
   final Map<String, dynamic> results;
 
@@ -378,12 +388,17 @@ class _ClearResults extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text('Boxes removidos: ${results['totalClearedBoxes'] ?? 0}'),
-          Text('Preferências removidas: ${results['totalClearedPreferences'] ?? 0}'),
+          Text(
+            'Preferências removidas: ${results['totalClearedPreferences'] ?? 0}',
+          ),
           if (results['duration'] != null)
             Text('Tempo: ${results['duration']}ms'),
-          if (results['errors'] != null && (results['errors'] as List).isNotEmpty)
-            Text('Erros: ${(results['errors'] as List).length}', 
-                 style: const TextStyle(color: Colors.red)),
+          if (results['errors'] != null &&
+              (results['errors'] as List).isNotEmpty)
+            Text(
+              'Erros: ${(results['errors'] as List).length}',
+              style: const TextStyle(color: Colors.red),
+            ),
         ],
       ),
     );

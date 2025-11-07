@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 /// Widget para tabs de autenticação (Login/Cadastro)
@@ -88,4 +88,6 @@ class AuthTabsWidget extends ConsumerWidget {
 }
 
 /// Provider para gerenciar o estado do modo de autenticação (login/cadastro)
-final _authModeProvider = StateProvider<bool>((ref) => false); // false = login, true = signup
+final _authModeProvider = StateProvider<bool>(
+  (ref) => false,
+); // false = login, true = signup

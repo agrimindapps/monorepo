@@ -19,7 +19,6 @@ import '../../domain/repositories/vehicle_repository.dart';
 /// - Stream de mudanças para UI reativa
 /// - Busca e filtros
 
-// DISABLED: Using Drift implementation now
 // @LazySingleton(as: VehicleRepository)
 class VehicleRepositoryImpl implements VehicleRepository {
   const VehicleRepositoryImpl();

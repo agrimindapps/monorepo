@@ -2,7 +2,6 @@ import 'package:core/core.dart';
 
 import '../../../../core/data/models/base_sync_model.dart';
 
-
 /// Helper function to safely convert dynamic values to bool
 bool _parseBool(dynamic value) {
   if (value is bool) return value;
@@ -18,17 +17,16 @@ bool _parseBool(dynamic value) {
 /// Maintenance (Manutenção) model with Firebase sync support
 /// TypeId: 14 - Gasometer range (10-19) to avoid conflicts with other apps
 class MaintenanceModel extends BaseSyncModel {
-
   MaintenanceModel({
-    required this.id,
-    this.createdAtMs,
-    this.updatedAtMs,
-    this.lastSyncAtMs,
-    this.isDirty = false,
-    this.isDeleted = false,
-    this.version = 1,
-    this.userId,
-    this.moduleName = 'gasometer',
+    required String id,
+    int? createdAtMs,
+    int? updatedAtMs,
+    int? lastSyncAtMs,
+    bool isDirty = false,
+    bool isDeleted = false,
+    int version = 1,
+    String? userId,
+    String? moduleName = 'gasometer',
     this.veiculoId = '',
     this.tipo = '',
     this.descricao = '',
@@ -40,18 +38,37 @@ class MaintenanceModel extends BaseSyncModel {
     this.receiptImageUrl,
     this.receiptImagePath,
   }) : super(
-          id: id,
-          createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
-          updatedAt: updatedAtMs != null ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs) : null,
-          lastSyncAt: lastSyncAtMs != null ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs) : null,
-          isDirty: isDirty,
-          isDeleted: isDeleted,
-          version: version,
-          userId: userId,
-          moduleName: moduleName,
-        );
+         id: id,
+         createdAt: createdAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
+             : null,
+         updatedAt: updatedAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
+             : null,
+         lastSyncAt: lastSyncAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
+             : null,
+         isDirty: isDirty,
+         isDeleted: isDeleted,
+         version: version,
+         userId: userId,
+         moduleName: moduleName,
+       );
 
-  /// Factory constructor for creating new maintenance
+  // Field declarations
+  final String veiculoId;
+  final String tipo;
+  final String descricao;
+  final double valor;
+  final int data;
+  final int odometro;
+  final int? proximaRevisao;
+  final bool concluida;
+  final String? receiptImageUrl;
+  final String? receiptImagePath;
+
+  @override
+  String get collectionName => 'maintenance';
   factory MaintenanceModel.create({
     String? id,
     String? userId,
@@ -68,7 +85,7 @@ class MaintenanceModel extends BaseSyncModel {
   }) {
     final now = DateTime.now();
     final maintenanceId = id ?? now.millisecondsSinceEpoch.toString();
-    
+
     return MaintenanceModel(
       id: maintenanceId,
       createdAtMs: now.millisecondsSinceEpoch,
@@ -85,33 +102,6 @@ class MaintenanceModel extends BaseSyncModel {
       concluida: concluida,
       receiptImageUrl: receiptImageUrl,
       receiptImagePath: receiptImagePath,
-    );
-  }
-
-  /// Create from Hive map
-  factory MaintenanceModel.fromHiveMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncModel.parseBaseHiveFields(map);
-
-    return MaintenanceModel(
-      id: baseFields['id'] as String,
-      createdAtMs: map['createdAt'] as int?,
-      updatedAtMs: map['updatedAt'] as int?,
-      lastSyncAtMs: map['lastSyncAt'] as int?,
-      isDirty: baseFields['isDirty'] as bool,
-      isDeleted: baseFields['isDeleted'] as bool,
-      version: baseFields['version'] as int,
-      userId: baseFields['userId'] as String?,
-      moduleName: baseFields['moduleName'] as String?,
-      veiculoId: map['veiculoId']?.toString() ?? '',
-      tipo: map['tipo']?.toString() ?? '',
-      descricao: map['descricao']?.toString() ?? '',
-      valor: (map['valor'] as num? ?? 0.0).toDouble(),
-      data: (map['data'] as num?)?.toInt() ?? 0,
-      odometro: (map['odometro'] as num?)?.toInt() ?? 0,
-      proximaRevisao: (map['proximaRevisao'] as num?)?.toInt(),
-      concluida: _parseBool(map['concluida']),
-      receiptImageUrl: map['receiptImageUrl']?.toString(),
-      receiptImagePath: map['receiptImagePath']?.toString(),
     );
   }
 
@@ -141,27 +131,6 @@ class MaintenanceModel extends BaseSyncModel {
       receiptImageUrl: map['receipt_image_url']?.toString(),
       receiptImagePath: map['receipt_image_path']?.toString(),
     );
-  }
-
-  @override
-  String get collectionName => 'maintenance';
-
-  /// Convert to Hive map
-  @override
-  Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()
-      ..addAll({
-        'veiculoId': veiculoId,
-        'tipo': tipo,
-        'descricao': descricao,
-        'valor': valor,
-        'data': data,
-        'odometro': odometro,
-        'proximaRevisao': proximaRevisao,
-        'concluida': concluida,
-        'receiptImageUrl': receiptImageUrl,
-        'receiptImagePath': receiptImagePath,
-      });
   }
 
   /// Convert to Firebase map
@@ -208,9 +177,15 @@ class MaintenanceModel extends BaseSyncModel {
   }) {
     return MaintenanceModel(
       id: id ?? this.id,
-      createdAtMs: createdAt?.millisecondsSinceEpoch ?? createdAtMs,
-      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? updatedAtMs,
-      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? lastSyncAtMs,
+      createdAtMs:
+          createdAt?.millisecondsSinceEpoch ??
+          this.createdAt?.millisecondsSinceEpoch,
+      updatedAtMs:
+          updatedAt?.millisecondsSinceEpoch ??
+          this.updatedAt?.millisecondsSinceEpoch,
+      lastSyncAtMs:
+          lastSyncAt?.millisecondsSinceEpoch ??
+          this.lastSyncAt?.millisecondsSinceEpoch,
       isDirty: isDirty ?? this.isDirty,
       isDeleted: isDeleted ?? this.isDeleted,
       version: version ?? this.version,
@@ -229,7 +204,6 @@ class MaintenanceModel extends BaseSyncModel {
     );
   }
 
-
   /// Calculate total maintenance costs
   static double calcularTotalManutencoes(List<MaintenanceModel> manutencoes) {
     return manutencoes.fold(
@@ -243,14 +217,13 @@ class MaintenanceModel extends BaseSyncModel {
     List<MaintenanceModel> manutencoes,
     String tipo,
   ) {
-    return manutencoes
-        .where((manutencao) => manutencao.tipo == tipo)
-        .toList();
+    return manutencoes.where((manutencao) => manutencao.tipo == tipo).toList();
   }
 
   /// Sort maintenances by date (most recent first)
   static List<MaintenanceModel> ordenarPorData(
-      List<MaintenanceModel> manutencoes) {
+    List<MaintenanceModel> manutencoes,
+  ) {
     manutencoes.sort((a, b) => b.data.compareTo(a.data));
     return manutencoes;
   }
@@ -263,9 +236,9 @@ class MaintenanceModel extends BaseSyncModel {
   /// Check if belongs to specific date
   bool pertenceAData(DateTime dataAlvo) {
     final maintenanceDate = DateTime.fromMillisecondsSinceEpoch(data);
-    return maintenanceDate.year == dataAlvo.year && 
-           maintenanceDate.month == dataAlvo.month &&
-           maintenanceDate.day == dataAlvo.day;
+    return maintenanceDate.year == dataAlvo.year &&
+        maintenanceDate.month == dataAlvo.month &&
+        maintenanceDate.day == dataAlvo.day;
   }
 
   /// Check if maintenance is overdue

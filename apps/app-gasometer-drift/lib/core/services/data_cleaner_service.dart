@@ -1,20 +1,17 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'database_inspector_service.dart';
+
+import '../../database/gasometer_database.dart';
 
 /// Serviço para limpeza de dados do GasOMeter
-/// Permite limpar boxes Hive e SharedPreferences de forma segura
+/// Permite limpar tabelas Drift e SharedPreferences de forma segura
+@lazySingleton
 class DataCleanerService {
-  DataCleanerService._internal();
-  static DataCleanerService? _instance;
-  static DataCleanerService get instance {
-    _instance ??= DataCleanerService._internal();
-    return _instance!;
-  }
+  DataCleanerService(this._database);
 
-  final _inspectorService = GasOMeterDatabaseInspectorService.instance;
+  final GasometerDatabase _database;
 
-  /// Limpa todos os dados da aplicação (HiveBoxes + SharedPreferences)
+  /// Limpa todos os dados da aplicação (Drift Tables + SharedPreferences)
   Future<Map<String, dynamic>> clearAllData() async {
     if (kDebugMode) {
       debugPrint('🧹 Iniciando limpeza completa de dados...');
@@ -22,17 +19,17 @@ class DataCleanerService {
 
     final startTime = DateTime.now();
     final results = <String, dynamic>{
-      'clearedBoxes': <String>[],
+      'clearedTables': <String>[],
       'clearedPreferences': <String>[],
       'errors': <String>[],
       'startTime': startTime,
     };
 
     try {
-      final boxResults = await clearAllHiveBoxes();
-      results['clearedBoxes'] = boxResults['clearedBoxes'];
-      if (boxResults['errors'] != null) {
-        results['errors'].addAll(boxResults['errors']);
+      final tableResults = await clearAllDriftTables();
+      results['clearedTables'] = tableResults['clearedTables'];
+      if (tableResults['errors'] != null) {
+        results['errors'].addAll(tableResults['errors']);
       }
       final prefsResults = await clearAppSharedPreferences();
       results['clearedPreferences'] = prefsResults['clearedKeys'];
@@ -41,7 +38,7 @@ class DataCleanerService {
       }
 
       results['success'] = true;
-      results['totalClearedBoxes'] = results['clearedBoxes'].length;
+      results['totalClearedTables'] = results['clearedTables'].length;
       results['totalClearedPreferences'] = results['clearedPreferences'].length;
     } catch (e) {
       results['success'] = false;
@@ -52,12 +49,13 @@ class DataCleanerService {
     }
 
     results['endTime'] = DateTime.now();
-    results['duration'] =
-        results['endTime'].difference(startTime).inMilliseconds;
+    results['duration'] = results['endTime']
+        .difference(startTime)
+        .inMilliseconds;
 
     if (kDebugMode) {
       debugPrint('✅ Limpeza completa finalizada:');
-      debugPrint('   Boxes limpos: ${results['totalClearedBoxes'] ?? 0}');
+      debugPrint('   Tabelas limpas: ${results['totalClearedTables'] ?? 0}');
       debugPrint(
         '   Preferências limpas: ${results['totalClearedPreferences'] ?? 0}',
       );
@@ -68,71 +66,172 @@ class DataCleanerService {
     return results;
   }
 
-  /// Limpa todas as HiveBoxes do aplicativo
-  Future<Map<String, dynamic>> clearAllHiveBoxes() async {
-    final availableBoxes = _inspectorService.getAvailableHiveBoxes();
+  /// Limpa todas as tabelas Drift do aplicativo
+  Future<Map<String, dynamic>> clearAllDriftTables() async {
     final results = <String, dynamic>{
-      'clearedBoxes': <String>[],
+      'clearedTables': <String>[],
       'errors': <String>[],
     };
 
     if (kDebugMode) {
-      debugPrint('🧹 Limpando ${availableBoxes.length} HiveBoxes...');
+      debugPrint('🧹 Limpando tabelas Drift...');
     }
 
-    for (final boxKey in availableBoxes) {
-      try {
-        final box = Hive.box<dynamic>(boxKey);
-        final recordCount = box.keys.length;
+    // Limpar cada tabela individualmente
+    try {
+      // Vehicles
+      final vehicleCount =
+          (await _database.select(_database.vehicles).get()).length;
+      await _database.delete(_database.vehicles).go();
+      results['clearedTables'].add('vehicles');
+      if (kDebugMode)
+        debugPrint('   ✅ Tabela "vehicles" limpa ($vehicleCount registros)');
+    } catch (e) {
+      results['errors'].add('Erro ao limpar tabela "vehicles": $e');
+      if (kDebugMode) debugPrint('   ❌ Erro ao limpar tabela "vehicles": $e');
+    }
 
-        await box.clear();
+    try {
+      // Fuel Supplies
+      final fuelCount =
+          (await _database.select(_database.fuelSupplies).get()).length;
+      await _database.delete(_database.fuelSupplies).go();
+      results['clearedTables'].add('fuel_supplies');
+      if (kDebugMode)
+        debugPrint('   ✅ Tabela "fuel_supplies" limpa ($fuelCount registros)');
+    } catch (e) {
+      results['errors'].add('Erro ao limpar tabela "fuel_supplies": $e');
+      if (kDebugMode)
+        debugPrint('   ❌ Erro ao limpar tabela "fuel_supplies": $e');
+    }
 
-        results['clearedBoxes'].add(boxKey);
+    try {
+      // Maintenances
+      final maintenanceCount =
+          (await _database.select(_database.maintenances).get()).length;
+      await _database.delete(_database.maintenances).go();
+      results['clearedTables'].add('maintenances');
+      if (kDebugMode)
+        debugPrint(
+          '   ✅ Tabela "maintenances" limpa ($maintenanceCount registros)',
+        );
+    } catch (e) {
+      results['errors'].add('Erro ao limpar tabela "maintenances": $e');
+      if (kDebugMode)
+        debugPrint('   ❌ Erro ao limpar tabela "maintenances": $e');
+    }
 
-        if (kDebugMode) {
-          debugPrint('   ✅ Box "$boxKey" limpo ($recordCount registros)');
-        }
-      } catch (e) {
-        final error = 'Erro ao limpar box "$boxKey": $e';
-        results['errors'].add(error);
+    try {
+      // Expenses
+      final expenseCount =
+          (await _database.select(_database.expenses).get()).length;
+      await _database.delete(_database.expenses).go();
+      results['clearedTables'].add('expenses');
+      if (kDebugMode)
+        debugPrint('   ✅ Tabela "expenses" limpa ($expenseCount registros)');
+    } catch (e) {
+      results['errors'].add('Erro ao limpar tabela "expenses": $e');
+      if (kDebugMode) debugPrint('   ❌ Erro ao limpar tabela "expenses": $e');
+    }
 
-        if (kDebugMode) {
-          debugPrint('   ❌ $error');
-        }
-      }
+    try {
+      // Odometer Readings
+      final odometerCount =
+          (await _database.select(_database.odometerReadings).get()).length;
+      await _database.delete(_database.odometerReadings).go();
+      results['clearedTables'].add('odometer_readings');
+      if (kDebugMode)
+        debugPrint(
+          '   ✅ Tabela "odometer_readings" limpa ($odometerCount registros)',
+        );
+    } catch (e) {
+      results['errors'].add('Erro ao limpar tabela "odometer_readings": $e');
+      if (kDebugMode)
+        debugPrint('   ❌ Erro ao limpar tabela "odometer_readings": $e');
+    }
+
+    try {
+      // Audit Trail
+      final auditCount =
+          (await _database.select(_database.auditTrail).get()).length;
+      await _database.delete(_database.auditTrail).go();
+      results['clearedTables'].add('audit_trail');
+      if (kDebugMode)
+        debugPrint('   ✅ Tabela "audit_trail" limpa ($auditCount registros)');
+    } catch (e) {
+      results['errors'].add('Erro ao limpar tabela "audit_trail": $e');
+      if (kDebugMode)
+        debugPrint('   ❌ Erro ao limpar tabela "audit_trail": $e');
     }
 
     return results;
   }
 
-  /// Limpa box específica
-  Future<Map<String, dynamic>> clearSpecificBox(String boxKey) async {
+  /// Limpa tabela específica
+  Future<Map<String, dynamic>> clearSpecificTable(String tableName) async {
     final results = <String, dynamic>{
-      'boxKey': boxKey,
+      'tableName': tableName,
       'success': false,
       'recordsCleared': 0,
     };
 
     try {
-      if (!Hive.isBoxOpen(boxKey)) {
-        throw Exception('Box "$boxKey" não está aberta');
+      switch (tableName) {
+        case 'vehicles':
+          final count =
+              (await _database.select(_database.vehicles).get()).length;
+          await _database.delete(_database.vehicles).go();
+          results['success'] = true;
+          results['recordsCleared'] = count;
+          break;
+        case 'fuel_supplies':
+          final count =
+              (await _database.select(_database.fuelSupplies).get()).length;
+          await _database.delete(_database.fuelSupplies).go();
+          results['success'] = true;
+          results['recordsCleared'] = count;
+          break;
+        case 'maintenances':
+          final count =
+              (await _database.select(_database.maintenances).get()).length;
+          await _database.delete(_database.maintenances).go();
+          results['success'] = true;
+          results['recordsCleared'] = count;
+          break;
+        case 'expenses':
+          final count =
+              (await _database.select(_database.expenses).get()).length;
+          await _database.delete(_database.expenses).go();
+          results['success'] = true;
+          results['recordsCleared'] = count;
+          break;
+        case 'odometer_readings':
+          final count =
+              (await _database.select(_database.odometerReadings).get()).length;
+          await _database.delete(_database.odometerReadings).go();
+          results['success'] = true;
+          results['recordsCleared'] = count;
+          break;
+        case 'audit_trail':
+          final count =
+              (await _database.select(_database.auditTrail).get()).length;
+          await _database.delete(_database.auditTrail).go();
+          results['success'] = true;
+          results['recordsCleared'] = count;
+          break;
+        default:
+          throw Exception('Tabela "$tableName" não encontrada');
       }
 
-      final box = Hive.box<dynamic>(boxKey);
-      final recordCount = box.keys.length;
-
-      await box.clear();
-
-      results['success'] = true;
-      results['recordsCleared'] = recordCount;
-
-      if (kDebugMode) {
-        debugPrint('✅ Box "$boxKey" limpo ($recordCount registros)');
+      if (kDebugMode && results['success'] == true) {
+        debugPrint(
+          '✅ Tabela "$tableName" limpa (${results['recordsCleared']} registros)',
+        );
       }
     } catch (e) {
       results['error'] = e.toString();
       if (kDebugMode) {
-        debugPrint('❌ Erro ao limpar box "$boxKey": $e');
+        debugPrint('❌ Erro ao limpar tabela "$tableName": $e');
       }
     }
 
@@ -149,21 +248,20 @@ class DataCleanerService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final allKeys = prefs.getKeys();
-      final appKeys =
-          allKeys
-              .where(
-                (key) =>
-                    key.startsWith('gasometer_') ||
-                    key.startsWith('theme_') ||
-                    key.startsWith('user_') ||
-                    key.startsWith('vehicle_') ||
-                    key.startsWith('fuel_') ||
-                    key.startsWith('maintenance_') ||
-                    key.startsWith('expense_') ||
-                    key.contains('gasometer') ||
-                    key == 'theme_mode', // Theme provider key
-              )
-              .toList();
+      final appKeys = allKeys
+          .where(
+            (key) =>
+                key.startsWith('gasometer_') ||
+                key.startsWith('theme_') ||
+                key.startsWith('user_') ||
+                key.startsWith('vehicle_') ||
+                key.startsWith('fuel_') ||
+                key.startsWith('maintenance_') ||
+                key.startsWith('expense_') ||
+                key.contains('gasometer') ||
+                key == 'theme_mode', // Theme provider key
+          )
+          .toList();
 
       if (kDebugMode) {
         debugPrint('🧹 Limpando ${appKeys.length} preferências do app...');
@@ -206,39 +304,39 @@ class DataCleanerService {
   Future<Map<String, dynamic>> clearModuleData(String moduleName) async {
     final results = <String, dynamic>{
       'module': moduleName,
-      'clearedBoxes': <String>[],
+      'clearedTables': <String>[],
       'errors': <String>[],
     };
-    final moduleBoxes = <String, List<String>>{
-      'Veículos': [GasOMeterDatabaseInspectorService.vehiclesBoxName],
-      'Combustível': [GasOMeterDatabaseInspectorService.fuelRecordsBoxName],
-      'Manutenção': [GasOMeterDatabaseInspectorService.maintenanceBoxName],
-      'Odômetro': [GasOMeterDatabaseInspectorService.odometerBoxName],
-      'Despesas': [GasOMeterDatabaseInspectorService.expensesBoxName],
-      'Sincronização': [GasOMeterDatabaseInspectorService.syncQueueBoxName],
-      'Categorias': [GasOMeterDatabaseInspectorService.categoriesBoxName],
+
+    final moduleTables = <String, List<String>>{
+      'Veículos': ['vehicles'],
+      'Combustível': ['fuel_supplies'],
+      'Manutenção': ['maintenances'],
+      'Odômetro': ['odometer_readings'],
+      'Despesas': ['expenses'],
+      'Auditoria': ['audit_trail'],
     };
 
-    final boxesToClear = moduleBoxes[moduleName] ?? [];
+    final tablesToClear = moduleTables[moduleName] ?? [];
 
-    if (boxesToClear.isEmpty) {
+    if (tablesToClear.isEmpty) {
       results['errors'].add('Módulo "$moduleName" não encontrado');
       return results;
     }
 
     if (kDebugMode) {
       debugPrint(
-        '🧹 Limpando módulo "$moduleName" (${boxesToClear.length} boxes)...',
+        '🧹 Limpando módulo "$moduleName" (${tablesToClear.length} tabelas)...',
       );
     }
 
-    for (final boxKey in boxesToClear) {
-      final boxResult = await clearSpecificBox(boxKey);
+    for (final tableName in tablesToClear) {
+      final tableResult = await clearSpecificTable(tableName);
 
-      if (boxResult['success'] == true) {
-        results['clearedBoxes'].add(boxKey);
+      if (tableResult['success'] == true) {
+        results['clearedTables'].add(tableName);
       } else {
-        results['errors'].add(boxResult['error'] ?? 'Erro desconhecido');
+        results['errors'].add(tableResult['error'] ?? 'Erro desconhecido');
       }
     }
 
@@ -248,39 +346,67 @@ class DataCleanerService {
   /// Obtém estatísticas antes da limpeza (para confirmação)
   Future<Map<String, dynamic>> getDataStatsBeforeCleaning() async {
     try {
-      final availableBoxes = _inspectorService.getAvailableHiveBoxes();
-      final boxStats = <String, Map<String, dynamic>>{};
+      final tableStats = <String, Map<String, dynamic>>{};
       int totalRecords = 0;
 
-      for (final boxKey in availableBoxes) {
-        final stats = _inspectorService.getBoxStats(boxKey);
-        boxStats[boxKey] = stats;
-        totalRecords += (stats['totalRecords'] as int? ?? 0);
-      }
-      final sharedPrefsData =
-          await _inspectorService.loadSharedPreferencesData();
-      final appPrefsCount =
-          sharedPrefsData
-              .where(
-                (record) =>
-                    record.key.contains('gasometer') ||
-                    record.key.startsWith('theme_') ||
-                    record.key.startsWith('user_') ||
-                    record.key == 'theme_mode',
-              )
-              .length;
+      // Estatísticas das tabelas
+      final vehicleCount =
+          (await _database.select(_database.vehicles).get()).length;
+      tableStats['vehicles'] = {'totalRecords': vehicleCount};
+      totalRecords += vehicleCount;
+
+      final fuelCount =
+          (await _database.select(_database.fuelSupplies).get()).length;
+      tableStats['fuel_supplies'] = {'totalRecords': fuelCount};
+      totalRecords += fuelCount;
+
+      final maintenanceCount =
+          (await _database.select(_database.maintenances).get()).length;
+      tableStats['maintenances'] = {'totalRecords': maintenanceCount};
+      totalRecords += maintenanceCount;
+
+      final expenseCount =
+          (await _database.select(_database.expenses).get()).length;
+      tableStats['expenses'] = {'totalRecords': expenseCount};
+      totalRecords += expenseCount;
+
+      final odometerCount =
+          (await _database.select(_database.odometerReadings).get()).length;
+      tableStats['odometer_readings'] = {'totalRecords': odometerCount};
+      totalRecords += odometerCount;
+
+      final auditCount =
+          (await _database.select(_database.auditTrail).get()).length;
+      tableStats['audit_trail'] = {'totalRecords': auditCount};
+      totalRecords += auditCount;
+
+      // Para SharedPreferences, ainda usamos o método antigo
+      final sharedPrefsData = await _loadSharedPreferencesData();
+      final appPrefsCount = sharedPrefsData
+          .where(
+            (SharedPreferencesRecord record) =>
+                record.key.contains('gasometer') ||
+                record.key.startsWith('theme_') ||
+                record.key.startsWith('user_') ||
+                record.key == 'theme_mode',
+          )
+          .length;
 
       return {
-        'totalBoxes': availableBoxes.length,
+        'totalTables':
+            6, // vehicles, fuel_supplies, maintenances, expenses, odometer_readings, audit_trail
         'totalRecords': totalRecords,
         'totalSharedPrefs': sharedPrefsData.length,
         'appSpecificPrefs': appPrefsCount,
-        'boxStats': boxStats,
-        'availableModules':
-            _inspectorService.customBoxes
-                .map((box) => box.module)
-                .toSet()
-                .toList(),
+        'tableStats': tableStats,
+        'availableModules': [
+          'Veículos',
+          'Combustível',
+          'Manutenção',
+          'Odômetro',
+          'Despesas',
+          'Auditoria',
+        ],
       };
     } catch (e) {
       return {'error': 'Erro ao obter estatísticas: $e'};
@@ -306,8 +432,43 @@ class DataCleanerService {
       'Manutenção': 'Apaga histórico de manutenções',
       'Odômetro': 'Remove leituras do odômetro',
       'Despesas': 'Limpa todas as despesas registradas',
-      'Sincronização': 'Limpa fila de sincronização',
-      'Categorias': 'Remove categorias personalizadas',
+      'Auditoria': 'Remove histórico de auditoria',
     };
+  }
+
+  /// Helper para carregar dados do SharedPreferences (simplificado)
+  Future<List<SharedPreferencesRecord>> _loadSharedPreferencesData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final allKeys = prefs.getKeys();
+      final records = <SharedPreferencesRecord>[];
+
+      for (final key in allKeys) {
+        try {
+          final value = prefs.get(key);
+          final type = _getValueType(value);
+          records.add(
+            SharedPreferencesRecord(key: key, value: value, type: type),
+          );
+        } catch (e) {
+          // Ignora erros individuais
+        }
+      }
+
+      return records;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Helper para determinar o tipo do valor
+  String _getValueType(dynamic value) {
+    if (value == null) return 'null';
+    if (value is String) return 'String';
+    if (value is int) return 'int';
+    if (value is bool) return 'bool';
+    if (value is double) return 'double';
+    if (value is List<String>) return 'List<String>';
+    return 'unknown';
   }
 }

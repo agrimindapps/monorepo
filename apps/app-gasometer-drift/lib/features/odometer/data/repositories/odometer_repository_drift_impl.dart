@@ -171,9 +171,11 @@ class OdometerRepositoryDriftImpl implements OdometerRepository {
       final dataList = await _dataSource.findAll();
       final entities = dataList
           .map(_toEntity)
-          .where((entity) =>
-              entity.registrationDate.isAfter(startDate) &&
-              entity.registrationDate.isBefore(endDate))
+          .where(
+            (entity) =>
+                entity.registrationDate.isAfter(startDate) &&
+                entity.registrationDate.isBefore(endDate),
+          )
           .toList();
       return Right(entities);
     } catch (e) {
@@ -212,14 +214,13 @@ class OdometerRepositoryDriftImpl implements OdometerRepository {
   ) async {
     try {
       final dataList = await _dataSource.findAll();
-      final entities = dataList
-          .map(_toEntity)
-          .where((entity) {
-            final matchesNotes = entity.description.toLowerCase().contains(query.toLowerCase());
-            final matchesValue = entity.value.toString().contains(query);
-            return matchesNotes || matchesValue;
-          })
-          .toList();
+      final entities = dataList.map(_toEntity).where((entity) {
+        final matchesNotes = entity.description.toLowerCase().contains(
+          query.toLowerCase(),
+        );
+        final matchesValue = entity.value.toString().contains(query);
+        return matchesNotes || matchesValue;
+      }).toList();
       return Right(entities);
     } catch (e) {
       return Left(CacheFailure(e.toString()));
@@ -232,12 +233,14 @@ class OdometerRepositoryDriftImpl implements OdometerRepository {
   ) async {
     try {
       final vehicleIdInt = int.parse(vehicleId);
-      
-      final totalDistance = await _dataSource.calculateTotalDistance(vehicleIdInt);
+
+      final totalDistance = await _dataSource.calculateTotalDistance(
+        vehicleIdInt,
+      );
       final count = await _dataSource.countByVehicleId(vehicleIdInt);
       final latest = await _dataSource.findLatestByVehicleId(vehicleIdInt);
       final first = await _dataSource.findFirstByVehicleId(vehicleIdInt);
-      
+
       return Right({
         'totalDistance': totalDistance,
         'totalReadings': count,

@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide AuthProvider;
+import 'package:core/core.dart' hide AuthProvider, Column;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -151,10 +151,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors:
-                isDark
-                    ? [const Color(0xFF0F3460), const Color(0xFF16213E)]
-                    : [Colors.blue.shade600, Colors.blue.shade800],
+            colors: isDark
+                ? [const Color(0xFF0F3460), const Color(0xFF16213E)]
+                : [Colors.blue.shade600, Colors.blue.shade800],
           ),
         ),
         child: Padding(

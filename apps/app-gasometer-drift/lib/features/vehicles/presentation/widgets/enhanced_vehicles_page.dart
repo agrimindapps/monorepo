@@ -2,7 +2,7 @@
 /// Demonstrates the new responsive layout system with desktop/mobile adaptations
 library;
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/responsive_constants.dart';
@@ -19,7 +19,8 @@ class EnhancedVehiclesPage extends ConsumerStatefulWidget {
   const EnhancedVehiclesPage({super.key});
 
   @override
-  ConsumerState<EnhancedVehiclesPage> createState() => _EnhancedVehiclesPageState();
+  ConsumerState<EnhancedVehiclesPage> createState() =>
+      _EnhancedVehiclesPageState();
 }
 
 class _EnhancedVehiclesPageState extends ConsumerState<EnhancedVehiclesPage> {
@@ -34,8 +35,7 @@ class _EnhancedVehiclesPageState extends ConsumerState<EnhancedVehiclesPage> {
       body: SafeArea(
         child: Column(
           children: [
-            if (ResponsiveLayout.isMobile(context))
-              _MobileHeader(),
+            if (ResponsiveLayout.isMobile(context)) _MobileHeader(),
             Expanded(
               child: ResponsiveContentArea(
                 child: Column(
@@ -45,14 +45,10 @@ class _EnhancedVehiclesPageState extends ConsumerState<EnhancedVehiclesPage> {
                         title: 'Gerenciamento de Veículos',
                         subtitle: 'Controle sua frota de veículos',
                         icon: Icons.directions_car,
-                        actions: [
-                          _AddVehicleButton(),
-                        ],
+                        actions: [_AddVehicleButton()],
                       ),
-                    
-                    Expanded(
-                      child: _ResponsiveVehiclesList(),
-                    ),
+
+                    Expanded(child: _ResponsiveVehiclesList()),
                   ],
                 ),
               ),
@@ -67,7 +63,7 @@ class _EnhancedVehiclesPageState extends ConsumerState<EnhancedVehiclesPage> {
       ),
     );
   }
-  
+
   void _addVehicle() async {
     final result = await showDialog<bool>(
       context: context,
@@ -129,10 +125,7 @@ class _MobileHeader extends StatelessWidget {
                   ),
                   Text(
                     'Gerencie sua frota de veículos',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white70,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.white70),
                   ),
                 ],
               ),
@@ -187,7 +180,8 @@ class _ResponsiveVehiclesList extends ConsumerWidget {
           return EnhancedEmptyState.generic(
             icon: Icons.directions_car_outlined,
             title: 'Nenhum veículo cadastrado',
-            description: 'Cadastre seu primeiro veículo para começar a controlar seus gastos',
+            description:
+                'Cadastre seu primeiro veículo para começar a controlar seus gastos',
             actionLabel: 'Cadastrar Veículo',
             onAction: () => _addVehicle(context, ref),
             height: MediaQuery.of(context).size.height - 300,
@@ -221,21 +215,23 @@ class _ResponsiveVehiclesList extends ConsumerWidget {
 
 /// Responsive grid that adapts to screen size and uses full width available (1120px)
 class _ResponsiveVehiclesGrid extends StatelessWidget {
-  
   const _ResponsiveVehiclesGrid({required this.vehicles});
   final List<VehicleEntity> vehicles;
-  
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final columns = ResponsiveBreakpoints.getGridColumns(constraints.maxWidth);
+        final columns = ResponsiveBreakpoints.getGridColumns(
+          constraints.maxWidth,
+        );
         final spacing = AdaptiveSpacing.md(context);
         final double availableWidth = constraints.maxWidth;
-        final double totalSpacing = (columns - 1) * spacing + (2 * spacing); // spacing lateral
+        final double totalSpacing =
+            (columns - 1) * spacing + (2 * spacing); // spacing lateral
         final double effectiveWidth = availableWidth - totalSpacing;
         final double cardWidth = effectiveWidth / columns;
-        
+
         return GridView.builder(
           padding: EdgeInsets.all(spacing),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -262,13 +258,9 @@ class _ResponsiveVehiclesGrid extends StatelessWidget {
 
 /// Enhanced vehicle card with responsive design
 class _ResponsiveVehicleCard extends ConsumerWidget {
-
-  const _ResponsiveVehicleCard({
-    super.key,
-    required this.vehicle,
-  });
+  const _ResponsiveVehicleCard({super.key, required this.vehicle});
   final VehicleEntity vehicle;
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDesktop = ResponsiveLayout.isDesktop(context);
@@ -283,7 +275,9 @@ class _ResponsiveVehicleCard extends ConsumerWidget {
               Container(
                 padding: EdgeInsets.all(AdaptiveSpacing.sm(context)),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -309,7 +303,9 @@ class _ResponsiveVehicleCard extends ConsumerWidget {
                     Text(
                       '${vehicle.year} • ${vehicle.color}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.6),
                         fontSize: isDesktop ? 14 : 12,
                       ),
                       maxLines: 1,
@@ -320,7 +316,7 @@ class _ResponsiveVehicleCard extends ConsumerWidget {
               ),
             ],
           ),
-          
+
           SizedBox(height: AdaptiveSpacing.md(context)),
           Expanded(
             child: Column(
@@ -334,7 +330,9 @@ class _ResponsiveVehicleCard extends ConsumerWidget {
                 _InfoRow(
                   icon: Icons.local_gas_station,
                   label: 'Combustível',
-                  value: vehicle.supportedFuels.map((f) => f.displayName).join(', '),
+                  value: vehicle.supportedFuels
+                      .map((f) => f.displayName)
+                      .join(', '),
                 ),
                 SizedBox(height: AdaptiveSpacing.xs(context)),
                 _InfoRow(
@@ -377,15 +375,19 @@ class _ResponsiveVehicleCard extends ConsumerWidget {
       ),
     );
   }
-  
+
   String _formatNumber(num number) {
     return number.toInt().toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), 
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
       (Match m) => '${m[1]}.',
     );
   }
-  
-  void _editVehicle(BuildContext context, WidgetRef ref, VehicleEntity vehicle) async {
+
+  void _editVehicle(
+    BuildContext context,
+    WidgetRef ref,
+    VehicleEntity vehicle,
+  ) async {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AddVehiclePage(vehicle: vehicle),
@@ -396,12 +398,18 @@ class _ResponsiveVehicleCard extends ConsumerWidget {
     }
   }
 
-  void _deleteVehicle(BuildContext context, WidgetRef ref, VehicleEntity vehicle) {
+  void _deleteVehicle(
+    BuildContext context,
+    WidgetRef ref,
+    VehicleEntity vehicle,
+  ) {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Confirmar exclusão'),
-        content: Text('Tem certeza que deseja excluir o veículo ${vehicle.brand} ${vehicle.model}?'),
+        content: Text(
+          'Tem certeza que deseja excluir o veículo ${vehicle.brand} ${vehicle.model}?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
@@ -411,7 +419,9 @@ class _ResponsiveVehicleCard extends ConsumerWidget {
             onPressed: () async {
               Navigator.of(dialogContext).pop();
               try {
-                await ref.read(vehiclesNotifierProvider.notifier).deleteVehicle(vehicle.id);
+                await ref
+                    .read(vehiclesNotifierProvider.notifier)
+                    .deleteVehicle(vehicle.id);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -431,7 +441,9 @@ class _ResponsiveVehicleCard extends ConsumerWidget {
                 }
               }
             },
-            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
             child: const Text('Excluir'),
           ),
         ],
@@ -442,7 +454,6 @@ class _ResponsiveVehicleCard extends ConsumerWidget {
 
 /// Info row widget for vehicle details
 class _InfoRow extends StatelessWidget {
-  
   const _InfoRow({
     required this.icon,
     required this.label,
@@ -465,15 +476,17 @@ class _InfoRow extends StatelessWidget {
         Text(
           '$label: ',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -485,11 +498,7 @@ class _InfoRow extends StatelessWidget {
 
 /// Error state widget
 class _ErrorState extends StatelessWidget {
-
-  const _ErrorState({
-    required this.errorMessage,
-    required this.onRetry,
-  });
+  const _ErrorState({required this.errorMessage, required this.onRetry});
   final String errorMessage;
   final VoidCallback onRetry;
 
@@ -516,7 +525,9 @@ class _ErrorState extends StatelessWidget {
           Text(
             errorMessage,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             textAlign: TextAlign.center,
           ),

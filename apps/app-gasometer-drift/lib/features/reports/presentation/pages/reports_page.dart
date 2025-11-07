@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/semantic_widgets.dart';
@@ -126,7 +126,6 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
       ),
     );
   }
-
 
   Widget _buildContent(BuildContext context) {
     return _buildStatisticsContent();
@@ -285,8 +284,9 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                   height: 200,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color:
-                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
@@ -301,12 +301,12 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                         const SizedBox(height: 8),
                         Text(
                           'Gráficos serão implementados',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                       ],
                     ),

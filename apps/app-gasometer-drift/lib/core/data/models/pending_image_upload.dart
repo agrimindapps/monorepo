@@ -1,52 +1,38 @@
-import 'package:hive/hive.dart';
-
-part 'pending_image_upload.g.dart';
+import 'package:equatable/equatable.dart';
 
 /// Modelo para armazenar uploads de imagens pendentes
 /// Usado quando o usuário adiciona uma imagem offline
-/// TypeId: 50 - Gasometer range para evitar conflitos
-@HiveType(typeId: 50)
-class PendingImageUpload {
+class PendingImageUpload extends Equatable {
   /// ID único do upload pendente
-  @HiveField(0)
   final String id;
 
   /// Caminho local da imagem a ser enviada
-  @HiveField(1)
   final String localPath;
 
   /// ID do usuário que criou a imagem
-  @HiveField(2)
   final String userId;
 
   /// ID do registro ao qual a imagem pertence
-  @HiveField(3)
   final String recordId;
 
   /// Categoria do registro (fuel, maintenance, expenses)
-  @HiveField(4)
   final String category;
 
   /// Caminho da coleção no Firestore para atualizar após upload
   /// Ex: 'fuel_supplies', 'maintenance_records', 'expenses'
-  @HiveField(5)
   final String collectionPath;
 
   /// Quando o upload foi adicionado à fila
-  @HiveField(6)
   final int createdAtMs;
 
   /// Número de tentativas de upload já realizadas
-  @HiveField(7)
-  int retryCount;
+  final int retryCount;
 
   /// Última mensagem de erro (se houver)
-  @HiveField(8)
-  String? lastError;
+  final String? lastError;
 
   /// Timestamp da última tentativa
-  @HiveField(9)
-  int? lastAttemptMs;
+  final int? lastAttemptMs;
 
   PendingImageUpload({
     required this.id,
@@ -125,11 +111,16 @@ class PendingImageUpload {
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is PendingImageUpload && other.id == id;
-  }
-
-  @override
-  int get hashCode => id.hashCode;
+  List<Object?> get props => [
+    id,
+    localPath,
+    userId,
+    recordId,
+    category,
+    collectionPath,
+    createdAtMs,
+    retryCount,
+    lastError,
+    lastAttemptMs,
+  ];
 }

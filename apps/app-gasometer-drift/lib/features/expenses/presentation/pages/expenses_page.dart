@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/enhanced_empty_state.dart';
@@ -28,7 +28,8 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
           children: [
             _buildHeader(context),
             _buildVehicleSelector(context),
-            if (_selectedVehicleId != null && (vehiclesAsync.value?.isNotEmpty ?? false))
+            if (_selectedVehicleId != null &&
+                (vehiclesAsync.value?.isNotEmpty ?? false))
               _buildMonthSelector(),
             Expanded(
               child: vehiclesAsync.when(
@@ -159,30 +160,26 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
               margin: const EdgeInsets.only(right: 12),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color:
-                    isSelected
-                        ? Theme.of(context).primaryColor
-                        : Theme.of(context).cardColor,
+                color: isSelected
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color:
-                      isSelected
-                          ? Theme.of(context).primaryColor
-                          : Theme.of(
-                            context,
-                          ).dividerColor.withValues(alpha: 0.2),
+                  color: isSelected
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).dividerColor.withValues(alpha: 0.2),
                 ),
               ),
               child: Center(
                 child: Text(
                   months[index],
                   style: TextStyle(
-                    color:
-                        isSelected
-                            ? Colors.white
-                            : Theme.of(context).textTheme.bodyMedium?.color,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color: isSelected
+                        ? Colors.white
+                        : Theme.of(context).textTheme.bodyMedium?.color,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
                   ),
                 ),
               ),
@@ -200,8 +197,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
           'Adicione sua primeira despesa para começar a acompanhar seus gastos.',
       icon: Icons.attach_money_outlined,
       actionLabel: 'Adicionar despesa',
-      onAction: () {
-      },
+      onAction: () {},
     );
   }
 
@@ -236,8 +232,6 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
       child: const Icon(Icons.add),
     );
   }
-
-
 
   Widget _buildSelectVehicleState() {
     return const EnhancedEmptyState(

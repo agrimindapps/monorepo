@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/gasometer_colors.dart';
@@ -20,10 +20,9 @@ class SimpleSyncLoading extends ConsumerStatefulWidget {
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black26,
-      builder:
-          (context) => SimpleSyncLoading(
-            message: message ?? 'Sincronizando dados automotivos...',
-          ),
+      builder: (context) => SimpleSyncLoading(
+        message: message ?? 'Sincronizando dados automotivos...',
+      ),
     );
   }
 
@@ -57,12 +56,11 @@ class _SimpleSyncLoadingState extends ConsumerState<SimpleSyncLoading> {
 
   /// Monitora automaticamente o estado da sincronização usando UnifiedSyncProvider
   void _startListeningToSync() {
-    _syncSubscription = Stream<void>.periodic(
-      const Duration(seconds: 2),
-    ).listen((_) {
-      if (!mounted) return;
-      _autoClose();
-    });
+    _syncSubscription = Stream<void>.periodic(const Duration(seconds: 2))
+        .listen((_) {
+          if (!mounted) return;
+          _autoClose();
+        });
   }
 
   /// Fecha automaticamente o loading

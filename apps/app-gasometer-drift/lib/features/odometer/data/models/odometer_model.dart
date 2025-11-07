@@ -2,37 +2,48 @@ import 'package:core/core.dart';
 
 import '../../../../core/data/models/base_sync_model.dart';
 
-
 /// Odometer model with Firebase sync support
 /// TypeId: 12 - Gasometer range (10-19) to avoid conflicts with other apps
 class OdometerModel extends BaseSyncModel {
-
   OdometerModel({
-    required this.id,
-    this.createdAtMs,
-    this.updatedAtMs,
-    this.lastSyncAtMs,
-    this.isDirty = false,
-    this.isDeleted = false,
-    this.version = 1,
-    this.userId,
-    this.moduleName = 'gasometer',
+    required String id,
+    int? createdAtMs,
+    int? updatedAtMs,
+    int? lastSyncAtMs,
+    bool isDirty = false,
+    bool isDeleted = false,
+    int version = 1,
+    String? userId,
+    String? moduleName = 'gasometer',
     this.vehicleId = '',
     this.registrationDate = 0,
     this.value = 0.0,
     this.description = '',
     this.type,
   }) : super(
-          id: id,
-          createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
-          updatedAt: updatedAtMs != null ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs) : null,
-          lastSyncAt: lastSyncAtMs != null ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs) : null,
-          isDirty: isDirty,
-          isDeleted: isDeleted,
-          version: version,
-          userId: userId,
-          moduleName: moduleName,
-        );
+         id: id,
+         createdAt: createdAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
+             : null,
+         updatedAt: updatedAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
+             : null,
+         lastSyncAt: lastSyncAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
+             : null,
+         isDirty: isDirty,
+         isDeleted: isDeleted,
+         version: version,
+         userId: userId,
+         moduleName: moduleName,
+       );
+
+  // Field declarations
+  final String vehicleId;
+  final int registrationDate;
+  final double value;
+  final String description;
+  final String? type;
 
   /// Factory constructor for creating new odometer reading
   factory OdometerModel.create({
@@ -46,7 +57,7 @@ class OdometerModel extends BaseSyncModel {
   }) {
     final now = DateTime.now();
     final readingId = id ?? now.millisecondsSinceEpoch.toString();
-    
+
     return OdometerModel(
       id: readingId,
       createdAtMs: now.millisecondsSinceEpoch,
@@ -61,33 +72,11 @@ class OdometerModel extends BaseSyncModel {
     );
   }
 
-  /// Create from Hive map
-  factory OdometerModel.fromHiveMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncModel.parseBaseHiveFields(map);
-    
-    return OdometerModel(
-      id: baseFields['id'] as String,
-      createdAtMs: map['createdAt'] as int?,
-      updatedAtMs: map['updatedAt'] as int?,
-      lastSyncAtMs: map['lastSyncAt'] as int?,
-      isDirty: baseFields['isDirty'] as bool,
-      isDeleted: baseFields['isDeleted'] as bool,
-      version: baseFields['version'] as int,
-      userId: baseFields['userId'] as String?,
-      moduleName: baseFields['moduleName'] as String?,
-      vehicleId: map['vehicleId']?.toString() ?? '',
-      registrationDate: (map['registrationDate'] as num?)?.toInt() ?? 0,
-      value: (map['value'] as num? ?? 0.0).toDouble(),
-      description: map['description']?.toString() ?? '',
-      type: map['type']?.toString(),
-    );
-  }
-
   /// Create from Firebase map
   factory OdometerModel.fromFirebaseMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
     final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
-    
+
     return OdometerModel(
       id: baseFields['id'] as String,
       createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
@@ -106,23 +95,11 @@ class OdometerModel extends BaseSyncModel {
     );
   }
 
-  factory OdometerModel.fromJson(Map<String, dynamic> json) => OdometerModel.fromHiveMap(json);
+  factory OdometerModel.fromJson(Map<String, dynamic> json) =>
+      OdometerModel.fromFirebaseMap(json);
 
   @override
   String get collectionName => 'odometer_readings';
-
-  /// Convert to Hive map
-  @override
-  Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()
-      ..addAll({
-        'vehicleId': vehicleId,
-        'registrationDate': registrationDate,
-        'value': value,
-        'description': description,
-        'type': type,
-      });
-  }
 
   /// Convert to Firebase map
   @override
@@ -158,9 +135,15 @@ class OdometerModel extends BaseSyncModel {
   }) {
     return OdometerModel(
       id: id ?? this.id,
-      createdAtMs: createdAt?.millisecondsSinceEpoch ?? createdAtMs,
-      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? updatedAtMs,
-      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? lastSyncAtMs,
+      createdAtMs:
+          createdAt?.millisecondsSinceEpoch ??
+          this.createdAt?.millisecondsSinceEpoch,
+      updatedAtMs:
+          updatedAt?.millisecondsSinceEpoch ??
+          this.updatedAt?.millisecondsSinceEpoch,
+      lastSyncAtMs:
+          lastSyncAt?.millisecondsSinceEpoch ??
+          this.lastSyncAt?.millisecondsSinceEpoch,
       isDirty: isDirty ?? this.isDirty,
       isDeleted: isDeleted ?? this.isDeleted,
       version: version ?? this.version,

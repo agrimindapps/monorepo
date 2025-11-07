@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/gasometer_colors.dart';
@@ -322,65 +322,63 @@ class DeviceActionsDialog extends StatelessWidget {
   void _confirmRevokeDevice(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Confirmar Desconexão'),
-            content: Text(
-              'Tem certeza que deseja desconectar o dispositivo "${device.name}"?\n\n'
-              'Este dispositivo perderá o acesso à sua conta imediatamente.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Fecha confirmação
-                  Navigator.of(context).pop(); // Fecha diálogo principal
-                  onAction('revoke');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Desconectar'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar Desconexão'),
+        content: Text(
+          'Tem certeza que deseja desconectar o dispositivo "${device.name}"?\n\n'
+          'Este dispositivo perderá o acesso à sua conta imediatamente.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
           ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Fecha confirmação
+              Navigator.of(context).pop(); // Fecha diálogo principal
+              onAction('revoke');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Desconectar'),
+          ),
+        ],
+      ),
     );
   }
 
   void _showTechnicalDetails(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('Detalhes Técnicos - ${device.name}'),
-            content: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildTechnicalDetail('UUID', device.uuid),
-                  _buildTechnicalDetail('Identificador', device.identifier),
-                  _buildTechnicalDetail(
-                    'Dispositivo Físico',
-                    device.isPhysicalDevice ? 'Sim' : 'Não',
-                  ),
-                  if (device.ipAddress != null)
-                    _buildTechnicalDetail('IP', device.ipAddress!),
-                  _buildTechnicalDetail('Build Number', device.buildNumber),
-                ],
+      builder: (context) => AlertDialog(
+        title: Text('Detalhes Técnicos - ${device.name}'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildTechnicalDetail('UUID', device.uuid),
+              _buildTechnicalDetail('Identificador', device.identifier),
+              _buildTechnicalDetail(
+                'Dispositivo Físico',
+                device.isPhysicalDevice ? 'Sim' : 'Não',
               ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Fechar'),
-              ),
+              if (device.ipAddress != null)
+                _buildTechnicalDetail('IP', device.ipAddress!),
+              _buildTechnicalDetail('Build Number', device.buildNumber),
             ],
           ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
+          ),
+        ],
+      ),
     );
   }
 

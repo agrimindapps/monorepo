@@ -323,3 +323,51 @@ class OdometerReadings extends Table {
   /// Observações
   TextColumn get notes => text().nullable()();
 }
+
+/// Tabela de Auditoria Financeira
+///
+/// Registra todas as operações financeiras para compliance e auditoria
+/// Mantém histórico de alterações em despesas, abastecimentos, etc.
+class AuditTrail extends Table {
+  // ========== CAMPOS BASE ==========
+
+  /// ID único da entrada de auditoria (auto incremento)
+  IntColumn get id => integer().autoIncrement()();
+
+  /// ID da entidade auditada (veículo, despesa, abastecimento, etc.)
+  TextColumn get entityId => text()();
+
+  /// Tipo da entidade (vehicle, expense, fuel_supply, maintenance)
+  TextColumn get entityType => text()();
+
+  /// Tipo do evento (CREATE, UPDATE, DELETE, SYNC, etc.)
+  TextColumn get eventType => text()();
+
+  // ========== TIMESTAMPS ==========
+
+  /// Timestamp do evento
+  DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
+
+  // ========== DADOS DO EVENTO ==========
+
+  /// ID do usuário que realizou a operação
+  TextColumn get userId => text().nullable()();
+
+  /// Estado anterior da entidade (JSON serializado)
+  TextColumn get beforeState => text().nullable()();
+
+  /// Estado posterior da entidade (JSON serializado)
+  TextColumn get afterState => text().nullable()();
+
+  /// Descrição da operação
+  TextColumn get description => text().nullable()();
+
+  /// Valor monetário envolvido na operação
+  RealColumn get monetaryValue => real().nullable()();
+
+  /// Metadados adicionais (JSON serializado)
+  TextColumn get metadata => text().nullable()();
+
+  /// Fonte da sincronização (local, remote, conflict_resolution)
+  TextColumn get syncSource => text().nullable()();
+}

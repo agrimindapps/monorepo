@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -87,8 +87,9 @@ class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
                   icon: const Icon(Icons.open_in_new, size: 20),
                   tooltip: 'Ver todos os dispositivos',
                   style: IconButton.styleFrom(
-                    backgroundColor:
-                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     foregroundColor: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),

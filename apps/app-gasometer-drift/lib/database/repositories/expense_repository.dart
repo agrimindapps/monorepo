@@ -1,10 +1,12 @@
 import 'package:core/core.dart';
+import 'package:injectable/injectable.dart';
 import '../gasometer_database.dart';
 import '../tables/gasometer_tables.dart';
 
 /// Repositório de Despesas usando Drift
 ///
 /// Gerencia operações de CRUD e queries para despesas gerais de veículos
+@lazySingleton
 class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
   ExpenseRepository(this._db);
 

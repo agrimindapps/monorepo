@@ -36,9 +36,7 @@ class _AdBannerWidgetState extends ConsumerState<AdBannerWidget> {
 
   Future<void> _loadAd() async {
     // Check if should show ads (premium status)
-    final shouldShow = await ref.read(
-      shouldShowAdsProvider('banner').future,
-    );
+    final shouldShow = await ref.read(shouldShowAdsProvider('banner').future);
 
     if (!shouldShow) {
       setState(() {
@@ -59,7 +57,13 @@ class _AdBannerWidgetState extends ConsumerState<AdBannerWidget> {
           _hasError = true;
         });
         widget.onAdFailedToLoad?.call(
-          _bannerAd!,
+          _bannerAd ??
+              BannerAd(
+                adUnitId: widget.adUnitId,
+                size: widget.size,
+                request: const AdRequest(),
+                listener: BannerAdListener(),
+              ),
           LoadAdError(0, 'domain', failure.message, null),
         );
       },
@@ -128,9 +132,7 @@ class _AdaptiveBannerWidgetState extends ConsumerState<AdaptiveBannerWidget> {
 
   Future<void> _loadAd() async {
     // Check if should show ads
-    final shouldShow = await ref.read(
-      shouldShowAdsProvider('banner').future,
-    );
+    final shouldShow = await ref.read(shouldShowAdsProvider('banner').future);
 
     if (!shouldShow) {
       setState(() {

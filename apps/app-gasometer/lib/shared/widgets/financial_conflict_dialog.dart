@@ -2,8 +2,9 @@
 /// UI for manual resolution of financial data conflicts
 library;
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' show BaseSyncEntity;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../features/expenses/data/models/expense_model.dart';
 import '../../../features/fuel/data/models/fuel_supply_model.dart';

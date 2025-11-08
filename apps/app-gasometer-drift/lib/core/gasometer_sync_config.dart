@@ -1,31 +1,27 @@
 import 'package:core/core.dart';
 
-import '../features/expenses/domain/entities/expense_entity.dart';
-import '../features/fuel/domain/entities/fuel_record_entity.dart';
-import '../features/maintenance/domain/entities/maintenance_entity.dart';
-import '../features/odometer/domain/entities/odometer_entity.dart';
-import '../features/vehicles/domain/entities/vehicle_entity.dart';
 // import 'extensions/user_entity_gasometer_extension.dart'; // Não usado mais
 
-VehicleEntity _vehicleFromFirebaseMap(Map<String, dynamic> map) {
-  return VehicleEntity.fromFirebaseMap(map);
-}
+// REMOVIDO: Funções de conversão migradas para Drift
+// VehicleEntity _vehicleFromFirebaseMap(Map<String, dynamic> map) {
+//   return VehicleEntity.fromFirebaseMap(map);
+// }
 
-MaintenanceEntity _maintenanceFromFirebaseMap(Map<String, dynamic> map) {
-  return MaintenanceEntity.fromFirebaseMap(map);
-}
+// MaintenanceEntity _maintenanceFromFirebaseMap(Map<String, dynamic> map) {
+//   return MaintenanceEntity.fromFirebaseMap(map);
+// }
 
-FuelRecordEntity _fuelRecordFromFirebaseMap(Map<String, dynamic> map) {
-  return FuelRecordEntity.fromFirebaseMap(map);
-}
+// FuelRecordEntity _fuelRecordFromFirebaseMap(Map<String, dynamic> map) {
+//   return FuelRecordEntity.fromFirebaseMap(map);
+// }
 
-ExpenseEntity _expenseFromFirebaseMap(Map<String, dynamic> map) {
-  return ExpenseEntity.fromFirebaseMap(map);
-}
+// ExpenseEntity _expenseFromFirebaseMap(Map<String, dynamic> map) {
+//   return ExpenseEntity.fromFirebaseMap(map);
+// }
 
-OdometerEntity _odometerFromFirebaseMap(Map<String, dynamic> map) {
-  return OdometerEntity.fromFirebaseMap(map);
-}
+// OdometerEntity _odometerFromFirebaseMap(Map<String, dynamic> map) {
+//   return OdometerEntity.fromFirebaseMap(map);
+// }
 
 // UserEntity não é mais sincronizado via UnifiedSync
 // Os dados ficam no documento users/{userId}, não em subcollection
@@ -60,12 +56,12 @@ abstract final class GasometerSyncConfig {
       // Registrar boxes para cada entidade
       // NOTA: Nomes das boxes locais podem ser diferentes dos nomes das collections Firebase
       final boxesToRegister = [
-        'vehicles', // Hive box (Firebase: vehicles)
-        'fuel', // Hive box (Firebase: fuel) - usado pelo UnifiedSync
-        'fuel_supplies', // Hive box (legacy) - mantido para compatibilidade com HiveService
-        'expenses', // Hive box (Firebase: expenses)
-        'maintenance', // Hive box (Firebase: maintenance)
-        'odometer', // Hive box (Firebase: odometer)
+        // Removido: vehicles - migrado para Drift
+        // Removido: fuel - migrado para Drift
+        // Removido: fuel_supplies - não usado
+        // Removido: expenses - migrado para Drift
+        // Removido: maintenance - migrado para Drift
+        // Removido: odometer - migrado para Drift
         'settings', // Hive box (não sincroniza com Firebase)
         'cache', // Hive box (Firebase: subscriptions)
       ];
@@ -119,48 +115,8 @@ abstract final class GasometerSyncConfig {
         conflictStrategy: ConflictStrategy.timestamp,
       ),
       entities: [
-        // Veículos: dados críticos, sync frequente
-        EntitySyncRegistration<VehicleEntity>.simple(
-          entityType: VehicleEntity,
-          collectionName: 'vehicles', // Firebase collection
-          fromMap: _vehicleFromFirebaseMap,
-          toMap: (vehicle) => vehicle.toFirebaseMap(),
-        ),
-        // Combustível: dados financeiros, resolução manual para precisão
-        // IMPORTANTE: Firebase collection é 'fuel', mas a box local é 'fuel_supplies'
-        // O SyncFirebaseService usa collectionName para AMBOS (Firebase E Hive)
-        // Solução: Usar 'fuel' para acessar o Firebase corretamente
-        EntitySyncRegistration<FuelRecordEntity>.simple(
-          entityType: FuelRecordEntity,
-          collectionName:
-              'fuel', // Firebase: fuel (SyncFirebaseService usará isso para Hive também)
-          fromMap: _fuelRecordFromFirebaseMap,
-          toMap: (fuelRecord) => fuelRecord.toFirebaseMap(),
-        ),
-        // Despesas: dados monetários, resolução manual
-        EntitySyncRegistration<ExpenseEntity>.simple(
-          entityType: ExpenseEntity,
-          collectionName: 'expenses', // Firebase collection
-          fromMap: _expenseFromFirebaseMap,
-          toMap: (expense) => expense.toFirebaseMap(),
-        ),
-        // Manutenção: dados críticos do veículo
-        EntitySyncRegistration<MaintenanceEntity>.simple(
-          entityType: MaintenanceEntity,
-          collectionName: 'maintenance', // Firebase collection
-          fromMap: _maintenanceFromFirebaseMap,
-          toMap: (maintenance) => maintenance.toFirebaseMap(),
-        ),
-        // Odômetro: leituras de quilometragem
-        EntitySyncRegistration<OdometerEntity>.simple(
-          entityType: OdometerEntity,
-          collectionName: 'odometer', // Firebase collection
-          fromMap: _odometerFromFirebaseMap,
-          toMap: (odometer) => odometer.toFirebaseMap(),
-        ),
-        // NOTA: UserEntity não é sincronizado como collection separada
-        // Os dados do usuário ficam no documento users/{userId} (não em subcollection)
-        // Removido para evitar erro de permissão
+        // NOTA: Veículos, combustível, despesas, manutenção e odômetro foram migrados para Drift
+        // Apenas subscriptions permanece usando Hive para cache
 
         // Assinatura: dados de billing
         EntitySyncRegistration<SubscriptionEntity>.simple(

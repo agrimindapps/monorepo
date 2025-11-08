@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

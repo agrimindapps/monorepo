@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as flutter show FormState;
 import 'package:flutter/material.dart' hide FormState;

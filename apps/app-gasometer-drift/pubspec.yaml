@@ -38,13 +38,18 @@ dev_dependencies:
   json_serializable: ^6.8.0
   riverpod_generator: any
   injectable_generator: any
-  drift_dev: ^2.22.0
   analyzer: ^7.6.0
 
 # The following section is specific to Flutter packages.
 flutter:
   uses-material-design: true
 
+  # Assets para Drift WASM (necessário para web)
+  # O drift_worker.dart será compilado automaticamente para JS pelo Flutter
   assets:
-    - assets/images/
-    - assets/icons/
+    - web/sqlite3.wasm
+
+  # Diretórios criados mas vazios por enquanto
+  # assets:
+  #   - assets/images/
+  #   - assets/icons/

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../features/auth/domain/entities/user_entity.dart' as gasometer_entities;

@@ -1,5 +1,6 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' show DeviceEntity;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/theme/gasometer_colors.dart';
 import '../../domain/extensions/vehicle_device_extension.dart';

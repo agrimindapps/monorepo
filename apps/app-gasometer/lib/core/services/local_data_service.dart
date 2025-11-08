@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 /// Helper function to safely convert any Map to Map<String, dynamic>

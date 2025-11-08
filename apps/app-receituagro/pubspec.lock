@@ -234,7 +234,7 @@ packages:
     source: hosted
     version: "1.1.2"
   cloud_firestore:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: cloud_firestore
       sha256: ea3fe98eaf0c3b675ab2a242d98430518da60f89d5cc9774df7b2d9110aaf160
@@ -416,6 +416,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  drift:
+    dependency: transitive
+    description:
+      name: drift
+      sha256: "83290a32ae006a7535c5ecf300722cb77177250d9df4ee2becc5fa8a36095114"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.29.0"
   encrypt:
     dependency: transitive
     description:
@@ -1656,7 +1664,7 @@ packages:
     source: hosted
     version: "6.1.0"
   shared_preferences:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: shared_preferences
       sha256: "6e8bf70b7fef813df4e9a36f658ac46d107db4b4cfe1048b477d4e453a8159f5"
@@ -1836,6 +1844,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.0"
+  sqlite3:
+    dependency: transitive
+    description:
+      name: sqlite3
+      sha256: "3145bd74dcdb4fd6f5c6dda4d4e4490a8087d7f286a14dee5d37087290f0f8a2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.9.4"
+  sqlite3_flutter_libs:
+    dependency: transitive
+    description:
+      name: sqlite3_flutter_libs
+      sha256: "69c80d812ef2500202ebd22002cbfc1b6565e9ff56b2f971e757fac5d42294df"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.40"
+  sqlite3_web:
+    dependency: transitive
+    description:
+      name: sqlite3_web
+      sha256: "3973adf9ee74e485d5552319e1903129f4ed999fe675aa0b4b5d35d112b2aa1c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.1"
   stack_trace:
     dependency: transitive
     description:

@@ -3,7 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/di/injection.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../../vehicles/domain/usecases/get_vehicle_by_id.dart';
-import '../../data/repositories/maintenance_repository.dart';
+import '../../domain/repositories/maintenance_repository.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../../domain/services/maintenance_formatter_service.dart';
 import '../models/maintenance_form_model.dart';
@@ -31,7 +31,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
     _repository = getIt<MaintenanceRepository>();
     _formatter = MaintenanceFormatterService();
     _getVehicleById = getIt<GetVehicleById>();
-    _repository.initialize();
     loadMaintenances();
 
     return const MaintenancesState();
@@ -40,18 +39,22 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
   /// Carrega todas as manutenções
   Future<void> loadMaintenances() async {
     try {
-      state = state.copyWith(
-        isLoading: true,
-        errorMessage: () => null,
-      );
+      state = state.copyWith(isLoading: true, errorMessage: () => null);
 
-      final maintenances = await _repository.getAllMaintenances();
-
-      state = state.copyWith(
-        maintenances: maintenances,
-        isLoading: false,
+      final result = await _repository.getAllMaintenanceRecords();
+      
+      result.fold(
+        (failure) {
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: () => 'Erro ao carregar manutenções: ${failure.message}',
+          );
+        },
+        (maintenances) {
+          state = state.copyWith(maintenances: maintenances, isLoading: false);
+          _applyFiltersAndStats();
+        },
       );
-      _applyFiltersAndStats();
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -69,13 +72,22 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
         selectedVehicleId: () => vehicleId,
       );
 
-      final maintenances = await _repository.getMaintenancesByVehicle(vehicleId);
-
-      state = state.copyWith(
-        maintenances: maintenances,
-        isLoading: false,
+      final result = await _repository.getMaintenanceRecordsByVehicle(
+        vehicleId,
       );
-      _applyFiltersAndStats();
+
+      result.fold(
+        (failure) {
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: () => 'Erro ao carregar manutenções: ${failure.message}',
+          );
+        },
+        (maintenances) {
+          state = state.copyWith(maintenances: maintenances, isLoading: false);
+          _applyFiltersAndStats();
+        },
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -91,26 +103,31 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
       final validationErrors = formModel.validate();
       if (validationErrors.isNotEmpty) {
         state = state.copyWith(
-          errorMessage: () => 'Dados inválidos: ${validationErrors.values.first}',
+          errorMessage: () =>
+              'Dados inválidos: ${validationErrors.values.first}',
         );
         return false;
       }
       final maintenance = formModel.toMaintenanceEntity();
-      final saved = await _repository.saveMaintenance(maintenance);
+      final result = await _repository.addMaintenanceRecord(maintenance);
 
-      if (saved != null) {
-        final updatedList = List<MaintenanceEntity>.from(state.maintenances);
-        updatedList.add(saved);
+      return result.fold(
+        (failure) {
+          state = state.copyWith(
+            errorMessage: () => 'Erro ao salvar manutenção: ${failure.message}',
+          );
+          return false;
+        },
+        (saved) {
+          final updatedList = List<MaintenanceEntity>.from(state.maintenances);
+          updatedList.add(saved);
 
-        state = state.copyWith(
-          maintenances: updatedList,
-        );
-        _applyFiltersAndStats();
+          state = state.copyWith(maintenances: updatedList);
+          _applyFiltersAndStats();
 
-        return true;
-      }
-
-      return false;
+          return true;
+        },
+      );
     } catch (e) {
       state = state.copyWith(
         errorMessage: () => 'Erro ao salvar manutenção: $e',
@@ -133,30 +150,35 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
       final validationErrors = formModel.validate();
       if (validationErrors.isNotEmpty) {
         state = state.copyWith(
-          errorMessage: () => 'Dados inválidos: ${validationErrors.values.first}',
+          errorMessage: () =>
+              'Dados inválidos: ${validationErrors.values.first}',
         );
         return false;
       }
       final maintenance = formModel.toMaintenanceEntity();
-      final updated = await _repository.updateMaintenance(maintenance);
+      final result = await _repository.updateMaintenanceRecord(maintenance);
 
-      if (updated != null) {
-        final updatedList = List<MaintenanceEntity>.from(state.maintenances);
-        final index = updatedList.indexWhere((m) => m.id == maintenance.id);
-
-        if (index >= 0) {
-          updatedList[index] = updated;
-
+      return result.fold(
+        (failure) {
           state = state.copyWith(
-            maintenances: updatedList,
+            errorMessage: () => 'Erro ao atualizar manutenção: ${failure.message}',
           );
-          _applyFiltersAndStats();
-        }
+          return false;
+        },
+        (updated) {
+          final updatedList = List<MaintenanceEntity>.from(state.maintenances);
+          final index = updatedList.indexWhere((m) => m.id == maintenance.id);
 
-        return true;
-      }
+          if (index >= 0) {
+            updatedList[index] = updated;
 
-      return false;
+            state = state.copyWith(maintenances: updatedList);
+            _applyFiltersAndStats();
+          }
+
+          return true;
+        },
+      );
     } catch (e) {
       state = state.copyWith(
         errorMessage: () => 'Erro ao atualizar manutenção: $e',
@@ -170,21 +192,25 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
     try {
       state = state.clearError();
 
-      final success = await _repository.deleteMaintenance(maintenanceId);
+      final result = await _repository.deleteMaintenanceRecord(maintenanceId);
 
-      if (success) {
-        final updatedList = List<MaintenanceEntity>.from(state.maintenances);
-        updatedList.removeWhere((m) => m.id == maintenanceId);
+      return result.fold(
+        (failure) {
+          state = state.copyWith(
+            errorMessage: () => 'Erro ao remover manutenção: ${failure.message}',
+          );
+          return false;
+        },
+        (_) {
+          final updatedList = List<MaintenanceEntity>.from(state.maintenances);
+          updatedList.removeWhere((m) => m.id == maintenanceId);
 
-        state = state.copyWith(
-          maintenances: updatedList,
-        );
-        _applyFiltersAndStats();
+          state = state.copyWith(maintenances: updatedList);
+          _applyFiltersAndStats();
 
-        return true;
-      }
-
-      return false;
+          return true;
+        },
+      );
     } catch (e) {
       state = state.copyWith(
         errorMessage: () => 'Erro ao remover manutenção: $e',
@@ -205,23 +231,24 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
   /// Carrega manutenções pendentes
   Future<List<MaintenanceEntity>> getUpcomingMaintenances() async {
     try {
-      double currentOdometer = 0;
-
-      if (state.selectedVehicleId != null) {
-        final vehicleResult = await _getVehicleById(
-          GetVehicleByIdParams(vehicleId: state.selectedVehicleId!),
-        );
-
-        await vehicleResult.fold(
-          (failure) async {
-          },
-          (vehicle) async {
-            currentOdometer = vehicle.currentOdometer;
-          },
-        );
+      if (state.selectedVehicleId == null) {
+        return [];
       }
 
-      return await _repository.getUpcomingMaintenances(currentOdometer);
+      final result = await _repository.getUpcomingMaintenanceRecords(
+        state.selectedVehicleId!,
+        days: 30,
+      );
+
+      return result.fold(
+        (failure) {
+          state = state.copyWith(
+            errorMessage: () => 'Erro ao carregar manutenções pendentes: ${failure.message}',
+          );
+          return [];
+        },
+        (maintenances) => maintenances,
+      );
     } catch (e) {
       state = state.copyWith(
         errorMessage: () => 'Erro ao carregar manutenções pendentes: $e',
@@ -239,47 +266,38 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
 
   /// Obtém manutenções de alto custo
   List<MaintenanceEntity> getHighCostMaintenances({double threshold = 1000.0}) {
-    return state.filteredMaintenances.where((m) => m.cost >= threshold).toList();
+    return state.filteredMaintenances
+        .where((m) => m.cost >= threshold)
+        .toList();
   }
 
   /// Aplica filtro por veículo
   void filterByVehicle(String? vehicleId) {
-    state = state.copyWith(
-      selectedVehicleId: () => vehicleId,
-    );
+    state = state.copyWith(selectedVehicleId: () => vehicleId);
     _applyFiltersAndStats();
   }
 
   /// Aplica filtro por tipo
   void filterByType(MaintenanceType? type) {
-    state = state.copyWith(
-      selectedType: () => type,
-    );
+    state = state.copyWith(selectedType: () => type);
     _applyFiltersAndStats();
   }
 
   /// Aplica filtro por status
   void filterByStatus(MaintenanceStatus? status) {
-    state = state.copyWith(
-      selectedStatus: () => status,
-    );
+    state = state.copyWith(selectedStatus: () => status);
     _applyFiltersAndStats();
   }
 
   /// Aplica filtro por período
   void filterByPeriod(DateTime? start, DateTime? end) {
-    state = state.copyWith(
-      startDate: () => start,
-      endDate: () => end,
-    );
+    state = state.copyWith(startDate: () => start, endDate: () => end);
     _applyFiltersAndStats();
   }
 
   /// Aplica busca por texto
   void search(String query) {
-    state = state.copyWith(
-      searchQuery: query,
-    );
+    state = state.copyWith(searchQuery: query);
     _applyFiltersAndStats();
   }
 
@@ -293,7 +311,8 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
   void setSortBy(String field, {bool? ascending}) {
     state = state.copyWith(
       sortBy: field,
-      sortAscending: ascending ?? (state.sortBy == field ? !state.sortAscending : false),
+      sortAscending:
+          ascending ?? (state.sortBy == field ? !state.sortAscending : false),
     );
     _applySort();
   }
@@ -305,7 +324,8 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
           maintenance.vehicleId != state.selectedVehicleId) {
         return false;
       }
-      if (state.selectedType != null && maintenance.type != state.selectedType) {
+      if (state.selectedType != null &&
+          maintenance.type != state.selectedType) {
         return false;
       }
       if (state.selectedStatus != null &&
@@ -346,9 +366,7 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
       return true;
     }).toList();
 
-    state = state.copyWith(
-      filteredMaintenances: filtered,
-    );
+    state = state.copyWith(filteredMaintenances: filtered);
 
     _applySort();
     _calculateStats();
@@ -387,9 +405,7 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
       return state.sortAscending ? comparison : -comparison;
     });
 
-    state = state.copyWith(
-      filteredMaintenances: sorted,
-    );
+    state = state.copyWith(filteredMaintenances: sorted);
   }
 
   /// Calcula estatísticas da lista filtrada
@@ -408,7 +424,8 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
     final countByType = <MaintenanceType, int>{};
 
     for (final maintenance in state.filteredMaintenances) {
-      byType[maintenance.type] = (byType[maintenance.type] ?? 0) + maintenance.cost;
+      byType[maintenance.type] =
+          (byType[maintenance.type] ?? 0) + maintenance.cost;
       countByType[maintenance.type] = (countByType[maintenance.type] ?? 0) + 1;
     }
     MaintenanceType? mostExpensiveType;
@@ -421,14 +438,17 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
     });
     double monthlyCost = 0;
     if (state.filteredMaintenances.length >= 2) {
-      final sortedByDate = List<MaintenanceEntity>.from(state.filteredMaintenances)
-        ..sort((a, b) => a.serviceDate.compareTo(b.serviceDate));
+      final sortedByDate = List<MaintenanceEntity>.from(
+        state.filteredMaintenances,
+      )..sort((a, b) => a.serviceDate.compareTo(b.serviceDate));
 
       final firstDate = sortedByDate.first.serviceDate;
       final lastDate = sortedByDate.last.serviceDate;
       final monthsDiff =
-          ((lastDate.year - firstDate.year) * 12 + lastDate.month - firstDate.month) +
-              1;
+          ((lastDate.year - firstDate.year) * 12 +
+              lastDate.month -
+              firstDate.month) +
+          1;
 
       if (monthsDiff > 0) {
         monthlyCost = totalCost / monthsDiff;
@@ -469,7 +489,9 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
   }
 
   /// Obtém relatório detalhado de uma manutenção
-  Future<Map<String, dynamic>> getMaintenanceReport(String maintenanceId) async {
+  Future<Map<String, dynamic>> getMaintenanceReport(
+    String maintenanceId,
+  ) async {
     final maintenance = getMaintenanceById(maintenanceId);
     if (maintenance == null) return {};
 
@@ -478,13 +500,9 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
       GetVehicleByIdParams(vehicleId: maintenance.vehicleId),
     );
 
-    await vehicleResult.fold(
-      (failure) async {
-      },
-      (v) async {
-        vehicle = v;
-      },
-    );
+    await vehicleResult.fold((failure) async {}, (v) async {
+      vehicle = v;
+    });
 
     if (vehicle == null) return {};
     final similarMaintenances = state.maintenances
@@ -493,16 +511,18 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
 
     double? averageSimilar;
     if (similarMaintenances.isNotEmpty) {
-      averageSimilar = similarMaintenances.fold<double>(0, (sum, m) => sum + m.cost) /
+      averageSimilar =
+          similarMaintenances.fold<double>(0, (sum, m) => sum + m.cost) /
           similarMaintenances.length;
     }
     final lastSimilar = similarMaintenances
         .where((m) => m.serviceDate.isBefore(maintenance.serviceDate))
         .fold<MaintenanceEntity?>(null, (latest, current) {
-      return latest == null || current.serviceDate.isAfter(latest.serviceDate)
-          ? current
-          : latest;
-    });
+          return latest == null ||
+                  current.serviceDate.isAfter(latest.serviceDate)
+              ? current
+              : latest;
+        });
 
     return {
       'maintenance': maintenance,
@@ -517,7 +537,8 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
         'daysSinceLastSimilar': lastSimilar != null
             ? maintenance.serviceDate.difference(lastSimilar.serviceDate).inDays
             : null,
-        'isOverdue': maintenance.hasNextService &&
+        'isOverdue':
+            maintenance.hasNextService &&
             maintenance.isNextServiceDue(vehicle!.currentOdometer),
         'urgencyLevel': maintenance.urgencyLevel,
       },
@@ -533,7 +554,10 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
 
     if (periodMaintenances.isEmpty) return {};
 
-    final totalCost = periodMaintenances.fold<double>(0, (sum, m) => sum + m.cost);
+    final totalCost = periodMaintenances.fold<double>(
+      0,
+      (sum, m) => sum + m.cost,
+    );
     final days = end.difference(start).inDays + 1;
 
     return {

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';

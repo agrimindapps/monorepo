@@ -1,11 +1,16 @@
 import 'package:core/core.dart';
-import 'package:hive/hive.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../database/gasometer_database.dart';
+
 /// Implementação de IAppDataCleaner para o app Gasometer
-/// Responsável por limpar todos os dados locais do app
+/// Responsável por limpar todos os dados locais do app usando Drift
 @LazySingleton(as: IAppDataCleaner)
 class GasometerDataCleaner implements IAppDataCleaner {
+  final GasometerDatabase _database;
+
+  GasometerDataCleaner(this._database);
+
   @override
   String get appName => 'Gasometer';
 
@@ -18,41 +23,93 @@ class GasometerDataCleaner implements IAppDataCleaner {
 
   @override
   Future<Map<String, dynamic>> clearAllAppData() async {
-    final clearedBoxes = <String>[];
+    final clearedTables = <String>[];
     final errors = <String>[];
     var totalRecordsCleared = 0;
 
     try {
-      // Lista de boxes do Gasometer
-      final boxNames = [
+      // Limpar todas as tabelas Drift
+      final tablesToClear = [
         'vehicles',
         'fuel_supplies',
-        'odometer',
+        'odometer_readings',
         'expenses',
-        'maintenance',
-        'categories',
-        'settings',
-        'cache',
-        'logs',
+        'maintenances',
+        'audit_trail',
       ];
 
-      for (final boxName in boxNames) {
+      for (final tableName in tablesToClear) {
         try {
-          if (Hive.isBoxOpen(boxName)) {
-            final box = Hive.box(boxName);
-            final count = box.length;
-            await box.clear();
-            clearedBoxes.add(boxName);
-            totalRecordsCleared += count;
+          int count = 0;
+
+          switch (tableName) {
+            case 'vehicles':
+              count = await _database
+                  .select(_database.vehicles)
+                  .get()
+                  .then((list) => list.length);
+              await (_database.delete(
+                _database.vehicles,
+              )..where((tbl) => tbl.id.isNotNull())).go();
+              break;
+            case 'fuel_supplies':
+              count = await _database
+                  .select(_database.fuelSupplies)
+                  .get()
+                  .then((list) => list.length);
+              await (_database.delete(
+                _database.fuelSupplies,
+              )..where((tbl) => tbl.id.isNotNull())).go();
+              break;
+            case 'odometer_readings':
+              count = await _database
+                  .select(_database.odometerReadings)
+                  .get()
+                  .then((list) => list.length);
+              await (_database.delete(
+                _database.odometerReadings,
+              )..where((tbl) => tbl.id.isNotNull())).go();
+              break;
+            case 'expenses':
+              count = await _database
+                  .select(_database.expenses)
+                  .get()
+                  .then((list) => list.length);
+              await (_database.delete(
+                _database.expenses,
+              )..where((tbl) => tbl.id.isNotNull())).go();
+              break;
+            case 'maintenances':
+              count = await _database
+                  .select(_database.maintenances)
+                  .get()
+                  .then((list) => list.length);
+              await (_database.delete(
+                _database.maintenances,
+              )..where((tbl) => tbl.id.isNotNull())).go();
+              break;
+            case 'audit_trail':
+              count = await _database
+                  .select(_database.auditTrail)
+                  .get()
+                  .then((list) => list.length);
+              await (_database.delete(
+                _database.auditTrail,
+              )..where((tbl) => tbl.id.isNotNull())).go();
+              break;
           }
+
+          clearedTables.add(tableName);
+          totalRecordsCleared += count;
         } catch (e) {
-          errors.add('Erro ao limpar box $boxName: $e');
+          errors.add('Erro ao limpar tabela $tableName: $e');
         }
       }
 
       return {
         'success': errors.isEmpty,
-        'clearedBoxes': clearedBoxes,
+        'clearedBoxes':
+            clearedTables, // Mantém nome do campo para compatibilidade
         'clearedPreferences': <String>[],
         'errors': errors,
         'totalRecordsCleared': totalRecordsCleared,
@@ -61,7 +118,7 @@ class GasometerDataCleaner implements IAppDataCleaner {
       errors.add('Erro geral na limpeza: $e');
       return {
         'success': false,
-        'clearedBoxes': clearedBoxes,
+        'clearedBoxes': clearedTables,
         'clearedPreferences': <String>[],
         'errors': errors,
         'totalRecordsCleared': totalRecordsCleared,
@@ -74,35 +131,55 @@ class GasometerDataCleaner implements IAppDataCleaner {
     final stats = <String, int>{};
     var totalRecords = 0;
 
-    final boxNames = [
-      'vehicles',
-      'fuel_supplies',
-      'odometer',
-      'expenses',
-      'maintenance',
-      'categories',
-      'settings',
-      'cache',
-      'logs',
-    ];
+    try {
+      // Contar registros em cada tabela Drift
+      final vehiclesCount = await _database
+          .select(_database.vehicles)
+          .get()
+          .then((list) => list.length);
+      stats['vehicles'] = vehiclesCount;
+      totalRecords += vehiclesCount;
 
-    for (final boxName in boxNames) {
-      try {
-        if (Hive.isBoxOpen(boxName)) {
-          final box = Hive.box(boxName);
-          final count = box.length;
-          stats[boxName] = count;
-          totalRecords += count;
-        }
-      } catch (e) {
-        stats[boxName] = 0;
-      }
+      final fuelCount = await _database
+          .select(_database.fuelSupplies)
+          .get()
+          .then((list) => list.length);
+      stats['fuel_supplies'] = fuelCount;
+      totalRecords += fuelCount;
+
+      final odometerCount = await _database
+          .select(_database.odometerReadings)
+          .get()
+          .then((list) => list.length);
+      stats['odometer_readings'] = odometerCount;
+      totalRecords += odometerCount;
+
+      final expensesCount = await _database
+          .select(_database.expenses)
+          .get()
+          .then((list) => list.length);
+      stats['expenses'] = expensesCount;
+      totalRecords += expensesCount;
+
+      final maintenanceCount = await _database
+          .select(_database.maintenances)
+          .get()
+          .then((list) => list.length);
+      stats['maintenances'] = maintenanceCount;
+      totalRecords += maintenanceCount;
+
+      final auditCount = await _database
+          .select(_database.auditTrail)
+          .get()
+          .then((list) => list.length);
+      stats['audit_trail'] = auditCount;
+      totalRecords += auditCount;
+    } catch (e) {
+      // Em caso de erro, retorna valores zerados
+      return {'totalRecords': 0, 'boxStats': stats};
     }
 
-    return {
-      'totalRecords': totalRecords,
-      'boxStats': stats,
-    };
+    return {'totalRecords': totalRecords, 'boxStats': stats};
   }
 
   @override
@@ -125,13 +202,10 @@ class GasometerDataCleaner implements IAppDataCleaner {
       'all',
       'vehicles',
       'fuel_supplies',
-      'odometer',
+      'odometer_readings',
       'expenses',
-      'maintenance',
-      'categories',
-      'settings',
-      'cache',
-      'logs',
+      'maintenances',
+      'audit_trail',
     ];
   }
 
@@ -145,15 +219,67 @@ class GasometerDataCleaner implements IAppDataCleaner {
     var totalRecordsCleared = 0;
 
     try {
-      if (Hive.isBoxOpen(category)) {
-        final box = Hive.box(category);
-        final count = box.length;
-        await box.clear();
-        totalRecordsCleared = count;
+      switch (category) {
+        case 'vehicles':
+          totalRecordsCleared = await _database
+              .select(_database.vehicles)
+              .get()
+              .then((list) => list.length);
+          await (_database.delete(
+            _database.vehicles,
+          )..where((tbl) => tbl.id.isNotNull())).go();
+          break;
+        case 'fuel_supplies':
+          totalRecordsCleared = await _database
+              .select(_database.fuelSupplies)
+              .get()
+              .then((list) => list.length);
+          await (_database.delete(
+            _database.fuelSupplies,
+          )..where((tbl) => tbl.id.isNotNull())).go();
+          break;
+        case 'odometer_readings':
+          totalRecordsCleared = await _database
+              .select(_database.odometerReadings)
+              .get()
+              .then((list) => list.length);
+          await (_database.delete(
+            _database.odometerReadings,
+          )..where((tbl) => tbl.id.isNotNull())).go();
+          break;
+        case 'expenses':
+          totalRecordsCleared = await _database
+              .select(_database.expenses)
+              .get()
+              .then((list) => list.length);
+          await (_database.delete(
+            _database.expenses,
+          )..where((tbl) => tbl.id.isNotNull())).go();
+          break;
+        case 'maintenances':
+          totalRecordsCleared = await _database
+              .select(_database.maintenances)
+              .get()
+              .then((list) => list.length);
+          await (_database.delete(
+            _database.maintenances,
+          )..where((tbl) => tbl.id.isNotNull())).go();
+          break;
+        case 'audit_trail':
+          totalRecordsCleared = await _database
+              .select(_database.auditTrail)
+              .get()
+              .then((list) => list.length);
+          await (_database.delete(
+            _database.auditTrail,
+          )..where((tbl) => tbl.id.isNotNull())).go();
+          break;
+        default:
+          errors.add('Categoria desconhecida: $category');
       }
 
       return {
-        'success': true,
+        'success': errors.isEmpty,
         'clearedBoxes': [category],
         'clearedPreferences': <String>[],
         'errors': errors,

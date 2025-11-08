@@ -127,7 +127,10 @@ dependencies:
 
   # Analysis/Linting (needed for transitive analysis_options.yaml inheritance)
   flutter_lints: ^5.0.0
+
+  # Drift - SQL Database
   drift: ^2.21.0
+  sqlite3_web: ^0.4.1  # Suporte web WASM para Drift
   
 dev_dependencies:
   flutter_test:

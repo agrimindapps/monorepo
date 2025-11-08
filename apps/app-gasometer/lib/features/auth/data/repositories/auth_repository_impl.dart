@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/error/exceptions.dart' as local_exceptions;

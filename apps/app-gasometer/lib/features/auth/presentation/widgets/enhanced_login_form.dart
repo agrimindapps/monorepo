@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

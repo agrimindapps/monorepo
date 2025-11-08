@@ -2,8 +2,9 @@
 /// Demonstrates the new responsive layout system with desktop/mobile adaptations
 library;
 
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 
 import '../../../../core/constants/responsive_constants.dart';
 import '../../../../core/widgets/enhanced_empty_state.dart';

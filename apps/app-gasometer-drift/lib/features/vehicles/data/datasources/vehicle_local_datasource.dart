@@ -70,6 +70,8 @@ class VehicleLocalDataSource {
       vendido: Value(vendido),
       valorVenda: Value(valorVenda),
       foto: Value(foto),
+      // 🔥 FIX: Marcar como "dirty" para sincronização com Firebase
+      isDirty: const Value(true),
     );
     // Use the database insert method directly
     return await _repository.database.into(_repository.table).insert(companion);

@@ -67,7 +67,8 @@ class InputSanitizer {
         );
   }
 
-  /// Sanitizes name input by allowing only letters, spaces, and common name characters
+  /// Sanitizes name input by allowing letters, numbers, spaces, and common name characters
+  /// Useful for vehicle brands, models, and person names
   ///
   /// [input] - The name input string to sanitize
   ///
@@ -78,7 +79,8 @@ class InputSanitizer {
     return input
         .trim()
         .replaceAll(RegExp(r'<[^>]*>'), '')
-        .replaceAll(RegExp(r'[^a-zA-ZÀ-ÿ\s\x27-]'), '')
+        // Permite: letras (a-z, A-Z), acentuadas (À-ÿ), números (0-9), espaços, hífen e apóstrofo
+        .replaceAll(RegExp(r'[^a-zA-ZÀ-ÿ0-9\s\x27-]'), '')
         .replaceAll(
           RegExp(r'javascript:|data:|file:', caseSensitive: false),
           '',

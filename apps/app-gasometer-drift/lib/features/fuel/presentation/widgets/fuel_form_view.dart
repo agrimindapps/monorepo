@@ -214,10 +214,12 @@ class FuelFormView extends ConsumerWidget {
     final state = ref.watch(fuelFormNotifierProvider(vehicleId));
     final formatter = FuelFormatterService();
     final totalPrice = state.formModel.totalPrice;
+    final formattedTotal = totalPrice > 0 ? formatter.formatTotalPrice(totalPrice) : '';
 
     return ValidatedTextField(
+      key: ValueKey('total_price_$formattedTotal'), // Force rebuild when value changes
       controller: TextEditingController(
-        text: totalPrice > 0 ? formatter.formatTotalPrice(totalPrice) : '',
+        text: formattedTotal,
       ),
       label: FuelConstants.totalPriceLabel,
       hint: 'Calculado automaticamente',

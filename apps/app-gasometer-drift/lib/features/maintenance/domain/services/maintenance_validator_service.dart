@@ -99,7 +99,14 @@ class MaintenanceValidatorService {
       return 'Odômetro é obrigatório';
     }
 
-    final cleanValue = value.replaceAll(',', '.');
+    // Remove espaços, pontos separadores de milhar, sufixo " km" e substitui vírgula por ponto
+    final cleanValue = value
+        .trim()
+        .replaceAll(' km', '')
+        .replaceAll(' ', '')
+        .replaceAll('.', '')  // Remove pontos separadores de milhar
+        .replaceAll(',', '.'); // Substitui vírgula decimal por ponto
+
     final odometer = double.tryParse(cleanValue);
 
     if (odometer == null) {
@@ -179,7 +186,14 @@ class MaintenanceValidatorService {
   String? validateNextServiceOdometer(String? value, double currentOdometer) {
     if (value == null || value.trim().isEmpty) return null; // Opcional
 
-    final cleanValue = value.replaceAll(',', '.');
+    // Remove espaços, pontos separadores de milhar, sufixo " km" e substitui vírgula por ponto
+    final cleanValue = value
+        .trim()
+        .replaceAll(' km', '')
+        .replaceAll(' ', '')
+        .replaceAll('.', '')  // Remove pontos separadores de milhar
+        .replaceAll(',', '.'); // Substitui vírgula decimal por ponto
+
     final nextOdometer = double.tryParse(cleanValue);
 
     if (nextOdometer == null) {

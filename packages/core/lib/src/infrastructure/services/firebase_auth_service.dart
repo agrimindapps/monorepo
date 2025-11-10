@@ -33,9 +33,9 @@ class FirebaseAuthService implements IAuthRepository {
     FirebaseAuth? firebaseAuth,
     GoogleSignIn? googleSignIn,
     FacebookAuth? facebookAuth,
-  })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-        _googleSignIn = googleSignIn ?? GoogleSignIn(scopes: ['email']),
-        _facebookAuth = facebookAuth ?? FacebookAuth.instance;
+  }) : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
+       _googleSignIn = googleSignIn ?? GoogleSignIn(scopes: ['email']),
+       _facebookAuth = facebookAuth ?? FacebookAuth.instance;
 
   @override
   Stream<core_entities.UserEntity?> get currentUser {
@@ -109,7 +109,29 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Attempting Google Sign In...');
       }
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+      // 🔥 FIX: Previne "Future already completed" na Web
+      // Limpa estado anterior antes de nova tentativa
+      if (kIsWeb) {
+        try {
+          await _googleSignIn.signOut();
+        } catch (_) {
+          // Ignora erro de signOut (pode não estar logado)
+        }
+      }
+
+      // 🔥 FIX: Adiciona timeout para prevenir Future travado
+      final GoogleSignInAccount? googleUser = await _googleSignIn
+          .signIn()
+          .timeout(
+            const Duration(seconds: 60),
+            onTimeout: () {
+              if (kDebugMode) {
+                debugPrint('⏱️ Firebase: Google Sign In timeout');
+              }
+              return null;
+            },
+          );
 
       if (googleUser == null) {
         if (kDebugMode) {
@@ -119,9 +141,12 @@ class FirebaseAuthService implements IAuthRepository {
       }
 
       if (kDebugMode) {
-        debugPrint('🔄 Firebase: Google user obtained, getting authentication...');
+        debugPrint(
+          '🔄 Firebase: Google user obtained, getting authentication...',
+        );
       }
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       if (googleAuth.accessToken == null || googleAuth.idToken == null) {
         if (kDebugMode) {
@@ -137,7 +162,9 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Signing in with Google credential...');
       }
-      final userCredential = await _firebaseAuth.signInWithCredential(credential);
+      final userCredential = await _firebaseAuth.signInWithCredential(
+        credential,
+      );
 
       if (userCredential.user == null) {
         if (kDebugMode) {
@@ -147,15 +174,33 @@ class FirebaseAuthService implements IAuthRepository {
       }
 
       if (kDebugMode) {
-        debugPrint('✅ Firebase: Google Sign In successful - User: ${userCredential.user!.uid}');
+        debugPrint(
+          '✅ Firebase: Google Sign In successful - User: ${userCredential.user!.uid}',
+        );
       }
 
       return Right(_mapFirebaseUserToEntity(userCredential.user!));
     } on FirebaseAuthException catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ Firebase: FirebaseAuthException - ${e.code}: ${e.message}');
+        debugPrint(
+          '❌ Firebase: FirebaseAuthException - ${e.code}: ${e.message}',
+        );
       }
       return Left(AuthFailure(_mapFirebaseAuthError(e)));
+    } on StateError catch (e) {
+      // 🔥 FIX: Captura especificamente "Bad state: Future already completed"
+      if (e.message.contains('Future already completed')) {
+        if (kDebugMode) {
+          debugPrint(
+            '⚠️ Firebase: Future already completed - Google Sign In plugin state issue',
+          );
+          debugPrint('💡 Usuário deve tentar novamente (estado foi resetado)');
+        }
+        return const Left(
+          AuthFailure('Estado inválido do login. Tente novamente.'),
+        );
+      }
+      rethrow;
     } catch (e, stackTrace) {
       if (kDebugMode) {
         debugPrint('❌ Firebase: Unexpected error during Google Sign In: $e');
@@ -175,7 +220,9 @@ class FirebaseAuthService implements IAuthRepository {
         if (kDebugMode) {
           debugPrint('❌ Firebase: Apple Sign In not available on this device');
         }
-        return const Left(AuthFailure('Login com Apple não disponível neste dispositivo'));
+        return const Left(
+          AuthFailure('Login com Apple não disponível neste dispositivo'),
+        );
       }
       final appleCredential = await SignInWithApple.getAppleIDCredential(
         scopes: [
@@ -185,13 +232,17 @@ class FirebaseAuthService implements IAuthRepository {
         webAuthenticationOptions: kIsWeb
             ? WebAuthenticationOptions(
                 clientId: 'your.bundle.id',
-                redirectUri: Uri.parse('https://your-project.firebaseapp.com/__/auth/handler'),
+                redirectUri: Uri.parse(
+                  'https://your-project.firebaseapp.com/__/auth/handler',
+                ),
               )
             : null,
       );
 
       if (kDebugMode) {
-        debugPrint('🔄 Firebase: Apple credential obtained, creating Firebase credential...');
+        debugPrint(
+          '🔄 Firebase: Apple credential obtained, creating Firebase credential...',
+        );
       }
       final oAuthProvider = OAuthProvider('apple.com');
       final credential = oAuthProvider.credential(
@@ -202,7 +253,9 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Signing in with Apple credential...');
       }
-      final userCredential = await _firebaseAuth.signInWithCredential(credential);
+      final userCredential = await _firebaseAuth.signInWithCredential(
+        credential,
+      );
 
       if (userCredential.user == null) {
         if (kDebugMode) {
@@ -210,9 +263,13 @@ class FirebaseAuthService implements IAuthRepository {
         }
         return const Left(AuthFailure('Falha no login com Apple'));
       }
-      if (appleCredential.givenName != null || appleCredential.familyName != null) {
-        final displayName = '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'.trim();
-        if (displayName.isNotEmpty && userCredential.user!.displayName == null) {
+      if (appleCredential.givenName != null ||
+          appleCredential.familyName != null) {
+        final displayName =
+            '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'
+                .trim();
+        if (displayName.isNotEmpty &&
+            userCredential.user!.displayName == null) {
           await userCredential.user!.updateDisplayName(displayName);
           if (kDebugMode) {
             debugPrint('✅ Firebase: Updated display name to: $displayName');
@@ -221,13 +278,17 @@ class FirebaseAuthService implements IAuthRepository {
       }
 
       if (kDebugMode) {
-        debugPrint('✅ Firebase: Apple Sign In successful - User: ${userCredential.user!.uid}');
+        debugPrint(
+          '✅ Firebase: Apple Sign In successful - User: ${userCredential.user!.uid}',
+        );
       }
 
       return Right(_mapFirebaseUserToEntity(userCredential.user!));
     } on SignInWithAppleAuthorizationException catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ Firebase: SignInWithAppleAuthorizationException - ${e.code}: ${e.message}');
+        debugPrint(
+          '❌ Firebase: SignInWithAppleAuthorizationException - ${e.code}: ${e.message}',
+        );
       }
       switch (e.code) {
         case AuthorizationErrorCode.canceled:
@@ -239,13 +300,19 @@ class FirebaseAuthService implements IAuthRepository {
         case AuthorizationErrorCode.notHandled:
           return const Left(AuthFailure('Solicitação não processada'));
         case AuthorizationErrorCode.notInteractive:
-          return const Left(AuthFailure('Autenticação não interativa não suportada'));
+          return const Left(
+            AuthFailure('Autenticação não interativa não suportada'),
+          );
         case AuthorizationErrorCode.unknown:
-          return Left(AuthFailure('Erro desconhecido no login com Apple: ${e.message}'));
+          return Left(
+            AuthFailure('Erro desconhecido no login com Apple: ${e.message}'),
+          );
       }
     } on FirebaseAuthException catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ Firebase: FirebaseAuthException - ${e.code}: ${e.message}');
+        debugPrint(
+          '❌ Firebase: FirebaseAuthException - ${e.code}: ${e.message}',
+        );
       }
       return Left(AuthFailure(_mapFirebaseAuthError(e)));
     } catch (e, stackTrace) {
@@ -302,18 +369,26 @@ class FirebaseAuthService implements IAuthRepository {
 
       if (result.status != LoginStatus.success) {
         if (kDebugMode) {
-          debugPrint('❌ Firebase: Facebook login failed with status: ${result.status}');
+          debugPrint(
+            '❌ Firebase: Facebook login failed with status: ${result.status}',
+          );
         }
 
         switch (result.status) {
           case LoginStatus.cancelled:
             return const Left(AuthFailure('Login com Facebook cancelado'));
           case LoginStatus.failed:
-            return Left(AuthFailure('Falha no login com Facebook: ${result.message}'));
+            return Left(
+              AuthFailure('Falha no login com Facebook: ${result.message}'),
+            );
           case LoginStatus.operationInProgress:
             return const Left(AuthFailure('Operação de login já em andamento'));
           default:
-            return Left(AuthFailure('Erro desconhecido no login com Facebook: ${result.message}'));
+            return Left(
+              AuthFailure(
+                'Erro desconhecido no login com Facebook: ${result.message}',
+              ),
+            );
         }
       }
 
@@ -321,20 +396,25 @@ class FirebaseAuthService implements IAuthRepository {
         if (kDebugMode) {
           debugPrint('❌ Firebase: Facebook access token is null');
         }
-        return const Left(AuthFailure('Falha ao obter token de acesso do Facebook'));
+        return const Left(
+          AuthFailure('Falha ao obter token de acesso do Facebook'),
+        );
       }
 
       if (kDebugMode) {
-        debugPrint('🔄 Firebase: Facebook token obtained, creating Firebase credential...');
+        debugPrint(
+          '🔄 Firebase: Facebook token obtained, creating Firebase credential...',
+        );
       }
-      final OAuthCredential facebookCredential = FacebookAuthProvider.credential(
-        result.accessToken!.token,
-      );
+      final OAuthCredential facebookCredential =
+          FacebookAuthProvider.credential(result.accessToken!.token);
 
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Signing in with Facebook credential...');
       }
-      final userCredential = await _firebaseAuth.signInWithCredential(facebookCredential);
+      final userCredential = await _firebaseAuth.signInWithCredential(
+        facebookCredential,
+      );
 
       if (userCredential.user == null) {
         if (kDebugMode) {
@@ -344,13 +424,17 @@ class FirebaseAuthService implements IAuthRepository {
       }
 
       if (kDebugMode) {
-        debugPrint('✅ Firebase: Facebook Sign In successful - User: ${userCredential.user!.uid}');
+        debugPrint(
+          '✅ Firebase: Facebook Sign In successful - User: ${userCredential.user!.uid}',
+        );
       }
 
       return Right(_mapFirebaseUserToEntity(userCredential.user!));
     } on FirebaseAuthException catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ Firebase: FirebaseAuthException - ${e.code}: ${e.message}');
+        debugPrint(
+          '❌ Firebase: FirebaseAuthException - ${e.code}: ${e.message}',
+        );
       }
       return Left(AuthFailure(_mapFirebaseAuthError(e)));
     } catch (e, stackTrace) {
@@ -373,7 +457,9 @@ class FirebaseAuthService implements IAuthRepository {
         await _googleSignIn.signOut();
       } catch (e) {
         if (kDebugMode) {
-          debugPrint('⚠️ Firebase: Google sign out error (may not be signed in): $e');
+          debugPrint(
+            '⚠️ Firebase: Google sign out error (may not be signed in): $e',
+          );
         }
       }
 
@@ -381,7 +467,9 @@ class FirebaseAuthService implements IAuthRepository {
         await _facebookAuth.logOut();
       } catch (e) {
         if (kDebugMode) {
-          debugPrint('⚠️ Firebase: Facebook sign out error (may not be signed in): $e');
+          debugPrint(
+            '⚠️ Firebase: Facebook sign out error (may not be signed in): $e',
+          );
         }
       }
 
@@ -574,7 +662,7 @@ class FirebaseAuthService implements IAuthRepository {
       );
 
       final userCredential = await user.linkWithCredential(credential);
-      
+
       if (userCredential.user == null) {
         return const Left(AuthFailure('Erro ao vincular conta'));
       }
@@ -606,7 +694,9 @@ class FirebaseAuthService implements IAuthRepository {
       if (user == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-      final isLinked = user.providerData.any((info) => info.providerId == 'google.com');
+      final isLinked = user.providerData.any(
+        (info) => info.providerId == 'google.com',
+      );
       if (isLinked) {
         if (kDebugMode) {
           debugPrint('⚠️ Firebase: Account already linked with Google');
@@ -621,7 +711,8 @@ class FirebaseAuthService implements IAuthRepository {
         }
         return const Left(AuthFailure('Vinculação cancelada pelo usuário'));
       }
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       if (googleAuth.accessToken == null || googleAuth.idToken == null) {
         return const Left(AuthFailure('Falha ao obter credenciais do Google'));
@@ -647,12 +738,18 @@ class FirebaseAuthService implements IAuthRepository {
       return Right(_mapFirebaseUserToEntity(userCredential.user!));
     } on FirebaseAuthException catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ Firebase: FirebaseAuthException - ${e.code}: ${e.message}');
+        debugPrint(
+          '❌ Firebase: FirebaseAuthException - ${e.code}: ${e.message}',
+        );
       }
       if (e.code == 'credential-already-in-use') {
-        return const Left(AuthFailure('Esta conta Google já está em uso por outro usuário'));
+        return const Left(
+          AuthFailure('Esta conta Google já está em uso por outro usuário'),
+        );
       } else if (e.code == 'email-already-in-use') {
-        return const Left(AuthFailure('O email desta conta Google já está em uso'));
+        return const Left(
+          AuthFailure('O email desta conta Google já está em uso'),
+        );
       } else if (e.code == 'provider-already-linked') {
         return const Left(AuthFailure('Conta já vinculada com Google'));
       }
@@ -678,7 +775,9 @@ class FirebaseAuthService implements IAuthRepository {
       if (user == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-      final isLinked = user.providerData.any((info) => info.providerId == 'apple.com');
+      final isLinked = user.providerData.any(
+        (info) => info.providerId == 'apple.com',
+      );
       if (isLinked) {
         if (kDebugMode) {
           debugPrint('⚠️ Firebase: Account already linked with Apple');
@@ -686,7 +785,9 @@ class FirebaseAuthService implements IAuthRepository {
         return const Left(AuthFailure('Conta já vinculada com Apple'));
       }
       if (!await SignInWithApple.isAvailable()) {
-        return const Left(AuthFailure('Login com Apple não disponível neste dispositivo'));
+        return const Left(
+          AuthFailure('Login com Apple não disponível neste dispositivo'),
+        );
       }
       final appleCredential = await SignInWithApple.getAppleIDCredential(
         scopes: [
@@ -696,7 +797,9 @@ class FirebaseAuthService implements IAuthRepository {
         webAuthenticationOptions: kIsWeb
             ? WebAuthenticationOptions(
                 clientId: 'your.bundle.id',
-                redirectUri: Uri.parse('https://your-project.firebaseapp.com/__/auth/handler'),
+                redirectUri: Uri.parse(
+                  'https://your-project.firebaseapp.com/__/auth/handler',
+                ),
               )
             : null,
       );
@@ -714,9 +817,13 @@ class FirebaseAuthService implements IAuthRepository {
       if (userCredential.user == null) {
         return const Left(AuthFailure('Erro ao vincular conta com Apple'));
       }
-      if (appleCredential.givenName != null || appleCredential.familyName != null) {
-        final displayName = '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'.trim();
-        if (displayName.isNotEmpty && userCredential.user!.displayName == null) {
+      if (appleCredential.givenName != null ||
+          appleCredential.familyName != null) {
+        final displayName =
+            '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'
+                .trim();
+        if (displayName.isNotEmpty &&
+            userCredential.user!.displayName == null) {
           await userCredential.user!.updateDisplayName(displayName);
         }
       }
@@ -728,7 +835,9 @@ class FirebaseAuthService implements IAuthRepository {
       return Right(_mapFirebaseUserToEntity(userCredential.user!));
     } on SignInWithAppleAuthorizationException catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ Firebase: SignInWithAppleAuthorizationException - ${e.code}: ${e.message}');
+        debugPrint(
+          '❌ Firebase: SignInWithAppleAuthorizationException - ${e.code}: ${e.message}',
+        );
       }
 
       if (e.code == AuthorizationErrorCode.canceled) {
@@ -737,12 +846,18 @@ class FirebaseAuthService implements IAuthRepository {
       return Left(AuthFailure('Erro ao vincular com Apple: ${e.message}'));
     } on FirebaseAuthException catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ Firebase: FirebaseAuthException - ${e.code}: ${e.message}');
+        debugPrint(
+          '❌ Firebase: FirebaseAuthException - ${e.code}: ${e.message}',
+        );
       }
       if (e.code == 'credential-already-in-use') {
-        return const Left(AuthFailure('Esta conta Apple já está em uso por outro usuário'));
+        return const Left(
+          AuthFailure('Esta conta Apple já está em uso por outro usuário'),
+        );
       } else if (e.code == 'email-already-in-use') {
-        return const Left(AuthFailure('O email desta conta Apple já está em uso'));
+        return const Left(
+          AuthFailure('O email desta conta Apple já está em uso'),
+        );
       } else if (e.code == 'provider-already-linked') {
         return const Left(AuthFailure('Conta já vinculada com Apple'));
       }
@@ -768,7 +883,9 @@ class FirebaseAuthService implements IAuthRepository {
       if (user == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-      final isLinked = user.providerData.any((info) => info.providerId == 'facebook.com');
+      final isLinked = user.providerData.any(
+        (info) => info.providerId == 'facebook.com',
+      );
       if (isLinked) {
         if (kDebugMode) {
           debugPrint('⚠️ Firebase: Account already linked with Facebook');
@@ -781,15 +898,18 @@ class FirebaseAuthService implements IAuthRepository {
         if (result.status == LoginStatus.cancelled) {
           return const Left(AuthFailure('Vinculação com Facebook cancelada'));
         }
-        return Left(AuthFailure('Falha ao vincular com Facebook: ${result.message}'));
+        return Left(
+          AuthFailure('Falha ao vincular com Facebook: ${result.message}'),
+        );
       }
 
       if (result.accessToken == null) {
-        return const Left(AuthFailure('Falha ao obter token de acesso do Facebook'));
+        return const Left(
+          AuthFailure('Falha ao obter token de acesso do Facebook'),
+        );
       }
-      final OAuthCredential facebookCredential = FacebookAuthProvider.credential(
-        result.accessToken!.token,
-      );
+      final OAuthCredential facebookCredential =
+          FacebookAuthProvider.credential(result.accessToken!.token);
 
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Linking account with Facebook credential...');
@@ -807,12 +927,18 @@ class FirebaseAuthService implements IAuthRepository {
       return Right(_mapFirebaseUserToEntity(userCredential.user!));
     } on FirebaseAuthException catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ Firebase: FirebaseAuthException - ${e.code}: ${e.message}');
+        debugPrint(
+          '❌ Firebase: FirebaseAuthException - ${e.code}: ${e.message}',
+        );
       }
       if (e.code == 'credential-already-in-use') {
-        return const Left(AuthFailure('Esta conta Facebook já está em uso por outro usuário'));
+        return const Left(
+          AuthFailure('Esta conta Facebook já está em uso por outro usuário'),
+        );
       } else if (e.code == 'email-already-in-use') {
-        return const Left(AuthFailure('O email desta conta Facebook já está em uso'));
+        return const Left(
+          AuthFailure('O email desta conta Facebook já está em uso'),
+        );
       } else if (e.code == 'provider-already-linked') {
         return const Left(AuthFailure('Conta já vinculada com Facebook'));
       }
@@ -845,7 +971,7 @@ class FirebaseAuthService implements IAuthRepository {
   /// Mapeia os provedores do Firebase para AuthProvider
   core_entities.AuthProvider _mapAuthProvider(List<UserInfo> providerData) {
     if (providerData.isEmpty) return core_entities.AuthProvider.anonymous;
-    
+
     final providerId = providerData.first.providerId;
     switch (providerId) {
       case 'google.com':

@@ -7,8 +7,12 @@ import 'package:core/core.dart';
 class Vehicles extends Table {
   // ========== CAMPOS BASE ==========
 
-  /// ID único do veículo (auto incremento)
+  /// ID único do veículo (auto incremento - apenas local)
   IntColumn get id => integer().autoIncrement()();
+
+  /// ID do documento no Firebase Firestore (UUID)
+  /// Null = registro ainda não foi sincronizado com Firebase
+  TextColumn get firebaseId => text().nullable()();
 
   /// ID do usuário proprietário (Firebase UID)
   TextColumn get userId => text()();
@@ -102,6 +106,10 @@ class FuelSupplies extends Table {
   // ========== CAMPOS BASE ==========
 
   IntColumn get id => integer().autoIncrement()();
+
+  /// ID do documento no Firebase Firestore (UUID)
+  TextColumn get firebaseId => text().nullable()();
+
   TextColumn get userId => text()();
   TextColumn get moduleName =>
       text().withDefault(const Constant('gasometer'))();
@@ -174,6 +182,10 @@ class Maintenances extends Table {
   // ========== CAMPOS BASE ==========
 
   IntColumn get id => integer().autoIncrement()();
+
+  /// ID do documento no Firebase Firestore (UUID)
+  TextColumn get firebaseId => text().nullable()();
+
   TextColumn get userId => text()();
   TextColumn get moduleName =>
       text().withDefault(const Constant('gasometer'))();
@@ -235,6 +247,10 @@ class Expenses extends Table {
   // ========== CAMPOS BASE ==========
 
   IntColumn get id => integer().autoIncrement()();
+
+  /// ID do documento no Firebase Firestore (UUID)
+  TextColumn get firebaseId => text().nullable()();
+
   TextColumn get userId => text()();
   TextColumn get moduleName =>
       text().withDefault(const Constant('gasometer'))();
@@ -290,6 +306,10 @@ class OdometerReadings extends Table {
   // ========== CAMPOS BASE ==========
 
   IntColumn get id => integer().autoIncrement()();
+
+  /// ID do documento no Firebase Firestore (UUID)
+  TextColumn get firebaseId => text().nullable()();
+
   TextColumn get userId => text()();
   TextColumn get moduleName =>
       text().withDefault(const Constant('gasometer'))();

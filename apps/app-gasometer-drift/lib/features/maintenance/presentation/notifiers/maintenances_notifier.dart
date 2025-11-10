@@ -42,12 +42,13 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
       state = state.copyWith(isLoading: true, errorMessage: () => null);
 
       final result = await _repository.getAllMaintenanceRecords();
-      
+
       result.fold(
         (failure) {
           state = state.copyWith(
             isLoading: false,
-            errorMessage: () => 'Erro ao carregar manutenções: ${failure.message}',
+            errorMessage: () =>
+                'Erro ao carregar manutenções: ${failure.message}',
           );
         },
         (maintenances) {
@@ -80,7 +81,8 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
         (failure) {
           state = state.copyWith(
             isLoading: false,
-            errorMessage: () => 'Erro ao carregar manutenções: ${failure.message}',
+            errorMessage: () =>
+                'Erro ao carregar manutenções: ${failure.message}',
           );
         },
         (maintenances) {
@@ -161,7 +163,8 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
       return result.fold(
         (failure) {
           state = state.copyWith(
-            errorMessage: () => 'Erro ao atualizar manutenção: ${failure.message}',
+            errorMessage: () =>
+                'Erro ao atualizar manutenção: ${failure.message}',
           );
           return false;
         },
@@ -197,7 +200,8 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
       return result.fold(
         (failure) {
           state = state.copyWith(
-            errorMessage: () => 'Erro ao remover manutenção: ${failure.message}',
+            errorMessage: () =>
+                'Erro ao remover manutenção: ${failure.message}',
           );
           return false;
         },
@@ -240,15 +244,13 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
         days: 30,
       );
 
-      return result.fold(
-        (failure) {
-          state = state.copyWith(
-            errorMessage: () => 'Erro ao carregar manutenções pendentes: ${failure.message}',
-          );
-          return [];
-        },
-        (maintenances) => maintenances,
-      );
+      return result.fold((failure) {
+        state = state.copyWith(
+          errorMessage: () =>
+              'Erro ao carregar manutenções pendentes: ${failure.message}',
+        );
+        return [];
+      }, (maintenances) => maintenances);
     } catch (e) {
       state = state.copyWith(
         errorMessage: () => 'Erro ao carregar manutenções pendentes: $e',

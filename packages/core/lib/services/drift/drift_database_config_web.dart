@@ -17,18 +17,32 @@ class DriftDatabaseConfig {
     bool logStatements = false,
   }) {
     return LazyDatabase(() async {
-      final result = await WasmDatabase.open(
-        databaseName: databaseName,
-        sqlite3Uri: Uri.parse('sqlite3.wasm'),
-        driftWorkerUri: Uri.parse('drift_worker.dart.js'),
-      );
-
-      if (result.missingFeatures.isNotEmpty) {
+      try {
         // ignore: avoid_print
-        print('Missing features for drift web: ${result.missingFeatures}');
-      }
+        print('🔧 Initializing Drift WASM database: $databaseName');
 
-      return result.resolvedExecutor;
+        final result = await WasmDatabase.open(
+          databaseName: databaseName,
+          sqlite3Uri: Uri.parse('/sqlite3.wasm'),
+          driftWorkerUri: Uri.parse('/drift_worker.dart.js'),
+        );
+
+        if (result.missingFeatures.isNotEmpty) {
+          // ignore: avoid_print
+          print('⚠️ Missing features for drift web: ${result.missingFeatures}');
+        }
+
+        // ignore: avoid_print
+        print('✅ Drift WASM database initialized successfully');
+
+        return result.resolvedExecutor;
+      } catch (e, stackTrace) {
+        // ignore: avoid_print
+        print('❌ Failed to initialize Drift WASM database: $e');
+        // ignore: avoid_print
+        print('Stack trace: $stackTrace');
+        rethrow;
+      }
     });
   }
 

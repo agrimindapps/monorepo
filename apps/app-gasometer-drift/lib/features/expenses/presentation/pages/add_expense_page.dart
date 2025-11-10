@@ -178,6 +178,8 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage>
           },
           (success) {
             debugPrint('[EXPENSE DEBUG] SUCCESS - Closing dialog');
+            // Limpar formulário antes de fechar
+            formNotifier.clearForm();
             Navigator.of(context).pop({
               'success': true,
               'action': widget.editExpenseId != null ? 'edit' : 'create',

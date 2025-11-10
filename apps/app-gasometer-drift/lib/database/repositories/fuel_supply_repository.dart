@@ -49,7 +49,8 @@ class FuelSupplyRepository
   @override
   Insertable<FuelSupply> toCompanion(FuelSupplyData entity) {
     return FuelSuppliesCompanion(
-      id: Value(entity.id),
+      // id é autoIncrement, não deve ser especificado no insert
+      id: entity.id > 0 ? Value(entity.id) : Value.absent(),
       userId: Value(entity.userId),
       moduleName: Value(entity.moduleName),
       vehicleId: Value(entity.vehicleId),

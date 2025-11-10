@@ -289,7 +289,11 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
       } else {
         await vehiclesNotifier.addVehicle(updatedVehicleEntity);
       }
+
+      // Limpar formulário e controller local após sucesso
       if (mounted) {
+        notifier.clearForm();
+        _observacoesController.clear();
         Navigator.of(context).pop(true);
       }
     } catch (e) {

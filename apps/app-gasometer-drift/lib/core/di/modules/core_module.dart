@@ -77,25 +77,36 @@ class CoreModule implements DIModule {
     try {
       // Firebase-dependent services
       if (firebaseEnabled) {
-        getIt.registerLazySingleton<core.FirebaseDeviceService>(
-          () => core.FirebaseDeviceService(),
-        );
-        getIt.registerLazySingleton<core.FirebaseAuthService>(
-          () => getIt<core.IAuthRepository>() as core.FirebaseAuthService,
-        );
-        getIt.registerLazySingleton<core.FirebaseAnalyticsService>(
-          () =>
-              getIt<core.IAnalyticsRepository>()
-                  as core.FirebaseAnalyticsService,
-        );
+        // Only register if not already present (avoid duplicates)
+        if (!getIt.isRegistered<core.FirebaseDeviceService>()) {
+          getIt.registerLazySingleton<core.FirebaseDeviceService>(
+            () => core.FirebaseDeviceService(),
+          );
+        }
+
+        if (!getIt.isRegistered<core.FirebaseAuthService>()) {
+          getIt.registerLazySingleton<core.FirebaseAuthService>(
+            () => getIt<core.IAuthRepository>() as core.FirebaseAuthService,
+          );
+        }
+
+        if (!getIt.isRegistered<core.FirebaseAnalyticsService>()) {
+          getIt.registerLazySingleton<core.FirebaseAnalyticsService>(
+            () =>
+                getIt<core.IAnalyticsRepository>()
+                    as core.FirebaseAnalyticsService,
+          );
+        }
         // Note: FirebaseDeviceService já implementa IDeviceRepository
         // mas não podemos fazer cast direto, então criamos nova instância
       }
 
       // RevenueCat and local services (don't require Firebase)
-      getIt.registerLazySingleton<core.ISubscriptionRepository>(
-        () => core.RevenueCatService(),
-      );
+      if (!getIt.isRegistered<core.ISubscriptionRepository>()) {
+        getIt.registerLazySingleton<core.ISubscriptionRepository>(
+          () => core.RevenueCatService(),
+        );
+      }
       // DataCleanerService is registered via Injectable (@lazySingleton)
 
       debugPrint(

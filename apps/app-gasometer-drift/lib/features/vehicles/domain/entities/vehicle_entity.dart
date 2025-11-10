@@ -66,6 +66,7 @@ enum VehicleType {
 class VehicleEntity extends BaseSyncEntity {
   const VehicleEntity({
     required super.id,
+    this.firebaseId,
     required this.name,
     required this.brand,
     required this.model,
@@ -90,6 +91,11 @@ class VehicleEntity extends BaseSyncEntity {
     this.isActive = true,
     this.metadata = const {},
   });
+
+  /// ID do documento no Firebase Firestore (UUID)
+  /// Null = registro ainda não foi sincronizado
+  final String? firebaseId;
+
   final String name;
   final String brand;
   final String model;
@@ -109,6 +115,7 @@ class VehicleEntity extends BaseSyncEntity {
   @override
   List<Object?> get props => [
     ...super.props,
+    firebaseId,
     name,
     brand,
     model,
@@ -129,6 +136,7 @@ class VehicleEntity extends BaseSyncEntity {
   @override
   VehicleEntity copyWith({
     String? id,
+    String? firebaseId,
     String? name,
     String? brand,
     String? model,
@@ -155,6 +163,7 @@ class VehicleEntity extends BaseSyncEntity {
   }) {
     return VehicleEntity(
       id: id ?? this.id,
+      firebaseId: firebaseId ?? this.firebaseId,
       name: name ?? this.name,
       brand: brand ?? this.brand,
       model: model ?? this.model,
@@ -195,7 +204,7 @@ class VehicleEntity extends BaseSyncEntity {
 
   @override
   Map<String, dynamic> toFirebaseMap() {
-    return {
+    final map = <String, dynamic>{
       ...baseFirebaseFields,
       'name': name,
       'brand': brand,
@@ -205,14 +214,26 @@ class VehicleEntity extends BaseSyncEntity {
       'license_plate': licensePlate,
       'type': type.name,
       'supported_fuels': supportedFuels.map((e) => e.name).toList(),
-      'tank_capacity': tankCapacity,
-      'engine_size': engineSize,
-      'photo_url': photoUrl,
       'current_odometer': currentOdometer,
-      'average_consumption': averageConsumption,
       'is_active': isActive,
       'metadata': metadata,
     };
+
+    // Adicionar campos opcionais apenas se não forem null
+    if (tankCapacity != null) {
+      map['tank_capacity'] = tankCapacity;
+    }
+    if (engineSize != null) {
+      map['engine_size'] = engineSize;
+    }
+    if (photoUrl != null) {
+      map['photo_url'] = photoUrl;
+    }
+    if (averageConsumption != null) {
+      map['average_consumption'] = averageConsumption;
+    }
+
+    return map;
   }
 
   static VehicleEntity fromFirebaseMap(Map<String, dynamic> map) {

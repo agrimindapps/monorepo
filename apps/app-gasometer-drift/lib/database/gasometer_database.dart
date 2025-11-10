@@ -46,10 +46,15 @@ class GasometerDatabase extends _$GasometerDatabase with BaseDriftDatabase {
 
   /// Factory Injectable
   @factoryMethod
-  factory GasometerDatabase.injectable() => GasometerDatabase.production();
+  factory GasometerDatabase.injectable() {
+    print('🏭 Creating GasometerDatabase via injectable factory');
+    final db = GasometerDatabase.production();
+    print('✅ GasometerDatabase created successfully: ${db.hashCode}');
+    return db;
+  }
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2; // Incrementado para adicionar firebaseId
 
   /// Factory para ambiente de produção
   factory GasometerDatabase.production() {
@@ -105,15 +110,32 @@ class GasometerDatabase extends _$GasometerDatabase with BaseDriftDatabase {
       await m.createAll();
     },
     onUpgrade: (Migrator m, int from, int to) async {
+      // ========== MIGRAÇÃO v1 → v2: Adicionar firebaseId ==========
+      if (from < 2) {
+        // Adicionar coluna firebaseId em todas as tabelas usando SQL direto
+        await customStatement(
+          'ALTER TABLE vehicles ADD COLUMN firebase_id TEXT;',
+        );
+        await customStatement(
+          'ALTER TABLE fuel_supplies ADD COLUMN firebase_id TEXT;',
+        );
+        await customStatement(
+          'ALTER TABLE maintenances ADD COLUMN firebase_id TEXT;',
+        );
+        await customStatement(
+          'ALTER TABLE expenses ADD COLUMN firebase_id TEXT;',
+        );
+        await customStatement(
+          'ALTER TABLE odometer_readings ADD COLUMN firebase_id TEXT;',
+        );
+
+        print('✅ Migration v1→v2: firebaseId adicionado a todas as tabelas');
+      }
+
       // Migrações futuras virão aqui
-      // Exemplo:
-      // if (from < 2) {
-      //   // Migração da versão 1 para 2
-      //   await m.addColumn(vehicles, vehicles.newColumn);
-      // }
       // if (from < 3) {
       //   // Migração da versão 2 para 3
-      //   await m.createTable(newTable);
+      //   await m.addColumn(vehicles, vehicles.newColumn);
       // }
     },
     beforeOpen: (details) async {

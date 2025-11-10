@@ -1,5 +1,7 @@
 import 'package:core/core.dart';
 
+import 'services/gasometer_sync_service.dart';
+
 // import 'extensions/user_entity_gasometer_extension.dart'; // Não usado mais
 
 // REMOVIDO: Funções de conversão migradas para Drift
@@ -54,16 +56,11 @@ abstract final class GasometerSyncConfig {
       print('✅ [GasometerSync] BoxRegistryService obtido com sucesso');
 
       // Registrar boxes para cada entidade
-      // NOTA: Nomes das boxes locais podem ser diferentes dos nomes das collections Firebase
-      final boxesToRegister = [
-        // Removido: vehicles - migrado para Drift
-        // Removido: fuel - migrado para Drift
-        // Removido: fuel_supplies - não usado
-        // Removido: expenses - migrado para Drift
-        // Removido: maintenance - migrado para Drift
-        // Removido: odometer - migrado para Drift
-        'settings', // Hive box (não sincroniza com Firebase)
-        'cache', // Hive box (Firebase: subscriptions)
+      // NOTA: Entidades foram migradas para Drift
+      // Boxes Hive removidas: não há mais necessidade de sync via Hive
+      final boxesToRegister = <String>[
+        // Todas as entidades agora usam Drift para storage local
+        // Premium usa seu próprio sistema de sync (RevenueCat + Firebase)
       ];
 
       print(
@@ -105,28 +102,59 @@ abstract final class GasometerSyncConfig {
     }
 
     print('🔧 [GasometerSync] Iniciando UnifiedSyncManager...');
+
+    // 🔥 CRITICAL: Inicializar BackgroundSyncManager PRIMEIRO
+    print('🔧 [GasometerSync] Inicializando BackgroundSyncManager...');
+    final bgSyncInitResult = await BackgroundSyncManager.instance.initialize(
+      minSyncInterval: const Duration(minutes: 3),
+      maxQueueSize: 50,
+    );
+
+    bgSyncInitResult.fold(
+      (failure) {
+        print('❌ [GasometerSync] Erro ao inicializar BackgroundSyncManager: ${failure.message}');
+        throw Exception('Failed to initialize BackgroundSyncManager: ${failure.message}');
+      },
+      (_) {
+        print('✅ [GasometerSync] BackgroundSyncManager inicializado com sucesso');
+      },
+    );
+
+    // Obter GasometerSyncService do DI
+    print('🔧 [GasometerSync] Obtendo GasometerSyncService do DI...');
+    final gasometerSyncService = GetIt.I<GasometerSyncService>();
+
+    // Inicializar o GasometerSyncService
+    print('🔧 [GasometerSync] Inicializando GasometerSyncService...');
+    await gasometerSyncService.initialize();
+
+    // Inicializar UnifiedSyncManager para registrar o app
     await UnifiedSyncManager.instance.initializeApp(
       appName: 'gasometer',
       config: AppSyncConfig.simple(
         appName: 'gasometer',
-        syncInterval: const Duration(
-          minutes: 5,
-        ), // Sync frequente para dados financeiros
+        syncInterval: const Duration(minutes: 5),
         conflictStrategy: ConflictStrategy.timestamp,
       ),
       entities: [
-        // NOTA: Veículos, combustível, despesas, manutenção e odômetro foram migrados para Drift
-        // Apenas subscriptions permanece usando Hive para cache
-
-        // Assinatura: dados de billing
-        EntitySyncRegistration<SubscriptionEntity>.simple(
-          entityType: SubscriptionEntity,
-          collectionName: 'subscriptions', // Firebase collection
-          fromMap: SubscriptionEntity.fromFirebaseMap,
-          toMap: (subscription) => subscription.toFirebaseMap(),
-        ),
+        // NOTA: Drift entities são gerenciadas pelo GasometerSyncService
+        // Não precisamos registrar entidades individuais aqui
       ],
     );
+
+    // 🔥 IMPORTANTE: Registrar o GasometerSyncService no BackgroundSyncManager
+    // Isso permite que AutoSyncService → UnifiedSyncManager → BackgroundSync → GasometerSyncService
+    print(
+      '🔧 [GasometerSync] Registrando GasometerSyncService no BackgroundSyncManager...',
+    );
+    BackgroundSyncManager.instance.registerService(
+      gasometerSyncService,
+      config: const BackgroundSyncConfig(
+        syncInterval: Duration(minutes: 3),
+        enabled: true,
+      ),
+    );
+    print('✅ [GasometerSync] GasometerSyncService registrado com sucesso');
 
     print('✅ [GasometerSync] ========== INICIALIZAÇÃO COMPLETA ==========');
   }

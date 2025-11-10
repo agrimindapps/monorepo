@@ -15,9 +15,8 @@ import 'package:core/core.dart';
 /// - Respects connectivity status
 /// - Lifecycle-aware (can be paused/resumed)
 class AutoSyncService {
-  AutoSyncService({
-    required ConnectivityService connectivityService,
-  }) : _connectivityService = connectivityService;
+  AutoSyncService({required ConnectivityService connectivityService})
+    : _connectivityService = connectivityService;
 
   final ConnectivityService _connectivityService;
 
@@ -32,10 +31,7 @@ class AutoSyncService {
   /// Initialize the auto-sync service
   Future<void> initialize() async {
     if (_isInitialized) {
-      developer.log(
-        'AutoSyncService already initialized',
-        name: 'AutoSync',
-      );
+      developer.log('AutoSyncService already initialized', name: 'AutoSync');
       return;
     }
 
@@ -50,18 +46,12 @@ class AutoSyncService {
   /// Start periodic auto-sync
   void start() {
     if (!_isInitialized) {
-      developer.log(
-        'Cannot start - service not initialized',
-        name: 'AutoSync',
-      );
+      developer.log('Cannot start - service not initialized', name: 'AutoSync');
       return;
     }
 
     if (_syncTimer != null) {
-      developer.log(
-        'Auto-sync already running',
-        name: 'AutoSync',
-      );
+      developer.log('Auto-sync already running', name: 'AutoSync');
       return;
     }
 
@@ -85,10 +75,7 @@ class AutoSyncService {
       return;
     }
 
-    developer.log(
-      'Stopping auto-sync',
-      name: 'AutoSync',
-    );
+    developer.log('Stopping auto-sync', name: 'AutoSync');
 
     _syncTimer?.cancel();
     _syncTimer = null;
@@ -100,10 +87,7 @@ class AutoSyncService {
       return;
     }
 
-    developer.log(
-      'Pausing auto-sync (app backgrounded)',
-      name: 'AutoSync',
-    );
+    developer.log('Pausing auto-sync (app backgrounded)', name: 'AutoSync');
 
     _syncTimer?.cancel();
     _syncTimer = null;
@@ -116,20 +100,14 @@ class AutoSyncService {
       return;
     }
 
-    developer.log(
-      'Resuming auto-sync (app foregrounded)',
-      name: 'AutoSync',
-    );
+    developer.log('Resuming auto-sync (app foregrounded)', name: 'AutoSync');
 
     start();
   }
 
   /// Force immediate sync (manual trigger)
   Future<void> syncNow() async {
-    developer.log(
-      'Manual sync triggered',
-      name: 'AutoSync',
-    );
+    developer.log('Manual sync triggered', name: 'AutoSync');
 
     await _performSync();
   }
@@ -138,10 +116,7 @@ class AutoSyncService {
   Future<void> _performSync() async {
     // Guard: Prevent concurrent syncs
     if (_isSyncing) {
-      developer.log(
-        'Sync already in progress, skipping',
-        name: 'AutoSync',
-      );
+      developer.log('Sync already in progress, skipping', name: 'AutoSync');
       return;
     }
 
@@ -153,31 +128,23 @@ class AutoSyncService {
     );
 
     if (!isOnline) {
-      developer.log(
-        'Device offline, skipping sync',
-        name: 'AutoSync',
-      );
+      developer.log('Device offline, skipping sync', name: 'AutoSync');
       return;
     }
 
     try {
       _isSyncing = true;
 
-      developer.log(
-        'Starting background sync for $_appId',
-        name: 'AutoSync',
+      developer.log('Starting background sync for $_appId', name: 'AutoSync');
+
+      // Trigger sync via BackgroundSyncManager
+      // O GasometerSyncService está registrado no BackgroundSyncManager
+      await BackgroundSyncManager.instance.triggerSync(
+        _appId,
+        force: true, // Força sync mesmo se throttled
       );
 
-      // Get UnifiedSyncManager instance
-      final syncManager = UnifiedSyncManager.instance;
-
-      // Trigger sync for gasometer app
-      await syncManager.forceSyncApp(_appId);
-
-      developer.log(
-        'Background sync completed successfully',
-        name: 'AutoSync',
-      );
+      developer.log('Background sync triggered successfully', name: 'AutoSync');
     } catch (e, stackTrace) {
       developer.log(
         'Background sync failed: $e',
@@ -199,10 +166,7 @@ class AutoSyncService {
 
   /// Dispose resources
   void dispose() {
-    developer.log(
-      'Disposing AutoSyncService',
-      name: 'AutoSync',
-    );
+    developer.log('Disposing AutoSyncService', name: 'AutoSync');
 
     stop();
     _isInitialized = false;

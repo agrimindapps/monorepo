@@ -107,17 +107,35 @@ abstract class BaseSyncEntity extends BaseEntity {
   }
 
   /// Campos base para toFirebaseMap
-  Map<String, dynamic> get baseFirebaseFields => {
-    'id': id,
-    'created_at': createdAt?.toIso8601String(),
-    'updated_at': updatedAt?.toIso8601String(),
-    'last_sync_at': lastSyncAt?.toIso8601String(),
-    'is_dirty': isDirty,
-    'is_deleted': isDeleted,
-    'version': version,
-    'user_id': userId,
-    'module_name': moduleName,
-  };
+  ///
+  /// IMPORTANTE: Filtra valores null para evitar problemas no Firestore Web
+  Map<String, dynamic> get baseFirebaseFields {
+    final map = <String, dynamic>{
+      'id': id,
+      'is_dirty': isDirty,
+      'is_deleted': isDeleted,
+      'version': version,
+    };
+
+    // Adicionar campos opcionais apenas se não forem null
+    if (createdAt != null) {
+      map['created_at'] = createdAt!.toIso8601String();
+    }
+    if (updatedAt != null) {
+      map['updated_at'] = updatedAt!.toIso8601String();
+    }
+    if (lastSyncAt != null) {
+      map['last_sync_at'] = lastSyncAt!.toIso8601String();
+    }
+    if (userId != null) {
+      map['user_id'] = userId;
+    }
+    if (moduleName != null) {
+      map['module_name'] = moduleName;
+    }
+
+    return map;
+  }
 
   /// Campos base para fromFirebaseMap
   static Map<String, dynamic> parseBaseFirebaseFields(

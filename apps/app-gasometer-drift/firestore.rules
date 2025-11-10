@@ -45,39 +45,36 @@ service cloud.firestore {
       }
 
       // ===== ABASTECIMENTOS =====
-      match /fuel/{recordId} {
+      match /fuel_supplies/{recordId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) &&
           hasValidSyncFields() &&
           request.resource.data.user_id == userId &&
-          request.resource.data.module_name == 'gasometer' &&
-          request.resource.data.keys().hasAll(['vehicle_id', 'liters', 'total_price']);
+          request.resource.data.module_name == 'gasometer';
         allow update: if isOwner(userId) &&
           request.resource.data.user_id == userId;
         allow delete: if isOwner(userId);
       }
 
       // ===== ODÔMETRO =====
-      match /odometer/{recordId} {
+      match /odometer_readings/{recordId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) &&
           hasValidSyncFields() &&
           request.resource.data.user_id == userId &&
-          request.resource.data.module_name == 'gasometer' &&
-          request.resource.data.keys().hasAll(['vehicle_id', 'odometer_reading']);
+          request.resource.data.module_name == 'gasometer';
         allow update: if isOwner(userId) &&
           request.resource.data.user_id == userId;
         allow delete: if isOwner(userId);
       }
 
       // ===== MANUTENÇÕES =====
-      match /maintenance/{recordId} {
+      match /maintenances/{recordId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) &&
           hasValidSyncFields() &&
           request.resource.data.user_id == userId &&
-          request.resource.data.module_name == 'gasometer' &&
-          request.resource.data.keys().hasAll(['vehicle_id', 'type', 'cost']);
+          request.resource.data.module_name == 'gasometer';
         allow update: if isOwner(userId) &&
           request.resource.data.user_id == userId;
         allow delete: if isOwner(userId);

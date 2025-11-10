@@ -201,18 +201,10 @@ class ConflictAuditService {
 
   /// Extrai valor financeiro da entidade (se aplicável)
   double? _extractFinancialValue(BaseSyncModel entity) {
-    try {
-      // FuelSupplyModel tem 'totalPrice'
-      if (entity is dynamic && (entity as dynamic).totalPrice != null) {
-        return (entity as dynamic).totalPrice as double;
-      }
-      // MaintenanceModel tem 'valor'
-      if (entity is dynamic && (entity as dynamic).valor != null) {
-        return (entity as dynamic).valor as double;
-      }
-    } catch (_) {
-      // Ignora erros de cast
-    }
+    // Não é possível extrair valor financeiro de forma genérica
+    // sem acesso aos campos específicos do modelo.
+    // Esta funcionalidade precisa ser implementada nas subclasses
+    // ou através de reflexão/codegen.
     return null;
   }
 

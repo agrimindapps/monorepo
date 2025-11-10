@@ -250,9 +250,13 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage>
           },
           (success) {
             debugPrint('[FUEL DEBUG] SUCCESS - Closing dialog');
-            Navigator.of(context).pop({
-              'success': true,
-              'action': widget.editFuelRecordId != null ? 'edit' : 'create',
+            // Limpar formulário antes de fechar
+            formNotifier.clearForm();
+            // Use addPostFrameCallback to avoid navigation during build
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted && context.mounted) {
+                Navigator.of(context).pop(true);
+              }
             });
           },
         );

@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -18,14 +17,6 @@ abstract class RegisterModule {
   ImagePicker get imagePicker => ImagePicker();
 
   @singleton
-  GoogleSignIn get googleSignIn {
-    if (kIsWeb) {
-      return GoogleSignIn(signInOption: SignInOption.standard);
-    }
-    return GoogleSignIn();
-  }
-
-  @singleton
   FlutterSecureStorage get secureStorage => const FlutterSecureStorage();
 
   @singleton
@@ -34,12 +25,6 @@ abstract class RegisterModule {
   @singleton
   Connectivity get connectivity => Connectivity();
 
-  // ❌ REMOVIDO: BoxRegistryService já é registrado no core package
-  // Não devemos registrar novamente aqui para evitar múltiplas instâncias
-
-  // ✅ IMPORTANTE: Usar @lazySingleton para evitar erro de "não registrado"
-  // O BoxRegistryService só é registrado DEPOIS pelo CoreModule
-  // LazySingleton adia a criação até o primeiro uso
   @lazySingleton
   ILocalStorageRepository get localStorageRepository =>
       HiveStorageService(GetIt.I<IBoxRegistryService>());
@@ -51,20 +36,6 @@ abstract class RegisterModule {
   ImageCompressionService get imageCompressionService =>
       ImageCompressionService();
 
-  // ❌ REMOVIDO: IAuthRepository já é registrado pelo core package
-  // Manter aqui causa erro "already registered"
-  // @lazySingleton
-  // IAuthRepository get authRepository => FirebaseAuthService();
-
-  // ❌ REMOVIDO: ISubscriptionRepository já é registrado pelo core package
-  // Manter aqui causa erro "already registered"
-  // @lazySingleton
-  // ISubscriptionRepository get subscriptionRepository => RevenueCatService();
-
-  /// DataCleanerService is registered via @lazySingleton annotation on the class
-
-  /// EnhancedAnalyticsService for GasometerAnalyticsService
-  /// NOTE: This requires Firebase to be initialized. Will be null in local-only mode.
   @lazySingleton
   EnhancedAnalyticsService get enhancedAnalyticsService {
     try {
@@ -81,20 +52,16 @@ abstract class RegisterModule {
     }
   }
 
-  /// FirebaseDeviceService for DeviceManagementService
   @lazySingleton
   FirebaseDeviceService get firebaseDeviceService => FirebaseDeviceService();
 
-  /// FirebaseAuthService concrete class (already registered as IAuthRepository)
   @lazySingleton
   FirebaseAuthService get firebaseAuthService => FirebaseAuthService();
 
-  /// FirebaseAnalyticsService concrete class (for DeviceManagementService)
   @lazySingleton
   FirebaseAnalyticsService get firebaseAnalyticsService =>
       FirebaseAnalyticsService();
 
-  /// IDeviceRepository - FirebaseDeviceService implements this
   @lazySingleton
   IDeviceRepository get deviceRepository => FirebaseDeviceService();
 }

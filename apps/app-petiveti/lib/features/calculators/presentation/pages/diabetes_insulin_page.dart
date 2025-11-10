@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 
 import '../providers/diabetes_insulin_provider.dart';
@@ -8,7 +8,8 @@ class DiabetesInsulinPage extends ConsumerStatefulWidget {
   const DiabetesInsulinPage({super.key});
 
   @override
-  ConsumerState<DiabetesInsulinPage> createState() => _DiabetesInsulinPageState();
+  ConsumerState<DiabetesInsulinPage> createState() =>
+      _DiabetesInsulinPageState();
 }
 
 class _DiabetesInsulinPageState extends ConsumerState<DiabetesInsulinPage> {
@@ -17,7 +18,7 @@ class _DiabetesInsulinPageState extends ConsumerState<DiabetesInsulinPage> {
   final _glucoseController = TextEditingController();
   final _previousDoseController = TextEditingController();
   final _timeSinceLastDoseController = TextEditingController();
-  
+
   String _selectedInsulinType = 'regular';
   String _selectedDiabetesType = 'type1';
   bool _isFirstDose = false;
@@ -71,7 +72,7 @@ class _DiabetesInsulinPageState extends ConsumerState<DiabetesInsulinPage> {
 
   Widget _buildInfoCard() {
     final theme = Theme.of(context);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -80,10 +81,7 @@ class _DiabetesInsulinPageState extends ConsumerState<DiabetesInsulinPage> {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.info_outline,
-                  color: theme.colorScheme.primary,
-                ),
+                Icon(Icons.info_outline, color: theme.colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
                   'Sobre esta Calculadora',
@@ -148,27 +146,27 @@ class _DiabetesInsulinPageState extends ConsumerState<DiabetesInsulinPage> {
             children: [
               Text(
                 'Dados do Animal',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               _buildAnimalInfoSection(),
               const SizedBox(height: 24),
               Text(
                 'Informações da Insulina',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               _buildInsulinInfoSection(),
               const SizedBox(height: 24),
               Text(
                 'Histórico e Condições',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               _buildHistorySection(),
@@ -295,7 +293,9 @@ class _DiabetesInsulinPageState extends ConsumerState<DiabetesInsulinPage> {
       children: [
         SwitchListTile(
           title: const Text('É a primeira dose?'),
-          subtitle: const Text('Marque se esta é a primeira administração de insulina'),
+          subtitle: const Text(
+            'Marque se esta é a primeira administração de insulina',
+          ),
           value: _isFirstDose,
           onChanged: (value) {
             setState(() {
@@ -374,7 +374,7 @@ class _DiabetesInsulinPageState extends ConsumerState<DiabetesInsulinPage> {
 
   Widget _buildCalculateButton() {
     final state = ref.watch(diabetesInsulinProvider);
-    
+
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
@@ -386,7 +386,9 @@ class _DiabetesInsulinPageState extends ConsumerState<DiabetesInsulinPage> {
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
             : const Icon(Icons.calculate),
-        label: Text(state.isLoading ? 'Calculando...' : 'Calcular Dose de Insulina'),
+        label: Text(
+          state.isLoading ? 'Calculando...' : 'Calcular Dose de Insulina',
+        ),
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
         ),
@@ -396,17 +398,14 @@ class _DiabetesInsulinPageState extends ConsumerState<DiabetesInsulinPage> {
 
   Widget _buildErrorCard(String message) {
     final theme = Theme.of(context);
-    
+
     return Card(
       color: theme.colorScheme.errorContainer,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(
-              Icons.error_outline,
-              color: theme.colorScheme.error,
-            ),
+            Icon(Icons.error_outline, color: theme.colorScheme.error),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -447,7 +446,9 @@ class _DiabetesInsulinPageState extends ConsumerState<DiabetesInsulinPage> {
     }
 
     if (!_isFirstDose && _timeSinceLastDoseController.text.isNotEmpty) {
-      inputs['timeSinceLastDose'] = int.parse(_timeSinceLastDoseController.text);
+      inputs['timeSinceLastDose'] = int.parse(
+        _timeSinceLastDoseController.text,
+      );
     }
 
     ref.read(diabetesInsulinProvider.notifier).calculate(inputs);

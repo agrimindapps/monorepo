@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 import '../../services/image_preloader_service.dart';

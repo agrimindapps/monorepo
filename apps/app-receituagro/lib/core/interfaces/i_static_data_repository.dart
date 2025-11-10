@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Interface para repositórios de dados estáticos
 /// Princípio: Dependency Inversion Principle

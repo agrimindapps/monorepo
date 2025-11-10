@@ -1,5 +1,5 @@
 import 'package:core/core.dart'
-    hide deviceManagementNotifierProvider, DeviceManagementState;
+    hide deviceManagementNotifierProvider, DeviceManagementState, Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/device_management_providers.dart';
@@ -22,8 +22,8 @@ class DeviceListWidget extends ConsumerWidget {
         }
 
         return RefreshIndicator(
-          onRefresh:
-              () => ref.read(deviceManagementNotifierProvider.notifier).refresh(),
+          onRefresh: () =>
+              ref.read(deviceManagementNotifierProvider.notifier).refresh(),
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -132,10 +132,9 @@ class DeviceListWidget extends ConsumerWidget {
         device: device,
         isCurrentDevice: deviceState.currentDevice?.uuid == device.uuid,
         isBeingRevoked: isBeingRevoked,
-        onRevoke:
-            device.isActive
-                ? () => _showRevokeDialog(context, ref, device, deviceState)
-                : null,
+        onRevoke: device.isActive
+            ? () => _showRevokeDialog(context, ref, device, deviceState)
+            : null,
         onTap: () => _showDeviceDetails(context, device),
       ),
     );
@@ -159,78 +158,72 @@ class DeviceListWidget extends ConsumerWidget {
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Revogar Dispositivo'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Deseja revogar o acesso do dispositivo:'),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Theme.of(context).dividerColor),
+      builder: (context) => AlertDialog(
+        title: const Text('Revogar Dispositivo'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Deseja revogar o acesso do dispositivo:'),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Theme.of(context).dividerColor),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    device.platformIcon,
+                    style: const TextStyle(fontSize: 20),
                   ),
-                  child: Row(
-                    children: [
-                      Text(
-                        device.platformIcon,
-                        style: const TextStyle(fontSize: 20),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              device.name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            Text(
-                              device.model,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color:
-                                    Theme.of(
-                                      context,
-                                    ).textTheme.bodySmall?.color,
-                              ),
-                            ),
-                          ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          device.name,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
-                      ),
-                    ],
+                        Text(
+                          device.model,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).textTheme.bodySmall?.color,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Este dispositivo será desconectado imediatamente e '
-                  'precisará fazer login novamente.',
-                  style: TextStyle(fontSize: 14),
-                ),
-              ],
+                ],
+              ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Revogar'),
-              ),
-            ],
+            const SizedBox(height: 12),
+            const Text(
+              'Este dispositivo será desconectado imediatamente e '
+              'precisará fazer login novamente.',
+              style: TextStyle(fontSize: 14),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
           ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Revogar'),
+          ),
+        ],
+      ),
     );
 
     if (confirmed == true && context.mounted) {

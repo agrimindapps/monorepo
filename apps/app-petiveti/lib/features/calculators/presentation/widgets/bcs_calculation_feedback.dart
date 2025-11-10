@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/body_condition_output.dart';
@@ -9,7 +9,8 @@ class BcsCalculationFeedback extends ConsumerStatefulWidget {
   const BcsCalculationFeedback({super.key});
 
   @override
-  ConsumerState<BcsCalculationFeedback> createState() => _BcsCalculationFeedbackState();
+  ConsumerState<BcsCalculationFeedback> createState() =>
+      _BcsCalculationFeedbackState();
 }
 
 class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
@@ -18,7 +19,7 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
   late AnimationController _progressController;
   late AnimationController _fadeController;
   late AnimationController _scaleController;
-  
+
   late Animation<double> _pulseAnimation;
   late Animation<double> _progressAnimation;
   late Animation<double> _fadeAnimation;
@@ -51,19 +52,20 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
     _pulseAnimation = Tween<double>(begin: 0.8, end: 1.2).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
-    
+
     _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _progressController, curve: Curves.easeInOut),
     );
-    
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
-    );
-    
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
+
     _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
     );
-    
+
     _colorAnimation = ColorTween(
       begin: Colors.blue[100],
       end: Colors.blue[400],
@@ -159,28 +161,28 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
                   );
                 },
               ),
-              
+
               const SizedBox(height: 20),
-              
+
               Text(
                 'Analisando Condição Corporal',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               Text(
                 'Processando dados biométricos...',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
               ),
-              
+
               const SizedBox(height: 20),
               _buildCalculationPhases(theme),
-              
+
               const SizedBox(height: 20),
               AnimatedBuilder(
                 animation: _progressAnimation,
@@ -231,7 +233,7 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
             final label = phase['label'] as String;
             final isActive = progress >= threshold;
             final isCompleted = progress > threshold;
-            
+
             return Container(
               margin: const EdgeInsets.symmetric(vertical: 4),
               child: Row(
@@ -241,11 +243,11 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
                     height: 20,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: isCompleted 
-                          ? Colors.green 
-                          : isActive 
-                              ? theme.colorScheme.primary 
-                              : Colors.grey[300],
+                      color: isCompleted
+                          ? Colors.green
+                          : isActive
+                          ? theme.colorScheme.primary
+                          : Colors.grey[300],
                     ),
                     child: Center(
                       child: isCompleted
@@ -255,15 +257,15 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
                               color: Colors.white,
                             )
                           : isActive
-                              ? Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : null,
+                          ? Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                              ),
+                            )
+                          : null,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -272,10 +274,14 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
                       label,
                       style: TextStyle(
                         fontSize: 14,
-                        fontWeight: isActive ? FontWeight.w500 : FontWeight.normal,
-                        color: isActive 
-                            ? theme.colorScheme.onSurface 
-                            : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        fontWeight: isActive
+                            ? FontWeight.w500
+                            : FontWeight.normal,
+                        color: isActive
+                            ? theme.colorScheme.onSurface
+                            : theme.colorScheme.onSurface.withValues(
+                                alpha: 0.5,
+                              ),
                       ),
                     ),
                   ),
@@ -324,16 +330,16 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
                 ScaleTransition(
                   scale: _scaleAnimation,
                   child: _buildBcsScoreDisplay(theme, output),
                 ),
-                
+
                 const SizedBox(height: 20),
                 _buildQuickSummary(theme, output),
-                
+
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
@@ -360,7 +366,7 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
     final color = Color(
       int.parse(output.statusColor.substring(1), radix: 16) + 0xFF000000,
     );
-    
+
     return Container(
       width: 120,
       height: 120,
@@ -417,7 +423,8 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Color(
-                int.parse(output.statusColor.substring(1), radix: 16) + 0xFF000000,
+                int.parse(output.statusColor.substring(1), radix: 16) +
+                    0xFF000000,
               ),
             ),
           ),
@@ -452,7 +459,12 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
     );
   }
 
-  Widget _buildQuickMetric(String label, String value, IconData icon, Color color) {
+  Widget _buildQuickMetric(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Column(
       children: [
         Container(
@@ -474,10 +486,7 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
         ),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -517,9 +526,7 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
               Text(
                 error ?? 'Ocorreu um erro durante o cálculo',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.red[600],
-                ),
+                style: TextStyle(color: Colors.red[600]),
               ),
               const SizedBox(height: 16),
               OutlinedButton.icon(
@@ -566,6 +573,5 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
     }
   }
 
-  void _navigateToDetailedResults() {
-  }
+  void _navigateToDetailedResults() {}
 }

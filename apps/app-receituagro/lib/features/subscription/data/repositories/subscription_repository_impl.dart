@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../domain/repositories/i_subscription_repository.dart';
 import '../../presentation/services/subscription_error_message_service.dart';

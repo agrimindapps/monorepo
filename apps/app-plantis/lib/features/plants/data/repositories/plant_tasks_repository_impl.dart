@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Task;
+import 'package:core/core.dart' hide Column, Task;
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/interfaces/network_info.dart';

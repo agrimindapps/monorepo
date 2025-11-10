@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 /// Widget responsável por exibir o status da assinatura ativa

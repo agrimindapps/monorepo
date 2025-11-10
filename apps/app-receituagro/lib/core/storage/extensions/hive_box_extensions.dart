@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide CacheFailure;
+import 'package:core/core.dart' hide CacheFailure, Column;
 import '../../errors/failures.dart';
 
 /// Extension methods for Hive Box to provide batch operations with error handling

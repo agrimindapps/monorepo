@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 
 import 'package:dartz/dartz.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Helper centralizado para gerenciar abertura/fechamento seguro de Hive boxes
 ///

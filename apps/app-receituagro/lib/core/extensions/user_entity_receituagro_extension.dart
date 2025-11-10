@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Extensão para UserEntity do core package, adicionando funcionalidades específicas do ReceitaAgro
 /// Esta extensão permite trabalhar com campos específicos que eram do UserProfileSyncEntity

@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide User, AuthState, AuthStatus;
+import 'package:core/core.dart' hide User, AuthState, AuthStatus, Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
@@ -158,8 +158,8 @@ class ProfilePage extends ConsumerWidget {
                   return Text(
                     version,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   );
                 },
               ),

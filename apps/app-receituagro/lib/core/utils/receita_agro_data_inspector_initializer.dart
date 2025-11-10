@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 /// Inicializador do DatabaseInspectorService específico para o app-receituagro

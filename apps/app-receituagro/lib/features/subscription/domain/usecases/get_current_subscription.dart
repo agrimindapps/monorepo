@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Use case para buscar a assinatura atual com todos os detalhes do RevenueCat
 /// Retorna SubscriptionEntity com expirationDate, purchaseDate, daysRemaining, etc.

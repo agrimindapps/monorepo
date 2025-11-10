@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../interfaces/network_info.dart';
 import '../../services/connectivity_state_manager.dart';

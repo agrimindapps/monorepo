@@ -1,11 +1,12 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/animals_constants.dart';
 import '../../domain/entities/animal_enums.dart';
 import '../providers/animals_provider.dart';
 
-class AnimalsAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget {
+class AnimalsAppBar extends ConsumerStatefulWidget
+    implements PreferredSizeWidget {
   const AnimalsAppBar({super.key});
 
   @override
@@ -39,7 +40,8 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
                 if (hasActiveFilters) ...[
                   const SizedBox(width: 8),
                   Semantics(
-                    label: '${animalsState.displayedAnimals.length} pets filtrados',
+                    label:
+                        '${animalsState.displayedAnimals.length} pets filtrados',
                     hint: 'Número de pets que atendem aos filtros aplicados',
                     child: Container(
                       padding: const EdgeInsets.symmetric(
@@ -48,13 +50,17 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
                       ),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(AnimalsConstants.badgeBorderRadius),
+                        borderRadius: BorderRadius.circular(
+                          AnimalsConstants.badgeBorderRadius,
+                        ),
                       ),
                       child: Text(
                         '${animalsState.displayedAnimals.length}',
                         style: TextStyle(
                           fontSize: AnimalsConstants.badgeFontSize,
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onPrimaryContainer,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -84,7 +90,7 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
         if (!_isSearching) ...[
           Semantics(
             label: AnimalsConstants.searchPets,
-            hint: hasActiveFilters 
+            hint: hasActiveFilters
                 ? AnimalsConstants.searchActiveHint
                 : AnimalsConstants.searchPetsAccessibilityHint,
             button: true,
@@ -103,7 +109,7 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
             ),
           ),
           Semantics(
-            label: hasActiveFilters 
+            label: hasActiveFilters
                 ? AnimalsConstants.filtersActiveLabel
                 : AnimalsConstants.filtersLabel,
             hint: hasActiveFilters
@@ -272,11 +278,11 @@ class AnimalsFilterBottomSheet extends ConsumerStatefulWidget {
   const AnimalsFilterBottomSheet({super.key});
 
   @override
-  ConsumerState<AnimalsFilterBottomSheet> createState() => 
+  ConsumerState<AnimalsFilterBottomSheet> createState() =>
       _AnimalsFilterBottomSheetState();
 }
 
-class _AnimalsFilterBottomSheetState 
+class _AnimalsFilterBottomSheetState
     extends ConsumerState<AnimalsFilterBottomSheet> {
   late AnimalsFilter _tempFilter;
 
@@ -347,8 +353,8 @@ class _AnimalsFilterBottomSheetState
                     value: null,
                     child: Text(AnimalsConstants.allSpecies),
                   ),
-                  ...AnimalSpecies.values.map((species) =>
-                    DropdownMenuItem<AnimalSpecies?>(
+                  ...AnimalSpecies.values.map(
+                    (species) => DropdownMenuItem<AnimalSpecies?>(
                       value: species,
                       child: Text(species.displayName),
                     ),
@@ -376,8 +382,8 @@ class _AnimalsFilterBottomSheetState
                     value: null,
                     child: Text(AnimalsConstants.allGenders),
                   ),
-                  ...AnimalGender.values.map((gender) =>
-                    DropdownMenuItem<AnimalGender?>(
+                  ...AnimalGender.values.map(
+                    (gender) => DropdownMenuItem<AnimalGender?>(
                       value: gender,
                       child: Text(gender.displayName),
                     ),
@@ -405,13 +411,14 @@ class _AnimalsFilterBottomSheetState
                     value: null,
                     child: Text(AnimalsConstants.allSizes),
                   ),
-                  ...AnimalSize.values.where((size) => size != AnimalSize.unknown)
-                      .map((size) =>
-                    DropdownMenuItem<AnimalSize?>(
-                      value: size,
-                      child: Text(size.displayName),
-                    ),
-                  ),
+                  ...AnimalSize.values
+                      .where((size) => size != AnimalSize.unknown)
+                      .map(
+                        (size) => DropdownMenuItem<AnimalSize?>(
+                          value: size,
+                          child: Text(size.displayName),
+                        ),
+                      ),
                 ],
                 onChanged: (value) {
                   setState(() {
@@ -430,7 +437,9 @@ class _AnimalsFilterBottomSheetState
 
   Widget _buildFilterSection(String title, Widget child) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: AnimalsConstants.filterSectionSpacing),
+      padding: const EdgeInsets.only(
+        bottom: AnimalsConstants.filterSectionSpacing,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

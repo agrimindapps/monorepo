@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Entidade de sincronização para comentários
 /// Extends BaseSyncEntity do core package para compatibilidade

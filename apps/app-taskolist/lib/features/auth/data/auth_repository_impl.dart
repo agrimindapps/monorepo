@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide UserEntity;
+import 'package:core/core.dart' hide UserEntity, Column;
 
 import '../../../core/errors/failures.dart' as local_failures;
 import '../../../core/utils/typedef.dart';

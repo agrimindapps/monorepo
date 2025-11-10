@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide AuthProvider, getIt;
+import 'package:core/core.dart' hide AuthProvider, getIt, Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection_container.dart';
@@ -90,17 +90,15 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             CircleAvatar(
               radius: 40,
-              backgroundImage:
-                  user.profileImageUrl?.isNotEmpty == true
-                      ? NetworkImage(user.profileImageUrl!)
-                      : null,
-              child:
-                  user.profileImageUrl?.isEmpty ?? true
-                      ? Text(
-                        user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
-                        style: Theme.of(context).textTheme.headlineMedium,
-                      )
-                      : null,
+              backgroundImage: user.profileImageUrl?.isNotEmpty == true
+                  ? NetworkImage(user.profileImageUrl!)
+                  : null,
+              child: user.profileImageUrl?.isEmpty ?? true
+                  ? Text(
+                      user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    )
+                  : null,
             ),
 
             const SizedBox(width: 16),
@@ -228,18 +226,16 @@ class _ProfilePageState extends State<ProfilePage> {
                 Text('Ações', style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
-                  onPressed:
-                      authProvider.isRefreshing
-                          ? null
-                          : () => _refreshUserData(ref),
-                  icon:
-                      authProvider.isRefreshing
-                          ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                          : const Icon(Icons.refresh),
+                  onPressed: authProvider.isRefreshing
+                      ? null
+                      : () => _refreshUserData(ref),
+                  icon: authProvider.isRefreshing
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.refresh),
                   label: Text(
                     authProvider.isRefreshing
                         ? 'Atualizando...'
@@ -249,27 +245,25 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 const SizedBox(height: 12),
                 ElevatedButton.icon(
-                  onPressed:
-                      authProvider.isLoggingOut
-                          ? null
-                          : () => _performLogout(ref),
+                  onPressed: authProvider.isLoggingOut
+                      ? null
+                      : () => _performLogout(ref),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     foregroundColor: Colors.white,
                   ),
-                  icon:
-                      authProvider.isLoggingOut
-                          ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
+                  icon: authProvider.isLoggingOut
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
                             ),
-                          )
-                          : const Icon(Icons.logout),
+                          ),
+                        )
+                      : const Icon(Icons.logout),
                   label: Text(
                     authProvider.isLoggingOut ? 'Saindo...' : 'Sair da Conta',
                   ),

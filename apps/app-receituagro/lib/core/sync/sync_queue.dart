@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:core/core.dart' hide SyncQueueItem;
+import 'package:core/core.dart' hide SyncQueueItem, Column;
 import '../data/models/sync_queue_item.dart' as models;
 
 /// Sync queue for offline-first operations

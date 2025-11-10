@@ -1,28 +1,28 @@
-import 'package:core/core.dart' hide AuthState;
+import 'package:core/core.dart' hide AuthState, Column;
 import 'package:flutter/material.dart';
 
 import '../providers/auth_provider.dart';
 
 /// **Social Authentication Buttons for Registration**
-/// 
+///
 /// Contains social login/registration buttons (Google, Apple) with proper
 /// styling, loading states, and error handling. This widget handles the
 /// presentation of social authentication options while delegating the
 /// actual authentication logic to the auth provider.
-/// 
+///
 /// ## Features:
 /// - **Platform-Specific Buttons**: Shows appropriate buttons per platform
 /// - **Loading States**: Visual feedback during authentication
 /// - **Error Handling**: Graceful handling of authentication failures
 /// - **Responsive Design**: Adapts to different screen sizes
 /// - **Accessibility**: Full screen reader and keyboard support
-/// 
+///
 /// @author PetiVeti Development Team
 /// @since 1.0.0
 /// @version 1.3.0 - Enhanced platform detection and error handling
 class RegisterSocialAuth extends ConsumerWidget {
   /// Creates social authentication buttons for registration.
-  /// 
+  ///
   /// Provides Google and Apple sign-in options with proper styling
   /// and authentication flow handling.
   const RegisterSocialAuth({super.key});
@@ -44,7 +44,7 @@ class RegisterSocialAuth extends ConsumerWidget {
   }
 
   /// **Section Divider**
-  /// 
+  ///
   /// Visual separator between form fields and social authentication options.
   Widget _buildDivider(BuildContext context) {
     return Row(
@@ -63,9 +63,13 @@ class RegisterSocialAuth extends ConsumerWidget {
   }
 
   /// **Google Sign-In Button**
-  /// 
+  ///
   /// Styled button for Google authentication with loading state.
-  Widget _buildGoogleButton(BuildContext context, WidgetRef ref, AuthState authState) {
+  Widget _buildGoogleButton(
+    BuildContext context,
+    WidgetRef ref,
+    AuthState authState,
+  ) {
     return _buildSocialButton(
       context: context,
       text: 'Cadastrar com Google',
@@ -77,10 +81,14 @@ class RegisterSocialAuth extends ConsumerWidget {
   }
 
   /// **Apple Sign-In Button**
-  /// 
+  ///
   /// Styled button for Apple authentication with loading state.
   /// Only shown on iOS platforms where Apple Sign-In is available.
-  Widget _buildAppleButton(BuildContext context, WidgetRef ref, AuthState authState) {
+  Widget _buildAppleButton(
+    BuildContext context,
+    WidgetRef ref,
+    AuthState authState,
+  ) {
     return _buildSocialButton(
       context: context,
       text: 'Cadastrar com Apple',
@@ -92,10 +100,10 @@ class RegisterSocialAuth extends ConsumerWidget {
   }
 
   /// **Generic Social Button Builder**
-  /// 
+  ///
   /// Creates a standardized social authentication button with consistent
   /// styling, loading states, and accessibility features.
-  /// 
+  ///
   /// @param context Build context for styling
   /// @param text Button label text
   /// @param icon Button icon
@@ -112,21 +120,16 @@ class RegisterSocialAuth extends ConsumerWidget {
   }) {
     return OutlinedButton.icon(
       onPressed: isLoading ? null : onPressed,
-      icon: isLoading 
+      icon: isLoading
           ? SizedBox(
               width: 20,
               height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: color,
-              ),
+              child: CircularProgressIndicator(strokeWidth: 2, color: color),
             )
           : Icon(icon, color: color),
       label: Text(
         text,
-        style: TextStyle(
-          color: isLoading ? Colors.grey : null,
-        ),
+        style: TextStyle(color: isLoading ? Colors.grey : null),
       ),
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -138,14 +141,14 @@ class RegisterSocialAuth extends ConsumerWidget {
   }
 
   /// **Handle Google Sign-In**
-  /// 
+  ///
   /// Initiates Google authentication flow through the auth provider.
   void _handleGoogleSignIn(WidgetRef ref) {
     ref.read(authProvider.notifier).signInWithGoogle();
   }
 
   /// **Handle Apple Sign-In**
-  /// 
+  ///
   /// Initiates Apple authentication flow through the auth provider.
   /// Only available on supported platforms (iOS).
   void _handleAppleSignIn(WidgetRef ref) {

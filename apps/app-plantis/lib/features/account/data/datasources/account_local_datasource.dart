@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Interface para data source local de conta
 /// Abstração para acesso a Hive ou outro storage local

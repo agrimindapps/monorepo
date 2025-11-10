@@ -1,38 +1,38 @@
-import 'package:core/core.dart' hide AuthState, FormState;
+import 'package:core/core.dart' hide AuthState, FormState, Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../providers/auth_provider.dart';
 
 /// **Login Action Section Widget**
-/// 
+///
 /// A comprehensive action section for authentication that handles primary
 /// authentication actions, mode switching, and additional user options.
-/// 
+///
 /// ## Key Features:
 /// - **Primary Action Button**: Main login/signup button with loading states
 /// - **Mode Switching**: Toggle between login and registration modes
 /// - **Forgot Password**: Password recovery option for existing users
 /// - **Enhanced Loading**: Multi-stage loading feedback with messages
 /// - **Social Authentication**: Integration points for social login
-/// 
+///
 /// ## Button States:
 /// - **Normal State**: Ready for user interaction
 /// - **Loading State**: Processing authentication with progress feedback
 /// - **Disabled State**: Form validation prevents interaction
 /// - **Enhanced Loading**: Multi-step loading with informative messages
-/// 
+///
 /// ## Accessibility Features:
 /// - Semantic labels for all action buttons
 /// - Loading state announcements
 /// - High contrast support
 /// - Keyboard navigation compatibility
-/// 
+///
 /// @author PetiVeti Development Team
 /// @since 1.1.0
 class LoginActionSection extends ConsumerWidget {
   /// Creates a login action section widget.
-  /// 
+  ///
   /// **Parameters:**
   /// - [formKey]: Global form key for validation
   /// - [emailController]: Controller for email input
@@ -62,34 +62,34 @@ class LoginActionSection extends ConsumerWidget {
 
   /// Global form key for validation
   final GlobalKey<FormState> formKey;
-  
+
   /// Controller for email input field
   final TextEditingController emailController;
-  
+
   /// Controller for password input field
   final TextEditingController passwordController;
-  
+
   /// Whether form is in sign-up mode
   final bool isSignUp;
-  
+
   /// Whether remember me option is selected
   final bool rememberMe;
-  
+
   /// Whether enhanced authentication is active
   final bool isAuthenticating;
-  
+
   /// Current loading message for enhanced feedback
   final String loadingMessage;
-  
+
   /// Callback for switching between login/signup modes
   final VoidCallback onModeToggle;
-  
+
   /// Callback for form submission
   final VoidCallback onAuthenticationSubmit;
-  
+
   /// Callback for forgot password action
   final VoidCallback onForgotPassword;
-  
+
   /// Callback for social authentication
   final ValueChanged<String> onSocialAuth;
 
@@ -103,9 +103,7 @@ class LoginActionSection extends ConsumerWidget {
         _buildPrimaryActionButton(context, authState),
         const SizedBox(height: 16),
         _buildModeToggleButton(context),
-        if (!isSignUp) ...[
-          _buildForgotPasswordButton(context),
-        ],
+        if (!isSignUp) ...[_buildForgotPasswordButton(context)],
         const SizedBox(height: 32),
         _buildDivider(context),
         const SizedBox(height: 24),
@@ -119,20 +117,20 @@ class LoginActionSection extends ConsumerWidget {
   }
 
   /// **Primary Action Button**
-  /// 
+  ///
   /// Main authentication button with enhanced loading states and validation.
   Widget _buildPrimaryActionButton(BuildContext context, AuthState authState) {
     final isLoading = (authState.isLoading == true) || isAuthenticating;
     final canSubmit = !isLoading;
 
     return Semantics(
-      label: isSignUp 
+      label: isSignUp
           ? 'Criar nova conta de usuário'
           : 'Fazer login com credenciais fornecidas',
       hint: canSubmit
-          ? (isSignUp 
-              ? 'Toque para criar conta com email e senha fornecidos'
-              : 'Toque para fazer login com email e senha fornecidos')
+          ? (isSignUp
+                ? 'Toque para criar conta com email e senha fornecidos'
+                : 'Toque para fazer login com email e senha fornecidos')
           : 'Aguarde o processamento da solicitação anterior',
       button: true,
       child: AnimatedContainer(
@@ -155,7 +153,7 @@ class LoginActionSection extends ConsumerWidget {
   }
 
   /// **Button Content Builder**
-  /// 
+  ///
   /// Creates appropriate button content based on loading state.
   Widget _buildButtonContent(BuildContext context, AuthState authState) {
     if (isAuthenticating) {
@@ -198,24 +196,21 @@ class LoginActionSection extends ConsumerWidget {
         const SizedBox(width: 8),
         Text(
           isSignUp ? 'Criar Conta' : 'Entrar',
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ],
     );
   }
 
   /// **Mode Toggle Button**
-  /// 
+  ///
   /// Button to switch between login and registration modes.
   Widget _buildModeToggleButton(BuildContext context) {
     return Semantics(
-      label: isSignUp 
+      label: isSignUp
           ? 'Alternar para modo de login'
           : 'Alternar para modo de cadastro',
-      hint: isSignUp 
+      hint: isSignUp
           ? 'Para usuários que já possuem conta'
           : 'Para novos usuários que precisam criar conta',
       button: true,
@@ -227,7 +222,7 @@ class LoginActionSection extends ConsumerWidget {
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           child: Text(
-            isSignUp 
+            isSignUp
                 ? 'Já tem uma conta? Faça login'
                 : 'Não tem conta? Cadastre-se',
             key: ValueKey(isSignUp),
@@ -242,7 +237,7 @@ class LoginActionSection extends ConsumerWidget {
   }
 
   /// **Forgot Password Button**
-  /// 
+  ///
   /// Button for password recovery option (login mode only).
   Widget _buildForgotPasswordButton(BuildContext context) {
     return Semantics(
@@ -263,7 +258,7 @@ class LoginActionSection extends ConsumerWidget {
   }
 
   /// **Section Divider**
-  /// 
+  ///
   /// Visual separator between main actions and social authentication.
   Widget _buildDivider(BuildContext context) {
     return Row(
@@ -285,7 +280,7 @@ class LoginActionSection extends ConsumerWidget {
   }
 
   /// **Social Authentication Section**
-  /// 
+  ///
   /// Buttons for social login options (Google, Apple).
   Widget _buildSocialAuthSection(BuildContext context) {
     return Column(
@@ -310,7 +305,7 @@ class LoginActionSection extends ConsumerWidget {
   }
 
   /// **Social Authentication Button**
-  /// 
+  ///
   /// Individual social login button with consistent styling.
   Widget _buildSocialButton(
     BuildContext context,
@@ -344,7 +339,7 @@ class LoginActionSection extends ConsumerWidget {
   }
 
   /// **Demo Login Information**
-  /// 
+  ///
   /// Development-only information panel with demo credentials.
   Widget _buildDemoLoginInfo(BuildContext context) {
     return Container(
@@ -358,11 +353,7 @@ class LoginActionSection extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.developer_mode,
-                color: Colors.blue[700],
-                size: 20,
-              ),
+              Icon(Icons.developer_mode, color: Colors.blue[700], size: 20),
               const SizedBox(width: 8),
               Text(
                 'Demo Login (Development Only)',

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/body_condition_input.dart';
@@ -177,17 +177,17 @@ class BcsInputFeedback extends ConsumerWidget {
   }
 
   Widget _buildValidationItem(ThemeData theme, _ValidationItem item) {
-    final color = item.isValid 
-        ? Colors.green 
-        : item.isRequired 
-            ? Colors.red 
-            : Colors.orange;
+    final color = item.isValid
+        ? Colors.green
+        : item.isRequired
+        ? Colors.red
+        : Colors.orange;
 
-    final icon = item.isValid 
+    final icon = item.isValid
         ? Icons.check_circle
-        : item.isRequired 
-            ? Icons.error
-            : Icons.warning;
+        : item.isRequired
+        ? Icons.error
+        : Icons.warning;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -195,9 +195,7 @@ class BcsInputFeedback extends ConsumerWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         color: color.withValues(alpha: 0.05),
-        border: Border.all(
-          color: color.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -207,11 +205,7 @@ class BcsInputFeedback extends ConsumerWidget {
               color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
-            child: Icon(
-              item.icon,
-              size: 16,
-              color: color,
-            ),
+            child: Icon(item.icon, size: 16, color: color),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -241,10 +235,7 @@ class BcsInputFeedback extends ConsumerWidget {
                         ),
                         child: const Text(
                           'opcional',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 10, color: Colors.grey),
                         ),
                       ),
                     ],
@@ -263,11 +254,7 @@ class BcsInputFeedback extends ConsumerWidget {
               ],
             ),
           ),
-          Icon(
-            icon,
-            color: color,
-            size: 20,
-          ),
+          Icon(icon, color: color, size: 20),
         ],
       ),
     );
@@ -311,10 +298,7 @@ class BcsInputFeedback extends ConsumerWidget {
                 const SizedBox(height: 4),
                 Text(
                   'Todos os dados obrigatórios foram preenchidos. Toque no botão para iniciar o cálculo.',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.green[600],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.green[600]),
                 ),
               ],
             ),
@@ -326,13 +310,13 @@ class BcsInputFeedback extends ConsumerWidget {
 
   int _countCompletedFields(BodyConditionState state) {
     int count = 0;
-    
+
     if (state.input.currentWeight > 0) count++;
     if ((state.input.animalAge ?? 0) > 0) count++;
     count++; // species sempre presente
     if (state.input.animalBreed?.isNotEmpty ?? false) count++;
     count++; // usando isNeutered que sempre tem valor
-    
+
     return count;
   }
 
@@ -392,10 +376,7 @@ class BcsEstimationPreview extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.preview,
-                  color: theme.colorScheme.primary,
-                ),
+                Icon(Icons.preview, color: theme.colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
                   'Estimativa Preliminar',
@@ -447,7 +428,9 @@ class BcsEstimationPreview extends ConsumerWidget {
                       Text(
                         'Confiança: ${(confidence * 100).round()}%',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.7,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -473,19 +456,12 @@ class BcsEstimationPreview extends ConsumerWidget {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.info_outline,
-                    size: 16,
-                    color: Colors.amber[700],
-                  ),
+                  Icon(Icons.info_outline, size: 16, color: Colors.amber[700]),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Esta é uma estimativa baseada nos dados inseridos. O cálculo completo fornecerá resultados mais precisos.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.amber[800],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.amber[800]),
                     ),
                   ),
                 ],
@@ -504,8 +480,10 @@ class BcsEstimationPreview extends ConsumerWidget {
   double _calculatePreliminaryBcs(BodyConditionState state) {
     double baseBcs = 5.0; // Average BCS
     if (state.input.species == AnimalSpecies.dog) {
-      if (state.input.currentWeight < 5) baseBcs += 0.5; // Small dogs tend to be overweight
-      if (state.input.currentWeight > 30) baseBcs -= 0.5; // Large dogs tend to be underweight
+      if (state.input.currentWeight < 5)
+        baseBcs += 0.5; // Small dogs tend to be overweight
+      if (state.input.currentWeight > 30)
+        baseBcs -= 0.5; // Large dogs tend to be underweight
     } else if (state.input.species == AnimalSpecies.cat) {
       if (state.input.currentWeight < 3) baseBcs -= 1.0;
       if (state.input.currentWeight > 6) baseBcs += 1.0;
@@ -515,18 +493,18 @@ class BcsEstimationPreview extends ConsumerWidget {
       if (age < 12) baseBcs -= 0.5; // Young animals
       if (age > 84) baseBcs += 0.5; // Senior animals
     }
-    
+
     return baseBcs.clamp(1.0, 9.0);
   }
 
   double _calculateConfidence(BodyConditionState state) {
     double confidence = 0.3; // Base confidence
-    
+
     if (state.input.currentWeight > 0) confidence += 0.3;
     confidence += 0.2; // species sempre presente
     if ((state.input.animalAge ?? 0) > 0) confidence += 0.1;
     if (state.input.animalBreed?.isNotEmpty ?? false) confidence += 0.1;
-    
+
     return confidence.clamp(0.0, 1.0);
   }
 

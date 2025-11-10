@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../entities/document_type.dart';
 import '../entities/legal_document.dart';

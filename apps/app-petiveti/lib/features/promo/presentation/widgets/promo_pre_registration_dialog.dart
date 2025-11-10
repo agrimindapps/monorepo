@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 
 import '../providers/promo_provider.dart';
@@ -7,16 +7,15 @@ import '../states/promo_state.dart';
 class PromoPreRegistrationDialog extends ConsumerStatefulWidget {
   final VoidCallback onClose;
 
-  const PromoPreRegistrationDialog({
-    super.key,
-    required this.onClose,
-  });
+  const PromoPreRegistrationDialog({super.key, required this.onClose});
 
   @override
-  ConsumerState<PromoPreRegistrationDialog> createState() => _PromoPreRegistrationDialogState();
+  ConsumerState<PromoPreRegistrationDialog> createState() =>
+      _PromoPreRegistrationDialogState();
 }
 
-class _PromoPreRegistrationDialogState extends ConsumerState<PromoPreRegistrationDialog> {
+class _PromoPreRegistrationDialogState
+    extends ConsumerState<PromoPreRegistrationDialog> {
   final TextEditingController _emailController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -30,7 +29,7 @@ class _PromoPreRegistrationDialogState extends ConsumerState<PromoPreRegistratio
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final state = ref.watch(promoProvider);
-    
+
     return Material(
       color: Colors.black.withValues(alpha: 0.5),
       child: Center(
@@ -87,15 +86,11 @@ class _PromoPreRegistrationDialogState extends ConsumerState<PromoPreRegistratio
             color: Colors.green.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(32),
           ),
-          child: const Icon(
-            Icons.check_circle,
-            color: Colors.green,
-            size: 32,
-          ),
+          child: const Icon(Icons.check_circle, color: Colors.green, size: 32),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         Text(
           'Pré-cadastro realizado!',
           style: theme.textTheme.titleMedium?.copyWith(
@@ -104,9 +99,9 @@ class _PromoPreRegistrationDialogState extends ConsumerState<PromoPreRegistratio
           ),
           textAlign: TextAlign.center,
         ),
-        
+
         const SizedBox(height: 8),
-        
+
         Text(
           'Você será notificado assim que o PetiVeti for lançado.',
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -114,9 +109,9 @@ class _PromoPreRegistrationDialogState extends ConsumerState<PromoPreRegistratio
           ),
           textAlign: TextAlign.center,
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
@@ -145,9 +140,9 @@ class _PromoPreRegistrationDialogState extends ConsumerState<PromoPreRegistratio
               color: theme.colorScheme.onSurface,
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
@@ -158,7 +153,9 @@ class _PromoPreRegistrationDialogState extends ConsumerState<PromoPreRegistratio
                 borderRadius: BorderRadius.circular(8),
               ),
               prefixIcon: const Icon(Icons.email),
-              errorText: state.hasPreRegistrationError ? state.preRegistrationError : null,
+              errorText: state.hasPreRegistrationError
+                  ? state.preRegistrationError
+                  : null,
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -171,13 +168,15 @@ class _PromoPreRegistrationDialogState extends ConsumerState<PromoPreRegistratio
               return null;
             },
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: state.isSubmittingPreRegistration ? null : _submitPreRegistration,
+              onPressed: state.isSubmittingPreRegistration
+                  ? null
+                  : _submitPreRegistration,
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
                 foregroundColor: Colors.white,
@@ -195,9 +194,9 @@ class _PromoPreRegistrationDialogState extends ConsumerState<PromoPreRegistratio
                   : const Text('Fazer pré-cadastro'),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           Text(
             'Seus dados estão seguros conosco e você pode cancelar a qualquer momento.',
             style: theme.textTheme.bodySmall?.copyWith(
@@ -212,7 +211,9 @@ class _PromoPreRegistrationDialogState extends ConsumerState<PromoPreRegistratio
 
   void _submitPreRegistration() {
     if (_formKey.currentState!.validate()) {
-      ref.read(promoProvider.notifier).submitPreRegistration(_emailController.text.trim());
+      ref
+          .read(promoProvider.notifier)
+          .submitPreRegistration(_emailController.text.trim());
     }
   }
 }

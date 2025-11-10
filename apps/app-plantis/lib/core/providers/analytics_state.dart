@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'analytics_state.freezed.dart';

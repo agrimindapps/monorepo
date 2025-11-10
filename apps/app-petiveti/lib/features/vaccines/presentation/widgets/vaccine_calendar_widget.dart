@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/vaccine.dart';
@@ -8,7 +8,7 @@ import '../providers/vaccines_provider.dart';
 class VaccineCalendarWidget extends ConsumerStatefulWidget {
   final String? animalId;
   final void Function(Vaccine)? onVaccineSelected;
-  
+
   const VaccineCalendarWidget({
     super.key,
     this.animalId,
@@ -16,7 +16,8 @@ class VaccineCalendarWidget extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<VaccineCalendarWidget> createState() => _VaccineCalendarWidgetState();
+  ConsumerState<VaccineCalendarWidget> createState() =>
+      _VaccineCalendarWidgetState();
 }
 
 class _VaccineCalendarWidgetState extends ConsumerState<VaccineCalendarWidget> {
@@ -60,7 +61,8 @@ class _VaccineCalendarWidgetState extends ConsumerState<VaccineCalendarWidget> {
           _buildCalendarHeader(theme),
           calendarAsync.when(
             loading: () => _buildLoadingState(),
-            error: (error, stackTrace) => _buildErrorState(theme, error.toString()),
+            error: (error, stackTrace) =>
+                _buildErrorState(theme, error.toString()),
             data: (calendar) => _buildCalendarContent(theme, calendar),
           ),
         ],
@@ -73,16 +75,11 @@ class _VaccineCalendarWidgetState extends ConsumerState<VaccineCalendarWidget> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.primary.withValues(alpha: 0.1),
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(16),
-        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.calendar_today,
-            color: theme.colorScheme.primary,
-          ),
+          Icon(Icons.calendar_today, color: theme.colorScheme.primary),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -160,7 +157,10 @@ class _VaccineCalendarWidgetState extends ConsumerState<VaccineCalendarWidget> {
     );
   }
 
-  Widget _buildCalendarContent(ThemeData theme, Map<DateTime, List<Vaccine>> calendar) {
+  Widget _buildCalendarContent(
+    ThemeData theme,
+    Map<DateTime, List<Vaccine>> calendar,
+  ) {
     final monthVaccines = <DateTime, List<Vaccine>>{};
     final startOfMonth = DateTime(_currentMonth.year, _currentMonth.month, 1);
     final endOfMonth = DateTime(_currentMonth.year, _currentMonth.month + 1, 0);
@@ -235,18 +235,20 @@ class _VaccineCalendarWidgetState extends ConsumerState<VaccineCalendarWidget> {
 
   Widget _buildDayGroup(ThemeData theme, DateTime day, List<Vaccine> vaccines) {
     final isToday = DateTime.now().difference(day).inDays == 0;
-    final isPast = day.isBefore(DateTime.now().subtract(const Duration(days: 1)));
+    final isPast = day.isBefore(
+      DateTime.now().subtract(const Duration(days: 1)),
+    );
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isToday 
-              ? theme.colorScheme.primary 
+          color: isToday
+              ? theme.colorScheme.primary
               : theme.colorScheme.outline.withValues(alpha: 0.3),
         ),
-        color: isToday 
+        color: isToday
             ? theme.colorScheme.primary.withValues(alpha: 0.05)
             : null,
       ),
@@ -259,8 +261,8 @@ class _VaccineCalendarWidgetState extends ConsumerState<VaccineCalendarWidget> {
               color: isToday
                   ? theme.colorScheme.primary.withValues(alpha: 0.1)
                   : isPast
-                      ? Colors.grey[100]
-                      : Colors.blue[50],
+                  ? Colors.grey[100]
+                  : Colors.blue[50],
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(12),
               ),
@@ -273,8 +275,8 @@ class _VaccineCalendarWidgetState extends ConsumerState<VaccineCalendarWidget> {
                     color: isToday
                         ? theme.colorScheme.primary
                         : isPast
-                            ? Colors.grey[400]
-                            : Colors.blue,
+                        ? Colors.grey[400]
+                        : Colors.blue,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -300,7 +302,9 @@ class _VaccineCalendarWidgetState extends ConsumerState<VaccineCalendarWidget> {
                       Text(
                         '${vaccines.length} ${vaccines.length == 1 ? 'vacina' : 'vacinas'}',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.7,
+                          ),
                         ),
                       ),
                     ],
@@ -308,7 +312,10 @@ class _VaccineCalendarWidgetState extends ConsumerState<VaccineCalendarWidget> {
                 ),
                 if (isToday)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primary,
                       borderRadius: BorderRadius.circular(12),
@@ -335,15 +342,13 @@ class _VaccineCalendarWidgetState extends ConsumerState<VaccineCalendarWidget> {
     final color = vaccine.isOverdue
         ? Colors.red
         : vaccine.isDueToday
-            ? Colors.orange
-            : Colors.blue;
+        ? Colors.orange
+        : Colors.blue;
 
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: const BoxDecoration(
-        border: Border(
-          top: BorderSide(color: Colors.grey, width: 0.5),
-        ),
+        border: Border(top: BorderSide(color: Colors.grey, width: 0.5)),
       ),
       child: Row(
         children: [
@@ -358,8 +363,8 @@ class _VaccineCalendarWidgetState extends ConsumerState<VaccineCalendarWidget> {
               vaccine.isOverdue
                   ? Icons.warning
                   : vaccine.isDueToday
-                      ? Icons.today
-                      : Icons.vaccines,
+                  ? Icons.today
+                  : Icons.vaccines,
               color: color,
             ),
           ),
@@ -374,10 +379,7 @@ class _VaccineCalendarWidgetState extends ConsumerState<VaccineCalendarWidget> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                Text(
-                  vaccine.veterinarian,
-                  style: theme.textTheme.bodySmall,
-                ),
+                Text(vaccine.veterinarian, style: theme.textTheme.bodySmall),
                 if (vaccine.notes != null && vaccine.notes!.isNotEmpty)
                   Text(
                     vaccine.notes!,
@@ -412,7 +414,10 @@ class _VaccineCalendarWidgetState extends ConsumerState<VaccineCalendarWidget> {
               if (vaccine.isOverdue || vaccine.isDueToday) ...[
                 const SizedBox(height: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: color,
                     borderRadius: BorderRadius.circular(8),
@@ -446,18 +451,34 @@ class _VaccineCalendarWidgetState extends ConsumerState<VaccineCalendarWidget> {
 
   String _formatMonth(DateTime date) {
     final months = [
-      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro',
     ];
-    
+
     return '${months[date.month - 1]} ${date.year}';
   }
 
   String _formatDate(DateTime date) {
     final weekdays = [
-      'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'
+      'Segunda',
+      'Terça',
+      'Quarta',
+      'Quinta',
+      'Sexta',
+      'Sábado',
+      'Domingo',
     ];
-    
+
     final weekday = weekdays[date.weekday - 1];
     return '$weekday, ${date.day}';
   }

@@ -1,19 +1,16 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../providers/home_provider.dart';
 
 /// **Home Feature Grid**
-/// 
+///
 /// Responsive grid of feature cards with dynamic badges and navigation.
 /// Adapts layout based on screen size and displays relevant statistics.
 class HomeFeatureGrid extends StatelessWidget {
   final HomeStatsState stats;
 
-  const HomeFeatureGrid({
-    super.key,
-    required this.stats,
-  });
+  const HomeFeatureGrid({super.key, required this.stats});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +22,7 @@ class HomeFeatureGrid extends StatelessWidget {
           final isTablet = screenWidth > 600;
           final crossAxisCount = isTablet ? 4 : 2;
           final maxCrossAxisExtent = screenWidth / crossAxisCount - 16;
-          
+
           return GridView.extent(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -56,9 +53,9 @@ class HomeFeatureGrid extends StatelessWidget {
         subtitle: 'Agende e acompanhe',
         route: '/appointments',
         color: Theme.of(context).colorScheme.secondary,
-        badge: stats.upcomingAppointments > 0 
-          ? stats.upcomingAppointments.toString() 
-          : null,
+        badge: stats.upcomingAppointments > 0
+            ? stats.upcomingAppointments.toString()
+            : null,
       ),
       FeatureCard(
         icon: Icons.vaccines,
@@ -66,9 +63,9 @@ class HomeFeatureGrid extends StatelessWidget {
         subtitle: 'Controle de vacinas',
         route: '/vaccines',
         color: Theme.of(context).colorScheme.tertiary,
-        badge: stats.pendingVaccinations > 0 
-          ? stats.pendingVaccinations.toString() 
-          : null,
+        badge: stats.pendingVaccinations > 0
+            ? stats.pendingVaccinations.toString()
+            : null,
       ),
       FeatureCard(
         icon: Icons.medication,
@@ -76,9 +73,9 @@ class HomeFeatureGrid extends StatelessWidget {
         subtitle: 'Gerencie medicações',
         route: '/medications',
         color: Theme.of(context).colorScheme.error,
-        badge: stats.activeMedications > 0 
-          ? stats.activeMedications.toString() 
-          : null,
+        badge: stats.activeMedications > 0
+            ? stats.activeMedications.toString()
+            : null,
       ),
       FeatureCard(
         icon: Icons.monitor_weight,
@@ -99,7 +96,7 @@ class HomeFeatureGrid extends StatelessWidget {
 }
 
 /// **Feature Card Component**
-/// 
+///
 /// Individual feature card with icon, title, subtitle, and optional badge.
 /// Includes semantic labeling and navigation handling.
 class FeatureCard extends StatelessWidget {
@@ -123,7 +120,7 @@ class FeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final badgeText = badge != null ? ', $badge itens pendentes' : '';
-    
+
     return Semantics(
       label: '$title, $subtitle$badgeText',
       hint: 'Toque para acessar $title',
@@ -138,11 +135,7 @@ class FeatureCard extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _CardIcon(
-                  icon: icon,
-                  color: color,
-                  badge: badge,
-                ),
+                _CardIcon(icon: icon, color: color, badge: badge),
                 const SizedBox(height: 12),
                 Text(
                   title,
@@ -173,21 +166,13 @@ class _CardIcon extends StatelessWidget {
   final Color color;
   final String? badge;
 
-  const _CardIcon({
-    required this.icon,
-    required this.color,
-    this.badge,
-  });
+  const _CardIcon({required this.icon, required this.color, this.badge});
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Icon(
-          icon,
-          size: 48,
-          color: color,
-        ),
+        Icon(icon, size: 48, color: color),
         if (badge != null)
           Positioned(
             right: 0,
@@ -198,10 +183,7 @@ class _CardIcon extends StatelessWidget {
                 color: Theme.of(context).colorScheme.error,
                 borderRadius: BorderRadius.circular(10),
               ),
-              constraints: const BoxConstraints(
-                minWidth: 18,
-                minHeight: 18,
-              ),
+              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
               child: Text(
                 badge!,
                 style: TextStyle(

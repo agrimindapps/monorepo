@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../entities/favorito_entity.dart';
 import '../repositories/i_favoritos_repository.dart';

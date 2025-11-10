@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart' as core;
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 import '../di/core_package_integration.dart';

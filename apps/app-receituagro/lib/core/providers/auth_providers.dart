@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide AuthState;
+import 'package:core/core.dart' hide AuthState, Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../di/injection_container.dart' as di;

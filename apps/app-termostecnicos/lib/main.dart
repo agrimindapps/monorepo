@@ -9,7 +9,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart' as purchases;
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import 'app_page.dart';
 import 'const/environment_const.dart';

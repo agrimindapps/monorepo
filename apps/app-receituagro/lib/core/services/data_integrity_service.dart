@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 
 import 'package:dartz/dartz.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../data/models/cultura_hive.dart';
 import '../data/models/diagnostico_hive.dart';

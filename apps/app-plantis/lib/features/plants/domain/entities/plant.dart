@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 class Plant extends BaseSyncEntity {
   final String name;

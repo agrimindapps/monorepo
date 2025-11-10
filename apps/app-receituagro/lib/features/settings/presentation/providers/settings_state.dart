@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../../../core/services/device_identity_service.dart';
 import '../../domain/entities/user_settings_entity.dart';

@@ -1,5 +1,5 @@
 import 'package:core/core.dart' as core;
-import 'package:core/core.dart' hide NotificationSettings;
+import 'package:core/core.dart' hide NotificationSettings, Column;
 import 'package:flutter/material.dart';
 
 import '../../../shared/providers/notification_providers.dart';

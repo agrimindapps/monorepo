@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 import '../data/models/sync_queue_item.dart' as local;

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/vaccine.dart';
@@ -115,41 +115,33 @@ class VaccineQuickActions extends ConsumerWidget {
 
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Marcar como Aplicada'),
-            content: Text(
-              'Confirmar que a vacina "${vaccine.name}" foi aplicada?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  ref
-                      .read(vaccinesProvider.notifier)
-                      .markAsCompleted(vaccine.id);
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Vacina "${vaccine.name}" marcada como aplicada',
-                      ),
-                      backgroundColor: Colors.green,
-                      action: SnackBarAction(
-                        label: 'Desfazer',
-                        onPressed: () {},
-                      ),
-                    ),
-                  );
-                },
-                child: const Text('Confirmar'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Marcar como Aplicada'),
+        content: Text('Confirmar que a vacina "${vaccine.name}" foi aplicada?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
           ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ref.read(vaccinesProvider.notifier).markAsCompleted(vaccine.id);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Vacina "${vaccine.name}" marcada como aplicada',
+                  ),
+                  backgroundColor: Colors.green,
+                  action: SnackBarAction(label: 'Desfazer', onPressed: () {}),
+                ),
+              );
+            },
+            child: const Text('Confirmar'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -158,47 +150,43 @@ class VaccineQuickActions extends ConsumerWidget {
 
     showDialog<void>(
       context: context,
-      builder:
-          (context) => _ReminderDatePicker(
-            vaccine: vaccine,
-            onReminderSet: (reminderDate) {
-              ref
-                  .read(vaccinesProvider.notifier)
-                  .scheduleReminder(vaccine.id, reminderDate);
+      builder: (context) => _ReminderDatePicker(
+        vaccine: vaccine,
+        onReminderSet: (reminderDate) {
+          ref
+              .read(vaccinesProvider.notifier)
+              .scheduleReminder(vaccine.id, reminderDate);
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Lembrete definido para ${_formatDate(reminderDate)}',
-                  ),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            },
-          ),
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Lembrete definido para ${_formatDate(reminderDate)}',
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+        },
+      ),
     );
   }
 
   void _rescheduleVaccine(BuildContext context, WidgetRef ref) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => _RescheduleDatePicker(
-            vaccine: vaccine,
-            onRescheduled: (newDate) {
-              final updatedVaccine = vaccine.copyWith(nextDueDate: newDate);
-              ref.read(vaccinesProvider.notifier).updateVaccine(updatedVaccine);
+      builder: (context) => _RescheduleDatePicker(
+        vaccine: vaccine,
+        onRescheduled: (newDate) {
+          final updatedVaccine = vaccine.copyWith(nextDueDate: newDate);
+          ref.read(vaccinesProvider.notifier).updateVaccine(updatedVaccine);
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Vacina reagendada para ${_formatDate(newDate)}',
-                  ),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            },
-          ),
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Vacina reagendada para ${_formatDate(newDate)}'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        },
+      ),
     );
   }
 

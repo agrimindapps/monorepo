@@ -1,6 +1,6 @@
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 class GlobalEnvironment {
   static bool _isProduction = false;

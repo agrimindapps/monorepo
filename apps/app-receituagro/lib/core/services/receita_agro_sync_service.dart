@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 import '../../features/favoritos/data/repositories/favoritos_repository_simplified.dart';

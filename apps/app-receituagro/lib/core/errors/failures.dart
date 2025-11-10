@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Server failure específico para este app
 class ServerFailure extends Failure {

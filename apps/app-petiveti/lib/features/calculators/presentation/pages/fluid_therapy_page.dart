@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 
 import '../providers/fluid_therapy_provider.dart';
@@ -15,7 +15,7 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
   final _formKey = GlobalKey<FormState>();
   final _weightController = TextEditingController();
   final _ongoingLossesController = TextEditingController();
-  
+
   String _selectedDehydrationPercentage = '0% (Sem desidratação)';
   String _selectedVomitingFrequency = '0';
   String _selectedDiarrheaSeverity = 'Nenhuma';
@@ -67,7 +67,7 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
 
   Widget _buildInfoCard() {
     final theme = Theme.of(context);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -76,10 +76,7 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.water_drop,
-                  color: theme.colorScheme.primary,
-                ),
+                Icon(Icons.water_drop, color: theme.colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
                   'Sobre a Fluidoterapia',
@@ -139,36 +136,36 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
             children: [
               Text(
                 'Dados do Paciente',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               _buildPatientInfoSection(),
               const SizedBox(height: 24),
               Text(
                 'Avaliação de Desidratação',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               _buildDehydrationSection(),
               const SizedBox(height: 24),
               Text(
                 'Perdas Contínuas',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               _buildLossesSection(),
               const SizedBox(height: 24),
               Text(
                 'Parâmetros de Tratamento',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               _buildTreatmentSection(),
@@ -218,12 +215,30 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
             helperText: 'Baseado em sinais clínicos (turgor, mucosas, olhos)',
           ),
           items: const [
-            DropdownMenuItem(value: '0% (Sem desidratação)', child: Text('0% (Sem desidratação)')),
-            DropdownMenuItem(value: '3% (Leve)', child: Text('3% (Leve) - Turgor levemente ↓')),
-            DropdownMenuItem(value: '5% (Moderada)', child: Text('5% (Moderada) - Turgor ↓, mucosas secas')),
-            DropdownMenuItem(value: '8% (Grave)', child: Text('8% (Grave) - Turgor persistente')),
-            DropdownMenuItem(value: '10% (Severa)', child: Text('10% (Severa) - Olhos fundos')),
-            DropdownMenuItem(value: '12% (Crítica)', child: Text('12% (Crítica) - Choque')),
+            DropdownMenuItem(
+              value: '0% (Sem desidratação)',
+              child: Text('0% (Sem desidratação)'),
+            ),
+            DropdownMenuItem(
+              value: '3% (Leve)',
+              child: Text('3% (Leve) - Turgor levemente ↓'),
+            ),
+            DropdownMenuItem(
+              value: '5% (Moderada)',
+              child: Text('5% (Moderada) - Turgor ↓, mucosas secas'),
+            ),
+            DropdownMenuItem(
+              value: '8% (Grave)',
+              child: Text('8% (Grave) - Turgor persistente'),
+            ),
+            DropdownMenuItem(
+              value: '10% (Severa)',
+              child: Text('10% (Severa) - Olhos fundos'),
+            ),
+            DropdownMenuItem(
+              value: '12% (Crítica)',
+              child: Text('12% (Crítica) - Choque'),
+            ),
           ],
           onChanged: (value) {
             if (value != null) {
@@ -241,7 +256,7 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
 
   Widget _buildDehydrationGuide() {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -305,9 +320,18 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
           ),
           items: const [
             DropdownMenuItem(value: 'Nenhuma', child: Text('Nenhuma')),
-            DropdownMenuItem(value: 'Leve', child: Text('Leve - Fezes pastosas')),
-            DropdownMenuItem(value: 'Moderada', child: Text('Moderada - Fezes líquidas')),
-            DropdownMenuItem(value: 'Severa', child: Text('Severa - Diarreia profusa')),
+            DropdownMenuItem(
+              value: 'Leve',
+              child: Text('Leve - Fezes pastosas'),
+            ),
+            DropdownMenuItem(
+              value: 'Moderada',
+              child: Text('Moderada - Fezes líquidas'),
+            ),
+            DropdownMenuItem(
+              value: 'Severa',
+              child: Text('Severa - Diarreia profusa'),
+            ),
           ],
           onChanged: (value) {
             if (value != null) {
@@ -370,7 +394,7 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
 
   Widget _buildCalculateButton() {
     final state = ref.watch(fluidTherapyProvider);
-    
+
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
@@ -382,7 +406,9 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
             : const Icon(Icons.calculate),
-        label: Text(state.isLoading ? 'Calculando...' : 'Calcular Fluidoterapia'),
+        label: Text(
+          state.isLoading ? 'Calculando...' : 'Calcular Fluidoterapia',
+        ),
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
         ),
@@ -392,17 +418,14 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
 
   Widget _buildErrorCard(String message) {
     final theme = Theme.of(context);
-    
+
     return Card(
       color: theme.colorScheme.errorContainer,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(
-              Icons.error_outline,
-              color: theme.colorScheme.error,
-            ),
+            Icon(Icons.error_outline, color: theme.colorScheme.error),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -432,8 +455,8 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
     final inputs = <String, dynamic>{
       'weight': double.parse(_weightController.text),
       'dehydration_percentage': _selectedDehydrationPercentage,
-      'ongoing_losses': _ongoingLossesController.text.isNotEmpty 
-          ? double.parse(_ongoingLossesController.text) 
+      'ongoing_losses': _ongoingLossesController.text.isNotEmpty
+          ? double.parse(_ongoingLossesController.text)
           : 0.0,
       'vomiting_frequency': _selectedVomitingFrequency,
       'diarrhea_severity': _selectedDiarrheaSeverity,

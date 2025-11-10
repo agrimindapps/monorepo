@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide getIt;
+import 'package:core/core.dart' hide Column, getIt;
 
 import '../data/models/sync_queue_item.dart' as local;
 import '../sync/sync_queue.dart' as local;

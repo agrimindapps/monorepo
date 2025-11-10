@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../presentation/services/pragas_cultura_error_message_service.dart';
 import '../repositories/i_pragas_cultura_repository.dart';

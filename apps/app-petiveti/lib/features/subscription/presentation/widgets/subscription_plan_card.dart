@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide SubscriptionState;
+import 'package:core/core.dart' hide SubscriptionState, Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/subscription_plan.dart';
@@ -30,7 +30,10 @@ class SubscriptionPlanCard extends ConsumerWidget {
           decoration: plan.isPopular
               ? BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2,
+                  ),
                 )
               : const BoxDecoration(),
           child: Stack(
@@ -94,14 +97,16 @@ class SubscriptionPlanCard extends ConsumerWidget {
             children: [
               Text(
                 plan.title,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 4),
               Text(
                 plan.description,
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -142,9 +147,11 @@ class SubscriptionPlanCard extends ConsumerWidget {
         Text(
           plan.formattedPrice,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: plan.isPopular ? Theme.of(context).colorScheme.primary : null,
-              ),
+            fontWeight: FontWeight.bold,
+            color: plan.isPopular
+                ? Theme.of(context).colorScheme.primary
+                : null,
+          ),
         ),
         Text(
           plan.billingPeriod,
@@ -161,7 +168,9 @@ class SubscriptionPlanCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.primaryContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
@@ -176,43 +185,49 @@ class SubscriptionPlanCard extends ConsumerWidget {
   }
 
   List<Widget> _buildFeatureList(BuildContext context) {
-    return plan.features.map(
-      (feature) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          children: [
-            Icon(
-              Icons.check,
-              color: Theme.of(context).colorScheme.primary,
-              size: 16,
+    return plan.features
+        .map(
+          (feature) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.check,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 16,
+                ),
+                const SizedBox(width: 8),
+                Expanded(child: Text(feature)),
+              ],
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(feature),
-            ),
-          ],
-        ),
-      ),
-    ).toList();
+          ),
+        )
+        .toList();
   }
 
-  Widget _buildSubscribeButton(BuildContext context, WidgetRef ref, bool isCurrentPlan) {
+  Widget _buildSubscribeButton(
+    BuildContext context,
+    WidgetRef ref,
+    bool isCurrentPlan,
+  ) {
     final isPurchasing = state.isPurchasing(plan.id);
     final isButtonDisabled = isCurrentPlan || isPurchasing;
 
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        onPressed: isButtonDisabled 
-            ? null 
+        onPressed: isButtonDisabled
+            ? null
             : () => SubscriptionPageCoordinator.subscribeToPlan(
-                  ref, 
-                  context, 
-                  userId, 
-                  plan,
-                ),
+                ref,
+                context,
+                userId,
+                plan,
+              ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: plan.isPopular ? Theme.of(context).colorScheme.primary : null,
+          backgroundColor: plan.isPopular
+              ? Theme.of(context).colorScheme.primary
+              : null,
           padding: const EdgeInsets.symmetric(vertical: 12),
         ),
         icon: _buildButtonIcon(context, isPurchasing, isCurrentPlan),
@@ -221,16 +236,18 @@ class SubscriptionPlanCard extends ConsumerWidget {
           child: Text(
             _getButtonText(isPurchasing, isCurrentPlan),
             key: ValueKey(isPurchasing ? 'loading' : 'normal'),
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildButtonIcon(BuildContext context, bool isPurchasing, bool isCurrentPlan) {
+  Widget _buildButtonIcon(
+    BuildContext context,
+    bool isPurchasing,
+    bool isCurrentPlan,
+  ) {
     if (isPurchasing) {
       return SizedBox(
         width: 16,

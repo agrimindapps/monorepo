@@ -12,7 +12,7 @@
 /// - Acessibilidade total (screen readers, keyboard navigation)
 library;
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../theme/spacing_tokens.dart';

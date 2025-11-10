@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/widgets.dart';
 
 /// Ícones centralizados do app ReceitaAgro

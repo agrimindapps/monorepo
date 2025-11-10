@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide SubscriptionState;
+import 'package:core/core.dart' hide SubscriptionState, Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/feature_flags_notifier.dart';

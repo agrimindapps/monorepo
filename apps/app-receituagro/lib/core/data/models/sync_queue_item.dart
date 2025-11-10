@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Sync operation type
 enum SyncOperationType { create, update, delete }

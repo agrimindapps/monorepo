@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide Column, FormState;
 import 'package:flutter/material.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/register_loading_overlay.dart';

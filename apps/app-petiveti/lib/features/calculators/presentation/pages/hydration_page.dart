@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/calculators/hydration_calculator.dart';
@@ -84,10 +84,7 @@ class _HydrationPageState extends ConsumerState<HydrationPage> {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.water_drop,
-                  color: theme.colorScheme.primary,
-                ),
+                Icon(Icons.water_drop, color: theme.colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
                   'Sobre a Hidratação Animal',
@@ -148,36 +145,36 @@ class _HydrationPageState extends ConsumerState<HydrationPage> {
             children: [
               Text(
                 'Dados Básicos',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               _buildBasicInfoSection(),
               const SizedBox(height: 24),
               Text(
                 'Avaliação de Hidratação',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               _buildHydrationAssessmentSection(),
               const SizedBox(height: 24),
               Text(
                 'Fatores Ambientais e Físicos',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               _buildEnvironmentalSection(),
               const SizedBox(height: 24),
               Text(
                 'Condições Médicas',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               _buildMedicalConditionsSection(),
@@ -225,11 +222,14 @@ class _HydrationPageState extends ConsumerState<HydrationPage> {
           ),
           items: const [
             DropdownMenuItem(
-                value: BodyCondition.underweight,
-                child: Text('Abaixo do Peso')),
+              value: BodyCondition.underweight,
+              child: Text('Abaixo do Peso'),
+            ),
             DropdownMenuItem(value: BodyCondition.ideal, child: Text('Ideal')),
             DropdownMenuItem(
-                value: BodyCondition.overweight, child: Text('Sobrepeso')),
+              value: BodyCondition.overweight,
+              child: Text('Sobrepeso'),
+            ),
             DropdownMenuItem(value: BodyCondition.obese, child: Text('Obeso')),
           ],
           onChanged: (value) {
@@ -255,17 +255,25 @@ class _HydrationPageState extends ConsumerState<HydrationPage> {
           ),
           items: const [
             DropdownMenuItem(
-                value: DehydrationLevel.none, child: Text('Normal (0-3%)')),
+              value: DehydrationLevel.none,
+              child: Text('Normal (0-3%)'),
+            ),
             DropdownMenuItem(
-                value: DehydrationLevel.mild, child: Text('Leve (3-5%)')),
+              value: DehydrationLevel.mild,
+              child: Text('Leve (3-5%)'),
+            ),
             DropdownMenuItem(
-                value: DehydrationLevel.moderate,
-                child: Text('Moderada (5-8%)')),
+              value: DehydrationLevel.moderate,
+              child: Text('Moderada (5-8%)'),
+            ),
             DropdownMenuItem(
-                value: DehydrationLevel.severe, child: Text('Severa (8-12%)')),
+              value: DehydrationLevel.severe,
+              child: Text('Severa (8-12%)'),
+            ),
             DropdownMenuItem(
-                value: DehydrationLevel.critical,
-                child: Text('Crítica (>12%)')),
+              value: DehydrationLevel.critical,
+              child: Text('Crítica (>12%)'),
+            ),
           ],
           onChanged: (value) {
             if (value != null) {
@@ -336,12 +344,18 @@ class _HydrationPageState extends ConsumerState<HydrationPage> {
           ),
           items: const [
             DropdownMenuItem(
-                value: ActivityLevel.sedentary, child: Text('Sedentário')),
+              value: ActivityLevel.sedentary,
+              child: Text('Sedentário'),
+            ),
             DropdownMenuItem(
-                value: ActivityLevel.moderate, child: Text('Moderado')),
+              value: ActivityLevel.moderate,
+              child: Text('Moderado'),
+            ),
             DropdownMenuItem(value: ActivityLevel.active, child: Text('Ativo')),
             DropdownMenuItem(
-                value: ActivityLevel.veryActive, child: Text('Muito Ativo')),
+              value: ActivityLevel.veryActive,
+              child: Text('Muito Ativo'),
+            ),
           ],
           onChanged: (value) {
             if (value != null) {
@@ -360,14 +374,21 @@ class _HydrationPageState extends ConsumerState<HydrationPage> {
           ),
           items: const [
             DropdownMenuItem(
-                value: EnvironmentTemp.cool, child: Text('Frio (<20°C)')),
+              value: EnvironmentTemp.cool,
+              child: Text('Frio (<20°C)'),
+            ),
             DropdownMenuItem(
-                value: EnvironmentTemp.normal, child: Text('Normal (20-25°C)')),
+              value: EnvironmentTemp.normal,
+              child: Text('Normal (20-25°C)'),
+            ),
             DropdownMenuItem(
-                value: EnvironmentTemp.warm, child: Text('Quente (25-30°C)')),
+              value: EnvironmentTemp.warm,
+              child: Text('Quente (25-30°C)'),
+            ),
             DropdownMenuItem(
-                value: EnvironmentTemp.hot,
-                child: Text('Muito Quente (>30°C)')),
+              value: EnvironmentTemp.hot,
+              child: Text('Muito Quente (>30°C)'),
+            ),
           ],
           onChanged: (value) {
             if (value != null) {
@@ -464,10 +485,7 @@ class _HydrationPageState extends ConsumerState<HydrationPage> {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(
-              Icons.error_outline,
-              color: theme.colorScheme.error,
-            ),
+            Icon(Icons.error_outline, color: theme.colorScheme.error),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -512,8 +530,9 @@ class _HydrationPageState extends ConsumerState<HydrationPage> {
     }
 
     if (_hoursWithoutWaterController.text.isNotEmpty) {
-      inputs['hoursWithoutWater'] =
-          int.parse(_hoursWithoutWaterController.text);
+      inputs['hoursWithoutWater'] = int.parse(
+        _hoursWithoutWaterController.text,
+      );
     }
 
     ref.read(hydrationProvider.notifier).calculate(inputs);

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide SyncQueue, SyncQueueItem;
+import 'package:core/core.dart' hide Column, SyncQueue, SyncQueueItem;
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../data/models/sync_queue_item.dart';

@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import '../../models/task_history_model.dart';
 
 abstract class TaskHistoryRemoteDataSource {

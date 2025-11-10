@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import 'data/factories/favorito_entity_factory_registry.dart';
 import 'data/repositories/favoritos_repository_simplified.dart';

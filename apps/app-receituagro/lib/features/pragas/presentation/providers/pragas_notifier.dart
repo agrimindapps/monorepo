@@ -1,5 +1,5 @@
 import 'package:app_receituagro/core/di/injection.dart' as di;
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../../../core/data/repositories/pragas_hive_repository.dart';
 import '../../../../core/services/access_history_service.dart';

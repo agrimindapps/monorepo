@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Repository interface para operações de perfil de usuário
 abstract class ProfileRepository {

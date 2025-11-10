@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../services/remote_config_service.dart';
 

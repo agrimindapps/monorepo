@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide Column, FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -10,7 +10,7 @@ class ExpenseAddForm extends ConsumerStatefulWidget {
   final Expense? expense;
   final String? initialAnimalId;
   final ExpenseCategory? initialCategory;
-  
+
   const ExpenseAddForm({
     super.key,
     this.expense,
@@ -30,11 +30,11 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
   final _notesController = TextEditingController();
   final _veterinarianController = TextEditingController();
   final _receiptNumberController = TextEditingController();
-  
+
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  
+
   ExpenseCategory? _selectedCategory;
   DateTime _selectedDate = DateTime.now();
   String? _selectedAnimalId;
@@ -75,19 +75,19 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
-    
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
-    
+
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+
     _animationController.forward();
   }
 
@@ -105,7 +105,7 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.expense == null ? 'Nova Despesa' : 'Editar Despesa'),
@@ -188,8 +188,8 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
                       Icon(
                         _getCategoryIcon(category),
                         size: 16,
-                        color: isSelected 
-                            ? Colors.white 
+                        color: isSelected
+                            ? Colors.white
                             : _getCategoryColor(category),
                       ),
                       const SizedBox(width: 6),
@@ -294,7 +294,9 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
             const SizedBox(height: 16),
             TextFormField(
               controller: _amountController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
               ],
@@ -309,16 +311,16 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
                 if (value == null || value.isEmpty) {
                   return 'Valor é obrigatório';
                 }
-                
+
                 final amount = double.tryParse(value.replaceAll(',', '.'));
                 if (amount == null || amount <= 0) {
                   return 'Digite um valor válido maior que zero';
                 }
-                
+
                 if (amount > 999999.99) {
                   return 'Valor muito alto';
                 }
-                
+
                 return null;
               },
             ),
@@ -444,10 +446,14 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.repeat),
                 ),
-                items: RecurrenceType.values.map((type) => DropdownMenuItem(
-                  value: type,
-                  child: Text(_getRecurrenceTypeName(type)),
-                )).toList(),
+                items: RecurrenceType.values
+                    .map(
+                      (type) => DropdownMenuItem(
+                        value: type,
+                        child: Text(_getRecurrenceTypeName(type)),
+                      ),
+                    )
+                    .toList(),
                 onChanged: (value) {
                   if (value != null) {
                     setState(() {
@@ -526,7 +532,7 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
-    
+
     if (date != null) {
       setState(() {
         _selectedDate = date;
@@ -538,7 +544,7 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    
+
     if (_selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -555,9 +561,11 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
 
     try {
       final amount = double.parse(_amountController.text.replaceAll(',', '.'));
-      
+
       final expense = Expense(
-        id: widget.expense?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        id:
+            widget.expense?.id ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
         animalId: _selectedAnimalId ?? 'default_animal',
         userId: widget.expense?.userId ?? 'temp_user_id',
         title: _descriptionController.text.trim(),
@@ -566,14 +574,15 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
         description: _descriptionController.text.trim(),
         amount: amount,
         expenseDate: _selectedDate,
-        veterinarian: _veterinarianController.text.trim().isEmpty 
-            ? null 
+        veterinarian: _veterinarianController.text.trim().isEmpty
+            ? null
             : _veterinarianController.text.trim(),
-        receiptNumber: _hasReceipt && _receiptNumberController.text.trim().isNotEmpty
+        receiptNumber:
+            _hasReceipt && _receiptNumberController.text.trim().isNotEmpty
             ? _receiptNumberController.text.trim()
             : null,
-        notes: _notesController.text.trim().isEmpty 
-            ? null 
+        notes: _notesController.text.trim().isEmpty
+            ? null
             : _notesController.text.trim(),
         isPaid: _isPaid,
         isRecurring: _isRecurring,
@@ -625,6 +634,7 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
       }
     }
   }
+
   Color _getCategoryColor(ExpenseCategory category) {
     const categoryColors = {
       ExpenseCategory.consultation: Colors.blue,
@@ -691,4 +701,3 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 }
-

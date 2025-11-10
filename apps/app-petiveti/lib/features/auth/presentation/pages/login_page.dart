@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide AuthState, FormState;
+import 'package:core/core.dart' hide AuthState, FormState, Column;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -15,7 +15,7 @@ import '../widgets/password_recovery_widget.dart';
 import '../widgets/social_login_widget.dart';
 
 /// Refactored LoginPage following SOLID principles
-/// 
+///
 /// Reduced from 1,454 to ~250 lines by extracting components
 /// - UI components extracted to separate widgets
 /// - Background painter extracted to separate file
@@ -63,29 +63,21 @@ class _LoginPageState extends ConsumerState<LoginPage>
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
-    
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0.3, 0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
-    
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
+
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0.3, 0), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
+
     _fadeController.forward();
     _slideController.forward();
   }
 
-  void _setupListeners() {
-  }
+  void _setupListeners() {}
 
   @override
   void dispose() {
@@ -104,7 +96,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
     final size = MediaQuery.of(context).size;
     final isDesktop = size.width > 900;
     final isMobile = size.width <= 600;
-    
+
     _setupAuthListeners();
 
     return Scaffold(
@@ -132,8 +124,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
                       position: _slideAnimation,
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
-                          maxWidth: isMobile 
-                              ? size.width * 0.9 
+                          maxWidth: isMobile
+                              ? size.width * 0.9
                               : (isDesktop ? 1000 : 500),
                         ),
                         child: Card(
@@ -180,13 +172,10 @@ class _LoginPageState extends ConsumerState<LoginPage>
   /// Manipula o sucesso da autenticação mostrando loading de sincronização
   void _handleAuthSuccess() {
     if (!mounted) return;
-    SimpleSyncLoading.show(
-      context,
-      message: 'Carregando seus pets...',
-    );
+    SimpleSyncLoading.show(context, message: 'Carregando seus pets...');
     _navigateAfterSync();
   }
-  
+
   /// Navega para home quando sync terminar
   void _navigateAfterSync() {
     Timer(const Duration(seconds: 3), () {
@@ -199,10 +188,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
   Widget _buildDesktopLayout() {
     return Row(
       children: [
-        const Expanded(
-          flex: 6,
-          child: DesktopBrandingWidget(),
-        ),
+        const Expanded(flex: 6, child: DesktopBrandingWidget()),
         Expanded(
           flex: 4,
           child: Padding(
@@ -213,7 +199,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       ],
     );
   }
-  
+
   Widget _buildMobileLayout() {
     return Padding(
       padding: const EdgeInsets.all(24.0),
@@ -249,8 +235,10 @@ class _LoginPageState extends ConsumerState<LoginPage>
             obscurePassword: _obscurePassword,
             rememberMe: _rememberMe,
             isLoading: _isLoading,
-            onTogglePassword: () => setState(() => _obscurePassword = !_obscurePassword),
-            onRememberMeChanged: (value) => setState(() => _rememberMe = value ?? false),
+            onTogglePassword: () =>
+                setState(() => _obscurePassword = !_obscurePassword),
+            onRememberMeChanged: (value) =>
+                setState(() => _rememberMe = value ?? false),
             onLogin: _handleLogin,
             onForgotPassword: () => setState(() => _showRecoveryForm = true),
             onToggleAuth: () => setState(() => _isLoginMode = !_isLoginMode),
@@ -268,18 +256,21 @@ class _LoginPageState extends ConsumerState<LoginPage>
       child: Text('Signup wizard - To be implemented in Phase 2'),
     );
   }
+
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() => _isLoading = true);
-    
+
     try {
-      final success = await ref.read(authProvider.notifier).loginAndSync(
-        _emailController.text.trim(),
-        _passwordController.text,
-        showSyncOverlay: true,
-      );
-      
+      final success = await ref
+          .read(authProvider.notifier)
+          .loginAndSync(
+            _emailController.text.trim(),
+            _passwordController.text,
+            showSyncOverlay: true,
+          );
+
       if (success && mounted) {
         unawaited(HapticFeedback.lightImpact());
         ScaffoldMessenger.of(context).showSnackBar(
@@ -303,7 +294,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       if (mounted) setState(() => _isLoading = false);
     }
   }
-  
+
   Future<void> _sendPasswordReset() async {
     if (_emailController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -314,14 +305,14 @@ class _LoginPageState extends ConsumerState<LoginPage>
       );
       return;
     }
-    
+
     setState(() => _isLoading = true);
-    
+
     try {
-      await ref.read(authProvider.notifier).sendPasswordResetEmail(
-        _emailController.text.trim(),
-      );
-      
+      await ref
+          .read(authProvider.notifier)
+          .sendPasswordResetEmail(_emailController.text.trim());
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -334,17 +325,14 @@ class _LoginPageState extends ConsumerState<LoginPage>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
-  
+
   void _handleSocialAuth(String provider) {
     switch (provider) {
       case 'google':
@@ -372,7 +360,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
             SizedBox(height: 8),
             Text('• Você pode usar o app sem criar conta'),
             Text('• Seus dados ficam apenas no dispositivo'),
-            Text('• Limitação: dados podem ser perdidos se o app for desinstalado'),
+            Text(
+              '• Limitação: dados podem ser perdidos se o app for desinstalado',
+            ),
             Text('• Sem backup na nuvem'),
             Text('• Sem sincronização entre dispositivos'),
             SizedBox(height: 16),
@@ -395,7 +385,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
               navigator.pop();
               setState(() => _isLoading = true);
 
-              final success = await ref.read(authProvider.notifier).signInAnonymously();
+              final success = await ref
+                  .read(authProvider.notifier)
+                  .signInAnonymously();
 
               if (mounted) {
                 setState(() => _isLoading = false);

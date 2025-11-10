@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../data/models/device_model.dart';
 import '../repositories/device_repository.dart';

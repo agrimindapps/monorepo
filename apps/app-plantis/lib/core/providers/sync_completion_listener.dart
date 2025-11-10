@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../features/plants/presentation/providers/plants_notifier.dart';
 import 'realtime_sync_notifier.dart';

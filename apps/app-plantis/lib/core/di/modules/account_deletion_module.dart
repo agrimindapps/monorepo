@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Módulo de Dependency Injection para Account Deletion
 /// Registra todos os serviços necessários para exclusão de conta segura

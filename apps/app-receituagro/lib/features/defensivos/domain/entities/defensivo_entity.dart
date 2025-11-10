@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Entity unificada para Defensivo seguindo princípios Clean Architecture
 /// Representa um defensivo agrícola no domínio da aplicação

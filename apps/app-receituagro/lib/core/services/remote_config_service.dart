@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 /// Feature flags available in ReceitaAgro app

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:core/src/domain/repositories/i_local_storage_repository.dart'
     as storage;
 

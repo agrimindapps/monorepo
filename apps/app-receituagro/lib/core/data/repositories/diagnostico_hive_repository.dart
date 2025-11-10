@@ -1,6 +1,6 @@
 import 'dart:developer' as developer;
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../models/diagnostico_hive.dart';
 

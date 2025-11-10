@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Entity para Cultura seguindo princípios Clean Architecture
 /// Representa uma cultura agrícola no domínio da aplicação

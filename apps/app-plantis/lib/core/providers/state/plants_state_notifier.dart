@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide getIt;
+import 'package:core/core.dart' hide Column, getIt;
 
 import '../../../features/plants/domain/entities/plant.dart';
 import '../../../features/plants/domain/usecases/add_plant_usecase.dart';

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Use case para buscar histórico de compras (usa core repository)
 @injectable

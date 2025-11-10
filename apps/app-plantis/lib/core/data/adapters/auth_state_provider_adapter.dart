@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../auth/auth_state_notifier.dart';
 import '../../interfaces/i_auth_state_provider.dart';

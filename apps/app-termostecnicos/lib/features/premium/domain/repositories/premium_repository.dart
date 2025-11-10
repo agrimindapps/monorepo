@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:core/core.dart' hide SubscriptionStatus;
+import 'package:core/core.dart' hide SubscriptionStatus, Column;
 
 import '../entities/subscription_status.dart';
 

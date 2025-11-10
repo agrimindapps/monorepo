@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide DeviceManagementState;
+import 'package:core/core.dart' hide Column, DeviceManagementState;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

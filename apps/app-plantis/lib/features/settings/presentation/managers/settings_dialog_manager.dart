@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/theme_providers.dart' as theme_providers;
 import '../dialogs/feedback_dialog.dart';

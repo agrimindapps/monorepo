@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/expense.dart';
@@ -6,12 +6,12 @@ import 'expense_card_widget.dart';
 import 'expense_search_filters_widget.dart';
 
 /// Refactored Enhanced expense list following SOLID principles
-/// 
+///
 /// Reduced from 897 to ~150 lines by extracting components
 /// - Single Responsibility: Only manages the list display logic
 /// - Open/Closed: Easy to extend with new filtering/sorting options
 /// - Dependency Inversion: Components can be injected
-/// 
+///
 /// Benefits:
 /// - 83% code reduction in main widget class
 /// - Improved component reusability
@@ -20,7 +20,7 @@ import 'expense_search_filters_widget.dart';
 class ExpenseEnhancedListRefactored extends ConsumerStatefulWidget {
   final List<Expense> expenses;
   final bool showAnimations;
-  
+
   const ExpenseEnhancedListRefactored({
     super.key,
     required this.expenses,
@@ -28,10 +28,12 @@ class ExpenseEnhancedListRefactored extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ExpenseEnhancedListRefactored> createState() => _ExpenseEnhancedListRefactoredState();
+  ConsumerState<ExpenseEnhancedListRefactored> createState() =>
+      _ExpenseEnhancedListRefactoredState();
 }
 
-class _ExpenseEnhancedListRefactoredState extends ConsumerState<ExpenseEnhancedListRefactored>
+class _ExpenseEnhancedListRefactoredState
+    extends ConsumerState<ExpenseEnhancedListRefactored>
     with TickerProviderStateMixin {
   late AnimationController _listAnimationController;
   late Animation<double> _fadeAnimation;
@@ -51,11 +53,11 @@ class _ExpenseEnhancedListRefactoredState extends ConsumerState<ExpenseEnhancedL
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _listAnimationController, curve: Curves.easeOut),
     );
-    
+
     if (widget.showAnimations) {
       _listAnimationController.forward();
     } else {
@@ -80,7 +82,8 @@ class _ExpenseEnhancedListRefactoredState extends ConsumerState<ExpenseEnhancedL
         children: [
           ExpenseSearchFiltersWidget(
             onSearchChanged: (query) => setState(() => _searchQuery = query),
-            onCategoryChanged: (category) => setState(() => _filterCategory = category),
+            onCategoryChanged: (category) =>
+                setState(() => _filterCategory = category),
             onDateRangeChanged: (range) => setState(() => _dateRange = range),
             onFiltersToggled: (show) => setState(() => _showFilters = show),
             showFilters: _showFilters,
@@ -126,7 +129,7 @@ class _ExpenseEnhancedListRefactoredState extends ConsumerState<ExpenseEnhancedL
           _dateRange!.end.month,
           _dateRange!.end.day,
         );
-        
+
         if (expenseDate.isBefore(startDate) || expenseDate.isAfter(endDate)) {
           return false;
         }
@@ -142,7 +145,9 @@ class _ExpenseEnhancedListRefactoredState extends ConsumerState<ExpenseEnhancedL
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            _searchQuery.isNotEmpty || _filterCategory != null || _dateRange != null
+            _searchQuery.isNotEmpty ||
+                    _filterCategory != null ||
+                    _dateRange != null
                 ? Icons.search_off
                 : Icons.receipt_long_outlined,
             size: 64,
@@ -150,7 +155,9 @@ class _ExpenseEnhancedListRefactoredState extends ConsumerState<ExpenseEnhancedL
           ),
           const SizedBox(height: 16),
           Text(
-            _searchQuery.isNotEmpty || _filterCategory != null || _dateRange != null
+            _searchQuery.isNotEmpty ||
+                    _filterCategory != null ||
+                    _dateRange != null
                 ? 'Nenhuma despesa encontrada'
                 : 'Nenhuma despesa registrada',
             style: theme.textTheme.titleMedium?.copyWith(
@@ -159,7 +166,9 @@ class _ExpenseEnhancedListRefactoredState extends ConsumerState<ExpenseEnhancedL
           ),
           const SizedBox(height: 8),
           Text(
-            _searchQuery.isNotEmpty || _filterCategory != null || _dateRange != null
+            _searchQuery.isNotEmpty ||
+                    _filterCategory != null ||
+                    _dateRange != null
                 ? 'Tente ajustar os filtros de pesquisa'
                 : 'Suas despesas aparecerão aqui',
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -177,7 +186,7 @@ class _ExpenseEnhancedListRefactoredState extends ConsumerState<ExpenseEnhancedL
       padding: const EdgeInsets.only(bottom: 16),
       itemBuilder: (context, index) {
         final expense = expenses[index];
-        
+
         return widget.showAnimations
             ? AnimatedBuilder(
                 animation: _listAnimationController,
@@ -187,14 +196,14 @@ class _ExpenseEnhancedListRefactoredState extends ConsumerState<ExpenseEnhancedL
                 ),
                 builder: (context, child) {
                   final animationValue = Curves.easeOut.transform(
-                    (_listAnimationController.value - (index * 0.1)).clamp(0.0, 1.0),
+                    (_listAnimationController.value - (index * 0.1)).clamp(
+                      0.0,
+                      1.0,
+                    ),
                   );
                   return Transform.translate(
                     offset: Offset(0, 30 * (1 - animationValue)),
-                    child: Opacity(
-                      opacity: animationValue,
-                      child: child,
-                    ),
+                    child: Opacity(opacity: animationValue, child: child),
                   );
                 },
               )
@@ -220,10 +229,7 @@ class _ExpenseEnhancedListRefactoredState extends ConsumerState<ExpenseEnhancedL
 class ExpenseDetailsSheet extends StatelessWidget {
   final Expense expense;
 
-  const ExpenseDetailsSheet({
-    super.key,
-    required this.expense,
-  });
+  const ExpenseDetailsSheet({super.key, required this.expense});
 
   @override
   Widget build(BuildContext context) {

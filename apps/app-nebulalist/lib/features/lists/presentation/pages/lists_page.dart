@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/providers/services_providers.dart';
@@ -62,18 +62,12 @@ class ListsPage extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red,
-              ),
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
               Text(
                 'Erro ao carregar listas',
@@ -124,10 +118,7 @@ class ListsPage extends ConsumerWidget {
   ) async {
     await showDialog(
       context: context,
-      builder: (context) => CreateListDialog(
-        ref: ref,
-        existingList: list,
-      ),
+      builder: (context) => CreateListDialog(ref: ref, existingList: list),
     );
   }
 
@@ -232,7 +223,9 @@ class ListsPage extends ConsumerWidget {
       );
 
       // Track reminder event
-      await ref.read(appAnalyticsServiceProvider).logEvent(
+      await ref
+          .read(appAnalyticsServiceProvider)
+          .logEvent(
             'list_reminder_set',
             parameters: {
               'list_id': list.id,

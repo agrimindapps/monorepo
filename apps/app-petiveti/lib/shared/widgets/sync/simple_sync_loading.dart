@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -9,7 +9,7 @@ import '../../../core/theme/app_colors.dart';
 /// Versão do PetiVeti adaptada do padrão usado nos outros apps
 class SimpleSyncLoading extends ConsumerStatefulWidget {
   final String message;
-  
+
   const SimpleSyncLoading({
     super.key,
     this.message = 'Sincronizando dados dos pets...',
@@ -65,33 +65,29 @@ class _SimpleSyncLoadingState extends ConsumerState<SimpleSyncLoading>
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat(reverse: true);
-    
-    _pulseAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.2,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+
+    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.2).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
   }
 
   /// Monitora automaticamente o estado da sincronização do PetiVeti
   void _startListeningToSync() {
     _syncSubscription = Stream<void>.periodic(const Duration(milliseconds: 500))
         .listen((_) {
-      if (!mounted) return;
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          _autoClose();
-        }
-      });
-    });
+          if (!mounted) return;
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) {
+              _autoClose();
+            }
+          });
+        });
   }
 
   /// Fecha automaticamente o loading
   void _autoClose() {
     _syncSubscription?.cancel();
-    
+
     if (mounted && Navigator.canPop(context)) {
       Navigator.of(context).pop();
     }

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../../core/data/repositories/pragas_hive_repository.dart';
 import '../data/repositories/pragas_repository_impl.dart';

@@ -13,7 +13,7 @@
 /// 4. Lista pragas por cultura (target)
 library;
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 /// # SPACING TOKENS

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import '../entities/praga_entity.dart';
 import '../repositories/i_pragas_repository.dart';
 import 'get_pragas_params.dart';

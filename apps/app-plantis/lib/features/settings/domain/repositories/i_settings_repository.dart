@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import '../entities/settings_entity.dart';
 
 /// Interface do repositório de configurações seguindo Clean Architecture

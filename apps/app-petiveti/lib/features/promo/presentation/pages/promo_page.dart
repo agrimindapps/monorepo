@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/splash_constants.dart';
@@ -94,25 +94,22 @@ class _PromoPageState extends ConsumerState<PromoPage> {
             appTagline: SplashConstants.appTagline,
             appDescription: SplashConstants.appDescription,
             onGetStartedPressed: _onLoginPressed,
-            onPreRegisterPressed:
-                () => _togglePreRegistration(
-                  trackingEvent: 'promo_pre_register_clicked',
-                ),
+            onPreRegisterPressed: () => _togglePreRegistration(
+              trackingEvent: 'promo_pre_register_clicked',
+            ),
           ),
           PromoFeaturesSection(key: _featuresKey, features: kPromoFeatures),
           PromoScreenshotsSection(
             key: _screenshotsKey,
             screenshots: kPromoScreenshots,
             currentIndex: state.currentScreenshotIndex,
-            onScreenshotChanged:
-                (index) =>
-                    ref.read(promoProvider.notifier).changeScreenshot(index),
+            onScreenshotChanged: (index) =>
+                ref.read(promoProvider.notifier).changeScreenshot(index),
           ),
           PromoSimpleFaqSection(key: _faqKey),
           PromoCTASection(
-            onPreRegisterPressed:
-                () =>
-                    _togglePreRegistration(trackingEvent: 'promo_cta_clicked'),
+            onPreRegisterPressed: () =>
+                _togglePreRegistration(trackingEvent: 'promo_cta_clicked'),
           ),
           const PromoFooter(),
         ],

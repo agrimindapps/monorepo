@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../services/stats/i_diagnosticos_stats_service.dart';
 

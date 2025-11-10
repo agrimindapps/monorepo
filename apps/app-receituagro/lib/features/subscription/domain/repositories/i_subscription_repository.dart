@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide ISubscriptionRepository;
+import 'package:core/core.dart' hide ISubscriptionRepository, Column;
 import 'package:core/core.dart';
 
 /// Interface local para repositório de assinaturas do ReceitaAgro

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide Consumer, FormState;
+import 'package:core/core.dart' hide Column, Consumer, FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

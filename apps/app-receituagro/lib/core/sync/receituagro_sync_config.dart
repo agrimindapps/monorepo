@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../features/comentarios/domain/entities/comentario_sync_entity.dart';
 import '../../features/favoritos/domain/entities/favorito_sync_entity.dart';

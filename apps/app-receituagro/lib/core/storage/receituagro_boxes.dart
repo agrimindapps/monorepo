@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Definições de boxes específicas do app ReceitaAgro
 /// Cada app gerencia suas próprias boxes para evitar contaminação cross-app

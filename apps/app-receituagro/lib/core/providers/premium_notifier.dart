@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
-import 'package:core/core.dart' hide PremiumFeature;
+import 'package:core/core.dart' hide PremiumFeature, Column;
 import 'package:flutter/foundation.dart';
 
 import '../../features/analytics/analytics_service.dart';

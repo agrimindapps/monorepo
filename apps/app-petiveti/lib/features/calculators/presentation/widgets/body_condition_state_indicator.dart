@@ -1,10 +1,10 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../providers/body_condition_provider.dart';
 
 /// State indicator widget for Body Condition Calculator
-/// 
+///
 /// Responsibilities:
 /// - Display loading, error, and validation states
 /// - Keep state indication logic separate from main page
@@ -15,7 +15,7 @@ class BodyConditionStateIndicator extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(bodyConditionProvider);
-    
+
     if (state.isLoading) {
       return _buildLoadingIndicator();
     }
@@ -51,7 +51,11 @@ class BodyConditionStateIndicator extends ConsumerWidget {
   }
 
   /// Build error indicator
-  Widget _buildErrorIndicator(BuildContext context, WidgetRef ref, dynamic state) {
+  Widget _buildErrorIndicator(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic state,
+  ) {
     return Container(
       padding: const EdgeInsets.all(8.0),
       color: Colors.red.withValues(alpha: 0.1),
@@ -66,7 +70,8 @@ class BodyConditionStateIndicator extends ConsumerWidget {
             ),
           ),
           TextButton(
-            onPressed: () => ref.read(bodyConditionProvider.notifier).clearError(),
+            onPressed: () =>
+                ref.read(bodyConditionProvider.notifier).clearError(),
             child: const Text('Fechar'),
           ),
         ],
@@ -96,13 +101,16 @@ class BodyConditionStateIndicator extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 4),
-          ...(state.validationErrors as List<String>? ?? <String>[]).map<Widget>((error) => Padding(
-            padding: const EdgeInsets.only(left: 24.0),
-            child: Text(
-              '• $error',
-              style: const TextStyle(color: Colors.orange),
-            ),
-          )),
+          ...(state.validationErrors as List<String>? ?? <String>[])
+              .map<Widget>(
+                (error) => Padding(
+                  padding: const EdgeInsets.only(left: 24.0),
+                  child: Text(
+                    '• $error',
+                    style: const TextStyle(color: Colors.orange),
+                  ),
+                ),
+              ),
         ],
       ),
     );

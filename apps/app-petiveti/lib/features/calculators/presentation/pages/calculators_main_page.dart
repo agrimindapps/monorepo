@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
@@ -160,9 +160,8 @@ class _CategorySection extends StatelessWidget {
             mainAxisSpacing: 12,
           ),
           itemCount: calculators.length,
-          itemBuilder:
-              (context, index) =>
-                  _CalculatorCard(calculator: calculators[index]),
+          itemBuilder: (context, index) =>
+              _CalculatorCard(calculator: calculators[index]),
         ),
         const SizedBox(height: 24),
       ],
@@ -341,19 +340,18 @@ class _CalculatorCard extends StatelessWidget {
   void _showComingSoonDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Em breve'),
-            content: Text(
-              'A calculadora "${calculator.name}" estará disponível em breve!',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Em breve'),
+        content: Text(
+          'A calculadora "${calculator.name}" estará disponível em breve!',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
           ),
+        ],
+      ),
     );
   }
 }

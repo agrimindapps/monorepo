@@ -1,10 +1,11 @@
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 /// Centralized error handling utility
 class ErrorHandler {
   ErrorHandler._();
+
   /// Show error snackbar based on failure type
   static void showErrorSnackbar(
     BuildContext context,
@@ -12,16 +13,12 @@ class ErrorHandler {
     Duration duration = const Duration(seconds: 4),
   }) {
     final messenger = ScaffoldMessenger.of(context);
-    
+
     messenger.showSnackBar(
       SnackBar(
         content: Row(
           children: [
-            Icon(
-              _getErrorIcon(failure),
-              color: Colors.white,
-              size: 20,
-            ),
+            Icon(_getErrorIcon(failure), color: Colors.white, size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -53,9 +50,7 @@ class ErrorHandler {
         backgroundColor: _getErrorColor(failure),
         duration: duration,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
@@ -68,7 +63,7 @@ class ErrorHandler {
     Duration duration = const Duration(seconds: 3),
   }) {
     final messenger = ScaffoldMessenger.of(context);
-    
+
     messenger.showSnackBar(
       SnackBar(
         content: Row(
@@ -109,9 +104,7 @@ class ErrorHandler {
         backgroundColor: AppTheme.successColor,
         duration: duration,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
@@ -124,16 +117,12 @@ class ErrorHandler {
     Duration duration = const Duration(seconds: 3),
   }) {
     final messenger = ScaffoldMessenger.of(context);
-    
+
     messenger.showSnackBar(
       SnackBar(
         content: Row(
           children: [
-            const Icon(
-              Icons.info_outline,
-              color: Colors.white,
-              size: 20,
-            ),
+            const Icon(Icons.info_outline, color: Colors.white, size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -165,9 +154,7 @@ class ErrorHandler {
         backgroundColor: AppTheme.infoColor,
         duration: duration,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
@@ -190,8 +177,13 @@ class ErrorHandler {
             size: 48,
           ),
           title: Text(customTitle ?? _getErrorTitle(failure)),
-          content: Text(failure.message.isNotEmpty ? failure.message : 'Ocorreu um erro inesperado'),
-          actions: actions ??
+          content: Text(
+            failure.message.isNotEmpty
+                ? failure.message
+                : 'Ocorreu um erro inesperado',
+          ),
+          actions:
+              actions ??
               [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
@@ -257,12 +249,12 @@ class ErrorHandler {
     } else if (failure is CacheFailure) {
       return 'Problema no armazenamento local. Reinicie o aplicativo.';
     } else if (failure is ValidationFailure) {
-      return failure.message.isNotEmpty 
-          ? failure.message 
+      return failure.message.isNotEmpty
+          ? failure.message
           : 'Verifique os dados inseridos e tente novamente.';
     } else {
-      return failure.message.isNotEmpty 
-          ? failure.message 
+      return failure.message.isNotEmpty
+          ? failure.message
           : 'Ocorreu um erro inesperado. Tente novamente.';
     }
   }
@@ -278,8 +270,8 @@ mixin ErrorHandlerMixin {
   /// Show success message
   void showSuccess(BuildContext context, String message, {String? title}) {
     ErrorHandler.showSuccessSnackbar(
-      context, 
-      message, 
+      context,
+      message,
       title: title ?? 'Sucesso',
     );
   }
@@ -287,8 +279,8 @@ mixin ErrorHandlerMixin {
   /// Show info message
   void showInfo(BuildContext context, String message, {String? title}) {
     ErrorHandler.showInfoSnackbar(
-      context, 
-      message, 
+      context,
+      message,
       title: title ?? 'Informação',
     );
   }

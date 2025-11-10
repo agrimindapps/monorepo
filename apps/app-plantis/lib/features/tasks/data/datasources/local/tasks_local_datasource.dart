@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../../../../core/constants/plantis_environment_config.dart';
 import '../../../domain/entities/task.dart';

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'base_sync_model.dart';
 
 part 'espaco_model.g.dart';

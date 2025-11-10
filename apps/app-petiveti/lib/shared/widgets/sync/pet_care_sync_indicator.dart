@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../core/sync/petiveti_sync_service.dart';
@@ -16,7 +16,6 @@ class PetCareSyncIndicator extends StatefulWidget {
 
   /// Se deve mostrar status de emergência
   final bool showEmergencyStatus;
-
 
   /// Modo compacto (ícone apenas)
   final bool compactMode;
@@ -83,7 +82,9 @@ class _PetCareSyncIndicatorState extends State<PetCareSyncIndicator>
       }
     });
     if (widget.showEmergencyStatus) {
-      PetivetiSyncService.instance.emergencyStatusStream.listen((emergencyStatus) {
+      PetivetiSyncService.instance.emergencyStatusStream.listen((
+        emergencyStatus,
+      ) {
         if (mounted) {
           setState(() {
             _emergencyStatus = emergencyStatus;
@@ -237,7 +238,6 @@ class _PetCareSyncIndicatorState extends State<PetCareSyncIndicator>
               ),
             ),
           ],
-
         ],
       ),
     );
@@ -326,10 +326,7 @@ class PetCareSyncDetailsSheet extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.pets,
-                color: Theme.of(context).primaryColor,
-              ),
+              Icon(Icons.pets, color: Theme.of(context).primaryColor),
               const SizedBox(width: 8),
               Text(
                 'Status de Sincronização',
@@ -449,9 +446,9 @@ class PetCareSyncDetailsSheet extends StatelessWidget {
                 ),
                 Text(
                   statusText,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: color,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: color),
                 ),
               ],
             ),
@@ -466,7 +463,11 @@ class PetCareSyncDetailsSheet extends StatelessWidget {
     final entities = [
       {'name': 'Animais', 'icon': Icons.pets, 'key': 'animals'},
       {'name': 'Medicações', 'icon': Icons.medication, 'key': 'medications'},
-      {'name': 'Consultas', 'icon': Icons.medical_services, 'key': 'appointments'},
+      {
+        'name': 'Consultas',
+        'icon': Icons.medical_services,
+        'key': 'appointments',
+      },
       {'name': 'Peso', 'icon': Icons.monitor_weight, 'key': 'weights'},
       {'name': 'Configurações', 'icon': Icons.settings, 'key': 'settings'},
     ];
@@ -479,12 +480,14 @@ class PetCareSyncDetailsSheet extends StatelessWidget {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
-        ...entities.map((entity) => _buildEntityRow(
-          context,
-          entity['name'] as String,
-          entity['icon'] as IconData,
-          stats[entity['key']] as Map<String, dynamic>? ?? {},
-        )),
+        ...entities.map(
+          (entity) => _buildEntityRow(
+            context,
+            entity['name'] as String,
+            entity['icon'] as IconData,
+            stats[entity['key']] as Map<String, dynamic>? ?? {},
+          ),
+        ),
       ],
     );
   }
@@ -506,9 +509,7 @@ class PetCareSyncDetailsSheet extends StatelessWidget {
         children: [
           Icon(icon, size: 20, color: Colors.grey[600]),
           const SizedBox(width: 12),
-          Expanded(
-            child: Text(name),
-          ),
+          Expanded(child: Text(name)),
           if (pending > 0) ...[
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -518,18 +519,11 @@ class PetCareSyncDetailsSheet extends StatelessWidget {
               ),
               child: Text(
                 '$pending pendente${pending > 1 ? 's' : ''}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                ),
+                style: const TextStyle(color: Colors.white, fontSize: 10),
               ),
             ),
           ] else ...[
-            const Icon(
-              Icons.check_circle,
-              color: Colors.green,
-              size: 16,
-            ),
+            const Icon(Icons.check_circle, color: Colors.green, size: 16),
           ],
         ],
       ),
@@ -583,7 +577,9 @@ class PetCareSyncDetailsSheet extends StatelessWidget {
         (failure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Erro na sincronização de emergência: ${failure.message}'),
+              content: Text(
+                'Erro na sincronização de emergência: ${failure.message}',
+              ),
               backgroundColor: Colors.red,
             ),
           );

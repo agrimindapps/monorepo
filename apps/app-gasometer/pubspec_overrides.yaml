@@ -1,5 +1,2 @@
-# melos_managed_dependency_overrides: core
 dependency_overrides:
-  core:
-    path: ../../packages/core
   intl: 0.19.0  # Override core's intl version for flutter_localizations compatibility

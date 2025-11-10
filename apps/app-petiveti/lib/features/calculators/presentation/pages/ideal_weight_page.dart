@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/calculators/ideal_weight_calculator.dart';
@@ -91,7 +91,7 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
 
   Widget _buildInfoCard() {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -143,9 +143,9 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
           children: [
             Text(
               'Informações Básicas',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
@@ -155,17 +155,14 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
                 border: OutlineInputBorder(),
               ),
               items: ['Cão', 'Gato'].map((species) {
-                return DropdownMenuItem(
-                  value: species,
-                  child: Text(species),
-                );
+                return DropdownMenuItem(value: species, child: Text(species));
               }).toList(),
               onChanged: (value) {
                 if (value != null) {
                   setState(() {
                     _selectedSpecies = value;
-                    _selectedBreed = value == 'Cão' 
-                        ? 'Sem raça definida' 
+                    _selectedBreed = value == 'Cão'
+                        ? 'Sem raça definida'
                         : 'Gato doméstico';
                   });
                 }
@@ -185,10 +182,7 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
                 border: OutlineInputBorder(),
               ),
               items: _getBreedOptions(_selectedSpecies).map((breed) {
-                return DropdownMenuItem(
-                  value: breed,
-                  child: Text(breed),
-                );
+                return DropdownMenuItem(value: breed, child: Text(breed));
               }).toList(),
               onChanged: (value) {
                 if (value != null) {
@@ -212,10 +206,7 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
                 border: OutlineInputBorder(),
               ),
               items: ['Macho', 'Fêmea'].map((sex) {
-                return DropdownMenuItem(
-                  value: sex,
-                  child: Text(sex),
-                );
+                return DropdownMenuItem(value: sex, child: Text(sex));
               }).toList(),
               onChanged: (value) {
                 if (value != null) {
@@ -234,7 +225,9 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
             const SizedBox(height: 16),
             SwitchListTile(
               title: const Text('Animal Castrado/Esterilizado'),
-              subtitle: const Text('Influencia no cálculo das necessidades calóricas'),
+              subtitle: const Text(
+                'Influencia no cálculo das necessidades calóricas',
+              ),
               value: _isNeutered,
               onChanged: (value) {
                 setState(() {
@@ -257,9 +250,9 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
           children: [
             Text(
               'Dados Físicos',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -270,7 +263,9 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
                 border: OutlineInputBorder(),
                 helperText: 'Idade do animal em anos',
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor, informe a idade';
@@ -291,7 +286,9 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
                 border: OutlineInputBorder(),
                 helperText: 'Peso atual do animal',
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor, informe o peso atual';
@@ -318,19 +315,21 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
           children: [
             Text(
               'Escore de Condição Corporal (ECC)',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'Escala de 1 (caquético) a 9 (obeso mórbido)',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 16),
-            
+
             Row(
               children: [
                 const Text('1'),
@@ -351,7 +350,7 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
                 const Text('9'),
               ],
             ),
-            
+
             Center(
               child: Column(
                 children: [
@@ -372,7 +371,7 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 8),
             TextButton(
               onPressed: () => _showBcsGuide(context),
@@ -386,7 +385,7 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
 
   Widget _buildResultCard(CalculationResult result) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: 3,
       child: Padding(
@@ -411,13 +410,15 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
             ),
             const SizedBox(height: 16),
             ...result.results.map((item) => _buildResultItem(item)),
-            
+
             if (result.summary != null) ...[
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  color: theme.colorScheme.primaryContainer.withValues(
+                    alpha: 0.3,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -428,7 +429,7 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
                 ),
               ),
             ],
-            
+
             if (result.recommendations.isNotEmpty == true) ...[
               const SizedBox(height: 16),
               Text(
@@ -438,26 +439,28 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
                 ),
               ),
               const SizedBox(height: 8),
-              ...result.recommendations.map((rec) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      _getRecommendationIcon(rec.severity),
-                      size: 16,
-                      color: _getSeverityColor(rec.severity),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        rec.message,
-                        style: theme.textTheme.bodyMedium,
+              ...result.recommendations.map(
+                (rec) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        _getRecommendationIcon(rec.severity),
+                        size: 16,
+                        color: _getSeverityColor(rec.severity),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          rec.message,
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              )),
+              ),
             ],
           ],
         ),
@@ -468,7 +471,7 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
   Widget _buildResultItem(ResultItem item) {
     final theme = Theme.of(context);
     final color = _getSeverityColor(item.severity);
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -515,7 +518,7 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
 
   Widget _buildErrorCard(String error) {
     final theme = Theme.of(context);
-    
+
     return Card(
       color: theme.colorScheme.errorContainer,
       child: Padding(
@@ -694,11 +697,31 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
           child: ListView(
             shrinkWrap: true,
             children: [
-              _buildBcsGuideItem('1-2', 'Muito Magro', 'Costelas, vértebras e ossos pélvicos facilmente visíveis. Sem gordura corporal detectável.'),
-              _buildBcsGuideItem('3', 'Magro', 'Costelas facilmente palpáveis. Cintura bem definida. Gordura abdominal mínima.'),
-              _buildBcsGuideItem('4-5', 'Ideal', 'Costelas palpáveis sem excesso de cobertura. Cintura observada atrás das costelas.'),
-              _buildBcsGuideItem('6', 'Sobrepeso', 'Costelas palpáveis com ligeira cobertura de gordura. Cintura pouco definida.'),
-              _buildBcsGuideItem('7-9', 'Obeso', 'Costelas difíceis de palpar. Depósitos de gordura no dorso e base da cauda.'),
+              _buildBcsGuideItem(
+                '1-2',
+                'Muito Magro',
+                'Costelas, vértebras e ossos pélvicos facilmente visíveis. Sem gordura corporal detectável.',
+              ),
+              _buildBcsGuideItem(
+                '3',
+                'Magro',
+                'Costelas facilmente palpáveis. Cintura bem definida. Gordura abdominal mínima.',
+              ),
+              _buildBcsGuideItem(
+                '4-5',
+                'Ideal',
+                'Costelas palpáveis sem excesso de cobertura. Cintura observada atrás das costelas.',
+              ),
+              _buildBcsGuideItem(
+                '6',
+                'Sobrepeso',
+                'Costelas palpáveis com ligeira cobertura de gordura. Cintura pouco definida.',
+              ),
+              _buildBcsGuideItem(
+                '7-9',
+                'Obeso',
+                'Costelas difíceis de palpar. Depósitos de gordura no dorso e base da cauda.',
+              ),
             ],
           ),
         ),

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../../core/data/repositories/comentarios_hive_repository.dart';
 import '../../../core/services/error_handler_service.dart';

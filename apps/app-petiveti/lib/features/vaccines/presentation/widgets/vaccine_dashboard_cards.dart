@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/vaccine.dart';
@@ -17,12 +17,8 @@ class VaccineDashboardCards extends ConsumerWidget {
     return statisticsAsync.when(
       loading: () => _buildLoadingCards(),
       error: (error, stackTrace) => _buildErrorCard(theme, error.toString()),
-      data: (statistics) => _buildDashboardCards(
-        context,
-        theme,
-        statistics,
-        vaccinesState,
-      ),
+      data: (statistics) =>
+          _buildDashboardCards(context, theme, statistics, vaccinesState),
     );
   }
 
@@ -40,9 +36,7 @@ class VaccineDashboardCards extends ConsumerWidget {
             borderRadius: BorderRadius.circular(16),
             color: Colors.grey[200],
           ),
-          child: const Center(
-            child: CircularProgressIndicator(),
-          ),
+          child: const Center(child: CircularProgressIndicator()),
         ),
       ),
     );
@@ -65,7 +59,9 @@ class VaccineDashboardCards extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               'Erro ao carregar estatísticas',
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.red[700]),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: Colors.red[700],
+              ),
             ),
           ],
         ),
@@ -121,7 +117,8 @@ class VaccineDashboardCards extends ConsumerWidget {
         scrollDirection: Axis.horizontal,
         itemCount: cards.length,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemBuilder: (context, index) => _buildDashboardCard(context, theme, cards[index]),
+        itemBuilder: (context, index) =>
+            _buildDashboardCard(context, theme, cards[index]),
       ),
     );
   }
@@ -187,11 +184,7 @@ class VaccineDashboardCards extends ConsumerWidget {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Icon(
-                      cardData.icon,
-                      size: 32,
-                      color: cardData.color,
-                    ),
+                    Icon(cardData.icon, size: 32, color: cardData.color),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -207,7 +200,9 @@ class VaccineDashboardCards extends ConsumerWidget {
                           Text(
                             cardData.subtitle,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.7,
+                              ),
                             ),
                           ),
                         ],
@@ -223,8 +218,7 @@ class VaccineDashboardCards extends ConsumerWidget {
     );
   }
 
-  void _onCardTap(BuildContext context, VaccinesFilter filter) {
-  }
+  void _onCardTap(BuildContext context, VaccinesFilter filter) {}
 }
 
 class _DashboardCardData {
@@ -250,24 +244,29 @@ class _DashboardCardData {
 /// Enhanced vaccine timeline widget showing upcoming vaccines
 class VaccineTimeline extends ConsumerWidget {
   final String? animalId;
-  
+
   const VaccineTimeline({super.key, this.animalId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final vaccinesState = ref.watch(vaccinesProvider);
-    final upcomingVaccines = vaccinesState.vaccines
-        .where((vaccine) => 
-            (animalId == null || vaccine.animalId == animalId) &&
-            (vaccine.isDueSoon || vaccine.isDueToday || vaccine.isOverdue))
-        .toList()
-      ..sort((a, b) {
-        if (a.nextDueDate == null && b.nextDueDate == null) return 0;
-        if (a.nextDueDate == null) return 1;
-        if (b.nextDueDate == null) return -1;
-        return a.nextDueDate!.compareTo(b.nextDueDate!);
-      });
+    final upcomingVaccines =
+        vaccinesState.vaccines
+            .where(
+              (vaccine) =>
+                  (animalId == null || vaccine.animalId == animalId) &&
+                  (vaccine.isDueSoon ||
+                      vaccine.isDueToday ||
+                      vaccine.isOverdue),
+            )
+            .toList()
+          ..sort((a, b) {
+            if (a.nextDueDate == null && b.nextDueDate == null) return 0;
+            if (a.nextDueDate == null) return 1;
+            if (b.nextDueDate == null) return -1;
+            return a.nextDueDate!.compareTo(b.nextDueDate!);
+          });
 
     if (upcomingVaccines.isEmpty) {
       return _buildEmptyTimeline(theme);
@@ -344,7 +343,9 @@ class VaccineTimeline extends ConsumerWidget {
   Widget _buildTimelineItem(ThemeData theme, Vaccine vaccine, bool isLast) {
     final isOverdue = vaccine.isOverdue;
     final isDueToday = vaccine.isDueToday;
-    final color = isOverdue ? Colors.red : (isDueToday ? Colors.orange : Colors.blue);
+    final color = isOverdue
+        ? Colors.red
+        : (isDueToday ? Colors.orange : Colors.blue);
 
     return Row(
       children: [
@@ -360,11 +361,11 @@ class VaccineTimeline extends ConsumerWidget {
               ),
               child: Center(
                 child: Icon(
-                  isOverdue 
-                      ? Icons.warning 
-                      : isDueToday 
-                          ? Icons.today 
-                          : Icons.schedule,
+                  isOverdue
+                      ? Icons.warning
+                      : isDueToday
+                      ? Icons.today
+                      : Icons.schedule,
                   size: 12,
                   color: Colors.white,
                 ),
@@ -386,9 +387,7 @@ class VaccineTimeline extends ConsumerWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               color: theme.scaffoldBackgroundColor,
-              border: Border.all(
-                color: color.withValues(alpha: 0.3),
-              ),
+              border: Border.all(color: color.withValues(alpha: 0.3)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.05),
@@ -411,7 +410,10 @@ class VaccineTimeline extends ConsumerWidget {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),

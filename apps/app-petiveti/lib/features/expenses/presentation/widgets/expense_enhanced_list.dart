@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/expense.dart';
@@ -8,7 +8,7 @@ import '../providers/expenses_provider.dart';
 class ExpenseEnhancedList extends ConsumerStatefulWidget {
   final List<Expense> expenses;
   final bool showAnimations;
-  
+
   const ExpenseEnhancedList({
     super.key,
     required this.expenses,
@@ -16,14 +16,15 @@ class ExpenseEnhancedList extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ExpenseEnhancedList> createState() => _ExpenseEnhancedListState();
+  ConsumerState<ExpenseEnhancedList> createState() =>
+      _ExpenseEnhancedListState();
 }
 
 class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
     with TickerProviderStateMixin {
   late AnimationController _listAnimationController;
   late Animation<double> _fadeAnimation;
-  
+
   String _searchQuery = '';
   ExpenseCategory? _filterCategory;
   DateTimeRange? _dateRange;
@@ -40,11 +41,11 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _listAnimationController, curve: Curves.easeOut),
     );
-    
+
     if (widget.showAnimations) {
       _listAnimationController.forward();
     } else {
@@ -62,7 +63,7 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final filteredExpenses = _filterExpenses(widget.expenses);
-    
+
     return FadeTransition(
       opacity: _fadeAnimation,
       child: Column(
@@ -155,7 +156,9 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
           },
         ),
         FilterChip(
-          label: Text(_dateRange == null ? 'Período' : _formatDateRange(_dateRange!)),
+          label: Text(
+            _dateRange == null ? 'Período' : _formatDateRange(_dateRange!),
+          ),
           selected: _dateRange != null,
           onSelected: (_) => _selectDateRange(),
         ),
@@ -174,8 +177,11 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
   }
 
   Widget _buildEmptyState(ThemeData theme) {
-    final hasFilters = _searchQuery.isNotEmpty || _filterCategory != null || _dateRange != null;
-    
+    final hasFilters =
+        _searchQuery.isNotEmpty ||
+        _filterCategory != null ||
+        _dateRange != null;
+
     return Expanded(
       child: Center(
         child: Column(
@@ -188,7 +194,7 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
             ),
             const SizedBox(height: 24),
             Text(
-              hasFilters 
+              hasFilters
                   ? 'Nenhuma despesa encontrada'
                   : 'Nenhuma despesa registrada',
               style: theme.textTheme.titleLarge?.copyWith(
@@ -271,7 +277,9 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: _getCategoryColor(expense.category).withValues(alpha: 0.1),
+                        color: _getCategoryColor(
+                          expense.category,
+                        ).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
@@ -280,7 +288,7 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
                         size: 24,
                       ),
                     ),
-                    
+
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
@@ -298,7 +306,9 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
                           Text(
                             expense.description,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.7,
+                              ),
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -335,16 +345,21 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
                         Text(
                           _formatDate(expense.expenseDate),
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.6,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),
                         PopupMenuButton<String>(
                           icon: Icon(
                             Icons.more_vert,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.6,
+                            ),
                           ),
-                          onSelected: (action) => _handleAction(action, expense),
+                          onSelected: (action) =>
+                              _handleAction(action, expense),
                           itemBuilder: (context) => [
                             const PopupMenuItem(
                               value: 'view',
@@ -384,7 +399,10 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
                                 children: [
                                   Icon(Icons.delete, color: Colors.red),
                                   SizedBox(width: 8),
-                                  Text('Excluir', style: TextStyle(color: Colors.red)),
+                                  Text(
+                                    'Excluir',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
                                 ],
                               ),
                             ),
@@ -394,7 +412,8 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
                     ),
                   ],
                 ),
-                if (expense.invoiceNumber != null || expense.veterinaryClinic != null) ...[
+                if (expense.invoiceNumber != null ||
+                    expense.veterinaryClinic != null) ...[
                   const SizedBox(height: 12),
                   const Divider(height: 1),
                   const SizedBox(height: 12),
@@ -404,30 +423,39 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
                         Icon(
                           Icons.receipt,
                           size: 16,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.6,
+                          ),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           'NF: ${expense.invoiceNumber}',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.6,
+                            ),
                           ),
                         ),
                       ],
-                      if (expense.invoiceNumber != null && expense.veterinaryClinic != null)
+                      if (expense.invoiceNumber != null &&
+                          expense.veterinaryClinic != null)
                         const SizedBox(width: 16),
                       if (expense.veterinaryClinic != null) ...[
                         Icon(
                           Icons.local_hospital,
                           size: 16,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.6,
+                          ),
                         ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             expense.veterinaryClinic!,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.6,
+                              ),
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -469,21 +497,28 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
       filtered = filtered.where((expense) {
         final query = _searchQuery.toLowerCase();
         return expense.title.toLowerCase().contains(query) ||
-               expense.description.toLowerCase().contains(query) ||
-               (expense.veterinarianName?.toLowerCase().contains(query) ?? false) ||
-               (expense.veterinaryClinic?.toLowerCase().contains(query) ?? false);
+            expense.description.toLowerCase().contains(query) ||
+            (expense.veterinarianName?.toLowerCase().contains(query) ??
+                false) ||
+            (expense.veterinaryClinic?.toLowerCase().contains(query) ?? false);
       }).toList();
     }
     if (_filterCategory != null) {
-      filtered = filtered.where((expense) => expense.category == _filterCategory).toList();
+      filtered = filtered
+          .where((expense) => expense.category == _filterCategory)
+          .toList();
     }
     if (_dateRange != null) {
       filtered = filtered.where((expense) {
-        return expense.expenseDate.isAfter(_dateRange!.start.subtract(const Duration(days: 1))) &&
-               expense.expenseDate.isBefore(_dateRange!.end.add(const Duration(days: 1)));
+        return expense.expenseDate.isAfter(
+              _dateRange!.start.subtract(const Duration(days: 1)),
+            ) &&
+            expense.expenseDate.isBefore(
+              _dateRange!.end.add(const Duration(days: 1)),
+            );
       }).toList();
     }
-    
+
     return filtered;
   }
 
@@ -494,7 +529,7 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
       lastDate: DateTime.now(),
       initialDateRange: _dateRange,
     );
-    
+
     if (range != null) {
       setState(() {
         _dateRange = range;
@@ -538,7 +573,9 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Excluir Despesa'),
-        content: Text('Tem certeza que deseja excluir "${expense.title}"? Esta ação não pode ser desfeita.'),
+        content: Text(
+          'Tem certeza que deseja excluir "${expense.title}"? Esta ação não pode ser desfeita.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -562,6 +599,7 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
       ),
     );
   }
+
   Color _getCategoryColor(ExpenseCategory category) {
     const categoryColors = {
       ExpenseCategory.consultation: Colors.blue,
@@ -636,7 +674,7 @@ class ExpenseDetailsSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
@@ -664,7 +702,9 @@ class ExpenseDetailsSheet extends StatelessWidget {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: _getCategoryColor(expense.category).withValues(alpha: 0.1),
+                        color: _getCategoryColor(
+                          expense.category,
+                        ).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Icon(
@@ -696,12 +736,14 @@ class ExpenseDetailsSheet extends StatelessWidget {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 24),
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: _getCategoryColor(expense.category).withValues(alpha: 0.1),
+                    color: _getCategoryColor(
+                      expense.category,
+                    ).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -717,21 +759,45 @@ class ExpenseDetailsSheet extends StatelessWidget {
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
-                _buildDetailItem('Descrição', expense.description, Icons.description),
-                _buildDetailItem('Data', _formatDate(expense.expenseDate), Icons.calendar_today),
-                _buildDetailItem('Forma de Pagamento', _getPaymentMethodName(expense.paymentMethod), Icons.payment),
-                
+                _buildDetailItem(
+                  'Descrição',
+                  expense.description,
+                  Icons.description,
+                ),
+                _buildDetailItem(
+                  'Data',
+                  _formatDate(expense.expenseDate),
+                  Icons.calendar_today,
+                ),
+                _buildDetailItem(
+                  'Forma de Pagamento',
+                  _getPaymentMethodName(expense.paymentMethod),
+                  Icons.payment,
+                ),
+
                 if (expense.veterinarianName != null)
-                  _buildDetailItem('Veterinário', expense.veterinarianName!, Icons.person),
-                
+                  _buildDetailItem(
+                    'Veterinário',
+                    expense.veterinarianName!,
+                    Icons.person,
+                  ),
+
                 if (expense.veterinaryClinic != null)
-                  _buildDetailItem('Clínica', expense.veterinaryClinic!, Icons.local_hospital),
-                
+                  _buildDetailItem(
+                    'Clínica',
+                    expense.veterinaryClinic!,
+                    Icons.local_hospital,
+                  ),
+
                 if (expense.invoiceNumber != null)
-                  _buildDetailItem('Número NF', expense.invoiceNumber!, Icons.receipt),
-                
+                  _buildDetailItem(
+                    'Número NF',
+                    expense.invoiceNumber!,
+                    Icons.receipt,
+                  ),
+
                 if (expense.hasAttachments) ...[
                   const SizedBox(height: 16),
                   Text(
@@ -741,12 +807,13 @@ class ExpenseDetailsSheet extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  ...expense.attachments.map((attachment) => ListTile(
-                        leading: const Icon(Icons.attach_file),
-                        title: Text(attachment),
-                        onTap: () {
-                        },
-                      )),
+                  ...expense.attachments.map(
+                    (attachment) => ListTile(
+                      leading: const Icon(Icons.attach_file),
+                      title: Text(attachment),
+                      onTap: () {},
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -791,6 +858,7 @@ class ExpenseDetailsSheet extends StatelessWidget {
       ),
     );
   }
+
   Color _getCategoryColor(ExpenseCategory category) {
     const categoryColors = {
       ExpenseCategory.consultation: Colors.blue,

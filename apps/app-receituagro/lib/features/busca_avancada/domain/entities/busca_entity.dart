@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Entity para resultado de busca seguindo princípios Clean Architecture
 class BuscaResultEntity extends Equatable {

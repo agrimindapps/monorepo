@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Dados da sessão do usuário no ReceitauAgro
 /// Contém informações específicas da sessão atual

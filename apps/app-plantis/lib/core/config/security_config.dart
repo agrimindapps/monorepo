@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Plantis-specific security configuration
 /// Implements enhanced security policies for the plant care application

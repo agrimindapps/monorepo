@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide SubscriptionState;
+import 'package:core/core.dart' hide SubscriptionState, Column;
 import 'package:flutter/material.dart';
 
 import '../providers/subscription_provider.dart';
@@ -203,7 +203,10 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   Widget _buildScaffold(SubscriptionState state) => Scaffold(
     appBar: _buildAppBar(state),
     body: Stack(
-      children: [_buildBody(state), SubscriptionLoadingOverlay(state: state)],
+      children: [
+        _buildBody(state),
+        SubscriptionLoadingOverlay(state: state),
+      ],
     ),
   );
 
@@ -213,12 +216,11 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
       if (state.currentSubscription != null)
         IconButton(
           icon: const Icon(Icons.restore),
-          onPressed:
-              () => SubscriptionPageCoordinator.restorePurchases(
-                ref,
-                context,
-                widget.userId,
-              ),
+          onPressed: () => SubscriptionPageCoordinator.restorePurchases(
+            ref,
+            context,
+            widget.userId,
+          ),
           tooltip: 'Restaurar Compras',
         ),
     ],

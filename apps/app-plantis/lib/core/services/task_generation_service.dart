@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../features/tasks/domain/entities/task.dart' as task_entity;
 import '../data/models/planta_config_model.dart';

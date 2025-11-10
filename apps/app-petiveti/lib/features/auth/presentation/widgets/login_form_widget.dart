@@ -1,10 +1,10 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/splash_constants.dart';
 
 /// Login form widget following SRP principle
-/// 
+///
 /// Single responsibility: Handle login form UI and validation
 class LoginFormWidget extends ConsumerStatefulWidget {
   final GlobalKey<FormState> formKey;
@@ -54,7 +54,7 @@ class _LoginFormWidgetState extends ConsumerState<LoginFormWidget> {
             _buildAuthToggle(),
             const SizedBox(height: 32),
           ],
-          
+
           const Text(
             'Entrar',
             style: TextStyle(
@@ -66,22 +66,19 @@ class _LoginFormWidgetState extends ConsumerState<LoginFormWidget> {
           const SizedBox(height: 8),
           Text(
             'Acesse sua conta para gerenciar',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
           ),
           const SizedBox(height: 32),
-          
+
           _buildEmailField(),
           const SizedBox(height: 20),
-          
+
           _buildPasswordField(),
           const SizedBox(height: 16),
-          
+
           _buildRememberAndForgot(),
           const SizedBox(height: 32),
-          
+
           _buildLoginButton(),
         ],
       ),
@@ -132,9 +129,7 @@ class _LoginFormWidgetState extends ConsumerState<LoginFormWidget> {
                 const SizedBox(height: 8),
                 Container(
                   height: 3,
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                  ),
+                  decoration: const BoxDecoration(color: Colors.transparent),
                 ),
               ],
             ),
@@ -151,9 +146,7 @@ class _LoginFormWidgetState extends ConsumerState<LoginFormWidget> {
       decoration: InputDecoration(
         labelText: 'Email',
         prefixIcon: const Icon(Icons.email_outlined),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: SplashColors.primaryColor),
@@ -185,9 +178,7 @@ class _LoginFormWidgetState extends ConsumerState<LoginFormWidget> {
             widget.obscurePassword ? Icons.visibility : Icons.visibility_off,
           ),
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: SplashColors.primaryColor),
@@ -254,10 +245,7 @@ class _LoginFormWidgetState extends ConsumerState<LoginFormWidget> {
               )
             : const Text(
                 'Entrar',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
       ),
     );

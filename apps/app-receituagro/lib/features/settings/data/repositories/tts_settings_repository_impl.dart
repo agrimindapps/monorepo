@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../domain/entities/tts_settings_entity.dart';
 import '../../domain/repositories/i_tts_settings_repository.dart';

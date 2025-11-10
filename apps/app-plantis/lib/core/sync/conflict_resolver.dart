@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide ConflictResolutionStrategy, Task;
+import 'package:core/core.dart' hide Column, ConflictResolutionStrategy, Task;
 import 'package:flutter/material.dart';
 
 import '../../features/plants/data/models/plant_model.dart';

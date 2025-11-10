@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 import '../data/models/promotional_notification.dart';

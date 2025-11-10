@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Failure, UnexpectedFailure;
+import 'package:core/core.dart' hide Failure, UnexpectedFailure, Column;
 
 import '../../../core/errors/failures.dart';
 import '../../../core/usecases/usecase.dart';

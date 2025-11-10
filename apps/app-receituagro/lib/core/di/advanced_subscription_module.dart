@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:core/src/services/subscription/subscription_sync_models.dart'
     as subscription_models;
 

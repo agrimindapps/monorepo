@@ -1,6 +1,6 @@
 import 'package:app_receituagro/core/di/injection.dart' as di;
 import 'package:app_receituagro/core/services/failure_message_service.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../domain/domain.dart';
 

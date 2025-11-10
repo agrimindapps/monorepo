@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -29,7 +29,9 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
 
   AnimalSpecies _selectedSpecies = AnimalSpecies.dog;
   AnimalGender _selectedGender = AnimalGender.male;
-  DateTime _selectedBirthDate = DateTime.now().subtract(const Duration(days: 365));
+  DateTime _selectedBirthDate = DateTime.now().subtract(
+    const Duration(days: 365),
+  );
   bool _isLoading = false;
 
   bool get _isEditing => widget.animal != null;
@@ -50,7 +52,9 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
       _notesController.text = animal.notes ?? '';
       _selectedSpecies = animal.species;
       _selectedGender = animal.gender;
-      _selectedBirthDate = animal.birthDate ?? DateTime.now().subtract(const Duration(days: 365));
+      _selectedBirthDate =
+          animal.birthDate ??
+          DateTime.now().subtract(const Duration(days: 365));
     }
   }
 
@@ -153,7 +157,8 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
                     _selectedSpecies = value!;
                   });
                 },
-                validator: (value) => value == null ? 'Espécie é obrigatória' : null,
+                validator: (value) =>
+                    value == null ? 'Espécie é obrigatória' : null,
               ),
             ),
             const SizedBox(width: 12),
@@ -176,7 +181,8 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
                     _selectedGender = value!;
                   });
                 },
-                validator: (value) => value == null ? 'Gênero é obrigatório' : null,
+                validator: (value) =>
+                    value == null ? 'Gênero é obrigatório' : null,
               ),
             ),
           ],
@@ -317,17 +323,25 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
       final now = DateTime.now();
 
       final animal = Animal(
-        id: widget.animal?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        id:
+            widget.animal?.id ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
         userId: 'temp_user_id',
         name: _nameController.text.trim(),
         species: _selectedSpecies,
-        breed: _breedController.text.trim().isEmpty ? null : _breedController.text.trim(),
+        breed: _breedController.text.trim().isEmpty
+            ? null
+            : _breedController.text.trim(),
         birthDate: _selectedBirthDate,
         gender: _selectedGender,
-        color: _colorController.text.trim().isEmpty ? null : _colorController.text.trim(),
+        color: _colorController.text.trim().isEmpty
+            ? null
+            : _colorController.text.trim(),
         weight: weight,
         photoUrl: widget.animal?.photoUrl,
-        notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
         createdAt: widget.animal?.createdAt ?? now,
         updatedAt: now,
       );
@@ -341,9 +355,11 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
         Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_isEditing 
-              ? 'Pet atualizado com sucesso!' 
-              : 'Pet cadastrado com sucesso!'),
+            content: Text(
+              _isEditing
+                  ? 'Pet atualizado com sucesso!'
+                  : 'Pet cadastrado com sucesso!',
+            ),
             backgroundColor: Theme.of(context).colorScheme.primary,
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(

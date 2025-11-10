@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../providers/weights_provider.dart';
@@ -7,7 +7,7 @@ import 'weight_goal_form.dart';
 import 'weight_veterinary_guidelines.dart';
 
 /// Refactored weight goal management following SOLID principles
-/// 
+///
 /// This is the main coordinator widget that composes all extracted components
 /// following SRP, OCP, and DIP principles.
 class WeightGoalManagementRefactored extends ConsumerStatefulWidget {
@@ -21,13 +21,15 @@ class WeightGoalManagementRefactored extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<WeightGoalManagementRefactored> createState() => _WeightGoalManagementRefactoredState();
+  ConsumerState<WeightGoalManagementRefactored> createState() =>
+      _WeightGoalManagementRefactoredState();
 }
 
-class _WeightGoalManagementRefactoredState extends ConsumerState<WeightGoalManagementRefactored>
+class _WeightGoalManagementRefactoredState
+    extends ConsumerState<WeightGoalManagementRefactored>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
+
   @override
   void initState() {
     super.initState();
@@ -99,23 +101,17 @@ class _WeightGoalManagementRefactoredState extends ConsumerState<WeightGoalManag
   }
 
   Widget _buildVeterinaryGuidelinesTab() {
-    return const SingleChildScrollView(
-      child: WeightVeterinaryGuidelines(),
-    );
+    return const SingleChildScrollView(child: WeightVeterinaryGuidelines());
   }
 
   Widget _buildEmptyGoalsState() {
     final theme = Theme.of(context);
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.track_changes,
-            size: 64,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.track_changes, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'Nenhuma meta ativa',
@@ -140,6 +136,7 @@ class _WeightGoalManagementRefactoredState extends ConsumerState<WeightGoalManag
       ),
     );
   }
+
   List<Map<String, dynamic>> _getMockActiveGoals() {
     return [
       {
@@ -177,7 +174,9 @@ class _WeightGoalManagementRefactoredState extends ConsumerState<WeightGoalManag
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Editar Meta'),
-        content: const Text('Funcionalidade de edição será implementada em breve.'),
+        content: const Text(
+          'Funcionalidade de edição será implementada em breve.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -195,7 +194,7 @@ class _WeightGoalManagementRefactoredState extends ConsumerState<WeightGoalManag
         title: const Text('Concluir Meta'),
         content: Text(
           'Parabéns! Você atingiu sua meta "${goal['title']}".\n'
-          'Deseja marcá-la como concluída?'
+          'Deseja marcá-la como concluída?',
         ),
         actions: [
           TextButton(
@@ -219,16 +218,11 @@ class _WeightGoalManagementRefactoredState extends ConsumerState<WeightGoalManag
       SnackBar(
         content: Text('Meta "${goal['title']}" concluída com sucesso!'),
         backgroundColor: Colors.green,
-        action: SnackBarAction(
-          label: 'Ver Histórico',
-          onPressed: () {
-          },
-        ),
+        action: SnackBarAction(label: 'Ver Histórico', onPressed: () {}),
       ),
     );
-    
-    setState(() {
-    });
+
+    setState(() {});
   }
 
   void _showGoalAnalytics(Map<String, dynamic> goal) {
@@ -243,7 +237,9 @@ class _WeightGoalManagementRefactoredState extends ConsumerState<WeightGoalManag
             children: [
               Text('Animal: ${goal['animal']}'),
               const SizedBox(height: 8),
-              Text('Progresso: ${((goal['progress'] as double) * 100).toStringAsFixed(0)}%'),
+              Text(
+                'Progresso: ${((goal['progress'] as double) * 100).toStringAsFixed(0)}%',
+              ),
               const SizedBox(height: 8),
               Text('Peso Atual: ${goal['currentWeight']} kg'),
               const SizedBox(height: 8),
@@ -275,7 +271,7 @@ class _WeightGoalManagementRefactoredState extends ConsumerState<WeightGoalManag
         title: const Text('Consulta Veterinária'),
         content: const Text(
           'Recomendamos consultar um veterinário para definir metas de peso adequadas para seu pet.\n\n'
-          'O profissional poderá avaliar a condição corporal atual, histórico de saúde e criar um plano personalizado.'
+          'O profissional poderá avaliar a condição corporal atual, histórico de saúde e criar um plano personalizado.',
         ),
         actions: [
           TextButton(

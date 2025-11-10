@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 // FIXED (P0.1): Changed from core/services/ to core/utils/

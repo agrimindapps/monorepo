@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -61,11 +61,11 @@ class AnimalSelectorField extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<AnimalSelectorField> createState() => _AnimalSelectorFieldState();
+  ConsumerState<AnimalSelectorField> createState() =>
+      _AnimalSelectorFieldState();
 }
 
 class _AnimalSelectorFieldState extends ConsumerState<AnimalSelectorField> {
-
   @override
   void initState() {
     super.initState();
@@ -143,7 +143,8 @@ class _AnimalSelectorFieldState extends ConsumerState<AnimalSelectorField> {
         subtitle: Text(error),
         trailing: IconButton(
           icon: const Icon(Icons.refresh),
-          onPressed: () => ref.read(animalsNotifierProvider.notifier).loadAnimals(),
+          onPressed: () =>
+              ref.read(animalsNotifierProvider.notifier).loadAnimals(),
           tooltip: 'Tentar novamente',
         ),
       ),
@@ -207,7 +208,9 @@ class _AnimalSelectorFieldState extends ConsumerState<AnimalSelectorField> {
       children: [
         CircleAvatar(
           radius: 16,
-          backgroundColor: _getSpeciesColor(animal.species.name).withValues(alpha: 0.2),
+          backgroundColor: _getSpeciesColor(
+            animal.species.name,
+          ).withValues(alpha: 0.2),
           child: animal.photoUrl != null
               ? ClipOval(
                   child: Image.network(

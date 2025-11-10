@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide getIt;
+import 'package:core/core.dart' hide Column, getIt;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

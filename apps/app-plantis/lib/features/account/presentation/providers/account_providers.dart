@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
-import 'package:core/core.dart' hide DeleteAccountUseCase;
+import 'package:core/core.dart' hide Column, DeleteAccountUseCase;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container.dart' as di;

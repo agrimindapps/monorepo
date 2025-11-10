@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import '../../features/busca_avancada/di/busca_di.dart';
 // ❌ REMOVIDO: import '../../features/culturas/di/culturas_di.dart'; (duplicado via Injectable)
 // ❌ REMOVIDO: import '../../features/defensivos/di/defensivos_di.dart'; (duplicado via Injectable)

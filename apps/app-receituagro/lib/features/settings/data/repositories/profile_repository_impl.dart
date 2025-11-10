@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:dartz/dartz.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../../../core/providers/receituagro_auth_notifier.dart';
 import '../../domain/repositories/profile_repository.dart';

@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/calculators/exercise_calculator.dart';
@@ -95,7 +95,7 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
 
   Widget _buildInfoCard() {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -147,9 +147,9 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
           children: [
             Text(
               'Informações do Animal',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
@@ -159,10 +159,7 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
                 border: OutlineInputBorder(),
               ),
               items: ['Cão', 'Gato'].map((species) {
-                return DropdownMenuItem(
-                  value: species,
-                  child: Text(species),
-                );
+                return DropdownMenuItem(value: species, child: Text(species));
               }).toList(),
               onChanged: (value) {
                 if (value != null) {
@@ -225,9 +222,9 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
           children: [
             Text(
               'Dados Físicos',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -238,7 +235,9 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
                 border: OutlineInputBorder(),
                 helperText: 'Idade do animal em anos',
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor, informe a idade';
@@ -259,7 +258,9 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
                 border: OutlineInputBorder(),
                 helperText: 'Peso atual do animal',
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor, informe o peso';
@@ -278,20 +279,24 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
                 labelText: 'Condições de Saúde',
                 border: OutlineInputBorder(),
               ),
-              items: [
-                'Saudável (sem restrições)',
-                'Obesidade/Sobrepeso',
-                'Problemas Articulares (artrite, displasia)',
-                'Problemas Cardíacos',
-                'Problemas Respiratórios',
-                'Recuperação de Cirurgia',
-                'Idade Avançada (limitações)',
-              ].map((condition) {
-                return DropdownMenuItem(
-                  value: condition,
-                  child: Text(condition, style: const TextStyle(fontSize: 12)),
-                );
-              }).toList(),
+              items:
+                  [
+                    'Saudável (sem restrições)',
+                    'Obesidade/Sobrepeso',
+                    'Problemas Articulares (artrite, displasia)',
+                    'Problemas Cardíacos',
+                    'Problemas Respiratórios',
+                    'Recuperação de Cirurgia',
+                    'Idade Avançada (limitações)',
+                  ].map((condition) {
+                    return DropdownMenuItem(
+                      value: condition,
+                      child: Text(
+                        condition,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    );
+                  }).toList(),
               onChanged: (value) {
                 if (value != null) {
                   setState(() {
@@ -321,9 +326,9 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
           children: [
             Text(
               'Nível de Atividade Atual',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
@@ -332,18 +337,19 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
                 labelText: 'Nível de Atividade Atual',
                 border: OutlineInputBorder(),
               ),
-              items: [
-                'Sedentário (pouco ou nenhum exercício)',
-                'Levemente Ativo (exercício ocasional)',
-                'Moderadamente Ativo (exercício regular)',
-                'Muito Ativo (exercício intenso diário)',
-                'Atlético (treinamento intensivo)',
-              ].map((level) {
-                return DropdownMenuItem(
-                  value: level,
-                  child: Text(level, style: const TextStyle(fontSize: 12)),
-                );
-              }).toList(),
+              items:
+                  [
+                    'Sedentário (pouco ou nenhum exercício)',
+                    'Levemente Ativo (exercício ocasional)',
+                    'Moderadamente Ativo (exercício regular)',
+                    'Muito Ativo (exercício intenso diário)',
+                    'Atlético (treinamento intensivo)',
+                  ].map((level) {
+                    return DropdownMenuItem(
+                      value: level,
+                      child: Text(level, style: const TextStyle(fontSize: 12)),
+                    );
+                  }).toList(),
               onChanged: (value) {
                 if (value != null) {
                   setState(() {
@@ -394,9 +400,9 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
           children: [
             Text(
               'Objetivo do Exercício',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
@@ -405,19 +411,17 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
                 labelText: 'Objetivo Principal',
                 border: OutlineInputBorder(),
               ),
-              items: [
-                'Manutenção da Saúde',
-                'Perda de Peso',
-                'Ganho de Condicionamento',
-                'Controle de Comportamento',
-                'Preparação Esportiva',
-                'Reabilitação',
-              ].map((goal) {
-                return DropdownMenuItem(
-                  value: goal,
-                  child: Text(goal),
-                );
-              }).toList(),
+              items:
+                  [
+                    'Manutenção da Saúde',
+                    'Perda de Peso',
+                    'Ganho de Condicionamento',
+                    'Controle de Comportamento',
+                    'Preparação Esportiva',
+                    'Reabilitação',
+                  ].map((goal) {
+                    return DropdownMenuItem(value: goal, child: Text(goal));
+                  }).toList(),
               onChanged: (value) {
                 if (value != null) {
                   setState(() {
@@ -440,7 +444,7 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
 
   Widget _buildResultCard(CalculationResult result) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: 3,
       child: Padding(
@@ -465,13 +469,15 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
             ),
             const SizedBox(height: 16),
             ...result.results.map((item) => _buildResultItem(item)),
-            
+
             if (result.summary != null) ...[
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  color: theme.colorScheme.primaryContainer.withValues(
+                    alpha: 0.3,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -482,7 +488,7 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
                 ),
               ),
             ],
-            
+
             if (result.recommendations.isNotEmpty == true) ...[
               const SizedBox(height: 16),
               _buildRecommendationsSection(result.recommendations),
@@ -496,7 +502,7 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
   Widget _buildResultItem(ResultItem item) {
     final theme = Theme.of(context);
     final color = _getSeverityColor(item.severity);
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(
@@ -514,7 +520,10 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
@@ -546,8 +555,12 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
 
   Widget _buildRecommendationsSection(List<Recommendation> recommendations) {
     final theme = Theme.of(context);
-    final safetyAlerts = recommendations.where((r) => r.title.contains('Segurança')).toList();
-    final normalRecs = recommendations.where((r) => !r.title.contains('Segurança')).toList();
+    final safetyAlerts = recommendations
+        .where((r) => r.title.contains('Segurança'))
+        .toList();
+    final normalRecs = recommendations
+        .where((r) => !r.title.contains('Segurança'))
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -585,44 +598,45 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
                   ],
                 ),
                 const SizedBox(height: 8),
-                ...safetyAlerts.map((alert) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    '• ${alert.message}',
-                    style: theme.textTheme.bodyMedium,
+                ...safetyAlerts.map(
+                  (alert) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      '• ${alert.message}',
+                      style: theme.textTheme.bodyMedium,
+                    ),
                   ),
-                )),
+                ),
               ],
             ),
           ),
         ],
-        ...normalRecs.map((rec) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                _getRecommendationIcon(rec.severity),
-                size: 16,
-                color: _getSeverityColor(rec.severity),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  rec.message,
-                  style: theme.textTheme.bodyMedium,
+        ...normalRecs.map(
+          (rec) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  _getRecommendationIcon(rec.severity),
+                  size: 16,
+                  color: _getSeverityColor(rec.severity),
                 ),
-              ),
-            ],
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(rec.message, style: theme.textTheme.bodyMedium),
+                ),
+              ],
+            ),
           ),
-        )),
+        ),
       ],
     );
   }
 
   Widget _buildErrorCard(String error) {
     final theme = Theme.of(context);
-    
+
     return Card(
       color: theme.colorScheme.errorContainer,
       child: Padding(
@@ -681,10 +695,7 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
 
   List<String> _getBreedGroupOptions(String species) {
     if (species == 'Gato') {
-      return [
-        'Gato de Apartamento',
-        'Gato com Acesso Externo',
-      ];
+      return ['Gato de Apartamento', 'Gato com Acesso Externo'];
     } else {
       return [
         'Cão de Trabalho (Pastor, Border Collie)',

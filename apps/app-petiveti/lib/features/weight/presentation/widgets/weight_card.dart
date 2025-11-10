@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/weight.dart';
@@ -27,7 +27,7 @@ class WeightCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final difference = weight.calculateDifference(previousWeight);
-    
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
@@ -56,8 +56,8 @@ class WeightCard extends ConsumerWidget {
                           weight.formattedWeight,
                           style: theme.textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: difference?.isConcerning == true 
-                                ? Colors.orange[800] 
+                            color: difference?.isConcerning == true
+                                ? Colors.orange[800]
                                 : theme.colorScheme.onSurface,
                           ),
                         ),
@@ -73,7 +73,10 @@ class WeightCard extends ConsumerWidget {
                   ),
                   if (weight.isRecent)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.green.withAlpha(51),
                         borderRadius: BorderRadius.circular(12),
@@ -114,7 +117,9 @@ class WeightCard extends ConsumerWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withAlpha(127),
+                    color: theme.colorScheme.surfaceContainerHighest.withAlpha(
+                      127,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: theme.colorScheme.outline.withAlpha(76),
@@ -147,10 +152,8 @@ class WeightCard extends ConsumerWidget {
                 Row(
                   children: [
                     if (difference != null)
-                      Expanded(
-                        child: _buildQuickStats(context, difference),
-                      ),
-                    
+                      Expanded(child: _buildQuickStats(context, difference)),
+
                     const SizedBox(width: 12),
                     PopupMenuButton<String>(
                       onSelected: (value) {
@@ -182,7 +185,10 @@ class WeightCard extends ConsumerWidget {
                               children: [
                                 Icon(Icons.delete, color: Colors.red),
                                 SizedBox(width: 8),
-                                Text('Excluir', style: TextStyle(color: Colors.red)),
+                                Text(
+                                  'Excluir',
+                                  style: TextStyle(color: Colors.red),
+                                ),
                               ],
                             ),
                           ),
@@ -205,7 +211,7 @@ class WeightCard extends ConsumerWidget {
   Widget _buildTrendInfo(BuildContext context, WeightDifference difference) {
     final theme = Theme.of(context);
     final trendColor = _getTrendColor(difference.trend);
-    
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -250,11 +256,7 @@ class WeightCard extends ConsumerWidget {
             ),
           ),
           if (difference.isConcerning)
-            Icon(
-              Icons.warning,
-              size: 20,
-              color: Colors.orange[700],
-            ),
+            Icon(Icons.warning, size: 20, color: Colors.orange[700]),
         ],
       ),
     );
@@ -264,7 +266,7 @@ class WeightCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final bodyCondition = weight.bodyCondition;
     final conditionColor = _getBodyConditionColor(bodyCondition);
-    
+
     return Row(
       children: [
         Icon(
@@ -300,7 +302,7 @@ class WeightCard extends ConsumerWidget {
 
   Widget _buildQuickStats(BuildContext context, WeightDifference difference) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -314,10 +316,7 @@ class WeightCard extends ConsumerWidget {
         const SizedBox(height: 2),
         Row(
           children: [
-            Text(
-              difference.trend.emoji,
-              style: const TextStyle(fontSize: 16),
-            ),
+            Text(difference.trend.emoji, style: const TextStyle(fontSize: 16)),
             const SizedBox(width: 4),
             Text(
               difference.formattedDifference,
@@ -382,7 +381,9 @@ class WeightCard extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Excluir Registro'),
-        content: Text('Tem certeza que deseja excluir o registro de peso de ${weight.formattedWeight} do dia ${weight.formattedDate}? Esta ação não pode ser desfeita.'),
+        content: Text(
+          'Tem certeza que deseja excluir o registro de peso de ${weight.formattedWeight} do dia ${weight.formattedDate}? Esta ação não pode ser desfeita.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

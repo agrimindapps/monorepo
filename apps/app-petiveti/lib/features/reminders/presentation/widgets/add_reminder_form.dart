@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 
 import '../../../../features/animals/domain/entities/animal.dart';
@@ -76,31 +76,35 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
   @override
   Widget build(BuildContext context) {
     final animalsState = ref.watch(animalsNotifierProvider);
-    
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.reminder != null ? 'Editar Lembrete' : 'Novo Lembrete'),
+        title: Text(
+          widget.reminder != null ? 'Editar Lembrete' : 'Novo Lembrete',
+        ),
         elevation: 0,
       ),
-      body: animalsState.isLoading 
+      body: animalsState.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : animalsState.error != null 
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                      const SizedBox(height: 16),
-                      Text('Erro ao carregar animais: ${animalsState.error}'),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => ref.read(animalsNotifierProvider.notifier).loadAnimals(),
-                        child: const Text('Tentar novamente'),
-                      ),
-                    ],
+          : animalsState.error != null
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text('Erro ao carregar animais: ${animalsState.error}'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => ref
+                        .read(animalsNotifierProvider.notifier)
+                        .loadAnimals(),
+                    child: const Text('Tentar novamente'),
                   ),
-                )
-              : _buildForm(animalsState.animals),
+                ],
+              ),
+            )
+          : _buildForm(animalsState.animals),
     );
   }
 
@@ -199,7 +203,9 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
       value: _selectedPriority.name,
       onChanged: (dynamic value) {
         if (value is String) {
-          final priority = ReminderPriority.values.firstWhere((p) => p.name == value);
+          final priority = ReminderPriority.values.firstWhere(
+            (p) => p.name == value,
+          );
           setState(() => _selectedPriority = priority);
         }
       },
@@ -228,8 +234,6 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
       },
     );
   }
-
-
 
   Widget _buildRecurringSection() {
     return Column(
@@ -283,17 +287,12 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
           );
   }
 
-
-
-
-
-
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedAnimalId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecione um animal')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Selecione um animal')));
       return;
     }
 
@@ -310,7 +309,9 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
       );
 
       final reminder = Reminder(
-        id: widget.reminder?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        id:
+            widget.reminder?.id ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
         animalId: _selectedAnimalId!,
         userId: widget.userId,
         title: _titleController.text.trim(),
@@ -329,16 +330,20 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
 
       bool success;
       if (widget.reminder != null) {
-        success = await ref.read(remindersProvider.notifier).updateReminder(reminder);
+        success = await ref
+            .read(remindersProvider.notifier)
+            .updateReminder(reminder);
       } else {
-        success = await ref.read(remindersProvider.notifier).addReminder(reminder);
+        success = await ref
+            .read(remindersProvider.notifier)
+            .addReminder(reminder);
       }
 
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              widget.reminder != null 
+              widget.reminder != null
                   ? 'Lembrete atualizado com sucesso!'
                   : 'Lembrete criado com sucesso!',
             ),

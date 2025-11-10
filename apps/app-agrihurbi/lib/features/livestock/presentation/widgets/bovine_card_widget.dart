@@ -1,10 +1,10 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/bovine_entity.dart';
 
 /// Widget de card para exibição de bovinos em listas
-/// 
+///
 /// Substitui os antigos widgets GetX com design clean e responsivo
 /// Inclui imagem, informações principais e ações rápidas
 class BovineCardWidget extends StatelessWidget {
@@ -41,11 +41,8 @@ class BovineCardWidget extends StatelessWidget {
                 children: [
                   _buildBovineImage(context),
                   const SizedBox(width: 12.0),
-                  Expanded(
-                    child: _buildBovineInfo(context),
-                  ),
-                  if (showActions)
-                    _buildActionsMenu(context),
+                  Expanded(child: _buildBovineInfo(context)),
+                  if (showActions) _buildActionsMenu(context),
                 ],
               ),
               const SizedBox(height: 8.0),
@@ -61,7 +58,7 @@ class BovineCardWidget extends StatelessWidget {
 
   Widget _buildBovineImage(BuildContext context) {
     const double imageSize = 80.0;
-    
+
     if (bovine.imageUrls.isNotEmpty) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(8.0),
@@ -78,11 +75,12 @@ class BovineCardWidget extends StatelessWidget {
               child: CircularProgressIndicator(strokeWidth: 2.0),
             ),
           ),
-          errorWidget: (context, url, error) => _buildDefaultImage(context, imageSize),
+          errorWidget: (context, url, error) =>
+              _buildDefaultImage(context, imageSize),
         ),
       );
     }
-    
+
     return _buildDefaultImage(context, imageSize);
   }
 
@@ -108,13 +106,13 @@ class BovineCardWidget extends StatelessWidget {
       children: [
         Text(
           bovine.commonName,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        
+
         const SizedBox(height: 4.0),
         Text(
           bovine.breed,
@@ -125,7 +123,7 @@ class BovineCardWidget extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        
+
         const SizedBox(height: 2.0),
         Text(
           'ID: ${bovine.registrationId}',
@@ -135,7 +133,7 @@ class BovineCardWidget extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        
+
         const SizedBox(height: 2.0),
         Row(
           children: [
@@ -178,11 +176,7 @@ class BovineCardWidget extends StatelessWidget {
         const PopupMenuItem(
           value: 'edit',
           child: Row(
-            children: [
-              Icon(Icons.edit),
-              SizedBox(width: 8),
-              Text('Editar'),
-            ],
+            children: [Icon(Icons.edit), SizedBox(width: 8), Text('Editar')],
           ),
         ),
         const PopupMenuItem(
@@ -225,7 +219,10 @@ class BovineCardWidget extends StatelessWidget {
           Wrap(
             spacing: 4.0,
             runSpacing: 4.0,
-            children: bovine.tags.take(3).map((tag) => _buildTag(context, tag)).toList(),
+            children: bovine.tags
+                .take(3)
+                .map((tag) => _buildTag(context, tag))
+                .toList(),
           ),
           if (bovine.tags.length > 3)
             Padding(
@@ -242,7 +239,12 @@ class BovineCardWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildChip(BuildContext context, String label, IconData icon, Color backgroundColor) {
+  Widget _buildChip(
+    BuildContext context,
+    String label,
+    IconData icon,
+    Color backgroundColor,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       decoration: BoxDecoration(
@@ -325,7 +327,7 @@ class BovineCardWidget extends StatelessWidget {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
-    
+
     if (difference.inDays == 0) {
       if (difference.inHours == 0) {
         return '${difference.inMinutes}m atrás';
@@ -342,17 +344,13 @@ class BovineCardWidget extends StatelessWidget {
 }
 
 /// Widget de card compacto para bovinos
-/// 
+///
 /// Versão simplificada para uso em carrosséis ou listas menores
 class CompactBovineCardWidget extends StatelessWidget {
   final BovineEntity bovine;
   final VoidCallback? onTap;
 
-  const CompactBovineCardWidget({
-    super.key,
-    required this.bovine,
-    this.onTap,
-  });
+  const CompactBovineCardWidget({super.key, required this.bovine, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -373,11 +371,12 @@ class CompactBovineCardWidget extends StatelessWidget {
                         width: 40.0,
                         height: 40.0,
                         fit: BoxFit.cover,
-                        errorWidget: (context, url, error) => _buildDefaultIcon(context),
+                        errorWidget: (context, url, error) =>
+                            _buildDefaultIcon(context),
                       )
                     : _buildDefaultIcon(context),
               ),
-              
+
               const SizedBox(width: 8.0),
               Expanded(
                 child: Column(
@@ -403,7 +402,10 @@ class CompactBovineCardWidget extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6.0,
+                  vertical: 2.0,
+                ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8.0),

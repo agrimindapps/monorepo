@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../../../core/data/models/fitossanitario_hive.dart';
 import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 abstract class NetworkInfo {
   Future<bool> get isConnected;

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 abstract class AuthModule {
   static void init(GetIt sl) {
   }

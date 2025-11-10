@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/body_condition_output.dart';
@@ -6,17 +6,14 @@ import '../providers/body_condition_provider.dart';
 
 /// Painel de histórico dos cálculos de condição corporal
 class BodyConditionHistoryPanel extends ConsumerWidget {
-  const BodyConditionHistoryPanel({
-    super.key,
-    required this.history,
-  });
+  const BodyConditionHistoryPanel({super.key, required this.history});
 
   final List<BodyConditionOutput> history;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(bodyConditionHistoryStatsProvider);
-    
+
     return Column(
       children: [
         if (history.isNotEmpty) _buildStatisticsCard(stats),
@@ -25,9 +22,10 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
             padding: const EdgeInsets.all(16.0),
             itemCount: history.length,
             itemBuilder: (context, index) {
-              final result = history[history.length - 1 - index]; // Mais recente primeiro
+              final result =
+                  history[history.length - 1 - index]; // Mais recente primeiro
               final position = history.length - index;
-              
+
               return _buildHistoryItem(context, ref, result, position, index);
             },
           ),
@@ -51,10 +49,7 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
                 SizedBox(width: 8),
                 Text(
                   'Estatísticas do Histórico',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -93,7 +88,9 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
                     'Tendência',
                     _getTrendText(((stats['trend'] as num?) ?? 0.0).toDouble()),
                     _getTrendIcon(((stats['trend'] as num?) ?? 0.0).toDouble()),
-                    color: _getTrendColor(((stats['trend'] as num?) ?? 0.0).toDouble()),
+                    color: _getTrendColor(
+                      ((stats['trend'] as num?) ?? 0.0).toDouble(),
+                    ),
                   ),
                 ),
               ],
@@ -104,7 +101,12 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatItem(String label, String value, IconData icon, {Color? color}) {
+  Widget _buildStatItem(
+    String label,
+    String value,
+    IconData icon, {
+    Color? color,
+  }) {
     return Column(
       children: [
         Icon(icon, color: color ?? Colors.blue, size: 24),
@@ -119,10 +121,7 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
         ),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
-          ),
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
           textAlign: TextAlign.center,
         ),
       ],
@@ -148,27 +147,28 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
   }
 
   Widget _buildHistoryItem(
-    BuildContext context, 
-    WidgetRef ref, 
-    BodyConditionOutput result, 
-    int position, 
-    int index
+    BuildContext context,
+    WidgetRef ref,
+    BodyConditionOutput result,
+    int position,
+    int index,
   ) {
     final dateFormatter = DateFormat('dd/MM/yyyy - HH:mm');
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12.0),
       child: ExpansionTile(
         leading: CircleAvatar(
           backgroundColor: Color(
-            int.parse(result.statusColor.substring(1), radix: 16) + 0xFF000000
+            int.parse(result.statusColor.substring(1), radix: 16) + 0xFF000000,
           ).withValues(alpha: 0.2),
           child: Text(
             '${result.bcsScore}',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Color(
-                int.parse(result.statusColor.substring(1), radix: 16) + 0xFF000000
+                int.parse(result.statusColor.substring(1), radix: 16) +
+                    0xFF000000,
               ),
             ),
           ),
@@ -184,11 +184,7 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
             const SizedBox(height: 4),
             Row(
               children: [
-                Icon(
-                  Icons.monitor_weight,
-                  size: 16,
-                  color: Colors.grey[600],
-                ),
+                Icon(Icons.monitor_weight, size: 16, color: Colors.grey[600]),
                 const SizedBox(width: 4),
                 Text(
                   result.results
@@ -212,7 +208,8 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
           ],
         ),
         trailing: PopupMenuButton<String>(
-          onSelected: (value) => _handleHistoryAction(context, ref, value, index),
+          onSelected: (value) =>
+              _handleHistoryAction(context, ref, value, index),
           itemBuilder: (context) => [
             const PopupMenuItem(
               value: 'load',
@@ -291,7 +288,9 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
                 child: _buildDetailMetric(
                   result.needsWeightLoss ? 'Reduzir' : 'Aumentar',
                   '${result.weightAdjustmentNeeded.abs().toStringAsFixed(1)} kg',
-                  result.needsWeightLoss ? Icons.trending_down : Icons.trending_up,
+                  result.needsWeightLoss
+                      ? Icons.trending_down
+                      : Icons.trending_up,
                 ),
               ),
             Expanded(
@@ -318,7 +317,9 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
               border: Border(
                 left: BorderSide(
                   width: 3,
-                  color: _getRecommendationColor((result.recommendations.first as BcsRecommendation).type),
+                  color: _getRecommendationColor(
+                    (result.recommendations.first as BcsRecommendation).type,
+                  ),
                 ),
               ),
             ),
@@ -406,7 +407,9 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
         break;
       case 'share':
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Compartilhamento será implementado em breve')),
+          const SnackBar(
+            content: Text('Compartilhamento será implementado em breve'),
+          ),
         );
         break;
       case 'delete':

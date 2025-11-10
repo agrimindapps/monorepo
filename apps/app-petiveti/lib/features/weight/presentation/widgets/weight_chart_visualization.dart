@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/weight.dart';
@@ -8,7 +8,7 @@ import '../providers/weights_provider.dart';
 class WeightChartVisualization extends ConsumerStatefulWidget {
   final String? animalId;
   final bool showInteractiveMode;
-  
+
   const WeightChartVisualization({
     super.key,
     this.animalId,
@@ -16,19 +16,21 @@ class WeightChartVisualization extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<WeightChartVisualization> createState() => _WeightChartVisualizationState();
+  ConsumerState<WeightChartVisualization> createState() =>
+      _WeightChartVisualizationState();
 }
 
-class _WeightChartVisualizationState extends ConsumerState<WeightChartVisualization>
+class _WeightChartVisualizationState
+    extends ConsumerState<WeightChartVisualization>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
-  
+
   ChartPeriod _selectedPeriod = ChartPeriod.lastThreeMonths;
   ChartType _selectedType = ChartType.line;
   bool _showTrendLine = true;
   bool _showGoalLine = false;
-  
+
   @override
   void initState() {
     super.initState();
@@ -40,12 +42,12 @@ class _WeightChartVisualizationState extends ConsumerState<WeightChartVisualizat
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    
+
     _animation = CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOutCubic,
     );
-    
+
     _animationController.forward();
   }
 
@@ -60,13 +62,13 @@ class _WeightChartVisualizationState extends ConsumerState<WeightChartVisualizat
     final theme = Theme.of(context);
     final weightsState = ref.watch(weightsProvider);
     final weights = weightsState.sortedWeights;
-    
+
     if (weights.isEmpty) {
       return _buildEmptyChartState(theme);
     }
 
     final filteredWeights = _filterWeightsByPeriod(weights, _selectedPeriod);
-    
+
     return Card(
       margin: const EdgeInsets.all(16),
       elevation: 4,
@@ -218,17 +220,21 @@ class _WeightChartVisualizationState extends ConsumerState<WeightChartVisualizat
               }).toList(),
             ),
           ),
-          
+
           const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
                 child: SegmentedButton<ChartType>(
-                  segments: ChartType.values.map((type) => ButtonSegment<ChartType>(
-                    value: type,
-                    icon: Icon(type.icon, size: 18),
-                    label: Text(type.shortName),
-                  )).toList(),
+                  segments: ChartType.values
+                      .map(
+                        (type) => ButtonSegment<ChartType>(
+                          value: type,
+                          icon: Icon(type.icon, size: 18),
+                          label: Text(type.shortName),
+                        ),
+                      )
+                      .toList(),
                   selected: {_selectedType},
                   onSelectionChanged: (Set<ChartType> selection) {
                     setState(() {
@@ -248,7 +254,7 @@ class _WeightChartVisualizationState extends ConsumerState<WeightChartVisualizat
 
   Widget _buildChartLegend(ThemeData theme, List<Weight> weights) {
     if (weights.isEmpty) return const SizedBox.shrink();
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -296,9 +302,9 @@ class _WeightChartVisualizationState extends ConsumerState<WeightChartVisualizat
 
   Widget _buildChartInsights(ThemeData theme, List<Weight> weights) {
     if (weights.length < 2) return const SizedBox.shrink();
-    
+
     final insights = _calculateInsights(weights);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -435,10 +441,13 @@ class _WeightChartVisualizationState extends ConsumerState<WeightChartVisualizat
     );
   }
 
-  List<Weight> _filterWeightsByPeriod(List<Weight> weights, ChartPeriod period) {
+  List<Weight> _filterWeightsByPeriod(
+    List<Weight> weights,
+    ChartPeriod period,
+  ) {
     final now = DateTime.now();
     DateTime cutoffDate;
-    
+
     switch (period) {
       case ChartPeriod.lastWeek:
         cutoffDate = now.subtract(const Duration(days: 7));
@@ -458,7 +467,7 @@ class _WeightChartVisualizationState extends ConsumerState<WeightChartVisualizat
       case ChartPeriod.all:
         return weights;
     }
-    
+
     return weights.where((weight) => weight.date.isAfter(cutoffDate)).toList();
   }
 
@@ -474,15 +483,16 @@ class _WeightChartVisualizationState extends ConsumerState<WeightChartVisualizat
         trendIcon: Icons.trending_flat,
       );
     }
-    
+
     final firstWeight = weights.last.weight;
     final lastWeight = weights.first.weight;
     final totalChange = lastWeight - firstWeight;
-    final averageWeight = weights.map((w) => w.weight).reduce((a, b) => a + b) / weights.length;
-    
+    final averageWeight =
+        weights.map((w) => w.weight).reduce((a, b) => a + b) / weights.length;
+
     Color totalChangeColor;
     IconData totalChangeIcon;
-    
+
     if (totalChange > 0) {
       totalChangeColor = Colors.blue;
       totalChangeIcon = Icons.trending_up;
@@ -496,7 +506,7 @@ class _WeightChartVisualizationState extends ConsumerState<WeightChartVisualizat
     String trendDescription;
     Color trendColor;
     IconData trendIcon;
-    
+
     if (totalChange.abs() < 0.1) {
       trendDescription = 'Estável';
       trendColor = Colors.green;
@@ -510,7 +520,7 @@ class _WeightChartVisualizationState extends ConsumerState<WeightChartVisualizat
       trendColor = Colors.red;
       trendIcon = Icons.trending_down;
     }
-    
+
     return WeightInsights(
       totalChange: '${totalChange.toStringAsFixed(1)} kg',
       totalChangeColor: totalChangeColor,
@@ -531,7 +541,7 @@ class WeightChartPainter extends CustomPainter {
   final bool showGoalLine;
   final Animation<double> animation;
   final ThemeData theme;
-  
+
   WeightChartPainter({
     required this.weights,
     required this.chartType,
@@ -544,12 +554,12 @@ class WeightChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (weights.isEmpty) return;
-    
+
     final paint = Paint()
       ..color = Colors.blue
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
-      
+
     final pointPaint = Paint()
       ..color = Colors.blue
       ..style = PaintingStyle.fill;
@@ -588,25 +598,34 @@ class WeightChartPainter extends CustomPainter {
     );
   }
 
-  void _drawLineChart(Canvas canvas, Rect chartRect, Paint linePaint, Paint pointPaint) {
+  void _drawLineChart(
+    Canvas canvas,
+    Rect chartRect,
+    Paint linePaint,
+    Paint pointPaint,
+  ) {
     if (weights.length < 2) return;
-    
-    final minWeight = weights.map((w) => w.weight).reduce((a, b) => a < b ? a : b) * 0.9;
-    final maxWeight = weights.map((w) => w.weight).reduce((a, b) => a > b ? a : b) * 1.1;
+
+    final minWeight =
+        weights.map((w) => w.weight).reduce((a, b) => a < b ? a : b) * 0.9;
+    final maxWeight =
+        weights.map((w) => w.weight).reduce((a, b) => a > b ? a : b) * 1.1;
     final weightRange = maxWeight - minWeight;
-    
+
     final path = Path();
     final animatedProgress = animation.value;
-    
+
     for (int i = 0; i < weights.length; i++) {
       final weight = weights[i];
       final progress = (i + 1) / weights.length;
-      
+
       if (progress > animatedProgress) break;
-      
+
       final x = chartRect.left + (i / (weights.length - 1)) * chartRect.width;
-      final y = chartRect.bottom - ((weight.weight - minWeight) / weightRange) * chartRect.height;
-      
+      final y =
+          chartRect.bottom -
+          ((weight.weight - minWeight) / weightRange) * chartRect.height;
+
       if (i == 0) {
         path.moveTo(x, y);
       } else {
@@ -614,27 +633,33 @@ class WeightChartPainter extends CustomPainter {
       }
       canvas.drawCircle(Offset(x, y), 4, pointPaint);
     }
-    
+
     canvas.drawPath(path, linePaint);
   }
 
   void _drawBarChart(Canvas canvas, Rect chartRect, Paint paint) {
-    final minWeight = weights.map((w) => w.weight).reduce((a, b) => a < b ? a : b) * 0.9;
-    final maxWeight = weights.map((w) => w.weight).reduce((a, b) => a > b ? a : b) * 1.1;
+    final minWeight =
+        weights.map((w) => w.weight).reduce((a, b) => a < b ? a : b) * 0.9;
+    final maxWeight =
+        weights.map((w) => w.weight).reduce((a, b) => a > b ? a : b) * 1.1;
     final weightRange = maxWeight - minWeight;
-    
+
     final barWidth = chartRect.width / weights.length * 0.7;
     final animatedProgress = animation.value;
-    
+
     for (int i = 0; i < weights.length; i++) {
       final progress = (i + 1) / weights.length;
       if (progress > animatedProgress) break;
-      
+
       final weight = weights[i];
-      final x = chartRect.left + (i + 0.5) / weights.length * chartRect.width - barWidth / 2;
-      final barHeight = ((weight.weight - minWeight) / weightRange) * chartRect.height;
+      final x =
+          chartRect.left +
+          (i + 0.5) / weights.length * chartRect.width -
+          barWidth / 2;
+      final barHeight =
+          ((weight.weight - minWeight) / weightRange) * chartRect.height;
       final y = chartRect.bottom - barHeight;
-      
+
       canvas.drawRect(
         Rect.fromLTWH(x, y, barWidth, barHeight),
         paint..style = PaintingStyle.fill,
@@ -649,14 +674,20 @@ class WeightChartPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
     final firstWeight = weights.last.weight;
     final lastWeight = weights.first.weight;
-    
-    final minWeight = weights.map((w) => w.weight).reduce((a, b) => a < b ? a : b) * 0.9;
-    final maxWeight = weights.map((w) => w.weight).reduce((a, b) => a > b ? a : b) * 1.1;
+
+    final minWeight =
+        weights.map((w) => w.weight).reduce((a, b) => a < b ? a : b) * 0.9;
+    final maxWeight =
+        weights.map((w) => w.weight).reduce((a, b) => a > b ? a : b) * 1.1;
     final weightRange = maxWeight - minWeight;
-    
-    final startY = chartRect.bottom - ((firstWeight - minWeight) / weightRange) * chartRect.height;
-    final endY = chartRect.bottom - ((lastWeight - minWeight) / weightRange) * chartRect.height;
-    
+
+    final startY =
+        chartRect.bottom -
+        ((firstWeight - minWeight) / weightRange) * chartRect.height;
+    final endY =
+        chartRect.bottom -
+        ((lastWeight - minWeight) / weightRange) * chartRect.height;
+
     canvas.drawLine(
       Offset(chartRect.left, startY),
       Offset(chartRect.right, endY),
@@ -664,15 +695,14 @@ class WeightChartPainter extends CustomPainter {
     );
   }
 
-  void _drawLabels(Canvas canvas, Rect chartRect) {
-  }
+  void _drawLabels(Canvas canvas, Rect chartRect) {}
 
   @override
   bool shouldRepaint(WeightChartPainter oldDelegate) {
     return weights != oldDelegate.weights ||
-           animation.value != oldDelegate.animation.value ||
-           chartType != oldDelegate.chartType ||
-           showTrendLine != oldDelegate.showTrendLine;
+        animation.value != oldDelegate.animation.value ||
+        chartType != oldDelegate.chartType ||
+        showTrendLine != oldDelegate.showTrendLine;
   }
 }
 
@@ -685,7 +715,7 @@ class WeightInsights {
   final String trendDescription;
   final Color trendColor;
   final IconData trendIcon;
-  
+
   const WeightInsights({
     required this.totalChange,
     required this.totalChangeColor,
@@ -723,7 +753,7 @@ extension ChartPeriodExtension on ChartPeriod {
         return 'Todo o Período';
     }
   }
-  
+
   String get shortName {
     switch (this) {
       case ChartPeriod.lastWeek:
@@ -742,10 +772,7 @@ extension ChartPeriodExtension on ChartPeriod {
   }
 }
 
-enum ChartType {
-  line,
-  bar,
-}
+enum ChartType { line, bar }
 
 extension ChartTypeExtension on ChartType {
   String get displayName {
@@ -756,7 +783,7 @@ extension ChartTypeExtension on ChartType {
         return 'Barras';
     }
   }
-  
+
   String get shortName {
     switch (this) {
       case ChartType.line:
@@ -765,7 +792,7 @@ extension ChartTypeExtension on ChartType {
         return 'Barras';
     }
   }
-  
+
   IconData get icon {
     switch (this) {
       case ChartType.line:

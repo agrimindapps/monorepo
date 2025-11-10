@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide ConflictResolutionStrategy;
+import 'package:core/core.dart' hide ConflictResolutionStrategy, Column;
 import '../data/models/base_sync_model.dart';
 import '../data/models/comentario_hive.dart';
 import '../data/models/diagnostico_hive.dart';

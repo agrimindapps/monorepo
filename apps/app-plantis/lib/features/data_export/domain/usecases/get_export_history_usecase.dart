@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../entities/export_request.dart';
 import '../repositories/data_export_repository.dart';

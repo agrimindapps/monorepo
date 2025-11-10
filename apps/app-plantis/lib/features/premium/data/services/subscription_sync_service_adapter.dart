@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:core/src/services/subscription/advanced/advanced_subscription_sync_service.dart';
 import 'package:flutter/foundation.dart';
 

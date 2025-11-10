@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../services/plantis_realtime_service.dart';

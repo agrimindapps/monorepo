@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide AuthState;
+import 'package:core/core.dart' hide AuthState, Column;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -16,10 +16,12 @@ class EnhancedAuthenticationManager extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<EnhancedAuthenticationManager> createState() => _EnhancedAuthenticationManagerState();
+  ConsumerState<EnhancedAuthenticationManager> createState() =>
+      _EnhancedAuthenticationManagerState();
 }
 
-class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenticationManager>
+class _EnhancedAuthenticationManagerState
+    extends ConsumerState<EnhancedAuthenticationManager>
     with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late AnimationController _scaleController;
@@ -34,7 +36,7 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
   bool _hasStoredCredentials = false;
   bool _isBiometricLoading = false;
   bool _isCheckingStoredAuth = true;
-  
+
   @override
   void initState() {
     super.initState();
@@ -48,40 +50,29 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
+
     _scaleController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
-    
+
     _slideController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
-    
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _scaleController,
-      curve: Curves.elasticOut,
-    ));
-    
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
+    );
+
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
     _fadeController.forward();
     _scaleController.forward();
     _slideController.forward();
@@ -105,7 +96,11 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
     }
 
     return AnimatedBuilder(
-      animation: Listenable.merge([_fadeAnimation, _scaleAnimation, _slideAnimation]),
+      animation: Listenable.merge([
+        _fadeAnimation,
+        _scaleAnimation,
+        _slideAnimation,
+      ]),
       builder: (context, child) {
         return FadeTransition(
           opacity: _fadeAnimation,
@@ -123,15 +118,15 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
                     children: [
                       _buildAuthenticationHeader(theme),
                       const SizedBox(height: 24),
-                      
+
                       if (_biometricsAvailable && _hasStoredCredentials)
                         _buildBiometricAuthSection(theme, authState),
-                      
+
                       if (_hasStoredCredentials && !authState.isLoading)
                         _buildStoredAuthSection(theme),
-                      
+
                       _buildRememberMeSection(theme),
-                      
+
                       const SizedBox(height: 16),
                       _buildAuthenticationOptions(theme, authState),
                     ],
@@ -157,9 +152,7 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
               color: theme.colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(40),
             ),
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
+            child: const Center(child: CircularProgressIndicator()),
           ),
           const SizedBox(height: 24),
           Text(
@@ -171,9 +164,7 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
           const SizedBox(height: 8),
           Text(
             'Isso pode levar alguns segundos',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: Colors.grey[500],
-            ),
+            style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
           ),
         ],
       ),
@@ -195,11 +186,7 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
             ),
             borderRadius: BorderRadius.circular(30),
           ),
-          child: const Icon(
-            Icons.security,
-            color: Colors.white,
-            size: 32,
-          ),
+          child: const Icon(Icons.security, color: Colors.white, size: 32),
         ),
         const SizedBox(height: 16),
         Text(
@@ -211,9 +198,7 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
         const SizedBox(height: 8),
         Text(
           'Escolha seu método preferido de autenticação',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: Colors.grey[600],
-          ),
+          style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
           textAlign: TextAlign.center,
         ),
       ],
@@ -236,9 +221,7 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
                 ],
               ),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.green.withValues(alpha: 0.3),
-              ),
+              border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
             ),
             child: Column(
               children: [
@@ -283,7 +266,9 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
-                    onPressed: _isBiometricLoading ? null : _authenticateWithBiometrics,
+                    onPressed: _isBiometricLoading
+                        ? null
+                        : _authenticateWithBiometrics,
                     style: FilledButton.styleFrom(
                       backgroundColor: Colors.green,
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -299,8 +284,8 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
                           )
                         : Icon(_getBiometricIcon()),
                     label: Text(
-                      _isBiometricLoading 
-                          ? 'Autenticando...' 
+                      _isBiometricLoading
+                          ? 'Autenticando...'
                           : 'Usar $_biometricType',
                     ),
                   ),
@@ -337,17 +322,11 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
       decoration: BoxDecoration(
         color: Colors.blue.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.blue.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.account_circle,
-            color: Colors.blue[600],
-            size: 24,
-          ),
+          Icon(Icons.account_circle, color: Colors.blue[600], size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -387,10 +366,7 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
       onChanged: (value) {
         setState(() => _rememberMe = value);
       },
-      secondary: Icon(
-        Icons.remember_me,
-        color: theme.colorScheme.primary,
-      ),
+      secondary: Icon(Icons.remember_me, color: theme.colorScheme.primary),
     );
   }
 
@@ -398,9 +374,8 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
     final isLoading = authState.isLoading == true;
     return Column(
       children: [
-        if (isLoading)
-          _buildAdvancedLoadingIndicator(theme, authState),
-        
+        if (isLoading) _buildAdvancedLoadingIndicator(theme, authState),
+
         if (!isLoading) ...[
           SizedBox(
             width: double.infinity,
@@ -442,11 +417,7 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
                 strokeWidth: 3,
                 valueColor: AlwaysStoppedAnimation(theme.colorScheme.primary),
               ),
-              Icon(
-                Icons.security,
-                color: theme.colorScheme.primary,
-                size: 24,
-              ),
+              Icon(Icons.security, color: theme.colorScheme.primary, size: 24),
             ],
           ),
           const SizedBox(height: 16),
@@ -459,22 +430,22 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
           const SizedBox(height: 8),
           Text(
             'Verificando suas credenciais...',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: Colors.grey[600],
-            ),
+            style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
           ),
         ],
       ),
     );
   }
+
   Future<void> _checkBiometricAvailability() async {
     try {
       await Future<void>.delayed(const Duration(milliseconds: 500));
-      
+
       setState(() {
         _biometricsAvailable = true;
         _biometricsEnabled = true;
-        _biometricType = 'Biométrica'; // Could be 'Face ID', 'Touch ID', 'Fingerprint'
+        _biometricType =
+            'Biométrica'; // Could be 'Face ID', 'Touch ID', 'Fingerprint'
       });
     } catch (e) {
       setState(() {
@@ -487,7 +458,7 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
   Future<void> _checkStoredAuthentication() async {
     try {
       await Future<void>.delayed(const Duration(seconds: 1));
-      
+
       setState(() {
         _hasStoredCredentials = true; // Simulate having stored credentials
         _rememberMe = true;
@@ -506,13 +477,15 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
 
   Future<void> _authenticateWithBiometrics() async {
     setState(() => _isBiometricLoading = true);
-    
+
     try {
       await Future<void>.delayed(const Duration(seconds: 2));
-      
+
       await HapticFeedback.lightImpact();
-      final success = await ref.read(authProvider.notifier).signInWithEmail('stored@example.com', 'stored_password');
-      
+      final success = await ref
+          .read(authProvider.notifier)
+          .signInWithEmail('stored@example.com', 'stored_password');
+
       if (success) {
         widget.onAuthenticationSuccess?.call();
         _showSuccessAnimation();
@@ -529,8 +502,10 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
 
   Future<void> _authenticateWithStoredCredentials() async {
     try {
-      final success = await ref.read(authProvider.notifier).signInWithEmail('stored@example.com', 'stored_password');
-      
+      final success = await ref
+          .read(authProvider.notifier)
+          .signInWithEmail('stored@example.com', 'stored_password');
+
       if (success) {
         widget.onAuthenticationSuccess?.call();
         _showSuccessAnimation();
@@ -563,7 +538,7 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
                 _rememberMe = false;
                 _biometricsEnabled = false;
               });
-              
+
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Credenciais removidas com sucesso'),
@@ -581,16 +556,12 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
 
   void _showBiometricPrompt() {
     if (!mounted) return;
-    
+
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        icon: Icon(
-          _getBiometricIcon(),
-          size: 48,
-          color: Colors.green,
-        ),
+        icon: Icon(_getBiometricIcon(), size: 48, color: Colors.green),
         title: const Text('Autenticação Disponível'),
         content: Text(
           'Você pode usar $_biometricType para acessar sua conta de forma rápida e segura.',
@@ -629,9 +600,7 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
         ),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
@@ -655,7 +624,7 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
       'Validando acesso...',
       'Preparando sua conta...',
     ];
-    
+
     return messages[DateTime.now().second % messages.length];
   }
 }

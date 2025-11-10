@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/uuid_generator.dart';
@@ -30,30 +30,26 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
   late DateTime _selectedDate;
   late TimeOfDay _selectedTime;
   AppointmentStatus _selectedStatus = AppointmentStatus.scheduled;
-  
+
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     final appointment = widget.initialAppointment;
-    
+
     _veterinarianController = TextEditingController(
       text: appointment?.veterinarianName ?? '',
     );
-    
-    _reasonController = TextEditingController(
-      text: appointment?.reason ?? '',
-    );
-    
+
+    _reasonController = TextEditingController(text: appointment?.reason ?? '');
+
     _diagnosisController = TextEditingController(
       text: appointment?.diagnosis ?? '',
     );
-    
-    _notesController = TextEditingController(
-      text: appointment?.notes ?? '',
-    );
-    
+
+    _notesController = TextEditingController(text: appointment?.notes ?? '');
+
     _costController = TextEditingController(
       text: appointment?.cost?.toString() ?? '',
     );
@@ -82,12 +78,10 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final selectedAnimal = ref.watch(selectedAnimalProvider);
-    
+
     if (selectedAnimal == null) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Adicionar Consulta'),
-        ),
+        appBar: AppBar(title: const Text('Adicionar Consulta')),
         body: const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -139,8 +133,8 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                 CircleAvatar(
                   backgroundColor: theme.colorScheme.primary,
                   child: Text(
-                    selectedAnimal.name.isNotEmpty 
-                        ? selectedAnimal.name[0].toUpperCase() 
+                    selectedAnimal.name.isNotEmpty
+                        ? selectedAnimal.name[0].toUpperCase()
                         : 'A',
                     style: TextStyle(
                       color: theme.colorScheme.onPrimary,
@@ -190,20 +184,16 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                           const SizedBox(height: 12),
                           Row(
                             children: [
-                              Expanded(
-                                child: _buildDateField(context),
-                              ),
+                              Expanded(child: _buildDateField(context)),
                               const SizedBox(width: 16),
-                              Expanded(
-                                child: _buildTimeField(context),
-                              ),
+                              Expanded(child: _buildTimeField(context)),
                             ],
                           ),
                         ],
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _veterinarianController,
@@ -219,7 +209,7 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                       return null;
                     },
                   ),
-                  
+
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _reasonController,
@@ -236,7 +226,7 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                       return null;
                     },
                   ),
-                  
+
                   const SizedBox(height: 16),
                   if (widget.isEditing) ...[
                     DropdownButtonFormField<AppointmentStatus>(
@@ -271,7 +261,7 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                     ),
                     maxLines: 2,
                   ),
-                  
+
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _notesController,
@@ -282,7 +272,7 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                     ),
                     maxLines: 3,
                   ),
-                  
+
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _costController,
@@ -292,10 +282,14 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                       border: OutlineInputBorder(),
                       prefixText: 'R\$ ',
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     validator: (value) {
                       if (value != null && value.isNotEmpty) {
-                        final cost = double.tryParse(value.replaceAll(',', '.'));
+                        final cost = double.tryParse(
+                          value.replaceAll(',', '.'),
+                        );
                         if (cost == null || cost < 0) {
                           return 'Valor inválido';
                         }
@@ -303,7 +297,7 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                       return null;
                     },
                   ),
-                  
+
                   const SizedBox(height: 32),
                 ],
               ),
@@ -410,11 +404,11 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
         veterinarianName: _veterinarianController.text.trim(),
         date: appointmentDate,
         reason: _reasonController.text.trim(),
-        diagnosis: _diagnosisController.text.trim().isEmpty 
-            ? null 
+        diagnosis: _diagnosisController.text.trim().isEmpty
+            ? null
             : _diagnosisController.text.trim(),
-        notes: _notesController.text.trim().isEmpty 
-            ? null 
+        notes: _notesController.text.trim().isEmpty
+            ? null
             : _notesController.text.trim(),
         status: _selectedStatus,
         cost: cost,
@@ -435,11 +429,11 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
 
       if (success && mounted) {
         Navigator.of(context).pop();
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              widget.isEditing 
+              widget.isEditing
                   ? 'Consulta atualizada com sucesso'
                   : 'Consulta agendada com sucesso',
             ),

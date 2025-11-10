@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/appointment.dart';
@@ -6,6 +6,7 @@ import '../providers/appointments_provider.dart';
 import '../widgets/appointment_card.dart';
 import '../widgets/appointments_auto_reload_manager.dart';
 import '../widgets/empty_appointments_state.dart';
+
 final selectedAnimalIdProvider = StateProvider<String?>((ref) => null);
 
 class AppointmentsPage extends ConsumerStatefulWidget {
@@ -21,7 +22,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
   final Map<String, AnimationController> _slideAnimations = {};
   final Map<String, AnimationController> _fadeAnimations = {};
   String? _itemBeingDeleted;
-  
+
   @override
   void initState() {
     super.initState();
@@ -41,7 +42,9 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
   void _loadAppointments() {
     final selectedAnimalId = ref.read(selectedAnimalIdProvider);
     if (selectedAnimalId != null) {
-      ref.read(appointmentsProvider.notifier).loadAppointments(selectedAnimalId);
+      ref
+          .read(appointmentsProvider.notifier)
+          .loadAppointments(selectedAnimalId);
     }
   }
 
@@ -73,10 +76,8 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
 
     return AppointmentsAutoReloadManager(
       selectedAnimalId: selectedAnimalId,
-      onReloadStart: () {
-      },
-      onReloadComplete: () {
-      },
+      onReloadStart: () {},
+      onReloadComplete: () {},
       onReloadError: (error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -86,84 +87,91 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
         );
       },
       child: Scaffold(
-      appBar: AppBar(
-        title: const Text('Consultas'),
-        actions: [
-          Semantics(
-            label: 'Atualizar lista de consultas',
-            hint: 'Toque para recarregar as consultas',
-            child: IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _loadAppointments,
-            ),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          if (selectedAnimalId != null)
+        appBar: AppBar(
+          title: const Text('Consultas'),
+          actions: [
             Semantics(
-              label: 'Animal selecionado para consultas',
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                margin: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Semantics(
-                      label: 'Avatar do animal selecionado',
-                      child: CircleAvatar(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        child: Text(
-                          'A',  // Simplified - could get from animal data if needed
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Animal Selecionado',  // Simplified - could get from animal data
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              label: 'Atualizar lista de consultas',
+              hint: 'Toque para recarregar as consultas',
+              child: IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: _loadAppointments,
+              ),
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            if (selectedAnimalId != null)
+              Semantics(
+                label: 'Animal selecionado para consultas',
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Semantics(
+                        label: 'Avatar do animal selecionado',
+                        child: CircleAvatar(
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
+                          child: Text(
+                            'A', // Simplified - could get from animal data if needed
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Text(
-                            'ID: $selectedAnimalId',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Animal Selecionado', // Simplified - could get from animal data
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              'ID: $selectedAnimalId',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          Expanded(
-            child: _buildContent(context, appointmentState, appointments, selectedAnimalId),
-          ),
-        ],
-      ),
-      floatingActionButton: selectedAnimalId != null
-          ? Semantics(
-              label: 'Adicionar nova consulta',
-              hint: 'Toque para agendar uma nova consulta para o animal selecionado',
-              child: FloatingActionButton(
-                onPressed: () => context.push('/appointments/add'),
-                child: const Icon(Icons.add),
+            Expanded(
+              child: _buildContent(
+                context,
+                appointmentState,
+                appointments,
+                selectedAnimalId,
               ),
-            )
-          : null,
+            ),
+          ],
+        ),
+        floatingActionButton: selectedAnimalId != null
+            ? Semantics(
+                label: 'Adicionar nova consulta',
+                hint:
+                    'Toque para agendar uma nova consulta para o animal selecionado',
+                child: FloatingActionButton(
+                  onPressed: () => context.push('/appointments/add'),
+                  child: const Icon(Icons.add),
+                ),
+              )
+            : null,
       ),
     );
   }
@@ -235,9 +243,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
               Text(
                 state.errorMessage!,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.error,
-                ),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
               const SizedBox(height: 16),
               Semantics(
@@ -271,7 +277,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
             final slideController = _getSlideController(appointment.id);
             final fadeController = _getFadeController(appointment.id);
             final isBeingDeleted = _itemBeingDeleted == appointment.id;
-            
+
             return Dismissible(
               key: ValueKey(appointment.id),
               direction: DismissDirection.endToStart,
@@ -300,16 +306,18 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
               confirmDismiss: (direction) async {
                 return await _showDeleteDialogForDismiss(context, appointment);
               },
-              onDismissed: (direction) {
-              },
+              onDismissed: (direction) {},
               child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(1, 0),
-                  end: Offset.zero,
-                ).animate(CurvedAnimation(
-                  parent: slideController,
-                  curve: Curves.easeOutCubic,
-                )),
+                position:
+                    Tween<Offset>(
+                      begin: const Offset(1, 0),
+                      end: Offset.zero,
+                    ).animate(
+                      CurvedAnimation(
+                        parent: slideController,
+                        curve: Curves.easeOutCubic,
+                      ),
+                    ),
                 child: FadeTransition(
                   opacity: fadeController,
                   child: AnimatedContainer(
@@ -324,7 +332,9 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
                       boxShadow: isBeingDeleted
                           ? [
                               BoxShadow(
-                                color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.error.withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 spreadRadius: 2,
                               ),
@@ -335,21 +345,27 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
                       children: [
                         AppointmentCard(
                           appointment: appointment,
-                          onTap: isBeingDeleted 
-                              ? null 
-                              : () => context.push('/appointments/${appointment.id}'),
-                          onEdit: isBeingDeleted 
-                              ? null 
-                              : () => context.push('/appointments/${appointment.id}/edit'),
-                          onDelete: isBeingDeleted 
-                              ? null 
+                          onTap: isBeingDeleted
+                              ? null
+                              : () => context.push(
+                                  '/appointments/${appointment.id}',
+                                ),
+                          onEdit: isBeingDeleted
+                              ? null
+                              : () => context.push(
+                                  '/appointments/${appointment.id}/edit',
+                                ),
+                          onDelete: isBeingDeleted
+                              ? null
                               : () => _showDeleteDialog(context, appointment),
                         ),
                         if (isBeingDeleted)
                           Positioned.fill(
                             child: DecoratedBox(
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.surface.withValues(alpha: 0.8),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Center(
@@ -358,13 +374,17 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
                                   children: [
                                     CircularProgressIndicator(
                                       strokeWidth: 3,
-                                      color: Theme.of(context).colorScheme.error,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.error,
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
                                       'Excluindo...',
                                       style: TextStyle(
-                                        color: Theme.of(context).colorScheme.error,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.error,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -385,9 +405,12 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
     );
   }
 
-  Future<bool?> _showDeleteDialogForDismiss(BuildContext context, Appointment appointment) async {
+  Future<bool?> _showDeleteDialogForDismiss(
+    BuildContext context,
+    Appointment appointment,
+  ) async {
     final formattedDate = DateFormat('dd/MM/yyyy').format(appointment.date);
-    
+
     return showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -424,49 +447,60 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
           ),
           StatefulBuilder(
             builder: (context, setState) => ElevatedButton(
-              onPressed: _isDeleting ? null : () async {
-                setState(() => _isDeleting = true);
-                
-                try {
-                  this.setState(() => _itemBeingDeleted = appointment.id);
-                  
-                  final success = await ref
-                      .read(appointmentsProvider.notifier)
-                      .deleteAppointment(appointment.id);
-                  
-                  if (context.mounted) {
-                    Navigator.of(context).pop(success);
-                    if (success) {
-                      _showResultSnackBar(context, success, 'consulta excluída');
-                      final fadeController = _fadeAnimations[appointment.id];
-                      if (fadeController != null) {
-                        await fadeController.reverse();
+              onPressed: _isDeleting
+                  ? null
+                  : () async {
+                      setState(() => _isDeleting = true);
+
+                      try {
+                        this.setState(() => _itemBeingDeleted = appointment.id);
+
+                        final success = await ref
+                            .read(appointmentsProvider.notifier)
+                            .deleteAppointment(appointment.id);
+
+                        if (context.mounted) {
+                          Navigator.of(context).pop(success);
+                          if (success) {
+                            _showResultSnackBar(
+                              context,
+                              success,
+                              'consulta excluída',
+                            );
+                            final fadeController =
+                                _fadeAnimations[appointment.id];
+                            if (fadeController != null) {
+                              await fadeController.reverse();
+                            }
+                          } else {
+                            _showResultSnackBar(
+                              context,
+                              success,
+                              'consulta excluída',
+                            );
+                          }
+                        }
+                      } finally {
+                        if (mounted) {
+                          setState(() => _isDeleting = false);
+                          this.setState(() => _itemBeingDeleted = null);
+                        }
                       }
-                    } else {
-                      _showResultSnackBar(context, success, 'consulta excluída');
-                    }
-                  }
-                } finally {
-                  if (mounted) {
-                    setState(() => _isDeleting = false);
-                    this.setState(() => _itemBeingDeleted = null);
-                  }
-                }
-              },
+                    },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.error,
                 foregroundColor: Theme.of(context).colorScheme.onError,
               ),
-              child: _isDeleting 
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Text('Excluir'),
+              child: _isDeleting
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text('Excluir'),
             ),
           ),
         ],
@@ -477,22 +511,24 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
   void _showDeleteDialog(BuildContext context, Appointment appointment) async {
     await _showDeleteDialogForDismiss(context, appointment);
   }
-  
+
   void _showResultSnackBar(BuildContext context, bool success, String action) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          success 
-            ? '${action[0].toUpperCase()}${action.substring(1)} com sucesso'
-            : 'Erro ao ${action.split(' ').join(' ')}',
+          success
+              ? '${action[0].toUpperCase()}${action.substring(1)} com sucesso'
+              : 'Erro ao ${action.split(' ').join(' ')}',
         ),
-        backgroundColor: success 
-          ? Theme.of(context).colorScheme.primary
-          : Theme.of(context).colorScheme.error,
-        action: success ? null : SnackBarAction(
-          label: 'Tentar Novamente',
-          onPressed: _loadAppointments,
-        ),
+        backgroundColor: success
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.error,
+        action: success
+            ? null
+            : SnackBarAction(
+                label: 'Tentar Novamente',
+                onPressed: _loadAppointments,
+              ),
       ),
     );
   }

@@ -1,5 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:core/core.dart' hide SubscriptionStatus;
+import 'package:core/core.dart' hide SubscriptionStatus, Column;
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../../../../core/di/di_providers.dart';

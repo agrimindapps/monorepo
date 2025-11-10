@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../domain/entities/plant.dart';

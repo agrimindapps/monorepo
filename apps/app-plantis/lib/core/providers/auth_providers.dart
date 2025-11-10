@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide User;
+import 'package:core/core.dart' hide Column, User;
 import 'package:flutter/foundation.dart';
 
 import '../../features/auth/domain/usecases/reset_password_usecase.dart';

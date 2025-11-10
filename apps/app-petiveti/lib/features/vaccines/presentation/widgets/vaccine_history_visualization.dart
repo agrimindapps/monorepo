@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/vaccine.dart';
@@ -16,10 +16,12 @@ class VaccineHistoryVisualization extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<VaccineHistoryVisualization> createState() => _VaccineHistoryVisualizationState();
+  ConsumerState<VaccineHistoryVisualization> createState() =>
+      _VaccineHistoryVisualizationState();
 }
 
-class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisualization>
+class _VaccineHistoryVisualizationState
+    extends ConsumerState<VaccineHistoryVisualization>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _selectedTimeRange = 'all';
@@ -46,7 +48,8 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
 
     return Column(
       children: [
-        if (widget.showAnalytics) _buildAnalyticsHeader(theme, filteredVaccines),
+        if (widget.showAnalytics)
+          _buildAnalyticsHeader(theme, filteredVaccines),
         _buildFilterControls(theme),
         Expanded(
           child: TabBarView(
@@ -113,7 +116,13 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
     );
   }
 
-  Widget _buildStatCard(ThemeData theme, String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    ThemeData theme,
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -161,35 +170,49 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
                   setState(() => _selectedTimeRange = value);
                 }),
                 const SizedBox(width: 8),
-                _buildFilterChip('Este Ano', 'thisYear', _selectedTimeRange, (value) {
+                _buildFilterChip('Este Ano', 'thisYear', _selectedTimeRange, (
+                  value,
+                ) {
                   setState(() => _selectedTimeRange = value);
                 }),
                 const SizedBox(width: 8),
-                _buildFilterChip('6 Meses', '6months', _selectedTimeRange, (value) {
+                _buildFilterChip('6 Meses', '6months', _selectedTimeRange, (
+                  value,
+                ) {
                   setState(() => _selectedTimeRange = value);
                 }),
                 const SizedBox(width: 8),
-                _buildFilterChip('30 Dias', '30days', _selectedTimeRange, (value) {
+                _buildFilterChip('30 Dias', '30days', _selectedTimeRange, (
+                  value,
+                ) {
                   setState(() => _selectedTimeRange = value);
                 }),
                 const SizedBox(width: 16),
-                Container(
-                  height: 24,
-                  width: 1,
-                  color: theme.dividerColor,
+                Container(height: 24, width: 1, color: theme.dividerColor),
+                const SizedBox(width: 16),
+                _buildFilterChip('Todas Vacinas', 'all', _selectedVaccineType, (
+                  value,
+                ) {
+                  setState(() => _selectedVaccineType = value);
+                }),
+                const SizedBox(width: 8),
+                _buildFilterChip(
+                  'Essenciais',
+                  'required',
+                  _selectedVaccineType,
+                  (value) {
+                    setState(() => _selectedVaccineType = value);
+                  },
                 ),
-                const SizedBox(width: 16),
-                _buildFilterChip('Todas Vacinas', 'all', _selectedVaccineType, (value) {
-                  setState(() => _selectedVaccineType = value);
-                }),
                 const SizedBox(width: 8),
-                _buildFilterChip('Essenciais', 'required', _selectedVaccineType, (value) {
-                  setState(() => _selectedVaccineType = value);
-                }),
-                const SizedBox(width: 8),
-                _buildFilterChip('Opcionais', 'optional', _selectedVaccineType, (value) {
-                  setState(() => _selectedVaccineType = value);
-                }),
+                _buildFilterChip(
+                  'Opcionais',
+                  'optional',
+                  _selectedVaccineType,
+                  (value) {
+                    setState(() => _selectedVaccineType = value);
+                  },
+                ),
               ],
             ),
           ),
@@ -199,7 +222,12 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
     );
   }
 
-  Widget _buildFilterChip(String label, String value, String currentValue, ValueChanged<String> onChanged) {
+  Widget _buildFilterChip(
+    String label,
+    String value,
+    String currentValue,
+    ValueChanged<String> onChanged,
+  ) {
     final isSelected = value == currentValue;
     return FilterChip(
       label: Text(label),
@@ -230,7 +258,12 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
     );
   }
 
-  Widget _buildTimelineItem(ThemeData theme, DateTime date, List<Vaccine> vaccines, bool isLast) {
+  Widget _buildTimelineItem(
+    ThemeData theme,
+    DateTime date,
+    List<Vaccine> vaccines,
+    bool isLast,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -281,7 +314,9 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
                 ),
               ),
               const SizedBox(height: 8),
-              ...vaccines.map((vaccine) => _buildVaccineHistoryCard(theme, vaccine)),
+              ...vaccines.map(
+                (vaccine) => _buildVaccineHistoryCard(theme, vaccine),
+              ),
               const SizedBox(height: 16),
             ],
           ),
@@ -315,7 +350,10 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: _getVaccineColor(vaccine).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -335,10 +373,7 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
               children: [
                 Icon(Icons.medical_services, size: 16, color: Colors.grey[600]),
                 const SizedBox(width: 4),
-                Text(
-                  vaccine.veterinarian,
-                  style: theme.textTheme.bodySmall,
-                ),
+                Text(vaccine.veterinarian, style: theme.textTheme.bodySmall),
                 if (vaccine.batch != null) ...[
                   const SizedBox(width: 16),
                   Icon(Icons.qr_code, size: 16, color: Colors.grey[600]),
@@ -409,7 +444,10 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
           _buildAnalyticsCard(
             theme,
             'Eficácia por Tipo',
-            _buildEffectivenessChart(theme, analytics['effectiveness'] as Map<String, double>),
+            _buildEffectivenessChart(
+              theme,
+              analytics['effectiveness'] as Map<String, double>,
+            ),
           ),
           const SizedBox(height: 16),
           _buildAnalyticsCard(
@@ -421,7 +459,10 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
           _buildAnalyticsCard(
             theme,
             'Distribuição de Veterinários',
-            _buildVeterinarianDistribution(theme, analytics['veterinarians'] as Map<String, int>),
+            _buildVeterinarianDistribution(
+              theme,
+              analytics['veterinarians'] as Map<String, int>,
+            ),
           ),
           const SizedBox(height: 16),
           _buildAnalyticsCard(
@@ -455,7 +496,10 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
     );
   }
 
-  Widget _buildEffectivenessChart(ThemeData theme, Map<String, double> effectiveness) {
+  Widget _buildEffectivenessChart(
+    ThemeData theme,
+    Map<String, double> effectiveness,
+  ) {
     return Column(
       children: effectiveness.entries.map((entry) {
         return Padding(
@@ -472,8 +516,11 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
                   value: entry.value / 100,
                   backgroundColor: Colors.grey[300],
                   valueColor: AlwaysStoppedAnimation(
-                    entry.value >= 80 ? Colors.green : 
-                    entry.value >= 60 ? Colors.orange : Colors.red,
+                    entry.value >= 80
+                        ? Colors.green
+                        : entry.value >= 60
+                        ? Colors.orange
+                        : Colors.red,
                   ),
                 ),
               ),
@@ -505,7 +552,10 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
     );
   }
 
-  Widget _buildVeterinarianDistribution(ThemeData theme, Map<String, int> distribution) {
+  Widget _buildVeterinarianDistribution(
+    ThemeData theme,
+    Map<String, int> distribution,
+  ) {
     return Column(
       children: distribution.entries.take(5).map((entry) {
         return ListTile(
@@ -531,7 +581,7 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
           ),
           title: Text(recommendation['title'] as String),
           subtitle: Text(recommendation['description'] as String),
-          trailing: recommendation['urgent'] as bool 
+          trailing: recommendation['urgent'] as bool
               ? const Icon(Icons.priority_high, color: Colors.red)
               : null,
         );
@@ -544,11 +594,7 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.history,
-            size: 64,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.history, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'Nenhuma vacina encontrada',
@@ -567,8 +613,9 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
       ),
     );
   }
+
   List<Vaccine> _filterVaccines(List<Vaccine> vaccines) {
-    List<Vaccine> filtered = widget.animalId != null 
+    List<Vaccine> filtered = widget.animalId != null
         ? vaccines.where((v) => v.animalId == widget.animalId).toList()
         : vaccines;
     final now = DateTime.now();
@@ -582,7 +629,9 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
         break;
       case '30days':
         final thirtyDaysAgo = now.subtract(const Duration(days: 30));
-        filtered = filtered.where((v) => v.date.isAfter(thirtyDaysAgo)).toList();
+        filtered = filtered
+            .where((v) => v.date.isAfter(thirtyDaysAgo))
+            .toList();
         break;
     }
     switch (_selectedVaccineType) {
@@ -615,12 +664,16 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
 
   Map<DateTime, List<Vaccine>> _groupVaccinesByDate(List<Vaccine> vaccines) {
     final Map<DateTime, List<Vaccine>> grouped = {};
-    
+
     for (final vaccine in vaccines) {
-      final dateKey = DateTime(vaccine.date.year, vaccine.date.month, vaccine.date.day);
+      final dateKey = DateTime(
+        vaccine.date.year,
+        vaccine.date.month,
+        vaccine.date.day,
+      );
       grouped.putIfAbsent(dateKey, () => []).add(vaccine);
     }
-    
+
     return grouped;
   }
 
@@ -629,19 +682,25 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
     for (final vaccine in vaccines) {
       byType.putIfAbsent(vaccine.name, () => []).add(vaccine);
     }
-    
+
     final effectiveness = byType.map((key, value) {
       final completed = value.where((v) => v.isCompleted).length;
       final rate = value.isNotEmpty ? (completed / value.length * 100) : 0.0;
       return MapEntry(key, rate);
     });
     final trends = <String, int>{};
-    for (int year = DateTime.now().year - 2; year <= DateTime.now().year; year++) {
-      trends[year.toString()] = vaccines.where((v) => v.date.year == year).length;
+    for (
+      int year = DateTime.now().year - 2;
+      year <= DateTime.now().year;
+      year++
+    ) {
+      trends[year.toString()] = vaccines
+          .where((v) => v.date.year == year)
+          .length;
     }
     final veterinarians = <String, int>{};
     for (final vaccine in vaccines) {
-      veterinarians[vaccine.veterinarian] = 
+      veterinarians[vaccine.veterinarian] =
           (veterinarians[vaccine.veterinarian] ?? 0) + 1;
     }
 
@@ -654,7 +713,7 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
 
   List<Map<String, dynamic>> _generateRecommendations(List<Vaccine> vaccines) {
     final recommendations = <Map<String, dynamic>>[];
-    
+
     final overdue = vaccines.where((v) => v.isOverdue).toList();
     if (overdue.isNotEmpty) {
       recommendations.add({
@@ -708,10 +767,20 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
 
   String _formatDateHeader(DateTime date) {
     final months = [
-      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+      'Jan',
+      'Fev',
+      'Mar',
+      'Abr',
+      'Mai',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Set',
+      'Out',
+      'Nov',
+      'Dez',
     ];
-    
+
     return '${months[date.month - 1]} ${date.year}';
   }
 }

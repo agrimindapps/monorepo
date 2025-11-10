@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 
 import '../../../../features/animals/domain/entities/animal.dart';
@@ -11,11 +11,7 @@ class AddMedicationForm extends ConsumerStatefulWidget {
   final Medication? medication;
   final String? initialAnimalId;
 
-  const AddMedicationForm({
-    super.key,
-    this.medication,
-    this.initialAnimalId,
-  });
+  const AddMedicationForm({super.key, this.medication, this.initialAnimalId});
 
   @override
   ConsumerState<AddMedicationForm> createState() => _AddMedicationFormState();
@@ -74,31 +70,35 @@ class _AddMedicationFormState extends ConsumerState<AddMedicationForm> {
   @override
   Widget build(BuildContext context) {
     final animalsState = ref.watch(animalsNotifierProvider);
-    
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.medication != null ? 'Editar Medicamento' : 'Novo Medicamento'),
+        title: Text(
+          widget.medication != null ? 'Editar Medicamento' : 'Novo Medicamento',
+        ),
         elevation: 0,
       ),
-      body: animalsState.isLoading 
+      body: animalsState.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : animalsState.error != null 
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                      const SizedBox(height: 16),
-                      Text('Erro ao carregar animais: ${animalsState.error}'),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => ref.read(animalsNotifierProvider.notifier).loadAnimals(),
-                        child: const Text('Tentar novamente'),
-                      ),
-                    ],
+          : animalsState.error != null
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text('Erro ao carregar animais: ${animalsState.error}'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => ref
+                        .read(animalsNotifierProvider.notifier)
+                        .loadAnimals(),
+                    child: const Text('Tentar novamente'),
                   ),
-                )
-              : _buildForm(animalsState.animals),
+                ],
+              ),
+            )
+          : _buildForm(animalsState.animals),
     );
   }
 
@@ -273,7 +273,8 @@ class _AddMedicationFormState extends ConsumerState<AddMedicationForm> {
         final selectedDate = await showDatePicker(
           context: context,
           initialDate: date,
-          firstDate: minDate ?? DateTime.now().subtract(const Duration(days: 30)),
+          firstDate:
+              minDate ?? DateTime.now().subtract(const Duration(days: 30)),
           lastDate: DateTime.now().add(const Duration(days: 365)),
         );
         if (selectedDate != null) {
@@ -325,13 +326,12 @@ class _AddMedicationFormState extends ConsumerState<AddMedicationForm> {
           );
   }
 
-
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedAnimalId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecione um animal')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Selecione um animal')));
       return;
     }
 
@@ -340,16 +340,24 @@ class _AddMedicationFormState extends ConsumerState<AddMedicationForm> {
     try {
       final now = DateTime.now();
       final medication = Medication(
-        id: widget.medication?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        id:
+            widget.medication?.id ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
         animalId: _selectedAnimalId!,
         name: _nameController.text.trim(),
         dosage: _dosageController.text.trim(),
         frequency: _frequencyController.text.trim(),
-        duration: _durationController.text.isNotEmpty ? _durationController.text.trim() : null,
+        duration: _durationController.text.isNotEmpty
+            ? _durationController.text.trim()
+            : null,
         startDate: _startDate,
         endDate: _endDate,
-        notes: _notesController.text.isNotEmpty ? _notesController.text.trim() : null,
-        prescribedBy: _prescribedByController.text.isNotEmpty ? _prescribedByController.text.trim() : null,
+        notes: _notesController.text.isNotEmpty
+            ? _notesController.text.trim()
+            : null,
+        prescribedBy: _prescribedByController.text.isNotEmpty
+            ? _prescribedByController.text.trim()
+            : null,
         type: _selectedType,
         createdAt: widget.medication?.createdAt ?? now,
         updatedAt: now,
@@ -357,7 +365,9 @@ class _AddMedicationFormState extends ConsumerState<AddMedicationForm> {
       );
 
       if (widget.medication != null) {
-        await ref.read(medicationsProvider.notifier).updateMedication(medication);
+        await ref
+            .read(medicationsProvider.notifier)
+            .updateMedication(medication);
       } else {
         await ref.read(medicationsProvider.notifier).addMedication(medication);
       }
@@ -366,7 +376,7 @@ class _AddMedicationFormState extends ConsumerState<AddMedicationForm> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              widget.medication != null 
+              widget.medication != null
                   ? 'Medicamento atualizado com sucesso!'
                   : 'Medicamento cadastrado com sucesso!',
             ),

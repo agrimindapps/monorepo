@@ -1,6 +1,6 @@
 import 'dart:developer' as developer;
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 /// Centralizador para tratamento de erros da aplicação

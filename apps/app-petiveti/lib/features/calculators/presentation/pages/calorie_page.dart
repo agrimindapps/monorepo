@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/calorie_constants.dart';
@@ -17,62 +17,62 @@ import '../widgets/calorie_review_step.dart';
 import '../widgets/calorie_special_conditions_step.dart';
 
 /// **Refactored Calorie Calculator Page - Clean Architecture Implementation**
-/// 
+///
 /// A comprehensive calorie calculation interface built with Clean Architecture
 /// principles and optimized for performance and maintainability.
-/// 
+///
 /// ## Responsibilities:
 /// - **Page Layout**: Main structure and responsive design coordination
 /// - **Handler Coordination**: Manages specialized handlers for different concerns
 /// - **Widget Lifecycle**: Proper initialization and disposal of resources
 /// - **Separation of Concerns**: Each handler manages a specific aspect
-/// 
+///
 /// ## Architecture Components:
 /// - **CalorieAnimationManager**: Handles all animation logic and transitions
 /// - **CalorieNavigationHandler**: Manages step navigation and validation
 /// - **CalorieDialogManager**: Handles all dialog interactions and sharing
 /// - **CalorieMenuHandler**: Manages menu actions and presets
 /// - **PageController**: Controls the multi-step form navigation
-/// 
+///
 /// ## Unit Testing Strategy & Documentation:
-/// 
+///
 /// ### **1. Widget Testing Approach:**
 /// ```dart
 /// testWidgets('CaloriePage navigation flow', (tester) async {
 ///   await tester.pumpWidget(createTestWidget(CaloriePage()));
-///   
+///
 ///   // Test initial state
 ///   expect(find.byType(CalorieBasicInfoStep), findsOneWidget);
-///   
+///
 ///   // Test navigation to next step
 ///   await tester.tap(find.text('Avançar'));
 ///   await tester.pumpAndSettle();
 ///   expect(find.byType(CaloriePhysiologicalStep), findsOneWidget);
 /// });
 /// ```
-/// 
+///
 /// ### **2. Provider/State Testing:**
 /// ```dart
 /// test('calorie calculation provider state management', () {
 ///   final container = ProviderContainer();
 ///   addTearDown(container.dispose);
-///   
+///
 ///   // Test initial state
 ///   expect(container.read(calorieProvider).currentStep, equals(0));
-///   
+///
 ///   // Test input validation
 ///   container.read(calorieProvider.notifier).updateInput(testInput);
 ///   expect(container.read(calorieCanProceedProvider), isTrue);
 /// });
 /// ```
-/// 
+///
 /// ### **3. Handler Integration Testing:**
 /// ```dart
 /// group('CalorieNavigationHandler tests', () {
 ///   late CalorieNavigationHandler handler;
 ///   late PageController pageController;
 ///   late ProviderContainer container;
-///   
+///
 ///   setUp(() {
 ///     pageController = PageController();
 ///     container = ProviderContainer();
@@ -82,7 +82,7 @@ import '../widgets/calorie_special_conditions_step.dart';
 ///       onTransition: (_) {},
 ///     );
 ///   });
-///   
+///
 ///   test('should advance to next step when valid', () async {
 ///     // Setup valid input state
 ///     await handler.goToNextStep(false);
@@ -90,25 +90,25 @@ import '../widgets/calorie_special_conditions_step.dart';
 ///   });
 /// });
 /// ```
-/// 
+///
 /// ### **4. Animation Testing:**
 /// ```dart
 /// testWidgets('animation manager lifecycle', (tester) async {
 ///   final animationManager = CalorieAnimationManager();
 ///   animationManager.initialize(tester);
-///   
+///
 ///   // Test animation initialization
 ///   expect(animationManager.fadeAnimation, isNotNull);
-///   
+///
 ///   // Test transition animations
 ///   animationManager.animateTransition(() {});
 ///   await tester.pump();
-///   
+///
 ///   // Test cleanup
 ///   animationManager.dispose();
 /// });
 /// ```
-/// 
+///
 /// ### **5. Dialog Testing:**
 /// ```dart
 /// testWidgets('dialog manager interactions', (tester) async {
@@ -116,14 +116,14 @@ import '../widgets/calorie_special_conditions_step.dart';
 ///     context: tester.element(find.byType(MaterialApp)),
 ///     ref: container,
 ///   );
-///   
+///
 ///   // Test preset loading dialog
 ///   dialogManager.loadPresetsDialog();
 ///   await tester.pumpAndSettle();
 ///   expect(find.byType(Dialog), findsOneWidget);
 /// });
 /// ```
-/// 
+///
 /// ### **6. Integration Testing Checklist:**
 /// - [ ] **Complete User Flow**: From basic info to final calculation
 /// - [ ] **Error State Handling**: Network failures, validation errors
@@ -132,13 +132,13 @@ import '../widgets/calorie_special_conditions_step.dart';
 /// - [ ] **Responsive Design**: Different screen sizes and orientations
 /// - [ ] **Performance**: Animation smoothness, memory usage
 /// - [ ] **Data Persistence**: History saving and favorite management
-/// 
+///
 /// ### **7. Mock Strategies:**
 /// ```dart
-/// class MockCalorieProvider extends StateNotifier<CalorieState> 
+/// class MockCalorieProvider extends StateNotifier<CalorieState>
 ///     implements CalorieNotifier {
 ///   MockCalorieProvider() : super(const CalorieState.initial());
-///   
+///
 ///   @override
 ///   Future<void> calculate() async {
 ///     state = state.copyWith(isLoading: true);
@@ -151,19 +151,19 @@ import '../widgets/calorie_special_conditions_step.dart';
 ///   }
 /// }
 /// ```
-/// 
+///
 /// ### **8. Performance Testing:**
 /// - **Navigation Performance**: Measure step transition times
 /// - **Memory Management**: Monitor for handler disposal leaks
 /// - **Animation Performance**: Frame rate during transitions
 /// - **Provider Efficiency**: State update frequency and optimization
-/// 
+///
 /// ### **9. Edge Case Testing:**
 /// - **Rapid Navigation**: Fast tapping between steps
 /// - **Form Validation**: Invalid input combinations
 /// - **Network Conditions**: Offline/online state changes
 /// - **Lifecycle Events**: App backgrounding during calculations
-/// 
+///
 /// This comprehensive testing approach ensures reliability, performance,
 /// and maintainability of the calorie calculation feature.
 class CaloriePage extends ConsumerStatefulWidget {
@@ -173,7 +173,7 @@ class CaloriePage extends ConsumerStatefulWidget {
   ConsumerState<CaloriePage> createState() => _CaloriePageState();
 }
 
-class _CaloriePageState extends ConsumerState<CaloriePage> 
+class _CaloriePageState extends ConsumerState<CaloriePage>
     with TickerProviderStateMixin {
   late PageController _pageController;
   late CalorieAnimationManager _animationManager;
@@ -196,17 +196,14 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
       ref: ref,
       onTransition: _animationManager.animateTransition,
     );
-    _dialogManager = CalorieDialogManager(
-      context: context,
-      ref: ref,
-    );
+    _dialogManager = CalorieDialogManager(context: context, ref: ref);
     _menuHandler = CalorieMenuHandler(
       dialogManager: _dialogManager,
       ref: ref,
-      onPresetLoaded: () => _navigationHandler.goToPage(CalorieConstants.reviewStepIndex),
+      onPresetLoaded: () =>
+          _navigationHandler.goToPage(CalorieConstants.reviewStepIndex),
       onReset: () => _navigationHandler.resetToFirstStep(),
-      onHistoryItemSelected: () {
-      },
+      onHistoryItemSelected: () {},
     );
   }
 
@@ -222,7 +219,7 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(calorieProvider);
-    
+
     return Scaffold(
       appBar: _buildAppBar(),
       body: Column(
@@ -260,13 +257,13 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
     );
   }
 
-
   Widget _buildMainContent(CalorieState state) {
     return Expanded(
       child: FadeTransition(
-        opacity: _animationManager.fadeAnimation ?? 
-          const AlwaysStoppedAnimation(CalorieConstants.defaultOpacityValue),
-        child: state.hasResult 
+        opacity:
+            _animationManager.fadeAnimation ??
+            const AlwaysStoppedAnimation(CalorieConstants.defaultOpacityValue),
+        child: state.hasResult
             ? _buildResultView(state)
             : _buildStepperView(state),
       ),
@@ -281,25 +278,25 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
         CalorieBasicInfoStep(
           input: state.input,
           validationErrors: state.validationErrors,
-          onInputChanged: (input) => 
+          onInputChanged: (input) =>
               ref.read(calorieProvider.notifier).updateInput(input),
         ),
         CaloriePhysiologicalStep(
           input: state.input,
           validationErrors: state.validationErrors,
-          onInputChanged: (input) => 
+          onInputChanged: (input) =>
               ref.read(calorieProvider.notifier).updateInput(input),
         ),
         CalorieActivityConditionStep(
           input: state.input,
           validationErrors: state.validationErrors,
-          onInputChanged: (input) => 
+          onInputChanged: (input) =>
               ref.read(calorieProvider.notifier).updateInput(input),
         ),
         CalorieSpecialConditionsStep(
           input: state.input,
           validationErrors: state.validationErrors,
-          onInputChanged: (input) => 
+          onInputChanged: (input) =>
               ref.read(calorieProvider.notifier).updateInput(input),
         ),
         CalorieReviewStep(
@@ -319,7 +316,8 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
         children: [
           CalorieResultCard(
             output: state.output!,
-            onSaveAsFavorite: () => ref.read(calorieProvider.notifier).saveAsFavorite(),
+            onSaveAsFavorite: () =>
+                ref.read(calorieProvider.notifier).saveAsFavorite(),
             onRecalculate: () {
               ref.read(calorieProvider.notifier).clearResult();
               _navigationHandler.resetToFirstStep();
@@ -356,5 +354,4 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
       ],
     );
   }
-
 }

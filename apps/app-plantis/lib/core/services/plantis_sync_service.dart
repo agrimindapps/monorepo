@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 import '../../../features/plants/domain/repositories/plant_comments_repository.dart';

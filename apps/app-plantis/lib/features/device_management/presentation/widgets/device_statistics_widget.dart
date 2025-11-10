@@ -1,5 +1,5 @@
 import 'package:core/core.dart'
-    hide deviceManagementNotifierProvider, DeviceManagementState;
+    hide deviceManagementNotifierProvider, DeviceManagementState, Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/device_management_providers.dart';
@@ -21,7 +21,8 @@ class _DeviceStatisticsWidgetState
   void initState() {
     super.initState();
     Future.microtask(
-      () => ref.read(deviceManagementNotifierProvider.notifier).loadStatistics(),
+      () =>
+          ref.read(deviceManagementNotifierProvider.notifier).loadStatistics(),
     );
   }
 
@@ -38,10 +39,9 @@ class _DeviceStatisticsWidgetState
         final stats = deviceState.statistics!;
 
         return RefreshIndicator(
-          onRefresh:
-              () => ref
-                  .read(deviceManagementNotifierProvider.notifier)
-                  .loadStatistics(refresh: true),
+          onRefresh: () => ref
+              .read(deviceManagementNotifierProvider.notifier)
+              .loadStatistics(refresh: true),
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -62,9 +62,8 @@ class _DeviceStatisticsWidgetState
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error:
-          (error, stack) =>
-              Center(child: Text('Erro ao carregar estatísticas: $error')),
+      error: (error, stack) =>
+          Center(child: Text('Erro ao carregar estatísticas: $error')),
     );
   }
 

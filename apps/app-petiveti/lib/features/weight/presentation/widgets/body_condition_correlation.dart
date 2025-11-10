@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../providers/weights_provider.dart';
@@ -15,10 +15,12 @@ class BodyConditionCorrelation extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<BodyConditionCorrelation> createState() => _BodyConditionCorrelationState();
+  ConsumerState<BodyConditionCorrelation> createState() =>
+      _BodyConditionCorrelationState();
 }
 
-class _BodyConditionCorrelationState extends ConsumerState<BodyConditionCorrelation>
+class _BodyConditionCorrelationState
+    extends ConsumerState<BodyConditionCorrelation>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _selectedPeriod = 'last3months';
@@ -171,13 +173,10 @@ class _BodyConditionCorrelationState extends ConsumerState<BodyConditionCorrelat
             ),
             child: CustomPaint(
               size: const Size(double.infinity, 180),
-              painter: CorrelationChartPainter(
-                data: mockData,
-                theme: theme,
-              ),
+              painter: CorrelationChartPainter(data: mockData, theme: theme),
             ),
           ),
-          
+
           const SizedBox(height: 16),
           _buildCorrelationMetrics(theme, mockData),
         ],
@@ -215,14 +214,17 @@ class _BodyConditionCorrelationState extends ConsumerState<BodyConditionCorrelat
             Colors.orange,
           ),
           const SizedBox(height: 20),
-          
+
           _buildBcsWeightTable(theme),
         ],
       ),
     );
   }
 
-  Widget _buildCorrelationMetrics(ThemeData theme, List<Map<String, double>> data) {
+  Widget _buildCorrelationMetrics(
+    ThemeData theme,
+    List<Map<String, double>> data,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -235,10 +237,22 @@ class _BodyConditionCorrelationState extends ConsumerState<BodyConditionCorrelat
           Row(
             children: [
               Expanded(
-                child: _buildMetricItem(theme, 'Correlação', '0.85', 'Forte', Colors.green),
+                child: _buildMetricItem(
+                  theme,
+                  'Correlação',
+                  '0.85',
+                  'Forte',
+                  Colors.green,
+                ),
               ),
               Expanded(
-                child: _buildMetricItem(theme, 'R²', '0.72', 'Boa', Colors.blue),
+                child: _buildMetricItem(
+                  theme,
+                  'R²',
+                  '0.72',
+                  'Boa',
+                  Colors.blue,
+                ),
               ),
             ],
           ),
@@ -246,10 +260,22 @@ class _BodyConditionCorrelationState extends ConsumerState<BodyConditionCorrelat
           Row(
             children: [
               Expanded(
-                child: _buildMetricItem(theme, 'Tendência', '+0.8 kg/BCS', 'Positiva', Colors.orange),
+                child: _buildMetricItem(
+                  theme,
+                  'Tendência',
+                  '+0.8 kg/BCS',
+                  'Positiva',
+                  Colors.orange,
+                ),
               ),
               Expanded(
-                child: _buildMetricItem(theme, 'Precisão', '±1.2 kg', 'Alta', Colors.purple),
+                child: _buildMetricItem(
+                  theme,
+                  'Precisão',
+                  '±1.2 kg',
+                  'Alta',
+                  Colors.purple,
+                ),
               ),
             ],
           ),
@@ -258,14 +284,18 @@ class _BodyConditionCorrelationState extends ConsumerState<BodyConditionCorrelat
     );
   }
 
-  Widget _buildMetricItem(ThemeData theme, String label, String value, String description, Color color) {
+  Widget _buildMetricItem(
+    ThemeData theme,
+    String label,
+    String value,
+    String description,
+    Color color,
+  ) {
     return Column(
       children: [
         Text(
           label,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: Colors.grey[600],
-          ),
+          style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
         ),
         const SizedBox(height: 4),
         Text(
@@ -286,7 +316,13 @@ class _BodyConditionCorrelationState extends ConsumerState<BodyConditionCorrelat
     );
   }
 
-  Widget _buildAnalysisCard(ThemeData theme, String title, String description, IconData icon, Color color) {
+  Widget _buildAnalysisCard(
+    ThemeData theme,
+    String title,
+    String description,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -317,10 +353,7 @@ class _BodyConditionCorrelationState extends ConsumerState<BodyConditionCorrelat
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  description,
-                  style: theme.textTheme.bodySmall,
-                ),
+                Text(description, style: theme.textTheme.bodySmall),
               ],
             ),
           ),
@@ -342,7 +375,9 @@ class _BodyConditionCorrelationState extends ConsumerState<BodyConditionCorrelat
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(8),
+              ),
             ),
             child: Row(
               children: [
@@ -377,21 +412,27 @@ class _BodyConditionCorrelationState extends ConsumerState<BodyConditionCorrelat
             flex: 2,
             child: Text(
               'BCS',
-              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           Expanded(
             flex: 3,
             child: Text(
               'Peso Estimado',
-              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           Expanded(
             flex: 3,
             child: Text(
               'Status',
-              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -401,7 +442,7 @@ class _BodyConditionCorrelationState extends ConsumerState<BodyConditionCorrelat
 
   Widget _buildTableRow(ThemeData theme, Map<String, dynamic> row) {
     final statusColor = _getStatusColor(row['status'] as String);
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       decoration: BoxDecoration(
@@ -444,6 +485,7 @@ class _BodyConditionCorrelationState extends ConsumerState<BodyConditionCorrelat
       ),
     );
   }
+
   List<Map<String, double>> _generateMockCorrelationData() {
     return [
       {'weight': 18.5, 'bcs': 3.0},
@@ -489,10 +531,7 @@ class CorrelationChartPainter extends CustomPainter {
   final List<Map<String, double>> data;
   final ThemeData theme;
 
-  CorrelationChartPainter({
-    required this.data,
-    required this.theme,
-  });
+  CorrelationChartPainter({required this.data, required this.theme});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -515,33 +554,43 @@ class CorrelationChartPainter extends CustomPainter {
     );
     final weights = data.map((d) => d['weight']!).toList();
     final bcsValues = data.map((d) => d['bcs']!).toList();
-    
+
     final minWeight = weights.reduce((a, b) => a < b ? a : b);
     final maxWeight = weights.reduce((a, b) => a > b ? a : b);
     final minBcs = bcsValues.reduce((a, b) => a < b ? a : b);
     final maxBcs = bcsValues.reduce((a, b) => a > b ? a : b);
     for (final point in data) {
-      final x = chartRect.left + 
-          ((point['weight']! - minWeight) / (maxWeight - minWeight)) * chartRect.width;
-      final y = chartRect.bottom - 
+      final x =
+          chartRect.left +
+          ((point['weight']! - minWeight) / (maxWeight - minWeight)) *
+              chartRect.width;
+      final y =
+          chartRect.bottom -
           ((point['bcs']! - minBcs) / (maxBcs - minBcs)) * chartRect.height;
-      
+
       canvas.drawCircle(Offset(x, y), 4, paint);
     }
     if (data.length > 1) {
       final firstPoint = data.first;
       final lastPoint = data.last;
-      
-      final startX = chartRect.left + 
-          ((firstPoint['weight']! - minWeight) / (maxWeight - minWeight)) * chartRect.width;
-      final startY = chartRect.bottom - 
-          ((firstPoint['bcs']! - minBcs) / (maxBcs - minBcs)) * chartRect.height;
-      
-      final endX = chartRect.left + 
-          ((lastPoint['weight']! - minWeight) / (maxWeight - minWeight)) * chartRect.width;
-      final endY = chartRect.bottom - 
+
+      final startX =
+          chartRect.left +
+          ((firstPoint['weight']! - minWeight) / (maxWeight - minWeight)) *
+              chartRect.width;
+      final startY =
+          chartRect.bottom -
+          ((firstPoint['bcs']! - minBcs) / (maxBcs - minBcs)) *
+              chartRect.height;
+
+      final endX =
+          chartRect.left +
+          ((lastPoint['weight']! - minWeight) / (maxWeight - minWeight)) *
+              chartRect.width;
+      final endY =
+          chartRect.bottom -
           ((lastPoint['bcs']! - minBcs) / (maxBcs - minBcs)) * chartRect.height;
-      
+
       canvas.drawLine(Offset(startX, startY), Offset(endX, endY), linePaint);
     }
     final axisPaint = Paint()

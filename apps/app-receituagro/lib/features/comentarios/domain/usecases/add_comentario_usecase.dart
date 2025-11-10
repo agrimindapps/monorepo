@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../constants/comentarios_design_tokens.dart';
 import '../entities/comentario_entity.dart';

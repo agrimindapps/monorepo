@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 /// Adaptador para converter entre o sistema antigo (`Either<Failure, T>`) e o novo (`Result<T>`)

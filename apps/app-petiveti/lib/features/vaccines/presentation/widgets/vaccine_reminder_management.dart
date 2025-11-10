@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/vaccine.dart';
@@ -16,10 +16,12 @@ class VaccineReminderManagement extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<VaccineReminderManagement> createState() => _VaccineReminderManagementState();
+  ConsumerState<VaccineReminderManagement> createState() =>
+      _VaccineReminderManagementState();
 }
 
-class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManagement>
+class _VaccineReminderManagementState
+    extends ConsumerState<VaccineReminderManagement>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _enableSmartReminders = true;
@@ -89,7 +91,7 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
         children: [
           _buildReminderOverview(theme, state.vaccines),
           const SizedBox(height: 24),
-          
+
           if (overdueReminders.isNotEmpty) ...[
             _buildReminderSection(
               theme,
@@ -101,7 +103,7 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
             ),
             const SizedBox(height: 16),
           ],
-          
+
           if (upcomingReminders.isNotEmpty) ...[
             _buildReminderSection(
               theme,
@@ -112,7 +114,7 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
             ),
             const SizedBox(height: 16),
           ],
-          
+
           if (activeReminders.isNotEmpty) ...[
             _buildReminderSection(
               theme,
@@ -122,8 +124,10 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
               theme.colorScheme.primary,
             ),
           ],
-          
-          if (activeReminders.isEmpty && upcomingReminders.isEmpty && overdueReminders.isEmpty)
+
+          if (activeReminders.isEmpty &&
+              upcomingReminders.isEmpty &&
+              overdueReminders.isEmpty)
             _buildEmptyRemindersState(theme),
         ],
       ),
@@ -192,7 +196,13 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
     );
   }
 
-  Widget _buildStatItem(ThemeData theme, String label, String value, IconData icon, Color color) {
+  Widget _buildStatItem(
+    ThemeData theme,
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Column(
       children: [
         Icon(icon, color: color, size: 24),
@@ -255,12 +265,19 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
           ],
         ),
         const SizedBox(height: 8),
-        ...vaccines.map((vaccine) => _buildReminderCard(theme, vaccine, color, isUrgent)),
+        ...vaccines.map(
+          (vaccine) => _buildReminderCard(theme, vaccine, color, isUrgent),
+        ),
       ],
     );
   }
 
-  Widget _buildReminderCard(ThemeData theme, Vaccine vaccine, Color accentColor, bool isUrgent) {
+  Widget _buildReminderCard(
+    ThemeData theme,
+    Vaccine vaccine,
+    Color accentColor,
+    bool isUrgent,
+  ) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
       elevation: isUrgent ? 4 : 1,
@@ -298,7 +315,10 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: accentColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
@@ -330,11 +350,7 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
                   Expanded(
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.pets,
-                          size: 16,
-                          color: Colors.grey[600],
-                        ),
+                        Icon(Icons.pets, size: 16, color: Colors.grey[600]),
                         const SizedBox(width: 4),
                         Text(
                           'Pet ID: ${vaccine.animalId}',
@@ -392,27 +408,33 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
                   const SizedBox(height: 16),
                   SwitchListTile(
                     title: const Text('Lembretes Inteligentes'),
-                    subtitle: const Text('Sistema automático baseado no tipo de vacina'),
+                    subtitle: const Text(
+                      'Sistema automático baseado no tipo de vacina',
+                    ),
                     value: _enableSmartReminders,
-                    onChanged: (value) => setState(() => _enableSmartReminders = value),
+                    onChanged: (value) =>
+                        setState(() => _enableSmartReminders = value),
                   ),
                   SwitchListTile(
                     title: const Text('Notificações Push'),
                     subtitle: const Text('Receber notificações no dispositivo'),
                     value: _enablePushNotifications,
-                    onChanged: (value) => setState(() => _enablePushNotifications = value),
+                    onChanged: (value) =>
+                        setState(() => _enablePushNotifications = value),
                   ),
                   SwitchListTile(
                     title: const Text('Lembretes por E-mail'),
                     subtitle: const Text('Receber lembretes por e-mail'),
                     value: _enableEmailReminders,
-                    onChanged: (value) => setState(() => _enableEmailReminders = value),
+                    onChanged: (value) =>
+                        setState(() => _enableEmailReminders = value),
                   ),
                   SwitchListTile(
                     title: const Text('Lembretes por SMS'),
                     subtitle: const Text('Receber lembretes por SMS'),
                     value: _enableSmsReminders,
-                    onChanged: (value) => setState(() => _enableSmsReminders = value),
+                    onChanged: (value) =>
+                        setState(() => _enableSmsReminders = value),
                   ),
                 ],
               ),
@@ -456,15 +478,20 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
                   ListTile(
                     leading: const Icon(Icons.repeat),
                     title: const Text('Frequência'),
-                    subtitle: Text(_getFrequencyDisplayName(_reminderFrequency)),
+                    subtitle: Text(
+                      _getFrequencyDisplayName(_reminderFrequency),
+                    ),
                     trailing: const Icon(Icons.edit),
                     onTap: () => _selectFrequency(),
                   ),
                   SwitchListTile(
                     title: const Text('Lembretes em Fins de Semana'),
-                    subtitle: const Text('Enviar lembretes aos sábados e domingos'),
+                    subtitle: const Text(
+                      'Enviar lembretes aos sábados e domingos',
+                    ),
                     value: _weekendReminders,
-                    onChanged: (value) => setState(() => _weekendReminders = value),
+                    onChanged: (value) =>
+                        setState(() => _weekendReminders = value),
                   ),
                 ],
               ),
@@ -494,11 +521,7 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.notifications_none,
-            size: 64,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.notifications_none, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'Nenhum lembrete ativo',
@@ -523,24 +546,31 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
       ),
     );
   }
+
   List<Vaccine> _getActiveReminders(List<Vaccine> vaccines) {
-    return vaccines.where((v) => 
-        !v.isCompleted && 
-        v.reminderDate != null && 
-        v.reminderDate!.isAfter(DateTime.now())
-    ).toList();
+    return vaccines
+        .where(
+          (v) =>
+              !v.isCompleted &&
+              v.reminderDate != null &&
+              v.reminderDate!.isAfter(DateTime.now()),
+        )
+        .toList();
   }
 
   List<Vaccine> _getUpcomingReminders(List<Vaccine> vaccines) {
     final now = DateTime.now();
     final next7Days = now.add(const Duration(days: 7));
-    
-    return vaccines.where((v) => 
-        !v.isCompleted && 
-        v.nextDueDate != null &&
-        v.nextDueDate!.isAfter(now) &&
-        v.nextDueDate!.isBefore(next7Days)
-    ).toList();
+
+    return vaccines
+        .where(
+          (v) =>
+              !v.isCompleted &&
+              v.nextDueDate != null &&
+              v.nextDueDate!.isAfter(now) &&
+              v.nextDueDate!.isBefore(next7Days),
+        )
+        .toList();
   }
 
   List<Vaccine> _getOverdueReminders(List<Vaccine> vaccines) {
@@ -551,7 +581,9 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
     final active = _getActiveReminders(vaccines);
     final urgent = _getOverdueReminders(vaccines);
     final upcoming = _getUpcomingReminders(vaccines);
-    final smart = vaccines.where((v) => _enableSmartReminders && !v.isCompleted).length;
+    final smart = vaccines
+        .where((v) => _enableSmartReminders && !v.isCompleted)
+        .length;
 
     return {
       'total': active.length,
@@ -581,8 +613,7 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
     );
   }
 
-  void _editReminder(Vaccine vaccine) {
-  }
+  void _editReminder(Vaccine vaccine) {}
 
   void _snoozeReminder(Vaccine vaccine) {
     showDialog<void>(
@@ -623,12 +654,16 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
   void _performSnooze(Vaccine vaccine, int hours) {
     Navigator.pop(context);
     final newReminderDate = DateTime.now().add(Duration(hours: hours));
-    
-    ref.read(vaccinesProvider.notifier).scheduleReminder(vaccine.id, newReminderDate);
-    
+
+    ref
+        .read(vaccinesProvider.notifier)
+        .scheduleReminder(vaccine.id, newReminderDate);
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Lembrete adiado para ${_formatDateTime(newReminderDate)}'),
+        content: Text(
+          'Lembrete adiado para ${_formatDateTime(newReminderDate)}',
+        ),
         backgroundColor: Colors.orange,
       ),
     );
@@ -636,7 +671,7 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
 
   void _markAsCompleted(Vaccine vaccine) {
     ref.read(vaccinesProvider.notifier).markAsCompleted(vaccine.id);
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Vacina marcada como concluída'),
@@ -696,7 +731,7 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
       context: context,
       initialTime: _preferredTime,
     );
-    
+
     if (time != null) {
       setState(() => _preferredTime = time);
     }
@@ -709,21 +744,22 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
         title: const Text('Frequência dos Lembretes'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            {'value': 'once', 'name': 'Uma vez'},
-            {'value': 'daily', 'name': 'Diariamente'},
-            {'value': 'weekly', 'name': 'Semanalmente'},
-          ].map((freq) {
-            return RadioListTile<String>(
-              title: Text(freq['name']!),
-              value: freq['value']!,
-              groupValue: _reminderFrequency,
-              onChanged: (value) {
-                setState(() => _reminderFrequency = value!);
-                Navigator.pop(context);
-              },
-            );
-          }).toList(),
+          children:
+              [
+                {'value': 'once', 'name': 'Uma vez'},
+                {'value': 'daily', 'name': 'Diariamente'},
+                {'value': 'weekly', 'name': 'Semanalmente'},
+              ].map((freq) {
+                return RadioListTile<String>(
+                  title: Text(freq['name']!),
+                  value: freq['value']!,
+                  groupValue: _reminderFrequency,
+                  onChanged: (value) {
+                    setState(() => _reminderFrequency = value!);
+                    Navigator.pop(context);
+                  },
+                );
+              }).toList(),
         ),
       ),
     );

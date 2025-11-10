@@ -1,6 +1,6 @@
 import 'dart:convert' as convert;
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../domain/entities/export_request.dart';
 import '../../domain/repositories/data_export_repository.dart';

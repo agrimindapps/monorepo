@@ -1,14 +1,8 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 /// Enum para as tabs da navegação principal
-enum MainTab {
-  home,
-  animals,
-  calculators,
-  reminders,
-  profile,
-}
+enum MainTab { home, animals, calculators, reminders, profile }
 
 /// Provider para gerenciar o estado da tab atual
 final currentTabProvider = StateProvider<MainTab>((ref) => MainTab.home);
@@ -51,7 +45,7 @@ class MainBottomNavigation extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: MainTab.values.map((tab) {
                     final isSelected = _isTabSelected(tab, currentLocation);
-                    
+
                     return Expanded(
                       child: _NavBarItem(
                         tab: tab,
@@ -83,9 +77,9 @@ class MainBottomNavigation extends ConsumerWidget {
       case MainTab.reminders:
         return location.startsWith('/reminders');
       case MainTab.profile:
-        return location.startsWith('/profile') || 
-               location.startsWith('/expenses') ||
-               location.startsWith('/subscription');
+        return location.startsWith('/profile') ||
+            location.startsWith('/expenses') ||
+            location.startsWith('/subscription');
     }
   }
 
@@ -126,9 +120,9 @@ class _NavBarItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     final tabInfo = _getTabInfo(tab);
-    
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -137,40 +131,42 @@ class _NavBarItem extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected 
-              ? colorScheme.primary.withValues(alpha: 0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              child: Icon(
-                (isSelected ? tabInfo['selectedIcon'] : tabInfo['icon']) as IconData? ?? Icons.home,
-                color: isSelected 
-                    ? colorScheme.primary
-                    : colorScheme.onSurfaceVariant,
-                size: 24,
+          decoration: BoxDecoration(
+            color: isSelected
+                ? colorScheme.primary.withValues(alpha: 0.1)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                child: Icon(
+                  (isSelected ? tabInfo['selectedIcon'] : tabInfo['icon'])
+                          as IconData? ??
+                      Icons.home,
+                  color: isSelected
+                      ? colorScheme.primary
+                      : colorScheme.onSurfaceVariant,
+                  size: 24,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 200),
-              style: theme.textTheme.labelSmall!.copyWith(
-                color: isSelected 
-                    ? colorScheme.primary
-                    : colorScheme.onSurfaceVariant,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                fontSize: 10,
+              const SizedBox(height: 4),
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                style: theme.textTheme.labelSmall!.copyWith(
+                  color: isSelected
+                      ? colorScheme.primary
+                      : colorScheme.onSurfaceVariant,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  fontSize: 10,
+                ),
+                child: Text(tabInfo['label'] as String? ?? ''),
               ),
-              child: Text(tabInfo['label'] as String? ?? ''),
-            ),
-          ],
-        ),
+            ],
+          ),
         ),
       ),
     );
@@ -217,19 +213,11 @@ class BottomNavShell extends ConsumerWidget {
   final Widget child;
   final GoRouterState state;
 
-  const BottomNavShell({
-    super.key,
-    required this.child,
-    required this.state,
-  });
+  const BottomNavShell({super.key, required this.child, required this.state});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hideBottomNavPages = [
-      '/login',
-      '/onboarding',
-      '/splash',
-    ];
+    final hideBottomNavPages = ['/login', '/onboarding', '/splash'];
 
     final shouldShowBottomNav = !hideBottomNavPages.any(
       (page) => state.uri.toString().startsWith(page),
@@ -251,11 +239,7 @@ class NavigationBadge extends StatelessWidget {
   final int count;
   final Widget child;
 
-  const NavigationBadge({
-    super.key,
-    required this.count,
-    required this.child,
-  });
+  const NavigationBadge({super.key, required this.count, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -273,10 +257,7 @@ class NavigationBadge extends StatelessWidget {
                 color: Theme.of(context).colorScheme.error,
                 borderRadius: BorderRadius.circular(10),
               ),
-              constraints: const BoxConstraints(
-                minWidth: 16,
-                minHeight: 16,
-              ),
+              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
               child: Text(
                 count > 99 ? '99+' : count.toString(),
                 style: TextStyle(

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/vaccine.dart';
@@ -23,7 +23,7 @@ class VaccineCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
@@ -56,13 +56,18 @@ class VaccineCard extends ConsumerWidget {
                   _buildStatusBadge(context),
                 ],
               ),
-              
+
               const SizedBox(height: 8),
               if (vaccine.priorityLevel != 'Baixa')
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: _getPriorityColor(vaccine.priorityLevel).withValues(alpha: 0.1),
+                    color: _getPriorityColor(
+                      vaccine.priorityLevel,
+                    ).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: _getPriorityColor(vaccine.priorityLevel),
@@ -88,7 +93,7 @@ class VaccineCard extends ConsumerWidget {
                     ],
                   ),
                 ),
-              
+
               if (vaccine.priorityLevel != 'Baixa') const SizedBox(height: 8),
               Row(
                 children: [
@@ -102,37 +107,41 @@ class VaccineCard extends ConsumerWidget {
                     child: Text(
                       vaccine.veterinarian,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.8,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 4),
               Row(
                 children: [
                   Icon(
-                    vaccine.isCompleted 
+                    vaccine.isCompleted
                         ? Icons.check_circle_outline
                         : Icons.schedule_outlined,
                     size: 16,
-                    color: vaccine.isCompleted 
+                    color: vaccine.isCompleted
                         ? Colors.green
                         : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      vaccine.isCompleted 
+                      vaccine.isCompleted
                           ? 'Aplicada em ${_formatDate(vaccine.date)}'
                           : vaccine.nextDoseInfo,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: vaccine.isCompleted 
+                        color: vaccine.isCompleted
                             ? Colors.green[700]
-                            : vaccine.isOverdue 
-                                ? Colors.red[700]
-                                : theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                            : vaccine.isOverdue
+                            ? Colors.red[700]
+                            : theme.colorScheme.onSurface.withValues(
+                                alpha: 0.8,
+                              ),
                         fontWeight: vaccine.isOverdue ? FontWeight.w600 : null,
                       ),
                     ),
@@ -146,7 +155,7 @@ class VaccineCard extends ConsumerWidget {
                     Icon(
                       Icons.notifications_outlined,
                       size: 16,
-                      color: vaccine.needsReminder 
+                      color: vaccine.needsReminder
                           ? Colors.orange[700]
                           : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
@@ -155,10 +164,14 @@ class VaccineCard extends ConsumerWidget {
                       child: Text(
                         vaccine.reminderInfo,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: vaccine.needsReminder 
+                          color: vaccine.needsReminder
                               ? Colors.orange[700]
-                              : theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                          fontWeight: vaccine.needsReminder ? FontWeight.w600 : null,
+                              : theme.colorScheme.onSurface.withValues(
+                                  alpha: 0.7,
+                                ),
+                          fontWeight: vaccine.needsReminder
+                              ? FontWeight.w600
+                              : null,
                         ),
                       ),
                     ),
@@ -182,13 +195,16 @@ class VaccineCard extends ConsumerWidget {
                     'Fabricante: ${vaccine.manufacturer}',
                   ),
               ],
-              if (vaccine.notes != null && vaccine.notes!.trim().isNotEmpty) ...[
+              if (vaccine.notes != null &&
+                  vaccine.notes!.trim().isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.3,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -211,7 +227,7 @@ class VaccineCard extends ConsumerWidget {
                       color: Colors.green,
                       onPressed: () => _markAsCompleted(context, ref),
                     ),
-                  
+
                   if (vaccine.isCompleted)
                     _buildActionChip(
                       context,
@@ -220,21 +236,23 @@ class VaccineCard extends ConsumerWidget {
                       color: Colors.green,
                       onPressed: null, // Disabled
                     ),
-                  
+
                   const SizedBox(width: 8),
                   if (!vaccine.isCompleted && vaccine.nextDueDate != null)
                     _buildActionChip(
                       context,
-                      label: vaccine.reminderDate != null ? 'Lembrete Ativo' : 'Lembrete',
-                      icon: vaccine.reminderDate != null 
-                          ? Icons.notifications_active 
+                      label: vaccine.reminderDate != null
+                          ? 'Lembrete Ativo'
+                          : 'Lembrete',
+                      icon: vaccine.reminderDate != null
+                          ? Icons.notifications_active
                           : Icons.notifications_none,
-                      color: vaccine.reminderDate != null 
-                          ? Colors.orange 
+                      color: vaccine.reminderDate != null
+                          ? Colors.orange
                           : theme.colorScheme.primary,
                       onPressed: () => _showReminderDialog(context, ref),
                     ),
-                  
+
                   const Spacer(),
                   if (onEdit != null || onDelete != null)
                     PopupMenuButton<String>(
@@ -267,14 +285,19 @@ class VaccineCard extends ConsumerWidget {
                               children: [
                                 Icon(Icons.delete, color: Colors.red),
                                 SizedBox(width: 8),
-                                Text('Excluir', style: TextStyle(color: Colors.red)),
+                                Text(
+                                  'Excluir',
+                                  style: TextStyle(color: Colors.red),
+                                ),
                               ],
                             ),
                           ),
                       ],
                       child: Icon(
                         Icons.more_vert,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.6,
+                        ),
                       ),
                     ),
                 ],
@@ -289,7 +312,7 @@ class VaccineCard extends ConsumerWidget {
   Widget _buildStatusBadge(BuildContext context) {
     final theme = Theme.of(context);
     final statusColor = _getStatusColor(vaccine.status);
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -309,7 +332,7 @@ class VaccineCard extends ConsumerWidget {
 
   Widget _buildInfoRow(BuildContext context, IconData icon, String text) {
     final theme = Theme.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
@@ -342,7 +365,7 @@ class VaccineCard extends ConsumerWidget {
   }) {
     final theme = Theme.of(context);
     final isEnabled = onPressed != null;
-    
+
     return ActionChip(
       onPressed: onPressed,
       avatar: Icon(
@@ -357,8 +380,8 @@ class VaccineCard extends ConsumerWidget {
           fontWeight: FontWeight.w600,
         ),
       ),
-      backgroundColor: isEnabled 
-          ? color.withValues(alpha: 0.1) 
+      backgroundColor: isEnabled
+          ? color.withValues(alpha: 0.1)
           : theme.disabledColor.withValues(alpha: 0.1),
       side: BorderSide(
         color: isEnabled ? color : theme.disabledColor,
@@ -410,7 +433,7 @@ class VaccineCard extends ConsumerWidget {
 
   void _markAsCompleted(BuildContext context, WidgetRef ref) {
     ref.read(vaccinesProvider.notifier).markAsCompleted(vaccine.id);
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Vacina ${vaccine.name} marcada como concluída'),
@@ -421,9 +444,11 @@ class VaccineCard extends ConsumerWidget {
   }
 
   void _showReminderDialog(BuildContext context, WidgetRef ref) {
-    DateTime selectedDate = vaccine.reminderDate ?? 
-        (vaccine.nextDueDate?.subtract(const Duration(days: 3)) ?? DateTime.now().add(const Duration(days: 1)));
-    
+    DateTime selectedDate =
+        vaccine.reminderDate ??
+        (vaccine.nextDueDate?.subtract(const Duration(days: 3)) ??
+            DateTime.now().add(const Duration(days: 1)));
+
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -431,7 +456,9 @@ class VaccineCard extends ConsumerWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Quando você quer ser lembrado sobre a vacina ${vaccine.name}?'),
+            Text(
+              'Quando você quer ser lembrado sobre a vacina ${vaccine.name}?',
+            ),
             const SizedBox(height: 16),
             ListTile(
               title: Text('Data: ${_formatDate(selectedDate)}'),
@@ -441,7 +468,9 @@ class VaccineCard extends ConsumerWidget {
                   context: context,
                   initialDate: selectedDate,
                   firstDate: DateTime.now(),
-                  lastDate: vaccine.nextDueDate ?? DateTime.now().add(const Duration(days: 365)),
+                  lastDate:
+                      vaccine.nextDueDate ??
+                      DateTime.now().add(const Duration(days: 365)),
                 );
                 if (date != null) {
                   selectedDate = date;
@@ -457,12 +486,16 @@ class VaccineCard extends ConsumerWidget {
           ),
           FilledButton(
             onPressed: () {
-              ref.read(vaccinesProvider.notifier).scheduleReminder(vaccine.id, selectedDate);
+              ref
+                  .read(vaccinesProvider.notifier)
+                  .scheduleReminder(vaccine.id, selectedDate);
               Navigator.pop(context);
-              
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Lembrete agendado para ${_formatDate(selectedDate)}'),
+                  content: Text(
+                    'Lembrete agendado para ${_formatDate(selectedDate)}',
+                  ),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -479,7 +512,9 @@ class VaccineCard extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Excluir Vacina'),
-        content: Text('Tem certeza que deseja excluir a vacina ${vaccine.name}? Esta ação não pode ser desfeita.'),
+        content: Text(
+          'Tem certeza que deseja excluir a vacina ${vaccine.name}? Esta ação não pode ser desfeita.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

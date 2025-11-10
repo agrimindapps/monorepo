@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -7,6 +7,7 @@ import 'core/di/injection_container.dart' as di;
 import 'core/di/modules/account_deletion_module.dart';
 import 'core/di/modules/sync_module.dart';
 import 'firebase_options.dart';
+
 late ICrashlyticsRepository _crashlyticsRepository;
 
 Future<void> main() async {
@@ -23,7 +24,9 @@ Future<void> main() async {
     debugPrint('Firebase initialized successfully');
   } catch (e) {
     debugPrint('Firebase initialization failed: $e');
-    debugPrint('App will continue without Firebase features (local-first mode)');
+    debugPrint(
+      'App will continue without Firebase features (local-first mode)',
+    );
   }
 
   // Initialize DI with Firebase status (AFTER Firebase)
@@ -72,7 +75,9 @@ Future<void> main() async {
       }
       await _initializeFirebaseServices();
     } else {
-      debugPrint('⚠️ Firebase services not initialized - running in local-first mode');
+      debugPrint(
+        '⚠️ Firebase services not initialized - running in local-first mode',
+      );
     }
 
     runApp(const ProviderScope(child: AgriHurbiApp()));
@@ -141,8 +146,6 @@ Future<void> _initializeFirebaseServices() async {
         stackTrace: stackTrace,
         reason: 'Firebase services initialization failed',
       );
-    } catch (_) {
-    }
+    } catch (_) {}
   }
 }
-

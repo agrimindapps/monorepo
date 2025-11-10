@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide ThemeNotifier;
+import 'package:core/core.dart' hide ThemeNotifier, Column;
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';

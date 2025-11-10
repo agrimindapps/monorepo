@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -40,15 +40,12 @@ class _AccountPageState extends ConsumerState<AccountPage> {
         foregroundColor: Colors.black87,
       ),
       body: authState.when(
-        data:
-            (user) =>
-                user != null
-                    ? _buildAccountContent(context, user, subscriptionState)
-                    : _buildNotLoggedInContent(),
+        data: (user) => user != null
+            ? _buildAccountContent(context, user, subscriptionState)
+            : _buildNotLoggedInContent(),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error:
-            (error, stack) =>
-                Center(child: Text('Erro ao carregar conta: $error')),
+        error: (error, stack) =>
+            Center(child: Text('Erro ao carregar conta: $error')),
       ),
     );
   }
@@ -88,16 +85,16 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             CircleAvatar(
               radius: 40,
               backgroundColor: AppColors.primaryColor.withAlpha(26),
-              backgroundImage:
-                  user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
-              child:
-                  user.photoUrl == null
-                      ? const Icon(
-                        Icons.person,
-                        size: 40,
-                        color: AppColors.primaryColor,
-                      )
-                      : null,
+              backgroundImage: user.photoUrl != null
+                  ? NetworkImage(user.photoUrl!)
+                  : null,
+              child: user.photoUrl == null
+                  ? const Icon(
+                      Icons.person,
+                      size: 40,
+                      color: AppColors.primaryColor,
+                    )
+                  : null,
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -204,43 +201,35 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             const SizedBox(height: 12),
 
             subscriptionState.when(
-              data:
-                  (status) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        status.isActive ? 'Premium' : 'Gratuito',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color:
-                              status.isActive
-                                  ? AppColors.success
-                                  : AppColors.textSecondary,
-                        ),
-                      ),
-                      if (status.isActive && status.expirationDate != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          'Válido até ${_formatDate(status.expirationDate!)}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                      if (!status.isActive) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          'Limite: 50 tarefas, 10 subtarefas por tarefa',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ],
+              data: (status) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    status.isActive ? 'Premium' : 'Gratuito',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: status.isActive
+                          ? AppColors.success
+                          : AppColors.textSecondary,
+                    ),
                   ),
+                  if (status.isActive && status.expirationDate != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Válido até ${_formatDate(status.expirationDate!)}',
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    ),
+                  ],
+                  if (!status.isActive) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Limite: 50 tarefas, 10 subtarefas por tarefa',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                  ],
+                ],
+              ),
               loading: () => const Text('Carregando...'),
               error: (error, stack) => const Text('Erro ao carregar plano'),
             ),
@@ -413,73 +402,72 @@ class _AccountPageState extends ConsumerState<AccountPage> {
       ),
     );
   }
+
   void _showEditProfileDialog(UserEntity user) {
     _displayNameController.text = user.displayName;
 
     showDialog<dynamic>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Editar perfil'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: _displayNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Nome de exibição',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Outras funcionalidades de edição serão implementadas em breve.',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
+      builder: (context) => AlertDialog(
+        title: const Text('Editar perfil'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _displayNameController,
+              decoration: const InputDecoration(
+                labelText: 'Nome de exibição',
+                border: OutlineInputBorder(),
+              ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _updateProfile();
-                },
-                child: const Text('Salvar'),
-              ),
-            ],
+            const SizedBox(height: 16),
+            const Text(
+              'Outras funcionalidades de edição serão implementadas em breve.',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
           ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _updateProfile();
+            },
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
     );
   }
 
   void _showLogoutDialog() {
     showDialog<dynamic>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Sair'),
-            content: const Text('Tem certeza que deseja sair da sua conta?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  Navigator.pop(context);
-                  await ref.read(authNotifierProvider.notifier).signOut();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.error,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Sair'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Sair'),
+        content: const Text('Tem certeza que deseja sair da sua conta?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
           ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await ref.read(authNotifierProvider.notifier).signOut();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Sair'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -502,6 +490,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
       error: (error, stackTrace) {},
     );
   }
+
   void _updateProfile() async {
     final authService = ref.read(taskManagerAuthServiceProvider);
     final newName = _displayNameController.text.trim();
@@ -573,19 +562,18 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   void _showUpgradeAccountDialog() {
     showDialog<dynamic>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Criar conta permanente'),
-            content: const Text(
-              'Para manter seus dados seguros, crie uma conta com email e senha.\n\nEsta funcionalidade será implementada em breve.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Entendi'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Criar conta permanente'),
+        content: const Text(
+          'Para manter seus dados seguros, crie uma conta com email e senha.\n\nEsta funcionalidade será implementada em breve.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Entendi'),
           ),
+        ],
+      ),
     );
   }
 
@@ -643,118 +631,110 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   void _showThemeDialog() {
     showDialog<dynamic>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Tema'),
-            content: const Text(
-              'Configurações de tema serão implementadas em breve',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Tema'),
+        content: const Text(
+          'Configurações de tema serão implementadas em breve',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
           ),
+        ],
+      ),
     );
   }
 
   void _showLanguageDialog() {
     showDialog<dynamic>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Idioma'),
-            content: const Text(
-              'Suporte a múltiplos idiomas será implementado em breve',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Idioma'),
+        content: const Text(
+          'Suporte a múltiplos idiomas será implementado em breve',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
           ),
+        ],
+      ),
     );
   }
 
   void _showBackupDialog() {
     showDialog<dynamic>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Backup'),
-            content: const Text(
-              'Sincronização com a nuvem será implementada em breve',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Backup'),
+        content: const Text(
+          'Sincronização com a nuvem será implementada em breve',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
           ),
+        ],
+      ),
     );
   }
 
   void _showExportDialog() {
     showDialog<dynamic>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Exportar dados'),
-            content: const Text(
-              'Exportação de dados será implementada em breve',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Exportar dados'),
+        content: const Text('Exportação de dados será implementada em breve'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
           ),
+        ],
+      ),
     );
   }
 
   void _showHelpDialog() {
     showDialog<dynamic>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Ajuda'),
-            content: const Text(
-              'Task Manager - Gerenciador de Tarefas\n\n'
-              'Para suporte, entre em contato:\n'
-              '• Email: suporte@taskmanager.com\n'
-              '• Website: www.taskmanager.com',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Fechar'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Ajuda'),
+        content: const Text(
+          'Task Manager - Gerenciador de Tarefas\n\n'
+          'Para suporte, entre em contato:\n'
+          '• Email: suporte@taskmanager.com\n'
+          '• Website: www.taskmanager.com',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Fechar'),
           ),
+        ],
+      ),
     );
   }
 
   void _showPrivacyDialog() {
     showDialog<dynamic>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Privacidade'),
-            content: const Text(
-              'Seus dados são tratados com segurança e privacidade.\n\n'
-              'Para mais informações, consulte nossa política de privacidade.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Fechar'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Privacidade'),
+        content: const Text(
+          'Seus dados são tratados com segurança e privacidade.\n\n'
+          'Para mais informações, consulte nossa política de privacidade.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Fechar'),
           ),
+        ],
+      ),
     );
   }
 

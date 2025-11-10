@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 import '../../domain/entities/list_entity.dart';
 import '../providers/lists_provider.dart';
@@ -9,11 +9,7 @@ class CreateListDialog extends ConsumerStatefulWidget {
   final ListEntity? existingList;
   final WidgetRef ref;
 
-  const CreateListDialog({
-    super.key,
-    this.existingList,
-    required this.ref,
-  });
+  const CreateListDialog({super.key, this.existingList, required this.ref});
 
   @override
   ConsumerState<CreateListDialog> createState() => _CreateListDialogState();

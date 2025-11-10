@@ -1,5 +1,5 @@
 import 'package:core/core.dart' as core;
-import 'package:core/core.dart' hide getIt;
+import 'package:core/core.dart' hide getIt, Column;
 
 import '../../core/di/injection.dart' as di;
 import '../../features/notifications/presentation/notification_stats.dart' as local_stats;

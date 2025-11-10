@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/animal.dart';
@@ -9,10 +9,7 @@ class AnimalsListController {
   final BuildContext context;
   final WidgetRef ref;
 
-  const AnimalsListController({
-    required this.context,
-    required this.ref,
-  });
+  const AnimalsListController({required this.context, required this.ref});
 
   void addAnimal() {
     showDialog<void>(
@@ -90,7 +87,7 @@ class AnimalsListController {
             onPressed: () async {
               Navigator.pop(context);
               await ref.read(animalsProvider.notifier).deleteAnimal(animal.id);
-              
+
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Pet excluído com sucesso')),

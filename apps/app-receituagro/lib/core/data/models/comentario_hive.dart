@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import '../../../features/comentarios/data/comentario_model.dart';
 
 part 'comentario_hive.g.dart';

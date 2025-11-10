@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../features/plants/domain/entities/plant.dart';
 import '../../features/plants/domain/usecases/add_plant_usecase.dart';

@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Task;
+import 'package:core/core.dart' hide Column, Task;
 import '../../domain/entities/task.dart';
 
 class TaskModel extends Task {

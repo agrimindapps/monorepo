@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:core/core.dart' hide SyncQueue, SyncQueueItem;
+import 'package:core/core.dart' hide SyncQueue, SyncQueueItem, Column;
 import 'package:flutter/foundation.dart';
 import '../../features/comentarios/data/comentario_model.dart';
 import '../data/models/diagnostico_hive.dart';

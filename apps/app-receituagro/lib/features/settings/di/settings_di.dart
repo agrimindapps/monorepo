@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 // ❌ REMOVIDO: user_settings_repository_impl.dart (via @LazySingleton)
 // ❌ REMOVIDO: i_user_settings_repository.dart (via @LazySingleton)

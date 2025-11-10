@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 // Project imports:
 import '../const/environment_const.dart';
@@ -44,10 +44,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      AppColors.contentColorCyan,
-                      Color(0xFF40B4D4),
-                    ],
+                    colors: [AppColors.contentColorCyan, Color(0xFF40B4D4)],
                   ),
                 ),
                 child: SafeArea(
@@ -78,10 +75,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       ),
                       const Text(
                         'Configurações de nutrição e saúde',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
+                        style: TextStyle(color: Colors.white, fontSize: 16),
                       ),
                     ],
                   ),
@@ -190,8 +184,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       Text(
                         'Faça login para sincronizar seus dados',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.textTheme.bodyMedium?.color
-                              ?.withValues(alpha: 0.7),
+                          color: theme.textTheme.bodyMedium?.color?.withValues(
+                            alpha: 0.7,
+                          ),
                         ),
                       ),
                     ],
@@ -206,7 +201,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                        content: Text('Funcionalidade em desenvolvimento')),
+                      content: Text('Funcionalidade em desenvolvimento'),
+                    ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
@@ -257,8 +253,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child:
-                        const Icon(Icons.star, color: Colors.white, size: 30),
+                    child: const Icon(
+                      Icons.star,
+                      color: Colors.white,
+                      size: 30,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -317,7 +316,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                          content: Text('Funcionalidade em desenvolvimento')),
+                        content: Text('Funcionalidade em desenvolvimento'),
+                      ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -453,7 +453,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                      content: Text('Funcionalidade em desenvolvimento')),
+                    content: Text('Funcionalidade em desenvolvimento'),
+                  ),
                 );
               },
             ),
@@ -497,7 +498,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                      content: Text('Funcionalidade em desenvolvimento')),
+                    content: Text('Funcionalidade em desenvolvimento'),
+                  ),
                 );
               },
             ),
@@ -508,7 +510,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                      content: Text('Funcionalidade em desenvolvimento')),
+                    content: Text('Funcionalidade em desenvolvimento'),
+                  ),
                 );
               },
             ),
@@ -519,7 +522,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                      content: Text('Funcionalidade em desenvolvimento')),
+                    content: Text('Funcionalidade em desenvolvimento'),
+                  ),
                 );
               },
             ),
@@ -619,7 +623,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                      content: Text('Funcionalidade em desenvolvimento')),
+                    content: Text('Funcionalidade em desenvolvimento'),
+                  ),
                 );
               },
             ),
@@ -637,7 +642,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                      content: Text('Funcionalidade em desenvolvimento')),
+                    content: Text('Funcionalidade em desenvolvimento'),
+                  ),
                 );
               },
             ),
@@ -647,7 +653,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                      content: Text('Funcionalidade em desenvolvimento')),
+                    content: Text('Funcionalidade em desenvolvimento'),
+                  ),
                 );
               },
             ),
@@ -657,7 +664,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                      content: Text('Funcionalidade em desenvolvimento')),
+                    content: Text('Funcionalidade em desenvolvimento'),
+                  ),
                 );
               },
             ),
@@ -687,9 +695,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       ),
       title: Text(
         title,
-        style: TextStyle(
-          color: isDestructive ? Colors.red : null,
-        ),
+        style: TextStyle(color: isDestructive ? Colors.red : null),
       ),
       subtitle: subtitle != null ? Text(subtitle) : null,
       trailing: const Icon(Icons.chevron_right),
@@ -735,7 +741,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                      content: Text('Funcionalidade em desenvolvimento')),
+                    content: Text('Funcionalidade em desenvolvimento'),
+                  ),
                 );
               },
               style: TextButton.styleFrom(foregroundColor: Colors.red),

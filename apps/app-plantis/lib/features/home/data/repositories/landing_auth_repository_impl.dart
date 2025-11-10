@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../domain/entities/auth_status.dart';
 import '../../domain/repositories/auth_status_repository.dart';

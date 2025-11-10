@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../features/plants/domain/repositories/plants_repository.dart';
 import '../../features/plants/domain/repositories/spaces_repository.dart';

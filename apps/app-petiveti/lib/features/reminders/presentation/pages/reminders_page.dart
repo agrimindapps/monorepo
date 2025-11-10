@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/reminders_constants.dart';
@@ -8,10 +8,7 @@ import '../providers/reminders_provider.dart';
 class RemindersPage extends ConsumerStatefulWidget {
   final String userId;
 
-  const RemindersPage({
-    super.key,
-    required this.userId,
-  });
+  const RemindersPage({super.key, required this.userId});
 
   @override
   ConsumerState<RemindersPage> createState() => _RemindersPageState();
@@ -25,16 +22,19 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: RemindersConstants.tabCount, vsync: this);
-    Future.microtask(() => _loadReminders());
-    ref.listenManual<RemindersState>(
-      remindersProvider,
-      (RemindersState? previous, RemindersState next) {
-        if (next.error != null && previous?.error != next.error) {
-          _showError(next.error!);
-        }
-      },
+    _tabController = TabController(
+      length: RemindersConstants.tabCount,
+      vsync: this,
     );
+    Future.microtask(() => _loadReminders());
+    ref.listenManual<RemindersState>(remindersProvider, (
+      RemindersState? previous,
+      RemindersState next,
+    ) {
+      if (next.error != null && previous?.error != next.error) {
+        _showError(next.error!);
+      }
+    });
   }
 
   @override
@@ -64,23 +64,35 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
           controller: _tabController,
           tabs: [
             Semantics(
-              label: RemindersSemantics.tabLabel(RemindersConstants.todayTabText, state.todayReminders.length),
+              label: RemindersSemantics.tabLabel(
+                RemindersConstants.todayTabText,
+                state.todayReminders.length,
+              ),
               child: Tab(
-                text: '${RemindersConstants.todayTabText} (${state.todayReminders.length})',
+                text:
+                    '${RemindersConstants.todayTabText} (${state.todayReminders.length})',
                 icon: const Icon(RemindersIcons.todayIcon),
               ),
             ),
             Semantics(
-              label: RemindersSemantics.tabLabel(RemindersConstants.overdueTabText, state.overdueReminders.length),
+              label: RemindersSemantics.tabLabel(
+                RemindersConstants.overdueTabText,
+                state.overdueReminders.length,
+              ),
               child: Tab(
-                text: '${RemindersConstants.overdueTabText} (${state.overdueReminders.length})',
+                text:
+                    '${RemindersConstants.overdueTabText} (${state.overdueReminders.length})',
                 icon: const Icon(RemindersIcons.warningIcon),
               ),
             ),
             Semantics(
-              label: RemindersSemantics.tabLabel(RemindersConstants.allTabText, state.reminders.length),
+              label: RemindersSemantics.tabLabel(
+                RemindersConstants.allTabText,
+                state.reminders.length,
+              ),
               child: Tab(
-                text: '${RemindersConstants.allTabText} (${state.reminders.length})',
+                text:
+                    '${RemindersConstants.allTabText} (${state.reminders.length})',
                 icon: const Icon(RemindersIcons.listIcon),
               ),
             ),
@@ -96,17 +108,17 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
               controller: _tabController,
               children: [
                 _buildRemindersList(
-                  state.todayReminders, 
+                  state.todayReminders,
                   RemindersConstants.emptyTodayMessage,
                   RemindersConstants.todayListLabel,
                 ),
                 _buildRemindersList(
-                  state.overdueReminders, 
+                  state.overdueReminders,
                   RemindersConstants.emptyOverdueMessage,
                   RemindersConstants.overdueListLabel,
                 ),
                 _buildRemindersList(
-                  state.reminders, 
+                  state.reminders,
                   RemindersConstants.emptyAllMessage,
                   RemindersConstants.allListLabel,
                 ),
@@ -123,7 +135,11 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
     );
   }
 
-  Widget _buildRemindersList(List<Reminder> reminders, String emptyMessage, String listLabel) {
+  Widget _buildRemindersList(
+    List<Reminder> reminders,
+    String emptyMessage,
+    String listLabel,
+  ) {
     if (reminders.isEmpty) {
       return Semantics(
         label: emptyMessage,
@@ -132,8 +148,8 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                RemindersIcons.emptyScheduleIcon, 
-                size: RemindersConstants.emptyIconSize, 
+                RemindersIcons.emptyScheduleIcon,
+                size: RemindersConstants.emptyIconSize,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(height: 16),
@@ -170,19 +186,22 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
   Widget _buildReminderCard(Reminder reminder) {
     final isOverdue = reminder.isOverdue;
     final isDueToday = reminder.isDueToday;
-    final statusText = reminder.status == ReminderStatus.completed 
-        ? RemindersConstants.completedStatus 
-        : isOverdue 
-            ? RemindersConstants.overdueStatus 
-            : isDueToday 
-                ? RemindersConstants.todayStatus 
-                : RemindersConstants.scheduledStatus;
-    
+    final statusText = reminder.status == ReminderStatus.completed
+        ? RemindersConstants.completedStatus
+        : isOverdue
+        ? RemindersConstants.overdueStatus
+        : isDueToday
+        ? RemindersConstants.todayStatus
+        : RemindersConstants.scheduledStatus;
+
     final colorScheme = Theme.of(context).colorScheme;
 
     return Semantics(
       label: RemindersSemantics.reminderCardLabel(
-        reminder.title, statusText, _formatDateTime(reminder.scheduledDate)),
+        reminder.title,
+        statusText,
+        _formatDateTime(reminder.scheduledDate),
+      ),
       hint: RemindersSemantics.cardHint,
       child: Card(
         key: ValueKey(reminder.id), // Key for optimized rebuilds
@@ -190,8 +209,8 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
         color: isOverdue
             ? colorScheme.errorContainer
             : isDueToday
-                ? colorScheme.tertiaryContainer
-                : null,
+            ? colorScheme.tertiaryContainer
+            : null,
         child: ListTile(
           leading: Semantics(
             label: RemindersSemantics.reminderTypeLabel(reminder.type.name),
@@ -199,8 +218,8 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
               backgroundColor: isOverdue
                   ? colorScheme.error
                   : isDueToday
-                      ? colorScheme.tertiary
-                      : _getTypeColor(reminder.type),
+                  ? colorScheme.tertiary
+                  : _getTypeColor(reminder.type),
               child: Icon(
                 _getTypeIcon(reminder.type),
                 color: RemindersColors.completedIconColor,
@@ -227,17 +246,17 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
               Row(
                 children: [
                   Icon(
-                    Icons.schedule, 
-                    size: 14, 
+                    Icons.schedule,
+                    size: 14,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     _formatDateTime(reminder.scheduledDate),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: isOverdue 
-                        ? colorScheme.error 
-                        : colorScheme.onSurfaceVariant,
+                      color: isOverdue
+                          ? colorScheme.error
+                          : colorScheme.onSurfaceVariant,
                       fontWeight: isOverdue ? FontWeight.bold : null,
                     ),
                   ),
@@ -248,8 +267,8 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
                 Row(
                   children: [
                     Icon(
-                      Icons.repeat, 
-                      size: 14, 
+                      Icons.repeat,
+                      size: 14,
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 4),
@@ -298,7 +317,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
                   child: ListTile(
                     leading: Icon(Icons.delete, color: colorScheme.error),
                     title: Text(
-                      'Excluir', 
+                      'Excluir',
                       style: TextStyle(color: colorScheme.error),
                     ),
                   ),
@@ -358,7 +377,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
 
   void _handleMenuAction(String action, Reminder reminder) async {
     if (_isProcessing) return;
-    
+
     try {
       switch (action) {
         case 'complete':
@@ -388,10 +407,10 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
   void _loadReminders() {
     ref.read(remindersProvider.notifier).loadReminders(widget.userId);
   }
-  
+
   void _showError(String message) {
     if (!mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Erro: $message'),
@@ -403,39 +422,39 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
       ),
     );
   }
-  
+
   void _showResultSnackBar(bool success, String action) {
     if (!mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          success 
-            ? '${action[0].toUpperCase()}${action.substring(1)} com sucesso'
-            : 'Erro ao ${action.split(' ').join(' ')}',
+          success
+              ? '${action[0].toUpperCase()}${action.substring(1)} com sucesso'
+              : 'Erro ao ${action.split(' ').join(' ')}',
         ),
-        backgroundColor: success 
-          ? Theme.of(context).colorScheme.primary
-          : Theme.of(context).colorScheme.error,
-        action: success ? null : SnackBarAction(
-          label: 'Tentar Novamente',
-          onPressed: _loadReminders,
-        ),
+        backgroundColor: success
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.error,
+        action: success
+            ? null
+            : SnackBarAction(
+                label: 'Tentar Novamente',
+                onPressed: _loadReminders,
+              ),
       ),
     );
   }
-  
+
   void _snoozeReminder(Reminder reminder, Duration duration) async {
     Navigator.of(context).pop();
     setState(() => _isProcessing = true);
-    
+
     try {
       final snoozeUntil = DateTime.now().add(duration);
-      final success = await ref.read(remindersProvider.notifier).snoozeReminder(
-        reminder.id,
-        snoozeUntil,
-        widget.userId,
-      );
+      final success = await ref
+          .read(remindersProvider.notifier)
+          .snoozeReminder(reminder.id, snoozeUntil, widget.userId);
       _showResultSnackBar(success, 'lembrete adiado');
     } finally {
       if (mounted) {
@@ -460,15 +479,18 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
         content: const Text('Por quanto tempo deseja adiar este lembrete?'),
         actions: [
           TextButton(
-            onPressed: () => _snoozeReminder(reminder, RemindersConstants.snooze1Hour),
+            onPressed: () =>
+                _snoozeReminder(reminder, RemindersConstants.snooze1Hour),
             child: const Text('1 hora'),
           ),
           TextButton(
-            onPressed: () => _snoozeReminder(reminder, RemindersConstants.snooze4Hours),
+            onPressed: () =>
+                _snoozeReminder(reminder, RemindersConstants.snooze4Hours),
             child: const Text('4 horas'),
           ),
           TextButton(
-            onPressed: () => _snoozeReminder(reminder, RemindersConstants.snooze1Day),
+            onPressed: () =>
+                _snoozeReminder(reminder, RemindersConstants.snooze1Day),
             child: const Text('1 dia'),
           ),
           TextButton(
@@ -485,7 +507,9 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmar Exclusão'),
-        content: Text('Deseja realmente excluir o lembrete "${reminder.title}"?'),
+        content: Text(
+          'Deseja realmente excluir o lembrete "${reminder.title}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -495,7 +519,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
             onPressed: () async {
               Navigator.of(context).pop();
               setState(() => _isProcessing = true);
-              
+
               try {
                 final success = await ref
                     .read(remindersProvider.notifier)

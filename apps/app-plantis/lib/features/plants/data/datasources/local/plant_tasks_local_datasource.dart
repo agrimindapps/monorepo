@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 import '../../../domain/entities/plant_task.dart';

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Adaptador para converter e manter compatibilidade com SubscriptionEntity
 /// Fornece métodos utilitários para lógica de negócio específica do ReceitaAgro

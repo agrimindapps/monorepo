@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 part 'fitossanitario_info_hive.g.dart';
 

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide getIt;
+import 'package:core/core.dart' hide Column, getIt;
 
 import '../services/background_sync_service.dart';
 import '../sync/background_sync_status.dart';

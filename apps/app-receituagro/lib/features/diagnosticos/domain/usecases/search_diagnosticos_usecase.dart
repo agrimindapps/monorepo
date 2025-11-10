@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../entities/diagnostico_entity.dart';
 import '../services/search/i_diagnosticos_search_service.dart';

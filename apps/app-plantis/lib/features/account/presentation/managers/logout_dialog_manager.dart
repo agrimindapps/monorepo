@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide LogoutUseCase;
+import 'package:core/core.dart' hide Column, LogoutUseCase;
 import 'package:flutter/material.dart';
 
 import '../../domain/usecases/logout_usecase.dart';

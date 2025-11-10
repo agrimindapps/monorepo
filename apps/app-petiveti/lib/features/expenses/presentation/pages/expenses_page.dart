@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../providers/expenses_provider.dart';
@@ -9,10 +9,7 @@ import '../widgets/expense_summary_tab.dart';
 class ExpensesPage extends ConsumerStatefulWidget {
   final String userId;
 
-  const ExpensesPage({
-    super.key,
-    required this.userId,
-  });
+  const ExpensesPage({super.key, required this.userId});
 
   @override
   ConsumerState<ExpensesPage> createState() => _ExpensesPageState();
@@ -66,10 +63,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage>
                 button: true,
                 child: const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.list),
-                    Text('Todas'),
-                  ],
+                  children: [Icon(Icons.list), Text('Todas')],
                 ),
               ),
             ),
@@ -80,10 +74,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage>
                 button: true,
                 child: const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.calendar_month),
-                    Text('Este Mês'),
-                  ],
+                  children: [Icon(Icons.calendar_month), Text('Este Mês')],
                 ),
               ),
             ),
@@ -94,10 +85,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage>
                 button: true,
                 child: const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.category),
-                    Text('Categorias'),
-                  ],
+                  children: [Icon(Icons.category), Text('Categorias')],
                 ),
               ),
             ),
@@ -108,10 +96,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage>
                 button: true,
                 child: const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.analytics),
-                    Text('Resumo'),
-                  ],
+                  children: [Icon(Icons.analytics), Text('Resumo')],
                 ),
               ),
             ),
@@ -123,25 +108,26 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage>
         child: TabBarView(
           controller: _tabController,
           children: [
-          ExpenseListTab(
-            state: expensesState,
-            expenses: expensesState.expenses,
-            emptyTitle: 'Nenhuma Despesa Cadastrada',
-            emptySubtitle: 'Comece adicionando sua primeira despesa.',
-            emptyIcon: Icons.receipt_long,
-          ),
-          ExpenseListTab(
-            state: expensesState,
-            expenses: expensesState.monthlyExpenses,
-            emptyTitle: 'Nenhuma Despesa Este Mês',
-            emptySubtitle: 'Adicione despesas para visualizar o resumo mensal.',
-            emptyIcon: Icons.calendar_today,
-          ),
-          ExpenseCategoriesTab(
-            state: expensesState,
-            onCategoryTap: _showCategoryDetails,
-          ),
-          ExpenseSummaryTab(state: expensesState),
+            ExpenseListTab(
+              state: expensesState,
+              expenses: expensesState.expenses,
+              emptyTitle: 'Nenhuma Despesa Cadastrada',
+              emptySubtitle: 'Comece adicionando sua primeira despesa.',
+              emptyIcon: Icons.receipt_long,
+            ),
+            ExpenseListTab(
+              state: expensesState,
+              expenses: expensesState.monthlyExpenses,
+              emptyTitle: 'Nenhuma Despesa Este Mês',
+              emptySubtitle:
+                  'Adicione despesas para visualizar o resumo mensal.',
+              emptyIcon: Icons.calendar_today,
+            ),
+            ExpenseCategoriesTab(
+              state: expensesState,
+              onCategoryTap: _showCategoryDetails,
+            ),
+            ExpenseSummaryTab(state: expensesState),
           ],
         ),
       ),
@@ -158,11 +144,12 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage>
     );
   }
 
-
   void _showAddExpenseDialog(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Funcionalidade de adicionar despesa será implementada em breve'),
+        content: Text(
+          'Funcionalidade de adicionar despesa será implementada em breve',
+        ),
         duration: Duration(seconds: 2),
       ),
     );
@@ -173,7 +160,9 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage>
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Despesas - $categoryName'),
-        content: const Text('Lista de despesas desta categoria será exibida aqui.'),
+        content: const Text(
+          'Lista de despesas desta categoria será exibida aqui.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),

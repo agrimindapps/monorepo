@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../data/repositories/culturas_repository_impl.dart';
 import '../data/services/culturas_query_service.dart';

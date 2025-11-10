@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide getIt;
+import 'package:core/core.dart' hide Column, getIt;
 import 'package:flutter/foundation.dart';
 
 part 'license_notifier.g.dart';

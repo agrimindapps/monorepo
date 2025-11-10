@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/medications_constants.dart';
@@ -10,37 +10,37 @@ import '../widgets/medication_filters.dart';
 import '../widgets/medication_stats.dart';
 
 /// **Medications Management Page**
-/// 
+///
 /// A comprehensive page for managing pet medications with advanced filtering,
 /// search capabilities, and organized tabbed navigation.
-/// 
+///
 /// ## Key Features:
 /// - **Multi-tab Organization**: Active, Expired, All, and Statistics views
 /// - **Real-time Search**: Live filtering as user types
 /// - **Performance Optimized**: Uses provider caching and keep-alive for smooth scrolling
 /// - **Accessibility**: Full semantic labels and screen reader support
 /// - **Error Handling**: Graceful error states with retry mechanisms
-/// 
+///
 /// ## Architecture:
 /// - Follows Clean Architecture principles with proper separation of concerns
 /// - Uses Riverpod for state management and provider caching
 /// - Implements custom widgets for reusable components
 /// - Optimized ListView with SliverFixedExtentList for large datasets
-/// 
+///
 /// ## API Integration:
 /// The page integrates with the medication repository to provide:
 /// - Real-time medication data sync
 /// - Offline-first approach with local storage fallback
 /// - Automatic data refresh on tab switches
 /// - Batch operations for better performance
-/// 
+///
 /// ## Usage:
 /// ```dart
 /// Navigator.push(context, MaterialPageRoute(
 ///   builder: (context) => MedicationsPage(animalId: 'specific-animal-id')
 /// ));
 /// ```
-/// 
+///
 /// @author PetiVeti Development Team
 /// @since 1.0.0
 /// @version 1.2.0 - Added performance optimizations and caching
@@ -50,28 +50,25 @@ class MedicationsPage extends ConsumerStatefulWidget {
   final String? animalId;
 
   /// Creates a medications page instance.
-  /// 
+  ///
   /// The [animalId] parameter is optional and when provided,
   /// filters the medications to show only those for the specified animal.
-  const MedicationsPage({
-    super.key,
-    this.animalId,
-  });
+  const MedicationsPage({super.key, this.animalId});
 
   @override
   ConsumerState<MedicationsPage> createState() => _MedicationsPageState();
 }
 
 /// **Private State Management Class**
-/// 
+///
 /// Handles the internal state and lifecycle management for the MedicationsPage.
-/// 
+///
 /// ## Performance Optimizations:
 /// - **Provider Caching**: Caches frequently used providers to avoid repeated lookups
 /// - **Keep Alive**: Maintains widget state when navigating between tabs
 /// - **Optimized Tab Controller**: Prevents unnecessary rebuilds during tab switches
 /// - **Batch Loading**: Loads initial data efficiently after widget mount
-/// 
+///
 /// ## State Management:
 /// - Manages tab navigation state with TabController
 /// - Handles search functionality with TextEditingController
@@ -81,13 +78,14 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
     with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   /// Controls the tab navigation between Active, Expired, All, and Stats views
   late TabController _tabController;
-  
+
   /// Handles search input for real-time medication filtering
   final TextEditingController _searchController = TextEditingController();
-  
+
   /// Cached provider references for better performance
   /// Avoids repeated provider lookups which can impact performance in large lists
-  late final StateNotifierProvider<MedicationsNotifier, MedicationsState> _medicationsProvider;
+  late final StateNotifierProvider<MedicationsNotifier, MedicationsState>
+  _medicationsProvider;
   late final Provider<List<Medication>> _filteredProvider;
 
   @override
@@ -95,40 +93,43 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
     super.initState();
     _medicationsProvider = medicationsProvider;
     _filteredProvider = filteredMedicationsProvider;
-    
-    _tabController = TabController(length: MedicationsConstants.tabCount, vsync: this);
+
+    _tabController = TabController(
+      length: MedicationsConstants.tabCount,
+      vsync: this,
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _loadInitialData();
       }
     });
   }
-  
+
   @override
   bool get wantKeepAlive => true; // Keep page alive for better performance
-  
+
   /// **Optimized Initial Data Loading**
-  /// 
+  ///
   /// Performs intelligent batch loading of medication data with comprehensive
   /// error handling and performance optimizations.
-  /// 
+  ///
   /// ## Loading Strategy:
   /// 1. **Primary Load**: Main medication data (with 10s timeout)
   /// 2. **Secondary Parallel Loads**: Active and expiring medications
   /// 3. **Error Recovery**: Graceful fallbacks for failed secondary loads
   /// 4. **Animal-Specific**: Filters by animalId when provided
-  /// 
+  ///
   /// ## Performance Features:
   /// - Timeout protection to prevent UI blocking
   /// - Parallel execution of secondary loads
   /// - Graceful error handling with catchError
   /// - Optimized provider caching
-  /// 
+  ///
   /// ## Error Handling:
   /// - Primary load failures are propagated to UI
   /// - Secondary load failures are silently handled (non-critical)
   /// - Network timeout protection with custom error messages
-  /// 
+  ///
   /// @throws Exception when primary data load fails or times out
   Future<void> _loadInitialData() async {
     try {
@@ -136,7 +137,7 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
       final primaryLoad = widget.animalId != null
           ? notifier.loadMedicationsByAnimalId(widget.animalId!)
           : notifier.loadMedications();
-      
+
       await primaryLoad.timeout(
         MedicationsConstants.loadingTimeout,
         onTimeout: () => throw Exception('Timeout loading medications'),
@@ -179,7 +180,11 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.animalId != null ? MedicationsConstants.petMedicationsTitle : MedicationsConstants.allMedicationsTitle),
+        title: Text(
+          widget.animalId != null
+              ? MedicationsConstants.petMedicationsTitle
+              : MedicationsConstants.allMedicationsTitle,
+        ),
         actions: [
           Semantics(
             label: 'Atualizar lista de medicamentos',
@@ -206,13 +211,17 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
           tabs: [
             Tab(
               child: Semantics(
-                label: 'Aba todos os medicamentos, ${medicationsState.medications.length} itens',
+                label:
+                    'Aba todos os medicamentos, ${medicationsState.medications.length} itens',
                 hint: 'Toque para ver todos os medicamentos',
                 button: true,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.medication, size: MedicationsConstants.tabIconSize),
+                    const Icon(
+                      Icons.medication,
+                      size: MedicationsConstants.tabIconSize,
+                    ),
                     const SizedBox(width: 8),
                     Text('Todos (${medicationsState.medications.length})'),
                   ],
@@ -221,30 +230,42 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
             ),
             Tab(
               child: Semantics(
-                label: 'Aba medicamentos ativos, ${medicationsState.activeMedications.length} itens',
+                label:
+                    'Aba medicamentos ativos, ${medicationsState.activeMedications.length} itens',
                 hint: 'Toque para ver apenas os medicamentos ativos',
                 button: true,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.play_circle_filled, size: MedicationsConstants.tabIconSize),
+                    const Icon(
+                      Icons.play_circle_filled,
+                      size: MedicationsConstants.tabIconSize,
+                    ),
                     const SizedBox(width: 8),
-                    Text('Ativos (${medicationsState.activeMedications.length})'),
+                    Text(
+                      'Ativos (${medicationsState.activeMedications.length})',
+                    ),
                   ],
                 ),
               ),
             ),
             Tab(
               child: Semantics(
-                label: 'Aba medicamentos vencendo, ${medicationsState.expiringMedications.length} itens',
+                label:
+                    'Aba medicamentos vencendo, ${medicationsState.expiringMedications.length} itens',
                 hint: 'Toque para ver medicamentos próximos ao vencimento',
                 button: true,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.warning, size: MedicationsConstants.tabIconSize),
+                    const Icon(
+                      Icons.warning,
+                      size: MedicationsConstants.tabIconSize,
+                    ),
                     const SizedBox(width: 8),
-                    Text('Vencendo (${medicationsState.expiringMedications.length})'),
+                    Text(
+                      'Vencendo (${medicationsState.expiringMedications.length})',
+                    ),
                   ],
                 ),
               ),
@@ -252,12 +273,16 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
             Tab(
               child: Semantics(
                 label: 'Aba de estatísticas de medicamentos',
-                hint: 'Toque para ver estatísticas e relatórios dos medicamentos',
+                hint:
+                    'Toque para ver estatísticas e relatórios dos medicamentos',
                 button: true,
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.analytics, size: MedicationsConstants.tabIconSize),
+                    Icon(
+                      Icons.analytics,
+                      size: MedicationsConstants.tabIconSize,
+                    ),
                     SizedBox(width: 8),
                     Text('Estatísticas'),
                   ],
@@ -270,7 +295,9 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(MedicationsConstants.pageContentPadding),
+            padding: const EdgeInsets.all(
+              MedicationsConstants.pageContentPadding,
+            ),
             child: Column(
               children: [
                 Semantics(
@@ -285,11 +312,14 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
                       border: OutlineInputBorder(),
                     ),
                     onChanged: (value) {
-                      ref.read(medicationSearchQueryProvider.notifier).state = value;
+                      ref.read(medicationSearchQueryProvider.notifier).state =
+                          value;
                     },
                   ),
                 ),
-                const SizedBox(height: MedicationsConstants.searchFiltersSpacing),
+                const SizedBox(
+                  height: MedicationsConstants.searchFiltersSpacing,
+                ),
                 const MedicationFilters(),
               ],
             ),
@@ -358,12 +388,18 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
             children: [
               Semantics(
                 label: 'Ícone de erro',
-                child: Icon(Icons.error_outline, size: MedicationsConstants.errorIconSize, color: Theme.of(context).colorScheme.error),
+                child: Icon(
+                  Icons.error_outline,
+                  size: MedicationsConstants.errorIconSize,
+                  color: Theme.of(context).colorScheme.error,
+                ),
               ),
               const SizedBox(height: MedicationsConstants.errorContentSpacing),
               Text(
                 error,
-                style: const TextStyle(fontSize: MedicationsConstants.errorTextSize),
+                style: const TextStyle(
+                  fontSize: MedicationsConstants.errorTextSize,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: MedicationsConstants.errorContentSpacing),
@@ -395,36 +431,48 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
       child: RefreshIndicator(
         onRefresh: _refreshMedications,
         child: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.all(MedicationsConstants.pageContentPadding),
-            sliver: SliverFixedExtentList(
-              itemExtent: MedicationsConstants.medicationCardHeight, // Fixed height for optimal performance
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final medication = medications[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: RepaintBoundary(
-                      child: MedicationCard(
-                        key: ValueKey(medication.id), // Stable key for performance
-                        medication: medication,
-                        onTap: () => _navigateToMedicationDetails(context, medication),
-                        onEdit: () => _navigateToEditMedication(context, medication),
-                        onDelete: () => _confirmDeleteMedication(context, medication),
-                        onDiscontinue: () => _confirmDiscontinueMedication(context, medication),
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.all(
+                MedicationsConstants.pageContentPadding,
+              ),
+              sliver: SliverFixedExtentList(
+                itemExtent: MedicationsConstants
+                    .medicationCardHeight, // Fixed height for optimal performance
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final medication = medications[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: RepaintBoundary(
+                        child: MedicationCard(
+                          key: ValueKey(
+                            medication.id,
+                          ), // Stable key for performance
+                          medication: medication,
+                          onTap: () =>
+                              _navigateToMedicationDetails(context, medication),
+                          onEdit: () =>
+                              _navigateToEditMedication(context, medication),
+                          onDelete: () =>
+                              _confirmDeleteMedication(context, medication),
+                          onDiscontinue: () => _confirmDiscontinueMedication(
+                            context,
+                            medication,
+                          ),
+                        ),
                       ),
-                    ),
-                  );
-                },
-                childCount: medications.length,
-                addAutomaticKeepAlives: true,
-                addRepaintBoundaries: true,
-                addSemanticIndexes: false, // Disable for better performance in large lists
+                    );
+                  },
+                  childCount: medications.length,
+                  addAutomaticKeepAlives: true,
+                  addRepaintBoundaries: true,
+                  addSemanticIndexes:
+                      false, // Disable for better performance in large lists
+                ),
               ),
             ),
-          ),
-        ],
+          ],
         ),
       ),
     );
@@ -436,7 +484,7 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
       final primaryRefresh = widget.animalId != null
           ? notifier.loadMedicationsByAnimalId(widget.animalId!)
           : notifier.loadMedications();
-      
+
       await primaryRefresh.timeout(MedicationsConstants.loadingTimeout);
       await Future.wait([
         notifier.loadActiveMedications().catchError((e) => null),
@@ -452,13 +500,15 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
   }
 
   void _navigateToAddMedication(BuildContext context) {
-    Navigator.of(context).pushNamed(
-      '/medications/add',
-      arguments: {'animalId': widget.animalId},
-    );
+    Navigator.of(
+      context,
+    ).pushNamed('/medications/add', arguments: {'animalId': widget.animalId});
   }
 
-  void _navigateToMedicationDetails(BuildContext context, Medication medication) {
+  void _navigateToMedicationDetails(
+    BuildContext context,
+    Medication medication,
+  ) {
     Navigator.of(context).pushNamed(
       '/medications/details',
       arguments: {'medicationId': medication.id},
@@ -466,13 +516,15 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
   }
 
   void _navigateToEditMedication(BuildContext context, Medication medication) {
-    Navigator.of(context).pushNamed(
-      '/medications/edit',
-      arguments: {'medication': medication},
-    );
+    Navigator.of(
+      context,
+    ).pushNamed('/medications/edit', arguments: {'medication': medication});
   }
 
-  Future<void> _confirmDeleteMedication(BuildContext context, Medication medication) async {
+  Future<void> _confirmDeleteMedication(
+    BuildContext context,
+    Medication medication,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -493,8 +545,10 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
     );
 
     if (confirmed == true) {
-      await ref.read(_medicationsProvider.notifier).deleteMedication(medication.id);
-      
+      await ref
+          .read(_medicationsProvider.notifier)
+          .deleteMedication(medication.id);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Medicamento excluído com sucesso')),
@@ -503,9 +557,12 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
     }
   }
 
-  Future<void> _confirmDiscontinueMedication(BuildContext context, Medication medication) async {
+  Future<void> _confirmDiscontinueMedication(
+    BuildContext context,
+    Medication medication,
+  ) async {
     final reasonController = TextEditingController();
-    
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -540,18 +597,17 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
     );
 
     if (confirmed == true && reasonController.text.isNotEmpty) {
-      await ref.read(_medicationsProvider.notifier).discontinueMedication(
-        medication.id,
-        reasonController.text,
-      );
-      
+      await ref
+          .read(_medicationsProvider.notifier)
+          .discontinueMedication(medication.id, reasonController.text);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Medicamento descontinuado')),
         );
       }
     }
-    
+
     reasonController.dispose();
   }
 }

@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/uuid_generator.dart';
@@ -10,12 +10,8 @@ import '../providers/vaccines_provider.dart';
 class AddVaccineForm extends ConsumerStatefulWidget {
   final Vaccine? vaccine; // For editing
   final String? initialAnimalId;
-  
-  const AddVaccineForm({
-    super.key,
-    this.vaccine,
-    this.initialAnimalId,
-  });
+
+  const AddVaccineForm({super.key, this.vaccine, this.initialAnimalId});
 
   @override
   ConsumerState<AddVaccineForm> createState() => _AddVaccineFormState();
@@ -91,7 +87,7 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final animalsState = ref.watch(animalsProvider);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.vaccine != null ? 'Editar Vacina' : 'Nova Vacina'),
@@ -101,7 +97,9 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
             child: Text(
               'Salvar',
               style: TextStyle(
-                color: _isLoading ? theme.disabledColor : theme.colorScheme.primary,
+                color: _isLoading
+                    ? theme.disabledColor
+                    : theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -137,7 +135,9 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
                       children: [
                         CircleAvatar(
                           radius: 16,
-                          backgroundColor: theme.colorScheme.primary.withAlpha(51),
+                          backgroundColor: theme.colorScheme.primary.withAlpha(
+                            51,
+                          ),
                           child: Text(
                             animal.name.substring(0, 1).toUpperCase(),
                             style: TextStyle(
@@ -162,7 +162,9 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
                               Text(
                                 '${animal.species} • ${animal.breed}',
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurface.withAlpha(153),
+                                  color: theme.colorScheme.onSurface.withAlpha(
+                                    153,
+                                  ),
                                 ),
                               ),
                             ],
@@ -207,10 +209,10 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
                     _nameController.text = value;
                   },
                   itemBuilder: (context) => _commonVaccines
-                      .map((vaccine) => PopupMenuItem(
-                            value: vaccine,
-                            child: Text(vaccine),
-                          ))
+                      .map(
+                        (vaccine) =>
+                            PopupMenuItem(value: vaccine, child: Text(vaccine)),
+                      )
                       .toList(),
                 ),
               ),
@@ -279,9 +281,11 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
                 side: BorderSide(color: theme.colorScheme.outline),
               ),
               leading: const Icon(Icons.schedule),
-              title: Text(_nextDueDate != null 
-                  ? _formatDate(_nextDueDate!) 
-                  : 'Sem próxima dose'),
+              title: Text(
+                _nextDueDate != null
+                    ? _formatDate(_nextDueDate!)
+                    : 'Sem próxima dose',
+              ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -423,11 +427,13 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
                   side: BorderSide(color: theme.colorScheme.outline),
                 ),
                 leading: const Icon(Icons.notifications),
-                title: Text(_reminderDate != null 
-                    ? _formatDate(_reminderDate!) 
-                    : 'Sem lembrete'),
-                subtitle: _reminderDate != null 
-                    ? const Text('Você será notificado nesta data') 
+                title: Text(
+                  _reminderDate != null
+                      ? _formatDate(_reminderDate!)
+                      : 'Sem lembrete',
+                ),
+                subtitle: _reminderDate != null
+                    ? const Text('Você será notificado nesta data')
                     : const Text('Toque para agendar um lembrete'),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -454,10 +460,16 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                         ),
                       )
-                    : Text(widget.vaccine != null ? 'Atualizar Vacina' : 'Salvar Vacina'),
+                    : Text(
+                        widget.vaccine != null
+                            ? 'Atualizar Vacina'
+                            : 'Salvar Vacina',
+                      ),
               ),
             ),
             const SizedBox(height: 16),
@@ -467,13 +479,16 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
     );
   }
 
-  Future<void> _selectDate(BuildContext context, {required bool isApplicationDate}) async {
+  Future<void> _selectDate(
+    BuildContext context, {
+    required bool isApplicationDate,
+  }) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: isApplicationDate 
-          ? _selectedDate 
+      initialDate: isApplicationDate
+          ? _selectedDate
           : (_nextDueDate ?? _selectedDate.add(const Duration(days: 30))),
-      firstDate: isApplicationDate 
+      firstDate: isApplicationDate
           ? DateTime.now().subtract(const Duration(days: 365))
           : _selectedDate,
       lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
@@ -498,7 +513,8 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
 
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _reminderDate ?? _nextDueDate!.subtract(const Duration(days: 3)),
+      initialDate:
+          _reminderDate ?? _nextDueDate!.subtract(const Duration(days: 3)),
       firstDate: DateTime.now(),
       lastDate: _nextDueDate!,
     );
@@ -524,12 +540,22 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
         veterinarian: _veterinarianController.text.trim(),
         date: _selectedDate,
         nextDueDate: _nextDueDate,
-        batch: _batchController.text.trim().isEmpty ? null : _batchController.text.trim(),
-        manufacturer: _manufacturerController.text.trim().isEmpty ? null : _manufacturerController.text.trim(),
-        dosage: _dosageController.text.trim().isEmpty ? null : _dosageController.text.trim(),
-        notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+        batch: _batchController.text.trim().isEmpty
+            ? null
+            : _batchController.text.trim(),
+        manufacturer: _manufacturerController.text.trim().isEmpty
+            ? null
+            : _manufacturerController.text.trim(),
+        dosage: _dosageController.text.trim().isEmpty
+            ? null
+            : _dosageController.text.trim(),
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
         isRequired: _isRequired,
-        isCompleted: _status == VaccineStatus.applied || _status == VaccineStatus.completed,
+        isCompleted:
+            _status == VaccineStatus.applied ||
+            _status == VaccineStatus.completed,
         reminderDate: _reminderDate,
         status: _status,
         createdAt: widget.vaccine?.createdAt ?? DateTime.now(),
@@ -546,9 +572,11 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(widget.vaccine != null 
-                ? 'Vacina atualizada com sucesso' 
-                : 'Vacina adicionada com sucesso'),
+            content: Text(
+              widget.vaccine != null
+                  ? 'Vacina atualizada com sucesso'
+                  : 'Vacina adicionada com sucesso',
+            ),
             backgroundColor: Colors.green,
           ),
         );

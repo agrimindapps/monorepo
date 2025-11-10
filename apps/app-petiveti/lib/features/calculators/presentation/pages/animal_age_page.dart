@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column, Table;
 import 'package:flutter/material.dart';
 
 /// Página da Calculadora de Idade Animal
@@ -12,7 +12,7 @@ class AnimalAgePage extends StatefulWidget {
 class _AnimalAgePageState extends State<AnimalAgePage> {
   final _ageController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  
+
   String _selectedSpecies = 'dog';
   String _conversionType = 'to_human';
   String? _result;
@@ -79,9 +79,9 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
             const SizedBox(height: 12),
             Text(
               'Conversão de Idade Animal',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
@@ -105,9 +105,9 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
           children: [
             Text(
               'Espécie Animal',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
@@ -117,14 +117,8 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
                 prefixIcon: Icon(Icons.pets),
               ),
               items: const [
-                DropdownMenuItem(
-                  value: 'dog',
-                  child: Text('Cão'),
-                ),
-                DropdownMenuItem(
-                  value: 'cat',
-                  child: Text('Gato'),
-                ),
+                DropdownMenuItem(value: 'dog', child: Text('Cão')),
+                DropdownMenuItem(value: 'cat', child: Text('Gato')),
               ],
               onChanged: (value) {
                 setState(() {
@@ -148,9 +142,9 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
           children: [
             Text(
               'Tipo de Conversão',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
@@ -197,9 +191,9 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
           children: [
             Text(
               'Entrada de Idade',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             TextFormField(
@@ -211,7 +205,9 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
                 prefixIcon: const Icon(Icons.cake),
                 suffixText: 'anos',
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor, digite uma idade';
@@ -247,10 +243,7 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
       ),
       child: const Text(
         'Calcular Idade',
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -307,9 +300,9 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
           children: [
             Text(
               'Tabela de Referência',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             _buildSpeciesTable('Cão', _getDogAgeTable()),
@@ -345,15 +338,18 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
     );
   }
 
-  Widget _buildSpeciesTable(String species, List<MapEntry<String, String>> data) {
+  Widget _buildSpeciesTable(
+    String species,
+    List<MapEntry<String, String>> data,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           species,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Table(
@@ -436,11 +432,13 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
     if (_conversionType == 'to_human') {
       resultAge = _convertAnimalToHuman(inputAge, _selectedSpecies);
       final speciesName = _selectedSpecies == 'dog' ? 'cão' : 'gato';
-      resultText = '${inputAge.toInt()} ano${inputAge != 1 ? 's' : ''} de $speciesName = ${resultAge.toInt()} anos humanos';
+      resultText =
+          '${inputAge.toInt()} ano${inputAge != 1 ? 's' : ''} de $speciesName = ${resultAge.toInt()} anos humanos';
     } else {
       resultAge = _convertHumanToAnimal(inputAge, _selectedSpecies);
       final speciesName = _selectedSpecies == 'dog' ? 'cão' : 'gato';
-      resultText = '${inputAge.toInt()} anos humanos = ${resultAge.toStringAsFixed(1)} anos de $speciesName';
+      resultText =
+          '${inputAge.toInt()} anos humanos = ${resultAge.toStringAsFixed(1)} anos de $speciesName';
     }
 
     setState(() {
@@ -457,7 +455,8 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
       } else {
         return 24 + (animalAge - 2) * 4;
       }
-    } else { // cat
+    } else {
+      // cat
       if (animalAge <= 1) {
         return animalAge * 15;
       } else if (animalAge <= 2) {
@@ -477,7 +476,8 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
       } else {
         return 2 + (humanAge - 24) / 4;
       }
-    } else { // cat
+    } else {
+      // cat
       if (humanAge <= 15) {
         return humanAge / 15;
       } else if (humanAge <= 24) {

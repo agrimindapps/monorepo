@@ -1,11 +1,11 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../providers/body_condition_provider.dart';
 import 'body_condition_tab_controller.dart';
 
 /// Menu handler for Body Condition Calculator
-/// 
+///
 /// Responsibilities:
 /// - Handle menu action selection
 /// - Coordinate with dialog presentations
@@ -44,7 +44,9 @@ class BodyConditionMenuHandler {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Resetar Calculadora'),
-        content: const Text('Isso limpará todos os dados inseridos e resultados. Continuar?'),
+        content: const Text(
+          'Isso limpará todos os dados inseridos e resultados. Continuar?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -79,7 +81,7 @@ class BodyConditionMenuHandler {
       _showErrorSnackBar('Dados insuficientes para exportação segura');
       return;
     }
-    
+
     _showExportDialog(output);
   }
 
@@ -119,7 +121,7 @@ class BodyConditionMenuHandler {
     if (bcsScore < 1.0 || bcsScore > 9.0) {
       return false; // Invalid BCS score
     }
-    
+
     final input = ref.read(bodyConditionInputProvider);
     if (input.currentWeight <= 0.0 || input.currentWeight > 150.0) {
       return false; // Invalid weight
@@ -128,7 +130,7 @@ class BodyConditionMenuHandler {
     if (results.isEmpty) {
       return false; // No calculated results
     }
-    
+
     return true;
   }
 
@@ -143,7 +145,9 @@ class BodyConditionMenuHandler {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Score BCS: ${output.bcsScore.toStringAsFixed(1)}'),
-            Text('Classificação: ${_getClassificationText(output.classification)}'),
+            Text(
+              'Classificação: ${_getClassificationText(output.classification)}',
+            ),
             const SizedBox(height: 8),
             const Text('Os dados serão exportados de forma segura e anônima.'),
           ],
@@ -167,7 +171,6 @@ class BodyConditionMenuHandler {
 
   /// Perform secure export
   void _performSecureExport(dynamic output) {
-    
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Resultado exportado com segurança!'),
@@ -185,14 +188,10 @@ class BodyConditionMenuHandler {
   /// Show error snackbar
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
   /// Dispose of resources
-  void dispose() {
-  }
+  void dispose() {}
 }

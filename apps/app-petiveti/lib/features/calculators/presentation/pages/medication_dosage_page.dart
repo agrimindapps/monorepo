@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/medication_dosage_output.dart';
@@ -16,7 +16,8 @@ class MedicationDosagePage extends ConsumerStatefulWidget {
   const MedicationDosagePage({super.key});
 
   @override
-  ConsumerState<MedicationDosagePage> createState() => _MedicationDosagePageState();
+  ConsumerState<MedicationDosagePage> createState() =>
+      _MedicationDosagePageState();
 }
 
 class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
@@ -49,7 +50,9 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
               final provider = ref.watch(medicationDosageProviderProvider);
               return IconButton(
                 icon: Icon(
-                  provider.output != null ? Icons.medical_services : Icons.medical_services_outlined,
+                  provider.output != null
+                      ? Icons.medical_services
+                      : Icons.medical_services_outlined,
                   color: provider.output != null ? Colors.green : Colors.grey,
                 ),
                 onPressed: provider.output != null
@@ -97,11 +100,7 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildInputTab(),
-          _buildResultTab(),
-          _buildAlertsTab(),
-        ],
+        children: [_buildInputTab(), _buildResultTab(), _buildAlertsTab()],
       ),
       floatingActionButton: Builder(
         builder: (context) {
@@ -109,7 +108,9 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
           if (!provider.hasValidInput) return const SizedBox.shrink();
 
           return FloatingActionButton.extended(
-            onPressed: provider.isCalculating ? null : () => _handleCalculateWithSafetyCheck(provider),
+            onPressed: provider.isCalculating
+                ? null
+                : () => _handleCalculateWithSafetyCheck(provider),
             backgroundColor: Colors.red.shade600,
             icon: provider.isCalculating
                 ? const SizedBox(
@@ -121,7 +122,9 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
                     ),
                   )
                 : const Icon(Icons.calculate),
-            label: Text(provider.isCalculating ? 'Calculando...' : 'Calcular Dosagem'),
+            label: Text(
+              provider.isCalculating ? 'Calculando...' : 'Calcular Dosagem',
+            ),
           );
         },
       ),
@@ -180,18 +183,11 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.shield_outlined,
-              size: 64,
-              color: Colors.grey,
-            ),
+            Icon(Icons.shield_outlined, size: 64, color: Colors.grey),
             SizedBox(height: 16),
             Text(
               'Nenhum alerta disponível',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey,
-              ),
+              style: TextStyle(fontSize: 18, color: Colors.grey),
             ),
             SizedBox(height: 8),
             Text(
@@ -220,11 +216,7 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.warning,
-            color: Colors.orange.shade700,
-            size: 32,
-          ),
+          Icon(Icons.warning, color: Colors.orange.shade700, size: 32),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -241,10 +233,7 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
                 const SizedBox(height: 4),
                 Text(
                   'Esta calculadora é uma ferramenta auxiliar. Sempre consulte um veterinário antes de administrar medicamentos.',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.orange.shade700,
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.orange.shade700),
                 ),
               ],
             ),
@@ -261,11 +250,7 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red.shade400,
-            ),
+            Icon(Icons.error_outline, size: 64, color: Colors.red.shade400),
             const SizedBox(height: 16),
             Text(
               'Erro no Cálculo',
@@ -307,11 +292,7 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.calculate_outlined,
-              size: 64,
-              color: Colors.grey,
-            ),
+            Icon(Icons.calculate_outlined, size: 64, color: Colors.grey),
             SizedBox(height: 16),
             Text(
               'Resultado do Cálculo',
@@ -347,15 +328,15 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
                 const SizedBox(width: 8),
                 const Text(
                   'Monitoramento Necessário',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            _buildInfoRow('Parâmetros', output.monitoringInfo!.parametersToMonitor.join(', ')),
+            _buildInfoRow(
+              'Parâmetros',
+              output.monitoringInfo!.parametersToMonitor.join(', '),
+            ),
             _buildInfoRow('Frequência', output.monitoringInfo!.frequency),
             _buildInfoRow('Duração', output.monitoringInfo!.duration),
             if (output.monitoringInfo!.warningSignsToWatch.isNotEmpty) ...[
@@ -373,7 +354,11 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
                   padding: const EdgeInsets.only(left: 16, bottom: 2),
                   child: Row(
                     children: [
-                      Icon(Icons.warning, size: 16, color: Colors.orange.shade600),
+                      Icon(
+                        Icons.warning,
+                        size: 16,
+                        color: Colors.orange.shade600,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(child: Text(sign)),
                     ],
@@ -401,10 +386,7 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
                 const SizedBox(width: 8),
                 const Text(
                   'Instruções de Administração',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -449,20 +431,22 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
-          Expanded(
-            child: Text(value),
-          ),
+          Expanded(child: Text(value)),
         ],
       ),
     );
   }
 
   /// Implementa confirmação dupla para doses críticas
-  Future<void> _handleCalculateWithSafetyCheck(MedicationDosageProvider provider) async {
+  Future<void> _handleCalculateWithSafetyCheck(
+    MedicationDosageProvider provider,
+  ) async {
     final preValidation = DosageValidationService.preValidate(provider.input);
-    
+
     if (preValidation.requiresDoubleConfirmation) {
-      final confirmed = await _showCriticalDoseConfirmation(preValidation.warnings);
+      final confirmed = await _showCriticalDoseConfirmation(
+        preValidation.warnings,
+      );
       if (!confirmed) return;
     }
     await provider.calculateDosage();
@@ -480,7 +464,7 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
           unit: provider.output!.unit,
           recommendedAction: postValidation.recommendedAction,
         );
-        
+
         if (!confirmed) {
           provider.clearAll();
           return;
@@ -511,7 +495,10 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
     ).then((value) => value ?? false);
   }
 
-  void _showPrescriptionExport(BuildContext context, MedicationDosageProvider provider) {
+  void _showPrescriptionExport(
+    BuildContext context,
+    MedicationDosageProvider provider,
+  ) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -587,10 +574,7 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
                       ? const Center(
                           child: Text(
                             'Nenhum cálculo no histórico',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                            ),
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
                           ),
                         )
                       : ListView.builder(
@@ -641,14 +625,16 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
 
   void _handleMenuAction(BuildContext context, String action) {
     final provider = ref.read(medicationDosageProviderProvider);
-    
+
     switch (action) {
       case 'clear':
         showDialog<void>(
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('Limpar Todos os Dados'),
-            content: const Text('Tem certeza que deseja limpar todos os dados inseridos?'),
+            content: const Text(
+              'Tem certeza que deseja limpar todos os dados inseridos?',
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -660,9 +646,7 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
                   Navigator.pop(context);
                   _tabController.animateTo(0);
                 },
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.red,
-                ),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
                 child: const Text('Limpar'),
               ),
             ],
@@ -685,10 +669,7 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'Como usar:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              Text('Como usar:', style: TextStyle(fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
               Text('1. Selecione o medicamento desejado'),
               Text('2. Informe os dados do animal (espécie, peso, idade)'),
@@ -698,7 +679,10 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
               SizedBox(height: 16),
               Text(
                 'Importante:',
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
               ),
               SizedBox(height: 8),
               Text('• Esta ferramenta é apenas auxiliar'),

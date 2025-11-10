@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide SubscriptionState;
+import 'package:core/core.dart' hide SubscriptionState, Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/user_subscription.dart';
@@ -44,16 +44,19 @@ class CurrentSubscriptionCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, _SubscriptionStatusInfo statusInfo) {
+  Widget _buildHeader(
+    BuildContext context,
+    _SubscriptionStatusInfo statusInfo,
+  ) {
     return Row(
       children: [
         Icon(Icons.check_circle, color: statusInfo.color),
         const SizedBox(width: 8),
         Text(
           'Assinatura Atual',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -62,13 +65,17 @@ class CurrentSubscriptionCard extends ConsumerWidget {
   Widget _buildPlanInfo(BuildContext context, dynamic plan) {
     return Text(
       plan?.title?.toString() ?? 'Plano não identificado',
-      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+      style: Theme.of(
+        context,
+      ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
     );
   }
 
-  Widget _buildStatusAndPrice(BuildContext context, dynamic plan, _SubscriptionStatusInfo statusInfo) {
+  Widget _buildStatusAndPrice(
+    BuildContext context,
+    dynamic plan,
+    _SubscriptionStatusInfo statusInfo,
+  ) {
     return Row(
       children: [
         Container(
@@ -89,9 +96,9 @@ class CurrentSubscriptionCard extends ConsumerWidget {
         const Spacer(),
         Text(
           plan?.formattedPrice?.toString() ?? 'Preço não disponível',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -105,7 +112,9 @@ class CurrentSubscriptionCard extends ConsumerWidget {
         const SizedBox(height: 8),
         Text(
           'Expira em: ${_formatDate(subscription.expirationDate!)}',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       ]);
     }
@@ -145,7 +154,9 @@ class CurrentSubscriptionCard extends ConsumerWidget {
         if (subscription.isActive && !subscription.isCancelled) ...[
           Expanded(
             child: OutlinedButton.icon(
-              onPressed: state.isCancelling ? null : () => _showCancelDialog(context, ref),
+              onPressed: state.isCancelling
+                  ? null
+                  : () => _showCancelDialog(context, ref),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Theme.of(context).colorScheme.error,
               ),
@@ -164,13 +175,13 @@ class CurrentSubscriptionCard extends ConsumerWidget {
         if (subscription.isPaused) ...[
           Expanded(
             child: ElevatedButton.icon(
-              onPressed: state.isResuming 
-                  ? null 
+              onPressed: state.isResuming
+                  ? null
                   : () => SubscriptionPageCoordinator.resumeSubscription(
-                        ref, 
-                        context, 
-                        userId,
-                      ),
+                      ref,
+                      context,
+                      userId,
+                    ),
               icon: state.isResuming
                   ? const SizedBox(
                       width: 16,
@@ -206,9 +217,15 @@ class CurrentSubscriptionCard extends ConsumerWidget {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              SubscriptionPageCoordinator.cancelSubscription(ref, context, userId);
+              SubscriptionPageCoordinator.cancelSubscription(
+                ref,
+                context,
+                userId,
+              );
             },
-            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
             child: const Text('Cancelar'),
           ),
         ],
@@ -219,7 +236,7 @@ class CurrentSubscriptionCard extends ConsumerWidget {
   _SubscriptionStatusInfo _getStatusInfo(BuildContext context) {
     Color statusColor = Theme.of(context).colorScheme.primary;
     String statusText = 'Ativo';
-    
+
     if (subscription.isCancelled) {
       statusColor = Theme.of(context).colorScheme.error;
       statusText = 'Cancelado';
@@ -246,8 +263,5 @@ class _SubscriptionStatusInfo {
   final Color color;
   final String text;
 
-  const _SubscriptionStatusInfo({
-    required this.color,
-    required this.text,
-  });
+  const _SubscriptionStatusInfo({required this.color, required this.text});
 }

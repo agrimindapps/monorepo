@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Interface para gerenciamento de agendamento de notificações
 /// Segue o princípio ISP - Interface Segregation Principle

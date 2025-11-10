@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../../features/plants/data/datasources/local/spaces_local_datasource.dart';
 import '../../../features/plants/data/datasources/remote/spaces_remote_datasource.dart';

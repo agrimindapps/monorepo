@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide Column, FormState;
 import 'package:flutter/material.dart';
 
 import '../../domain/calculators/pregnancy_gestacao_calculator.dart';
@@ -90,7 +90,7 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
 
   Widget _buildInfoCard() {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -142,9 +142,9 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
           children: [
             Text(
               'Informações Básicas',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
@@ -154,10 +154,7 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
                 border: OutlineInputBorder(),
               ),
               items: ['Cão', 'Gato'].map((species) {
-                return DropdownMenuItem(
-                  value: species,
-                  child: Text(species),
-                );
+                return DropdownMenuItem(value: species, child: Text(species));
               }).toList(),
               onChanged: (value) {
                 if (value != null) {
@@ -186,10 +183,7 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
                 border: OutlineInputBorder(),
               ),
               items: _getBreedSizeOptions(_selectedSpecies).map((size) {
-                return DropdownMenuItem(
-                  value: size,
-                  child: Text(size),
-                );
+                return DropdownMenuItem(value: size, child: Text(size));
               }).toList(),
               onChanged: (value) {
                 if (value != null) {
@@ -214,7 +208,9 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
                 border: OutlineInputBorder(),
                 helperText: 'Peso atual da fêmea gestante',
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor, informe o peso da mãe';
@@ -241,9 +237,9 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
           children: [
             Text(
               'Dados da Gestação',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             ListTile(
@@ -281,9 +277,9 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
           children: [
             Text(
               'Informações Adicionais (Opcional)',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -313,7 +309,7 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
 
   Widget _buildResultCard(CalculationResult result) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: 3,
       child: Padding(
@@ -338,13 +334,15 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
             ),
             const SizedBox(height: 16),
             ...result.results.map((item) => _buildResultItem(item)),
-            
+
             if (result.summary != null) ...[
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  color: theme.colorScheme.primaryContainer.withValues(
+                    alpha: 0.3,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -355,7 +353,7 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
                 ),
               ),
             ],
-            
+
             if (result.recommendations.isNotEmpty == true) ...[
               const SizedBox(height: 16),
               _buildRecommendationsSection(result.recommendations),
@@ -369,7 +367,7 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
   Widget _buildResultItem(ResultItem item) {
     final theme = Theme.of(context);
     final color = _getSeverityColor(item.severity);
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -392,7 +390,9 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
                     child: Text(
                       item.description!,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                     ),
                   ),
@@ -421,8 +421,12 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
 
   Widget _buildRecommendationsSection(List<Recommendation> recommendations) {
     final theme = Theme.of(context);
-    final alerts = recommendations.where((r) => r.title.contains('Alerta')).toList();
-    final normalRecs = recommendations.where((r) => !r.title.contains('Alerta')).toList();
+    final alerts = recommendations
+        .where((r) => r.title.contains('Alerta'))
+        .toList();
+    final normalRecs = recommendations
+        .where((r) => !r.title.contains('Alerta'))
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -448,7 +452,11 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.warning_amber, color: Colors.orange, size: 20),
+                    const Icon(
+                      Icons.warning_amber,
+                      color: Colors.orange,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'Alertas Importantes',
@@ -460,44 +468,45 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
                   ],
                 ),
                 const SizedBox(height: 8),
-                ...alerts.map((alert) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    '• ${alert.message}',
-                    style: theme.textTheme.bodyMedium,
+                ...alerts.map(
+                  (alert) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      '• ${alert.message}',
+                      style: theme.textTheme.bodyMedium,
+                    ),
                   ),
-                )),
+                ),
               ],
             ),
           ),
         ],
-        ...normalRecs.map((rec) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                _getRecommendationIcon(rec.severity),
-                size: 16,
-                color: _getSeverityColor(rec.severity),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  rec.message,
-                  style: theme.textTheme.bodyMedium,
+        ...normalRecs.map(
+          (rec) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  _getRecommendationIcon(rec.severity),
+                  size: 16,
+                  color: _getSeverityColor(rec.severity),
                 ),
-              ),
-            ],
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(rec.message, style: theme.textTheme.bodyMedium),
+                ),
+              ],
+            ),
           ),
-        )),
+        ),
       ],
     );
   }
 
   Widget _buildErrorCard(String error) {
     final theme = Theme.of(context);
-    
+
     return Card(
       color: theme.colorScheme.errorContainer,
       child: Padding(
@@ -624,7 +633,7 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
       'mating_date': _matingDate.toIso8601String().split('T')[0],
       'mother_weight': double.parse(_motherWeightController.text),
       'breed_size': _selectedBreedSize,
-      'expected_litter_size': _expectedLitterSizeController.text.isNotEmpty 
+      'expected_litter_size': _expectedLitterSizeController.text.isNotEmpty
           ? double.parse(_expectedLitterSizeController.text)
           : null,
       'is_first_pregnancy': _isFirstPregnancy,

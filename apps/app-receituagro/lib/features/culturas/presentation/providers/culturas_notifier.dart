@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/failure_message_service.dart';

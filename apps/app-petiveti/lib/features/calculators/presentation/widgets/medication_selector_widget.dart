@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/medication_data.dart';
@@ -9,10 +9,12 @@ class MedicationSelectorWidget extends ConsumerStatefulWidget {
   const MedicationSelectorWidget({super.key});
 
   @override
-  ConsumerState<MedicationSelectorWidget> createState() => _MedicationSelectorWidgetState();
+  ConsumerState<MedicationSelectorWidget> createState() =>
+      _MedicationSelectorWidgetState();
 }
 
-class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWidget> {
+class _MedicationSelectorWidgetState
+    extends ConsumerState<MedicationSelectorWidget> {
   final TextEditingController _searchController = TextEditingController();
   bool _showFavoritesOnly = false;
 
@@ -49,7 +51,9 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
                     const Spacer(),
                     IconButton(
                       icon: Icon(
-                        _showFavoritesOnly ? Icons.favorite : Icons.favorite_outline,
+                        _showFavoritesOnly
+                            ? Icons.favorite
+                            : Icons.favorite_outline,
                         color: _showFavoritesOnly ? Colors.red : Colors.grey,
                       ),
                       onPressed: () {
@@ -86,9 +90,9 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
                 ),
                 const SizedBox(height: 16),
                 if (!_showFavoritesOnly) _buildCategoryFilters(provider),
-                
+
                 const SizedBox(height: 16),
-                if (provider.searchQuery.isEmpty && !_showFavoritesOnly) 
+                if (provider.searchQuery.isEmpty && !_showFavoritesOnly)
                   _buildTopMedicationsSection(provider),
                 _buildMedicationsList(provider),
               ],
@@ -114,10 +118,7 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
       children: [
         const Text(
           'Filtrar por categoria:',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -145,10 +146,7 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
       children: [
         const Text(
           'Medicamentos mais utilizados:',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         SizedBox(
@@ -168,9 +166,12 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
     );
   }
 
-  Widget _buildTopMedicationCard(MedicationData medication, MedicationDosageProvider provider) {
+  Widget _buildTopMedicationCard(
+    MedicationData medication,
+    MedicationDosageProvider provider,
+  ) {
     final isSelected = provider.input.medicationId == medication.id;
-    
+
     return Container(
       width: 140,
       margin: const EdgeInsets.only(right: 12),
@@ -205,10 +206,7 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
                 const SizedBox(height: 4),
                 Text(
                   medication.category,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -221,7 +219,7 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
   }
 
   Widget _buildMedicationsList(MedicationDosageProvider provider) {
-    List<MedicationData> medications = _showFavoritesOnly 
+    List<MedicationData> medications = _showFavoritesOnly
         ? provider.getFavoriteMedications()
         : provider.filteredMedications;
 
@@ -239,13 +237,10 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
               ),
               const SizedBox(height: 8),
               Text(
-                _showFavoritesOnly 
+                _showFavoritesOnly
                     ? 'Nenhum medicamento favorito'
                     : 'Nenhum medicamento encontrado',
-                style: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16,
-                ),
+                style: const TextStyle(color: Colors.grey, fontSize: 16),
               ),
             ],
           ),
@@ -257,13 +252,10 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          _showFavoritesOnly 
+          _showFavoritesOnly
               ? 'Favoritos (${medications.length})'
               : 'Resultados (${medications.length})',
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         ConstrainedBox(
@@ -281,16 +273,21 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
     );
   }
 
-  Widget _buildMedicationTile(MedicationData medication, MedicationDosageProvider provider) {
+  Widget _buildMedicationTile(
+    MedicationData medication,
+    MedicationDosageProvider provider,
+  ) {
     final isSelected = provider.input.medicationId == medication.id;
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       elevation: isSelected ? 3 : 1,
       color: isSelected ? Colors.red.shade50 : null,
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: isSelected ? Colors.red.shade100 : Colors.grey.shade200,
+          backgroundColor: isSelected
+              ? Colors.red.shade100
+              : Colors.grey.shade200,
           child: _getCategoryIcon(medication.category),
         ),
         title: Text(
@@ -307,10 +304,7 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
             if (medication.indications.isNotEmpty)
               Text(
                 medication.indications.take(2).join(', '),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -321,10 +315,7 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
           children: [
             _buildFavoriteButton(medication, provider),
             if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: Colors.green.shade600,
-              ),
+              Icon(Icons.check_circle, color: Colors.green.shade600),
           ],
         ),
         onTap: () => provider.updateMedicationId(medication.id),
@@ -333,9 +324,12 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
     );
   }
 
-  Widget _buildFavoriteButton(MedicationData medication, MedicationDosageProvider provider) {
+  Widget _buildFavoriteButton(
+    MedicationData medication,
+    MedicationDosageProvider provider,
+  ) {
     final isFavorite = provider.favoriteMedications.contains(medication.id);
-    
+
     return IconButton(
       icon: Icon(
         isFavorite ? Icons.favorite : Icons.favorite_outline,
@@ -350,7 +344,7 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
   Widget _getCategoryIcon(String category) {
     IconData iconData;
     Color color;
-    
+
     switch (category.toLowerCase()) {
       case 'antibiótico':
       case 'antibiótico quinolona':
@@ -393,7 +387,7 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
         iconData = Icons.medication;
         color = Colors.grey.shade600;
     }
-    
+
     return Icon(iconData, color: color, size: 20);
   }
 }

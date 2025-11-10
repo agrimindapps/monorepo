@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 
 import '../../../animals/presentation/providers/animals_provider.dart';
@@ -9,14 +9,11 @@ class WeightGoalManagement extends ConsumerStatefulWidget {
   final String? animalId;
   final VoidCallback? onGoalsUpdated;
 
-  const WeightGoalManagement({
-    super.key,
-    this.animalId,
-    this.onGoalsUpdated,
-  });
+  const WeightGoalManagement({super.key, this.animalId, this.onGoalsUpdated});
 
   @override
-  ConsumerState<WeightGoalManagement> createState() => _WeightGoalManagementState();
+  ConsumerState<WeightGoalManagement> createState() =>
+      _WeightGoalManagementState();
 }
 
 class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
@@ -26,13 +23,13 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
   final _targetWeightController = TextEditingController();
   final _timelineController = TextEditingController();
   final _notesController = TextEditingController();
-  
+
   DateTime _targetDate = DateTime.now().add(const Duration(days: 90));
   String _goalType = 'maintain'; // maintain, lose, gain
   String _priority = 'medium'; // low, medium, high
   bool _enableProgressAlerts = true;
   bool _enableWeeklyReminders = true;
-  
+
   @override
   void initState() {
     super.initState();
@@ -77,7 +74,11 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
     );
   }
 
-  Widget _buildActiveGoalsTab(ThemeData theme, WeightsState weightsState, AnimalsState animalsState) {
+  Widget _buildActiveGoalsTab(
+    ThemeData theme,
+    WeightsState weightsState,
+    AnimalsState animalsState,
+  ) {
     final activeGoals = _getMockActiveGoals();
 
     if (activeGoals.isEmpty) {
@@ -94,9 +95,17 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
     );
   }
 
-  Widget _buildGoalCard(ThemeData theme, Map<String, dynamic> goal, WeightsState weightsState) {
+  Widget _buildGoalCard(
+    ThemeData theme,
+    Map<String, dynamic> goal,
+    WeightsState weightsState,
+  ) {
     final progress = goal['progress'] as double;
-    final progressColor = progress >= 0.8 ? Colors.green : progress >= 0.5 ? Colors.orange : Colors.red;
+    final progressColor = progress >= 0.8
+        ? Colors.green
+        : progress >= 0.5
+        ? Colors.orange
+        : Colors.red;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -110,7 +119,9 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: _getGoalTypeColor(goal['type'] as String).withValues(alpha: 0.1),
+                    color: _getGoalTypeColor(
+                      goal['type'] as String,
+                    ).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -139,9 +150,14 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: _getPriorityColor(goal['priority'] as String).withValues(alpha: 0.1),
+                    color: _getPriorityColor(
+                      goal['priority'] as String,
+                    ).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -166,10 +182,7 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Progresso',
-                        style: theme.textTheme.titleSmall,
-                      ),
+                      Text('Progresso', style: theme.textTheme.titleSmall),
                       Text(
                         '${(progress * 100).toStringAsFixed(0)}%',
                         style: theme.textTheme.titleSmall?.copyWith(
@@ -202,7 +215,7 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 12),
             Row(
               children: [
@@ -264,16 +277,28 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
                     Wrap(
                       spacing: 8,
                       children: [
-                        _buildGoalTypeChip('maintain', 'Manter Peso', Icons.balance),
-                        _buildGoalTypeChip('lose', 'Perder Peso', Icons.trending_down),
-                        _buildGoalTypeChip('gain', 'Ganhar Peso', Icons.trending_up),
+                        _buildGoalTypeChip(
+                          'maintain',
+                          'Manter Peso',
+                          Icons.balance,
+                        ),
+                        _buildGoalTypeChip(
+                          'lose',
+                          'Perder Peso',
+                          Icons.trending_down,
+                        ),
+                        _buildGoalTypeChip(
+                          'gain',
+                          'Ganhar Peso',
+                          Icons.trending_up,
+                        ),
                       ],
                     ),
                   ],
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 16),
             Card(
               child: Padding(
@@ -329,7 +354,8 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
                       decoration: const InputDecoration(
                         labelText: 'Observações',
                         prefixIcon: Icon(Icons.notes),
-                        hintText: 'Motivação, estratégias, recomendações veterinárias...',
+                        hintText:
+                            'Motivação, estratégias, recomendações veterinárias...',
                       ),
                       maxLines: 3,
                     ),
@@ -337,7 +363,7 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 16),
             Card(
               child: Padding(
@@ -368,21 +394,27 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
                     const SizedBox(height: 16),
                     SwitchListTile(
                       title: const Text('Alertas de Progresso'),
-                      subtitle: const Text('Notificações sobre evolução da meta'),
+                      subtitle: const Text(
+                        'Notificações sobre evolução da meta',
+                      ),
                       value: _enableProgressAlerts,
-                      onChanged: (value) => setState(() => _enableProgressAlerts = value),
+                      onChanged: (value) =>
+                          setState(() => _enableProgressAlerts = value),
                     ),
                     SwitchListTile(
                       title: const Text('Lembretes Semanais'),
-                      subtitle: const Text('Lembrete para registrar peso semanalmente'),
+                      subtitle: const Text(
+                        'Lembrete para registrar peso semanalmente',
+                      ),
                       value: _enableWeeklyReminders,
-                      onChanged: (value) => setState(() => _enableWeeklyReminders = value),
+                      onChanged: (value) =>
+                          setState(() => _enableWeeklyReminders = value),
                     ),
                   ],
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 24),
             Row(
               children: [
@@ -413,11 +445,7 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
       selected: isSelected,
       label: Row(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16),
-          const SizedBox(width: 4),
-          Text(label),
-        ],
+        children: [Icon(icon, size: 16), const SizedBox(width: 4), Text(label)],
       ),
       onSelected: (selected) {
         if (selected) {
@@ -427,7 +455,10 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
     );
   }
 
-  Widget _buildVeterinaryGuidelinesTab(ThemeData theme, AnimalsState animalsState) {
+  Widget _buildVeterinaryGuidelinesTab(
+    ThemeData theme,
+    AnimalsState animalsState,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -441,7 +472,10 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.medical_information, color: theme.colorScheme.primary),
+                      Icon(
+                        Icons.medical_information,
+                        color: theme.colorScheme.primary,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'Diretrizes Veterinárias',
@@ -484,9 +518,9 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
               ),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -505,9 +539,9 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
               ),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -522,9 +556,21 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
                     ),
                   ),
                   const SizedBox(height: 16),
-                  _buildAlertItem(theme, 'Perda de peso > 10% em 3 meses', Colors.red),
-                  _buildAlertItem(theme, 'Ganho de peso > 15% em 6 meses', Colors.orange),
-                  _buildAlertItem(theme, 'Flutuações frequentes (>5% por semana)', Colors.yellow),
+                  _buildAlertItem(
+                    theme,
+                    'Perda de peso > 10% em 3 meses',
+                    Colors.red,
+                  ),
+                  _buildAlertItem(
+                    theme,
+                    'Ganho de peso > 15% em 6 meses',
+                    Colors.orange,
+                  ),
+                  _buildAlertItem(
+                    theme,
+                    'Flutuações frequentes (>5% por semana)',
+                    Colors.yellow,
+                  ),
                 ],
               ),
             ),
@@ -534,7 +580,13 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
     );
   }
 
-  Widget _buildGuidelineItem(ThemeData theme, String title, String description, IconData icon, Color color) {
+  Widget _buildGuidelineItem(
+    ThemeData theme,
+    String title,
+    String description,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -561,10 +613,7 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
                     color: color,
                   ),
                 ),
-                Text(
-                  description,
-                  style: theme.textTheme.bodySmall,
-                ),
+                Text(description, style: theme.textTheme.bodySmall),
               ],
             ),
           ),
@@ -640,11 +689,7 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.track_changes,
-            size: 64,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.track_changes, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'Nenhuma meta ativa',
@@ -669,6 +714,7 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
       ),
     );
   }
+
   List<Map<String, dynamic>> _getMockActiveGoals() {
     return [
       {
@@ -755,7 +801,7 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
-    
+
     if (date != null) {
       setState(() => _targetDate = date);
     }
@@ -769,21 +815,22 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
           backgroundColor: Colors.green,
         ),
       );
-      
+
       widget.onGoalsUpdated?.call();
       Navigator.of(context).pop();
     }
   }
 
-  void _editGoal(Map<String, dynamic> goal) {
-  }
+  void _editGoal(Map<String, dynamic> goal) {}
 
   void _completeGoal(Map<String, dynamic> goal) {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Concluir Meta'),
-        content: const Text('Parabéns! Você atingiu sua meta de peso. Deseja marcá-la como concluída?'),
+        content: const Text(
+          'Parabéns! Você atingiu sua meta de peso. Deseja marcá-la como concluída?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -806,15 +853,16 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
     );
   }
 
-  void _showGoalAnalytics(Map<String, dynamic> goal) {
-  }
+  void _showGoalAnalytics(Map<String, dynamic> goal) {}
 
   void _showVeterinaryConsultation() {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Consulta Veterinária'),
-        content: const Text('Recomendamos consultar um veterinário para definir metas de peso adequadas para seu pet.'),
+        content: const Text(
+          'Recomendamos consultar um veterinário para definir metas de peso adequadas para seu pet.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -836,7 +884,9 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Peso Ideal Calculado'),
-        content: const Text('Com base nas informações fornecidas, o peso ideal estimado é entre 25-30kg. Consulte um veterinário para confirmação.'),
+        content: const Text(
+          'Com base nas informações fornecidas, o peso ideal estimado é entre 25-30kg. Consulte um veterinário para confirmação.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

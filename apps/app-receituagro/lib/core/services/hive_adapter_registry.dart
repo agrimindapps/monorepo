@@ -1,5 +1,5 @@
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../data/models/comentario_hive.dart';
 import '../data/models/cultura_hive.dart';

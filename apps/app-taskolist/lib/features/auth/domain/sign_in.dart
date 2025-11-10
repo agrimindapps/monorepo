@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide UserEntity;
+import 'package:core/core.dart' hide UserEntity, Column;
 
 import '../../../core/usecases/usecase.dart';
 import '../../../core/utils/typedef.dart';

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../entities/defensivo_entity.dart';
 import '../repositories/i_defensivos_repository.dart';

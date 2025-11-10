@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../animals/presentation/providers/animals_provider.dart';
@@ -19,7 +19,7 @@ class WeightPage extends ConsumerStatefulWidget {
 
 class _WeightPageState extends ConsumerState<WeightPage> {
   String? _selectedAnimalId;
-  
+
   @override
   void initState() {
     super.initState();
@@ -42,16 +42,22 @@ class _WeightPageState extends ConsumerState<WeightPage> {
           if (animalsState.animals.isNotEmpty)
             PopupMenuButton<String?>(
               icon: Icon(
-                _selectedAnimalId != null ? Icons.filter_alt : Icons.filter_alt_outlined,
-                color: _selectedAnimalId != null ? theme.colorScheme.primary : null,
+                _selectedAnimalId != null
+                    ? Icons.filter_alt
+                    : Icons.filter_alt_outlined,
+                color: _selectedAnimalId != null
+                    ? theme.colorScheme.primary
+                    : null,
               ),
               onSelected: (animalId) {
                 setState(() {
                   _selectedAnimalId = animalId;
                 });
-                
+
                 if (animalId != null) {
-                  ref.read(weightsProvider.notifier).loadWeightsByAnimal(animalId);
+                  ref
+                      .read(weightsProvider.notifier)
+                      .loadWeightsByAnimal(animalId);
                 } else {
                   ref.read(weightsProvider.notifier).loadWeights();
                 }
@@ -68,33 +74,37 @@ class _WeightPageState extends ConsumerState<WeightPage> {
                   ),
                 ),
                 const PopupMenuDivider(),
-                ...animalsState.animals.map((animal) => PopupMenuItem<String>(
-                      value: animal.id,
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 12,
-                            backgroundColor: theme.colorScheme.primary.withAlpha(51),
-                            child: Text(
-                              animal.name.substring(0, 1).toUpperCase(),
-                              style: TextStyle(
-                                color: theme.colorScheme.primary,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
+                ...animalsState.animals.map(
+                  (animal) => PopupMenuItem<String>(
+                    value: animal.id,
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 12,
+                          backgroundColor: theme.colorScheme.primary.withAlpha(
+                            51,
+                          ),
+                          child: Text(
+                            animal.name.substring(0, 1).toUpperCase(),
+                            style: TextStyle(
+                              color: theme.colorScheme.primary,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(child: Text(animal.name)),
-                          if (_selectedAnimalId == animal.id)
-                            Icon(
-                              Icons.check,
-                              color: theme.colorScheme.primary,
-                              size: 18,
-                            ),
-                        ],
-                      ),
-                    )),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(animal.name)),
+                        if (_selectedAnimalId == animal.id)
+                          Icon(
+                            Icons.check,
+                            color: theme.colorScheme.primary,
+                            size: 18,
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           PopupMenuButton<String>(
@@ -157,11 +167,13 @@ class _WeightPageState extends ConsumerState<WeightPage> {
     );
   }
 
-  Widget _buildBody(BuildContext context, WeightsState weightsState, AnimalsState animalsState) {
+  Widget _buildBody(
+    BuildContext context,
+    WeightsState weightsState,
+    AnimalsState animalsState,
+  ) {
     if (weightsState.isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (weightsState.error != null) {
@@ -169,11 +181,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red[300],
-            ),
+            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
             const SizedBox(height: 16),
             Text(
               'Erro ao carregar registros',
@@ -190,7 +198,9 @@ class _WeightPageState extends ConsumerState<WeightPage> {
               onPressed: () {
                 ref.read(weightsProvider.notifier).clearError();
                 if (_selectedAnimalId != null) {
-                  ref.read(weightsProvider.notifier).loadWeightsByAnimal(_selectedAnimalId!);
+                  ref
+                      .read(weightsProvider.notifier)
+                      .loadWeightsByAnimal(_selectedAnimalId!);
                 } else {
                   ref.read(weightsProvider.notifier).loadWeights();
                 }
@@ -220,7 +230,9 @@ class _WeightPageState extends ConsumerState<WeightPage> {
           child: RefreshIndicator(
             onRefresh: () async {
               if (_selectedAnimalId != null) {
-                await ref.read(weightsProvider.notifier).loadWeightsByAnimal(_selectedAnimalId!);
+                await ref
+                    .read(weightsProvider.notifier)
+                    .loadWeightsByAnimal(_selectedAnimalId!);
               } else {
                 await ref.read(weightsProvider.notifier).loadWeights();
               }
@@ -229,8 +241,10 @@ class _WeightPageState extends ConsumerState<WeightPage> {
               itemCount: weights.length,
               itemBuilder: (context, index) {
                 final weight = weights[index];
-                final previousWeight = index < weights.length - 1 ? weights[index + 1] : null;
-                
+                final previousWeight = index < weights.length - 1
+                    ? weights[index + 1]
+                    : null;
+
                 return WeightCard(
                   weight: weight,
                   previousWeight: previousWeight,
@@ -250,7 +264,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
   Widget _buildStatisticsHeader(BuildContext context, WeightsState state) {
     final theme = Theme.of(context);
     final statistics = state.statistics!;
-    
+
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
@@ -321,16 +335,18 @@ class _WeightPageState extends ConsumerState<WeightPage> {
     );
   }
 
-  Widget _buildStatItem(BuildContext context, String label, String value, String unit, IconData icon) {
+  Widget _buildStatItem(
+    BuildContext context,
+    String label,
+    String value,
+    String unit,
+    IconData icon,
+  ) {
     final theme = Theme.of(context);
-    
+
     return Column(
       children: [
-        Icon(
-          icon,
-          color: theme.colorScheme.primary,
-          size: 24,
-        ),
+        Icon(icon, color: theme.colorScheme.primary, size: 24),
         const SizedBox(height: 8),
         Text(
           label,
@@ -364,7 +380,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
 
   Widget _buildNoAnimalsState(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -391,8 +407,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
           ),
           const SizedBox(height: 32),
           FilledButton.icon(
-            onPressed: () {
-            },
+            onPressed: () {},
             icon: const Icon(Icons.pets),
             label: const Text('Cadastrar Animal'),
           ),
@@ -403,7 +418,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
 
   Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -415,7 +430,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
           ),
           const SizedBox(height: 24),
           Text(
-            _selectedAnimalId != null 
+            _selectedAnimalId != null
                 ? 'Nenhum registro de peso encontrado'
                 : 'Nenhum registro de peso',
             style: theme.textTheme.titleLarge?.copyWith(
@@ -447,9 +462,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (context) => AddWeightForm(
-          initialAnimalId: _selectedAnimalId,
-        ),
+        builder: (context) => AddWeightForm(initialAnimalId: _selectedAnimalId),
       ),
     );
   }
@@ -474,9 +487,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
         builder: (context, scrollController) => DecoratedBox(
           decoration: BoxDecoration(
             color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(16),
-            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
           ),
           child: Column(
             children: [
@@ -521,7 +532,9 @@ class _WeightPageState extends ConsumerState<WeightPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Excluir Registro'),
-        content: const Text('Tem certeza que deseja excluir este registro de peso? Esta ação não pode ser desfeita.'),
+        content: const Text(
+          'Tem certeza que deseja excluir este registro de peso? Esta ação não pode ser desfeita.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -531,7 +544,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
             onPressed: () {
               Navigator.pop(context);
               ref.read(weightsProvider.notifier).deleteWeight(weightId);
-              
+
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Registro de peso excluído com sucesso'),
@@ -577,17 +590,19 @@ class _WeightPageState extends ConsumerState<WeightPage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: WeightSortOrder.values
-              .map((order) => RadioListTile<WeightSortOrder>(
-                    title: Text(order.displayName),
-                    value: order,
-                    groupValue: weightsState.sortOrder,
-                    onChanged: (value) {
-                      if (value != null) {
-                        ref.read(weightsProvider.notifier).setSortOrder(value);
-                      }
-                      Navigator.pop(context);
-                    },
-                  ))
+              .map(
+                (order) => RadioListTile<WeightSortOrder>(
+                  title: Text(order.displayName),
+                  value: order,
+                  groupValue: weightsState.sortOrder,
+                  onChanged: (value) {
+                    if (value != null) {
+                      ref.read(weightsProvider.notifier).setSortOrder(value);
+                    }
+                    Navigator.pop(context);
+                  },
+                ),
+              )
               .toList(),
         ),
         actions: [
@@ -605,9 +620,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
       context,
       MaterialPageRoute<void>(
         builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: const Text('Gráficos de Peso'),
-          ),
+          appBar: AppBar(title: const Text('Gráficos de Peso')),
           body: WeightChartVisualization(
             animalId: _selectedAnimalId,
             showInteractiveMode: true,
@@ -625,7 +638,9 @@ class _WeightPageState extends ConsumerState<WeightPage> {
           animalId: _selectedAnimalId,
           onGoalsUpdated: () {
             if (_selectedAnimalId != null) {
-              ref.read(weightsProvider.notifier).loadWeightsByAnimal(_selectedAnimalId!);
+              ref
+                  .read(weightsProvider.notifier)
+                  .loadWeightsByAnimal(_selectedAnimalId!);
             } else {
               ref.read(weightsProvider.notifier).loadWeights();
             }
@@ -640,9 +655,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
       context,
       MaterialPageRoute<void>(
         builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: const Text('Correlação Peso vs BCS'),
-          ),
+          appBar: AppBar(title: const Text('Correlação Peso vs BCS')),
           body: BodyConditionCorrelation(
             animalId: _selectedAnimalId,
             showInteractiveMode: true,

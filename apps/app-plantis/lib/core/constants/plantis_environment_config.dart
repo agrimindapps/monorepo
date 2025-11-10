@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Plantis-specific environment configuration
 /// Extends the generic AppEnvironmentConfig with plantis-specific settings

@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -70,10 +70,9 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
             child: Text(
               'Salvar',
               style: TextStyle(
-                color:
-                    _isLoading
-                        ? theme.disabledColor
-                        : theme.colorScheme.primary,
+                color: _isLoading
+                    ? theme.disabledColor
+                    : theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -217,14 +216,14 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
                       min: 0,
                       max: 9,
                       divisions: 9,
-                      label:
-                          _bodyConditionScore != null
-                              ? _bodyConditionScore.toString()
-                              : 'Não informado',
+                      label: _bodyConditionScore != null
+                          ? _bodyConditionScore.toString()
+                          : 'Não informado',
                       onChanged: (value) {
                         setState(() {
-                          _bodyConditionScore =
-                              value == 0 ? null : value.round();
+                          _bodyConditionScore = value == 0
+                              ? null
+                              : value.round();
                         });
                       },
                     ),
@@ -243,14 +242,12 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
                       return Text(
                         index.toString(),
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color:
-                              _bodyConditionScore == index
-                                  ? theme.colorScheme.primary
-                                  : theme.colorScheme.onSurface.withAlpha(153),
-                          fontWeight:
-                              _bodyConditionScore == index
-                                  ? FontWeight.bold
-                                  : null,
+                          color: _bodyConditionScore == index
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurface.withAlpha(153),
+                          fontWeight: _bodyConditionScore == index
+                              ? FontWeight.bold
+                              : null,
                         ),
                       );
                     }),
@@ -266,14 +263,14 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
             const SizedBox(height: 32),
             widget.weight != null
                 ? PetiVetiFormComponents.submitUpdate(
-                  onSubmit: _saveWeight,
-                  isLoading: _isLoading,
-                )
+                    onSubmit: _saveWeight,
+                    isLoading: _isLoading,
+                  )
                 : PetiVetiFormComponents.submitCreate(
-                  onSubmit: _saveWeight,
-                  isLoading: _isLoading,
-                  itemName: 'Registro de Peso',
-                ),
+                    onSubmit: _saveWeight,
+                    isLoading: _isLoading,
+                    itemName: 'Registro de Peso',
+                  ),
             const SizedBox(height: 16),
             if (widget.weight == null && _selectedAnimal != null) ...[
               const Divider(),
@@ -312,20 +309,20 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children:
-          suggestions.map((weight) {
-            return ActionChip(
-              label: Text('${weight}kg'),
-              onPressed: () {
-                _weightController.text = weight.toString();
-              },
-              backgroundColor:
-                  Theme.of(context).colorScheme.surfaceContainerHighest,
-              side: BorderSide(
-                color: Theme.of(context).colorScheme.outline.withAlpha(127),
-              ),
-            );
-          }).toList(),
+      children: suggestions.map((weight) {
+        return ActionChip(
+          label: Text('${weight}kg'),
+          onPressed: () {
+            _weightController.text = weight.toString();
+          },
+          backgroundColor: Theme.of(
+            context,
+          ).colorScheme.surfaceContainerHighest,
+          side: BorderSide(
+            color: Theme.of(context).colorScheme.outline.withAlpha(127),
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -343,10 +340,9 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
         animalId: _selectedAnimal!.id,
         weight: weightValue,
         date: _selectedDate,
-        notes:
-            _notesController.text.trim().isEmpty
-                ? null
-                : _notesController.text.trim(),
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
         bodyConditionScore: _bodyConditionScore,
         createdAt: widget.weight?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),

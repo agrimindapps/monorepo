@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/calculator_category.dart';
@@ -91,49 +91,48 @@ class _CalculatorsFavoritesPageState
         actions: [
           PopupMenuButton<String>(
             onSelected: _handleMenuAction,
-            itemBuilder:
-                (context) => [
-                  const PopupMenuItem(
-                    value: 'organize',
-                    child: Row(
-                      children: [
-                        Icon(Icons.sort),
-                        SizedBox(width: 8),
-                        Text('Organizar'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'export',
-                    child: Row(
-                      children: [
-                        Icon(Icons.share),
-                        SizedBox(width: 8),
-                        Text('Exportar'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'import',
-                    child: Row(
-                      children: [
-                        Icon(Icons.file_download),
-                        SizedBox(width: 8),
-                        Text('Importar'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'clear',
-                    child: Row(
-                      children: [
-                        Icon(Icons.clear_all),
-                        SizedBox(width: 8),
-                        Text('Limpar Todos'),
-                      ],
-                    ),
-                  ),
-                ],
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'organize',
+                child: Row(
+                  children: [
+                    Icon(Icons.sort),
+                    SizedBox(width: 8),
+                    Text('Organizar'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'export',
+                child: Row(
+                  children: [
+                    Icon(Icons.share),
+                    SizedBox(width: 8),
+                    Text('Exportar'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'import',
+                child: Row(
+                  children: [
+                    Icon(Icons.file_download),
+                    SizedBox(width: 8),
+                    Text('Importar'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'clear',
+                child: Row(
+                  children: [
+                    Icon(Icons.clear_all),
+                    SizedBox(width: 8),
+                    Text('Limpar Todos'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -248,8 +247,9 @@ class _CalculatorsFavoritesPageState
                   const Spacer(),
                   Chip(
                     label: Text('${categoryCalculators.length}'),
-                    backgroundColor:
-                        Theme.of(context).colorScheme.primaryContainer,
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer,
                   ),
                 ],
               ),
@@ -489,19 +489,16 @@ class _CalculatorsFavoritesPageState
   void _showOrganizeDialog() {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Organizar Favoritos'),
-            content: const Text(
-              'Funcionalidade de organização em desenvolvimento',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Organizar Favoritos'),
+        content: const Text('Funcionalidade de organização em desenvolvimento'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
           ),
+        ],
+      ),
     );
   }
 
@@ -524,30 +521,29 @@ class _CalculatorsFavoritesPageState
   void _showClearAllDialog() {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Limpar Todos os Favoritos'),
-            content: const Text(
-              'Tem certeza que deseja remover todas as calculadoras dos favoritos? '
-              'Esta ação não pode ser desfeita.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _clearAllFavorites();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                ),
-                child: const Text('Limpar Todos'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Limpar Todos os Favoritos'),
+        content: const Text(
+          'Tem certeza que deseja remover todas as calculadoras dos favoritos? '
+          'Esta ação não pode ser desfeita.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
           ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _clearAllFavorites();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Limpar Todos'),
+          ),
+        ],
+      ),
     );
   }
 

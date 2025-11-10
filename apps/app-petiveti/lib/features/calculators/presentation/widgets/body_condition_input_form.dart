@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide Column, FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -10,10 +10,12 @@ class BodyConditionInputForm extends ConsumerStatefulWidget {
   const BodyConditionInputForm({super.key});
 
   @override
-  ConsumerState<BodyConditionInputForm> createState() => _BodyConditionInputFormState();
+  ConsumerState<BodyConditionInputForm> createState() =>
+      _BodyConditionInputFormState();
 }
 
-class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm> {
+class _BodyConditionInputFormState
+    extends ConsumerState<BodyConditionInputForm> {
   final _formKey = GlobalKey<FormState>();
   final _weightController = TextEditingController();
   final _idealWeightController = TextEditingController();
@@ -26,7 +28,9 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final input = ref.read(bodyConditionInputProvider);
-      _weightController.text = input.currentWeight > 0 ? input.currentWeight.toString() : '';
+      _weightController.text = input.currentWeight > 0
+          ? input.currentWeight.toString()
+          : '';
       _idealWeightController.text = input.idealWeight?.toString() ?? '';
       _ageController.text = input.animalAge?.toString() ?? '';
       _breedController.text = input.animalBreed ?? '';
@@ -57,10 +61,10 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
           if (suggestions.isNotEmpty) _buildSuggestionPanel(suggestions),
           _buildSectionHeader('Dados do Animal', Icons.pets),
           const SizedBox(height: 12),
-          
+
           _buildSpeciesDropdown(input.species),
           const SizedBox(height: 16),
-          
+
           Row(
             children: [
               Expanded(
@@ -72,7 +76,9 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
                   onChanged: (value) {
                     final weight = double.tryParse(value);
                     if (weight != null) {
-                      ref.read(bodyConditionProvider.notifier).updateCurrentWeight(weight);
+                      ref
+                          .read(bodyConditionProvider.notifier)
+                          .updateCurrentWeight(weight);
                     }
                   },
                 ),
@@ -84,44 +90,44 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
                   label: 'Peso Ideal',
                   hint: 'Opcional',
                   onChanged: (value) {
-                    final weight = value.isEmpty ? null : double.tryParse(value);
-                    ref.read(bodyConditionProvider.notifier).updateIdealWeight(weight);
+                    final weight = value.isEmpty
+                        ? null
+                        : double.tryParse(value);
+                    ref
+                        .read(bodyConditionProvider.notifier)
+                        .updateIdealWeight(weight);
                   },
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          
+
           Row(
             children: [
-              Expanded(
-                child: _buildAgeField(),
-              ),
+              Expanded(child: _buildAgeField()),
               const SizedBox(width: 12),
-              Expanded(
-                child: _buildBreedField(),
-              ),
+              Expanded(child: _buildBreedField()),
             ],
           ),
           const SizedBox(height: 24),
           _buildSectionHeader('Avaliação Física', Icons.touch_app),
           const SizedBox(height: 12),
-          
+
           _buildRibPalpationDropdown(input.ribPalpation),
           const SizedBox(height: 16),
-          
+
           _buildWaistVisibilityDropdown(input.waistVisibility),
           const SizedBox(height: 16),
-          
+
           _buildAbdominalProfileDropdown(input.abdominalProfile),
           const SizedBox(height: 24),
           _buildSectionHeader('Informações Adicionais', Icons.info_outline),
           const SizedBox(height: 12),
-          
+
           _buildAdditionalInfo(input),
           const SizedBox(height: 16),
-          
+
           _buildObservationsField(),
           const SizedBox(height: 24),
           _buildInputSummary(input),
@@ -144,15 +150,23 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
                 SizedBox(width: 8),
                 Text(
                   'Dicas para melhorar a precisão:',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            ...suggestions.map((suggestion) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2.0),
-              child: Text('• $suggestion', style: const TextStyle(fontSize: 12)),
-            )),
+            ...suggestions.map(
+              (suggestion) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2.0),
+                child: Text(
+                  '• $suggestion',
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -219,13 +233,15 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
         prefixIcon: const Icon(Icons.monitor_weight),
       ),
       onChanged: onChanged,
-      validator: label.contains('*') ? (value) {
-        if (value == null || value.isEmpty) return 'Campo obrigatório';
-        final weight = double.tryParse(value);
-        if (weight == null || weight <= 0) return 'Peso inválido';
-        if (weight > 200) return 'Peso muito alto';
-        return null;
-      } : null,
+      validator: label.contains('*')
+          ? (value) {
+              if (value == null || value.isEmpty) return 'Campo obrigatório';
+              final weight = double.tryParse(value);
+              if (weight == null || weight <= 0) return 'Peso inválido';
+              if (weight > 200) return 'Peso muito alto';
+              return null;
+            }
+          : null,
     );
   }
 
@@ -259,7 +275,9 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
         prefixIcon: Icon(Icons.category),
       ),
       onChanged: (value) {
-        ref.read(bodyConditionProvider.notifier).updateAnimalBreed(value.isEmpty ? null : value);
+        ref
+            .read(bodyConditionProvider.notifier)
+            .updateAnimalBreed(value.isEmpty ? null : value);
       },
     );
   }
@@ -274,10 +292,7 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
         helperText: 'Pressione suavemente as laterais do tórax',
       ),
       items: RibPalpation.values.map((rib) {
-        return DropdownMenuItem(
-          value: rib,
-          child: Text(rib.description),
-        );
+        return DropdownMenuItem(value: rib, child: Text(rib.description));
       }).toList(),
       onChanged: (value) {
         if (value != null) {
@@ -297,10 +312,7 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
         helperText: 'Observe o animal de cima para ver a "cintura"',
       ),
       items: WaistVisibility.values.map((waist) {
-        return DropdownMenuItem(
-          value: waist,
-          child: Text(waist.description),
-        );
+        return DropdownMenuItem(value: waist, child: Text(waist.description));
       }).toList(),
       onChanged: (value) {
         if (value != null) {
@@ -327,7 +339,9 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
       }).toList(),
       onChanged: (value) {
         if (value != null) {
-          ref.read(bodyConditionProvider.notifier).updateAbdominalProfile(value);
+          ref
+              .read(bodyConditionProvider.notifier)
+              .updateAbdominalProfile(value);
         }
       },
     );
@@ -338,7 +352,9 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
       children: [
         SwitchListTile(
           title: const Text('Animal Castrado/Esterilizado'),
-          subtitle: const Text('Animais castrados tendem a ganhar peso mais facilmente'),
+          subtitle: const Text(
+            'Animais castrados tendem a ganhar peso mais facilmente',
+          ),
           value: input.isNeutered,
           onChanged: (value) {
             ref.read(bodyConditionProvider.notifier).updateIsNeutered(value);
@@ -349,7 +365,9 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
           subtitle: const Text('Ex: diabetes, hipotireoidismo, etc.'),
           value: input.hasMetabolicConditions,
           onChanged: (value) {
-            ref.read(bodyConditionProvider.notifier).updateHasMetabolicConditions(value);
+            ref
+                .read(bodyConditionProvider.notifier)
+                .updateHasMetabolicConditions(value);
           },
         ),
       ],
@@ -363,19 +381,22 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
       textCapitalization: TextCapitalization.sentences,
       decoration: const InputDecoration(
         labelText: 'Observações',
-        hintText: 'Comportamento alimentar, atividade física, outras observações...',
+        hintText:
+            'Comportamento alimentar, atividade física, outras observações...',
         border: OutlineInputBorder(),
         prefixIcon: Icon(Icons.notes),
       ),
       onChanged: (value) {
-        ref.read(bodyConditionProvider.notifier).updateObservations(value.isEmpty ? null : value);
+        ref
+            .read(bodyConditionProvider.notifier)
+            .updateObservations(value.isEmpty ? null : value);
       },
     );
   }
 
   Widget _buildInputSummary(BodyConditionInput input) {
     final canCalculate = ref.watch(bodyConditionCanCalculateProvider);
-    
+
     return Card(
       color: canCalculate ? Colors.green.shade50 : Colors.grey.shade50,
       child: Padding(
@@ -386,7 +407,9 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
             Row(
               children: [
                 Icon(
-                  canCalculate ? Icons.check_circle : Icons.radio_button_unchecked,
+                  canCalculate
+                      ? Icons.check_circle
+                      : Icons.radio_button_unchecked,
                   color: canCalculate ? Colors.green : Colors.grey,
                 ),
                 const SizedBox(width: 8),
@@ -401,7 +424,9 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
             ),
             const SizedBox(height: 12),
             Text('Espécie: ${input.species.displayName}'),
-            Text('Peso: ${input.currentWeight > 0 ? "${input.currentWeight.toStringAsFixed(1)} kg" : "Não informado"}'),
+            Text(
+              'Peso: ${input.currentWeight > 0 ? "${input.currentWeight.toStringAsFixed(1)} kg" : "Não informado"}',
+            ),
             if (input.idealWeight != null)
               Text('Peso ideal: ${input.idealWeight!.toStringAsFixed(1)} kg'),
             Text('Costelas: ${input.ribPalpation.description}'),
@@ -409,9 +434,9 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
             Text('Abdome: ${input.abdominalProfile.description}'),
             const SizedBox(height: 8),
             Text(
-              canCalculate 
-                ? '✓ Pronto para calcular' 
-                : '⚠ Preencha os campos obrigatórios',
+              canCalculate
+                  ? '✓ Pronto para calcular'
+                  : '⚠ Preencha os campos obrigatórios',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: canCalculate ? Colors.green : Colors.orange,

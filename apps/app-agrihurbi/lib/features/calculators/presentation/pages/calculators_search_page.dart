@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/debounced_search_manager.dart';
@@ -85,11 +85,10 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
             children: [
               CalculatorSearchBarWidget(
                 controller: _searchController,
-                onChanged:
-                    (_) => _debouncedSearchManager.searchWithDebounce(
-                      _searchController.text,
-                      _performOptimizedSearch,
-                    ),
+                onChanged: (_) => _debouncedSearchManager.searchWithDebounce(
+                  _searchController.text,
+                  _performOptimizedSearch,
+                ),
                 isLoading: _isSearching,
               ),
               CalculatorSearchFiltersWidget(

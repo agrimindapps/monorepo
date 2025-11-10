@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import '../core/data/models/comentario_model.dart';
 import '../features/plants/domain/entities/plant.dart';
 import '../features/tasks/domain/entities/task.dart' as task_entity;

@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide Column, FormState;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/vaccine.dart';
@@ -18,10 +18,12 @@ class VaccineSchedulingInterface extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<VaccineSchedulingInterface> createState() => _VaccineSchedulingInterfaceState();
+  ConsumerState<VaccineSchedulingInterface> createState() =>
+      _VaccineSchedulingInterfaceState();
 }
 
-class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingInterface>
+class _VaccineSchedulingInterfaceState
+    extends ConsumerState<VaccineSchedulingInterface>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _formKey = GlobalKey<FormState>();
@@ -31,7 +33,7 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
   final _manufacturerController = TextEditingController();
   final _dosageController = TextEditingController();
   final _notesController = TextEditingController();
-  
+
   DateTime _scheduledDate = DateTime.now();
   DateTime? _nextDueDate;
   DateTime? _reminderDate;
@@ -43,7 +45,7 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
   int _seriesIntervalDays = 30;
   bool _enableSeasonalReminders = false;
   String? _selectedSeason;
-  
+
   @override
   void initState() {
     super.initState();
@@ -83,10 +85,12 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.existingVaccine == null ? 'Agendar Vacina' : 'Editar Vacina'),
+        title: Text(
+          widget.existingVaccine == null ? 'Agendar Vacina' : 'Editar Vacina',
+        ),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
@@ -101,10 +105,7 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Cancelar'),
           ),
-          FilledButton(
-            onPressed: _saveVaccine,
-            child: const Text('Salvar'),
-          ),
+          FilledButton(onPressed: _saveVaccine, child: const Text('Salvar')),
         ],
       ),
       body: Form(
@@ -233,7 +234,9 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
                   const SizedBox(height: 8),
                   SwitchListTile(
                     title: const Text('Vacina Obrigatória'),
-                    subtitle: const Text('Marca como essencial para a saúde do pet'),
+                    subtitle: const Text(
+                      'Marca como essencial para a saúde do pet',
+                    ),
                     value: _isRequired,
                     onChanged: (value) => setState(() => _isRequired = value),
                   ),
@@ -293,9 +296,11 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
                   ListTile(
                     leading: const Icon(Icons.event_repeat),
                     title: const Text('Próxima Dose'),
-                    subtitle: Text(_nextDueDate != null 
-                        ? _formatDate(_nextDueDate!) 
-                        : 'Dose única - sem reforço'),
+                    subtitle: Text(
+                      _nextDueDate != null
+                          ? _formatDate(_nextDueDate!)
+                          : 'Dose única - sem reforço',
+                    ),
                     trailing: const Icon(Icons.edit),
                     onTap: () => _selectNextDueDate(context),
                   ),
@@ -319,9 +324,12 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
                   const SizedBox(height: 8),
                   SwitchListTile(
                     title: const Text('Vacina em Série'),
-                    subtitle: const Text('Múltiplas doses programadas automaticamente'),
+                    subtitle: const Text(
+                      'Múltiplas doses programadas automaticamente',
+                    ),
                     value: _isSeriesVaccine,
-                    onChanged: (value) => setState(() => _isSeriesVaccine = value),
+                    onChanged: (value) =>
+                        setState(() => _isSeriesVaccine = value),
                   ),
                   if (_isSeriesVaccine) ...[
                     const SizedBox(height: 16),
@@ -362,7 +370,9 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                        color: theme.colorScheme.primaryContainer.withValues(
+                          alpha: 0.3,
+                        ),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Column(
@@ -421,12 +431,15 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
                   const SizedBox(height: 8),
                   SwitchListTile(
                     title: const Text('Lembretes Inteligentes'),
-                    subtitle: const Text('Sistema automático baseado no tipo de vacina'),
+                    subtitle: const Text(
+                      'Sistema automático baseado no tipo de vacina',
+                    ),
                     value: _enableSmartReminders,
-                    onChanged: (value) => setState(() => _enableSmartReminders = value),
+                    onChanged: (value) =>
+                        setState(() => _enableSmartReminders = value),
                   ),
                   const SizedBox(height: 16),
-                  if (_enableSmartReminders) 
+                  if (_enableSmartReminders)
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -463,9 +476,11 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
                   ListTile(
                     leading: const Icon(Icons.notification_add),
                     title: const Text('Lembrete Personalizado'),
-                    subtitle: Text(_reminderDate != null 
-                        ? 'Agendado para ${_formatDateTime(_reminderDate!)}'
-                        : 'Nenhum lembrete personalizado'),
+                    subtitle: Text(
+                      _reminderDate != null
+                          ? 'Agendado para ${_formatDateTime(_reminderDate!)}'
+                          : 'Nenhum lembrete personalizado',
+                    ),
                     trailing: const Icon(Icons.edit),
                     onTap: () => _selectReminderDate(context),
                   ),
@@ -489,9 +504,12 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
                   const SizedBox(height: 8),
                   SwitchListTile(
                     title: const Text('Ativar Lembretes Sazonais'),
-                    subtitle: const Text('Para vacinas anuais como antirrábica'),
+                    subtitle: const Text(
+                      'Para vacinas anuais como antirrábica',
+                    ),
                     value: _enableSeasonalReminders,
-                    onChanged: (value) => setState(() => _enableSeasonalReminders = value),
+                    onChanged: (value) =>
+                        setState(() => _enableSeasonalReminders = value),
                   ),
                   if (_enableSeasonalReminders) ...[
                     const SizedBox(height: 16),
@@ -502,12 +520,22 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
                         prefixIcon: Icon(Icons.wb_sunny),
                       ),
                       items: const [
-                        DropdownMenuItem(value: 'spring', child: Text('Primavera')),
+                        DropdownMenuItem(
+                          value: 'spring',
+                          child: Text('Primavera'),
+                        ),
                         DropdownMenuItem(value: 'summer', child: Text('Verão')),
-                        DropdownMenuItem(value: 'autumn', child: Text('Outono')),
-                        DropdownMenuItem(value: 'winter', child: Text('Inverno')),
+                        DropdownMenuItem(
+                          value: 'autumn',
+                          child: Text('Outono'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'winter',
+                          child: Text('Inverno'),
+                        ),
                       ],
-                      onChanged: (value) => setState(() => _selectedSeason = value),
+                      onChanged: (value) =>
+                          setState(() => _selectedSeason = value),
                     ),
                   ],
                 ],
@@ -563,11 +591,7 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
                     leading: const Icon(Icons.sync),
                     title: const Text('Sincronizar com Calendário do Sistema'),
                     subtitle: const Text('Adiciona eventos automaticamente'),
-                    trailing: Switch(
-                      value: false,
-                      onChanged: (value) {
-                      },
-                    ),
+                    trailing: Switch(value: false, onChanged: (value) {}),
                   ),
                 ],
               ),
@@ -662,21 +686,27 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
       _nameController.text = template['name'] as String;
       _isSeriesVaccine = (template['series'] as int) > 1;
       _seriesCount = template['series'] as int;
-      
+
       if (template['interval'] != null) {
-        _nextDueDate = _scheduledDate.add(Duration(days: template['interval'] as int));
+        _nextDueDate = _scheduledDate.add(
+          Duration(days: template['interval'] as int),
+        );
       }
     });
   }
 
-  void _selectDate(BuildContext context, DateTime initialDate, void Function(DateTime) onDateSelected) async {
+  void _selectDate(
+    BuildContext context,
+    DateTime initialDate,
+    void Function(DateTime) onDateSelected,
+  ) async {
     final date = await showDatePicker(
       context: context,
       initialDate: initialDate,
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
     );
-    
+
     if (date != null) {
       onDateSelected(date);
     }
@@ -685,11 +715,12 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
   void _selectNextDueDate(BuildContext context) async {
     final date = await showDatePicker(
       context: context,
-      initialDate: _nextDueDate ?? _scheduledDate.add(const Duration(days: 365)),
+      initialDate:
+          _nextDueDate ?? _scheduledDate.add(const Duration(days: 365)),
       firstDate: _scheduledDate,
       lastDate: DateTime(2030),
     );
-    
+
     if (date != null) {
       setState(() => _nextDueDate = date);
     }
@@ -698,18 +729,19 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
   void _selectReminderDate(BuildContext context) async {
     final date = await showDatePicker(
       context: context,
-      initialDate: _reminderDate ?? _scheduledDate.subtract(const Duration(days: 7)),
+      initialDate:
+          _reminderDate ?? _scheduledDate.subtract(const Duration(days: 7)),
       firstDate: DateTime.now(),
       lastDate: DateTime(2030),
     );
-    
+
     if (date != null && mounted) {
       final localContext = context;
       final time = await showTimePicker(
         context: localContext,
         initialTime: TimeOfDay.fromDateTime(_reminderDate ?? DateTime.now()),
       );
-      
+
       if (time != null && mounted) {
         setState(() {
           _reminderDate = DateTime(
@@ -738,16 +770,26 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
     }
 
     final vaccine = Vaccine(
-      id: widget.existingVaccine?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id:
+          widget.existingVaccine?.id ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
       animalId: widget.animalId ?? widget.existingVaccine!.animalId,
       name: _nameController.text.trim(),
       veterinarian: _veterinarianController.text.trim(),
       date: _scheduledDate,
       nextDueDate: _nextDueDate,
-      batch: _batchController.text.trim().isEmpty ? null : _batchController.text.trim(),
-      manufacturer: _manufacturerController.text.trim().isEmpty ? null : _manufacturerController.text.trim(),
-      dosage: _dosageController.text.trim().isEmpty ? null : _dosageController.text.trim(),
-      notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+      batch: _batchController.text.trim().isEmpty
+          ? null
+          : _batchController.text.trim(),
+      manufacturer: _manufacturerController.text.trim().isEmpty
+          ? null
+          : _manufacturerController.text.trim(),
+      dosage: _dosageController.text.trim().isEmpty
+          ? null
+          : _dosageController.text.trim(),
+      notes: _notesController.text.trim().isEmpty
+          ? null
+          : _notesController.text.trim(),
       isRequired: _isRequired,
       reminderDate: _reminderDate,
       status: _status,
@@ -763,8 +805,14 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
             final seriesDose = vaccine.copyWith(
               id: '${vaccine.id}_series_${i + 1}',
               date: _scheduledDate.add(Duration(days: i * _seriesIntervalDays)),
-              nextDueDate: i == _seriesCount - 1 ? null : _scheduledDate.add(Duration(days: (i + 1) * _seriesIntervalDays)),
-              notes: '${vaccine.notes ?? ''}\nDose ${i + 1} de $_seriesCount da série'.trim(),
+              nextDueDate: i == _seriesCount - 1
+                  ? null
+                  : _scheduledDate.add(
+                      Duration(days: (i + 1) * _seriesIntervalDays),
+                    ),
+              notes:
+                  '${vaccine.notes ?? ''}\nDose ${i + 1} de $_seriesCount da série'
+                      .trim(),
             );
             await ref.read(vaccinesProvider.notifier).addVaccine(seriesDose);
           }
@@ -776,12 +824,14 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
       if (mounted) {
         widget.onScheduled?.call();
         Navigator.of(context).pop();
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(widget.existingVaccine == null 
-                ? 'Vacina agendada com sucesso!' 
-                : 'Vacina atualizada com sucesso!'),
+            content: Text(
+              widget.existingVaccine == null
+                  ? 'Vacina agendada com sucesso!'
+                  : 'Vacina atualizada com sucesso!',
+            ),
             backgroundColor: Colors.green,
           ),
         );

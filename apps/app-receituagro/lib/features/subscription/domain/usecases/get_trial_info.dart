@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Use case para buscar informações de trial (usa core repository)
 @injectable

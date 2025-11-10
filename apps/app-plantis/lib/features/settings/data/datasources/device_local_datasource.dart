@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Datasource local para gerenciamento de cache de dispositivos
 /// Usa Hive para persistência offline

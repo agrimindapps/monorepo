@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'base_sync_model.dart';
 
 part 'conflict_history_model.g.dart';

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide getIt;
+import 'package:core/core.dart' hide Column, getIt;
 
 import '../../../../core/providers/auth_providers.dart';
 import '../../domain/entities/export_request.dart';

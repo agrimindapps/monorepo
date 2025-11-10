@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Service to get app version information
 /// Centralizes version retrieval to avoid hardcoded values

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 import '../../../../core/interfaces/network_info.dart';
 import '../../domain/entities/task_history.dart';

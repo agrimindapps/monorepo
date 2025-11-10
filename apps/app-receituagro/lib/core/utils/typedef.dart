@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Type definitions for common return types
 typedef ResultFuture<T> = Future<Either<Failure, T>>;

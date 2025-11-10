@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +8,7 @@ import 'core/di/modules/account_deletion_module.dart';
 import 'core/di/modules/auth_module.dart';
 import 'core/di/modules/sync_module.dart';
 import 'firebase_options.dart';
+
 late ICrashlyticsRepository _crashlyticsRepository;
 
 Future<void> main() async {
@@ -129,8 +130,6 @@ Future<void> _initializeFirebaseServices() async {
         stackTrace: stackTrace,
         reason: 'Firebase services initialization failed',
       );
-    } catch (_) {
-    }
+    } catch (_) {}
   }
 }
-

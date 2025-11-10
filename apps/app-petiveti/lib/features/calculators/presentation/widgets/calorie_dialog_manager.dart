@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/calorie_output.dart';
@@ -6,7 +6,7 @@ import '../providers/calorie_provider.dart';
 import 'calorie_quick_presets.dart';
 
 /// Dialog manager for Calorie Calculator
-/// 
+///
 /// Responsibilities:
 /// - Handle all dialog presentations
 /// - Manage dialog states and actions
@@ -15,10 +15,7 @@ class CalorieDialogManager {
   final BuildContext context;
   final WidgetRef ref;
 
-  CalorieDialogManager({
-    required this.context,
-    required this.ref,
-  });
+  CalorieDialogManager({required this.context, required this.ref});
 
   /// Show presets selection dialog
   void showPresetsDialog({VoidCallback? onPresetLoaded}) {
@@ -53,7 +50,7 @@ class CalorieDialogManager {
       builder: (context) => AlertDialog(
         title: const Text('Resetar Calculadora'),
         content: const Text(
-          'Isso irá limpar todos os dados inseridos. Deseja continuar?'
+          'Isso irá limpar todos os dados inseridos. Deseja continuar?',
         ),
         actions: [
           TextButton(
@@ -76,7 +73,7 @@ class CalorieDialogManager {
   /// Show calculation history dialog
   void showHistoryDialog({VoidCallback? onHistoryItemSelected}) {
     final history = ref.read(calorieHistoryProvider);
-    
+
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -108,7 +105,7 @@ class CalorieDialogManager {
       builder: (context) => AlertDialog(
         title: const Text('Exportar Resultado'),
         content: const Text(
-          'Escolha como deseja exportar o resultado do cálculo:'
+          'Escolha como deseja exportar o resultado do cálculo:',
         ),
         actions: [
           TextButton(
@@ -140,9 +137,7 @@ class CalorieDialogManager {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Guia de Cálculo Calórico'),
-        content: const SingleChildScrollView(
-          child: _CalorieGuideContent(),
-        ),
+        content: const SingleChildScrollView(child: _CalorieGuideContent()),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -156,7 +151,7 @@ class CalorieDialogManager {
   /// Share calculation result
   void shareResult(CalorieOutput output) {
     final text = _formatResultForSharing(output);
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Texto copiado para área de transferência'),
@@ -167,6 +162,7 @@ class CalorieDialogManager {
       ),
     );
   }
+
   Widget _buildEmptyHistoryView() {
     return const Center(
       child: Column(
@@ -180,7 +176,10 @@ class CalorieDialogManager {
     );
   }
 
-  Widget _buildHistoryListView(List<dynamic> history, VoidCallback? onItemSelected) {
+  Widget _buildHistoryListView(
+    List<dynamic> history,
+    VoidCallback? onItemSelected,
+  ) {
     return ListView.builder(
       itemCount: history.length,
       itemBuilder: (context, index) {
@@ -219,9 +218,7 @@ class CalorieDialogManager {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Resultado para Compartilhar'),
-        content: SingleChildScrollView(
-          child: Text(text),
-        ),
+        content: SingleChildScrollView(child: Text(text)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),

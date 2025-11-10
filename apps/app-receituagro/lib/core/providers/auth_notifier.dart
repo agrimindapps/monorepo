@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:core/core.dart' as core;
-import 'package:core/core.dart' hide AuthState;
+import 'package:core/core.dart' hide AuthState, Column;
 import 'package:flutter/foundation.dart';
 
 import '../../features/analytics/analytics_service.dart';

@@ -45,7 +45,7 @@ import '../../domain/entities/expense_entity.dart';
 @lazySingleton
 class ExpenseDriftSyncAdapter
     extends DriftSyncAdapterBase<ExpenseEntity, Expense> {
-  ExpenseDriftSyncAdapter(super.db, super.firestore, super.connectivityService);
+  ExpenseDriftSyncAdapter(super.db, super.firestore);
 
   @override
   String get collectionName => 'expenses';
@@ -304,13 +304,13 @@ class ExpenseDriftSyncAdapter
   // OPERAÇÕES DRIFT (Implementações de métodos abstratos)
   // ==========================================================================
 
-  // ignore: unused_element
-  Future<Either<Failure, List<ExpenseEntity>>> _getDirtyRecords(
+  @override
+  Future<Either<Failure, List<ExpenseEntity>>> getDirtyRecords(
     String userId,
   ) async {
     try {
       developer.log(
-        '🔍 Starting _getDirtyRecords for user: $userId',
+        '🔍 Starting getDirtyRecords for user: $userId',
         name: 'ExpenseDriftSyncAdapter',
       );
 
@@ -370,7 +370,21 @@ class ExpenseDriftSyncAdapter
       final entities = <ExpenseEntity>[];
       for (final row in rows) {
         try {
-          final entity = toDomainEntity(row);
+          var entity = toDomainEntity(row);
+
+          final vehicleFirebaseId = await _resolveVehicleFirebaseId(
+            row.vehicleId,
+          );
+
+          if (vehicleFirebaseId == null) {
+            developer.log(
+              '⏸️ Skipping expense ${entity.id}: vehicle ${row.vehicleId} not synced yet',
+              name: 'ExpenseDriftSyncAdapter',
+            );
+            continue;
+          }
+
+          entity = entity.copyWith(vehicleId: vehicleFirebaseId);
           entities.add(entity);
         } catch (e) {
           developer.log(
@@ -400,8 +414,8 @@ class ExpenseDriftSyncAdapter
     }
   }
 
-  // ignore: unused_element
-  Future<Either<Failure, ExpenseEntity?>> _getLocalEntity(String id) async {
+  @override
+  Future<Either<Failure, ExpenseEntity?>> getLocalEntity(String id) async {
     try {
       // Buscar por firebaseId OU por id (local autoIncrement)
       final query = db.select(db.expenses)
@@ -434,10 +448,17 @@ class ExpenseDriftSyncAdapter
     }
   }
 
-  // ignore: unused_element
-  Future<Either<Failure, void>> _insertLocal(ExpenseEntity entity) async {
+  @override
+  Future<Either<Failure, void>> insertLocal(ExpenseEntity entity) async {
     try {
-      final companion = toCompanion(entity);
+      final resolvedEntity = await _ensureLocalVehicleReference(entity);
+      if (resolvedEntity == null) {
+        return const Left(
+          CacheFailure('Failed to resolve vehicle reference for expense'),
+        );
+      }
+
+      final companion = toCompanion(resolvedEntity);
       await db.into(db.expenses).insert(companion);
 
       developer.log(
@@ -458,10 +479,17 @@ class ExpenseDriftSyncAdapter
     }
   }
 
-  // ignore: unused_element
-  Future<Either<Failure, void>> _updateLocal(ExpenseEntity entity) async {
+  @override
+  Future<Either<Failure, void>> updateLocal(ExpenseEntity entity) async {
     try {
-      final companion = toCompanion(entity);
+      final resolvedEntity = await _ensureLocalVehicleReference(entity);
+      if (resolvedEntity == null) {
+        return const Left(
+          CacheFailure('Failed to resolve vehicle reference for expense'),
+        );
+      }
+
+      final companion = toCompanion(resolvedEntity);
 
       // Atualizar por firebaseId OU por id local
       final query = db.update(db.expenses)
@@ -478,7 +506,7 @@ class ExpenseDriftSyncAdapter
           'No rows updated for expense ${entity.id}, inserting instead',
           name: 'ExpenseDriftSyncAdapter',
         );
-        return _insertLocal(entity);
+        return insertLocal(entity);
       }
 
       developer.log(
@@ -499,8 +527,8 @@ class ExpenseDriftSyncAdapter
     }
   }
 
-  // ignore: unused_element
-  Future<Either<Failure, void>> _markAsSynced(
+  @override
+  Future<Either<Failure, void>> markAsSynced(
     String id, {
     String? firebaseId,
   }) async {
@@ -708,5 +736,46 @@ class ExpenseDriftSyncAdapter
     yield* query.watch().map(
       (rows) => rows.map((row) => toDomainEntity(row)).toList(),
     );
+  }
+
+  Future<String?> _resolveVehicleFirebaseId(int localVehicleId) async {
+    final vehicleRow = await (db.select(
+      db.vehicles,
+    )..where((tbl) => tbl.id.equals(localVehicleId))).getSingleOrNull();
+
+    final firebaseId = vehicleRow?.firebaseId;
+
+    if (firebaseId == null || firebaseId.isEmpty) {
+      developer.log(
+        'Vehicle $localVehicleId does not have a firebaseId yet',
+        name: 'ExpenseDriftSyncAdapter',
+      );
+      return null;
+    }
+
+    return firebaseId;
+  }
+
+  Future<ExpenseEntity?> _ensureLocalVehicleReference(
+    ExpenseEntity entity,
+  ) async {
+    if (int.tryParse(entity.vehicleId) != null) {
+      return entity;
+    }
+
+    final vehicleRow =
+        await (db.select(db.vehicles)
+              ..where((tbl) => tbl.firebaseId.equals(entity.vehicleId)))
+            .getSingleOrNull();
+
+    if (vehicleRow == null) {
+      developer.log(
+        'Unable to find local vehicle for firebaseId ${entity.vehicleId}',
+        name: 'ExpenseDriftSyncAdapter',
+      );
+      return null;
+    }
+
+    return entity.copyWith(vehicleId: vehicleRow.id.toString());
   }
 }

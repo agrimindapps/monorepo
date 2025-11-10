@@ -42,11 +42,7 @@ import 'i_drift_sync_adapter.dart';
 /// ```
 abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
     implements IDriftSyncAdapter<TEntity, TDriftRow> {
-  DriftSyncAdapterBase(
-    this.db,
-    this.firestore,
-    this.connectivityService,
-  );
+  DriftSyncAdapterBase(this.db, this.firestore);
 
   /// Database Drift para operações locais
   final GasometerDatabase db;
@@ -55,7 +51,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
   final FirebaseFirestore firestore;
 
   /// Serviço de conectividade (verificar se está online)
-  final ConnectivityService connectivityService;
+  final ConnectivityService connectivityService = getIt<ConnectivityService>();
 
   // ==========================================================================
   // CONFIGURAÇÃO ABSTRATA (Subclasses devem implementar)
@@ -94,15 +90,15 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
           'Push aborted: No internet connection',
           name: 'DriftSync.$collectionName',
         );
-        return Left(
-          NetworkFailure('Sem conexão com a internet'),
-        );
+        return Left(NetworkFailure('Sem conexão com a internet'));
       }
 
       // 2. Buscar registros dirty do Drift
-      final dirtyEntitiesResult = await _getDirtyRecords(userId);
+      final dirtyEntitiesResult = await getDirtyRecords(userId);
       if (dirtyEntitiesResult.isLeft()) {
-        return Left((dirtyEntitiesResult as Left<Failure, List<TEntity>>).value);
+        return Left(
+          (dirtyEntitiesResult as Left<Failure, List<TEntity>>).value,
+        );
       }
 
       final dirtyEntities =
@@ -160,10 +156,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
         duration: stopwatch.elapsed,
       );
 
-      developer.log(
-        result.summary,
-        name: 'DriftSync.$collectionName',
-      );
+      developer.log(result.summary, name: 'DriftSync.$collectionName');
 
       return Right(result);
     } catch (e, stackTrace) {
@@ -175,9 +168,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
         stackTrace: stackTrace,
       );
 
-      return Left(
-        SyncFailure('Erro ao fazer push: $e'),
-      );
+      return Left(SyncFailure('Erro ao fazer push: $e'));
     }
   }
 
@@ -222,7 +213,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
             error: conversionError,
             stackTrace: stackTrace,
           );
-          continue;  // Skip this entity and continue with next
+          continue; // Skip this entity and continue with next
         }
 
         // Incrementar versão
@@ -242,7 +233,9 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
         } else {
           // UUID tem formato: 8-4-4-4-12 caracteres hexadecimais separados por hífens
           // Exemplo: 550e8400-e29b-41d4-a716-446655440000
-          isUuid = existingFirebaseId.contains('-') && existingFirebaseId.length >= 36;
+          isUuid =
+              existingFirebaseId.contains('-') &&
+              existingFirebaseId.length >= 36;
         }
 
         if (isUuid) {
@@ -282,7 +275,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
       // Marcar como sincronizados localmente e atualizar firebaseId se gerado
       for (final entity in entities.take(count)) {
         final generatedFirebaseId = generatedIds[entity.id];
-        await _markAsSynced(entity.id, firebaseId: generatedFirebaseId);
+        await markAsSynced(entity.id, firebaseId: generatedFirebaseId);
       }
 
       developer.log(
@@ -391,7 +384,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
         final remoteEntity = (parseResult as Right<Failure, TEntity>).value;
 
         // Verificar se existe localmente
-        final localEntityResult = await _getLocalEntity(remoteEntity.id);
+        final localEntityResult = await getLocalEntity(remoteEntity.id);
 
         if (localEntityResult.isRight()) {
           final localEntity =
@@ -399,14 +392,14 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
 
           if (localEntity == null) {
             // Novo registro remoto → Insert local
-            await _insertLocal(remoteEntity);
+            await insertLocal(remoteEntity);
             recordsPulled++;
           } else {
             // Registro existe → Verificar conflito
             if (localEntity.isDirty) {
               // CONFLITO: ambos dirty
               final resolved = resolveConflict(localEntity, remoteEntity);
-              await _updateLocal(resolved);
+              await updateLocal(resolved);
               conflictsResolved++;
 
               developer.log(
@@ -415,7 +408,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
               );
             } else {
               // Sem conflito → Atualizar com remoto
-              await _updateLocal(remoteEntity);
+              await updateLocal(remoteEntity);
               recordsUpdated++;
             }
           }
@@ -432,10 +425,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
         duration: stopwatch.elapsed,
       );
 
-      developer.log(
-        result.summary,
-        name: 'DriftSync.$collectionName',
-      );
+      developer.log(result.summary, name: 'DriftSync.$collectionName');
 
       return Right(result);
     } catch (e, stackTrace) {
@@ -465,10 +455,8 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
         'Conflict: Remote wins (version ${remote.version} > ${local.version})',
         name: 'DriftSync.$collectionName',
       );
-      return remote.copyWith(
-        isDirty: false,
-        lastSyncAt: DateTime.now(),
-      ) as TEntity;
+      return remote.copyWith(isDirty: false, lastSyncAt: DateTime.now())
+          as TEntity;
     }
 
     if (local.version > remote.version) {
@@ -477,8 +465,9 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
         name: 'DriftSync.$collectionName',
       );
       return local.copyWith(
-        isDirty: true, // Manter dirty para push novamente
-      ) as TEntity;
+            isDirty: true, // Manter dirty para push novamente
+          )
+          as TEntity;
     }
 
     // 2. Versions iguais → Comparar timestamps
@@ -487,10 +476,8 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
 
     if (localTimestamp == null && remoteTimestamp == null) {
       // Edge case: sem timestamps → preferir remoto
-      return remote.copyWith(
-        isDirty: false,
-        lastSyncAt: DateTime.now(),
-      ) as TEntity;
+      return remote.copyWith(isDirty: false, lastSyncAt: DateTime.now())
+          as TEntity;
     }
 
     if (localTimestamp == null) return remote;
@@ -501,18 +488,14 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
         'Conflict: Remote wins (timestamp)',
         name: 'DriftSync.$collectionName',
       );
-      return remote.copyWith(
-        isDirty: false,
-        lastSyncAt: DateTime.now(),
-      ) as TEntity;
+      return remote.copyWith(isDirty: false, lastSyncAt: DateTime.now())
+          as TEntity;
     } else {
       developer.log(
         'Conflict: Local wins (timestamp)',
         name: 'DriftSync.$collectionName',
       );
-      return local.copyWith(
-        isDirty: true,
-      ) as TEntity;
+      return local.copyWith(isDirty: true) as TEntity;
     }
   }
 
@@ -525,9 +508,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
     // Validações básicas (subclasses podem sobrescrever para regras específicas)
 
     if (entity.id.isEmpty) {
-      return const Left(
-        ValidationFailure('ID da entidade não pode ser vazio'),
-      );
+      return const Left(ValidationFailure('ID da entidade não pode ser vazio'));
     }
 
     if (entity.userId == null || entity.userId!.isEmpty) {
@@ -556,7 +537,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
   /// Example:
   /// ```dart
   /// @override
-  /// Future<Either<Failure, List<VehicleEntity>>> _getDirtyRecords(String userId) async {
+  /// Future<Either<Failure, List<VehicleEntity>>> getDirtyRecords(String userId) async {
   ///   try {
   ///     final query = db.select(db.vehicles)
   ///       ..where((t) => t.userId.equals(userId) & t.isDirty.equals(true));
@@ -568,7 +549,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
   ///   }
   /// }
   /// ```
-  Future<Either<Failure, List<TEntity>>> _getDirtyRecords(String userId);
+  Future<Either<Failure, List<TEntity>>> getDirtyRecords(String userId);
 
   /// Busca entidade local por ID
   ///
@@ -577,7 +558,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
   /// Example:
   /// ```dart
   /// @override
-  /// Future<Either<Failure, VehicleEntity?>> _getLocalEntity(String id) async {
+  /// Future<Either<Failure, VehicleEntity?>> getLocalEntity(String id) async {
   ///   try {
   ///     final query = db.select(db.vehicles)
   ///       ..where((t) => t.firebaseId.equals(id) | t.id.equals(int.parse(id)));
@@ -588,14 +569,14 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
   ///   }
   /// }
   /// ```
-  Future<Either<Failure, TEntity?>> _getLocalEntity(String id);
+  Future<Either<Failure, TEntity?>> getLocalEntity(String id);
 
   /// Insere nova entidade no Drift
   ///
   /// Example:
   /// ```dart
   /// @override
-  /// Future<Either<Failure, void>> _insertLocal(VehicleEntity entity) async {
+  /// Future<Either<Failure, void>> insertLocal(VehicleEntity entity) async {
   ///   try {
   ///     final companion = toCompanion(entity);
   ///     await db.into(db.vehicles).insert(companion);
@@ -605,14 +586,14 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
   ///   }
   /// }
   /// ```
-  Future<Either<Failure, void>> _insertLocal(TEntity entity);
+  Future<Either<Failure, void>> insertLocal(TEntity entity);
 
   /// Atualiza entidade existente no Drift
   ///
   /// Example:
   /// ```dart
   /// @override
-  /// Future<Either<Failure, void>> _updateLocal(VehicleEntity entity) async {
+  /// Future<Either<Failure, void>> updateLocal(VehicleEntity entity) async {
   ///   try {
   ///     final companion = toCompanion(entity);
   ///     await db.update(db.vehicles).replace(companion);
@@ -622,7 +603,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
   ///   }
   /// }
   /// ```
-  Future<Either<Failure, void>> _updateLocal(TEntity entity);
+  Future<Either<Failure, void>> updateLocal(TEntity entity);
 
   /// Marca registro como sincronizado (isDirty = false, lastSyncAt = now)
   ///
@@ -632,7 +613,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
   /// Example:
   /// ```dart
   /// @override
-  /// Future<Either<Failure, void>> _markAsSynced(String id, {String? firebaseId}) async {
+  /// Future<Either<Failure, void>> markAsSynced(String id, {String? firebaseId}) async {
   ///   try {
   ///     final companion = VehiclesCompanion(
   ///       isDirty: const Value(false),
@@ -650,5 +631,5 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
   ///   }
   /// }
   /// ```
-  Future<Either<Failure, void>> _markAsSynced(String id, {String? firebaseId});
+  Future<Either<Failure, void>> markAsSynced(String id, {String? firebaseId});
 }

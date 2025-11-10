@@ -52,11 +52,7 @@ import '../../domain/entities/fuel_record_entity.dart';
 @lazySingleton
 class FuelSupplyDriftSyncAdapter
     extends DriftSyncAdapterBase<FuelRecordEntity, FuelSupply> {
-  FuelSupplyDriftSyncAdapter(
-    super.db,
-    super.firestore,
-    super.connectivityService,
-  );
+  FuelSupplyDriftSyncAdapter(super.db, super.firestore);
 
   @override
   String get collectionName => 'fuel_supplies';
@@ -377,13 +373,13 @@ class FuelSupplyDriftSyncAdapter
   // OPERAÇÕES DRIFT (Implementações de métodos abstratos)
   // ==========================================================================
 
-  // ignore: unused_element
-  Future<Either<Failure, List<FuelRecordEntity>>> _getDirtyRecords(
+  @override
+  Future<Either<Failure, List<FuelRecordEntity>>> getDirtyRecords(
     String userId,
   ) async {
     try {
       developer.log(
-        '🔍 Starting _getDirtyRecords for user: $userId',
+        '🔍 Starting getDirtyRecords for user: $userId',
         name: 'FuelSupplyDriftSyncAdapter',
       );
 
@@ -443,7 +439,21 @@ class FuelSupplyDriftSyncAdapter
       final entities = <FuelRecordEntity>[];
       for (final row in rows) {
         try {
-          final entity = toDomainEntity(row);
+          var entity = toDomainEntity(row);
+
+          final vehicleFirebaseId = await _resolveVehicleFirebaseId(
+            row.vehicleId,
+          );
+
+          if (vehicleFirebaseId == null) {
+            developer.log(
+              '⏸️ Skipping fuel record ${entity.id}: vehicle ${row.vehicleId} not synced yet',
+              name: 'FuelSupplyDriftSyncAdapter',
+            );
+            continue;
+          }
+
+          entity = entity.copyWith(vehicleId: vehicleFirebaseId);
           entities.add(entity);
         } catch (e) {
           developer.log(
@@ -473,8 +483,8 @@ class FuelSupplyDriftSyncAdapter
     }
   }
 
-  // ignore: unused_element
-  Future<Either<Failure, FuelRecordEntity?>> _getLocalEntity(String id) async {
+  @override
+  Future<Either<Failure, FuelRecordEntity?>> getLocalEntity(String id) async {
     try {
       // Buscar por firebaseId OU por id (local autoIncrement)
       final query = db.select(db.fuelSupplies)
@@ -507,10 +517,17 @@ class FuelSupplyDriftSyncAdapter
     }
   }
 
-  // ignore: unused_element
-  Future<Either<Failure, void>> _insertLocal(FuelRecordEntity entity) async {
+  @override
+  Future<Either<Failure, void>> insertLocal(FuelRecordEntity entity) async {
     try {
-      final companion = toCompanion(entity);
+      final resolvedEntity = await _ensureLocalVehicleReference(entity);
+      if (resolvedEntity == null) {
+        return const Left(
+          CacheFailure('Failed to resolve vehicle reference for fuel record'),
+        );
+      }
+
+      final companion = toCompanion(resolvedEntity);
       await db.into(db.fuelSupplies).insert(companion);
 
       developer.log(
@@ -531,10 +548,17 @@ class FuelSupplyDriftSyncAdapter
     }
   }
 
-  // ignore: unused_element
-  Future<Either<Failure, void>> _updateLocal(FuelRecordEntity entity) async {
+  @override
+  Future<Either<Failure, void>> updateLocal(FuelRecordEntity entity) async {
     try {
-      final companion = toCompanion(entity);
+      final resolvedEntity = await _ensureLocalVehicleReference(entity);
+      if (resolvedEntity == null) {
+        return const Left(
+          CacheFailure('Failed to resolve vehicle reference for fuel record'),
+        );
+      }
+
+      final companion = toCompanion(resolvedEntity);
 
       // Atualizar por firebaseId OU por id local
       final query = db.update(db.fuelSupplies)
@@ -551,7 +575,7 @@ class FuelSupplyDriftSyncAdapter
           'No rows updated for fuel supply ${entity.id}, inserting instead',
           name: 'FuelSupplyDriftSyncAdapter',
         );
-        return _insertLocal(entity);
+        return insertLocal(entity);
       }
 
       developer.log(
@@ -572,8 +596,8 @@ class FuelSupplyDriftSyncAdapter
     }
   }
 
-  // ignore: unused_element
-  Future<Either<Failure, void>> _markAsSynced(
+  @override
+  Future<Either<Failure, void>> markAsSynced(
     String id, {
     String? firebaseId,
   }) async {
@@ -716,5 +740,46 @@ class FuelSupplyDriftSyncAdapter
     yield* query.watch().map(
       (rows) => rows.map((row) => toDomainEntity(row)).toList(),
     );
+  }
+
+  Future<String?> _resolveVehicleFirebaseId(int localVehicleId) async {
+    final vehicleRow = await (db.select(
+      db.vehicles,
+    )..where((tbl) => tbl.id.equals(localVehicleId))).getSingleOrNull();
+
+    final firebaseId = vehicleRow?.firebaseId;
+
+    if (firebaseId == null || firebaseId.isEmpty) {
+      developer.log(
+        'Vehicle $localVehicleId does not have a firebaseId yet',
+        name: 'FuelSupplyDriftSyncAdapter',
+      );
+      return null;
+    }
+
+    return firebaseId;
+  }
+
+  Future<FuelRecordEntity?> _ensureLocalVehicleReference(
+    FuelRecordEntity entity,
+  ) async {
+    if (int.tryParse(entity.vehicleId) != null) {
+      return entity;
+    }
+
+    final vehicleRow =
+        await (db.select(db.vehicles)
+              ..where((tbl) => tbl.firebaseId.equals(entity.vehicleId)))
+            .getSingleOrNull();
+
+    if (vehicleRow == null) {
+      developer.log(
+        'Unable to find local vehicle for firebaseId ${entity.vehicleId}',
+        name: 'FuelSupplyDriftSyncAdapter',
+      );
+      return null;
+    }
+
+    return entity.copyWith(vehicleId: vehicleRow.id.toString());
   }
 }

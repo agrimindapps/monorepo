@@ -35,11 +35,7 @@ import '../../domain/entities/odometer_entity.dart';
 @lazySingleton
 class OdometerDriftSyncAdapter
     extends DriftSyncAdapterBase<OdometerEntity, OdometerReading> {
-  OdometerDriftSyncAdapter(
-    super.db,
-    super.firestore,
-    super.connectivityService,
-  ) {
+  OdometerDriftSyncAdapter(super.db, super.firestore) {
     developer.log(
       '🏗️ OdometerDriftSyncAdapter initialized with db: ${db.hashCode}, firestore: ${firestore.hashCode}',
       name: 'OdometerDriftSyncAdapter',
@@ -254,13 +250,13 @@ class OdometerDriftSyncAdapter
   // OPERAÇÕES DRIFT (Implementações de métodos abstratos)
   // ==========================================================================
 
-  // ignore: unused_element
-  Future<Either<Failure, List<OdometerEntity>>> _getDirtyRecords(
+  @override
+  Future<Either<Failure, List<OdometerEntity>>> getDirtyRecords(
     String userId,
   ) async {
     try {
       developer.log(
-        '🔍 Starting _getDirtyRecords for user: $userId',
+        '🔍 Starting getDirtyRecords for user: $userId',
         name: 'OdometerDriftSyncAdapter',
       );
 
@@ -326,7 +322,21 @@ class OdometerDriftSyncAdapter
       final entities = <OdometerEntity>[];
       for (final row in rows) {
         try {
-          final entity = toDomainEntity(row);
+          var entity = toDomainEntity(row);
+
+          final vehicleFirebaseId = await _resolveVehicleFirebaseId(
+            row.vehicleId,
+          );
+
+          if (vehicleFirebaseId == null) {
+            developer.log(
+              '⏸️ Skipping odometer ${entity.id}: vehicle ${row.vehicleId} not synced yet',
+              name: 'OdometerDriftSyncAdapter',
+            );
+            continue;
+          }
+
+          entity = entity.copyWith(vehicleId: vehicleFirebaseId);
           entities.add(entity);
         } catch (e) {
           developer.log(
@@ -356,8 +366,8 @@ class OdometerDriftSyncAdapter
     }
   }
 
-  // ignore: unused_element
-  Future<Either<Failure, OdometerEntity?>> _getLocalEntity(String id) async {
+  @override
+  Future<Either<Failure, OdometerEntity?>> getLocalEntity(String id) async {
     try {
       final query = db.select(db.odometerReadings)
         ..where(
@@ -389,10 +399,17 @@ class OdometerDriftSyncAdapter
     }
   }
 
-  // ignore: unused_element
-  Future<Either<Failure, void>> _insertLocal(OdometerEntity entity) async {
+  @override
+  Future<Either<Failure, void>> insertLocal(OdometerEntity entity) async {
     try {
-      final companion = toCompanion(entity);
+      final resolvedEntity = await _ensureLocalVehicleReference(entity);
+      if (resolvedEntity == null) {
+        return const Left(
+          CacheFailure('Failed to resolve vehicle reference for odometer'),
+        );
+      }
+
+      final companion = toCompanion(resolvedEntity);
       await db.into(db.odometerReadings).insert(companion);
 
       developer.log(
@@ -413,10 +430,17 @@ class OdometerDriftSyncAdapter
     }
   }
 
-  // ignore: unused_element
-  Future<Either<Failure, void>> _updateLocal(OdometerEntity entity) async {
+  @override
+  Future<Either<Failure, void>> updateLocal(OdometerEntity entity) async {
     try {
-      final companion = toCompanion(entity);
+      final resolvedEntity = await _ensureLocalVehicleReference(entity);
+      if (resolvedEntity == null) {
+        return const Left(
+          CacheFailure('Failed to resolve vehicle reference for odometer'),
+        );
+      }
+
+      final companion = toCompanion(resolvedEntity);
 
       // OdometerEntity não tem firebaseId, apenas id
       final query = db.update(db.odometerReadings)
@@ -433,7 +457,7 @@ class OdometerDriftSyncAdapter
           'No rows updated for odometer reading ${entity.id}, inserting instead',
           name: 'OdometerDriftSyncAdapter',
         );
-        return _insertLocal(entity);
+        return insertLocal(entity);
       }
 
       developer.log(
@@ -454,8 +478,8 @@ class OdometerDriftSyncAdapter
     }
   }
 
-  // ignore: unused_element
-  Future<Either<Failure, void>> _markAsSynced(
+  @override
+  Future<Either<Failure, void>> markAsSynced(
     String id, {
     String? firebaseId,
   }) async {
@@ -568,5 +592,46 @@ class OdometerDriftSyncAdapter
       developer.log('❌ Error getting latest reading: $e', name: 'OdometerSync');
       return null;
     }
+  }
+
+  Future<String?> _resolveVehicleFirebaseId(int localVehicleId) async {
+    final vehicleRow = await (db.select(
+      db.vehicles,
+    )..where((tbl) => tbl.id.equals(localVehicleId))).getSingleOrNull();
+
+    final firebaseId = vehicleRow?.firebaseId;
+
+    if (firebaseId == null || firebaseId.isEmpty) {
+      developer.log(
+        'Vehicle $localVehicleId does not have a firebaseId yet',
+        name: 'OdometerDriftSyncAdapter',
+      );
+      return null;
+    }
+
+    return firebaseId;
+  }
+
+  Future<OdometerEntity?> _ensureLocalVehicleReference(
+    OdometerEntity entity,
+  ) async {
+    if (int.tryParse(entity.vehicleId) != null) {
+      return entity;
+    }
+
+    final vehicleRow =
+        await (db.select(db.vehicles)
+              ..where((tbl) => tbl.firebaseId.equals(entity.vehicleId)))
+            .getSingleOrNull();
+
+    if (vehicleRow == null) {
+      developer.log(
+        'Unable to find local vehicle for firebaseId ${entity.vehicleId}',
+        name: 'OdometerDriftSyncAdapter',
+      );
+      return null;
+    }
+
+    return entity.copyWith(vehicleId: vehicleRow.id.toString());
   }
 }

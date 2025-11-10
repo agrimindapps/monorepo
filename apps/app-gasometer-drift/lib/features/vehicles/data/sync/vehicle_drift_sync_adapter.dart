@@ -47,7 +47,7 @@ import '../../../vehicles/domain/entities/vehicle_entity.dart';
 @lazySingleton
 class VehicleDriftSyncAdapter
     extends DriftSyncAdapterBase<VehicleEntity, Vehicle> {
-  VehicleDriftSyncAdapter(super.db, super.firestore, super.connectivityService);
+  VehicleDriftSyncAdapter(super.db, super.firestore);
 
   @override
   String get collectionName => 'vehicles';
@@ -375,13 +375,13 @@ class VehicleDriftSyncAdapter
   // Esses métodos são chamados pela base class DriftSyncAdapterBase,
   // então warnings de "unused" são falsos positivos.
 
-  // ignore: unused_element
-  Future<Either<Failure, List<VehicleEntity>>> _getDirtyRecords(
+  @override
+  Future<Either<Failure, List<VehicleEntity>>> getDirtyRecords(
     String userId,
   ) async {
     try {
       developer.log(
-        '🔍 Starting _getDirtyRecords for user: $userId',
+        '🔍 Starting getDirtyRecords for user: $userId',
         name: 'VehicleDriftSyncAdapter',
       );
 
@@ -471,8 +471,8 @@ class VehicleDriftSyncAdapter
     }
   }
 
-  // ignore: unused_element
-  Future<Either<Failure, VehicleEntity?>> _getLocalEntity(String id) async {
+  @override
+  Future<Either<Failure, VehicleEntity?>> getLocalEntity(String id) async {
     try {
       // Buscar por firebaseId OU por id (local autoIncrement)
       final query = db.select(db.vehicles)
@@ -505,8 +505,8 @@ class VehicleDriftSyncAdapter
     }
   }
 
-  // ignore: unused_element
-  Future<Either<Failure, void>> _insertLocal(VehicleEntity entity) async {
+  @override
+  Future<Either<Failure, void>> insertLocal(VehicleEntity entity) async {
     try {
       final companion = toCompanion(entity);
       await db.into(db.vehicles).insert(companion);
@@ -529,8 +529,8 @@ class VehicleDriftSyncAdapter
     }
   }
 
-  // ignore: unused_element
-  Future<Either<Failure, void>> _updateLocal(VehicleEntity entity) async {
+  @override
+  Future<Either<Failure, void>> updateLocal(VehicleEntity entity) async {
     try {
       final companion = toCompanion(entity);
 
@@ -549,7 +549,7 @@ class VehicleDriftSyncAdapter
           'No rows updated for vehicle ${entity.id}, inserting instead',
           name: 'VehicleDriftSyncAdapter',
         );
-        return _insertLocal(entity);
+        return insertLocal(entity);
       }
 
       developer.log(
@@ -570,8 +570,8 @@ class VehicleDriftSyncAdapter
     }
   }
 
-  // ignore: unused_element
-  Future<Either<Failure, void>> _markAsSynced(
+  @override
+  Future<Either<Failure, void>> markAsSynced(
     String id, {
     String? firebaseId,
   }) async {

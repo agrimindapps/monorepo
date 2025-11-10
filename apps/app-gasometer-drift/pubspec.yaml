@@ -1,11 +1,11 @@
-name: gasometer
+name: gasometer_drift
 description: Aplicativo para controle pessoal de veículos - abastecimentos, manutenções e custos
 version: 1.0.0+1
 publish_to: 'none'
 
 environment:
   sdk: ">=3.9.0 <4.0.0"
-  flutter: ">=3.24.0"
+  flutter: ">=3.35.0"
 
 dependencies:
   flutter:

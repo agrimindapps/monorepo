@@ -256,7 +256,6 @@ Future<void> runVehicleSyncPOC({
   final adapter = VehicleDriftSyncAdapter(
     db,
     firestore,
-    connectivityService,
   );
 
   final poc = VehicleSyncPOC(

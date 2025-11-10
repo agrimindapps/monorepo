@@ -63,7 +63,9 @@ abstract class TaskolistSyncDIModule {
       result.fold(
         (failure) {
           if (kDebugMode) {
-            debugPrint('⚠️ Failed to initialize AutoSyncService: ${failure.message}');
+            debugPrint(
+              '⚠️ Failed to initialize AutoSyncService: ${failure.message}',
+            );
           }
         },
         (_) {

@@ -1,4 +1,5 @@
-import 'package:core/core.dart' show Hive;
+import 'package:core/core.dart' hide Column;
+import 'package:hive/hive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 

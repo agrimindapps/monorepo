@@ -1,42 +1,45 @@
 import 'package:flutter/foundation.dart';
 
-import '../data/repositories/cultura_legacy_repository.dart';
+import '../../database/repositories/culturas_repository.dart';
 import '../data/repositories/fitossanitario_legacy_repository.dart';
 import '../data/repositories/pragas_legacy_repository.dart';
 import '../di/injection_container.dart';
 
 /// Serviço unificado para resolver nomes de entidades em diagnósticos
-/// 
+///
 /// Centraliza a lógica de resolução de IDs para nomes legíveis,
 /// garantindo consistência em toda a aplicação e otimizando performance
 /// através de cache inteligente.
-/// 
+///
 /// **Funcionalidades:**
 /// - Resolução de culturas por ID ou nome
-/// - Resolução de defensivos por ID ou nome  
+/// - Resolução de defensivos por ID ou nome
 /// - Resolução de pragas por ID ou nome
 /// - Cache automático com invalidação inteligente
 /// - Fallback strategies para dados incompletos
 /// - Batch resolution para operações em lote
 class DiagnosticoEntityResolver {
   static DiagnosticoEntityResolver? _instance;
-  static DiagnosticoEntityResolver get instance => _instance ??= DiagnosticoEntityResolver._internal();
-  
+  static DiagnosticoEntityResolver get instance =>
+      _instance ??= DiagnosticoEntityResolver._internal();
+
   DiagnosticoEntityResolver._internal();
-  late final CulturaLegacyRepository _culturaRepository = sl<CulturaLegacyRepository>();
-  late final FitossanitarioLegacyRepository _defensivoRepository = sl<FitossanitarioLegacyRepository>();
-  late final PragasLegacyRepository _pragasRepository = sl<PragasLegacyRepository>();
+  late final CulturasRepository _culturaRepository = sl<CulturasRepository>();
+  late final FitossanitarioLegacyRepository _defensivoRepository =
+      sl<FitossanitarioLegacyRepository>();
+  late final PragasLegacyRepository _pragasRepository =
+      sl<PragasLegacyRepository>();
   final Map<String, String> _culturaCache = {};
   final Map<String, String> _defensivoCache = {};
   final Map<String, String> _pragaCache = {};
-  
+
   DateTime? _lastCacheUpdate;
   static const Duration _cacheTTL = Duration(minutes: 30);
 
   /// Verifica se o cache está válido
   bool get _isCacheValid {
-    return _lastCacheUpdate != null && 
-           DateTime.now().difference(_lastCacheUpdate!) < _cacheTTL;
+    return _lastCacheUpdate != null &&
+        DateTime.now().difference(_lastCacheUpdate!) < _cacheTTL;
   }
 
   /// Limpa todos os caches
@@ -66,9 +69,12 @@ class DiagnosticoEntityResolver {
         return _culturaCache[idCultura]!;
       }
       if (idCultura.isNotEmpty) {
-        final culturaData = await _culturaRepository.getById(idCultura);
-        if (culturaData != null && culturaData.cultura.isNotEmpty) {
-          final resolvedName = culturaData.cultura;
+        final idCulturaInt = int.tryParse(idCultura);
+        if (idCulturaInt == null) return defaultValue;
+
+        final culturaData = await _culturaRepository.findById(idCulturaInt);
+        if (culturaData != null && culturaData.nome.isNotEmpty) {
+          final resolvedName = culturaData.nome;
           _culturaCache[idCultura] = resolvedName;
           _updateCacheTimestamp();
           return resolvedName;
@@ -158,9 +164,7 @@ class DiagnosticoEntityResolver {
     final results = <String, String>{};
 
     for (final id in ids) {
-      final resolvedName = await resolveCulturaNome(
-        idCultura: id,
-      );
+      final resolvedName = await resolveCulturaNome(idCultura: id);
       results[id] = resolvedName;
     }
 
@@ -172,9 +176,7 @@ class DiagnosticoEntityResolver {
     final results = <String, String>{};
 
     for (final id in ids) {
-      final resolvedName = await resolveDefensivoNome(
-        idDefensivo: id,
-      );
+      final resolvedName = await resolveDefensivoNome(idDefensivo: id);
       results[id] = resolvedName;
     }
 
@@ -186,9 +188,7 @@ class DiagnosticoEntityResolver {
     final results = <String, String>{};
 
     for (final id in ids) {
-      final resolvedName = await resolvePragaNome(
-        idPraga: id,
-      );
+      final resolvedName = await resolvePragaNome(idPraga: id);
       results[id] = resolvedName;
     }
 
@@ -214,36 +214,38 @@ class DiagnosticoEntityResolver {
   /// Valida se uma entidade existe nos repositórios
   Future<ValidationResult> validateEntity({
     String? idCultura,
-    String? idDefensivo, 
+    String? idDefensivo,
     String? idPraga,
   }) async {
     final issues = <String>[];
-    
+
     if (idCultura?.isNotEmpty == true) {
-      final cultura = await _culturaRepository.getById(idCultura!);
-      if (cultura == null) {
-        issues.add('Cultura com ID $idCultura não encontrada');
+      final idCulturaInt = int.tryParse(idCultura!);
+      if (idCulturaInt != null) {
+        final cultura = await _culturaRepository.findById(idCulturaInt);
+        if (cultura == null) {
+          issues.add('Cultura com ID $idCultura não encontrada');
+        }
+      } else {
+        issues.add('ID de cultura inválido: $idCultura');
       }
     }
-    
+
     if (idDefensivo?.isNotEmpty == true) {
       final defensivo = await _defensivoRepository.getById(idDefensivo!);
       if (defensivo == null) {
         issues.add('Defensivo com ID $idDefensivo não encontrado');
       }
     }
-    
+
     if (idPraga?.isNotEmpty == true) {
       final praga = await _pragasRepository.getById(idPraga!);
       if (praga == null) {
         issues.add('Praga com ID $idPraga não encontrada');
       }
     }
-    
-    return ValidationResult(
-      isValid: issues.isEmpty,
-      issues: issues,
-    );
+
+    return ValidationResult(isValid: issues.isEmpty, issues: issues);
   }
 }
 
@@ -291,10 +293,7 @@ class ValidationResult {
   final bool isValid;
   final List<String> issues;
 
-  const ValidationResult({
-    required this.isValid,
-    required this.issues,
-  });
+  const ValidationResult({required this.isValid, required this.issues});
 
   @override
   String toString() {

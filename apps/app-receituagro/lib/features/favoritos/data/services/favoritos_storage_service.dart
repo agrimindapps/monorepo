@@ -326,7 +326,7 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
           'nomeComum': '',
         };
       }
-      
+
       final cultura = await _culturaRepository.findById(idInt);
       if (cultura != null) {
         return {

@@ -203,7 +203,9 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
             String defensivoNome = '';
             String ingredienteAtivo = 'Não especificado';
             if (entity.idDefensivo.isNotEmpty) {
-              final defensivoData = await _resolveDefensivoData(entity.idDefensivo);
+              final defensivoData = await _resolveDefensivoData(
+                entity.idDefensivo,
+              );
               defensivoNome = defensivoData.$1; // Nome
               ingredienteAtivo = defensivoData.$2; // Ingrediente ativo
             }
@@ -215,7 +217,8 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
               DiagnosticoModel(
                 id: entity.id,
                 nome: defensivoNome,
-                ingredienteAtivo: ingredienteAtivo, // Agora usa ingrediente ativo real
+                ingredienteAtivo:
+                    ingredienteAtivo, // Agora usa ingrediente ativo real
                 dosagem: entity.dosagem.displayDosagem,
                 cultura: culturaNome,
                 grupo: pragaNome,
@@ -225,12 +228,16 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
 
           // CORREÇÃO: Extrair culturas únicas dos diagnósticos carregados
           // ao invés de usar lista hard-coded
-          final culturasUnicas = diagnosticosList
-              .map((d) => d.cultura)
-              .where((c) => c.isNotEmpty && c != 'Não especificado' && c != 'Todas')
-              .toSet()
-              .toList()
-            ..sort();
+          final culturasUnicas =
+              diagnosticosList
+                  .map((d) => d.cultura)
+                  .where(
+                    (c) =>
+                        c.isNotEmpty && c != 'Não especificado' && c != 'Todas',
+                  )
+                  .toSet()
+                  .toList()
+                ..sort();
 
           // Adiciona "Todas" no início, garantindo sem duplicatas
           final culturasComTodas = ['Todas', ...culturasUnicas];
@@ -262,7 +269,7 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
     try {
       final idCulturaInt = int.tryParse(idCultura);
       if (idCulturaInt == null) return 'Não especificado';
-      
+
       final culturaData = await _culturaRepository.findById(idCulturaInt);
       if (culturaData != null && culturaData.nome.isNotEmpty) {
         return culturaData.nome;

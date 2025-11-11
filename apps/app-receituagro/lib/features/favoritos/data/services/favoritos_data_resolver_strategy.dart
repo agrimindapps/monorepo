@@ -91,15 +91,14 @@ class DiagnosticoResolverStrategy implements IFavoritosDataResolverStrategy {
 /// Estratégia para resolver dados de culturas
 class CulturaResolverStrategy implements IFavoritosDataResolverStrategy {
   // ✅ Lazy loading: obtém o repo apenas quando necessário
-  CulturasRepository get _repository =>
-      GetIt.instance<CulturasRepository>();
+  CulturasRepository get _repository => GetIt.instance<CulturasRepository>();
 
   @override
   Future<Map<String, dynamic>?> resolveItemData(String id) async {
     try {
       final idInt = int.tryParse(id);
       if (idInt == null) return null;
-      
+
       final item = await _repository.findById(idInt);
       if (item == null) return null;
 

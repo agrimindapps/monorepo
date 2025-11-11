@@ -140,7 +140,10 @@ class DiagnosticosTabWidget extends ConsumerWidget {
       String culturaNome = 'Não especificado';
 
       try {
-        final idCulturaStr = _getPropertyFromDiagnostic(diagnostic, 'idCultura');
+        final idCulturaStr = _getPropertyFromDiagnostic(
+          diagnostic,
+          'idCultura',
+        );
         if (idCulturaStr != null) {
           final idCultura = int.tryParse(idCulturaStr);
           if (idCultura != null) {

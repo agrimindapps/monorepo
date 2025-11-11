@@ -2,16 +2,16 @@ import 'package:flutter/foundation.dart';
 
 import '../../features/diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
-import '../data/repositories/cultura_legacy_repository.dart';
+import '../../database/repositories/culturas_repository.dart';
 import '../data/repositories/fitossanitario_legacy_repository.dart';
 import '../data/repositories/pragas_legacy_repository.dart';
 import '../di/injection_container.dart';
 
 /// Serviço avançado para validação de compatibilidade entre entidades
-/// 
+///
 /// Fornece validação robusta de compatibilidade entre defensivos, culturas e pragas,
 /// incluindo validações de segurança, eficácia e regulamentação.
-/// 
+///
 /// **Funcionalidades:**
 /// - Validação de compatibilidade tripla (defensivo-cultura-praga)
 /// - Verificação de registro MAPA
@@ -22,22 +22,25 @@ import '../di/injection_container.dart';
 /// - Métricas de qualidade dos dados
 class DiagnosticoCompatibilityService {
   static DiagnosticoCompatibilityService? _instance;
-  static DiagnosticoCompatibilityService get instance => 
+  static DiagnosticoCompatibilityService get instance =>
       _instance ??= DiagnosticoCompatibilityService._internal();
-  
+
   DiagnosticoCompatibilityService._internal();
-  late final IDiagnosticosRepository _diagnosticosRepository = sl<IDiagnosticosRepository>();
-  late final CulturaLegacyRepository _culturaRepository = sl<CulturaLegacyRepository>();
-  late final FitossanitarioLegacyRepository _defensivoRepository = sl<FitossanitarioLegacyRepository>();
-  late final PragasLegacyRepository _pragasRepository = sl<PragasLegacyRepository>();
+  late final IDiagnosticosRepository _diagnosticosRepository =
+      sl<IDiagnosticosRepository>();
+  late final CulturasRepository _culturaRepository = sl<CulturasRepository>();
+  late final FitossanitarioLegacyRepository _defensivoRepository =
+      sl<FitossanitarioLegacyRepository>();
+  late final PragasLegacyRepository _pragasRepository =
+      sl<PragasLegacyRepository>();
   final Map<String, CompatibilityValidation> _validationCache = {};
   DateTime? _lastCacheUpdate;
   static const Duration _cacheTTL = Duration(hours: 1);
 
   /// Verifica se o cache está válido
   bool get _isCacheValid {
-    return _lastCacheUpdate != null && 
-           DateTime.now().difference(_lastCacheUpdate!) < _cacheTTL;
+    return _lastCacheUpdate != null &&
+        DateTime.now().difference(_lastCacheUpdate!) < _cacheTTL;
   }
 
   /// Valida compatibilidade completa entre defensivo, cultura e praga
@@ -91,7 +94,10 @@ class DiagnosticoCompatibilityService {
     final List<ValidationWarning> warnings = [];
     final List<String> recommendations = [];
     final entityValidation = await _validateEntitiesExist(
-      idDefensivo, idCultura, idPraga);
+      idDefensivo,
+      idCultura,
+      idPraga,
+    );
     issues.addAll(entityValidation.issues);
 
     if (entityValidation.hasBlockingIssues) {
@@ -103,28 +109,38 @@ class DiagnosticoCompatibilityService {
         idPraga: idPraga,
       );
     }
-    final diagnosticosResult = await _diagnosticosRepository.queryByTriplaCombinacao(
-      idDefensivo: idDefensivo,
-      idCultura: idCultura,
-      idPraga: idPraga,
-    );
+    final diagnosticosResult = await _diagnosticosRepository
+        .queryByTriplaCombinacao(
+          idDefensivo: idDefensivo,
+          idCultura: idCultura,
+          idPraga: idPraga,
+        );
 
     List<DiagnosticoEntity> diagnosticos = [];
     diagnosticosResult.fold(
-      (failure) => issues.add(ValidationIssue.error(
-        'Erro ao buscar diagnósticos: ${failure.toString()}')),
+      (failure) => issues.add(
+        ValidationIssue.error(
+          'Erro ao buscar diagnósticos: ${failure.toString()}',
+        ),
+      ),
       (data) => diagnosticos = data,
     );
     if (diagnosticos.isEmpty) {
-      issues.add(ValidationIssue.warning(
-        'Nenhum diagnóstico encontrado para esta combinação'));
+      issues.add(
+        ValidationIssue.warning(
+          'Nenhum diagnóstico encontrado para esta combinação',
+        ),
+      );
       if (includeAlternatives) {
         final alternatives = await _findAlternatives(idCultura, idPraga);
         recommendations.addAll(alternatives);
       }
     } else {
       final diagValidation = await _validateDiagnosticos(
-        diagnosticos, checkDosage, checkRegistration);
+        diagnosticos,
+        checkDosage,
+        checkRegistration,
+      );
       issues.addAll(diagValidation.issues);
       warnings.addAll(diagValidation.warnings);
       recommendations.addAll(diagValidation.recommendations);
@@ -135,8 +151,9 @@ class DiagnosticoCompatibilityService {
       warnings.addAll(regValidation.warnings);
     }
     final hasErrors = issues.any((i) => i.severity == IssueSeverity.error);
-    final hasWarnings = issues.any((i) => i.severity == IssueSeverity.warning) ||
-                       warnings.isNotEmpty;
+    final hasWarnings =
+        issues.any((i) => i.severity == IssueSeverity.warning) ||
+        warnings.isNotEmpty;
 
     if (hasErrors) {
       return CompatibilityValidation.failed(
@@ -145,7 +162,9 @@ class DiagnosticoCompatibilityService {
         idDefensivo: idDefensivo,
         idCultura: idCultura,
         idPraga: idPraga,
-        alternatives: includeAlternatives ? await _findAlternatives(idCultura, idPraga) : [],
+        alternatives: includeAlternatives
+            ? await _findAlternatives(idCultura, idPraga)
+            : [],
       );
     } else if (hasWarnings) {
       return CompatibilityValidation.warning(
@@ -170,25 +189,39 @@ class DiagnosticoCompatibilityService {
 
   /// Valida se as entidades existem nos repositórios
   Future<EntityValidationResult> _validateEntitiesExist(
-    String idDefensivo, String idCultura, String idPraga) async {
+    String idDefensivo,
+    String idCultura,
+    String idPraga,
+  ) async {
     final issues = <ValidationIssue>[];
     final defensivo = await _defensivoRepository.getById(idDefensivo);
     if (defensivo == null) {
-      issues.add(ValidationIssue.error(
-        'Defensivo com ID $idDefensivo não encontrado'));
+      issues.add(
+        ValidationIssue.error('Defensivo com ID $idDefensivo não encontrado'),
+      );
     } else if (!defensivo.status) {
-      issues.add(ValidationIssue.warning(
-        'Defensivo ${defensivo.nomeComum} está inativo'));
+      issues.add(
+        ValidationIssue.warning(
+          'Defensivo ${defensivo.nomeComum} está inativo',
+        ),
+      );
     }
-    final cultura = await _culturaRepository.getById(idCultura);
-    if (cultura == null) {
-      issues.add(ValidationIssue.error(
-        'Cultura com ID $idCultura não encontrada'));
+
+    final idCulturaInt = int.tryParse(idCultura);
+    if (idCulturaInt != null) {
+      final cultura = await _culturaRepository.findById(idCulturaInt);
+      if (cultura == null) {
+        issues.add(
+          ValidationIssue.error('Cultura com ID $idCultura não encontrada'),
+        );
+      }
+    } else {
+      issues.add(ValidationIssue.error('ID de cultura inválido: $idCultura'));
     }
+
     final praga = await _pragasRepository.getById(idPraga);
     if (praga == null) {
-      issues.add(ValidationIssue.error(
-        'Praga com ID $idPraga não encontrada'));
+      issues.add(ValidationIssue.error('Praga com ID $idPraga não encontrada'));
     }
 
     return EntityValidationResult(
@@ -199,31 +232,42 @@ class DiagnosticoCompatibilityService {
 
   /// Valida diagnósticos encontrados
   Future<DiagnosticosValidationResult> _validateDiagnosticos(
-    List<DiagnosticoEntity> diagnosticos, bool checkDosage, bool checkRegistration) async {
+    List<DiagnosticoEntity> diagnosticos,
+    bool checkDosage,
+    bool checkRegistration,
+  ) async {
     final issues = <ValidationIssue>[];
     final warnings = <ValidationWarning>[];
     final recommendations = <String>[];
 
     for (final diagnostico in diagnosticos) {
       if (!diagnostico.isComplete) {
-        warnings.add(ValidationWarning(
-          'Diagnóstico ${diagnostico.id} tem dados incompletos (${diagnostico.completude.displayName})',
-          severity: WarningSevetiry.medium,
-        ));
+        warnings.add(
+          ValidationWarning(
+            'Diagnóstico ${diagnostico.id} tem dados incompletos (${diagnostico.completude.displayName})',
+            severity: WarningSevetiry.medium,
+          ),
+        );
       }
       if (checkDosage && !diagnostico.hasDosagemValida) {
-        issues.add(ValidationIssue.warning(
-          'Dosagem inválida no diagnóstico ${diagnostico.id}'));
+        issues.add(
+          ValidationIssue.warning(
+            'Dosagem inválida no diagnóstico ${diagnostico.id}',
+          ),
+        );
       }
       if (!diagnostico.hasAplicacaoValida) {
-        warnings.add(ValidationWarning(
-          'Informações de aplicação incompletas no diagnóstico ${diagnostico.id}',
-          severity: WarningSevetiry.low,
-        ));
+        warnings.add(
+          ValidationWarning(
+            'Informações de aplicação incompletas no diagnóstico ${diagnostico.id}',
+            severity: WarningSevetiry.low,
+          ),
+        );
       }
       if (diagnostico.completude == DiagnosticoCompletude.completo) {
         recommendations.add(
-          'Diagnóstico ${diagnostico.id} tem dados completos e confiáveis');
+          'Diagnóstico ${diagnostico.id} tem dados completos e confiáveis',
+        );
       }
     }
     if (diagnosticos.length > 1) {
@@ -231,14 +275,17 @@ class DiagnosticoCompatibilityService {
           .map((d) => d.dosagem.dosageAverage)
           .where((d) => d > 0)
           .toList();
-      
+
       if (dosagens.isNotEmpty) {
         final variance = _calculateVariance(dosagens);
-        if (variance > 50) { // Alta variância nas dosagens
-          warnings.add(ValidationWarning(
-            'Grande variação nas dosagens recomendadas (${variance.toStringAsFixed(1)}% variância)',
-            severity: WarningSevetiry.medium,
-          ));
+        if (variance > 50) {
+          // Alta variância nas dosagens
+          warnings.add(
+            ValidationWarning(
+              'Grande variação nas dosagens recomendadas (${variance.toStringAsFixed(1)}% variância)',
+              severity: WarningSevetiry.medium,
+            ),
+          );
         }
       }
     }
@@ -251,46 +298,53 @@ class DiagnosticoCompatibilityService {
   }
 
   /// Valida registro MAPA
-  Future<RegistrationValidationResult> _validateRegistration(String idDefensivo) async {
+  Future<RegistrationValidationResult> _validateRegistration(
+    String idDefensivo,
+  ) async {
     final issues = <ValidationIssue>[];
     final warnings = <ValidationWarning>[];
 
     final defensivo = await _defensivoRepository.getById(idDefensivo);
     if (defensivo != null) {
       if (defensivo.comercializado != 1) {
-        issues.add(ValidationIssue.warning(
-          'Defensivo ${defensivo.nomeComum} não está sendo comercializado'));
+        issues.add(
+          ValidationIssue.warning(
+            'Defensivo ${defensivo.nomeComum} não está sendo comercializado',
+          ),
+        );
       }
       if (!defensivo.elegivel) {
-        warnings.add(ValidationWarning(
-          'Defensivo ${defensivo.nomeComum} pode ter restrições de uso',
-          severity: WarningSevetiry.medium,
-        ));
+        warnings.add(
+          ValidationWarning(
+            'Defensivo ${defensivo.nomeComum} pode ter restrições de uso',
+            severity: WarningSevetiry.medium,
+          ),
+        );
       }
       if (defensivo.classeAgronomica?.isEmpty != false) {
-        warnings.add(ValidationWarning(
-          'Classe agronômica não especificada para ${defensivo.nomeComum}',
-          severity: WarningSevetiry.low,
-        ));
+        warnings.add(
+          ValidationWarning(
+            'Classe agronômica não especificada para ${defensivo.nomeComum}',
+            severity: WarningSevetiry.low,
+          ),
+        );
       }
     }
 
-    return RegistrationValidationResult(
-      issues: issues,
-      warnings: warnings,
-    );
+    return RegistrationValidationResult(issues: issues, warnings: warnings);
   }
 
   /// Busca alternativas para uma combinação cultura-praga
-  Future<List<String>> _findAlternatives(String idCultura, String idPraga) async {
+  Future<List<String>> _findAlternatives(
+    String idCultura,
+    String idPraga,
+  ) async {
     final alternatives = <String>[];
 
     try {
       // Use queryByTriplaCombinacao with only cultura and praga
-      final alternativesResult = await _diagnosticosRepository.queryByTriplaCombinacao(
-        idCultura: idCultura,
-        idPraga: idPraga,
-      );
+      final alternativesResult = await _diagnosticosRepository
+          .queryByTriplaCombinacao(idCultura: idCultura, idPraga: idPraga);
 
       alternativesResult.fold(
         (failure) => debugPrint('Erro ao buscar alternativas: $failure'),
@@ -304,14 +358,17 @@ class DiagnosticoCompatibilityService {
           for (final diag in limited) {
             if (diag.nomeDefensivo?.isNotEmpty == true) {
               alternatives.add(
-                'Considere usar ${diag.nomeDefensivo} com dosagem ${diag.dosagem.displayDosagem}');
+                'Considere usar ${diag.nomeDefensivo} com dosagem ${diag.dosagem.displayDosagem}',
+              );
             }
           }
         },
       );
 
       if (alternatives.isEmpty) {
-        alternatives.add('Consulte um engenheiro agrônomo para recomendações específicas');
+        alternatives.add(
+          'Consulte um engenheiro agrônomo para recomendações específicas',
+        );
       }
     } catch (e) {
       debugPrint('Erro ao buscar alternativas: $e');
@@ -326,9 +383,9 @@ class DiagnosticoCompatibilityService {
     if (values.length < 2) return 0;
 
     final mean = values.reduce((a, b) => a + b) / values.length;
-    final variance = values
-        .map((x) => (x - mean) * (x - mean))
-        .reduce((a, b) => a + b) / values.length;
+    final variance =
+        values.map((x) => (x - mean) * (x - mean)).reduce((a, b) => a + b) /
+        values.length;
 
     return (variance / mean) * 100; // Retorna como percentual
   }
@@ -342,17 +399,21 @@ class DiagnosticoCompatibilityService {
     required String unit,
   }) async {
     try {
-      final diagnosticosResult = await _diagnosticosRepository.queryByTriplaCombinacao(
-        idDefensivo: idDefensivo,
-        idCultura: idCultura,
-        idPraga: idPraga,
-      );
+      final diagnosticosResult = await _diagnosticosRepository
+          .queryByTriplaCombinacao(
+            idDefensivo: idDefensivo,
+            idCultura: idCultura,
+            idPraga: idPraga,
+          );
 
       return diagnosticosResult.fold(
-        (failure) => DosageValidation.error('Erro ao validar dosagem: $failure'),
+        (failure) =>
+            DosageValidation.error('Erro ao validar dosagem: $failure'),
         (diagnosticos) {
           if (diagnosticos.isEmpty) {
-            return DosageValidation.warning('Nenhuma referência de dosagem encontrada');
+            return DosageValidation.warning(
+              'Nenhuma referência de dosagem encontrada',
+            );
           }
 
           final validDosages = diagnosticos
@@ -360,24 +421,31 @@ class DiagnosticoCompatibilityService {
               .toList();
 
           if (validDosages.isEmpty) {
-            return DosageValidation.warning('Nenhuma dosagem válida encontrada para a unidade $unit');
+            return DosageValidation.warning(
+              'Nenhuma dosagem válida encontrada para a unidade $unit',
+            );
           }
-          final dosages = validDosages.map((d) => d.dosagem.dosageAverage).toList();
+          final dosages = validDosages
+              .map((d) => d.dosagem.dosageAverage)
+              .toList();
           final minRecommended = dosages.reduce((a, b) => a < b ? a : b);
           final maxRecommended = dosages.reduce((a, b) => a > b ? a : b);
 
           if (proposedDosage < minRecommended) {
             return DosageValidation.warning(
               'Dosagem proposta ($proposedDosage $unit) está abaixo do recomendado '
-              '(${minRecommended.toStringAsFixed(2)} - ${maxRecommended.toStringAsFixed(2)} $unit)');
+              '(${minRecommended.toStringAsFixed(2)} - ${maxRecommended.toStringAsFixed(2)} $unit)',
+            );
           } else if (proposedDosage > maxRecommended) {
             return DosageValidation.warning(
               'Dosagem proposta ($proposedDosage $unit) está acima do recomendado '
-              '(${minRecommended.toStringAsFixed(2)} - ${maxRecommended.toStringAsFixed(2)} $unit)');
+              '(${minRecommended.toStringAsFixed(2)} - ${maxRecommended.toStringAsFixed(2)} $unit)',
+            );
           } else {
             return DosageValidation.success(
               'Dosagem está dentro da faixa recomendada '
-              '(${minRecommended.toStringAsFixed(2)} - ${maxRecommended.toStringAsFixed(2)} $unit)');
+              '(${minRecommended.toStringAsFixed(2)} - ${maxRecommended.toStringAsFixed(2)} $unit)',
+            );
           }
         },
       );
@@ -515,7 +583,9 @@ class CompatibilityValidation {
     );
   }
 
-  bool get isValid => result == CompatibilityResult.success || result == CompatibilityResult.warning;
+  bool get isValid =>
+      result == CompatibilityResult.success ||
+      result == CompatibilityResult.warning;
   bool get hasIssues => issues.isNotEmpty || warnings.isNotEmpty;
   bool get hasAlternatives => alternatives.isNotEmpty;
 }
@@ -528,13 +598,13 @@ class ValidationIssue {
 
   const ValidationIssue(this.message, this.severity);
 
-  factory ValidationIssue.error(String message) => 
+  factory ValidationIssue.error(String message) =>
       ValidationIssue(message, IssueSeverity.error);
-  
-  factory ValidationIssue.warning(String message) => 
+
+  factory ValidationIssue.warning(String message) =>
       ValidationIssue(message, IssueSeverity.warning);
-  
-  factory ValidationIssue.info(String message) => 
+
+  factory ValidationIssue.info(String message) =>
       ValidationIssue(message, IssueSeverity.info);
 }
 
@@ -589,10 +659,10 @@ class DosageValidation {
 
   factory DosageValidation.success(String message) =>
       DosageValidation._(DosageValidationResult.valid, message);
-  
+
   factory DosageValidation.warning(String message) =>
       DosageValidation._(DosageValidationResult.warning, message);
-  
+
   factory DosageValidation.error(String message) =>
       DosageValidation._(DosageValidationResult.invalid, message);
 

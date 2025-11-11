@@ -1,5 +1,5 @@
+import '../../database/repositories/culturas_repository.dart';
 import '../data/models/diagnostico_legacy.dart';
-import '../data/repositories/cultura_legacy_repository.dart';
 import '../data/repositories/fitossanitario_legacy_repository.dart';
 import '../data/repositories/pragas_legacy_repository.dart';
 import '../di/injection_container.dart' as di;
@@ -59,10 +59,10 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
   /// Retorna o nome da cultura com warnings de validação
   Future<DataWithWarnings<String>> getDisplayNomeCulturaWithWarnings() async {
     try {
-      final repository = di.sl<CulturaLegacyRepository>();
-      final cultura = await repository.getById(fkIdCultura);
-      if (cultura != null && cultura.cultura.isNotEmpty) {
-        return DataWithWarnings(data: cultura.cultura);
+      final repository = di.sl<CulturasRepository>();
+      final cultura = await repository.findByIdCultura(fkIdCultura);
+      if (cultura != null && cultura.nome.isNotEmpty) {
+        return DataWithWarnings(data: cultura.nome);
       }
     } catch (e, stackTrace) {
       DiagnosticoLogger.dataResolutionFailure('cultura', fkIdCultura, e);
@@ -166,10 +166,9 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
   }
 
   /// Retorna a época de aplicação formatada
-  String get displayEpocaAplicacao =>
-      epocaAplicacao?.isNotEmpty == true
-          ? epocaAplicacao!
-          : 'Época não especificada';
+  String get displayEpocaAplicacao => epocaAplicacao?.isNotEmpty == true
+      ? epocaAplicacao!
+      : 'Época não especificada';
 
   /// Converte para mapa de dados resolvendo informações técnicas dinamicamente
   Future<Map<String, String>> toDataMap() async {
@@ -264,15 +263,18 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
       'epocaAplicacao': displayEpocaAplicacao,
       'ingredienteAtivo': ingredienteAtivo,
       'toxico': toxico,
-      'classificacaoToxicologica': toxico, // Alias para compatibilidade com widgets
+      'classificacaoToxicologica':
+          toxico, // Alias para compatibilidade com widgets
       'formulacao': formulacao,
       'modoAcao': modoAcao,
       'intervaloSeguranca': 'Consulte a bula do produto',
       'classAmbiental': 'Consulte a bula do produto',
-      'classificacaoAmbiental': 'Consulte a bula do produto', // Alias para compatibilidade
+      'classificacaoAmbiental':
+          'Consulte a bula do produto', // Alias para compatibilidade
       'classeAgronomica': 'Consulte a bula do produto',
       'mapa': 'Consulte o registro MAPA',
-      'numeroAplicacoes': maxAplicacaoT ?? 'N/A', // Para instruções de aplicação
+      'numeroAplicacoes':
+          maxAplicacaoT ?? 'N/A', // Para instruções de aplicação
       'intervaloAplicacoes': intervalo ?? 'N/A',
       'volumeCalda': minAplicacaoA != null && maxAplicacaoA != null
           ? '$minAplicacaoA - $maxAplicacaoA $umA'

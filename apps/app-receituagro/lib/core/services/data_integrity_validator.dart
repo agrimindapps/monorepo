@@ -148,8 +148,9 @@ class DataIntegrityValidator {
     }
 
     final report = IntegrityReport(
-      totalDiagnosticos:
-          diagnosticosResult.isSuccess ? diagnosticosResult.data!.length : 0,
+      totalDiagnosticos: diagnosticosResult.isSuccess
+          ? diagnosticosResult.data!.length
+          : 0,
       issues: issues,
       timestamp: startTime,
     );
@@ -223,7 +224,8 @@ class DataIntegrityValidator {
       } else {
         final idCulturaInt = int.tryParse(diag.fkIdCultura);
         if (idCulturaInt != null) {
-          final culturaExists = await _culturaRepo.findById(idCulturaInt) != null;
+          final culturaExists =
+              await _culturaRepo.findById(idCulturaInt) != null;
           if (!culturaExists) {
             issues.add(
               IntegrityIssue.brokenForeignKey(

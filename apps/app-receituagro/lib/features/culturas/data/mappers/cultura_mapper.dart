@@ -1,4 +1,5 @@
 import '../../../../core/data/models/cultura_legacy.dart';
+import '../../../../database/receituagro_database.dart';
 import '../../data/cultura_model.dart';
 import '../../domain/entities/cultura_entity.dart';
 
@@ -46,6 +47,22 @@ class CulturaMapper {
   /// Converte lista de CulturaHive para Entities
   static List<CulturaEntity> fromHiveToEntityList(List<CulturaHive> hives) {
     return hives.map((hive) => fromHiveToEntity(hive)).toList();
+  }
+
+  /// Converte Cultura Drift para Entity
+  static CulturaEntity fromDriftToEntity(Cultura drift) {
+    return CulturaEntity(
+      id: drift.idCultura,
+      nome: drift.nome,
+      grupo: null, // Drift não tem grupo
+      descricao: drift.descricao,
+      isActive: true,
+    );
+  }
+
+  /// Converte lista de Cultura Drift para Entities
+  static List<CulturaEntity> fromDriftToEntityList(List<Cultura> drifts) {
+    return drifts.map((drift) => fromDriftToEntity(drift)).toList();
   }
 
   /// Converte lista de Entities para Models

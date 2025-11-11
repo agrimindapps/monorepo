@@ -51,4 +51,30 @@ class CulturasRepository {
     final result = await query.getSingle();
     return result.read(count)!;
   }
+
+  /// Carrega dados do JSON e salva no banco Drift
+  ///
+  /// Recebe uma lista de Maps do JSON e insere no banco de dados.
+  /// Limpa os dados existentes antes de inserir.
+  Future<void> loadFromJson(
+    List<Map<String, dynamic>> jsonData,
+    String version,
+  ) async {
+    await _db.transaction(() async {
+      // Limpar dados existentes
+      await _db.delete(_db.culturas).go();
+
+      // Inserir novos dados
+      for (final item in jsonData) {
+        final companion = CulturasCompanion.insert(
+          idCultura: item['idReg']?.toString() ?? '',
+          nome: item['cultura']?.toString() ?? '',
+          nomeLatino: Value(item['nomeLatino']?.toString()),
+          descricao: Value(item['descricao']?.toString()),
+          familia: Value(item['familia']?.toString()),
+        );
+        await _db.into(_db.culturas).insert(companion);
+      }
+    });
+  }
 }

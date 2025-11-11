@@ -1,7 +1,8 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/data/repositories/cultura_legacy_repository.dart';
+import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../core/data/repositories/fitossanitario_legacy_repository.dart';
+import '../../../../features/culturas/data/mappers/cultura_mapper.dart';
 import '../../domain/repositories/i_pragas_cultura_repository.dart';
 import '../../presentation/services/pragas_cultura_error_message_service.dart';
 import '../datasources/pragas_cultura_integration_datasource.dart';
@@ -15,12 +16,12 @@ import '../datasources/pragas_cultura_local_datasource.dart';
 /// Orquestração entre:
 /// - PragasCulturaIntegrationDataSource (integração de dados)
 /// - PragasCulturaLocalDataSource (cache local)
-/// - Repositórios base (CulturaLegacyRepository, FitossanitarioLegacyRepository)
+/// - Repositórios base (CulturasRepository Drift, FitossanitarioLegacyRepository)
 @LazySingleton(as: IPragasCulturaRepository)
 class PragasCulturaRepositoryImpl implements IPragasCulturaRepository {
   final PragasCulturaIntegrationDataSource integrationDataSource;
   final PragasCulturaLocalDataSource localDataSource;
-  final CulturaLegacyRepository culturaRepository;
+  final CulturasRepository culturaRepository;
   final FitossanitarioLegacyRepository fitossanitarioRepository;
   final PragasCulturaErrorMessageService errorService;
 
@@ -35,19 +36,13 @@ class PragasCulturaRepositoryImpl implements IPragasCulturaRepository {
   @override
   Future<Either<Failure, List<dynamic>>> getCulturas() async {
     try {
-      // Buscar culturas diretamente do repositório Hive
-      final result = await culturaRepository.getAll();
+      // Buscar culturas diretamente do repositório Drift
+      final culturas = await culturaRepository.findAll();
 
-      if (result.isFailure) {
-        return Left(
-          CacheFailure(
-            errorService.getLoadCulturasError(result.error?.message),
-          ),
-        );
-      }
+      // Convert Drift models to entities
+      final culturasEntities = CulturaMapper.fromDriftToEntityList(culturas);
 
-      final culturas = result.data ?? [];
-      return Right(culturas as List<dynamic>);
+      return Right(culturasEntities as List<dynamic>);
     } catch (e) {
       return Left(
         CacheFailure(errorService.getLoadCulturasError(e.toString())),

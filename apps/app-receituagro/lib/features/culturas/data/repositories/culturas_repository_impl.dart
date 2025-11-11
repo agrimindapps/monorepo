@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/data/repositories/cultura_legacy_repository.dart';
+import '../../../../database/repositories/culturas_repository.dart';
 import '../../domain/entities/cultura_entity.dart';
 import '../../domain/repositories/i_culturas_repository.dart';
 import '../mappers/cultura_mapper.dart';
@@ -21,12 +21,12 @@ import '../services/culturas_search_service.dart';
 /// Segue padrões Clean Architecture + Either pattern para error handling
 @LazySingleton(as: ICulturasRepository)
 class CulturasRepositoryImpl implements ICulturasRepository {
-  final CulturaLegacyRepository _hiveRepository;
+  final CulturasRepository _driftRepository;
   final ICulturasQueryService _queryService;
   final ICulturasSearchService _searchService;
 
   CulturasRepositoryImpl(
-    this._hiveRepository,
+    this._driftRepository,
     this._queryService,
     this._searchService,
   );
@@ -34,14 +34,10 @@ class CulturasRepositoryImpl implements ICulturasRepository {
   @override
   Future<Either<Failure, List<CulturaEntity>>> getAllCulturas() async {
     try {
-      final result = await _hiveRepository.getAll();
-      if (result.isFailure) {
-        return Left(
-          CacheFailure('Erro ao buscar culturas: ${result.error?.message}'),
-        );
-      }
-      final culturasHive = result.data ?? [];
-      final culturasEntities = CulturaMapper.fromHiveToEntityList(culturasHive);
+      final culturasDrift = await _driftRepository.findAll();
+      final culturasEntities = CulturaMapper.fromDriftToEntityList(
+        culturasDrift,
+      );
 
       return Right(culturasEntities);
     } catch (e) {
@@ -54,15 +50,8 @@ class CulturasRepositoryImpl implements ICulturasRepository {
     String grupo,
   ) async {
     try {
-      final result = await _hiveRepository.getAll();
-      if (result.isFailure) {
-        return Left(
-          CacheFailure('Erro ao buscar culturas: ${result.error?.message}'),
-        );
-      }
-
-      final allCulturas = result.data ?? [];
-      final culturasEntities = CulturaMapper.fromHiveToEntityList(allCulturas);
+      final allCulturas = await _driftRepository.findAll();
+      final culturasEntities = CulturaMapper.fromDriftToEntityList(allCulturas);
 
       // Delegate to query service
       final culturasFiltradas = _queryService.getByGrupo(
@@ -81,21 +70,17 @@ class CulturasRepositoryImpl implements ICulturasRepository {
   @override
   Future<Either<Failure, CulturaEntity?>> getCulturaById(String id) async {
     try {
-      final result = await _hiveRepository.getByKey(id);
-      if (result.isFailure) {
-        return Left(
-          CacheFailure(
-            'Erro ao buscar cultura por ID: ${result.error?.message}',
-          ),
-        );
+      final idInt = int.tryParse(id);
+      if (idInt == null) {
+        return const Right(null);
       }
-      final cultura = result.data;
 
+      final cultura = await _driftRepository.findById(idInt);
       if (cultura == null) {
         return const Right(null);
       }
 
-      final culturaEntity = CulturaMapper.fromHiveToEntity(cultura);
+      final culturaEntity = CulturaMapper.fromDriftToEntity(cultura);
       return Right(culturaEntity);
     } catch (e) {
       return Left(
@@ -109,15 +94,8 @@ class CulturasRepositoryImpl implements ICulturasRepository {
     String query,
   ) async {
     try {
-      final result = await _hiveRepository.getAll();
-      if (result.isFailure) {
-        return Left(
-          CacheFailure('Erro ao buscar culturas: ${result.error?.message}'),
-        );
-      }
-
-      final allCulturas = result.data ?? [];
-      final culturasEntities = CulturaMapper.fromHiveToEntityList(allCulturas);
+      final allCulturas = await _driftRepository.findAll();
+      final culturasEntities = CulturaMapper.fromDriftToEntityList(allCulturas);
 
       // Delegate to search service
       final searchResults = _searchService.search(culturasEntities, query);
@@ -131,17 +109,8 @@ class CulturasRepositoryImpl implements ICulturasRepository {
   @override
   Future<Either<Failure, List<String>>> getGruposCulturas() async {
     try {
-      final result = await _hiveRepository.getAll();
-      if (result.isFailure) {
-        return Left(
-          CacheFailure(
-            'Erro ao buscar grupos de culturas: ${result.error?.message}',
-          ),
-        );
-      }
-
-      final allCulturas = result.data ?? [];
-      final culturasEntities = CulturaMapper.fromHiveToEntityList(allCulturas);
+      final allCulturas = await _driftRepository.findAll();
+      final culturasEntities = CulturaMapper.fromDriftToEntityList(allCulturas);
 
       // Delegate to query service to extract distinct grupos
       final grupos = _queryService.getGrupos(culturasEntities);
@@ -149,7 +118,7 @@ class CulturasRepositoryImpl implements ICulturasRepository {
       return Right(grupos);
     } catch (e) {
       return Left(
-        CacheFailure('Erro ao buscar grupos de culturas: {{e.toString()}}'),
+        CacheFailure('Erro ao buscar grupos de culturas: ${e.toString()}'),
       );
     }
   }
@@ -157,28 +126,16 @@ class CulturasRepositoryImpl implements ICulturasRepository {
   @override
   Future<Either<Failure, bool>> isCulturaActive(String culturaId) async {
     try {
-      final result = await _hiveRepository.getAll();
-      if (result.isFailure) {
-        return const Left(
-          CacheFailure(
-            'Erro ao verificar status da cultura: {{result.error?.message}}',
-          ),
-        );
+      final idInt = int.tryParse(culturaId);
+      if (idInt == null) {
+        return const Right(false);
       }
 
-      final allCulturas = result.data ?? [];
-      final culturasEntities = CulturaMapper.fromHiveToEntityList(allCulturas);
-
-      // Delegate to query service
-      final isActive = _queryService.isCulturaActive(
-        culturasEntities,
-        culturaId,
-      );
-
-      return Right(isActive);
+      final cultura = await _driftRepository.findById(idInt);
+      return Right(cultura != null);
     } catch (e) {
-      return const Left(
-        CacheFailure('Erro ao verificar status da cultura: {{e.toString()}}'),
+      return Left(
+        CacheFailure('Erro ao verificar status da cultura: ${e.toString()}'),
       );
     }
   }

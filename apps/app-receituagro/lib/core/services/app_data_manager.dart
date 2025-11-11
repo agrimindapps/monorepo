@@ -2,7 +2,8 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart' hide Column;
 
-import '../data/repositories/cultura_legacy_repository.dart';
+import '../../database/receituagro_database.dart';
+import '../../database/repositories/culturas_repository.dart';
 import '../data/repositories/diagnostico_legacy_repository.dart';
 import '../data/repositories/fitossanitario_legacy_repository.dart';
 import '../data/repositories/fitossanitario_info_legacy_repository.dart';
@@ -92,7 +93,11 @@ class AppDataManager implements IAppDataManager {
       );
       final assetLoader = AssetLoaderService();
       final versionManager = VersionManagerService();
-      final culturaRepo = CulturaLegacyRepository();
+
+      // Create Drift database and repository
+      final database = ReceituagroDatabase.production();
+      final culturaRepo = CulturasRepository(database);
+
       final pragasRepo = PragasLegacyRepository();
       final fitossanitarioRepo = FitossanitarioLegacyRepository();
       final diagnosticoRepo = DiagnosticoLegacyRepository();

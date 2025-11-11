@@ -18,18 +18,15 @@ import '../../features/settings/di/device_management_di.dart';
 import '../../features/settings/di/settings_di.dart';
 import '../../features/settings/di/tts_module.dart';
 import '../data/repositories/comentarios_hive_repository.dart';
-import '../data/repositories/cultura_hive_repository.dart';
-import '../data/repositories/diagnostico_hive_repository.dart';
-import '../data/repositories/favoritos_hive_repository.dart';
-import '../data/repositories/fitossanitario_hive_repository.dart';
-import '../data/repositories/fitossanitario_info_hive_repository.dart';
-import '../data/repositories/plantas_inf_hive_repository.dart';
-import '../data/repositories/pragas_hive_repository.dart';
-import '../data/repositories/pragas_inf_hive_repository.dart';
 import '../data/repositories/premium_hive_repository.dart';
+import '../../database/repositories/fitossanitarios_repository.dart';
+import '../../database/repositories/pragas_repository.dart';
+import '../../database/repositories/culturas_repository.dart';
+import '../../database/receituagro_database.dart';
 import '../interfaces/i_premium_service.dart';
 import '../navigation/agricultural_navigation_extension.dart';
 import '../services/app_data_manager.dart';
+import '../services/app_data_manager_drift.dart';
 import '../services/cloud_functions_service.dart';
 import '../services/device_identity_service.dart';
 import '../services/diagnostico_integration_service.dart';
@@ -41,8 +38,7 @@ import '../services/receituagro_data_cleaner.dart';
 import '../services/receituagro_navigation_service.dart';
 import '../services/receituagro_notification_service.dart';
 import '../services/remote_config_service.dart';
-import '../services/data_integrity_service.dart';
-import '../services/web_local_storage_repository.dart';
+import '../services/data_migration_service.dart';
 import '../sync/sync_operations.dart';
 import '../sync/sync_queue.dart';
 import 'core_package_integration.dart';
@@ -81,11 +77,7 @@ Future<void> init() async {
     );
   }
 
-  if (!sl.isRegistered<DataIntegrityService>()) {
-    sl.registerLazySingleton<DataIntegrityService>(
-      () => DataIntegrityService(sl<core.IHiveManager>()),
-    );
-  }
+  // DataIntegrityService removed - no longer needed
 
   // ℹ️ SyncDIModule.init() é chamado no main.dart após Hive estar pronto
   // Não registramos aqui para evitar duplicação
@@ -160,7 +152,7 @@ Future<void> init() async {
       remindLaunches: 10,
     ),
   );
-  sl.registerLazySingleton<IAppDataManager>(() => AppDataManager());
+  sl.registerLazySingleton<IAppDataManager>(() => AppDataManagerDrift());
   sl.registerLazySingleton<IReceitaAgroNotificationService>(
     () => ReceitaAgroNotificationService(),
   );
@@ -212,72 +204,27 @@ Future<void> init() async {
         );
       }
     }
-  } else if (kIsWeb && !sl.isRegistered<core.ILocalStorageRepository>()) {
-    try {
-      sl.registerLazySingleton<core.ILocalStorageRepository>(
-        () => WebLocalStorageRepository(),
-      );
-      if (kDebugMode) {
-        developer.log(
-          'ILocalStorageRepository (Web) registered successfully',
-          name: 'InjectionContainer',
-          level: 500,
-        );
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        developer.log(
-          'ILocalStorageRepository (Web) registration failed',
-          name: 'InjectionContainer',
-          error: e,
-          level: 900,
-        );
-      }
-    }
-  } else if (kIsWeb && kDebugMode) {
-    developer.log(
-      'ILocalStorageRepository already registered on Web',
-      name: 'InjectionContainer',
-      level: 900,
+  } else if (kIsWeb) {
+    // Web storage handled differently - no specific repository needed
+  }
+  // Register Drift repositories for services that still use GetIt
+  if (!sl.isRegistered<FitossanitariosRepository>()) {
+    sl.registerLazySingleton<FitossanitariosRepository>(
+      () => FitossanitariosRepository(sl<ReceituagroDatabase>()),
     );
   }
-  sl.registerLazySingleton<CulturaHiveRepository>(
-    () => CulturaHiveRepository(),
-  );
 
-  sl.registerLazySingleton<PragasHiveRepository>(() => PragasHiveRepository());
+  if (!sl.isRegistered<PragasRepository>()) {
+    sl.registerLazySingleton<PragasRepository>(
+      () => PragasRepository(sl<ReceituagroDatabase>()),
+    );
+  }
 
-  sl.registerLazySingleton<PragasInfHiveRepository>(
-    () => PragasInfHiveRepository(),
-  );
-
-  sl.registerLazySingleton<PlantasInfHiveRepository>(
-    () => PlantasInfHiveRepository(),
-  );
-
-  sl.registerLazySingleton<FitossanitarioHiveRepository>(
-    () => FitossanitarioHiveRepository(),
-  );
-
-  sl.registerLazySingleton<DiagnosticoHiveRepository>(
-    () => DiagnosticoHiveRepository(),
-  );
-
-  sl.registerLazySingleton<FitossanitarioInfoHiveRepository>(
-    () => FitossanitarioInfoHiveRepository(),
-  );
-  sl.registerLazySingleton<DiagnosticoIntegrationService>(
-    () => DiagnosticoIntegrationService(
-      diagnosticoRepo: sl<DiagnosticoHiveRepository>(),
-      fitossanitarioRepo: sl<FitossanitarioHiveRepository>(),
-      culturaRepo: sl<CulturaHiveRepository>(),
-      pragasRepo: sl<PragasHiveRepository>(),
-      fitossanitarioInfoRepo: sl<FitossanitarioInfoHiveRepository>(),
-    ),
-  );
-  sl.registerLazySingleton<FavoritosHiveRepository>(
-    () => FavoritosHiveRepository(),
-  );
+  if (!sl.isRegistered<CulturasRepository>()) {
+    sl.registerLazySingleton<CulturasRepository>(
+      () => CulturasRepository(sl<ReceituagroDatabase>()),
+    );
+  }
 
   sl.registerLazySingleton<AgriculturalNavigationExtension>(
     () => AgriculturalNavigationExtension(),
@@ -290,8 +237,8 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<FavoritosNavigationService>(
     () => FavoritosNavigationService(
-      fitossanitarioRepository: sl<FitossanitarioHiveRepository>(),
-      pragasRepository: sl<PragasHiveRepository>(),
+      fitossanitarioRepository: sl<FitossanitariosRepository>(),
+      pragasRepository: sl<PragasRepository>(),
       integrationService: sl<DiagnosticoIntegrationService>(),
     ),
   );
@@ -336,6 +283,11 @@ Future<void> init() async {
   // ❌ REMOVIDO: ComentariosDI.register(sl); // IComentariosRepository e use cases agora via @LazySingleton/@injectable
   SettingsDI.register(sl); // ⚠️ Ainda registra manualmente (sem @LazySingleton)
   await TTSModule.register(sl); // ✅ TTS feature
+
+  // ✅ Registrar DataMigrationService para migração Hive -> Drift
+  sl.registerLazySingleton<DataMigrationService>(
+    () => DataMigrationService(sl<core.PreferencesService>(), sl()),
+  );
   try {
     sl.registerLazySingleton<ReceitaAgroPremiumService>(() {
       if (!sl.isRegistered<ReceitaAgroAnalyticsService>()) {

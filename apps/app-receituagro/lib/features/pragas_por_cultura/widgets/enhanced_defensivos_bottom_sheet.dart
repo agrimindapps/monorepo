@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../core/services/diagnostico_compatibility_service.dart';
-import '../../../core/services/diagnostico_entity_resolver.dart';
+import '../../../core/services/diagnostico_compatibility_service_drift.dart';
+import '../../../core/services/diagnostico_entity_resolver_drift.dart';
 import '../../../core/services/diagnostico_integration_service.dart';
 
 /// Bottom sheet aprimorado para exibir defensivos de uma praga
@@ -32,7 +32,7 @@ class EnhancedDefensivosBottomSheet extends StatefulWidget {
 class _EnhancedDefensivosBottomSheetState
     extends State<EnhancedDefensivosBottomSheet> {
   final _resolver = DiagnosticoEntityResolver.instance;
-  final _compatibilityService = DiagnosticoCompatibilityService.instance;
+  final _compatibilityService = DiagnosticoCompatibilityServiceDrift.instance;
   final TextEditingController _searchController = TextEditingController();
   List<String> _filteredDefensivos = [];
   List<String> _allDefensivos = [];
@@ -204,16 +204,15 @@ class _EnhancedDefensivosBottomSheetState
         decoration: InputDecoration(
           hintText: 'Buscar defensivo...',
           prefixIcon: const Icon(Icons.search),
-          suffixIcon:
-              _searchController.text.isNotEmpty
-                  ? IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      _searchController.clear();
-                      _onSearchChanged('');
-                    },
-                  )
-                  : null,
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    _onSearchChanged('');
+                  },
+                )
+              : null,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
@@ -225,8 +224,9 @@ class _EnhancedDefensivosBottomSheetState
   }
 
   Widget _buildStatsRow(BuildContext context) {
-    final validCount =
-        _compatibilityCache.values.where((v) => v.isValid).length;
+    final validCount = _compatibilityCache.values
+        .where((v) => v.isValid)
+        .length;
     final totalCount = _filteredDefensivos.length;
 
     return Row(
@@ -305,9 +305,8 @@ class _EnhancedDefensivosBottomSheetState
 
     return ListView.separated(
       itemCount: _filteredDefensivos.length,
-      separatorBuilder:
-          (context, index) =>
-              Divider(color: theme.dividerColor.withValues(alpha: 0.3)),
+      separatorBuilder: (context, index) =>
+          Divider(color: theme.dividerColor.withValues(alpha: 0.3)),
       itemBuilder: (context, index) {
         final defensivo = _filteredDefensivos[index];
         return _buildDefensivoTile(context, defensivo, index);

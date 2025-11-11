@@ -2,19 +2,19 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/data/models/fitossanitario_hive.dart';
-import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
+import '../../../../database/receituagro_database.dart';
+import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/extensions/fitossanitario_hive_extension.dart';
+import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../data/view_mode.dart';
 
 part 'lista_defensivos_notifier.g.dart';
 
 /// Lista defensivos state
 class ListaDefensivosState {
-  final List<FitossanitarioHive> allDefensivos;
-  final List<FitossanitarioHive> filteredDefensivos;
-  final List<FitossanitarioHive> displayedDefensivos;
+  final List<Fitossanitario> allDefensivos;
+  final List<Fitossanitario> filteredDefensivos;
+  final List<Fitossanitario> displayedDefensivos;
   final ViewMode selectedViewMode;
   final bool isLoading;
   final bool isSearching;
@@ -55,9 +55,9 @@ class ListaDefensivosState {
   }
 
   ListaDefensivosState copyWith({
-    List<FitossanitarioHive>? allDefensivos,
-    List<FitossanitarioHive>? filteredDefensivos,
-    List<FitossanitarioHive>? displayedDefensivos,
+    List<Fitossanitario>? allDefensivos,
+    List<Fitossanitario>? filteredDefensivos,
+    List<Fitossanitario>? displayedDefensivos,
     ViewMode? selectedViewMode,
     bool? isLoading,
     bool? isSearching,
@@ -85,9 +85,11 @@ class ListaDefensivosState {
   ListaDefensivosState clearError() {
     return copyWith(errorMessage: null);
   }
+
   bool get hasData => allDefensivos.isNotEmpty;
   bool get hasFilteredData => displayedDefensivos.isNotEmpty;
-  bool get canLoadMore => displayedDefensivos.length < filteredDefensivos.length;
+  bool get canLoadMore =>
+      displayedDefensivos.length < filteredDefensivos.length;
 
   /// Get header subtitle text
   String getHeaderSubtitle() {
@@ -115,14 +117,14 @@ class ListaDefensivosState {
 /// Optimizes performance by consolidating state updates
 @riverpod
 class ListaDefensivosNotifier extends _$ListaDefensivosNotifier {
-  late final FitossanitarioHiveRepository _repository;
+  late final FitossanitariosRepository _repository;
   Timer? _debounceTimer;
 
   static const int _itemsPerPage = 50;
 
   @override
   Future<ListaDefensivosState> build() async {
-    _repository = di.sl<FitossanitarioHiveRepository>();
+    _repository = di.sl<FitossanitariosRepository>();
     ref.onDispose(() {
       _debounceTimer?.cancel();
     });
@@ -132,8 +134,11 @@ class ListaDefensivosNotifier extends _$ListaDefensivosNotifier {
   /// Load initial data
   Future<ListaDefensivosState> _loadData() async {
     try {
-      final defensivos = await _repository.getActiveDefensivos();
-      defensivos.sort((a, b) => a.displayName.compareTo(b.displayName));
+      final defensivos = await _repository.findElegiveis();
+      defensivos.sort(
+        (Fitossanitario a, Fitossanitario b) =>
+            (a.displayName).compareTo(b.displayName),
+      );
       final endIndex = _itemsPerPage.clamp(0, defensivos.length);
       final displayedDefensivos = defensivos.sublist(0, endIndex);
 
@@ -163,7 +168,9 @@ class ListaDefensivosNotifier extends _$ListaDefensivosNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     final newState = await _loadData();
     state = AsyncValue.data(newState);
@@ -220,11 +227,13 @@ class ListaDefensivosNotifier extends _$ListaDefensivosNotifier {
     if (currentState == null) return;
 
     final isAscending = !currentState.isAscending;
-    final sortedFiltered = List<FitossanitarioHive>.from(currentState.filteredDefensivos);
-    sortedFiltered.sort((a, b) {
+    final sortedFiltered = List<Fitossanitario>.from(
+      currentState.filteredDefensivos,
+    );
+    sortedFiltered.sort((Fitossanitario a, Fitossanitario b) {
       return isAscending
-          ? a.displayName.compareTo(b.displayName)
-          : b.displayName.compareTo(a.displayName);
+          ? (a.displayName).compareTo(b.displayName)
+          : (b.displayName).compareTo(a.displayName);
     });
     final endIndex = _itemsPerPage.clamp(0, sortedFiltered.length);
     final displayedDefensivos = sortedFiltered.sublist(0, endIndex);
@@ -245,7 +254,9 @@ class ListaDefensivosNotifier extends _$ListaDefensivosNotifier {
     if (currentState == null) return;
 
     if (currentState.selectedViewMode != viewMode) {
-      state = AsyncValue.data(currentState.copyWith(selectedViewMode: viewMode));
+      state = AsyncValue.data(
+        currentState.copyWith(selectedViewMode: viewMode),
+      );
     }
   }
 
@@ -261,11 +272,19 @@ class ListaDefensivosNotifier extends _$ListaDefensivosNotifier {
 
     final nextPage = currentState.currentPage + 1;
     final startIndex = nextPage * _itemsPerPage;
-    final endIndex = ((nextPage + 1) * _itemsPerPage).clamp(0, currentState.filteredDefensivos.length);
+    final endIndex = ((nextPage + 1) * _itemsPerPage).clamp(
+      0,
+      currentState.filteredDefensivos.length,
+    );
 
     if (startIndex < currentState.filteredDefensivos.length) {
-      final newItems = currentState.filteredDefensivos.sublist(startIndex, endIndex);
-      final updatedDisplayed = List<FitossanitarioHive>.from(currentState.displayedDefensivos)..addAll(newItems);
+      final newItems = currentState.filteredDefensivos.sublist(
+        startIndex,
+        endIndex,
+      );
+      final updatedDisplayed = List<Fitossanitario>.from(
+        currentState.displayedDefensivos,
+      )..addAll(newItems);
 
       state = AsyncValue.data(
         currentState.copyWith(
@@ -319,7 +338,7 @@ class ListaDefensivosNotifier extends _$ListaDefensivosNotifier {
     required ListaDefensivosState currentState,
     required String searchText,
     required bool isSearching,
-    required List<FitossanitarioHive> filteredData,
+    required List<Fitossanitario> filteredData,
   }) {
     final endIndex = _itemsPerPage.clamp(0, filteredData.length);
     final displayedDefensivos = filteredData.sublist(0, endIndex);

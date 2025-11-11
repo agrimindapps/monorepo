@@ -14,15 +14,17 @@ class GAnalyticsService {
   }
 
   static Future<void> setCurrentScreen(String screenName) async {
-    await FirebaseAnalytics.instance.setCurrentScreen(
-      screenName: screenName,
-      screenClassOverride: 'AnalyticsDemo',
+    await FirebaseAnalytics.instance.logEvent(
+      name: 'screen_view',
+      parameters: {'screen_name': screenName, 'screen_class': 'AnalyticsDemo'},
     );
   }
 
   // Novo método para registrar ações customizadas
-  static Future<void> logCustomEvent(String eventName,
-      {Map<String, Object>? parameters}) async {
+  static Future<void> logCustomEvent(
+    String eventName, {
+    Map<String, Object>? parameters,
+  }) async {
     await FirebaseAnalytics.instance.logEvent(
       name: eventName,
       parameters: parameters,
@@ -37,9 +39,7 @@ class GAnalyticsService {
   static Future<void> logInstall() async {
     await FirebaseAnalytics.instance.logEvent(
       name: 'install',
-      parameters: <String, Object>{
-        'name': 'install',
-      },
+      parameters: <String, Object>{'name': 'install'},
     );
   }
 }

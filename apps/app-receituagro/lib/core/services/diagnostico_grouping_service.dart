@@ -2,13 +2,13 @@ import 'package:flutter/foundation.dart';
 
 import '../../features/diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../data/models/diagnostico_hive.dart';
-import 'diagnostico_entity_resolver.dart';
+import 'diagnostico_entity_resolver_drift.dart';
 
 /// Serviço centralizado para agrupamento de diagnósticos
-/// 
+///
 /// Unifica toda a lógica de agrupamento de diagnósticos por diferentes critérios,
 /// garantindo consistência e reutilização em toda a aplicação.
-/// 
+///
 /// **Funcionalidades:**
 /// - Agrupamento por cultura, defensivo e praga
 /// - Resolução consistente de nomes através do EntityResolver
@@ -18,24 +18,25 @@ import 'diagnostico_entity_resolver.dart';
 /// - Cache interno para agrupamentos frequentes
 class DiagnosticoGroupingService {
   static DiagnosticoGroupingService? _instance;
-  static DiagnosticoGroupingService get instance => 
+  static DiagnosticoGroupingService get instance =>
       _instance ??= DiagnosticoGroupingService._internal();
-  
+
   DiagnosticoGroupingService._internal();
 
-  final DiagnosticoEntityResolver _resolver = DiagnosticoEntityResolver.instance;
+  final DiagnosticoEntityResolver _resolver =
+      DiagnosticoEntityResolver.instance;
   final Map<String, Map<String, dynamic>> _groupingCache = {};
   DateTime? _lastCacheUpdate;
   static const Duration _cacheTTL = Duration(minutes: 15);
 
   /// Verifica se o cache está válido
   bool get _isCacheValid {
-    return _lastCacheUpdate != null && 
-           DateTime.now().difference(_lastCacheUpdate!) < _cacheTTL;
+    return _lastCacheUpdate != null &&
+        DateTime.now().difference(_lastCacheUpdate!) < _cacheTTL;
   }
 
   /// Agrupa diagnósticos por cultura (versão unificada)
-  /// 
+  ///
   /// Funciona com qualquer tipo de lista de diagnósticos,
   /// garantindo resolução consistente de nomes de cultura
   Future<Map<String, List<T>>> groupByCultura<T>(
@@ -48,7 +49,7 @@ class DiagnosticoGroupingService {
     int Function(T, T)? itemComparator,
   }) async {
     final cacheKey = 'cultura_${items.length}_${T.toString()}';
-    
+
     if (_isCacheValid && _groupingCache.containsKey(cacheKey)) {
       final cached = _groupingCache[cacheKey]!;
       if (cached['type'] == T && cached['count'] == items.length) {
@@ -57,7 +58,7 @@ class DiagnosticoGroupingService {
     }
 
     final grouped = <String, List<T>>{};
-    
+
     for (final item in items) {
       final idCultura = getIdCultura(item);
       String culturaNome = defaultGroupName;
@@ -105,7 +106,7 @@ class DiagnosticoGroupingService {
     int Function(T, T)? itemComparator,
   }) async {
     final grouped = <String, List<T>>{};
-    
+
     for (final item in items) {
       final idDefensivo = getIdDefensivo(item);
       String defensivoNome = defaultGroupName;
@@ -144,7 +145,7 @@ class DiagnosticoGroupingService {
     int Function(T, T)? itemComparator,
   }) async {
     final grouped = <String, List<T>>{};
-    
+
     for (final item in items) {
       final idPraga = getIdPraga(item);
       String pragaNome = defaultGroupName;
@@ -188,32 +189,31 @@ class DiagnosticoGroupingService {
     }
     for (final entry in primaryGroups.entries) {
       final secondaryGroups = <String, List<T>>{};
-      
+
       for (final item in entry.value) {
         final secondaryKey = secondaryGrouper(item);
         secondaryGroups.putIfAbsent(secondaryKey, () => []).add(item);
       }
-      
+
       if (sortSecondaryGroups) {
         final sortedSecondary = Map.fromEntries(
           secondaryGroups.entries.toList()
-            ..sort((a, b) => a.key.compareTo(b.key))
+            ..sort((a, b) => a.key.compareTo(b.key)),
         );
         result[entry.key] = sortedSecondary;
       } else {
         result[entry.key] = secondaryGroups;
       }
     }
-    
+
     if (sortPrimaryGroups) {
       final sortedResult = Map.fromEntries(
-        result.entries.toList()
-          ..sort((a, b) => a.key.compareTo(b.key))
+        result.entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
       );
       result.clear();
       result.addAll(sortedResult);
     }
-    
+
     return result;
   }
 
@@ -227,12 +227,10 @@ class DiagnosticoGroupingService {
     bool sortGroups = true,
     bool includeEmptyGroups = false,
   }) {
-    final filteredItems = filter != null 
-        ? items.where(filter).toList()
-        : items;
-    
+    final filteredItems = filter != null ? items.where(filter).toList() : items;
+
     final grouped = <String, List<T>>{};
-    
+
     for (final item in filteredItems) {
       final groupKey = grouper(item);
       grouped.putIfAbsent(groupKey, () => []).add(item);
@@ -240,7 +238,7 @@ class DiagnosticoGroupingService {
     if (minGroupSize != null) {
       grouped.removeWhere((key, list) => list.length < minGroupSize);
     }
-    
+
     if (maxGroupSize != null) {
       grouped.forEach((key, list) {
         if (list.length > maxGroupSize) {
@@ -251,21 +249,22 @@ class DiagnosticoGroupingService {
     if (!includeEmptyGroups) {
       grouped.removeWhere((key, list) => list.isEmpty);
     }
-    
+
     if (sortGroups) {
       final sortedEntries = grouped.entries.toList()
         ..sort((a, b) => a.key.compareTo(b.key));
       grouped.clear();
       grouped.addAll(Map.fromEntries(sortedEntries));
     }
-    
+
     return grouped;
   }
 
   /// Métodos de conveniência para tipos específicos
 
   /// Agrupa DiagnosticoEntity por cultura
-  Future<Map<String, List<DiagnosticoEntity>>> groupDiagnosticoEntitiesByCultura(
+  Future<Map<String, List<DiagnosticoEntity>>>
+  groupDiagnosticoEntitiesByCultura(
     List<DiagnosticoEntity> diagnosticos, {
     bool sortByRelevance = true,
   }) {
@@ -299,8 +298,11 @@ class DiagnosticoGroupingService {
   }) {
     return groupByCultura<dynamic>(
       diagnosticos,
-      (d) => _extractProperty(d, 'idCultura') ?? _extractProperty(d, 'fkIdCultura'),
-      (d) => _extractProperty(d, 'nomeCultura') ?? _extractProperty(d, 'cultura'),
+      (d) =>
+          _extractProperty(d, 'idCultura') ??
+          _extractProperty(d, 'fkIdCultura'),
+      (d) =>
+          _extractProperty(d, 'nomeCultura') ?? _extractProperty(d, 'cultura'),
     );
   }
 
@@ -333,7 +335,7 @@ class DiagnosticoGroupingService {
   int _compareByRelevance(DiagnosticoEntity a, DiagnosticoEntity b) {
     final aCompletude = a.completude.index;
     final bCompletude = b.completude.index;
-    
+
     if (aCompletude != bCompletude) {
       return bCompletude.compareTo(aCompletude); // Decrescente
     }
@@ -344,39 +346,43 @@ class DiagnosticoGroupingService {
   int _compareHiveByRelevance(DiagnosticoHive a, DiagnosticoHive b) {
     final aScore = _calculateHiveRelevanceScore(a);
     final bScore = _calculateHiveRelevanceScore(b);
-    
+
     if (aScore != bScore) {
       return bScore.compareTo(aScore); // Decrescente
     }
-    
+
     return (a.nomeDefensivo ?? '').compareTo(b.nomeDefensivo ?? '');
   }
 
   /// Calcula pontuação de relevância para DiagnosticoHive
   int _calculateHiveRelevanceScore(DiagnosticoHive diagnostico) {
     int score = 0;
-    
+
     if (diagnostico.nomeDefensivo?.isNotEmpty == true) score += 2;
     if (diagnostico.nomeCultura?.isNotEmpty == true) score += 2;
     if (diagnostico.nomePraga?.isNotEmpty == true) score += 2;
     if (diagnostico.dsMax.isNotEmpty) score += 1;
     if (diagnostico.um.isNotEmpty) score += 1;
-    
+
     return score;
   }
 
   /// Obtém estatísticas de agrupamento
   GroupingStats getGroupingStats<T>(Map<String, List<T>> grouped) {
     final groupSizes = grouped.values.map((list) => list.length).toList();
-    
+
     return GroupingStats(
       totalGroups: grouped.length,
       totalItems: groupSizes.fold<int>(0, (sum, size) => sum + size),
-      averageGroupSize: groupSizes.isNotEmpty 
-          ? groupSizes.reduce((a, b) => a + b) / groupSizes.length 
+      averageGroupSize: groupSizes.isNotEmpty
+          ? groupSizes.reduce((a, b) => a + b) / groupSizes.length
           : 0.0,
-      largestGroupSize: groupSizes.isNotEmpty ? groupSizes.reduce((a, b) => a > b ? a : b) : 0,
-      smallestGroupSize: groupSizes.isNotEmpty ? groupSizes.reduce((a, b) => a < b ? a : b) : 0,
+      largestGroupSize: groupSizes.isNotEmpty
+          ? groupSizes.reduce((a, b) => a > b ? a : b)
+          : 0,
+      smallestGroupSize: groupSizes.isNotEmpty
+          ? groupSizes.reduce((a, b) => a < b ? a : b)
+          : 0,
       emptyGroups: grouped.values.where((list) => list.isEmpty).length,
     );
   }
@@ -420,7 +426,7 @@ class GroupingStats {
   @override
   String toString() {
     return 'GroupingStats{groups: $totalGroups, items: $totalItems, '
-           'avgSize: ${averageGroupSize.toStringAsFixed(1)}, '
-           'largest: $largestGroupSize, smallest: $smallestGroupSize}';
+        'avgSize: ${averageGroupSize.toStringAsFixed(1)}, '
+        'largest: $largestGroupSize, smallest: $smallestGroupSize}';
   }
 }

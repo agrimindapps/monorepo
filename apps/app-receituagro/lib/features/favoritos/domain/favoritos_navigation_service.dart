@@ -1,8 +1,8 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../core/data/repositories/fitossanitario_hive_repository.dart';
-import '../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../database/repositories/fitossanitarios_repository.dart';
+import '../../../database/repositories/pragas_repository.dart';
 import '../../../core/services/diagnostico_integration_service.dart';
 import '../../../core/services/receituagro_navigation_service.dart';
 import '../../diagnosticos/presentation/pages/detalhe_diagnostico_page.dart';
@@ -14,13 +14,13 @@ import '../data/favorito_praga_model.dart';
 /// Usa dados reais dos repositórios para navegação correta
 /// MIGRADO PARA RIVERPOD: Removida dependência de Provider
 class FavoritosNavigationService {
-  final FitossanitarioHiveRepository _fitossanitarioRepository;
-  final PragasHiveRepository _pragasRepository;
+  final FitossanitariosRepository _fitossanitarioRepository;
+  final PragasRepository _pragasRepository;
   final DiagnosticoIntegrationService _integrationService;
 
   FavoritosNavigationService({
-    required FitossanitarioHiveRepository fitossanitarioRepository,
-    required PragasHiveRepository pragasRepository,
+    required FitossanitariosRepository fitossanitarioRepository,
+    required PragasRepository pragasRepository,
     required DiagnosticoIntegrationService integrationService,
   }) : _fitossanitarioRepository = fitossanitarioRepository,
        _pragasRepository = pragasRepository,
@@ -32,16 +32,17 @@ class FavoritosNavigationService {
     FavoritoDefensivoModel defensivo,
   ) async {
     try {
-      final result = await _fitossanitarioRepository.getByKey(defensivo.idReg);
-      final defensivoReal = result.isSuccess ? result.data : null;
+      final defensivoReal = await _fitossanitarioRepository.findById(
+        int.parse(defensivo.idReg),
+      );
 
       if (defensivoReal != null) {
         final navigationService =
             GetIt.instance<ReceitaAgroNavigationService>();
         await navigationService.navigateToDetalheDefensivo(
-          defensivoName: defensivoReal.nomeComum.isNotEmpty == true
-              ? defensivoReal.nomeComum
-              : defensivoReal.nomeTecnico,
+          defensivoName: defensivoReal.nomeComum?.isNotEmpty == true
+              ? defensivoReal.nomeComum!
+              : defensivoReal.nome,
           extraData: {
             'fabricante':
                 defensivoReal.fabricante ?? 'Fabricante não informado',
@@ -65,17 +66,18 @@ class FavoritosNavigationService {
     FavoritoPragaModel praga,
   ) async {
     try {
-      final result = await _pragasRepository.getByKey(praga.idReg);
-      final pragaReal = result.isSuccess ? result.data : null;
+      final pragaReal = await _pragasRepository.findById(
+        int.parse(praga.idReg),
+      );
 
       if (pragaReal != null) {
         final navigationService =
             GetIt.instance<ReceitaAgroNavigationService>();
         await navigationService.navigateToDetalhePraga(
-          pragaName: pragaReal.nomeComum,
-          pragaId: pragaReal.objectId, // Use objectId for better precision
-          pragaScientificName: pragaReal.nomeCientifico.isNotEmpty == true
-              ? pragaReal.nomeCientifico
+          pragaName: pragaReal.nome,
+          pragaId: pragaReal.id.toString(), // Use id for navigation
+          pragaScientificName: pragaReal.nomeLatino?.isNotEmpty == true
+              ? pragaReal.nomeLatino!
               : 'Nome científico não disponível',
         );
       } else {
@@ -201,11 +203,13 @@ class FavoritosNavigationService {
     try {
       switch (tipo) {
         case 'defensivos':
-          final result = await _fitossanitarioRepository.getByKey(itemId);
-          return result.isSuccess && result.data != null;
+          final result = await _fitossanitarioRepository.findById(
+            int.parse(itemId),
+          );
+          return result != null;
         case 'pragas':
-          final result = await _pragasRepository.getByKey(itemId);
-          return result.isSuccess && result.data != null;
+          final result = await _pragasRepository.findById(int.parse(itemId));
+          return result != null;
         case 'diagnosticos':
           final diagnostico = await _integrationService.getDiagnosticoCompleto(
             itemId,
@@ -227,13 +231,14 @@ class FavoritosNavigationService {
     try {
       switch (tipo) {
         case 'defensivos':
-          final result = await _fitossanitarioRepository.getByKey(itemId);
-          final item = result.isSuccess ? result.data : null;
+          final item = await _fitossanitarioRepository.findById(
+            int.parse(itemId),
+          );
           if (item != null) {
             return {
-              'nome': item.nomeComum.isNotEmpty == true
-                  ? item.nomeComum
-                  : (item.nomeTecnico),
+              'nome': item.nomeComum?.isNotEmpty == true
+                  ? item.nomeComum!
+                  : item.nome,
               'subtitulo': item.ingredienteAtivo ?? 'Ingrediente não informado',
               'detalhes':
                   '${item.fabricante ?? ''} • ${item.classeAgronomica ?? ''}',
@@ -241,13 +246,12 @@ class FavoritosNavigationService {
           }
           break;
         case 'pragas':
-          final result = await _pragasRepository.getByKey(itemId);
-          final item = result.isSuccess ? result.data : null;
+          final item = await _pragasRepository.findById(int.parse(itemId));
           if (item != null) {
             return {
-              'nome': item.nomeComum,
-              'subtitulo': item.nomeCientifico.isNotEmpty == true
-                  ? item.nomeCientifico
+              'nome': item.nome,
+              'subtitulo': item.nomeLatino?.isNotEmpty == true
+                  ? item.nomeLatino!
                   : 'Nome científico não disponível',
               'detalhes': 'Praga agrícola',
             };

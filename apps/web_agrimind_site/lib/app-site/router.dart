@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'pages/detalhes_defensivos_page.dart';
 import 'pages/download_page.dart';
-import 'pages/home_defensivos_page.dart';
+import 'pages/lista_defensivos_page.dart';
 
 class Routes {
   static Route<dynamic> generateRoute(RouteSettings settings) {

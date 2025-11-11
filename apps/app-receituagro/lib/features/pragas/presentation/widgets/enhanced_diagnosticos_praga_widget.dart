@@ -45,12 +45,16 @@ class _EnhancedDiagnosticosPragaWidgetState
   }
 
   Future<void> _initializeProvider() async {
-    final notifier = ref.read(enhancedDiagnosticosPragaNotifierProvider.notifier);
+    final notifier = ref.read(
+      enhancedDiagnosticosPragaNotifierProvider.notifier,
+    );
     await notifier.initialize();
     if (widget.pragaId?.isNotEmpty == true) {
       await notifier.loadDiagnosticos(widget.pragaId!);
     } else {
-      debugPrint('⚠️ Enhanced widget requer pragaId para funcionar corretamente');
+      debugPrint(
+        '⚠️ Enhanced widget requer pragaId para funcionar corretamente',
+      );
     }
   }
 
@@ -71,9 +75,7 @@ class _EnhancedDiagnosticosPragaWidgetState
           children: [
             _buildHeader(context, state),
             _buildFilters(context, state),
-            Flexible(
-              child: _buildContent(context, state),
-            ),
+            Flexible(child: _buildContent(context, state)),
           ],
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -83,84 +85,93 @@ class _EnhancedDiagnosticosPragaWidgetState
   }
 
   /// Constrói header com estatísticas
-  Widget _buildHeader(BuildContext context, EnhancedDiagnosticosPragaState state) {
+  Widget _buildHeader(
+    BuildContext context,
+    EnhancedDiagnosticosPragaState state,
+  ) {
     final stats = state.stats;
 
-        return Container(
-          padding: const EdgeInsets.all(SpacingTokens.sm),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
+    return Container(
+      padding: const EdgeInsets.all(SpacingTokens.sm),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Diagnósticos para ${widget.pragaName}',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (state.hasData) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    state.hasFilters
+                        ? '${stats.filtered} de ${stats.total} diagnósticos'
+                        : '${stats.total} diagnósticos em ${stats.groups} culturas',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Diagnósticos para ${widget.pragaName}',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (state.hasData) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        state.hasFilters
-                            ? '${stats.filtered} de ${stats.total} diagnósticos'
-                            : '${stats.total} diagnósticos em ${stats.groups} culturas',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+          if (state.hasData) ...[
+            _buildCacheIndicator(stats.cacheHitRate),
+            const SizedBox(width: SpacingTokens.xs),
+            IconButton(
+              icon: Icon(
+                _showCompatibilityIndicators
+                    ? Icons.verified_outlined
+                    : Icons.verified_outlined,
+                size: 20,
               ),
-              if (state.hasData) ...[
-                _buildCacheIndicator(stats.cacheHitRate),
-                const SizedBox(width: SpacingTokens.xs),
-                IconButton(
-                  icon: Icon(
-                    _showCompatibilityIndicators
-                        ? Icons.verified_outlined
-                        : Icons.verified_outlined,
-                    size: 20,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _showCompatibilityIndicators = !_showCompatibilityIndicators;
-                    });
-                  },
-                  tooltip: _showCompatibilityIndicators
-                      ? 'Ocultar indicadores de compatibilidade'
-                      : 'Mostrar indicadores de compatibilidade',
-                ),
-                IconButton(
-                  icon: const Icon(Icons.refresh, size: 20),
-                  onPressed: state.isLoading
-                      ? null
-                      : () => ref.read(enhancedDiagnosticosPragaNotifierProvider.notifier).refresh(),
-                  tooltip: 'Atualizar dados',
-                ),
-              ],
-            ],
-          ),
-        );
+              onPressed: () {
+                setState(() {
+                  _showCompatibilityIndicators = !_showCompatibilityIndicators;
+                });
+              },
+              tooltip: _showCompatibilityIndicators
+                  ? 'Ocultar indicadores de compatibilidade'
+                  : 'Mostrar indicadores de compatibilidade',
+            ),
+            IconButton(
+              icon: const Icon(Icons.refresh, size: 20),
+              onPressed: state.isLoading
+                  ? null
+                  : () => ref
+                        .read(
+                          enhancedDiagnosticosPragaNotifierProvider.notifier,
+                        )
+                        .refresh(),
+              tooltip: 'Atualizar dados',
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   /// Constrói indicador de cache
   Widget _buildCacheIndicator(double hitRate) {
-    final color = hitRate > 80 
-        ? Colors.green 
-        : hitRate > 50 
-            ? Colors.orange 
-            : Colors.red;
-    
+    final color = hitRate > 80
+        ? Colors.green
+        : hitRate > 50
+        ? Colors.orange
+        : Colors.red;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
@@ -187,7 +198,10 @@ class _EnhancedDiagnosticosPragaWidgetState
   }
 
   /// Constrói área de filtros
-  Widget _buildFilters(BuildContext context, EnhancedDiagnosticosPragaState state) {
+  Widget _buildFilters(
+    BuildContext context,
+    EnhancedDiagnosticosPragaState state,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: SpacingTokens.sm,
@@ -208,7 +222,12 @@ class _EnhancedDiagnosticosPragaWidgetState
                             icon: const Icon(Icons.clear, size: 18),
                             onPressed: () {
                               _searchController.clear();
-                              ref.read(enhancedDiagnosticosPragaNotifierProvider.notifier).updateSearchQuery('');
+                              ref
+                                  .read(
+                                    enhancedDiagnosticosPragaNotifierProvider
+                                        .notifier,
+                                  )
+                                  .updateSearchQuery('');
                             },
                           )
                         : null,
@@ -224,7 +243,11 @@ class _EnhancedDiagnosticosPragaWidgetState
                     ),
                   ),
                   onChanged: (value) {
-                    ref.read(enhancedDiagnosticosPragaNotifierProvider.notifier).updateSearchQuery(value);
+                    ref
+                        .read(
+                          enhancedDiagnosticosPragaNotifierProvider.notifier,
+                        )
+                        .updateSearchQuery(value);
                   },
                 ),
               ),
@@ -233,7 +256,11 @@ class _EnhancedDiagnosticosPragaWidgetState
                 OutlinedButton.icon(
                   onPressed: () {
                     _searchController.clear();
-                    ref.read(enhancedDiagnosticosPragaNotifierProvider.notifier).clearFilters();
+                    ref
+                        .read(
+                          enhancedDiagnosticosPragaNotifierProvider.notifier,
+                        )
+                        .clearFilters();
                   },
                   icon: const Icon(Icons.clear_all, size: 16),
                   label: const Text('Limpar'),
@@ -250,7 +277,7 @@ class _EnhancedDiagnosticosPragaWidgetState
           if (state.availableCulturas.length > 2) ...[
             const SizedBox(height: SpacingTokens.xs),
             DropdownButtonFormField<String>(
-              value: state.selectedCultura,
+              initialValue: state.selectedCultura,
               decoration: InputDecoration(
                 labelText: 'Filtrar por cultura',
                 border: OutlineInputBorder(
@@ -262,14 +289,13 @@ class _EnhancedDiagnosticosPragaWidgetState
                 ),
               ),
               items: state.availableCulturas.map((String cultura) {
-                return DropdownMenuItem(
-                  value: cultura,
-                  child: Text(cultura),
-                );
+                return DropdownMenuItem(value: cultura, child: Text(cultura));
               }).toList(),
               onChanged: (value) {
                 if (value != null) {
-                  ref.read(enhancedDiagnosticosPragaNotifierProvider.notifier).updateSelectedCultura(value);
+                  ref
+                      .read(enhancedDiagnosticosPragaNotifierProvider.notifier)
+                      .updateSelectedCultura(value);
                 }
               },
             ),
@@ -280,7 +306,10 @@ class _EnhancedDiagnosticosPragaWidgetState
   }
 
   /// Constrói conteúdo principal
-  Widget _buildContent(BuildContext context, EnhancedDiagnosticosPragaState state) {
+  Widget _buildContent(
+    BuildContext context,
+    EnhancedDiagnosticosPragaState state,
+  ) {
     if (state.isLoading) {
       return _buildLoadingState();
     }
@@ -339,7 +368,9 @@ class _EnhancedDiagnosticosPragaWidgetState
             ),
             const SizedBox(height: SpacingTokens.md),
             ElevatedButton.icon(
-              onPressed: () => ref.read(enhancedDiagnosticosPragaNotifierProvider.notifier).refresh(),
+              onPressed: () => ref
+                  .read(enhancedDiagnosticosPragaNotifierProvider.notifier)
+                  .refresh(),
               icon: const Icon(Icons.refresh),
               label: const Text('Tentar novamente'),
             ),
@@ -380,7 +411,10 @@ class _EnhancedDiagnosticosPragaWidgetState
   }
 
   /// Constrói lista de diagnósticos agrupados
-  Widget _buildDiagnosticsList(BuildContext context, EnhancedDiagnosticosPragaState state) {
+  Widget _buildDiagnosticsList(
+    BuildContext context,
+    EnhancedDiagnosticosPragaState state,
+  ) {
     final groupedDiagnostics = state.groupedDiagnosticos;
 
     return SingleChildScrollView(
@@ -396,7 +430,10 @@ class _EnhancedDiagnosticosPragaWidgetState
   }
 
   /// Constrói widgets agrupados por cultura
-  List<Widget> _buildGroupedWidgets(BuildContext context, Map<String, List<DiagnosticoEntity>> grouped) {
+  List<Widget> _buildGroupedWidgets(
+    BuildContext context,
+    Map<String, List<DiagnosticoEntity>> grouped,
+  ) {
     final widgets = <Widget>[];
 
     grouped.forEach((cultura, diagnosticos) {
@@ -469,7 +506,10 @@ class _EnhancedDiagnosticosPragaWidgetState
   }
 
   /// Constrói item de diagnóstico
-  Widget _buildDiagnosticoItem(BuildContext context, DiagnosticoEntity diagnostico) {
+  Widget _buildDiagnosticoItem(
+    BuildContext context,
+    DiagnosticoEntity diagnostico,
+  ) {
     return Card(
       margin: EdgeInsets.zero,
       child: InkWell(
@@ -531,11 +571,18 @@ class _EnhancedDiagnosticosPragaWidgetState
   }
 
   /// Constrói indicador de compatibilidade
-  Widget _buildCompatibilityIndicator(BuildContext context, DiagnosticoEntity diagnostico) {
-    final notifier = ref.read(enhancedDiagnosticosPragaNotifierProvider.notifier);
+  Widget _buildCompatibilityIndicator(
+    BuildContext context,
+    DiagnosticoEntity diagnostico,
+  ) {
+    final notifier = ref.read(
+      enhancedDiagnosticosPragaNotifierProvider.notifier,
+    );
 
     return FutureBuilder<CompatibilityValidation?>(
-      future: notifier.validateCompatibility(diagnostico),
+      future:
+          notifier.validateCompatibility(diagnostico)
+              as Future<CompatibilityValidation?>?,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const SizedBox(
@@ -544,12 +591,12 @@ class _EnhancedDiagnosticosPragaWidgetState
             child: CircularProgressIndicator(strokeWidth: 2),
           );
         }
-        
+
         if (snapshot.hasData && snapshot.data != null) {
           final validation = snapshot.data!;
           Color color;
           IconData icon;
-          
+
           switch (validation.result) {
             case CompatibilityResult.success:
               color = Colors.green;
@@ -565,10 +612,10 @@ class _EnhancedDiagnosticosPragaWidgetState
               icon = Icons.error;
               break;
           }
-          
+
           return Icon(icon, size: 16, color: color);
         }
-        
+
         return const SizedBox.shrink();
       },
     );
@@ -597,7 +644,10 @@ class _EnhancedDiagnosticosPragaWidgetState
   }
 
   /// Mostra modal de detalhes do diagnóstico
-  void _showDiagnosticoDialog(BuildContext context, DiagnosticoEntity diagnostico) {
+  void _showDiagnosticoDialog(
+    BuildContext context,
+    DiagnosticoEntity diagnostico,
+  ) {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(

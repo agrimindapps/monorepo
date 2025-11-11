@@ -1,19 +1,18 @@
 import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/data/models/fitossanitario_hive.dart';
-import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
+import '../../../../database/receituagro_database.dart';
+import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/extensions/fitossanitario_hive_extension.dart';
+import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/services/access_history_service.dart';
-import '../../../../core/services/receituagro_random_extensions.dart';
 
 part 'defensivos_history_notifier.g.dart';
 
 /// Defensivos history state
 class DefensivosHistoryState {
-  final List<FitossanitarioHive> recentDefensivos;
-  final List<FitossanitarioHive> newDefensivos;
+  final List<Fitossanitario> recentDefensivos;
+  final List<Fitossanitario> newDefensivos;
   final bool isLoading;
   final String? errorMessage;
 
@@ -34,8 +33,8 @@ class DefensivosHistoryState {
   }
 
   DefensivosHistoryState copyWith({
-    List<FitossanitarioHive>? recentDefensivos,
-    List<FitossanitarioHive>? newDefensivos,
+    List<Fitossanitario>? recentDefensivos,
+    List<Fitossanitario>? newDefensivos,
     bool? isLoading,
     String? errorMessage,
   }) {
@@ -50,6 +49,7 @@ class DefensivosHistoryState {
   DefensivosHistoryState clearError() {
     return copyWith(errorMessage: null);
   }
+
   bool get hasRecentDefensivos => recentDefensivos.isNotEmpty;
   bool get hasNewDefensivos => newDefensivos.isNotEmpty;
 }
@@ -58,12 +58,12 @@ class DefensivosHistoryState {
 /// Separated from HomeDefensivosProvider to improve maintainability and testability
 @riverpod
 class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
-  late final FitossanitarioHiveRepository _repository;
+  late final FitossanitariosRepository _repository;
   late final AccessHistoryService _historyService;
 
   @override
   Future<DefensivosHistoryState> build() async {
-    _repository = di.sl<FitossanitarioHiveRepository>();
+    _repository = di.sl<FitossanitariosRepository>();
     _historyService = AccessHistoryService();
     return await _loadHistory();
   }
@@ -71,7 +71,7 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
   /// Load history and generate recommendations
   Future<DefensivosHistoryState> _loadHistory() async {
     try {
-      final allDefensivos = await _repository.getActiveDefensivos();
+      final allDefensivos = await _repository.findElegiveis();
       if (allDefensivos.isEmpty) {
         return DefensivosHistoryState.initial();
       }
@@ -79,17 +79,17 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
       final historyData = await _loadHistoryData(allDefensivos);
 
       return DefensivosHistoryState(
-        recentDefensivos: historyData['recent'] as List<FitossanitarioHive>,
-        newDefensivos: historyData['new'] as List<FitossanitarioHive>,
+        recentDefensivos: historyData['recent'] as List<Fitossanitario>,
+        newDefensivos: historyData['new'] as List<Fitossanitario>,
         isLoading: false,
         errorMessage: null,
       );
     } catch (e) {
-      final allDefensivos = await _repository.getActiveDefensivos();
+      final allDefensivos = await _repository.findElegiveis();
       if (allDefensivos.isNotEmpty) {
         return DefensivosHistoryState(
-          recentDefensivos: ReceitaAgroRandomExtensions.selectRandomDefensivos(allDefensivos, count: 3),
-          newDefensivos: ReceitaAgroRandomExtensions.selectNewDefensivos(allDefensivos, count: 4),
+          recentDefensivos: _selectRandomDefensivos(allDefensivos, count: 3),
+          newDefensivos: _selectNewDefensivos(allDefensivos, count: 4),
           isLoading: false,
           errorMessage: 'Erro ao carregar histórico: ${e.toString()}',
         );
@@ -106,7 +106,9 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     final newState = await _loadHistory();
     state = AsyncValue.data(newState);
@@ -118,14 +120,16 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
     if (currentState == null) return;
 
     try {
-      final allDefensivos = await _repository.getActiveDefensivos();
+      final allDefensivos = await _repository.findElegiveis();
       final historyData = await _loadHistoryData(allDefensivos);
 
       state = AsyncValue.data(
-        currentState.copyWith(
-          recentDefensivos: historyData['recent'] as List<FitossanitarioHive>,
-          newDefensivos: historyData['new'] as List<FitossanitarioHive>,
-        ).clearError(),
+        currentState
+            .copyWith(
+              recentDefensivos: historyData['recent'] as List<Fitossanitario>,
+              newDefensivos: historyData['new'] as List<Fitossanitario>,
+            )
+            .clearError(),
       );
     } catch (e) {
       state = AsyncValue.data(
@@ -137,9 +141,9 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
   }
 
   /// Record access to a defensivo
-  Future<void> recordDefensivoAccess(FitossanitarioHive defensivo) async {
+  Future<void> recordDefensivoAccess(Fitossanitario defensivo) async {
     await _historyService.recordDefensivoAccess(
-      id: defensivo.idReg,
+      id: defensivo.idDefensivo,
       name: defensivo.displayName,
       fabricante: defensivo.displayFabricante,
       ingrediente: defensivo.displayIngredient,
@@ -158,66 +162,89 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
   }
 
   /// Load history data and combine with random selection
-  Future<Map<String, List<FitossanitarioHive>>> _loadHistoryData(List<FitossanitarioHive> allDefensivos) async {
+  Future<Map<String, List<Fitossanitario>>> _loadHistoryData(
+    List<Fitossanitario> allDefensivos,
+  ) async {
     try {
       final historyItems = await _historyService.getDefensivosHistory();
       if (allDefensivos.isEmpty) {
-        return {
-          'recent': <FitossanitarioHive>[],
-          'new': <FitossanitarioHive>[],
-        };
+        return {'recent': <Fitossanitario>[], 'new': <Fitossanitario>[]};
       }
 
-      final historicDefensivos = <FitossanitarioHive>[];
+      final historicDefensivos = <Fitossanitario>[];
 
       for (final historyItem in historyItems.take(10)) {
         final defensivo = allDefensivos.firstWhere(
-          (d) => d.idReg == historyItem.id,
+          (d) => d.idDefensivo == historyItem.id,
           orElse: () => allDefensivos.firstWhere(
             (d) => d.displayName == historyItem.name,
-            orElse: () => FitossanitarioHive(
-              idReg: '',
-              status: false,
+            orElse: () => Fitossanitario(
+              id: -1,
+              idDefensivo: '',
+              nome: '',
               nomeComum: '',
-              nomeTecnico: '',
+              fabricante: '',
+              classe: '',
+              classeAgronomica: '',
+              ingredienteAtivo: '',
+              registroMapa: '',
+              status: false,
               comercializado: 0,
               elegivel: false,
             ),
           ),
         );
 
-        if (defensivo.idReg.isNotEmpty) {
+        if (defensivo.id != -1) {
           historicDefensivos.add(defensivo);
         }
       }
-      List<FitossanitarioHive> recentDefensivos;
+      List<Fitossanitario> recentDefensivos;
       if (historicDefensivos.isEmpty) {
-        print('⚠️ Nenhum histórico de acesso encontrado. Inicializando "Últimos Acessados" com 10 defensivos aleatórios.');
-        recentDefensivos = ReceitaAgroRandomExtensions.selectRandomDefensivos(allDefensivos, count: 10);
+        print(
+          '⚠️ Nenhum histórico de acesso encontrado. Inicializando "Últimos Acessados" com 10 defensivos aleatórios.',
+        );
+        recentDefensivos = _selectRandomDefensivos(allDefensivos, count: 10);
       } else {
-        print('✅ ${historicDefensivos.length} defensivos encontrados no histórico de acesso.');
+        print(
+          '✅ ${historicDefensivos.length} defensivos encontrados no histórico de acesso.',
+        );
         recentDefensivos = historicDefensivos;
       }
-      final newDefensivos = ReceitaAgroRandomExtensions.selectNewDefensivos(allDefensivos, count: 10);
+      final newDefensivos = _selectNewDefensivos(allDefensivos, count: 10);
 
-      return {
-        'recent': recentDefensivos,
-        'new': newDefensivos,
-      };
+      return {'recent': recentDefensivos, 'new': newDefensivos};
     } catch (e) {
       print('❌ Erro ao carregar histórico: $e');
       if (allDefensivos.isNotEmpty) {
         print('🔄 Usando seleção aleatória como fallback para ambas as listas');
         return {
-          'recent': ReceitaAgroRandomExtensions.selectRandomDefensivos(allDefensivos, count: 10),
-          'new': ReceitaAgroRandomExtensions.selectRandomDefensivos(allDefensivos, count: 10),
+          'recent': _selectRandomDefensivos(allDefensivos, count: 10),
+          'new': _selectRandomDefensivos(allDefensivos, count: 10),
         };
       } else {
-        return {
-          'recent': <FitossanitarioHive>[],
-          'new': <FitossanitarioHive>[],
-        };
+        return {'recent': <Fitossanitario>[], 'new': <Fitossanitario>[]};
       }
     }
+  }
+
+  /// Seleciona defensivos aleatórios da lista
+  List<Fitossanitario> _selectRandomDefensivos(
+    List<Fitossanitario> defensivos, {
+    int count = 5,
+  }) {
+    if (defensivos.length <= count) return List.from(defensivos);
+
+    final shuffled = List<Fitossanitario>.from(defensivos)..shuffle();
+    return shuffled.take(count).toList();
+  }
+
+  /// Seleciona defensivos "novos" (simula seleção baseada em algum critério)
+  List<Fitossanitario> _selectNewDefensivos(
+    List<Fitossanitario> defensivos, {
+    int count = 5,
+  }) {
+    // Por enquanto, apenas retorna aleatórios como fallback
+    return _selectRandomDefensivos(defensivos, count: count);
   }
 }

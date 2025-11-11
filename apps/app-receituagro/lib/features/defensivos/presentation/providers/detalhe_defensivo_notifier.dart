@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/data/models/fitossanitario_hive.dart';
-import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/premium_notifier.dart';
+import '../../../../database/receituagro_database.dart';
+import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../comentarios/data/comentario_model.dart';
 import '../../../comentarios/domain/comentarios_service.dart';
 import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
@@ -15,7 +15,7 @@ part 'detalhe_defensivo_notifier.g.dart';
 
 /// Detalhe Defensivo state
 class DetalheDefensivoState {
-  final FitossanitarioHive? defensivoData;
+  final Fitossanitario? defensivoData;
   final List<ComentarioModel> comentarios;
   final bool isFavorited;
   final bool isPremium;
@@ -46,7 +46,7 @@ class DetalheDefensivoState {
   }
 
   DetalheDefensivoState copyWith({
-    FitossanitarioHive? defensivoData,
+    Fitossanitario? defensivoData,
     List<ComentarioModel>? comentarios,
     bool? isFavorited,
     bool? isPremium,
@@ -81,14 +81,14 @@ class DetalheDefensivoState {
 /// Isso previne perda de dados ao navegar entre tabs ou fazer rebuilds temporários
 @Riverpod(keepAlive: true)
 class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
-  late final FitossanitarioHiveRepository _fitossanitarioRepository;
+  late final FitossanitariosRepository _fitossanitarioRepository;
   late final ComentariosService _comentariosService;
   late final FavoritosRepositorySimplified _favoritosRepository;
 
   @override
   Future<DetalheDefensivoState> build() async {
     _favoritosRepository = FavoritosDI.get<FavoritosRepositorySimplified>();
-    _fitossanitarioRepository = di.sl<FitossanitarioHiveRepository>();
+    _fitossanitarioRepository = di.sl<FitossanitariosRepository>();
     _comentariosService = di.sl<ComentariosService>();
     _setupPremiumStatusListener();
 
@@ -138,17 +138,8 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
   Future<void> _loadDefensivoData(String defensivoName) async {
     final currentState = state.value;
     if (currentState == null) return;
-    final result = await _fitossanitarioRepository.getAll();
-    if (result.isError) {
-      throw Exception('Erro ao acessar dados: ${result.error}');
-    }
-
-    var defensivos = result.data!.where((d) => d.nomeComum == defensivoName);
-    if (defensivos.isEmpty) {
-      defensivos = result.data!.where((d) => d.nomeTecnico == defensivoName);
-    }
-
-    final defensivoData = defensivos.isNotEmpty ? defensivos.first : null;
+    final defensivos = await _fitossanitarioRepository.findElegiveis();
+    final defensivoData = defensivos.where((d) => d.nomeComum == defensivoName || d.nome == defensivoName).firstOrNull;
 
     if (defensivoData == null) {
       throw Exception('Defensivo não encontrado');
@@ -164,7 +155,7 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    final itemId = currentState.defensivoData?.idReg ?? defensivoName;
+    final itemId = currentState.defensivoData?.idDefensivo ?? defensivoName;
 
     try {
       final isFavorited = await _favoritosRepository.isFavorito(
@@ -195,7 +186,7 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     state = AsyncValue.data(currentState.copyWith(isLoadingComments: true));
 
     try {
-      final pkIdentificador = currentState.defensivoData?.idReg ?? '';
+      final pkIdentificador = currentState.defensivoData?.idDefensivo ?? '';
       final comentarios = await _comentariosService.getAllComentarios(
         pkIdentificador: pkIdentificador,
       );
@@ -232,7 +223,7 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
       titulo: '',
       conteudo: content,
       ferramenta: 'defensivos',
-      pkIdentificador: currentState.defensivoData?.idReg ?? '',
+      pkIdentificador: currentState.defensivoData?.idDefensivo ?? '',
       status: true,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
@@ -279,7 +270,7 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     if (currentState == null) return false;
 
     final wasAlreadyFavorited = currentState.isFavorited;
-    final itemId = currentState.defensivoData?.idReg ?? defensivoName;
+    final itemId = currentState.defensivoData?.idDefensivo ?? defensivoName;
     state = AsyncValue.data(
       currentState.copyWith(isFavorited: !wasAlreadyFavorited),
     );

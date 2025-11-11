@@ -1,4 +1,6 @@
 import 'package:core/core.dart' hide Column;
+import '../../core/models/user_preferences.dart';
+import '../../database/repositories/i_user_preferences_repository.dart';
 
 part 'preferences_notifier.g.dart';
 
@@ -23,6 +25,15 @@ class PreferencesState {
     );
   }
 
+  /// Cria estado a partir de UserPreferences
+  factory PreferencesState.fromUserPreferences(UserPreferences preferences) {
+    return PreferencesState(
+      pragasDetectadasEnabled: preferences.pragasDetectadasEnabled,
+      lembretesAplicacaoEnabled: preferences.lembretesAplicacaoEnabled,
+      isInitialized: true,
+    );
+  }
+
   /// Copia o estado com novos valores
   PreferencesState copyWith({
     bool? pragasDetectadasEnabled,
@@ -42,19 +53,17 @@ class PreferencesState {
 /// Notifier para gerenciar estado das preferências de usuário
 @riverpod
 class PreferencesNotifier extends _$PreferencesNotifier {
-  final PreferencesService _preferencesService = PreferencesService();
+  late final IUserPreferencesRepository _preferencesRepository;
 
   @override
   Future<PreferencesState> build() async {
-    await _preferencesService.initialize();
-    final pragasDetectadas = _preferencesService.getPragasDetectadasEnabled();
-    final lembretesAplicacao = _preferencesService.getLembretesAplicacaoEnabled();
+    // O repositório será injetado via Riverpod
+    // Por enquanto, vamos inicializar diretamente (será melhorado depois)
+    _preferencesRepository = getIt<IUserPreferencesRepository>();
 
-    return PreferencesState(
-      pragasDetectadasEnabled: pragasDetectadas,
-      lembretesAplicacaoEnabled: lembretesAplicacao,
-      isInitialized: true,
-    );
+    final userPreferences = await _preferencesRepository.getUserPreferences();
+
+    return PreferencesState.fromUserPreferences(userPreferences);
   }
 
   /// Toggle notificações de pragas detectadas
@@ -62,12 +71,13 @@ class PreferencesNotifier extends _$PreferencesNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    final success = await _preferencesService.setPragasDetectadasEnabled(enabled);
-    if (success) {
-      state = AsyncValue.data(
-        currentState.copyWith(pragasDetectadasEnabled: enabled),
-      );
-    }
+    await _preferencesRepository.updatePreferences(
+      pragasDetectadasEnabled: enabled,
+    );
+
+    state = AsyncValue.data(
+      currentState.copyWith(pragasDetectadasEnabled: enabled),
+    );
   }
 
   /// Toggle lembretes de aplicação
@@ -75,12 +85,13 @@ class PreferencesNotifier extends _$PreferencesNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    final success = await _preferencesService.setLembretesAplicacaoEnabled(enabled);
-    if (success) {
-      state = AsyncValue.data(
-        currentState.copyWith(lembretesAplicacaoEnabled: enabled),
-      );
-    }
+    await _preferencesRepository.updatePreferences(
+      lembretesAplicacaoEnabled: enabled,
+    );
+
+    state = AsyncValue.data(
+      currentState.copyWith(lembretesAplicacaoEnabled: enabled),
+    );
   }
 
   /// Toggle genérico para qualquer tipo de notificação
@@ -114,34 +125,34 @@ class PreferencesNotifier extends _$PreferencesNotifier {
 
   /// Reset para configurações padrão
   Future<void> resetToDefaults() async {
-    final success = await _preferencesService.resetToDefaults();
-    if (success) {
-      state = const AsyncValue.data(
-        PreferencesState(
-          pragasDetectadasEnabled: true,
-          lembretesAplicacaoEnabled: true,
-          isInitialized: true,
-        ),
-      );
-    }
-  }
+    await _preferencesRepository.resetToDefaults();
 
-  /// Refresh das preferências (reload from storage)
-  Future<void> refresh() async {
-    final pragasDetectadas = _preferencesService.getPragasDetectadasEnabled();
-    final lembretesAplicacao = _preferencesService.getLembretesAplicacaoEnabled();
-
-    state = AsyncValue.data(
+    state = const AsyncValue.data(
       PreferencesState(
-        pragasDetectadasEnabled: pragasDetectadas,
-        lembretesAplicacaoEnabled: lembretesAplicacao,
+        pragasDetectadasEnabled: true,
+        lembretesAplicacaoEnabled: true,
         isInitialized: true,
       ),
     );
   }
 
+  /// Refresh das preferências (reload from storage)
+  Future<void> refresh() async {
+    final userPreferences = await _preferencesRepository.getUserPreferences();
+
+    state = AsyncValue.data(
+      PreferencesState.fromUserPreferences(userPreferences),
+    );
+  }
+
   /// Estatísticas das preferências
-  Map<String, dynamic> getStats() {
-    return _preferencesService.getStats();
+  Future<Map<String, dynamic>> getStats() async {
+    // Como o repositório não tem stats, retornamos dados básicos
+    final currentState = state.value;
+    return {
+      'isInitialized': currentState?.isInitialized ?? false,
+      'pragasDetectadas': currentState?.pragasDetectadasEnabled ?? false,
+      'lembretesAplicacao': currentState?.lembretesAplicacaoEnabled ?? false,
+    };
   }
 }

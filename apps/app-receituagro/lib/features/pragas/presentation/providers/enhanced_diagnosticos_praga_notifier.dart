@@ -1,8 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/services/diagnostico_compatibility_service.dart';
-import '../../../../core/services/diagnostico_entity_resolver.dart';
+import '../../../../core/services/diagnostico_compatibility_service_drift.dart';
+import '../../../../core/services/diagnostico_entity_resolver_drift.dart';
 import '../../../../core/services/diagnostico_grouping_service.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
@@ -179,14 +179,14 @@ class EnhancedDiagnosticosPragaNotifier
   late final IDiagnosticosRepository _repository;
   late final DiagnosticoEntityResolver _resolver;
   late final DiagnosticoGroupingService _groupingService;
-  late final DiagnosticoCompatibilityService _compatibilityService;
+  late final DiagnosticoCompatibilityServiceDrift _compatibilityService;
 
   @override
   Future<EnhancedDiagnosticosPragaState> build() async {
     _repository = di.sl<IDiagnosticosRepository>();
     _resolver = DiagnosticoEntityResolver.instance;
     _groupingService = DiagnosticoGroupingService.instance;
-    _compatibilityService = DiagnosticoCompatibilityService.instance;
+    _compatibilityService = DiagnosticoCompatibilityServiceDrift.instance;
 
     return EnhancedDiagnosticosPragaState.initial();
   }

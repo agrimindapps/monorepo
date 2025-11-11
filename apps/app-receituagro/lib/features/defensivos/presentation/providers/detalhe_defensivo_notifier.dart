@@ -139,7 +139,9 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     final currentState = state.value;
     if (currentState == null) return;
     final defensivos = await _fitossanitarioRepository.findElegiveis();
-    final defensivoData = defensivos.where((d) => d.nomeComum == defensivoName || d.nome == defensivoName).firstOrNull;
+    final defensivoData = defensivos
+        .where((d) => d.nomeComum == defensivoName || d.nome == defensivoName)
+        .firstOrNull;
 
     if (defensivoData == null) {
       throw Exception('Defensivo não encontrado');

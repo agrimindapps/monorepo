@@ -48,11 +48,10 @@ class _DiagnosticoDefensivoCultureSectionWidgetState
         if (idCulturaStr != null) {
           final idCultura = int.tryParse(idCulturaStr);
           if (idCultura == null) continue;
-          
+
           final culturaData = await culturaRepository.findById(idCultura);
           if (culturaData != null &&
-              culturaData.nome.toLowerCase() ==
-                  widget.cultura.toLowerCase()) {
+              culturaData.nome.toLowerCase() == widget.cultura.toLowerCase()) {
             if (mounted) {
               setState(() {
                 _isLoadingCultura = false;

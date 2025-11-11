@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/data/repositories/cultura_legacy_repository.dart';
+import '../../../../../database/repositories/culturas_repository.dart';
 import '../../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../../../../core/di/injection_container.dart';
 import '../../../../../core/theme/spacing_tokens.dart';
@@ -134,17 +134,20 @@ class DiagnosticosTabWidget extends ConsumerWidget {
     List<dynamic> diagnosticos,
   ) async {
     final grouped = <String, List<dynamic>>{};
-    final culturaRepository = sl<CulturaLegacyRepository>();
+    final culturaRepository = sl<CulturasRepository>();
 
     for (final diagnostic in diagnosticos) {
       String culturaNome = 'Não especificado';
 
       try {
-        final idCultura = _getPropertyFromDiagnostic(diagnostic, 'idCultura');
-        if (idCultura != null) {
-          final culturaData = await culturaRepository.getById(idCultura);
-          if (culturaData != null) {
-            culturaNome = culturaData.cultura;
+        final idCulturaStr = _getPropertyFromDiagnostic(diagnostic, 'idCultura');
+        if (idCulturaStr != null) {
+          final idCultura = int.tryParse(idCulturaStr);
+          if (idCultura != null) {
+            final culturaData = await culturaRepository.findById(idCultura);
+            if (culturaData != null) {
+              culturaNome = culturaData.nome;
+            }
           }
         }
         if (culturaNome == 'Não especificado') {

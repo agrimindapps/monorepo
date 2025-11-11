@@ -1,6 +1,6 @@
 import 'dart:developer' as developer;
 
-import '../../../../core/data/repositories/cultura_legacy_repository.dart';
+import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
 import '../../../../core/data/repositories/favoritos_legacy_repository.dart';
 import '../../../../core/data/repositories/fitossanitario_legacy_repository.dart';
@@ -239,7 +239,7 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
   final PragasLegacyRepository _pragasRepository = sl<PragasLegacyRepository>();
   final DiagnosticoLegacyRepository _diagnosticoRepository =
       sl<DiagnosticoLegacyRepository>();
-  final CulturaLegacyRepository _culturaRepository = sl<CulturaLegacyRepository>();
+  final CulturasRepository _culturaRepository = sl<CulturasRepository>();
 
   @override
   Future<Map<String, dynamic>?> resolveDefensivo(String id) async {
@@ -318,12 +318,21 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
   @override
   Future<Map<String, dynamic>?> resolveCultura(String id) async {
     try {
-      final cultura = await _culturaRepository.getById(id);
+      final idInt = int.tryParse(id);
+      if (idInt == null) {
+        return {
+          'nomeCultura': 'Cultura $id',
+          'descricao': 'ID inválido',
+          'nomeComum': '',
+        };
+      }
+      
+      final cultura = await _culturaRepository.findById(idInt);
       if (cultura != null) {
         return {
-          'nomeCultura': cultura.cultura,
-          'descricao': cultura.cultura, // Não há campo descricao separado
-          'nomeComum': cultura.nomeComum,
+          'nomeCultura': cultura.nome,
+          'descricao': cultura.nome,
+          'nomeComum': cultura.nome,
         };
       }
       return {
@@ -424,7 +433,7 @@ class FavoritosValidatorService implements IFavoritosValidator {
   final PragasLegacyRepository _pragasRepository = sl<PragasLegacyRepository>();
   final DiagnosticoLegacyRepository _diagnosticoRepository =
       sl<DiagnosticoLegacyRepository>();
-  final CulturaLegacyRepository _culturaRepository = sl<CulturaLegacyRepository>();
+  final CulturasRepository _culturaRepository = sl<CulturasRepository>();
 
   @override
   Future<bool> canAddToFavorites(String tipo, String id) async {
@@ -447,7 +456,9 @@ class FavoritosValidatorService implements IFavoritosValidator {
           );
           return diagnostico != null;
         case TipoFavorito.cultura:
-          final cultura = await _culturaRepository.getById(id);
+          final idInt = int.tryParse(id);
+          if (idInt == null) return false;
+          final cultura = await _culturaRepository.findById(idInt);
           return cultura != null;
         default:
           return false;

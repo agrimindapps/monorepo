@@ -83,12 +83,9 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
       if (searchText.isEmpty) {
         _filteredCulturas = _culturas;
       } else {
-        _filteredCulturas =
-            _culturas.where((cultura) {
-              return cultura.nome.toLowerCase().contains(
-                searchText.toLowerCase(),
-              );
-            }).toList();
+        _filteredCulturas = _culturas.where((cultura) {
+          return cultura.nome.toLowerCase().contains(searchText.toLowerCase());
+        }).toList();
       }
       _sortCulturas();
     });
@@ -111,9 +108,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
 
   void _sortCulturas() {
     _filteredCulturas.sort((a, b) {
-      return _isAscending
-          ? a.nome.compareTo(b.nome)
-          : b.nome.compareTo(a.nome);
+      return _isAscending ? a.nome.compareTo(b.nome) : b.nome.compareTo(a.nome);
     });
   }
 
@@ -127,9 +122,8 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder:
-            (context) =>
-                PragasPorCulturaDetalhadasPage(culturaIdInicial: cultura.idCultura),
+        builder: (context) =>
+            PragasPorCulturaDetalhadasPage(culturaIdInicial: cultura.idCultura),
       ),
     );
   }
@@ -162,17 +156,15 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
                   title: 'Culturas',
                   subtitle: _getHeaderSubtitle(),
                   leftIcon: Icons.agriculture_outlined,
-                  rightIcon:
-                      _isAscending
-                          ? Icons.arrow_upward_outlined
-                          : Icons.arrow_downward_outlined,
+                  rightIcon: _isAscending
+                      ? Icons.arrow_upward_outlined
+                      : Icons.arrow_downward_outlined,
                   isDark: isDark,
                   showBackButton: true,
                   showActions: true,
-                  onBackPressed:
-                      () =>
-                          GetIt.instance<ReceitaAgroNavigationService>()
-                              .goBack<void>(),
+                  onBackPressed: () =>
+                      GetIt.instance<ReceitaAgroNavigationService>()
+                          .goBack<void>(),
                   onRightIconPressed: _toggleSort,
                 ),
                 CulturaSearchField(

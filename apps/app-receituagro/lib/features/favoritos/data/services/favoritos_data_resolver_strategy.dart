@@ -1,6 +1,6 @@
 import 'package:core/core.dart' show GetIt;
 
-import '../../../../core/data/repositories/cultura_legacy_repository.dart';
+import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
 import '../../../../core/data/repositories/fitossanitario_legacy_repository.dart';
 import '../../../../core/data/repositories/pragas_legacy_repository.dart';
@@ -91,19 +91,22 @@ class DiagnosticoResolverStrategy implements IFavoritosDataResolverStrategy {
 /// Estratégia para resolver dados de culturas
 class CulturaResolverStrategy implements IFavoritosDataResolverStrategy {
   // ✅ Lazy loading: obtém o repo apenas quando necessário
-  CulturaLegacyRepository get _repository =>
-      GetIt.instance<CulturaLegacyRepository>();
+  CulturasRepository get _repository =>
+      GetIt.instance<CulturasRepository>();
 
   @override
   Future<Map<String, dynamic>?> resolveItemData(String id) async {
     try {
-      final item = await _repository.getById(id);
+      final idInt = int.tryParse(id);
+      if (idInt == null) return null;
+      
+      final item = await _repository.findById(idInt);
       if (item == null) return null;
 
       return {
-        'nomeCultura': item.cultura,
-        'descricao': item.cultura,
-        'nomeComum': item.nomeComum,
+        'nomeCultura': item.nome,
+        'descricao': item.nome,
+        'nomeComum': item.nome,
       };
     } catch (e) {
       return null;

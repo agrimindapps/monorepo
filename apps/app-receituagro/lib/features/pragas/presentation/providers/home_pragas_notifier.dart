@@ -201,11 +201,13 @@ class HomePragasNotifier extends _$HomePragasNotifier {
     final pragasState = ref.read(pragasNotifierProvider).value;
 
     // Atualizar estatísticas com contagens por tipo
-    final stats = pragasState != null ? {
-      'insetos': pragasState.insetos.length,
-      'doencas': pragasState.doencas.length,
-      'plantas': pragasState.plantas.length,
-    } : currentState.stats;
+    final stats = pragasState != null
+        ? {
+            'insetos': pragasState.insetos.length,
+            'doencas': pragasState.doencas.length,
+            'plantas': pragasState.plantas.length,
+          }
+        : currentState.stats;
 
     state = AsyncValue.data(
       currentState.copyWith(

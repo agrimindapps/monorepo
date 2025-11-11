@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/data/repositories/cultura_legacy_repository.dart';
+import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../core/data/repositories/fitossanitario_legacy_repository.dart';
 import '../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
@@ -146,14 +146,14 @@ class DiagnosticosPragaState {
 @Riverpod(keepAlive: true)
 class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
   late final IDiagnosticosRepository _diagnosticosRepository;
-  late final CulturaLegacyRepository _culturaRepository;
+  late final CulturasRepository _culturaRepository;
   late final PragasLegacyRepository _pragasRepository;
   late final FitossanitarioLegacyRepository _defensivoRepository;
 
   @override
   Future<DiagnosticosPragaState> build() async {
     _diagnosticosRepository = di.sl<IDiagnosticosRepository>();
-    _culturaRepository = di.sl<CulturaLegacyRepository>();
+    _culturaRepository = di.sl<CulturasRepository>();
     _pragasRepository = di.sl<PragasLegacyRepository>();
     _defensivoRepository = di.sl<FitossanitarioLegacyRepository>();
 
@@ -260,9 +260,12 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
   /// Resolve o nome da cultura pelo ID usando o repository
   Future<String> _resolveCulturaNome(String idCultura) async {
     try {
-      final culturaData = await _culturaRepository.getById(idCultura);
-      if (culturaData != null && culturaData.cultura.isNotEmpty) {
-        return culturaData.cultura;
+      final idCulturaInt = int.tryParse(idCultura);
+      if (idCulturaInt == null) return 'Não especificado';
+      
+      final culturaData = await _culturaRepository.findById(idCulturaInt);
+      if (culturaData != null && culturaData.nome.isNotEmpty) {
+        return culturaData.nome;
       }
     } catch (e) {
       // Erro ao buscar cultura, retorna valor padrão

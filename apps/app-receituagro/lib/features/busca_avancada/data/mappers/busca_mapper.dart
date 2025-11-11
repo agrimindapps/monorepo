@@ -38,8 +38,7 @@ class BuscaMapper {
       if (praga != null && praga.nomeComum.isNotEmpty) {
         pragaNome = praga.nomeComum;
       }
-    } catch (e) {
-    }
+    } catch (e) {}
 
     return BuscaResultEntity(
       id: diagnostico.objectId,
@@ -62,19 +61,18 @@ class BuscaMapper {
 
   /// Converte PragasHive para BuscaResultEntity
   static BuscaResultEntity pragaToEntity(PragasHive praga) {
-    final nomeExibicao =
-        (praga.nomeComum.isNotEmpty == true)
-            ? praga.nomeComum
-            : praga.nomeCientifico;
+    final nomeExibicao = (praga.nomeComum.isNotEmpty == true)
+        ? praga.nomeComum
+        : praga.nomeCientifico;
 
     return BuscaResultEntity(
       id: praga.objectId,
       tipo: 'praga',
       titulo: nomeExibicao,
-      subtitulo:
-          praga.nomeCientifico != nomeExibicao ? praga.nomeCientifico : null,
-      descricao:
-          'Praga identificada',
+      subtitulo: praga.nomeCientifico != nomeExibicao
+          ? praga.nomeCientifico
+          : null,
+      descricao: 'Praga identificada',
       metadata: {
         'nomeCientifico': praga.nomeCientifico,
         'nomeComum': praga.nomeComum,
@@ -88,10 +86,9 @@ class BuscaMapper {
 
   /// Converte FitossanitarioHive para BuscaResultEntity
   static BuscaResultEntity defensivoToEntity(FitossanitarioHive defensivo) {
-    final nomeExibicao =
-        defensivo.nomeComum.isNotEmpty
-            ? defensivo.nomeComum
-            : defensivo.nomeTecnico;
+    final nomeExibicao = defensivo.nomeComum.isNotEmpty
+        ? defensivo.nomeComum
+        : defensivo.nomeTecnico;
 
     return BuscaResultEntity(
       id: defensivo.objectId ?? defensivo.idReg, // objectId pode ser null
@@ -166,10 +163,9 @@ class BuscaMapper {
 
   /// Converte PragasHive para DropdownItemEntity
   static DropdownItemEntity pragaToDropdownItem(PragasHive praga) {
-    final nomeExibicao =
-        (praga.nomeComum.isNotEmpty == true)
-            ? praga.nomeComum
-            : praga.nomeCientifico;
+    final nomeExibicao = (praga.nomeComum.isNotEmpty == true)
+        ? praga.nomeComum
+        : praga.nomeCientifico;
 
     return DropdownItemEntity(
       id: praga.objectId,
@@ -183,10 +179,9 @@ class BuscaMapper {
   static DropdownItemEntity defensivoToDropdownItem(
     FitossanitarioHive defensivo,
   ) {
-    final nomeExibicao =
-        defensivo.nomeComum.isNotEmpty
-            ? defensivo.nomeComum
-            : defensivo.nomeTecnico;
+    final nomeExibicao = defensivo.nomeComum.isNotEmpty
+        ? defensivo.nomeComum
+        : defensivo.nomeTecnico;
 
     return DropdownItemEntity(
       id: defensivo.objectId ?? defensivo.idReg,

@@ -19,8 +19,7 @@ class PragasInfRepository {
 
   /// Busca informação de praga por ID
   Future<PragasInfData?> findById(int id) async {
-    final query = _db.select(_db.pragasInf)
-      ..where((tbl) => tbl.id.equals(id));
+    final query = _db.select(_db.pragasInf)..where((tbl) => tbl.id.equals(id));
     return await query.getSingleOrNull();
   }
 
@@ -41,10 +40,7 @@ class PragasInfRepository {
   /// Busca informações com join da praga
   Future<List<PragaInfoWithPraga>> findAllWithPraga() async {
     final query = _db.select(_db.pragasInf).join([
-      leftOuterJoin(
-        _db.pragas,
-        _db.pragas.id.equalsExp(_db.pragasInf.pragaId),
-      ),
+      leftOuterJoin(_db.pragas, _db.pragas.id.equalsExp(_db.pragasInf.pragaId)),
     ]);
 
     final results = await query.get();
@@ -92,8 +88,7 @@ class PragasInfRepository {
 
   /// Observa mudanças em uma informação específica
   Stream<PragasInfData?> watchById(int id) {
-    final query = _db.select(_db.pragasInf)
-      ..where((tbl) => tbl.id.equals(id));
+    final query = _db.select(_db.pragasInf)..where((tbl) => tbl.id.equals(id));
     return query.watchSingleOrNull();
   }
 
@@ -110,8 +105,5 @@ class PragaInfoWithPraga {
   final PragasInfData pragaInfo;
   final Praga? praga;
 
-  PragaInfoWithPraga({
-    required this.pragaInfo,
-    this.praga,
-  });
+  PragaInfoWithPraga({required this.pragaInfo, this.praga});
 }

@@ -19,7 +19,7 @@ class CulturaItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return mode == CulturaItemMode.grid 
+    return mode == CulturaItemMode.grid
         ? _buildGridItem(context)
         : _buildListItem(context);
   }
@@ -27,13 +27,11 @@ class CulturaItemWidget extends StatelessWidget {
   Widget _buildListItem(BuildContext context) {
     final theme = Theme.of(context);
     final color = theme.colorScheme.primary;
-    
+
     return Card(
       elevation: 2,
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: isDark ? const Color(0xFF222228) : Colors.white,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -48,11 +46,7 @@ class CulturaItemWidget extends StatelessWidget {
                   color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  Icons.agriculture,
-                  size: 20,
-                  color: color,
-                ),
+                child: Icon(Icons.agriculture, size: 20, color: color),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -82,13 +76,11 @@ class CulturaItemWidget extends StatelessWidget {
   Widget _buildGridItem(BuildContext context) {
     final theme = Theme.of(context);
     final color = theme.colorScheme.primary;
-    
+
     return Card(
       elevation: 2,
       margin: const EdgeInsets.all(4),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: isDark ? const Color(0xFF222228) : Colors.white,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -104,11 +96,7 @@ class CulturaItemWidget extends StatelessWidget {
                   color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  Icons.agriculture,
-                  size: 24,
-                  color: color,
-                ),
+                child: Icon(Icons.agriculture, size: 24, color: color),
               ),
               const SizedBox(height: 12),
               Expanded(

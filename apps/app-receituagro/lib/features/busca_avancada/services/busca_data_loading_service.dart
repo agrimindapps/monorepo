@@ -22,7 +22,7 @@ class BuscaDataLoadingService {
   Future<List<Map<String, String>>> loadCulturas() async {
     try {
       final result = await _culturaRepo.findAll();
-      
+
       final culturas =
           result.map((c) => {'id': c.idCultura, 'nome': c.nome}).toList()
             ..sort((a, b) => a['nome']!.compareTo(b['nome']!));

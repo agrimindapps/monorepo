@@ -1,24 +1,24 @@
 import 'package:core/core.dart' hide Column;
 
-part 'app_settings_model.g.dart';
+// part 'app_settings_model.g.dart';
 
 @HiveType(typeId: 20)
 class AppSettingsModel extends HiveObject {
   @HiveField(0)
   final String? theme; // 'light', 'dark', 'system'
-  
+
   @HiveField(1)
   final String? language; // 'pt', 'en', 'es'
-  
+
   @HiveField(2)
   final bool enableNotifications;
-  
+
   @HiveField(3)
   final bool enableSync;
-  
+
   @HiveField(4)
   final Map<String, bool> featureFlags;
-  
+
   @HiveField(5)
   final String? userId;
 
@@ -61,7 +61,9 @@ class AppSettingsModel extends HiveObject {
       sync_syncedAt: map['sync_syncedAt'] != null
           ? DateTime.tryParse(map['sync_syncedAt'].toString())
           : null,
-      sync_createdAt: DateTime.tryParse(map['sync_createdAt']?.toString() ?? '') ?? DateTime.now(),
+      sync_createdAt:
+          DateTime.tryParse(map['sync_createdAt']?.toString() ?? '') ??
+          DateTime.now(),
       sync_updatedAt: map['sync_updatedAt'] != null
           ? DateTime.tryParse(map['sync_updatedAt'].toString())
           : null,
@@ -110,17 +112,11 @@ class AppSettingsModel extends HiveObject {
   }
 
   AppSettingsModel markAsUnsynchronized() {
-    return copyWith(
-      sync_synchronized: false,
-      sync_updatedAt: DateTime.now(),
-    );
+    return copyWith(sync_synchronized: false, sync_updatedAt: DateTime.now());
   }
 
   AppSettingsModel markAsSynchronized() {
-    return copyWith(
-      sync_synchronized: true,
-      sync_syncedAt: DateTime.now(),
-    );
+    return copyWith(sync_synchronized: true, sync_syncedAt: DateTime.now());
   }
 
   @override

@@ -2,7 +2,7 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/data/repositories/favoritos_hive_repository.dart';
+import '../../../../core/data/repositories/favoritos_legacy_repository.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
@@ -21,7 +21,7 @@ import 'favoritos_validator_service.dart';
 /// - Extensible: adding new tipos doesn't require modifying this service
 class FavoritosService {
   // Lazy loading do repository (evita erro de acesso antes do registro no GetIt)
-  late final FavoritosHiveRepository _repository;
+  late final FavoritosLegacyRepository _repository;
   bool _repositoryInitialized = false;
 
   // Specialized Services (injetadas via construtor - DIP)
@@ -44,9 +44,9 @@ class FavoritosService {
        _factoryRegistry = factoryRegistry;
 
   // Getter lazy para repository (inicializado na primeira vez que é acessado)
-  FavoritosHiveRepository get repo {
+  FavoritosLegacyRepository get repo {
     if (!_repositoryInitialized) {
-      _repository = sl<FavoritosHiveRepository>();
+      _repository = sl<FavoritosLegacyRepository>();
       _repositoryInitialized = true;
     }
     return _repository;

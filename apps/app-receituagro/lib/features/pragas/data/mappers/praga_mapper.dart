@@ -1,4 +1,4 @@
-import '../../../../core/data/models/pragas_hive.dart';
+import '../../../../core/data/models/pragas_legacy.dart';
 import '../../data/praga_model.dart';
 import '../../domain/entities/praga_entity.dart';
 

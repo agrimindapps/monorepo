@@ -4,7 +4,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import '../data/repositories/pragas_hive_repository.dart';
+import '../data/repositories/pragas_legacy_repository.dart';
 import '../di/injection_container.dart' as di;
 
 /// Serviço para carregar dados de pragas dos assets JSON
@@ -52,7 +52,7 @@ class PragasDataLoader {
         '🐛 [PRAGAS] JSON carregado: ${allPragas.length} registros totais, ${pragas.length} pragas válidas',
         name: 'PragasDataLoader',
       );
-      final repository = di.sl<PragasHiveRepository>();
+      final repository = di.sl<PragasLegacyRepository>();
       final result = await repository.loadFromJson(pragas, '1.0.0');
 
       result.fold(
@@ -111,7 +111,7 @@ class PragasDataLoader {
   /// Verifica se dados estão carregados
   static Future<bool> isDataLoaded() async {
     try {
-      final repository = di.sl<PragasHiveRepository>();
+      final repository = di.sl<PragasLegacyRepository>();
       final pragasResult = await repository.getAll();
 
       return pragasResult.fold(
@@ -143,7 +143,7 @@ class PragasDataLoader {
   /// Obtém estatísticas de carregamento
   static Future<Map<String, dynamic>> getStats() async {
     try {
-      final repository = di.sl<PragasHiveRepository>();
+      final repository = di.sl<PragasLegacyRepository>();
       final pragasResult = await repository.getAll();
 
       return pragasResult.fold(

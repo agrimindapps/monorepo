@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/data/repositories/cultura_hive_repository.dart';
-import '../../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../../core/data/repositories/cultura_legacy_repository.dart';
+import '../../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../../../../core/di/injection_container.dart';
 import '../../../../../core/theme/spacing_tokens.dart';
 import '../../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
@@ -83,7 +83,7 @@ class DiagnosticosTabWidget extends ConsumerWidget {
   void _retryLoadDiagnostics(WidgetRef ref) {
     final defensivoState = ref.read(detalheDefensivoNotifierProvider);
     defensivoState.whenData((data) {
-      final idReg = data.defensivoData?.idReg;
+      final idReg = data.defensivoData?.idDefensivo;
       final nomeDefensivo = data.defensivoData?.nomeComum;
       if (idReg != null) {
         ref
@@ -134,7 +134,7 @@ class DiagnosticosTabWidget extends ConsumerWidget {
     List<dynamic> diagnosticos,
   ) async {
     final grouped = <String, List<dynamic>>{};
-    final culturaRepository = sl<CulturaHiveRepository>();
+    final culturaRepository = sl<CulturaLegacyRepository>();
 
     for (final diagnostic in diagnosticos) {
       String culturaNome = 'Não especificado';
@@ -203,7 +203,7 @@ class DiagnosticosTabWidget extends ConsumerWidget {
       // Ordena diagnósticos por nome comum da praga usando ordenação assíncrona
       // Precisamos buscar os nomes das pragas do repositório para ordenar corretamente
       final diagnosticsComNomes = <MapEntry<dynamic, String>>[];
-      final pragaRepository = sl<PragasHiveRepository>();
+      final pragaRepository = sl<PragasLegacyRepository>();
 
       for (final diagnostic in diagnostics) {
         String nomePraga = '';

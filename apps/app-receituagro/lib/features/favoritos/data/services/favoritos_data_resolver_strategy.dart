@@ -1,9 +1,9 @@
 import 'package:core/core.dart' show GetIt;
 
-import '../../../../core/data/repositories/cultura_hive_repository.dart';
-import '../../../../core/data/repositories/diagnostico_hive_repository.dart';
-import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
-import '../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../core/data/repositories/cultura_legacy_repository.dart';
+import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
+import '../../../../core/data/repositories/fitossanitario_legacy_repository.dart';
+import '../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../domain/entities/favorito_entity.dart';
 
 /// Strategy Pattern para resolver dados de diferentes tipos de favoritos
@@ -16,8 +16,8 @@ abstract class IFavoritosDataResolverStrategy {
 /// Estratégia para resolver dados de defensivos
 class DefensivoResolverStrategy implements IFavoritosDataResolverStrategy {
   // ✅ Lazy loading: obtém o repo apenas quando necessário
-  FitossanitarioHiveRepository get _repository =>
-      GetIt.instance<FitossanitarioHiveRepository>();
+  FitossanitarioLegacyRepository get _repository =>
+      GetIt.instance<FitossanitarioLegacyRepository>();
 
   @override
   Future<Map<String, dynamic>?> resolveItemData(String id) async {
@@ -41,8 +41,8 @@ class DefensivoResolverStrategy implements IFavoritosDataResolverStrategy {
 /// Estratégia para resolver dados de pragas
 class PragaResolverStrategy implements IFavoritosDataResolverStrategy {
   // ✅ Lazy loading: obtém o repo apenas quando necessário
-  PragasHiveRepository get _repository =>
-      GetIt.instance<PragasHiveRepository>();
+  PragasLegacyRepository get _repository =>
+      GetIt.instance<PragasLegacyRepository>();
 
   @override
   Future<Map<String, dynamic>?> resolveItemData(String id) async {
@@ -67,8 +67,8 @@ class PragaResolverStrategy implements IFavoritosDataResolverStrategy {
 /// Estratégia para resolver dados de diagnósticos
 class DiagnosticoResolverStrategy implements IFavoritosDataResolverStrategy {
   // ✅ Lazy loading: obtém o repo apenas quando necessário
-  DiagnosticoHiveRepository get _repository =>
-      GetIt.instance<DiagnosticoHiveRepository>();
+  DiagnosticoLegacyRepository get _repository =>
+      GetIt.instance<DiagnosticoLegacyRepository>();
 
   @override
   Future<Map<String, dynamic>?> resolveItemData(String id) async {
@@ -91,8 +91,8 @@ class DiagnosticoResolverStrategy implements IFavoritosDataResolverStrategy {
 /// Estratégia para resolver dados de culturas
 class CulturaResolverStrategy implements IFavoritosDataResolverStrategy {
   // ✅ Lazy loading: obtém o repo apenas quando necessário
-  CulturaHiveRepository get _repository =>
-      GetIt.instance<CulturaHiveRepository>();
+  CulturaLegacyRepository get _repository =>
+      GetIt.instance<CulturaLegacyRepository>();
 
   @override
   Future<Map<String, dynamic>?> resolveItemData(String id) async {

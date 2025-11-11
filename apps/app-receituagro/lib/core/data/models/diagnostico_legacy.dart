@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-part 'diagnostico_hive.g.dart';
+// part 'diagnostico_hive.g.dart';
 
 @HiveType(typeId: 101)
 class DiagnosticoHive extends HiveObject {
@@ -152,11 +152,13 @@ class DiagnosticoHive extends HiveObject {
       'epocaAplicacao': epocaAplicacao,
     };
   }
+
   String get id => idReg;
   String get nome => nomeDefensivo ?? 'Defensivo desconhecido';
   String get cultura => nomeCultura ?? 'Cultura desconhecida';
   String get praga => nomePraga ?? 'Praga desconhecida';
-  String get sintomas => dsMax; // Usando dsMax como sintomas por compatibilidade
+  String get sintomas =>
+      dsMax; // Usando dsMax como sintomas por compatibilidade
   String get situacao => 'Ativo'; // Situação padrão
   String get tipo => 'Diagnóstico'; // Tipo padrão
 

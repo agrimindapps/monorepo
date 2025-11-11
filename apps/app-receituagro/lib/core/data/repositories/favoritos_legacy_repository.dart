@@ -3,19 +3,19 @@ import 'dart:convert';
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
-import '../models/favorito_item_hive.dart';
+import '../models/favorito_item_legacy.dart';
 import 'base/typed_box_adapter.dart';
 
 /// Repositório para gerenciar favoritos usando Hive com type-safe boxes.
 /// ✅ FIXED (P0.3): Using `TypedBoxAdapter<FavoritoItemHive>` para compatibilidade
 /// com boxes abertas como `Box<dynamic>` pelo BoxRegistryService
 /// BENEFIT: Não tenta reabrir a box com tipo diferente - usa adapter type-safe
-class FavoritosHiveRepository {
+class FavoritosLegacyRepository {
   final IHiveManager _hiveManager;
   final String boxName = 'favoritos';
   TypedBoxAdapter<FavoritoItemHive>? _adapter;
 
-  FavoritosHiveRepository()
+  FavoritosLegacyRepository()
     : _hiveManager = GetIt.instance<IHiveManager>();
 
   /// Obtém o adapter type-safe para `Box<dynamic>` já aberta pelo BoxRegistryService

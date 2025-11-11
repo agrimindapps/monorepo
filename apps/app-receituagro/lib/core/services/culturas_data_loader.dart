@@ -4,7 +4,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import '../data/repositories/cultura_hive_repository.dart';
+import '../data/repositories/cultura_legacy_repository.dart';
 import '../di/injection_container.dart' as di;
 
 class CulturasDataLoader {
@@ -55,7 +55,7 @@ class CulturasDataLoader {
       print(
         '🌱 [CULTURAS] JSON carregado: ${allCulturas.length} registros totais, ${culturas.length} culturas válidas',
       );
-      final repository = di.sl<CulturaHiveRepository>();
+      final repository = di.sl<CulturaLegacyRepository>();
       final result = await repository.loadFromJson(culturas, '1.0.0');
 
       result.fold(
@@ -110,7 +110,7 @@ class CulturasDataLoader {
     if (!_isLoaded) return false;
 
     try {
-      final repository = di.sl<CulturaHiveRepository>();
+      final repository = di.sl<CulturaLegacyRepository>();
       final result = await repository.getAll();
       return result.isSuccess && result.data!.isNotEmpty;
     } catch (e) {
@@ -121,7 +121,7 @@ class CulturasDataLoader {
   /// Obtém estatísticas de carregamento
   static Future<Map<String, dynamic>> getStats() async {
     try {
-      final repository = di.sl<CulturaHiveRepository>();
+      final repository = di.sl<CulturaLegacyRepository>();
       final result = await repository.getAll();
 
       if (result.isSuccess) {

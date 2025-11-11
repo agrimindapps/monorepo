@@ -1,4 +1,4 @@
-import '../../../../core/data/models/pragas_hive.dart';
+import '../../../../core/data/models/pragas_legacy.dart';
 
 /// Entidade de domínio para Praga (Domain Layer)
 /// Princípio: Single Responsibility - Apenas representa dados da praga

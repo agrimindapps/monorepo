@@ -1,8 +1,8 @@
-import '../data/models/diagnostico_hive.dart';
-import '../data/repositories/cultura_hive_repository.dart';
-import '../data/repositories/diagnostico_hive_repository.dart';
-import '../data/repositories/fitossanitario_hive_repository.dart';
-import '../data/repositories/pragas_hive_repository.dart';
+import '../data/models/diagnostico_legacy.dart';
+import '../data/repositories/cultura_legacy_repository.dart';
+import '../data/repositories/diagnostico_legacy_repository.dart';
+import '../data/repositories/fitossanitario_legacy_repository.dart';
+import '../data/repositories/pragas_legacy_repository.dart';
 import '../utils/diagnostico_logger.dart';
 
 /// EXEMPLO DE USO:
@@ -10,10 +10,10 @@ import '../utils/diagnostico_logger.dart';
 /// ```dart
 /// // Injeção de dependências (GetIt)
 /// final validator = DataIntegrityValidator(
-///   diagnosticoRepo: getIt<DiagnosticoHiveRepository>(),
-///   defensivoRepo: getIt<FitossanitarioHiveRepository>(),
-///   pragaRepo: getIt<PragasHiveRepository>(),
-///   culturaRepo: getIt<CulturaHiveRepository>(),
+///   diagnosticoRepo: getIt<DiagnosticoLegacyRepository>(),
+///   defensivoRepo: getIt<FitossanitarioLegacyRepository>(),
+///   pragaRepo: getIt<PragasLegacyRepository>(),
+///   culturaRepo: getIt<CulturaLegacyRepository>(),
 /// );
 ///
 /// // Validação completa
@@ -120,16 +120,16 @@ enum IntegritySeverity {
 
 /// Serviço para validar integridade referencial dos dados Hive
 class DataIntegrityValidator {
-  final DiagnosticoHiveRepository _diagnosticoRepo;
-  final FitossanitarioHiveRepository _defensivoRepo;
-  final PragasHiveRepository _pragaRepo;
-  final CulturaHiveRepository _culturaRepo;
+  final DiagnosticoLegacyRepository _diagnosticoRepo;
+  final FitossanitarioLegacyRepository _defensivoRepo;
+  final PragasLegacyRepository _pragaRepo;
+  final CulturaLegacyRepository _culturaRepo;
 
   DataIntegrityValidator({
-    required DiagnosticoHiveRepository diagnosticoRepo,
-    required FitossanitarioHiveRepository defensivoRepo,
-    required PragasHiveRepository pragaRepo,
-    required CulturaHiveRepository culturaRepo,
+    required DiagnosticoLegacyRepository diagnosticoRepo,
+    required FitossanitarioLegacyRepository defensivoRepo,
+    required PragasLegacyRepository pragaRepo,
+    required CulturaLegacyRepository culturaRepo,
   }) : _diagnosticoRepo = diagnosticoRepo,
        _defensivoRepo = defensivoRepo,
        _pragaRepo = pragaRepo,

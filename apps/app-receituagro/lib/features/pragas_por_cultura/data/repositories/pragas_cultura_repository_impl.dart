@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/data/repositories/cultura_hive_repository.dart';
-import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
+import '../../../../core/data/repositories/cultura_legacy_repository.dart';
+import '../../../../core/data/repositories/fitossanitario_legacy_repository.dart';
 import '../../domain/repositories/i_pragas_cultura_repository.dart';
 import '../../presentation/services/pragas_cultura_error_message_service.dart';
 import '../datasources/pragas_cultura_integration_datasource.dart';
@@ -15,13 +15,13 @@ import '../datasources/pragas_cultura_local_datasource.dart';
 /// Orquestração entre:
 /// - PragasCulturaIntegrationDataSource (integração de dados)
 /// - PragasCulturaLocalDataSource (cache local)
-/// - Repositórios base (CulturaHiveRepository, FitossanitarioHiveRepository)
+/// - Repositórios base (CulturaLegacyRepository, FitossanitarioLegacyRepository)
 @LazySingleton(as: IPragasCulturaRepository)
 class PragasCulturaRepositoryImpl implements IPragasCulturaRepository {
   final PragasCulturaIntegrationDataSource integrationDataSource;
   final PragasCulturaLocalDataSource localDataSource;
-  final CulturaHiveRepository culturaRepository;
-  final FitossanitarioHiveRepository fitossanitarioRepository;
+  final CulturaLegacyRepository culturaRepository;
+  final FitossanitarioLegacyRepository fitossanitarioRepository;
   final PragasCulturaErrorMessageService errorService;
 
   const PragasCulturaRepositoryImpl({

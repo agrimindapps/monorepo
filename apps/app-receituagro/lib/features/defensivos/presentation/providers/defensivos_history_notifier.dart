@@ -174,28 +174,16 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
       final historicDefensivos = <Fitossanitario>[];
 
       for (final historyItem in historyItems.take(10)) {
-        final defensivo = allDefensivos.firstWhere(
-          (d) => d.idDefensivo == historyItem.id,
-          orElse: () => allDefensivos.firstWhere(
-            (d) => d.displayName == historyItem.name,
-            orElse: () => Fitossanitario(
-              id: -1,
-              idDefensivo: '',
-              nome: '',
-              nomeComum: '',
-              fabricante: '',
-              classe: '',
-              classeAgronomica: '',
-              ingredienteAtivo: '',
-              registroMapa: '',
-              status: false,
-              comercializado: 0,
-              elegivel: false,
-            ),
-          ),
-        );
+        // Find defensivo by idDefensivo first, then by name
+        Fitossanitario? defensivo = allDefensivos
+            .where((d) => d.idDefensivo == historyItem.id)
+            .firstOrNull;
 
-        if (defensivo.id != -1) {
+        defensivo ??= allDefensivos
+            .where((d) => d.nome == historyItem.name)
+            .firstOrNull;
+
+        if (defensivo != null) {
           historicDefensivos.add(defensivo);
         }
       }

@@ -2,9 +2,9 @@ import 'package:flutter/foundation.dart';
 
 import '../../features/diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
-import '../data/repositories/cultura_hive_repository.dart';
-import '../data/repositories/fitossanitario_hive_repository.dart';
-import '../data/repositories/pragas_hive_repository.dart';
+import '../data/repositories/cultura_legacy_repository.dart';
+import '../data/repositories/fitossanitario_legacy_repository.dart';
+import '../data/repositories/pragas_legacy_repository.dart';
 import '../di/injection_container.dart';
 
 /// Serviço avançado para validação de compatibilidade entre entidades
@@ -27,9 +27,9 @@ class DiagnosticoCompatibilityService {
   
   DiagnosticoCompatibilityService._internal();
   late final IDiagnosticosRepository _diagnosticosRepository = sl<IDiagnosticosRepository>();
-  late final CulturaHiveRepository _culturaRepository = sl<CulturaHiveRepository>();
-  late final FitossanitarioHiveRepository _defensivoRepository = sl<FitossanitarioHiveRepository>();
-  late final PragasHiveRepository _pragasRepository = sl<PragasHiveRepository>();
+  late final CulturaLegacyRepository _culturaRepository = sl<CulturaLegacyRepository>();
+  late final FitossanitarioLegacyRepository _defensivoRepository = sl<FitossanitarioLegacyRepository>();
+  late final PragasLegacyRepository _pragasRepository = sl<PragasLegacyRepository>();
   final Map<String, CompatibilityValidation> _validationCache = {};
   DateTime? _lastCacheUpdate;
   static const Duration _cacheTTL = Duration(hours: 1);

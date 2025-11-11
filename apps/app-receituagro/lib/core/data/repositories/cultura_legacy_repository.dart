@@ -1,11 +1,11 @@
 import 'package:core/core.dart' hide Column;
 
-import '../models/cultura_hive.dart';
+import '../models/cultura_legacy.dart';
 
 /// Repositório para CulturaHive
 /// Implementa os métodos abstratos do BaseHiveRepository
-class CulturaHiveRepository extends BaseHiveRepository<CulturaHive> {
-  CulturaHiveRepository()
+class CulturaLegacyRepository extends BaseHiveRepository<CulturaHive> {
+  CulturaLegacyRepository()
     : super(
         hiveManager: GetIt.instance<IHiveManager>(),
         boxName: 'receituagro_culturas',

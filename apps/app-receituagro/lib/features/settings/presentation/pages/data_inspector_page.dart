@@ -30,10 +30,8 @@ class _DataInspectorPageState extends State<DataInspectorPage>
   late TabController _tabController;
   bool _isLoading = true;
   String _searchQuery = '';
-  String _selectedModule = 'Todos';
 
   final DatabaseInspectorService _inspector = DatabaseInspectorService.instance;
-  List<String> _availableModules = ['Todos'];
   List<SharedPreferencesRecord> _sharedPrefsData = [];
 
   @override
@@ -53,13 +51,12 @@ class _DataInspectorPageState extends State<DataInspectorPage>
   void _initializeInspector() {
     ReceitaAgroDataInspectorInitializer.initialize();
 
-    final modules =
-        _inspector.customBoxes
-            .map((box) => box.module ?? 'Outros')
-            .toSet()
-            .toList();
+    final modules = _inspector.customBoxes
+        .map((box) => box.module ?? 'Outros')
+        .toSet()
+        .toList();
     modules.sort();
-    _availableModules = ['Todos', ...modules];
+    // _availableModules = ['Todos', ...modules]; // Temporariamente comentado
   }
 
   Future<void> _loadData() async {
@@ -87,7 +84,10 @@ class _DataInspectorPageState extends State<DataInspectorPage>
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1120),
               child: Column(
-                children: [_buildHeader(isDark), Expanded(child: _buildBody())],
+                children: [
+                  _buildHeader(isDark),
+                  Expanded(child: _buildBody()),
+                ],
               ),
             ),
           ),
@@ -105,8 +105,8 @@ class _DataInspectorPageState extends State<DataInspectorPage>
       isDark: isDark,
       showBackButton: true,
       showActions: true,
-      onBackPressed:
-          () => GetIt.instance<ReceitaAgroNavigationService>().goBack<void>(),
+      onBackPressed: () =>
+          GetIt.instance<ReceitaAgroNavigationService>().goBack<void>(),
       onRightIconPressed: _loadData,
     );
   }
@@ -142,16 +142,22 @@ class _DataInspectorPageState extends State<DataInspectorPage>
   }
 
   Widget _buildHiveBoxesTab() {
-    return HiveTabWidget(
-      inspector: _inspector,
-      availableModules: _availableModules,
-      selectedModule: _selectedModule,
-      searchQuery: _searchQuery,
-      onModuleChanged: (value) => setState(() => _selectedModule = value),
-      onSearchChanged: (value) => setState(() => _searchQuery = value),
-      onShowSuccessMessage: (msg) => _showSnackBar(msg, isError: false),
-      onShowErrorMessage: (msg) => _showSnackBar(msg, isError: true),
+    // Temporariamente desabilitado durante migração para Drift
+    return const Center(
+      child: Text(
+        'Hive Inspector temporariamente indisponível durante migração',
+      ),
     );
+    // return HiveTabWidget(
+    //   inspector: _inspector,
+    //   availableModules: _availableModules,
+    //   selectedModule: _selectedModule,
+    //   searchQuery: _searchQuery,
+    //   onModuleChanged: (value) => setState(() => _selectedModule = value),
+    //   onSearchChanged: (value) => setState(() => _searchQuery = value),
+    //   onShowSuccessMessage: (msg) => _showSnackBar(msg, isError: false),
+    //   onShowErrorMessage: (msg) => _showSnackBar(msg, isError: true),
+    // );
   }
 
   Widget _buildSharedPrefsTab() {

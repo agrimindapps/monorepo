@@ -1,4 +1,4 @@
-import '../../../../core/data/models/cultura_hive.dart';
+import '../../../../core/data/models/cultura_legacy.dart';
 import '../../data/cultura_model.dart';
 import '../../domain/entities/cultura_entity.dart';
 

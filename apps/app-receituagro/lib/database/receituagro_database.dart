@@ -38,6 +38,7 @@ part 'receituagro_database.g.dart';
     AppSettings,
     // Static data (JSON assets)
     Culturas,
+    PlantasInf,
     Pragas,
     PragasInf,
     Fitossanitarios,

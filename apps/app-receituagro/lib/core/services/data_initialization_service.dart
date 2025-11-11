@@ -2,37 +2,37 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart' hide Column;
 
-import '../data/repositories/cultura_hive_repository.dart';
-import '../data/repositories/diagnostico_hive_repository.dart';
-import '../data/repositories/fitossanitario_hive_repository.dart';
-import '../data/repositories/fitossanitario_info_hive_repository.dart';
-import '../data/repositories/plantas_inf_hive_repository.dart';
-import '../data/repositories/pragas_hive_repository.dart';
-import '../data/repositories/pragas_inf_hive_repository.dart';
+import '../data/repositories/cultura_legacy_repository.dart';
+import '../data/repositories/diagnostico_legacy_repository.dart';
+import '../data/repositories/fitossanitario_legacy_repository.dart';
+import '../data/repositories/fitossanitario_info_legacy_repository.dart';
+import '../data/repositories/plantas_inf_legacy_repository.dart';
+import '../data/repositories/pragas_legacy_repository.dart';
+import '../data/repositories/pragas_inf_legacy_repository.dart';
 
 /// Serviço responsável por inicializar e gerenciar dados da aplicação
 /// Orquestra o carregamento de JSONs e populacião das Hive boxes
 class DataInitializationService {
   final AssetLoaderService _assetLoader;
   final VersionManagerService _versionManager;
-  final CulturaHiveRepository _culturaRepository;
-  final PragasHiveRepository _pragasRepository;
-  final FitossanitarioHiveRepository _fitossanitarioRepository;
-  final DiagnosticoHiveRepository _diagnosticoRepository;
-  final FitossanitarioInfoHiveRepository _fitossanitarioInfoRepository;
-  final PlantasInfHiveRepository _plantasInfRepository;
-  final PragasInfHiveRepository _pragasInfRepository;
+  final CulturaLegacyRepository _culturaRepository;
+  final PragasLegacyRepository _pragasRepository;
+  final FitossanitarioLegacyRepository _fitossanitarioRepository;
+  final DiagnosticoLegacyRepository _diagnosticoRepository;
+  final FitossanitarioInfoLegacyRepository _fitossanitarioInfoRepository;
+  final PlantasInfLegacyRepository _plantasInfRepository;
+  final PragasInfLegacyRepository _pragasInfRepository;
 
   DataInitializationService({
     required AssetLoaderService assetLoader,
     required VersionManagerService versionManager,
-    required CulturaHiveRepository culturaRepository,
-    required PragasHiveRepository pragasRepository,
-    required FitossanitarioHiveRepository fitossanitarioRepository,
-    required DiagnosticoHiveRepository diagnosticoRepository,
-    required FitossanitarioInfoHiveRepository fitossanitarioInfoRepository,
-    required PlantasInfHiveRepository plantasInfRepository,
-    required PragasInfHiveRepository pragasInfRepository,
+    required CulturaLegacyRepository culturaRepository,
+    required PragasLegacyRepository pragasRepository,
+    required FitossanitarioLegacyRepository fitossanitarioRepository,
+    required DiagnosticoLegacyRepository diagnosticoRepository,
+    required FitossanitarioInfoLegacyRepository fitossanitarioInfoRepository,
+    required PlantasInfLegacyRepository plantasInfRepository,
+    required PragasInfLegacyRepository pragasInfRepository,
   })  : _assetLoader = assetLoader,
         _versionManager = versionManager,
         _culturaRepository = culturaRepository,

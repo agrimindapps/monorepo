@@ -1,4 +1,4 @@
-import '../../../../core/data/models/diagnostico_hive.dart';
+import '../../../../core/data/models/diagnostico_legacy.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 
 class DiagnosticoMapper {

@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-part 'pragas_hive.g.dart';
+// part 'pragas_hive.g.dart';
 
 @HiveType(typeId: 105)
 class PragasHive extends HiveObject {
@@ -194,7 +194,10 @@ class PragasHive extends HiveObject {
       'tipoPraga': tipoPraga,
     };
   }
-  String? get descricao => tipoPraga.isNotEmpty ? tipoPraga : null; // Usando tipoPraga como descrição
+
+  String? get descricao => tipoPraga.isNotEmpty
+      ? tipoPraga
+      : null; // Usando tipoPraga como descrição
 
   @override
   String toString() {

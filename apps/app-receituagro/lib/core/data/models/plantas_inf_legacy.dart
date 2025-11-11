@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-part 'plantas_inf_hive.g.dart';
+// part 'plantas_inf_hive.g.dart';
 
 @HiveType(typeId: 104)
 class PlantasInfHive extends HiveObject {
@@ -90,8 +90,12 @@ class PlantasInfHive extends HiveObject {
   factory PlantasInfHive.fromJson(Map<String, dynamic> json) {
     return PlantasInfHive(
       objectId: (json['objectId'] as String?) ?? '',
-      createdAt: json['createdAt'] != null ? int.tryParse(json['createdAt'].toString()) ?? 0 : 0,
-      updatedAt: json['updatedAt'] != null ? int.tryParse(json['updatedAt'].toString()) ?? 0 : 0,
+      createdAt: json['createdAt'] != null
+          ? int.tryParse(json['createdAt'].toString()) ?? 0
+          : 0,
+      updatedAt: json['updatedAt'] != null
+          ? int.tryParse(json['updatedAt'].toString()) ?? 0
+          : 0,
       idReg: (json['idReg'] as String?) ?? '',
       ciclo: json['ciclo'] as String?,
       reproducao: json['reproducao'] as String?,

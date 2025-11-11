@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/data/models/plantas_inf_hive.dart';
-import '../../../../core/data/models/pragas_hive.dart';
-import '../../../../core/data/models/pragas_inf_hive.dart';
-import '../../../../core/data/repositories/plantas_inf_hive_repository.dart';
-import '../../../../core/data/repositories/pragas_hive_repository.dart';
-import '../../../../core/data/repositories/pragas_inf_hive_repository.dart';
+import '../../../../core/data/models/plantas_inf_legacy.dart';
+import '../../../../core/data/models/pragas_legacy.dart';
+import '../../../../core/data/models/pragas_inf_legacy.dart';
+import '../../../../core/data/repositories/plantas_inf_legacy_repository.dart';
+import '../../../../core/data/repositories/pragas_legacy_repository.dart';
+import '../../../../core/data/repositories/pragas_inf_legacy_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/premium_notifier.dart';
 import '../../../comentarios/data/comentario_model.dart';
@@ -109,17 +109,17 @@ class DetalhePragaState {
 @Riverpod(keepAlive: true)
 class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   late final FavoritosRepositorySimplified _favoritosRepository;
-  late final PragasHiveRepository _pragasRepository;
-  late final PragasInfHiveRepository _pragasInfRepository;
-  late final PlantasInfHiveRepository _plantasInfRepository;
+  late final PragasLegacyRepository _pragasRepository;
+  late final PragasInfLegacyRepository _pragasInfRepository;
+  late final PlantasInfLegacyRepository _plantasInfRepository;
   late final ComentariosService _comentariosService;
 
   @override
   Future<DetalhePragaState> build() async {
     _favoritosRepository = FavoritosDI.get<FavoritosRepositorySimplified>();
-    _pragasRepository = di.sl<PragasHiveRepository>();
-    _pragasInfRepository = di.sl<PragasInfHiveRepository>();
-    _plantasInfRepository = di.sl<PlantasInfHiveRepository>();
+    _pragasRepository = di.sl<PragasLegacyRepository>();
+    _pragasInfRepository = di.sl<PragasInfLegacyRepository>();
+    _plantasInfRepository = di.sl<PlantasInfLegacyRepository>();
     _comentariosService = di.sl<ComentariosService>();
     _setupPremiumStatusListener();
 

@@ -3,12 +3,12 @@ import 'dart:developer' as developer;
 import 'package:dartz/dartz.dart';
 import 'package:core/core.dart' hide Column;
 
-import '../data/models/cultura_hive.dart';
-import '../data/models/diagnostico_hive.dart';
+import '../data/models/cultura_legacy.dart';
+import '../data/models/diagnostico_legacy.dart';
 import '../data/models/diagnostico_with_warnings.dart';
-import '../data/models/fitossanitario_hive.dart';
-import '../data/models/pragas_hive.dart';
-import '../utils/hive_box_manager.dart';
+import '../data/models/fitossanitario_legacy.dart';
+import '../data/models/pragas_legacy.dart';
+import '../utils/box_manager.dart';
 
 /// Extension para enriquecer DiagnosticoHive com dados relacionados
 ///
@@ -28,90 +28,90 @@ extension DiagnosticoEnrichmentExtension on DiagnosticoHive {
     IHiveManager hiveManager,
   ) async {
     try {
-      // Usa HiveBoxManager para abrir múltiplas boxes de forma segura
+      // Usa BoxManager para abrir múltiplas boxes de forma segura
       final result =
-          await HiveBoxManager.withMultipleBoxes<DiagnosticoWithWarnings>(
-        hiveManager: hiveManager,
-        boxNames: [
-          'receituagro_defensivos',
-          'receituagro_pragas',
-          'receituagro_culturas',
-        ],
-        operation: (boxes) async {
-          final defensivoBox = boxes['receituagro_defensivos']!;
-          final pragasBox = boxes['receituagro_pragas']!;
-          final culturasBox = boxes['receituagro_culturas']!;
+          await BoxManager.withMultipleBoxes<DiagnosticoWithWarnings>(
+            hiveManager: hiveManager,
+            boxNames: [
+              'receituagro_defensivos',
+              'receituagro_pragas',
+              'receituagro_culturas',
+            ],
+            operation: (boxes) async {
+              final defensivoBox = boxes['receituagro_defensivos']!;
+              final pragasBox = boxes['receituagro_pragas']!;
+              final culturasBox = boxes['receituagro_culturas']!;
 
-          final warnings = <String>[];
+              final warnings = <String>[];
 
-          // Busca defensivo
-          FitossanitarioHive? defensivo;
-          if (fkIdDefensivo.isNotEmpty) {
-            defensivo = _findInBox<FitossanitarioHive>(
-              defensivoBox,
-              fkIdDefensivo,
-              (item) => item.idReg,
-            );
+              // Busca defensivo
+              FitossanitarioHive? defensivo;
+              if (fkIdDefensivo.isNotEmpty) {
+                defensivo = _findInBox<FitossanitarioHive>(
+                  defensivoBox,
+                  fkIdDefensivo,
+                  (item) => item.idReg,
+                );
 
-            if (defensivo == null) {
-              warnings.add('Defensivo não encontrado (ID: $fkIdDefensivo)');
-              developer.log(
-                'Missing defensivo: $fkIdDefensivo for diagnostico: $idReg',
-                name: 'DiagnosticoEnrichment.enrichWithRelatedData',
-                level: 800, // Warning
+                if (defensivo == null) {
+                  warnings.add('Defensivo não encontrado (ID: $fkIdDefensivo)');
+                  developer.log(
+                    'Missing defensivo: $fkIdDefensivo for diagnostico: $idReg',
+                    name: 'DiagnosticoEnrichment.enrichWithRelatedData',
+                    level: 800, // Warning
+                  );
+                }
+              }
+
+              // Busca praga
+              PragasHive? praga;
+              if (fkIdPraga.isNotEmpty) {
+                praga = _findInBox<PragasHive>(
+                  pragasBox,
+                  fkIdPraga,
+                  (item) => item.idReg,
+                );
+
+                if (praga == null) {
+                  warnings.add('Praga não encontrada (ID: $fkIdPraga)');
+                  developer.log(
+                    'Missing praga: $fkIdPraga for diagnostico: $idReg',
+                    name: 'DiagnosticoEnrichment.enrichWithRelatedData',
+                    level: 800,
+                  );
+                }
+              }
+
+              // Busca cultura
+              CulturaHive? cultura;
+              if (fkIdCultura.isNotEmpty) {
+                cultura = _findInBox<CulturaHive>(
+                  culturasBox,
+                  fkIdCultura,
+                  (item) => item.idReg,
+                );
+
+                if (cultura == null) {
+                  warnings.add('Cultura não encontrada (ID: $fkIdCultura)');
+                  developer.log(
+                    'Missing cultura: $fkIdCultura for diagnostico: $idReg',
+                    name: 'DiagnosticoEnrichment.enrichWithRelatedData',
+                    level: 800,
+                  );
+                }
+              }
+
+              return DiagnosticoWithWarnings(
+                data: this,
+                defensivo: defensivo,
+                praga: praga,
+                cultura: cultura,
+                warnings: warnings,
               );
-            }
-          }
-
-          // Busca praga
-          PragasHive? praga;
-          if (fkIdPraga.isNotEmpty) {
-            praga = _findInBox<PragasHive>(
-              pragasBox,
-              fkIdPraga,
-              (item) => item.idReg,
-            );
-
-            if (praga == null) {
-              warnings.add('Praga não encontrada (ID: $fkIdPraga)');
-              developer.log(
-                'Missing praga: $fkIdPraga for diagnostico: $idReg',
-                name: 'DiagnosticoEnrichment.enrichWithRelatedData',
-                level: 800,
-              );
-            }
-          }
-
-          // Busca cultura
-          CulturaHive? cultura;
-          if (fkIdCultura.isNotEmpty) {
-            cultura = _findInBox<CulturaHive>(
-              culturasBox,
-              fkIdCultura,
-              (item) => item.idReg,
-            );
-
-            if (cultura == null) {
-              warnings.add('Cultura não encontrada (ID: $fkIdCultura)');
-              developer.log(
-                'Missing cultura: $fkIdCultura for diagnostico: $idReg',
-                name: 'DiagnosticoEnrichment.enrichWithRelatedData',
-                level: 800,
-              );
-            }
-          }
-
-          return DiagnosticoWithWarnings(
-            data: this,
-            defensivo: defensivo,
-            praga: praga,
-            cultura: cultura,
-            warnings: warnings,
+            },
           );
-        },
-      );
 
-      return result;
+      return result.toEither();
     } catch (e, stackTrace) {
       developer.log(
         'Error enriching diagnostico: $e',
@@ -133,34 +133,34 @@ extension DiagnosticoEnrichmentExtension on DiagnosticoHive {
   ) async {
     try {
       final result =
-          await HiveBoxManager.readBox<FitossanitarioHive, DiagnosticoWithWarnings>(
-        hiveManager: hiveManager,
-        boxName: 'receituagro_defensivos',
-        operation: (box) async {
-          final warnings = <String>[];
-          FitossanitarioHive? defensivo;
+          await BoxManager.readBox<FitossanitarioHive, DiagnosticoWithWarnings>(
+            hiveManager: hiveManager,
+            boxName: 'receituagro_defensivos',
+            operation: (box) async {
+              final warnings = <String>[];
+              FitossanitarioHive? defensivo;
 
-          if (fkIdDefensivo.isNotEmpty) {
-            defensivo = _findInBox<FitossanitarioHive>(
-              box,
-              fkIdDefensivo,
-              (item) => item.idReg,
-            );
+              if (fkIdDefensivo.isNotEmpty) {
+                defensivo = _findInBox<FitossanitarioHive>(
+                  box,
+                  fkIdDefensivo,
+                  (item) => item.idReg,
+                );
 
-            if (defensivo == null) {
-              warnings.add('Defensivo não encontrado (ID: $fkIdDefensivo)');
-            }
-          }
+                if (defensivo == null) {
+                  warnings.add('Defensivo não encontrado (ID: $fkIdDefensivo)');
+                }
+              }
 
-          return DiagnosticoWithWarnings(
-            data: this,
-            defensivo: defensivo,
-            warnings: warnings,
+              return DiagnosticoWithWarnings(
+                data: this,
+                defensivo: defensivo,
+                warnings: warnings,
+              );
+            },
           );
-        },
-      );
 
-      return result;
+      return result.toEither();
     } catch (e, stackTrace) {
       return Left(UnexpectedFailure('Error enriching with defensivo: $e'));
     }
@@ -172,34 +172,34 @@ extension DiagnosticoEnrichmentExtension on DiagnosticoHive {
   ) async {
     try {
       final result =
-          await HiveBoxManager.readBox<PragasHive, DiagnosticoWithWarnings>(
-        hiveManager: hiveManager,
-        boxName: 'receituagro_pragas',
-        operation: (box) async {
-          final warnings = <String>[];
-          PragasHive? praga;
+          await BoxManager.readBox<PragasHive, DiagnosticoWithWarnings>(
+            hiveManager: hiveManager,
+            boxName: 'receituagro_pragas',
+            operation: (box) async {
+              final warnings = <String>[];
+              PragasHive? praga;
 
-          if (fkIdPraga.isNotEmpty) {
-            praga = _findInBox<PragasHive>(
-              box,
-              fkIdPraga,
-              (item) => item.idReg,
-            );
+              if (fkIdPraga.isNotEmpty) {
+                praga = _findInBox<PragasHive>(
+                  box,
+                  fkIdPraga,
+                  (item) => item.idReg,
+                );
 
-            if (praga == null) {
-              warnings.add('Praga não encontrada (ID: $fkIdPraga)');
-            }
-          }
+                if (praga == null) {
+                  warnings.add('Praga não encontrada (ID: $fkIdPraga)');
+                }
+              }
 
-          return DiagnosticoWithWarnings(
-            data: this,
-            praga: praga,
-            warnings: warnings,
+              return DiagnosticoWithWarnings(
+                data: this,
+                praga: praga,
+                warnings: warnings,
+              );
+            },
           );
-        },
-      );
 
-      return result;
+      return result.toEither();
     } catch (e, stackTrace) {
       return Left(UnexpectedFailure('Error enriching with praga: $e'));
     }
@@ -211,34 +211,34 @@ extension DiagnosticoEnrichmentExtension on DiagnosticoHive {
   ) async {
     try {
       final result =
-          await HiveBoxManager.readBox<CulturaHive, DiagnosticoWithWarnings>(
-        hiveManager: hiveManager,
-        boxName: 'receituagro_culturas',
-        operation: (box) async {
-          final warnings = <String>[];
-          CulturaHive? cultura;
+          await BoxManager.readBox<CulturaHive, DiagnosticoWithWarnings>(
+            hiveManager: hiveManager,
+            boxName: 'receituagro_culturas',
+            operation: (box) async {
+              final warnings = <String>[];
+              CulturaHive? cultura;
 
-          if (fkIdCultura.isNotEmpty) {
-            cultura = _findInBox<CulturaHive>(
-              box,
-              fkIdCultura,
-              (item) => item.idReg,
-            );
+              if (fkIdCultura.isNotEmpty) {
+                cultura = _findInBox<CulturaHive>(
+                  box,
+                  fkIdCultura,
+                  (item) => item.idReg,
+                );
 
-            if (cultura == null) {
-              warnings.add('Cultura não encontrada (ID: $fkIdCultura)');
-            }
-          }
+                if (cultura == null) {
+                  warnings.add('Cultura não encontrada (ID: $fkIdCultura)');
+                }
+              }
 
-          return DiagnosticoWithWarnings(
-            data: this,
-            cultura: cultura,
-            warnings: warnings,
+              return DiagnosticoWithWarnings(
+                data: this,
+                cultura: cultura,
+                warnings: warnings,
+              );
+            },
           );
-        },
-      );
 
-      return result;
+      return result.toEither();
     } catch (e, stackTrace) {
       return Left(UnexpectedFailure('Error enriching with cultura: $e'));
     }
@@ -265,89 +265,88 @@ extension DiagnosticoListEnrichmentExtension on List<DiagnosticoHive> {
   /// abrindo as boxes uma única vez para todos os registros.
   ///
   /// Retorna `Either<Failure, List<DiagnosticoWithWarnings>>`
-  Future<Either<Failure, List<DiagnosticoWithWarnings>>> enrichAllWithRelatedData(
-    IHiveManager hiveManager,
-  ) async {
+  Future<Either<Failure, List<DiagnosticoWithWarnings>>>
+  enrichAllWithRelatedData(IHiveManager hiveManager) async {
     try {
       final result =
-          await HiveBoxManager.withMultipleBoxes<List<DiagnosticoWithWarnings>>(
-        hiveManager: hiveManager,
-        boxNames: [
-          'receituagro_defensivos',
-          'receituagro_pragas',
-          'receituagro_culturas',
-        ],
-        operation: (boxes) async {
-          final defensivoBox = boxes['receituagro_defensivos']!;
-          final pragasBox = boxes['receituagro_pragas']!;
-          final culturasBox = boxes['receituagro_culturas']!;
+          await BoxManager.withMultipleBoxes<List<DiagnosticoWithWarnings>>(
+            hiveManager: hiveManager,
+            boxNames: [
+              'receituagro_defensivos',
+              'receituagro_pragas',
+              'receituagro_culturas',
+            ],
+            operation: (boxes) async {
+              final defensivoBox = boxes['receituagro_defensivos']!;
+              final pragasBox = boxes['receituagro_pragas']!;
+              final culturasBox = boxes['receituagro_culturas']!;
 
-          // Cria Maps para busca rápida O(1)
-          final defensivosMap = _buildMap<FitossanitarioHive>(
-            defensivoBox,
-            (item) => item.idReg,
-          );
-          final pragasMap = _buildMap<PragasHive>(
-            pragasBox,
-            (item) => item.idReg,
-          );
-          final culturasMap = _buildMap<CulturaHive>(
-            culturasBox,
-            (item) => item.idReg,
-          );
-
-          // Enriquece cada diagnóstico
-          final enrichedList = <DiagnosticoWithWarnings>[];
-
-          for (final diagnostico in this) {
-            final warnings = <String>[];
-
-            // Busca defensivo
-            final defensivo = defensivosMap[diagnostico.fkIdDefensivo];
-            if (diagnostico.fkIdDefensivo.isNotEmpty && defensivo == null) {
-              warnings.add(
-                'Defensivo não encontrado (ID: ${diagnostico.fkIdDefensivo})',
+              // Cria Maps para busca rápida O(1)
+              final defensivosMap = _buildMap<FitossanitarioHive>(
+                defensivoBox,
+                (item) => item.idReg,
               );
-            }
-
-            // Busca praga
-            final praga = pragasMap[diagnostico.fkIdPraga];
-            if (diagnostico.fkIdPraga.isNotEmpty && praga == null) {
-              warnings.add(
-                'Praga não encontrada (ID: ${diagnostico.fkIdPraga})',
+              final pragasMap = _buildMap<PragasHive>(
+                pragasBox,
+                (item) => item.idReg,
               );
-            }
-
-            // Busca cultura
-            final cultura = culturasMap[diagnostico.fkIdCultura];
-            if (diagnostico.fkIdCultura.isNotEmpty && cultura == null) {
-              warnings.add(
-                'Cultura não encontrada (ID: ${diagnostico.fkIdCultura})',
+              final culturasMap = _buildMap<CulturaHive>(
+                culturasBox,
+                (item) => item.idReg,
               );
-            }
 
-            enrichedList.add(
-              DiagnosticoWithWarnings(
-                data: diagnostico,
-                defensivo: defensivo,
-                praga: praga,
-                cultura: cultura,
-                warnings: warnings,
-              ),
-            );
-          }
+              // Enriquece cada diagnóstico
+              final enrichedList = <DiagnosticoWithWarnings>[];
 
-          developer.log(
-            'Enriched ${enrichedList.length} diagnosticos, '
-            '${enrichedList.where((d) => d.hasWarnings).length} with warnings',
-            name: 'DiagnosticoListEnrichment.enrichAllWithRelatedData',
+              for (final diagnostico in this) {
+                final warnings = <String>[];
+
+                // Busca defensivo
+                final defensivo = defensivosMap[diagnostico.fkIdDefensivo];
+                if (diagnostico.fkIdDefensivo.isNotEmpty && defensivo == null) {
+                  warnings.add(
+                    'Defensivo não encontrado (ID: ${diagnostico.fkIdDefensivo})',
+                  );
+                }
+
+                // Busca praga
+                final praga = pragasMap[diagnostico.fkIdPraga];
+                if (diagnostico.fkIdPraga.isNotEmpty && praga == null) {
+                  warnings.add(
+                    'Praga não encontrada (ID: ${diagnostico.fkIdPraga})',
+                  );
+                }
+
+                // Busca cultura
+                final cultura = culturasMap[diagnostico.fkIdCultura];
+                if (diagnostico.fkIdCultura.isNotEmpty && cultura == null) {
+                  warnings.add(
+                    'Cultura não encontrada (ID: ${diagnostico.fkIdCultura})',
+                  );
+                }
+
+                enrichedList.add(
+                  DiagnosticoWithWarnings(
+                    data: diagnostico,
+                    defensivo: defensivo,
+                    praga: praga,
+                    cultura: cultura,
+                    warnings: warnings,
+                  ),
+                );
+              }
+
+              developer.log(
+                'Enriched ${enrichedList.length} diagnosticos, '
+                '${enrichedList.where((d) => d.hasWarnings).length} with warnings',
+                name: 'DiagnosticoListEnrichment.enrichAllWithRelatedData',
+              );
+
+              return enrichedList;
+            },
           );
 
-          return enrichedList;
-        },
-      );
-
-      return result;
+      return result.toEither();
     } catch (e, stackTrace) {
       developer.log(
         'Error enriching diagnostico list: $e',

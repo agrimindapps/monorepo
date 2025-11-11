@@ -1,8 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/data/repositories/cultura_hive_repository.dart';
-import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
-import '../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../core/data/repositories/cultura_legacy_repository.dart';
+import '../../../../core/data/repositories/fitossanitario_legacy_repository.dart';
+import '../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 
@@ -146,16 +146,16 @@ class DiagnosticosPragaState {
 @Riverpod(keepAlive: true)
 class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
   late final IDiagnosticosRepository _diagnosticosRepository;
-  late final CulturaHiveRepository _culturaRepository;
-  late final PragasHiveRepository _pragasRepository;
-  late final FitossanitarioHiveRepository _defensivoRepository;
+  late final CulturaLegacyRepository _culturaRepository;
+  late final PragasLegacyRepository _pragasRepository;
+  late final FitossanitarioLegacyRepository _defensivoRepository;
 
   @override
   Future<DiagnosticosPragaState> build() async {
     _diagnosticosRepository = di.sl<IDiagnosticosRepository>();
-    _culturaRepository = di.sl<CulturaHiveRepository>();
-    _pragasRepository = di.sl<PragasHiveRepository>();
-    _defensivoRepository = di.sl<FitossanitarioHiveRepository>();
+    _culturaRepository = di.sl<CulturaLegacyRepository>();
+    _pragasRepository = di.sl<PragasLegacyRepository>();
+    _defensivoRepository = di.sl<FitossanitarioLegacyRepository>();
 
     return DiagnosticosPragaState.initial();
   }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../core/data/models/cultura_hive.dart';
+import '../../../database/receituagro_database.dart';
 
 enum CulturaItemMode { list, grid }
 
 class CulturaItemWidget extends StatelessWidget {
-  final CulturaHive cultura;
+  final Cultura cultura;
   final bool isDark;
   final VoidCallback onTap;
   final CulturaItemMode mode;
@@ -57,7 +57,7 @@ class CulturaItemWidget extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
-                  cultura.cultura,
+                  cultura.nome,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -113,7 +113,7 @@ class CulturaItemWidget extends StatelessWidget {
               const SizedBox(height: 12),
               Expanded(
                 child: Text(
-                  cultura.cultura,
+                  cultura.nome,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,

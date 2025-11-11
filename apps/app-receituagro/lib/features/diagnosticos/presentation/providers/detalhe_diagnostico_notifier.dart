@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/data/models/diagnostico_hive.dart';
-import '../../../../core/data/repositories/diagnostico_hive_repository.dart';
+import '../../../../core/data/models/diagnostico_legacy.dart';
+import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/extensions/diagnostico_hive_extension.dart';
 import '../../../../core/providers/premium_notifier.dart';
@@ -90,13 +90,13 @@ class DetalheDiagnosticoState {
 @Riverpod(keepAlive: true)
 class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
   late final IDiagnosticosRepository _diagnosticosRepository;
-  late final DiagnosticoHiveRepository _hiveRepository;
+  late final DiagnosticoLegacyRepository _hiveRepository;
   late final FavoritosRepositorySimplified _favoritosRepository;
 
   @override
   Future<DetalheDiagnosticoState> build() async {
     _diagnosticosRepository = di.sl<IDiagnosticosRepository>();
-    _hiveRepository = di.sl<DiagnosticoHiveRepository>();
+    _hiveRepository = di.sl<DiagnosticoLegacyRepository>();
     _favoritosRepository = FavoritosDI.get<FavoritosRepositorySimplified>();
 
     // Setup listener APÓS o estado inicial ser retornado

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../../core/data/repositories/cultura_hive_repository.dart';
+import '../../../../../../database/repositories/culturas_repository.dart';
 import '../../../../../../core/di/injection_container.dart';
 import '../../../../../../core/theme/spacing_tokens.dart';
 
@@ -42,13 +42,16 @@ class _DiagnosticoDefensivoCultureSectionWidgetState
     });
 
     try {
-      final culturaRepository = sl<CulturaHiveRepository>();
+      final culturaRepository = sl<CulturasRepository>();
       for (final diagnostic in widget.diagnosticos!) {
-        final idCultura = _getProperty(diagnostic, 'idCultura');
-        if (idCultura != null) {
-          final culturaData = await culturaRepository.getById(idCultura);
+        final idCulturaStr = _getProperty(diagnostic, 'idCultura');
+        if (idCulturaStr != null) {
+          final idCultura = int.tryParse(idCulturaStr);
+          if (idCultura == null) continue;
+          
+          final culturaData = await culturaRepository.findById(idCultura);
           if (culturaData != null &&
-              culturaData.cultura.toLowerCase() ==
+              culturaData.nome.toLowerCase() ==
                   widget.cultura.toLowerCase()) {
             if (mounted) {
               setState(() {

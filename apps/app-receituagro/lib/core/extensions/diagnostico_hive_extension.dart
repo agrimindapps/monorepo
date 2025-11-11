@@ -1,7 +1,7 @@
-import '../data/models/diagnostico_hive.dart';
-import '../data/repositories/cultura_hive_repository.dart';
-import '../data/repositories/fitossanitario_hive_repository.dart';
-import '../data/repositories/pragas_hive_repository.dart';
+import '../data/models/diagnostico_legacy.dart';
+import '../data/repositories/cultura_legacy_repository.dart';
+import '../data/repositories/fitossanitario_legacy_repository.dart';
+import '../data/repositories/pragas_legacy_repository.dart';
 import '../di/injection_container.dart' as di;
 import '../utils/data_with_warnings.dart';
 import '../utils/diagnostico_logger.dart';
@@ -18,7 +18,7 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
   /// Retorna o nome do defensivo com warnings de validação
   Future<DataWithWarnings<String>> getDisplayNomeDefensivoWithWarnings() async {
     try {
-      final repository = di.sl<FitossanitarioHiveRepository>();
+      final repository = di.sl<FitossanitarioLegacyRepository>();
       final defensivo = await repository.getById(fkIdDefensivo);
       if (defensivo != null && defensivo.nomeComum.isNotEmpty) {
         return DataWithWarnings(data: defensivo.nomeComum);
@@ -59,7 +59,7 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
   /// Retorna o nome da cultura com warnings de validação
   Future<DataWithWarnings<String>> getDisplayNomeCulturaWithWarnings() async {
     try {
-      final repository = di.sl<CulturaHiveRepository>();
+      final repository = di.sl<CulturaLegacyRepository>();
       final cultura = await repository.getById(fkIdCultura);
       if (cultura != null && cultura.cultura.isNotEmpty) {
         return DataWithWarnings(data: cultura.cultura);
@@ -98,7 +98,7 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
   /// Retorna o nome da praga com warnings de validação
   Future<DataWithWarnings<String>> getDisplayNomePragaWithWarnings() async {
     try {
-      final repository = di.sl<PragasHiveRepository>();
+      final repository = di.sl<PragasLegacyRepository>();
       final praga = await repository.getById(fkIdPraga);
       if (praga != null && praga.nomeComum.isNotEmpty) {
         return DataWithWarnings(data: praga.nomeComum);
@@ -188,7 +188,7 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
 
     // Resolver dados do defensivo
     try {
-      final fitossanitarioRepo = di.sl<FitossanitarioHiveRepository>();
+      final fitossanitarioRepo = di.sl<FitossanitarioLegacyRepository>();
       final defensivo = await fitossanitarioRepo.getById(fkIdDefensivo);
       if (defensivo != null) {
         if (defensivo.ingredienteAtivo?.isNotEmpty == true) {
@@ -227,7 +227,7 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
 
     // Resolver dados da praga
     try {
-      final pragaRepo = di.sl<PragasHiveRepository>();
+      final pragaRepo = di.sl<PragasLegacyRepository>();
       final praga = await pragaRepo.getById(fkIdPraga);
       if (praga != null && praga.nomeCientifico.isNotEmpty) {
         nomeCientifico = praga.nomeCientifico;

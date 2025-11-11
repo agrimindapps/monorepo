@@ -22,6 +22,7 @@ class StaticDataLoader {
 
     await db.transaction(() async {
       await loadCulturas();
+      await loadPlantasInf();
       await loadPragas();
       await loadPragasInf();
       await loadFitossanitarios();
@@ -74,6 +75,89 @@ class StaticDataLoader {
     } catch (e, stack) {
       developer.log(
         'Error loading culturas: $e',
+        name: 'StaticDataLoader',
+        error: e,
+        stackTrace: stack,
+      );
+      rethrow;
+    }
+  }
+
+  /// Carrega informações complementares de plantas/culturas do JSON
+  Future<void> loadPlantasInf() async {
+    try {
+      final jsonString = await rootBundle.loadString(
+        'assets/database/json/tbplantasinf/TBPLANTASINF.json',
+      );
+      final jsonList = json.decode(jsonString) as List<dynamic>;
+
+      developer.log(
+        'Loading ${jsonList.length} plantas info...',
+        name: 'StaticDataLoader',
+      );
+
+      int loaded = 0;
+      for (final item in jsonList) {
+        final data = item as Map<String, dynamic>;
+
+        final idReg = data['idReg'] as String?;
+        if (idReg == null) continue;
+
+        // Precisamos encontrar o culturaId correspondente
+        // O idReg no PlantasInf corresponde ao idCultura na tabela Culturas
+        final culturaQuery = db.select(db.culturas)
+          ..where((c) => c.idCultura.equals(idReg));
+        final cultura = await culturaQuery.getSingleOrNull();
+
+        if (cultura == null) {
+          developer.log(
+            'Cultura not found for idReg: $idReg, skipping plantas info',
+            name: 'StaticDataLoader',
+          );
+          continue;
+        }
+
+        await db
+            .into(db.plantasInf)
+            .insert(
+              PlantasInfCompanion.insert(
+                idReg: idReg,
+                culturaId: cultura.id,
+                ciclo: Value(data['ciclo'] as String?),
+                reproducao: Value(data['reproducao'] as String?),
+                habitat: Value(data['habitat'] as String?),
+                adaptacoes: Value(data['adaptacoes'] as String?),
+                altura: Value(data['altura'] as String?),
+                filotaxia: Value(data['filotaxia'] as String?),
+                formaLimbo: Value(data['formaLimbo'] as String?),
+                superficie: Value(data['superficie'] as String?),
+                consistencia: Value(data['consistencia'] as String?),
+                nervacao: Value(data['nervacao'] as String?),
+                nervacaoComprimento: Value(
+                  data['nervacaoComprimento'] as String?,
+                ),
+                margemFolha: Value(data['margemFolha'] as String?),
+                folha: Value(data['folha'] as String?),
+                base: Value(data['base'] as String?),
+                formaBase: Value(data['formaBase'] as String?),
+                apice: Value(data['apice'] as String?),
+                formaApice: Value(data['formaApice'] as String?),
+                tipoFlor: Value(data['tipoFlor'] as String?),
+                corFlor: Value(data['corFlor'] as String?),
+                tipoFruto: Value(data['tipoFruto'] as String?),
+                corFruto: Value(data['corFruto'] as String?),
+                tipoSemente: Value(data['tipoSemente'] as String?),
+                corSemente: Value(data['corSemente'] as String?),
+              ),
+              mode: InsertMode.insertOrIgnore,
+            );
+        loaded++;
+      }
+
+      developer.log('Loaded $loaded plantas info', name: 'StaticDataLoader');
+    } catch (e, stack) {
+      developer.log(
+        'Error loading plantas info: $e',
         name: 'StaticDataLoader',
         error: e,
         stackTrace: stack,

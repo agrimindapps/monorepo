@@ -1,10 +1,10 @@
-import '../../../../core/data/models/cultura_hive.dart';
-import '../../../../core/data/models/diagnostico_hive.dart';
-import '../../../../core/data/models/fitossanitario_hive.dart';
-import '../../../../core/data/models/pragas_hive.dart';
-import '../../../../core/data/repositories/cultura_hive_repository.dart';
-import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
-import '../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../core/data/models/cultura_legacy.dart';
+import '../../../../core/data/models/diagnostico_legacy.dart';
+import '../../../../core/data/models/fitossanitario_legacy.dart';
+import '../../../../core/data/models/pragas_legacy.dart';
+import '../../../../core/data/repositories/cultura_legacy_repository.dart';
+import '../../../../core/data/repositories/fitossanitario_legacy_repository.dart';
+import '../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/busca_entity.dart';
 
@@ -20,17 +20,17 @@ class BuscaMapper {
     String pragaNome = 'Praga não encontrada';
 
     try {
-      final defensivoRepo = sl<FitossanitarioHiveRepository>();
+      final defensivoRepo = sl<FitossanitarioLegacyRepository>();
       final defensivo = await defensivoRepo.getById(diagnostico.fkIdDefensivo);
       if (defensivo != null && defensivo.nomeComum.isNotEmpty) {
         defensivoNome = defensivo.nomeComum;
       }
-      final culturaRepo = sl<CulturaHiveRepository>();
+      final culturaRepo = sl<CulturaLegacyRepository>();
       final cultura = await culturaRepo.getById(diagnostico.fkIdCultura);
       if (cultura != null && cultura.cultura.isNotEmpty) {
         culturaNome = cultura.cultura;
       }
-      final pragaRepo = sl<PragasHiveRepository>();
+      final pragaRepo = sl<PragasLegacyRepository>();
       final praga = await pragaRepo.getById(diagnostico.fkIdPraga);
       if (praga != null && praga.nomeComum.isNotEmpty) {
         pragaNome = praga.nomeComum;

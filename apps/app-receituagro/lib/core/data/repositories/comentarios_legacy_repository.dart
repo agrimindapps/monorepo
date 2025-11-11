@@ -5,13 +5,13 @@ import '../../../features/comentarios/data/comentario_model.dart';
 import '../../../features/comentarios/data/services/comentarios_sync_service.dart';
 import '../../../features/comentarios/domain/comentarios_service.dart';
 import '../../services/device_identity_service.dart';
-import '../models/comentario_hive.dart';
+import '../models/comentario_legacy.dart';
 
 /// Repository for comentarios using Hive storage with type-safe boxes.
 /// ✅ MIGRATED: Using `IHiveManager.getBox<T>()` para type safety com cast seguro
 /// BENEFIT: Funciona com `Box<dynamic>` já aberta pelo BoxRegistryService
 @LazySingleton()
-class ComentariosHiveRepository implements IComentariosRepository {
+class ComentariosLegacyRepository implements IComentariosRepository {
   final IHiveManager _hiveManager;
   final String boxName = 'comentarios';
   Box<ComentarioHive>? _box;
@@ -19,7 +19,7 @@ class ComentariosHiveRepository implements IComentariosRepository {
   // Sync service para sincronização com Firebase
   late final ComentariosSyncService _syncService;
 
-  ComentariosHiveRepository()
+  ComentariosLegacyRepository()
     : _hiveManager = GetIt.instance<IHiveManager>() {
     _syncService = ComentariosSyncService();
   }

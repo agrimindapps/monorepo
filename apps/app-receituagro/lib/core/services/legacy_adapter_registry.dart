@@ -1,24 +1,21 @@
-
-import 'package:core/core.dart' hide Column;
-
-import '../data/models/comentario_hive.dart';
-import '../data/models/cultura_hive.dart';
-import '../data/models/diagnostico_hive.dart';
-import '../data/models/favorito_item_hive.dart';
-import '../data/models/fitossanitario_hive.dart';
-import '../data/models/fitossanitario_info_hive.dart';
-import '../data/models/plantas_inf_hive.dart';
-import '../data/models/pragas_hive.dart';
-import '../data/models/pragas_inf_hive.dart';
-import '../data/models/premium_status_hive.dart';
+import '../data/models/comentario_legacy.dart';
+import '../data/models/cultura_legacy.dart';
+import '../data/models/diagnostico_legacy.dart';
+import '../data/models/favorito_item_legacy.dart';
+import '../data/models/fitossanitario_legacy.dart';
+import '../data/models/fitossanitario_info_legacy.dart';
+import '../data/models/plantas_inf_legacy.dart';
+import '../data/models/pragas_legacy.dart';
+import '../data/models/pragas_inf_legacy.dart';
+import '../data/models/premium_status_legacy.dart';
 // import '../data/models/sync_queue_item.dart'; // TODO: Uncomment after build_runner generates .g.dart
 
 /// Registry centralizado para registro de todos os adapters Hive
 /// ✅ PADRÃO APP-PLANTIS: Apenas registra adapters, NÃO abre boxes
 /// BoxRegistryService é responsável por abrir/fechar boxes
-class HiveAdapterRegistry {
+class LegacyAdapterRegistry {
   // Private constructor para classe utilitária (apenas métodos estáticos)
-  HiveAdapterRegistry._();
+  LegacyAdapterRegistry._();
 
   static bool _isRegistered = false;
 
@@ -31,23 +28,23 @@ class HiveAdapterRegistry {
 
     try {
       // ✅ Hive.initFlutter() já foi executado no main.dart
-      Hive.registerAdapter(CulturaHiveAdapter());
-      Hive.registerAdapter(PragasHiveAdapter());
-      Hive.registerAdapter(FitossanitarioHiveAdapter());
-      Hive.registerAdapter(DiagnosticoHiveAdapter());
-      Hive.registerAdapter(FitossanitarioInfoHiveAdapter());
-      Hive.registerAdapter(PlantasInfHiveAdapter());
-      Hive.registerAdapter(PragasInfHiveAdapter());
-      Hive.registerAdapter(PremiumStatusHiveAdapter());
-      Hive.registerAdapter(ComentarioHiveAdapter());
-      Hive.registerAdapter(FavoritoItemHiveAdapter());
+      // Temporariamente comentado devido à migração para Drift
+      // Hive.registerAdapter(CulturaHiveAdapter());
+      // Hive.registerAdapter(PragasHiveAdapter());
+      // Hive.registerAdapter(FitossanitarioHiveAdapter());
+      // Hive.registerAdapter(DiagnosticoHiveAdapter());
+      // Hive.registerAdapter(FitossanitarioInfoHiveAdapter());
+      // Hive.registerAdapter(PlantasInfHiveAdapter());
+      // Hive.registerAdapter(PragasInfHiveAdapter());
+      // Hive.registerAdapter(PremiumStatusHiveAdapter());
+      // Hive.registerAdapter(ComentarioHiveAdapter());
+      // Hive.registerAdapter(FavoritoItemHiveAdapter());
 
       // P1.3 - Sync infrastructure
       // TODO: Uncomment after running build_runner (requires Dart SDK ≥3.9.0)
       // Hive.registerAdapter(SyncQueueItemAdapter());
 
       _isRegistered = true;
-
     } catch (e) {
       throw Exception('Erro ao registrar adapters Hive: $e');
     }
@@ -67,7 +64,8 @@ class HiveAdapterRegistry {
     'pragas_inf': 'receituagro_pragas_inf',
     'premium_status': 'receituagro_premium_status',
     'comentarios': 'comentarios',
-    'favoritos': 'favoritos',  // ✅ FIXED: Deve corresponder a FavoritosHiveRepository e ReceitaAgroBoxes
+    'favoritos':
+        'favoritos', // ✅ FIXED: Deve corresponder a FavoritosLegacyRepository e ReceitaAgroBoxes
   };
 
   // ❌ REMOVIDO: openBoxes() - BoxRegistryService gerencia abertura

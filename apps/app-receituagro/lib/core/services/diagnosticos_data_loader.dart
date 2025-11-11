@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import '../data/models/diagnostico_hive.dart';
-import '../data/repositories/diagnostico_hive_repository.dart';
+import '../data/models/diagnostico_legacy.dart';
+import '../data/repositories/diagnostico_legacy_repository.dart';
 import '../di/injection_container.dart' as di;
 
 /// Serviço para carregar dados de diagnósticos dos assets JSON
@@ -56,7 +56,7 @@ class DiagnosticosDataLoader {
 
       // Use repository.loadFromJson which will persist items using IdReg as key
       // (provides consistent retrieval by idReg/objectId later).
-      final repository = di.sl<DiagnosticoHiveRepository>();
+      final repository = di.sl<DiagnosticoLegacyRepository>();
       try {
         await repository.loadFromJson(diagnosticos, 'assets_init');
       } catch (e) {
@@ -80,7 +80,7 @@ class DiagnosticosDataLoader {
   /// Verifica se dados estão carregados
   static Future<bool> isDataLoaded() async {
     try {
-      final repository = di.sl<DiagnosticoHiveRepository>();
+      final repository = di.sl<DiagnosticoLegacyRepository>();
       final result = await repository.getAll();
       final diagnosticos =
           result.isSuccess ? result.data! : <DiagnosticoHive>[];
@@ -95,7 +95,7 @@ class DiagnosticosDataLoader {
   /// Obtém estatísticas de carregamento
   static Future<Map<String, dynamic>> getStats() async {
     try {
-      final repository = di.sl<DiagnosticoHiveRepository>();
+      final repository = di.sl<DiagnosticoLegacyRepository>();
       final result = await repository.getAll();
       final diagnosticos =
           result.isSuccess ? result.data! : <DiagnosticoHive>[];

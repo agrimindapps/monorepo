@@ -1,12 +1,12 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
-import '../models/premium_status_hive.dart';
+import '../models/premium_status_legacy.dart';
 
 /// Repository para gerenciar dados premium com cache local Hive
-class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
+class PremiumLegacyRepository extends BaseHiveRepository<PremiumStatusHive> {
   static const String _boxName = 'receituagro_premium_status';
 
-  PremiumHiveRepository() : super(
+  PremiumLegacyRepository() : super(
     hiveManager: GetIt.instance<IHiveManager>(),
     boxName: _boxName,
   );

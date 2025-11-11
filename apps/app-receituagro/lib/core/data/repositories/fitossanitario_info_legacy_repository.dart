@@ -1,12 +1,12 @@
 import 'package:core/core.dart' hide Column;
 
-import '../models/fitossanitario_info_hive.dart';
+import '../models/fitossanitario_info_legacy.dart';
 
 /// Repositório para FitossanitarioInfoHive
 /// Implementa os métodos abstratos do BaseHiveRepository
-class FitossanitarioInfoHiveRepository
+class FitossanitarioInfoLegacyRepository
     extends BaseHiveRepository<FitossanitarioInfoHive> {
-  FitossanitarioInfoHiveRepository()
+  FitossanitarioInfoLegacyRepository()
     : super(
         hiveManager: GetIt.instance<IHiveManager>(),
         boxName: 'receituagro_fitossanitarios_info',

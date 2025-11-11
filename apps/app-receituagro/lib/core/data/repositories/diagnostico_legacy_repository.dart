@@ -2,12 +2,12 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart' hide Column;
 
-import '../models/diagnostico_hive.dart';
+import '../models/diagnostico_legacy.dart';
 
 /// Repositório para DiagnosticoHive
 /// Implementa os métodos abstratos do BaseHiveRepository
-class DiagnosticoHiveRepository extends BaseHiveRepository<DiagnosticoHive> {
-  DiagnosticoHiveRepository()
+class DiagnosticoLegacyRepository extends BaseHiveRepository<DiagnosticoHive> {
+  DiagnosticoLegacyRepository()
     : super(
         hiveManager: GetIt.instance<IHiveManager>(),
         boxName: 'receituagro_diagnosticos',
@@ -206,7 +206,7 @@ class DiagnosticoHiveRepository extends BaseHiveRepository<DiagnosticoHive> {
       if (missing.isNotEmpty) {
         developer.log(
           'Diagnostico.saveSafe: missing required fields: ${missing.join(', ')}',
-          name: 'DiagnosticoHiveRepository',
+          name: 'DiagnosticoLegacyRepository',
         );
       }
 

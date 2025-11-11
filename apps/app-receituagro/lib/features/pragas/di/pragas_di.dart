@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../data/repositories/pragas_repository_impl.dart';
 import '../data/services/pragas_query_service.dart';
 import '../data/services/pragas_search_service.dart';
@@ -49,7 +49,7 @@ class PragasDI {
     // Register repository with service dependencies
     sl.registerLazySingleton<IPragasRepository>(
       () => PragasRepositoryImpl(
-        sl<PragasHiveRepository>(),
+        sl<PragasLegacyRepository>(),
         sl<IPragasQueryService>(),
         sl<IPragasSearchService>(),
         sl<IPragasStatsService>(),
@@ -59,7 +59,7 @@ class PragasDI {
 
     sl.registerLazySingleton<IPragasHistoryRepository>(
       () => PragasHistoryRepositoryImpl(
-        sl<PragasHiveRepository>(),
+        sl<PragasLegacyRepository>(),
         sl<PragasErrorMessageService>(),
       ),
     );

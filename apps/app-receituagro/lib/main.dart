@@ -9,8 +9,8 @@ import 'core/navigation/app_router.dart' as app_router;
 import 'core/providers/theme_notifier.dart';
 import 'core/services/app_data_manager.dart';
 import 'core/services/firebase_messaging_service.dart';
-import 'core/services/hive_adapter_registry.dart';
-import 'core/services/hive_migration_service.dart'; // FIXED (P0.4): Schema migration service
+import 'core/services/legacy_adapter_registry.dart';
+import 'core/services/legacy_migration_service.dart'; // FIXED (P0.4): Schema migration service
 import 'core/services/premium_service.dart';
 import 'core/services/prioritized_data_loader.dart';
 import 'core/services/promotional_notification_manager.dart';
@@ -48,12 +48,12 @@ void main() async {
   // Isso garante que os adapters estejam disponíveis quando BoxRegistryService
   // tentar abrir boxes persistentes
   await Hive.initFlutter();
-  await HiveAdapterRegistry.registerAdapters();
+  await LegacyAdapterRegistry.registerAdapters();
   DiagnosticoLogger.debug('✅ Hive adapters registrados antes das boxes');
 
   // ✅ FIXED (P0.4): Run schema migrations BEFORE opening any data boxes
   // This prevents data corruption when models change across app versions
-  await HiveMigrationService.runMigrations();
+  await LegacyMigrationService.runMigrations();
   DiagnosticoLogger.debug('✅ Hive schema migrations completed');
 
   await di.init();

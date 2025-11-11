@@ -5,8 +5,8 @@ import 'package:hive/hive.dart'; // Changed from hive_flutter to hive (core depe
 /// Ensures data integrity across app versions
 ///
 /// ✅ FIXED (P0.4): Created to prevent data corruption when models change
-class HiveMigrationService {
-  HiveMigrationService._(); // Private constructor - utility class
+class LegacyMigrationService {
+  LegacyMigrationService._(); // Private constructor - utility class
 
   /// Current schema version
   /// Increment this when adding new migrations
@@ -28,7 +28,7 @@ class HiveMigrationService {
 
       if (kDebugMode) {
         debugPrint(
-          '📦 [HiveMigrationService] Installed version: $installedVersion, '
+          '📦 [LegacyMigrationService] Installed version: $installedVersion, '
           'Current version: $currentVersion',
         );
       }
@@ -37,7 +37,7 @@ class HiveMigrationService {
       if (installedVersion! < currentVersion) {
         if (kDebugMode) {
           debugPrint(
-            '⚠️ [HiveMigrationService] Running migrations from v$installedVersion to v$currentVersion...',
+            '⚠️ [LegacyMigrationService] Running migrations from v$installedVersion to v$currentVersion...',
           );
         }
 
@@ -47,11 +47,11 @@ class HiveMigrationService {
         await versionBox.put('schema_version', currentVersion);
 
         if (kDebugMode) {
-          debugPrint('✅ [HiveMigrationService] Migrations completed successfully');
+          debugPrint('✅ [LegacyMigrationService] Migrations completed successfully');
         }
       } else {
         if (kDebugMode) {
-          debugPrint('✅ [HiveMigrationService] Schema is up-to-date (v$currentVersion)');
+          debugPrint('✅ [LegacyMigrationService] Schema is up-to-date (v$currentVersion)');
         }
       }
 
@@ -59,7 +59,7 @@ class HiveMigrationService {
       await versionBox.close();
     } catch (e, stackTrace) {
       if (kDebugMode) {
-        debugPrint('❌ [HiveMigrationService] Migration failed: $e');
+        debugPrint('❌ [LegacyMigrationService] Migration failed: $e');
         debugPrint('StackTrace: $stackTrace');
       }
       rethrow; // Critical error - app should not continue with corrupted data
@@ -70,7 +70,7 @@ class HiveMigrationService {
   static Future<void> _migrate(int fromVersion, int toVersion) async {
     for (int version = fromVersion + 1; version <= toVersion; version++) {
       if (kDebugMode) {
-        debugPrint('🔄 [HiveMigrationService] Applying migration v$version...');
+        debugPrint('🔄 [LegacyMigrationService] Applying migration v$version...');
       }
 
       switch (version) {
@@ -83,7 +83,7 @@ class HiveMigrationService {
         //   break;
         default:
           if (kDebugMode) {
-            debugPrint('⚠️ [HiveMigrationService] No migration defined for v$version');
+            debugPrint('⚠️ [LegacyMigrationService] No migration defined for v$version');
           }
       }
     }
@@ -93,7 +93,7 @@ class HiveMigrationService {
   /// Initial migration - sets up baseline for future migrations
   static Future<void> _migrateToV1() async {
     if (kDebugMode) {
-      debugPrint('📝 [HiveMigrationService.v1] Initial migration - baseline setup');
+      debugPrint('📝 [LegacyMigrationService.v1] Initial migration - baseline setup');
     }
 
     // V1 migration tasks:
@@ -108,7 +108,7 @@ class HiveMigrationService {
     // 4. Close boxes
 
     if (kDebugMode) {
-      debugPrint('✅ [HiveMigrationService.v1] Migration completed');
+      debugPrint('✅ [LegacyMigrationService.v1] Migration completed');
     }
   }
 
@@ -117,7 +117,7 @@ class HiveMigrationService {
   /// Use this pattern when you need to modify existing data
   // static Future<void> _migrateToV2() async {
   //   if (kDebugMode) {
-  //     debugPrint('📝 [HiveMigrationService.v2] Adding newField to DiagnosticoHive');
+  //     debugPrint('📝 [LegacyMigrationService.v2] Adding newField to DiagnosticoHive');
   //   }
   //
   //   // Open affected box
@@ -138,7 +138,7 @@ class HiveMigrationService {
   //     }
   //
   //     if (kDebugMode) {
-  //       debugPrint('✅ [HiveMigrationService.v2] Updated ${keysToUpdate.length} items');
+  //       debugPrint('✅ [LegacyMigrationService.v2] Updated ${keysToUpdate.length} items');
   //     }
   //   } finally {
   //     await box.close();
@@ -160,7 +160,7 @@ class HiveMigrationService {
       }
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('⚠️ [HiveMigrationService] Error getting version: $e');
+        debugPrint('⚠️ [LegacyMigrationService] Error getting version: $e');
       }
       return 0; // Assume fresh install on error
     }
@@ -181,11 +181,11 @@ class HiveMigrationService {
       await versionBox.close();
 
       if (kDebugMode) {
-        debugPrint('🔄 [HiveMigrationService] Schema version reset (TEST MODE)');
+        debugPrint('🔄 [LegacyMigrationService] Schema version reset (TEST MODE)');
       }
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ [HiveMigrationService] Error resetting version: $e');
+        debugPrint('❌ [LegacyMigrationService] Error resetting version: $e');
       }
     }
   }

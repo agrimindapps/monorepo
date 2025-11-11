@@ -1,4 +1,4 @@
-import '../../../../core/data/models/fitossanitario_hive.dart';
+import '../../../../core/data/models/fitossanitario_legacy.dart';
 import '../../../../database/receituagro_database.dart';
 
 /// Entity que representa os detalhes de um defensivo

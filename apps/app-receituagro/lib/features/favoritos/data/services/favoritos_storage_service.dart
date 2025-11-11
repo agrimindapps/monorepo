@@ -1,10 +1,10 @@
 import 'dart:developer' as developer;
 
-import '../../../../core/data/repositories/cultura_hive_repository.dart';
-import '../../../../core/data/repositories/diagnostico_hive_repository.dart';
-import '../../../../core/data/repositories/favoritos_hive_repository.dart';
-import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
-import '../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../core/data/repositories/cultura_legacy_repository.dart';
+import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
+import '../../../../core/data/repositories/favoritos_legacy_repository.dart';
+import '../../../../core/data/repositories/fitossanitario_legacy_repository.dart';
+import '../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
@@ -16,7 +16,7 @@ import '../../domain/repositories/i_favoritos_repository.dart';
 /// mas a implementação atual usa FavoritosService consolidado
 class FavoritosStorageService implements IFavoritosStorage {
   // Lazy loading para evitar circular dependencies (DIP)
-  late final FavoritosHiveRepository _repository;
+  late final FavoritosLegacyRepository _repository;
 
   bool _repositoryInitialized = false;
 
@@ -30,7 +30,7 @@ class FavoritosStorageService implements IFavoritosStorage {
   /// Inicializa as dependências lazy (chamado na primeira vez que são acessadas)
   void _initializeRepository() {
     if (_repositoryInitialized) return;
-    _repository = sl<FavoritosHiveRepository>();
+    _repository = sl<FavoritosLegacyRepository>();
     _repositoryInitialized = true;
   }
 
@@ -234,12 +234,12 @@ class FavoritosCacheService implements IFavoritosCache {
 /// Implementação do resolvedor de dados
 /// Princípio: Single Responsibility - Apenas resolução de dados
 class FavoritosDataResolverService implements IFavoritosDataResolver {
-  final FitossanitarioHiveRepository _fitossanitarioRepository =
-      sl<FitossanitarioHiveRepository>();
-  final PragasHiveRepository _pragasRepository = sl<PragasHiveRepository>();
-  final DiagnosticoHiveRepository _diagnosticoRepository =
-      sl<DiagnosticoHiveRepository>();
-  final CulturaHiveRepository _culturaRepository = sl<CulturaHiveRepository>();
+  final FitossanitarioLegacyRepository _fitossanitarioRepository =
+      sl<FitossanitarioLegacyRepository>();
+  final PragasLegacyRepository _pragasRepository = sl<PragasLegacyRepository>();
+  final DiagnosticoLegacyRepository _diagnosticoRepository =
+      sl<DiagnosticoLegacyRepository>();
+  final CulturaLegacyRepository _culturaRepository = sl<CulturaLegacyRepository>();
 
   @override
   Future<Map<String, dynamic>?> resolveDefensivo(String id) async {
@@ -419,12 +419,12 @@ class FavoritosEntityFactoryService implements IFavoritosEntityFactory {
 /// Validador para favoritos
 /// Princípio: Single Responsibility - Apenas validação
 class FavoritosValidatorService implements IFavoritosValidator {
-  final FitossanitarioHiveRepository _fitossanitarioRepository =
-      sl<FitossanitarioHiveRepository>();
-  final PragasHiveRepository _pragasRepository = sl<PragasHiveRepository>();
-  final DiagnosticoHiveRepository _diagnosticoRepository =
-      sl<DiagnosticoHiveRepository>();
-  final CulturaHiveRepository _culturaRepository = sl<CulturaHiveRepository>();
+  final FitossanitarioLegacyRepository _fitossanitarioRepository =
+      sl<FitossanitarioLegacyRepository>();
+  final PragasLegacyRepository _pragasRepository = sl<PragasLegacyRepository>();
+  final DiagnosticoLegacyRepository _diagnosticoRepository =
+      sl<DiagnosticoLegacyRepository>();
+  final CulturaLegacyRepository _culturaRepository = sl<CulturaLegacyRepository>();
 
   @override
   Future<bool> canAddToFavorites(String tipo, String id) async {

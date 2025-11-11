@@ -11,6 +11,6 @@
 // - hive_tab_widget.dart (~450 linhas) - Tab HiveBoxes
 
 export 'data_inspector_helpers.dart';
-export 'hive_box_loader_service.dart';
-export 'hive_tab_widget.dart';
+// export 'hive_box_loader_service.dart'; // Temporariamente comentado durante migração
+// export 'hive_tab_widget.dart'; // Temporariamente comentado durante migração
 export 'shared_prefs_tab_widget.dart';

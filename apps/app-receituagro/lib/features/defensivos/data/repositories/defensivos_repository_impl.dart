@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
+import '../../../../core/data/repositories/fitossanitario_legacy_repository.dart';
 import '../../domain/entities/defensivo_entity.dart';
 import '../../domain/repositories/i_defensivos_repository.dart';
 import '../mappers/defensivo_mapper.dart';
@@ -24,7 +24,7 @@ import '../services/defensivos_stats_service.dart';
 /// This follows the pattern established in diagnosticos and comentarios features.
 @LazySingleton(as: IDefensivosRepository)
 class DefensivosRepositoryImpl implements IDefensivosRepository {
-  final FitossanitarioHiveRepository _repository;
+  final FitossanitarioLegacyRepository _repository;
   final IDefensivosQueryService _queryService;
   final IDefensivosSearchService _searchService;
   final IDefensivosStatsService _statsService;

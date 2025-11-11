@@ -2,7 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 // FIXED (P0.1): Changed from core/services/ to core/utils/
-import '../../../core/utils/hive_box_manager.dart';
+import '../../../core/utils/box_manager.dart';
 
 import '../../../features/comentarios/data/comentario_model.dart';
 import '../../../features/comentarios/domain/entities/comentario_entity.dart';
@@ -21,7 +21,7 @@ class UserDataRepository {
   static const String _appSettingsBoxName = 'app_settings';
   static const String _subscriptionDataBoxName = 'subscription_data';
 
-  // FIXED (P0.3): Inject IHiveManager to use HiveBoxManager pattern
+  // FIXED (P0.3): Inject IHiveManager to use BoxManager pattern
   final IHiveManager _hiveManager;
 
   // Specialized repositories for delegation (Dependency Injection)
@@ -32,9 +32,11 @@ class UserDataRepository {
     IHiveManager? hiveManager,
     IFavoritosRepository? favoritosRepository,
     IComentariosRepository? comentariosRepository,
-  })  : _hiveManager = hiveManager ?? GetIt.instance<IHiveManager>(),
-        _favoritosRepository = favoritosRepository ?? GetIt.instance<IFavoritosRepository>(),
-        _comentariosRepository = comentariosRepository ?? GetIt.instance<IComentariosRepository>();
+  }) : _hiveManager = hiveManager ?? GetIt.instance<IHiveManager>(),
+       _favoritosRepository =
+           favoritosRepository ?? GetIt.instance<IFavoritosRepository>(),
+       _comentariosRepository =
+           comentariosRepository ?? GetIt.instance<IComentariosRepository>();
 
   /// Obtém o userId atual via Firebase Auth (synchronous access)
   String? get currentUserId {
@@ -56,16 +58,17 @@ class UserDataRepository {
         return Left(Exception('No user logged in'));
       }
 
-      // FIXED (P0.3): Use HiveBoxManager.withBox with correct signature
-      final result = await HiveBoxManager.withBox<AppSettingsModel, AppSettingsModel?>(
-        hiveManager: _hiveManager,
-        boxName: _appSettingsBoxName,
-        operation: (box) async {
-          return box.values
-              .where((settings) => settings.userId == userId)
-              .firstOrNull;
-        },
-      );
+      // FIXED (P0.3): Use BoxManager.withBox with correct signature
+      final result =
+          await BoxManager.withBox<AppSettingsModel, AppSettingsModel?>(
+            hiveManager: _hiveManager,
+            boxName: _appSettingsBoxName,
+            operation: (box) async {
+              return box.values
+                  .where((settings) => settings.userId == userId)
+                  .firstOrNull;
+            },
+          );
 
       return result.fold(
         (failure) => Left(Exception('Error getting app settings: $failure')),
@@ -86,8 +89,8 @@ class UserDataRepository {
         return Left(Exception('No user logged in'));
       }
 
-      // FIXED (P0.3): Use HiveBoxManager.withBox instead of direct Hive.openBox()
-      final result = await HiveBoxManager.withBox<AppSettingsModel, void>(
+      // FIXED (P0.3): Use BoxManager.withBox instead of direct Hive.openBox()
+      final result = await BoxManager.withBox<AppSettingsModel, void>(
         hiveManager: _hiveManager,
         boxName: _appSettingsBoxName,
         operation: (box) async {
@@ -149,17 +152,24 @@ class UserDataRepository {
         return Left(Exception('No user logged in'));
       }
 
-      // FIXED (P0.3): Use HiveBoxManager.withBox instead of direct Hive.openBox()
-      final result = await HiveBoxManager.withBox<Map<dynamic, dynamic>, Map<dynamic, dynamic>?>(
-        hiveManager: _hiveManager,
-        boxName: _subscriptionDataBoxName,
-        operation: (box) async {
-          return box.values.where((sub) => sub['userId'] == userId).firstOrNull;
-        },
-      );
+      // FIXED (P0.3): Use BoxManager.withBox instead of direct Hive.openBox()
+      final result =
+          await BoxManager.withBox<
+            Map<dynamic, dynamic>,
+            Map<dynamic, dynamic>?
+          >(
+            hiveManager: _hiveManager,
+            boxName: _subscriptionDataBoxName,
+            operation: (box) async {
+              return box.values
+                  .where((sub) => sub['userId'] == userId)
+                  .firstOrNull;
+            },
+          );
 
       return result.fold(
-        (failure) => Left(Exception('Error getting subscription data: $failure')),
+        (failure) =>
+            Left(Exception('Error getting subscription data: $failure')),
         (subscriptionMap) {
           if (subscriptionMap == null) {
             return const Right(null);
@@ -190,8 +200,8 @@ class UserDataRepository {
         return Left(Exception('No user logged in'));
       }
 
-      // FIXED (P0.3): Use HiveBoxManager.withBox instead of direct Hive.openBox()
-      final result = await HiveBoxManager.withBox<Map<dynamic, dynamic>, void>(
+      // FIXED (P0.3): Use BoxManager.withBox instead of direct Hive.openBox()
+      final result = await BoxManager.withBox<Map<dynamic, dynamic>, void>(
         hiveManager: _hiveManager,
         boxName: _subscriptionDataBoxName,
         operation: (box) async {
@@ -214,7 +224,8 @@ class UserDataRepository {
       );
 
       return result.fold(
-        (failure) => Left(Exception('Error saving subscription data: $failure')),
+        (failure) =>
+            Left(Exception('Error saving subscription data: $failure')),
         (_) => const Right(null),
       );
     } catch (e) {
@@ -238,23 +249,27 @@ class UserDataRepository {
       }
 
       // Delega para FavoritosRepository
-      final favoritos = await _favoritosRepository.getByTipo(TipoFavorito.defensivo);
+      final favoritos = await _favoritosRepository.getByTipo(
+        TipoFavorito.defensivo,
+      );
 
       // Converte entities para models
       final models = favoritos
           .whereType<FavoritoDefensivoEntity>()
-          .map((entity) => FavoritoDefensivoModel(
-                id: int.tryParse(entity.id) ?? 0,
-                idReg: entity.id,
-                line1: entity.line1,
-                line2: entity.line2,
-                nomeComum: entity.nomeComum,
-                ingredienteAtivo: entity.ingredienteAtivo,
-                fabricante: entity.fabricante,
-                dataCriacao: entity.adicionadoEm ?? DateTime.now(),
-                userId: userId,
-                synchronized: false,
-              ))
+          .map(
+            (entity) => FavoritoDefensivoModel(
+              id: int.tryParse(entity.id) ?? 0,
+              idReg: entity.id,
+              line1: entity.line1,
+              line2: entity.line2,
+              nomeComum: entity.nomeComum,
+              ingredienteAtivo: entity.ingredienteAtivo,
+              fabricante: entity.fabricante,
+              dataCriacao: entity.adicionadoEm ?? DateTime.now(),
+              userId: userId,
+              synchronized: false,
+            ),
+          )
           .toList();
 
       return Right(models);
@@ -278,10 +293,12 @@ class UserDataRepository {
 
       // Delega para FavoritosRepository (salva apenas o ID)
       // O repository já cuida de verificar usuário e sincronizar
-      final success = await (_favoritosRepository as dynamic).addFavorito(
-        TipoFavorito.defensivo,
-        favorito.idReg,
-      ) as bool;
+      final success =
+          await (_favoritosRepository as dynamic).addFavorito(
+                TipoFavorito.defensivo,
+                favorito.idReg,
+              )
+              as bool;
 
       if (success == false) {
         return Left(Exception('Failed to save favorito'));
@@ -304,10 +321,12 @@ class UserDataRepository {
       }
 
       // Delega para FavoritosRepository
-      final success = await (_favoritosRepository as dynamic).removeFavorito(
-        TipoFavorito.defensivo,
-        favoritoId.toString(),
-      ) as bool;
+      final success =
+          await (_favoritosRepository as dynamic).removeFavorito(
+                TipoFavorito.defensivo,
+                favoritoId.toString(),
+              )
+              as bool;
 
       if (success == false) {
         return Left(Exception('Failed to remove favorito'));
@@ -338,19 +357,23 @@ class UserDataRepository {
       final entities = await _comentariosRepository.getAllComentarios();
 
       // Converte entities para models
-      final models = entities.map((entity) => ComentarioModel(
-            id: entity.id,
-            idReg: entity.idReg,
-            titulo: entity.titulo,
-            conteudo: entity.conteudo,
-            ferramenta: entity.ferramenta,
-            pkIdentificador: entity.pkIdentificador,
-            status: entity.status,
-            createdAt: entity.createdAt,
-            updatedAt: entity.updatedAt,
-            userId: userId,
-            synchronized: false,
-          )).toList();
+      final models = entities
+          .map(
+            (entity) => ComentarioModel(
+              id: entity.id,
+              idReg: entity.idReg,
+              titulo: entity.titulo,
+              conteudo: entity.conteudo,
+              ferramenta: entity.ferramenta,
+              pkIdentificador: entity.pkIdentificador,
+              status: entity.status,
+              createdAt: entity.createdAt,
+              updatedAt: entity.updatedAt,
+              userId: userId,
+              synchronized: false,
+            ),
+          )
+          .toList();
 
       return Right(models);
     } catch (e) {
@@ -439,16 +462,18 @@ class UserDataRepository {
       });
       final favoritosResult = await getFavoritos();
       favoritosResult.fold((error) => null, (favoritos) {
-        final unsyncedFavoritos =
-            favoritos.where((f) => !f.synchronized).toList();
+        final unsyncedFavoritos = favoritos
+            .where((f) => !f.synchronized)
+            .toList();
         if (unsyncedFavoritos.isNotEmpty) {
           unsynchronizedData['favoritos'] = unsyncedFavoritos;
         }
       });
       final comentariosResult = await getComentarios();
       comentariosResult.fold((error) => null, (comentarios) {
-        final unsyncedComentarios =
-            comentarios.where((c) => !c.synchronized).toList();
+        final unsyncedComentarios = comentarios
+            .where((c) => !c.synchronized)
+            .toList();
         if (unsyncedComentarios.isNotEmpty) {
           unsynchronizedData['comentarios'] = unsyncedComentarios;
         }
@@ -521,13 +546,14 @@ class UserDataRepository {
         return Left(Exception('No user logged in'));
       }
 
-      // FIXED (P0.3): Use HiveBoxManager.withMultipleBoxes with correct signature
-      final result = await HiveBoxManager.withMultipleBoxes<void>(
+      // FIXED (P0.3): Use BoxManager.withMultipleBoxes with correct signature
+      final result = await BoxManager.withMultipleBoxes<void>(
         hiveManager: _hiveManager,
         boxNames: [_appSettingsBoxName, _subscriptionDataBoxName],
         operation: (boxes) async {
           final appSettingsBox = boxes[_appSettingsBoxName] as Box<dynamic>;
-          final subscriptionBox = boxes[_subscriptionDataBoxName] as Box<dynamic>;
+          final subscriptionBox =
+              boxes[_subscriptionDataBoxName] as Box<dynamic>;
 
           final settingsKeysToRemove = appSettingsBox.keys.where((key) {
             final settings = appSettingsBox.get(key);
@@ -566,13 +592,14 @@ class UserDataRepository {
         return Left(Exception('No user logged in'));
       }
 
-      // FIXED (P0.3): Use HiveBoxManager.withMultipleBoxes to avoid multiple open/close cycles
-      final result = await HiveBoxManager.withMultipleBoxes<Map<String, int>>(
+      // FIXED (P0.3): Use BoxManager.withMultipleBoxes to avoid multiple open/close cycles
+      final result = await BoxManager.withMultipleBoxes<Map<String, int>>(
         hiveManager: _hiveManager,
         boxNames: [_appSettingsBoxName, _subscriptionDataBoxName],
         operation: (boxes) async {
           final appSettingsBox = boxes[_appSettingsBoxName] as Box<dynamic>;
-          final subscriptionBox = boxes[_subscriptionDataBoxName] as Box<dynamic>;
+          final subscriptionBox =
+              boxes[_subscriptionDataBoxName] as Box<dynamic>;
 
           final stats = <String, int>{};
 

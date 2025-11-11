@@ -1,11 +1,11 @@
 import 'package:core/core.dart' hide Column;
 
-import '../models/plantas_inf_hive.dart';
+import '../models/plantas_inf_legacy.dart';
 
 /// Repositório para PlantasInfHive
 /// Implementa os métodos abstratos do BaseHiveRepository
-class PlantasInfHiveRepository extends BaseHiveRepository<PlantasInfHive> {
-  PlantasInfHiveRepository()
+class PlantasInfLegacyRepository extends BaseHiveRepository<PlantasInfHive> {
+  PlantasInfLegacyRepository()
     : super(
         hiveManager: GetIt.instance<IHiveManager>(),
         boxName: 'receituagro_plantas_inf',

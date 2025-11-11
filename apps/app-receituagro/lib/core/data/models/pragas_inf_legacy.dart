@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-part 'pragas_inf_hive.g.dart';
+// part 'pragas_inf_hive.g.dart';
 
 @HiveType(typeId: 106)
 class PragasInfHive extends HiveObject {
@@ -46,8 +46,12 @@ class PragasInfHive extends HiveObject {
   factory PragasInfHive.fromJson(Map<String, dynamic> json) {
     return PragasInfHive(
       objectId: (json['objectId'] as String?) ?? '',
-      createdAt: json['createdAt'] != null ? int.tryParse(json['createdAt'].toString()) ?? 0 : 0,
-      updatedAt: json['updatedAt'] != null ? int.tryParse(json['updatedAt'].toString()) ?? 0 : 0,
+      createdAt: json['createdAt'] != null
+          ? int.tryParse(json['createdAt'].toString()) ?? 0
+          : 0,
+      updatedAt: json['updatedAt'] != null
+          ? int.tryParse(json['updatedAt'].toString()) ?? 0
+          : 0,
       idReg: (json['idReg'] as String?) ?? '',
       descrisao: json['descrisao'] as String?,
       sintomas: json['sintomas'] as String?,

@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../domain/entities/praga_entity.dart';
 import '../../domain/repositories/i_pragas_repository.dart';
 import '../../presentation/services/pragas_error_message_service.dart';
@@ -24,7 +24,7 @@ import '../services/pragas_stats_service.dart';
 /// Segue padrão Either for error handling consistente
 @LazySingleton(as: IPragasRepository)
 class PragasRepositoryImpl implements IPragasRepository {
-  final PragasHiveRepository _hiveRepository;
+  final PragasLegacyRepository _hiveRepository;
   final IPragasQueryService _queryService;
   final IPragasSearchService _searchService;
   final IPragasStatsService _statsService;
@@ -335,7 +335,7 @@ class PragasRepositoryImpl implements IPragasRepository {
 /// Princípio: Single Responsibility - Apenas gerencia histórico
 @LazySingleton(as: IPragasHistoryRepository)
 class PragasHistoryRepositoryImpl implements IPragasHistoryRepository {
-  final PragasHiveRepository _hiveRepository;
+  final PragasLegacyRepository _hiveRepository;
   final PragasErrorMessageService _errorService;
 
   static const int _maxRecentItems = 7;

@@ -17,8 +17,8 @@ import '../../features/favoritos/favoritos_di.dart';
 import '../../features/settings/di/device_management_di.dart';
 import '../../features/settings/di/settings_di.dart';
 import '../../features/settings/di/tts_module.dart';
-import '../data/repositories/comentarios_hive_repository.dart';
-import '../data/repositories/premium_hive_repository.dart';
+import '../data/repositories/comentarios_legacy_repository.dart';
+import '../data/repositories/premium_legacy_repository.dart';
 import '../../database/repositories/fitossanitarios_repository.dart';
 import '../../database/repositories/pragas_repository.dart';
 import '../../database/repositories/culturas_repository.dart';
@@ -57,7 +57,7 @@ Future<void> init() async {
 
   // ✅ FavoritosDataResolverStrategyRegistry agora usa lazy loading dos repos
   // Não precisa registrá-los cedo mais
-  FavoritosDI.registerServices(); // ⚠️ FavoritosService com lazy loading (não precisa de FavoritosHiveRepository no construtor)
+  FavoritosDI.registerServices(); // ⚠️ FavoritosService com lazy loading (não precisa de FavoritosLegacyRepository no construtor)
 
   await injectable.configureDependencies();
   FavoritosDI.registerRepository(); // ✅ Registra FavoritosRepositorySimplified como classe concreta
@@ -246,11 +246,11 @@ Future<void> init() async {
   // ✅ PHASE 3: Setup GetIt for Pragas por Cultura services
   _setupPragasPorCulturaServices();
 
-  // ✅ ComentariosHiveRepository now registered via @LazySingleton in the repository file
+  // ✅ ComentariosLegacyRepository now registered via @LazySingleton in the repository file
   // ❌ REMOVIDO: Manual registration to avoid duplicate with Injectable
 
-  sl.registerLazySingleton<PremiumHiveRepository>(
-    () => PremiumHiveRepository(),
+  sl.registerLazySingleton<PremiumLegacyRepository>(
+    () => PremiumLegacyRepository(),
   );
   try {
     sl.registerLazySingleton<IPremiumService>(() => MockPremiumService());
@@ -267,7 +267,7 @@ Future<void> init() async {
 
   sl.registerLazySingleton<ComentariosService>(
     () => ComentariosService(
-      repository: sl<ComentariosHiveRepository>(),
+      repository: sl<ComentariosLegacyRepository>(),
       premiumService: sl<IPremiumService>(),
     ),
   );

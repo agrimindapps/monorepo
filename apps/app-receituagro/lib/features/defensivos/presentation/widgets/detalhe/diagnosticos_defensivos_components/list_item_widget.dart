@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../../core/data/models/diagnostico_hive.dart';
-import '../../../../../../core/data/models/pragas_hive.dart';
-import '../../../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../../../core/data/models/diagnostico_legacy.dart';
+import '../../../../../../core/data/models/pragas_legacy.dart';
+import '../../../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../../../../../core/di/injection_container.dart';
 import '../../../../../../core/theme/spacing_tokens.dart';
 
@@ -46,7 +46,7 @@ class _DiagnosticoDefensivoListItemWidgetState
 
   Future<void> _loadPragaData() async {
     try {
-      final pragasRepository = sl<PragasHiveRepository>();
+      final pragasRepository = sl<PragasLegacyRepository>();
       final idPraga = _getProperty('fkIdPraga') ?? _getProperty('idPraga');
 
       if (idPraga != null) {

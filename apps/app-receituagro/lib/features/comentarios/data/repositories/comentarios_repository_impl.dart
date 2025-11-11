@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/data/repositories/comentarios_hive_repository.dart';
+import '../../../../core/data/repositories/comentarios_legacy_repository.dart';
 import '../../domain/entities/comentario_entity.dart';
 import '../../domain/repositories/i_comentarios_repository.dart';
 import '../services/comentarios_mapper.dart';
@@ -18,7 +18,7 @@ import '../services/comentarios_mapper.dart';
 /// This follows the pattern established in diagnosticos feature.
 @LazySingleton(as: IComentariosRepository)
 class ComentariosRepositoryImpl implements IComentariosRepository {
-  final ComentariosHiveRepository _hiveRepository;
+  final ComentariosLegacyRepository _hiveRepository;
   final IComentariosMapper _mapper;
 
   ComentariosRepositoryImpl(

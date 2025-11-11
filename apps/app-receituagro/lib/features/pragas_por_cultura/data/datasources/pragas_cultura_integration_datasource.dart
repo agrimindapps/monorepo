@@ -1,21 +1,21 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/data/repositories/diagnostico_hive_repository.dart';
-import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
-import '../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
+import '../../../../core/data/repositories/fitossanitario_legacy_repository.dart';
+import '../../../../core/data/repositories/pragas_legacy_repository.dart';
 
 /// Integração com serviços existentes para obter pragas por cultura
 ///
 /// Responsabilidades:
-/// - Consultar PragasHiveRepository para dados base de pragas
-/// - Integrar dados de diagnóstico (DiagnosticoHiveRepository)
-/// - Integrar dados de defensivos (FitossanitarioHiveRepository)
+/// - Consultar PragasLegacyRepository para dados base de pragas
+/// - Integrar dados de diagnóstico (DiagnosticoLegacyRepository)
+/// - Integrar dados de defensivos (FitossanitarioLegacyRepository)
 /// - Retornar lista consolidada de pragas para uma cultura específica
 @injectable
 class PragasCulturaIntegrationDataSource {
-  final PragasHiveRepository _pragasRepository;
-  final DiagnosticoHiveRepository _diagnosticoRepository;
-  final FitossanitarioHiveRepository _fitossanitarioRepository;
+  final PragasLegacyRepository _pragasRepository;
+  final DiagnosticoLegacyRepository _diagnosticoRepository;
+  final FitossanitarioLegacyRepository _fitossanitarioRepository;
 
   const PragasCulturaIntegrationDataSource(
     this._pragasRepository,

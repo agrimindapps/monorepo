@@ -1,8 +1,8 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
-import '../data/models/comentario_hive.dart';
-import 'hive_adapter_registry.dart';
+import '../data/models/comentario_legacy.dart';
+import 'legacy_adapter_registry.dart';
 
 /// Implementação específica do ReceitaAgro para limpeza de dados
 /// Implementa IAppDataCleaner do core package
@@ -86,7 +86,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
 
       int totalRecords = 0;
       final boxStats = <String, Map<String, dynamic>>{};
-      for (final entry in HiveAdapterRegistry.boxNames.entries) {
+      for (final entry in LegacyAdapterRegistry.boxNames.entries) {
         final boxName = entry.value;
         try {
           if (Hive.isBoxOpen(boxName)) {
@@ -110,7 +110,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       }
 
       stats['boxStats'] = boxStats;
-      stats['totalBoxes'] = HiveAdapterRegistry.boxNames.length;
+      stats['totalBoxes'] = LegacyAdapterRegistry.boxNames.length;
       stats['totalRecords'] = totalRecords;
       try {
         final prefs = await SharedPreferences.getInstance();
@@ -214,7 +214,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       int totalRecords = 0;
 
       for (final boxKey in boxesToClear) {
-        final boxName = HiveAdapterRegistry.boxNames[boxKey];
+        final boxName = LegacyAdapterRegistry.boxNames[boxKey];
         if (boxName == null) continue;
 
         try {
@@ -272,7 +272,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
   @override
   Future<bool> verifyDataCleanup() async {
     try {
-      for (final boxName in HiveAdapterRegistry.boxNames.values) {
+      for (final boxName in LegacyAdapterRegistry.boxNames.values) {
         if (Hive.isBoxOpen(boxName)) {
           final box = Hive.box<dynamic>(boxName);
           if (box.keys.isNotEmpty) {
@@ -334,7 +334,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
     int totalRecords = 0;
 
     for (final boxKey in userDataBoxKeys) {
-      final boxName = HiveAdapterRegistry.boxNames[boxKey];
+      final boxName = LegacyAdapterRegistry.boxNames[boxKey];
       if (boxName == null) continue;
 
       try {
@@ -400,12 +400,12 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
     };
 
     if (kDebugMode) {
-      debugPrint('🧹 ReceitaAgroDataCleaner: Limpando ${HiveAdapterRegistry.boxNames.length} HiveBoxes...');
+      debugPrint('🧹 ReceitaAgroDataCleaner: Limpando ${LegacyAdapterRegistry.boxNames.length} HiveBoxes...');
     }
 
     int totalRecords = 0;
 
-    for (final entry in HiveAdapterRegistry.boxNames.entries) {
+    for (final entry in LegacyAdapterRegistry.boxNames.entries) {
       final boxKey = entry.key;
       final boxName = entry.value;
 
@@ -566,7 +566,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
         debugPrint('🧹 ReceitaAgroDataCleaner: Limpando favoritos e disparando sincronização...');
       }
 
-      final boxName = HiveAdapterRegistry.boxNames['favoritos'];
+      final boxName = LegacyAdapterRegistry.boxNames['favoritos'];
       if (boxName == null) {
         results['error'] = 'Box de favoritos não encontrada no registry';
         return results;
@@ -640,7 +640,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
         debugPrint('🧹 ReceitaAgroDataCleaner: Marcando comentários como deletados (soft delete)...');
       }
 
-      final boxName = HiveAdapterRegistry.boxNames['comentarios'];
+      final boxName = LegacyAdapterRegistry.boxNames['comentarios'];
       if (boxName == null) {
         results['error'] = 'Box de comentários não encontrada no registry';
         return results;

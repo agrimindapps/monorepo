@@ -1,7 +1,7 @@
-import '../models/cultura_hive.dart';
-import '../models/diagnostico_hive.dart';
-import '../models/fitossanitario_hive.dart';
-import '../models/pragas_hive.dart';
+import '../models/cultura_legacy.dart';
+import '../models/diagnostico_legacy.dart';
+import '../models/fitossanitario_legacy.dart';
+import '../models/pragas_legacy.dart';
 
 /// Wrapper que enriquece DiagnosticoHive com dados relacionados e avisos
 ///

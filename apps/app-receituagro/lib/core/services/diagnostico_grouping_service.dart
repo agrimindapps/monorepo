@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../features/diagnosticos/domain/entities/diagnostico_entity.dart';
-import '../data/models/diagnostico_hive.dart';
+import '../data/models/diagnostico_legacy.dart';
 import 'diagnostico_entity_resolver_drift.dart';
 
 /// Serviço centralizado para agrupamento de diagnósticos

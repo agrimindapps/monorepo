@@ -8,5 +8,8 @@ export 'app_settings_repository.dart';
 export 'user_preferences_repository.dart';
 export 'i_user_preferences_repository.dart';
 export 'fitossanitarios_repository.dart';
+export 'fitossanitarios_info_repository.dart';
 export 'culturas_repository.dart';
+export 'plantas_inf_repository.dart';
 export 'pragas_repository.dart';
+export 'pragas_inf_repository.dart';

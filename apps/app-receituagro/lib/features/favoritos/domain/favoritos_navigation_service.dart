@@ -108,7 +108,7 @@ class FavoritosNavigationService {
             context,
             MaterialPageRoute<void>(
               builder: (context) => DetalheDiagnosticoPage(
-                diagnosticoId: diagnosticoCompleto.diagnostico.objectId,
+                diagnosticoId: diagnosticoCompleto.diagnostico.idReg,
                 nomeDefensivo: diagnosticoCompleto.nomeDefensivo,
                 nomePraga: diagnosticoCompleto.nomePraga,
                 cultura: diagnosticoCompleto.nomeCultura,

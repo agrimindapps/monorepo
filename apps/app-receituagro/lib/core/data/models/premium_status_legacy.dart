@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-part 'premium_status_hive.g.dart';
+// part 'premium_status_hive.g.dart';
 
 @HiveType(typeId: 111)
 class PremiumStatusHive extends HiveObject {
@@ -56,8 +56,8 @@ class PremiumStatusHive extends HiveObject {
   });
 
   /// Converte timestamp para DateTime
-  DateTime? get expiryDate => expiryDateTimestamp != null 
-      ? DateTime.fromMillisecondsSinceEpoch(expiryDateTimestamp!) 
+  DateTime? get expiryDate => expiryDateTimestamp != null
+      ? DateTime.fromMillisecondsSinceEpoch(expiryDateTimestamp!)
       : null;
 
   /// Define data de expiração
@@ -110,7 +110,8 @@ class PremiumStatusHive extends HiveObject {
     return PremiumStatusHive(
       userId: userId,
       isActive: (subscriptionEntity?.isActive as bool?) ?? false,
-      expiryDateTimestamp: subscriptionEntity?.expiryDate?.millisecondsSinceEpoch as int?,
+      expiryDateTimestamp:
+          subscriptionEntity?.expiryDate?.millisecondsSinceEpoch as int?,
       planType: subscriptionEntity?.planType as String?,
       subscriptionId: subscriptionEntity?.id as String?,
       productId: subscriptionEntity?.productId as String?,
@@ -145,7 +146,8 @@ class PremiumStatusHive extends HiveObject {
       planType: planType ?? this.planType,
       subscriptionId: subscriptionId ?? this.subscriptionId,
       productId: productId ?? this.productId,
-      sync_lastSyncTimestamp: sync_lastSyncTimestamp ?? this.sync_lastSyncTimestamp,
+      sync_lastSyncTimestamp:
+          sync_lastSyncTimestamp ?? this.sync_lastSyncTimestamp,
       sync_needsOnlineSync: sync_needsOnlineSync ?? this.sync_needsOnlineSync,
     );
   }

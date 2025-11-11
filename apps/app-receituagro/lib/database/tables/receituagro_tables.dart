@@ -300,6 +300,87 @@ class FitossanitariosInfo extends Table {
   TextColumn get informacoesAdicionais => text().nullable()();
 }
 
+/// Tabela de Informações de Plantas/Culturas (Dados estáticos - JSON)
+class PlantasInf extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  /// ID de registro (chave do JSON)
+  TextColumn get idReg => text().unique()();
+
+  /// FK → Culturas
+  IntColumn get culturaId =>
+      integer().references(Culturas, #id, onDelete: KeyAction.restrict)();
+
+  /// Ciclo da planta
+  TextColumn get ciclo => text().nullable()();
+
+  /// Tipo de reprodução
+  TextColumn get reproducao => text().nullable()();
+
+  /// Habitat natural
+  TextColumn get habitat => text().nullable()();
+
+  /// Adaptações específicas
+  TextColumn get adaptacoes => text().nullable()();
+
+  /// Altura média da planta
+  TextColumn get altura => text().nullable()();
+
+  /// Filotaxia (arranjo das folhas)
+  TextColumn get filotaxia => text().nullable()();
+
+  /// Forma do limbo foliar
+  TextColumn get formaLimbo => text().nullable()();
+
+  /// Superfície das folhas
+  TextColumn get superficie => text().nullable()();
+
+  /// Consistência das folhas
+  TextColumn get consistencia => text().nullable()();
+
+  /// Tipo de nervação
+  TextColumn get nervacao => text().nullable()();
+
+  /// Comprimento da nervação
+  TextColumn get nervacaoComprimento => text().nullable()();
+
+  /// Margem das folhas
+  TextColumn get margemFolha => text().nullable()();
+
+  /// Característica foliar
+  TextColumn get folha => text().nullable()();
+
+  /// Base da folha
+  TextColumn get base => text().nullable()();
+
+  /// Forma da base foliar
+  TextColumn get formaBase => text().nullable()();
+
+  /// Ápice foliar
+  TextColumn get apice => text().nullable()();
+
+  /// Forma do ápice
+  TextColumn get formaApice => text().nullable()();
+
+  /// Tipo de flor
+  TextColumn get tipoFlor => text().nullable()();
+
+  /// Cor da flor
+  TextColumn get corFlor => text().nullable()();
+
+  /// Tipo de fruto
+  TextColumn get tipoFruto => text().nullable()();
+
+  /// Cor do fruto
+  TextColumn get corFruto => text().nullable()();
+
+  /// Tipo de semente
+  TextColumn get tipoSemente => text().nullable()();
+
+  /// Cor da semente
+  TextColumn get corSemente => text().nullable()();
+}
+
 /// ========== APP SETTINGS TABLES ==========
 
 /// Tabela de Configurações do App

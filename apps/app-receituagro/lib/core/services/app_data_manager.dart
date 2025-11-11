@@ -2,13 +2,13 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart' hide Column;
 
-import '../data/repositories/cultura_hive_repository.dart';
-import '../data/repositories/diagnostico_hive_repository.dart';
-import '../data/repositories/fitossanitario_hive_repository.dart';
-import '../data/repositories/fitossanitario_info_hive_repository.dart';
-import '../data/repositories/plantas_inf_hive_repository.dart';
-import '../data/repositories/pragas_hive_repository.dart';
-import '../data/repositories/pragas_inf_hive_repository.dart';
+import '../data/repositories/cultura_legacy_repository.dart';
+import '../data/repositories/diagnostico_legacy_repository.dart';
+import '../data/repositories/fitossanitario_legacy_repository.dart';
+import '../data/repositories/fitossanitario_info_legacy_repository.dart';
+import '../data/repositories/plantas_inf_legacy_repository.dart';
+import '../data/repositories/pragas_legacy_repository.dart';
+import '../data/repositories/pragas_inf_legacy_repository.dart';
 import 'data_initialization_service.dart';
 
 /// Interface para o gerenciador de dados da aplicação
@@ -33,7 +33,7 @@ class AppDataManager implements IAppDataManager {
   AppDataManager();
 
   /// Inicializa completamente o sistema de dados com controle automático de versão
-  /// ✅ PADRÃO APP-PLANTIS: Hive.initFlutter() e HiveAdapterRegistry.registerAdapters()
+  /// ✅ PADRÃO APP-PLANTIS: Hive.initFlutter() e LegacyAdapterRegistry.registerAdapters()
   /// já foram chamados no main.dart ANTES de ReceitaAgroStorageInitializer
   @override
   Future<Either<Exception, void>> initialize() async {
@@ -47,7 +47,7 @@ class AppDataManager implements IAppDataManager {
         name: 'AppDataManager',
       );
 
-      // ✅ Hive.initFlutter() e HiveAdapterRegistry.registerAdapters()
+      // ✅ Hive.initFlutter() e LegacyAdapterRegistry.registerAdapters()
       // já foram executados no main.dart antes de registrar boxes
       // Isso garante que adapters estejam disponíveis quando BoxRegistryService
       // tentar abrir boxes persistentes
@@ -92,13 +92,13 @@ class AppDataManager implements IAppDataManager {
       );
       final assetLoader = AssetLoaderService();
       final versionManager = VersionManagerService();
-      final culturaRepo = CulturaHiveRepository();
-      final pragasRepo = PragasHiveRepository();
-      final fitossanitarioRepo = FitossanitarioHiveRepository();
-      final diagnosticoRepo = DiagnosticoHiveRepository();
-      final fitossanitarioInfoRepo = FitossanitarioInfoHiveRepository();
-      final plantasInfRepo = PlantasInfHiveRepository();
-      final pragasInfRepo = PragasInfHiveRepository();
+      final culturaRepo = CulturaLegacyRepository();
+      final pragasRepo = PragasLegacyRepository();
+      final fitossanitarioRepo = FitossanitarioLegacyRepository();
+      final diagnosticoRepo = DiagnosticoLegacyRepository();
+      final fitossanitarioInfoRepo = FitossanitarioInfoLegacyRepository();
+      final plantasInfRepo = PlantasInfLegacyRepository();
+      final pragasInfRepo = PragasInfLegacyRepository();
       _dataService = DataInitializationService(
         assetLoader: assetLoader,
         versionManager: versionManager,
@@ -209,7 +209,7 @@ class AppDataManager implements IAppDataManager {
         name: 'AppDataManager',
       );
 
-      // ❌ REMOVIDO: await HiveAdapterRegistry.closeBoxes();
+      // ❌ REMOVIDO: await LegacyAdapterRegistry.closeBoxes();
       // ✅ BoxRegistryService gerencia fechamento de boxes
       await Hive.close();
 

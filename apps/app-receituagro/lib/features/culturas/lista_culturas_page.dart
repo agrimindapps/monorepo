@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../core/data/models/cultura_hive.dart';
-import '../../core/data/repositories/cultura_hive_repository.dart';
+import '../../database/repositories/culturas_repository.dart';
+import '../../database/receituagro_database.dart';
 import '../../core/di/injection_container.dart';
 import '../../core/services/receituagro_navigation_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
@@ -23,10 +23,10 @@ class ListaCulturasPage extends StatefulWidget {
 
 class _ListaCulturasPageState extends State<ListaCulturasPage> {
   final TextEditingController _searchController = TextEditingController();
-  final CulturaHiveRepository _repository = sl<CulturaHiveRepository>();
+  final CulturasRepository _repository = sl<CulturasRepository>();
 
-  List<CulturaHive> _culturas = [];
-  List<CulturaHive> _filteredCulturas = [];
+  List<Cultura> _culturas = [];
+  List<Cultura> _filteredCulturas = [];
   bool _isLoading = false;
   bool _isAscending = true;
   CulturaViewMode _viewMode = CulturaViewMode.list;
@@ -54,7 +54,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     });
 
     try {
-      final culturas = await _repository.getActiveCulturas();
+      final culturas = await _repository.findAll();
       setState(() {
         _culturas = culturas;
         _filteredCulturas = culturas;
@@ -85,7 +85,7 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
       } else {
         _filteredCulturas =
             _culturas.where((cultura) {
-              return cultura.cultura.toLowerCase().contains(
+              return cultura.nome.toLowerCase().contains(
                 searchText.toLowerCase(),
               );
             }).toList();
@@ -112,8 +112,8 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
   void _sortCulturas() {
     _filteredCulturas.sort((a, b) {
       return _isAscending
-          ? a.cultura.compareTo(b.cultura)
-          : b.cultura.compareTo(a.cultura);
+          ? a.nome.compareTo(b.nome)
+          : b.nome.compareTo(a.nome);
     });
   }
 
@@ -123,13 +123,13 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     });
   }
 
-  void _onCulturaTap(CulturaHive cultura) {
+  void _onCulturaTap(Cultura cultura) {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
         builder:
             (context) =>
-                PragasPorCulturaDetalhadasPage(culturaIdInicial: cultura.idReg),
+                PragasPorCulturaDetalhadasPage(culturaIdInicial: cultura.idCultura),
       ),
     );
   }

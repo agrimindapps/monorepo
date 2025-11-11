@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import '../../../features/comentarios/data/comentario_model.dart';
 
-part 'comentario_hive.g.dart';
+// part 'comentario_hive.g.dart';
 
 @HiveType(typeId: 108)
 class ComentarioHive extends HiveObject {
@@ -51,10 +51,16 @@ class ComentarioHive extends HiveObject {
   factory ComentarioHive.fromJson(Map<String, dynamic> json) {
     return ComentarioHive(
       sync_objectId: json['sync_objectId'] as String?,
-      sync_createdAt: json['sync_createdAt'] != null ? int.tryParse(json['sync_createdAt'].toString()) : null,
-      sync_updatedAt: json['sync_updatedAt'] != null ? int.tryParse(json['sync_updatedAt'].toString()) : null,
+      sync_createdAt: json['sync_createdAt'] != null
+          ? int.tryParse(json['sync_createdAt'].toString())
+          : null,
+      sync_updatedAt: json['sync_updatedAt'] != null
+          ? int.tryParse(json['sync_updatedAt'].toString())
+          : null,
       idReg: (json['idReg'] as String?) ?? '',
-      sync_deleted: json['sync_deleted'] != null ? json['sync_deleted'] as bool : false,
+      sync_deleted: json['sync_deleted'] != null
+          ? json['sync_deleted'] as bool
+          : false,
       titulo: (json['titulo'] as String?) ?? '',
       conteudo: (json['conteudo'] as String?) ?? '',
       ferramenta: (json['ferramenta'] as String?) ?? '',
@@ -87,7 +93,8 @@ class ComentarioHive extends HiveObject {
       conteudo: conteudo,
       ferramenta: ferramenta,
       pkIdentificador: pkIdentificador,
-      status: !sync_deleted, // Invert: sync_deleted=false means active (status=true)
+      status:
+          !sync_deleted, // Invert: sync_deleted=false means active (status=true)
       createdAt: sync_createdAt != null
           ? DateTime.fromMillisecondsSinceEpoch(sync_createdAt!)
           : DateTime.now(),
@@ -98,7 +105,10 @@ class ComentarioHive extends HiveObject {
   }
 
   /// Cria um ComentarioHive a partir do ComentarioModel
-  static ComentarioHive fromComentarioModel(ComentarioModel model, String userId) {
+  static ComentarioHive fromComentarioModel(
+    ComentarioModel model,
+    String userId,
+  ) {
     return ComentarioHive(
       sync_objectId: model.id,
       idReg: model.idReg,
@@ -106,7 +116,8 @@ class ComentarioHive extends HiveObject {
       conteudo: model.conteudo,
       ferramenta: model.ferramenta,
       pkIdentificador: model.pkIdentificador,
-      sync_deleted: !model.status, // Invert: status=true means sync_deleted=false
+      sync_deleted:
+          !model.status, // Invert: status=true means sync_deleted=false
       userId: userId,
       sync_createdAt: model.createdAt.millisecondsSinceEpoch,
       sync_updatedAt: model.updatedAt.millisecondsSinceEpoch,

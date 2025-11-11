@@ -4,8 +4,8 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/data/models/diagnostico_hive.dart';
-import '../../../../core/data/repositories/diagnostico_hive_repository.dart';
+import '../../../../core/data/models/diagnostico_legacy.dart';
+import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/services/access_history_service.dart';
@@ -165,7 +165,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
   Future<void> _debugDiagnosticosStatus() async {
     try {
       debugPrint('🔧 [FORCE DEBUG] Verificando status dos diagnósticos...');
-      final repository = sl<DiagnosticoHiveRepository>();
+      final repository = sl<DiagnosticoLegacyRepository>();
       final result = await repository.getAll();
       final allDiagnosticos = result.isSuccess
           ? result.data!
@@ -229,7 +229,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
 
   /// Investigar padrões de ID e buscar correspondências
   Future<void> _investigateIdPatterns(
-    DiagnosticoHiveRepository repository,
+    DiagnosticoLegacyRepository repository,
     List<dynamic> allDiagnosticos,
   ) async {
     try {

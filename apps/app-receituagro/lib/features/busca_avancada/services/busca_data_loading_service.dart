@@ -1,16 +1,16 @@
 import 'package:injectable/injectable.dart';
 
-import '../../../core/data/repositories/cultura_hive_repository.dart';
-import '../../../core/data/repositories/fitossanitario_hive_repository.dart';
-import '../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../core/data/repositories/cultura_legacy_repository.dart';
+import '../../../core/data/repositories/fitossanitario_legacy_repository.dart';
+import '../../../core/data/repositories/pragas_legacy_repository.dart';
 
 /// Service specialized in loading and formatting data for search dropdowns
 /// Principle: Single Responsibility - Only handles data loading and transformation
 @lazySingleton
 class BuscaDataLoadingService {
-  final CulturaHiveRepository _culturaRepo;
-  final PragasHiveRepository _pragasRepo;
-  final FitossanitarioHiveRepository _fitossanitarioRepo;
+  final CulturaLegacyRepository _culturaRepo;
+  final PragasLegacyRepository _pragasRepo;
+  final FitossanitarioLegacyRepository _fitossanitarioRepo;
 
   BuscaDataLoadingService(
     this._culturaRepo,

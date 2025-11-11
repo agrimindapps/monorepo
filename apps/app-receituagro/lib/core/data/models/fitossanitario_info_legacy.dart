@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-part 'fitossanitario_info_hive.g.dart';
+// part 'fitossanitario_info_hive.g.dart';
 
 @HiveType(typeId: 103)
 class FitossanitarioInfoHive extends HiveObject {
@@ -58,8 +58,12 @@ class FitossanitarioInfoHive extends HiveObject {
   factory FitossanitarioInfoHive.fromJson(Map<String, dynamic> json) {
     return FitossanitarioInfoHive(
       objectId: (json['objectId'] as String?) ?? '',
-      createdAt: json['createdAt'] != null ? int.tryParse(json['createdAt'].toString()) ?? 0 : 0,
-      updatedAt: json['updatedAt'] != null ? int.tryParse(json['updatedAt'].toString()) ?? 0 : 0,
+      createdAt: json['createdAt'] != null
+          ? int.tryParse(json['createdAt'].toString()) ?? 0
+          : 0,
+      updatedAt: json['updatedAt'] != null
+          ? int.tryParse(json['updatedAt'].toString()) ?? 0
+          : 0,
       idReg: (json['idReg'] as String?) ?? '',
       embalagens: json['embalagens'] as String?,
       tecnologia: json['tecnologia'] as String?,

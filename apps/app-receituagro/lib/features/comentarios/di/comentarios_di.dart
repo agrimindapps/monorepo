@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../core/data/repositories/comentarios_hive_repository.dart';
+import '../../../core/data/repositories/comentarios_legacy_repository.dart';
 import '../../../core/services/error_handler_service.dart';
 import '../data/repositories/comentarios_repository_impl.dart';
 import '../data/services/comentarios_id_service.dart';
@@ -45,7 +45,7 @@ class ComentariosDI {
     // Register repository with mapper dependency
     getIt.registerFactory<IComentariosRepository>(
       () => ComentariosRepositoryImpl(
-        getIt<ComentariosHiveRepository>(),
+        getIt<ComentariosLegacyRepository>(),
         getIt<IComentariosMapper>(),
       ),
     );

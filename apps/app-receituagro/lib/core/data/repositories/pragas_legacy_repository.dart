@@ -1,11 +1,11 @@
 import 'package:core/core.dart' hide Column;
 
-import '../models/pragas_hive.dart';
+import '../models/pragas_legacy.dart';
 
 /// Repositório para PragasHive
 /// Implementa os métodos abstratos do BaseHiveRepository
-class PragasHiveRepository extends BaseHiveRepository<PragasHive> {
-  PragasHiveRepository()
+class PragasLegacyRepository extends BaseHiveRepository<PragasHive> {
+  PragasLegacyRepository()
     : super(
         hiveManager: GetIt.instance<IHiveManager>(),
         boxName: 'receituagro_pragas',

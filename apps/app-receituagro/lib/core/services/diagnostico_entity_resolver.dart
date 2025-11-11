@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
-import '../data/repositories/cultura_hive_repository.dart';
-import '../data/repositories/fitossanitario_hive_repository.dart';
-import '../data/repositories/pragas_hive_repository.dart';
+import '../data/repositories/cultura_legacy_repository.dart';
+import '../data/repositories/fitossanitario_legacy_repository.dart';
+import '../data/repositories/pragas_legacy_repository.dart';
 import '../di/injection_container.dart';
 
 /// Serviço unificado para resolver nomes de entidades em diagnósticos
@@ -23,9 +23,9 @@ class DiagnosticoEntityResolver {
   static DiagnosticoEntityResolver get instance => _instance ??= DiagnosticoEntityResolver._internal();
   
   DiagnosticoEntityResolver._internal();
-  late final CulturaHiveRepository _culturaRepository = sl<CulturaHiveRepository>();
-  late final FitossanitarioHiveRepository _defensivoRepository = sl<FitossanitarioHiveRepository>();
-  late final PragasHiveRepository _pragasRepository = sl<PragasHiveRepository>();
+  late final CulturaLegacyRepository _culturaRepository = sl<CulturaLegacyRepository>();
+  late final FitossanitarioLegacyRepository _defensivoRepository = sl<FitossanitarioLegacyRepository>();
+  late final PragasLegacyRepository _pragasRepository = sl<PragasLegacyRepository>();
   final Map<String, String> _culturaCache = {};
   final Map<String, String> _defensivoCache = {};
   final Map<String, String> _pragaCache = {};

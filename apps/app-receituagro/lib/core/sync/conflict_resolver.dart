@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide ConflictResolutionStrategy, Column;
 import '../data/models/base_sync_model.dart';
-import '../data/models/comentario_hive.dart';
-import '../data/models/diagnostico_hive.dart';
+import '../data/models/comentario_legacy.dart';
+import '../data/models/diagnostico_legacy.dart';
 import 'conflict_resolution_strategy.dart';
 
 @injectable

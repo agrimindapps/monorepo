@@ -1,7 +1,7 @@
 import 'package:app_receituagro/core/di/injection.dart' as di;
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../../../core/services/access_history_service.dart';
 import '../../domain/entities/praga_entity.dart';
 import '../services/pragas_error_message_service.dart';
@@ -15,13 +15,13 @@ part 'pragas_notifier.g.dart';
 class PragasNotifier extends _$PragasNotifier {
   late final AccessHistoryService _historyService;
   late final PragasErrorMessageService _errorService;
-  late final PragasHiveRepository _pragasRepository;
+  late final PragasLegacyRepository _pragasRepository;
 
   @override
   Future<PragasState> build() async {
     _historyService = AccessHistoryService();
     _errorService = di.getIt<PragasErrorMessageService>();
-    _pragasRepository = GetIt.instance<PragasHiveRepository>();
+    _pragasRepository = GetIt.instance<PragasLegacyRepository>();
     return await _loadInitialData();
   }
 

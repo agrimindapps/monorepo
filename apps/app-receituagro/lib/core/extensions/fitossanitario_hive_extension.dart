@@ -1,4 +1,4 @@
-import '../data/models/fitossanitario_hive.dart';
+import '../data/models/fitossanitario_legacy.dart';
 
 /// Extensão para FitossanitarioHive com métodos display compatíveis com DefensivoModel
 extension FitossanitarioHiveExtension on FitossanitarioHive {

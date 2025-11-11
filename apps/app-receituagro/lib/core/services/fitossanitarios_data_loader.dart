@@ -4,7 +4,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import '../data/repositories/fitossanitario_hive_repository.dart';
+import '../data/repositories/fitossanitario_legacy_repository.dart';
 import '../di/injection_container.dart' as di;
 
 /// Serviço para carregar dados de fitossanitários dos assets JSON
@@ -76,7 +76,7 @@ class FitossanitariosDataLoader {
       print(
         '🛡️ [FITOSSANITARIOS] JSON carregado: ${allFitossanitarios.length} registros totais, ${fitossanitarios.length} fitossanitários válidos',
       );
-      final repository = di.sl<FitossanitarioHiveRepository>();
+      final repository = di.sl<FitossanitarioLegacyRepository>();
       final result = await repository.loadFromJson(fitossanitarios, '1.0.0');
 
       result.fold(
@@ -131,7 +131,7 @@ class FitossanitariosDataLoader {
   /// Verifica se dados estão carregados
   static Future<bool> isDataLoaded() async {
     try {
-      final repository = di.sl<FitossanitarioHiveRepository>();
+      final repository = di.sl<FitossanitarioLegacyRepository>();
       final result = await repository.getAll();
 
       if (result.isSuccess) {
@@ -163,7 +163,7 @@ class FitossanitariosDataLoader {
   /// Obtém estatísticas de carregamento
   static Future<Map<String, dynamic>> getStats() async {
     try {
-      final repository = di.sl<FitossanitarioHiveRepository>();
+      final repository = di.sl<FitossanitarioLegacyRepository>();
       final result = await repository.getAll();
 
       if (result.isSuccess) {

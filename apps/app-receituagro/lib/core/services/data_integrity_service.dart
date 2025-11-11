@@ -3,11 +3,11 @@ import 'dart:developer' as developer;
 import 'package:dartz/dartz.dart';
 import 'package:core/core.dart' hide Column;
 
-import '../data/models/cultura_hive.dart';
-import '../data/models/diagnostico_hive.dart';
-import '../data/models/fitossanitario_hive.dart';
-import '../data/models/pragas_hive.dart';
-import '../utils/hive_box_manager.dart';
+import '../data/models/cultura_legacy.dart';
+import '../data/models/diagnostico_legacy.dart';
+import '../data/models/fitossanitario_legacy.dart';
+import '../data/models/pragas_legacy.dart';
+import '../utils/box_manager.dart';
 
 /// Relatório de integridade referencial dos dados
 ///
@@ -111,8 +111,8 @@ class DataIntegrityService {
         name: 'DataIntegrityService.validateIntegrity',
       );
 
-      // Usa HiveBoxManager para abrir múltiplas boxes de forma segura
-      final result = await HiveBoxManager.withMultipleBoxes<IntegrityReport>(
+      // Usa BoxManager para abrir múltiplas boxes de forma segura
+      final result = await BoxManager.withMultipleBoxes<IntegrityReport>(
         hiveManager: _hiveManager,
         boxNames: [
           _diagnosticoBoxName,
@@ -200,7 +200,7 @@ class DataIntegrityService {
         },
       );
 
-      return result;
+      return result.toEither();
     } catch (e, stackTrace) {
       developer.log(
         'Error during integrity validation: $e',
@@ -221,13 +221,9 @@ class DataIntegrityService {
     DiagnosticoHive diagnostico,
   ) async {
     try {
-      final result = await HiveBoxManager.withMultipleBoxes<List<String>>(
+      final result = await BoxManager.withMultipleBoxes<List<String>>(
         hiveManager: _hiveManager,
-        boxNames: [
-          _defensivoBoxName,
-          _pragasBoxName,
-          _culturasBoxName,
-        ],
+        boxNames: [_defensivoBoxName, _pragasBoxName, _culturasBoxName],
         operation: (boxes) async {
           final defensivoBox = boxes[_defensivoBoxName]!;
           final pragasBox = boxes[_pragasBoxName]!;
@@ -279,7 +275,7 @@ class DataIntegrityService {
         },
       );
 
-      return result;
+      return result.toEither();
     } catch (e, stackTrace) {
       developer.log(
         'Error validating diagnostico: $e',
@@ -297,27 +293,26 @@ class DataIntegrityService {
   Future<Either<Failure, Map<String, dynamic>>> getIntegrityStatistics() async {
     final reportResult = await validateIntegrity();
 
-    return reportResult.map((report) => {
-          'isValid': report.isValid,
-          'totalDiagnosticos': report.totalDiagnosticos,
-          'totalWithIssues': report.totalWithIssues,
-          'totalIssues': report.totalIssues,
-          'integrityPercentage': report.totalDiagnosticos > 0
-              ? ((report.totalDiagnosticos - report.totalWithIssues) /
+    return reportResult.map(
+      (report) => {
+        'isValid': report.isValid,
+        'totalDiagnosticos': report.totalDiagnosticos,
+        'totalWithIssues': report.totalWithIssues,
+        'totalIssues': report.totalIssues,
+        'integrityPercentage': report.totalDiagnosticos > 0
+            ? ((report.totalDiagnosticos - report.totalWithIssues) /
                       report.totalDiagnosticos *
                       100)
                   .toStringAsFixed(2)
-              : '100.00',
-        });
+            : '100.00',
+      },
+    );
   }
 
   // ========== Helper Methods ==========
 
   /// Cria um Set de IDs a partir de uma box para busca rápida
-  Set<String> _buildIdSet<T>(
-    Box<dynamic> box,
-    String Function(T) idExtractor,
-  ) {
+  Set<String> _buildIdSet<T>(Box<dynamic> box, String Function(T) idExtractor) {
     final Set<String> ids = {};
 
     for (final item in box.values) {

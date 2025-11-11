@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-part 'favorito_item_hive.g.dart';
+// part 'favorito_item_hive.g.dart';
 
 @HiveType(typeId: 110)
 class FavoritoItemHive extends HiveObject {

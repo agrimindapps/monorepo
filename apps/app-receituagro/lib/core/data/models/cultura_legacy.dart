@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-part 'cultura_hive.g.dart';
+// part 'cultura_hive.g.dart';
 
 @HiveType(typeId: 100)
 class CulturaHive extends HiveObject {
@@ -53,9 +53,11 @@ class CulturaHive extends HiveObject {
       'cultura': cultura,
     };
   }
+
   String get nome => cultura;
   String get nomeComum => cultura;
-  String get nomeCientifico => cultura; // Por enquanto, vamos usar o mesmo valor
+  String get nomeCientifico =>
+      cultura; // Por enquanto, vamos usar o mesmo valor
 
   @override
   String toString() {

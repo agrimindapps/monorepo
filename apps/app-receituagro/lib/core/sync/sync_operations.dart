@@ -2,10 +2,10 @@ import 'dart:async';
 import 'package:core/core.dart' hide SyncQueue, SyncQueueItem, Column;
 import 'package:flutter/foundation.dart';
 import '../../features/comentarios/data/comentario_model.dart';
-import '../data/models/diagnostico_hive.dart';
+import '../data/models/diagnostico_legacy.dart';
 import '../data/models/sync_queue_item.dart';
-import '../data/repositories/comentarios_hive_repository.dart';
-import '../data/repositories/diagnostico_hive_repository.dart';
+import '../data/repositories/comentarios_legacy_repository.dart';
+import '../data/repositories/diagnostico_legacy_repository.dart';
 import 'sync_queue.dart';
 
 /// Handles sync operations with queue management
@@ -16,8 +16,8 @@ class SyncOperations {
   final ConnectivityService _connectivityService;
 
   // Repositories for data persistence
-  late final ComentariosHiveRepository _comentariosRepo;
-  late final DiagnosticoHiveRepository _diagnosticoRepo;
+  late final ComentariosLegacyRepository _comentariosRepo;
+  late final DiagnosticoLegacyRepository _diagnosticoRepo;
 
   late StreamSubscription<ConnectivityType> _networkSubscription;
   bool _isProcessingSync = false;
@@ -26,20 +26,20 @@ class SyncOperations {
   SyncOperations(this._syncQueue, this._connectivityService) {
     // Initialize repositories from GetIt
     try {
-      _comentariosRepo = GetIt.instance<ComentariosHiveRepository>();
+      _comentariosRepo = GetIt.instance<ComentariosLegacyRepository>();
     } catch (e) {
-      _comentariosRepo = ComentariosHiveRepository();
+      _comentariosRepo = ComentariosLegacyRepository();
       if (kDebugMode) {
-        print('⚠️ ComentariosHiveRepository not registered in GetIt, creating new instance');
+        print('⚠️ ComentariosLegacyRepository not registered in GetIt, creating new instance');
       }
     }
 
     try {
-      _diagnosticoRepo = GetIt.instance<DiagnosticoHiveRepository>();
+      _diagnosticoRepo = GetIt.instance<DiagnosticoLegacyRepository>();
     } catch (e) {
-      _diagnosticoRepo = DiagnosticoHiveRepository();
+      _diagnosticoRepo = DiagnosticoLegacyRepository();
       if (kDebugMode) {
-        print('⚠️ DiagnosticoHiveRepository not registered in GetIt, creating new instance');
+        print('⚠️ DiagnosticoLegacyRepository not registered in GetIt, creating new instance');
       }
     }
   }

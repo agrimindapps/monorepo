@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../../core/data/models/fitossanitario_hive.dart';
+import '../../../../core/data/models/fitossanitario_legacy.dart';
 import '../../../../core/extensions/fitossanitario_hive_extension.dart';
 import '../../../../core/theme/receituagro_colors.dart';
 

@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/data/repositories/cultura_hive_repository.dart';
+import '../../../../core/data/repositories/cultura_legacy_repository.dart';
 import '../../domain/entities/cultura_entity.dart';
 import '../../domain/repositories/i_culturas_repository.dart';
 import '../mappers/cultura_mapper.dart';
@@ -21,7 +21,7 @@ import '../services/culturas_search_service.dart';
 /// Segue padrões Clean Architecture + Either pattern para error handling
 @LazySingleton(as: ICulturasRepository)
 class CulturasRepositoryImpl implements ICulturasRepository {
-  final CulturaHiveRepository _hiveRepository;
+  final CulturaLegacyRepository _hiveRepository;
   final ICulturasQueryService _queryService;
   final ICulturasSearchService _searchService;
 

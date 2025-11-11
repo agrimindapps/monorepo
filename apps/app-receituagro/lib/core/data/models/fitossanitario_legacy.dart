@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-part 'fitossanitario_hive.g.dart';
+// part 'fitossanitario_hive.g.dart';
 
 @HiveType(typeId: 102)
 class FitossanitarioHive extends HiveObject {
@@ -90,8 +90,12 @@ class FitossanitarioHive extends HiveObject {
   factory FitossanitarioHive.fromJson(Map<String, dynamic> json) {
     return FitossanitarioHive(
       objectId: json['objectId'] as String?,
-      createdAt: json['createdAt'] != null ? int.tryParse(json['createdAt'].toString()) : null,
-      updatedAt: json['updatedAt'] != null ? int.tryParse(json['updatedAt'].toString()) : null,
+      createdAt: json['createdAt'] != null
+          ? int.tryParse(json['createdAt'].toString())
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? int.tryParse(json['updatedAt'].toString())
+          : null,
       idReg: (json['idReg'] as String?) ?? '',
       status: json['status'] != null ? json['status'] as bool : false,
       nomeComum: (json['nomeComum'] as String?) ?? '',
@@ -99,8 +103,9 @@ class FitossanitarioHive extends HiveObject {
       classeAgronomica: json['classeAgronomica'] as String?,
       fabricante: json['fabricante'] as String?,
       classAmbiental: json['classAmbiental'] as String?,
-      comercializado:
-          json['comercializado'] != null ? int.tryParse(json['comercializado'].toString()) ?? 0 : 0,
+      comercializado: json['comercializado'] != null
+          ? int.tryParse(json['comercializado'].toString()) ?? 0
+          : 0,
       corrosivo: json['corrosivo'] as String?,
       inflamavel: json['inflamavel'] as String?,
       formulacao: json['formulacao'] as String?,
@@ -134,7 +139,7 @@ class FitossanitarioHive extends HiveObject {
       'toxico': toxico,
       'ingredienteAtivo': ingredienteAtivo,
       'quantProduto': quantProduto,
-      'elegivel': elegivel
+      'elegivel': elegivel,
     };
   }
 

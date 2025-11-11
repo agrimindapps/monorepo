@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../../../../../core/data/models/pragas_hive.dart';
-import '../../../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../../../core/data/models/pragas_legacy.dart';
+import '../../../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../../../../../core/di/injection_container.dart';
 import '../../../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../../../core/widgets/praga_image_widget.dart';
@@ -64,7 +64,7 @@ class _DiagnosticoDefensivoDialogWidgetState
     try {
       final nomePraga = _getProperty('nomePraga', 'grupo');
       if (nomePraga != null && nomePraga.isNotEmpty) {
-        final pragaRepository = sl<PragasHiveRepository>();
+        final pragaRepository = sl<PragasLegacyRepository>();
         final praga = await pragaRepository.findByNomeComum(nomePraga);
         if (mounted) {
           setState(() {

@@ -158,10 +158,10 @@ class TypedBoxAdapter<T extends HiveObject> {
 ///
 /// **Uso:**
 /// ```dart
-/// class ComentariosHiveRepository
+/// class ComentariosLegacyRepository
 ///     extends TypedDynamicBoxRepository<ComentarioHive> {
 ///
-///   ComentariosHiveRepository() : super(
+///   ComentariosLegacyRepository() : super(
 ///     hiveManager: GetIt.instance<IHiveManager>(),
 ///     boxName: 'comentarios',
 ///   );

@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
 
-import '../../../core/data/repositories/cultura_legacy_repository.dart';
+import '../../../database/repositories/culturas_repository.dart';
 import '../../../core/data/repositories/fitossanitario_legacy_repository.dart';
 import '../../../core/data/repositories/pragas_legacy_repository.dart';
 
@@ -8,7 +8,7 @@ import '../../../core/data/repositories/pragas_legacy_repository.dart';
 /// Principle: Single Responsibility - Only handles data loading and transformation
 @lazySingleton
 class BuscaDataLoadingService {
-  final CulturaLegacyRepository _culturaRepo;
+  final CulturasRepository _culturaRepo;
   final PragasLegacyRepository _pragasRepo;
   final FitossanitarioLegacyRepository _fitossanitarioRepo;
 
@@ -20,17 +20,17 @@ class BuscaDataLoadingService {
 
   /// Loads all culturas and formats them for dropdown display
   Future<List<Map<String, String>>> loadCulturas() async {
-    final result = await _culturaRepo.getAll();
+    try {
+      final result = await _culturaRepo.findAll();
+      
+      final culturas =
+          result.map((c) => {'id': c.idCultura, 'nome': c.nome}).toList()
+            ..sort((a, b) => a['nome']!.compareTo(b['nome']!));
 
-    if (result.isError) {
+      return culturas;
+    } catch (e) {
       return [];
     }
-
-    final culturas =
-        result.data!.map((c) => {'id': c.idReg, 'nome': c.cultura}).toList()
-          ..sort((a, b) => a['nome']!.compareTo(b['nome']!));
-
-    return culturas;
   }
 
   /// Loads all pragas and formats them for dropdown display

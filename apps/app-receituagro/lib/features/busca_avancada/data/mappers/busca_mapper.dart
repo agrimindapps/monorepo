@@ -2,7 +2,7 @@ import '../../../../core/data/models/cultura_legacy.dart';
 import '../../../../core/data/models/diagnostico_legacy.dart';
 import '../../../../core/data/models/fitossanitario_legacy.dart';
 import '../../../../core/data/models/pragas_legacy.dart';
-import '../../../../core/data/repositories/cultura_legacy_repository.dart';
+import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../core/data/repositories/fitossanitario_legacy_repository.dart';
 import '../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../../../core/di/injection_container.dart';
@@ -25,10 +25,13 @@ class BuscaMapper {
       if (defensivo != null && defensivo.nomeComum.isNotEmpty) {
         defensivoNome = defensivo.nomeComum;
       }
-      final culturaRepo = sl<CulturaLegacyRepository>();
-      final cultura = await culturaRepo.getById(diagnostico.fkIdCultura);
-      if (cultura != null && cultura.cultura.isNotEmpty) {
-        culturaNome = cultura.cultura;
+      final culturaRepo = sl<CulturasRepository>();
+      final culturaIdInt = int.tryParse(diagnostico.fkIdCultura);
+      if (culturaIdInt != null) {
+        final cultura = await culturaRepo.findById(culturaIdInt);
+        if (cultura != null && cultura.nome.isNotEmpty) {
+          culturaNome = cultura.nome;
+        }
       }
       final pragaRepo = sl<PragasLegacyRepository>();
       final praga = await pragaRepo.getById(diagnostico.fkIdPraga);

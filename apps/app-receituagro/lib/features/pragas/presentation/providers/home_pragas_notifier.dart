@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/data/repositories/cultura_legacy_repository.dart';
+import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/praga_entity.dart';
 import '../services/pragas_type_service.dart';
@@ -122,11 +122,11 @@ class HomePragasState {
 /// Notifier para gerenciamento de estado da página Home de Pragas
 @Riverpod(keepAlive: true)
 class HomePragasNotifier extends _$HomePragasNotifier {
-  late final CulturaLegacyRepository _culturaRepository;
+  late final CulturasRepository _culturaRepository;
 
   @override
   Future<HomePragasState> build() async {
-    _culturaRepository = di.sl<CulturaLegacyRepository>();
+    _culturaRepository = di.sl<CulturasRepository>();
     return await _initialize();
   }
 
@@ -169,8 +169,8 @@ class HomePragasNotifier extends _$HomePragasNotifier {
   /// Carrega dados de culturas do repositório
   Future<int> _loadCulturaData() async {
     try {
-      final culturasResult = await _culturaRepository.getAll();
-      return culturasResult.fold((failure) => 0, (culturas) => culturas.length);
+      final culturas = await _culturaRepository.findAll();
+      return culturas.length;
     } catch (e) {
       return 0;
     }

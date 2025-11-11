@@ -1,5 +1,5 @@
 import '../data/models/diagnostico_legacy.dart';
-import '../data/repositories/cultura_legacy_repository.dart';
+import '../../database/repositories/culturas_repository.dart';
 import '../data/repositories/diagnostico_legacy_repository.dart';
 import '../data/repositories/fitossanitario_legacy_repository.dart';
 import '../data/repositories/pragas_legacy_repository.dart';
@@ -123,13 +123,13 @@ class DataIntegrityValidator {
   final DiagnosticoLegacyRepository _diagnosticoRepo;
   final FitossanitarioLegacyRepository _defensivoRepo;
   final PragasLegacyRepository _pragaRepo;
-  final CulturaLegacyRepository _culturaRepo;
+  final CulturasRepository _culturaRepo;
 
   DataIntegrityValidator({
     required DiagnosticoLegacyRepository diagnosticoRepo,
     required FitossanitarioLegacyRepository defensivoRepo,
     required PragasLegacyRepository pragaRepo,
-    required CulturaLegacyRepository culturaRepo,
+    required CulturasRepository culturaRepo,
   }) : _diagnosticoRepo = diagnosticoRepo,
        _defensivoRepo = defensivoRepo,
        _pragaRepo = pragaRepo,
@@ -221,17 +221,19 @@ class DataIntegrityValidator {
           ),
         );
       } else {
-        final culturaExists =
-            await _culturaRepo.getById(diag.fkIdCultura) != null;
-        if (!culturaExists) {
-          issues.add(
-            IntegrityIssue.brokenForeignKey(
-              'diagnostico',
-              diag.idReg,
-              'cultura',
-              diag.fkIdCultura,
-            ),
-          );
+        final idCulturaInt = int.tryParse(diag.fkIdCultura);
+        if (idCulturaInt != null) {
+          final culturaExists = await _culturaRepo.findById(idCulturaInt) != null;
+          if (!culturaExists) {
+            issues.add(
+              IntegrityIssue.brokenForeignKey(
+                'diagnostico',
+                diag.idReg,
+                'cultura',
+                diag.fkIdCultura,
+              ),
+            );
+          }
         }
       }
 

@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../../core/extensions/praga_drift_extension.dart';
 import '../../../core/services/diagnostico_integration_service.dart';
 
 /// Bottom sheet especializado para exibir defensivos de uma praga
@@ -39,7 +40,7 @@ class DefensivosBottomSheet extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
-    final pragaName = pragaPorCultura.praga.nomeComum;
+    final pragaName = pragaPorCultura.praga.displayName;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -109,9 +110,8 @@ class DefensivosBottomSheet extends StatelessWidget {
 
     return ListView.separated(
       itemCount: defensivos.length,
-      separatorBuilder:
-          (context, index) =>
-              Divider(color: theme.dividerColor.withValues(alpha: 0.3)),
+      separatorBuilder: (context, index) =>
+          Divider(color: theme.dividerColor.withValues(alpha: 0.3)),
       itemBuilder: (context, index) {
         final defensivo = defensivos[index];
         return _buildDefensivoTile(context, defensivo, index);
@@ -233,11 +233,10 @@ class DefensivosBottomSheet extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder:
-          (context) => DefensivosBottomSheet(
-            pragaPorCultura: pragaPorCultura,
-            onDefensivoTap: onDefensivoTap,
-          ),
+      builder: (context) => DefensivosBottomSheet(
+        pragaPorCultura: pragaPorCultura,
+        onDefensivoTap: onDefensivoTap,
+      ),
     );
   }
 }

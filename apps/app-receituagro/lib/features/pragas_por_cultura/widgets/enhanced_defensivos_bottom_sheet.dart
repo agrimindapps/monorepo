@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../../core/extensions/praga_drift_extension.dart';
 import '../../../core/services/diagnostico_compatibility_service_drift.dart';
 import '../../../core/services/diagnostico_entity_resolver_drift.dart';
 import '../../../core/services/diagnostico_integration_service.dart';
@@ -64,7 +65,7 @@ class _EnhancedDefensivosBottomSheetState
             .validateFullCompatibility(
               idDefensivo: defensivo,
               idCultura: '', // Cultura não disponível em PragaPorCultura
-              idPraga: widget.pragaPorCultura.praga.idReg,
+              idPraga: widget.pragaPorCultura.praga.idPraga,
               includeAlternatives: false,
             );
 
@@ -129,7 +130,7 @@ class _EnhancedDefensivosBottomSheetState
 
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
-    final pragaName = widget.pragaPorCultura.praga.nomeComum;
+    final pragaName = widget.pragaPorCultura.praga.displayName;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),

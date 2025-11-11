@@ -1,4 +1,5 @@
 import '../../../../core/data/models/fitossanitario_hive.dart';
+import '../../../../database/receituagro_database.dart';
 
 /// Entity que representa os detalhes de um defensivo
 /// Encapsula dados vindos do FitossanitarioHive mantendo clean architecture
@@ -52,6 +53,26 @@ class DefensivoDetailsEntity {
       formulacao: hive.formulacao,
       idReg: hive.idReg,
       mapa: hive.mapa,
+    );
+  }
+
+  /// Cria entity a partir do modelo Drift
+  factory DefensivoDetailsEntity.fromDrift(Fitossanitario drift) {
+    return DefensivoDetailsEntity(
+      id: drift.idDefensivo,
+      nomeComum: drift.nomeComum ?? drift.nome,
+      nomeTecnico: drift.nome,
+      fabricante: drift.fabricante ?? 'Não informado',
+      ingredienteAtivo: drift.ingredienteAtivo ?? 'Não informado',
+      toxico: null, // Não disponível no Drift
+      inflamavel: null, // Não disponível no Drift
+      corrosivo: null, // Não disponível no Drift
+      modoAcao: null, // Não disponível no Drift
+      classeAgronomica: drift.classeAgronomica,
+      classAmbiental: null, // Não disponível no Drift
+      formulacao: null, // Não disponível no Drift
+      idReg: drift.registroMapa,
+      mapa: drift.registroMapa,
     );
   }
 

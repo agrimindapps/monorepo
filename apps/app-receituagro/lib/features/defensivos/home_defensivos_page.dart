@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../core/data/models/fitossanitario_hive.dart';
+import '../../database/receituagro_database.dart';
 import '../../core/services/receituagro_navigation_service.dart';
 import '../../core/theme/design_tokens.dart';
 import 'presentation/providers/home_defensivos_notifier.dart';
@@ -119,7 +119,7 @@ class _HomeDefensivosPageState extends ConsumerState<HomeDefensivosPage> {
   void _navigateToDefensivoDetails(
     String defensivoName,
     String fabricante,
-    FitossanitarioHive defensivo,
+    Fitossanitario defensivo,
   ) {
     ref
         .read(homeDefensivosNotifierProvider.notifier)

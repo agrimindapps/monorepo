@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../core/extensions/diagnostico_detalhado_extension.dart';
+import '../../../core/extensions/praga_drift_extension.dart';
 import '../../../core/services/diagnostico_integration_service.dart';
 import '../../../core/widgets/praga_image_widget.dart';
 
@@ -27,10 +28,9 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
       elevation: pragaPorCultura.isCritica ? 4 : 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side:
-            pragaPorCultura.isCritica
-                ? const BorderSide(color: Colors.red, width: 1)
-                : BorderSide.none,
+        side: pragaPorCultura.isCritica
+            ? const BorderSide(color: Colors.red, width: 1)
+            : BorderSide.none,
       ),
       child: InkWell(
         onTap: onTap,
@@ -58,7 +58,7 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
     return Row(
       children: [
         PragaImageWidget(
-          nomeCientifico: pragaPorCultura.praga.nomeCientifico,
+          nomeCientifico: pragaPorCultura.praga.displaySecondaryName,
           width: 60,
           height: 60,
           fit: BoxFit.cover,
@@ -69,10 +69,9 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors:
-                    pragaPorCultura.isCritica
-                        ? [Colors.red.shade400, Colors.red.shade600]
-                        : [Colors.orange.shade400, Colors.orange.shade600],
+                colors: pragaPorCultura.isCritica
+                    ? [Colors.red.shade400, Colors.red.shade600]
+                    : [Colors.orange.shade400, Colors.orange.shade600],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -93,7 +92,7 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                pragaPorCultura.praga.nomeComum,
+                pragaPorCultura.praga.displayName,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -105,7 +104,7 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
               ...[
                 const SizedBox(height: 4),
                 Text(
-                  pragaPorCultura.praga.nomeCientifico,
+                  pragaPorCultura.praga.displaySecondaryName,
                   style: TextStyle(
                     fontSize: 12,
                     fontStyle: FontStyle.italic,
@@ -177,10 +176,9 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
           Wrap(
             spacing: 12,
             runSpacing: 8,
-            children:
-                info.entries.take(4).map((entry) {
-                  return _buildTaxonomiaItem(theme, entry.key, entry.value);
-                }).toList(),
+            children: info.entries.take(4).map((entry) {
+              return _buildTaxonomiaItem(theme, entry.key, entry.value);
+            }).toList(),
           ),
         ],
       ),

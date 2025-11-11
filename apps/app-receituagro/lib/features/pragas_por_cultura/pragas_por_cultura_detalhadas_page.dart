@@ -2,7 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/data/models/pragas_hive.dart';
+import '../../database/receituagro_database.dart';
 import '../../core/services/diagnostico_integration_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../pragas/widgets/praga_cultura_tab_bar_widget.dart';
@@ -40,8 +40,7 @@ class _PragasPorCulturaDetalhadasPageState
 
     // Initialize ViewModel and load data
     Future.microtask(() {
-      final viewModel =
-          ref.read(pragasCulturaPageViewModelProvider.notifier);
+      final viewModel = ref.read(pragasCulturaPageViewModelProvider.notifier);
       viewModel.loadCulturas();
       if (widget.culturaIdInicial != null) {
         viewModel.loadPragasForCultura(widget.culturaIdInicial!);
@@ -58,8 +57,7 @@ class _PragasPorCulturaDetalhadasPageState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(pragasCulturaPageViewModelProvider);
-    final viewModel =
-        ref.read(pragasCulturaPageViewModelProvider.notifier);
+    final viewModel = ref.read(pragasCulturaPageViewModelProvider.notifier);
     final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -83,10 +81,12 @@ class _PragasPorCulturaDetalhadasPageState
                             margin: const EdgeInsets.all(8.0),
                             child: CulturaSelectorWidget(
                               culturas: state.culturas
-                                  .map((c) => {
-                                        'id': c['id'] ?? '',
-                                        'nome': c['nome'] ?? '',
-                                      })
+                                  .map(
+                                    (c) => {
+                                      'id': c['id'] ?? '',
+                                      'nome': c['nome'] ?? '',
+                                    },
+                                  )
                                   .toList()
                                   .cast<Map<String, String>>(),
                               culturaIdSelecionada: _extractCulturaId(state),
@@ -103,8 +103,7 @@ class _PragasPorCulturaDetalhadasPageState
                             child: PragasCulturaStateHandler(
                               state: PragasCulturaState.initial,
                               errorMessage: null,
-                              onRetry: () =>
-                                  viewModel.refreshData(),
+                              onRetry: () => viewModel.refreshData(),
                             ),
                           )
                         else if (state.isLoading)
@@ -112,8 +111,7 @@ class _PragasPorCulturaDetalhadasPageState
                             child: PragasCulturaStateHandler(
                               state: PragasCulturaState.loading,
                               errorMessage: null,
-                              onRetry: () =>
-                                  viewModel.refreshData(),
+                              onRetry: () => viewModel.refreshData(),
                             ),
                           )
                         else if (state.erro != null)
@@ -121,8 +119,7 @@ class _PragasPorCulturaDetalhadasPageState
                             child: PragasCulturaStateHandler(
                               state: PragasCulturaState.error,
                               errorMessage: state.erro,
-                              onRetry: () =>
-                                  viewModel.refreshData(),
+                              onRetry: () => viewModel.refreshData(),
                             ),
                           )
                         else if (state.pragasFiltradasOrdenadas.isEmpty)
@@ -130,8 +127,7 @@ class _PragasPorCulturaDetalhadasPageState
                             child: PragasCulturaStateHandler(
                               state: PragasCulturaState.empty,
                               errorMessage: null,
-                              onRetry: () =>
-                                  viewModel.refreshData(),
+                              onRetry: () => viewModel.refreshData(),
                             ),
                           )
                         else ...[
@@ -143,20 +139,16 @@ class _PragasPorCulturaDetalhadasPageState
                               ),
                               child: EstatisticasCulturaWidget(
                                 nomeCultura: _extractCulturaNome(state),
-                                pragasPorCultura:
-                                    state.pragasFiltradasOrdenadas
-                                        .map(_mapToPragaPorCultura)
-                                        .toList(),
+                                pragasPorCultura: state.pragasFiltradasOrdenadas
+                                    .map(_mapToPragaPorCultura)
+                                    .toList(),
                                 ordenacao: state.filtroAtual.sortBy,
                                 filtroTipo: _extractFiltroTipo(state),
                                 onOrdenacaoChanged: (valor) {
                                   viewModel.sortPragas(valor);
                                 },
                                 onFiltroTipoChanged: (valor) {
-                                  _applyFilterByType(
-                                    valor,
-                                    viewModel,
-                                  );
+                                  _applyFilterByType(valor, viewModel);
                                 },
                               ),
                             ),
@@ -239,20 +231,15 @@ class _PragasPorCulturaDetalhadasPageState
       rightIcon: Icons.sort,
       isDark: isDark,
       showBackButton: true,
-      showActions: state.pragasFiltradasOrdenadas.isNotEmpty &&
-          state.erro == null,
+      showActions:
+          state.pragasFiltradasOrdenadas.isNotEmpty && state.erro == null,
       onBackPressed: () => Navigator.of(context).pop(),
-      onRightIconPressed: () =>
-          _mostrarOpcoesOrdenacao(viewModel),
+      onRightIconPressed: () => _mostrarOpcoesOrdenacao(viewModel),
       additionalActions: [
-        if (state.pragasFiltradasOrdenadas.isNotEmpty &&
-            state.erro == null)
+        if (state.pragasFiltradasOrdenadas.isNotEmpty && state.erro == null)
           Container(
             margin: const EdgeInsets.only(right: 8),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 4,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: Colors.red.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
@@ -283,20 +270,18 @@ class _PragasPorCulturaDetalhadasPageState
             Icon(
               Icons.search_off,
               size: 64,
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurface
-                  .withValues(alpha: 0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 16),
             Text(
               'Nenhuma praga do tipo "$tipoNome" encontrada',
               style: TextStyle(
                 fontSize: 16,
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.6),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
               textAlign: TextAlign.center,
             ),
@@ -305,10 +290,9 @@ class _PragasPorCulturaDetalhadasPageState
               'para a cultura selecionada',
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.4),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.4),
               ),
               textAlign: TextAlign.center,
             ),
@@ -324,16 +308,14 @@ class _PragasPorCulturaDetalhadasPageState
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .primaryContainer
-                  .withValues(alpha: 0.1),
+              color: Theme.of(
+                context,
+              ).colorScheme.primaryContainer.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Theme.of(context)
-                    .colorScheme
-                    .primaryContainer
-                    .withValues(alpha: 0.3),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primaryContainer.withValues(alpha: 0.3),
               ),
             ),
             child: Row(
@@ -360,10 +342,9 @@ class _PragasPorCulturaDetalhadasPageState
                         '${pragasList.length} praga(s)',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.6),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
                     ],
@@ -398,9 +379,8 @@ class _PragasPorCulturaDetalhadasPageState
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: PragaPorCulturaCardWidget(
           pragaPorCultura: _mapToPragaPorCultura(pragaMap),
-          onTap: () => debugPrint(
-            'Navegar para detalhes da praga: ${pragaMap['id']}',
-          ),
+          onTap: () =>
+              debugPrint('Navegar para detalhes da praga: ${pragaMap['id']}'),
           onVerDefensivos: () =>
               _verDefensivosDaPraga(_mapToPragaPorCultura(pragaMap)),
         ),
@@ -409,9 +389,7 @@ class _PragasPorCulturaDetalhadasPageState
   }
 
   /// Show ordering and filter options
-  void _mostrarOpcoesOrdenacao(
-    PragasCulturaPageViewModel viewModel,
-  ) {
+  void _mostrarOpcoesOrdenacao(PragasCulturaPageViewModel viewModel) {
     FiltrosOrdenacaoDialog.show(
       context,
       ordenacaoAtual: 'ameaca',
@@ -426,9 +404,7 @@ class _PragasPorCulturaDetalhadasPageState
   }
 
   /// Show defensivos bottom sheet
-  void _verDefensivosDaPraga(
-    PragaPorCultura pragaPorCultura,
-  ) {
+  void _verDefensivosDaPraga(PragaPorCultura pragaPorCultura) {
     DefensivosBottomSheet.show(
       context,
       pragaPorCultura,
@@ -481,10 +457,7 @@ class _PragasPorCulturaDetalhadasPageState
   }
 
   /// Apply filter by type
-  void _applyFilterByType(
-    String tipo,
-    PragasCulturaPageViewModel viewModel,
-  ) {
+  void _applyFilterByType(String tipo, PragasCulturaPageViewModel viewModel) {
     if (tipo == 'criticas') {
       viewModel.filterByCriticidade(onlyCriticas: true);
     } else if (tipo == 'normais') {
@@ -499,29 +472,22 @@ class _PragasPorCulturaDetalhadasPageState
     List<Map<String, dynamic>> pragas,
     String tipoPragaCode,
   ) {
-    return pragas
-        .where((p) => p['tipoPraga'] == tipoPragaCode)
-        .toList();
+    return pragas.where((p) => p['tipoPraga'] == tipoPragaCode).toList();
   }
 
   /// Map from Map to PragaPorCultura (temporary adapter)
   /// TODO: Replace with proper type conversion after Phase 3
   PragaPorCultura _mapToPragaPorCultura(Map<String, dynamic> map) {
-    // Create a minimal PragaPorCultura from map data
+    // Create a minimal Praga from map data
     // This is a temporary solution - replace with proper mapper in Phase 4
-    final pragasHive = PragasHive(
-      objectId: map['objectId'] as String? ?? '',
-      createdAt: map['createdAt'] as int? ?? 0,
-      updatedAt: map['updatedAt'] as int? ?? 0,
-      idReg: map['id'] as String? ?? '',
-      nomeComum: map['nome'] as String? ?? '',
-      nomeCientifico: map['nomeCientifico'] as String? ?? '',
-      tipoPraga: map['tipoPraga'] as String? ?? '1',
+    final praga = Praga(
+      id: 0, // Auto-generated
+      idPraga: map['objectId'] as String? ?? '',
+      nome: map['nome'] as String? ?? '',
+      nomeLatino: map['nomeCientifico'] as String? ?? '',
+      tipo: map['tipoPraga'] as String? ?? '1',
     );
 
-    return PragaPorCultura(
-      praga: pragasHive,
-      diagnosticosRelacionados: const [],
-    );
+    return PragaPorCultura(praga: praga, diagnosticosRelacionados: const []);
   }
 }

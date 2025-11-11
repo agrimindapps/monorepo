@@ -14,6 +14,8 @@ extension FitossanitarioDriftExtension on Fitossanitario {
   String get displayFabricante =>
       fabricante?.isNotEmpty == true ? fabricante! : 'Não informado';
 
+  String get displayModoAcao => 'Não especificado';
+
   /// Retorna modo de ação consultando a tabela FitossanitariosInfo
   Future<String> getDisplayModoAcao() async {
     try {

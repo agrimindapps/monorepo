@@ -215,22 +215,15 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
 
       // Buscar até 7 itens do histórico
       for (final historyItem in historyItems.take(7)) {
-        final defensivo = allDefensivos.where((d) => d.idDefensivo == historyItem.id).firstOrNull ?? allDefensivos.where((d) => d.displayName == historyItem.name).firstOrNull;
-          (d) => d.idDefensivo == historyItem.id,
-          orElse: () => allDefensivos.firstWhere(
-            (d) => d.displayName == historyItem.name,
-            
-              idReg: '',
-              status: false,
-              nomeComum: '',
-              nomeTecnico: '',
-              comercializado: 0,
-              elegivel: false,
-            ),
-          ),
-        );
+        final defensivo =
+            allDefensivos
+                .where((d) => d.idDefensivo == historyItem.id)
+                .firstOrNull ??
+            allDefensivos
+                .where((d) => d.displayName == historyItem.name)
+                .firstOrNull;
 
-        if (defensivo.idDefensivo.isNotEmpty) {
+        if (defensivo != null && defensivo.idDefensivo.isNotEmpty) {
           historicDefensivos.add(defensivo);
         }
       }
@@ -389,9 +382,7 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
   }
 
   /// Load history data and combine with random selection
-  Future<void> _loadHistoryIntoState(
-    List<Fitossanitario> allDefensivos,
-  ) async {
+  Future<void> _loadHistoryIntoState(List<Fitossanitario> allDefensivos) async {
     final currentState = state.value;
     if (currentState == null) return;
 
@@ -409,22 +400,15 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
 
       // Buscar até 7 itens do histórico
       for (final historyItem in historyItems.take(7)) {
-        final defensivo = allDefensivos.where((d) => d.idDefensivo == historyItem.id).firstOrNull ?? allDefensivos.where((d) => d.displayName == historyItem.name).firstOrNull;
-          (d) => d.idDefensivo == historyItem.id,
-          orElse: () => allDefensivos.firstWhere(
-            (d) => d.displayName == historyItem.name,
-            
-              idReg: '',
-              status: false,
-              nomeComum: '',
-              nomeTecnico: '',
-              comercializado: 0,
-              elegivel: false,
-            ),
-          ),
-        );
+        final defensivo =
+            allDefensivos
+                .where((d) => d.idDefensivo == historyItem.id)
+                .firstOrNull ??
+            allDefensivos
+                .where((d) => d.displayName == historyItem.name)
+                .firstOrNull;
 
-        if (defensivo.idDefensivo.isNotEmpty) {
+        if (defensivo != null && defensivo.idDefensivo.isNotEmpty) {
           historicDefensivos.add(defensivo);
         }
       }
@@ -475,9 +459,7 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
   }
 
   /// Calculate statistics from defensivos list
-  DefensivosStatistics _calculateStatistics(
-    List<Fitossanitario> defensivos,
-  ) {
+  DefensivosStatistics _calculateStatistics(List<Fitossanitario> defensivos) {
     final totalDefensivos = defensivos.length;
 
     // Fabricantes: valor único (normalizado para lowercase)

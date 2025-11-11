@@ -1,13 +1,13 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../core/data/models/pragas_hive.dart';
-import '../../../core/extensions/pragas_hive_extension.dart';
+import '../../../database/receituagro_database.dart';
+import '../../../core/extensions/praga_drift_extension.dart';
 import '../../../core/widgets/optimized_praga_image_widget.dart';
 import '../data/praga_view_mode.dart';
 
 class PragaItemWidget extends StatelessWidget {
-  final PragasHive praga;
+  final Praga praga;
   final PragaViewMode viewMode;
   final bool isDark;
   final VoidCallback onTap;
@@ -77,7 +77,7 @@ class PragaItemWidget extends StatelessWidget {
     final size = viewMode.isList ? 48.0 : 56.0;
 
     return OptimizedPragaImageWidget(
-      nomeCientifico: praga.nomeCientifico,
+      nomeCientifico: praga.displaySecondaryName,
       width: size,
       height: size,
       fit: BoxFit.cover,
@@ -103,10 +103,9 @@ class PragaItemWidget extends StatelessWidget {
 
   Widget _buildContent() {
     return Column(
-      crossAxisAlignment:
-          viewMode.isList
-              ? CrossAxisAlignment.start
-              : CrossAxisAlignment.center,
+      crossAxisAlignment: viewMode.isList
+          ? CrossAxisAlignment.start
+          : CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
@@ -147,26 +146,30 @@ class PragaItemWidget extends StatelessWidget {
   }
 
   Color _getTypeColor() {
-    switch (praga.tipoPraga) {
-      case '1': // Insetos
+    switch (praga.displayType.toLowerCase()) {
+      case 'inseto':
         return const Color(0xFFE53935); // Vermelho
-      case '2': // Doenças
+      case 'doença':
         return const Color(0xFFFF9800); // Laranja
-      case '3': // Plantas Daninhas
+      case 'planta daninha':
         return const Color(0xFF4CAF50); // Verde
+      case 'nematoide':
+        return const Color(0xFF9C27B0); // Roxo
       default:
         return const Color(0xFF757575); // Cinza
     }
   }
 
   IconData _getTypeIcon() {
-    switch (praga.tipoPraga) {
-      case '1': // Insetos
+    switch (praga.displayType.toLowerCase()) {
+      case 'inseto':
         return FontAwesomeIcons.bug;
-      case '2': // Doenças
+      case 'doença':
         return FontAwesomeIcons.virus;
-      case '3': // Plantas Daninhas
+      case 'planta daninha':
         return FontAwesomeIcons.seedling;
+      case 'nematoide':
+        return FontAwesomeIcons.worm;
       default:
         return FontAwesomeIcons.triangleExclamation;
     }
@@ -177,7 +180,7 @@ class PragaItemWidget extends StatelessWidget {
 
     return Positioned.fill(
       child: OptimizedPragaImageWidget(
-        nomeCientifico: praga.nomeCientifico,
+        nomeCientifico: praga.displaySecondaryName,
         width: double.infinity,
         height: double.infinity,
         fit: BoxFit.cover,

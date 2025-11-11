@@ -1,11 +1,11 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/data/repositories/comentarios_legacy_repository.dart';
+import '../../../../database/repositories/comentarios_repository.dart';
 import '../../domain/entities/comentario_entity.dart';
 import '../../domain/repositories/i_comentarios_repository.dart';
 import '../services/comentarios_mapper.dart';
 
-/// Implementation of IComentariosRepository using Hive local storage.
+/// Implementation of IComentariosRepository using Drift local storage.
 /// This is the data layer implementation that handles actual data persistence.
 ///
 /// SOLID Refactoring:
@@ -18,68 +18,69 @@ import '../services/comentarios_mapper.dart';
 /// This follows the pattern established in diagnosticos feature.
 @LazySingleton(as: IComentariosRepository)
 class ComentariosRepositoryImpl implements IComentariosRepository {
-  final ComentariosLegacyRepository _hiveRepository;
+  final ComentariosRepository _repository;
   final IComentariosMapper _mapper;
 
-  ComentariosRepositoryImpl(
-    this._hiveRepository,
-    this._mapper,
-  );
+  ComentariosRepositoryImpl(this._repository, this._mapper);
 
   @override
   Future<List<ComentarioEntity>> getAllComentarios() async {
-    final models = await _hiveRepository.getAllComentarios();
-    return _mapper.modelsToEntities(models);
+    final data = await _repository.findAll();
+    return _mapper.driftToEntities(data);
   }
 
   @override
   Future<List<ComentarioEntity>> getComentariosByContext(
     String pkIdentificador,
   ) async {
-    final models = await _hiveRepository.getComentariosByContext(
-      pkIdentificador,
-    );
-    return _mapper.modelsToEntities(models);
+    final data = await _repository.findByContext(pkIdentificador);
+    return _mapper.driftToEntities(data);
   }
 
   @override
   Future<List<ComentarioEntity>> getComentariosByTool(String ferramenta) async {
-    final models = await _hiveRepository.getComentariosByTool(ferramenta);
-    return _mapper.modelsToEntities(models);
+    final data = await _repository.findByTool(ferramenta);
+    return _mapper.driftToEntities(data);
   }
 
   @override
   Future<ComentarioEntity?> getComentarioById(String id) async {
-    final model = await _hiveRepository.getComentarioById(id);
-    if (model == null) return null;
-    return _mapper.modelToEntity(model);
+    final intId = int.tryParse(id);
+    if (intId == null) return null;
+
+    final data = await _repository.findById(intId);
+    if (data == null) return null;
+    return _mapper.driftToEntity(data);
   }
 
   @override
   Future<void> addComentario(ComentarioEntity comentario) async {
-    final model = _mapper.entityToModel(comentario);
-    await _hiveRepository.addComentario(model);
+    final data = _mapper.entityToDrift(comentario);
+    await _repository.insert(data);
   }
 
   @override
   Future<void> updateComentario(ComentarioEntity comentario) async {
-    final model = _mapper.entityToModel(comentario);
-    await _hiveRepository.updateComentario(model);
+    final data = _mapper.entityToDrift(comentario);
+    await _repository.update(data);
   }
 
   @override
   Future<void> deleteComentario(String id) async {
-    await _hiveRepository.deleteComentario(id);
+    final intId = int.tryParse(id);
+    if (intId == null) return;
+    await _repository.delete(intId);
   }
 
   @override
   Future<void> cleanupOldComments() async {
-    await _hiveRepository.cleanupOldComments();
+    await _repository.cleanupOld();
   }
 
   @override
   Future<Map<String, int>> getUserCommentStats() async {
-    return await _hiveRepository.getUserCommentStats();
+    // TODO: Get current user ID from auth service
+    return await _repository.getUserStats('current-user-id');
   }
 
   @override

@@ -1,4 +1,5 @@
 import '../../../../core/data/models/diagnostico_legacy.dart';
+import '../../../../database/repositories/diagnostico_repository.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 
 class DiagnosticoMapper {
@@ -40,6 +41,48 @@ class DiagnosticoMapper {
       createdAt: DateTime.fromMillisecondsSinceEpoch(hive.createdAt),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(hive.updatedAt),
     );
+  }
+
+  static DiagnosticoEntity fromDrift(DiagnosticoData data) {
+    return DiagnosticoEntity(
+      id: data.firebaseId ?? data.id.toString(),
+      idDefensivo: data.defenisivoId.toString(),
+      idCultura: data.culturaId.toString(),
+      idPraga: data.pragaId.toString(),
+      nomeDefensivo: '', // Será resolvido por join/lookup
+      nomeCultura: '', // Será resolvido por join/lookup
+      nomePraga: '', // Será resolvido por join/lookup
+      dosagem: DosagemEntity(
+        dosagemMinima: double.tryParse(data.dsMin ?? '0'),
+        dosagemMaxima: double.tryParse(data.dsMax) ?? 0.0,
+        unidadeMedida: data.um,
+      ),
+      aplicacao: AplicacaoEntity(
+        terrestre: data.minAplicacaoT != null
+            ? AplicacaoTerrestrefEntity(
+                volumeMinimo: double.tryParse(data.minAplicacaoT!),
+                volumeMaximo: double.tryParse(data.maxAplicacaoT ?? '0'),
+                unidadeMedida: data.umT,
+              )
+            : null,
+        aerea: data.minAplicacaoA != null
+            ? AplicacaoAereaEntity(
+                volumeMinimo: double.tryParse(data.minAplicacaoA!),
+                volumeMaximo: double.tryParse(data.maxAplicacaoA ?? '0'),
+                unidadeMedida: data.umA,
+              )
+            : null,
+        intervaloReaplicacao: data.intervalo,
+        intervaloReaplicacao2: data.intervalo2,
+        epocaAplicacao: data.epocaAplicacao,
+      ),
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt ?? data.createdAt,
+    );
+  }
+
+  static List<DiagnosticoEntity> fromDriftList(List<DiagnosticoData> dataList) {
+    return dataList.map(fromDrift).toList();
   }
 
   static DiagnosticoHive toHive(DiagnosticoEntity entity) {

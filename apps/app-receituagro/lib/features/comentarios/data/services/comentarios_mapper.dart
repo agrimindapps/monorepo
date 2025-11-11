@@ -1,3 +1,4 @@
+import '../../../../database/repositories/comentario_repository.dart';
 import '../../domain/entities/comentario_entity.dart';
 import '../comentario_model.dart';
 
@@ -19,6 +20,15 @@ abstract class IComentariosMapper {
 
   /// Convert multiple entities to models
   List<ComentarioModel> entitiesToModels(List<ComentarioEntity> entities);
+
+  /// Convert ComentarioData (Drift) to ComentarioEntity
+  ComentarioEntity driftToEntity(ComentarioData data);
+
+  /// Convert ComentarioEntity to ComentarioData (Drift)
+  ComentarioData entityToDrift(ComentarioEntity entity);
+
+  /// Convert multiple Drift data to entities
+  List<ComentarioEntity> driftToEntities(List<ComentarioData> dataList);
 }
 
 /// Default implementation of ComentariosMapper
@@ -61,5 +71,43 @@ class ComentariosMapper implements IComentariosMapper {
   @override
   List<ComentarioModel> entitiesToModels(List<ComentarioEntity> entities) {
     return entities.map(entityToModel).toList();
+  }
+
+  @override
+  ComentarioEntity driftToEntity(ComentarioData data) {
+    return ComentarioEntity(
+      id: data.id.toString(),
+      idReg: data.firebaseId ?? '',
+      titulo: '', // Drift não tem título separado
+      conteudo: data.texto,
+      ferramenta: data.moduleName,
+      pkIdentificador: data.itemId,
+      status: !data.isDeleted,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt ?? data.createdAt,
+    );
+  }
+
+  @override
+  ComentarioData entityToDrift(ComentarioEntity entity) {
+    return ComentarioData(
+      id: int.tryParse(entity.id) ?? 0,
+      firebaseId: entity.idReg.isNotEmpty ? entity.idReg : null,
+      userId: '', // Será preenchido pelo repository
+      moduleName: entity.ferramenta,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      lastSyncAt: null,
+      isDirty: true,
+      isDeleted: !entity.status,
+      version: 1,
+      itemId: entity.pkIdentificador,
+      texto: entity.conteudo,
+    );
+  }
+
+  @override
+  List<ComentarioEntity> driftToEntities(List<ComentarioData> dataList) {
+    return dataList.map(driftToEntity).toList();
   }
 }

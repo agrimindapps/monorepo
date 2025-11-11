@@ -2,7 +2,8 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
+import '../../../../database/repositories/diagnostico_repository.dart';
+import '../../../../database/repositories/diagnosticos_repository.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/repositories/i_diagnosticos_repository.dart';
 import '../mappers/diagnostico_mapper.dart';
@@ -18,9 +19,9 @@ import '../mappers/diagnostico_mapper.dart';
 /// leaving business logic to specialized services.
 @LazySingleton(as: IDiagnosticosRepository)
 class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
-  final DiagnosticoLegacyRepository _hiveRepository;
+  final DiagnosticosRepository _repository;
 
-  const DiagnosticosRepositoryImpl(this._hiveRepository);
+  const DiagnosticosRepositoryImpl(this._repository);
 
   @override
   Future<Either<Failure, List<DiagnosticoEntity>>> getAll({
@@ -28,24 +29,16 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     int? offset,
   }) async {
     try {
-      final result = await _hiveRepository.getAll();
-      if (result.isError) {
-        return Left(
-          CacheFailure('Erro ao buscar diagnósticos: ${result.error?.message}'),
-        );
-      }
+      var diagnosticosDrift = await _repository.findAll();
 
-      var diagnosticosHive = result.data!;
       if (offset != null && offset > 0) {
-        diagnosticosHive = diagnosticosHive.skip(offset).toList();
+        diagnosticosDrift = diagnosticosDrift.skip(offset).toList();
       }
       if (limit != null && limit > 0) {
-        diagnosticosHive = diagnosticosHive.take(limit).toList();
+        diagnosticosDrift = diagnosticosDrift.take(limit).toList();
       }
 
-      final entities = diagnosticosHive
-          .map((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
+      final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
 
       return Right(entities);
     } catch (e) {
@@ -56,13 +49,13 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   @override
   Future<Either<Failure, DiagnosticoEntity?>> getById(String id) async {
     try {
-      final diagnosticoHive = await _hiveRepository.getByIdOrObjectId(id);
+      final diagnosticoDrift = await _repository.findByIdOrObjectId(id);
 
-      if (diagnosticoHive == null) {
+      if (diagnosticoDrift == null) {
         return const Right(null);
       }
 
-      final entity = DiagnosticoMapper.fromHive(diagnosticoHive);
+      final entity = DiagnosticoMapper.fromDrift(diagnosticoDrift);
       return Right(entity);
     } catch (e) {
       return Left(
@@ -83,18 +76,17 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         name: 'DiagnosticosRepository',
       );
 
-      final diagnosticosHive = await _hiveRepository.findByDefensivo(
+      final diagnosticosDrift = await _repository.findByDefensivo(
+        'current-user', // TODO: Get from auth
         idDefensivo,
       );
 
       developer.log(
-        '✅ queryByDefensivo (Repository) - ${diagnosticosHive.length} registros Hive encontrados',
+        '✅ queryByDefensivo (Repository) - ${diagnosticosDrift.length} registros Drift encontrados',
         name: 'DiagnosticosRepository',
       );
 
-      final entities = diagnosticosHive
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
+      final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
 
       developer.log(
         '✅ queryByDefensivo (Repository) - ${entities.length} entities mapeadas, retornando Right()',
@@ -120,10 +112,11 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     String idCultura,
   ) async {
     try {
-      final diagnosticosHive = await _hiveRepository.findByCultura(idCultura);
-      final entities = diagnosticosHive
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
+      final diagnosticosDrift = await _repository.findByCultura(
+        'current-user', // TODO: Get from auth
+        idCultura,
+      );
+      final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
 
       return Right(entities);
     } catch (e) {
@@ -136,10 +129,11 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     String idPraga,
   ) async {
     try {
-      final diagnosticosHive = await _hiveRepository.findByPraga(idPraga);
-      final entities = diagnosticosHive
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
+      final diagnosticosDrift = await _repository.findByPraga(
+        'current-user', // TODO: Get from auth
+        idPraga,
+      );
+      final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
 
       return Right(entities);
     } catch (e) {
@@ -154,14 +148,13 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     String? idPraga,
   }) async {
     try {
-      final diagnosticosHive = await _hiveRepository.findByMultipleCriteria(
-        defensivoId: idDefensivo,
+      final diagnosticosDrift = await _repository.findByTriplaCombinacao(
+        userId: 'current-user', // TODO: Get from auth
+        defenisivoId: idDefensivo,
         culturaId: idCultura,
         pragaId: idPraga,
       );
-      final entities = diagnosticosHive
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
+      final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
 
       return Right(entities);
     } catch (e) {
@@ -180,26 +173,18 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         return const Right(<DiagnosticoEntity>[]);
       }
 
-      final result = await _hiveRepository.getAll();
-      if (result.isError) {
-        return Left(
-          CacheFailure('Erro na busca por padrão: ${result.error?.message}'),
-        );
-      }
+      final allDiagnosticos = await _repository.findAll();
 
-      final allDiagnosticos = result.data!;
       final matchingDiagnosticos = allDiagnosticos
           .where(
             (d) =>
-                d.fkIdDefensivo.contains(pattern) ||
-                d.fkIdCultura.contains(pattern) ||
-                d.fkIdPraga.contains(pattern),
+                d.defenisivoId.toString().contains(pattern) ||
+                d.culturaId.toString().contains(pattern) ||
+                d.pragaId.toString().contains(pattern),
           )
           .toList();
 
-      final entities = matchingDiagnosticos
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
+      final entities = DiagnosticoMapper.fromDriftList(matchingDiagnosticos);
 
       return Right(entities);
     } catch (e) {
@@ -212,21 +197,15 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   @override
   Future<Either<Failure, List<Map<String, dynamic>>>> getAllDefensivos() async {
     try {
-      final result = await _hiveRepository.getAll();
-      if (result.isError) {
-        return Left(
-          CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'),
-        );
-      }
-
-      final diagnosticos = result.data!;
+      final diagnosticos = await _repository.findAll();
       final defensivosMap = <String, Map<String, dynamic>>{};
 
       for (final d in diagnosticos) {
-        if (!defensivosMap.containsKey(d.fkIdDefensivo)) {
-          defensivosMap[d.fkIdDefensivo] = {
-            'id': d.fkIdDefensivo,
-            'nome': d.fkIdDefensivo, // Nome seria ideal vir de outra tabela
+        final idStr = d.defenisivoId.toString();
+        if (!defensivosMap.containsKey(idStr)) {
+          defensivosMap[idStr] = {
+            'id': idStr,
+            'nome': idStr, // Nome seria ideal vir de outra tabela
           };
         }
       }
@@ -240,22 +219,13 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   @override
   Future<Either<Failure, List<Map<String, dynamic>>>> getAllCulturas() async {
     try {
-      final result = await _hiveRepository.getAll();
-      if (result.isError) {
-        return Left(
-          CacheFailure('Erro ao buscar culturas: ${result.error?.message}'),
-        );
-      }
-
-      final diagnosticos = result.data!;
+      final diagnosticos = await _repository.findAll();
       final culturasMap = <String, Map<String, dynamic>>{};
 
       for (final d in diagnosticos) {
-        if (!culturasMap.containsKey(d.fkIdCultura)) {
-          culturasMap[d.fkIdCultura] = {
-            'id': d.fkIdCultura,
-            'nome': d.fkIdCultura,
-          };
+        final idStr = d.culturaId.toString();
+        if (!culturasMap.containsKey(idStr)) {
+          culturasMap[idStr] = {'id': idStr, 'nome': idStr};
         }
       }
 
@@ -268,19 +238,13 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   @override
   Future<Either<Failure, List<Map<String, dynamic>>>> getAllPragas() async {
     try {
-      final result = await _hiveRepository.getAll();
-      if (result.isError) {
-        return Left(
-          CacheFailure('Erro ao buscar pragas: ${result.error?.message}'),
-        );
-      }
-
-      final diagnosticos = result.data!;
+      final diagnosticos = await _repository.findAll();
       final pragasMap = <String, Map<String, dynamic>>{};
 
       for (final d in diagnosticos) {
-        if (!pragasMap.containsKey(d.fkIdPraga)) {
-          pragasMap[d.fkIdPraga] = {'id': d.fkIdPraga, 'nome': d.fkIdPraga};
+        final idStr = d.pragaId.toString();
+        if (!pragasMap.containsKey(idStr)) {
+          pragasMap[idStr] = {'id': idStr, 'nome': idStr};
         }
       }
 
@@ -293,14 +257,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   @override
   Future<Either<Failure, List<String>>> getUnidadesMedida() async {
     try {
-      final result = await _hiveRepository.getAll();
-      if (result.isError) {
-        return Left(
-          CacheFailure('Erro ao buscar unidades: ${result.error?.message}'),
-        );
-      }
-
-      final diagnosticos = result.data!;
+      final diagnosticos = await _repository.findAll();
       final unidades = <String>{};
 
       for (final d in diagnosticos) {
@@ -323,14 +280,13 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     required String pragaId,
   }) async {
     try {
-      final diagnosticosHive = await _hiveRepository.findByMultipleCriteria(
+      final diagnosticosDrift = await _repository.findByTriplaCombinacao(
+        userId: 'current-user', // TODO: Get from auth
         culturaId: culturaId,
         pragaId: pragaId,
       );
 
-      final entities = diagnosticosHive
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
+      final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
 
       return Right(entities);
     } catch (e) {
@@ -350,15 +306,14 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     String? tipoAplicacao,
   }) async {
     try {
-      final diagnosticosHive = await _hiveRepository.findByMultipleCriteria(
-        defensivoId: defensivo,
+      final diagnosticosDrift = await _repository.findByTriplaCombinacao(
+        userId: 'current-user', // TODO: Get from auth
+        defenisivoId: defensivo,
         culturaId: cultura,
         pragaId: praga,
       );
 
-      var entities = diagnosticosHive
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
+      var entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
 
       // Filter by tipo de aplicacao (terrestre/aerea)
       if (tipoAplicacao != null && tipoAplicacao.isNotEmpty) {
@@ -393,27 +348,20 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         return const Right(<DiagnosticoEntity>[]);
       }
 
-      final result = await _hiveRepository.getAll();
-      if (result.isError) {
-        return Left(
-          CacheFailure('Erro ao buscar similares: ${result.error?.message}'),
-        );
-      }
+      final allDiagnosticos = await _repository.findAll();
 
-      final allDiagnosticos = result.data!;
       final similar = allDiagnosticos
           .where(
-            (d) =>
-                d.objectId != diagnostico.id &&
-                (d.fkIdCultura == diagnostico.idCultura ||
-                    d.fkIdPraga == diagnostico.idPraga),
+            (DiagnosticoData d) =>
+                d.firebaseId != diagnostico.id &&
+                d.id.toString() != diagnostico.id &&
+                (d.culturaId.toString() == diagnostico.idCultura ||
+                    d.pragaId.toString() == diagnostico.idPraga),
           )
           .take(10)
           .toList();
 
-      final entities = similar
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
+      final entities = DiagnosticoMapper.fromDriftList(similar);
 
       return Right(entities);
     } catch (e) {
@@ -433,22 +381,16 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   @override
   Future<Either<Failure, Map<String, dynamic>>> getStatistics() async {
     try {
-      final result = await _hiveRepository.getAll();
-      if (result.isError) {
-        return Left(
-          CacheFailure('Erro ao buscar estatísticas: ${result.error?.message}'),
-        );
-      }
+      final diagnosticos = await _repository.findAll();
 
-      final diagnosticos = result.data!;
       final stats = {
         'total': diagnosticos.length,
         'totalDefensivos': diagnosticos
-            .map((e) => e.fkIdDefensivo)
+            .map((e) => e.defenisivoId)
             .toSet()
             .length,
-        'totalCulturas': diagnosticos.map((e) => e.fkIdCultura).toSet().length,
-        'totalPragas': diagnosticos.map((e) => e.fkIdPraga).toSet().length,
+        'totalCulturas': diagnosticos.map((e) => e.culturaId).toSet().length,
+        'totalPragas': diagnosticos.map((e) => e.pragaId).toSet().length,
       };
 
       return Right(stats);
@@ -462,17 +404,8 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     int limit = 10,
   }) async {
     try {
-      final result = await _hiveRepository.getAll();
-      if (result.isError) {
-        return Left(
-          CacheFailure('Erro ao buscar populares: ${result.error?.message}'),
-        );
-      }
-
-      final diagnosticos = result.data!.take(limit).toList();
-      final entities = diagnosticos
-          .map<DiagnosticoEntity>((hive) => DiagnosticoMapper.fromHive(hive))
-          .toList();
+      final diagnosticos = (await _repository.findAll()).take(limit).toList();
+      final entities = DiagnosticoMapper.fromDriftList(diagnosticos);
 
       return Right(entities);
     } catch (e) {
@@ -487,13 +420,14 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     String? praga,
   }) async {
     try {
-      final diagnosticosHive = await _hiveRepository.findByMultipleCriteria(
-        defensivoId: defensivo,
+      final diagnosticosDrift = await _repository.findByTriplaCombinacao(
+        userId: 'current-user', // TODO: Get from auth
+        defenisivoId: defensivo,
         culturaId: cultura,
         pragaId: praga,
       );
 
-      return Right(diagnosticosHive.length);
+      return Right(diagnosticosDrift.length);
     } catch (e) {
       return Left(CacheFailure('Erro ao contar filtros: ${e.toString()}'));
     }
@@ -525,13 +459,14 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     required String idPraga,
   }) async {
     try {
-      final diagnosticosHive = await _hiveRepository.findByMultipleCriteria(
-        defensivoId: idDefensivo,
+      final diagnosticosDrift = await _repository.findByTriplaCombinacao(
+        userId: 'current-user', // TODO: Get from auth
+        defenisivoId: idDefensivo,
         culturaId: idCultura,
         pragaId: idPraga,
       );
 
-      return Right(diagnosticosHive.isNotEmpty);
+      return Right(diagnosticosDrift.isNotEmpty);
     } catch (e) {
       return Left(
         CacheFailure('Erro ao validar compatibilidade: ${e.toString()}'),

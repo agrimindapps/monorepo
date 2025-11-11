@@ -4,7 +4,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import '../data/repositories/fitossanitario_legacy_repository.dart';
+import '../../database/repositories/fitossanitarios_repository.dart';
 import '../di/injection_container.dart' as di;
 
 /// Serviço para carregar dados de fitossanitários dos assets JSON
@@ -33,17 +33,17 @@ class FitossanitariosDataLoader {
       final List<Map<String, dynamic>> allFitossanitarios = [];
       for (int i = 0; i <= 2; i++) {
         try {
-          final String assetPath =
-              kIsWeb
-                  ? 'database/json/tbfitossanitarios/TBFITOSSANITARIOS$i.json'
-                  : 'assets/database/json/tbfitossanitarios/TBFITOSSANITARIOS$i.json';
+          final String assetPath = kIsWeb
+              ? 'database/json/tbfitossanitarios/TBFITOSSANITARIOS$i.json'
+              : 'assets/database/json/tbfitossanitarios/TBFITOSSANITARIOS$i.json';
 
           final String jsonString = await rootBundle.loadString(assetPath);
 
           final dynamic decodedJson = json.decode(jsonString);
           final List<dynamic> jsonData = decodedJson is List ? decodedJson : [];
-          final List<Map<String, dynamic>> fitossanitarios =
-              jsonData.cast<Map<String, dynamic>>().toList();
+          final List<Map<String, dynamic>> fitossanitarios = jsonData
+              .cast<Map<String, dynamic>>()
+              .toList();
 
           allFitossanitarios.addAll(fitossanitarios);
 
@@ -58,16 +58,15 @@ class FitossanitariosDataLoader {
           );
         }
       }
-      final List<Map<String, dynamic>> fitossanitarios =
-          allFitossanitarios
-              .where(
-                (item) =>
-                    item['nomeComum'] != null &&
-                    item['nomeComum'].toString().trim().isNotEmpty &&
-                    item['idReg'] != null &&
-                    item['idReg'].toString().trim().isNotEmpty,
-              )
-              .toList();
+      final List<Map<String, dynamic>> fitossanitarios = allFitossanitarios
+          .where(
+            (item) =>
+                item['nomeComum'] != null &&
+                item['nomeComum'].toString().trim().isNotEmpty &&
+                item['idReg'] != null &&
+                item['idReg'].toString().trim().isNotEmpty,
+          )
+          .toList();
 
       developer.log(
         '🛡️ [FITOSSANITARIOS] JSON carregado: ${allFitossanitarios.length} registros totais, ${fitossanitarios.length} fitossanitários válidos',
@@ -76,39 +75,26 @@ class FitossanitariosDataLoader {
       print(
         '🛡️ [FITOSSANITARIOS] JSON carregado: ${allFitossanitarios.length} registros totais, ${fitossanitarios.length} fitossanitários válidos',
       );
-      final repository = di.sl<FitossanitarioLegacyRepository>();
-      final result = await repository.loadFromJson(fitossanitarios, '1.0.0');
+      final repository = di.sl<FitossanitariosRepository>();
+      await repository.loadFromJson(fitossanitarios, '1.0.0');
 
-      result.fold(
-        (error) {
-          developer.log(
-            'Erro ao carregar fitossanitários: $error',
-            name: 'FitossanitariosDataLoader',
-          );
-          throw Exception('Erro ao carregar fitossanitários: $error');
-        },
-        (_) {
-          developer.log(
-            'Fitossanitários carregados com sucesso!',
-            name: 'FitossanitariosDataLoader',
-          );
-          _isLoaded = true;
-        },
+      developer.log(
+        'Fitossanitários carregados com sucesso!',
+        name: 'FitossanitariosDataLoader',
       );
-      final loadedResult = await repository.getAll();
-      if (loadedResult.isSuccess) {
-        final loadedFitossanitarios = loadedResult.data!;
+      _isLoaded = true;
+
+      final loadedFitossanitarios = await repository.findAll();
+      developer.log(
+        'Verificação: ${loadedFitossanitarios.length} fitossanitários disponíveis',
+        name: 'FitossanitariosDataLoader',
+      );
+
+      if (loadedFitossanitarios.isNotEmpty) {
         developer.log(
-          'Verificação: ${loadedFitossanitarios.length} fitossanitários disponíveis',
+          'Primeiros 3 fitossanitários: ${loadedFitossanitarios.take(3).map((f) => f.nome).join(', ')}',
           name: 'FitossanitariosDataLoader',
         );
-
-        if (loadedFitossanitarios.isNotEmpty) {
-          developer.log(
-            'Primeiros 3 fitossanitários: ${loadedFitossanitarios.take(3).map((f) => f.nomeComum).join(', ')}',
-            name: 'FitossanitariosDataLoader',
-          );
-        }
       }
     } catch (e) {
       developer.log(
@@ -131,26 +117,16 @@ class FitossanitariosDataLoader {
   /// Verifica se dados estão carregados
   static Future<bool> isDataLoaded() async {
     try {
-      final repository = di.sl<FitossanitarioLegacyRepository>();
-      final result = await repository.getAll();
+      final repository = di.sl<FitossanitariosRepository>();
+      final fitossanitarios = await repository.findAll();
+      final hasData = fitossanitarios.isNotEmpty;
 
-      if (result.isSuccess) {
-        final fitossanitarios = result.data!;
-        final hasData = fitossanitarios.isNotEmpty;
+      developer.log(
+        '🔍 [FITOSSANITARIOS] isDataLoaded() - Repository has ${fitossanitarios.length} items: $hasData',
+        name: 'FitossanitariosDataLoader',
+      );
 
-        developer.log(
-          '🔍 [FITOSSANITARIOS] isDataLoaded() - Repository has ${fitossanitarios.length} items: $hasData',
-          name: 'FitossanitariosDataLoader',
-        );
-
-        return hasData;
-      } else {
-        developer.log(
-          '❌ [FITOSSANITARIOS] Error getting all items: ${result.error}',
-          name: 'FitossanitariosDataLoader',
-        );
-        return false;
-      }
+      return hasData;
     } catch (e) {
       developer.log(
         '❌ [FITOSSANITARIOS] Error checking isDataLoaded: $e',
@@ -163,24 +139,17 @@ class FitossanitariosDataLoader {
   /// Obtém estatísticas de carregamento
   static Future<Map<String, dynamic>> getStats() async {
     try {
-      final repository = di.sl<FitossanitarioLegacyRepository>();
-      final result = await repository.getAll();
+      final repository = di.sl<FitossanitariosRepository>();
+      final fitossanitarios = await repository.findAll();
 
-      if (result.isSuccess) {
-        final fitossanitarios = result.data!;
-        return {
-          'total_fitossanitarios': fitossanitarios.length,
-          'is_loaded': _isLoaded,
-          'sample_fitossanitarios':
-              fitossanitarios.take(5).map((f) => f.nomeComum).toList(),
-        };
-      } else {
-        return {
-          'total_fitossanitarios': 0,
-          'is_loaded': false,
-          'error': result.error.toString(),
-        };
-      }
+      return {
+        'total_fitossanitarios': fitossanitarios.length,
+        'is_loaded': _isLoaded,
+        'sample_fitossanitarios': fitossanitarios
+            .take(5)
+            .map((f) => f.nome)
+            .toList(),
+      };
     } catch (e) {
       return {
         'total_fitossanitarios': 0,

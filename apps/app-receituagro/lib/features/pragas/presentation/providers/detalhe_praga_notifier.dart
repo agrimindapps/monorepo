@@ -6,10 +6,11 @@ import '../../../../core/data/models/plantas_inf_legacy.dart';
 import '../../../../core/data/models/pragas_legacy.dart';
 import '../../../../core/data/models/pragas_inf_legacy.dart';
 import '../../../../core/data/repositories/plantas_inf_legacy_repository.dart';
-import '../../../../core/data/repositories/pragas_legacy_repository.dart';
+import '../../../../database/repositories/pragas_repository.dart';
 import '../../../../core/data/repositories/pragas_inf_legacy_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/premium_notifier.dart';
+import '../../data/mappers/praga_mapper.dart';
 import '../../../comentarios/data/comentario_model.dart';
 import '../../../comentarios/domain/comentarios_service.dart';
 import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
@@ -109,7 +110,7 @@ class DetalhePragaState {
 @Riverpod(keepAlive: true)
 class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   late final FavoritosRepositorySimplified _favoritosRepository;
-  late final PragasLegacyRepository _pragasRepository;
+  late final PragasRepository _pragasRepository;
   late final PragasInfLegacyRepository _pragasInfRepository;
   late final PlantasInfLegacyRepository _plantasInfRepository;
   late final ComentariosService _comentariosService;
@@ -117,7 +118,7 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   @override
   Future<DetalhePragaState> build() async {
     _favoritosRepository = FavoritosDI.get<FavoritosRepositorySimplified>();
-    _pragasRepository = di.sl<PragasLegacyRepository>();
+    _pragasRepository = di.sl<PragasRepository>();
     _pragasInfRepository = di.sl<PragasInfLegacyRepository>();
     _plantasInfRepository = di.sl<PlantasInfLegacyRepository>();
     _comentariosService = di.sl<ComentariosService>();

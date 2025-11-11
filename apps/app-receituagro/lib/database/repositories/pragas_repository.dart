@@ -50,4 +50,31 @@ class PragasRepository {
     final result = await query.getSingle();
     return result.read(count)!;
   }
+
+  /// Carrega dados do JSON e salva no banco Drift
+  ///
+  /// Recebe uma lista de Maps do JSON e insere no banco de dados.
+  /// Limpa os dados existentes antes de inserir.
+  Future<void> loadFromJson(
+    List<Map<String, dynamic>> jsonData,
+    String version,
+  ) async {
+    await _db.transaction(() async {
+      // Limpar dados existentes
+      await _db.delete(_db.pragas).go();
+
+      // Inserir novos dados
+      for (final item in jsonData) {
+        final companion = PragasCompanion.insert(
+          idPraga: item['idReg']?.toString() ?? '',
+          nome: item['nomeComum']?.toString() ?? '',
+          nomeLatino: Value(item['nomeCientifico']?.toString()),
+          tipo: Value(item['tipoPraga']?.toString()),
+          imagemUrl: Value(item['imagemUrl']?.toString()),
+          descricao: Value(item['descricao']?.toString()),
+        );
+        await _db.into(_db.pragas).insert(companion);
+      }
+    });
+  }
 }

@@ -3,8 +3,8 @@ import '../../../../core/data/models/diagnostico_legacy.dart';
 import '../../../../core/data/models/fitossanitario_legacy.dart';
 import '../../../../core/data/models/pragas_legacy.dart';
 import '../../../../database/repositories/culturas_repository.dart';
-import '../../../../core/data/repositories/fitossanitario_legacy_repository.dart';
-import '../../../../core/data/repositories/pragas_legacy_repository.dart';
+import '../../../../database/repositories/fitossanitarios_repository.dart';
+import '../../../../database/repositories/pragas_repository.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/busca_entity.dart';
 
@@ -20,10 +20,12 @@ class BuscaMapper {
     String pragaNome = 'Praga não encontrada';
 
     try {
-      final defensivoRepo = sl<FitossanitarioLegacyRepository>();
-      final defensivo = await defensivoRepo.getById(diagnostico.fkIdDefensivo);
-      if (defensivo != null && defensivo.nomeComum.isNotEmpty) {
-        defensivoNome = defensivo.nomeComum;
+      final defensivoRepo = sl<FitossanitariosRepository>();
+      final defensivo = await defensivoRepo.findByIdDefensivo(
+        diagnostico.fkIdDefensivo,
+      );
+      if (defensivo != null && defensivo.nome.isNotEmpty) {
+        defensivoNome = defensivo.nome;
       }
       final culturaRepo = sl<CulturasRepository>();
       final culturaIdInt = int.tryParse(diagnostico.fkIdCultura);
@@ -33,10 +35,10 @@ class BuscaMapper {
           culturaNome = cultura.nome;
         }
       }
-      final pragaRepo = sl<PragasLegacyRepository>();
-      final praga = await pragaRepo.getById(diagnostico.fkIdPraga);
-      if (praga != null && praga.nomeComum.isNotEmpty) {
-        pragaNome = praga.nomeComum;
+      final pragaRepo = sl<PragasRepository>();
+      final praga = await pragaRepo.findByIdPraga(diagnostico.fkIdPraga);
+      if (praga != null && praga.nome.isNotEmpty) {
+        pragaNome = praga.nome;
       }
     } catch (e) {}
 

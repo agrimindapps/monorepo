@@ -3,11 +3,11 @@ import 'dart:developer' as developer;
 import 'package:core/core.dart' hide Column;
 
 import '../../database/repositories/culturas_repository.dart';
+import '../../database/repositories/fitossanitarios_repository.dart';
+import '../../database/repositories/pragas_repository.dart';
 import '../data/repositories/diagnostico_legacy_repository.dart';
-import '../data/repositories/fitossanitario_legacy_repository.dart';
 import '../data/repositories/fitossanitario_info_legacy_repository.dart';
 import '../data/repositories/plantas_inf_legacy_repository.dart';
-import '../data/repositories/pragas_legacy_repository.dart';
 import '../data/repositories/pragas_inf_legacy_repository.dart';
 
 /// Serviço responsável por inicializar e gerenciar dados da aplicação
@@ -16,8 +16,8 @@ class DataInitializationService {
   final AssetLoaderService _assetLoader;
   final VersionManagerService _versionManager;
   final CulturasRepository _culturaRepository;
-  final PragasLegacyRepository _pragasRepository;
-  final FitossanitarioLegacyRepository _fitossanitarioRepository;
+  final PragasRepository _pragasRepository;
+  final FitossanitariosRepository _fitossanitarioRepository;
   final DiagnosticoLegacyRepository _diagnosticoRepository;
   final FitossanitarioInfoLegacyRepository _fitossanitarioInfoRepository;
   final PlantasInfLegacyRepository _plantasInfRepository;
@@ -27,8 +27,8 @@ class DataInitializationService {
     required AssetLoaderService assetLoader,
     required VersionManagerService versionManager,
     required CulturasRepository culturaRepository,
-    required PragasLegacyRepository pragasRepository,
-    required FitossanitarioLegacyRepository fitossanitarioRepository,
+    required PragasRepository pragasRepository,
+    required FitossanitariosRepository fitossanitarioRepository,
     required DiagnosticoLegacyRepository diagnosticoRepository,
     required FitossanitarioInfoLegacyRepository fitossanitarioInfoRepository,
     required PlantasInfLegacyRepository plantasInfRepository,
@@ -203,8 +203,8 @@ class DataInitializationService {
         'version_info': versionStats,
         'repositories': {
           'culturas': await _culturaRepository.count(),
-          'pragas': await _pragasRepository.countAsync(),
-          'fitossanitarios': await _fitossanitarioRepository.countAsync(),
+          'pragas': await _pragasRepository.count(),
+          'fitossanitarios': await _fitossanitarioRepository.count(),
           'diagnosticos': await _diagnosticoRepository.countAsync(),
           'fitossanitarios_info': await _fitossanitarioInfoRepository
               .countAsync(),
@@ -227,8 +227,8 @@ class DataInitializationService {
     try {
       final counts = await Future.wait<int>([
         _culturaRepository.count(),
-        _pragasRepository.countAsync(),
-        _fitossanitarioRepository.countAsync(),
+        _pragasRepository.count(),
+        _fitossanitarioRepository.count(),
         _diagnosticoRepository.countAsync(),
         _fitossanitarioInfoRepository.countAsync(),
         _plantasInfRepository.countAsync(),

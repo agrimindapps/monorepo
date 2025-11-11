@@ -1,10 +1,10 @@
 import 'dart:developer' as developer;
 
 import '../../../../database/repositories/culturas_repository.dart';
+import '../../../../database/repositories/fitossanitarios_repository.dart';
+import '../../../../database/repositories/pragas_repository.dart';
 import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
 import '../../../../core/data/repositories/favoritos_legacy_repository.dart';
-import '../../../../core/data/repositories/fitossanitario_legacy_repository.dart';
-import '../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
@@ -234,9 +234,9 @@ class FavoritosCacheService implements IFavoritosCache {
 /// Implementação do resolvedor de dados
 /// Princípio: Single Responsibility - Apenas resolução de dados
 class FavoritosDataResolverService implements IFavoritosDataResolver {
-  final FitossanitarioLegacyRepository _fitossanitarioRepository =
-      sl<FitossanitarioLegacyRepository>();
-  final PragasLegacyRepository _pragasRepository = sl<PragasLegacyRepository>();
+  final FitossanitariosRepository _fitossanitarioRepository =
+      sl<FitossanitariosRepository>();
+  final PragasRepository _pragasRepository = sl<PragasRepository>();
   final DiagnosticoLegacyRepository _diagnosticoRepository =
       sl<DiagnosticoLegacyRepository>();
   final CulturasRepository _culturaRepository = sl<CulturasRepository>();
@@ -244,14 +244,14 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
   @override
   Future<Map<String, dynamic>?> resolveDefensivo(String id) async {
     try {
-      final defensivo = await _fitossanitarioRepository.getById(id);
+      final defensivo = await _fitossanitarioRepository.findByIdDefensivo(id);
       if (defensivo != null) {
         return {
-          'nomeComum': defensivo.nomeComum,
+          'nomeComum': defensivo.nome,
           'ingredienteAtivo': defensivo.ingredienteAtivo ?? '',
           'fabricante': defensivo.fabricante ?? '',
           'classeAgron': defensivo.classeAgronomica ?? '',
-          'modoAcao': defensivo.modoAcao ?? '',
+          'modoAcao': '', // Not available in Drift Fitossanitarios table
         };
       }
       return {
@@ -267,15 +267,15 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
   @override
   Future<Map<String, dynamic>?> resolvePraga(String id) async {
     try {
-      final praga = await _pragasRepository.getById(id);
+      final praga = await _pragasRepository.findByIdPraga(id);
       if (praga != null) {
         return {
-          'nomeComum': praga.nomeComum,
-          'nomeCientifico': praga.nomeCientifico,
-          'tipoPraga': praga.tipoPraga,
-          'dominio': praga.dominio ?? '',
-          'reino': praga.reino ?? '',
-          'familia': praga.familia ?? '',
+          'nomeComum': praga.nome,
+          'nomeCientifico': praga.nomeLatino ?? '',
+          'tipoPraga': praga.tipo ?? '',
+          'dominio': '',
+          'reino': '',
+          'familia': '',
         };
       }
       return {
@@ -428,9 +428,9 @@ class FavoritosEntityFactoryService implements IFavoritosEntityFactory {
 /// Validador para favoritos
 /// Princípio: Single Responsibility - Apenas validação
 class FavoritosValidatorService implements IFavoritosValidator {
-  final FitossanitarioLegacyRepository _fitossanitarioRepository =
-      sl<FitossanitarioLegacyRepository>();
-  final PragasLegacyRepository _pragasRepository = sl<PragasLegacyRepository>();
+  final FitossanitariosRepository _fitossanitarioRepository =
+      sl<FitossanitariosRepository>();
+  final PragasRepository _pragasRepository = sl<PragasRepository>();
   final DiagnosticoLegacyRepository _diagnosticoRepository =
       sl<DiagnosticoLegacyRepository>();
   final CulturasRepository _culturaRepository = sl<CulturasRepository>();
@@ -445,10 +445,12 @@ class FavoritosValidatorService implements IFavoritosValidator {
     try {
       switch (tipo) {
         case TipoFavorito.defensivo:
-          final defensivo = await _fitossanitarioRepository.getById(id);
+          final defensivo = await _fitossanitarioRepository.findByIdDefensivo(
+            id,
+          );
           return defensivo != null;
         case TipoFavorito.praga:
-          final praga = await _pragasRepository.getById(id);
+          final praga = await _pragasRepository.findByIdPraga(id);
           return praga != null;
         case TipoFavorito.diagnostico:
           final diagnostico = await _diagnosticoRepository.getByIdOrObjectId(

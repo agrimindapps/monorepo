@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/data/repositories/pragas_legacy_repository.dart';
+import '../../../../database/repositories/pragas_repository.dart';
 import '../../domain/entities/praga_entity.dart';
 import '../../domain/repositories/i_pragas_repository.dart';
 import '../../presentation/services/pragas_error_message_service.dart';
@@ -9,7 +9,7 @@ import '../services/pragas_query_service.dart';
 import '../services/pragas_search_service.dart';
 import '../services/pragas_stats_service.dart';
 
-/// Implementação do repositório de pragas usando Hive (Data Layer)
+/// Implementação do repositório de pragas usando Drift (Data Layer)
 ///
 /// SOLID Refactoring:
 /// - Separated query logic to PragasQueryService (SRP)
@@ -24,14 +24,14 @@ import '../services/pragas_stats_service.dart';
 /// Segue padrão Either for error handling consistente
 @LazySingleton(as: IPragasRepository)
 class PragasRepositoryImpl implements IPragasRepository {
-  final PragasLegacyRepository _hiveRepository;
+  final PragasRepository _repository;
   final IPragasQueryService _queryService;
   final IPragasSearchService _searchService;
   final IPragasStatsService _statsService;
   final PragasErrorMessageService _errorService;
 
   PragasRepositoryImpl(
-    this._hiveRepository,
+    this._repository,
     this._queryService,
     this._searchService,
     this._statsService,

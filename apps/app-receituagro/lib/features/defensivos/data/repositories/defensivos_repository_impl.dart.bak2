@@ -58,6 +58,8 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   ) async {
     try {
       final allDrift = await _repository.findAll();
+        );
+      }
       final allDefensivos = allDrift;
 
       // Convert to entities and use search service
@@ -80,13 +82,17 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, DefensivoEntity?>> getDefensivoById(String id) async {
     try {
-      final defensivo = await _repository.findByIdDefensivo(id);
+      final result = await _repository.getByKey(id);
+          ),
+        );
+      }
+      final defensivo = result.data;
 
       if (defensivo == null) {
         return const Right(null);
       }
 
-      final defensivoEntity = DefensivoMapper.fromDriftToEntity(defensivo);
+      final defensivoEntity = DefensivoMapper.fromHiveToEntity(defensivo);
       return Right(defensivoEntity);
     } catch (e) {
       return Left(
@@ -101,6 +107,8 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   ) async {
     try {
       final allDrift = await _repository.findAll();
+        );
+      }
 
       final allDefensivos = allDrift;
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
@@ -127,6 +135,8 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   ) async {
     try {
       final allDrift = await _repository.findAll();
+        );
+      }
 
       final allDefensivos = allDrift;
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
@@ -155,6 +165,8 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   ) async {
     try {
       final allDrift = await _repository.findAll();
+        );
+      }
 
       final allDefensivos = allDrift;
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
@@ -183,6 +195,8 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   Future<Either<Failure, List<String>>> getClassesAgronomicas() async {
     try {
       final allDrift = await _repository.findAll();
+        );
+      }
 
       final allDefensivos = allDrift;
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
@@ -203,6 +217,8 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   Future<Either<Failure, List<String>>> getFabricantes() async {
     try {
       final allDrift = await _repository.findAll();
+        );
+      }
 
       final allDefensivos = allDrift;
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
@@ -221,6 +237,8 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   Future<Either<Failure, List<String>>> getModosAcao() async {
     try {
       final allDrift = await _repository.findAll();
+        );
+      }
 
       final allDefensivos = allDrift;
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
@@ -243,6 +261,8 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   }) async {
     try {
       final allDrift = await _repository.findAll();
+        );
+      }
 
       final allDefensivos = allDrift;
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
@@ -267,6 +287,8 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   Future<Either<Failure, Map<String, int>>> getDefensivosStats() async {
     try {
       final allDrift = await _repository.findAll();
+        );
+      }
 
       final allDefensivos = allDrift;
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
@@ -289,13 +311,17 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, bool>> isDefensivoActive(String defensivoId) async {
     try {
-      final defensivo = await _repository.findByIdDefensivo(defensivoId);
+      final result = await _repository.getByKey(defensivoId);
+          ),
+        );
+      }
 
+      final defensivo = result.data;
       if (defensivo == null) {
         return const Right(false);
       }
 
-      final defensivoEntity = DefensivoMapper.fromDriftToEntity(defensivo);
+      final defensivoEntity = DefensivoMapper.fromHiveToEntity(defensivo);
       // Delegate to query service
       final isActive = _queryService.isDefensivoActive([
         defensivoEntity,
@@ -304,7 +330,7 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       return Right(isActive);
     } catch (e) {
       return Left(
-        CacheFailure('Erro ao verificar status do defensivo: ${e.toString()}'),
+        CacheFailure('Erro ao verificar status do defensivo: {{e.toString()}}'),
       );
     }
   }
@@ -316,8 +342,14 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   }) async {
     try {
       debugPrint('🔍 [REPO AGRUPADOS] Buscando todos os defensivos do Hive...');
-      final allDefensivos = await _repository.findAll();
+      final allDrift = await _repository.findAll();
+        );
+        return Left(
+          CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'),
+        );
+      }
 
+      final allDefensivos = allDrift;
       debugPrint(
         '✅ [REPO AGRUPADOS] Defensivos retornados do Hive: ${allDefensivos.length} itens',
       );
@@ -348,7 +380,7 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
     } catch (e) {
       debugPrint('❌ [REPO AGRUPADOS] Erro: $e');
       return Left(
-        CacheFailure('Erro ao buscar defensivos agrupados: ${e.toString()}'),
+        CacheFailure('Erro ao buscar defensivos agrupados: {{e.toString()}}'),
       );
     }
   }
@@ -358,12 +390,15 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   getDefensivosCompletos() async {
     try {
       final allDrift = await _repository.findAll();
-      final defensivosEntities = allDrift.map((drift) {
-        return DefensivoMapper.fromDriftToEntity(drift).copyWith(
+        );
+      }
+      final allDefensivos = allDrift;
+      final defensivosEntities = allDefensivos.map((hive) {
+        return DefensivoMapper.fromHiveToEntity(hive).copyWith(
           quantidadeDiagnosticos: 0,
           nivelPrioridade: 1,
-          isComercializado: drift.status,
-          isElegivel: drift.elegivel,
+          isComercializado: hive.status,
+          isElegivel: hive.status,
         );
       }).toList();
 
@@ -385,6 +420,8 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   }) async {
     try {
       final allDrift = await _repository.findAll();
+        );
+      }
 
       final allDefensivos = allDrift;
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(

@@ -1,4 +1,5 @@
 import '../../../../core/data/models/pragas_legacy.dart';
+import '../../../../database/receituagro_database.dart';
 import '../../data/praga_model.dart';
 import '../../domain/entities/praga_entity.dart';
 
@@ -79,5 +80,20 @@ class PragaMapper {
   /// Converte lista de Entities para PragasHive
   static List<PragasHive> fromEntityToHiveList(List<PragaEntity> entities) {
     return entities.map((entity) => fromEntityToHive(entity)).toList();
+  }
+
+  /// Converte Drift Praga para Entity
+  static PragaEntity fromDriftToEntity(Praga drift) {
+    return PragaEntity(
+      idReg: drift.idPraga,
+      nomeComum: drift.nome,
+      nomeCientifico: drift.nomeLatino ?? '',
+      tipoPraga: drift.tipo ?? '',
+    );
+  }
+
+  /// Converte lista de Drift Praga para Entities
+  static List<PragaEntity> fromDriftToEntityList(List<Praga> drifts) {
+    return drifts.map((drift) => fromDriftToEntity(drift)).toList();
   }
 }

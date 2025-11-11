@@ -1,9 +1,9 @@
 import 'package:core/core.dart' show GetIt;
 
 import '../../../../database/repositories/culturas_repository.dart';
+import '../../../../database/repositories/fitossanitarios_repository.dart';
+import '../../../../database/repositories/pragas_repository.dart';
 import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
-import '../../../../core/data/repositories/fitossanitario_legacy_repository.dart';
-import '../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../domain/entities/favorito_entity.dart';
 
 /// Strategy Pattern para resolver dados de diferentes tipos de favoritos
@@ -16,21 +16,21 @@ abstract class IFavoritosDataResolverStrategy {
 /// Estratégia para resolver dados de defensivos
 class DefensivoResolverStrategy implements IFavoritosDataResolverStrategy {
   // ✅ Lazy loading: obtém o repo apenas quando necessário
-  FitossanitarioLegacyRepository get _repository =>
-      GetIt.instance<FitossanitarioLegacyRepository>();
+  FitossanitariosRepository get _repository =>
+      GetIt.instance<FitossanitariosRepository>();
 
   @override
   Future<Map<String, dynamic>?> resolveItemData(String id) async {
     try {
-      final item = await _repository.getById(id);
+      final item = await _repository.findByIdDefensivo(id);
       if (item == null) return null;
 
       return {
-        'nomeComum': item.nomeComum,
+        'nomeComum': item.nome,
         'ingredienteAtivo': item.ingredienteAtivo ?? '',
         'fabricante': item.fabricante ?? '',
         'classeAgron': item.classeAgronomica ?? '',
-        'modoAcao': item.modoAcao ?? '',
+        'modoAcao': '', // Not available in Drift Fitossanitarios table
       };
     } catch (e) {
       return null;
@@ -41,22 +41,21 @@ class DefensivoResolverStrategy implements IFavoritosDataResolverStrategy {
 /// Estratégia para resolver dados de pragas
 class PragaResolverStrategy implements IFavoritosDataResolverStrategy {
   // ✅ Lazy loading: obtém o repo apenas quando necessário
-  PragasLegacyRepository get _repository =>
-      GetIt.instance<PragasLegacyRepository>();
+  PragasRepository get _repository => GetIt.instance<PragasRepository>();
 
   @override
   Future<Map<String, dynamic>?> resolveItemData(String id) async {
     try {
-      final item = await _repository.getById(id);
+      final item = await _repository.findByIdPraga(id);
       if (item == null) return null;
 
       return {
-        'nomeComum': item.nomeComum,
-        'nomeCientifico': item.nomeCientifico,
-        'tipoPraga': item.tipoPraga,
-        'dominio': item.dominio ?? '',
-        'reino': item.reino ?? '',
-        'familia': item.familia ?? '',
+        'nomeComum': item.nome,
+        'nomeCientifico': item.nomeLatino ?? '',
+        'tipoPraga': item.tipo ?? '',
+        'dominio': '',
+        'reino': '',
+        'familia': '',
       };
     } catch (e) {
       return null;

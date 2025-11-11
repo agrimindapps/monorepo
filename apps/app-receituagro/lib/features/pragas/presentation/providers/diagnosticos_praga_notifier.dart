@@ -1,8 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../database/repositories/culturas_repository.dart';
-import '../../../../core/data/repositories/fitossanitario_legacy_repository.dart';
-import '../../../../core/data/repositories/pragas_legacy_repository.dart';
+import '../../../../database/repositories/fitossanitarios_repository.dart';
+import '../../../../database/repositories/pragas_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 
@@ -147,15 +147,15 @@ class DiagnosticosPragaState {
 class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
   late final IDiagnosticosRepository _diagnosticosRepository;
   late final CulturasRepository _culturaRepository;
-  late final PragasLegacyRepository _pragasRepository;
-  late final FitossanitarioLegacyRepository _defensivoRepository;
+  late final PragasRepository _pragasRepository;
+  late final FitossanitariosRepository _defensivoRepository;
 
   @override
   Future<DiagnosticosPragaState> build() async {
     _diagnosticosRepository = di.sl<IDiagnosticosRepository>();
     _culturaRepository = di.sl<CulturasRepository>();
-    _pragasRepository = di.sl<PragasLegacyRepository>();
-    _defensivoRepository = di.sl<FitossanitarioLegacyRepository>();
+    _pragasRepository = di.sl<PragasRepository>();
+    _defensivoRepository = di.sl<FitossanitariosRepository>();
 
     return DiagnosticosPragaState.initial();
   }
@@ -283,9 +283,9 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
   /// Resolve o nome da praga pelo ID usando o repository
   Future<String> _resolvePragaNome(String idPraga) async {
     try {
-      final pragaData = await _pragasRepository.getById(idPraga);
-      if (pragaData != null && pragaData.nomeComum.isNotEmpty) {
-        return pragaData.nomeComum;
+      final pragaData = await _pragasRepository.findByIdPraga(idPraga);
+      if (pragaData != null && pragaData.nome.isNotEmpty) {
+        return pragaData.nome;
       }
     } catch (e) {
       // Erro ao buscar praga, retorna valor padrão
@@ -297,11 +297,11 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
   /// Retorna (nome, ingredienteAtivo)
   Future<(String, String)> _resolveDefensivoData(String idDefensivo) async {
     try {
-      final defensivoData = await _defensivoRepository.getById(idDefensivo);
+      final defensivoData = await _defensivoRepository.findByIdDefensivo(
+        idDefensivo,
+      );
       if (defensivoData != null) {
-        final nome = defensivoData.nomeComum.isNotEmpty
-            ? defensivoData.nomeComum
-            : defensivoData.nomeTecnico;
+        final nome = defensivoData.nome;
         final ingrediente = defensivoData.ingredienteAtivo?.isNotEmpty == true
             ? defensivoData.ingredienteAtivo!
             : 'Não especificado';

@@ -1,21 +1,21 @@
 import 'package:core/core.dart' hide Column;
 
+import '../../../../database/repositories/fitossanitarios_repository.dart';
+import '../../../../database/repositories/pragas_repository.dart';
 import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
-import '../../../../core/data/repositories/fitossanitario_legacy_repository.dart';
-import '../../../../core/data/repositories/pragas_legacy_repository.dart';
 
 /// Integração com serviços existentes para obter pragas por cultura
 ///
 /// Responsabilidades:
-/// - Consultar PragasLegacyRepository para dados base de pragas
+/// - Consultar PragasRepository (Drift) para dados base de pragas
 /// - Integrar dados de diagnóstico (DiagnosticoLegacyRepository)
-/// - Integrar dados de defensivos (FitossanitarioLegacyRepository)
+/// - Integrar dados de defensivos (FitossanitariosRepository Drift)
 /// - Retornar lista consolidada de pragas para uma cultura específica
 @injectable
 class PragasCulturaIntegrationDataSource {
-  final PragasLegacyRepository _pragasRepository;
+  final PragasRepository _pragasRepository;
   final DiagnosticoLegacyRepository _diagnosticoRepository;
-  final FitossanitarioLegacyRepository _fitossanitarioRepository;
+  final FitossanitariosRepository _fitossanitarioRepository;
 
   const PragasCulturaIntegrationDataSource(
     this._pragasRepository,
@@ -39,37 +39,36 @@ class PragasCulturaIntegrationDataSource {
       }
 
       // 1. Obter todas as pragas
-      final pragasResult = await _pragasRepository.getAll();
-      if (pragasResult.isFailure) {
-        return [];
-      }
+      final pragasResult = await _pragasRepository.findAll();
 
-      final allPragas = pragasResult.data ?? [];
+      final allPragas = pragasResult;
       if (allPragas.isEmpty) {
         return [];
       }
 
       // 2. Obter diagnósticos para contar frequência
       final diagnosticosResult = await _diagnosticoRepository.getAll();
-      final List<dynamic> diagnosticos =
-          diagnosticosResult.isSuccess ? (diagnosticosResult.data ?? []) : [];
+      final List<dynamic> diagnosticos = diagnosticosResult.isSuccess
+          ? (diagnosticosResult.data ?? [])
+          : [];
 
       // 3. Agrupar por tipo de praga e contar diagnósticos
-      final List<Map<String, dynamic>> pragasComDados =
-          allPragas.map<Map<String, dynamic>>((praga) {
-        // Contar diagnósticos para esta praga
-        final countDiagnosticos = diagnosticos.where((dynamic d) {
-          // Verificar se o diagnóstico está associado a esta praga
-          // Ajustar conforme a estrutura real do modelo Diagnóstico
-          return true; // Placeholder - ajustar com lógica real
-        }).length;
+      final List<Map<String, dynamic>> pragasComDados = allPragas
+          .map<Map<String, dynamic>>((praga) {
+            // Contar diagnósticos para esta praga
+            final countDiagnosticos = diagnosticos.where((dynamic d) {
+              // Verificar se o diagnóstico está associado a esta praga
+              // Ajustar conforme a estrutura real do modelo Diagnóstico
+              return true; // Placeholder - ajustar com lógica real
+            }).length;
 
-        return {
-          'praga': praga,
-          'totalDiagnosticos': countDiagnosticos,
-          'culturaId': culturaId,
-        };
-      }).toList();
+            return {
+              'praga': praga,
+              'totalDiagnosticos': countDiagnosticos,
+              'culturaId': culturaId,
+            };
+          })
+          .toList();
 
       return pragasComDados;
     } catch (e) {
@@ -87,12 +86,7 @@ class PragasCulturaIntegrationDataSource {
         return [];
       }
 
-      final defensivosResult = await _fitossanitarioRepository.getAll();
-      if (defensivosResult.isFailure) {
-        return [];
-      }
-
-      final allDefensivos = defensivosResult.data ?? [];
+      final allDefensivos = await _fitossanitarioRepository.findAll();
 
       // Filtrar defensivos elegíveis (ativo e comercializado)
       final List<dynamic> defensivosEligibles = allDefensivos
@@ -120,12 +114,7 @@ class PragasCulturaIntegrationDataSource {
       }
 
       // Buscar praga
-      final pragaResult = await _pragasRepository.getByKey(pragaId);
-      if (pragaResult.isFailure) {
-        throw Exception('Praga não encontrada');
-      }
-
-      final praga = pragaResult.data;
+      final praga = await _pragasRepository.findByIdPraga(pragaId);
       if (praga == null) {
         throw Exception('Praga não encontrada');
       }
@@ -135,7 +124,9 @@ class PragasCulturaIntegrationDataSource {
 
       // Contar diagnósticos
       final diagnosticosResult = await _diagnosticoRepository.getAll();
-      final List<dynamic> diagnosticos = diagnosticosResult.isSuccess ? (diagnosticosResult.data ?? []) : [];
+      final List<dynamic> diagnosticos = diagnosticosResult.isSuccess
+          ? (diagnosticosResult.data ?? [])
+          : [];
       final countDiagnosticos = diagnosticos.length;
 
       return {

@@ -1,7 +1,7 @@
 import '../../database/repositories/culturas_repository.dart';
+import '../../database/repositories/fitossanitarios_repository.dart';
+import '../../database/repositories/pragas_repository.dart';
 import '../data/models/diagnostico_legacy.dart';
-import '../data/repositories/fitossanitario_legacy_repository.dart';
-import '../data/repositories/pragas_legacy_repository.dart';
 import '../di/injection_container.dart' as di;
 import '../utils/data_with_warnings.dart';
 import '../utils/diagnostico_logger.dart';
@@ -18,10 +18,10 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
   /// Retorna o nome do defensivo com warnings de validação
   Future<DataWithWarnings<String>> getDisplayNomeDefensivoWithWarnings() async {
     try {
-      final repository = di.sl<FitossanitarioLegacyRepository>();
-      final defensivo = await repository.getById(fkIdDefensivo);
-      if (defensivo != null && defensivo.nomeComum.isNotEmpty) {
-        return DataWithWarnings(data: defensivo.nomeComum);
+      final repository = di.sl<FitossanitariosRepository>();
+      final defensivo = await repository.findByIdDefensivo(fkIdDefensivo);
+      if (defensivo != null && defensivo.nome.isNotEmpty) {
+        return DataWithWarnings(data: defensivo.nome);
       }
     } catch (e, stackTrace) {
       DiagnosticoLogger.dataResolutionFailure('defensivo', fkIdDefensivo, e);
@@ -98,10 +98,10 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
   /// Retorna o nome da praga com warnings de validação
   Future<DataWithWarnings<String>> getDisplayNomePragaWithWarnings() async {
     try {
-      final repository = di.sl<PragasLegacyRepository>();
-      final praga = await repository.getById(fkIdPraga);
-      if (praga != null && praga.nomeComum.isNotEmpty) {
-        return DataWithWarnings(data: praga.nomeComum);
+      final repository = di.sl<PragasRepository>();
+      final praga = await repository.findByIdPraga(fkIdPraga);
+      if (praga != null && praga.nome.isNotEmpty) {
+        return DataWithWarnings(data: praga.nome);
       }
     } catch (e, stackTrace) {
       DiagnosticoLogger.dataResolutionFailure('praga', fkIdPraga, e);
@@ -187,31 +187,18 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
 
     // Resolver dados do defensivo
     try {
-      final fitossanitarioRepo = di.sl<FitossanitarioLegacyRepository>();
-      final defensivo = await fitossanitarioRepo.getById(fkIdDefensivo);
+      final fitossanitarioRepo = di.sl<FitossanitariosRepository>();
+      final defensivo = await fitossanitarioRepo.findByIdDefensivo(
+        fkIdDefensivo,
+      );
       if (defensivo != null) {
         if (defensivo.ingredienteAtivo?.isNotEmpty == true) {
           ingredienteAtivo = defensivo.ingredienteAtivo!;
         } else {
           warnings.add('Ingrediente ativo não disponível para o defensivo');
         }
-        if (defensivo.toxico?.isNotEmpty == true) {
-          toxico = defensivo.toxico!;
-        } else {
-          warnings.add(
-            'Informações toxicológicas não disponíveis para o defensivo',
-          );
-        }
-        if (defensivo.formulacao?.isNotEmpty == true) {
-          formulacao = defensivo.formulacao!;
-        } else {
-          warnings.add('Formulação não disponível para o defensivo');
-        }
-        if (defensivo.modoAcao?.isNotEmpty == true) {
-          modoAcao = defensivo.modoAcao!;
-        } else {
-          warnings.add('Modo de ação não disponível para o defensivo');
-        }
+        // Note: Dados detalhados (toxico, formulacao, modoAcao) não estão no
+        // FitossanitariosRepository, apenas campos básicos
       } else {
         warnings.add('Defensivo não encontrado na base de dados');
       }
@@ -226,10 +213,12 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
 
     // Resolver dados da praga
     try {
-      final pragaRepo = di.sl<PragasLegacyRepository>();
-      final praga = await pragaRepo.getById(fkIdPraga);
-      if (praga != null && praga.nomeCientifico.isNotEmpty) {
-        nomeCientifico = praga.nomeCientifico;
+      final pragaRepo = di.sl<PragasRepository>();
+      final praga = await pragaRepo.findByIdPraga(fkIdPraga);
+      if (praga != null &&
+          praga.nomeLatino != null &&
+          praga.nomeLatino!.isNotEmpty) {
+        nomeCientifico = praga.nomeLatino!;
       } else {
         warnings.add('Nome científico da praga não disponível');
       }

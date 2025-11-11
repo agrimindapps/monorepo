@@ -1,4 +1,5 @@
 import '../../../../core/data/models/fitossanitario_legacy.dart';
+import '../../../../database/receituagro_database.dart';
 import '../../data/defensivo_agrupado_item_model.dart';
 import '../../data/defensivo_model.dart';
 import '../../domain/entities/defensivo_entity.dart';
@@ -120,5 +121,27 @@ class DefensivoMapper {
     List<FitossanitarioHive> hives,
   ) {
     return hives.map((hive) => fromHiveToEntity(hive)).toList();
+  }
+
+  /// Converte Fitossanitario Drift para Entity
+  static DefensivoEntity fromDriftToEntity(Fitossanitario drift) {
+    return DefensivoEntity(
+      id: drift.idDefensivo,
+      nome: drift.nome,
+      ingredienteAtivo: drift.ingredienteAtivo ?? '',
+      nomeComum: drift.nomeComum ?? drift.nome,
+      classeAgronomica: drift.classeAgronomica,
+      fabricante: drift.fabricante,
+      modoAcao: null, // Drift não tem campo modoAcao
+      isActive: drift.status,
+      lastUpdated: DateTime.now(),
+    );
+  }
+
+  /// Converte lista de Fitossanitario Drift para Entities
+  static List<DefensivoEntity> fromDriftToEntityList(
+    List<Fitossanitario> drifts,
+  ) {
+    return drifts.map((drift) => fromDriftToEntity(drift)).toList();
   }
 }

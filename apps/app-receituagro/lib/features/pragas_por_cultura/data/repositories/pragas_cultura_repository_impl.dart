@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 
 import '../../../../database/repositories/culturas_repository.dart';
-import '../../../../core/data/repositories/fitossanitario_legacy_repository.dart';
+import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../../features/culturas/data/mappers/cultura_mapper.dart';
 import '../../domain/repositories/i_pragas_cultura_repository.dart';
 import '../../presentation/services/pragas_cultura_error_message_service.dart';
@@ -16,13 +16,13 @@ import '../datasources/pragas_cultura_local_datasource.dart';
 /// Orquestração entre:
 /// - PragasCulturaIntegrationDataSource (integração de dados)
 /// - PragasCulturaLocalDataSource (cache local)
-/// - Repositórios base (CulturasRepository Drift, FitossanitarioLegacyRepository)
+/// - Repositórios base (CulturasRepository Drift, FitossanitariosRepository Drift)
 @LazySingleton(as: IPragasCulturaRepository)
 class PragasCulturaRepositoryImpl implements IPragasCulturaRepository {
   final PragasCulturaIntegrationDataSource integrationDataSource;
   final PragasCulturaLocalDataSource localDataSource;
   final CulturasRepository culturaRepository;
-  final FitossanitarioLegacyRepository fitossanitarioRepository;
+  final FitossanitariosRepository fitossanitarioRepository;
   final PragasCulturaErrorMessageService errorService;
 
   const PragasCulturaRepositoryImpl({
@@ -89,18 +89,8 @@ class PragasCulturaRepositoryImpl implements IPragasCulturaRepository {
         return Left(ValidationFailure(errorService.getEmptyPragaIdError()));
       }
 
-      // Obter defensivos do repositório Hive
-      final result = await fitossanitarioRepository.getAll();
-
-      if (result.isFailure) {
-        return Left(
-          CacheFailure(
-            errorService.getLoadDefensivosError(result.error?.message),
-          ),
-        );
-      }
-
-      final defensivos = result.data ?? [];
+      // Obter defensivos do repositório Drift
+      final defensivos = await fitossanitarioRepository.findAll();
 
       // Filtrar apenas defensivos elegíveis e ativos
       final List<dynamic> defensivosElegibles = defensivos

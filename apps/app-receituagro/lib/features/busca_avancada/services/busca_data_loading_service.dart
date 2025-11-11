@@ -1,16 +1,16 @@
 import 'package:injectable/injectable.dart';
 
 import '../../../database/repositories/culturas_repository.dart';
-import '../../../core/data/repositories/fitossanitario_legacy_repository.dart';
-import '../../../core/data/repositories/pragas_legacy_repository.dart';
+import '../../../database/repositories/fitossanitarios_repository.dart';
+import '../../../database/repositories/pragas_repository.dart';
 
 /// Service specialized in loading and formatting data for search dropdowns
 /// Principle: Single Responsibility - Only handles data loading and transformation
 @lazySingleton
 class BuscaDataLoadingService {
   final CulturasRepository _culturaRepo;
-  final PragasLegacyRepository _pragasRepo;
-  final FitossanitarioLegacyRepository _fitossanitarioRepo;
+  final PragasRepository _pragasRepo;
+  final FitossanitariosRepository _fitossanitarioRepo;
 
   BuscaDataLoadingService(
     this._culturaRepo,
@@ -35,46 +35,41 @@ class BuscaDataLoadingService {
 
   /// Loads all pragas and formats them for dropdown display
   Future<List<Map<String, String>>> loadPragas() async {
-    final result = await _pragasRepo.getAll();
+    try {
+      final result = await _pragasRepo.findAll();
 
-    if (result.isError) {
+      final pragas =
+          result
+              .map(
+                (p) => {
+                  'id': p.idPraga,
+                  'nome': p.nome.isNotEmpty
+                      ? p.nome
+                      : (p.nomeLatino ?? 'Praga desconhecida'),
+                },
+              )
+              .toList()
+            ..sort((a, b) => a['nome']!.compareTo(b['nome']!));
+
+      return pragas;
+    } catch (e) {
       return [];
     }
-
-    final pragas =
-        result.data!
-            .map(
-              (p) => {
-                'id': p.idReg,
-                'nome': p.nomeComum.isNotEmpty ? p.nomeComum : p.nomeCientifico,
-              },
-            )
-            .toList()
-          ..sort((a, b) => a['nome']!.compareTo(b['nome']!));
-
-    return pragas;
   }
 
   /// Loads all defensivos and formats them for dropdown display
   Future<List<Map<String, String>>> loadDefensivos() async {
-    final result = await _fitossanitarioRepo.getAll();
+    try {
+      final result = await _fitossanitarioRepo.findAll();
 
-    if (result.isError) {
+      final defensivos =
+          result.map((d) => {'id': d.idDefensivo, 'nome': d.nome}).toList()
+            ..sort((a, b) => a['nome']!.compareTo(b['nome']!));
+
+      return defensivos;
+    } catch (e) {
       return [];
     }
-
-    final defensivos =
-        result.data!
-            .map(
-              (d) => {
-                'id': d.idReg,
-                'nome': d.nomeComum.isNotEmpty ? d.nomeComum : d.nomeTecnico,
-              },
-            )
-            .toList()
-          ..sort((a, b) => a['nome']!.compareTo(b['nome']!));
-
-    return defensivos;
   }
 
   /// Loads all dropdown data in parallel for better performance

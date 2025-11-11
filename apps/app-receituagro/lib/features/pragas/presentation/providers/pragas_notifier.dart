@@ -1,8 +1,9 @@
 import 'package:app_receituagro/core/di/injection.dart' as di;
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/data/repositories/pragas_legacy_repository.dart';
+import '../../../../database/repositories/pragas_repository.dart';
 import '../../../../core/services/access_history_service.dart';
+import '../../data/mappers/praga_mapper.dart';
 import '../../domain/entities/praga_entity.dart';
 import '../services/pragas_error_message_service.dart';
 import 'pragas_state.dart';
@@ -15,13 +16,13 @@ part 'pragas_notifier.g.dart';
 class PragasNotifier extends _$PragasNotifier {
   late final AccessHistoryService _historyService;
   late final PragasErrorMessageService _errorService;
-  late final PragasLegacyRepository _pragasRepository;
+  late final PragasRepository _pragasRepository;
 
   @override
   Future<PragasState> build() async {
     _historyService = AccessHistoryService();
     _errorService = di.getIt<PragasErrorMessageService>();
-    _pragasRepository = GetIt.instance<PragasLegacyRepository>();
+    _pragasRepository = GetIt.instance<PragasRepository>();
     return await _loadInitialData();
   }
 
@@ -29,12 +30,8 @@ class PragasNotifier extends _$PragasNotifier {
   Future<PragasState> _loadInitialData() async {
     try {
       // Carregar todas as pragas
-      final pragasResult = await _pragasRepository.getAll();
-      final pragas = pragasResult.fold(
-        (failure) => <PragaEntity>[],
-        (hiveList) =>
-            hiveList.map((hive) => PragaEntity.fromHive(hive)).toList(),
-      );
+      final pragasDrift = await _pragasRepository.findAll();
+      final pragas = PragaMapper.fromDriftToEntityList(pragasDrift);
 
       return PragasState(
         pragas: pragas,
@@ -181,12 +178,8 @@ class PragasNotifier extends _$PragasNotifier {
       // Se pragas já foram carregadas, apenas atualiza o estado
       // As propriedades computed (insetos, doencas, plantas) são calculadas automaticamente
       if (currentState.pragas.isEmpty) {
-        final pragasResult = await _pragasRepository.getAll();
-        final pragas = pragasResult.fold(
-          (failure) => <PragaEntity>[],
-          (hiveList) =>
-              hiveList.map((hive) => PragaEntity.fromHive(hive)).toList(),
-        );
+        final pragasDrift = await _pragasRepository.findAll();
+        final pragas = PragaMapper.fromDriftToEntityList(pragasDrift);
 
         state = AsyncValue.data(currentState.copyWith(pragas: pragas));
       } else {

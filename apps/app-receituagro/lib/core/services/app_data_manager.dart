@@ -4,11 +4,11 @@ import 'package:core/core.dart' hide Column;
 
 import '../../database/receituagro_database.dart';
 import '../../database/repositories/culturas_repository.dart';
+import '../../database/repositories/fitossanitarios_repository.dart';
+import '../../database/repositories/pragas_repository.dart';
 import '../data/repositories/diagnostico_legacy_repository.dart';
-import '../data/repositories/fitossanitario_legacy_repository.dart';
 import '../data/repositories/fitossanitario_info_legacy_repository.dart';
 import '../data/repositories/plantas_inf_legacy_repository.dart';
-import '../data/repositories/pragas_legacy_repository.dart';
 import '../data/repositories/pragas_inf_legacy_repository.dart';
 import 'data_initialization_service.dart';
 
@@ -97,9 +97,9 @@ class AppDataManager implements IAppDataManager {
       // Create Drift database and repository
       final database = ReceituagroDatabase.production();
       final culturaRepo = CulturasRepository(database);
+      final pragasRepo = PragasRepository(database);
+      final fitossanitarioRepo = FitossanitariosRepository(database);
 
-      final pragasRepo = PragasLegacyRepository();
-      final fitossanitarioRepo = FitossanitarioLegacyRepository();
       final diagnosticoRepo = DiagnosticoLegacyRepository();
       final fitossanitarioInfoRepo = FitossanitarioInfoLegacyRepository();
       final plantasInfRepo = PlantasInfLegacyRepository();

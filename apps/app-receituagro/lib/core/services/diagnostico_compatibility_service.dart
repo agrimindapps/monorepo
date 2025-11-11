@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 import '../../features/diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../database/repositories/culturas_repository.dart';
-import '../data/repositories/fitossanitario_legacy_repository.dart';
-import '../data/repositories/pragas_legacy_repository.dart';
+import '../../database/repositories/fitossanitarios_repository.dart';
+import '../../database/repositories/pragas_repository.dart';
 import '../di/injection_container.dart';
 
 /// Serviço avançado para validação de compatibilidade entre entidades
@@ -29,10 +29,9 @@ class DiagnosticoCompatibilityService {
   late final IDiagnosticosRepository _diagnosticosRepository =
       sl<IDiagnosticosRepository>();
   late final CulturasRepository _culturaRepository = sl<CulturasRepository>();
-  late final FitossanitarioLegacyRepository _defensivoRepository =
-      sl<FitossanitarioLegacyRepository>();
-  late final PragasLegacyRepository _pragasRepository =
-      sl<PragasLegacyRepository>();
+  late final FitossanitariosRepository _defensivoRepository =
+      sl<FitossanitariosRepository>();
+  late final PragasRepository _pragasRepository = sl<PragasRepository>();
   final Map<String, CompatibilityValidation> _validationCache = {};
   DateTime? _lastCacheUpdate;
   static const Duration _cacheTTL = Duration(hours: 1);
@@ -194,16 +193,14 @@ class DiagnosticoCompatibilityService {
     String idPraga,
   ) async {
     final issues = <ValidationIssue>[];
-    final defensivo = await _defensivoRepository.getById(idDefensivo);
+    final defensivo = await _defensivoRepository.findByIdDefensivo(idDefensivo);
     if (defensivo == null) {
       issues.add(
         ValidationIssue.error('Defensivo com ID $idDefensivo não encontrado'),
       );
     } else if (!defensivo.status) {
       issues.add(
-        ValidationIssue.warning(
-          'Defensivo ${defensivo.nomeComum} está inativo',
-        ),
+        ValidationIssue.warning('Defensivo ${defensivo.nome} está inativo'),
       );
     }
 
@@ -219,7 +216,7 @@ class DiagnosticoCompatibilityService {
       issues.add(ValidationIssue.error('ID de cultura inválido: $idCultura'));
     }
 
-    final praga = await _pragasRepository.getById(idPraga);
+    final praga = await _pragasRepository.findByIdPraga(idPraga);
     if (praga == null) {
       issues.add(ValidationIssue.error('Praga com ID $idPraga não encontrada'));
     }
@@ -304,19 +301,19 @@ class DiagnosticoCompatibilityService {
     final issues = <ValidationIssue>[];
     final warnings = <ValidationWarning>[];
 
-    final defensivo = await _defensivoRepository.getById(idDefensivo);
+    final defensivo = await _defensivoRepository.findByIdDefensivo(idDefensivo);
     if (defensivo != null) {
       if (defensivo.comercializado != 1) {
         issues.add(
           ValidationIssue.warning(
-            'Defensivo ${defensivo.nomeComum} não está sendo comercializado',
+            'Defensivo ${defensivo.nome} não está sendo comercializado',
           ),
         );
       }
       if (!defensivo.elegivel) {
         warnings.add(
           ValidationWarning(
-            'Defensivo ${defensivo.nomeComum} pode ter restrições de uso',
+            'Defensivo ${defensivo.nome} pode ter restrições de uso',
             severity: WarningSevetiry.medium,
           ),
         );

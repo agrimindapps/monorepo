@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
 import '../../database/repositories/culturas_repository.dart';
-import '../data/repositories/fitossanitario_legacy_repository.dart';
-import '../data/repositories/pragas_legacy_repository.dart';
+import '../../database/repositories/fitossanitarios_repository.dart';
+import '../../database/repositories/pragas_repository.dart';
 import '../di/injection_container.dart';
 
 /// Serviço unificado para resolver nomes de entidades em diagnósticos
@@ -25,10 +25,9 @@ class DiagnosticoEntityResolver {
 
   DiagnosticoEntityResolver._internal();
   late final CulturasRepository _culturaRepository = sl<CulturasRepository>();
-  late final FitossanitarioLegacyRepository _defensivoRepository =
-      sl<FitossanitarioLegacyRepository>();
-  late final PragasLegacyRepository _pragasRepository =
-      sl<PragasLegacyRepository>();
+  late final FitossanitariosRepository _defensivoRepository =
+      sl<FitossanitariosRepository>();
+  late final PragasRepository _pragasRepository = sl<PragasRepository>();
   final Map<String, String> _culturaCache = {};
   final Map<String, String> _defensivoCache = {};
   final Map<String, String> _pragaCache = {};
@@ -107,9 +106,11 @@ class DiagnosticoEntityResolver {
         return _defensivoCache[idDefensivo]!;
       }
       if (idDefensivo.isNotEmpty) {
-        final defensivoData = await _defensivoRepository.getById(idDefensivo);
-        if (defensivoData != null && defensivoData.nomeComum.isNotEmpty) {
-          final resolvedName = defensivoData.nomeComum;
+        final defensivoData = await _defensivoRepository.findByIdDefensivo(
+          idDefensivo,
+        );
+        if (defensivoData != null && defensivoData.nome.isNotEmpty) {
+          final resolvedName = defensivoData.nome;
           _defensivoCache[idDefensivo] = resolvedName;
           _updateCacheTimestamp();
           return resolvedName;
@@ -142,9 +143,9 @@ class DiagnosticoEntityResolver {
         return _pragaCache[idPraga]!;
       }
       if (idPraga.isNotEmpty) {
-        final pragaData = await _pragasRepository.getById(idPraga);
-        if (pragaData != null && pragaData.nomeComum.isNotEmpty) {
-          final resolvedName = pragaData.nomeComum;
+        final pragaData = await _pragasRepository.findByIdPraga(idPraga);
+        if (pragaData != null && pragaData.nome.isNotEmpty) {
+          final resolvedName = pragaData.nome;
           _pragaCache[idPraga] = resolvedName;
           _updateCacheTimestamp();
           return resolvedName;
@@ -232,14 +233,16 @@ class DiagnosticoEntityResolver {
     }
 
     if (idDefensivo?.isNotEmpty == true) {
-      final defensivo = await _defensivoRepository.getById(idDefensivo!);
+      final defensivo = await _defensivoRepository.findByIdDefensivo(
+        idDefensivo!,
+      );
       if (defensivo == null) {
         issues.add('Defensivo com ID $idDefensivo não encontrado');
       }
     }
 
     if (idPraga?.isNotEmpty == true) {
-      final praga = await _pragasRepository.getById(idPraga!);
+      final praga = await _pragasRepository.findByIdPraga(idPraga!);
       if (praga == null) {
         issues.add('Praga com ID $idPraga não encontrada');
       }

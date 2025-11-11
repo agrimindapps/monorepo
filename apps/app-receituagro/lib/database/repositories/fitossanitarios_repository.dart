@@ -66,4 +66,62 @@ class FitossanitariosRepository {
     final result = await query.getSingle();
     return result.read(count)!;
   }
+
+  /// Carrega fitossanitários a partir de dados JSON
+  ///
+  /// **Formato esperado do JSON:**
+  /// ```json
+  /// {
+  ///   "idReg": "string",
+  ///   "nomeComum": "string",
+  ///   "fabricante": "string",
+  ///   "classe": "string",
+  ///   "classeAgronomica": "string",
+  ///   "ingredienteAtivo": "string",
+  ///   "registroMapa": "string",
+  ///   "status": "boolean",
+  ///   "comercializado": "int",
+  ///   "elegivel": "boolean"
+  /// }
+  /// ```
+  Future<void> loadFromJson(
+    List<Map<String, dynamic>> jsonData,
+    String version,
+  ) async {
+    await _db.transaction(() async {
+      // Limpa dados antigos
+      await _db.delete(_db.fitossanitarios).go();
+
+      // Insere novos dados
+      for (final item in jsonData) {
+        final companion = FitossanitariosCompanion.insert(
+          idDefensivo: item['idReg'] as String,
+          nome: item['nomeComum'] as String,
+          nomeComum: Value(item['nomeComum'] as String?),
+          fabricante: Value(item['fabricante'] as String?),
+          classe: Value(item['classe'] as String?),
+          classeAgronomica: Value(item['classeAgronomica'] as String?),
+          ingredienteAtivo: Value(item['ingredienteAtivo'] as String?),
+          registroMapa: Value(item['registroMapa'] as String?),
+          status: Value(
+            item['status'] is bool
+                ? item['status'] as bool
+                : (item['status']?.toString().toLowerCase() == 'true'),
+          ),
+          comercializado: Value(
+            item['comercializado'] is int
+                ? item['comercializado'] as int
+                : int.tryParse(item['comercializado']?.toString() ?? '1') ?? 1,
+          ),
+          elegivel: Value(
+            item['elegivel'] is bool
+                ? item['elegivel'] as bool
+                : (item['elegivel']?.toString().toLowerCase() == 'true'),
+          ),
+        );
+
+        await _db.into(_db.fitossanitarios).insert(companion);
+      }
+    });
+  }
 }

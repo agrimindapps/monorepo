@@ -8,13 +8,13 @@ import '../../../../database/repositories/pragas_repository.dart';
 ///
 /// Responsabilidades:
 /// - Consultar PragasRepository (Drift) para dados base de pragas
-/// - Integrar dados de diagnóstico (DiagnosticoLegacyRepository)
+/// - Integrar dados de diagnóstico (DiagnosticoRepository)
 /// - Integrar dados de defensivos (FitossanitariosRepository Drift)
 /// - Retornar lista consolidada de pragas para uma cultura específica
 @injectable
 class PragasCulturaIntegrationDataSource {
   final PragasRepository _pragasRepository;
-  final DiagnosticoLegacyRepository _diagnosticoRepository;
+  final DiagnosticoRepository _diagnosticoRepository;
   final FitossanitariosRepository _fitossanitarioRepository;
 
   const PragasCulturaIntegrationDataSource(

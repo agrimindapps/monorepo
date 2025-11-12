@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/services/diagnostico_integration_service.dart';
 
 /// Widget especializado para exibir um diagnóstico com dados relacionais
-/// Mostra informações integradas de DiagnosticoHive, FitossanitarioHive, 
-/// CulturaHive e PragasHive em um card visualmente organizado
+/// Mostra informações integradas de Diagnostico, Fitossanitario, 
+/// Cultura e Praga em um card visualmente organizado
 class DiagnosticoRelacionalCardWidget extends StatelessWidget {
   final DiagnosticoDetalhado diagnosticoDetalhado;
   final VoidCallback? onTap;

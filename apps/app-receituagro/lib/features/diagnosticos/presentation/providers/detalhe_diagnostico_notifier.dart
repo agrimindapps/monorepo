@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-import '../../../../core/data/models/diagnostico_legacy.dart';
 import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/extensions/diagnostico_hive_extension.dart';
@@ -20,7 +18,7 @@ part 'detalhe_diagnostico_notifier.g.dart';
 /// Detalhe Diagnostico state
 class DetalheDiagnosticoState {
   final DiagnosticoEntity? diagnostico;
-  final DiagnosticoHive? diagnosticoHive;
+  final Diagnostico? diagnosticoHive;
   final Map<String, String> diagnosticoData;
   final bool isFavorited;
   final bool isPremium;
@@ -54,7 +52,7 @@ class DetalheDiagnosticoState {
 
   DetalheDiagnosticoState copyWith({
     DiagnosticoEntity? diagnostico,
-    DiagnosticoHive? diagnosticoHive,
+    Diagnostico? diagnosticoHive,
     Map<String, String>? diagnosticoData,
     bool? isFavorited,
     bool? isPremium,
@@ -90,13 +88,13 @@ class DetalheDiagnosticoState {
 @Riverpod(keepAlive: true)
 class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
   late final IDiagnosticosRepository _diagnosticosRepository;
-  late final DiagnosticoLegacyRepository _hiveRepository;
+  late final DiagnosticoRepository _hiveRepository;
   late final FavoritosRepositorySimplified _favoritosRepository;
 
   @override
   Future<DetalheDiagnosticoState> build() async {
     _diagnosticosRepository = di.sl<IDiagnosticosRepository>();
-    _hiveRepository = di.sl<DiagnosticoLegacyRepository>();
+    _hiveRepository = di.sl<DiagnosticoRepository>();
     _favoritosRepository = FavoritosDI.get<FavoritosRepositorySimplified>();
 
     // Setup listener APÓS o estado inicial ser retornado
@@ -127,7 +125,7 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
               diagnosticoId,
             );
 
-            // Extensão DiagnosticoHiveExtension já busca dados do defensivo internamente
+            // Extensão DiagnosticoExtension já busca dados do defensivo internamente
             final diagnosticoData = diagnosticoHive != null
                 ? await diagnosticoHive.toDataMap()
                 : <String, String>{};
@@ -182,7 +180,7 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
         if (diagnosticoHive != null) {
           final diagnostico = DiagnosticoMapper.fromHive(diagnosticoHive);
 
-          // Extensão DiagnosticoHiveExtension já busca dados do defensivo internamente
+          // Extensão DiagnosticoExtension já busca dados do defensivo internamente
           final diagnosticoData = await diagnosticoHive.toDataMap();
 
           state = AsyncValue.data(

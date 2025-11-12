@@ -211,8 +211,6 @@ class DefensivoAgrupadoItemWidget extends StatelessWidget {
       ),
     );
   }
-
-
   Color _getItemColor() {
     return const Color(0xFF4CAF50);
   }

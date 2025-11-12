@@ -2,7 +2,7 @@ import 'dart:developer' as developer;
 
 import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
-import '../../../../database/repositories/legacy_type_aliases.dart';
+
 import '../../../../database/repositories/pragas_repository.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/favorito_entity.dart';
@@ -15,7 +15,7 @@ import '../../domain/repositories/i_favoritos_repository.dart';
 /// mas a implementação atual usa FavoritosService consolidado
 class FavoritosStorageService implements IFavoritosStorage {
   // Lazy loading para evitar circular dependencies (DIP)
-  late final FavoritosLegacyRepository _repository;
+  late final FavoritoRepository _repository;
 
   bool _repositoryInitialized = false;
 
@@ -29,7 +29,7 @@ class FavoritosStorageService implements IFavoritosStorage {
   /// Inicializa as dependências lazy (chamado na primeira vez que são acessadas)
   void _initializeRepository() {
     if (_repositoryInitialized) return;
-    _repository = sl<FavoritosLegacyRepository>();
+    _repository = sl<FavoritoRepository>();
     _repositoryInitialized = true;
   }
 
@@ -241,8 +241,8 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
   final FitossanitariosRepository _fitossanitarioRepository =
       sl<FitossanitariosRepository>();
   final PragasRepository _pragasRepository = sl<PragasRepository>();
-  final DiagnosticoLegacyRepository _diagnosticoRepository =
-      sl<DiagnosticoLegacyRepository>();
+  final DiagnosticoRepository _diagnosticoRepository =
+      sl<DiagnosticoRepository>();
   final CulturasRepository _culturaRepository = sl<CulturasRepository>();
 
   @override
@@ -304,8 +304,8 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
           'cultura': 'ID: ${diagnostico.culturaId}',
           'dosagem':
               '${diagnostico.dsMin ?? ''} - ${diagnostico.dsMax} ${diagnostico.um}',
-          'fabricante': '', // Campo não disponível no DiagnosticoHive
-          'modoAcao': '', // Campo não disponível no DiagnosticoHive
+          'fabricante': '', // Campo não disponível no Diagnostico
+          'modoAcao': '', // Campo não disponível no Diagnostico
         };
       }
       return {
@@ -435,8 +435,8 @@ class FavoritosValidatorService implements IFavoritosValidator {
   final FitossanitariosRepository _fitossanitarioRepository =
       sl<FitossanitariosRepository>();
   final PragasRepository _pragasRepository = sl<PragasRepository>();
-  final DiagnosticoLegacyRepository _diagnosticoRepository =
-      sl<DiagnosticoLegacyRepository>();
+  final DiagnosticoRepository _diagnosticoRepository =
+      sl<DiagnosticoRepository>();
   final CulturasRepository _culturaRepository = sl<CulturasRepository>();
 
   @override

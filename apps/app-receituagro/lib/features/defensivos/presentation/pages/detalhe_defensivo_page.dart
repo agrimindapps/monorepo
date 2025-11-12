@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import '../../../../core/data/models/diagnostico_legacy.dart';
 // DEPRECATED: import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
@@ -165,11 +163,11 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
   Future<void> _debugDiagnosticosStatus() async {
     try {
       debugPrint('🔧 [FORCE DEBUG] Verificando status dos diagnósticos...');
-      final repository = sl<DiagnosticoLegacyRepository>();
+      final repository = sl<DiagnosticoRepository>();
       final result = await repository.getAll();
       final allDiagnosticos = result.isSuccess
           ? result.data!
-          : <DiagnosticoHive>[];
+          : <Diagnostico>[];
       debugPrint(
         '📊 [FORCE DEBUG] Repository direto: ${allDiagnosticos.length} diagnósticos',
       );
@@ -193,7 +191,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
           final sampleResult = await repository.getAll();
           final sample = sampleResult.isSuccess
               ? sampleResult.data!.take(3).toList()
-              : <DiagnosticoHive>[];
+              : <Diagnostico>[];
           for (int i = 0; i < sample.length; i++) {
             final diag = sample[i];
             debugPrint(
@@ -229,7 +227,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
 
   /// Investigar padrões de ID e buscar correspondências
   Future<void> _investigateIdPatterns(
-    DiagnosticoLegacyRepository repository,
+    DiagnosticoRepository repository,
     List<dynamic> allDiagnosticos,
   ) async {
     try {

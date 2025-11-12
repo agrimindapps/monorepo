@@ -8,8 +8,8 @@ import 'package:flutter/foundation.dart';
 ///
 /// **Uso:**
 /// ```dart
-/// final adapter = TypedBoxAdapter<ComentarioHive>(dynamicBox);
-/// final items = adapter.values.toList(); // Type-safe List<ComentarioHive>
+/// final adapter = TypedBoxAdapter<Comentario>(dynamicBox);
+/// final items = adapter.values.toList(); // Type-safe List<Comentario>
 /// ```
 ///
 /// **Por que isso é necessário:**
@@ -158,10 +158,10 @@ class TypedBoxAdapter<T extends HiveObject> {
 ///
 /// **Uso:**
 /// ```dart
-/// class ComentariosLegacyRepository
-///     extends TypedDynamicBoxRepository<ComentarioHive> {
+/// class ComentarioRepository
+///     extends TypedDynamicBoxRepository<Comentario> {
 ///
-///   ComentariosLegacyRepository() : super(
+///   ComentarioRepository() : super(
 ///     hiveManager: GetIt.instance<IHiveManager>(),
 ///     boxName: 'comentarios',
 ///   );

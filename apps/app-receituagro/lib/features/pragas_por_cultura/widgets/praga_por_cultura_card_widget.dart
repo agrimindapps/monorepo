@@ -7,7 +7,7 @@ import '../../../core/services/diagnostico_integration_service.dart';
 import '../../../core/widgets/praga_image_widget.dart';
 
 /// Widget especializado para exibir uma praga por cultura
-/// Mostra dados integrados de PragasHive + DiagnosticoHive relacionados
+/// Mostra dados integrados de Praga + Diagnostico relacionados
 class PragaPorCulturaCardWidget extends StatelessWidget {
   final PragaPorCultura pragaPorCultura;
   final VoidCallback? onTap;

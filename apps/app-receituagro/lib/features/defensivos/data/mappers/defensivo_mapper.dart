@@ -1,4 +1,4 @@
-import '../../../../core/data/models/fitossanitario_legacy.dart';
+
 import '../../../../database/receituagro_database.dart';
 import '../../data/defensivo_agrupado_item_model.dart';
 import '../../data/defensivo_model.dart';
@@ -101,8 +101,8 @@ class DefensivoMapper {
     return entities.map((entity) => toAgrupadoModel(entity)).toList();
   }
 
-  /// Converte FitossanitarioHive para Entity
-  static DefensivoEntity fromHiveToEntity(FitossanitarioHive hive) {
+  /// Converte Fitossanitario para Entity
+  static DefensivoEntity fromHiveToEntity(Fitossanitario hive) {
     return DefensivoEntity(
       id: hive.idReg,
       nome: hive.nomeComum,
@@ -110,15 +110,15 @@ class DefensivoMapper {
       nomeComum: hive.nomeComum,
       classeAgronomica: hive.classeAgronomica,
       fabricante: hive.fabricante,
-      modoAcao: hive.modoAcao, // Campo modoAcao existe no FitossanitarioHive
+      modoAcao: hive.modoAcao, // Campo modoAcao existe no Fitossanitario
       isActive: hive.status,
       lastUpdated: DateTime.now(),
     );
   }
 
-  /// Converte lista de FitossanitarioHive para Entities
+  /// Converte lista de Fitossanitario para Entities
   static List<DefensivoEntity> fromHiveToEntityList(
-    List<FitossanitarioHive> hives,
+    List<Fitossanitario> hives,
   ) {
     return hives.map((hive) => fromHiveToEntity(hive)).toList();
   }

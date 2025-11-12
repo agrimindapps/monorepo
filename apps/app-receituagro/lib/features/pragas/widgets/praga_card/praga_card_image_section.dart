@@ -95,8 +95,6 @@ class PragaCardImageSection extends StatelessWidget {
       ),
     );
   }
-
-
   /// Constrói o fallback com ícone quando imagem falha
   Widget _buildIconFallback(double size) {
     final typeColor = PragaCardHelpers.getTypeColor(properties.praga.tipoPraga);

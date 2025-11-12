@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../features/diagnosticos/domain/entities/diagnostico_entity.dart';
-import '../data/models/diagnostico_legacy.dart';
+
 import 'diagnostico_entity_resolver_drift.dart';
 
 /// Serviço centralizado para agrupamento de diagnósticos
@@ -277,12 +277,12 @@ class DiagnosticoGroupingService {
     );
   }
 
-  /// Agrupa DiagnosticoHive por cultura
-  Future<Map<String, List<DiagnosticoHive>>> groupDiagnosticoHivesByCultura(
-    List<DiagnosticoHive> diagnosticos, {
+  /// Agrupa Diagnostico por cultura
+  Future<Map<String, List<Diagnostico>>> groupDiagnosticosByCultura(
+    List<Diagnostico> diagnosticos, {
     bool sortByRelevance = true,
   }) {
-    return groupByCultura<DiagnosticoHive>(
+    return groupByCultura<Diagnostico>(
       diagnosticos,
       (d) => d.fkIdCultura,
       (d) => d.nomeCultura,
@@ -342,8 +342,8 @@ class DiagnosticoGroupingService {
     return (a.nomeDefensivo ?? '').compareTo(b.nomeDefensivo ?? '');
   }
 
-  /// Comparador por relevância para DiagnosticoHive
-  int _compareHiveByRelevance(DiagnosticoHive a, DiagnosticoHive b) {
+  /// Comparador por relevância para Diagnostico
+  int _compareHiveByRelevance(Diagnostico a, Diagnostico b) {
     final aScore = _calculateHiveRelevanceScore(a);
     final bScore = _calculateHiveRelevanceScore(b);
 
@@ -354,8 +354,8 @@ class DiagnosticoGroupingService {
     return (a.nomeDefensivo ?? '').compareTo(b.nomeDefensivo ?? '');
   }
 
-  /// Calcula pontuação de relevância para DiagnosticoHive
-  int _calculateHiveRelevanceScore(DiagnosticoHive diagnostico) {
+  /// Calcula pontuação de relevância para Diagnostico
+  int _calculateHiveRelevanceScore(Diagnostico diagnostico) {
     int score = 0;
 
     if (diagnostico.nomeDefensivo?.isNotEmpty == true) score += 2;

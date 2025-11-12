@@ -57,7 +57,7 @@ Future<void> init() async {
 
   // ✅ FavoritosDataResolverStrategyRegistry agora usa lazy loading dos repos
   // Não precisa registrá-los cedo mais
-  FavoritosDI.registerServices(); // ⚠️ FavoritosService com lazy loading (não precisa de FavoritosLegacyRepository no construtor)
+  FavoritosDI.registerServices(); // ⚠️ FavoritosService com lazy loading (não precisa de FavoritoRepository no construtor)
 
   await injectable.configureDependencies();
   FavoritosDI.registerRepository(); // ✅ Registra FavoritosRepositorySimplified como classe concreta
@@ -247,7 +247,7 @@ Future<void> init() async {
   _setupPragasPorCulturaServices();
 
   // ❌ REMOVED: PremiumLegacyRepository (Hive dependency removed)
-  // ❌ REMOVED: ComentariosLegacyRepository (Hive dependency removed)
+  // ❌ REMOVED: ComentarioRepository (Hive dependency removed)
   
   try {
     sl.registerLazySingleton<IPremiumService>(() => MockPremiumService());
@@ -262,7 +262,7 @@ Future<void> init() async {
     }
   }
 
-  // ❌ REMOVED: ComentariosService (depends on ComentariosLegacyRepository)
+  // ❌ REMOVED: ComentariosService (depends on ComentarioRepository)
   // TODO: Migrate to Drift-based comentarios repository
   
   // ✅ IDiagnosticosRepository and all use cases now managed by Injectable (@LazySingleton, @injectable)

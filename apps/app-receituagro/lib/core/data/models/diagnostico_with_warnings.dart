@@ -1,9 +1,5 @@
-import '../models/cultura_legacy.dart';
-import '../models/diagnostico_legacy.dart';
-import '../models/fitossanitario_legacy.dart';
-import '../models/pragas_legacy.dart';
 
-/// Wrapper que enriquece DiagnosticoHive com dados relacionados e avisos
+/// Wrapper que enriquece Diagnostico com dados relacionados e avisos
 ///
 /// Fornece acesso seguro a entidades relacionadas (defensivo, praga, cultura)
 /// e lista de avisos quando referências não são encontradas.
@@ -23,16 +19,16 @@ import '../models/pragas_legacy.dart';
 /// ```
 class DiagnosticoWithWarnings {
   /// Dados do diagnóstico original
-  final DiagnosticoHive data;
+  final Diagnostico data;
 
   /// Entidade relacionada: Defensivo/Fitossanitário
-  final FitossanitarioHive? defensivo;
+  final Fitossanitario? defensivo;
 
   /// Entidade relacionada: Praga
-  final PragasHive? praga;
+  final Praga? praga;
 
   /// Entidade relacionada: Cultura
-  final CulturaHive? cultura;
+  final Cultura? cultura;
 
   /// Lista de avisos de integridade referencial
   ///
@@ -114,10 +110,10 @@ class DiagnosticoWithWarnings {
 
   /// Cria uma cópia com warnings atualizados
   DiagnosticoWithWarnings copyWith({
-    DiagnosticoHive? data,
-    FitossanitarioHive? defensivo,
-    PragasHive? praga,
-    CulturaHive? cultura,
+    Diagnostico? data,
+    Fitossanitario? defensivo,
+    Praga? praga,
+    Cultura? cultura,
     List<String>? warnings,
   }) {
     return DiagnosticoWithWarnings(

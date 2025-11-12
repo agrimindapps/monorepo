@@ -209,7 +209,7 @@ class DiagnosticosTabWidget extends ConsumerWidget {
       // Ordena diagnósticos por nome comum da praga usando ordenação assíncrona
       // Precisamos buscar os nomes das pragas do repositório para ordenar corretamente
       final diagnosticsComNomes = <MapEntry<dynamic, String>>[];
-      final pragaRepository = sl<PragasLegacyRepository>();
+      final pragaRepository = sl<PragasRepository>();
 
       for (final diagnostic in diagnostics) {
         String nomePraga = '';

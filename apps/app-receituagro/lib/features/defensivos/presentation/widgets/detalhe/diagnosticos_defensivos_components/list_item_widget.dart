@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../../core/data/models/diagnostico_legacy.dart';
-import '../../../../../../core/data/models/pragas_legacy.dart';
 // DEPRECATED: import '../../../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../../../../../core/di/injection_container.dart';
 import '../../../../../../core/theme/spacing_tokens.dart';
@@ -35,7 +33,7 @@ class DiagnosticoDefensivoListItemWidget extends StatefulWidget {
 
 class _DiagnosticoDefensivoListItemWidgetState
     extends State<DiagnosticoDefensivoListItemWidget> {
-  PragasHive? _pragaData;
+  Praga? _pragaData;
   bool _isLoadingPraga = true;
 
   @override
@@ -46,7 +44,7 @@ class _DiagnosticoDefensivoListItemWidgetState
 
   Future<void> _loadPragaData() async {
     try {
-      final pragasRepository = sl<PragasLegacyRepository>();
+      final pragasRepository = sl<PragasRepository>();
       final idPraga = _getProperty('fkIdPraga') ?? _getProperty('idPraga');
 
       if (idPraga != null) {
@@ -83,8 +81,8 @@ class _DiagnosticoDefensivoListItemWidgetState
     String nomeCientificoPraga = '';
     String dosagemFormatada = '';
 
-    if (widget.diagnostico is DiagnosticoHive) {
-      final diagnosticoHive = widget.diagnostico as DiagnosticoHive;
+    if (widget.diagnostico is Diagnostico) {
+      final diagnosticoHive = widget.diagnostico as Diagnostico;
       nomeComumPraga = diagnosticoHive.nomePraga ?? 'Praga não identificada';
     } else {
       final nomePragaModel = _getProperty('nomePraga') ?? _getProperty('grupo');

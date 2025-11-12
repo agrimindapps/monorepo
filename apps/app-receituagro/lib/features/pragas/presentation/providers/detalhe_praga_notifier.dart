@@ -1,14 +1,10 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-import '../../../../core/data/models/plantas_inf_legacy.dart';
-import '../../../../core/data/models/pragas_legacy.dart';
-import '../../../../core/data/models/pragas_inf_legacy.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/premium_notifier.dart';
 import '../../../../database/receituagro_database.dart';
-import '../../../../database/repositories/legacy_type_aliases.dart';
+
 import '../../domain/entities/praga_entity.dart';
 import '../../domain/repositories/i_pragas_repository.dart';
 import '../../../comentarios/data/comentario_model.dart';
@@ -22,7 +18,7 @@ part 'detalhe_praga_notifier.g.dart';
 class DetalhePragaState {
   final String pragaName;
   final String pragaScientificName;
-  final PragasHive? pragaData;
+  final Praga? pragaData;
   final bool isFavorited;
   final bool isPremium;
   final bool isLoading;
@@ -68,7 +64,7 @@ class DetalhePragaState {
   DetalhePragaState copyWith({
     String? pragaName,
     String? pragaScientificName,
-    PragasHive? pragaData,
+    Praga? pragaData,
     bool? isFavorited,
     bool? isPremium,
     bool? isLoading,
@@ -207,8 +203,8 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
       });
 
       if (pragaData != null) {
-        // Convert PragaEntity to PragasHive for state compatibility
-        final pragaHive = PragasHive(
+        // Convert PragaEntity to Praga for state compatibility
+        final pragaHive = Praga(
           objectId: pragaData!.idReg,
           createdAt: 0,
           updatedAt: 0,

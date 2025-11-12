@@ -1,5 +1,5 @@
 import 'package:core/core.dart';
-import '../../core/data/models/diagnostico_legacy.dart';
+
 import '../receituagro_database.dart';
 import '../tables/receituagro_tables.dart';
 
@@ -611,13 +611,13 @@ class PragaData {
 // MÉTODOS DE COMPATIBILIDADE LEGACY (Hive → Drift Migration)
 // ============================================================================
 // Estes métodos fornecem compatibilidade temporária com código antigo que
-// esperava DiagnosticoHive. DEPRECATE após migração completa.
+// esperava Diagnostico. DEPRECATE após migração completa.
 
 extension DiagnosticoRepositoryLegacyCompat on DiagnosticoRepository {
   /// @deprecated Use findByFirebaseIdOrId instead
   ///
   /// Compatibilidade com código antigo que chamava getByIdOrObjectId
-  Future<DiagnosticoHive?> getByIdOrObjectId(String idString) async {
+  Future<Diagnostico?> getByIdOrObjectId(String idString) async {
     final data = await findByFirebaseIdOrId(idString);
     return data != null ? _diagnosticoDataToHive(data) : null;
   }
@@ -655,14 +655,14 @@ extension DiagnosticoRepositoryLegacyCompat on DiagnosticoRepository {
   /// @deprecated Use getAllData instead
   ///
   /// Compatibilidade com código antigo que chamava getAll
-  Future<List<DiagnosticoHive>> getAll() async {
+  Future<List<Diagnostico>> getAll() async {
     final dataList = await getAllData();
     return dataList.map(_diagnosticoDataToHive).toList();
   }
 
-  /// Converte DiagnosticoData (Drift) → DiagnosticoHive (Legacy)
-  DiagnosticoHive _diagnosticoDataToHive(DiagnosticoData data) {
-    return DiagnosticoHive(
+  /// Converte DiagnosticoData (Drift) → Diagnostico (Legacy)
+  Diagnostico _diagnosticoDataToHive(DiagnosticoData data) {
+    return Diagnostico(
       objectId: data.firebaseId ?? data.id.toString(),
       createdAt: data.createdAt.millisecondsSinceEpoch,
       updatedAt: data.updatedAt?.millisecondsSinceEpoch ?? 0,

@@ -1,6 +1,6 @@
-import '../data/models/diagnostico_legacy.dart';
+
 import '../../database/repositories/culturas_repository.dart';
-import '../../database/repositories/legacy_type_aliases.dart';
+
 import '../utils/diagnostico_logger.dart';
 
 /// EXEMPLO DE USO:
@@ -8,10 +8,10 @@ import '../utils/diagnostico_logger.dart';
 /// ```dart
 /// // Injeção de dependências (GetIt)
 /// final validator = DataIntegrityValidator(
-///   diagnosticoRepo: getIt<DiagnosticoLegacyRepository>(),
-///   defensivoRepo: getIt<FitossanitarioLegacyRepository>(),
-///   pragaRepo: getIt<PragasLegacyRepository>(),
-///   culturaRepo: getIt<CulturaLegacyRepository>(),
+///   diagnosticoRepo: getIt<DiagnosticoRepository>(),
+///   defensivoRepo: getIt<FitossanitariosRepository>(),
+///   pragaRepo: getIt<PragasRepository>(),
+///   culturaRepo: getIt<CulturasRepository>(),
 /// );
 ///
 /// // Validação completa
@@ -118,15 +118,15 @@ enum IntegritySeverity {
 
 /// Serviço para validar integridade referencial dos dados Hive
 class DataIntegrityValidator {
-  final DiagnosticoLegacyRepository _diagnosticoRepo;
-  final FitossanitarioLegacyRepository _defensivoRepo;
-  final PragasLegacyRepository _pragaRepo;
+  final DiagnosticoRepository _diagnosticoRepo;
+  final FitossanitariosRepository _defensivoRepo;
+  final PragasRepository _pragaRepo;
   final CulturasRepository _culturaRepo;
 
   DataIntegrityValidator({
-    required DiagnosticoLegacyRepository diagnosticoRepo,
-    required FitossanitarioLegacyRepository defensivoRepo,
-    required PragasLegacyRepository pragaRepo,
+    required DiagnosticoRepository diagnosticoRepo,
+    required FitossanitariosRepository defensivoRepo,
+    required PragasRepository pragaRepo,
     required CulturasRepository culturaRepo,
   }) : _diagnosticoRepo = diagnosticoRepo,
        _defensivoRepo = defensivoRepo,
@@ -158,7 +158,7 @@ class DataIntegrityValidator {
 
   /// Valida integridade dos diagnósticos
   Future<List<IntegrityIssue>> _validateDiagnosticos(
-    List<DiagnosticoHive> diagnosticos,
+    List<Diagnostico> diagnosticos,
   ) async {
     final issues = <IntegrityIssue>[];
 

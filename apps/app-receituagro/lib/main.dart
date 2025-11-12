@@ -9,7 +9,7 @@ import 'core/navigation/app_router.dart' as app_router;
 import 'core/providers/theme_notifier.dart';
 import 'core/services/app_data_manager.dart';
 import 'core/services/firebase_messaging_service.dart';
-import 'core/services/legacy_migration_service.dart'; // FIXED (P0.4): Schema migration service
+
 import 'core/services/premium_service.dart';
 import 'core/services/prioritized_data_loader.dart';
 import 'core/services/promotional_notification_manager.dart';
@@ -42,13 +42,8 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await ThemePreferenceMigration.migratePreferences();
 
-  // ✅ Initialize Hive for any remaining legacy data
+  // ✅ Initialize Hive for sync queue (still required by core package)
   await Hive.initFlutter();
-
-  // ✅ FIXED (P0.4): Run schema migrations BEFORE initialization
-  // This prevents data corruption when models change across app versions
-  await LegacyMigrationService.runMigrations();
-  DiagnosticoLogger.debug('✅ Hive schema migrations completed');
 
   await di.init();
   await _initializeFirebaseServices();

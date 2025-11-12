@@ -2,8 +2,6 @@ import 'dart:async';
 import 'package:core/core.dart' hide SyncQueue, SyncQueueItem, Column;
 import 'package:flutter/foundation.dart';
 import '../../features/comentarios/data/comentario_model.dart';
-import '../../database/repositories/legacy_type_aliases.dart';
-import '../data/models/diagnostico_legacy.dart';
 import '../data/models/sync_queue_item.dart';
 import 'sync_queue.dart';
 
@@ -15,8 +13,8 @@ class SyncOperations {
   final ConnectivityService _connectivityService;
 
   // Repositories for data persistence
-  late final ComentariosLegacyRepository _comentariosRepo;
-  late final DiagnosticoLegacyRepository _diagnosticoRepo;
+  late final ComentarioRepository _comentariosRepo;
+  late final DiagnosticoRepository _diagnosticoRepo;
 
   late StreamSubscription<ConnectivityType> _networkSubscription;
   bool _isProcessingSync = false;
@@ -25,23 +23,23 @@ class SyncOperations {
   SyncOperations(this._syncQueue, this._connectivityService) {
     // Initialize repositories from GetIt
     try {
-      _comentariosRepo = GetIt.instance<ComentariosLegacyRepository>();
+      _comentariosRepo = GetIt.instance<ComentarioRepository>();
     } catch (e) {
-      _comentariosRepo = ComentariosLegacyRepository();
+      _comentariosRepo = ComentarioRepository();
       if (kDebugMode) {
         print(
-          '⚠️ ComentariosLegacyRepository not registered in GetIt, creating new instance',
+          '⚠️ ComentarioRepository not registered in GetIt, creating new instance',
         );
       }
     }
 
     try {
-      _diagnosticoRepo = GetIt.instance<DiagnosticoLegacyRepository>();
+      _diagnosticoRepo = GetIt.instance<DiagnosticoRepository>();
     } catch (e) {
-      _diagnosticoRepo = DiagnosticoLegacyRepository();
+      _diagnosticoRepo = DiagnosticoRepository();
       if (kDebugMode) {
         print(
-          '⚠️ DiagnosticoLegacyRepository not registered in GetIt, creating new instance',
+          '⚠️ DiagnosticoRepository not registered in GetIt, creating new instance',
         );
       }
     }
@@ -165,28 +163,28 @@ class SyncOperations {
   Future<void> _performCreate(SyncQueueItem item) async {
     try {
       switch (item.modelType) {
-        case 'ComentarioHive':
+        case 'Comentario':
           // Deserialize data to ComentarioModel
           final comentario = ComentarioModel.fromJson(item.data);
           await _comentariosRepo.addComentario(comentario);
 
           if (kDebugMode) {
-            print('✅ Created ComentarioHive: ${comentario.idReg}');
+            print('✅ Created Comentario: ${comentario.idReg}');
           }
           break;
 
-        case 'DiagnosticoHive':
-          // Deserialize data to DiagnosticoHive
-          final diagnostico = DiagnosticoHive.fromJson(item.data);
+        case 'Diagnostico':
+          // Deserialize data to Diagnostico
+          final diagnostico = Diagnostico.fromJson(item.data);
           final result = await _diagnosticoRepo.saveWithIdReg(diagnostico);
 
           result.fold(
             (failure) => throw Exception(
-              'Failed to save DiagnosticoHive: ${failure.message}',
+              'Failed to save Diagnostico: ${failure.message}',
             ),
             (_) {
               if (kDebugMode) {
-                print('✅ Created DiagnosticoHive: ${diagnostico.idReg}');
+                print('✅ Created Diagnostico: ${diagnostico.idReg}');
               }
             },
           );
@@ -210,28 +208,28 @@ class SyncOperations {
   Future<void> _performUpdate(SyncQueueItem item) async {
     try {
       switch (item.modelType) {
-        case 'ComentarioHive':
+        case 'Comentario':
           // Deserialize data to ComentarioModel
           final comentario = ComentarioModel.fromJson(item.data);
           await _comentariosRepo.updateComentario(comentario);
 
           if (kDebugMode) {
-            print('✅ Updated ComentarioHive: ${comentario.idReg}');
+            print('✅ Updated Comentario: ${comentario.idReg}');
           }
           break;
 
-        case 'DiagnosticoHive':
-          // Deserialize data to DiagnosticoHive
-          final diagnostico = DiagnosticoHive.fromJson(item.data);
+        case 'Diagnostico':
+          // Deserialize data to Diagnostico
+          final diagnostico = Diagnostico.fromJson(item.data);
           final result = await _diagnosticoRepo.saveWithIdReg(diagnostico);
 
           result.fold(
             (failure) => throw Exception(
-              'Failed to update DiagnosticoHive: ${failure.message}',
+              'Failed to update Diagnostico: ${failure.message}',
             ),
             (_) {
               if (kDebugMode) {
-                print('✅ Updated DiagnosticoHive: ${diagnostico.idReg}');
+                print('✅ Updated Diagnostico: ${diagnostico.idReg}');
               }
             },
           );
@@ -255,29 +253,29 @@ class SyncOperations {
   Future<void> _performDelete(SyncQueueItem item) async {
     try {
       switch (item.modelType) {
-        case 'ComentarioHive':
+        case 'Comentario':
           // Extract ID from data
           final id =
               item.data['idReg']?.toString() ?? item.data['id']?.toString();
           if (id == null || id.isEmpty) {
             throw ArgumentError(
-              'ComentarioHive delete requires idReg or id in data',
+              'Comentario delete requires idReg or id in data',
             );
           }
 
           await _comentariosRepo.deleteComentario(id);
 
           if (kDebugMode) {
-            print('✅ Deleted ComentarioHive: $id');
+            print('✅ Deleted Comentario: $id');
           }
           break;
 
-        case 'DiagnosticoHive':
+        case 'Diagnostico':
           // Extract ID from data
           final idReg = item.data['idReg']?.toString();
           if (idReg == null || idReg.isEmpty) {
             throw ArgumentError(
-              'DiagnosticoHive delete requires idReg in data',
+              'Diagnostico delete requires idReg in data',
             );
           }
 
@@ -285,7 +283,7 @@ class SyncOperations {
           final diagnostico = await _diagnosticoRepo.getByIdOrObjectId(idReg);
           if (diagnostico == null) {
             if (kDebugMode) {
-              print('⚠️ DiagnosticoHive not found for delete: $idReg');
+              print('⚠️ Diagnostico not found for delete: $idReg');
             }
             return; // Item doesn't exist, consider delete successful
           }
@@ -294,7 +292,7 @@ class SyncOperations {
           await diagnostico.delete();
 
           if (kDebugMode) {
-            print('✅ Deleted DiagnosticoHive: $idReg');
+            print('✅ Deleted Diagnostico: $idReg');
           }
           break;
 

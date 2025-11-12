@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/di/injection_container.dart';
-import '../../../../database/repositories/legacy_type_aliases.dart';
+
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
 import '../factories/favorito_entity_factory_registry.dart';
@@ -23,7 +23,7 @@ import 'favoritos_validator_service.dart';
 @lazySingleton
 class FavoritosService {
   // Lazy loading do repository (evita erro de acesso antes do registro no GetIt)
-  late final FavoritosLegacyRepository _repository;
+  late final FavoritoRepository _repository;
   bool _repositoryInitialized = false;
 
   // Specialized Services (injetadas via construtor - DIP)
@@ -46,9 +46,9 @@ class FavoritosService {
        _factoryRegistry = factoryRegistry;
 
   // Getter lazy para repository (inicializado na primeira vez que é acessado)
-  FavoritosLegacyRepository get repo {
+  FavoritoRepository get repo {
     if (!_repositoryInitialized) {
-      _repository = sl<FavoritosLegacyRepository>();
+      _repository = sl<FavoritoRepository>();
       _repositoryInitialized = true;
     }
     return _repository;

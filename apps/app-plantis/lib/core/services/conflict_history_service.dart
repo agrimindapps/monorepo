@@ -5,8 +5,8 @@ import 'conflict_history_drift_service.dart';
 
 /// ADAPTER PATTERN - Mantém interface antiga mas delega para Drift
 ///
-/// Este adapter permite migração gradual de código que usa a interface
-/// antiga baseada em Hive para a nova implementação Drift.
+/// Este adapter permite uso consistente do conflict history enquanto
+/// toda a base de código migra para a implementação Drift nativa.
 ///
 /// ⚠️ DEPRECATED: Use ConflictHistoryDriftService diretamente para código novo
 @injectable

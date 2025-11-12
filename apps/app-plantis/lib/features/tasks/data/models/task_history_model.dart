@@ -108,7 +108,7 @@ class TaskHistoryModel extends TaskHistory {
     );
   }
 
-  factory TaskHistoryModel.fromHiveMap(Map<String, dynamic> map) {
+  factory TaskHistoryModel.fromMap(Map<String, dynamic> map) {
     return TaskHistoryModel(
       id: map['id'] as String,
       taskId: map['taskId'] as String,
@@ -186,7 +186,7 @@ class TaskHistoryModel extends TaskHistory {
   }
 
   @override
-  Map<String, dynamic> toHiveMap() {
+  Map<String, dynamic> toMap() {
     return {
       'id': id,
       'taskId': taskId,

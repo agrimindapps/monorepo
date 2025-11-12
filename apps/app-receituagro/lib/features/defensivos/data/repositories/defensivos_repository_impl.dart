@@ -315,11 +315,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
     String? filtroTexto,
   }) async {
     try {
-      debugPrint('🔍 [REPO AGRUPADOS] Buscando todos os defensivos do Hive...');
+      debugPrint('🔍 [REPO AGRUPADOS] Buscando todos os defensivos do banco de dados...');
       final allDefensivos = await _repository.findAll();
 
       debugPrint(
-        '✅ [REPO AGRUPADOS] Defensivos retornados do Hive: ${allDefensivos.length} itens',
+        '✅ [REPO AGRUPADOS] Defensivos retornados: ${allDefensivos.length} itens',
       );
 
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(

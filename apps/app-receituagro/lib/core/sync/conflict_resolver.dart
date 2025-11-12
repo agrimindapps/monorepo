@@ -1,5 +1,6 @@
 // TEMPORARILY DISABLED: Hive to Drift migration in progress
-// Minimal stub implementation - full implementation in conflict_resolver_original.dart
+/// Conflict resolution for sync operations
+/// Implements strategies for resolving conflicts between local and remote data
 import 'package:core/core.dart' hide ConflictResolutionStrategy, Column;
 
 import 'conflict_resolution_strategy.dart';

@@ -263,13 +263,13 @@ class EnhancedDiagnosticosPragaNotifier
 
     try {
       final diagnosticos = await _repository.queryByPattern(query);
-      final diagnosticosHive = diagnosticos.fold(
+      final diagnosticosDrift = diagnosticos.fold(
         (failure) => <DiagnosticoEntity>[],
         (data) => data,
       );
 
-      if (diagnosticosHive.isNotEmpty) {
-        final ids = diagnosticosHive.map((d) => d.id).toList();
+      if (diagnosticosDrift.isNotEmpty) {
+        final ids = diagnosticosDrift.map((d) => d.id).toList();
         final filteredResults = <DiagnosticoEntity>[];
 
         for (final id in ids) {

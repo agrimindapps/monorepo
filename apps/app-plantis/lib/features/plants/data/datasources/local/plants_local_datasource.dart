@@ -11,8 +11,8 @@ import 'plants_search_service.dart';
 /// PLANTS LOCAL DATASOURCE - MIGRADO PARA DRIFT
 /// ============================================================================
 ///
-/// **MIGRAÇÃO HIVE → DRIFT (Fase 2):**
-/// - Removido código Hive (Box, JSON serialization)
+/// **MIGRAÇÃO PARA DRIFT (Fase 2):**
+/// - Removido código legado (Box, JSON serialization)
 /// - Usa PlantsDriftRepository para persistência
 /// - Mantém cache em memória para performance (5 minutos)
 /// - Integração com PlantsSearchService

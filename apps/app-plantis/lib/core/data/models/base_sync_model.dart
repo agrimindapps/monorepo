@@ -2,13 +2,10 @@ import 'package:core/core.dart' hide Column;
 
 import '../../sync/sync_status.dart' as local;
 
-/// Base sync model for all Hive models in the Plantis app
+/// Base sync model for all data models in the Plantis app
 /// Integrates with core package's BaseSyncEntity for Firebase sync
-///
-/// Note: Cannot be @immutable due to HiveObjectMixin requirements
 // ignore: must_be_immutable
-abstract class BaseSyncModel extends BaseSyncEntity
-    with HiveObjectMixin, SyncEntityMixin {
+abstract class BaseSyncModel extends BaseSyncEntity with SyncEntityMixin {
   /// Field to track last user who modified the entity
   final String? lastModifiedBy;
 
@@ -32,8 +29,8 @@ abstract class BaseSyncModel extends BaseSyncEntity
     this.conflictData,
   });
 
-  /// Convert to Hive-compatible map (using millisecond timestamps)
-  Map<String, dynamic> toHiveMap() {
+  /// Convert to map (using millisecond timestamps)
+  Map<String, dynamic> toMap() {
     return {
       'id': id,
       'createdAt': createdAt?.millisecondsSinceEpoch,
@@ -47,8 +44,8 @@ abstract class BaseSyncModel extends BaseSyncEntity
     };
   }
 
-  /// Parse base fields from Hive map
-  static Map<String, dynamic> parseBaseHiveFields(Map<String, dynamic> map) {
+  /// Parse base fields from map
+  static Map<String, dynamic> parseBaseFields(Map<String, dynamic> map) {
     return {
       'id': map['id'] as String,
       'createdAt':
@@ -71,7 +68,7 @@ abstract class BaseSyncModel extends BaseSyncEntity
     };
   }
 
-  /// Update timestamps for Hive operations
+  /// Update timestamps
   BaseSyncModel updateTimestamps() {
     return copyWith(updatedAt: DateTime.now(), isDirty: true) as BaseSyncModel;
   }
@@ -201,7 +198,7 @@ abstract class BaseSyncModel extends BaseSyncEntity
 
   Map<String, dynamic> toJson() {
     return {
-      ...toHiveMap(),
+      ...toMap(),
       'lastModifiedBy': lastModifiedBy,
       'syncStatus': syncStatus.index,
       'conflictData': conflictData,

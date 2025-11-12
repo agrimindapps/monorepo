@@ -93,7 +93,7 @@ class TaskHistoryLocalDataSourceImpl implements TaskHistoryLocalDataSource {
       allHistory.add(history);
       await storageService.save<List<Map<String, dynamic>>>(
         key: 'all_task_history',
-        data: allHistory.map((h) => h.toHiveMap()).toList(),
+        data: allHistory.map((h) => h.toMap()).toList(),
         box: _boxName,
       );
     } catch (e) {
@@ -106,7 +106,7 @@ class TaskHistoryLocalDataSourceImpl implements TaskHistoryLocalDataSource {
     try {
       await storageService.save<List<Map<String, dynamic>>>(
         key: 'all_task_history',
-        data: histories.map((h) => h.toHiveMap()).toList(),
+        data: histories.map((h) => h.toMap()).toList(),
         box: _boxName,
       );
     } catch (e) {
@@ -123,7 +123,7 @@ class TaskHistoryLocalDataSourceImpl implements TaskHistoryLocalDataSource {
         allHistory[index] = history;
         await storageService.save<List<Map<String, dynamic>>>(
           key: 'all_task_history',
-          data: allHistory.map((h) => h.toHiveMap()).toList(),
+          data: allHistory.map((h) => h.toMap()).toList(),
           box: _boxName,
         );
       }
@@ -139,7 +139,7 @@ class TaskHistoryLocalDataSourceImpl implements TaskHistoryLocalDataSource {
       allHistory.removeWhere((history) => history.id == id);
       await storageService.save<List<Map<String, dynamic>>>(
         key: 'all_task_history',
-        data: allHistory.map((h) => h.toHiveMap()).toList(),
+        data: allHistory.map((h) => h.toMap()).toList(),
         box: _boxName,
       );
     } catch (e) {
@@ -154,7 +154,7 @@ class TaskHistoryLocalDataSourceImpl implements TaskHistoryLocalDataSource {
       allHistory.removeWhere((history) => history.taskId == taskId);
       await storageService.save<List<Map<String, dynamic>>>(
         key: 'all_task_history',
-        data: allHistory.map((h) => h.toHiveMap()).toList(),
+        data: allHistory.map((h) => h.toMap()).toList(),
         box: _boxName,
       );
     } catch (e) {
@@ -170,7 +170,7 @@ class TaskHistoryLocalDataSourceImpl implements TaskHistoryLocalDataSource {
       allHistory.removeWhere((history) => history.plantId == plantId);
       await storageService.save<List<Map<String, dynamic>>>(
         key: 'all_task_history',
-        data: allHistory.map((h) => h.toHiveMap()).toList(),
+        data: allHistory.map((h) => h.toMap()).toList(),
         box: _boxName,
       );
     } catch (e) {
@@ -201,7 +201,7 @@ class TaskHistoryLocalDataSourceImpl implements TaskHistoryLocalDataSource {
           final Map<String, dynamic> historyMap = Map<String, dynamic>.from(
             data as Map,
           );
-          return TaskHistoryModel.fromHiveMap(historyMap);
+          return TaskHistoryModel.fromMap(historyMap);
         }).toList();
       });
     } catch (e) {

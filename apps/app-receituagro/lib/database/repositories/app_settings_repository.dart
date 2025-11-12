@@ -7,7 +7,7 @@ import '../tables/receituagro_tables.dart' as tables;
 /// Repositório de Configurações do App usando Drift
 ///
 /// Gerencia todas as operações de CRUD e queries relacionadas às configurações
-/// do aplicativo usando o banco de dados Drift ao invés do Hive.
+/// do aplicativo 
 @lazySingleton
 class AppSettingsRepository
     extends BaseDriftRepositoryImpl<models.AppSettings, AppSetting> {

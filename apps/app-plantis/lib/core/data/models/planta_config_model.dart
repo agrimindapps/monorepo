@@ -1,7 +1,7 @@
 import 'base_sync_model.dart';
 
 /// PlantaConfig model with Firebase sync support
-/// Drift-based model (migrated from Hive)
+/// Drift-based model
 // ignore: must_be_immutable
 class PlantaConfigModel extends BaseSyncModel {
   @override
@@ -120,9 +120,9 @@ class PlantaConfigModel extends BaseSyncModel {
     );
   }
 
-  /// Create from Hive map
-  factory PlantaConfigModel.fromHiveMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncModel.parseBaseHiveFields(map);
+  /// Create from map
+  factory PlantaConfigModel.fromMap(Map<String, dynamic> map) {
+    final baseFields = BaseSyncModel.parseBaseFields(map);
 
     return PlantaConfigModel(
       id: baseFields['id'] as String,
@@ -151,10 +151,10 @@ class PlantaConfigModel extends BaseSyncModel {
     );
   }
 
-  /// Convert to Hive map
+  /// Convert to map
   @override
-  Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()..addAll({
+  Map<String, dynamic> toMap() {
+    return super.toMap()..addAll({
       'plantaId': plantaId,
       'aguaAtiva': aguaAtiva,
       'intervaloRegaDias': intervaloRegaDias,
@@ -281,13 +281,9 @@ class PlantaConfigModel extends BaseSyncModel {
     );
   }
 
-  Map<String, dynamic> toMap() => toHiveMap();
-  @override
-  Map<String, dynamic> toJson() => toHiveMap();
-  factory PlantaConfigModel.fromMap(Map<String, dynamic> map) =>
-      PlantaConfigModel.fromHiveMap(map);
+  Map<String, dynamic> toJson() => toMap();
   factory PlantaConfigModel.fromJson(Map<String, dynamic> json) =>
-      PlantaConfigModel.fromHiveMap(json);
+      PlantaConfigModel.fromMap(json);
 
   /// Obtém o intervalo em dias para um tipo de cuidado específico
   int getIntervalForCareType(String tipoCuidado) {

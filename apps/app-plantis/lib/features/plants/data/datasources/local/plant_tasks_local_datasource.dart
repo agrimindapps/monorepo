@@ -10,8 +10,8 @@ import '../../models/plant_task_model.dart';
 /// PLANT TASKS LOCAL DATASOURCE - MIGRADO PARA DRIFT
 /// ============================================================================
 ///
-/// **MIGRAÇÃO HIVE → DRIFT (Fase 2):**
-/// - Removido código Hive (Box, JSON serialization)
+/// **MIGRAÇÃO PARA DRIFT (Fase 2):**
+/// - Removido código legado (Box, JSON serialization)
 /// - Usa PlantTasksDriftRepository para persistência
 /// - Mantém cache em memória para performance (5 minutos)
 /// - Interface pública idêntica (0 breaking changes)

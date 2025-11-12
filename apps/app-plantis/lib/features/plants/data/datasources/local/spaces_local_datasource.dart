@@ -9,8 +9,8 @@ import '../../models/space_model.dart';
 /// SPACES LOCAL DATASOURCE - MIGRADO PARA DRIFT
 /// ============================================================================
 ///
-/// **MIGRAÇÃO HIVE → DRIFT (Fase 2):**
-/// - Removido código Hive (Box, JSON serialization)
+/// **MIGRAÇÃO PARA DRIFT (Fase 2):**
+/// - Removido código legado (Box, JSON serialization)
 /// - Usa SpacesDriftRepository para persistência
 /// - Conversão SpaceModel ↔ EspacoModel (compatibilidade)
 /// - Mantém interface pública idêntica (0 breaking changes)

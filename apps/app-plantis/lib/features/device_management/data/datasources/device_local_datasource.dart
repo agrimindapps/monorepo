@@ -37,7 +37,7 @@ abstract class DeviceLocalDataSource {
   Future<bool> hasDevicesCache(String userId);
 }
 
-/// Implementação com cache persistente usando Hive
+/// Implementação com cache persistente usando local storage
 class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
   final ILocalStorageRepository _storageService;
   static const String _devicesBoxKey = 'devices_cache';
@@ -50,7 +50,7 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
   DeviceLocalDataSourceImpl({required ILocalStorageRepository storageService})
     : _storageService = storageService;
 
-  /// Inicializa cache em memória do Hive se necessário
+  /// Inicializa cache em memória se necessário
   Future<void> _ensureMemoryCacheInitialized() async {
     if (_isMemoryCacheInitialized) return;
 
@@ -62,7 +62,7 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
         (failure) {
           if (kDebugMode) {
             debugPrint(
-              '📱 DeviceLocal: Could not load device keys from Hive: ${failure.message}',
+              '📱 DeviceLocal: Could not load device keys from storage: ${failure.message}',
             );
           }
         },
@@ -106,7 +106,7 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
         (failure) {
           if (kDebugMode) {
             debugPrint(
-              '📱 DeviceLocal: Could not load user keys from Hive: ${failure.message}',
+              '📱 DeviceLocal: Could not load user keys from storage: ${failure.message}',
             );
           }
         },
@@ -226,7 +226,7 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
 
       if (kDebugMode) {
         debugPrint(
-          '📱 DeviceLocal: Saved ${devices.length} devices for user $userId to Hive',
+          '📱 DeviceLocal: Saved ${devices.length} devices for user $userId to storage',
         );
       }
       return const Right(null);
@@ -247,7 +247,7 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
       );
 
       if (kDebugMode) {
-        debugPrint('📱 DeviceLocal: Saved device ${device.uuid} to Hive');
+        debugPrint('📱 DeviceLocal: Saved device ${device.uuid} to storage');
       }
       return const Right(null);
     } catch (e) {
@@ -283,7 +283,7 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
       }
 
       if (kDebugMode) {
-        debugPrint('📱 DeviceLocal: Removed device $deviceUuid from Hive');
+        debugPrint('📱 DeviceLocal: Removed device $deviceUuid from storage');
       }
       return const Right(null);
     } catch (e) {
@@ -306,7 +306,7 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
 
       if (kDebugMode) {
         debugPrint(
-          '📱 DeviceLocal: Removed all devices for user $userId from Hive',
+          '📱 DeviceLocal: Removed all devices for user $userId from storage',
         );
       }
       return const Right(null);
@@ -393,7 +393,7 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
       _isMemoryCacheInitialized = false; // Força reinicialização
 
       if (kDebugMode) {
-        debugPrint('📱 DeviceLocal: Cleared all cache from memory and Hive');
+        debugPrint('📱 DeviceLocal: Cleared all cache from memory and storage');
       }
       return const Right(null);
     } catch (e) {

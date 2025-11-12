@@ -6,7 +6,6 @@ import '../tables/receituagro_tables.dart';
 /// Repositório de Diagnósticos usando Drift
 ///
 /// Gerencia todas as operações de CRUD e queries relacionadas a diagnósticos
-/// usando o banco de dados Drift ao invés do Hive.
 @lazySingleton
 class DiagnosticoRepository
     extends BaseDriftRepositoryImpl<DiagnosticoData, Diagnostico> {
@@ -608,10 +607,9 @@ class PragaData {
 }
 
 // ============================================================================
-// MÉTODOS DE COMPATIBILIDADE LEGACY (Hive → Drift Migration)
+// MÉTODOS DE COMPATIBILIDADE (Drift Migration)
 // ============================================================================
-// Estes métodos fornecem compatibilidade temporária com código antigo que
-// esperava Diagnostico. DEPRECATE após migração completa.
+// Estes métodos fornecem compatibilidade temporária com código antigo
 
 extension DiagnosticoRepositoryLegacyCompat on DiagnosticoRepository {
   /// @deprecated Use findByFirebaseIdOrId instead
@@ -619,7 +617,7 @@ extension DiagnosticoRepositoryLegacyCompat on DiagnosticoRepository {
   /// Compatibilidade com código antigo que chamava getByIdOrObjectId
   Future<Diagnostico?> getByIdOrObjectId(String idString) async {
     final data = await findByFirebaseIdOrId(idString);
-    return data != null ? _diagnosticoDataToHive(data) : null;
+    return data != null ? _convertToDiagnostico(data) : null;
   }
 
   /// Busca Diagnostico (Drift) por firebaseId ou ID local
@@ -657,11 +655,11 @@ extension DiagnosticoRepositoryLegacyCompat on DiagnosticoRepository {
   /// Compatibilidade com código antigo que chamava getAll
   Future<List<Diagnostico>> getAll() async {
     final dataList = await getAllData();
-    return dataList.map(_diagnosticoDataToHive).toList();
+    return dataList.map(_convertToDiagnostico).toList();
   }
 
   /// Converte DiagnosticoData → Diagnostico (Drift DataClass)
-  Diagnostico _diagnosticoDataToHive(DiagnosticoData data) {
+  Diagnostico _convertToDiagnostico(DiagnosticoData data) {
     return Diagnostico(
       id: data.id,
       firebaseId: data.firebaseId,

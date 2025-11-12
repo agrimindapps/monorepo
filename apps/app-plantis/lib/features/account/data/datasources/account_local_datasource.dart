@@ -22,8 +22,8 @@ abstract class AccountLocalDataSource {
 /// ACCOUNT LOCAL DATASOURCE - MIGRADO PARA DRIFT
 /// ============================================================================
 ///
-/// **MIGRAÇÃO HIVE → DRIFT (Phase 3.5):**
-/// - Removido IHiveManager e acesso direto aos boxes Hive
+/// **MIGRAÇÃO PARA DRIFT (Phase 3.5):**
+/// - Removido acesso direto a boxes de storage legado
 /// - Usa Drift repositories para limpar dados
 /// - clearLocalUserData() → chama clearAll() em todos os repos
 /// - Interface pública idêntica (0 breaking changes)

@@ -20,7 +20,7 @@ part 'detalhe_diagnostico_notifier.g.dart';
 /// Detalhe Diagnostico state
 class DetalheDiagnosticoState {
   final DiagnosticoEntity? diagnostico;
-  final Diagnostico? diagnosticoHive;
+  final Diagnostico? diagnosticoDrift;
   final Map<String, String> diagnosticoData;
   final bool isFavorited;
   final bool isPremium;
@@ -30,7 +30,7 @@ class DetalheDiagnosticoState {
 
   const DetalheDiagnosticoState({
     this.diagnostico,
-    this.diagnosticoHive,
+    this.diagnosticoDrift,
     required this.diagnosticoData,
     required this.isFavorited,
     required this.isPremium,
@@ -42,7 +42,7 @@ class DetalheDiagnosticoState {
   factory DetalheDiagnosticoState.initial() {
     return const DetalheDiagnosticoState(
       diagnostico: null,
-      diagnosticoHive: null,
+      diagnosticoDrift: null,
       diagnosticoData: {},
       isFavorited: false,
       isPremium: false,
@@ -54,7 +54,7 @@ class DetalheDiagnosticoState {
 
   DetalheDiagnosticoState copyWith({
     DiagnosticoEntity? diagnostico,
-    Diagnostico? diagnosticoHive,
+    Diagnostico? diagnosticoDrift,
     Map<String, String>? diagnosticoData,
     bool? isFavorited,
     bool? isPremium,
@@ -64,7 +64,7 @@ class DetalheDiagnosticoState {
   }) {
     return DetalheDiagnosticoState(
       diagnostico: diagnostico ?? this.diagnostico,
-      diagnosticoHive: diagnosticoHive ?? this.diagnosticoHive,
+      diagnosticoDrift: diagnosticoDrift ?? this.diagnosticoDrift,
       diagnosticoData: diagnosticoData ?? this.diagnosticoData,
       isFavorited: isFavorited ?? this.isFavorited,
       isPremium: isPremium ?? this.isPremium,
@@ -123,14 +123,14 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
         },
         (diagnosticoEntity) async {
           if (diagnosticoEntity != null) {
-            final diagnosticoHive =
+            final diagnosticoDrift =
                 await _hiveRepository.getDiagnosticoByIdOrObjectId(
               diagnosticoId,
             );
 
             // Extensão DiagnosticoExtension já busca dados do defensivo internamente
-            final diagnosticoData = diagnosticoHive != null
-                ? await diagnosticoHive.toDataMap()
+            final diagnosticoData = diagnosticoDrift != null
+                ? await diagnosticoDrift.toDataMap()
                 : <String, String>{};
 
             // Debug logs
@@ -151,7 +151,7 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
               currentState
                   .copyWith(
                     diagnostico: diagnosticoEntity,
-                    diagnosticoHive: diagnosticoHive,
+                    diagnosticoDrift: diagnosticoDrift,
                     diagnosticoData: diagnosticoData,
                     isLoading: false,
                   )
@@ -175,21 +175,21 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
       );
     } catch (e) {
       try {
-        final diagnosticoHive =
+        final diagnosticoDrift =
             await _hiveRepository.getDiagnosticoByIdOrObjectId(
           diagnosticoId,
         );
-        if (diagnosticoHive != null) {
-          final diagnostico = DiagnosticoMapper.fromDrift(diagnosticoHive);
+        if (diagnosticoDrift != null) {
+          final diagnostico = DiagnosticoMapper.fromDrift(diagnosticoDrift);
 
           // Extensão DiagnosticoExtension já busca dados do defensivo internamente
-          final diagnosticoData = await diagnosticoHive.toDataMap();
+          final diagnosticoData = await diagnosticoDrift.toDataMap();
 
           state = AsyncValue.data(
             currentState
                 .copyWith(
                   diagnostico: diagnostico,
-                  diagnosticoHive: diagnosticoHive,
+                  diagnosticoDrift: diagnosticoDrift,
                   diagnosticoData: diagnosticoData,
                   isLoading: false,
                 )

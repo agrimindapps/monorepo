@@ -3,7 +3,7 @@ import 'dart:async';
 import '../../../domain/entities/plant.dart';
 
 /// Simplified search service for plants using in-memory search only
-/// Consistent with monorepo architecture using only Hive for persistence
+/// Consistent with monorepo architecture using Drift for persistence
 class PlantsSearchService {
   static PlantsSearchService? _instance;
   static PlantsSearchService get instance =>

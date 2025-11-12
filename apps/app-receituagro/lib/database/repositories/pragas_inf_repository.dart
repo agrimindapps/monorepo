@@ -4,7 +4,7 @@ import '../receituagro_database.dart';
 /// Repositório de Informações de Pragas usando Drift
 ///
 /// Gerencia todas as operações de leitura dos dados complementares de pragas
-/// usando o banco de dados Drift ao invés do Hive.
+/// 
 @lazySingleton
 class PragasInfRepository {
   PragasInfRepository(this._db);

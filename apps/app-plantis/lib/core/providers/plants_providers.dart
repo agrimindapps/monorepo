@@ -1120,7 +1120,7 @@ class PlantsNotifier extends _$PlantsNotifier {
             failure.message.contains('TypeAdapter')) {
           return 'Erro ao acessar dados locais. O app será reiniciado para corrigir o problema.';
         }
-        if (failure.message.contains('HiveError') ||
+        if (failure.message.contains('DatabaseError') ||
             failure.message.contains('corrupted')) {
           return 'Dados locais corrompidos. Sincronizando com servidor...';
         }

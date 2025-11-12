@@ -17,8 +17,7 @@ import '../di/injection_container.dart';
 /// - Fallback strategies para dados incompletos
 /// - Batch resolution para operações em lote
 ///
-/// **MIGRADO PARA DRIFT**: Agora usa tabelas estáticas do Drift
-/// ao invés de repositórios Hive.
+/// **MIGRADO PARA DRIFT**: Agora usa tabelas estáticas do Drift.
 class DiagnosticoEntityResolver {
   static DiagnosticoEntityResolver? _instance;
   static DiagnosticoEntityResolver get instance =>

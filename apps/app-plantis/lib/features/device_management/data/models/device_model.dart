@@ -70,7 +70,7 @@ class DeviceModel extends DeviceEntity {
     );
   }
 
-  /// Cria model do JSON (compatibilidade com API e Hive)
+  /// Cria model do JSON (compatibilidade com API)
   factory DeviceModel.fromJson(Map<String, dynamic> json) {
     final coreEntity = DeviceEntity.fromJson(json);
     return DeviceModel(
@@ -93,7 +93,7 @@ class DeviceModel extends DeviceEntity {
     );
   }
 
-  /// Converte para JSON (compatibilidade com API e Hive)
+  /// Converte para JSON (compatibilidade com API)
   @override
   Map<String, dynamic> toJson() {
     final json = super.toJson();

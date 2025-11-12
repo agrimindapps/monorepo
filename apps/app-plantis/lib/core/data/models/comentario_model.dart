@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 
 /// Comentario model with Firebase sync support
-/// Drift-based model (migrated from Hive)
+/// Drift-based model
 class ComentarioModel extends BaseSyncEntity {
   @override
   final String id;
@@ -94,8 +94,8 @@ class ComentarioModel extends BaseSyncEntity {
     );
   }
 
-  /// Create from Hive map
-  factory ComentarioModel.fromHiveMap(Map<String, dynamic> map) {
+  /// Create from map
+  factory ComentarioModel.fromMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
 
     return ComentarioModel(

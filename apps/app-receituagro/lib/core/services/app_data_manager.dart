@@ -30,8 +30,7 @@ class AppDataManager implements IAppDataManager {
   AppDataManager();
 
   /// Inicializa completamente o sistema de dados com controle automático de versão
-  /// ✅ PADRÃO APP-PLANTIS: Hive.initFlutter() e LegacyAdapterRegistry.registerAdapters()
-  /// já foram chamados no main.dart ANTES de ReceitaAgroStorageInitializer
+  /// ✅ PADRÃO: Hive.initFlutter() já foi chamado no main.dart para sync queue do core package
   @override
   Future<Either<Exception, void>> initialize() async {
     if (_isInitialized) {
@@ -44,10 +43,9 @@ class AppDataManager implements IAppDataManager {
         name: 'AppDataManager',
       );
 
-      // ✅ Hive.initFlutter() e LegacyAdapterRegistry.registerAdapters()
-      // já foram executados no main.dart antes de registrar boxes
-      // Isso garante que adapters estejam disponíveis quando BoxRegistryService
-      // tentar abrir boxes persistentes
+      // ✅ Hive.initFlutter() já foi executado no main.dart
+      // Necessário apenas para sync queue do core package
+      // Dados do app usam Drift (não Hive)
 
       await _createServices();
       developer.log(

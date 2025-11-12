@@ -1,7 +1,7 @@
 import 'base_sync_model.dart';
 
 /// Espaco model with Firebase sync support
-/// Drift-based model (migrated from Hive)
+/// Drift-based model
 // ignore: must_be_immutable
 class EspacoModel extends BaseSyncModel {
   @override
@@ -84,9 +84,9 @@ class EspacoModel extends BaseSyncModel {
     );
   }
 
-  /// Create from Hive map
-  factory EspacoModel.fromHiveMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncModel.parseBaseHiveFields(map);
+  /// Create from map
+  factory EspacoModel.fromMap(Map<String, dynamic> map) {
+    final baseFields = BaseSyncModel.parseBaseFields(map);
 
     return EspacoModel(
       id: baseFields['id'] as String,
@@ -107,10 +107,10 @@ class EspacoModel extends BaseSyncModel {
     );
   }
 
-  /// Convert to Hive map
+  /// Convert to map
   @override
-  Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()..addAll({
+  Map<String, dynamic> toMap() {
+    return super.toMap()..addAll({
       'nome': nome,
       'descricao': descricao,
       'ativo': ativo,
@@ -189,13 +189,9 @@ class EspacoModel extends BaseSyncModel {
     );
   }
 
-  Map<String, dynamic> toMap() => toHiveMap();
-  @override
-  Map<String, dynamic> toJson() => toHiveMap();
-  factory EspacoModel.fromMap(Map<String, dynamic> map) =>
-      EspacoModel.fromHiveMap(map);
+  Map<String, dynamic> toJson() => toMap();
   factory EspacoModel.fromJson(Map<String, dynamic> json) =>
-      EspacoModel.fromHiveMap(json);
+      EspacoModel.fromMap(json);
 
   @override
   bool operator ==(Object other) {

@@ -46,7 +46,7 @@ class TasksModule {
     );
 
     // TODO: TaskHistoryLocalDataSource needs migration to Drift
-    // Currently still using Hive ILocalStorageRepository
+    // Using local storage repository for task history
     // Temporarily commented out until PlantTasks table is used for history
 
     // sl.registerLazySingleton<TaskHistoryRepository>(

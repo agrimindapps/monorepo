@@ -250,7 +250,7 @@ class FavoritoRepository
   }
 
   // ============================================================================
-  // MÉTODOS DE COMPATIBILIDADE LEGACY (Hive → Drift Migration)
+  // MÉTODOS DE COMPATIBILIDADE (Drift Migration)
   // ============================================================================
 
   /// @deprecated Legacy method - busca favoritos por tipo

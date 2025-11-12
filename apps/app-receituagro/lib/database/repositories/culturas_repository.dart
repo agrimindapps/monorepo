@@ -4,7 +4,7 @@ import '../receituagro_database.dart';
 /// Repositório de Culturas usando Drift
 ///
 /// Gerencia todas as operações de leitura dos dados estáticos de culturas
-/// usando o banco de dados Drift ao invés do Hive.
+/// 
 @lazySingleton
 class CulturasRepository {
   CulturasRepository(this._db);

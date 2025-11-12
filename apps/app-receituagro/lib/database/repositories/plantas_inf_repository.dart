@@ -4,7 +4,7 @@ import '../receituagro_database.dart';
 /// Repositório de Informações de Plantas/Culturas usando Drift
 ///
 /// Gerencia todas as operações de leitura dos dados complementares de plantas
-/// usando o banco de dados Drift ao invés do Hive.
+/// 
 @lazySingleton
 class PlantasInfRepository {
   PlantasInfRepository(this._db);

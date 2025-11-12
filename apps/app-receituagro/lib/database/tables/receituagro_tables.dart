@@ -1,30 +1,21 @@
 import 'package:core/core.dart';
 
-/// ========== USER-GENERATED DATA TABLES ==========
+/// ========== STATIC DATA TABLES ==========
 
-/// Tabela de Diagnósticos
+/// Tabela de Diagnósticos (Tabela de Junção/Relacionamento)
 ///
-/// Armazena diagnósticos criados pelo usuário relacionando
-/// defensivos, culturas e pragas com dosagens e aplicações.
+/// Relaciona defensivos agrícolas com culturas e pragas, definindo
+/// dosagens e formas de aplicação recomendadas.
+/// 
+/// ⚠️ TABELA ESTÁTICA - Não pertence ao usuário, não sincroniza com Firebase.
+/// Dados carregados do Firebase apenas para leitura (lookup table).
 class Diagnosticos extends Table {
   // ========== PRIMARY KEY ==========
   IntColumn get id => integer().autoIncrement()();
 
-  // ========== FIREBASE SYNC ==========
+  // ========== STATIC DATA ID (Firebase Reference) ==========
+  /// ID de referência no Firebase (apenas para lookup)
   TextColumn get firebaseId => text().nullable()();
-  TextColumn get userId => text()();
-  TextColumn get moduleName =>
-      text().withDefault(const Constant('receituagro'))();
-
-  // ========== TIMESTAMPS ==========
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
-  DateTimeColumn get updatedAt => dateTime().nullable()();
-  DateTimeColumn get lastSyncAt => dateTime().nullable()();
-
-  // ========== SYNC CONTROL ==========
-  BoolColumn get isDirty => boolean().withDefault(const Constant(false))();
-  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
-  IntColumn get version => integer().withDefault(const Constant(1))();
 
   // ========== FOREIGN KEYS (NORMALIZED) ==========
   /// ID do defensivo (FK → Fitossanitarios)
@@ -43,8 +34,8 @@ class Diagnosticos extends Table {
       integer().references(Pragas, #id, onDelete: KeyAction.restrict)();
 
   // ========== BUSINESS FIELDS ==========
-  /// ID de registro (legacy - único por usuário)
-  TextColumn get idReg => text()();
+  /// ID de registro único (do Firebase)
+  TextColumn get idReg => text().unique()();
 
   /// Dosagem mínima
   TextColumn get dsMin => text().nullable()();
@@ -81,13 +72,9 @@ class Diagnosticos extends Table {
 
   /// Época de aplicação
   TextColumn get epocaAplicacao => text().nullable()();
-
-  // ========== UNIQUE CONSTRAINTS ==========
-  @override
-  List<Set<Column>> get uniqueKeys => [
-    {userId, idReg}, // idReg único por usuário
-  ];
 }
+
+/// ========== USER-GENERATED DATA TABLES ==========
 
 /// Tabela de Favoritos
 ///

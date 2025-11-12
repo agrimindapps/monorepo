@@ -41,13 +41,13 @@ class FailureMessageMapper {
   }
 
   static String _mapCacheFailure(Failure failure) {
-    // Handle specific Hive/adapter errors
+    // Handle specific database/adapter errors
     if (failure.message.contains('PlantaModelAdapter') ||
         failure.message.contains('TypeAdapter')) {
       return 'Erro ao acessar dados locais. O app será reiniciado para corrigir o problema.';
     }
     
-    if (failure.message.contains('HiveError') ||
+    if (failure.message.contains('DatabaseError') ||
         failure.message.contains('corrupted')) {
       return 'Dados locais corrompidos. Sincronizando com servidor...';
     }

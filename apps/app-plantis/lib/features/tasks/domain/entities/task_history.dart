@@ -75,7 +75,7 @@ class TaskHistory extends Equatable {
     };
   }
 
-  Map<String, dynamic> toHiveMap() {
+  Map<String, dynamic> toMap() {
     return {
       'id': id,
       'taskId': taskId,
@@ -137,7 +137,7 @@ class TaskHistory extends Equatable {
     );
   }
 
-  factory TaskHistory.fromHiveMap(Map<String, dynamic> map) {
+  factory TaskHistory.fromMap(Map<String, dynamic> map) {
     return TaskHistory(
       id: (map['id'] as String?) ?? '',
       taskId: (map['taskId'] as String?) ?? '',

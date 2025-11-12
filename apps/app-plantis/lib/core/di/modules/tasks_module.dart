@@ -68,7 +68,7 @@ class TasksModule {
     // );
 
     sl.registerLazySingleton<TasksRemoteDataSource>(
-      () => TasksRemoteDataSourceImpl(rateLimiter: sl()),
+      () => TasksRemoteDataSourceImpl(sl(), rateLimiter: sl()),
     );
 
     // TasksLocalDataSource - auto-registered by @LazySingleton with TasksDriftRepository

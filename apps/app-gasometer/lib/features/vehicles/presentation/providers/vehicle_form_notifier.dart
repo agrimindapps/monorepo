@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as flutter show FormState;
 import 'package:flutter/material.dart' hide FormState;
@@ -322,6 +322,17 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
     final sanitizedRenavam = InputSanitizer.sanitizeNumeric(
       renavamController.text,
     );
+
+    // Validação adicional: Drift não aceita strings vazias para campos obrigatórios
+    if (sanitizedBrand.isEmpty) {
+      throw local_error.ValidationError(message: 'Marca é obrigatória');
+    }
+    if (sanitizedModel.isEmpty) {
+      throw local_error.ValidationError(message: 'Modelo é obrigatório');
+    }
+    if (sanitizedPlate.isEmpty) {
+      throw local_error.ValidationError(message: 'Placa é obrigatória');
+    }
 
     return VehicleEntity(
       id:

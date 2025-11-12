@@ -1,6 +1,5 @@
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 
 import '../../../auth/presentation/notifiers/notifiers.dart';
 import 'auth_button_widget.dart';

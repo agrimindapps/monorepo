@@ -11,7 +11,6 @@ import '../../../../core/services/auth_rate_limiter.dart';
 import '../../../../core/services/gasometer_analytics_service.dart';
 import '../../../../core/services/platform_service.dart';
 import '../../../../core/widgets/logout_loading_dialog.dart';
-import '../../data/datasources/auth_local_data_source.dart';
 import '../../domain/entities/user_entity.dart' as gasometer_auth;
 import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/send_password_reset.dart';
@@ -44,39 +43,62 @@ part 'auth_notifier.g.dart';
 /// Reduzido de 953 linhas para ~500 linhas (core auth apenas)
 @Riverpod(keepAlive: true)
 class Auth extends _$Auth {
-  late final GetCurrentUser _getCurrentUser;
-  late final WatchAuthState _watchAuthState;
-  late final SignInWithEmail _signInWithEmail;
-  late final SignUpWithEmail _signUpWithEmail;
-  late final SignInAnonymously _signInAnonymously;
-  late final SignOut _signOut;
-  late final SendPasswordReset _sendPasswordReset;
-  late final GasometerAnalyticsService _analytics;
-  late final PlatformService _platformService;
-  late final AuthRateLimiter _rateLimiter;
-  late final EnhancedAccountDeletionService _enhancedDeletionService;
+  // Remove late final - use lazy getters instead to prevent re-initialization
+  GetCurrentUser? _getCurrentUserInstance;
+  WatchAuthState? _watchAuthStateInstance;
+  SignInWithEmail? _signInWithEmailInstance;
+  SignUpWithEmail? _signUpWithEmailInstance;
+  SignInAnonymously? _signInAnonymouslyInstance;
+  SignOut? _signOutInstance;
+  SendPasswordReset? _sendPasswordResetInstance;
+  GasometerAnalyticsService? _analyticsInstance;
+  PlatformService? _platformServiceInstance;
+  AuthRateLimiter? _rateLimiterInstance;
+  EnhancedAccountDeletionService? _enhancedDeletionServiceInstance;
+
+  // Lazy getters to prevent re-initialization
+  GetCurrentUser get _getCurrentUser =>
+      _getCurrentUserInstance ??= sl<GetCurrentUser>();
+  WatchAuthState get _watchAuthState =>
+      _watchAuthStateInstance ??= sl<WatchAuthState>();
+  SignInWithEmail get _signInWithEmail =>
+      _signInWithEmailInstance ??= sl<SignInWithEmail>();
+  SignUpWithEmail get _signUpWithEmail =>
+      _signUpWithEmailInstance ??= sl<SignUpWithEmail>();
+  SignInAnonymously get _signInAnonymously =>
+      _signInAnonymouslyInstance ??= sl<SignInAnonymously>();
+  SignOut get _signOut =>
+      _signOutInstance ??= sl<SignOut>();
+  SendPasswordReset get _sendPasswordReset =>
+      _sendPasswordResetInstance ??= sl<SendPasswordReset>();
+  GasometerAnalyticsService get _analytics =>
+      _analyticsInstance ??= sl<GasometerAnalyticsService>();
+  PlatformService get _platformService =>
+      _platformServiceInstance ??= sl<PlatformService>();
+  AuthRateLimiter get _rateLimiter =>
+      _rateLimiterInstance ??= sl<AuthRateLimiter>();
+  EnhancedAccountDeletionService get _enhancedDeletionService =>
+      _enhancedDeletionServiceInstance ??= sl<EnhancedAccountDeletionService>();
+
   final MonorepoAuthCache _monorepoAuthCache = MonorepoAuthCache();
 
   StreamSubscription<void>? _authStateSubscription;
   bool _isInLoginAttempt = false;
+  bool _isInitialized = false;
 
   @override
   AuthState build() {
-    _getCurrentUser = sl<GetCurrentUser>();
-    _watchAuthState = sl<WatchAuthState>();
-    _signInWithEmail = sl<SignInWithEmail>();
-    _signUpWithEmail = sl<SignUpWithEmail>();
-    _signInAnonymously = sl<SignInAnonymously>();
-    _signOut = sl<SignOut>();
-    _sendPasswordReset = sl<SendPasswordReset>();
-    _analytics = sl<GasometerAnalyticsService>();
-    _platformService = sl<PlatformService>();
-    _rateLimiter = sl<AuthRateLimiter>();
-    _enhancedDeletionService = sl<EnhancedAccountDeletionService>();
+    // Prevent double initialization
+    if (_isInitialized) {
+      return state;
+    }
+
+    _isInitialized = true;
     _initializeAuthState();
     _initializeMonorepoAuthCache();
     ref.onDispose(() {
       _authStateSubscription?.cancel();
+      _isInitialized = false;
     });
 
     return const AuthState.initial();
@@ -321,6 +343,9 @@ class Auth extends _$Auth {
             'login_success',
             parameters: {'method': 'email'},
           );
+
+          // 🔄 Trigger sync after successful login
+          _triggerPostLoginSync();
         },
       );
     } catch (e) {
@@ -382,6 +407,9 @@ class Auth extends _$Auth {
           'register_success',
           parameters: {'method': 'email'},
         );
+
+        // 🔄 Trigger sync after successful registration
+        _triggerPostLoginSync();
       },
     );
   }
@@ -433,6 +461,11 @@ class Auth extends _$Auth {
         if (kDebugMode) {
           debugPrint('🔐 Usuário logado anonimamente');
         }
+
+        // 🔄 Trigger sync after anonymous login (if needed in future)
+        // Anonymous users typically don't have cloud data to sync
+        // but we trigger anyway for consistency
+        _triggerPostLoginSync();
       },
     );
   }
@@ -663,6 +696,30 @@ class Auth extends _$Auth {
     if (kDebugMode) {
       debugPrint('🔐 Conta deletada com sucesso');
     }
+  }
+
+  // ============================================================================
+  // SYNC INTEGRATION
+  // ============================================================================
+
+  /// Trigger sync after successful login
+  /// Ensures user data is fetched from Firestore immediately after authentication
+  void _triggerPostLoginSync() {
+    // Fire-and-forget: não bloqueia o login
+    // BackgroundSyncManager executará sync em background
+    BackgroundSyncManager.instance.triggerSync(
+      'gasometer',
+      force: true, // Force immediate sync
+    ).then((_) {
+      if (kDebugMode) {
+        debugPrint('🔄 Post-login sync triggered successfully');
+      }
+    }).catchError((Object e) {
+      if (kDebugMode) {
+        debugPrint('⚠️ Post-login sync failed (non-blocking): $e');
+      }
+      // Não propagar erro - sync failure não deve impedir login
+    });
   }
 
   // ============================================================================

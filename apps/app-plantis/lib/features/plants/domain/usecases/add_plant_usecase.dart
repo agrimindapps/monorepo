@@ -76,16 +76,16 @@ class TaskGenerationResult {
 @injectable
 class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
   AddPlantUseCase(
-    this.repository, {
+    this.repository,
     this.generateInitialTasksUseCase,
-    PlantTaskGenerator? plantTaskGenerator,
+    this.plantTaskGenerator,
     this.plantTasksRepository,
-  }) : plantTaskGenerator = plantTaskGenerator ?? PlantTaskGenerator();
+  );
 
   final PlantsRepository repository;
-  final GenerateInitialTasksUseCase? generateInitialTasksUseCase;
+  final GenerateInitialTasksUseCase generateInitialTasksUseCase;
   final PlantTaskGenerator plantTaskGenerator;
-  final PlantTasksRepository? plantTasksRepository;
+  final PlantTasksRepository plantTasksRepository;
 
   @override
   Future<Either<Failure, Plant>> call(AddPlantParams params) async {
@@ -162,19 +162,17 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
           final plantTasksResult = await _generatePlantTasksWithErrorHandling(
             savedPlant,
           );
-          if (generateInitialTasksUseCase != null) {
-            final taskGenerationResult =
-                await _generateInitialTasksWithErrorHandling(savedPlant);
+          final taskGenerationResult =
+              await _generateInitialTasksWithErrorHandling(savedPlant);
 
-            if (taskGenerationResult.isFailure && kDebugMode) {
-              print(
-                '⚠️ AddPlantUseCase.call() - Tasks tradicionais não foram geradas, mas planta foi salva com sucesso',
-              );
-            } else if (taskGenerationResult.isSuccess && kDebugMode) {
-              print(
-                '✅ AddPlantUseCase.call() - ${taskGenerationResult.taskCount} tasks tradicionais geradas com sucesso',
-              );
-            }
+          if (taskGenerationResult.isFailure && kDebugMode) {
+            print(
+              '⚠️ AddPlantUseCase.call() - Tasks tradicionais não foram geradas, mas planta foi salva com sucesso',
+            );
+          } else if (taskGenerationResult.isSuccess && kDebugMode) {
+            print(
+              '✅ AddPlantUseCase.call() - ${taskGenerationResult.taskCount} tasks tradicionais geradas com sucesso',
+            );
           }
 
           if (plantTasksResult.isFailure && kDebugMode) {
@@ -275,45 +273,36 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
           );
         }
       }
-      if (plantTasksRepository != null) {
-        if (kDebugMode) {
-          print(
-            '💾 _generatePlantTasksWithErrorHandling - Persistindo ${plantTasks.length} PlantTasks',
-          );
-        }
-
-        final saveResult = await plantTasksRepository!.addPlantTasks(
-          plantTasks,
+      if (kDebugMode) {
+        print(
+          '💾 _generatePlantTasksWithErrorHandling - Persistindo ${plantTasks.length} PlantTasks',
         );
-        return saveResult.fold(
-          (failure) {
-            if (kDebugMode) {
-              print(
-                '❌ _generatePlantTasksWithErrorHandling - Erro ao persistir PlantTasks: ${failure.message}',
-              );
-            }
-            return TaskGenerationResult.failure(
-              'Erro ao persistir PlantTasks: ${failure.message}',
-              failure,
-            );
-          },
-          (savedTasks) {
-            if (kDebugMode) {
-              print(
-                '✅ _generatePlantTasksWithErrorHandling - ${savedTasks.length} PlantTasks persistidas com sucesso',
-              );
-            }
-            return TaskGenerationResult.success(savedTasks.length, savedTasks);
-          },
-        );
-      } else {
-        if (kDebugMode) {
-          print(
-            '⚠️ _generatePlantTasksWithErrorHandling - PlantTasksRepository não disponível, PlantTasks não persistidas',
-          );
-        }
-        return TaskGenerationResult.success(plantTasks.length, plantTasks);
       }
+
+      final saveResult = await plantTasksRepository.addPlantTasks(
+        plantTasks,
+      );
+      return saveResult.fold(
+        (failure) {
+          if (kDebugMode) {
+            print(
+              '❌ _generatePlantTasksWithErrorHandling - Erro ao persistir PlantTasks: ${failure.message}',
+            );
+          }
+          return TaskGenerationResult.failure(
+            'Erro ao persistir PlantTasks: ${failure.message}',
+            failure,
+          );
+        },
+        (savedTasks) {
+          if (kDebugMode) {
+            print(
+              '✅ _generatePlantTasksWithErrorHandling - ${savedTasks.length} PlantTasks persistidas com sucesso',
+            );
+          }
+          return TaskGenerationResult.success(savedTasks.length, savedTasks);
+        },
+      );
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('❌ _generatePlantTasksWithErrorHandling - EXCEPTION: $e');
@@ -333,10 +322,10 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
   Future<TaskGenerationResult> _generateInitialTasksWithErrorHandling(
     Plant plant,
   ) async {
-    if (generateInitialTasksUseCase == null || plant.config == null) {
+    if (plant.config == null) {
       if (kDebugMode) {
         print(
-          '⚠️ _generateInitialTasksWithErrorHandling - Skipping: useCase=${generateInitialTasksUseCase != null}, config=${plant.config != null}',
+          '⚠️ _generateInitialTasksWithErrorHandling - Skipping: config=${plant.config != null}',
         );
       }
       return TaskGenerationResult.skipped(
@@ -382,7 +371,7 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
         );
       }
 
-      final result = await generateInitialTasksUseCase!(params);
+      final result = await generateInitialTasksUseCase(params);
 
       return result.fold(
         (failure) {

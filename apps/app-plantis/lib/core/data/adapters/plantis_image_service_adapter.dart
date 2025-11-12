@@ -55,48 +55,52 @@ class PlantisImageServiceAdapter {
   }
 
   /// Pick single image from gallery (backward compatible)
-  Future<Result<File>> pickImageFromGallery() {
-    return _coreImageService.pickImageFromGallery();
+  Future<Either<Failure, File>> pickImageFromGallery() async {
+    final result = await _coreImageService.pickImageFromGallery();
+    return result.toEither();
   }
 
   /// Pick single image from camera (backward compatible)
-  Future<Result<File>> pickImageFromCamera() {
-    return _coreImageService.pickImageFromCamera();
+  Future<Either<Failure, File>> pickImageFromCamera() async {
+    final result = await _coreImageService.pickImageFromCamera();
+    return result.toEither();
   }
 
   /// Pick multiple images (backward compatible)
-  Future<Result<List<File>>> pickMultipleImages({int? maxImages}) {
-    return _coreImageService.pickMultipleImages(maxImages: maxImages);
+  Future<Either<Failure, List<File>>> pickMultipleImages({int? maxImages}) async {
+    final result = await _coreImageService.pickMultipleImages(maxImages: maxImages);
+    return result.toEither();
   }
 
   /// Upload single image (backward compatible)
-  Future<Result<ImageUploadResult>> uploadImage(
+  Future<Either<Failure, ImageUploadResult>> uploadImage(
     File imageFile, {
     String? folder,
     String? fileName,
     String? uploadType,
     void Function(double progress)? onProgress,
-  }) {
+  }) async {
     // Sanitiza o nome do arquivo se fornecido
     final sanitizedFileName = fileName != null ? _sanitizeFileName(fileName) : null;
 
-    return _coreImageService.uploadImage(
+    final result = await _coreImageService.uploadImage(
       imageFile,
       folder: folder,
       fileName: sanitizedFileName,
       uploadType: uploadType,
       onProgress: onProgress,
     );
+    return result.toEither();
   }
 
   /// Upload multiple images (backward compatible)
-  Future<Result<MultipleImageUploadResult>> uploadMultipleImages(
+  Future<Either<Failure, MultipleImageUploadResult>> uploadMultipleImages(
     List<File> imageFiles, {
     String? folder,
     String? uploadType,
     void Function(double progress)? onProgress,
-  }) {
-    return _coreImageService.uploadMultipleImages(
+  }) async {
+    final result = await _coreImageService.uploadMultipleImages(
       imageFiles,
       folder: folder,
       uploadType: uploadType,
@@ -104,33 +108,37 @@ class PlantisImageServiceAdapter {
           ? (int index, double progress) => onProgress(progress)
           : null,
     );
+    return result.toEither();
   }
 
   /// Delete image (backward compatible)
-  Future<Result<void>> deleteImage(String downloadUrl) {
-    return _coreImageService.deleteImage(downloadUrl);
+  Future<Either<Failure, void>> deleteImage(String downloadUrl) async {
+    final result = await _coreImageService.deleteImage(downloadUrl);
+    return result.toEither();
   }
 
   /// Delete multiple images (backward compatible)
-  Future<Result<List<AppError>>> deleteMultipleImages(
+  Future<Either<Failure, List<AppError>>> deleteMultipleImages(
     List<String> downloadUrls,
-  ) {
-    return _coreImageService.deleteMultipleImages(downloadUrls);
+  ) async {
+    final result = await _coreImageService.deleteMultipleImages(downloadUrls);
+    return result.toEither();
   }
 
   /// Compress image (backward compatible)
-  Future<Result<File>> compressImage(
+  Future<Either<Failure, File>> compressImage(
     File imageFile, {
     int? maxWidth,
     int? maxHeight,
     int? quality,
-  }) {
-    return _coreImageService.compressImage(
+  }) async {
+    final result = await _coreImageService.compressImage(
       imageFile,
       maxWidth: maxWidth,
       maxHeight: maxHeight,
       quality: quality,
     );
+    return result.toEither();
   }
 
   /// Preload single image (ImagePreloaderService compatibility)
@@ -168,7 +176,7 @@ class PlantisImageServiceAdapter {
   }
 
   /// Pick and upload image in one operation (new convenience method)
-  Future<Result<ImageUploadResult>> pickAndUploadFromGallery({
+  Future<Either<Failure, ImageUploadResult>> pickAndUploadFromGallery({
     String? folder,
     String? uploadType,
     void Function(double progress)? onProgress,
@@ -176,7 +184,7 @@ class PlantisImageServiceAdapter {
     final pickResult = await pickImageFromGallery();
 
     return pickResult.fold(
-      (error) => Result.failure(error),
+      (failure) => Left(failure),
       (imageFile) => uploadImage(
         imageFile,
         folder: folder,
@@ -187,7 +195,7 @@ class PlantisImageServiceAdapter {
   }
 
   /// Pick and upload image from camera in one operation (new convenience method)
-  Future<Result<ImageUploadResult>> pickAndUploadFromCamera({
+  Future<Either<Failure, ImageUploadResult>> pickAndUploadFromCamera({
     String? folder,
     String? uploadType,
     void Function(double progress)? onProgress,
@@ -195,7 +203,7 @@ class PlantisImageServiceAdapter {
     final pickResult = await pickImageFromCamera();
 
     return pickResult.fold(
-      (error) => Result.failure(error),
+      (failure) => Left(failure),
       (imageFile) => uploadImage(
         imageFile,
         folder: folder,
@@ -206,7 +214,7 @@ class PlantisImageServiceAdapter {
   }
 
   /// Pick and upload multiple images in one operation (new convenience method)
-  Future<Result<MultipleImageUploadResult>> pickAndUploadMultiple({
+  Future<Either<Failure, MultipleImageUploadResult>> pickAndUploadMultiple({
     int? maxImages,
     String? folder,
     String? uploadType,
@@ -215,7 +223,7 @@ class PlantisImageServiceAdapter {
     final pickResult = await pickMultipleImages(maxImages: maxImages);
 
     return pickResult.fold(
-      (error) => Result.failure(error),
+      (failure) => Left(failure),
       (imageFiles) => uploadMultipleImages(
         imageFiles,
         folder: folder,
@@ -226,7 +234,7 @@ class PlantisImageServiceAdapter {
   }
 
   /// Upload image and preload it (new convenience method)
-  Future<Result<ImageUploadResult>> uploadAndPreload(
+  Future<Either<Failure, ImageUploadResult>> uploadAndPreload(
     File imageFile, {
     String? folder,
     String? uploadType,
@@ -239,7 +247,7 @@ class PlantisImageServiceAdapter {
       onProgress: onProgress,
     );
     uploadResult.fold(
-      (error) => null,
+      (failure) => null,
       (result) => preloadImage(result.downloadUrl, priority: true),
     );
 

@@ -4,6 +4,8 @@ library;
 
 import 'package:core/core.dart';
 
+import '../../core/data/models/audit_trail_model.dart';
+import '../../core/di/injection.dart' as gasometer_di;
 import 'audit_trail_service.dart';
 import 'financial_conflict_resolver.dart';
 import 'financial_sync_service.dart';
@@ -30,7 +32,7 @@ class FinancialModule {
     required String userId,
     required UnifiedSyncManager coreSync,
   }) async {
-    _auditService = FinancialAuditTrailService();
+    _auditService = gasometer_di.getIt<FinancialAuditTrailService>();
     await _auditService!.initialize(userId: userId);
     _conflictResolver = FinancialConflictResolver(_auditService!);
     _syncService = FinancialSyncService(
@@ -122,21 +124,26 @@ class FinancialModule {
   }
 
   /// Get audit trail for entity
-  static List<FinancialAuditEntry> getAuditTrail(String entityId) {
-    return auditService.getEntityAuditTrail(entityId);
+  static Future<List<AuditTrailEntry>> getAuditTrail(String entityId) async {
+    return await auditService.getEntityAuditTrail(entityId);
   }
 
   /// Get high-value transactions audit
-  static List<FinancialAuditEntry> getHighValueTransactions({int days = 30}) {
-    return auditService.getHighValueTransactions(days: days);
+  static Future<List<AuditTrailEntry>> getHighValueTransactions({
+    int days = 30,
+  }) async {
+    return await auditService.getHighValueTransactions(days: days);
   }
 
   /// Get audit summary
-  static Map<String, dynamic> getAuditSummary({
+  static Future<Map<String, dynamic>> getAuditSummary({
     DateTime? startDate,
     DateTime? endDate,
-  }) {
-    return auditService.getAuditSummary(startDate: startDate, endDate: endDate);
+  }) async {
+    return await auditService.getAuditSummary(
+      startDate: startDate,
+      endDate: endDate,
+    );
   }
 
   /// Resolve financial conflict

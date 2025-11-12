@@ -185,7 +185,7 @@ class FuelRecordEntity extends BaseSyncEntity { // km/l
 
   @override
   Map<String, dynamic> toFirebaseMap() {
-    return {
+    final map = <String, dynamic>{
       ...baseFirebaseFields,
       'vehicle_id': vehicleId,
       'fuel_type': fuelType.index,
@@ -194,16 +194,20 @@ class FuelRecordEntity extends BaseSyncEntity { // km/l
       'total_price': totalPrice,
       'odometer': odometer,
       'date': date.toIso8601String(),
-      'gas_station_name': gasStationName,
-      'gas_station_brand': gasStationBrand,
-      'latitude': latitude,
-      'longitude': longitude,
       'full_tank': fullTank,
-      'notes': notes,
-      'previous_odometer': previousOdometer,
-      'distance_traveled': distanceTraveled,
-      'consumption': consumption,
     };
+
+    // Adicionar campos opcionais apenas se não forem null
+    if (gasStationName != null) map['gas_station_name'] = gasStationName;
+    if (gasStationBrand != null) map['gas_station_brand'] = gasStationBrand;
+    if (latitude != null) map['latitude'] = latitude;
+    if (longitude != null) map['longitude'] = longitude;
+    if (notes != null) map['notes'] = notes;
+    if (previousOdometer != null) map['previous_odometer'] = previousOdometer;
+    if (distanceTraveled != null) map['distance_traveled'] = distanceTraveled;
+    if (consumption != null) map['consumption'] = consumption;
+
+    return map;
   }
 
   static FuelRecordEntity fromFirebaseMap(Map<String, dynamic> map) {

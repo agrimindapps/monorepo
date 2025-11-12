@@ -4,6 +4,7 @@ abstract class NetworkInfo {
   Future<bool> get isConnected;
 }
 
+@LazySingleton(as: NetworkInfo)
 class NetworkInfoImpl implements NetworkInfo {
   final Connectivity connectivity;
 

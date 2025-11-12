@@ -1,5 +1,6 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../../core/services/rate_limiter_service.dart';
 import '../../models/plant_model.dart';
@@ -15,6 +16,7 @@ abstract class PlantsRemoteDatasource {
   Future<void> syncPlants(List<PlantModel> plants, String userId);
 }
 
+@LazySingleton(as: PlantsRemoteDatasource)
 class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
   final FirebaseFirestore firestore;
   final RateLimiterService rateLimiter;

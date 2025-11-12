@@ -1,8 +1,8 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
-/// Adaptador para converter entre o sistema antigo (`Either<Failure, T>`) e o novo (`Result<T>`)
-/// Facilita a migração gradual do sistema de erros
+/// Adaptador para sistema de erros do app-plantis
+/// App-plantis usa exclusivamente Either<Failure, T>
 class ErrorAdapter {
   /// Converte Failure para AppError
   static AppError failureToAppError(Failure failure) {
@@ -92,86 +92,9 @@ class ErrorAdapter {
         return UnknownFailure(error.message);
     }
   }
-
-  /// Converte `Either<Failure, T>` para `Result<T>`
-  static Result<T> eitherToResult<T>(Either<Failure, T> either) {
-    return either.fold(
-      (failure) => Result.error(failureToAppError(failure)),
-      (success) => Result.success(success),
-    );
-  }
-
-  /// Converte `Result<T>` para `Either<Failure, T>`
-  static Either<Failure, T> resultToEither<T>(Result<T> result) {
-    return result.fold(
-      (error) => Left(appErrorToFailure(error)),
-      (success) => Right(success),
-    );
-  }
-
-  /// Converte `Future<Either<Failure, T>>` para `Future<Result<T>>`
-  static Future<Result<T>> futureEitherToResult<T>(
-    Future<Either<Failure, T>> futureEither,
-  ) async {
-    final either = await futureEither;
-    return eitherToResult(either);
-  }
-
-  /// Converte `Future<Result<T>>` para `Future<Either<Failure, T>>`
-  static Future<Either<Failure, T>> futureResultToEither<T>(
-    Future<Result<T>> futureResult,
-  ) async {
-    final result = await futureResult;
-    return resultToEither(result);
-  }
 }
 
-/// Extensões para facilitar a conversão
-extension ResultToEitherExtension<T> on Result<T> {
-  /// Converte Result para Either
-  Either<Failure, T> toEither() => ErrorAdapter.resultToEither(this);
-}
-
-extension FutureResultToEitherExtension<T> on Future<Result<T>> {
-  /// Converte `Future<Result>` para `Future<Either>`
-  Future<Either<Failure, T>> toEither() =>
-      ErrorAdapter.futureResultToEither(this);
-}
-
-/// Wrapper para repositórios antigos que ainda usam Either
-class RepositoryWrapper<T> {
-  final Future<Either<Failure, T>> Function() _operation;
-
-  RepositoryWrapper(this._operation);
-
-  /// Executa a operação e retorna Result
-  Future<Result<T>> execute() async {
-    try {
-      final either = await _operation();
-      return ErrorAdapter.eitherToResult(either);
-    } catch (error, stackTrace) {
-      return Result.error(
-        UnknownError(
-          message: 'Erro na operação do repositório: ${error.toString()}',
-          originalError: error,
-          stackTrace: stackTrace,
-        ),
-      );
-    }
-  }
-}
-
-/// Helper para migração gradual de UseCases
-abstract class MigratedUseCase<T, P> {
-  Future<Result<T>> executeNew(P params);
-
-  Future<Either<Failure, T>> call(P params) async {
-    final result = await executeNew(params);
-    return result.toEither();
-  }
-}
-
-/// Mixin para providers que facilita o uso do novo sistema de erros
+/// Mixin para providers que facilita o uso do sistema de erros
 mixin ErrorHandlingMixin on ChangeNotifier {
   AppError? _lastError;
   bool _hasError = false;
@@ -195,25 +118,17 @@ mixin ErrorHandlingMixin on ChangeNotifier {
     notifyListeners();
   }
 
-  /// Executa uma operação e trata erros automaticamente
-  Future<T?> handleOperation<T>(Future<Result<T>> Function() operation) async {
-    clearError();
-
-    final result = await operation();
-
-    return result.fold((error) {
-      setError(error);
-      return null;
-    }, (data) => data);
-  }
-
-  /// Executa uma operação Either e converte para Result
+  /// Executa uma operação Either e trata erros automaticamente
   Future<T?> handleEitherOperation<T>(
     Future<Either<Failure, T>> Function() operation,
   ) async {
-    return handleOperation(() async {
-      final either = await operation();
-      return ErrorAdapter.eitherToResult(either);
-    });
+    clearError();
+
+    final either = await operation();
+
+    return either.fold((failure) {
+      setError(ErrorAdapter.failureToAppError(failure));
+      return null;
+    }, (data) => data);
   }
 }

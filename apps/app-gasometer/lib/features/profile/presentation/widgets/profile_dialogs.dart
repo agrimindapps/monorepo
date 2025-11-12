@@ -1,8 +1,7 @@
 import 'dart:async';
 
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -177,26 +176,23 @@ class _AccountDeletionDialogState extends State<AccountDeletionDialog> {
           ),
         ),
         ElevatedButton(
-          onPressed:
-              _isConfirmationValid
-                  ? () {
-                    Navigator.of(context).pop();
-                    context.go('/account-deletion');
-                  }
-                  : null,
+          onPressed: _isConfirmationValid
+              ? () {
+                  Navigator.of(context).pop();
+                  context.go('/account-deletion');
+                }
+              : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor:
-                _isConfirmationValid
-                    ? Theme.of(context).colorScheme.error
-                    : Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.12),
-            foregroundColor:
-                _isConfirmationValid
-                    ? Colors.white
-                    : Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.38),
+            backgroundColor: _isConfirmationValid
+                ? Theme.of(context).colorScheme.error
+                : Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.12),
+            foregroundColor: _isConfirmationValid
+                ? Colors.white
+                : Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.38),
             shape: RoundedRectangleBorder(
               borderRadius: GasometerDesignTokens.borderRadius(
                 GasometerDesignTokens.radiusButton,
@@ -576,53 +572,49 @@ class _DataClearDialogState extends ConsumerState<DataClearDialog> {
           ),
         ),
         ElevatedButton(
-          onPressed:
-              _isConfirmationValid && !_isLoading
-                  ? () async {
-                    setState(() {
-                      _isLoading = true;
-                    });
+          onPressed: _isConfirmationValid && !_isLoading
+              ? () async {
+                  setState(() {
+                    _isLoading = true;
+                  });
 
-                    try {
-                      // TODO: Implement data clearing logic
-                      await Future<void>.delayed(const Duration(seconds: 2));
-                      if (mounted) {
-                        Navigator.of(context).pop();
-                      }
-                    } catch (e) {
-                      // Handle error
-                    } finally {
-                      if (mounted) {
-                        setState(() {
-                          _isLoading = false;
-                        });
-                      }
+                  try {
+                    // TODO: Implement data clearing logic
+                    await Future<void>.delayed(const Duration(seconds: 2));
+                    if (mounted) {
+                      Navigator.of(context).pop();
+                    }
+                  } catch (e) {
+                    // Handle error
+                  } finally {
+                    if (mounted) {
+                      setState(() {
+                        _isLoading = false;
+                      });
                     }
                   }
-                  : null,
+                }
+              : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor:
-                _isConfirmationValid && !_isLoading
-                    ? GasometerDesignTokens.colorWarning
-                    : theme.colorScheme.onSurface.withValues(alpha: 0.12),
-            foregroundColor:
-                _isConfirmationValid && !_isLoading
-                    ? Colors.white
-                    : theme.colorScheme.onSurface.withValues(alpha: 0.38),
+            backgroundColor: _isConfirmationValid && !_isLoading
+                ? GasometerDesignTokens.colorWarning
+                : theme.colorScheme.onSurface.withValues(alpha: 0.12),
+            foregroundColor: _isConfirmationValid && !_isLoading
+                ? Colors.white
+                : theme.colorScheme.onSurface.withValues(alpha: 0.38),
             shape: RoundedRectangleBorder(
               borderRadius: GasometerDesignTokens.borderRadius(
                 GasometerDesignTokens.radiusButton,
               ),
             ),
           ),
-          child:
-              _isLoading
-                  ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(color: Colors.white),
-                  )
-                  : const Text('Limpar Dados'),
+          child: _isLoading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(color: Colors.white),
+                )
+              : const Text('Limpar Dados'),
         ),
       ],
     );

@@ -1,1 +1,0 @@
-import "package:get_it/get_it.dart"; import "package:core/core.dart"; void main() { try { final service = GetIt.instance<IBoxRegistryService>(); print("✅ BoxRegistryService registrado com sucesso"); } catch (e) { print("❌ Erro: $e"); } }

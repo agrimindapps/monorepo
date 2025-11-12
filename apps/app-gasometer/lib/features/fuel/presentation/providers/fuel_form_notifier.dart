@@ -129,6 +129,7 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
   Timer? _litersDebounceTimer;
   Timer? _priceDebounceTimer;
   Timer? _odometerDebounceTimer;
+  bool _listenersSetup = false;
 
   // FocusNodes for field focus management
   final FocusNode litersFocusNode = FocusNode();
@@ -178,12 +179,26 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
   }
 
   void _setupControllers() {
+    if (_listenersSetup) {
+      if (kDebugMode) {
+        debugPrint('[FUEL FORM] Listeners already setup, skipping...');
+      }
+      return;
+    }
+
+    if (kDebugMode) {
+      debugPrint('[FUEL FORM] Setting up controller listeners...');
+    }
     litersController.addListener(_onLitersChanged);
     pricePerLiterController.addListener(_onPricePerLiterChanged);
     odometerController.addListener(_onOdometerChanged);
     gasStationController.addListener(_onGasStationChanged);
     gasStationBrandController.addListener(_onGasStationBrandChanged);
     notesController.addListener(_onNotesChanged);
+    _listenersSetup = true;
+    if (kDebugMode) {
+      debugPrint('[FUEL FORM] Controller listeners set up successfully');
+    }
   }
 
   Future<void> _loadVehicleData(String vehicleId) async {
@@ -234,17 +249,30 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
   }
 
   void _onLitersChanged() {
+    if (kDebugMode) {
+      debugPrint(
+        '[FUEL FORM] _onLitersChanged called - text: "${litersController.text}"',
+      );
+    }
     _litersDebounceTimer?.cancel();
     _litersDebounceTimer = Timer(
       const Duration(milliseconds: FuelConstants.litersDebounceMs),
       () {
         final value = _formatter.parseFormattedValue(litersController.text);
+        if (kDebugMode) {
+          debugPrint('[FUEL FORM] Liters parsed value: $value');
+        }
         _updateLiters(value);
       },
     );
   }
 
   void _onPricePerLiterChanged() {
+    if (kDebugMode) {
+      debugPrint(
+        '[FUEL FORM] _onPricePerLiterChanged called - text: "${pricePerLiterController.text}"',
+      );
+    }
     _priceDebounceTimer?.cancel();
     _priceDebounceTimer = Timer(
       const Duration(milliseconds: FuelConstants.priceDebounceMs),
@@ -252,6 +280,9 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
         final value = _formatter.parseFormattedValue(
           pricePerLiterController.text,
         );
+        if (kDebugMode) {
+          debugPrint('[FUEL FORM] Price parsed value: $value');
+        }
         _updatePricePerLiter(value);
       },
     );

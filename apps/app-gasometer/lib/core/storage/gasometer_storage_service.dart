@@ -1,67 +1,66 @@
 import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
 import '../constants/gasometer_environment_config.dart';
+import '../errors/failures.dart';
 
 /// Gasometer-specific storage service that manages app-specific boxes
 /// This prevents contamination with other apps while using the core infrastructure
 class GasometerStorageService {
   factory GasometerStorageService() => _instance;
   GasometerStorageService._internal();
-  static final GasometerStorageService _instance = GasometerStorageService._internal();
+  static final GasometerStorageService _instance =
+      GasometerStorageService._internal();
 
   late final IBoxRegistryService _boxRegistry;
   late final ILocalStorageRepository _storage;
   bool _isInitialized = false;
 
+  // Storage box names for gasometer app
+  static const String _vehiclesBox = 'gasometer_vehicles';
+  static const String _readingsBox = 'gasometer_readings';
+  static const String _statisticsBox = 'gasometer_statistics';
+  static const String _backupsBox = 'gasometer_backups';
+  static const String _mainBox = 'gasometer_main';
+
   /// Initialize the gasometer storage system
-  Future<Result<void>> initialize() async {
+  Future<Either<Failure, void>> initialize() async {
     try {
-      if (_isInitialized) return Result.success(null);
+      if (_isInitialized) return const Right(null);
       _boxRegistry = GetIt.I<IBoxRegistryService>();
       _storage = GetIt.I<ILocalStorageRepository>();
       await _registerGasometerBoxes();
 
       _isInitialized = true;
-      return Result.success(null);
+      return const Right(null);
     } catch (e) {
-      return Result.error(StorageError(message: 'Failed to initialize gasometer storage: $e'));
+      return Left(
+        StorageFailure(message: 'Failed to initialize gasometer storage: $e'),
+      );
     }
   }
 
   /// Register gasometer-specific boxes
   Future<void> _registerGasometerBoxes() async {
     final gasometerBoxes = [
-      BoxConfiguration.basic(
-        name: GasometerBoxes.main,
-        appId: 'gasometer',
-      ),
-      BoxConfiguration.basic(
-        name: GasometerBoxes.readings,
-        appId: 'gasometer',
-      ),
-      BoxConfiguration.basic(
-        name: GasometerBoxes.vehicles,
-        appId: 'gasometer',
-      ),
-      BoxConfiguration.basic(
-        name: GasometerBoxes.statistics,
-        appId: 'gasometer',
-      ),
-      BoxConfiguration.basic(
-        name: GasometerBoxes.backups,
-        appId: 'gasometer',
-      ),
+      BoxConfiguration.basic(name: _mainBox, appId: 'gasometer'),
+      BoxConfiguration.basic(name: _readingsBox, appId: 'gasometer'),
+      BoxConfiguration.basic(name: _vehiclesBox, appId: 'gasometer'),
+      BoxConfiguration.basic(name: _statisticsBox, appId: 'gasometer'),
+      BoxConfiguration.basic(name: _backupsBox, appId: 'gasometer'),
     ];
 
     for (final config in gasometerBoxes) {
       final result = await _boxRegistry.registerBox(config);
       if (result.isLeft()) {
-        print('Warning: Failed to register gasometer box "${config.name}": ${result.fold((f) => f.message, (_) => '')}');
+        print(
+          'Warning: Failed to register gasometer box "${config.name}": ${result.fold((f) => f.message, (_) => '')}',
+        );
       }
     }
   }
 
   /// Save vehicle data
-  Future<Result<void>> saveVehicle<T>({
+  Future<Either<Failure, void>> saveVehicle<T>({
     required String vehicleId,
     required T vehicle,
   }) async {
@@ -69,25 +68,20 @@ class GasometerStorageService {
     final result = await _storage.save<T>(
       key: vehicleId,
       data: vehicle,
-      box: GasometerBoxes.vehicles,
+      box: _vehiclesBox,
     );
-    return result.toResult();
+    return result.fold((failure) => Left(failure), (_) => const Right(null));
   }
 
   /// Get vehicle data
-  Future<Result<T?>> getVehicle<T>({
-    required String vehicleId,
-  }) async {
+  Future<Either<Failure, T?>> getVehicle<T>({required String vehicleId}) async {
     await _ensureInitialized();
-    final result = await _storage.get<T>(
-      key: vehicleId,
-      box: GasometerBoxes.vehicles,
-    );
-    return result.toResult();
+    final result = await _storage.get<T>(key: vehicleId, box: _vehiclesBox);
+    return result.fold((failure) => Left(failure), (value) => Right(value));
   }
 
   /// Save odometer reading
-  Future<Result<void>> saveReading<T>({
+  Future<Either<Failure, void>> saveReading<T>({
     required String readingId,
     required T reading,
   }) async {
@@ -95,32 +89,27 @@ class GasometerStorageService {
     final result = await _storage.save<T>(
       key: readingId,
       data: reading,
-      box: GasometerBoxes.readings,
+      box: _readingsBox,
     );
-    return result.toResult();
+    return result.fold((failure) => Left(failure), (_) => const Right(null));
   }
 
   /// Get odometer reading
-  Future<Result<T?>> getReading<T>({
-    required String readingId,
-  }) async {
+  Future<Either<Failure, T?>> getReading<T>({required String readingId}) async {
     await _ensureInitialized();
-    final result = await _storage.get<T>(
-      key: readingId,
-      box: GasometerBoxes.readings,
-    );
-    return result.toResult();
+    final result = await _storage.get<T>(key: readingId, box: _readingsBox);
+    return result.fold((failure) => Left(failure), (value) => Right(value));
   }
 
   /// Get all readings
-  Future<Result<List<T>>> getAllReadings<T>() async {
+  Future<Either<Failure, List<T>>> getAllReadings<T>() async {
     await _ensureInitialized();
-    final result = await _storage.getValues<T>(box: GasometerBoxes.readings);
-    return result.toResult();
+    final result = await _storage.getValues<T>(box: _readingsBox);
+    return result.fold((failure) => Left(failure), (values) => Right(values));
   }
 
   /// Save statistics
-  Future<Result<void>> saveStatistics<T>({
+  Future<Either<Failure, void>> saveStatistics<T>({
     required String key,
     required T statistics,
   }) async {
@@ -128,25 +117,20 @@ class GasometerStorageService {
     final result = await _storage.save<T>(
       key: key,
       data: statistics,
-      box: GasometerBoxes.statistics,
+      box: _statisticsBox,
     );
-    return result.toResult();
+    return result.fold((failure) => Left(failure), (_) => const Right(null));
   }
 
   /// Get statistics
-  Future<Result<T?>> getStatistics<T>({
-    required String key,
-  }) async {
+  Future<Either<Failure, T?>> getStatistics<T>({required String key}) async {
     await _ensureInitialized();
-    final result = await _storage.get<T>(
-      key: key,
-      box: GasometerBoxes.statistics,
-    );
-    return result.toResult();
+    final result = await _storage.get<T>(key: key, box: _statisticsBox);
+    return result.fold((failure) => Left(failure), (value) => Right(value));
   }
 
   /// Save backup data
-  Future<Result<void>> saveBackup<T>({
+  Future<Either<Failure, void>> saveBackup<T>({
     required String backupId,
     required T backupData,
   }) async {
@@ -154,34 +138,30 @@ class GasometerStorageService {
     final result = await _storage.save<T>(
       key: backupId,
       data: backupData,
-      box: GasometerBoxes.backups,
+      box: _backupsBox,
     );
-    return result.toResult();
+    return result.fold((failure) => Left(failure), (_) => const Right(null));
   }
 
   /// Get backup data
-  Future<Result<List<T>>> getAllBackups<T>() async {
+  Future<Either<Failure, List<T>>> getAllBackups<T>() async {
     await _ensureInitialized();
-    final result = await _storage.getValues<T>(box: GasometerBoxes.backups);
-    return result.toResult();
+    final result = await _storage.getValues<T>(box: _backupsBox);
+    return result.fold((failure) => Left(failure), (values) => Right(values));
   }
 
   /// Save gasometer-specific setting
-  Future<Result<void>> saveGasometerSetting({
+  Future<Either<Failure, void>> saveGasometerSetting({
     required String key,
     required dynamic value,
   }) async {
     await _ensureInitialized();
-    final result = await _storage.save<dynamic>(
-      key: 'gasometer_$key', // Prefix to avoid conflicts
-      data: value,
-      box: GasometerBoxes.main,
-    );
-    return result.toResult();
+    final result = await _storage.save(key: key, data: value, box: _mainBox);
+    return result.fold((failure) => Left(failure), (_) => const Right(null));
   }
 
   /// Get gasometer-specific setting
-  Future<Result<T?>> getGasometerSetting<T>({
+  Future<Either<Failure, T?>> getGasometerSetting<T>({
     required String key,
     T? defaultValue,
   }) async {
@@ -190,41 +170,44 @@ class GasometerStorageService {
       key: 'gasometer_$key', // Prefix to avoid conflicts
       box: GasometerBoxes.main,
     );
-    
+
     return result.fold(
-      (failure) => Result.error(AppErrorFactory.fromFailure(failure)),
-      (value) => Result.success(value ?? defaultValue),
+      (failure) => Left(failure),
+      (value) => Right(value ?? defaultValue),
     );
   }
 
   /// Clear all gasometer data (for reset/uninstall)
-  Future<Result<void>> clearAllGasometerData() async {
+  Future<Either<Failure, void>> clearAllGasometerData() async {
     await _ensureInitialized();
-    
+
     final boxes = [
-      GasometerBoxes.main,
-      GasometerBoxes.readings,
-      GasometerBoxes.vehicles,
-      GasometerBoxes.statistics,
-      GasometerBoxes.backups,
+      _mainBox,
+      _readingsBox,
+      _vehiclesBox,
+      _statisticsBox,
+      _backupsBox,
     ];
 
     for (final boxName in boxes) {
       final result = await _storage.clear(box: boxName);
       if (result.isLeft()) {
-        return result.toResult();
+        return result.fold(
+          (failure) => Left(failure),
+          (_) => const Right(null),
+        );
       }
     }
 
-    return Result.success(null);
+    return const Right(null);
   }
 
   /// Get storage statistics for debugging
   Future<Map<String, int>> getStorageStatistics() async {
     await _ensureInitialized();
-    
+
     final statistics = <String, int>{};
-    
+
     final boxes = [
       GasometerBoxes.main,
       GasometerBoxes.readings,

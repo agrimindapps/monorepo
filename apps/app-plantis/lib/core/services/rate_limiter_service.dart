@@ -111,7 +111,7 @@ class RateLimiterService {
 
       if (elapsed < config.throttleInterval) {
         final delay = config.throttleInterval - elapsed;
-        await Future.delayed(delay);
+        await Future<void>.delayed(delay);
       }
     }
 

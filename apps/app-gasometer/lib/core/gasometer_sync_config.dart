@@ -1,31 +1,29 @@
 import 'package:core/core.dart';
 
-import '../features/expenses/domain/entities/expense_entity.dart';
-import '../features/fuel/domain/entities/fuel_record_entity.dart';
-import '../features/maintenance/domain/entities/maintenance_entity.dart';
-import '../features/odometer/domain/entities/odometer_entity.dart';
-import '../features/vehicles/domain/entities/vehicle_entity.dart';
+import 'services/gasometer_sync_service.dart';
+
 // import 'extensions/user_entity_gasometer_extension.dart'; // Não usado mais
 
-VehicleEntity _vehicleFromFirebaseMap(Map<String, dynamic> map) {
-  return VehicleEntity.fromFirebaseMap(map);
-}
+// REMOVIDO: Funções de conversão migradas para Drift
+// VehicleEntity _vehicleFromFirebaseMap(Map<String, dynamic> map) {
+//   return VehicleEntity.fromFirebaseMap(map);
+// }
 
-MaintenanceEntity _maintenanceFromFirebaseMap(Map<String, dynamic> map) {
-  return MaintenanceEntity.fromFirebaseMap(map);
-}
+// MaintenanceEntity _maintenanceFromFirebaseMap(Map<String, dynamic> map) {
+//   return MaintenanceEntity.fromFirebaseMap(map);
+// }
 
-FuelRecordEntity _fuelRecordFromFirebaseMap(Map<String, dynamic> map) {
-  return FuelRecordEntity.fromFirebaseMap(map);
-}
+// FuelRecordEntity _fuelRecordFromFirebaseMap(Map<String, dynamic> map) {
+//   return FuelRecordEntity.fromFirebaseMap(map);
+// }
 
-ExpenseEntity _expenseFromFirebaseMap(Map<String, dynamic> map) {
-  return ExpenseEntity.fromFirebaseMap(map);
-}
+// ExpenseEntity _expenseFromFirebaseMap(Map<String, dynamic> map) {
+//   return ExpenseEntity.fromFirebaseMap(map);
+// }
 
-OdometerEntity _odometerFromFirebaseMap(Map<String, dynamic> map) {
-  return OdometerEntity.fromFirebaseMap(map);
-}
+// OdometerEntity _odometerFromFirebaseMap(Map<String, dynamic> map) {
+//   return OdometerEntity.fromFirebaseMap(map);
+// }
 
 // UserEntity não é mais sincronizado via UnifiedSync
 // Os dados ficam no documento users/{userId}, não em subcollection
@@ -58,16 +56,11 @@ abstract final class GasometerSyncConfig {
       print('✅ [GasometerSync] BoxRegistryService obtido com sucesso');
 
       // Registrar boxes para cada entidade
-      // NOTA: Nomes das boxes locais podem ser diferentes dos nomes das collections Firebase
-      final boxesToRegister = [
-        'vehicles', // Hive box (Firebase: vehicles)
-        'fuel', // Hive box (Firebase: fuel) - usado pelo UnifiedSync
-        'fuel_supplies', // Hive box (legacy) - mantido para compatibilidade com HiveService
-        'expenses', // Hive box (Firebase: expenses)
-        'maintenance', // Hive box (Firebase: maintenance)
-        'odometer', // Hive box (Firebase: odometer)
-        'settings', // Hive box (não sincroniza com Firebase)
-        'cache', // Hive box (Firebase: subscriptions)
+      // NOTA: Entidades foram migradas para Drift
+      // Boxes Hive removidas: não há mais necessidade de sync via Hive
+      final boxesToRegister = <String>[
+        // Todas as entidades agora usam Drift para storage local
+        // Premium usa seu próprio sistema de sync (RevenueCat + Firebase)
       ];
 
       print(
@@ -109,68 +102,59 @@ abstract final class GasometerSyncConfig {
     }
 
     print('🔧 [GasometerSync] Iniciando UnifiedSyncManager...');
+
+    // 🔥 CRITICAL: Inicializar BackgroundSyncManager PRIMEIRO
+    print('🔧 [GasometerSync] Inicializando BackgroundSyncManager...');
+    final bgSyncInitResult = await BackgroundSyncManager.instance.initialize(
+      minSyncInterval: const Duration(minutes: 3),
+      maxQueueSize: 50,
+    );
+
+    bgSyncInitResult.fold(
+      (failure) {
+        print('❌ [GasometerSync] Erro ao inicializar BackgroundSyncManager: ${failure.message}');
+        throw Exception('Failed to initialize BackgroundSyncManager: ${failure.message}');
+      },
+      (_) {
+        print('✅ [GasometerSync] BackgroundSyncManager inicializado com sucesso');
+      },
+    );
+
+    // Obter GasometerSyncService do DI
+    print('🔧 [GasometerSync] Obtendo GasometerSyncService do DI...');
+    final gasometerSyncService = GetIt.I<GasometerSyncService>();
+
+    // Inicializar o GasometerSyncService
+    print('🔧 [GasometerSync] Inicializando GasometerSyncService...');
+    await gasometerSyncService.initialize();
+
+    // Inicializar UnifiedSyncManager para registrar o app
     await UnifiedSyncManager.instance.initializeApp(
       appName: 'gasometer',
       config: AppSyncConfig.simple(
         appName: 'gasometer',
-        syncInterval: const Duration(
-          minutes: 5,
-        ), // Sync frequente para dados financeiros
+        syncInterval: const Duration(minutes: 5),
         conflictStrategy: ConflictStrategy.timestamp,
       ),
       entities: [
-        // Veículos: dados críticos, sync frequente
-        EntitySyncRegistration<VehicleEntity>.simple(
-          entityType: VehicleEntity,
-          collectionName: 'vehicles', // Firebase collection
-          fromMap: _vehicleFromFirebaseMap,
-          toMap: (vehicle) => vehicle.toFirebaseMap(),
-        ),
-        // Combustível: dados financeiros, resolução manual para precisão
-        // IMPORTANTE: Firebase collection é 'fuel', mas a box local é 'fuel_supplies'
-        // O SyncFirebaseService usa collectionName para AMBOS (Firebase E Hive)
-        // Solução: Usar 'fuel' para acessar o Firebase corretamente
-        EntitySyncRegistration<FuelRecordEntity>.simple(
-          entityType: FuelRecordEntity,
-          collectionName:
-              'fuel', // Firebase: fuel (SyncFirebaseService usará isso para Hive também)
-          fromMap: _fuelRecordFromFirebaseMap,
-          toMap: (fuelRecord) => fuelRecord.toFirebaseMap(),
-        ),
-        // Despesas: dados monetários, resolução manual
-        EntitySyncRegistration<ExpenseEntity>.simple(
-          entityType: ExpenseEntity,
-          collectionName: 'expenses', // Firebase collection
-          fromMap: _expenseFromFirebaseMap,
-          toMap: (expense) => expense.toFirebaseMap(),
-        ),
-        // Manutenção: dados críticos do veículo
-        EntitySyncRegistration<MaintenanceEntity>.simple(
-          entityType: MaintenanceEntity,
-          collectionName: 'maintenance', // Firebase collection
-          fromMap: _maintenanceFromFirebaseMap,
-          toMap: (maintenance) => maintenance.toFirebaseMap(),
-        ),
-        // Odômetro: leituras de quilometragem
-        EntitySyncRegistration<OdometerEntity>.simple(
-          entityType: OdometerEntity,
-          collectionName: 'odometer', // Firebase collection
-          fromMap: _odometerFromFirebaseMap,
-          toMap: (odometer) => odometer.toFirebaseMap(),
-        ),
-        // NOTA: UserEntity não é sincronizado como collection separada
-        // Os dados do usuário ficam no documento users/{userId} (não em subcollection)
-        // Removido para evitar erro de permissão
-
-        // Assinatura: dados de billing
-        EntitySyncRegistration<SubscriptionEntity>.simple(
-          entityType: SubscriptionEntity,
-          collectionName: 'subscriptions', // Firebase collection
-          fromMap: SubscriptionEntity.fromFirebaseMap,
-          toMap: (subscription) => subscription.toFirebaseMap(),
-        ),
+        // NOTA: Drift entities são gerenciadas pelo GasometerSyncService
+        // Não precisamos registrar entidades individuais aqui
       ],
     );
+
+    // 🔥 IMPORTANTE: Registrar o GasometerSyncService no BackgroundSyncManager
+    // Isso permite que AutoSyncService → UnifiedSyncManager → BackgroundSync → GasometerSyncService
+    print(
+      '🔧 [GasometerSync] Registrando GasometerSyncService no BackgroundSyncManager...',
+    );
+    BackgroundSyncManager.instance.registerService(
+      gasometerSyncService,
+      config: const BackgroundSyncConfig(
+        syncInterval: Duration(minutes: 3),
+        enabled: true,
+      ),
+    );
+    print('✅ [GasometerSync] GasometerSyncService registrado com sucesso');
 
     print('✅ [GasometerSync] ========== INICIALIZAÇÃO COMPLETA ==========');
   }

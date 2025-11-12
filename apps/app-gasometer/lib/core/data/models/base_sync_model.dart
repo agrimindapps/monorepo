@@ -1,9 +1,9 @@
 import 'package:core/core.dart';
 
-/// Base sync model for all models in the GasOMeter app
+/// Base sync model for Firebase models in the GasOMeter app
 /// Integrates with core package's BaseSyncEntity for Firebase sync
 abstract class BaseSyncModel extends BaseSyncEntity {
-  BaseSyncModel({
+  const BaseSyncModel({
     required super.id,
     super.createdAt,
     super.updatedAt,
@@ -14,6 +14,7 @@ abstract class BaseSyncModel extends BaseSyncEntity {
     super.userId,
     super.moduleName = 'gasometer',
   });
+
   /// Update timestamps for operations
   BaseSyncModel updateTimestamps() {
     return copyWith(updatedAt: DateTime.now(), isDirty: true) as BaseSyncModel;

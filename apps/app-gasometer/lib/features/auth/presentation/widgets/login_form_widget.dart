@@ -1,7 +1,6 @@
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 
 import '../../../auth/presentation/notifiers/notifiers.dart';
 import 'auth_button_widget.dart';
@@ -37,8 +36,7 @@ class LoginFormWidget extends ConsumerWidget {
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             validator: formNotifier.validateEmail,
-            onFieldSubmitted: (_) {
-            },
+            onFieldSubmitted: (_) {},
           ),
           const SizedBox(height: 16),
           AuthTextFieldWidget(
@@ -54,8 +52,9 @@ class LoginFormWidget extends ConsumerWidget {
                     : Icons.visibility_off_outlined,
               ),
               onPressed: formNotifier.togglePasswordVisibility,
-              tooltip:
-                  formState.obscurePassword ? 'Mostrar senha' : 'Ocultar senha',
+              tooltip: formState.obscurePassword
+                  ? 'Mostrar senha'
+                  : 'Ocultar senha',
             ),
             validator: formNotifier.validatePassword,
             onFieldSubmitted: (_) => _handleLogin(context, ref),

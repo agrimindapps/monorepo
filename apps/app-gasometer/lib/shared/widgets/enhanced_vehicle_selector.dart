@@ -1,8 +1,6 @@
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/ui_constants.dart';
 import '../../features/vehicles/domain/entities/vehicle_entity.dart';
@@ -284,14 +282,20 @@ class _EnhancedVehicleSelectorState
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.3),
                     width: 1.5,
                   ),
                   borderRadius: BorderRadius.circular(AppRadius.large),
-                  color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surface.withValues(alpha: 0.5),
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.05),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
@@ -366,19 +370,17 @@ class _EnhancedVehicleSelectorState
   }
 
   Widget _buildDropdown(BuildContext context, List<VehicleEntity> vehicles) {
-    final selectedVehicle =
-        _currentSelectedVehicleId != null
-            ? vehicles.firstWhere(
-              (v) => v.id == _currentSelectedVehicleId,
-              orElse: () => vehicles.first,
-            )
-            : null;
+    final selectedVehicle = _currentSelectedVehicleId != null
+        ? vehicles.firstWhere(
+            (v) => v.id == _currentSelectedVehicleId,
+            orElse: () => vehicles.first,
+          )
+        : null;
 
     return Semantics(
-      label:
-          selectedVehicle != null
-              ? 'Veículo selecionado: ${selectedVehicle.brand} ${selectedVehicle.model}, ${selectedVehicle.licensePlate}'
-              : 'Selecionar veículo',
+      label: selectedVehicle != null
+          ? 'Veículo selecionado: ${selectedVehicle.brand} ${selectedVehicle.model}, ${selectedVehicle.licensePlate}'
+          : 'Selecionar veículo',
       button: true,
       child: AnimatedBuilder(
         animation: _scaleAnimation,
@@ -390,28 +392,26 @@ class _EnhancedVehicleSelectorState
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color:
-                        selectedVehicle != null
-                            ? Theme.of(
-                              context,
-                            ).colorScheme.primary.withValues(alpha: 0.5)
-                            : Theme.of(
-                              context,
-                            ).colorScheme.outline.withValues(alpha: 0.3),
+                    color: selectedVehicle != null
+                        ? Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.5)
+                        : Theme.of(
+                            context,
+                          ).colorScheme.outline.withValues(alpha: 0.3),
                     width: selectedVehicle != null ? 2.0 : 1.5,
                   ),
                   borderRadius: BorderRadius.circular(AppRadius.large),
                   color: Theme.of(context).colorScheme.surface,
                   boxShadow: [
                     BoxShadow(
-                      color:
-                          selectedVehicle != null
-                              ? Theme.of(
-                                context,
-                              ).colorScheme.primary.withValues(alpha: 0.1)
-                              : Theme.of(
-                                context,
-                              ).colorScheme.onSurface.withValues(alpha: 0.05),
+                      color: selectedVehicle != null
+                          ? Theme.of(
+                              context,
+                            ).colorScheme.primary.withValues(alpha: 0.1)
+                          : Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.05),
                       blurRadius: selectedVehicle != null ? 12 : 8,
                       offset: const Offset(0, 4),
                     ),
@@ -443,11 +443,10 @@ class _EnhancedVehicleSelectorState
                           ),
                           child: Icon(
                             Icons.directions_car,
-                            color:
-                                selectedVehicle != null
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context).colorScheme.onSurface
-                                        .withValues(alpha: AppOpacity.subtle),
+                            color: selectedVehicle != null
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: AppOpacity.subtle),
                             size: AppSizes.iconM,
                           ),
                         ),
@@ -479,10 +478,9 @@ class _EnhancedVehicleSelectorState
                                         style: TextStyle(
                                           fontWeight: AppFontWeights.semiBold,
                                           fontSize: AppFontSizes.large,
-                                          color:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.onSurface,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
                                           letterSpacing: 0.2,
                                         ),
                                         overflow: TextOverflow.ellipsis,
@@ -512,10 +510,9 @@ class _EnhancedVehicleSelectorState
                                                 fontSize: AppFontSizes.small,
                                                 fontWeight:
                                                     AppFontWeights.medium,
-                                                color:
-                                                    Theme.of(
-                                                      context,
-                                                    ).colorScheme.primary,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
                                               ),
                                             ),
                                           ),
@@ -525,11 +522,12 @@ class _EnhancedVehicleSelectorState
                                           Icon(
                                             Icons.speed,
                                             size: AppSizes.iconXS,
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onSurface.withValues(
-                                              alpha: AppOpacity.medium,
-                                            ),
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface
+                                                .withValues(
+                                                  alpha: AppOpacity.medium,
+                                                ),
                                           ),
                                           const SizedBox(width: 4),
                                           Text(
@@ -564,8 +562,9 @@ class _EnhancedVehicleSelectorState
                                     child: Icon(
                                       Icons.pause_circle_outline,
                                       size: AppSizes.iconXS,
-                                      color:
-                                          Theme.of(context).colorScheme.error,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.error,
                                     ),
                                   ),
                                 ],
@@ -574,225 +573,198 @@ class _EnhancedVehicleSelectorState
                           );
                         }).toList();
                       },
-                      items:
-                          vehicles.map<DropdownMenuItem<String>>((
-                            VehicleEntity vehicle,
-                          ) {
-                            final isCurrentlySelected =
-                                vehicle.id == _currentSelectedVehicleId;
+                      items: vehicles.map<DropdownMenuItem<String>>((
+                        VehicleEntity vehicle,
+                      ) {
+                        final isCurrentlySelected =
+                            vehicle.id == _currentSelectedVehicleId;
 
-                            return DropdownMenuItem<String>(
-                              value: vehicle.id,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: AppSpacing.medium,
-                                  horizontal: AppSpacing.small,
-                                ),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(
-                                    AppRadius.medium,
+                        return DropdownMenuItem<String>(
+                          value: vehicle.id,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: AppSpacing.medium,
+                              horizontal: AppSpacing.small,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.medium,
+                              ),
+                              color: isCurrentlySelected
+                                  ? Theme.of(
+                                      context,
+                                    ).colorScheme.primary.withValues(alpha: 0.1)
+                                  : Colors.transparent,
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(
+                                    AppSpacing.small,
                                   ),
-                                  color:
-                                      isCurrentlySelected
-                                          ? Theme.of(context)
-                                              .colorScheme
-                                              .primary
+                                  decoration: BoxDecoration(
+                                    color: vehicle.isActive
+                                        ? Theme.of(context).colorScheme.primary
                                               .withValues(alpha: 0.1)
-                                          : Colors.transparent,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(
-                                        AppSpacing.small,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color:
-                                            vehicle.isActive
-                                                ? Theme.of(context)
-                                                    .colorScheme
-                                                    .primary
-                                                    .withValues(alpha: 0.1)
-                                                : Theme.of(context)
-                                                    .colorScheme
-                                                    .error
-                                                    .withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(
-                                          AppRadius.medium,
-                                        ),
-                                      ),
-                                      child: Icon(
-                                        vehicle.isActive
-                                            ? Icons.directions_car
-                                            : Icons.directions_car_outlined,
-                                        size: AppSizes.iconS,
-                                        color:
-                                            vehicle.isActive
-                                                ? Theme.of(
-                                                  context,
-                                                ).colorScheme.primary
-                                                : Theme.of(
-                                                  context,
-                                                ).colorScheme.error,
-                                      ),
+                                        : Theme.of(context).colorScheme.error
+                                              .withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(
+                                      AppRadius.medium,
                                     ),
-                                    const SizedBox(width: AppSpacing.medium),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
+                                  ),
+                                  child: Icon(
+                                    vehicle.isActive
+                                        ? Icons.directions_car
+                                        : Icons.directions_car_outlined,
+                                    size: AppSizes.iconS,
+                                    color: vehicle.isActive
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).colorScheme.error,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.medium),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Row(
                                         children: [
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  '${vehicle.brand} ${vehicle.model}',
-                                                  style: TextStyle(
-                                                    fontWeight:
-                                                        isCurrentlySelected
-                                                            ? AppFontWeights
-                                                                .semiBold
-                                                            : AppFontWeights
-                                                                .medium,
-                                                    fontSize:
-                                                        AppFontSizes.medium,
-                                                    color:
-                                                        isCurrentlySelected
-                                                            ? Theme.of(context)
-                                                                .colorScheme
-                                                                .primary
-                                                            : Theme.of(context)
-                                                                .colorScheme
-                                                                .onSurface,
-                                                  ),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  maxLines: 1,
-                                                ),
-                                              ),
-                                              if (!vehicle.isActive)
-                                                Container(
-                                                  margin: const EdgeInsets.only(
-                                                    left: AppSpacing.small,
-                                                  ),
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 6,
-                                                        vertical: 2,
-                                                      ),
-                                                  decoration: BoxDecoration(
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .error
-                                                        .withValues(alpha: 0.2),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          AppRadius.small,
-                                                        ),
-                                                  ),
-                                                  child: Text(
-                                                    'INATIVO',
-                                                    style: TextStyle(
-                                                      fontSize: AppFontSizes.xs,
-                                                      fontWeight:
-                                                          AppFontWeights.bold,
-                                                      color:
-                                                          Theme.of(
-                                                            context,
-                                                          ).colorScheme.error,
-                                                    ),
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 6),
-                                          Row(
-                                            children: [
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 6,
-                                                      vertical: 2,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  color:
-                                                      Theme.of(
+                                          Expanded(
+                                            child: Text(
+                                              '${vehicle.brand} ${vehicle.model}',
+                                              style: TextStyle(
+                                                fontWeight: isCurrentlySelected
+                                                    ? AppFontWeights.semiBold
+                                                    : AppFontWeights.medium,
+                                                fontSize: AppFontSizes.medium,
+                                                color: isCurrentlySelected
+                                                    ? Theme.of(
                                                         context,
-                                                      ).colorScheme.surface,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                        AppRadius.small,
-                                                      ),
-                                                  border: Border.all(
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .outline
-                                                        .withValues(alpha: 0.3),
-                                                  ),
-                                                ),
-                                                child: Text(
-                                                  vehicle.licensePlate,
-                                                  style: TextStyle(
-                                                    fontSize:
-                                                        AppFontSizes.small,
-                                                    fontWeight:
-                                                        AppFontWeights.medium,
-                                                    color:
-                                                        Theme.of(
-                                                          context,
-                                                        ).colorScheme.onSurface,
-                                                  ),
-                                                ),
+                                                      ).colorScheme.primary
+                                                    : Theme.of(
+                                                        context,
+                                                      ).colorScheme.onSurface,
                                               ),
-                                              const SizedBox(
-                                                width: AppSpacing.medium,
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                            ),
+                                          ),
+                                          if (!vehicle.isActive)
+                                            Container(
+                                              margin: const EdgeInsets.only(
+                                                left: AppSpacing.small,
                                               ),
-                                              Icon(
-                                                Icons.speed,
-                                                size: AppSizes.iconXS,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 6,
+                                                    vertical: 2,
+                                                  ),
+                                              decoration: BoxDecoration(
                                                 color: Theme.of(context)
                                                     .colorScheme
-                                                    .onSurface
-                                                    .withValues(
-                                                      alpha: AppOpacity.medium,
+                                                    .error
+                                                    .withValues(alpha: 0.2),
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      AppRadius.small,
                                                     ),
                                               ),
-                                              const SizedBox(width: 4),
-                                              Text(
-                                                '${vehicle.currentOdometer.toStringAsFixed(0)} km',
+                                              child: Text(
+                                                'INATIVO',
                                                 style: TextStyle(
-                                                  fontSize: AppFontSizes.small,
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onSurface
-                                                      .withValues(
-                                                        alpha:
-                                                            AppOpacity.medium,
-                                                      ),
+                                                  fontSize: AppFontSizes.xs,
                                                   fontWeight:
-                                                      AppFontWeights.medium,
+                                                      AppFontWeights.bold,
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).colorScheme.error,
                                                 ),
                                               ),
-                                            ],
+                                            ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.surface,
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                    AppRadius.small,
+                                                  ),
+                                              border: Border.all(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .outline
+                                                    .withValues(alpha: 0.3),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              vehicle.licensePlate,
+                                              style: TextStyle(
+                                                fontSize: AppFontSizes.small,
+                                                fontWeight:
+                                                    AppFontWeights.medium,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurface,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            width: AppSpacing.medium,
+                                          ),
+                                          Icon(
+                                            Icons.speed,
+                                            size: AppSizes.iconXS,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface
+                                                .withValues(
+                                                  alpha: AppOpacity.medium,
+                                                ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '${vehicle.currentOdometer.toStringAsFixed(0)} km',
+                                            style: TextStyle(
+                                              fontSize: AppFontSizes.small,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface
+                                                  .withValues(
+                                                    alpha: AppOpacity.medium,
+                                                  ),
+                                              fontWeight: AppFontWeights.medium,
+                                            ),
                                           ),
                                         ],
                                       ),
-                                    ),
-                                    if (isCurrentlySelected)
-                                      Icon(
-                                        Icons.check_circle,
-                                        size: AppSizes.iconS,
-                                        color:
-                                            Theme.of(
-                                              context,
-                                            ).colorScheme.primary,
-                                      ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            );
-                          }).toList(),
+                                if (isCurrentlySelected)
+                                  Icon(
+                                    Icons.check_circle,
+                                    size: AppSizes.iconS,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
                       onChanged: widget.enabled ? _onVehicleSelected : null,
                       onTap: _onDropdownTap,
                       isExpanded: true,
@@ -801,17 +773,16 @@ class _EnhancedVehicleSelectorState
                         duration: AppDurations.fast,
                         child: Icon(
                           Icons.expand_more,
-                          color:
-                              widget.enabled
-                                  ? (selectedVehicle != null
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(
+                          color: widget.enabled
+                              ? (selectedVehicle != null
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(
                                         context,
                                       ).colorScheme.onSurface.withValues(
                                         alpha: AppOpacity.prominent,
                                       ))
-                                  : Theme.of(context).colorScheme.onSurface
-                                      .withValues(alpha: AppOpacity.disabled),
+                              : Theme.of(context).colorScheme.onSurface
+                                    .withValues(alpha: AppOpacity.disabled),
                           size: AppSizes.iconM,
                         ),
                       ),

@@ -76,8 +76,6 @@ class ImageCompressionService {
   /// Implementação web-safe que reduz tamanho sem manipular pixels
   Future<String> _compressJpeg(String base64String, int quality) async {
     try {
-      final bytes = base64Decode(base64String);
-
       // Validação de qualidade
       final validQuality = quality.clamp(10, 95);
 

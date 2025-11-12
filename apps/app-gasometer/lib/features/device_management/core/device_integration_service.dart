@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../presentation/providers/vehicle_device_notifier.dart';

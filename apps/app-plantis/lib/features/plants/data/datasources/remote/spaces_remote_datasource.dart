@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide Column;
+import 'package:injectable/injectable.dart';
 
 import '../../../../../core/services/rate_limiter_service.dart';
 import '../../models/space_model.dart';
@@ -12,6 +13,7 @@ abstract class SpacesRemoteDatasource {
   Future<void> syncSpaces(List<SpaceModel> spaces, String userId);
 }
 
+@LazySingleton(as: SpacesRemoteDatasource)
 class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
   final FirebaseFirestore firestore;
   final RateLimiterService rateLimiter;

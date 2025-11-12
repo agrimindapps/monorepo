@@ -1,8 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../domain/usecases/clear_data_usecase.dart';
-import '../../domain/usecases/logout_usecase.dart';
-import '../../domain/usecases/delete_account_usecase.dart';
 import '../managers/clear_data_dialog_manager.dart';
 import '../managers/logout_dialog_manager.dart';
 import 'account_providers.dart';

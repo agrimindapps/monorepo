@@ -1,11 +1,11 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
+import '../providers/odometer_notifier.dart';
 import 'add_odometer_page.dart';
 
 class OdometerPage extends ConsumerStatefulWidget {
@@ -128,7 +128,9 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
           setState(() {
             _selectedVehicleId = vehicleId;
           });
-          // TODO: Implementar filtro de odômetro por veículo quando o provider estiver pronto
+          if (vehicleId != null) {
+            ref.read(odometerNotifierProvider.notifier).loadByVehicle(vehicleId);
+          }
         },
         hintText: 'Selecione um veículo',
       ),
@@ -189,11 +191,70 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
   }
 
   Widget _buildContent(BuildContext context) {
-    return const EnhancedEmptyState(
-      title: 'Nenhum registro',
-      description:
-          'Adicione sua primeira leitura de odômetro para começar a acompanhar a quilometragem.',
-      icon: Icons.speed_outlined,
+    final odometerState = ref.watch(odometerNotifierProvider);
+
+    return odometerState.when(
+      data: (readings) {
+        if (readings.isEmpty) {
+          return const EnhancedEmptyState(
+            title: 'Nenhum registro',
+            description:
+                'Adicione sua primeira leitura de odômetro para começar a acompanhar a quilometragem.',
+            icon: Icons.speed_outlined,
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: readings.length,
+          itemBuilder: (context, index) {
+            final reading = readings[index];
+            final formatter = NumberFormat('#,##0.0', 'pt_BR');
+            final dateFormatter = DateFormat('dd/MM/yyyy HH:mm');
+
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  child: const Icon(Icons.speed, color: Colors.white),
+                ),
+                title: Text(
+                  '${formatter.format(reading.value)} km',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(dateFormatter.format(reading.registrationDate)),
+                    if (reading.description.isNotEmpty)
+                      Text(
+                        reading.description,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                  ],
+                ),
+                trailing: Text(
+                  reading.type.displayName,
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => const EnhancedEmptyState(
+        title: 'Erro ao carregar',
+        description: 'Não foi possível carregar as leituras de odômetro.',
+        icon: Icons.error_outline,
+      ),
     );
   }
 
@@ -217,9 +278,9 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
           context: context,
           builder: (context) => AddOdometerPage(vehicleId: _selectedVehicleId),
         ).then((result) {
-          if (result == true) {
-            // Refresh odometer list when ready
-            setState(() {});
+          if (result == true && _selectedVehicleId != null) {
+            // Reload odometer list after adding
+            ref.read(odometerNotifierProvider.notifier).loadByVehicle(_selectedVehicleId!);
           }
         });
       },

@@ -1,5 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../auth/presentation/notifiers/notifiers.dart';
@@ -51,33 +50,32 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
       // ignore: use_build_context_synchronously
       context: context,
       barrierDismissible: false,
-      builder:
-          (context) => AlertDialog(
-            title: const Row(
-              children: [
-                Icon(Icons.warning, color: Colors.red),
-                SizedBox(width: 8),
-                Text('Confirmação Final'),
-              ],
-            ),
-            content: const Text(
-              'Esta ação não pode ser desfeita. Todos os seus dados serão permanentemente deletados em até 30 dias.\n\nDeseja realmente prosseguir com a exclusão da conta?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Confirmar Exclusão'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning, color: Colors.red),
+            SizedBox(width: 8),
+            Text('Confirmação Final'),
+          ],
+        ),
+        content: const Text(
+          'Esta ação não pode ser desfeita. Todos os seus dados serão permanentemente deletados em até 30 dias.\n\nDeseja realmente prosseguir com a exclusão da conta?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
           ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Confirmar Exclusão'),
+          ),
+        ],
+      ),
     );
 
     if (confirmed != true) return;
@@ -1017,14 +1015,13 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
                       children: [
                         Checkbox(
                           value: _confirmationChecked,
-                          onChanged:
-                              _isDeleting
-                                  ? null
-                                  : (value) {
-                                    setState(() {
-                                      _confirmationChecked = value ?? false;
-                                    });
-                                  },
+                          onChanged: _isDeleting
+                              ? null
+                              : (value) {
+                                  setState(() {
+                                    _confirmationChecked = value ?? false;
+                                  });
+                                },
                           activeColor: Colors.red.shade600,
                         ),
                         const SizedBox(width: 8),
@@ -1045,10 +1042,9 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton.icon(
-                        onPressed:
-                            _confirmationChecked && !_isDeleting
-                                ? _handleAccountDeletion
-                                : null,
+                        onPressed: _confirmationChecked && !_isDeleting
+                            ? _handleAccountDeletion
+                            : null,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red.shade600,
                           foregroundColor: Colors.white,
@@ -1056,19 +1052,18 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        icon:
-                            _isDeleting
-                                ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
-                                    ),
+                        icon: _isDeleting
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
                                   ),
-                                )
-                                : const Icon(Icons.delete_forever),
+                                ),
+                              )
+                            : const Icon(Icons.delete_forever),
                         label: Text(
                           _isDeleting
                               ? 'Excluindo Conta...'
@@ -1337,18 +1332,15 @@ class _PasswordDialogState extends State<_PasswordDialog> {
                 icon: Icon(
                   _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
                 ),
-                onPressed:
-                    () => setState(
-                      () => _isPasswordVisible = !_isPasswordVisible,
-                    ),
+                onPressed: () =>
+                    setState(() => _isPasswordVisible = !_isPasswordVisible),
               ),
               border: const OutlineInputBorder(),
             ),
-            onSubmitted:
-                _hasText
-                    ? (_) =>
-                        Navigator.of(context).pop(widget.controller.text.trim())
-                    : null,
+            onSubmitted: _hasText
+                ? (_) =>
+                      Navigator.of(context).pop(widget.controller.text.trim())
+                : null,
           ),
           const SizedBox(height: 16),
           Container(
@@ -1379,11 +1371,9 @@ class _PasswordDialogState extends State<_PasswordDialog> {
           child: const Text('Cancelar'),
         ),
         ElevatedButton(
-          onPressed:
-              _hasText
-                  ? () =>
-                      Navigator.of(context).pop(widget.controller.text.trim())
-                  : null,
+          onPressed: _hasText
+              ? () => Navigator.of(context).pop(widget.controller.text.trim())
+              : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue,
             foregroundColor: Colors.white,

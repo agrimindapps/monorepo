@@ -2,9 +2,8 @@
 /// UI for manual resolution of financial data conflicts
 library;
 
-import 'package:core/core.dart' show BaseSyncEntity;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../features/expenses/data/models/expense_model.dart';
 import '../../../features/fuel/data/models/fuel_supply_model.dart';
@@ -94,10 +93,9 @@ class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
           child: const Text('Cancelar'),
         ),
         ElevatedButton(
-          onPressed:
-              _selectedStrategy != FinancialConflictStrategy.manualReview
-                  ? () => _resolveConflict(context)
-                  : null,
+          onPressed: _selectedStrategy != FinancialConflictStrategy.manualReview
+              ? () => _resolveConflict(context)
+              : null,
           child: const Text('Resolver'),
         ),
       ],

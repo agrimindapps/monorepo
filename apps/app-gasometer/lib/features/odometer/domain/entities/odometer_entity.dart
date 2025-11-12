@@ -89,15 +89,19 @@ class OdometerEntity extends BaseSyncEntity {
 
   @override
   Map<String, dynamic> toFirebaseMap() {
-    return {
+    final map = <String, dynamic>{
       ...baseFirebaseFields,
       'vehicleId': vehicleId,
       'value': value,
       'registrationDate': registrationDate.millisecondsSinceEpoch,
-      'description': description,
       'type': type.name,
-      'metadata': metadata,
     };
+
+    // Adicionar campos opcionais apenas se não forem null/empty
+    if (description != null && description!.isNotEmpty) map['description'] = description;
+    if (metadata != null && metadata!.isNotEmpty) map['metadata'] = metadata;
+
+    return map;
   }
 
   @override

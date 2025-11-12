@@ -80,7 +80,7 @@
 
 - **Sincronização Multi-dispositivo**
   - Sync em tempo real com Firebase
-  - Suporte offline com Drift (SQLite)
+  - Suporte offline com Hive
   - Fila inteligente de sincronização
   - Resolução automática de conflitos
   - **📖 [Documentação Completa de Sincronismo](./docs/SYNC_ARCHITECTURE.md)**
@@ -180,17 +180,26 @@ class FuelNotifier {
 ### Instalação
 
 ```bash
-cd apps/app-gasometer
+cd apps/app-gasometer-drift
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
+
+# Para web: compilar drift_worker.dart
+./scripts/compile_drift_worker.sh
+
 flutter run
 ```
 
 ### Build
 
 ```bash
+# Mobile
 flutter build apk --release
 flutter build appbundle --release
+
+# Web (requer compilação do drift_worker)
+./scripts/compile_drift_worker.sh
+flutter build web --release
 ```
 
 ### Análise

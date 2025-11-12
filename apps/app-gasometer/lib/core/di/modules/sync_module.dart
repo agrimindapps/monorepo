@@ -1,32 +1,32 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
 
+import '../../../features/expenses/data/sync/expense_drift_sync_adapter.dart';
+import '../../../features/fuel/data/sync/fuel_supply_drift_sync_adapter.dart';
+import '../../../features/maintenance/data/sync/maintenance_drift_sync_adapter.dart';
+import '../../../features/vehicles/data/sync/vehicle_drift_sync_adapter.dart';
 import '../../services/gasometer_sync_service.dart';
-import '../../../features/fuel/domain/repositories/fuel_repository.dart';
-import '../../../features/maintenance/domain/repositories/maintenance_repository.dart';
-import '../../../features/vehicles/domain/repositories/vehicle_repository.dart';
 
 /// Módulo de Dependency Injection para sincronização do Gasometer
-/// Registra o GasometerSyncService do core package
+/// Registra o GasometerSyncService e seus adapters via Injectable/GetIt
 abstract class SyncDIModule {
   static void init(GetIt sl) {
     if (kDebugMode) {
       print('📦 Registering GasometerSyncService...');
     }
-    
+
     try {
-      sl.registerLazySingleton<GasometerSyncService>(
-        () => GasometerSyncService(
-          vehicleRepository: sl<VehicleRepository>(),
-          fuelRepository: sl<FuelRepository>(),
-          maintenanceRepository: sl<MaintenanceRepository>(),
-          expensesRepository: null,
-        ),
-      );
-      
+      // Adapters são registrados automaticamente via @lazySingleton (Injectable)
+      // GasometerSyncService também é registrado via @lazySingleton
+      // Apenas validar que estão disponíveis
+      sl<VehicleDriftSyncAdapter>();
+      sl<FuelSupplyDriftSyncAdapter>();
+      sl<MaintenanceDriftSyncAdapter>();
+      sl<ExpenseDriftSyncAdapter>();
+      sl<GasometerSyncService>();
+
       if (kDebugMode) {
-        print('✅ GasometerSyncService registered successfully');
+        print('✅ GasometerSyncService and adapters registered successfully');
       }
     } catch (e) {
       if (kDebugMode) {

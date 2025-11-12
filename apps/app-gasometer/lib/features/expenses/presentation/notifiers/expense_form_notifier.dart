@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -90,19 +90,11 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     required String userId,
   }) async {
     if (vehicleId.isEmpty) {
-      Future.microtask(() {
-        // ignore: unawaited_futures
-        state = state.copyWith(
-          errorMessage: () => 'Nenhum veículo selecionado',
-        );
-      });
+      state = state.copyWith(errorMessage: () => 'Nenhum veículo selecionado');
       return;
     }
 
-    Future.microtask(() {
-      // ignore: unawaited_futures
-      state = state.copyWith(isLoading: true);
-    });
+    state = state.copyWith(isLoading: true);
 
     try {
       final vehicleResult = await _getVehicleById(
@@ -137,10 +129,7 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
 
   /// Inicializa com despesa existente para edição
   Future<void> initializeWithExpense(ExpenseEntity expense) async {
-    Future.microtask(() {
-      // ignore: unawaited_futures
-      state = state.copyWith(isLoading: true);
-    });
+    state = state.copyWith(isLoading: true);
 
     try {
       final vehicleResult = await _getVehicleById(

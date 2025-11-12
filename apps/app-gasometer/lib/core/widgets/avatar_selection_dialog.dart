@@ -1,5 +1,5 @@
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/presentation/notifiers/profile_notifier.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';

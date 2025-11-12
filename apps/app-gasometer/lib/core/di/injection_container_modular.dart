@@ -24,7 +24,7 @@ class ModularInjectionContainer {
       print('🚀 Starting GasOMeter dependency initialization...');
 
       // ✅ IMPORTANTE: Inicializar core package DI PRIMEIRO
-      // Isso registra BoxRegistryService e outros serviços essenciais
+      // Isso registra serviços essenciais
       print('📦 Initializing core package DI...');
       await InjectionContainer.init();
       print('✅ Core package DI initialized');

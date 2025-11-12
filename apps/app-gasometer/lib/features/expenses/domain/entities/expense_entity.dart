@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 /// Entidade de despesa do veículo
@@ -152,7 +152,7 @@ class ExpenseEntity extends BaseSyncEntity {
 
   @override
   Map<String, dynamic> toFirebaseMap() {
-    return {
+    final map = <String, dynamic>{
       ...baseFirebaseFields,
       'vehicle_id': vehicleId,
       'type': type.name,
@@ -160,11 +160,15 @@ class ExpenseEntity extends BaseSyncEntity {
       'amount': amount,
       'date': date.toIso8601String(),
       'odometer': odometer,
-      'receipt_image_path': receiptImagePath,
-      'location': location,
-      'notes': notes,
-      'metadata': metadata,
     };
+
+    // Adicionar campos opcionais apenas se não forem null
+    if (receiptImagePath != null) map['receipt_image_path'] = receiptImagePath;
+    if (location != null) map['location'] = location;
+    if (notes != null) map['notes'] = notes;
+    if (metadata.isNotEmpty) map['metadata'] = metadata;
+
+    return map;
   }
 
   static ExpenseEntity fromFirebaseMap(Map<String, dynamic> map) {

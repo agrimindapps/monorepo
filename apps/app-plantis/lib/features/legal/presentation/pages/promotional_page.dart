@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../../core/router/app_router.dart';
+import '../../../home/domain/entities/landing_content.dart';
 import '../../../home/presentation/providers/landing_providers.dart';
 import '../builders/how_it_works_section_builder.dart';
 import '../builders/footer_section_builder.dart';
@@ -59,7 +59,7 @@ class _PromotionalPageState extends ConsumerState<PromotionalPage>
 
   @override
   Widget build(BuildContext context) {
-    final contentAsync = ref.watch(landingContentProvider);
+    final contentAsync = ref.watch<AsyncValue<LandingContent>>(landingContentProvider);
 
     return Scaffold(
       body: Stack(
@@ -68,8 +68,8 @@ class _PromotionalPageState extends ConsumerState<PromotionalPage>
             opacity: _animationManager.fadeAnimation,
             child: SingleChildScrollView(
               controller: _scrollManager.scrollController,
-              child: contentAsync.when(
-                data: (content) => Column(
+              child: contentAsync.when<Widget>(
+                data: (LandingContent content) => Column(
                   children: [
                     // Coming Soon banner and countdown (if applicable)
                     PromoComingSoonSectionBuilder.build(
@@ -111,8 +111,8 @@ class _PromotionalPageState extends ConsumerState<PromotionalPage>
             top: 0,
             left: 0,
             right: 0,
-            child: contentAsync.when(
-              data: (content) => PromoNavigationBar(
+            child: contentAsync.when<Widget>(
+              data: (LandingContent content) => PromoNavigationBar(
                 onNavigate: _scrollToSection,
                 featuresKey: _featuresKey,
                 howItWorksKey: _howItWorksKey,

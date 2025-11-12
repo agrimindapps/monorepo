@@ -1,8 +1,11 @@
 import 'dart:math';
 
+import 'package:injectable/injectable.dart';
+
 import '../entities/plant.dart';
 import '../entities/plant_task.dart';
 
+@injectable
 class PlantTaskGenerator {
   static const String _taskIdPrefix = 'task_';
 

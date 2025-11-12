@@ -2,7 +2,6 @@ import 'package:core/core.dart' as core;
 import 'package:core/core.dart' show GetIt;
 import 'package:flutter/foundation.dart';
 
-import '../../services/data_cleaner_service.dart';
 import '../di_module.dart';
 
 /// Core module responsible for external services and core infrastructure
@@ -78,28 +77,37 @@ class CoreModule implements DIModule {
     try {
       // Firebase-dependent services
       if (firebaseEnabled) {
-        getIt.registerLazySingleton<core.FirebaseDeviceService>(
-          () => core.FirebaseDeviceService(),
-        );
-        getIt.registerLazySingleton<core.FirebaseAuthService>(
-          () => getIt<core.IAuthRepository>() as core.FirebaseAuthService,
-        );
-        getIt.registerLazySingleton<core.FirebaseAnalyticsService>(
-          () =>
-              getIt<core.IAnalyticsRepository>()
-                  as core.FirebaseAnalyticsService,
-        );
+        // Only register if not already present (avoid duplicates)
+        if (!getIt.isRegistered<core.FirebaseDeviceService>()) {
+          getIt.registerLazySingleton<core.FirebaseDeviceService>(
+            () => core.FirebaseDeviceService(),
+          );
+        }
+
+        if (!getIt.isRegistered<core.FirebaseAuthService>()) {
+          getIt.registerLazySingleton<core.FirebaseAuthService>(
+            () => getIt<core.IAuthRepository>() as core.FirebaseAuthService,
+          );
+        }
+
+        if (!getIt.isRegistered<core.FirebaseAnalyticsService>()) {
+          getIt.registerLazySingleton<core.FirebaseAnalyticsService>(
+            () =>
+                getIt<core.IAnalyticsRepository>()
+                    as core.FirebaseAnalyticsService,
+          );
+        }
         // Note: FirebaseDeviceService já implementa IDeviceRepository
         // mas não podemos fazer cast direto, então criamos nova instância
       }
 
       // RevenueCat and local services (don't require Firebase)
-      getIt.registerLazySingleton<core.ISubscriptionRepository>(
-        () => core.RevenueCatService(),
-      );
-      getIt.registerLazySingleton<DataCleanerService>(
-        () => DataCleanerService.instance,
-      );
+      if (!getIt.isRegistered<core.ISubscriptionRepository>()) {
+        getIt.registerLazySingleton<core.ISubscriptionRepository>(
+          () => core.RevenueCatService(),
+        );
+      }
+      // DataCleanerService is registered via Injectable (@lazySingleton)
 
       debugPrint(
         '✅ Core package services registered for Injectable dependencies',

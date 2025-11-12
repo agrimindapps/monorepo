@@ -1,4 +1,4 @@
-name: gasometer
+name: gasometer_drift
 description: Aplicativo para controle pessoal de veículos - abastecimentos, manutenções e custos
 version: 1.0.0+1
 publish_to: 'none'
@@ -28,20 +28,9 @@ dependencies:
   image_picker: any
   cloud_firestore: ^6.0.0
   flutter_staggered_grid_view: ^0.7.0
-  go_router: any
-  firebase_auth: any
-  firebase_storage: any
-  firebase_crashlytics: any
-  flutter_secure_storage: any
-  get_it: any
-  permission_handler: any
-  image: any
-  cached_network_image: any
-  shimmer: any
-  shared_preferences: any
-  firebase_core: any
+  drift_dev: ^2.28.0
   equatable: any
-  uuid: ^4.5.1
+  uuid: ^4.5.1  # For generating Firebase document IDs
 
 dev_dependencies:
   flutter_test:
@@ -51,11 +40,20 @@ dev_dependencies:
   json_serializable: ^6.8.0
   riverpod_generator: any
   injectable_generator: any
+  analyzer: ^7.6.0
 
 # The following section is specific to Flutter packages.
 flutter:
   uses-material-design: true
 
+  # Assets para Drift WASM (necessário para web)
+  # O drift_worker.dart será compilado automaticamente para JS pelo Flutter
   assets:
-    - assets/images/
-    - assets/icons/
+    - web/sqlite3.wasm
+    - web/drift_worker.dart
+    - web/drift_worker.dart.js
+
+  # Diretórios criados mas vazios por enquanto
+  # assets:
+  #   - assets/images/
+  #   - assets/icons/

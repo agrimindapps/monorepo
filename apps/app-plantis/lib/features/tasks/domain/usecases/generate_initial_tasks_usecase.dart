@@ -13,6 +13,7 @@ import '../repositories/tasks_repository.dart';
 /// - Salvar as tarefas no repositório
 /// - Manter atomicidade da operação
 /// - Integrar com o sistema de sync offline-first
+@injectable
 class GenerateInitialTasksUseCase
     implements UseCase<List<task_entity.Task>, GenerateInitialTasksParams> {
   final TasksRepository tasksRepository;

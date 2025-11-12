@@ -102,7 +102,9 @@ class ConflictAuditService {
       remoteVersion: _extractVersion(remoteEntity),
       localData: _extractRelevantData(localEntity),
       remoteData: _extractRelevantData(remoteEntity),
-      mergedData: mergedEntity != null ? _extractRelevantData(mergedEntity) : null,
+      mergedData: mergedEntity != null
+          ? _extractRelevantData(mergedEntity)
+          : null,
       notes: additionalNotes,
     );
 
@@ -160,7 +162,11 @@ class ConflictAuditService {
   Local value: R\$ ${localValue?.toStringAsFixed(2) ?? 'N/A'}
   Remote value: R\$ ${remoteValue?.toStringAsFixed(2) ?? 'N/A'}
   ${mergedValue != null ? 'Merged value: R\$ ${mergedValue.toStringAsFixed(2)}' : ''}
-  Resolution: ${entry.resolution == ConflictAction.keepLocal ? 'KEPT LOCAL' : entry.resolution == ConflictAction.keepRemote ? 'KEPT REMOTE' : 'MERGED'}
+  Resolution: ${entry.resolution == ConflictAction.keepLocal
+        ? 'KEPT LOCAL'
+        : entry.resolution == ConflictAction.keepRemote
+        ? 'KEPT REMOTE'
+        : 'MERGED'}
   ⚠️ Financial data conflict requires attention!
 ''');
 
@@ -195,18 +201,10 @@ class ConflictAuditService {
 
   /// Extrai valor financeiro da entidade (se aplicável)
   double? _extractFinancialValue(BaseSyncModel entity) {
-    try {
-      // FuelSupplyModel tem 'totalPrice'
-      if (entity is dynamic && (entity as dynamic).totalPrice != null) {
-        return (entity as dynamic).totalPrice as double;
-      }
-      // MaintenanceModel tem 'valor'
-      if (entity is dynamic && (entity as dynamic).valor != null) {
-        return (entity as dynamic).valor as double;
-      }
-    } catch (_) {
-      // Ignora erros de cast
-    }
+    // Não é possível extrair valor financeiro de forma genérica
+    // sem acesso aos campos específicos do modelo.
+    // Esta funcionalidade precisa ser implementada nas subclasses
+    // ou através de reflexão/codegen.
     return null;
   }
 
@@ -227,17 +225,13 @@ class ConflictAuditService {
 
   /// Retorna conflitos de um tipo específico de entidade
   List<ConflictAuditEntry> getConflictsByEntityType(String entityType) {
-    return _auditLog
-        .where((entry) => entry.entityType == entityType)
-        .toList()
+    return _auditLog.where((entry) => entry.entityType == entityType).toList()
       ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
   }
 
   /// Retorna conflitos de uma entidade específica (por ID)
   List<ConflictAuditEntry> getConflictsByEntityId(String entityId) {
-    return _auditLog
-        .where((entry) => entry.entityId == entityId)
-        .toList()
+    return _auditLog.where((entry) => entry.entityId == entityId).toList()
       ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
   }
 
@@ -256,14 +250,15 @@ class ConflictAuditService {
       totalConflicts: total,
       conflictsByAction: byAction,
       conflictsByType: byType,
-      lastConflictAt:
-          _auditLog.isNotEmpty ? _auditLog.last.timestamp : null,
+      lastConflictAt: _auditLog.isNotEmpty ? _auditLog.last.timestamp : null,
     );
   }
 
   /// Limpa o log de auditoria
   void clearAuditLog() {
-    _logger.info('[ConflictAudit] Clearing audit log (${_auditLog.length} entries)');
+    _logger.info(
+      '[ConflictAudit] Clearing audit log (${_auditLog.length} entries)',
+    );
     _auditLog.clear();
   }
 

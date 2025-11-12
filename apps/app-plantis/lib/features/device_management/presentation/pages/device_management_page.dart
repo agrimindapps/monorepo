@@ -1,5 +1,4 @@
-import 'package:core/core.dart'
-    hide deviceManagementNotifierProvider, DeviceManagementState, Column;
+import 'package:core/core.dart' hide Column, DeviceManagementState;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/device_management_providers.dart';

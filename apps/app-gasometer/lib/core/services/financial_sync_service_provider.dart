@@ -1,6 +1,7 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../core/di/injection.dart' as gasometer_di;
 import 'audit_trail_service.dart';
 import 'financial_conflict_resolver.dart';
 import 'financial_sync_service.dart';
@@ -9,7 +10,7 @@ import 'financial_validator.dart';
 // Provider for FinancialAuditTrailService
 final financialAuditTrailServiceProvider = Provider<FinancialAuditTrailService>(
   (ref) {
-    final service = FinancialAuditTrailService();
+    final service = gasometer_di.getIt<FinancialAuditTrailService>();
     // Initialize will be called when service is first accessed
     service.initialize();
     return service;

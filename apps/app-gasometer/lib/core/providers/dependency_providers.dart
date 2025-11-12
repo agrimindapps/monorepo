@@ -18,6 +18,10 @@ final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
   return GetIt.instance<FirebaseAuthService>();
 });
 
+final hiveStorageServiceProvider = Provider<HiveStorageService>((ref) {
+  return GetIt.instance<HiveStorageService>();
+});
+
 final firebaseAnalyticsServiceProvider = Provider<FirebaseAnalyticsService>((
   ref,
 ) {

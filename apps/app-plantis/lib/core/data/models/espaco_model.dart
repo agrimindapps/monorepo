@@ -1,4 +1,3 @@
-import 'package:core/core.dart' hide Column;
 import 'base_sync_model.dart';
 
 /// Espaco model with Firebase sync support

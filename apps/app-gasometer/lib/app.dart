@@ -109,10 +109,7 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('pt', 'BR'),
-        Locale('en', 'US'),
-      ],
+      supportedLocales: const [Locale('pt', 'BR'), Locale('en', 'US')],
       builder: (context, child) {
         return Column(
           children: [

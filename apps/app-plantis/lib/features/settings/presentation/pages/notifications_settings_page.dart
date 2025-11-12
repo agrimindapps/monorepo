@@ -359,6 +359,10 @@ class NotificationsSettingsPage extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
   ) {
+    final currentValue = ref.read(settingsNotifierProvider).maybeWhen(
+          data: (state) => state.notificationSettings.reminderMinutesBefore,
+          orElse: () => 30);
+    
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -369,10 +373,8 @@ class NotificationsSettingsPage extends ConsumerWidget {
             return RadioListTile<int>(
               title: Text('$minutes minutos'),
               value: minutes,
-              groupValue: ref.read(settingsNotifierProvider).maybeWhen(
-                  data: (state) => state.notificationSettings.reminderMinutesBefore,
-                  orElse: () => 30),
-              onChanged: (value) {
+              groupValue: currentValue,
+              onChanged: (int? value) {
                 if (value != null) {
                   ref.read(settingsNotifierProvider.notifier).setReminderMinutesBefore(value);
                   Navigator.of(context).pop();

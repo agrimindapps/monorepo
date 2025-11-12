@@ -1,5 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
@@ -160,7 +159,8 @@ class _OptimizedVehiclesContent extends ConsumerWidget {
   Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
     return EnhancedEmptyState(
       title: 'Nenhum veículo cadastrado',
-      description: 'Adicione seu primeiro veículo para começar a controlar seus gastos e manutenções.',
+      description:
+          'Adicione seu primeiro veículo para começar a controlar seus gastos e manutenções.',
       icon: Icons.directions_car_outlined,
       actionLabel: 'Adicionar veículo',
       onAction: () {
@@ -176,7 +176,11 @@ class _OptimizedVehiclesContent extends ConsumerWidget {
     );
   }
 
-  Widget _buildVehiclesList(BuildContext context, WidgetRef ref, List<VehicleEntity> vehicles) {
+  Widget _buildVehiclesList(
+    BuildContext context,
+    WidgetRef ref,
+    List<VehicleEntity> vehicles,
+  ) {
     return RefreshIndicator(
       onRefresh: () async {
         await ref.read(vehiclesNotifierProvider.notifier).refresh();
@@ -222,6 +226,5 @@ class _OptimizedVehiclesContent extends ConsumerWidget {
     return 4;
   }
 
-  void _navigateToVehicleDetails(VehicleEntity vehicle) {
-  }
+  void _navigateToVehicleDetails(VehicleEntity vehicle) {}
 }

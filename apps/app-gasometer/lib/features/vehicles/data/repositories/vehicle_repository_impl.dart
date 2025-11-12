@@ -7,6 +7,9 @@ import '../../domain/repositories/vehicle_repository.dart';
 
 /// VehicleRepository migrado para usar UnifiedSyncManager
 ///
+/// ⚠️ DEPRECATED: Use VehicleRepositoryDriftImpl instead
+/// This implementation is being replaced with Drift-based storage
+///
 /// ✅ Migração completa:
 /// - ANTES: Implementação vazia com TODOs
 /// - DEPOIS: Usando UnifiedSyncManager para todas as operações
@@ -15,7 +18,8 @@ import '../../domain/repositories/vehicle_repository.dart';
 /// - Entidade principal (referenciada por fuel, maintenance, odometer, expenses)
 /// - Stream de mudanças para UI reativa
 /// - Busca e filtros
-@LazySingleton(as: VehicleRepository)
+
+// @LazySingleton(as: VehicleRepository)
 class VehicleRepositoryImpl implements VehicleRepository {
   const VehicleRepositoryImpl();
   static const _appName = 'gasometer';

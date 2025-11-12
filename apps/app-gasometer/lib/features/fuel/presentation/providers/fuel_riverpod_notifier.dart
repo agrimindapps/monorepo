@@ -1,13 +1,14 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/di/injection_container.dart';
+import '../../../vehicles/domain/entities/vehicle_entity.dart';
+import '../../data/datasources/fuel_supply_local_datasource.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../../domain/services/fuel_calculation_service.dart';
 import '../../domain/services/fuel_connectivity_service.dart';
-import '../../domain/services/fuel_offline_queue_service.dart';
 import '../../domain/usecases/add_fuel_record.dart';
 import '../../domain/usecases/delete_fuel_record.dart';
 import '../../domain/usecases/get_all_fuel_records.dart';
@@ -151,8 +152,10 @@ class FuelRiverpod extends _$FuelRiverpod {
 
   // Specialized Services (SRP)
   late FuelCalculationService _calculationService;
-  late FuelOfflineQueueService _offlineQueueService;
   late FuelConnectivityService _connectivityService;
+
+  // Drift DataSource for sync operations
+  late FuelSupplyLocalDataSource _localDataSource;
 
   StreamSubscription<bool>? _connectivitySubscription;
 
@@ -172,8 +175,8 @@ class FuelRiverpod extends _$FuelRiverpod {
 
     // Initialize specialized services
     _calculationService = getIt<FuelCalculationService>();
-    _offlineQueueService = getIt<FuelOfflineQueueService>();
     _connectivityService = getIt<FuelConnectivityService>();
+    _localDataSource = getIt<FuelSupplyLocalDataSource>();
 
     ref.onDispose(() {
       _connectivitySubscription?.cancel();
@@ -181,7 +184,7 @@ class FuelRiverpod extends _$FuelRiverpod {
     });
 
     await _setupConnectivityListener();
-    final pendingRecords = await _offlineQueueService.loadPendingRecords();
+    final pendingRecords = await _loadPendingRecordsFromDrift();
 
     final initialState = await _loadAllRecords();
     final stateWithPending = initialState.copyWith(
@@ -236,6 +239,55 @@ class FuelRiverpod extends _$FuelRiverpod {
         statistics: _calculationService.calculateStatistics(records),
       ),
     );
+  }
+
+  /// Carrega registros pendentes (isDirty) do Drift
+  Future<List<FuelRecordEntity>> _loadPendingRecordsFromDrift() async {
+    try {
+      final dirtyData = await _localDataSource.findDirtyRecords();
+
+      // Converter FuelSupplyData para FuelRecordEntity
+      return dirtyData.map((data) {
+        return FuelRecordEntity(
+          id: data.id.toString(),
+          vehicleId: data.vehicleId.toString(),
+          fuelType: FuelType.values[data.fuelType],
+          liters: data.liters,
+          pricePerLiter: data.pricePerLiter,
+          totalPrice: data.totalPrice,
+          odometer: data.odometer,
+          date: DateTime.fromMillisecondsSinceEpoch(data.date),
+          gasStationName: data.gasStationName,
+          fullTank: data.fullTank ?? true,
+          notes: data.notes,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+          lastSyncAt: data.lastSyncAt,
+          isDirty: data.isDirty,
+          isDeleted: data.isDeleted,
+          version: data.version,
+          userId: data.userId,
+          moduleName: data.moduleName,
+        );
+      }).toList();
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('🚗 Erro ao carregar registros pendentes do Drift: $e');
+      }
+      return [];
+    }
+  }
+
+  /// Marca registros como sincronizados no Drift
+  Future<void> _markRecordsAsSynced(List<String> recordIds) async {
+    try {
+      final intIds = recordIds.map((id) => int.parse(id)).toList();
+      await _localDataSource.markAsSynced(intIds);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('🚗 Erro ao marcar registros como sincronizados: $e');
+      }
+    }
   }
 
   Future<void> loadFuelRecords() async {
@@ -321,33 +373,20 @@ class FuelRiverpod extends _$FuelRiverpod {
     );
 
     try {
-      if (!currentState.isOnline) {
-        await _offlineQueueService.addToQueue(record);
-        final updatedRecords = [record, ...currentState.fuelRecords];
-        state = AsyncValue.data(
-          currentState.copyWith(
-            fuelRecords: updatedRecords,
-            isLoading: false,
-            statistics: _calculationService.calculateStatistics(updatedRecords),
-            pendingRecords: [...currentState.pendingRecords, record],
-          ),
-        );
-
-        if (kDebugMode) {
-          debugPrint('🔌 Registro salvo offline: ${record.id}');
-        }
-
-        return true;
-      }
+      // O repositório Drift sempre salva localmente com isDirty=true
+      // Se offline, fica marcado para sync posterior
+      // Se online, tenta sincronizar imediatamente
       final result = await _addFuelRecord(
         AddFuelRecordParams(fuelRecord: record),
       );
 
       return result.fold(
         (failure) async {
-          await _offlineQueueService.addToQueue(record);
-
+          // Mesmo com falha, o registro já foi salvo localmente pelo Drift
+          // com isDirty=true para sincronização posterior
+          final updatedPending = await _loadPendingRecordsFromDrift();
           final updatedRecords = [record, ...currentState.fuelRecords];
+
           state = AsyncValue.data(
             currentState.copyWith(
               fuelRecords: updatedRecords,
@@ -355,18 +394,23 @@ class FuelRiverpod extends _$FuelRiverpod {
               statistics: _calculationService.calculateStatistics(
                 updatedRecords,
               ),
-              pendingRecords: [...currentState.pendingRecords, record],
+              pendingRecords: updatedPending,
             ),
           );
 
           if (kDebugMode) {
-            debugPrint('🔌 Erro online, salvo offline: ${failure.message}');
+            debugPrint(
+              '🔌 Registro salvo localmente (Drift), será sincronizado: ${failure.message}',
+            );
           }
 
           return true;
         },
-        (addedRecord) {
+        (addedRecord) async {
+          // Sucesso - registro sincronizado e salvo localmente
           final updatedRecords = [addedRecord, ...currentState.fuelRecords];
+          final updatedPending = await _loadPendingRecordsFromDrift();
+
           state = AsyncValue.data(
             currentState.copyWith(
               fuelRecords: updatedRecords,
@@ -374,11 +418,14 @@ class FuelRiverpod extends _$FuelRiverpod {
               statistics: _calculationService.calculateStatistics(
                 updatedRecords,
               ),
+              pendingRecords: updatedPending,
             ),
           );
 
           if (kDebugMode) {
-            debugPrint('🚗 Registro adicionado online: ${addedRecord.id}');
+            debugPrint(
+              '🚗 Registro adicionado e sincronizado: ${addedRecord.id}',
+            );
           }
 
           return true;
@@ -503,6 +550,7 @@ class FuelRiverpod extends _$FuelRiverpod {
     final recordsToSync = List<FuelRecordEntity>.from(
       currentState.pendingRecords,
     );
+    final syncedIds = <String>[];
     final failedRecords = <FuelRecordEntity>[];
 
     for (final record in recordsToSync) {
@@ -521,6 +569,7 @@ class FuelRiverpod extends _$FuelRiverpod {
             }
           },
           (syncedRecord) {
+            syncedIds.add(syncedRecord.id);
             if (kDebugMode) {
               debugPrint('🔌 Registro sincronizado: ${syncedRecord.id}');
             }
@@ -533,21 +582,29 @@ class FuelRiverpod extends _$FuelRiverpod {
         }
       }
     }
+
+    // Marca registros sincronizados como limpos no Drift
+    if (syncedIds.isNotEmpty) {
+      await _markRecordsAsSynced(syncedIds);
+    }
+
+    // Recarrega lista de pendentes do Drift
+    final updatedPending = await _loadPendingRecordsFromDrift();
+
     state = AsyncValue.data(
-      currentState.copyWith(pendingRecords: failedRecords, isSyncing: false),
+      currentState.copyWith(pendingRecords: updatedPending, isSyncing: false),
     );
 
-    if (failedRecords.isEmpty) {
-      await _offlineQueueService.clearQueue();
+    if (updatedPending.isEmpty) {
       if (kDebugMode) {
         debugPrint('🔌 Todos os registros foram sincronizados!');
       }
     } else {
-      await _offlineQueueService.updateQueue(failedRecords);
       if (kDebugMode) {
-        debugPrint('🔌 ${failedRecords.length} registros ainda pendentes');
+        debugPrint('🔌 ${updatedPending.length} registros ainda pendentes');
       }
     }
+
     await loadFuelRecords();
   }
 

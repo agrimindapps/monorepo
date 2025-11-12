@@ -1,6 +1,5 @@
-import 'package:core/core.dart' show Failure;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/injection.dart' as gasometer_di;
 
@@ -268,16 +267,26 @@ class _FeedbackDialogState extends ConsumerState<FeedbackDialog> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Re-implementar com IAnalyticsRepository quando disponível
-      // Temporariamente apenas mostra sucesso
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Obter analytics repository do core
+      final analyticsRepository = gasometer_di.getIt<IAnalyticsRepository>();
 
-      setState(() => _isLoading = false);
-      _showSuccess(context);
+      // Enviar feedback para Firebase Analytics
+      final result = await analyticsRepository.logFeedback(
+        type: _selectedType,
+        content: content,
+        rating: _rating > 0 ? _rating : null,
+      );
 
-      // CÓDIGO ORIGINAL (comentado temporariamente):
-      // final analyticsRepository = gasometer_di.getIt<IAnalyticsRepository>();
-      // final result = await analyticsRepository.logFeedback(...);
+      result.fold(
+        (Failure failure) {
+          setState(() => _isLoading = false);
+          _showError('Erro ao enviar feedback: ${failure.message}');
+        },
+        (_) {
+          setState(() => _isLoading = false);
+          _showSuccess(context);
+        },
+      );
     } catch (e) {
       setState(() => _isLoading = false);
       _showError('Erro ao enviar feedback: $e');

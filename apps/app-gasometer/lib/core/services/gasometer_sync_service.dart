@@ -1,28 +1,54 @@
 import 'dart:async';
-import 'package:core/core.dart' hide Column;
-import 'package:flutter/foundation.dart';
+import 'dart:developer' as developer;
 
-import '../../../features/fuel/domain/repositories/fuel_repository.dart';
-import '../../../features/maintenance/domain/repositories/maintenance_repository.dart';
-import '../../../features/vehicles/domain/repositories/vehicle_repository.dart';
+import 'package:core/core.dart';
 
-/// Implementação do serviço de sincronização para o Gasometer
-/// Implementa ISyncService para integrar com o sistema de sync do core
+import '../../features/expenses/data/sync/expense_drift_sync_adapter.dart';
+import '../../features/fuel/data/sync/fuel_supply_drift_sync_adapter.dart';
+import '../../features/maintenance/data/sync/maintenance_drift_sync_adapter.dart';
+import '../../features/odometer/data/sync/odometer_drift_sync_adapter.dart';
+import '../../features/vehicles/data/sync/vehicle_drift_sync_adapter.dart';
+
+/// Orquestrador de sincronização para o Gasometer
+///
+/// Coordena os 5 adapters de sincronização Drift ↔ Firestore:
+/// - VehicleDriftSyncAdapter (veículos)
+/// - FuelSupplyDriftSyncAdapter (abastecimentos)
+/// - MaintenanceDriftSyncAdapter (manutenções)
+/// - ExpenseDriftSyncAdapter (despesas)
+/// - OdometerDriftSyncAdapter (odômetro)
+///
+/// Implementa ISyncService para integrar com o sistema de sync do core.
+///
+/// **Fluxo de Sincronização:**
+/// 1. Push: Envia registros dirty locais → Firestore (5 adapters)
+/// 2. Pull: Baixa mudanças remotas → Drift (5 adapters)
+/// 3. Reporta progresso detalhado (10 steps: 5 push + 5 pull)
+/// 4. Agrega resultados e estatísticas
+///
+/// **Error Handling:**
+/// - Um adapter falhando não interrompe os outros
+/// - Erros são agregados e reportados no final
+/// - Logging detalhado para debugging
+@lazySingleton
 class GasometerSyncService implements ISyncService {
   GasometerSyncService({
-    required VehicleRepository vehicleRepository,
-    required FuelRepository fuelRepository,
-    required MaintenanceRepository maintenanceRepository,
-    dynamic expensesRepository,
-  }) : _vehicleRepository = vehicleRepository,
-       _fuelRepository = fuelRepository,
-       _maintenanceRepository = maintenanceRepository,
-       _expensesRepository = expensesRepository;
+    required VehicleDriftSyncAdapter vehicleAdapter,
+    required FuelSupplyDriftSyncAdapter fuelAdapter,
+    required MaintenanceDriftSyncAdapter maintenanceAdapter,
+    required ExpenseDriftSyncAdapter expenseAdapter,
+    required OdometerDriftSyncAdapter odometerAdapter,
+  }) : _vehicleAdapter = vehicleAdapter,
+       _fuelAdapter = fuelAdapter,
+       _maintenanceAdapter = maintenanceAdapter,
+       _expenseAdapter = expenseAdapter,
+       _odometerAdapter = odometerAdapter;
 
-  final VehicleRepository _vehicleRepository;
-  final FuelRepository _fuelRepository;
-  final MaintenanceRepository _maintenanceRepository;
-  final dynamic _expensesRepository;
+  final VehicleDriftSyncAdapter _vehicleAdapter;
+  final FuelSupplyDriftSyncAdapter _fuelAdapter;
+  final MaintenanceDriftSyncAdapter _maintenanceAdapter;
+  final ExpenseDriftSyncAdapter _expenseAdapter;
+  final OdometerDriftSyncAdapter _odometerAdapter;
 
   final _statusController = StreamController<SyncServiceStatus>.broadcast();
   final _progressController = StreamController<ServiceProgress>.broadcast();
@@ -38,39 +64,100 @@ class GasometerSyncService implements ISyncService {
   String get displayName => 'Gasometer Sync Service';
 
   @override
-  String get version => '2.0.0';
+  String get version => '3.0.0';
 
   @override
   bool get canSync =>
       _isInitialized && _currentStatus != SyncServiceStatus.syncing;
 
+  /// Obtém o userId do usuário autenticado
+  ///
+  /// Retorna:
+  /// - Right(userId): Usuário autenticado
+  /// - Left(AuthFailure): Usuário não autenticado
+  Either<Failure, String> get _currentUserId {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return const Left(AuthFailure('No authenticated user'));
+    }
+    return Right(user.uid);
+  }
+
   @override
   Future<bool> get hasPendingSync async {
     try {
-      // Verificar se há dados em cada repositório
-      // Se existem dados locais, pode haver necessidade de sync
-      final vehiclesResult = await _vehicleRepository.getAllVehicles();
-      final hasVehicles = vehiclesResult.fold(
-        (_) => false,
-        (vehicles) => vehicles.isNotEmpty,
-      );
+      final userIdResult = _currentUserId;
+      if (userIdResult.isLeft()) {
+        developer.log(
+          '⚠️ Cannot check pending sync: user not authenticated',
+          name: 'GasometerSync',
+        );
+        return false;
+      }
 
-      final fuelResult = await _fuelRepository.getAllFuelRecords();
-      final hasFuel = fuelResult.fold(
-        (_) => false,
-        (records) => records.isNotEmpty,
-      );
+      final userId = userIdResult.getOrElse(() => '');
 
-      final maintenanceResult = await _maintenanceRepository.getAllMaintenanceRecords();
-      final hasMaintenance = maintenanceResult.fold(
-        (_) => false,
-        (records) => records.isNotEmpty,
-      );
+      // Verificar se há dirty records em qualquer adapter
+      // Query direta no Drift sem fazer push real
+      final vehiclesPending = await _vehicleAdapter.db
+          .customSelect(
+            'SELECT COUNT(*) as count FROM vehicles WHERE user_id = ? AND is_dirty = 1 AND is_deleted = 0',
+            variables: [Variable.withString(userId)],
+            readsFrom: {_vehicleAdapter.table},
+          )
+          .getSingle()
+          .then((row) => row.read<int>('count') > 0);
 
-      // Se há dados em qualquer repositório, considerar que pode haver pending sync
-      return hasVehicles || hasFuel || hasMaintenance;
+      final fuelPending = await _fuelAdapter.db
+          .customSelect(
+            'SELECT COUNT(*) as count FROM fuel_supplies WHERE user_id = ? AND is_dirty = 1 AND is_deleted = 0',
+            variables: [Variable.withString(userId)],
+            readsFrom: {_fuelAdapter.table},
+          )
+          .getSingle()
+          .then((row) => row.read<int>('count') > 0);
+
+      final maintenancePending = await _maintenanceAdapter.db
+          .customSelect(
+            'SELECT COUNT(*) as count FROM maintenances WHERE user_id = ? AND is_dirty = 1 AND is_deleted = 0',
+            variables: [Variable.withString(userId)],
+            readsFrom: {_maintenanceAdapter.table},
+          )
+          .getSingle()
+          .then((row) => row.read<int>('count') > 0);
+
+      final expensePending = await _expenseAdapter.db
+          .customSelect(
+            'SELECT COUNT(*) as count FROM expenses WHERE user_id = ? AND is_dirty = 1 AND is_deleted = 0',
+            variables: [Variable.withString(userId)],
+            readsFrom: {_expenseAdapter.table},
+          )
+          .getSingle()
+          .then((row) => row.read<int>('count') > 0);
+
+      final odometerPending = await _odometerAdapter.db
+          .customSelect(
+            'SELECT COUNT(*) as count FROM odometer_readings WHERE user_id = ? AND is_dirty = 1 AND is_deleted = 0',
+            variables: [Variable.withString(userId)],
+            readsFrom: {_odometerAdapter.table},
+          )
+          .getSingle()
+          .then((row) => row.read<int>('count') > 0);
+
+      final hasPending =
+          vehiclesPending ||
+          fuelPending ||
+          maintenancePending ||
+          expensePending ||
+          odometerPending;
+
+      if (hasPending) {
+        developer.log('🔄 Pending sync detected', name: 'GasometerSync');
+      }
+
+      return hasPending;
     } catch (e) {
-      if (kDebugMode) print('❌ Error checking pending sync: $e');
+      developer.log('❌ Error checking pending sync: $e', name: 'GasometerSync');
       return false;
     }
   }
@@ -84,17 +171,28 @@ class GasometerSyncService implements ISyncService {
   @override
   Future<Either<Failure, void>> initialize() async {
     try {
-      if (_isInitialized) return const Right(null);
+      if (_isInitialized) {
+        developer.log('⚠️ Already initialized', name: 'GasometerSync');
+        return const Right(null);
+      }
 
       _updateStatus(SyncServiceStatus.idle);
       _isInitialized = true;
 
-      if (kDebugMode) {
-        print('✅ GasometerSyncService initialized');
-      }
+      developer.log(
+        '✅ GasometerSyncService v$version initialized',
+        name: 'GasometerSync',
+      );
+      developer.log(
+        '   Adapters: Vehicle, FuelSupply, Maintenance, Expense',
+        name: 'GasometerSync',
+      );
 
       return const Right(null);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      developer.log('❌ Failed to initialize: $e', name: 'GasometerSync');
+      developer.log('$stackTrace', name: 'GasometerSync');
+
       return Left(
         ServerFailure('Failed to initialize GasometerSyncService: $e'),
       );
@@ -111,83 +209,383 @@ class GasometerSyncService implements ISyncService {
     _updateStatus(SyncServiceStatus.syncing);
 
     try {
+      // Obter userId autenticado
+      final userIdResult = _currentUserId;
+      if (userIdResult.isLeft()) {
+        _updateStatus(SyncServiceStatus.failed);
+        return const Left(AuthFailure('User not authenticated'));
+      }
+      final userId = userIdResult.getOrElse(() => '');
+
+      developer.log(
+        '🔄 Starting sync for user: $userId',
+        name: 'GasometerSync',
+      );
+
       int totalSynced = 0;
       int totalFailed = 0;
+      final errors = <String>[];
 
-      // Sync vehicles
+      // ========== PUSH PHASE (Local → Firestore) ==========
+
+      // 1. Push vehicles (dirty records)
       _progressController.add(
         ServiceProgress(
           serviceId: serviceId,
-          operation: 'syncing_vehicles',
+          operation: 'pushing_vehicles',
           current: 0,
-          total: 4,
-          currentItem: 'Sincronizando veículos...',
+          total: 8,
+          currentItem: 'Enviando veículos modificados...',
         ),
       );
 
-      final vehiclesResult = await _syncVehicles();
-      vehiclesResult.fold(
-        (failure) => totalFailed++,
-        (syncedCount) => totalSynced += syncedCount,
+      final vehiclePushResult = await _vehicleAdapter.pushDirtyRecords(userId);
+      vehiclePushResult.fold(
+        (failure) {
+          totalFailed++;
+          errors.add('Vehicles push: ${failure.message}');
+          developer.log(
+            '❌ Vehicles push failed: ${failure.message}',
+            name: 'GasometerSync',
+          );
+        },
+        (result) {
+          totalSynced += result.recordsPushed;
+          totalFailed += result.recordsFailed;
+          errors.addAll(result.errors);
+          developer.log(
+            '✅ Vehicles push: ${result.summary}',
+            name: 'GasometerSync',
+          );
+        },
       );
 
-      // Sync fuel records
+      // 2. Push fuel supplies (dirty records)
       _progressController.add(
         ServiceProgress(
           serviceId: serviceId,
-          operation: 'syncing_fuel',
+          operation: 'pushing_fuel',
           current: 1,
-          total: 4,
-          currentItem: 'Sincronizando registros de combustível...',
+          total: 8,
+          currentItem: 'Enviando abastecimentos modificados...',
         ),
       );
 
-      final fuelResult = await _syncFuelRecords();
-      fuelResult.fold(
-        (failure) => totalFailed++,
-        (syncedCount) => totalSynced += syncedCount,
+      final fuelPushResult = await _fuelAdapter.pushDirtyRecords(userId);
+      fuelPushResult.fold(
+        (failure) {
+          totalFailed++;
+          errors.add('Fuel push: ${failure.message}');
+          developer.log(
+            '❌ Fuel push failed: ${failure.message}',
+            name: 'GasometerSync',
+          );
+        },
+        (result) {
+          totalSynced += result.recordsPushed;
+          totalFailed += result.recordsFailed;
+          errors.addAll(result.errors);
+          developer.log(
+            '✅ Fuel push: ${result.summary}',
+            name: 'GasometerSync',
+          );
+        },
       );
 
-      // Sync maintenance
+      // 3. Push maintenances (dirty records)
       _progressController.add(
         ServiceProgress(
           serviceId: serviceId,
-          operation: 'syncing_maintenance',
+          operation: 'pushing_maintenances',
           current: 2,
-          total: 4,
-          currentItem: 'Sincronizando manutenções...',
+          total: 8,
+          currentItem: 'Enviando manutenções modificadas...',
         ),
       );
 
-      final maintenanceResult = await _syncMaintenance();
-      maintenanceResult.fold(
-        (failure) => totalFailed++,
-        (syncedCount) => totalSynced += syncedCount,
+      final maintenancePushResult = await _maintenanceAdapter.pushDirtyRecords(
+        userId,
+      );
+      maintenancePushResult.fold(
+        (failure) {
+          totalFailed++;
+          errors.add('Maintenance push: ${failure.message}');
+          developer.log(
+            '❌ Maintenance push failed: ${failure.message}',
+            name: 'GasometerSync',
+          );
+        },
+        (result) {
+          totalSynced += result.recordsPushed;
+          totalFailed += result.recordsFailed;
+          errors.addAll(result.errors);
+          developer.log(
+            '✅ Maintenance push: ${result.summary}',
+            name: 'GasometerSync',
+          );
+        },
       );
 
-      // Sync expenses
+      // 4. Push expenses (dirty records)
       _progressController.add(
         ServiceProgress(
           serviceId: serviceId,
-          operation: 'syncing_expenses',
+          operation: 'pushing_expenses',
           current: 3,
-          total: 4,
-          currentItem: 'Sincronizando despesas...',
+          total: 10,
+          currentItem: 'Enviando despesas modificadas...',
         ),
       );
 
-      final expensesResult = await _syncExpenses();
-      expensesResult.fold(
-        (failure) => totalFailed++,
-        (syncedCount) => totalSynced += syncedCount,
+      final expensePushResult = await _expenseAdapter.pushDirtyRecords(userId);
+      expensePushResult.fold(
+        (failure) {
+          totalFailed++;
+          errors.add('Expense push: ${failure.message}');
+          developer.log(
+            '❌ Expense push failed: ${failure.message}',
+            name: 'GasometerSync',
+          );
+        },
+        (result) {
+          totalSynced += result.recordsPushed;
+          totalFailed += result.recordsFailed;
+          errors.addAll(result.errors);
+          developer.log(
+            '✅ Expense push: ${result.summary}',
+            name: 'GasometerSync',
+          );
+        },
       );
+
+      // 5. Push odometer readings (dirty records)
+      _progressController.add(
+        ServiceProgress(
+          serviceId: serviceId,
+          operation: 'pushing_odometer',
+          current: 4,
+          total: 10,
+          currentItem: 'Enviando leituras de odômetro modificadas...',
+        ),
+      );
+
+      final odometerPushResult = await _odometerAdapter.pushDirtyRecords(
+        userId,
+      );
+      odometerPushResult.fold(
+        (failure) {
+          totalFailed++;
+          errors.add('Odometer push: ${failure.message}');
+          developer.log(
+            '❌ Odometer push failed: ${failure.message}',
+            name: 'GasometerSync',
+          );
+        },
+        (result) {
+          totalSynced += result.recordsPushed;
+          totalFailed += result.recordsFailed;
+          errors.addAll(result.errors);
+          developer.log(
+            '✅ Odometer push: ${result.summary}',
+            name: 'GasometerSync',
+          );
+        },
+      );
+
+      // ========== PULL PHASE (Firestore → Local) ==========
+
+      // 6. Pull vehicles (remote changes)
+      _progressController.add(
+        ServiceProgress(
+          serviceId: serviceId,
+          operation: 'pulling_vehicles',
+          current: 5,
+          total: 10,
+          currentItem: 'Buscando veículos atualizados...',
+        ),
+      );
+
+      final vehiclePullResult = await _vehicleAdapter.pullRemoteChanges(userId);
+      vehiclePullResult.fold(
+        (failure) {
+          totalFailed++;
+          errors.add('Vehicles pull: ${failure.message}');
+          developer.log(
+            '❌ Vehicles pull failed: ${failure.message}',
+            name: 'GasometerSync',
+          );
+        },
+        (result) {
+          totalSynced += result.recordsPulled;
+          if (result.conflictsResolved > 0) {
+            developer.log(
+              '⚠️ ${result.conflictsResolved} vehicle conflicts resolved',
+              name: 'GasometerSync',
+            );
+          }
+          developer.log(
+            '✅ Vehicles pull: ${result.summary}',
+            name: 'GasometerSync',
+          );
+        },
+      );
+
+      // 7. Pull fuel supplies (remote changes)
+      _progressController.add(
+        ServiceProgress(
+          serviceId: serviceId,
+          operation: 'pulling_fuel',
+          current: 6,
+          total: 10,
+          currentItem: 'Buscando abastecimentos atualizados...',
+        ),
+      );
+
+      final fuelPullResult = await _fuelAdapter.pullRemoteChanges(userId);
+      fuelPullResult.fold(
+        (failure) {
+          totalFailed++;
+          errors.add('Fuel pull: ${failure.message}');
+          developer.log(
+            '❌ Fuel pull failed: ${failure.message}',
+            name: 'GasometerSync',
+          );
+        },
+        (result) {
+          totalSynced += result.recordsPulled;
+          if (result.conflictsResolved > 0) {
+            developer.log(
+              '⚠️ ${result.conflictsResolved} fuel conflicts resolved',
+              name: 'GasometerSync',
+            );
+          }
+          developer.log(
+            '✅ Fuel pull: ${result.summary}',
+            name: 'GasometerSync',
+          );
+        },
+      );
+
+      // 8. Pull maintenances (remote changes)
+      _progressController.add(
+        ServiceProgress(
+          serviceId: serviceId,
+          operation: 'pulling_maintenances',
+          current: 7,
+          total: 10,
+          currentItem: 'Buscando manutenções atualizadas...',
+        ),
+      );
+
+      final maintenancePullResult = await _maintenanceAdapter.pullRemoteChanges(
+        userId,
+      );
+      maintenancePullResult.fold(
+        (failure) {
+          totalFailed++;
+          errors.add('Maintenance pull: ${failure.message}');
+          developer.log(
+            '❌ Maintenance pull failed: ${failure.message}',
+            name: 'GasometerSync',
+          );
+        },
+        (result) {
+          totalSynced += result.recordsPulled;
+          if (result.conflictsResolved > 0) {
+            developer.log(
+              '⚠️ ${result.conflictsResolved} maintenance conflicts resolved',
+              name: 'GasometerSync',
+            );
+          }
+          developer.log(
+            '✅ Maintenance pull: ${result.summary}',
+            name: 'GasometerSync',
+          );
+        },
+      );
+
+      // 9. Pull expenses (remote changes)
+      _progressController.add(
+        ServiceProgress(
+          serviceId: serviceId,
+          operation: 'pulling_expenses',
+          current: 8,
+          total: 10,
+          currentItem: 'Buscando despesas atualizadas...',
+        ),
+      );
+
+      final expensePullResult = await _expenseAdapter.pullRemoteChanges(userId);
+      expensePullResult.fold(
+        (failure) {
+          totalFailed++;
+          errors.add('Expense pull: ${failure.message}');
+          developer.log(
+            '❌ Expense pull failed: ${failure.message}',
+            name: 'GasometerSync',
+          );
+        },
+        (result) {
+          totalSynced += result.recordsPulled;
+          if (result.conflictsResolved > 0) {
+            developer.log(
+              '⚠️ ${result.conflictsResolved} expense conflicts resolved',
+              name: 'GasometerSync',
+            );
+          }
+          developer.log(
+            '✅ Expense pull: ${result.summary}',
+            name: 'GasometerSync',
+          );
+        },
+      );
+
+      // 10. Pull odometer readings (remote changes)
+      _progressController.add(
+        ServiceProgress(
+          serviceId: serviceId,
+          operation: 'pulling_odometer',
+          current: 9,
+          total: 10,
+          currentItem: 'Buscando leituras de odômetro atualizadas...',
+        ),
+      );
+
+      final odometerPullResult = await _odometerAdapter.pullRemoteChanges(
+        userId,
+      );
+      odometerPullResult.fold(
+        (failure) {
+          totalFailed++;
+          errors.add('Odometer pull: ${failure.message}');
+          developer.log(
+            '❌ Odometer pull failed: ${failure.message}',
+            name: 'GasometerSync',
+          );
+        },
+        (result) {
+          totalSynced += result.recordsPulled;
+          if (result.conflictsResolved > 0) {
+            developer.log(
+              '⚠️ ${result.conflictsResolved} odometer conflicts resolved',
+              name: 'GasometerSync',
+            );
+          }
+          developer.log(
+            '✅ Odometer pull: ${result.summary}',
+            name: 'GasometerSync',
+          );
+        },
+      );
+
+      // ========== FINALIZAÇÃO ==========
 
       _progressController.add(
         ServiceProgress(
           serviceId: serviceId,
           operation: 'completed',
-          current: 4,
-          total: 4,
+          current: 10,
+          total: 10,
           currentItem: 'Sincronização concluída',
         ),
       );
@@ -195,9 +593,17 @@ class GasometerSyncService implements ISyncService {
       final duration = DateTime.now().difference(startTime);
       _updateStatus(SyncServiceStatus.completed);
 
-      if (kDebugMode) {
-        print('✅ Sync completed: $totalSynced items synced, $totalFailed failed');
-        print('   Duration: ${duration.inSeconds}s');
+      developer.log(
+        '✅ Sync completed: $totalSynced items synced, $totalFailed failed',
+        name: 'GasometerSync',
+      );
+      developer.log(
+        '   Duration: ${duration.inSeconds}s',
+        name: 'GasometerSync',
+      );
+
+      if (errors.isNotEmpty) {
+        developer.log('   Errors: ${errors.join(', ')}', name: 'GasometerSync');
       }
 
       return Right(
@@ -206,15 +612,14 @@ class GasometerSyncService implements ISyncService {
           itemsSynced: totalSynced,
           itemsFailed: totalFailed,
           duration: duration,
+          error: errors.isEmpty ? null : errors.join('; '),
         ),
       );
     } catch (e, stackTrace) {
       _updateStatus(SyncServiceStatus.failed);
 
-      if (kDebugMode) {
-        print('❌ Sync failed with exception: $e');
-        print(stackTrace);
-      }
+      developer.log('❌ Sync failed with exception: $e', name: 'GasometerSync');
+      developer.log('$stackTrace', name: 'GasometerSync');
 
       return Left(ServerFailure('Sync failed: $e'));
     }
@@ -265,127 +670,8 @@ class GasometerSyncService implements ISyncService {
     await _connectivitySubscription?.cancel();
     await _statusController.close();
     await _progressController.close();
-  }
 
-  // Métodos auxiliares para sync de cada entidade
-  Future<Either<Failure, int>> _syncVehicles() async {
-    try {
-      if (kDebugMode) print('🔄 Starting vehicles sync...');
-
-      // VehicleRepository tem método syncVehicles() dedicado
-      final syncResult = await _vehicleRepository.syncVehicles();
-
-      return syncResult.fold(
-        (failure) {
-          if (kDebugMode) print('❌ Vehicles sync failed: ${failure.message}');
-          return Left(failure);
-        },
-        (_) async {
-          // Após sync, obter contagem de veículos
-          final vehiclesResult = await _vehicleRepository.getAllVehicles();
-          return vehiclesResult.fold(
-            (failure) {
-              if (kDebugMode) print('⚠️ Could not count vehicles after sync');
-              return const Right(0);
-            },
-            (vehicles) {
-              final count = vehicles.length;
-              if (kDebugMode) print('✅ Synced $count vehicles');
-              return Right(count);
-            },
-          );
-        },
-      );
-    } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print('❌ Exception during vehicles sync: $e');
-        print(stackTrace);
-      }
-      return Left(ServerFailure('Failed to sync vehicles: $e'));
-    }
-  }
-
-  Future<Either<Failure, int>> _syncFuelRecords() async {
-    try {
-      if (kDebugMode) print('🔄 Starting fuel records sync...');
-
-      // FuelRepository não tem método sync dedicado
-      // Obter todos os registros (UnifiedSyncManager cuida do sync em background)
-      final fuelResult = await _fuelRepository.getAllFuelRecords();
-
-      return fuelResult.fold(
-        (failure) {
-          if (kDebugMode) print('❌ Fuel records sync failed: ${failure.message}');
-          return Left(failure);
-        },
-        (records) {
-          final count = records.length;
-          if (kDebugMode) print('✅ Retrieved $count fuel records');
-          return Right(count);
-        },
-      );
-    } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print('❌ Exception during fuel records sync: $e');
-        print(stackTrace);
-      }
-      return Left(ServerFailure('Failed to sync fuel records: $e'));
-    }
-  }
-
-  Future<Either<Failure, int>> _syncMaintenance() async {
-    try {
-      if (kDebugMode) print('🔄 Starting maintenance records sync...');
-
-      // MaintenanceRepository não tem método sync dedicado
-      // Obter todos os registros (UnifiedSyncManager cuida do sync em background)
-      final maintenanceResult = await _maintenanceRepository.getAllMaintenanceRecords();
-
-      return maintenanceResult.fold(
-        (failure) {
-          if (kDebugMode) print('❌ Maintenance sync failed: ${failure.message}');
-          return Left(failure);
-        },
-        (records) {
-          final count = records.length;
-          if (kDebugMode) print('✅ Retrieved $count maintenance records');
-          return Right(count);
-        },
-      );
-    } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print('❌ Exception during maintenance sync: $e');
-        print(stackTrace);
-      }
-      return Left(ServerFailure('Failed to sync maintenance: $e'));
-    }
-  }
-
-  Future<Either<Failure, int>> _syncExpenses() async {
-    try {
-      if (kDebugMode) print('🔄 Starting expenses sync...');
-
-      // ExpensesRepository pode ser null (opcional)
-      if (_expensesRepository == null) {
-        if (kDebugMode) print('⏭️ Expenses repository not available, skipping');
-        return const Right(0);
-      }
-
-      // IExpensesRepository tem método getAllExpenses
-      final expensesResult = await _expensesRepository.getAllExpenses() as List<dynamic>;
-
-      final count = expensesResult.length;
-      if (kDebugMode) print('✅ Retrieved $count expenses');
-      return Right(count);
-    } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print('❌ Exception during expenses sync: $e');
-        print(stackTrace);
-      }
-      // Falha em expenses não deve interromper o sync
-      // Retornar sucesso com 0 itens
-      return const Right(0);
-    }
+    developer.log('🧹 GasometerSyncService disposed', name: 'GasometerSync');
   }
 
   void _updateStatus(SyncServiceStatus status) {

@@ -1,9 +1,4 @@
-import 'dart:math';
-
 import '../data/models/base_sync_model.dart';
-import '../../features/fuel/data/models/fuel_supply_model.dart';
-import '../../features/maintenance/data/models/maintenance_model.dart';
-import '../../features/vehicles/data/models/vehicle_model.dart';
 
 /// Estratégias disponíveis para resolução de conflitos
 enum ConflictStrategy {
@@ -85,76 +80,39 @@ abstract class ConflictResolver<T> {
   ConflictResolution<T> resolve(T local, T remote);
 }
 
-/// Resolver para VehicleModel (version-based + custom merge)
-class VehicleConflictResolver implements ConflictResolver<VehicleModel> {
+/// Resolver genérico baseado em timestamp (last write wins)
+class TimestampBasedResolver<T extends BaseSyncModel>
+    implements ConflictResolver<T> {
   @override
-  ConflictResolution<VehicleModel> resolve(
-    VehicleModel local,
-    VehicleModel remote,
-  ) {
-    // Version-based comparison first
+  ConflictResolution<T> resolve(T local, T remote) {
+    final localUpdatedAt = local.updatedAt ?? DateTime(1970);
+    final remoteUpdatedAt = remote.updatedAt ?? DateTime(1970);
+
+    // Last Write Wins: timestamp mais recente prevalece
+    if (remoteUpdatedAt.isAfter(localUpdatedAt)) {
+      return ConflictResolution.useRemote(remote);
+    } else {
+      return ConflictResolution.useLocal(local);
+    }
+  }
+}
+
+/// Resolver genérico baseado em versão
+class VersionBasedResolver<T extends BaseSyncModel>
+    implements ConflictResolver<T> {
+  @override
+  ConflictResolution<T> resolve(T local, T remote) {
+    // Version-based comparison
     if (remote.version > local.version) {
       return ConflictResolution.useRemote(remote);
     } else if (local.version > remote.version) {
       return ConflictResolution.useLocal(local);
     }
 
-    // Versions iguais mas dados diferentes → custom merge
-    final merged = _mergeVehicles(local, remote);
-    return ConflictResolution.useMerged(merged);
-  }
-
-  /// Custom merge para VehicleModel
-  /// Prioriza: dados mais recentes (updatedAt) e valores máximos (odometro)
-  VehicleModel _mergeVehicles(VehicleModel local, VehicleModel remote) {
-    final localUpdatedAt = local.updatedAt ?? DateTime(1970);
-    final remoteUpdatedAt = remote.updatedAt ?? DateTime(1970);
-    final isRemoteNewer = remoteUpdatedAt.isAfter(localUpdatedAt);
-
-    return VehicleModel(
-      id: local.id,
-      createdAtMs: local.createdAtMs ?? remote.createdAtMs,
-      updatedAtMs: DateTime.now().millisecondsSinceEpoch,
-      lastSyncAtMs: DateTime.now().millisecondsSinceEpoch,
-      isDirty: true,
-      isDeleted: local.isDeleted || remote.isDeleted,
-      version: local.version + 1, // Incrementa versão após merge
-      userId: local.userId ?? remote.userId,
-      moduleName: local.moduleName ?? remote.moduleName,
-      // Campos específicos: usa mais recente
-      marca: isRemoteNewer ? remote.marca : local.marca,
-      modelo: isRemoteNewer ? remote.modelo : local.modelo,
-      ano: isRemoteNewer ? remote.ano : local.ano,
-      placa: isRemoteNewer ? remote.placa : local.placa,
-      combustivel: isRemoteNewer ? remote.combustivel : local.combustivel,
-      renavan: isRemoteNewer ? remote.renavan : local.renavan,
-      chassi: isRemoteNewer ? remote.chassi : local.chassi,
-      cor: isRemoteNewer ? remote.cor : local.cor,
-      vendido: local.vendido || remote.vendido, // Se um vendeu, considera vendido
-      valorVenda: max(local.valorVenda, remote.valorVenda), // Maior valor
-      // Odômetro: sempre usa o maior valor (nunca regride)
-      odometroInicial: max(local.odometroInicial, remote.odometroInicial),
-      odometroAtual: max(local.odometroAtual, remote.odometroAtual),
-      // Foto: prefere a mais recente
-      foto: isRemoteNewer
-          ? (remote.foto ?? local.foto)
-          : (local.foto ?? remote.foto),
-    );
-  }
-}
-
-/// Resolver para FuelSupplyModel (last write wins - timestamp-based)
-class FuelSupplyConflictResolver
-    implements ConflictResolver<FuelSupplyModel> {
-  @override
-  ConflictResolution<FuelSupplyModel> resolve(
-    FuelSupplyModel local,
-    FuelSupplyModel remote,
-  ) {
+    // Versions iguais: fallback para timestamp
     final localUpdatedAt = local.updatedAt ?? DateTime(1970);
     final remoteUpdatedAt = remote.updatedAt ?? DateTime(1970);
 
-    // Last Write Wins: timestamp mais recente prevalece
     if (remoteUpdatedAt.isAfter(localUpdatedAt)) {
       return ConflictResolution.useRemote(remote);
     } else {
@@ -163,52 +121,20 @@ class FuelSupplyConflictResolver
   }
 }
 
-/// Resolver para MaintenanceModel (last write wins - timestamp-based)
-class MaintenanceConflictResolver
-    implements ConflictResolver<MaintenanceModel> {
-  @override
-  ConflictResolution<MaintenanceModel> resolve(
-    MaintenanceModel local,
-    MaintenanceModel remote,
-  ) {
-    final localUpdatedAt = local.updatedAt ?? DateTime(1970);
-    final remoteUpdatedAt = remote.updatedAt ?? DateTime(1970);
-
-    // Last Write Wins: timestamp mais recente prevalece
-    if (remoteUpdatedAt.isAfter(localUpdatedAt)) {
-      return ConflictResolution.useRemote(remote);
-    } else {
-      return ConflictResolution.useLocal(local);
-    }
-  }
-}
-
-/// Factory para obter resolver apropriado baseado no tipo de entidade
+/// Factory para obter resolver apropriado baseado na estratégia
 class ConflictResolverFactory {
-  static ConflictResolver<T>? getResolver<T extends BaseSyncModel>() {
-    if (T == VehicleModel) {
-      return VehicleConflictResolver() as ConflictResolver<T>;
-    } else if (T == FuelSupplyModel) {
-      return FuelSupplyConflictResolver() as ConflictResolver<T>;
-    } else if (T == MaintenanceModel) {
-      return MaintenanceConflictResolver() as ConflictResolver<T>;
-    }
-    return null;
-  }
-
-  static ConflictResolver? getResolverByType(String entityType) {
-    switch (entityType) {
-      case 'vehicle':
-      case 'VehicleModel':
-        return VehicleConflictResolver();
-      case 'fuel_supply':
-      case 'FuelSupplyModel':
-        return FuelSupplyConflictResolver();
-      case 'maintenance':
-      case 'MaintenanceModel':
-        return MaintenanceConflictResolver();
-      default:
-        return null;
+  static ConflictResolver<T> getResolver<T extends BaseSyncModel>({
+    ConflictStrategy strategy = ConflictStrategy.lastWriteWins,
+  }) {
+    switch (strategy) {
+      case ConflictStrategy.lastWriteWins:
+        return TimestampBasedResolver<T>();
+      case ConflictStrategy.versionBased:
+        return VersionBasedResolver<T>();
+      case ConflictStrategy.customMerge:
+      case ConflictStrategy.askUser:
+        // Fallback para timestamp-based
+        return TimestampBasedResolver<T>();
     }
   }
 }

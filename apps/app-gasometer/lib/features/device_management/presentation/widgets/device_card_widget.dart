@@ -1,6 +1,5 @@
-import 'package:core/core.dart' show DeviceEntity;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/theme/gasometer_colors.dart';
 import '../../domain/extensions/vehicle_device_extension.dart';
@@ -75,10 +74,9 @@ class DeviceCardWidget extends StatelessWidget {
                       device.name,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color:
-                            isCurrentDevice
-                                ? GasometerColors.primary
-                                : Colors.black87,
+                        color: isCurrentDevice
+                            ? GasometerColors.primary
+                            : Colors.black87,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

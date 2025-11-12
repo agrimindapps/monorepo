@@ -417,6 +417,8 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
           },
           (success) {
             debugPrint('[MAINTENANCE DEBUG] SUCCESS - Closing dialog');
+            // Limpar formulário antes de fechar
+            notifier.clearForm();
             Navigator.of(context).pop({
               'success': true,
               'action': widget.maintenanceToEdit != null ? 'edit' : 'create',

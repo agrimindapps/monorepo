@@ -17,15 +17,15 @@ abstract class TasksRemoteDataSource {
   Future<void> deleteTask(String id, String userId);
 }
 
+@LazySingleton(as: TasksRemoteDataSource)
 class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
   final FirebaseFirestore _firestore;
   final RateLimiterService _rateLimiter;
 
-  TasksRemoteDataSourceImpl({
-    FirebaseFirestore? firestore,
+  TasksRemoteDataSourceImpl(
+    this._firestore, {
     required RateLimiterService rateLimiter,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _rateLimiter = rateLimiter;
+  }) : _rateLimiter = rateLimiter;
 
   /// Gets the user-specific tasks collection path
   String _getUserTasksPath(String userId) => 'users/$userId/tasks';

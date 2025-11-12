@@ -32,7 +32,7 @@ class MaintenanceFormatterService {
   String formatOdometer(double value) {
     if (value == 0.0) return '';
     return _formatWithCache(value, 1, 'odometer', () {
-      return '${_odometerFormatter.format(value)} km';
+      return _odometerFormatter.format(value);
     });
   }
 
@@ -237,14 +237,14 @@ class MaintenanceFormatterService {
 
     if (maintenance.nextServiceOdometer != null) {
       nextService.add(
-        'Odômetro: ${formatOdometer(maintenance.nextServiceOdometer!)}',
+        'Odômetro: ${formatOdometer(maintenance.nextServiceOdometer!)} km',
       );
 
       final remaining = maintenance.nextServiceOdometer! - currentOdometer;
       if (remaining > 0) {
-        nextService.add('Faltam: ${formatOdometer(remaining)}');
+        nextService.add('Faltam: ${formatOdometer(remaining)} km');
       } else {
-        nextService.add('Atrasada em: ${formatOdometer(-remaining)}');
+        nextService.add('Atrasada em: ${formatOdometer(-remaining)} km');
       }
     }
 

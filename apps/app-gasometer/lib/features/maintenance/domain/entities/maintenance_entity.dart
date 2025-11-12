@@ -368,27 +368,31 @@ class MaintenanceEntity extends BaseSyncEntity {
 
   @override
   Map<String, dynamic> toFirebaseMap() {
-    return {
+    final map = <String, dynamic>{
       ...baseFirebaseFields,
       'vehicle_id': vehicleId,
       'type': type.name,
       'status': status.name,
       'title': title,
-      'description': description,
-      'cost': cost,
       'service_date': serviceDate.toIso8601String(),
-      'odometer': odometer,
-      'workshop_name': workshopName,
-      'workshop_phone': workshopPhone,
-      'workshop_address': workshopAddress,
-      'next_service_date': nextServiceDate?.toIso8601String(),
-      'next_service_odometer': nextServiceOdometer,
-      'photos_paths': photosPaths,
-      'invoices_paths': invoicesPaths,
-      'parts': parts,
-      'notes': notes,
-      'metadata': metadata,
     };
+
+    // Adicionar campos opcionais apenas se não forem null
+    if (description != null) map['description'] = description;
+    if (cost != null) map['cost'] = cost;
+    if (odometer != null) map['odometer'] = odometer;
+    if (workshopName != null) map['workshop_name'] = workshopName;
+    if (workshopPhone != null) map['workshop_phone'] = workshopPhone;
+    if (workshopAddress != null) map['workshop_address'] = workshopAddress;
+    if (nextServiceDate != null) map['next_service_date'] = nextServiceDate!.toIso8601String();
+    if (nextServiceOdometer != null) map['next_service_odometer'] = nextServiceOdometer;
+    if (photosPaths != null) map['photos_paths'] = photosPaths;
+    if (invoicesPaths != null) map['invoices_paths'] = invoicesPaths;
+    if (parts != null) map['parts'] = parts;
+    if (notes != null) map['notes'] = notes;
+    if (metadata != null) map['metadata'] = metadata;
+
+    return map;
   }
 
   static MaintenanceEntity fromFirebaseMap(Map<String, dynamic> map) {

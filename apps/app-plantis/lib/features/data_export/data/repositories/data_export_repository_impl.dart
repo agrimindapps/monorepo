@@ -1,6 +1,7 @@
 import 'dart:convert' as convert;
 
 import 'package:core/core.dart' hide Column;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/entities/export_request.dart';
 import '../../domain/repositories/data_export_repository.dart';
@@ -12,31 +13,30 @@ class DataExportRepositoryImpl implements DataExportRepository {
   final PlantsExportDataSource _plantsDataSource;
   final SettingsExportDataSource _settingsDataSource;
   final ExportFileGenerator _fileGenerator;
-  final IHiveManager _hiveManager;
+  final SharedPreferences _prefs;
   static const Duration _exportCooldown = Duration(hours: 1);
-  static const String _boxName = 'data_export';
+  static const String _keyPrefix = 'data_export_';
+  static const String _lastExportTimeKey = '${_keyPrefix}last_export_time';
+  static const String _exportRequestsKey = '${_keyPrefix}export_requests';
 
   DataExportRepositoryImpl({
     required PlantsExportDataSource plantsDataSource,
     required SettingsExportDataSource settingsDataSource,
     required ExportFileGenerator fileGenerator,
-    required IHiveManager hiveManager,
+    required SharedPreferences prefs,
   }) : _plantsDataSource = plantsDataSource,
        _settingsDataSource = settingsDataSource,
        _fileGenerator = fileGenerator,
-       _hiveManager = hiveManager;
+       _prefs = prefs;
 
-  // Helper methods for Hive persistence
+  // Helper methods for SharedPreferences persistence
   Future<DateTime?> _getLastExportTime() async {
     try {
-      final boxResult = await _hiveManager.getBox<String>(_boxName);
-      return boxResult.fold((failure) => null, (box) {
-        final value = box.get('last_export_time');
-        if (value is String) {
-          return DateTime.tryParse(value);
-        }
-        return null;
-      });
+      final value = _prefs.getString(_lastExportTimeKey);
+      if (value != null) {
+        return DateTime.tryParse(value);
+      }
+      return null;
     } catch (e) {
       return null;
     }
@@ -44,11 +44,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
 
   Future<void> _setLastExportTime(DateTime time) async {
     try {
-      final boxResult = await _hiveManager.getBox<String>(_boxName);
-      boxResult.fold(
-        (failure) => null,
-        (box) => box.put('last_export_time', time.toIso8601String()),
-      );
+      await _prefs.setString(_lastExportTimeKey, time.toIso8601String());
     } catch (e) {
       // Log error but don't fail the operation
     }
@@ -56,33 +52,30 @@ class DataExportRepositoryImpl implements DataExportRepository {
 
   Future<Map<String, ExportRequest>> _getExportRequests() async {
     try {
-      final boxResult = await _hiveManager.getBox<String>(_boxName);
-      return boxResult.fold((failure) => {}, (box) {
-        final stored = box.get('export_requests');
-        if (stored == null || stored.isEmpty) return {};
+      final stored = _prefs.getString(_exportRequestsKey);
+      if (stored == null || stored.isEmpty) return {};
 
-        final Map<String, ExportRequest> requests = {};
-        try {
-          // Parse from the stored string representation
-          if (stored.startsWith('[')) {
-            // It's a JSON array
-            final parsed = convert.jsonDecode(stored);
-            if (parsed is List) {
-              for (final item in parsed) {
-                if (item is Map<String, dynamic>) {
-                  final request = _exportRequestFromJson(item);
-                  if (request != null) {
-                    requests[request.id] = request;
-                  }
+      final Map<String, ExportRequest> requests = {};
+      try {
+        // Parse from the stored string representation
+        if (stored.startsWith('[')) {
+          // It's a JSON array
+          final parsed = convert.jsonDecode(stored);
+          if (parsed is List) {
+            for (final item in parsed) {
+              if (item is Map<String, dynamic>) {
+                final request = _exportRequestFromJson(item);
+                if (request != null) {
+                  requests[request.id] = request;
                 }
               }
             }
           }
-        } catch (e) {
-          // Silently fail to parse
         }
-        return requests;
-      });
+      } catch (e) {
+        // Silently fail to parse
+      }
+      return requests;
     } catch (e) {
       return {};
     }
@@ -629,12 +622,8 @@ class DataExportRepositoryImpl implements DataExportRepository {
     try {
       final requestsList = requests.values.map(_exportRequestToJson).toList();
       // Serialize to JSON string for storage
-      final jsonString = requestsList.toString();
-      final boxResult = await _hiveManager.getBox<String>(_boxName);
-      boxResult.fold(
-        (failure) => null,
-        (box) => box.put('export_requests', jsonString),
-      );
+      final jsonString = convert.jsonEncode(requestsList);
+      await _prefs.setString(_exportRequestsKey, jsonString);
     } catch (e) {
       // Log error
     }

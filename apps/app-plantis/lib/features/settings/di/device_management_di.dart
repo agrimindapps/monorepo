@@ -15,10 +15,10 @@ class DeviceManagementDI {
   /// Registra datasources e repositório que não podem usar @injectable
   static Future<void> registerPhase1(GetIt getIt) async {
     // Data Sources
-    final deviceLocalDataSource = DeviceLocalDataSource();
-    // Initialize Hive box only on non-web platforms
+    final deviceLocalDataSource = DeviceLocalDataSource(getIt<SharedPreferences>());
+    // Initialize datasource (no-op for SharedPreferences)
     if (!kIsWeb) {
-      await deviceLocalDataSource.init(); // Inicializa o Hive box
+      await deviceLocalDataSource.init();
     }
     getIt.registerLazySingleton<DeviceLocalDataSource>(
       () => deviceLocalDataSource,

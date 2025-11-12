@@ -1,26 +1,20 @@
 import 'package:core/core.dart' hide Column;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 /// Datasource local para gerenciamento de cache de dispositivos
-/// Usa Hive para persistência offline
+/// Usa SharedPreferences para persistência offline
 class DeviceLocalDataSource {
-  static const String _boxName = 'device_cache';
+  static const String _keyPrefix = 'device_cache_';
   static const String _devicesKey = 'user_devices';
 
-  Box<dynamic>? _box;
+  final SharedPreferences _prefs;
 
-  /// Inicializa o box do Hive (chamado pelo DI)
+  DeviceLocalDataSource(this._prefs);
+
+  /// Inicializa o datasource (compatibilidade com versão anterior)
   Future<void> init() async {
-    if (_box == null || !_box!.isOpen) {
-      _box = await Hive.openBox<dynamic>(_boxName);
-    }
-  }
-
-  /// Retorna o box, inicializando se necessário
-  Future<Box<dynamic>> _getBox() async {
-    if (_box == null || !_box!.isOpen) {
-      await init();
-    }
-    return _box!;
+    // No initialization needed for SharedPreferences
   }
 
   /// Armazena a lista de dispositivos do usuário em cache
@@ -29,16 +23,17 @@ class DeviceLocalDataSource {
     List<DeviceEntity> devices,
   ) async {
     try {
-      final box = await _getBox();
       final key = _getUserDevicesKey(userId);
 
       // Converte devices para JSON serializável
       final devicesJson = devices.map((d) => d.toJson()).toList();
 
-      await box.put(key, {
+      final cacheData = {
         'devices': devicesJson,
         'cachedAt': DateTime.now().toIso8601String(),
-      });
+      };
+
+      await _prefs.setString(key, jsonEncode(cacheData));
     } catch (e) {
       throw CacheFailure(
         'Erro ao armazenar dispositivos em cache',
@@ -51,15 +46,14 @@ class DeviceLocalDataSource {
   /// Recupera dispositivos do cache
   Future<List<DeviceEntity>> getCachedDevices(String userId) async {
     try {
-      final box = await _getBox();
       final key = _getUserDevicesKey(userId);
+      final cachedString = _prefs.getString(key);
 
-      final cached = box.get(key) as Map<dynamic, dynamic>?;
-
-      if (cached == null) {
+      if (cachedString == null) {
         return [];
       }
 
+      final cached = jsonDecode(cachedString) as Map<String, dynamic>;
       final devicesList = cached['devices'] as List<dynamic>?;
 
       if (devicesList == null || devicesList.isEmpty) {
@@ -82,13 +76,12 @@ class DeviceLocalDataSource {
   /// Remove um dispositivo específico do cache
   Future<void> removeDevice(String userId, String deviceUuid) async {
     try {
-      final box = await _getBox();
       final key = _getUserDevicesKey(userId);
+      final cachedString = _prefs.getString(key);
 
-      final cached = box.get(key) as Map<dynamic, dynamic>?;
+      if (cachedString == null) return;
 
-      if (cached == null) return;
-
+      final cached = jsonDecode(cachedString) as Map<String, dynamic>;
       final devicesList = cached['devices'] as List<dynamic>?;
 
       if (devicesList == null || devicesList.isEmpty) return;
@@ -100,10 +93,12 @@ class DeviceLocalDataSource {
           .toList();
 
       // Atualiza cache
-      await box.put(key, {
+      final updatedCache = {
         'devices': updatedDevices.map((d) => d.toJson()).toList(),
         'cachedAt': DateTime.now().toIso8601String(),
-      });
+      };
+
+      await _prefs.setString(key, jsonEncode(updatedCache));
     } catch (e) {
       throw CacheFailure(
         'Erro ao remover dispositivo do cache',
@@ -116,8 +111,11 @@ class DeviceLocalDataSource {
   /// Limpa todo o cache de dispositivos
   Future<void> clearCache() async {
     try {
-      final box = await _getBox();
-      await box.clear();
+      // Remove all keys with the device cache prefix
+      final keys = _prefs.getKeys().where((k) => k.startsWith(_keyPrefix));
+      for (final key in keys) {
+        await _prefs.remove(key);
+      }
     } catch (e) {
       throw CacheFailure(
         'Erro ao limpar cache',
@@ -130,14 +128,14 @@ class DeviceLocalDataSource {
   /// Verifica se existe cache válido (menos de 24h)
   Future<bool> hasFreshCache(String userId) async {
     try {
-      final box = await _getBox();
       final key = _getUserDevicesKey(userId);
+      final cachedString = _prefs.getString(key);
 
-      final cached = box.get(key) as Map<dynamic, dynamic>?;
+      if (cachedString == null) return false;
 
-      if (cached == null) return false;
-
+      final cached = jsonDecode(cachedString) as Map<String, dynamic>;
       final cachedAtStr = cached['cachedAt'] as String?;
+      
       if (cachedAtStr == null) return false;
 
       final cachedAt = DateTime.parse(cachedAtStr);
@@ -151,10 +149,10 @@ class DeviceLocalDataSource {
   }
 
   /// Gera chave única por usuário
-  String _getUserDevicesKey(String userId) => '${_devicesKey}_$userId';
+  String _getUserDevicesKey(String userId) => '$_keyPrefix${_devicesKey}_$userId';
 
-  /// Fecha o box (chamado no dispose do app)
+  /// Fecha o datasource (compatibilidade com versão anterior)
   Future<void> dispose() async {
-    await _box?.close();
+    // No cleanup needed for SharedPreferences
   }
 }

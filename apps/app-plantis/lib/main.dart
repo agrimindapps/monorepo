@@ -11,9 +11,7 @@ import 'core/di/injection_container.dart' as di;
 import 'core/di/modules/sync_module.dart';
 import 'core/di/solid_di_factory.dart';
 import 'core/plantis_sync_config.dart';
-import 'core/services/hive_schema_manager.dart';
 import 'core/services/plantis_notification_service.dart';
-import 'core/storage/plantis_boxes_setup.dart';
 import 'core/sync/sync_operations.dart' as local_sync;
 import 'core/sync/sync_queue.dart' as local_sync;
 import 'firebase_options.dart';
@@ -54,16 +52,6 @@ void main() async {
     );
   }
 
-  // Initialize Hive only on non-web platforms
-  if (!kIsWeb) {
-    await Hive.initFlutter();
-    Hive.registerAdapter(LicenseModelAdapter()); // TypeId: 10
-    Hive.registerAdapter(LicenseTypeAdapter()); // TypeId: 11
-
-    // Run schema migrations
-    await HiveSchemaManager.migrate();
-  }
-
   print('🔧 [MAIN] Iniciando DI initialization...');
   try {
     await di.init(firebaseEnabled: firebaseInitialized);
@@ -71,23 +59,6 @@ void main() async {
   } catch (e) {
     print('❌ [MAIN] ERRO no DI initialization: $e');
     rethrow;
-  }
-
-  // Register Plantis boxes IMMEDIATELY after DI init, before any other service is used
-  // This ensures boxes are registered before HiveStorageService or SyncQueue try to use them
-  // ✅ IMPORTANTE: Registrar em TODAS as plataformas (incluindo Web!)
-  print('🔧 [MAIN] ===== INICIANDO REGISTRO DE BOXES DO PLANTIS (Platform: Web=$kIsWeb) =====');
-  try {
-    print('🔧 [MAIN] Chamando PlantisBoxesSetup.registerPlantisBoxes()...');
-    await PlantisBoxesSetup.registerPlantisBoxes();
-    print('✅ [MAIN] ===== BOXES DO PLANTIS REGISTRADOS COM SUCESSO =====');
-  } catch (e, stackTrace) {
-    print('❌ [MAIN] ===== ERRO CRÍTICO AO REGISTRAR BOXES =====');
-    print('❌ [MAIN] Erro: $e');
-    print('❌ [MAIN] Stack trace:\n$stackTrace');
-    SecureLogger.error('Failed to register Plantis boxes', error: e);
-    // Não fazer rethrow - continuar mesmo com erro no registro
-    // rethrow;
   }
 
   // Initialize SyncQueue before other sync services

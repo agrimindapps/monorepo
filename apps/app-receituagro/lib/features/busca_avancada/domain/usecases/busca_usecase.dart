@@ -1,7 +1,6 @@
 import 'package:core/core.dart' hide Column;
 import '../entities/busca_entity.dart';
 import '../repositories/i_busca_repository.dart';
-import 'busca_params.dart';
 
 /// Use case para busca com filtros
 @injectable

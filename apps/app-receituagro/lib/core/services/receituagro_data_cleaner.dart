@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../database/receituagro_database.dart';
-import '../../database/tables/receituagro_tables.dart';
 
 /// Implementação específica do ReceitaAgro para limpeza de dados usando Drift
 /// Implementa IAppDataCleaner do core package

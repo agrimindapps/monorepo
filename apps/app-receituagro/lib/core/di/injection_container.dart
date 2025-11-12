@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 // ❌ REMOVIDO: import '../../features/DetalheDefensivos/di/defensivo_details_di.dart';
 import '../../features/analytics/analytics_service.dart';
 // ❌ REMOVIDO: import '../../features/comentarios/di/comentarios_di.dart'; (via @LazySingleton)
-import '../../features/comentarios/domain/comentarios_service.dart';
 import '../../features/defensivos/data/services/defensivos_grouping_service.dart';
 // ❌ REMOVIDO: import '../../features/defensivos/di/defensivos_di.dart'; // Unused after consolidation
 // ✅ Diagnosticos imports removed - now managed by Injectable

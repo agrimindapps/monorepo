@@ -1,7 +1,6 @@
 import 'package:get_it/get_it.dart';
 
 import '../presentation/services/pragas_cultura_error_message_service.dart';
-import '../presentation/services/pragas_cultura_sort_strategy_service.dart';
 
 /// Dependency Injection Configuration for Pragas por Cultura feature
 ///

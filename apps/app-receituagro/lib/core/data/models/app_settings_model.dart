@@ -1,5 +1,3 @@
-import 'package:core/core.dart' hide Column;
-
 // DEPRECATED: Legacy model - migrate to Drift AppSettings table
 // Maintained for backward compatibility during migration phase
 class AppSettingsModel {

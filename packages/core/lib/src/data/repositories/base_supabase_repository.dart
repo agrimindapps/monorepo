@@ -142,7 +142,7 @@ abstract class BaseSupabaseRepository<TModel, TEntity> {
         return Left(SupabaseNotFoundFailure('Registro não encontrado'));
       }
 
-      final data = response.first as Map<String, dynamic>;
+      final data = response.first;
       final entity = toEntity(data);
 
       // Salva no cache
@@ -173,7 +173,7 @@ abstract class BaseSupabaseRepository<TModel, TEntity> {
           .select()
           .single();
 
-      final data = response as Map<String, dynamic>;
+      final data = response;
       final createdEntity = toEntity(data);
 
       // Invalida cache
@@ -205,7 +205,7 @@ abstract class BaseSupabaseRepository<TModel, TEntity> {
           .select()
           .single();
 
-      final data = response as Map<String, dynamic>;
+      final data = response;
       final updatedEntity = toEntity(data);
 
       // Invalida cache

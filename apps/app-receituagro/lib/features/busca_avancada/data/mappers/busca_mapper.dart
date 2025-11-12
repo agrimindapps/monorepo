@@ -65,7 +65,7 @@ class BuscaMapper {
         : praga.nomeLatino ?? '';
 
     return BuscaResultEntity(
-      id: praga.firebaseId ?? praga.idPraga,
+      id: praga.idPraga,
       tipo: 'praga',
       titulo: nomeExibicao,
       subtitulo: praga.nomeLatino != nomeExibicao
@@ -89,7 +89,7 @@ class BuscaMapper {
         : defensivo.nome;
 
     return BuscaResultEntity(
-      id: defensivo.firebaseId ?? defensivo.idDefensivo,
+      id: defensivo.idDefensivo,
       tipo: 'defensivo',
       titulo: nomeExibicao,
       subtitulo: defensivo.ingredienteAtivo,
@@ -109,7 +109,7 @@ class BuscaMapper {
   /// Converte Cultura para BuscaResultEntity - SIMPLIFICADO
   static BuscaResultEntity culturaToEntity(Cultura cultura) {
     return BuscaResultEntity(
-      id: cultura.firebaseId ?? cultura.id.toString(),
+      id: cultura.id.toString(),
       tipo: 'cultura',
       titulo: cultura.nome,
       subtitulo: cultura.nomeLatino,
@@ -155,7 +155,7 @@ class BuscaMapper {
   /// Converte Cultura para DropdownItemEntity - SIMPLIFICADO
   static DropdownItemEntity culturaToDropdownItem(Cultura cultura) {
     return DropdownItemEntity(
-      id: cultura.firebaseId ?? cultura.id.toString(),
+      id: cultura.id.toString(),
       nome: cultura.nome,
       grupo: cultura.familia ?? 'Família não informada',
       isActive: true,
@@ -169,7 +169,7 @@ class BuscaMapper {
         : praga.nomeLatino ?? '';
 
     return DropdownItemEntity(
-      id: praga.firebaseId ?? praga.idPraga,
+      id: praga.idPraga,
       nome: nomeExibicao,
       grupo: praga.tipo ?? 'Tipo não informado',
       isActive: true,
@@ -185,7 +185,7 @@ class BuscaMapper {
         : defensivo.nome;
 
     return DropdownItemEntity(
-      id: defensivo.firebaseId ?? defensivo.idDefensivo,
+      id: defensivo.idDefensivo,
       nome: nomeExibicao,
       grupo: defensivo.classeAgronomica ?? 'Classe não informada',
       isActive: true,

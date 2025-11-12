@@ -3,8 +3,6 @@ import 'dart:developer' as developer;
 import 'package:dartz/dartz.dart';
 import 'package:core/core.dart' hide Column;
 
-import '../utils/box_manager.dart';
-
 /// Relatório de integridade referencial dos dados
 ///
 /// Contém estatísticas e lista de problemas encontrados na validação

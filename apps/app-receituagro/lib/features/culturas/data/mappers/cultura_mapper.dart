@@ -1,5 +1,3 @@
-import 'package:drift/drift.dart';
-
 import '../../../../database/receituagro_database.dart';
 import '../../data/cultura_model.dart';
 import '../../domain/entities/cultura_entity.dart';

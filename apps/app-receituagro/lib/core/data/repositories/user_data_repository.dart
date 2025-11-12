@@ -18,12 +18,6 @@ import '../models/app_settings_model.dart';
 /// - Favoritos → IFavoritosRepository (FavoritosRepositorySimplified)
 /// - Comentários → IComentariosRepository (ComentariosRepositoryImpl)
 class UserDataRepository {
-  static const String _appSettingsBoxName = 'app_settings';
-  static const String _subscriptionDataBoxName = 'subscription_data';
-
-  // FIXED (P0.3): Inject IHiveManager to use BoxManager pattern
-  final IHiveManager _hiveManager;
-
   // Specialized repositories for delegation (Dependency Injection)
   final IFavoritosRepository _favoritosRepository;
   final IComentariosRepository _comentariosRepository;
@@ -32,8 +26,7 @@ class UserDataRepository {
     IHiveManager? hiveManager,
     IFavoritosRepository? favoritosRepository,
     IComentariosRepository? comentariosRepository,
-  }) : _hiveManager = hiveManager ?? GetIt.instance<IHiveManager>(),
-       _favoritosRepository =
+  }) : _favoritosRepository =
            favoritosRepository ?? GetIt.instance<IFavoritosRepository>(),
        _comentariosRepository =
            comentariosRepository ?? GetIt.instance<IComentariosRepository>();

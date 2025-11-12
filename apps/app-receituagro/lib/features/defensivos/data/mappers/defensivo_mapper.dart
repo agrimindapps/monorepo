@@ -1,5 +1,3 @@
-import 'package:drift/drift.dart';
-
 import '../../../../database/receituagro_database.dart';
 import '../../data/defensivo_agrupado_item_model.dart';
 import '../../data/defensivo_model.dart';

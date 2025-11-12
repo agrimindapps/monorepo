@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import '../../database/receituagro_database.dart';
 import '../../database/repositories/diagnostico_repository.dart';
 import '../di/injection_container.dart' as di;
 

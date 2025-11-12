@@ -171,7 +171,13 @@ export 'src/infrastructure/services/selective_sync_service.dart';
 export 'src/infrastructure/services/sync_firebase_service.dart';
 export 'src/infrastructure/services/validation_service.dart';
 export 'src/infrastructure/services/web_notification_service.dart';
+
+// Storage - Hive (Legacy - sendo substituído por Drift)
 export 'src/infrastructure/storage/hive/hive_storage.dart';
+
+// Storage - Drift (Novo)
+export 'src/infrastructure/storage/drift/drift_storage.dart';
+
 export 'src/services/cache/cache_service.dart';
 export 'src/services/supabase/supabase_config_service.dart';
 export 'src/presentation/theme/base/base_colors.dart';

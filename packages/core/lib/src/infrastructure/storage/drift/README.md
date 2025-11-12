@@ -106,7 +106,7 @@ await service.saveWithTTL(
 
 ---
 
-### 4. BaseDriftRepository
+### 4. DriftRepositoryBase
 **Arquivo:** `repositories/base_drift_repository.dart`
 
 Classe base para implementar repositories Drift tipados.
@@ -120,7 +120,7 @@ Classe base para implementar repositories Drift tipados.
 
 **Uso:**
 ```dart
-class PlantsRepository extends BaseDriftRepository<Plant, PlantsTable> {
+class PlantsRepository extends DriftRepositoryBase<Plant, PlantsTable> {
   PlantsRepository(GeneratedDatabase db)
       : super(
           database: db,
@@ -195,7 +195,7 @@ final storage = DriftStorageService(database);
 Para apps novos, crie repositories Drift nativos:
 
 ```dart
-class MyRepository extends BaseDriftRepository<MyData, MyTable> {
+class MyRepository extends DriftRepositoryBase<MyData, MyTable> {
   MyRepository(GeneratedDatabase db)
       : super(database: db, table: db.myTable);
 

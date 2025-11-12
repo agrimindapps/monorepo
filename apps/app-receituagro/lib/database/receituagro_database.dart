@@ -172,23 +172,18 @@ class ReceituagroDatabase extends _$ReceituagroDatabase with BaseDriftDatabase {
   // ========== QUERIES ÚTEIS ==========
 
   /// Busca diagnósticos do usuário ordenados por data (mais recente primeiro)
-  Future<List<Diagnostico>> getDiagnosticosByUser(
-    String userId, {
-    int limit = 50,
-  }) async {
-    final query = select(diagnosticos)
-      ..where((tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false))
-      ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)])
-      ..limit(limit);
+  /// Busca diagnósticos (tabela estática - todos os dados)
+  ///
+  /// NOTA: Diagnosticos agora é uma tabela estática (lookup).
+  /// Não pertence a usuários específicos.
+  Future<List<Diagnostico>> getDiagnosticos({int limit = 50}) async {
+    final query = select(diagnosticos)..limit(limit);
     return await query.get();
   }
 
-  /// Stream de diagnósticos do usuário
-  Stream<List<Diagnostico>> watchDiagnosticosByUser(String userId) {
-    final query = select(diagnosticos)
-      ..where((tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false))
-      ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]);
-    return query.watch();
+  /// Stream de diagnósticos (tabela estática)
+  Stream<List<Diagnostico>> watchDiagnosticos() {
+    return select(diagnosticos).watch();
   }
 
   /// Busca favoritos do usuário por tipo
@@ -311,20 +306,7 @@ class ReceituagroDatabase extends _$ReceituagroDatabase with BaseDriftDatabase {
 
   // ========== OPERAÇÕES EM LOTE ==========
 
-  /// Marca múltiplos registros como deletados (soft delete)
-  Future<void> softDeleteDiagnosticos(List<int> diagnosticoIds) async {
-    await executeTransaction(() async {
-      for (final id in diagnosticoIds) {
-        await (update(diagnosticos)..where((tbl) => tbl.id.equals(id))).write(
-          DiagnosticosCompanion(
-            isDeleted: const Value(true),
-            isDirty: const Value(true),
-            updatedAt: Value(DateTime.now()),
-          ),
-        );
-      }
-    }, operationName: 'Soft delete diagnosticos');
-  }
+  // NOTA: softDeleteDiagnosticos removido - Diagnosticos é tabela estática
 
   /// Limpa todos os dados de um usuário (hard delete)
   Future<void> clearUserData(String userId) async {

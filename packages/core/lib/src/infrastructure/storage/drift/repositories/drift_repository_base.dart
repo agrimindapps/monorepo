@@ -10,7 +10,7 @@ import '../interfaces/i_drift_repository.dart';
 /// Fornece implementação padrão para CRUD operations
 /// 
 /// Equivalente Drift do BaseHiveRepository
-abstract class BaseDriftRepository<T extends DataClass, TTable extends Table>
+abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
     implements IQueryableDriftRepository<T> {
   @override
   final GeneratedDatabase database;
@@ -25,7 +25,7 @@ abstract class BaseDriftRepository<T extends DataClass, TTable extends Table>
   final Map<dynamic, T> _cache = {};
   bool _cacheEnabled = false;
 
-  BaseDriftRepository({
+  DriftRepositoryBase({
     required this.database,
     required this.table,
     bool enableCache = false,

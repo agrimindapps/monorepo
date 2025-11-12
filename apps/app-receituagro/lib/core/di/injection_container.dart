@@ -23,7 +23,6 @@ import '../../database/receituagro_database.dart';
 import '../interfaces/i_premium_service.dart';
 import '../navigation/agricultural_navigation_extension.dart';
 import '../services/app_data_manager.dart';
-import '../services/app_data_manager_drift.dart';
 import '../services/cloud_functions_service.dart';
 import '../services/device_identity_service.dart';
 import '../services/diagnostico_integration_service.dart';
@@ -149,7 +148,7 @@ Future<void> init() async {
       remindLaunches: 10,
     ),
   );
-  sl.registerLazySingleton<IAppDataManager>(() => AppDataManagerDrift());
+  sl.registerLazySingleton<IAppDataManager>(() => AppDataManager());
   sl.registerLazySingleton<IReceitaAgroNotificationService>(
     () => ReceitaAgroNotificationService(),
   );

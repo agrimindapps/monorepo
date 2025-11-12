@@ -90,18 +90,11 @@ class DiagnosticoMapper {
     return dataList.map(fromDriftData).toList();
   }
 
-  /// Converts DiagnosticoEntity to Drift Diagnostico (for backward compatibility)
-  /// Note: This method creates a DiagnosticosCompanion for insertion
+  /// Converts DiagnosticoEntity to Drift Diagnostico (static data)
+  /// Note: Diagnosticos is now a static/lookup table, not user data
   static DiagnosticosCompanion toDrift(DiagnosticoEntity entity) {
     return DiagnosticosCompanion(
       firebaseId: Value(entity.id),
-      userId: const Value(''), // Needs to be set by caller
-      moduleName: const Value('diagnosticos'),
-      createdAt: Value(entity.createdAt ?? DateTime.now()),
-      updatedAt: Value(entity.updatedAt ?? DateTime.now()),
-      isDirty: const Value(false),
-      isDeleted: const Value(false),
-      version: const Value(1),
       idReg: Value(entity.id),
       defenisivoId: Value(int.tryParse(entity.idDefensivo) ?? 0),
       culturaId: Value(int.tryParse(entity.idCultura) ?? 0),
@@ -154,8 +147,8 @@ class DiagnosticoMapper {
         intervaloReaplicacao2: hive.intervalo2,
         epocaAplicacao: hive.epocaAplicacao,
       ),
-      createdAt: hive.createdAt,
-      updatedAt: hive.updatedAt ?? hive.createdAt,
+      createdAt: null, // Static data doesn't have user timestamps
+      updatedAt: null,
     );
   }
 

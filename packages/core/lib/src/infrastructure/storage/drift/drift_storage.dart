@@ -13,7 +13,7 @@ export 'services/core_drift_storage_service.dart';
 export 'services/drift_storage_service.dart';
 
 // Repositories
-export 'repositories/base_drift_repository.dart';
+export 'repositories/drift_repository_base.dart';
 
 // Exceptions
 export 'exceptions/drift_exceptions.dart';

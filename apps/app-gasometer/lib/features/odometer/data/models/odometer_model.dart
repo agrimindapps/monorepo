@@ -2,11 +2,7 @@ import 'package:core/core.dart';
 
 import '../../../../core/data/models/base_sync_model.dart';
 
-part 'odometer_model.g.dart';
-
 /// Odometer model with Firebase sync support
-/// TypeId: 12 - Gasometer range (10-19) to avoid conflicts with other apps
-@HiveType(typeId: 12)
 class OdometerModel extends BaseSyncModel {
 
   OdometerModel({
@@ -63,8 +59,8 @@ class OdometerModel extends BaseSyncModel {
     );
   }
 
-  /// Create from Hive map
-  factory OdometerModel.fromHiveMap(Map<String, dynamic> map) {
+  /// Create from map
+  factory OdometerModel.fromMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncModel.parseBaseHiveFields(map);
     
     return OdometerModel(
@@ -108,29 +104,29 @@ class OdometerModel extends BaseSyncModel {
     );
   }
 
-  factory OdometerModel.fromJson(Map<String, dynamic> json) => OdometerModel.fromHiveMap(json);
-  @HiveField(0) @override final String id;
-  @HiveField(1) final int? createdAtMs;
-  @HiveField(2) final int? updatedAtMs;
-  @HiveField(3) final int? lastSyncAtMs;
-  @HiveField(4) @override final bool isDirty;
-  @HiveField(5) @override final bool isDeleted;
-  @HiveField(6) @override final int version;
-  @HiveField(7) @override final String? userId;
-  @HiveField(8) @override final String? moduleName;
-  @HiveField(10) final String vehicleId;
-  @HiveField(11) final int registrationDate;
-  @HiveField(12) final double value;
-  @HiveField(13) final String description;
-  @HiveField(14) final String? type;
+  factory OdometerModel.fromJson(Map<String, dynamic> json) => OdometerModel.fromMap(json);
+  @override final String id;
+  final int? createdAtMs;
+  final int? updatedAtMs;
+  final int? lastSyncAtMs;
+  @override final bool isDirty;
+  @override final bool isDeleted;
+  @override final int version;
+  @override final String? userId;
+  @override final String? moduleName;
+  final String vehicleId;
+  final int registrationDate;
+  final double value;
+  final String description;
+  final String? type;
 
   @override
   String get collectionName => 'odometer_readings';
 
-  /// Convert to Hive map
+  /// Convert to map
   @override
-  Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()
+  Map<String, dynamic> toMap() {
+    return super.toMap()
       ..addAll({
         'vehicleId': vehicleId,
         'registrationDate': registrationDate,

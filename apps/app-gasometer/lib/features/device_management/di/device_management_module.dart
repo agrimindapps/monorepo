@@ -25,13 +25,3 @@ abstract class DeviceManagementModule {
     DeviceInfoPlugin deviceInfoPlugin,
   ) => DeviceIntegrationService(coreDeviceService, deviceInfoPlugin);
 }
-
-/// Função para inicializar as caixas Hive necessárias
-Future<void> initializeDeviceManagementHiveBoxes() async {
-  try {
-    await Hive.openBox<Map<dynamic, dynamic>>('user_devices');
-    await Hive.openBox<Map<dynamic, dynamic>>('device_statistics');
-  } catch (e) {
-    print('Erro ao inicializar boxes do Device Management: $e');
-  }
-}

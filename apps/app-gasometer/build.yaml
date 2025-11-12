@@ -8,12 +8,6 @@ targets:
           # Generate injectable config
           class_name_pattern: "Injectable*"
           
-      hive_generator:hive_generator:
-        enabled: true
-        options:
-          # Generate Hive adapters
-          part_name_pattern: "{name}.g.dart"
-          
       freezed:freezed:
         enabled: true
         options:

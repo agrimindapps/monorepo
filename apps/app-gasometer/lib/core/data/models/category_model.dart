@@ -2,11 +2,7 @@ import 'package:core/core.dart';
 
 import 'base_sync_model.dart';
 
-part 'category_model.g.dart';
-
 /// Category model with Firebase sync support
-/// TypeId: 5 - New sequential numbering
-@HiveType(typeId: 5)
 class CategoryModel extends BaseSyncModel {
   CategoryModel({
     required this.id,
@@ -62,20 +58,18 @@ class CategoryModel extends BaseSyncModel {
     );
   }
 
-  /// Create from Hive map
-  factory CategoryModel.fromHiveMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncModel.parseBaseHiveFields(map);
-
+  /// Create from map
+  factory CategoryModel.fromMap(Map<String, dynamic> map) {
     return CategoryModel(
-      id: baseFields['id'] as String,
+      id: map['id'] as String,
       createdAtMs: map['createdAt'] as int?,
       updatedAtMs: map['updatedAt'] as int?,
       lastSyncAtMs: map['lastSyncAt'] as int?,
-      isDirty: baseFields['isDirty'] as bool,
-      isDeleted: baseFields['isDeleted'] as bool,
-      version: baseFields['version'] as int,
-      userId: baseFields['userId'] as String?,
-      moduleName: baseFields['moduleName'] as String?,
+      isDirty: map['isDirty'] as bool? ?? false,
+      isDeleted: map['isDeleted'] as bool? ?? false,
+      version: map['version'] as int? ?? 1,
+      userId: map['userId'] as String?,
+      moduleName: map['moduleName'] as String?,
       categoria: (map['categoria'] as num?)?.toInt() ?? 0,
       descricao: map['descricao']?.toString() ?? '',
     );
@@ -100,50 +94,45 @@ class CategoryModel extends BaseSyncModel {
       descricao: map['descricao']?.toString() ?? '',
     );
   }
-  factory CategoryModel.fromMap(Map<String, dynamic> map) =>
-      CategoryModel.fromHiveMap(map);
   factory CategoryModel.fromJson(Map<String, dynamic> json) =>
-      CategoryModel.fromHiveMap(json);
-  @override
-  void removeFromHive() {
-  }
-  @HiveField(0)
+      CategoryModel.fromMap(json);
+
   @override
   final String id;
-  @HiveField(1)
   final int? createdAtMs;
-  @HiveField(2)
   final int? updatedAtMs;
-  @HiveField(3)
   final int? lastSyncAtMs;
-  @HiveField(4)
   @override
   final bool isDirty;
-  @HiveField(5)
   @override
   final bool isDeleted;
-  @HiveField(6)
   @override
   final int version;
-  @HiveField(7)
   @override
   final String? userId;
-  @HiveField(8)
   @override
   final String? moduleName;
-  @HiveField(10)
   final int categoria;
-  @HiveField(11)
   final String descricao;
 
   @override
   String get collectionName => 'categories';
 
-  /// Convert to Hive map
-  @override
-  Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()
-      ..addAll({'categoria': categoria, 'descricao': descricao});
+  /// Convert to map
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'createdAt': createdAtMs,
+      'updatedAt': updatedAtMs,
+      'lastSyncAt': lastSyncAtMs,
+      'isDirty': isDirty,
+      'isDeleted': isDeleted,
+      'version': version,
+      'userId': userId,
+      'moduleName': moduleName,
+      'categoria': categoria,
+      'descricao': descricao,
+    };
   }
 
   /// Convert to Firebase map
@@ -186,8 +175,8 @@ class CategoryModel extends BaseSyncModel {
       descricao: descricao ?? this.descricao,
     );
   }
-  Map<String, dynamic> toMap() => toHiveMap();
-  Map<String, dynamic> toJson() => toHiveMap();
+
+  Map<String, dynamic> toJson() => toMap();
 
   @override
   bool operator ==(Object other) {

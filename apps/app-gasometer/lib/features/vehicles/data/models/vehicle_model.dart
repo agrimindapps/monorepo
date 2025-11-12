@@ -4,8 +4,6 @@ import '../../../../core/data/models/base_sync_model.dart';
 import '../../domain/entities/fuel_type_mapper.dart';
 import '../../domain/entities/vehicle_entity.dart';
 
-part 'vehicle_model.g.dart';
-
 /// Helper function to safely convert dynamic values to bool
 bool _parseBool(dynamic value) {
   if (value is bool) return value;
@@ -19,8 +17,6 @@ bool _parseBool(dynamic value) {
 }
 
 /// Vehicle model with Firebase sync support
-/// TypeId: 10 - Gasometer range (10-19) to avoid conflicts with other apps
-@HiveType(typeId: 10)
 class VehicleModel extends BaseSyncModel {
   VehicleModel({
     required this.id,
@@ -100,38 +96,6 @@ class VehicleModel extends BaseSyncModel {
     );
   }
 
-  /// Create from Hive map
-  factory VehicleModel.fromHiveMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncModel.parseBaseHiveFields(map);
-
-    return VehicleModel(
-      id: baseFields['id'] as String,
-      createdAtMs: map['createdAt'] as int?,
-      updatedAtMs: map['updatedAt'] as int?,
-      lastSyncAtMs: map['lastSyncAt'] as int?,
-      isDirty: baseFields['isDirty'] as bool,
-      isDeleted: baseFields['isDeleted'] as bool,
-      version: baseFields['version'] as int,
-      userId: baseFields['userId'] as String?,
-      moduleName: baseFields['moduleName'] as String?,
-      marca: map['marca']?.toString() ?? '',
-      modelo: map['modelo']?.toString() ?? '',
-      ano: (map['ano'] as num?)?.toInt() ?? 0,
-      placa: map['placa']?.toString() ?? '',
-      odometroInicial: (map['odometroInicial'] as num? ?? 0.0).toDouble(),
-      combustivel:
-          (map['combustivel'] as num?)?.toInt() ??
-          FuelTypeMapper.toIndex(FuelType.gasoline),
-      renavan: map['renavan']?.toString() ?? '',
-      chassi: map['chassi']?.toString() ?? '',
-      cor: map['cor']?.toString() ?? '',
-      vendido: _parseBool(map['vendido']),
-      valorVenda: (map['valorVenda'] as num? ?? 0.0).toDouble(),
-      odometroAtual: (map['odometroAtual'] as num? ?? 0.0).toDouble(),
-      foto: map['foto']?.toString(),
-    );
-  }
-
   /// Create from Firebase map
   factory VehicleModel.fromFirebaseMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
@@ -184,10 +148,9 @@ class VehicleModel extends BaseSyncModel {
       placa: entity.licensePlate,
       odometroInicial:
           (entity.metadata['odometroInicial'] as num?)?.toDouble() ?? 0.0,
-      combustivel:
-          entity.supportedFuels.isNotEmpty
-              ? FuelTypeMapper.toIndex(entity.supportedFuels.first)
-              : FuelTypeMapper.toIndex(FuelType.gasoline),
+      combustivel: entity.supportedFuels.isNotEmpty
+          ? FuelTypeMapper.toIndex(entity.supportedFuels.first)
+          : FuelTypeMapper.toIndex(FuelType.gasoline),
       renavan: entity.metadata['renavan']?.toString() ?? '',
       chassi: entity.metadata['chassi']?.toString() ?? '',
       cor: entity.color,
@@ -208,60 +171,38 @@ class VehicleModel extends BaseSyncModel {
         json.containsKey('updated_at')) {
       return VehicleModel.fromFirebaseMap(json);
     } else {
-      return VehicleModel.fromHiveMap(json);
+      // Fallback to standard JSON parsing
+      return VehicleModel.fromFirebaseMap(json);
     }
   }
-  @override
-  void removeFromHive() {}
-  @HiveField(0)
+
   @override
   final String id;
-  @HiveField(1)
   final int? createdAtMs;
-  @HiveField(2)
   final int? updatedAtMs;
-  @HiveField(3)
   final int? lastSyncAtMs;
-  @HiveField(4)
   @override
   final bool isDirty;
-  @HiveField(5)
   @override
   final bool isDeleted;
-  @HiveField(6)
   @override
   final int version;
-  @HiveField(7)
   @override
   final String? userId;
-  @HiveField(8)
   @override
   final String? moduleName;
-  @HiveField(10)
   final String marca;
-  @HiveField(11)
   final String modelo;
-  @HiveField(12)
   final int ano;
-  @HiveField(13)
   final String placa;
-  @HiveField(14)
   final double odometroInicial;
-  @HiveField(15)
   final int combustivel;
-  @HiveField(16)
   final String renavan;
-  @HiveField(17)
   final String chassi;
-  @HiveField(18)
   final String cor;
-  @HiveField(19)
   final bool vendido;
-  @HiveField(20)
   final double valorVenda;
-  @HiveField(21)
   final double odometroAtual;
-  @HiveField(22)
   final String? foto;
 
   @override
@@ -284,26 +225,6 @@ class VehicleModel extends BaseSyncModel {
   DateTime? get lastSyncAt => lastSyncAtMs != null
       ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs!)
       : null;
-
-  /// Convert to Hive map
-  @override
-  Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()..addAll({
-      'marca': marca,
-      'modelo': modelo,
-      'ano': ano,
-      'placa': placa,
-      'odometroInicial': odometroInicial,
-      'combustivel': combustivel,
-      'renavan': renavan,
-      'chassi': chassi,
-      'cor': cor,
-      'vendido': vendido,
-      'valorVenda': valorVenda,
-      'odometroAtual': odometroAtual,
-      'foto': foto,
-    });
-  }
 
   /// Convert to Firebase map
   @override

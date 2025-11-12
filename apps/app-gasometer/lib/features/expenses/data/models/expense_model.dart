@@ -2,23 +2,19 @@ import 'package:core/core.dart';
 
 import '../../../../core/data/models/base_sync_model.dart';
 
-part 'expense_model.g.dart';
-
 /// Expense (Despesa) model with Firebase sync support
 /// TypeId: 13 - Gasometer range (10-19) to avoid conflicts with other apps
-@HiveType(typeId: 13)
 class ExpenseModel extends BaseSyncModel {
-
   ExpenseModel({
-    required this.id,
-    this.createdAtMs,
-    this.updatedAtMs,
-    this.lastSyncAtMs,
-    this.isDirty = false,
-    this.isDeleted = false,
-    this.version = 1,
-    this.userId,
-    this.moduleName = 'gasometer',
+    required String id,
+    int? createdAtMs,
+    int? updatedAtMs,
+    int? lastSyncAtMs,
+    bool isDirty = false,
+    bool isDeleted = false,
+    int version = 1,
+    String? userId,
+    String? moduleName = 'gasometer',
     this.veiculoId = '',
     this.tipo = '',
     this.descricao = '',
@@ -31,16 +27,35 @@ class ExpenseModel extends BaseSyncModel {
     this.metadata = const {},
     this.receiptImageUrl,
   }) : super(
-          id: id,
-          createdAt: createdAtMs != null ? DateTime.fromMillisecondsSinceEpoch(createdAtMs) : null,
-          updatedAt: updatedAtMs != null ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs) : null,
-          lastSyncAt: lastSyncAtMs != null ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs) : null,
-          isDirty: isDirty,
-          isDeleted: isDeleted,
-          version: version,
-          userId: userId,
-          moduleName: moduleName,
-        );
+         id: id,
+         createdAt: createdAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
+             : null,
+         updatedAt: updatedAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
+             : null,
+         lastSyncAt: lastSyncAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
+             : null,
+         isDirty: isDirty,
+         isDeleted: isDeleted,
+         version: version,
+         userId: userId,
+         moduleName: moduleName,
+       );
+
+  // Field declarations
+  final String veiculoId;
+  final String tipo;
+  final String descricao;
+  final double valor;
+  final int data;
+  final double odometro;
+  final String? receiptImagePath;
+  final String? location;
+  final String? notes;
+  final Map<String, dynamic> metadata;
+  final String? receiptImageUrl;
 
   /// Factory constructor for creating new expense
   factory ExpenseModel.create({
@@ -81,40 +96,12 @@ class ExpenseModel extends BaseSyncModel {
     );
   }
 
-  /// Create from Hive map
-  factory ExpenseModel.fromHiveMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncModel.parseBaseHiveFields(map);
-
-    return ExpenseModel(
-      id: baseFields['id'] as String,
-      createdAtMs: map['createdAt'] as int?,
-      updatedAtMs: map['updatedAt'] as int?,
-      lastSyncAtMs: map['lastSyncAt'] as int?,
-      isDirty: baseFields['isDirty'] as bool,
-      isDeleted: baseFields['isDeleted'] as bool,
-      version: baseFields['version'] as int,
-      userId: baseFields['userId'] as String?,
-      moduleName: baseFields['moduleName'] as String?,
-      veiculoId: map['veiculoId']?.toString() ?? '',
-      tipo: map['tipo']?.toString() ?? '',
-      descricao: map['descricao']?.toString() ?? '',
-      valor: (map['valor'] as num? ?? 0.0).toDouble(),
-      data: (map['data'] as num?)?.toInt() ?? 0,
-      odometro: (map['odometro'] as num? ?? 0.0).toDouble(),
-      receiptImagePath: map['receiptImagePath']?.toString(),
-      location: map['location']?.toString(),
-      notes: map['notes']?.toString(),
-      metadata: Map<String, dynamic>.from((map['metadata'] as Map<dynamic, dynamic>?) ?? {}),
-      receiptImageUrl: map['receiptImageUrl']?.toString(),
-    );
-  }
-
   /// Create from Firebase map
   factory ExpenseModel.fromFirebaseMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
 
     final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
-    
+
     return ExpenseModel(
       id: baseFields['id'] as String,
       createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
@@ -134,73 +121,20 @@ class ExpenseModel extends BaseSyncModel {
       receiptImagePath: map['receipt_image_path']?.toString(),
       location: map['location']?.toString(),
       notes: map['notes']?.toString(),
-      metadata: Map<String, dynamic>.from((map['metadata'] as Map<dynamic, dynamic>?) ?? {}),
+      metadata: Map<String, dynamic>.from(
+        (map['metadata'] as Map<dynamic, dynamic>?) ?? {},
+      ),
       receiptImageUrl: map['receipt_image_url']?.toString(),
     );
   }
 
-  /// FIXED: fromJson now correctly handles Firebase Timestamp objects
+  /// Create from JSON map (Firebase format)
   factory ExpenseModel.fromJson(Map<String, dynamic> json) {
-    final hasTimestamp = json.values.any((value) => value is Timestamp);
-    
-    if (hasTimestamp || json.containsKey('created_at') || json.containsKey('updated_at')) {
-      return ExpenseModel.fromFirebaseMap(json);
-    } else {
-      return ExpenseModel.fromHiveMap(json);
-    }
+    return ExpenseModel.fromFirebaseMap(json);
   }
-  @HiveField(0) @override final String id;
-  @HiveField(1) final int? createdAtMs;
-  @HiveField(2) final int? updatedAtMs;
-  @HiveField(3) final int? lastSyncAtMs;
-  @HiveField(4) @override final bool isDirty;
-  @HiveField(5) @override final bool isDeleted;
-  @HiveField(6) @override final int version;
-  @HiveField(7) @override final String? userId;
-  @HiveField(8) @override final String? moduleName;
-  @HiveField(10)
-  final String veiculoId;
-  @HiveField(11)
-  final String tipo;
-  @HiveField(12)
-  final String descricao;
-  @HiveField(13)
-  final double valor;
-  @HiveField(14)
-  final int data;
-  @HiveField(15)
-  final double odometro;
-  @HiveField(16)
-  final String? receiptImagePath;
-  @HiveField(17)
-  final String? location;
-  @HiveField(18)
-  final String? notes;
-  @HiveField(19)
-  final Map<String, dynamic> metadata;
-  @HiveField(20)
-  final String? receiptImageUrl;
 
   @override
   String get collectionName => 'expenses';
-
-  /// Convert to Hive map
-  @override
-  Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()..addAll({
-      'veiculoId': veiculoId,
-      'tipo': tipo,
-      'descricao': descricao,
-      'valor': valor,
-      'data': data,
-      'odometro': odometro,
-      'receiptImagePath': receiptImagePath,
-      'location': location,
-      'notes': notes,
-      'metadata': metadata,
-      'receiptImageUrl': receiptImageUrl,
-    });
-  }
 
   /// Convert to Firebase map
   @override
@@ -248,9 +182,15 @@ class ExpenseModel extends BaseSyncModel {
   }) {
     return ExpenseModel(
       id: id ?? this.id,
-      createdAtMs: createdAt?.millisecondsSinceEpoch ?? createdAtMs,
-      updatedAtMs: updatedAt?.millisecondsSinceEpoch ?? updatedAtMs,
-      lastSyncAtMs: lastSyncAt?.millisecondsSinceEpoch ?? lastSyncAtMs,
+      createdAtMs:
+          createdAt?.millisecondsSinceEpoch ??
+          this.createdAt?.millisecondsSinceEpoch,
+      updatedAtMs:
+          updatedAt?.millisecondsSinceEpoch ??
+          this.updatedAt?.millisecondsSinceEpoch,
+      lastSyncAtMs:
+          lastSyncAt?.millisecondsSinceEpoch ??
+          this.lastSyncAt?.millisecondsSinceEpoch,
       isDirty: isDirty ?? this.isDirty,
       isDeleted: isDeleted ?? this.isDeleted,
       version: version ?? this.version,
@@ -269,7 +209,6 @@ class ExpenseModel extends BaseSyncModel {
       receiptImageUrl: receiptImageUrl ?? this.receiptImageUrl,
     );
   }
-
 
   /// Get the expense date as DateTime object
   DateTime get expenseDate => DateTime.fromMillisecondsSinceEpoch(data);

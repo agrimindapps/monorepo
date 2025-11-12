@@ -80,7 +80,7 @@
 
 - **Sincronização Multi-dispositivo**
   - Sync em tempo real com Firebase
-  - Suporte offline com Hive
+  - Suporte offline com Drift (SQLite)
   - Fila inteligente de sincronização
   - Resolução automática de conflitos
   - **📖 [Documentação Completa de Sincronismo](./docs/SYNC_ARCHITECTURE.md)**

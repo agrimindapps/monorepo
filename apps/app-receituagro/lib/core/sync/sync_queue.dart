@@ -26,7 +26,9 @@ class SyncQueue {
       // Use IHiveManager to get box as Box<dynamic> (matches BoxRegistryService pattern)
       final result = await _hiveManager.getBox<dynamic>('syncQueue');
       if (result.isFailure) {
-        throw Exception('Failed to open syncQueue box: ${result.error?.message}');
+        throw Exception(
+          'Failed to open syncQueue box: ${result.error?.message}',
+        );
       }
       _syncQueueBox = result.data;
       _notifyQueueUpdated();
@@ -111,7 +113,10 @@ class SyncQueue {
   }
 
   /// Increment retry count for failed sync
-  Future<void> incrementRetryCount(String itemId, {String? errorMessage}) async {
+  Future<void> incrementRetryCount(
+    String itemId, {
+    String? errorMessage,
+  }) async {
     _ensureInitialized();
 
     final item = _getAllSyncItems().firstWhere(

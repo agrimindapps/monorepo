@@ -82,9 +82,7 @@ class FavoritoRepository
   /// Busca todos os favoritos do usuário
   Future<List<FavoritoData>> findByUserId(String userId) async {
     final query = _db.select(_db.favoritos)
-      ..where(
-        (tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false),
-      )
+      ..where((tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false))
       ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]);
 
     final results = await query.get();
@@ -94,21 +92,16 @@ class FavoritoRepository
   /// Stream de favoritos do usuário
   Stream<List<FavoritoData>> watchByUserId(String userId) {
     final query = _db.select(_db.favoritos)
-      ..where(
-        (tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false),
-      )
+      ..where((tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false))
       ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]);
 
-    return query
-        .watch()
-        .map((dataList) => dataList.map((data) => fromData(data)).toList());
+    return query.watch().map(
+      (dataList) => dataList.map((data) => fromData(data)).toList(),
+    );
   }
 
   /// Stream de favoritos por tipo
-  Stream<List<FavoritoData>> watchByUserAndType(
-    String userId,
-    String tipo,
-  ) {
+  Stream<List<FavoritoData>> watchByUserAndType(String userId, String tipo) {
     final query = _db.select(_db.favoritos)
       ..where(
         (tbl) =>
@@ -118,9 +111,9 @@ class FavoritoRepository
       )
       ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]);
 
-    return query
-        .watch()
-        .map((dataList) => dataList.map((data) => fromData(data)).toList());
+    return query.watch().map(
+      (dataList) => dataList.map((data) => fromData(data)).toList(),
+    );
   }
 
   /// Verifica se um item está favoritado
@@ -197,15 +190,16 @@ class FavoritoRepository
     final favorito = await findByUserTypeAndItem(userId, tipo, itemId);
     if (favorito == null) return false;
 
-    final rowsAffected = await (_db.update(_db.favoritos)
-          ..where((tbl) => tbl.id.equals(favorito.id)))
-        .write(
-      FavoritosCompanion(
-        isDeleted: const Value(true),
-        isDirty: const Value(true),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+    final rowsAffected =
+        await (_db.update(
+          _db.favoritos,
+        )..where((tbl) => tbl.id.equals(favorito.id))).write(
+          FavoritosCompanion(
+            isDeleted: const Value(true),
+            isDirty: const Value(true),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
 
     return rowsAffected > 0;
   }
@@ -213,10 +207,8 @@ class FavoritoRepository
   /// @deprecated Legacy method - remove favorito sem userId (busca qualquer user)
   Future<bool> removeFavoritoLegacy(String tipo, String itemId) async {
     final query = _db.delete(_db.favoritos)
-      ..where((tbl) => 
-          tbl.tipo.equals(tipo) & 
-          tbl.itemId.equals(itemId));
-    
+      ..where((tbl) => tbl.tipo.equals(tipo) & tbl.itemId.equals(itemId));
+
     final rowsAffected = await query.go();
     return rowsAffected > 0;
   }
@@ -234,8 +226,9 @@ class FavoritoRepository
   Future<void> markAsSynced(List<int> favoritoIds) async {
     await _db.executeTransaction(() async {
       for (final id in favoritoIds) {
-        await (_db.update(_db.favoritos)..where((tbl) => tbl.id.equals(id)))
-            .write(
+        await (_db.update(
+          _db.favoritos,
+        )..where((tbl) => tbl.id.equals(id))).write(
           FavoritosCompanion(
             isDirty: const Value(false),
             lastSyncAt: Value(DateTime.now()),
@@ -246,14 +239,9 @@ class FavoritoRepository
   }
 
   /// Busca favoritos recentes (últimos N)
-  Future<List<FavoritoData>> findRecent(
-    String userId, {
-    int limit = 10,
-  }) async {
+  Future<List<FavoritoData>> findRecent(String userId, {int limit = 10}) async {
     final query = _db.select(_db.favoritos)
-      ..where(
-        (tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false),
-      )
+      ..where((tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false))
       ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)])
       ..limit(limit);
 
@@ -268,9 +256,7 @@ class FavoritoRepository
   /// @deprecated Legacy method - busca favoritos por tipo
   Future<List<FavoritoData>> getFavoritosByTipoAsync(String tipo) async {
     final query = _db.select(_db.favoritos)
-      ..where((tbl) => 
-          tbl.tipo.equals(tipo) & 
-          tbl.isDeleted.equals(false))
+      ..where((tbl) => tbl.tipo.equals(tipo) & tbl.isDeleted.equals(false))
       ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]);
 
     final results = await query.get();
@@ -292,10 +278,12 @@ class FavoritoRepository
   /// @deprecated Legacy method - verifica se é favorito
   Future<bool> isFavorito(String tipo, String itemId) async {
     final query = _db.select(_db.favoritos)
-      ..where((tbl) => 
-          tbl.tipo.equals(tipo) & 
-          tbl.itemId.equals(itemId) &
-          tbl.isDeleted.equals(false))
+      ..where(
+        (tbl) =>
+            tbl.tipo.equals(tipo) &
+            tbl.itemId.equals(itemId) &
+            tbl.isDeleted.equals(false),
+      )
       ..limit(1);
 
     final result = await query.getSingleOrNull();
@@ -304,8 +292,9 @@ class FavoritoRepository
 
   /// @deprecated Legacy method - limpa favoritos por tipo
   Future<void> clearFavoritosByTipo(String tipo) async {
-    await (_db.delete(_db.favoritos)
-      ..where((tbl) => tbl.tipo.equals(tipo))).go();
+    await (_db.delete(
+      _db.favoritos,
+    )..where((tbl) => tbl.tipo.equals(tipo))).go();
   }
 
   /// @deprecated Legacy method - estatísticas de favoritos

@@ -64,7 +64,11 @@ class FavoritosStorageService implements IFavoritosStorage {
         'adicionadoEm': DateTime.now().toIso8601String(),
       };
 
-      final result = await _repository.addFavorito(tipoKey, id, itemData.toString());
+      final result = await _repository.addFavorito(
+        tipoKey,
+        id,
+        itemData.toString(),
+      );
       return result > 0; // Converte int (id inserido) para bool
     } catch (e) {
       throw FavoritosException(

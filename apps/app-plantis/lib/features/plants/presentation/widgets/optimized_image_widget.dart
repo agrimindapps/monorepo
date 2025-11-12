@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/unified_image_widget.dart';
 
-/// Legacy wrapper for OptimizedImageWidget - now uses UnifiedImageWidget
-/// Kept for backward compatibility during transition
+/// @deprecated Use UnifiedImageWidget directly. Kept for backward compatibility.
 class OptimizedImageWidget extends StatelessWidget {
   final String? imageUrl;
   final String? base64Image;

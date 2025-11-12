@@ -215,7 +215,6 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
     );
   }
 
-  /// Delete a comment
   Future<bool> deleteComment(String commentId) async {
     final currentState = state.valueOrNull ?? const PlantCommentsState();
     final commentIndex =

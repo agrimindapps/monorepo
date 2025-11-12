@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/empty_state_widget.dart';
 
-/// Legacy wrapper for EmptyPlantsWidget - now uses consolidated EmptyStateWidget
-/// Kept for backward compatibility during transition
+/// @deprecated Use EmptyStateWidget directly. Kept for backward compatibility.
 class EmptyPlantsWidget extends StatelessWidget {
   final bool isSearching;
   final String searchQuery;

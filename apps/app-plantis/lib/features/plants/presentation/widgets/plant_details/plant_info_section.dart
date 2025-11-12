@@ -305,7 +305,6 @@ class PlantInfoSection extends ConsumerWidget {
             onPressed: () async {
               final newNotes = notesController.text.trim();
 
-              // Cria os parâmetros de atualização
               final updateParams = UpdatePlantParams(
                 id: plant.id,
                 name: plant.name,

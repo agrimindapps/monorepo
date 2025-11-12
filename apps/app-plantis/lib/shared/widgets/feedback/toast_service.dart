@@ -157,7 +157,6 @@ class ToastService {
     _showToast(context, controller);
   }
 
-  /// Remove o toast atual
   void dismiss() {
     if (_currentToast != null) {
       _currentToast!.remove();

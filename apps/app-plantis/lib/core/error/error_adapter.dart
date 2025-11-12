@@ -102,7 +102,6 @@ mixin ErrorHandlingMixin on ChangeNotifier {
   AppError? get lastError => _lastError;
   bool get hasError => _hasError;
 
-  /// Limpa o erro atual
   void clearError() {
     if (_hasError) {
       _lastError = null;

@@ -84,27 +84,8 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
     if (authState.hasValue &&
         authState.value!.isAuthenticated &&
         !authState.value!.isAnonymous) {
-      _monitorBackgroundSync();
+      // Background sync monitoring is handled by the sync service
     }
-  }
-
-  void _monitorBackgroundSync() {
-    // Timer.periodic(const Duration(minutes: 15), (timer) {
-    //   if (mounted) {
-    //     WidgetsBinding.instance.addPostFrameCallback((_) {
-    //       if (mounted) {
-    //         final authState = ref.read(authProvider);
-    //         if (authState.hasValue &&
-    //             authState.value!.isAuthenticated &&
-    //             !authState.value!.isAnonymous) {
-    //           ref.read(riverpod_plants.plantsNotifierProvider.notifier).refreshPlants();
-    //         }
-    //       }
-    //     });
-    //   } else {
-    //     timer.cancel();
-    //   }
-    // });
   }
 
   @override

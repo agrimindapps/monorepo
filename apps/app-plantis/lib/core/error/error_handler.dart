@@ -92,7 +92,6 @@ class ErrorHandler {
     return List.unmodifiable(_errorHistory);
   }
 
-  /// Limpa o histórico de erros
   void clearHistory() {
     _errorHistory.clear();
   }

@@ -35,7 +35,6 @@ class CachedImage {
         'downloadUrl': downloadUrl,
       };
 
-  /// Cria a partir de JSON
   factory CachedImage.fromJson(Map<String, dynamic> json) => CachedImage(
         id: json['id'] as String,
         base64Data: json['base64Data'] as String,
@@ -240,7 +239,6 @@ class LocalImageCacheService {
     }
   }
 
-  /// Remove imagem do cache
   Future<Either<Failure, void>> removeImage(String id) async {
     try {
       if (!_initialized) {
@@ -257,7 +255,6 @@ class LocalImageCacheService {
     }
   }
 
-  /// Limpa todo o cache
   Future<Either<Failure, void>> clearCache() async {
     try {
       if (!_initialized) {

@@ -237,7 +237,6 @@ class PlantisRealtimeService with WidgetsBindingObserver {
     };
   }
 
-  /// Limpa recursos
   Future<void> dispose() async {
     try {
       WidgetsBinding.instance.removeObserver(this);

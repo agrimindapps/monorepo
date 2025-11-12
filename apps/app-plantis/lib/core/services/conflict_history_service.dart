@@ -44,13 +44,11 @@ class ConflictHistoryService {
     return await _driftService.getRecent(limit: 1000);
   }
 
-  /// Remove um registro específico de conflito
   Future<void> removeConflict(String conflictId) async {
     // Drift não tem delete por ID - marcar como resolvido é equivalente
     await _driftService.markAsResolved(conflictId);
   }
 
-  /// Limpar histórico de conflitos
   Future<void> clearConflictHistory() async {
     await _driftService.clearAll();
   }

@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/unified_image_widget.dart';
 
-/// Legacy wrapper for OptimizedPlantImageWidget - now uses UnifiedImageWidget
-/// Kept for backward compatibility during transition
+/// @deprecated Use UnifiedImageWidget directly. Kept for backward compatibility.
 class OptimizedPlantImageWidget extends StatelessWidget {
   final String? imageBase64;
   final List<String> imageUrls;

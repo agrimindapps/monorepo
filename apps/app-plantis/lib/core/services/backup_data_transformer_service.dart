@@ -85,7 +85,6 @@ class BackupDataTransformerService {
     }
   }
 
-  /// Cria Plant a partir de dados de backup
   Plant createPlantFromBackupData(Map<String, dynamic> data, String userId) {
     try {
       return Plant(
@@ -109,7 +108,6 @@ class BackupDataTransformerService {
     }
   }
 
-  /// Cria Task a partir de dados de backup
   Task createTaskFromBackupData(Map<String, dynamic> data, String userId) {
     try {
       return Task(
@@ -137,7 +135,6 @@ class BackupDataTransformerService {
     }
   }
 
-  /// Cria Space a partir de dados de backup
   Space createSpaceFromBackupData(Map<String, dynamic> data, String userId) {
     try {
       return Space(

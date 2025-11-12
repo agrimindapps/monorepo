@@ -20,7 +20,6 @@ abstract class PlantCommentsRepository {
     ComentarioModel comment,
   );
 
-  /// Delete a comment
   Future<Either<Failure, void>> deleteComment(String commentId);
 
   /// Delete all comments for a specific plant

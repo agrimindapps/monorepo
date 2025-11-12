@@ -227,7 +227,6 @@ class CommentsNotifier extends _$CommentsNotifier {
     );
   }
 
-  /// Delete a comment
   Future<bool> deleteComment(String commentId) async {
     final currentState = state.valueOrNull ?? CommentsState.initial();
 

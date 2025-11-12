@@ -146,7 +146,6 @@ class PlantsListNotifier extends _$PlantsListNotifier {
     );
   }
 
-  /// Delete a plant
   Future<void> deletePlant(String id) async {
     final result = await _plantsRepository.deletePlant(id);
 

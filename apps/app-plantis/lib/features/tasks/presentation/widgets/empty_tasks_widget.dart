@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
 import '../providers/tasks_state.dart';
 
-/// Legacy wrapper for EmptyTasksWidget - now uses consolidated EmptyStateWidget
-/// Kept for backward compatibility during transition
+/// @deprecated Use EmptyStateWidget directly. Kept for backward compatibility.
 class EmptyTasksWidget extends StatelessWidget {
   final TasksFilterType filterType;
   final VoidCallback onAddTask;

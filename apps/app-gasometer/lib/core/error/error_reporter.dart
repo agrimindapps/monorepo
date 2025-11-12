@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart' as core;
-import 'package:core/core.dart' show injectable;
+import 'package:core/core.dart' as core show injectable;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import '../di/injection.dart';

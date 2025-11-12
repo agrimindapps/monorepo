@@ -2,7 +2,7 @@ import 'package:core/core.dart' show GetIt;
 
 import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
-import '../../../../database/repositories/legacy_type_aliases.dart';
+
 import '../../../../database/repositories/pragas_repository.dart';
 import '../../domain/entities/favorito_entity.dart';
 
@@ -66,8 +66,8 @@ class PragaResolverStrategy implements IFavoritosDataResolverStrategy {
 /// Estratégia para resolver dados de diagnósticos
 class DiagnosticoResolverStrategy implements IFavoritosDataResolverStrategy {
   // ✅ Lazy loading: obtém o repo apenas quando necessário
-  DiagnosticoLegacyRepository get _repository =>
-      GetIt.instance<DiagnosticoLegacyRepository>();
+  DiagnosticoRepository get _repository =>
+      GetIt.instance<DiagnosticoRepository>();
 
   @override
   Future<Map<String, dynamic>?> resolveItemData(String id) async {

@@ -1,7 +1,5 @@
 import 'package:core/core.dart' hide ConflictResolutionStrategy, Column;
 import '../data/models/base_sync_model.dart';
-import '../data/models/comentario_legacy.dart';
-import '../data/models/diagnostico_legacy.dart';
 import 'conflict_resolution_strategy.dart';
 
 @injectable
@@ -40,10 +38,10 @@ class ConflictResolver {
           conflictData.localData as ComentarioHive,
           conflictData.remoteData as ComentarioHive,
         );
-      case 'DiagnosticoHive':
+      case 'Diagnostico':
         return _mergeDiagnosticoModel(
-          conflictData.localData as DiagnosticoHive,
-          conflictData.remoteData as DiagnosticoHive,
+          conflictData.localData as Diagnostico,
+          conflictData.remoteData as Diagnostico,
         );
       default:
         // Para tipos não implementados, usa newerWins
@@ -74,15 +72,15 @@ class ConflictResolver {
     );
   }
 
-  /// Merge específico para DiagnosticoHive
-  DiagnosticoHive _mergeDiagnosticoModel(
-    DiagnosticoHive local,
-    DiagnosticoHive remote,
+  /// Merge específico para Diagnostico
+  Diagnostico _mergeDiagnosticoModel(
+    Diagnostico local,
+    Diagnostico remote,
   ) {
     // Para diagnósticos, mesclamos informações preservando dados locais mais recentes
     final isLocalNewer = local.updatedAt >= remote.updatedAt;
 
-    return DiagnosticoHive(
+    return Diagnostico(
       objectId: local.objectId,
       createdAt: local.createdAt,
       updatedAt: isLocalNewer ? local.updatedAt : remote.updatedAt,

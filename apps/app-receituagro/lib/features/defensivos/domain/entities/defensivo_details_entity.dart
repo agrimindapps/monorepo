@@ -1,8 +1,8 @@
-import '../../../../core/data/models/fitossanitario_legacy.dart';
+
 import '../../../../database/receituagro_database.dart';
 
 /// Entity que representa os detalhes de um defensivo
-/// Encapsula dados vindos do FitossanitarioHive mantendo clean architecture
+/// Encapsula dados vindos do Fitossanitario mantendo clean architecture
 class DefensivoDetailsEntity {
   final String id;
   final String nomeComum;
@@ -37,7 +37,7 @@ class DefensivoDetailsEntity {
   });
 
   /// Cria entity a partir do modelo Hive
-  factory DefensivoDetailsEntity.fromHive(FitossanitarioHive hive) {
+  factory DefensivoDetailsEntity.fromHive(Fitossanitario hive) {
     return DefensivoDetailsEntity(
       id: hive.idReg,
       nomeComum: hive.nomeComum,

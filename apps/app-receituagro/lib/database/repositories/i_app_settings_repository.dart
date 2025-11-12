@@ -1,4 +1,3 @@
-import 'package:core/core.dart';
 import '../../core/models/app_settings.dart';
 
 /// Interface para repositório de configurações do app

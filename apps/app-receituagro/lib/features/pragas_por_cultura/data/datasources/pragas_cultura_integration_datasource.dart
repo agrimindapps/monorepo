@@ -2,19 +2,18 @@ import 'package:core/core.dart' hide Column;
 
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../../database/repositories/pragas_repository.dart';
-// DEPRECATED: import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
 
 /// Integração com serviços existentes para obter pragas por cultura
 ///
 /// Responsabilidades:
 /// - Consultar PragasRepository (Drift) para dados base de pragas
-/// - Integrar dados de diagnóstico (DiagnosticoLegacyRepository)
+/// - Integrar dados de diagnóstico (DiagnosticoRepository)
 /// - Integrar dados de defensivos (FitossanitariosRepository Drift)
 /// - Retornar lista consolidada de pragas para uma cultura específica
 @injectable
 class PragasCulturaIntegrationDataSource {
   final PragasRepository _pragasRepository;
-  final DiagnosticoLegacyRepository _diagnosticoRepository;
+  final DiagnosticoRepository _diagnosticoRepository;
   final FitossanitariosRepository _fitossanitarioRepository;
 
   const PragasCulturaIntegrationDataSource(

@@ -1,5 +1,3 @@
-import 'package:core/core.dart' hide LoggingService;
-
 import '../sync/conflict_resolution_strategy.dart';
 import '../data/models/base_sync_model.dart';
 

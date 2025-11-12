@@ -1,5 +1,3 @@
-import '../../../../core/data/models/pragas_legacy.dart';
-
 /// Entidade de domínio para Praga (Domain Layer)
 /// Princípio: Single Responsibility - Apenas representa dados da praga
 class PragaEntity {
@@ -26,7 +24,7 @@ class PragaEntity {
   });
 
   /// Factory para criar do Hive model
-  factory PragaEntity.fromHive(PragasHive hiveModel) {
+  factory PragaEntity.fromHive(Praga hiveModel) {
     return PragaEntity(
       idReg: hiveModel.idReg,
       nomeComum: hiveModel.nomeComum,

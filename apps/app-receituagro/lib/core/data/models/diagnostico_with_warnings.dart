@@ -1,9 +1,10 @@
-import '../models/cultura_legacy.dart';
-import '../models/diagnostico_legacy.dart';
-import '../models/fitossanitario_legacy.dart';
-import '../models/pragas_legacy.dart';
 
-/// Wrapper que enriquece DiagnosticoHive com dados relacionados e avisos
+import '../../../features/diagnosticos/domain/entities/diagnostico_entity.dart';
+import '../../../features/defensivos/domain/entities/defensivo_entity.dart';
+import '../../../features/pragas/domain/entities/praga_entity.dart';
+import '../../../features/culturas/domain/entities/cultura_entity.dart';
+
+/// Wrapper que enriquece Diagnostico com dados relacionados e avisos
 ///
 /// Fornece acesso seguro a entidades relacionadas (defensivo, praga, cultura)
 /// e lista de avisos quando referências não são encontradas.
@@ -23,16 +24,16 @@ import '../models/pragas_legacy.dart';
 /// ```
 class DiagnosticoWithWarnings {
   /// Dados do diagnóstico original
-  final DiagnosticoHive data;
+  final DiagnosticoEntity data;
 
   /// Entidade relacionada: Defensivo/Fitossanitário
-  final FitossanitarioHive? defensivo;
+  final DefensivoEntity? defensivo;
 
   /// Entidade relacionada: Praga
-  final PragasHive? praga;
+  final PragaEntity? praga;
 
   /// Entidade relacionada: Cultura
-  final CulturaHive? cultura;
+  final CulturaEntity? cultura;
 
   /// Lista de avisos de integridade referencial
   ///
@@ -59,7 +60,7 @@ class DiagnosticoWithWarnings {
 
   /// Nome técnico do defensivo (com fallback)
   String get nomeTecnicoDefensivo =>
-      defensivo?.nomeTecnico ?? 'Nome técnico não disponível';
+      defensivo?.nome ?? 'Nome técnico não disponível';
 
   /// Nome da praga (com fallback seguro)
   String get nomePraga =>
@@ -71,7 +72,7 @@ class DiagnosticoWithWarnings {
 
   /// Nome da cultura (com fallback seguro)
   String get nomeCultura =>
-      cultura?.cultura ?? data.nomeCultura ?? 'Cultura não encontrada';
+      cultura?.nome ?? data.nomeCultura ?? 'Cultura não encontrada';
 
   /// Classe agronômica do defensivo (com fallback)
   String get classeAgronomica =>
@@ -89,35 +90,35 @@ class DiagnosticoWithWarnings {
 
   /// Dose mínima com unidade de medida
   String get doseMinima {
-    final min = data.dsMin;
-    if (min == null || min.isEmpty) return 'Não especificada';
-    return '$min ${data.um}';
+    final min = data.dosagem.dosagemMinima;
+    if (min == null) return 'Não especificada';
+    return '$min ${data.dosagem.unidadeMedida}';
   }
 
   /// Dose máxima com unidade de medida
   String get doseMaxima {
-    final max = data.dsMax;
-    if (max.isEmpty) return 'Não especificada';
-    return '$max ${data.um}';
+    final max = data.dosagem.dosagemMaxima;
+    return '$max ${data.dosagem.unidadeMedida}';
   }
 
   /// Intervalo de aplicação formatado
   String get intervaloAplicacao {
-    if (data.intervalo == null || data.intervalo!.isEmpty) {
+    if (data.aplicacao.intervaloReaplicacao == null || 
+        data.aplicacao.intervaloReaplicacao!.isEmpty) {
       return 'Não especificado';
     }
-    return '${data.intervalo} dias';
+    return '${data.aplicacao.intervaloReaplicacao} dias';
   }
 
   /// Época de aplicação (com fallback)
-  String get epocaAplicacao => data.epocaAplicacao ?? 'Não especificada';
+  String get epocaAplicacao => data.aplicacao.epocaAplicacao ?? 'Não especificada';
 
   /// Cria uma cópia com warnings atualizados
   DiagnosticoWithWarnings copyWith({
-    DiagnosticoHive? data,
-    FitossanitarioHive? defensivo,
-    PragasHive? praga,
-    CulturaHive? cultura,
+    DiagnosticoEntity? data,
+    DefensivoEntity? defensivo,
+    PragaEntity? praga,
+    CulturaEntity? cultura,
     List<String>? warnings,
   }) {
     return DiagnosticoWithWarnings(
@@ -132,7 +133,7 @@ class DiagnosticoWithWarnings {
   /// Converte para Map (útil para logging/debugging)
   Map<String, dynamic> toMap() {
     return {
-      'diagnosticoId': data.idReg,
+      'diagnosticoId': data.id,
       'nomeDefensivo': nomeDefensivo,
       'nomePraga': nomePraga,
       'nomeCultura': nomeCultura,
@@ -146,7 +147,7 @@ class DiagnosticoWithWarnings {
 
   @override
   String toString() {
-    return 'DiagnosticoWithWarnings{id: ${data.idReg}, '
+    return 'DiagnosticoWithWarnings{id: ${data.id}, '
         'defensivo: $nomeDefensivo, praga: $nomePraga, cultura: $nomeCultura, '
         'warnings: ${warnings.length}}';
   }
@@ -155,9 +156,9 @@ class DiagnosticoWithWarnings {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is DiagnosticoWithWarnings && other.data.idReg == data.idReg;
+    return other is DiagnosticoWithWarnings && other.data.id == data.id;
   }
 
   @override
-  int get hashCode => data.idReg.hashCode;
+  int get hashCode => data.id.hashCode;
 }

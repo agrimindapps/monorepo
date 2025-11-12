@@ -328,8 +328,6 @@ class _UserProfileCard extends ConsumerWidget {
       ),
     );
   }
-
-
   /// Get user display name
   String _getUserDisplayName(DeviceInfo? device) {
     if (device?.name.isNotEmpty == true) {
@@ -374,8 +372,6 @@ class _UserProfileCard extends ConsumerWidget {
   Future<void> _openUserProfileDialog(BuildContext context, SettingsState settingsState) async {
     await Navigator.pushNamed(context, '/profile');
   }
-
-
   /// Show login dialog
   void _showLoginDialog(BuildContext context, WidgetRef ref) {
     final emailController = TextEditingController();

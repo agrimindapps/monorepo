@@ -14,8 +14,6 @@ import '../../domain/usecases/update_user_settings_usecase.dart';
 import 'settings_state.dart';
 
 part 'settings_notifier.g.dart';
-
-
 /// Settings notifier for user settings management
 @riverpod
 class SettingsNotifier extends _$SettingsNotifier {

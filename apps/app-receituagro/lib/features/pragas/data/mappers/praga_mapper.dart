@@ -1,4 +1,4 @@
-import '../../../../core/data/models/pragas_legacy.dart';
+
 import '../../../../database/receituagro_database.dart';
 import '../../data/praga_model.dart';
 import '../../domain/entities/praga_entity.dart';
@@ -29,8 +29,8 @@ class PragaMapper {
     );
   }
 
-  /// Converte PragasHive para Entity
-  static PragaEntity fromHiveToEntity(PragasHive hive) {
+  /// Converte Praga para Entity
+  static PragaEntity fromHiveToEntity(Praga hive) {
     return PragaEntity(
       idReg: hive.idReg,
       nomeComum: hive.nomeComum,
@@ -44,9 +44,9 @@ class PragaMapper {
     );
   }
 
-  /// Converte Entity para PragasHive
-  static PragasHive fromEntityToHive(PragaEntity entity) {
-    return PragasHive(
+  /// Converte Entity para Praga
+  static Praga fromEntityToHive(PragaEntity entity) {
+    return Praga(
       objectId: entity.idReg,
       createdAt: 0,
       updatedAt: 0,
@@ -72,13 +72,13 @@ class PragaMapper {
     return entities.map((entity) => toModel(entity)).toList();
   }
 
-  /// Converte lista de PragasHive para Entities
-  static List<PragaEntity> fromHiveToEntityList(List<PragasHive> hives) {
+  /// Converte lista de Praga para Entities
+  static List<PragaEntity> fromHiveToEntityList(List<Praga> hives) {
     return hives.map((hive) => fromHiveToEntity(hive)).toList();
   }
 
-  /// Converte lista de Entities para PragasHive
-  static List<PragasHive> fromEntityToHiveList(List<PragaEntity> entities) {
+  /// Converte lista de Entities para Praga
+  static List<Praga> fromEntityToHiveList(List<PragaEntity> entities) {
     return entities.map((entity) => fromEntityToHive(entity)).toList();
   }
 

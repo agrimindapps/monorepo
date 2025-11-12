@@ -1,11 +1,11 @@
-import '../../../../core/data/models/diagnostico_legacy.dart';
+
 import '../../../../database/repositories/diagnostico_repository.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 
 class DiagnosticoMapper {
   const DiagnosticoMapper._();
 
-  static DiagnosticoEntity fromHive(DiagnosticoHive hive) {
+  static DiagnosticoEntity fromHive(Diagnostico hive) {
     return DiagnosticoEntity(
       id: hive.objectId,
       idDefensivo: hive.fkIdDefensivo,
@@ -85,8 +85,8 @@ class DiagnosticoMapper {
     return dataList.map(fromDrift).toList();
   }
 
-  static DiagnosticoHive toHive(DiagnosticoEntity entity) {
-    return DiagnosticoHive(
+  static Diagnostico toHive(DiagnosticoEntity entity) {
+    return Diagnostico(
       objectId: entity.id,
       createdAt:
           entity.createdAt?.millisecondsSinceEpoch ??

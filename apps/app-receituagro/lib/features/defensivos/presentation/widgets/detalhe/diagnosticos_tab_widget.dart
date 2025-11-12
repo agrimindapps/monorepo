@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../database/repositories/culturas_repository.dart';
-// DEPRECATED: import '../../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../../../../core/di/injection_container.dart';
 import '../../../../../core/theme/spacing_tokens.dart';
 import '../../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
@@ -209,7 +208,7 @@ class DiagnosticosTabWidget extends ConsumerWidget {
       // Ordena diagnósticos por nome comum da praga usando ordenação assíncrona
       // Precisamos buscar os nomes das pragas do repositório para ordenar corretamente
       final diagnosticsComNomes = <MapEntry<dynamic, String>>[];
-      final pragaRepository = sl<PragasLegacyRepository>();
+      final pragaRepository = sl<PragasRepository>();
 
       for (final diagnostic in diagnostics) {
         String nomePraga = '';

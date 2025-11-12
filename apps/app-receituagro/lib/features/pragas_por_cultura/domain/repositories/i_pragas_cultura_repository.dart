@@ -14,9 +14,9 @@ abstract class IPragasCulturaRepository {
 
   /// Get pragas for a specific cultura
   /// Integrates data from:
-  /// - PragasHive (base praga data)
-  /// - DiagnosticoHive (diagnostic count)
-  /// - FitossanitarioHive (defensive data)
+  /// - Praga (base praga data)
+  /// - Diagnostico (diagnostic count)
+  /// - Fitossanitario (defensive data)
   ///
   /// [culturaId]: ID da cultura
   /// Returns: Either of List of PragaPorCultura

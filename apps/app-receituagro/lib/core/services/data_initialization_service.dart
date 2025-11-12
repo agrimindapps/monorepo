@@ -5,10 +5,6 @@ import 'package:core/core.dart' hide Column;
 import '../../database/repositories/culturas_repository.dart';
 import '../../database/repositories/fitossanitarios_repository.dart';
 import '../../database/repositories/pragas_repository.dart';
-// DEPRECATED: import '../data/repositories/diagnostico_legacy_repository.dart';
-// DEPRECATED: import '../data/repositories/fitossanitario_info_legacy_repository.dart';
-// DEPRECATED: import '../data/repositories/plantas_inf_legacy_repository.dart';
-// DEPRECATED: import '../data/repositories/pragas_inf_legacy_repository.dart';
 
 /// Serviço responsável por inicializar e gerenciar dados da aplicação
 /// Orquestra o carregamento de JSONs e populacião das Drift database

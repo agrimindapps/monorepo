@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-
-import '../../../../../../core/data/models/pragas_legacy.dart';
-// DEPRECATED: import '../../../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../../../../../core/di/injection_container.dart';
 import '../../../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../../../core/widgets/praga_image_widget.dart';
@@ -51,7 +48,7 @@ class DiagnosticoDefensivoDialogWidget extends StatefulWidget {
 
 class _DiagnosticoDefensivoDialogWidgetState
     extends State<DiagnosticoDefensivoDialogWidget> {
-  PragasHive? _pragaData;
+  Praga? _pragaData;
 
   @override
   void initState() {
@@ -64,7 +61,7 @@ class _DiagnosticoDefensivoDialogWidgetState
     try {
       final nomePraga = _getProperty('nomePraga', 'grupo');
       if (nomePraga != null && nomePraga.isNotEmpty) {
-        final pragaRepository = sl<PragasLegacyRepository>();
+        final pragaRepository = sl<PragasRepository>();
         final praga = await pragaRepository.findByNomeComum(nomePraga);
         if (mounted) {
           setState(() {

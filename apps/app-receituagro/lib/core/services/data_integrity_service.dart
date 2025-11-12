@@ -3,10 +3,6 @@ import 'dart:developer' as developer;
 import 'package:dartz/dartz.dart';
 import 'package:core/core.dart' hide Column;
 
-import '../data/models/cultura_legacy.dart';
-import '../data/models/diagnostico_legacy.dart';
-import '../data/models/fitossanitario_legacy.dart';
-import '../data/models/pragas_legacy.dart';
 import '../utils/box_manager.dart';
 
 /// Relatório de integridade referencial dos dados
@@ -127,15 +123,15 @@ class DataIntegrityService {
           final culturasBox = boxes[_culturasBoxName]!;
 
           // Cria Sets de IDs existentes para busca rápida O(1)
-          final existingDefensivos = _buildIdSet<FitossanitarioHive>(
+          final existingDefensivos = _buildIdSet<Fitossanitario>(
             defensivoBox,
             (item) => item.idReg,
           );
-          final existingPragas = _buildIdSet<PragasHive>(
+          final existingPragas = _buildIdSet<Praga>(
             pragasBox,
             (item) => item.idReg,
           );
-          final existingCulturas = _buildIdSet<CulturaHive>(
+          final existingCulturas = _buildIdSet<Cultura>(
             culturasBox,
             (item) => item.idReg,
           );
@@ -153,7 +149,7 @@ class DataIntegrityService {
           final diagnosticosWithIssues = <String>{};
 
           for (final item in diagnosticoBox.values) {
-            final diagnostico = item as DiagnosticoHive;
+            final diagnostico = item as Diagnostico;
             bool hasIssues = false;
 
             // Valida FK de defensivo
@@ -218,7 +214,7 @@ class DataIntegrityService {
   ///
   /// Retorna lista de mensagens de erro (vazia se tudo OK)
   Future<Either<Failure, List<String>>> validateDiagnostico(
-    DiagnosticoHive diagnostico,
+    Diagnostico diagnostico,
   ) async {
     try {
       final result = await BoxManager.withMultipleBoxes<List<String>>(
@@ -233,7 +229,7 @@ class DataIntegrityService {
 
           // Valida defensivo
           if (diagnostico.fkIdDefensivo.isNotEmpty) {
-            final exists = _containsId<FitossanitarioHive>(
+            final exists = _containsId<Fitossanitario>(
               defensivoBox,
               diagnostico.fkIdDefensivo,
               (item) => item.idReg,
@@ -247,7 +243,7 @@ class DataIntegrityService {
 
           // Valida praga
           if (diagnostico.fkIdPraga.isNotEmpty) {
-            final exists = _containsId<PragasHive>(
+            final exists = _containsId<Praga>(
               pragasBox,
               diagnostico.fkIdPraga,
               (item) => item.idReg,
@@ -259,7 +255,7 @@ class DataIntegrityService {
 
           // Valida cultura
           if (diagnostico.fkIdCultura.isNotEmpty) {
-            final exists = _containsId<CulturaHive>(
+            final exists = _containsId<Cultura>(
               culturasBox,
               diagnostico.fkIdCultura,
               (item) => item.idReg,

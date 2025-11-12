@@ -6,10 +6,6 @@ import '../../database/receituagro_database.dart';
 import '../../database/repositories/culturas_repository.dart';
 import '../../database/repositories/fitossanitarios_repository.dart';
 import '../../database/repositories/pragas_repository.dart';
-// DEPRECATED: import '../data/repositories/diagnostico_legacy_repository.dart';
-// DEPRECATED: import '../data/repositories/fitossanitario_info_legacy_repository.dart';
-// DEPRECATED: import '../data/repositories/plantas_inf_legacy_repository.dart';
-// DEPRECATED: import '../data/repositories/pragas_inf_legacy_repository.dart';
 import 'data_initialization_service.dart';
 
 /// Interface para o gerenciador de dados da aplicação

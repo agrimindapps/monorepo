@@ -1,7 +1,3 @@
-import '../../../../core/data/models/cultura_legacy.dart';
-import '../../../../core/data/models/diagnostico_legacy.dart';
-import '../../../../core/data/models/fitossanitario_legacy.dart';
-import '../../../../core/data/models/pragas_legacy.dart';
 import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../../database/repositories/pragas_repository.dart';
@@ -10,10 +6,10 @@ import '../../domain/entities/busca_entity.dart';
 
 /// Mapper para conversão entre diferentes modelos e BuscaResultEntity
 class BuscaMapper {
-  /// Converte DiagnosticoHive para BuscaResultEntity
+  /// Converte Diagnostico para BuscaResultEntity
   /// ✅ CORRETO: Resolve nomes usando repositories, NUNCA usa campos cached
   static Future<BuscaResultEntity> diagnosticoToEntity(
-    DiagnosticoHive diagnostico,
+    Diagnostico diagnostico,
   ) async {
     String defensivoNome = 'Defensivo não encontrado';
     String culturaNome = 'Cultura não encontrada';
@@ -61,8 +57,8 @@ class BuscaMapper {
     );
   }
 
-  /// Converte PragasHive para BuscaResultEntity
-  static BuscaResultEntity pragaToEntity(PragasHive praga) {
+  /// Converte Praga para BuscaResultEntity
+  static BuscaResultEntity pragaToEntity(Praga praga) {
     final nomeExibicao = (praga.nomeComum.isNotEmpty == true)
         ? praga.nomeComum
         : praga.nomeCientifico;
@@ -86,8 +82,8 @@ class BuscaMapper {
     );
   }
 
-  /// Converte FitossanitarioHive para BuscaResultEntity
-  static BuscaResultEntity defensivoToEntity(FitossanitarioHive defensivo) {
+  /// Converte Fitossanitario para BuscaResultEntity
+  static BuscaResultEntity defensivoToEntity(Fitossanitario defensivo) {
     final nomeExibicao = defensivo.nomeComum.isNotEmpty
         ? defensivo.nomeComum
         : defensivo.nomeTecnico;
@@ -111,8 +107,8 @@ class BuscaMapper {
     );
   }
 
-  /// Converte CulturaHive para BuscaResultEntity - SIMPLIFICADO
-  static BuscaResultEntity culturaToEntity(CulturaHive cultura) {
+  /// Converte Cultura para BuscaResultEntity - SIMPLIFICADO
+  static BuscaResultEntity culturaToEntity(Cultura cultura) {
     return BuscaResultEntity(
       id: cultura.objectId,
       tipo: 'cultura',
@@ -125,7 +121,7 @@ class BuscaMapper {
 
   /// Converte lista de diagnósticos com resolução assíncrona
   static Future<List<BuscaResultEntity>> diagnosticosToEntityList(
-    List<DiagnosticoHive> diagnosticos,
+    List<Diagnostico> diagnosticos,
   ) async {
     final results = <BuscaResultEntity>[];
     for (final d in diagnosticos) {
@@ -135,26 +131,26 @@ class BuscaMapper {
   }
 
   /// Converte lista de pragas
-  static List<BuscaResultEntity> pragasToEntityList(List<PragasHive> pragas) {
+  static List<BuscaResultEntity> pragasToEntityList(List<Praga> pragas) {
     return pragas.map((p) => pragaToEntity(p)).toList();
   }
 
   /// Converte lista de defensivos
   static List<BuscaResultEntity> defensivosToEntityList(
-    List<FitossanitarioHive> defensivos,
+    List<Fitossanitario> defensivos,
   ) {
     return defensivos.map((d) => defensivoToEntity(d)).toList();
   }
 
   /// Converte lista de culturas
   static List<BuscaResultEntity> culturasToEntityList(
-    List<CulturaHive> culturas,
+    List<Cultura> culturas,
   ) {
     return culturas.map((c) => culturaToEntity(c)).toList();
   }
 
-  /// Converte CulturaHive para DropdownItemEntity - SIMPLIFICADO
-  static DropdownItemEntity culturaToDropdownItem(CulturaHive cultura) {
+  /// Converte Cultura para DropdownItemEntity - SIMPLIFICADO
+  static DropdownItemEntity culturaToDropdownItem(Cultura cultura) {
     return DropdownItemEntity(
       id: cultura.objectId,
       nome: 'Cultura',
@@ -163,8 +159,8 @@ class BuscaMapper {
     );
   }
 
-  /// Converte PragasHive para DropdownItemEntity
-  static DropdownItemEntity pragaToDropdownItem(PragasHive praga) {
+  /// Converte Praga para DropdownItemEntity
+  static DropdownItemEntity pragaToDropdownItem(Praga praga) {
     final nomeExibicao = (praga.nomeComum.isNotEmpty == true)
         ? praga.nomeComum
         : praga.nomeCientifico;
@@ -177,9 +173,9 @@ class BuscaMapper {
     );
   }
 
-  /// Converte FitossanitarioHive para DropdownItemEntity
+  /// Converte Fitossanitario para DropdownItemEntity
   static DropdownItemEntity defensivoToDropdownItem(
-    FitossanitarioHive defensivo,
+    Fitossanitario defensivo,
   ) {
     final nomeExibicao = defensivo.nomeComum.isNotEmpty
         ? defensivo.nomeComum

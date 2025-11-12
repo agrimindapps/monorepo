@@ -2,18 +2,16 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
 import '../receituagro_database.dart';
-import '../migration/hive_to_drift_migration_tool.dart';
 
 /// Helper para inicializar o banco de dados Drift
 class DatabaseInitialization {
   DatabaseInitialization._();
 
-  /// Inicializa o banco de dados Drift e executa migração se necessário
+  /// Inicializa o banco de dados Drift
   ///
   /// Deve ser chamado no main() antes de runApp()
   static Future<void> initialize({
     required GetIt getIt,
-    bool runMigration = true,
   }) async {
     developer.log('🔧 Inicializando Drift Database...', name: 'DatabaseInit');
 
@@ -24,20 +22,10 @@ class DatabaseInitialization {
       // 2. Verificar se o banco foi criado corretamente
       final culturasCount = await _checkDatabase(db);
 
-      // 3. Se necessário, executar migração do Hive
-      if (runMigration && culturasCount == 0) {
-        developer.log(
-          '🔄 Banco de dados vazio. Iniciando migração Hive → Drift...',
-          name: 'DatabaseInit',
-        );
-
-        await _runMigration(getIt, db);
-      } else {
-        developer.log(
-          '✅ Banco de dados já populado ($culturasCount culturas)',
-          name: 'DatabaseInit',
-        );
-      }
+      developer.log(
+        '✅ Banco de dados populado com $culturasCount culturas',
+        name: 'DatabaseInit',
+      );
 
       developer.log(
         '✅ Drift Database inicializado com sucesso!',
@@ -69,50 +57,6 @@ class DatabaseInitialization {
       );
       return 0;
     }
-  }
-
-  /// Executa a migração Hive → Drift
-  static Future<void> _runMigration(GetIt getIt, ReceituagroDatabase db) async {
-    try {
-      final hiveManager = getIt<IHiveManager>();
-
-      final tool = HiveToDriftMigrationTool(
-        hiveManager: hiveManager,
-        database: db,
-      );
-
-      final result = await tool.migrate();
-
-      developer.log(result.summary, name: 'DatabaseInit.migration');
-
-      if (result.hasError) {
-        throw Exception('Migration failed: ${result.error}');
-      }
-    } catch (e, stackTrace) {
-      developer.log(
-        '❌ Erro na migração: $e',
-        name: 'DatabaseInit.migration',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      rethrow;
-    }
-  }
-
-  /// Força uma nova migração (use apenas para desenvolvimento/teste)
-  static Future<void> forceMigration({required GetIt getIt}) async {
-    developer.log('⚠️ Forçando nova migração...', name: 'DatabaseInit.force');
-
-    final db = getIt<ReceituagroDatabase>();
-    final hiveManager = getIt<IHiveManager>();
-
-    final tool = HiveToDriftMigrationTool(
-      hiveManager: hiveManager,
-      database: db,
-    );
-
-    final result = await tool.migrate();
-    developer.log(result.summary, name: 'DatabaseInit.force');
   }
 
   /// Exporta dados do usuário para backup

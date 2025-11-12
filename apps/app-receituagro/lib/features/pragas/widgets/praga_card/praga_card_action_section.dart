@@ -39,8 +39,6 @@ class PragaCardActionSection extends StatelessWidget {
   Widget _buildGridActions() {
     return const SizedBox.shrink();
   }
-
-
 }
 
 /// Modos de exibição das ações

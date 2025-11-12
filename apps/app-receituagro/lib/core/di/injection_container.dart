@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 // ❌ REMOVIDO: import '../../features/DetalheDefensivos/di/defensivo_details_di.dart';
 import '../../features/analytics/analytics_service.dart';
 // ❌ REMOVIDO: import '../../features/comentarios/di/comentarios_di.dart'; (via @LazySingleton)
-import '../../features/comentarios/domain/comentarios_service.dart';
 import '../../features/defensivos/data/services/defensivos_grouping_service.dart';
 // ❌ REMOVIDO: import '../../features/defensivos/di/defensivos_di.dart'; // Unused after consolidation
 // ✅ Diagnosticos imports removed - now managed by Injectable
@@ -17,8 +16,6 @@ import '../../features/favoritos/favoritos_di.dart';
 import '../../features/settings/di/device_management_di.dart';
 import '../../features/settings/di/settings_di.dart';
 import '../../features/settings/di/tts_module.dart';
-// DEPRECATED: import '../data/repositories/comentarios_legacy_repository.dart';
-// DEPRECATED: import '../data/repositories/premium_legacy_repository.dart';
 import '../../database/repositories/fitossanitarios_repository.dart';
 import '../../database/repositories/pragas_repository.dart';
 import '../../database/repositories/culturas_repository.dart';
@@ -57,7 +54,7 @@ Future<void> init() async {
 
   // ✅ FavoritosDataResolverStrategyRegistry agora usa lazy loading dos repos
   // Não precisa registrá-los cedo mais
-  FavoritosDI.registerServices(); // ⚠️ FavoritosService com lazy loading (não precisa de FavoritosLegacyRepository no construtor)
+  FavoritosDI.registerServices(); // ⚠️ FavoritosService com lazy loading (não precisa de FavoritoRepository no construtor)
 
   await injectable.configureDependencies();
   FavoritosDI.registerRepository(); // ✅ Registra FavoritosRepositorySimplified como classe concreta
@@ -247,7 +244,7 @@ Future<void> init() async {
   _setupPragasPorCulturaServices();
 
   // ❌ REMOVED: PremiumLegacyRepository (Hive dependency removed)
-  // ❌ REMOVED: ComentariosLegacyRepository (Hive dependency removed)
+  // ❌ REMOVED: ComentarioRepository (Hive dependency removed)
   
   try {
     sl.registerLazySingleton<IPremiumService>(() => MockPremiumService());
@@ -262,7 +259,7 @@ Future<void> init() async {
     }
   }
 
-  // ❌ REMOVED: ComentariosService (depends on ComentariosLegacyRepository)
+  // ❌ REMOVED: ComentariosService (depends on ComentarioRepository)
   // TODO: Migrate to Drift-based comentarios repository
   
   // ✅ IDiagnosticosRepository and all use cases now managed by Injectable (@LazySingleton, @injectable)

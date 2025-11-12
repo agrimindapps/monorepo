@@ -1,9 +1,9 @@
-import '../../../../core/data/models/cultura_legacy.dart';
+
 import '../../../../database/receituagro_database.dart';
 import '../../data/cultura_model.dart';
 import '../../domain/entities/cultura_entity.dart';
 
-/// Mapper para conversão entre CulturaModel/CulturaHive e CulturaEntity
+/// Mapper para conversão entre CulturaModel/Cultura e CulturaEntity
 /// Segue padrão Clean Architecture - isolamento entre camadas
 class CulturaMapper {
   /// Converte Model para Entity
@@ -17,13 +17,13 @@ class CulturaMapper {
     );
   }
 
-  /// Converte CulturaHive para Entity
-  static CulturaEntity fromHiveToEntity(CulturaHive hive) {
+  /// Converte Cultura para Entity
+  static CulturaEntity fromHiveToEntity(Cultura hive) {
     return CulturaEntity(
       id: hive.idReg,
       nome: hive.cultura,
-      grupo: null, // CulturaHive não tem grupo
-      descricao: null, // CulturaHive não tem descricao
+      grupo: null, // Cultura não tem grupo
+      descricao: null, // Cultura não tem descricao
       isActive: true, // Assumindo que culturas carregadas estão ativas
     );
   }
@@ -44,8 +44,8 @@ class CulturaMapper {
     return models.map((model) => toEntity(model)).toList();
   }
 
-  /// Converte lista de CulturaHive para Entities
-  static List<CulturaEntity> fromHiveToEntityList(List<CulturaHive> hives) {
+  /// Converte lista de Cultura para Entities
+  static List<CulturaEntity> fromHiveToEntityList(List<Cultura> hives) {
     return hives.map((hive) => fromHiveToEntity(hive)).toList();
   }
 

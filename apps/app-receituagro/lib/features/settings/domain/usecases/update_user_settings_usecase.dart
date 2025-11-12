@@ -211,8 +211,6 @@ class UnsupportedLanguageException implements Exception {
   @override
   String toString() => 'UnsupportedLanguageException: $message';
 }
-
-
 /// Exception thrown when settings are invalid
 class InvalidSettingsException implements Exception {
   final String message;

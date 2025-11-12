@@ -2,12 +2,12 @@
 /// Tracks changes in financial data for compliance and debugging
 library;
 
-import 'package:core/core.dart';
+import 'package:injectable/injectable.dart';
 
+import '../../core/data/models/audit_trail_model.dart';
+import '../../database/repositories/audit_trail_repository.dart';
 import '../../features/expenses/data/models/expense_model.dart';
 import '../../features/fuel/data/models/fuel_supply_model.dart';
-
-part 'audit_trail_service.g.dart';
 
 /// Audit event types
 enum AuditEventType {
@@ -22,125 +22,20 @@ enum AuditEventType {
   final String value;
 }
 
-/// Audit trail entry for financial operations
-@HiveType(typeId: 50)
-class FinancialAuditEntry extends HiveObject {
-  // 'local', 'remote', 'conflict_resolution'
-
-  FinancialAuditEntry({
-    required this.id,
-    required this.entityId,
-    required this.entityType,
-    required this.eventType,
-    required this.timestamp,
-    this.userId,
-    this.beforeState = const {},
-    this.afterState = const {},
-    this.description,
-    this.monetaryValue,
-    this.metadata = const {},
-    this.syncSource,
-  });
-
-  factory FinancialAuditEntry.create({
-    required String entityId,
-    required String entityType,
-    required AuditEventType eventType,
-    String? userId,
-    Map<String, dynamic>? beforeState,
-    Map<String, dynamic>? afterState,
-    String? description,
-    double? monetaryValue,
-    Map<String, dynamic>? metadata,
-    String? syncSource,
-  }) {
-    final now = DateTime.now();
-    return FinancialAuditEntry(
-      id: '${entityId}_${eventType.value}_${now.millisecondsSinceEpoch}',
-      entityId: entityId,
-      entityType: entityType,
-      eventType: eventType.value,
-      timestamp: now.millisecondsSinceEpoch,
-      userId: userId,
-      beforeState: beforeState ?? {},
-      afterState: afterState ?? {},
-      description: description,
-      monetaryValue: monetaryValue,
-      metadata: metadata ?? {},
-      syncSource: syncSource,
-    );
-  }
-  @HiveField(0)
-  final String id;
-
-  @HiveField(1)
-  final String entityId;
-
-  @HiveField(2)
-  final String entityType;
-
-  @HiveField(3)
-  final String eventType;
-
-  @HiveField(4)
-  final int timestamp;
-
-  @HiveField(5)
-  final String? userId;
-
-  @HiveField(6)
-  final Map<String, dynamic> beforeState;
-
-  @HiveField(7)
-  final Map<String, dynamic> afterState;
-
-  @HiveField(8)
-  final String? description;
-
-  @HiveField(9)
-  final double? monetaryValue;
-
-  @HiveField(10)
-  final Map<String, dynamic> metadata;
-
-  @HiveField(11)
-  final String? syncSource;
-
-  DateTime get dateTime => DateTime.fromMillisecondsSinceEpoch(timestamp);
-
-  /// Check if this is a high-value transaction
-  bool get isHighValue => monetaryValue != null && monetaryValue! > 1000.0;
-
-  /// Get formatted monetary value
-  String get formattedValue => monetaryValue != null
-      ? 'R\$ ${monetaryValue!.toStringAsFixed(2)}'
-      : 'N/A';
-
-  @override
-  String toString() {
-    return 'FinancialAuditEntry(entityId: $entityId, eventType: $eventType, monetaryValue: $formattedValue)';
-  }
-}
-
-/// Financial Audit Trail Service
+/// Financial Audit Trail Service - Migrated to Drift
+@lazySingleton
 class FinancialAuditTrailService {
-  static const String _boxName = 'financial_audit_trail';
-  static const int _maxEntriesPerEntity =
-      100; // Keep last 100 entries per entity
+  FinancialAuditTrailService(this._repository);
+
+  final AuditTrailRepository _repository;
+
   static const int _retentionDays = 365; // Keep entries for 1 year
 
-  Box<FinancialAuditEntry>? _auditBox;
   String? _currentUserId;
 
-  /// Initialize the audit service
+  /// Initialize the audit service (no-op for Drift)
   Future<void> initialize({String? userId}) async {
     _currentUserId = userId;
-
-    if (!Hive.isBoxOpen(_boxName)) {
-      _auditBox = await Hive.openBox<FinancialAuditEntry>(_boxName);
-    } else {
-      _auditBox = Hive.box<FinancialAuditEntry>(_boxName);
-    }
     await _cleanOldEntries();
   }
 
@@ -150,27 +45,31 @@ class FinancialAuditTrailService {
   }
 
   /// Log creation of financial entity
-  Future<void> logCreation(BaseSyncEntity entity, {String? description}) async {
+  Future<void> logCreation(dynamic entity, {String? description}) async {
     if (!_shouldAudit(entity)) return;
 
-    final entry = FinancialAuditEntry.create(
-      entityId: entity.id,
+    final entry = AuditTrailEntry(
+      id: '${_getEntityId(entity)}_${AuditEventType.create.value}_${DateTime.now().millisecondsSinceEpoch}',
+      entityId: _getEntityId(entity),
       entityType: _getEntityType(entity),
-      eventType: AuditEventType.create,
-      userId: _currentUserId ?? entity.userId,
+      eventType: AuditEventType.create.value,
+      timestamp: DateTime.now(),
+      userId: _currentUserId ?? _getUserId(entity),
+      beforeState: const {},
       afterState: _extractFinancialFields(entity),
       description: description ?? 'Created ${_getEntityType(entity)}',
       monetaryValue: _extractMonetaryValue(entity),
+      metadata: const {},
       syncSource: 'local',
     );
 
-    await _saveEntry(entry);
+    await _repository.insert(entry);
   }
 
   /// Log update of financial entity
   Future<void> logUpdate(
-    BaseSyncEntity beforeEntity,
-    BaseSyncEntity afterEntity, {
+    dynamic beforeEntity,
+    dynamic afterEntity, {
     String? description,
   }) async {
     if (!_shouldAudit(afterEntity)) return;
@@ -178,54 +77,64 @@ class FinancialAuditTrailService {
     final beforeState = _extractFinancialFields(beforeEntity);
     final afterState = _extractFinancialFields(afterEntity);
     if (_hasFinancialChanges(beforeState, afterState)) {
-      final entry = FinancialAuditEntry.create(
-        entityId: afterEntity.id,
+      final entry = AuditTrailEntry(
+        id: '${_getEntityId(afterEntity)}_${AuditEventType.update.value}_${DateTime.now().millisecondsSinceEpoch}',
+        entityId: _getEntityId(afterEntity),
         entityType: _getEntityType(afterEntity),
-        eventType: AuditEventType.update,
-        userId: _currentUserId ?? afterEntity.userId,
+        eventType: AuditEventType.update.value,
+        timestamp: DateTime.now(),
+        userId: _currentUserId ?? _getUserId(afterEntity),
         beforeState: beforeState,
         afterState: afterState,
         description: description ?? 'Updated ${_getEntityType(afterEntity)}',
         monetaryValue: _extractMonetaryValue(afterEntity),
+        metadata: const {},
         syncSource: 'local',
       );
 
-      await _saveEntry(entry);
+      await _repository.insert(entry);
     }
   }
 
   /// Log deletion of financial entity
-  Future<void> logDeletion(BaseSyncEntity entity, {String? description}) async {
+  Future<void> logDeletion(dynamic entity, {String? description}) async {
     if (!_shouldAudit(entity)) return;
 
-    final entry = FinancialAuditEntry.create(
-      entityId: entity.id,
+    final entry = AuditTrailEntry(
+      id: '${_getEntityId(entity)}_${AuditEventType.delete.value}_${DateTime.now().millisecondsSinceEpoch}',
+      entityId: _getEntityId(entity),
       entityType: _getEntityType(entity),
-      eventType: AuditEventType.delete,
-      userId: _currentUserId ?? entity.userId,
+      eventType: AuditEventType.delete.value,
+      timestamp: DateTime.now(),
+      userId: _currentUserId ?? _getUserId(entity),
       beforeState: _extractFinancialFields(entity),
+      afterState: const {},
       description: description ?? 'Deleted ${_getEntityType(entity)}',
       monetaryValue: _extractMonetaryValue(entity),
+      metadata: const {},
       syncSource: 'local',
     );
 
-    await _saveEntry(entry);
+    await _repository.insert(entry);
   }
 
   /// Log sync operation
   Future<void> logSync(
-    BaseSyncEntity entity, {
+    dynamic entity, {
     required bool success,
     String? error,
     String? syncSource,
   }) async {
     if (!_shouldAudit(entity)) return;
 
-    final entry = FinancialAuditEntry.create(
-      entityId: entity.id,
+    final entry = AuditTrailEntry(
+      id: '${_getEntityId(entity)}_${AuditEventType.sync.value}_${DateTime.now().millisecondsSinceEpoch}',
+      entityId: _getEntityId(entity),
       entityType: _getEntityType(entity),
-      eventType: AuditEventType.sync,
-      userId: _currentUserId ?? entity.userId,
+      eventType: AuditEventType.sync.value,
+      timestamp: DateTime.now(),
+      userId: _currentUserId ?? _getUserId(entity),
+      beforeState: const {},
       afterState: _extractFinancialFields(entity),
       description: success
           ? 'Synced ${_getEntityType(entity)} successfully'
@@ -239,24 +148,26 @@ class FinancialAuditTrailService {
       syncSource: syncSource ?? 'remote',
     );
 
-    await _saveEntry(entry);
+    await _repository.insert(entry);
   }
 
   /// Log conflict resolution
   Future<void> logConflictResolution(
-    BaseSyncEntity localEntity,
-    BaseSyncEntity remoteEntity,
-    BaseSyncEntity resolvedEntity, {
+    dynamic localEntity,
+    dynamic remoteEntity,
+    dynamic resolvedEntity, {
     required String strategy,
     String? description,
   }) async {
     if (!_shouldAudit(resolvedEntity)) return;
 
-    final entry = FinancialAuditEntry.create(
-      entityId: resolvedEntity.id,
+    final entry = AuditTrailEntry(
+      id: '${_getEntityId(resolvedEntity)}_${AuditEventType.conflictResolution.value}_${DateTime.now().millisecondsSinceEpoch}',
+      entityId: _getEntityId(resolvedEntity),
       entityType: _getEntityType(resolvedEntity),
-      eventType: AuditEventType.conflictResolution,
-      userId: _currentUserId ?? resolvedEntity.userId,
+      eventType: AuditEventType.conflictResolution.value,
+      timestamp: DateTime.now(),
+      userId: _currentUserId ?? _getUserId(resolvedEntity),
       beforeState: {
         'local': _extractFinancialFields(localEntity),
         'remote': _extractFinancialFields(remoteEntity),
@@ -266,29 +177,32 @@ class FinancialAuditTrailService {
       monetaryValue: _extractMonetaryValue(resolvedEntity),
       metadata: {
         'strategy': strategy,
-        'local_version': localEntity.version,
-        'remote_version': remoteEntity.version,
-        'resolved_version': resolvedEntity.version,
+        'local_version': _getVersion(localEntity),
+        'remote_version': _getVersion(remoteEntity),
+        'resolved_version': _getVersion(resolvedEntity),
       },
       syncSource: 'conflict_resolution',
     );
 
-    await _saveEntry(entry);
+    await _repository.insert(entry);
   }
 
   /// Log validation failure
   Future<void> logValidationFailure(
-    BaseSyncEntity entity, {
+    dynamic entity, {
     required List<String> errors,
     List<String>? warnings,
   }) async {
     if (!_shouldAudit(entity)) return;
 
-    final entry = FinancialAuditEntry.create(
-      entityId: entity.id,
+    final entry = AuditTrailEntry(
+      id: '${_getEntityId(entity)}_${AuditEventType.validationFailure.value}_${DateTime.now().millisecondsSinceEpoch}',
+      entityId: _getEntityId(entity),
       entityType: _getEntityType(entity),
-      eventType: AuditEventType.validationFailure,
-      userId: _currentUserId ?? entity.userId,
+      eventType: AuditEventType.validationFailure.value,
+      timestamp: DateTime.now(),
+      userId: _currentUserId ?? _getUserId(entity),
+      beforeState: const {},
       afterState: _extractFinancialFields(entity),
       description: 'Validation failed: ${errors.join('; ')}',
       monetaryValue: _extractMonetaryValue(entity),
@@ -300,48 +214,34 @@ class FinancialAuditTrailService {
       syncSource: 'local',
     );
 
-    await _saveEntry(entry);
+    await _repository.insert(entry);
   }
 
   /// Get audit trail for specific entity
-  List<FinancialAuditEntry> getEntityAuditTrail(String entityId) {
-    if (_auditBox == null) return [];
-
-    return _auditBox!.values
-        .where((entry) => entry.entityId == entityId)
-        .toList()
-      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+  Future<List<AuditTrailEntry>> getEntityAuditTrail(String entityId) async {
+    return await _repository.getByEntity(entityId);
   }
 
   /// Get recent high-value transactions
-  List<FinancialAuditEntry> getHighValueTransactions({int days = 30}) {
-    if (_auditBox == null) return [];
-
-    final cutoff = DateTime.now().subtract(Duration(days: days));
-
-    return _auditBox!.values
-        .where((entry) => entry.isHighValue && entry.dateTime.isAfter(cutoff))
-        .toList()
-      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+  Future<List<AuditTrailEntry>> getHighValueTransactions({
+    int days = 30,
+  }) async {
+    return await _repository.getHighValueTransactions(
+      minValue: 1000.0,
+      days: days,
+    );
   }
 
   /// Get audit summary for date range
-  Map<String, dynamic> getAuditSummary({
+  Future<Map<String, dynamic>> getAuditSummary({
     DateTime? startDate,
     DateTime? endDate,
-  }) {
-    if (_auditBox == null) return {};
-
+  }) async {
     final start =
         startDate ?? DateTime.now().subtract(const Duration(days: 30));
     final end = endDate ?? DateTime.now();
 
-    final entries = _auditBox!.values
-        .where(
-          (entry) =>
-              entry.dateTime.isAfter(start) && entry.dateTime.isBefore(end),
-        )
-        .toList();
+    final entries = await _repository.getByDateRange(start, end);
 
     final summary = <String, dynamic>{
       'total_entries': entries.length,
@@ -356,7 +256,7 @@ class FinancialAuditTrailService {
           (summary['by_type'][entry.eventType] ?? 0) + 1;
       summary['by_entity'][entry.entityType] =
           (summary['by_entity'][entry.entityType] ?? 0) + 1;
-      if (entry.isHighValue) {
+      if (entry.monetaryValue != null && entry.monetaryValue! > 1000.0) {
         summary['high_value_count']++;
       }
       if (entry.monetaryValue != null) {
@@ -369,65 +269,44 @@ class FinancialAuditTrailService {
 
   /// Clean old audit entries
   Future<void> _cleanOldEntries() async {
-    if (_auditBox == null) return;
-
-    final cutoff = DateTime.now().subtract(
-      const Duration(days: _retentionDays),
-    );
-    final keysToDelete = <dynamic>[];
-
-    for (final entry in _auditBox!.values) {
-      if (entry.dateTime.isBefore(cutoff)) {
-        keysToDelete.add(entry.key);
-      }
-    }
-
-    if (keysToDelete.isNotEmpty) {
-      await _auditBox!.deleteAll(keysToDelete);
-    }
-    await _limitEntriesPerEntity();
-  }
-
-  /// Limit number of entries per entity
-  Future<void> _limitEntriesPerEntity() async {
-    if (_auditBox == null) return;
-
-    final entitiesMap = <String, List<FinancialAuditEntry>>{};
-    for (final entry in _auditBox!.values) {
-      entitiesMap.putIfAbsent(entry.entityId, () => []).add(entry);
-    }
-    for (final entityId in entitiesMap.keys) {
-      final entries = entitiesMap[entityId]!;
-      if (entries.length > _maxEntriesPerEntity) {
-        entries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-        final toDelete = entries.skip(_maxEntriesPerEntity);
-
-        final keysToDelete = toDelete.map((e) => e.key).toList();
-        await _auditBox!.deleteAll(keysToDelete);
-      }
-    }
-  }
-
-  /// Save audit entry
-  Future<void> _saveEntry(FinancialAuditEntry entry) async {
-    if (_auditBox == null) return;
-    await _auditBox!.put(entry.id, entry);
+    await _repository.cleanOldEntries(_retentionDays);
   }
 
   /// Check if entity should be audited
-  bool _shouldAudit(BaseSyncEntity entity) {
+  bool _shouldAudit(dynamic entity) {
     return entity is FuelSupplyModel || entity is ExpenseModel;
   }
 
+  /// Get entity ID
+  String _getEntityId(dynamic entity) {
+    if (entity is FuelSupplyModel) return entity.id;
+    if (entity is ExpenseModel) return entity.id;
+    return 'unknown';
+  }
+
+  /// Get user ID from entity
+  String? _getUserId(dynamic entity) {
+    if (entity is FuelSupplyModel) return entity.userId;
+    if (entity is ExpenseModel) return entity.userId;
+    return null;
+  }
+
+  /// Get version from entity
+  int _getVersion(dynamic entity) {
+    if (entity is FuelSupplyModel) return entity.version;
+    if (entity is ExpenseModel) return entity.version;
+    return 0;
+  }
+
   /// Get entity type string
-  String _getEntityType(BaseSyncEntity entity) {
+  String _getEntityType(dynamic entity) {
     if (entity is FuelSupplyModel) return 'fuel_supply';
     if (entity is ExpenseModel) return 'expense';
     return 'unknown';
   }
 
   /// Extract financial fields for audit
-  Map<String, dynamic> _extractFinancialFields(BaseSyncEntity entity) {
+  Map<String, dynamic> _extractFinancialFields(dynamic entity) {
     if (entity is FuelSupplyModel) {
       return {
         'vehicle_id': entity.vehicleId,
@@ -455,7 +334,7 @@ class FinancialAuditTrailService {
   }
 
   /// Extract monetary value from entity
-  double? _extractMonetaryValue(BaseSyncEntity entity) {
+  double? _extractMonetaryValue(dynamic entity) {
     if (entity is FuelSupplyModel) return entity.totalPrice;
     if (entity is ExpenseModel) return entity.valor;
     return null;
@@ -475,10 +354,8 @@ class FinancialAuditTrailService {
     return false;
   }
 
-  /// Close the audit service
+  /// Close the audit service (no-op for Drift)
   Future<void> close() async {
-    if (_auditBox?.isOpen == true) {
-      await _auditBox!.close();
-    }
+    // No-op for Drift
   }
 }

@@ -122,7 +122,7 @@ class ImageSyncService {
 
       // Se há uploads pendentes, tenta sincronizar
       if (pendingCount > 0) {
-        syncPendingImages();
+        await syncPendingImages();
       }
     } catch (e) {
       print('❌ Error initializing ImageSyncService: $e');

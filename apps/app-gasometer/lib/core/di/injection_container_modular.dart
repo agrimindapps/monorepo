@@ -1,6 +1,5 @@
 import 'package:core/core.dart' show GetIt, InjectionContainer;
 
-import '../storage/hive_service.dart';
 import 'di_module.dart';
 import 'injection.dart';
 import 'modules/account_deletion_module.dart';
@@ -29,10 +28,6 @@ class ModularInjectionContainer {
       print('📦 Initializing core package DI...');
       await InjectionContainer.init();
       print('✅ Core package DI initialized');
-
-      print('📦 Initializing Hive...');
-      await HiveService.instance.init();
-      print('✅ Hive initialized');
 
       // Configure injectable dependencies FIRST
       // This registers all @injectable dependencies from build_runner

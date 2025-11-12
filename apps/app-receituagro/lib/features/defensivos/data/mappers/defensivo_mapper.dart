@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 
 import '../../../../database/receituagro_database.dart';
 import '../../data/defensivo_agrupado_item_model.dart';
@@ -101,30 +102,31 @@ class DefensivoMapper {
     return entities.map((entity) => toAgrupadoModel(entity)).toList();
   }
 
-  /// Converte Fitossanitario para Entity
-  static DefensivoEntity fromHiveToEntity(Fitossanitario hive) {
+  /// Converte Drift Fitossanitario para Entity (updated for Drift migration)
+  static DefensivoEntity fromHiveToEntity(Fitossanitario drift) {
     return DefensivoEntity(
-      id: hive.idReg,
-      nome: hive.nomeComum,
-      ingredienteAtivo: hive.ingredienteAtivo ?? '',
-      nomeComum: hive.nomeComum,
-      classeAgronomica: hive.classeAgronomica,
-      fabricante: hive.fabricante,
-      modoAcao: hive.modoAcao, // Campo modoAcao existe no Fitossanitario
-      isActive: hive.status,
+      id: drift.idDefensivo,
+      nome: drift.nome,
+      ingredienteAtivo: drift.ingredienteAtivo ?? '',
+      nomeComum: drift.nomeComum ?? drift.nome,
+      classeAgronomica: drift.classeAgronomica,
+      fabricante: drift.fabricante,
+      modoAcao: null, // Not available in Drift Fitossanitario
+      isActive: drift.status,
       lastUpdated: DateTime.now(),
     );
   }
 
   /// Converte lista de Fitossanitario para Entities
   static List<DefensivoEntity> fromHiveToEntityList(
-    List<Fitossanitario> hives,
+    List<Fitossanitario> drifts,
   ) {
-    return hives.map((hive) => fromHiveToEntity(hive)).toList();
+    return drifts.map((drift) => fromHiveToEntity(drift)).toList();
   }
 
-  /// Converte Fitossanitario Drift para Entity
+  /// Converte Fitossanitario Drift para Entity (alias for consistency)
   static DefensivoEntity fromDriftToEntity(Fitossanitario drift) {
+    return fromHiveToEntity(drift);
     return DefensivoEntity(
       id: drift.idDefensivo,
       nome: drift.nome,

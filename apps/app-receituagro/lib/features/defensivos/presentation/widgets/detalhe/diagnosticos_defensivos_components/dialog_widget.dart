@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+
 import '../../../../../../core/di/injection_container.dart';
 import '../../../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../../../core/widgets/praga_image_widget.dart';
+import '../../../../../../database/receituagro_database.dart';
+import '../../../../../../database/repositories/pragas_repository.dart';
 
 /// Widget responsável pelo modal de detalhes do diagnóstico
 ///
@@ -59,10 +62,12 @@ class _DiagnosticoDefensivoDialogWidgetState
   /// Carrega dados da praga relacionada ao diagnóstico
   Future<void> _loadPragaData() async {
     try {
-      final nomePraga = _getProperty('nomePraga', 'grupo');
-      if (nomePraga != null && nomePraga.isNotEmpty) {
+      // TODO: Fix after migration - diagnostico should contain pragaId
+      // Need to update data structure to use pragaId instead of nomePraga
+      final pragaId = _getProperty('pragaId', null);
+      if (pragaId != null) {
         final pragaRepository = sl<PragasRepository>();
-        final praga = await pragaRepository.findByNomeComum(nomePraga);
+        final praga = await pragaRepository.findById(int.parse(pragaId.toString()));
         if (mounted) {
           setState(() {
             _pragaData = praga;
@@ -259,7 +264,7 @@ class _DiagnosticoDefensivoDialogWidgetState
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          if (_pragaData?.nomeCientifico != null) ...[
+          if (_pragaData?.nomeLatino != null) ...[
             const SizedBox(height: 16),
             _buildPragaImageSection(context),
           ],
@@ -317,7 +322,7 @@ class _DiagnosticoDefensivoDialogWidgetState
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: PragaImageWidget(
-                nomeCientifico: _pragaData!.nomeCientifico,
+                nomeCientifico: _pragaData!.nomeLatino ?? '',
                 width: double.infinity,
                 height: 200,
                 fit: BoxFit.cover,
@@ -394,7 +399,7 @@ class _DiagnosticoDefensivoDialogWidgetState
               ),
               const SizedBox(height: 4),
               Text(
-                _pragaData!.nomeCientifico,
+                _pragaData!.nomeLatino ?? '',
                 style: TextStyle(
                   fontSize: 14,
                   fontStyle: FontStyle.italic,

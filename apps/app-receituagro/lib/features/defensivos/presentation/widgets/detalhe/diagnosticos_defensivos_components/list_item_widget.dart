@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../core/di/injection_container.dart';
 import '../../../../../../core/theme/spacing_tokens.dart';
+import '../../../../../../database/receituagro_database.dart';
+import '../../../../../../database/repositories/pragas_repository.dart';
 
 /// Widget responsável por renderizar um item de diagnóstico na lista
 ///
@@ -81,8 +83,10 @@ class _DiagnosticoDefensivoListItemWidgetState
     String dosagemFormatada = '';
 
     if (widget.diagnostico is Diagnostico) {
-      final diagnosticoHive = widget.diagnostico as Diagnostico;
-      nomeComumPraga = diagnosticoHive.nomePraga ?? 'Praga não identificada';
+      // Diagnostico from Drift doesn't have denormalized nomePraga field
+      // Use _getProperty to access map data or load from repository using pragaId
+      final nomePragaModel = _getProperty('nomePraga') ?? _getProperty('grupo');
+      nomeComumPraga = nomePragaModel ?? 'Praga não identificada';
     } else {
       final nomePragaModel = _getProperty('nomePraga') ?? _getProperty('grupo');
       if (nomePragaModel != null &&
@@ -90,7 +94,7 @@ class _DiagnosticoDefensivoListItemWidgetState
           nomePragaModel != 'Não especificado') {
         nomeComumPraga = nomePragaModel;
       } else if (_pragaData != null) {
-        final nomeComumCompleto = _pragaData!.nomeComum;
+        final nomeComumCompleto = _pragaData!.nome;
         if (nomeComumCompleto.contains(',')) {
           nomeComumPraga = nomeComumCompleto.split(',').first.trim();
         } else if (nomeComumCompleto.contains(';')) {
@@ -102,7 +106,7 @@ class _DiagnosticoDefensivoListItemWidgetState
     }
 
     if (_pragaData != null) {
-      nomeCientificoPraga = _pragaData!.nomeCientifico;
+      nomeCientificoPraga = _pragaData!.nomeLatino ?? '';
     }
 
     final dosagemEntity = _getProperty('dosagem');
@@ -216,9 +220,9 @@ class _DiagnosticoDefensivoListItemWidgetState
       );
     }
 
-    if (_pragaData?.nomeCientifico != null) {
+    if (_pragaData?.nomeLatino != null) {
       final imagePath =
-          'assets/imagens/bigsize/${_pragaData!.nomeCientifico}.jpg';
+          'assets/imagens/bigsize/${_pragaData!.nomeLatino}.jpg';
 
       return Container(
         width: 48,

@@ -84,9 +84,9 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
       final pragaState = await ref.read(detalhePragaNotifierProvider.future);
 
       if (pragaState.pragaData != null &&
-          pragaState.pragaData!.idReg.isNotEmpty) {
+          pragaState.pragaData!.idPraga.isNotEmpty) {
         await diagnosticosNotifier.loadDiagnosticos(
-          pragaState.pragaData!.idReg,
+          pragaState.pragaData!.idPraga,
           pragaName: widget.pragaName,
         );
       }

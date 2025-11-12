@@ -55,7 +55,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         return const Right(null);
       }
 
-      final entity = DiagnosticoMapper.fromDrift(diagnosticoDrift);
+      final entity = DiagnosticoMapper.fromDriftData(diagnosticoDrift);
       return Right(entity);
     } catch (e) {
       return Left(

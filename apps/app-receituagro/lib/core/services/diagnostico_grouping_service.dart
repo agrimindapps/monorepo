@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../../database/receituagro_database.dart';
 import '../../features/diagnosticos/domain/entities/diagnostico_entity.dart';
-
 import 'diagnostico_entity_resolver_drift.dart';
 
 /// Serviço centralizado para agrupamento de diagnósticos
@@ -284,8 +284,8 @@ class DiagnosticoGroupingService {
   }) {
     return groupByCultura<Diagnostico>(
       diagnosticos,
-      (d) => d.fkIdCultura,
-      (d) => d.nomeCultura,
+      (d) => d.culturaId.toString(),
+      (d) => null, // Drift Diagnostico doesn't have nomeCultura, resolver will fill it
       sortItemsInGroup: sortByRelevance,
       itemComparator: sortByRelevance ? _compareHiveByRelevance : null,
     );
@@ -351,16 +351,17 @@ class DiagnosticoGroupingService {
       return bScore.compareTo(aScore); // Decrescente
     }
 
-    return (a.nomeDefensivo ?? '').compareTo(b.nomeDefensivo ?? '');
+    return a.idReg.compareTo(b.idReg);
   }
 
   /// Calcula pontuação de relevância para Diagnostico
   int _calculateHiveRelevanceScore(Diagnostico diagnostico) {
     int score = 0;
 
-    if (diagnostico.nomeDefensivo?.isNotEmpty == true) score += 2;
-    if (diagnostico.nomeCultura?.isNotEmpty == true) score += 2;
-    if (diagnostico.nomePraga?.isNotEmpty == true) score += 2;
+    // Drift Diagnostico has IDs, not name fields
+    if (diagnostico.defenisivoId > 0) score += 2;
+    if (diagnostico.culturaId > 0) score += 2;
+    if (diagnostico.pragaId > 0) score += 2;
     if (diagnostico.dsMax.isNotEmpty) score += 1;
     if (diagnostico.um.isNotEmpty) score += 1;
 

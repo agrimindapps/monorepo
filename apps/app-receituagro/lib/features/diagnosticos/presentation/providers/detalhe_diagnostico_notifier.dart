@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
+
 import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/extensions/diagnostico_hive_extension.dart';
+import '../../../../core/extensions/diagnostico_drift_extension.dart';
 import '../../../../core/providers/premium_notifier.dart';
+import '../../../../database/receituagro_database.dart';
+import '../../../../database/repositories/diagnostico_repository.dart';
 import '../../../diagnosticos/data/mappers/diagnostico_mapper.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
@@ -121,7 +123,8 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
         },
         (diagnosticoEntity) async {
           if (diagnosticoEntity != null) {
-            final diagnosticoHive = await _hiveRepository.getByIdOrObjectId(
+            final diagnosticoHive =
+                await _hiveRepository.getDiagnosticoByIdOrObjectId(
               diagnosticoId,
             );
 
@@ -159,9 +162,7 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
             await loadPremiumStatus();
           } else {
             final result = await _hiveRepository.getAll();
-            final totalDiagnosticos = result.isSuccess
-                ? result.data!.length
-                : 0;
+            final totalDiagnosticos = result.length;
             final errorMsg = totalDiagnosticos == 0
                 ? 'Base de dados vazia. Nenhum diagnóstico foi carregado. Verifique se o aplicativo foi inicializado corretamente ou tente resincronizar os dados.'
                 : 'Diagnóstico com ID "$diagnosticoId" não encontrado. Existem $totalDiagnosticos diagnósticos na base de dados local.';
@@ -174,11 +175,12 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
       );
     } catch (e) {
       try {
-        final diagnosticoHive = await _hiveRepository.getByIdOrObjectId(
+        final diagnosticoHive =
+            await _hiveRepository.getDiagnosticoByIdOrObjectId(
           diagnosticoId,
         );
         if (diagnosticoHive != null) {
-          final diagnostico = DiagnosticoMapper.fromHive(diagnosticoHive);
+          final diagnostico = DiagnosticoMapper.fromDrift(diagnosticoHive);
 
           // Extensão DiagnosticoExtension já busca dados do defensivo internamente
           final diagnosticoData = await diagnosticoHive.toDataMap();

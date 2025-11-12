@@ -15,6 +15,6 @@ export 'pragas_repository.dart';
 export 'pragas_inf_repository.dart';
 
 // DEPRECATED: Compatibility layer for Hive → Drift migration
-export 'legacy_type_aliases.dart';
+// export 'legacy_type_aliases.dart'; // File does not exist
 // Compatibility layer para migração (DEPRECATED)
-export 'legacy_compatibility.dart';
+// export 'legacy_compatibility.dart'; // File does not exist

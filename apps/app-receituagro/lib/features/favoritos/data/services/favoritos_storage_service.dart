@@ -1,8 +1,9 @@
 import 'dart:developer' as developer;
 
 import '../../../../database/repositories/culturas_repository.dart';
+import '../../../../database/repositories/diagnostico_repository.dart';
+import '../../../../database/repositories/favorito_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
-
 import '../../../../database/repositories/pragas_repository.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/favorito_entity.dart';

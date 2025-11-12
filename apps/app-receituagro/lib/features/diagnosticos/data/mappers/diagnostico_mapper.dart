@@ -1,49 +1,54 @@
 
+import 'package:drift/drift.dart';
+
+import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/diagnostico_repository.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 
 class DiagnosticoMapper {
   const DiagnosticoMapper._();
 
-  static DiagnosticoEntity fromHive(Diagnostico hive) {
+  /// Converts Drift Diagnostico to DiagnosticoEntity
+  /// Note: nomeDefensivo, nomeCultura, nomePraga should be resolved via extensions
+  static DiagnosticoEntity fromDrift(Diagnostico drift) {
     return DiagnosticoEntity(
-      id: hive.objectId,
-      idDefensivo: hive.fkIdDefensivo,
-      idCultura: hive.fkIdCultura,
-      idPraga: hive.fkIdPraga,
-      nomeDefensivo: hive.nomeDefensivo,
-      nomeCultura: hive.nomeCultura,
-      nomePraga: hive.nomePraga,
+      id: drift.firebaseId ?? drift.id.toString(),
+      idDefensivo: drift.defenisivoId.toString(),
+      idCultura: drift.culturaId.toString(),
+      idPraga: drift.pragaId.toString(),
+      nomeDefensivo: '', // Resolved via extension
+      nomeCultura: '', // Resolved via extension
+      nomePraga: '', // Resolved via extension
       dosagem: DosagemEntity(
-        dosagemMinima: double.tryParse(hive.dsMin ?? '0'),
-        dosagemMaxima: double.tryParse(hive.dsMax) ?? 0.0,
-        unidadeMedida: hive.um,
+        dosagemMinima: double.tryParse(drift.dsMin ?? '0'),
+        dosagemMaxima: double.tryParse(drift.dsMax) ?? 0.0,
+        unidadeMedida: drift.um,
       ),
       aplicacao: AplicacaoEntity(
-        terrestre: hive.minAplicacaoT != null
+        terrestre: drift.minAplicacaoT != null
             ? AplicacaoTerrestrefEntity(
-                volumeMinimo: double.tryParse(hive.minAplicacaoT!),
-                volumeMaximo: double.tryParse(hive.maxAplicacaoT ?? '0'),
-                unidadeMedida: hive.umT,
+                volumeMinimo: double.tryParse(drift.minAplicacaoT!),
+                volumeMaximo: double.tryParse(drift.maxAplicacaoT ?? '0'),
+                unidadeMedida: drift.umT,
               )
             : null,
-        aerea: hive.minAplicacaoA != null
+        aerea: drift.minAplicacaoA != null
             ? AplicacaoAereaEntity(
-                volumeMinimo: double.tryParse(hive.minAplicacaoA!),
-                volumeMaximo: double.tryParse(hive.maxAplicacaoA ?? '0'),
-                unidadeMedida: hive.umA,
+                volumeMinimo: double.tryParse(drift.minAplicacaoA!),
+                volumeMaximo: double.tryParse(drift.maxAplicacaoA ?? '0'),
+                unidadeMedida: drift.umA,
               )
             : null,
-        intervaloReaplicacao: hive.intervalo,
-        intervaloReaplicacao2: hive.intervalo2,
-        epocaAplicacao: hive.epocaAplicacao,
+        intervaloReaplicacao: drift.intervalo,
+        intervaloReaplicacao2: drift.intervalo2,
+        epocaAplicacao: drift.epocaAplicacao,
       ),
-      createdAt: DateTime.fromMillisecondsSinceEpoch(hive.createdAt),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch(hive.updatedAt),
+      createdAt: drift.createdAt,
+      updatedAt: drift.updatedAt ?? drift.createdAt,
     );
   }
 
-  static DiagnosticoEntity fromDrift(DiagnosticoData data) {
+  static DiagnosticoEntity fromDriftData(DiagnosticoData data) {
     return DiagnosticoEntity(
       id: data.firebaseId ?? data.id.toString(),
       idDefensivo: data.defenisivoId.toString(),
@@ -82,37 +87,75 @@ class DiagnosticoMapper {
   }
 
   static List<DiagnosticoEntity> fromDriftList(List<DiagnosticoData> dataList) {
-    return dataList.map(fromDrift).toList();
+    return dataList.map(fromDriftData).toList();
   }
 
-  static Diagnostico toHive(DiagnosticoEntity entity) {
-    return Diagnostico(
-      objectId: entity.id,
-      createdAt:
-          entity.createdAt?.millisecondsSinceEpoch ??
-          DateTime.now().millisecondsSinceEpoch,
-      updatedAt:
-          entity.updatedAt?.millisecondsSinceEpoch ??
-          DateTime.now().millisecondsSinceEpoch,
-      idReg: entity.id,
-      fkIdDefensivo: entity.idDefensivo,
-      nomeDefensivo: entity.nomeDefensivo,
-      fkIdCultura: entity.idCultura,
-      nomeCultura: entity.nomeCultura,
-      fkIdPraga: entity.idPraga,
-      nomePraga: entity.nomePraga,
-      dsMin: entity.dosagem.dosagemMinima?.toString(),
-      dsMax: entity.dosagem.dosagemMaxima.toString(),
-      um: entity.dosagem.unidadeMedida,
-      minAplicacaoT: entity.aplicacao.terrestre?.volumeMinimo?.toString(),
-      maxAplicacaoT: entity.aplicacao.terrestre?.volumeMaximo?.toString(),
-      umT: entity.aplicacao.terrestre?.unidadeMedida,
-      minAplicacaoA: entity.aplicacao.aerea?.volumeMinimo?.toString(),
-      maxAplicacaoA: entity.aplicacao.aerea?.volumeMaximo?.toString(),
-      umA: entity.aplicacao.aerea?.unidadeMedida,
-      intervalo: entity.aplicacao.intervaloReaplicacao,
-      intervalo2: entity.aplicacao.intervaloReaplicacao2,
-      epocaAplicacao: entity.aplicacao.epocaAplicacao,
+  /// Converts DiagnosticoEntity to Drift Diagnostico (for backward compatibility)
+  /// Note: This method creates a DiagnosticosCompanion for insertion
+  static DiagnosticosCompanion toDrift(DiagnosticoEntity entity) {
+    return DiagnosticosCompanion(
+      firebaseId: Value(entity.id),
+      userId: const Value(''), // Needs to be set by caller
+      moduleName: const Value('diagnosticos'),
+      createdAt: Value(entity.createdAt ?? DateTime.now()),
+      updatedAt: Value(entity.updatedAt ?? DateTime.now()),
+      isDirty: const Value(false),
+      isDeleted: const Value(false),
+      version: const Value(1),
+      idReg: Value(entity.id),
+      defenisivoId: Value(int.tryParse(entity.idDefensivo) ?? 0),
+      culturaId: Value(int.tryParse(entity.idCultura) ?? 0),
+      pragaId: Value(int.tryParse(entity.idPraga) ?? 0),
+      dsMin: Value(entity.dosagem.dosagemMinima?.toString()),
+      dsMax: Value(entity.dosagem.dosagemMaxima.toString()),
+      um: Value(entity.dosagem.unidadeMedida ?? ''),
+      minAplicacaoT: Value(entity.aplicacao.terrestre?.volumeMinimo?.toString()),
+      maxAplicacaoT: Value(entity.aplicacao.terrestre?.volumeMaximo?.toString()),
+      umT: Value(entity.aplicacao.terrestre?.unidadeMedida),
+      minAplicacaoA: Value(entity.aplicacao.aerea?.volumeMinimo?.toString()),
+      maxAplicacaoA: Value(entity.aplicacao.aerea?.volumeMaximo?.toString()),
+      umA: Value(entity.aplicacao.aerea?.unidadeMedida),
+      intervalo: Value(entity.aplicacao.intervaloReaplicacao),
+      intervalo2: Value(entity.aplicacao.intervaloReaplicacao2),
+      epocaAplicacao: Value(entity.aplicacao.epocaAplicacao),
+    );
+  }
+
+  static DiagnosticoEntity fromHive(Diagnostico hive) {
+    return DiagnosticoEntity(
+      id: hive.firebaseId ?? hive.id.toString(),
+      idDefensivo: hive.defenisivoId.toString(),
+      idCultura: hive.culturaId.toString(),
+      idPraga: hive.pragaId.toString(),
+      nomeDefensivo: '', // Resolved via extension
+      nomeCultura: '', // Resolved via extension
+      nomePraga: '', // Resolved via extension
+      dosagem: DosagemEntity(
+        dosagemMinima: double.tryParse(hive.dsMin ?? '0'),
+        dosagemMaxima: double.tryParse(hive.dsMax) ?? 0.0,
+        unidadeMedida: hive.um,
+      ),
+      aplicacao: AplicacaoEntity(
+        terrestre: hive.minAplicacaoT != null
+            ? AplicacaoTerrestrefEntity(
+                volumeMinimo: double.tryParse(hive.minAplicacaoT!),
+                volumeMaximo: double.tryParse(hive.maxAplicacaoT ?? '0'),
+                unidadeMedida: hive.umT,
+              )
+            : null,
+        aerea: hive.minAplicacaoA != null
+            ? AplicacaoAereaEntity(
+                volumeMinimo: double.tryParse(hive.minAplicacaoA!),
+                volumeMaximo: double.tryParse(hive.maxAplicacaoA ?? '0'),
+                unidadeMedida: hive.umA,
+              )
+            : null,
+        intervaloReaplicacao: hive.intervalo,
+        intervaloReaplicacao2: hive.intervalo2,
+        epocaAplicacao: hive.epocaAplicacao,
+      ),
+      createdAt: hive.createdAt,
+      updatedAt: hive.updatedAt ?? hive.createdAt,
     );
   }
 

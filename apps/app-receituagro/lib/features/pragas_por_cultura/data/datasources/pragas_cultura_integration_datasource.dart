@@ -1,5 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
+import '../../../../database/repositories/diagnostico_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../../database/repositories/pragas_repository.dart';
 
@@ -7,9 +8,12 @@ import '../../../../database/repositories/pragas_repository.dart';
 ///
 /// Responsabilidades:
 /// - Consultar PragasRepository (Drift) para dados base de pragas
-/// - Integrar dados de diagnóstico (DiagnosticoRepository)
+/// - Integrar dados de diagnóstico (DiagnosticoRepository) - TODO: Reintegrate
 /// - Integrar dados de defensivos (FitossanitariosRepository Drift)
 /// - Retornar lista consolidada de pragas para uma cultura específica
+/// 
+/// MIGRATION NOTE: DiagnosticoRepository temporarily removed from constructor
+/// until proper Drift repository is available
 @injectable
 class PragasCulturaIntegrationDataSource {
   final PragasRepository _pragasRepository;
@@ -46,10 +50,7 @@ class PragasCulturaIntegrationDataSource {
       }
 
       // 2. Obter diagnósticos para contar frequência
-      final diagnosticosResult = await _diagnosticoRepository.getAll();
-      final List<dynamic> diagnosticos = diagnosticosResult.isSuccess
-          ? (diagnosticosResult.data ?? [])
-          : [];
+      final diagnosticos = await _diagnosticoRepository.getAll();
 
       // 3. Agrupar por tipo de praga e contar diagnósticos
       final List<Map<String, dynamic>> pragasComDados = allPragas
@@ -122,10 +123,7 @@ class PragasCulturaIntegrationDataSource {
       final defensivos = await getDefensivosForPraga(pragaId);
 
       // Contar diagnósticos
-      final diagnosticosResult = await _diagnosticoRepository.getAll();
-      final List<dynamic> diagnosticos = diagnosticosResult.isSuccess
-          ? (diagnosticosResult.data ?? [])
-          : [];
+      final diagnosticos = await _diagnosticoRepository.getAll();
       final countDiagnosticos = diagnosticos.length;
 
       return {

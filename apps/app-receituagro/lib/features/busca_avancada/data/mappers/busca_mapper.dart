@@ -1,3 +1,4 @@
+import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../../database/repositories/pragas_repository.dart';
@@ -18,13 +19,13 @@ class BuscaMapper {
     try {
       final defensivoRepo = sl<FitossanitariosRepository>();
       final defensivo = await defensivoRepo.findByIdDefensivo(
-        diagnostico.fkIdDefensivo,
+        diagnostico.defenisivoId.toString(),
       );
       if (defensivo != null && defensivo.nome.isNotEmpty) {
         defensivoNome = defensivo.nome;
       }
       final culturaRepo = sl<CulturasRepository>();
-      final culturaIdInt = int.tryParse(diagnostico.fkIdCultura);
+      final culturaIdInt = diagnostico.culturaId;
       if (culturaIdInt != null) {
         final cultura = await culturaRepo.findById(culturaIdInt);
         if (cultura != null && cultura.nome.isNotEmpty) {
@@ -32,22 +33,22 @@ class BuscaMapper {
         }
       }
       final pragaRepo = sl<PragasRepository>();
-      final praga = await pragaRepo.findByIdPraga(diagnostico.fkIdPraga);
+      final praga = await pragaRepo.findByIdPraga(diagnostico.pragaId.toString());
       if (praga != null && praga.nome.isNotEmpty) {
         pragaNome = praga.nome;
       }
     } catch (e) {}
 
     return BuscaResultEntity(
-      id: diagnostico.objectId,
+      id: diagnostico.firebaseId ?? diagnostico.idReg,
       tipo: 'diagnostico',
       titulo: defensivoNome,
       subtitulo: culturaNome,
       descricao: '$pragaNome - ${diagnostico.dsMax}${diagnostico.um}',
       metadata: {
-        'idCultura': diagnostico.fkIdCultura,
-        'idPraga': diagnostico.fkIdPraga,
-        'idDefensivo': diagnostico.fkIdDefensivo,
+        'idCultura': diagnostico.culturaId.toString(),
+        'idPraga': diagnostico.pragaId.toString(),
+        'idDefensivo': diagnostico.defenisivoId.toString(),
         'cultura': culturaNome,
         'praga': pragaNome,
         'defensivo': defensivoNome,
@@ -59,24 +60,23 @@ class BuscaMapper {
 
   /// Converte Praga para BuscaResultEntity
   static BuscaResultEntity pragaToEntity(Praga praga) {
-    final nomeExibicao = (praga.nomeComum.isNotEmpty == true)
-        ? praga.nomeComum
-        : praga.nomeCientifico;
+    final nomeExibicao = (praga.nome.isNotEmpty == true)
+        ? praga.nome
+        : praga.nomeLatino ?? '';
 
     return BuscaResultEntity(
-      id: praga.objectId,
+      id: praga.firebaseId ?? praga.idPraga,
       tipo: 'praga',
       titulo: nomeExibicao,
-      subtitulo: praga.nomeCientifico != nomeExibicao
-          ? praga.nomeCientifico
+      subtitulo: praga.nomeLatino != nomeExibicao
+          ? praga.nomeLatino
           : null,
       descricao: 'Praga identificada',
       metadata: {
-        'nomeCientifico': praga.nomeCientifico,
-        'nomeComum': praga.nomeComum,
-        'reino': praga.reino,
-        'ordem': praga.ordem,
-        'familia': praga.familia,
+        'nomeCientifico': praga.nomeLatino ?? '',
+        'nomeComum': praga.nome,
+        'tipo': praga.tipo ?? '',
+        'descricao': praga.descricao ?? '',
       },
       relevancia: 1.0,
     );
@@ -84,22 +84,21 @@ class BuscaMapper {
 
   /// Converte Fitossanitario para BuscaResultEntity
   static BuscaResultEntity defensivoToEntity(Fitossanitario defensivo) {
-    final nomeExibicao = defensivo.nomeComum.isNotEmpty
-        ? defensivo.nomeComum
-        : defensivo.nomeTecnico;
+    final nomeExibicao = (defensivo.nomeComum?.isNotEmpty ?? false)
+        ? defensivo.nomeComum!
+        : defensivo.nome;
 
     return BuscaResultEntity(
-      id: defensivo.objectId ?? defensivo.idReg, // objectId pode ser null
+      id: defensivo.firebaseId ?? defensivo.idDefensivo,
       tipo: 'defensivo',
       titulo: nomeExibicao,
       subtitulo: defensivo.ingredienteAtivo,
-      descricao: defensivo.modoAcao,
+      descricao: defensivo.classe ?? '',
       metadata: {
-        'nomeTecnico': defensivo.nomeTecnico,
-        'nomeComum': defensivo.nomeComum,
+        'nome': defensivo.nome,
+        'nomeComum': defensivo.nomeComum ?? '',
         'ingredienteAtivo': defensivo.ingredienteAtivo ?? '',
-        'formulacao': defensivo.formulacao ?? '',
-        'modoAcao': defensivo.modoAcao ?? '',
+        'classe': defensivo.classe ?? '',
         'classeAgronomica': defensivo.classeAgronomica ?? '',
         'fabricante': defensivo.fabricante ?? '',
       },
@@ -110,11 +109,15 @@ class BuscaMapper {
   /// Converte Cultura para BuscaResultEntity - SIMPLIFICADO
   static BuscaResultEntity culturaToEntity(Cultura cultura) {
     return BuscaResultEntity(
-      id: cultura.objectId,
+      id: cultura.firebaseId ?? cultura.id.toString(),
       tipo: 'cultura',
-      titulo: 'Cultura',
-      subtitulo: null,
-      metadata: const {},
+      titulo: cultura.nome,
+      subtitulo: cultura.nomeLatino,
+      metadata: {
+        'nome': cultura.nome,
+        'nomeLatino': cultura.nomeLatino ?? '',
+        'familia': cultura.familia ?? '',
+      },
       relevancia: 1.0,
     );
   }
@@ -152,23 +155,23 @@ class BuscaMapper {
   /// Converte Cultura para DropdownItemEntity - SIMPLIFICADO
   static DropdownItemEntity culturaToDropdownItem(Cultura cultura) {
     return DropdownItemEntity(
-      id: cultura.objectId,
-      nome: 'Cultura',
-      grupo: 'Grupo não definido',
+      id: cultura.firebaseId ?? cultura.id.toString(),
+      nome: cultura.nome,
+      grupo: cultura.familia ?? 'Família não informada',
       isActive: true,
     );
   }
 
   /// Converte Praga para DropdownItemEntity
   static DropdownItemEntity pragaToDropdownItem(Praga praga) {
-    final nomeExibicao = (praga.nomeComum.isNotEmpty == true)
-        ? praga.nomeComum
-        : praga.nomeCientifico;
+    final nomeExibicao = (praga.nome.isNotEmpty == true)
+        ? praga.nome
+        : praga.nomeLatino ?? '';
 
     return DropdownItemEntity(
-      id: praga.objectId,
+      id: praga.firebaseId ?? praga.idPraga,
       nome: nomeExibicao,
-      grupo: praga.familia ?? 'Família não informada',
+      grupo: praga.tipo ?? 'Tipo não informado',
       isActive: true,
     );
   }
@@ -177,12 +180,12 @@ class BuscaMapper {
   static DropdownItemEntity defensivoToDropdownItem(
     Fitossanitario defensivo,
   ) {
-    final nomeExibicao = defensivo.nomeComum.isNotEmpty
-        ? defensivo.nomeComum
-        : defensivo.nomeTecnico;
+    final nomeExibicao = (defensivo.nomeComum?.isNotEmpty ?? false)
+        ? defensivo.nomeComum!
+        : defensivo.nome;
 
     return DropdownItemEntity(
-      id: defensivo.objectId ?? defensivo.idReg,
+      id: defensivo.firebaseId ?? defensivo.idDefensivo,
       nome: nomeExibicao,
       grupo: defensivo.classeAgronomica ?? 'Classe não informada',
       isActive: true,

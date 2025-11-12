@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 
 import '../../../../database/receituagro_database.dart';
 import '../../data/cultura_model.dart';
@@ -17,14 +18,14 @@ class CulturaMapper {
     );
   }
 
-  /// Converte Cultura para Entity
-  static CulturaEntity fromHiveToEntity(Cultura hive) {
+  /// Converte Drift Cultura para Entity (updated for Drift migration)
+  static CulturaEntity fromHiveToEntity(Cultura drift) {
     return CulturaEntity(
-      id: hive.idReg,
-      nome: hive.cultura,
-      grupo: null, // Cultura não tem grupo
-      descricao: null, // Cultura não tem descricao
-      isActive: true, // Assumindo que culturas carregadas estão ativas
+      id: drift.idCultura,
+      nome: drift.nome,
+      grupo: null, // Drift Cultura doesn't have grupo field
+      descricao: drift.descricao,
+      isActive: true, // Assuming loaded cultures are active
     );
   }
 
@@ -45,24 +46,18 @@ class CulturaMapper {
   }
 
   /// Converte lista de Cultura para Entities
-  static List<CulturaEntity> fromHiveToEntityList(List<Cultura> hives) {
-    return hives.map((hive) => fromHiveToEntity(hive)).toList();
+  static List<CulturaEntity> fromHiveToEntityList(List<Cultura> drifts) {
+    return drifts.map((drift) => fromHiveToEntity(drift)).toList();
   }
 
-  /// Converte Cultura Drift para Entity
+  /// Converte Cultura Drift para Entity (alias for consistency)
   static CulturaEntity fromDriftToEntity(Cultura drift) {
-    return CulturaEntity(
-      id: drift.idCultura,
-      nome: drift.nome,
-      grupo: null, // Drift não tem grupo
-      descricao: drift.descricao,
-      isActive: true,
-    );
+    return fromHiveToEntity(drift);
   }
 
-  /// Converte lista de Cultura Drift para Entities
+  /// Converte lista de Cultura Drift para Entities (alias for consistency)
   static List<CulturaEntity> fromDriftToEntityList(List<Cultura> drifts) {
-    return drifts.map((drift) => fromDriftToEntity(drift)).toList();
+    return fromHiveToEntityList(drifts);
   }
 
   /// Converte lista de Entities para Models

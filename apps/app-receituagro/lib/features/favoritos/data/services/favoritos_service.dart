@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/di/injection_container.dart';
-
+import '../../../../database/repositories/favorito_repository.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
 import '../factories/favorito_entity_factory_registry.dart';
@@ -93,8 +93,10 @@ class FavoritosService {
         'tipo': tipo,
         'adicionadoEm': DateTime.now().toIso8601String(),
       };
+      final itemDataString = '{"id":"$id","tipo":"$tipo","adicionadoEm":"${DateTime.now().toIso8601String()}"}';
 
-      final result = await repo.addFavorito(tipo, id, itemData);
+      final insertedId = await repo.addFavorito(tipo, id, itemDataString);
+      final result = insertedId > 0;
 
       if (result) {
         await _cache.clearForTipo(tipo);

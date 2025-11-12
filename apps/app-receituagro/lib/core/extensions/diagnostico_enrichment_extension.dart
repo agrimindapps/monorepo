@@ -1,3 +1,8 @@
+// TEMPORARILY COMMENTED OUT: Migration from Hive to Drift in progress
+// This file references Hive types that no longer exist.
+// TODO: Migrate to Drift-based queries or remove if no longer needed.
+
+/*
 import 'package:dartz/dartz.dart';
 import 'package:core/core.dart' hide Column;
 import '../data/models/diagnostico_with_warnings.dart';
@@ -70,3 +75,4 @@ extension DiagnosticoListEnrichmentExtension on List<Diagnostico> {
     );
   }
 }
+*/

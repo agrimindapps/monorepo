@@ -37,26 +37,27 @@ class DefensivoDetailsEntity {
   });
 
   /// Cria entity a partir do modelo Hive
-  factory DefensivoDetailsEntity.fromHive(Fitossanitario hive) {
+  /// Cria entity a partir do modelo Drift (updated for Drift migration)
+  factory DefensivoDetailsEntity.fromHive(Fitossanitario drift) {
     return DefensivoDetailsEntity(
-      id: hive.idReg,
-      nomeComum: hive.nomeComum,
-      nomeTecnico: hive.nomeTecnico,
-      fabricante: hive.fabricante ?? 'Não informado',
-      ingredienteAtivo: hive.ingredienteAtivo ?? 'Não informado',
-      toxico: hive.toxico,
-      inflamavel: hive.inflamavel,
-      corrosivo: hive.corrosivo,
-      modoAcao: hive.modoAcao,
-      classeAgronomica: hive.classeAgronomica,
-      classAmbiental: hive.classAmbiental,
-      formulacao: hive.formulacao,
-      idReg: hive.idReg,
-      mapa: hive.mapa,
+      id: drift.idDefensivo,
+      nomeComum: drift.nomeComum ?? drift.nome,
+      nomeTecnico: drift.nome, // Use nome as nomeTecnico
+      fabricante: drift.fabricante ?? 'Não informado',
+      ingredienteAtivo: drift.ingredienteAtivo ?? 'Não informado',
+      toxico: null, // Not available in Drift
+      inflamavel: null, // Not available in Drift
+      corrosivo: null, // Not available in Drift
+      modoAcao: null, // Not available in Drift
+      classeAgronomica: drift.classeAgronomica,
+      classAmbiental: null, // Not available in Drift
+      formulacao: null, // Not available in Drift
+      idReg: drift.idDefensivo,
+      mapa: drift.registroMapa,
     );
   }
 
-  /// Cria entity a partir do modelo Drift
+  /// Cria entity a partir do modelo Drift (alias for consistency)
   factory DefensivoDetailsEntity.fromDrift(Fitossanitario drift) {
     return DefensivoDetailsEntity(
       id: drift.idDefensivo,

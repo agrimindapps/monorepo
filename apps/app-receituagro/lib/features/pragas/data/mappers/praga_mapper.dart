@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 
 import '../../../../database/receituagro_database.dart';
 import '../../data/praga_model.dart';
@@ -29,36 +30,28 @@ class PragaMapper {
     );
   }
 
-  /// Converte Praga para Entity
-  static PragaEntity fromHiveToEntity(Praga hive) {
+  /// Converte Drift Praga para Entity (updated for Drift migration)
+  static PragaEntity fromHiveToEntity(Praga drift) {
     return PragaEntity(
-      idReg: hive.idReg,
-      nomeComum: hive.nomeComum,
-      nomeCientifico: hive.nomeCientifico,
-      tipoPraga: hive.tipoPraga,
-      dominio: hive.dominio,
-      reino: hive.reino,
-      familia: hive.familia,
-      genero: hive.genero,
-      especie: hive.especie,
+      idReg: drift.idPraga,
+      nomeComum: drift.nome,
+      nomeCientifico: drift.nomeLatino ?? '',
+      tipoPraga: drift.tipo ?? '',
+      dominio: null,
+      reino: null,
+      familia: null,
+      genero: null,
+      especie: null,
     );
   }
 
-  /// Converte Entity para Praga
-  static Praga fromEntityToHive(PragaEntity entity) {
-    return Praga(
-      objectId: entity.idReg,
-      createdAt: 0,
-      updatedAt: 0,
-      idReg: entity.idReg,
-      nomeComum: entity.nomeComum,
-      nomeCientifico: entity.nomeCientifico,
-      tipoPraga: entity.tipoPraga,
-      dominio: entity.dominio,
-      reino: entity.reino,
-      familia: entity.familia,
-      genero: entity.genero,
-      especie: entity.especie,
+  /// Converte Entity para Drift Praga (Companion for insertion)
+  static PragasCompanion fromEntityToHive(PragaEntity entity) {
+    return PragasCompanion(
+      idPraga: Value(entity.idReg),
+      nome: Value(entity.nomeComum),
+      nomeLatino: Value(entity.nomeCientifico),
+      tipo: Value(entity.tipoPraga),
     );
   }
 
@@ -73,27 +66,22 @@ class PragaMapper {
   }
 
   /// Converte lista de Praga para Entities
-  static List<PragaEntity> fromHiveToEntityList(List<Praga> hives) {
-    return hives.map((hive) => fromHiveToEntity(hive)).toList();
+  static List<PragaEntity> fromHiveToEntityList(List<Praga> drifts) {
+    return drifts.map((drift) => fromHiveToEntity(drift)).toList();
   }
 
-  /// Converte lista de Entities para Praga
-  static List<Praga> fromEntityToHiveList(List<PragaEntity> entities) {
+  /// Converte lista de Entities para Praga Companions
+  static List<PragasCompanion> fromEntityToHiveList(List<PragaEntity> entities) {
     return entities.map((entity) => fromEntityToHive(entity)).toList();
   }
 
-  /// Converte Drift Praga para Entity
+  /// Converte Drift Praga para Entity (alias for consistency)
   static PragaEntity fromDriftToEntity(Praga drift) {
-    return PragaEntity(
-      idReg: drift.idPraga,
-      nomeComum: drift.nome,
-      nomeCientifico: drift.nomeLatino ?? '',
-      tipoPraga: drift.tipo ?? '',
-    );
+    return fromHiveToEntity(drift);
   }
 
-  /// Converte lista de Drift Praga para Entities
+  /// Converte lista de Drift Praga para Entities (alias for consistency)
   static List<PragaEntity> fromDriftToEntityList(List<Praga> drifts) {
-    return drifts.map((drift) => fromDriftToEntity(drift)).toList();
+    return fromHiveToEntityList(drifts);
   }
 }

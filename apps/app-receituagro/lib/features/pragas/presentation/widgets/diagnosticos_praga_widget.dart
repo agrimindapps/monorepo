@@ -64,9 +64,10 @@ class DiagnosticosPragaWidget extends ConsumerWidget {
     final pragaState = ref.read(detalhePragaNotifierProvider).value;
 
     ref.read(diagnosticosPragaNotifierProvider.notifier).clearError();
-    if (pragaState?.pragaData != null && pragaState!.pragaData!.idReg.isNotEmpty) {
+    // MIGRATION NOTE: Drift Praga uses idPraga instead of idReg
+    if (pragaState?.pragaData != null && pragaState!.pragaData!.idPraga.isNotEmpty) {
       ref.read(diagnosticosPragaNotifierProvider.notifier).loadDiagnosticos(
-        pragaState.pragaData!.idReg,
+        pragaState.pragaData!.idPraga,
         pragaName: pragaName,
       );
     }

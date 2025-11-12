@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/services/access_history_service.dart';
@@ -11,6 +12,7 @@ import '../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../../core/widgets/standard_tab_bar_widget.dart';
 import '../../../../database/receituagro_database.dart';
+import '../../../../database/repositories/diagnostico_repository.dart';
 import '../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
 import '../../domain/entities/defensivo_details_entity.dart';
 import '../providers/detalhe_defensivo_notifier.dart';
@@ -164,9 +166,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
       debugPrint('🔧 [FORCE DEBUG] Verificando status dos diagnósticos...');
       final repository = sl<DiagnosticoRepository>();
       final result = await repository.getAll();
-      final allDiagnosticos = result.isSuccess
-          ? result.data!
-          : <Diagnostico>[];
+      final allDiagnosticos = result;
       debugPrint(
         '📊 [FORCE DEBUG] Repository direto: ${allDiagnosticos.length} diagnósticos',
       );
@@ -180,7 +180,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
         );
         await DiagnosticosDataLoader.loadDiagnosticosData();
         final newResult = await repository.getAll();
-        final newCount = newResult.isSuccess ? newResult.data!.length : 0;
+        final newCount = newResult.length;
         debugPrint(
           '📊 [FORCE DEBUG] Após carregamento: $newCount diagnósticos',
         );
@@ -188,13 +188,11 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
         if (newCount > 0) {
           debugPrint('✅ [FORCE DEBUG] Carregamento bem-sucedido!');
           final sampleResult = await repository.getAll();
-          final sample = sampleResult.isSuccess
-              ? sampleResult.data!.take(3).toList()
-              : <Diagnostico>[];
+          final sample = sampleResult.take(3).toList();
           for (int i = 0; i < sample.length; i++) {
             final diag = sample[i];
             debugPrint(
-              '[$i] SAMPLE: fkIdDefensivo="${diag.fkIdDefensivo}", nome="${diag.nomeDefensivo}"',
+              '[$i] SAMPLE: defenisivoId="${diag.defenisivoId}"',
             );
           }
         } else {
@@ -210,7 +208,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
         for (int i = 0; i < sample.length; i++) {
           final diag = sample[i];
           debugPrint(
-            '[$i] SAMPLE: fkIdDefensivo="${diag.fkIdDefensivo}", nome="${diag.nomeDefensivo}"',
+          '[$i] SAMPLE: defenisivoId="${diag.defenisivoId}", idReg="${diag.idReg}"',
           );
         }
         debugPrint(

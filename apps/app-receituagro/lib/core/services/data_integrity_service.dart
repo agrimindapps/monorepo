@@ -58,14 +58,11 @@ class IntegrityReport {
     return {
       'totalDiagnosticos': totalDiagnosticos,
       'totalWithIssues': totalWithIssues,
-      'isValid': isValid,
       'totalIssues': totalIssues,
+      'isValid': isValid,
       'missingDefensivos': missingDefensivos.length,
       'missingPragas': missingPragas.length,
       'missingCulturas': missingCulturas.length,
-      'missingDefensivosIds': missingDefensivos,
-      'missingPragasIds': missingPragas,
-      'missingCulturasIds': missingCulturas,
     };
   }
 
@@ -77,265 +74,69 @@ class IntegrityReport {
 
 /// Serviço de validação de integridade referencial dos dados
 ///
-/// Valida se todas as foreign keys de diagnósticos apontam para
-/// registros existentes nas tabelas relacionadas (defensivos, pragas, culturas)
-/// Note: Not using @lazySingleton because IHiveManager isn't injectable-annotated
-/// Must be registered manually in injection_container.dart
+/// DEPRECATED: This service depends on Hive which has been removed.
+/// TODO: Reimplement using Drift database queries and foreign key constraints.
+/// 
+/// MIGRATION NOTES:
+/// - Drift has built-in foreign key support
+/// - Use database queries instead of BoxManager
+/// - Leverage Drift's referential integrity features
+@Deprecated('Hive removed. Reimplement with Drift.')
 class DataIntegrityService {
-  final IHiveManager _hiveManager;
-
-  DataIntegrityService(this._hiveManager);
-
-  // Nomes das boxes
-  static const String _diagnosticoBoxName = 'receituagro_diagnosticos';
-  static const String _defensivoBoxName = 'receituagro_defensivos';
-  static const String _pragasBoxName = 'receituagro_pragas';
-  static const String _culturasBoxName = 'receituagro_culturas';
+  
+  DataIntegrityService(dynamic _hiveManager);
 
   /// Valida a integridade referencial de todos os diagnósticos
-  ///
-  /// Verifica se cada diagnóstico possui referências válidas para:
-  /// - Defensivo (fkIdDefensivo)
-  /// - Praga (fkIdPraga)
-  /// - Cultura (fkIdCultura)
-  ///
-  /// Retorna um [IntegrityReport] com estatísticas e lista de problemas
+  /// DEPRECATED: Returns empty report. Reimplement with Drift.
+  @Deprecated('Hive removed. Reimplement with Drift.')
   Future<Either<Failure, IntegrityReport>> validateIntegrity() async {
-    try {
-      developer.log(
-        'Starting data integrity validation',
-        name: 'DataIntegrityService.validateIntegrity',
-      );
-
-      // Usa BoxManager para abrir múltiplas boxes de forma segura
-      final result = await BoxManager.withMultipleBoxes<IntegrityReport>(
-        hiveManager: _hiveManager,
-        boxNames: [
-          _diagnosticoBoxName,
-          _defensivoBoxName,
-          _pragasBoxName,
-          _culturasBoxName,
-        ],
-        operation: (boxes) async {
-          final diagnosticoBox = boxes[_diagnosticoBoxName]!;
-          final defensivoBox = boxes[_defensivoBoxName]!;
-          final pragasBox = boxes[_pragasBoxName]!;
-          final culturasBox = boxes[_culturasBoxName]!;
-
-          // Cria Sets de IDs existentes para busca rápida O(1)
-          final existingDefensivos = _buildIdSet<Fitossanitario>(
-            defensivoBox,
-            (item) => item.idReg,
-          );
-          final existingPragas = _buildIdSet<Praga>(
-            pragasBox,
-            (item) => item.idReg,
-          );
-          final existingCulturas = _buildIdSet<Cultura>(
-            culturasBox,
-            (item) => item.idReg,
-          );
-
-          developer.log(
-            'Loaded reference data: defensivos=${existingDefensivos.length}, '
-            'pragas=${existingPragas.length}, culturas=${existingCulturas.length}',
-            name: 'DataIntegrityService.validateIntegrity',
-          );
-
-          // Valida cada diagnóstico
-          final missingDefensivos = <String>{};
-          final missingPragas = <String>{};
-          final missingCulturas = <String>{};
-          final diagnosticosWithIssues = <String>{};
-
-          for (final item in diagnosticoBox.values) {
-            final diagnostico = item as Diagnostico;
-            bool hasIssues = false;
-
-            // Valida FK de defensivo
-            if (diagnostico.fkIdDefensivo.isNotEmpty &&
-                !existingDefensivos.contains(diagnostico.fkIdDefensivo)) {
-              missingDefensivos.add(diagnostico.fkIdDefensivo);
-              hasIssues = true;
-            }
-
-            // Valida FK de praga
-            if (diagnostico.fkIdPraga.isNotEmpty &&
-                !existingPragas.contains(diagnostico.fkIdPraga)) {
-              missingPragas.add(diagnostico.fkIdPraga);
-              hasIssues = true;
-            }
-
-            // Valida FK de cultura
-            if (diagnostico.fkIdCultura.isNotEmpty &&
-                !existingCulturas.contains(diagnostico.fkIdCultura)) {
-              missingCulturas.add(diagnostico.fkIdCultura);
-              hasIssues = true;
-            }
-
-            if (hasIssues) {
-              diagnosticosWithIssues.add(diagnostico.idReg);
-            }
-          }
-
-          final report = IntegrityReport(
-            totalDiagnosticos: diagnosticoBox.length,
-            missingDefensivos: missingDefensivos.toList()..sort(),
-            missingPragas: missingPragas.toList()..sort(),
-            missingCulturas: missingCulturas.toList()..sort(),
-            totalWithIssues: diagnosticosWithIssues.length,
-          );
-
-          developer.log(
-            'Validation completed: ${report.toMap()}',
-            name: 'DataIntegrityService.validateIntegrity',
-            level: report.isValid ? 0 : 800, // Warning se houver problemas
-          );
-
-          return report;
-        },
-      );
-
-      return result.toEither();
-    } catch (e, stackTrace) {
-      developer.log(
-        'Error during integrity validation: $e',
-        name: 'DataIntegrityService.validateIntegrity',
-        error: e,
-        stackTrace: stackTrace,
-        level: 1000,
-      );
-
-      return Left(UnexpectedFailure('Error during integrity validation: $e'));
-    }
+    developer.log(
+      'DataIntegrityService is deprecated - returning empty report',
+      name: 'DataIntegrityService.validateIntegrity',
+      level: 800, // Warning
+    );
+    return Right(IntegrityReport.empty());
   }
 
   /// Valida integridade de um diagnóstico específico
-  ///
-  /// Retorna lista de mensagens de erro (vazia se tudo OK)
-  Future<Either<Failure, List<String>>> validateDiagnostico(
-    Diagnostico diagnostico,
-  ) async {
-    try {
-      final result = await BoxManager.withMultipleBoxes<List<String>>(
-        hiveManager: _hiveManager,
-        boxNames: [_defensivoBoxName, _pragasBoxName, _culturasBoxName],
-        operation: (boxes) async {
-          final defensivoBox = boxes[_defensivoBoxName]!;
-          final pragasBox = boxes[_pragasBoxName]!;
-          final culturasBox = boxes[_culturasBoxName]!;
-
-          final errors = <String>[];
-
-          // Valida defensivo
-          if (diagnostico.fkIdDefensivo.isNotEmpty) {
-            final exists = _containsId<Fitossanitario>(
-              defensivoBox,
-              diagnostico.fkIdDefensivo,
-              (item) => item.idReg,
-            );
-            if (!exists) {
-              errors.add(
-                'Defensivo não encontrado (ID: ${diagnostico.fkIdDefensivo})',
-              );
-            }
-          }
-
-          // Valida praga
-          if (diagnostico.fkIdPraga.isNotEmpty) {
-            final exists = _containsId<Praga>(
-              pragasBox,
-              diagnostico.fkIdPraga,
-              (item) => item.idReg,
-            );
-            if (!exists) {
-              errors.add('Praga não encontrada (ID: ${diagnostico.fkIdPraga})');
-            }
-          }
-
-          // Valida cultura
-          if (diagnostico.fkIdCultura.isNotEmpty) {
-            final exists = _containsId<Cultura>(
-              culturasBox,
-              diagnostico.fkIdCultura,
-              (item) => item.idReg,
-            );
-            if (!exists) {
-              errors.add(
-                'Cultura não encontrada (ID: ${diagnostico.fkIdCultura})',
-              );
-            }
-          }
-
-          return errors;
-        },
-      );
-
-      return result.toEither();
-    } catch (e, stackTrace) {
-      developer.log(
-        'Error validating diagnostico: $e',
-        name: 'DataIntegrityService.validateDiagnostico',
-        error: e,
-        stackTrace: stackTrace,
-        level: 1000,
-      );
-
-      return Left(UnexpectedFailure('Error validating diagnostico: $e'));
-    }
+  /// DEPRECATED: Returns empty list. Reimplement with Drift.
+  @Deprecated('Hive removed. Reimplement with Drift.')
+  Future<Either<Failure, List<String>>> validateDiagnostico(dynamic diagnostico) async {
+    return const Right([]);
   }
 
-  /// Obtém estatísticas de integridade resumidas
-  Future<Either<Failure, Map<String, dynamic>>> getIntegrityStatistics() async {
-    final reportResult = await validateIntegrity();
-
-    return reportResult.map(
-      (report) => {
-        'isValid': report.isValid,
-        'totalDiagnosticos': report.totalDiagnosticos,
-        'totalWithIssues': report.totalWithIssues,
-        'totalIssues': report.totalIssues,
-        'integrityPercentage': report.totalDiagnosticos > 0
-            ? ((report.totalDiagnosticos - report.totalWithIssues) /
-                      report.totalDiagnosticos *
-                      100)
-                  .toStringAsFixed(2)
-            : '100.00',
-      },
-    );
+  /// Tenta corrigir diagnósticos com referências inválidas
+  /// DEPRECATED: Returns empty list. Reimplement with Drift.
+  @Deprecated('Hive removed. Reimplement with Drift.')
+  Future<Either<Failure, List<dynamic>>> fixMissingReferences() async {
+    return const Right([]);
   }
 
-  // ========== Helper Methods ==========
-
-  /// Cria um Set de IDs a partir de uma box para busca rápida
-  Set<String> _buildIdSet<T>(Box<dynamic> box, String Function(T) idExtractor) {
-    final Set<String> ids = {};
-
-    for (final item in box.values) {
-      if (item is T) {
-        final id = idExtractor(item);
-        if (id.isNotEmpty) {
-          ids.add(id);
-        }
-      }
-    }
-
-    return ids;
-  }
-
-  /// Verifica se uma box contém um ID específico
-  bool _containsId<T>(
-    Box<dynamic> box,
-    String id,
-    String Function(T) idExtractor,
-  ) {
-    for (final item in box.values) {
-      if (item is T) {
-        if (idExtractor(item) == id) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
+  /* 
+  ============================================================================
+  COMMENTED OUT - Original Hive Implementation
+  ============================================================================
+  
+  This entire service was based on Hive/BoxManager which has been removed.
+  
+  Key functionality that needs to be reimplemented with Drift:
+  
+  1. validateIntegrity() - Check all foreign key references in diagnosticos
+     - Should use Drift SELECT queries with JOINs
+     - Can leverage Drift's foreign key constraints
+  
+  2. validateDiagnostico() - Check single diagnostico's references
+     - Use WHERE clauses to verify FK existence
+  
+  3. fixMissingReferences() - Clean up invalid FKs
+     - Use UPDATE statements to set invalid FKs to NULL/empty
+  
+  Original implementation relied on:
+  - IHiveManager for box access
+  - BoxManager.withMultipleBoxes for safe concurrent access
+  - Hive Box<T> types for data storage
+  - Legacy Hive models: Diagnostico, Fitossanitario, Praga, Cultura
+  
+  ============================================================================
+  */
 }

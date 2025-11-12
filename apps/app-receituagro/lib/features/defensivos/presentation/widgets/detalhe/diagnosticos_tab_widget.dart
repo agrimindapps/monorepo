@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../database/repositories/culturas_repository.dart';
 import '../../../../../core/di/injection_container.dart';
 import '../../../../../core/theme/spacing_tokens.dart';
+import '../../../../../database/repositories/culturas_repository.dart';
+import '../../../../../database/repositories/pragas_repository.dart';
 import '../../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
 import '../../providers/detalhe_defensivo_notifier.dart';
 import 'diagnosticos_defensivos_components.dart';
@@ -243,7 +244,7 @@ class DiagnosticosTabWidget extends ConsumerWidget {
           if (fkIdPraga != null && fkIdPraga.isNotEmpty) {
             final pragaData = await pragaRepository.getById(fkIdPraga);
             if (pragaData != null) {
-              final nomeComum = pragaData.nomeComum;
+              final nomeComum = pragaData.nome;
               // Extrai primeiro nome se houver vírgula ou ponto-e-vírgula
               if (nomeComum.contains(',')) {
                 nomePraga = nomeComum.split(',').first.trim();

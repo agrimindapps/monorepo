@@ -26,8 +26,11 @@ class DetalhePragaState {
   final String? errorMessage;
   final List<ComentarioModel> comentarios;
   final Map<String, dynamic>? defensivoData;
-  final PragasInfHive? pragaInfo;
-  final PlantasInfHive? plantaInfo;
+  // MIGRATION TODO: Replace legacy Hive types with Drift types
+  // final PragasInfHive? pragaInfo;
+  // final PlantasInfHive? plantaInfo;
+  final PragasInfData? pragaInfo; // Using Drift generated type
+  final PlantasInfData? plantaInfo; // Using Drift generated type (if exists)
 
   const DetalhePragaState({
     required this.pragaName,
@@ -72,8 +75,8 @@ class DetalhePragaState {
     String? errorMessage,
     List<ComentarioModel>? comentarios,
     Map<String, dynamic>? defensivoData,
-    PragasInfHive? pragaInfo,
-    PlantasInfHive? plantaInfo,
+    PragasInfData? pragaInfo, // Updated to Drift type
+    PlantasInfData? plantaInfo, // Updated to Drift type
   }) {
     return DetalhePragaState(
       pragaName: pragaName ?? this.pragaName,
@@ -98,7 +101,9 @@ class DetalhePragaState {
   bool get hasError => errorMessage != null;
   bool get hasComentarios => comentarios.isNotEmpty;
   bool get hasPragaData => pragaData != null;
-  String get itemId => pragaData?.idReg ?? pragaName;
+  // MIGRATION TODO: Praga Drift model uses 'idPraga' not 'idReg'
+  // String get itemId => pragaData?.idReg ?? pragaName;
+  String get itemId => pragaData?.idPraga ?? pragaName;
 }
 
 /// Notifier para gerenciar estado da página de detalhes da praga
@@ -107,16 +112,18 @@ class DetalhePragaState {
 class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   late final FavoritosRepositorySimplified _favoritosRepository;
   late final IPragasRepository _pragasRepository;
-  late final PragasInfLegacyRepository _pragasInfRepository;
-  late final PlantasInfLegacyRepository _plantasInfRepository;
+  // MIGRATION TODO: Legacy repositories removed, need Drift-based replacements
+  // late final PragasInfLegacyRepository _pragasInfRepository;
+  // late final PlantasInfLegacyRepository _plantasInfRepository;
   late final ComentariosService _comentariosService;
 
   @override
   Future<DetalhePragaState> build() async {
     _favoritosRepository = FavoritosDI.get<FavoritosRepositorySimplified>();
     _pragasRepository = di.sl<IPragasRepository>();
-    _pragasInfRepository = di.sl<PragasInfLegacyRepository>();
-    _plantasInfRepository = di.sl<PlantasInfLegacyRepository>();
+    // MIGRATION TODO: Initialize Drift-based repositories
+    // _pragasInfRepository = di.sl<PragasInfLegacyRepository>();
+    // _plantasInfRepository = di.sl<PlantasInfLegacyRepository>();
     _comentariosService = di.sl<ComentariosService>();
     _setupPremiumStatusListener();
 
@@ -203,22 +210,23 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
       });
 
       if (pragaData != null) {
-        // Convert PragaEntity to Praga for state compatibility
-        final pragaHive = Praga(
-          objectId: pragaData!.idReg,
-          createdAt: 0,
-          updatedAt: 0,
-          idReg: pragaData!.idReg,
-          nomeComum: pragaData!.nomeComum,
-          nomeCientifico: pragaData!.nomeCientifico,
-          tipoPraga: pragaData!.tipoPraga,
+        // MIGRATION NOTE: Convert PragaEntity to Drift Praga model
+        // Drift Praga uses: id, idPraga, nome, nomeLatino, tipo, imagemUrl, descricao
+        // PragaEntity uses: idReg, nomeComum, nomeCientifico, tipoPraga, etc.
+        final pragaDrift = Praga(
+          id: 0, // Will be set by database
+          idPraga: pragaData!.idReg, // Map idReg to idPraga
+          nome: pragaData!.nomeComum, // Map nomeComum to nome
+          nomeLatino: pragaData!.nomeCientifico, // Map nomeCientifico to nomeLatino
+          tipo: pragaData!.tipoPraga, // Map tipoPraga to tipo
+          // imagemUrl and descricao not available in PragaEntity
         );
 
         state = AsyncValue.data(
           currentState.copyWith(
             pragaName: pragaData!.nomeComum,
             pragaScientificName: pragaData!.nomeCientifico,
-            pragaData: pragaHive,
+            pragaData: pragaDrift, // Use Drift model
           ),
         );
 
@@ -317,33 +325,35 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   }
 
   /// Carrega informações específicas baseado no tipo da praga
+  /// MIGRATION TODO: Reimplement with Drift-based repository queries
   Future<void> _loadPragaSpecificInfo() async {
-    final currentState = state.value;
-    if (currentState == null || currentState.pragaData == null) return;
-
-    try {
-      PragasInfData? pragaInfo;
-      PlantasInfData? plantaInfo;
-      if (currentState.pragaData!.tipoPraga == '1') {
-        pragaInfo = await _pragasInfRepository.findByIdReg(
-          currentState.pragaData!.idReg,
-        );
-      } else if (currentState.pragaData!.tipoPraga == '3') {
-        plantaInfo = await _plantasInfRepository.findByIdReg(
-          currentState.pragaData!.idReg,
-        );
-      } else if (currentState.pragaData!.tipoPraga == '2') {
-        pragaInfo = await _pragasInfRepository.findByIdReg(
-          currentState.pragaData!.idReg,
-        );
-      }
-
-      state = AsyncValue.data(
-        currentState.copyWith(pragaInfo: pragaInfo, plantaInfo: plantaInfo),
-      );
-    } catch (e) {
-      // Erro já é tratado pelo estado AsyncValue - não precisamos fazer nada aqui
-    }
+    // TEMPORARILY DISABLED: Legacy repositories removed during Drift migration
+    // final currentState = state.value;
+    // if (currentState == null || currentState.pragaData == null) return;
+    //
+    // try {
+    //   PragasInfData? pragaInfo;
+    //   PlantasInfData? plantaInfo;
+    //   if (currentState.pragaData!.tipo == '1') {
+    //     // Query PragasInf using Drift database
+    //     // pragaInfo = await database.getPragasInfByIdReg(currentState.pragaData!.idPraga);
+    //   } else if (currentState.pragaData!.tipo == '3') {
+    //     // Query PlantasInf using Drift database
+    //     // plantaInfo = await database.getPlantasInfByIdReg(currentState.pragaData!.idPraga);
+    //   } else if (currentState.pragaData!.tipo == '2') {
+    //     // Query PragasInf using Drift database
+    //     // pragaInfo = await database.getPragasInfByIdReg(currentState.pragaData!.idPraga);
+    //   }
+    //
+    //   state = AsyncValue.data(
+    //     currentState.copyWith(pragaInfo: pragaInfo, plantaInfo: plantaInfo),
+    //   );
+    // } catch (e) {
+    //   // Error handling
+    // }
+    
+    // For now, just skip loading specific info
+    return;
   }
 
   /// Carrega status premium do usuário

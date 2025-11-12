@@ -1,8 +1,8 @@
 import 'package:core/core.dart' show GetIt;
 
 import '../../../../database/repositories/culturas_repository.dart';
+import '../../../../database/repositories/diagnostico_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
-
 import '../../../../database/repositories/pragas_repository.dart';
 import '../../domain/entities/favorito_entity.dart';
 
@@ -68,6 +68,11 @@ class DiagnosticoResolverStrategy implements IFavoritosDataResolverStrategy {
   // ✅ Lazy loading: obtém o repo apenas quando necessário
   DiagnosticoRepository get _repository =>
       GetIt.instance<DiagnosticoRepository>();
+  PragasRepository get _pragasRepository => GetIt.instance<PragasRepository>();
+  FitossanitariosRepository get _fitossanitariosRepository =>
+      GetIt.instance<FitossanitariosRepository>();
+  CulturasRepository get _culturasRepository =>
+      GetIt.instance<CulturasRepository>();
 
   @override
   Future<Map<String, dynamic>?> resolveItemData(String id) async {
@@ -75,11 +80,17 @@ class DiagnosticoResolverStrategy implements IFavoritosDataResolverStrategy {
       final item = await _repository.getByIdOrObjectId(id);
       if (item == null) return null;
 
+      // Fetch related data using FKs
+      final praga = await _pragasRepository.findById(item.pragaId);
+      final defensivo =
+          await _fitossanitariosRepository.findById(item.defenisivoId);
+      final cultura = await _culturasRepository.findById(item.culturaId);
+
       return {
-        'nomePraga': item.nomePraga ?? '',
-        'nomeDefensivo': item.nomeDefensivo ?? '',
-        'cultura': item.nomeCultura ?? '',
-        'dosagem': '${item.dsMin} - ${item.dsMax} ${item.um}',
+        'nomePraga': praga?.nome ?? '',
+        'nomeDefensivo': defensivo?.nome ?? '',
+        'cultura': cultura?.nome ?? '',
+        'dosagem': '${item.dsMin ?? ''} - ${item.dsMax} ${item.um}',
       };
     } catch (e) {
       return null;

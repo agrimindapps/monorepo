@@ -660,16 +660,23 @@ extension DiagnosticoRepositoryLegacyCompat on DiagnosticoRepository {
     return dataList.map(_diagnosticoDataToHive).toList();
   }
 
-  /// Converte DiagnosticoData (Drift) → Diagnostico (Legacy)
+  /// Converte DiagnosticoData → Diagnostico (Drift DataClass)
   Diagnostico _diagnosticoDataToHive(DiagnosticoData data) {
     return Diagnostico(
-      objectId: data.firebaseId ?? data.id.toString(),
-      createdAt: data.createdAt.millisecondsSinceEpoch,
-      updatedAt: data.updatedAt?.millisecondsSinceEpoch ?? 0,
+      id: data.id,
+      firebaseId: data.firebaseId,
+      userId: data.userId,
+      moduleName: data.moduleName,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+      lastSyncAt: data.lastSyncAt,
+      isDirty: data.isDirty,
+      isDeleted: data.isDeleted,
+      version: data.version,
+      defenisivoId: data.defenisivoId,
+      culturaId: data.culturaId,
+      pragaId: data.pragaId,
       idReg: data.idReg,
-      fkIdDefensivo: data.defenisivoId.toString(),
-      fkIdCultura: data.culturaId.toString(),
-      fkIdPraga: data.pragaId.toString(),
       dsMin: data.dsMin,
       dsMax: data.dsMax,
       um: data.um,

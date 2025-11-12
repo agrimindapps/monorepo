@@ -17,8 +17,6 @@ import '../../features/favoritos/favoritos_di.dart';
 import '../../features/settings/di/device_management_di.dart';
 import '../../features/settings/di/settings_di.dart';
 import '../../features/settings/di/tts_module.dart';
-// DEPRECATED: import '../data/repositories/comentarios_legacy_repository.dart';
-// DEPRECATED: import '../data/repositories/premium_legacy_repository.dart';
 import '../../database/repositories/fitossanitarios_repository.dart';
 import '../../database/repositories/pragas_repository.dart';
 import '../../database/repositories/culturas_repository.dart';

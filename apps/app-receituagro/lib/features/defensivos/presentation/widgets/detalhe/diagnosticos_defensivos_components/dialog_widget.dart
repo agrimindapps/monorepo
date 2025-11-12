@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-// DEPRECATED: import '../../../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../../../../../core/di/injection_container.dart';
 import '../../../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../../../core/widgets/praga_image_widget.dart';

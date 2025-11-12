@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// DEPRECATED: import '../../../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../../../../../core/di/injection_container.dart';
 import '../../../../../../core/theme/spacing_tokens.dart';
 

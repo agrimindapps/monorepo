@@ -1,8 +1,6 @@
-import 'package:core/core.dart' show HiveObject, HiveField;
-
-/// Base model class for all Hive models in the GasOMeter app
+/// Base model class for all models in the GasOMeter app
 /// Provides common fields for sync and versioning
-abstract class BaseModel extends HiveObject {
+abstract class BaseModel {
   BaseModel({
     this.id,
     this.createdAt,
@@ -16,25 +14,18 @@ abstract class BaseModel extends HiveObject {
     createdAt ??= DateTime.now().millisecondsSinceEpoch;
     updatedAt ??= DateTime.now().millisecondsSinceEpoch;
   }
-  @HiveField(0)
   String? id;
 
-  @HiveField(1)
   int? createdAt;
 
-  @HiveField(2)
   int? updatedAt;
 
-  @HiveField(3)
   bool isDeleted = false;
 
-  @HiveField(4)
   bool needsSync;
 
-  @HiveField(5)
   int? lastSyncAt;
 
-  @HiveField(6)
   int version = 1;
 
   /// Convert to map for JSON serialization

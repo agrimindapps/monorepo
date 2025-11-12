@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 
-/// Base sync model for all Hive models in the GasOMeter app
+/// Base sync model for all models in the GasOMeter app
 /// Integrates with core package's BaseSyncEntity for Firebase sync
 abstract class BaseSyncModel extends BaseSyncEntity {
   BaseSyncModel({
@@ -14,48 +14,7 @@ abstract class BaseSyncModel extends BaseSyncEntity {
     super.userId,
     super.moduleName = 'gasometer',
   });
-  void removeFromHive() {}
-
-  /// Convert to Hive-compatible map (using millisecond timestamps)
-  Map<String, dynamic> toHiveMap() {
-    return {
-      'id': id,
-      'createdAt': createdAt?.millisecondsSinceEpoch,
-      'updatedAt': updatedAt?.millisecondsSinceEpoch,
-      'lastSyncAt': lastSyncAt?.millisecondsSinceEpoch,
-      'isDirty': isDirty,
-      'isDeleted': isDeleted,
-      'version': version,
-      'userId': userId,
-      'moduleName': moduleName,
-    };
-  }
-
-  /// Parse base fields from Hive map
-  static Map<String, dynamic> parseBaseHiveFields(Map<String, dynamic> map) {
-    return {
-      'id': map['id'] as String,
-      'createdAt':
-          map['createdAt'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int)
-              : null,
-      'updatedAt':
-          map['updatedAt'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int)
-              : null,
-      'lastSyncAt':
-          map['lastSyncAt'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(map['lastSyncAt'] as int)
-              : null,
-      'isDirty': map['isDirty'] as bool? ?? false,
-      'isDeleted': map['isDeleted'] as bool? ?? false,
-      'version': map['version'] as int? ?? 1,
-      'userId': map['userId'] as String?,
-      'moduleName': map['moduleName'] as String? ?? 'gasometer',
-    };
-  }
-
-  /// Update timestamps for Hive operations
+  /// Update timestamps for operations
   BaseSyncModel updateTimestamps() {
     return copyWith(updatedAt: DateTime.now(), isDirty: true) as BaseSyncModel;
   }

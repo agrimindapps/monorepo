@@ -124,4 +124,14 @@ class FitossanitariosRepository {
       }
     });
   }
+
+  // ============================================================================
+  // MÉTODOS DE COMPATIBILIDADE LEGACY
+  // ============================================================================
+
+  /// @deprecated Use findById instead
+  /// Legacy alias for findById
+  Future<Fitossanitario?> getById(String idDefensivo) async {
+    return await findByIdDefensivo(idDefensivo);
+  }
 }

@@ -1,38 +1,30 @@
+/// DEPRECATED: Legacy Hive model - Use Drift ComentarioData instead
+/// Maintained for backward compatibility during migration phase
+
 import 'package:core/core.dart' hide Column;
 import '../../../features/comentarios/data/comentario_model.dart';
 
 // part 'comentario_hive.g.dart';
 
-@HiveType(typeId: 108)
-class ComentarioHive extends HiveObject {
-  @HiveField(0)
+class ComentarioHive {
   String? sync_objectId;
 
-  @HiveField(1)
   int? sync_createdAt;
 
-  @HiveField(2)
   int? sync_updatedAt;
 
-  @HiveField(3)
   String idReg;
 
-  @HiveField(4)
   bool sync_deleted; // true = deleted, false = active (inverted from old 'status')
 
-  @HiveField(5)
   String titulo;
 
-  @HiveField(6)
   String conteudo;
 
-  @HiveField(7)
   String ferramenta;
 
-  @HiveField(8)
   String pkIdentificador;
 
-  @HiveField(9)
   String userId; // ID do usuário que criou o comentário
 
   ComentarioHive({

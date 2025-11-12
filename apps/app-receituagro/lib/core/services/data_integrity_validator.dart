@@ -1,8 +1,6 @@
 import '../data/models/diagnostico_legacy.dart';
 import '../../database/repositories/culturas_repository.dart';
-import '../data/repositories/diagnostico_legacy_repository.dart';
-import '../data/repositories/fitossanitario_legacy_repository.dart';
-import '../data/repositories/pragas_legacy_repository.dart';
+import '../../database/repositories/legacy_type_aliases.dart';
 import '../utils/diagnostico_logger.dart';
 
 /// EXEMPLO DE USO:

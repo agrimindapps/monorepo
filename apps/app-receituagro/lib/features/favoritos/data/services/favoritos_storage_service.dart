@@ -2,9 +2,8 @@ import 'dart:developer' as developer;
 
 import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
+import '../../../../database/repositories/legacy_type_aliases.dart';
 import '../../../../database/repositories/pragas_repository.dart';
-import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
-import '../../../../core/data/repositories/favoritos_legacy_repository.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
@@ -65,7 +64,8 @@ class FavoritosStorageService implements IFavoritosStorage {
         'adicionadoEm': DateTime.now().toIso8601String(),
       };
 
-      return await _repository.addFavorito(tipoKey, id, itemData);
+      final result = await _repository.addFavorito(tipoKey, id, itemData.toString());
+      return result > 0; // Converte int (id inserido) para bool
     } catch (e) {
       throw FavoritosException(
         'Erro ao adicionar favorito: $e',
@@ -81,7 +81,7 @@ class FavoritosStorageService implements IFavoritosStorage {
       final tipoKey = _storageKeys[tipo];
       if (tipoKey == null) return false;
 
-      return await _repository.removeFavorito(tipoKey, id);
+      return await _repository.removeFavoritoLegacy(tipoKey, id);
     } catch (e) {
       throw FavoritosException(
         'Erro ao remover favorito: $e',
@@ -294,10 +294,10 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
       final diagnostico = await _diagnosticoRepository.getByIdOrObjectId(id);
       if (diagnostico != null) {
         return {
-          'nomePraga': diagnostico.nomePraga ?? 'Praga não encontrada',
-          'nomeDefensivo':
-              diagnostico.nomeDefensivo ?? 'Defensivo não encontrado',
-          'cultura': diagnostico.nomeCultura ?? 'Cultura não encontrada',
+          // TODO: Implement JOINs to get names from related tables
+          'nomePraga': 'ID: ${diagnostico.pragaId}',
+          'nomeDefensivo': 'ID: ${diagnostico.defenisivoId}',
+          'cultura': 'ID: ${diagnostico.culturaId}',
           'dosagem':
               '${diagnostico.dsMin ?? ''} - ${diagnostico.dsMax} ${diagnostico.um}',
           'fabricante': '', // Campo não disponível no DiagnosticoHive

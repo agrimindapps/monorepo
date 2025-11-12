@@ -1,44 +1,28 @@
 import 'package:core/core.dart' hide Column;
 import 'base_sync_model.dart';
 
-part 'espaco_model.g.dart';
-
 /// Espaco model with Firebase sync support
-/// TypeId: 1 - Sequential numbering
-@HiveType(typeId: 1)
+/// Drift-based model (migrated from Hive)
 // ignore: must_be_immutable
 class EspacoModel extends BaseSyncModel {
   @override
-  @HiveField(0)
   final String id;
-  @HiveField(1)
   final int? createdAtMs;
-  @HiveField(2)
   final int? updatedAtMs;
-  @HiveField(3)
   final int? lastSyncAtMs;
   @override
-  @HiveField(4)
   final bool isDirty;
   @override
-  @HiveField(5)
   final bool isDeleted;
   @override
-  @HiveField(6)
   final int version;
   @override
-  @HiveField(7)
   final String? userId;
   @override
-  @HiveField(8)
   final String? moduleName;
-  @HiveField(10)
   final String nome;
-  @HiveField(11)
   final String? descricao;
-  @HiveField(12)
   final bool ativo;
-  @HiveField(13)
   final DateTime? dataCriacao;
 
   EspacoModel({
@@ -57,18 +41,15 @@ class EspacoModel extends BaseSyncModel {
     this.dataCriacao,
   }) : super(
          id: id,
-         createdAt:
-             createdAtMs != null
-                 ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
-                 : null,
-         updatedAt:
-             updatedAtMs != null
-                 ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
-                 : null,
-         lastSyncAt:
-             lastSyncAtMs != null
-                 ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
-                 : null,
+         createdAt: createdAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
+             : null,
+         updatedAt: updatedAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
+             : null,
+         lastSyncAt: lastSyncAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
+             : null,
          isDirty: isDirty,
          isDeleted: isDeleted,
          version: version,
@@ -121,10 +102,9 @@ class EspacoModel extends BaseSyncModel {
       nome: map['nome']?.toString() ?? '',
       descricao: map['descricao']?.toString(),
       ativo: (map['ativo'] as bool?) ?? true,
-      dataCriacao:
-          map['dataCriacao'] != null
-              ? DateTime.parse(map['dataCriacao'] as String)
-              : null,
+      dataCriacao: map['dataCriacao'] != null
+          ? DateTime.parse(map['dataCriacao'] as String)
+          : null,
     );
   }
 
@@ -170,10 +150,9 @@ class EspacoModel extends BaseSyncModel {
       nome: map['nome']?.toString() ?? '',
       descricao: map['descricao']?.toString(),
       ativo: (map['ativo'] as bool?) ?? true,
-      dataCriacao:
-          map['data_criacao'] != null
-              ? DateTime.parse(map['data_criacao'] as String)
-              : null,
+      dataCriacao: map['data_criacao'] != null
+          ? DateTime.parse(map['data_criacao'] as String)
+          : null,
     );
   }
 

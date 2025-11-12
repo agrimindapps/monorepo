@@ -1,62 +1,37 @@
 import 'package:core/core.dart' hide Column;
 import 'base_sync_model.dart';
 
-part 'planta_config_model.g.dart';
-
 /// PlantaConfig model with Firebase sync support
-/// TypeId: 4 - Sequential numbering
-@HiveType(typeId: 4)
+/// Drift-based model (migrated from Hive)
 // ignore: must_be_immutable
 class PlantaConfigModel extends BaseSyncModel {
   @override
-  @HiveField(0)
   final String id;
-  @HiveField(1)
   final int? createdAtMs;
-  @HiveField(2)
   final int? updatedAtMs;
-  @HiveField(3)
   final int? lastSyncAtMs;
   @override
-  @HiveField(4)
   final bool isDirty;
   @override
-  @HiveField(5)
   final bool isDeleted;
   @override
-  @HiveField(6)
   final int version;
   @override
-  @HiveField(7)
   final String? userId;
   @override
-  @HiveField(8)
   final String? moduleName;
-  @HiveField(10)
   final String plantaId;
-  @HiveField(11)
   final bool aguaAtiva;
-  @HiveField(12)
   final int intervaloRegaDias;
-  @HiveField(13)
   final bool aduboAtivo;
-  @HiveField(14)
   final int intervaloAdubacaoDias;
-  @HiveField(15)
   final bool banhoSolAtivo;
-  @HiveField(16)
   final int intervaloBanhoSolDias;
-  @HiveField(17)
   final bool inspecaoPragasAtiva;
-  @HiveField(18)
   final int intervaloInspecaoPragasDias;
-  @HiveField(19)
   final bool podaAtiva;
-  @HiveField(20)
   final int intervaloPodaDias;
-  @HiveField(21)
   final bool replantarAtivo;
-  @HiveField(22)
   final int intervaloReplantarDias;
 
   PlantaConfigModel({
@@ -84,18 +59,15 @@ class PlantaConfigModel extends BaseSyncModel {
     this.intervaloReplantarDias = 180,
   }) : super(
          id: id,
-         createdAt:
-             createdAtMs != null
-                 ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
-                 : null,
-         updatedAt:
-             updatedAtMs != null
-                 ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
-                 : null,
-         lastSyncAt:
-             lastSyncAtMs != null
-                 ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
-                 : null,
+         createdAt: createdAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
+             : null,
+         updatedAt: updatedAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
+             : null,
+         lastSyncAt: lastSyncAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
+             : null,
          isDirty: isDirty,
          isDeleted: isDeleted,
          version: version,
@@ -401,10 +373,16 @@ class PlantaConfigModel extends BaseSyncModel {
     try {
       print('🔍 PlantaConfigModel.fromPlantConfig - Converting PlantConfig:');
       print('   wateringIntervalDays: ${plantConfig.wateringIntervalDays}');
-      print('   fertilizingIntervalDays: ${plantConfig.fertilizingIntervalDays}');
+      print(
+        '   fertilizingIntervalDays: ${plantConfig.fertilizingIntervalDays}',
+      );
       print('   pruningIntervalDays: ${plantConfig.pruningIntervalDays}');
-      print('   sunlightCheckIntervalDays: ${plantConfig.sunlightCheckIntervalDays}');
-      print('   pestInspectionIntervalDays: ${plantConfig.pestInspectionIntervalDays}');
+      print(
+        '   sunlightCheckIntervalDays: ${plantConfig.sunlightCheckIntervalDays}',
+      );
+      print(
+        '   pestInspectionIntervalDays: ${plantConfig.pestInspectionIntervalDays}',
+      );
       print('   replantingIntervalDays: ${plantConfig.replantingIntervalDays}');
 
       final enableWateringCare = plantConfig.enableWateringCare;
@@ -461,8 +439,12 @@ class PlantaConfigModel extends BaseSyncModel {
       print('   aduboAtivo: $aduboAtivo ($intervaloAdubacaoDias dias)');
       print('   podaAtiva: $podaAtiva ($intervaloPodaDias dias)');
       print('   banhoSolAtivo: $banhoSolAtivo ($intervaloBanhoSolDias dias)');
-      print('   inspecaoPragasAtiva: $inspecaoPragasAtiva ($intervaloInspecaoPragasDias dias)');
-      print('   replantarAtivo: $replantarAtivo ($intervaloReplantarDias dias)');
+      print(
+        '   inspecaoPragasAtiva: $inspecaoPragasAtiva ($intervaloInspecaoPragasDias dias)',
+      );
+      print(
+        '   replantarAtivo: $replantarAtivo ($intervaloReplantarDias dias)',
+      );
     } catch (e) {
       print('Warning: Error converting PlantConfig to PlantaConfigModel: $e');
     }

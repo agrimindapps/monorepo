@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../domain/entities/defensivo_entity.dart';
 
 /// Service responsible for generating statistics about defensivos.
@@ -28,6 +30,7 @@ abstract class IDefensivosStatsService {
 }
 
 /// Default implementation of stats service
+@LazySingleton(as: IDefensivosStatsService)
 class DefensivosStatsService implements IDefensivosStatsService {
   @override
   Map<String, int> calculateStats(List<DefensivoEntity> defensivos) {

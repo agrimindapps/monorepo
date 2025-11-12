@@ -210,6 +210,17 @@ class FavoritoRepository
     return rowsAffected > 0;
   }
 
+  /// @deprecated Legacy method - remove favorito sem userId (busca qualquer user)
+  Future<bool> removeFavoritoLegacy(String tipo, String itemId) async {
+    final query = _db.delete(_db.favoritos)
+      ..where((tbl) => 
+          tbl.tipo.equals(tipo) & 
+          tbl.itemId.equals(itemId));
+    
+    final rowsAffected = await query.go();
+    return rowsAffected > 0;
+  }
+
   /// Busca registros que precisam ser sincronizados
   Future<List<FavoritoData>> findDirtyRecords() async {
     final query = _db.select(_db.favoritos)
@@ -248,6 +259,70 @@ class FavoritoRepository
 
     final results = await query.get();
     return results.map((data) => fromData(data)).toList();
+  }
+
+  // ============================================================================
+  // MÉTODOS DE COMPATIBILIDADE LEGACY (Hive → Drift Migration)
+  // ============================================================================
+
+  /// @deprecated Legacy method - busca favoritos por tipo
+  Future<List<FavoritoData>> getFavoritosByTipoAsync(String tipo) async {
+    final query = _db.select(_db.favoritos)
+      ..where((tbl) => 
+          tbl.tipo.equals(tipo) & 
+          tbl.isDeleted.equals(false))
+      ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]);
+
+    final results = await query.get();
+    return results.map((data) => fromData(data)).toList();
+  }
+
+  /// @deprecated Legacy method - adiciona favorito
+  Future<int> addFavorito(String tipo, String itemId, String? itemData) async {
+    final companion = FavoritosCompanion.insert(
+      userId: '', // TODO: Obter userId do contexto
+      tipo: tipo,
+      itemId: itemId,
+      itemData: itemData ?? '',
+    );
+
+    return await _db.into(_db.favoritos).insert(companion);
+  }
+
+  /// @deprecated Legacy method - verifica se é favorito
+  Future<bool> isFavorito(String tipo, String itemId) async {
+    final query = _db.select(_db.favoritos)
+      ..where((tbl) => 
+          tbl.tipo.equals(tipo) & 
+          tbl.itemId.equals(itemId) &
+          tbl.isDeleted.equals(false))
+      ..limit(1);
+
+    final result = await query.getSingleOrNull();
+    return result != null;
+  }
+
+  /// @deprecated Legacy method - limpa favoritos por tipo
+  Future<void> clearFavoritosByTipo(String tipo) async {
+    await (_db.delete(_db.favoritos)
+      ..where((tbl) => tbl.tipo.equals(tipo))).go();
+  }
+
+  /// @deprecated Legacy method - estatísticas de favoritos
+  Future<Map<String, int>> getFavoritosStats() async {
+    // Busca todos os favoritos não deletados
+    final query = _db.select(_db.favoritos)
+      ..where((tbl) => tbl.isDeleted.equals(false));
+
+    final favoritos = await query.get();
+
+    // Conta por tipo
+    final stats = <String, int>{};
+    for (final fav in favoritos) {
+      stats[fav.tipo] = (stats[fav.tipo] ?? 0) + 1;
+    }
+
+    return stats;
   }
 }
 

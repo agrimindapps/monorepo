@@ -2,8 +2,8 @@ import 'package:core/core.dart' show GetIt;
 
 import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
+import '../../../../database/repositories/legacy_type_aliases.dart';
 import '../../../../database/repositories/pragas_repository.dart';
-import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
 import '../../domain/entities/favorito_entity.dart';
 
 /// Strategy Pattern para resolver dados de diferentes tipos de favoritos

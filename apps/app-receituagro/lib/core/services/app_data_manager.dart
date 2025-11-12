@@ -6,10 +6,10 @@ import '../../database/receituagro_database.dart';
 import '../../database/repositories/culturas_repository.dart';
 import '../../database/repositories/fitossanitarios_repository.dart';
 import '../../database/repositories/pragas_repository.dart';
-import '../data/repositories/diagnostico_legacy_repository.dart';
-import '../data/repositories/fitossanitario_info_legacy_repository.dart';
-import '../data/repositories/plantas_inf_legacy_repository.dart';
-import '../data/repositories/pragas_inf_legacy_repository.dart';
+// DEPRECATED: import '../data/repositories/diagnostico_legacy_repository.dart';
+// DEPRECATED: import '../data/repositories/fitossanitario_info_legacy_repository.dart';
+// DEPRECATED: import '../data/repositories/plantas_inf_legacy_repository.dart';
+// DEPRECATED: import '../data/repositories/pragas_inf_legacy_repository.dart';
 import 'data_initialization_service.dart';
 
 /// Interface para o gerenciador de dados da aplicação
@@ -100,20 +100,13 @@ class AppDataManager implements IAppDataManager {
       final pragasRepo = PragasRepository(database);
       final fitossanitarioRepo = FitossanitariosRepository(database);
 
-      final diagnosticoRepo = DiagnosticoLegacyRepository();
-      final fitossanitarioInfoRepo = FitossanitarioInfoLegacyRepository();
-      final plantasInfRepo = PlantasInfLegacyRepository();
-      final pragasInfRepo = PragasInfLegacyRepository();
+      // ❌ REMOVED: Legacy Hive repositories
       _dataService = DataInitializationService(
         assetLoader: assetLoader,
         versionManager: versionManager,
         culturaRepository: culturaRepo,
         pragasRepository: pragasRepo,
         fitossanitarioRepository: fitossanitarioRepo,
-        diagnosticoRepository: diagnosticoRepo,
-        fitossanitarioInfoRepository: fitossanitarioInfoRepo,
-        plantasInfRepository: plantasInfRepo,
-        pragasInfRepository: pragasInfRepo,
       );
 
       developer.log(

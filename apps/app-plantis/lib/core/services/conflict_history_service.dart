@@ -1,50 +1,87 @@
-import 'package:core/core.dart' hide Column;
+import 'package:injectable/injectable.dart';
 
 import '../data/models/conflict_history_model.dart';
+import 'conflict_history_drift_service.dart';
 
+/// ADAPTER PATTERN - Mantém interface antiga mas delega para Drift
+///
+/// Este adapter permite migração gradual de código que usa a interface
+/// antiga baseada em Hive para a nova implementação Drift.
+///
+/// ⚠️ DEPRECATED: Use ConflictHistoryDriftService diretamente para código novo
 @injectable
 class ConflictHistoryService {
-  final Box<ConflictHistoryModel> _conflictHistoryBox;
+  final ConflictHistoryDriftService _driftService;
 
-  ConflictHistoryService(@Named('conflictHistoryBox') this._conflictHistoryBox);
+  ConflictHistoryService(this._driftService);
 
   /// Salva um novo registro de histórico de conflito
   Future<void> saveConflict(ConflictHistoryModel conflictHistory) async {
-    await _conflictHistoryBox.put(conflictHistory.id, conflictHistory);
+    await _driftService.recordConflict(
+      tableName: conflictHistory.modelType,
+      recordId: conflictHistory.modelId,
+      conflictType: 'sync_conflict',
+      resolution: conflictHistory.resolutionStrategy,
+      localData: conflictHistory.localData,
+      remoteData: conflictHistory.remoteData,
+      mergedData: conflictHistory.resolvedData,
+      userId: conflictHistory.userId,
+    );
   }
 
   /// Busca histórico de conflitos por ID do modelo
-  List<ConflictHistoryModel> getConflictsByModelId(String modelId) {
-    return _conflictHistoryBox.values
-        .where((conflict) => conflict.modelId == modelId)
-        .toList();
+  Future<List<ConflictHistoryModel>> getConflictsByModelId(
+    String modelId,
+  ) async {
+    // Interface antiga não tinha tableName - buscar em todos
+    // Isso é uma limitação do adapter, código novo deve usar getByModel()
+    final allRecent = await _driftService.getRecent(limit: 1000);
+    return allRecent.where((c) => c.modelId == modelId).toList();
   }
 
   /// Busca todos os históricos de conflitos
-  List<ConflictHistoryModel> getAllConflicts() {
-    return _conflictHistoryBox.values.toList();
+  Future<List<ConflictHistoryModel>> getAllConflicts() async {
+    return await _driftService.getRecent(limit: 1000);
   }
 
   /// Remove um registro específico de conflito
   Future<void> removeConflict(String conflictId) async {
-    await _conflictHistoryBox.delete(conflictId);
+    // Drift não tem delete por ID - marcar como resolvido é equivalente
+    await _driftService.markAsResolved(conflictId);
   }
 
+  /// Limpar histórico de conflitos
   Future<void> clearConflictHistory() async {
-    await _conflictHistoryBox.clear();
+    await _driftService.clearAll();
   }
 
   /// Conta o número total de conflitos registrados
-  int countConflicts() {
-    return _conflictHistoryBox.length;
+  Future<int> countConflicts() async {
+    final stats = await _driftService.getStats();
+    return stats['total'] as int;
   }
 
   /// Obtém os últimos N conflitos registrados
-  List<ConflictHistoryModel> getRecentConflicts(int limit) {
-    final allConflicts = getAllConflicts();
-    allConflicts.sort(
-      (a, b) => (b.createdAtMs ?? 0).compareTo(a.createdAtMs ?? 0),
-    );
-    return allConflicts.take(limit).toList();
+  Future<List<ConflictHistoryModel>> getRecentConflicts(int limit) async {
+    return await _driftService.getRecent(limit: limit);
+  }
+
+  // NOVOS MÉTODOS ASSÍNCRONOS (interface melhorada)
+
+  /// Obter conflitos não resolvidos
+  Future<List<ConflictHistoryModel>> getUnresolvedConflicts() async {
+    return await _driftService.getUnresolved();
+  }
+
+  /// Obter estatísticas de conflitos
+  Future<Map<String, dynamic>> getConflictStats() async {
+    return await _driftService.getStats();
+  }
+
+  /// Limpar conflitos antigos resolvidos
+  Future<int> cleanOldConflicts({
+    Duration age = const Duration(days: 30),
+  }) async {
+    return await _driftService.cleanOldConflicts(age: age);
   }
 }

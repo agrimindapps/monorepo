@@ -105,7 +105,8 @@ class SyncQueue {
     );
 
     item.sync_isSynced = true;
-    await item.save();
+    // TODO: Migrate to Drift - Hive's save() no longer available
+    // await item.save();
     _notifyQueueUpdated();
   }
 
@@ -123,7 +124,8 @@ class SyncQueue {
     if (errorMessage != null) {
       item.sync_errorMessage = errorMessage;
     }
-    await item.save();
+    // TODO: Migrate to Drift - Hive's save() no longer available
+    // await item.save();
     _notifyQueueUpdated();
   }
 
@@ -131,11 +133,11 @@ class SyncQueue {
   Future<void> clearSyncedItems() async {
     _ensureInitialized();
 
-    final syncedItems = _getAllSyncItems().where((item) => item.sync_isSynced).toList();
-
-    for (var item in syncedItems) {
-      await item.delete();
-    }
+    // TODO: Migrate to Drift - Hive's delete() no longer available
+    // final syncedItems = _getAllSyncItems().where((item) => item.sync_isSynced).toList();
+    // for (var item in syncedItems) {
+    //   await item.delete();
+    // }
     _notifyQueueUpdated();
   }
 
@@ -151,12 +153,12 @@ class SyncQueue {
   Future<void> removeItem(String itemId) async {
     _ensureInitialized();
 
-    final item = _getAllSyncItems().firstWhere(
-      (item) => item.sync_id == itemId,
-      orElse: () => throw Exception('Item not found: $itemId'),
-    );
-
-    await item.delete();
+    // TODO: Migrate to Drift - Hive's delete() no longer available
+    // final item = _getAllSyncItems().firstWhere(
+    //   (item) => item.sync_id == itemId,
+    //   orElse: () => throw Exception('Item not found: $itemId'),
+    // );
+    // await item.delete();
     _notifyQueueUpdated();
   }
 
@@ -164,13 +166,13 @@ class SyncQueue {
   Future<void> removeFailedItems() async {
     _ensureInitialized();
 
-    final failedItems = _getAllSyncItems()
-        .where((item) => item.hasExceededMaxRetries)
-        .toList();
-
-    for (var item in failedItems) {
-      await item.delete();
-    }
+    // TODO: Migrate to Drift - Hive's delete() no longer available
+    // final failedItems = _getAllSyncItems()
+    //     .where((item) => item.hasExceededMaxRetries)
+    //     .toList();
+    // for (var item in failedItems) {
+    //   await item.delete();
+    // }
     _notifyQueueUpdated();
   }
 

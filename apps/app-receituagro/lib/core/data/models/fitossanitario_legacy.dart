@@ -2,66 +2,45 @@ import 'package:core/core.dart' hide Column;
 
 // part 'fitossanitario_hive.g.dart';
 
-@HiveType(typeId: 102)
-class FitossanitarioHive extends HiveObject {
-  @HiveField(0)
+class FitossanitarioHive {
   String? objectId;
 
-  @HiveField(1)
   int? createdAt;
 
-  @HiveField(2)
   int? updatedAt;
 
-  @HiveField(3)
   String idReg;
 
-  @HiveField(4)
   bool status;
 
-  @HiveField(5)
   String nomeComum;
 
-  @HiveField(6)
   String nomeTecnico;
 
-  @HiveField(7)
   String? classeAgronomica;
 
-  @HiveField(8)
   String? fabricante;
 
-  @HiveField(9)
   String? classAmbiental;
 
-  @HiveField(10)
   int comercializado;
 
-  @HiveField(11)
   String? corrosivo;
 
-  @HiveField(12)
   String? inflamavel;
 
-  @HiveField(13)
   String? formulacao;
 
-  @HiveField(14)
   String? modoAcao;
 
-  @HiveField(15)
   String? mapa;
 
-  @HiveField(16)
   String? toxico;
 
-  @HiveField(17)
   String? ingredienteAtivo;
 
-  @HiveField(18)
   String? quantProduto;
 
-  @HiveField(19)
   bool elegivel;
 
   FitossanitarioHive({

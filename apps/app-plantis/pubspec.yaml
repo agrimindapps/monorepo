@@ -34,16 +34,23 @@ dependencies:
   cloud_firestore: any
   go_router: any
   freezed_annotation: ^2.4.1
+
+  # Drift - SQL Database (Fase 1: Setup)
+  drift: any  # Versão do core: ^2.28.2
+  sqlite3_flutter_libs: any  # Versão do core: ^0.5.24
 dev_dependencies:
   flutter_test:
     sdk: flutter
   build_runner: ^2.4.6
-  hive_generator: ^2.0.1
-  riverpod_generator: 2.4.0
+  # hive_generator: ^2.0.1  # ⚠️ DESABILITADO: Conflita com drift_dev (analyzer)
+  riverpod_generator: any  # Compatível com drift_dev
   injectable_generator: any
   mocktail: ^1.0.0
   freezed: ^2.5.2
   json_serializable: ^6.8.0
+  drift_dev: any  # Versão do core: ^2.28.0 - Code generation Drift
+  # NOTA: Migração Hive → Drift em andamento (Fase 2)
+  # hive_generator será removido permanentemente após migração completa
 
 flutter:
   uses-material-design: true

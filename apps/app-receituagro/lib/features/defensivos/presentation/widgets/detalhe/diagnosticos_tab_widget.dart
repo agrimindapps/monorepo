@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../database/repositories/culturas_repository.dart';
-import '../../../../../core/data/repositories/pragas_legacy_repository.dart';
+// DEPRECATED: import '../../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../../../../core/di/injection_container.dart';
 import '../../../../../core/theme/spacing_tokens.dart';
 import '../../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';

@@ -5,6 +5,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/data_cleaner_service.dart';
+import '../../../../database/repositories/plant_tasks_drift_repository.dart';
+import '../../../../database/repositories/plants_drift_repository.dart';
+import '../../../../database/repositories/spaces_drift_repository.dart';
+import '../../../../database/repositories/tasks_drift_repository.dart';
 import '../../data/datasources/account_local_datasource.dart';
 import '../../data/datasources/account_remote_datasource.dart';
 import '../../data/repositories/account_repository_impl.dart';
@@ -35,8 +39,18 @@ AccountRemoteDataSource accountRemoteDataSource(
 
 @riverpod
 AccountLocalDataSource accountLocalDataSource(AccountLocalDataSourceRef ref) {
-  final hiveManager = HiveManager.instance;
-  return AccountLocalDataSourceImpl(hiveManager);
+  // Injeta Drift repositories via GetIt
+  final plantsRepo = di.sl<PlantsDriftRepository>();
+  final spacesRepo = di.sl<SpacesDriftRepository>();
+  final tasksRepo = di.sl<TasksDriftRepository>();
+  final plantTasksRepo = di.sl<PlantTasksDriftRepository>();
+
+  return AccountLocalDataSourceImpl(
+    plantsRepo: plantsRepo,
+    spacesRepo: spacesRepo,
+    tasksRepo: tasksRepo,
+    plantTasksRepo: plantTasksRepo,
+  );
 }
 
 // ============================================================================

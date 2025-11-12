@@ -1,9 +1,10 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 
-import '../../../../core/data/repositories/favoritos_legacy_repository.dart';
 import '../../../../core/di/injection_container.dart';
+import '../../../../database/repositories/legacy_type_aliases.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
 import '../factories/favorito_entity_factory_registry.dart';
@@ -19,6 +20,7 @@ import 'favoritos_validator_service.dart';
 /// - Removed switch case factory (OCP violation)
 /// - Now uses FavoritoEntityFactoryRegistry (Strategy Pattern)
 /// - Extensible: adding new tipos doesn't require modifying this service
+@lazySingleton
 class FavoritosService {
   // Lazy loading do repository (evita erro de acesso antes do registro no GetIt)
   late final FavoritosLegacyRepository _repository;
@@ -139,7 +141,7 @@ class FavoritosService {
         return false;
       }
 
-      final result = await repo.removeFavorito(tipo, id);
+      final result = await repo.removeFavoritoLegacy(tipo, id);
 
       if (result) {
         await _cache.clearForTipo(tipo);

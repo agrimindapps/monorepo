@@ -2,93 +2,63 @@ import 'package:core/core.dart' hide Column;
 
 // part 'pragas_hive.g.dart';
 
-@HiveType(typeId: 105)
-class PragasHive extends HiveObject {
-  @HiveField(0)
+class PragasHive {
   String objectId;
 
-  @HiveField(1)
   int createdAt;
 
-  @HiveField(2)
   int updatedAt;
 
-  @HiveField(3)
   String idReg;
 
-  @HiveField(4)
   String nomeComum;
 
-  @HiveField(5)
   String nomeCientifico;
 
-  @HiveField(6)
   String? dominio;
 
-  @HiveField(7)
   String? reino;
 
-  @HiveField(8)
   String? subReino;
 
-  @HiveField(9)
   String? clado01;
 
-  @HiveField(10)
   String? clado02;
 
-  @HiveField(11)
   String? clado03;
 
-  @HiveField(12)
   String? superDivisao;
 
-  @HiveField(13)
   String? divisao;
 
-  @HiveField(14)
   String? subDivisao;
 
-  @HiveField(15)
   String? classe;
 
-  @HiveField(16)
   String? subClasse;
 
-  @HiveField(17)
   String? superOrdem;
 
-  @HiveField(18)
   String? ordem;
 
-  @HiveField(19)
   String? subOrdem;
 
-  @HiveField(20)
   String? infraOrdem;
 
-  @HiveField(21)
   String? superFamilia;
 
-  @HiveField(22)
   String? familia;
 
-  @HiveField(23)
   String? subFamilia;
 
-  @HiveField(24)
   String? tribo;
 
-  @HiveField(25)
   String? subTribo;
 
-  @HiveField(26)
   String? genero;
 
-  @HiveField(27)
   String? especie;
 
-  @HiveField(28)
   String tipoPraga;
 
   PragasHive({

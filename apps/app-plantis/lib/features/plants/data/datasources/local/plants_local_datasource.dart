@@ -1,31 +1,23 @@
-import 'dart:convert';
-
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 
+import '../../../../../database/repositories/plants_drift_repository.dart';
 import '../../../domain/entities/plant.dart';
 import '../../models/plant_model.dart';
 import 'plants_search_service.dart';
 
-/// Helper function to safely convert any Map to Map<String, dynamic>
-/// Handles LinkedMap, IdentityMap, and other Hive internal map types
-Map<String, dynamic> _safeConvertToMap(dynamic value) {
-  if (value == null) return {};
-  if (value is Map<String, dynamic>) return value;
-  if (value is Map) {
-    try {
-      return Map<String, dynamic>.from(value);
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint(
-          'Warning: Failed to convert map of type ${value.runtimeType}: $e',
-        );
-      }
-      return {};
-    }
-  }
-  return {};
-}
+/// ============================================================================
+/// PLANTS LOCAL DATASOURCE - MIGRADO PARA DRIFT
+/// ============================================================================
+///
+/// **MIGRAÇÃO HIVE → DRIFT (Fase 2):**
+/// - Removido código Hive (Box, JSON serialization)
+/// - Usa PlantsDriftRepository para persistência
+/// - Mantém cache em memória para performance (5 minutos)
+/// - Integração com PlantsSearchService
+/// - Interface pública idêntica (0 breaking changes)
+/// ============================================================================
 
 abstract class PlantsLocalDatasource {
   Future<List<Plant>> getPlants();
@@ -39,32 +31,22 @@ abstract class PlantsLocalDatasource {
   Future<void> clearCache();
 }
 
+@LazySingleton(as: PlantsLocalDatasource)
 class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
-  static const String _boxName = 'plants'; // Usa box do UnifiedSyncManager
-  Box<dynamic>?
-  _box; // Sem tipo específico para aceitar Box<dynamic> ou Box<String>
+  final PlantsDriftRepository _driftRepo;
+  final PlantsSearchService _searchService = PlantsSearchService.instance;
+
+  // Cache em memória (5 minutos de validade)
   List<Plant>? _cachedPlants;
   DateTime? _cacheTimestamp;
   static const Duration _cacheValidity = Duration(minutes: 5);
 
-  final PlantsSearchService _searchService = PlantsSearchService.instance;
-
-  Future<Box<dynamic>> get box async {
-    if (_box != null) return _box!;
-    if (Hive.isBoxOpen(_boxName)) {
-      if (kDebugMode) {
-        debugPrint('ℹ️ Box "$_boxName" já está aberta - reutilizando');
-      }
-      _box = Hive.box(_boxName);
-      return _box!;
-    }
-    _box = await Hive.openBox(_boxName);
-    return _box!;
-  }
+  PlantsLocalDatasourceImpl(this._driftRepo);
 
   @override
   Future<List<Plant>> getPlants() async {
     try {
+      // Verifica cache em memória
       if (_cachedPlants != null && _cacheTimestamp != null) {
         final now = DateTime.now();
         if (now.difference(_cacheTimestamp!).compareTo(_cacheValidity) < 0) {
@@ -72,118 +54,28 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
         }
       }
 
-      final hiveBox = await box;
-      final plants = <Plant>[];
+      // Busca do Drift
+      final plants = await _driftRepo.getAllPlants();
 
-      for (final key in hiveBox.keys) {
-        try {
-          final plantData = hiveBox.get(key);
-          if (plantData != null) {
-            Map<String, dynamic> plantJson;
-
-            // Support both String (new format) and Map (old format)
-            if (plantData is String) {
-              plantJson = jsonDecode(plantData) as Map<String, dynamic>;
-            } else if (plantData is Map) {
-              plantJson = _safeConvertToMap(plantData);
-
-              // Migrate old format to new format
-              if (kDebugMode) {
-                debugPrint(
-                  '🔄 Migrating plant $key from Map to JSON String format',
-                );
-              }
-              final jsonString = jsonEncode(plantJson);
-              await hiveBox.put(key, jsonString);
-            } else {
-              debugPrint(
-                '⚠️ Unknown plant data format for key $key: ${plantData.runtimeType}',
-              );
-              continue;
-            }
-
-            final plant = PlantModel.fromJson(plantJson);
-            if (!plant.isDeleted) {
-              plants.add(plant);
-            }
-          }
-        } catch (e) {
-          debugPrint('Found corrupted plant data for key $key: $e');
-          try {
-            await hiveBox.delete(key);
-            debugPrint('Removed corrupted plant data for key: $key');
-          } catch (deleteError) {
-            debugPrint(
-              'Failed to remove corrupted data for key $key: $deleteError',
-            );
-          }
-          continue;
-        }
-      }
-      plants.sort(
-        (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
-          a.createdAt ?? DateTime.now(),
-        ),
-      );
+      // Atualiza cache
       _cachedPlants = plants;
       _cacheTimestamp = DateTime.now();
+
+      // Atualiza índice de busca
       await _searchService.updateSearchIndexFromPlants(plants);
 
       return plants;
     } catch (e) {
-      throw Exception('Erro ao buscar plantas do cache local: ${e.toString()}');
+      throw CacheFailure('Erro ao buscar plantas do cache local: ${e.toString()}');
     }
   }
 
   @override
   Future<Plant?> getPlantById(String id) async {
     try {
-      final hiveBox = await box;
-      final plantData = hiveBox.get(id);
-
-      if (plantData == null) {
-        return null;
-      }
-
-      try {
-        Map<String, dynamic> plantJson;
-
-        // Support both String (new format) and Map (old format)
-        if (plantData is String) {
-          plantJson = jsonDecode(plantData) as Map<String, dynamic>;
-        } else if (plantData is Map) {
-          plantJson = _safeConvertToMap(plantData);
-
-          // Migrate old format to new format
-          if (kDebugMode) {
-            debugPrint('🔄 Migrating plant $id from Map to JSON String format');
-          }
-          final jsonString = jsonEncode(plantJson);
-          await hiveBox.put(id, jsonString);
-        } else {
-          debugPrint(
-            '⚠️ Unknown plant data format for ID $id: ${plantData.runtimeType}',
-          );
-          return null;
-        }
-
-        final plant = PlantModel.fromJson(plantJson);
-
-        return plant.isDeleted ? null : plant;
-      } catch (corruptionError) {
-        debugPrint('Found corrupted plant data for ID $id: $corruptionError');
-        try {
-          await hiveBox.delete(id);
-          debugPrint('Removed corrupted plant data for ID: $id');
-        } catch (deleteError) {
-          debugPrint(
-            'Failed to remove corrupted data for ID $id: $deleteError',
-          );
-        }
-        return null;
-      }
+      return await _driftRepo.getPlantById(id);
     } catch (e) {
-      throw Exception('Erro ao buscar planta do cache local: ${e.toString()}');
+      throw CacheFailure('Erro ao buscar planta do cache local: ${e.toString()}');
     }
   }
 
@@ -192,172 +84,85 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
     try {
       if (kDebugMode) {
         debugPrint('🌱 PlantsLocalDatasourceImpl.addPlant() - Iniciando');
-        debugPrint(
-          '🌱 PlantsLocalDatasourceImpl.addPlant() - plant.id: ${plant.id}',
-        );
-        debugPrint(
-          '🌱 PlantsLocalDatasourceImpl.addPlant() - plant.name: ${plant.name}',
-        );
-      }
-
-      final hiveBox = await box;
-      if (hiveBox.containsKey(plant.id)) {
-        if (kDebugMode) {
-          debugPrint(
-            '⚠️ PlantsLocalDatasourceImpl.addPlant() - Planta já existe com id: ${plant.id}',
-          );
-        }
+        debugPrint('🌱 PlantsLocalDatasourceImpl.addPlant() - plant.id: ${plant.id}');
+        debugPrint('🌱 PlantsLocalDatasourceImpl.addPlant() - plant.name: ${plant.name}');
       }
 
       final plantModel = PlantModel.fromEntity(plant);
-      final plantJson = jsonEncode(plantModel.toJson());
+      await _driftRepo.insertPlant(plantModel);
 
       if (kDebugMode) {
-        debugPrint(
-          '🌱 PlantsLocalDatasourceImpl.addPlant() - Gravando no Hive',
-        );
+        debugPrint('✅ PlantsLocalDatasourceImpl.addPlant() - Gravado com sucesso');
       }
 
-      await hiveBox.put(plant.id, plantJson);
-
-      if (kDebugMode) {
-        debugPrint(
-          '✅ PlantsLocalDatasourceImpl.addPlant() - Gravado com sucesso',
-        );
-        debugPrint(
-          '🌱 PlantsLocalDatasourceImpl.addPlant() - Total de plantas no box: ${hiveBox.length}',
-        );
-      }
       _invalidateCache();
     } catch (e) {
       if (kDebugMode) {
         debugPrint('❌ PlantsLocalDatasourceImpl.addPlant() - Erro: $e');
       }
-      throw Exception('Erro ao salvar planta no cache local: ${e.toString()}');
+      throw CacheFailure('Erro ao salvar planta no cache local: ${e.toString()}');
     }
   }
 
   @override
   Future<void> updatePlant(Plant plant) async {
     try {
-      final hiveBox = await box;
       final plantModel = PlantModel.fromEntity(plant);
-      final plantJson = jsonEncode(plantModel.toJson());
-      await hiveBox.put(plant.id, plantJson);
+      await _driftRepo.updatePlant(plantModel);
       _invalidateCache();
     } catch (e) {
-      throw Exception(
-        'Erro ao atualizar planta no cache local: ${e.toString()}',
-      );
+      throw CacheFailure('Erro ao atualizar planta no cache local: ${e.toString()}');
     }
   }
 
   @override
   Future<void> deletePlant(String id) async {
     try {
-      final hiveBox = await box;
-      final plantData = hiveBox.get(id);
-      if (plantData != null) {
-        Map<String, dynamic> plantJson;
-
-        // Support both String (new format) and Map (old format)
-        if (plantData is String) {
-          plantJson = jsonDecode(plantData) as Map<String, dynamic>;
-        } else if (plantData is Map) {
-          plantJson = Map<String, dynamic>.from(plantData);
-        } else {
-          debugPrint(
-            '⚠️ Unknown plant data format for ID $id: ${plantData.runtimeType}',
-          );
-          return;
-        }
-
-        final plant = PlantModel.fromJson(plantJson);
-        final deletedPlant = plant.copyWith(
-          isDeleted: true,
-          updatedAt: DateTime.now(),
-          isDirty: true,
-        );
-
-        final updatedJson = jsonEncode(deletedPlant.toJson());
-        await hiveBox.put(id, updatedJson);
-        _invalidateCache();
-      }
+      await _driftRepo.deletePlant(id);
+      _invalidateCache();
     } catch (e) {
-      throw Exception('Erro ao deletar planta do cache local: ${e.toString()}');
+      throw CacheFailure('Erro ao deletar planta do cache local: ${e.toString()}');
     }
   }
 
-  /// Remove fisicamente a planta do Hive (para resolver duplicações)
   @override
   Future<void> hardDeletePlant(String id) async {
     try {
       if (kDebugMode) {
-        debugPrint(
-          '🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - Iniciando',
-        );
+        debugPrint('🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - Iniciando');
         debugPrint('🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - id: $id');
       }
 
-      final hiveBox = await box;
-      final exists = hiveBox.containsKey(id);
-      if (kDebugMode) {
-        debugPrint(
-          '🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - Registro existe: $exists',
-        );
-        debugPrint(
-          '🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - Total antes da remoção: ${hiveBox.length}',
-        );
-      }
-
-      await hiveBox.delete(id);
+      await _driftRepo.hardDeletePlant(id);
 
       if (kDebugMode) {
-        debugPrint(
-          '✅ PlantsLocalDatasourceImpl.hardDeletePlant() - Removido fisicamente',
-        );
-        debugPrint(
-          '🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - Total após remoção: ${hiveBox.length}',
-        );
+        debugPrint('✅ PlantsLocalDatasourceImpl.hardDeletePlant() - Removido fisicamente');
       }
+
       _invalidateCache();
     } catch (e) {
       if (kDebugMode) {
         debugPrint('❌ PlantsLocalDatasourceImpl.hardDeletePlant() - Erro: $e');
       }
-      throw Exception(
-        'Erro ao remover fisicamente planta do cache local: ${e.toString()}',
-      );
+      throw CacheFailure('Erro ao remover fisicamente planta do cache local: ${e.toString()}');
     }
   }
 
   @override
   Future<List<Plant>> searchPlants(String query) async {
     try {
+      // Primeiro tenta o search service (cache + debounce)
       final results = await _searchService.searchWithDebounce(
         query,
         const Duration(milliseconds: 300),
       );
-
       return results;
     } catch (e) {
+      // Fallback: busca direto no Drift
       try {
-        final allPlants = await getPlants();
-        final searchQuery = query.toLowerCase().trim();
-
-        return allPlants.where((plant) {
-          final name = plant.name.toLowerCase();
-          final species = (plant.species ?? '').toLowerCase();
-          final notes = (plant.notes ?? '').toLowerCase();
-
-          return name.contains(searchQuery) ||
-              species.contains(searchQuery) ||
-              notes.contains(searchQuery);
-        }).toList();
+        return await _driftRepo.searchPlants(query);
       } catch (fallbackError) {
-        throw Exception(
-          'Erro ao buscar plantas no cache local: ${fallbackError.toString()}',
-        );
+        throw CacheFailure('Erro ao buscar plantas no cache local: ${fallbackError.toString()}');
       }
     }
   }
@@ -365,24 +170,20 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   @override
   Future<List<Plant>> getPlantsBySpace(String spaceId) async {
     try {
-      final allPlants = await getPlants();
-      return allPlants.where((plant) => plant.spaceId == spaceId).toList();
+      return await _driftRepo.getPlantsBySpace(spaceId);
     } catch (e) {
-      throw Exception(
-        'Erro ao buscar plantas por espaço no cache local: ${e.toString()}',
-      );
+      throw CacheFailure('Erro ao buscar plantas por espaço no cache local: ${e.toString()}');
     }
   }
 
   @override
   Future<void> clearCache() async {
     try {
-      final hiveBox = await box;
-      await hiveBox.clear();
+      await _driftRepo.clearAll();
       _invalidateCache();
       _searchService.clearCache();
     } catch (e) {
-      throw Exception('Erro ao limpar cache local: ${e.toString()}');
+      throw CacheFailure('Erro ao limpar cache local: ${e.toString()}');
     }
   }
 
@@ -399,10 +200,9 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       'plantsCache': {
         'cached': _cachedPlants != null,
         'cacheSize': _cachedPlants?.length ?? 0,
-        'cacheAge':
-            _cacheTimestamp != null
-                ? DateTime.now().difference(_cacheTimestamp!).inMinutes
-                : null,
+        'cacheAge': _cacheTimestamp != null
+            ? DateTime.now().difference(_cacheTimestamp!).inMinutes
+            : null,
       },
       'searchCache': _searchService.getCacheStats(),
     };

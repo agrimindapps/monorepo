@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import '../../core/data/models/diagnostico_legacy.dart';
 import '../receituagro_database.dart';
 import '../tables/receituagro_tables.dart';
 
@@ -96,6 +97,37 @@ class DiagnosticoRepository
 
     final results = await query.get();
     return results.map((data) => fromData(data)).toList();
+  }
+
+  /// Busca diagnóstico por firebaseId ou ID local
+  ///
+  /// Este método tenta primeiro buscar por firebaseId (String).
+  /// Se não encontrar, tenta converter o ID para int e buscar por id local.
+  Future<DiagnosticoData?> findByFirebaseIdOrId(String idString) async {
+    // Primeiro tenta buscar por firebaseId
+    var query = _db.select(_db.diagnosticos)
+      ..where((tbl) => tbl.firebaseId.equals(idString))
+      ..limit(1);
+
+    var results = await query.get();
+    if (results.isNotEmpty) {
+      return fromData(results.first);
+    }
+
+    // Se não encontrar, tenta converter para int e buscar por id
+    final intId = int.tryParse(idString);
+    if (intId != null) {
+      query = _db.select(_db.diagnosticos)
+        ..where((tbl) => tbl.id.equals(intId))
+        ..limit(1);
+
+      results = await query.get();
+      if (results.isNotEmpty) {
+        return fromData(results.first);
+      }
+    }
+
+    return null;
   }
 
   /// Stream de diagnósticos do usuário
@@ -256,6 +288,34 @@ class DiagnosticoRepository
 
     final result = await query.getSingle();
     return result.read(_db.diagnosticos.id.count()) ?? 0;
+  }
+
+  /// Busca todos os diagnósticos (sem filtro de usuário)
+  ///
+  /// Retorna todos os diagnósticos não deletados
+  Future<List<DiagnosticoData>> getAllData() async {
+    final query = _db.select(_db.diagnosticos)
+      ..where((tbl) => tbl.isDeleted.equals(false))
+      ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]);
+
+    final results = await query.get();
+    return results.map((data) => fromData(data)).toList();
+  }
+
+  /// Busca diagnóstico por firebaseId ou ID local (Legacy compatibility)
+  ///
+  /// Este método tenta primeiro buscar por firebaseId (String).
+  /// Se não encontrar, tenta converter o ID para int e buscar por id local.
+  Future<DiagnosticoData?> getByIdOrObjectId(String idString) async {
+    final data = await findByFirebaseIdOrId(idString);
+    return data;
+  }
+
+  /// Busca todos os diagnósticos como lista (Legacy compatibility)
+  ///
+  /// Wrapper para getAllData() mantendo compatibilidade
+  Future<List<DiagnosticoData>> getAll() async {
+    return await getAllData();
   }
 
   /// Soft delete de um diagnóstico
@@ -543,6 +603,85 @@ class PragaData {
       tipo: data.tipo,
       imagemUrl: data.imagemUrl,
       descricao: data.descricao,
+    );
+  }
+}
+
+// ============================================================================
+// MÉTODOS DE COMPATIBILIDADE LEGACY (Hive → Drift Migration)
+// ============================================================================
+// Estes métodos fornecem compatibilidade temporária com código antigo que
+// esperava DiagnosticoHive. DEPRECATE após migração completa.
+
+extension DiagnosticoRepositoryLegacyCompat on DiagnosticoRepository {
+  /// @deprecated Use findByFirebaseIdOrId instead
+  ///
+  /// Compatibilidade com código antigo que chamava getByIdOrObjectId
+  Future<DiagnosticoHive?> getByIdOrObjectId(String idString) async {
+    final data = await findByFirebaseIdOrId(idString);
+    return data != null ? _diagnosticoDataToHive(data) : null;
+  }
+
+  /// Busca Diagnostico (Drift) por firebaseId ou ID local
+  ///
+  /// Retorna o row Drift diretamente (não DiagnosticoData)
+  Future<Diagnostico?> getDiagnosticoByIdOrObjectId(String idString) async {
+    // Primeiro tenta buscar por firebaseId
+    var query = _db.select(_db.diagnosticos)
+      ..where((tbl) => tbl.firebaseId.equals(idString))
+      ..limit(1);
+
+    var results = await query.get();
+    if (results.isNotEmpty) {
+      return results.first;
+    }
+
+    // Se não encontrar, tenta converter para int e buscar por id
+    final intId = int.tryParse(idString);
+    if (intId != null) {
+      query = _db.select(_db.diagnosticos)
+        ..where((tbl) => tbl.id.equals(intId))
+        ..limit(1);
+
+      results = await query.get();
+      if (results.isNotEmpty) {
+        return results.first;
+      }
+    }
+
+    return null;
+  }
+
+  /// @deprecated Use getAllData instead
+  ///
+  /// Compatibilidade com código antigo que chamava getAll
+  Future<List<DiagnosticoHive>> getAll() async {
+    final dataList = await getAllData();
+    return dataList.map(_diagnosticoDataToHive).toList();
+  }
+
+  /// Converte DiagnosticoData (Drift) → DiagnosticoHive (Legacy)
+  DiagnosticoHive _diagnosticoDataToHive(DiagnosticoData data) {
+    return DiagnosticoHive(
+      objectId: data.firebaseId ?? data.id.toString(),
+      createdAt: data.createdAt.millisecondsSinceEpoch,
+      updatedAt: data.updatedAt?.millisecondsSinceEpoch ?? 0,
+      idReg: data.idReg,
+      fkIdDefensivo: data.defenisivoId.toString(),
+      fkIdCultura: data.culturaId.toString(),
+      fkIdPraga: data.pragaId.toString(),
+      dsMin: data.dsMin,
+      dsMax: data.dsMax,
+      um: data.um,
+      minAplicacaoT: data.minAplicacaoT,
+      maxAplicacaoT: data.maxAplicacaoT,
+      umT: data.umT,
+      minAplicacaoA: data.minAplicacaoA,
+      maxAplicacaoA: data.maxAplicacaoA,
+      umA: data.umA,
+      intervalo: data.intervalo,
+      intervalo2: data.intervalo2,
+      epocaAplicacao: data.epocaAplicacao,
     );
   }
 }

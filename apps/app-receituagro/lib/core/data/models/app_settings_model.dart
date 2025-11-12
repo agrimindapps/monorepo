@@ -1,37 +1,26 @@
 import 'package:core/core.dart' hide Column;
 
-// part 'app_settings_model.g.dart';
-
-@HiveType(typeId: 20)
-class AppSettingsModel extends HiveObject {
-  @HiveField(0)
+// DEPRECATED: Legacy model - migrate to Drift AppSettings table
+// Maintained for backward compatibility during migration phase
+class AppSettingsModel {
   final String? theme; // 'light', 'dark', 'system'
 
-  @HiveField(1)
   final String? language; // 'pt', 'en', 'es'
 
-  @HiveField(2)
   final bool enableNotifications;
 
-  @HiveField(3)
   final bool enableSync;
 
-  @HiveField(4)
   final Map<String, bool> featureFlags;
 
-  @HiveField(5)
   final String? userId;
 
-  @HiveField(6)
   final bool sync_synchronized;
 
-  @HiveField(7)
   final DateTime? sync_syncedAt;
 
-  @HiveField(8)
   final DateTime sync_createdAt;
 
-  @HiveField(9)
   final DateTime? sync_updatedAt;
 
   AppSettingsModel({

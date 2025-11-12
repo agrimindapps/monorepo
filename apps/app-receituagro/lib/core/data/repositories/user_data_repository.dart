@@ -2,7 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 // FIXED (P0.1): Changed from core/services/ to core/utils/
-import '../../../core/utils/box_manager.dart';
+// DEPRECATED: import '../../../core/utils/box_manager.dart';
 
 import '../../../features/comentarios/data/comentario_model.dart';
 import '../../../features/comentarios/domain/entities/comentario_entity.dart';
@@ -51,73 +51,19 @@ class UserDataRepository {
   bool get hasCurrentUser => currentUserId != null;
 
   /// Obtém configurações do app para o usuário atual
+  /// DEPRECATED: Hive removed - Use Firebase or Drift for persistence
+  @Deprecated('Use Firebase or Drift repositories instead')
   Future<Either<Exception, AppSettingsModel?>> getAppSettings() async {
-    try {
-      final userId = currentUserId;
-      if (userId == null) {
-        return Left(Exception('No user logged in'));
-      }
-
-      // FIXED (P0.3): Use BoxManager.withBox with correct signature
-      final result =
-          await BoxManager.withBox<AppSettingsModel, AppSettingsModel?>(
-            hiveManager: _hiveManager,
-            boxName: _appSettingsBoxName,
-            operation: (box) async {
-              return box.values
-                  .where((settings) => settings.userId == userId)
-                  .firstOrNull;
-            },
-          );
-
-      return result.fold(
-        (failure) => Left(Exception('Error getting app settings: $failure')),
-        (data) => Right(data),
-      );
-    } catch (e) {
-      return Left(Exception('Error getting app settings: $e'));
-    }
+    return Left(Exception('Method deprecated: Hive support removed. Use Firebase or Drift instead.'));
   }
 
   /// Salva configurações do app para o usuário atual
+  /// DEPRECATED: Hive removed - Use Firebase or Drift for persistence
+  @Deprecated('Use Firebase or Drift repositories instead')
   Future<Either<Exception, void>> saveAppSettings(
     AppSettingsModel settings,
   ) async {
-    try {
-      final userId = currentUserId;
-      if (userId == null) {
-        return Left(Exception('No user logged in'));
-      }
-
-      // FIXED (P0.3): Use BoxManager.withBox instead of direct Hive.openBox()
-      final result = await BoxManager.withBox<AppSettingsModel, void>(
-        hiveManager: _hiveManager,
-        boxName: _appSettingsBoxName,
-        operation: (box) async {
-          final existingKey = box.keys.firstWhere(
-            (key) => box.get(key)?.userId == userId,
-            orElse: () => null,
-          );
-          final updatedSettings = settings.copyWith(
-            userId: userId,
-            sync_updatedAt: DateTime.now(),
-            sync_synchronized: false, // Marca como não sincronizado
-          );
-          if (existingKey != null) {
-            await box.put(existingKey, updatedSettings);
-          } else {
-            await box.add(updatedSettings);
-          }
-        },
-      );
-
-      return result.fold(
-        (failure) => Left(Exception('Error saving app settings: $failure')),
-        (_) => const Right(null),
-      );
-    } catch (e) {
-      return Left(Exception('Error saving app settings: $e'));
-    }
+    return Left(Exception('Method deprecated: Hive support removed. Use Firebase or Drift instead.'));
   }
 
   /// Cria configurações padrão para o usuário atual
@@ -145,92 +91,19 @@ class UserDataRepository {
   }
 
   /// Obtém dados de subscription para o usuário atual
+  /// DEPRECATED: Hive removed - Use Firebase or Drift for persistence
+  @Deprecated('Use Firebase or Drift repositories instead')
   Future<Either<Exception, SubscriptionEntity?>> getSubscriptionData() async {
-    try {
-      final userId = currentUserId;
-      if (userId == null) {
-        return Left(Exception('No user logged in'));
-      }
-
-      // FIXED (P0.3): Use BoxManager.withBox instead of direct Hive.openBox()
-      final result =
-          await BoxManager.withBox<
-            Map<dynamic, dynamic>,
-            Map<dynamic, dynamic>?
-          >(
-            hiveManager: _hiveManager,
-            boxName: _subscriptionDataBoxName,
-            operation: (box) async {
-              return box.values
-                  .where((sub) => sub['userId'] == userId)
-                  .firstOrNull;
-            },
-          );
-
-      return result.fold(
-        (failure) =>
-            Left(Exception('Error getting subscription data: $failure')),
-        (subscriptionMap) {
-          if (subscriptionMap == null) {
-            return const Right(null);
-          }
-
-          try {
-            final entity = SubscriptionEntity.fromFirebaseMap(
-              Map<String, dynamic>.from(subscriptionMap),
-            );
-            return Right(entity);
-          } catch (e) {
-            return Left(Exception('Error parsing subscription data: $e'));
-          }
-        },
-      );
-    } catch (e) {
-      return Left(Exception('Error getting subscription data: $e'));
-    }
+    return Left(Exception('Method deprecated: Hive support removed. Use Firebase or Drift instead.'));
   }
 
   /// Salva dados de subscription para o usuário atual
+  /// DEPRECATED: Hive removed - Use Firebase or Drift for persistence
+  @Deprecated('Use Firebase or Drift repositories instead')
   Future<Either<Exception, void>> saveSubscriptionData(
     SubscriptionEntity subscription,
   ) async {
-    try {
-      final userId = currentUserId;
-      if (userId == null) {
-        return Left(Exception('No user logged in'));
-      }
-
-      // FIXED (P0.3): Use BoxManager.withBox instead of direct Hive.openBox()
-      final result = await BoxManager.withBox<Map<dynamic, dynamic>, void>(
-        hiveManager: _hiveManager,
-        boxName: _subscriptionDataBoxName,
-        operation: (box) async {
-          final existingKey = box.keys.firstWhere((key) {
-            final sub = box.get(key);
-            return sub != null && sub['userId'] == userId;
-          }, orElse: () => null);
-          final updatedSubscription = subscription.copyWith(
-            userId: userId,
-            updatedAt: DateTime.now(),
-            isDirty: true, // Marca como não sincronizado
-          );
-          final subscriptionMap = updatedSubscription.toFirebaseMap();
-          if (existingKey != null) {
-            await box.put(existingKey, subscriptionMap);
-          } else {
-            await box.add(subscriptionMap);
-          }
-        },
-      );
-
-      return result.fold(
-        (failure) =>
-            Left(Exception('Error saving subscription data: $failure')),
-        (_) => const Right(null),
-      );
-    } catch (e) {
-      return Left(Exception('Error saving subscription data: $e'));
-    }
+    return Left(Exception('Method deprecated: Hive support removed. Use Firebase or Drift instead.'));
   }
 
   // ========================================================================
@@ -539,111 +412,16 @@ class UserDataRepository {
   }
 
   /// Limpa todos os dados do usuário atual (para logout)
+  /// DEPRECATED: Hive removed - Use Firebase or Drift for persistence
+  @Deprecated('Use Firebase or Drift repositories instead')
   Future<Either<Exception, void>> clearUserData() async {
-    try {
-      final userId = currentUserId;
-      if (userId == null) {
-        return Left(Exception('No user logged in'));
-      }
-
-      // FIXED (P0.3): Use BoxManager.withMultipleBoxes with correct signature
-      final result = await BoxManager.withMultipleBoxes<void>(
-        hiveManager: _hiveManager,
-        boxNames: [_appSettingsBoxName, _subscriptionDataBoxName],
-        operation: (boxes) async {
-          final appSettingsBox = boxes[_appSettingsBoxName] as Box<dynamic>;
-          final subscriptionBox =
-              boxes[_subscriptionDataBoxName] as Box<dynamic>;
-
-          final settingsKeysToRemove = appSettingsBox.keys.where((key) {
-            final settings = appSettingsBox.get(key);
-            return settings is AppSettingsModel && settings.userId == userId;
-          }).toList();
-
-          for (final key in settingsKeysToRemove) {
-            await appSettingsBox.delete(key);
-          }
-
-          final subscriptionKeysToRemove = subscriptionBox.keys.where((key) {
-            final sub = subscriptionBox.get(key);
-            return sub is Map && sub['userId'] == userId;
-          }).toList();
-
-          for (final key in subscriptionKeysToRemove) {
-            await subscriptionBox.delete(key);
-          }
-        },
-      );
-
-      return result.fold(
-        (failure) => Left(Exception('Error clearing user data: $failure')),
-        (_) => const Right(null),
-      );
-    } catch (e) {
-      return Left(Exception('Error clearing user data: $e'));
-    }
+    return Left(Exception('Method deprecated: Hive support removed. Use Firebase or Drift instead.'));
   }
 
   /// Obtém estatísticas de dados do usuário
+  /// DEPRECATED: Hive removed - Use Firebase or Drift for persistence
+  @Deprecated('Use Firebase or Drift repositories instead')
   Future<Either<Exception, Map<String, int>>> getUserDataStats() async {
-    try {
-      final userId = currentUserId;
-      if (userId == null) {
-        return Left(Exception('No user logged in'));
-      }
-
-      // FIXED (P0.3): Use BoxManager.withMultipleBoxes to avoid multiple open/close cycles
-      final result = await BoxManager.withMultipleBoxes<Map<String, int>>(
-        hiveManager: _hiveManager,
-        boxNames: [_appSettingsBoxName, _subscriptionDataBoxName],
-        operation: (boxes) async {
-          final appSettingsBox = boxes[_appSettingsBoxName] as Box<dynamic>;
-          final subscriptionBox =
-              boxes[_subscriptionDataBoxName] as Box<dynamic>;
-
-          final stats = <String, int>{};
-
-          stats['app_settings'] = appSettingsBox.values
-              .whereType<AppSettingsModel>()
-              .where((settings) => settings.userId == userId)
-              .length;
-
-          stats['subscription_data'] = subscriptionBox.values
-              .whereType<Map<dynamic, dynamic>>()
-              .where((sub) => sub['userId'] == userId)
-              .length;
-
-          // Delegate to specialized repositories for accurate counts
-          try {
-            final favoritosResult = await getFavoritos();
-            favoritosResult.fold(
-              (error) => stats['favoritos'] = 0,
-              (favoritos) => stats['favoritos'] = favoritos.length,
-            );
-          } catch (_) {
-            stats['favoritos'] = 0;
-          }
-
-          try {
-            final comentariosResult = await getComentarios();
-            comentariosResult.fold(
-              (error) => stats['comentarios'] = 0,
-              (comentarios) => stats['comentarios'] = comentarios.length,
-            );
-          } catch (_) {
-            stats['comentarios'] = 0;
-          }
-
-          return stats;
-        },
-      );
-
-      return result.fold(
-        (failure) => Left(Exception('Error getting user data stats: $failure')),
-        (stats) => Right(stats),
-      );
-    } catch (e) {
-      return Left(Exception('Error getting user data stats: $e'));
-    }
+    return Left(Exception('Method deprecated: Hive support removed. Use Firebase or Drift instead.'));
   }
 }

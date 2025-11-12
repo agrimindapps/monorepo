@@ -17,8 +17,8 @@ import '../../features/favoritos/favoritos_di.dart';
 import '../../features/settings/di/device_management_di.dart';
 import '../../features/settings/di/settings_di.dart';
 import '../../features/settings/di/tts_module.dart';
-import '../data/repositories/comentarios_legacy_repository.dart';
-import '../data/repositories/premium_legacy_repository.dart';
+// DEPRECATED: import '../data/repositories/comentarios_legacy_repository.dart';
+// DEPRECATED: import '../data/repositories/premium_legacy_repository.dart';
 import '../../database/repositories/fitossanitarios_repository.dart';
 import '../../database/repositories/pragas_repository.dart';
 import '../../database/repositories/culturas_repository.dart';
@@ -246,12 +246,9 @@ Future<void> init() async {
   // ✅ PHASE 3: Setup GetIt for Pragas por Cultura services
   _setupPragasPorCulturaServices();
 
-  // ✅ ComentariosLegacyRepository now registered via @LazySingleton in the repository file
-  // ❌ REMOVIDO: Manual registration to avoid duplicate with Injectable
-
-  sl.registerLazySingleton<PremiumLegacyRepository>(
-    () => PremiumLegacyRepository(),
-  );
+  // ❌ REMOVED: PremiumLegacyRepository (Hive dependency removed)
+  // ❌ REMOVED: ComentariosLegacyRepository (Hive dependency removed)
+  
   try {
     sl.registerLazySingleton<IPremiumService>(() => MockPremiumService());
   } catch (e) {
@@ -265,12 +262,9 @@ Future<void> init() async {
     }
   }
 
-  sl.registerLazySingleton<ComentariosService>(
-    () => ComentariosService(
-      repository: sl<ComentariosLegacyRepository>(),
-      premiumService: sl<IPremiumService>(),
-    ),
-  );
+  // ❌ REMOVED: ComentariosService (depends on ComentariosLegacyRepository)
+  // TODO: Migrate to Drift-based comentarios repository
+  
   // ✅ IDiagnosticosRepository and all use cases now managed by Injectable (@LazySingleton, @injectable)
   sl.registerLazySingleton<DefensivosGroupingService>(
     () => DefensivosGroupingService(),

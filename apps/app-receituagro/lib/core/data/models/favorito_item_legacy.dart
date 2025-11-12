@@ -2,24 +2,17 @@ import 'package:core/core.dart' hide Column;
 
 // part 'favorito_item_hive.g.dart';
 
-@HiveType(typeId: 110)
-class FavoritoItemHive extends HiveObject {
-  @HiveField(0)
+class FavoritoItemHive {
   String sync_objectId;
 
-  @HiveField(1)
   int sync_createdAt;
 
-  @HiveField(2)
   int sync_updatedAt;
 
-  @HiveField(3)
   String tipo; // 'defensivos', 'pragas', 'diagnosticos', 'culturas'
 
-  @HiveField(4)
   String itemId; // ID do item original
 
-  @HiveField(5)
   String itemData; // JSON string com dados do item para cache
 
   FavoritoItemHive({

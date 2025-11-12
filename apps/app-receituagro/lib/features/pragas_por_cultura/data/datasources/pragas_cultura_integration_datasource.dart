@@ -2,7 +2,7 @@ import 'package:core/core.dart' hide Column;
 
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../../database/repositories/pragas_repository.dart';
-import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
+// DEPRECATED: import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
 
 /// Integração com serviços existentes para obter pragas por cultura
 ///

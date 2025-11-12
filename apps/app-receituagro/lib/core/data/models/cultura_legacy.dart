@@ -2,21 +2,15 @@ import 'package:core/core.dart' hide Column;
 
 // part 'cultura_hive.g.dart';
 
-@HiveType(typeId: 100)
-class CulturaHive extends HiveObject {
-  @HiveField(0)
+class CulturaHive {
   String objectId;
 
-  @HiveField(1)
   int createdAt;
 
-  @HiveField(2)
   int updatedAt;
 
-  @HiveField(3)
   String idReg;
 
-  @HiveField(4)
   String cultura;
 
   CulturaHive({

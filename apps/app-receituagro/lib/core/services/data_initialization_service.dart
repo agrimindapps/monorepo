@@ -5,23 +5,19 @@ import 'package:core/core.dart' hide Column;
 import '../../database/repositories/culturas_repository.dart';
 import '../../database/repositories/fitossanitarios_repository.dart';
 import '../../database/repositories/pragas_repository.dart';
-import '../data/repositories/diagnostico_legacy_repository.dart';
-import '../data/repositories/fitossanitario_info_legacy_repository.dart';
-import '../data/repositories/plantas_inf_legacy_repository.dart';
-import '../data/repositories/pragas_inf_legacy_repository.dart';
+// DEPRECATED: import '../data/repositories/diagnostico_legacy_repository.dart';
+// DEPRECATED: import '../data/repositories/fitossanitario_info_legacy_repository.dart';
+// DEPRECATED: import '../data/repositories/plantas_inf_legacy_repository.dart';
+// DEPRECATED: import '../data/repositories/pragas_inf_legacy_repository.dart';
 
 /// Serviço responsável por inicializar e gerenciar dados da aplicação
-/// Orquestra o carregamento de JSONs e populacião das Hive boxes
+/// Orquestra o carregamento de JSONs e populacião das Drift database
 class DataInitializationService {
   final AssetLoaderService _assetLoader;
   final VersionManagerService _versionManager;
   final CulturasRepository _culturaRepository;
   final PragasRepository _pragasRepository;
   final FitossanitariosRepository _fitossanitarioRepository;
-  final DiagnosticoLegacyRepository _diagnosticoRepository;
-  final FitossanitarioInfoLegacyRepository _fitossanitarioInfoRepository;
-  final PlantasInfLegacyRepository _plantasInfRepository;
-  final PragasInfLegacyRepository _pragasInfRepository;
 
   DataInitializationService({
     required AssetLoaderService assetLoader,
@@ -29,19 +25,11 @@ class DataInitializationService {
     required CulturasRepository culturaRepository,
     required PragasRepository pragasRepository,
     required FitossanitariosRepository fitossanitarioRepository,
-    required DiagnosticoLegacyRepository diagnosticoRepository,
-    required FitossanitarioInfoLegacyRepository fitossanitarioInfoRepository,
-    required PlantasInfLegacyRepository plantasInfRepository,
-    required PragasInfLegacyRepository pragasInfRepository,
   }) : _assetLoader = assetLoader,
        _versionManager = versionManager,
        _culturaRepository = culturaRepository,
        _pragasRepository = pragasRepository,
-       _fitossanitarioRepository = fitossanitarioRepository,
-       _diagnosticoRepository = diagnosticoRepository,
-       _fitossanitarioInfoRepository = fitossanitarioInfoRepository,
-       _plantasInfRepository = plantasInfRepository,
-       _pragasInfRepository = pragasInfRepository;
+       _fitossanitarioRepository = fitossanitarioRepository;
 
   /// Inicializa todos os dados da aplicação se necessário
   Future<Either<Exception, void>> initializeData() async {
@@ -60,10 +48,7 @@ class DataInitializationService {
         _CategoryData('tbculturas', _culturaRepository),
         _CategoryData('tbpragas', _pragasRepository),
         _CategoryData('tbfitossanitarios', _fitossanitarioRepository),
-        _CategoryData('tbdiagnostico', _diagnosticoRepository),
-        _CategoryData('tbfitossanitariosinfo', _fitossanitarioInfoRepository),
-        _CategoryData('tbplantasinf', _plantasInfRepository),
-        _CategoryData('tbpragasinf', _pragasInfRepository),
+        // ❌ REMOVED: Legacy Hive repositories (tbdiagnostico, tbfitossanitariosinfo, tbplantasinf, tbpragasinf)
       ];
       for (final category in categories) {
         final result = await _loadCategoryData(category, currentVersion);
@@ -205,11 +190,7 @@ class DataInitializationService {
           'culturas': await _culturaRepository.count(),
           'pragas': await _pragasRepository.count(),
           'fitossanitarios': await _fitossanitarioRepository.count(),
-          'diagnosticos': await _diagnosticoRepository.countAsync(),
-          'fitossanitarios_info': await _fitossanitarioInfoRepository
-              .countAsync(),
-          'plantas_inf': await _plantasInfRepository.countAsync(),
-          'pragas_inf': await _pragasInfRepository.countAsync(),
+          // ❌ REMOVED: Legacy Hive repositories statistics
         },
         'last_update': await _versionManager.getLastDataVersion(),
       };
@@ -229,10 +210,7 @@ class DataInitializationService {
         _culturaRepository.count(),
         _pragasRepository.count(),
         _fitossanitarioRepository.count(),
-        _diagnosticoRepository.countAsync(),
-        _fitossanitarioInfoRepository.countAsync(),
-        _plantasInfRepository.countAsync(),
-        _pragasInfRepository.countAsync(),
+        // ❌ REMOVED: Legacy Hive repositories checks
       ]);
       return counts.any((itemCount) => itemCount > 0);
     } catch (e) {

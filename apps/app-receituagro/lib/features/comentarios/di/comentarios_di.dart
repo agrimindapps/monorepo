@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../core/data/repositories/comentarios_legacy_repository.dart';
+import '../../../database/repositories/comentarios_repository.dart';
 import '../../../core/services/error_handler_service.dart';
 import '../data/repositories/comentarios_repository_impl.dart';
 import '../data/services/comentarios_id_service.dart';
@@ -31,9 +31,7 @@ class ComentariosDI {
     }
 
     if (!getIt.isRegistered<IComentariosIdService>()) {
-      getIt.registerSingleton<IComentariosIdService>(
-        ComentariosIdService(),
-      );
+      getIt.registerSingleton<IComentariosIdService>(ComentariosIdService());
     }
 
     if (!getIt.isRegistered<IComentariosSearchService>()) {
@@ -45,7 +43,7 @@ class ComentariosDI {
     // Register repository with mapper dependency
     getIt.registerFactory<IComentariosRepository>(
       () => ComentariosRepositoryImpl(
-        getIt<ComentariosLegacyRepository>(),
+        getIt<ComentariosRepository>(),
         getIt<IComentariosMapper>(),
       ),
     );
@@ -66,7 +64,6 @@ class ComentariosDI {
 
   /// Unregister all dependencies (useful for testing)
   static void unregister(GetIt getIt) {
-
     if (getIt.isRegistered<DeleteComentarioUseCase>()) {
       getIt.unregister<DeleteComentarioUseCase>();
     }

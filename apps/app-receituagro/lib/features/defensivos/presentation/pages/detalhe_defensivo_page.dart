@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/data/models/diagnostico_legacy.dart';
-import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
+// DEPRECATED: import '../../../../core/data/repositories/diagnostico_legacy_repository.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/services/access_history_service.dart';

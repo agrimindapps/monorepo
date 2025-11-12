@@ -77,4 +77,14 @@ class PragasRepository {
       }
     });
   }
+
+  // ============================================================================
+  // MÉTODOS DE COMPATIBILIDADE LEGACY
+  // ============================================================================
+
+  /// @deprecated Use findByIdPraga instead
+  /// Legacy alias for findByIdPraga
+  Future<Praga?> getById(String idPraga) async {
+    return await findByIdPraga(idPraga);
+  }
 }

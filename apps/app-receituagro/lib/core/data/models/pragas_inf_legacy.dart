@@ -2,33 +2,23 @@ import 'package:core/core.dart' hide Column;
 
 // part 'pragas_inf_hive.g.dart';
 
-@HiveType(typeId: 106)
-class PragasInfHive extends HiveObject {
-  @HiveField(0)
+class PragasInfHive {
   String objectId;
 
-  @HiveField(1)
   int createdAt;
 
-  @HiveField(2)
   int updatedAt;
 
-  @HiveField(3)
   String idReg;
 
-  @HiveField(4)
   String? descrisao;
 
-  @HiveField(5)
   String? sintomas;
 
-  @HiveField(6)
   String? bioecologia;
 
-  @HiveField(7)
   String? controle;
 
-  @HiveField(8)
   String fkIdPraga;
 
   PragasInfHive({

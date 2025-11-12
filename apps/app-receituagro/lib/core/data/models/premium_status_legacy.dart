@@ -2,42 +2,29 @@ import 'package:core/core.dart' hide Column;
 
 // part 'premium_status_hive.g.dart';
 
-@HiveType(typeId: 111)
-class PremiumStatusHive extends HiveObject {
-  @HiveField(0)
+class PremiumStatusHive {
   String? sync_objectId;
 
-  @HiveField(1)
   int? sync_createdAt;
 
-  @HiveField(2)
   int? sync_updatedAt;
 
-  @HiveField(3)
   String userId;
 
-  @HiveField(4)
   bool isActive;
 
-  @HiveField(5)
   bool isTestSubscription;
 
-  @HiveField(6)
   int? expiryDateTimestamp;
 
-  @HiveField(7)
   String? planType;
 
-  @HiveField(8)
   String? subscriptionId;
 
-  @HiveField(9)
   String? productId;
 
-  @HiveField(10)
   int? sync_lastSyncTimestamp;
 
-  @HiveField(11)
   bool sync_needsOnlineSync;
 
   PremiumStatusHive({

@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../domain/entities/praga_entity.dart';
 
 /// Service responsible for querying and filtering pragas by various criteria.
@@ -37,6 +39,7 @@ abstract class IPragasQueryService {
 }
 
 /// Default implementation of query service
+@LazySingleton(as: IPragasQueryService)
 class PragasQueryService implements IPragasQueryService {
   @override
   List<PragaEntity> getByTipo(List<PragaEntity> pragas, String tipo) {

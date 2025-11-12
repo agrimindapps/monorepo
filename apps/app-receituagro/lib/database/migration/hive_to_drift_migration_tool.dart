@@ -5,7 +5,7 @@ import '../receituagro_database.dart';
 import '../../core/data/models/diagnostico_legacy.dart';
 import '../../core/data/models/favorito_item_legacy.dart';
 import '../../core/data/models/comentario_legacy.dart';
-import '../../core/utils/box_manager.dart';
+// DEPRECATED: import '../../core/utils/box_manager.dart';
 import '../loaders/static_data_loader.dart';
 
 /// Tool para migrar dados do Hive para Drift

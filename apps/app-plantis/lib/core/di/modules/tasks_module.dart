@@ -1,12 +1,8 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../features/tasks/data/datasources/local/task_history_local_datasource.dart';
-import '../../../features/tasks/data/datasources/local/tasks_local_datasource.dart';
 import '../../../features/tasks/data/datasources/remote/task_history_remote_datasource.dart';
 import '../../../features/tasks/data/datasources/remote/tasks_remote_datasource.dart';
-import '../../../features/tasks/data/repositories/task_history_repository_impl.dart';
 import '../../../features/tasks/data/repositories/tasks_repository_impl.dart';
-import '../../../features/tasks/domain/repositories/task_history_repository.dart';
 import '../../../features/tasks/domain/repositories/tasks_repository.dart';
 import '../../../features/tasks/domain/usecases/add_task_usecase.dart';
 import '../../../features/tasks/domain/usecases/complete_task_usecase.dart';
@@ -48,26 +44,34 @@ class TasksModule {
         plantsRepository: sl(),
       ),
     );
-    sl.registerLazySingleton<TaskHistoryRepository>(
-      () => TaskHistoryRepositoryImpl(
-        remoteDataSource: sl(),
-        localDataSource: sl(),
-        networkInfo: sl(),
-        authService: sl(),
-      ),
-    );
+
+    // TODO: TaskHistoryLocalDataSource needs migration to Drift
+    // Currently still using Hive ILocalStorageRepository
+    // Temporarily commented out until PlantTasks table is used for history
+
+    // sl.registerLazySingleton<TaskHistoryRepository>(
+    //   () => TaskHistoryRepositoryImpl(
+    //     remoteDataSource: sl(),
+    //     localDataSource: sl(),
+    //     networkInfo: sl(),
+    //     authService: sl(),
+    //   ),
+    // );
+
     sl.registerLazySingleton<TaskHistoryRemoteDataSource>(
       () => TaskHistoryRemoteDataSourceImpl(),
     );
-    sl.registerLazySingleton<TaskHistoryLocalDataSource>(
-      () => TaskHistoryLocalDataSourceImpl(sl<ILocalStorageRepository>()),
-    );
+
+    // TaskHistoryLocalDataSource - Needs Drift migration (commented out)
+    // sl.registerLazySingleton<TaskHistoryLocalDataSource>(
+    //   () => TaskHistoryLocalDataSourceImpl(sl<ILocalStorageRepository>()),
+    // );
+
     sl.registerLazySingleton<TasksRemoteDataSource>(
       () => TasksRemoteDataSourceImpl(rateLimiter: sl()),
     );
 
-    sl.registerLazySingleton<TasksLocalDataSource>(
-      () => TasksLocalDataSourceImpl(sl<ILocalStorageRepository>()),
-    );
+    // TasksLocalDataSource - auto-registered by @LazySingleton with TasksDriftRepository
+    // No manual registration needed
   }
 }

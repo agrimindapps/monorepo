@@ -18,6 +18,7 @@ abstract class DeviceLocalDataSource {
 }
 
 /// Implementação do datasource local usando Hive
+@LazySingleton(as: DeviceLocalDataSource)
 class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
   final ILocalStorageRepository _localStorage;
 

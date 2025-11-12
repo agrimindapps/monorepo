@@ -2,10 +2,9 @@ import 'dart:async';
 import 'package:core/core.dart' hide SyncQueue, SyncQueueItem, Column;
 import 'package:flutter/foundation.dart';
 import '../../features/comentarios/data/comentario_model.dart';
+import '../../database/repositories/legacy_type_aliases.dart';
 import '../data/models/diagnostico_legacy.dart';
 import '../data/models/sync_queue_item.dart';
-import '../data/repositories/comentarios_legacy_repository.dart';
-import '../data/repositories/diagnostico_legacy_repository.dart';
 import 'sync_queue.dart';
 
 /// Handles sync operations with queue management
@@ -30,7 +29,9 @@ class SyncOperations {
     } catch (e) {
       _comentariosRepo = ComentariosLegacyRepository();
       if (kDebugMode) {
-        print('⚠️ ComentariosLegacyRepository not registered in GetIt, creating new instance');
+        print(
+          '⚠️ ComentariosLegacyRepository not registered in GetIt, creating new instance',
+        );
       }
     }
 
@@ -39,7 +40,9 @@ class SyncOperations {
     } catch (e) {
       _diagnosticoRepo = DiagnosticoLegacyRepository();
       if (kDebugMode) {
-        print('⚠️ DiagnosticoLegacyRepository not registered in GetIt, creating new instance');
+        print(
+          '⚠️ DiagnosticoLegacyRepository not registered in GetIt, creating new instance',
+        );
       }
     }
   }
@@ -53,14 +56,14 @@ class SyncOperations {
   }
 
   void _initializeNetworkListener() {
-    _networkSubscription = _connectivityService.networkStatusStream.listen(
-      (status) {
-        if (status != ConnectivityType.offline &&
-            status != ConnectivityType.none) {
-          processOfflineQueue();
-        }
-      },
-    );
+    _networkSubscription = _connectivityService.networkStatusStream.listen((
+      status,
+    ) {
+      if (status != ConnectivityType.offline &&
+          status != ConnectivityType.none) {
+        processOfflineQueue();
+      }
+    });
   }
 
   /// Process all pending items in the sync queue
@@ -125,7 +128,9 @@ class SyncOperations {
       final priorityComparison = getPriority(b).compareTo(getPriority(a));
       return priorityComparison != 0
           ? priorityComparison
-          : a.sync_timestamp.compareTo(b.sync_timestamp); // FIFO within same priority
+          : a.sync_timestamp.compareTo(
+              b.sync_timestamp,
+            ); // FIFO within same priority
     });
 
     return items;
@@ -176,7 +181,9 @@ class SyncOperations {
           final result = await _diagnosticoRepo.saveWithIdReg(diagnostico);
 
           result.fold(
-            (failure) => throw Exception('Failed to save DiagnosticoHive: ${failure.message}'),
+            (failure) => throw Exception(
+              'Failed to save DiagnosticoHive: ${failure.message}',
+            ),
             (_) {
               if (kDebugMode) {
                 print('✅ Created DiagnosticoHive: ${diagnostico.idReg}');
@@ -219,7 +226,9 @@ class SyncOperations {
           final result = await _diagnosticoRepo.saveWithIdReg(diagnostico);
 
           result.fold(
-            (failure) => throw Exception('Failed to update DiagnosticoHive: ${failure.message}'),
+            (failure) => throw Exception(
+              'Failed to update DiagnosticoHive: ${failure.message}',
+            ),
             (_) {
               if (kDebugMode) {
                 print('✅ Updated DiagnosticoHive: ${diagnostico.idReg}');
@@ -248,9 +257,12 @@ class SyncOperations {
       switch (item.modelType) {
         case 'ComentarioHive':
           // Extract ID from data
-          final id = item.data['idReg']?.toString() ?? item.data['id']?.toString();
+          final id =
+              item.data['idReg']?.toString() ?? item.data['id']?.toString();
           if (id == null || id.isEmpty) {
-            throw ArgumentError('ComentarioHive delete requires idReg or id in data');
+            throw ArgumentError(
+              'ComentarioHive delete requires idReg or id in data',
+            );
           }
 
           await _comentariosRepo.deleteComentario(id);
@@ -264,7 +276,9 @@ class SyncOperations {
           // Extract ID from data
           final idReg = item.data['idReg']?.toString();
           if (idReg == null || idReg.isEmpty) {
-            throw ArgumentError('DiagnosticoHive delete requires idReg in data');
+            throw ArgumentError(
+              'DiagnosticoHive delete requires idReg in data',
+            );
           }
 
           // Find the diagnostico by idReg

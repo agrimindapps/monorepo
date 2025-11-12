@@ -1,10 +1,21 @@
-import 'dart:convert';
-
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 
+import '../../../../../database/repositories/plant_tasks_drift_repository.dart';
 import '../../../domain/entities/plant_task.dart';
 import '../../models/plant_task_model.dart';
+
+/// ============================================================================
+/// PLANT TASKS LOCAL DATASOURCE - MIGRADO PARA DRIFT
+/// ============================================================================
+///
+/// **MIGRAÇÃO HIVE → DRIFT (Fase 2):**
+/// - Removido código Hive (Box, JSON serialization)
+/// - Usa PlantTasksDriftRepository para persistência
+/// - Mantém cache em memória para performance (5 minutos)
+/// - Interface pública idêntica (0 breaking changes)
+/// ============================================================================
 
 abstract class PlantTasksLocalDatasource {
   Future<List<PlantTask>> getPlantTasks();
@@ -22,26 +33,21 @@ abstract class PlantTasksLocalDatasource {
   Future<void> clearCache();
 }
 
+@LazySingleton(as: PlantTasksLocalDatasource)
 class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
-  static const String _boxName = 'plant_tasks';
-  Box<dynamic>? _box; // Untyped to accept Box<dynamic> from UnifiedSyncManager
+  final PlantTasksDriftRepository _driftRepo;
+
+  // Cache em memória (5 minutos de validade)
   List<PlantTask>? _cachedTasks;
   DateTime? _cacheTimestamp;
   static const Duration _cacheValidity = Duration(minutes: 5);
 
-  Future<Box<dynamic>> get box async {
-    if (_box != null) return _box!;
-    if (Hive.isBoxOpen(_boxName)) {
-      _box = Hive.box<dynamic>(_boxName);
-      return _box!;
-    }
-    _box = await Hive.openBox<dynamic>(_boxName);
-    return _box!;
-  }
+  PlantTasksLocalDatasourceImpl(this._driftRepo);
 
   @override
   Future<List<PlantTask>> getPlantTasks() async {
     try {
+      // Verifica cache em memória
       if (_cachedTasks != null && _cacheTimestamp != null) {
         final now = DateTime.now();
         if (now.difference(_cacheTimestamp!).compareTo(_cacheValidity) < 0) {
@@ -54,49 +60,17 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
         }
       }
 
-      final hiveBox = await box;
-      final tasks = <PlantTask>[];
+      // Busca do Drift
+      final taskModels = await _driftRepo.getAllPlantTasks();
+      final tasks = taskModels.map((model) => model.toEntity()).toList();
 
       if (kDebugMode) {
         print(
-          '📥 PlantTasksLocalDatasource: Carregando ${hiveBox.length} tasks do Hive',
+          '📥 PlantTasksLocalDatasource: Carregando ${tasks.length} tasks do Drift',
         );
       }
 
-      for (final key in hiveBox.keys) {
-        try {
-          final taskJson = hiveBox.get(key) as String?;
-          if (taskJson != null) {
-            final taskData = jsonDecode(taskJson) as Map<String, dynamic>;
-            final taskModel = PlantTaskModel.fromJson(taskData);
-            if (!taskModel.isDeleted) {
-              tasks.add(taskModel.toEntity());
-            }
-          }
-        } catch (e) {
-          if (kDebugMode) {
-            print(
-              '❌ PlantTasksLocalDatasource: Dados corrompidos para key $key: $e',
-            );
-          }
-          try {
-            await hiveBox.delete(key);
-            if (kDebugMode) {
-              print(
-                '🗑️ PlantTasksLocalDatasource: Dados corrompidos removidos para key: $key',
-              );
-            }
-          } catch (deleteError) {
-            if (kDebugMode) {
-              print(
-                '❌ PlantTasksLocalDatasource: Falha ao remover dados corrompidos para key $key: $deleteError',
-              );
-            }
-          }
-          continue;
-        }
-      }
-      tasks.sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
+      // Atualiza cache
       _cachedTasks = tasks;
       _cacheTimestamp = DateTime.now();
 
@@ -120,17 +94,16 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   @override
   Future<List<PlantTask>> getPlantTasksByPlantId(String plantId) async {
     try {
-      final allTasks = await getPlantTasks();
-      final plantTasks =
-          allTasks.where((task) => task.plantId == plantId).toList();
+      final taskModels = await _driftRepo.getPlantTasksByPlantId(plantId);
+      final tasks = taskModels.map((model) => model.toEntity()).toList();
 
       if (kDebugMode) {
         print(
-          '📥 PlantTasksLocalDatasource: ${plantTasks.length} tasks encontradas para planta $plantId',
+          '📥 PlantTasksLocalDatasource: ${tasks.length} tasks encontradas para planta $plantId',
         );
       }
 
-      return plantTasks;
+      return tasks;
     } catch (e) {
       if (kDebugMode) {
         print(
@@ -146,40 +119,8 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   @override
   Future<PlantTask?> getPlantTaskById(String id) async {
     try {
-      final hiveBox = await box;
-      final taskJson = hiveBox.get(id) as String?;
-
-      if (taskJson == null) {
-        return null;
-      }
-
-      try {
-        final taskData = jsonDecode(taskJson) as Map<String, dynamic>;
-        final taskModel = PlantTaskModel.fromJson(taskData);
-
-        return taskModel.isDeleted ? null : taskModel.toEntity();
-      } catch (corruptionError) {
-        if (kDebugMode) {
-          print(
-            '❌ PlantTasksLocalDatasource: Dados corrompidos para ID $id: $corruptionError',
-          );
-        }
-        try {
-          await hiveBox.delete(id);
-          if (kDebugMode) {
-            print(
-              '🗑️ PlantTasksLocalDatasource: Dados corrompidos removidos para ID: $id',
-            );
-          }
-        } catch (deleteError) {
-          if (kDebugMode) {
-            print(
-              '❌ PlantTasksLocalDatasource: Falha ao remover dados corrompidos para ID $id: $deleteError',
-            );
-          }
-        }
-        return null;
-      }
+      final taskModel = await _driftRepo.getPlantTaskById(id);
+      return taskModel?.toEntity();
     } catch (e) {
       if (kDebugMode) {
         print('❌ PlantTasksLocalDatasource: Erro ao buscar task por ID: $e');
@@ -199,11 +140,8 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
         );
       }
 
-      final hiveBox = await box;
       final taskModel = PlantTaskModel.fromEntity(task);
-      final taskJson = jsonEncode(taskModel.toJson());
-
-      await hiveBox.put(task.id, taskJson);
+      await _driftRepo.insertPlantTask(taskModel);
       _invalidateCache();
 
       if (kDebugMode) {
@@ -228,12 +166,9 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
         );
       }
 
-      final hiveBox = await box;
-
       for (final task in tasks) {
         final taskModel = PlantTaskModel.fromEntity(task);
-        final taskJson = jsonEncode(taskModel.toJson());
-        await hiveBox.put(task.id, taskJson);
+        await _driftRepo.insertPlantTask(taskModel);
       }
       _invalidateCache();
 
@@ -255,10 +190,8 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   @override
   Future<void> updatePlantTask(PlantTask task) async {
     try {
-      final hiveBox = await box;
       final taskModel = PlantTaskModel.fromEntity(task).markAsDirty();
-      final taskJson = jsonEncode(taskModel.toJson());
-      await hiveBox.put(task.id, taskJson);
+      await _driftRepo.updatePlantTask(taskModel);
       _invalidateCache();
 
       if (kDebugMode) {
@@ -279,20 +212,11 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   @override
   Future<void> deletePlantTask(String id) async {
     try {
-      final hiveBox = await box;
-      final taskJson = hiveBox.get(id) as String?;
-      if (taskJson != null) {
-        final taskData = jsonDecode(taskJson) as Map<String, dynamic>;
-        final taskModel = PlantTaskModel.fromJson(taskData);
-        final deletedTask = taskModel.markAsDeleted();
+      await _driftRepo.deletePlantTask(id);
+      _invalidateCache();
 
-        final updatedJson = jsonEncode(deletedTask.toJson());
-        await hiveBox.put(id, updatedJson);
-        _invalidateCache();
-
-        if (kDebugMode) {
-          print('✅ PlantTasksLocalDatasource: Task $id marcada como deletada');
-        }
+      if (kDebugMode) {
+        print('✅ PlantTasksLocalDatasource: Task $id marcada como deletada');
       }
     } catch (e) {
       if (kDebugMode) {
@@ -313,15 +237,12 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
         );
       }
 
-      final tasks = await getPlantTasksByPlantId(plantId);
-
-      for (final task in tasks) {
-        await deletePlantTask(task.id);
-      }
+      final deleted = await _driftRepo.deletePlantTasksByPlantId(plantId);
+      _invalidateCache();
 
       if (kDebugMode) {
         print(
-          '✅ PlantTasksLocalDatasource: ${tasks.length} tasks da planta $plantId deletadas',
+          '✅ PlantTasksLocalDatasource: $deleted tasks da planta $plantId deletadas',
         );
       }
     } catch (e) {
@@ -391,8 +312,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   @override
   Future<void> clearCache() async {
     try {
-      final hiveBox = await box;
-      await hiveBox.clear();
+      await _driftRepo.clearAll();
       _invalidateCache();
 
       if (kDebugMode) {
@@ -418,10 +338,9 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       'tasksCache': {
         'cached': _cachedTasks != null,
         'cacheSize': _cachedTasks?.length ?? 0,
-        'cacheAge':
-            _cacheTimestamp != null
-                ? DateTime.now().difference(_cacheTimestamp!).inMinutes
-                : null,
+        'cacheAge': _cacheTimestamp != null
+            ? DateTime.now().difference(_cacheTimestamp!).inMinutes
+            : null,
       },
     };
   }

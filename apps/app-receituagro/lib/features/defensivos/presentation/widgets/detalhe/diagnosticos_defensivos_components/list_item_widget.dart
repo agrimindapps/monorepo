@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../core/data/models/diagnostico_legacy.dart';
 import '../../../../../../core/data/models/pragas_legacy.dart';
-import '../../../../../../core/data/repositories/pragas_legacy_repository.dart';
+// DEPRECATED: import '../../../../../../core/data/repositories/pragas_legacy_repository.dart';
 import '../../../../../../core/di/injection_container.dart';
 import '../../../../../../core/theme/spacing_tokens.dart';
 

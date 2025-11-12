@@ -1,60 +1,41 @@
 import 'package:core/core.dart' hide Column;
 
-part 'comentario_model.g.dart';
-
 /// Comentario model with Firebase sync support
-/// TypeId: 0 - Sequential numbering
-@HiveType(typeId: 0)
+/// Drift-based model (migrated from Hive)
 class ComentarioModel extends BaseSyncEntity {
-  @HiveField(0)
   @override
   final String id;
-  @HiveField(1)
   final int? createdAtMs;
-  @HiveField(2)
   final int? updatedAtMs;
-  @HiveField(3)
   final int? lastSyncAtMs;
-  @HiveField(4)
   @override
   final bool isDirty;
-  @HiveField(5)
   @override
   final bool isDeleted;
-  @HiveField(6)
   @override
   final int version;
-  @HiveField(7)
   @override
   final String? userId;
-  @HiveField(8)
   @override
   final String? moduleName;
-  @HiveField(10)
   final String conteudo;
-  @HiveField(11)
   final DateTime? dataAtualizacao;
-  @HiveField(12)
   final DateTime? dataCriacao;
-  @HiveField(13)
   final String? plantId;
   @override
-  DateTime? get createdAt =>
-      createdAtMs != null
-          ? DateTime.fromMillisecondsSinceEpoch(createdAtMs!)
-          : null;
+  DateTime? get createdAt => createdAtMs != null
+      ? DateTime.fromMillisecondsSinceEpoch(createdAtMs!)
+      : null;
 
   @override
-  DateTime? get updatedAt =>
-      updatedAtMs != null
-          ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs!)
-          : null;
+  DateTime? get updatedAt => updatedAtMs != null
+      ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs!)
+      : null;
 
   @override
-  DateTime? get lastSyncAt =>
-      lastSyncAtMs != null
-          ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs!)
-          : null;
+  DateTime? get lastSyncAt => lastSyncAtMs != null
+      ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs!)
+      : null;
 
   ComentarioModel({
     required this.id,
@@ -72,18 +53,15 @@ class ComentarioModel extends BaseSyncEntity {
     this.plantId,
   }) : super(
          id: id,
-         createdAt:
-             createdAtMs != null
-                 ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
-                 : null,
-         updatedAt:
-             updatedAtMs != null
-                 ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
-                 : null,
-         lastSyncAt:
-             lastSyncAtMs != null
-                 ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
-                 : null,
+         createdAt: createdAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
+             : null,
+         updatedAt: updatedAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
+             : null,
+         lastSyncAt: lastSyncAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
+             : null,
          isDirty: isDirty,
          isDeleted: isDeleted,
          version: version,
@@ -134,14 +112,12 @@ class ComentarioModel extends BaseSyncEntity {
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
       conteudo: map['conteudo']?.toString() ?? '',
-      dataAtualizacao:
-          map['dataAtualizacao'] != null
-              ? DateTime.parse(map['dataAtualizacao'] as String)
-              : null,
-      dataCriacao:
-          map['dataCriacao'] != null
-              ? DateTime.parse(map['dataCriacao'] as String)
-              : null,
+      dataAtualizacao: map['dataAtualizacao'] != null
+          ? DateTime.parse(map['dataAtualizacao'] as String)
+          : null,
+      dataCriacao: map['dataCriacao'] != null
+          ? DateTime.parse(map['dataCriacao'] as String)
+          : null,
       plantId: map['plantId'] as String?,
     );
   }
@@ -176,14 +152,12 @@ class ComentarioModel extends BaseSyncEntity {
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
       conteudo: map['conteudo']?.toString() ?? '',
-      dataAtualizacao:
-          map['data_atualizacao'] != null
-              ? DateTime.parse(map['data_atualizacao'] as String)
-              : null,
-      dataCriacao:
-          map['data_criacao'] != null
-              ? DateTime.parse(map['data_criacao'] as String)
-              : null,
+      dataAtualizacao: map['data_atualizacao'] != null
+          ? DateTime.parse(map['data_atualizacao'] as String)
+          : null,
+      dataCriacao: map['data_criacao'] != null
+          ? DateTime.parse(map['data_criacao'] as String)
+          : null,
       plantId: map['plant_id'] as String?,
     );
   }

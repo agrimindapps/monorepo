@@ -4,33 +4,23 @@ import 'package:core/core.dart' hide Column;
 enum SyncOperationType { create, update, delete }
 
 /// Item in the sync queue representing a pending operation
-@HiveType(typeId: 109)
-class SyncQueueItem extends HiveObject {
-  @HiveField(0)
+class SyncQueueItem {
   final String sync_id;
 
-  @HiveField(1)
   final String modelType;
 
-  @HiveField(2)
   final String sync_operation;
 
-  @HiveField(3)
   final Map<String, dynamic> data;
 
-  @HiveField(4)
   final DateTime sync_timestamp;
 
-  @HiveField(5)
   int sync_retryCount;
 
-  @HiveField(6)
   bool sync_isSynced;
 
-  @HiveField(7)
   String? sync_errorMessage;
 
-  @HiveField(8)
   DateTime? sync_lastRetryAt;
 
   SyncQueueItem({

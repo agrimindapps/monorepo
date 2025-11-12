@@ -1,30 +1,21 @@
 import 'package:core/core.dart' hide Column;
 
-part 'sync_queue_item.g.dart';
 
 enum SyncOperationType { create, update, delete }
 
-@HiveType(typeId: 100)
 class SyncQueueItem extends HiveObject {
-  @HiveField(0)
   final String id;
 
-  @HiveField(1)
   final String modelType;
 
-  @HiveField(2)
   final String operation;
 
-  @HiveField(3)
   final Map<String, dynamic> data;
 
-  @HiveField(4)
   final DateTime timestamp;
 
-  @HiveField(5)
   int retryCount;
 
-  @HiveField(6)
   bool isSynced;
 
   SyncQueueItem({

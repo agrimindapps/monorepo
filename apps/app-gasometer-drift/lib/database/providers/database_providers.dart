@@ -5,6 +5,7 @@ import '../repositories/repositories.dart';
 /// Provider do banco de dados principal
 ///
 /// Fornece uma instância singleton do GasometerDatabase
+/// IMPORTANTE: Não usa autoDispose para garantir uma única instância global
 final gasometerDatabaseProvider = Provider<GasometerDatabase>((ref) {
   final db = GasometerDatabase.production();
 
@@ -12,6 +13,9 @@ final gasometerDatabaseProvider = Provider<GasometerDatabase>((ref) {
   ref.onDispose(() {
     db.close();
   });
+
+  // Mantém o provider vivo permanentemente
+  ref.keepAlive();
 
   return db;
 });

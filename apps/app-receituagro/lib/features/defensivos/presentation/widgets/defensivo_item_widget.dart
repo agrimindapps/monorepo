@@ -1,12 +1,12 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../../core/data/models/fitossanitario_legacy.dart';
-import '../../../../core/extensions/fitossanitario_hive_extension.dart';
+import '../../../../database/receituagro_database.dart';
+import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/theme/receituagro_colors.dart';
 
 class DefensivoItemWidget extends StatelessWidget {
-  final FitossanitarioHive defensivo;
+  final Fitossanitario defensivo;
   final bool isDark;
   final VoidCallback onTap;
   final bool isGridView;
@@ -216,14 +216,13 @@ class DefensivoItemWidget extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color:
-                          isDark
-                              ? Colors.grey.shade700.withValues(alpha: 0.5)
-                              : Colors.grey.shade200,
+                      color: isDark
+                          ? Colors.grey.shade700.withValues(alpha: 0.5)
+                          : Colors.grey.shade200,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      defensivo.idReg,
+                      defensivo.idDefensivo,
                       style: TextStyle(
                         fontSize: 9,
                         color: ReceitaAgroColors.textTertiary(isDark),

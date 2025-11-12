@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../domain/entities/praga_entity.dart';
 
 /// Service responsible for searching pragas with relevance ranking.
@@ -27,6 +29,7 @@ abstract class IPragasSearchService {
 }
 
 /// Default implementation of search service with relevance ranking
+@LazySingleton(as: IPragasSearchService)
 class PragasSearchService implements IPragasSearchService {
   @override
   List<PragaEntity> searchByName(

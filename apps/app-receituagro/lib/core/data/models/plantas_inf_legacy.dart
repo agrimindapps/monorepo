@@ -2,66 +2,45 @@ import 'package:core/core.dart' hide Column;
 
 // part 'plantas_inf_hive.g.dart';
 
-@HiveType(typeId: 104)
-class PlantasInfHive extends HiveObject {
-  @HiveField(0)
+class PlantasInfHive {
   String objectId;
 
-  @HiveField(1)
   int createdAt;
 
-  @HiveField(2)
   int updatedAt;
 
-  @HiveField(3)
   String idReg;
 
-  @HiveField(4)
   String? ciclo;
 
-  @HiveField(5)
   String? reproducao;
 
-  @HiveField(6)
   String? habitat;
 
-  @HiveField(7)
   String? adaptacoes;
 
-  @HiveField(8)
   String? altura;
 
-  @HiveField(9)
   String? filotaxia;
 
-  @HiveField(10)
   String? formaLimbo;
 
-  @HiveField(11)
   String? superficie;
 
-  @HiveField(12)
   String? consistencia;
 
-  @HiveField(13)
   String? nervacao;
 
-  @HiveField(14)
   String? nervacaoComprimento;
 
-  @HiveField(15)
   String? inflorescencia;
 
-  @HiveField(16)
   String? perianto;
 
-  @HiveField(17)
   String? tipologiaFruto;
 
-  @HiveField(18)
   String? observacoes;
 
-  @HiveField(19)
   String? fkIdPraga;
 
   PlantasInfHive({

@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import 'package:core/core.dart' hide Column;
 
 /// Remote data source para operações de dispositivos via Firebase
@@ -13,6 +15,7 @@ abstract class DeviceRemoteDataSource {
 }
 
 /// Implementação do datasource remoto usando Firebase
+@LazySingleton(as: DeviceRemoteDataSource)
 class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
   final FirebaseDeviceService? _firebaseDeviceService;
   

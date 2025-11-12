@@ -1,8 +1,20 @@
 import 'package:core/core.dart' hide Column;
+import 'package:injectable/injectable.dart';
 
-import '../../../../../core/constants/plantis_environment_config.dart';
+import '../../../../../database/repositories/tasks_drift_repository.dart';
 import '../../../domain/entities/task.dart';
 import '../../models/task_model.dart';
+
+/// ============================================================================
+/// TASKS LOCAL DATASOURCE - MIGRADO PARA DRIFT
+/// ============================================================================
+///
+/// **MIGRAÇÃO STORAGE SERVICE → DRIFT (Fase 2):**
+/// - Removido código ILocalStorageRepository
+/// - Usa TasksDriftRepository para persistência
+/// - Mantém interface pública idêntica (0 breaking changes)
+/// - Lógica de filtragem (overdue, today, upcoming) preservada
+/// ============================================================================
 
 abstract class TasksLocalDataSource {
   Future<List<TaskModel>> getTasks();
@@ -19,103 +31,101 @@ abstract class TasksLocalDataSource {
   Future<void> clearCache();
 }
 
+@LazySingleton(as: TasksLocalDataSource)
 class TasksLocalDataSourceImpl implements TasksLocalDataSource {
-  final ILocalStorageRepository storageService;
-  static const String _boxName = PlantisBoxes.tasks;
+  final TasksDriftRepository _driftRepo;
 
-  TasksLocalDataSourceImpl(this.storageService);
+  TasksLocalDataSourceImpl(this._driftRepo);
 
   @override
   Future<List<TaskModel>> getTasks() async {
     try {
-      final result = await storageService.get<List<dynamic>>(
-        key: 'all_tasks',
-        box: _boxName,
-      );
-
-      return result.fold((failure) => <TaskModel>[], (tasksData) {
-        if (tasksData == null) return <TaskModel>[];
-
-        return tasksData
-            .map<TaskModel>((data) {
-              final Map<String, dynamic> taskMap = Map<String, dynamic>.from(
-                data as Map,
-              );
-              return TaskModel.fromJson(taskMap);
-            })
-            .where((task) => !task.isDeleted)
-            .toList();
-      });
+      return await _driftRepo.getAllTasks();
     } catch (e) {
-      throw Exception('Erro ao buscar tarefas locais: $e');
+      throw CacheFailure('Erro ao buscar tarefas locais: $e');
     }
   }
 
   @override
   Future<List<TaskModel>> getTasksByPlantId(String plantId) async {
-    final tasks = await getTasks();
-    return tasks.where((task) => task.plantId == plantId).toList();
+    try {
+      return await _driftRepo.getTasksByPlant(plantId);
+    } catch (e) {
+      throw CacheFailure('Erro ao buscar tarefas por planta: $e');
+    }
   }
 
   @override
   Future<List<TaskModel>> getTasksByStatus(TaskStatus status) async {
-    final tasks = await getTasks();
-    return tasks.where((task) => task.status == status).toList();
+    try {
+      if (status == TaskStatus.pending) {
+        return await _driftRepo.getPendingTasks();
+      }
+
+      // Para outros status, filtrar manualmente
+      final tasks = await getTasks();
+      return tasks.where((task) => task.status == status).toList();
+    } catch (e) {
+      throw CacheFailure('Erro ao buscar tarefas por status: $e');
+    }
   }
 
   @override
   Future<List<TaskModel>> getOverdueTasks() async {
-    final tasks = await getTasks();
-    final now = DateTime.now();
+    try {
+      final tasks = await _driftRepo.getPendingTasks();
+      final now = DateTime.now();
 
-    return tasks
-        .where(
-          (task) =>
-              task.status == TaskStatus.pending && task.dueDate.isBefore(now),
-        )
-        .toList();
+      return tasks
+          .where((task) => task.dueDate.isBefore(now))
+          .toList();
+    } catch (e) {
+      throw CacheFailure('Erro ao buscar tarefas atrasadas: $e');
+    }
   }
 
   @override
   Future<List<TaskModel>> getTodayTasks() async {
-    final tasks = await getTasks();
-    final today = DateTime.now();
+    try {
+      final tasks = await _driftRepo.getPendingTasks();
+      final today = DateTime.now();
 
-    return tasks
-        .where(
-          (task) =>
-              task.status == TaskStatus.pending &&
-              task.dueDate.year == today.year &&
-              task.dueDate.month == today.month &&
-              task.dueDate.day == today.day,
-        )
-        .toList();
+      return tasks
+          .where(
+            (task) =>
+                task.dueDate.year == today.year &&
+                task.dueDate.month == today.month &&
+                task.dueDate.day == today.day,
+          )
+          .toList();
+    } catch (e) {
+      throw CacheFailure('Erro ao buscar tarefas de hoje: $e');
+    }
   }
 
   @override
   Future<List<TaskModel>> getUpcomingTasks() async {
-    final tasks = await getTasks();
-    final now = DateTime.now();
-    final nextWeek = now.add(const Duration(days: 7));
+    try {
+      final tasks = await _driftRepo.getPendingTasks();
+      final now = DateTime.now();
+      final nextWeek = now.add(const Duration(days: 7));
 
-    return tasks
-        .where(
-          (task) =>
-              task.status == TaskStatus.pending &&
-              task.dueDate.isAfter(now) &&
-              task.dueDate.isBefore(nextWeek),
-        )
-        .toList();
+      return tasks
+          .where(
+            (task) =>
+                task.dueDate.isAfter(now) &&
+                task.dueDate.isBefore(nextWeek),
+          )
+          .toList();
+    } catch (e) {
+      throw CacheFailure('Erro ao buscar tarefas futuras: $e');
+    }
   }
 
   @override
   Future<TaskModel?> getTaskById(String id) async {
     try {
-      final tasks = await getTasks();
-      return tasks.firstWhere(
-        (task) => task.id == id,
-        orElse: () => throw StateError('Task not found'),
-      );
+      return await _driftRepo.getTaskById(id);
     } catch (e) {
       return null;
     }
@@ -124,98 +134,55 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
   @override
   Future<void> cacheTask(TaskModel task) async {
     try {
-      final tasks = await getTasks();
-      final existingIndex = tasks.indexWhere((t) => t.id == task.id);
+      // Verifica se já existe
+      final existing = await _driftRepo.getTaskById(task.id);
 
-      if (existingIndex >= 0) {
-        tasks[existingIndex] = task;
+      if (existing != null) {
+        await _driftRepo.updateTask(task);
       } else {
-        tasks.add(task);
+        await _driftRepo.insertTask(task);
       }
-
-      await _saveTasks(tasks);
     } catch (e) {
-      throw Exception('Erro ao cachear tarefa: $e');
+      throw CacheFailure('Erro ao cachear tarefa: $e');
     }
   }
 
   @override
   Future<void> cacheTasks(List<TaskModel> tasks) async {
     try {
-      final taskMaps = tasks.map((task) => task.toJson()).toList();
-
-      final result = await storageService.save<List<Map<String, dynamic>>>(
-        key: 'all_tasks',
-        data: taskMaps,
-        box: _boxName,
-      );
-
-      result.fold(
-        (failure) =>
-            throw Exception('Erro ao salvar tarefas: ${failure.message}'),
-        (_) => <String, dynamic>{},
-      );
+      // Insert/update em batch
+      for (final task in tasks) {
+        await cacheTask(task);
+      }
     } catch (e) {
-      throw Exception('Erro ao cachear tarefas: $e');
+      throw CacheFailure('Erro ao cachear tarefas: $e');
     }
   }
 
   @override
   Future<void> updateTask(TaskModel task) async {
-    await cacheTask(task);
+    try {
+      await _driftRepo.updateTask(task);
+    } catch (e) {
+      throw CacheFailure('Erro ao atualizar tarefa: $e');
+    }
   }
 
   @override
   Future<void> deleteTask(String id) async {
     try {
-      final tasks = await getTasks();
-      final taskIndex = tasks.indexWhere((t) => t.id == id);
-
-      if (taskIndex >= 0) {
-        final updatedTask = tasks[taskIndex].copyWith(
-          isDeleted: true,
-          isDirty: true,
-          updatedAt: DateTime.now(),
-        );
-        tasks[taskIndex] = updatedTask;
-        await _saveTasks(tasks);
-      }
+      await _driftRepo.deleteTask(id);
     } catch (e) {
-      throw Exception('Erro ao deletar tarefa: $e');
+      throw CacheFailure('Erro ao deletar tarefa: $e');
     }
   }
 
   @override
   Future<void> clearCache() async {
     try {
-      final result = await storageService.remove(
-        key: 'all_tasks',
-        box: _boxName,
-      );
-
-      result.fold(
-        (failure) =>
-            throw Exception('Erro ao limpar cache: ${failure.message}'),
-        (_) => <String, dynamic>{},
-      );
+      await _driftRepo.clearAll();
     } catch (e) {
-      throw Exception('Erro ao limpar cache de tarefas: $e');
+      throw CacheFailure('Erro ao limpar cache de tarefas: $e');
     }
-  }
-
-  Future<void> _saveTasks(List<TaskModel> tasks) async {
-    final taskMaps = tasks.map((task) => task.toJson()).toList();
-
-    final result = await storageService.save<List<Map<String, dynamic>>>(
-      key: 'all_tasks',
-      data: taskMaps,
-      box: _boxName,
-    );
-
-    result.fold(
-      (failure) =>
-          throw Exception('Erro ao salvar tarefas: ${failure.message}'),
-      (_) => <String, dynamic>{},
-    );
   }
 }

@@ -1,40 +1,28 @@
 import 'package:core/core.dart' hide Column;
 import 'base_sync_model.dart';
 
-part 'conflict_history_model.g.dart';
 
-@HiveType(typeId: 10)
 // ignore: must_be_immutable
 class ConflictHistoryModel extends BaseSyncModel {
   @override
-  @HiveField(0)
   final String id;
 
-  @HiveField(1)
   final int? createdAtMs;
 
-  @HiveField(2)
   final int? updatedAtMs;
 
-  @HiveField(3)
   final String modelType;
 
-  @HiveField(4)
   final String modelId;
 
-  @HiveField(5)
   final String resolutionStrategy;
 
-  @HiveField(6)
   final Map<String, dynamic> localData;
 
-  @HiveField(7)
   final Map<String, dynamic> remoteData;
 
-  @HiveField(8)
   final Map<String, dynamic> resolvedData;
 
-  @HiveField(9)
   final bool autoResolved;
 
   ConflictHistoryModel({

@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../domain/entities/praga_entity.dart';
 
 /// Service responsible for calculating statistics from pragas.
@@ -25,6 +27,7 @@ abstract class IPragasStatsService {
 }
 
 /// Default implementation of stats service
+@LazySingleton(as: IPragasStatsService)
 class PragasStatsService implements IPragasStatsService {
   @override
   Map<String, int> calculateStats(List<PragaEntity> pragas) {

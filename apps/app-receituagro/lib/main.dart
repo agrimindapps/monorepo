@@ -9,7 +9,6 @@ import 'core/navigation/app_router.dart' as app_router;
 import 'core/providers/theme_notifier.dart';
 import 'core/services/app_data_manager.dart';
 import 'core/services/firebase_messaging_service.dart';
-import 'core/services/legacy_adapter_registry.dart';
 import 'core/services/legacy_migration_service.dart'; // FIXED (P0.4): Schema migration service
 import 'core/services/premium_service.dart';
 import 'core/services/prioritized_data_loader.dart';
@@ -17,7 +16,6 @@ import 'core/services/promotional_notification_manager.dart';
 import 'core/services/receituagro_notification_service.dart';
 import 'core/services/receituagro_realtime_service.dart';
 import 'core/services/remote_config_service.dart';
-import 'core/storage/receituagro_storage_initializer.dart';
 import 'core/sync/receituagro_sync_config.dart';
 import 'core/theme/receituagro_theme.dart';
 import 'core/utils/diagnostico_logger.dart';
@@ -44,14 +42,10 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await ThemePreferenceMigration.migratePreferences();
 
-  // ✅ PADRÃO APP-PLANTIS: Registrar adapters Hive ANTES de registrar boxes
-  // Isso garante que os adapters estejam disponíveis quando BoxRegistryService
-  // tentar abrir boxes persistentes
+  // ✅ Initialize Hive for any remaining legacy data
   await Hive.initFlutter();
-  await LegacyAdapterRegistry.registerAdapters();
-  DiagnosticoLogger.debug('✅ Hive adapters registrados antes das boxes');
 
-  // ✅ FIXED (P0.4): Run schema migrations BEFORE opening any data boxes
+  // ✅ FIXED (P0.4): Run schema migrations BEFORE initialization
   // This prevents data corruption when models change across app versions
   await LegacyMigrationService.runMigrations();
   DiagnosticoLogger.debug('✅ Hive schema migrations completed');
@@ -111,36 +105,9 @@ void main() async {
     DiagnosticoLogger.debug('Data Inspector initialization completed');
   }
 
-  // 📦 Inicializar HiveBoxes para sync em tempo real
-  try {
-    DiagnosticoLogger.debug('Registering sync HiveBoxes...');
-    final boxRegistry = di.sl<IBoxRegistryService>();
-    final storageResult = await ReceitaAgroStorageInitializer.initialize(
-      boxRegistry,
-    );
+  // ✅ Drift-based storage is initialized via DI (no manual box registration needed)
+  DiagnosticoLogger.debug('✅ Drift database initialized via DI');
 
-    storageResult.fold(
-      (failure) {
-        DiagnosticoLogger.debug(
-          'Failed to register sync boxes: ${failure.message}',
-        );
-      },
-      (_) {
-        DiagnosticoLogger.debug('✅ Sync HiveBoxes registered successfully');
-        if (kDebugMode) {
-          final debugInfo = ReceitaAgroStorageInitializer.getDebugInfo(
-            boxRegistry,
-          );
-          debugPrint(
-            '📦 Boxes registered: ${debugInfo['registered_boxes']}/${debugInfo['expected_boxes']}',
-          );
-          debugPrint('📋 Missing boxes: ${debugInfo['missing_boxes']}');
-        }
-      },
-    );
-  } catch (e) {
-    DiagnosticoLogger.debug('Error registering sync boxes', e);
-  }
   if (!kIsWeb) {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   }

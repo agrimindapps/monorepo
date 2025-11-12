@@ -2,72 +2,49 @@ import 'package:core/core.dart' hide Column;
 
 // part 'diagnostico_hive.g.dart';
 
-@HiveType(typeId: 101)
-class DiagnosticoHive extends HiveObject {
-  @HiveField(0)
+class DiagnosticoHive {
   String objectId;
 
-  @HiveField(1)
   int createdAt;
 
-  @HiveField(2)
   int updatedAt;
 
-  @HiveField(3)
   String idReg;
 
-  @HiveField(4)
   String fkIdDefensivo;
 
-  @HiveField(5)
   String? nomeDefensivo;
 
-  @HiveField(6)
   String fkIdCultura;
 
-  @HiveField(7)
   String? nomeCultura;
 
-  @HiveField(8)
   String fkIdPraga;
 
-  @HiveField(9)
   String? nomePraga;
 
-  @HiveField(10)
   String? dsMin;
 
-  @HiveField(11)
   String dsMax;
 
-  @HiveField(12)
   String um;
 
-  @HiveField(13)
   String? minAplicacaoT;
 
-  @HiveField(14)
   String? maxAplicacaoT;
 
-  @HiveField(15)
   String? umT;
 
-  @HiveField(16)
   String? minAplicacaoA;
 
-  @HiveField(17)
   String? maxAplicacaoA;
 
-  @HiveField(18)
   String? umA;
 
-  @HiveField(19)
   String? intervalo;
 
-  @HiveField(20)
   String? intervalo2;
 
-  @HiveField(21)
   String? epocaAplicacao;
 
   DiagnosticoHive({

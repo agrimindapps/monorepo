@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../core/data/repositories/fitossanitario_legacy_repository.dart';
+import '../../../database/repositories/fitossanitarios_repository.dart';
 import '../data/repositories/defensivos_repository_impl.dart';
 import '../data/services/defensivos_filter_service.dart';
 import '../data/services/defensivos_query_service.dart';
@@ -25,9 +25,7 @@ void configureDefensivosDependencies() {
 
   // Register specialized services
   if (!getIt.isRegistered<IDefensivosQueryService>()) {
-    getIt.registerSingleton<IDefensivosQueryService>(
-      DefensivosQueryService(),
-    );
+    getIt.registerSingleton<IDefensivosQueryService>(DefensivosQueryService());
   }
 
   if (!getIt.isRegistered<IDefensivosSearchService>()) {
@@ -37,9 +35,7 @@ void configureDefensivosDependencies() {
   }
 
   if (!getIt.isRegistered<IDefensivosStatsService>()) {
-    getIt.registerSingleton<IDefensivosStatsService>(
-      DefensivosStatsService(),
-    );
+    getIt.registerSingleton<IDefensivosStatsService>(DefensivosStatsService());
   }
 
   if (!getIt.isRegistered<IDefensivosFilterService>()) {
@@ -51,7 +47,7 @@ void configureDefensivosDependencies() {
   // Register repository with service dependencies
   getIt.registerLazySingleton<IDefensivosRepository>(
     () => DefensivosRepositoryImpl(
-      getIt<FitossanitarioLegacyRepository>(),
+      getIt<FitossanitariosRepository>(),
       getIt<IDefensivosQueryService>(),
       getIt<IDefensivosSearchService>(),
       getIt<IDefensivosStatsService>(),

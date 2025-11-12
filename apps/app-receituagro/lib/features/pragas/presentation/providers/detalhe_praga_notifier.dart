@@ -5,12 +5,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/data/models/plantas_inf_legacy.dart';
 import '../../../../core/data/models/pragas_legacy.dart';
 import '../../../../core/data/models/pragas_inf_legacy.dart';
-import '../../../../core/data/repositories/plantas_inf_legacy_repository.dart';
-import '../../../../database/repositories/pragas_repository.dart';
-import '../../../../core/data/repositories/pragas_inf_legacy_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/premium_notifier.dart';
-import '../../data/mappers/praga_mapper.dart';
+import '../../../../database/receituagro_database.dart';
+import '../../../../database/repositories/legacy_type_aliases.dart';
+import '../../domain/entities/praga_entity.dart';
+import '../../domain/repositories/i_pragas_repository.dart';
 import '../../../comentarios/data/comentario_model.dart';
 import '../../../comentarios/domain/comentarios_service.dart';
 import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
@@ -110,7 +110,7 @@ class DetalhePragaState {
 @Riverpod(keepAlive: true)
 class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   late final FavoritosRepositorySimplified _favoritosRepository;
-  late final PragasRepository _pragasRepository;
+  late final IPragasRepository _pragasRepository;
   late final PragasInfLegacyRepository _pragasInfRepository;
   late final PlantasInfLegacyRepository _plantasInfRepository;
   late final ComentariosService _comentariosService;
@@ -118,7 +118,7 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   @override
   Future<DetalhePragaState> build() async {
     _favoritosRepository = FavoritosDI.get<FavoritosRepositorySimplified>();
-    _pragasRepository = di.sl<PragasRepository>();
+    _pragasRepository = di.sl<IPragasRepository>();
     _pragasInfRepository = di.sl<PragasInfLegacyRepository>();
     _plantasInfRepository = di.sl<PlantasInfLegacyRepository>();
     _comentariosService = di.sl<ComentariosService>();
@@ -197,21 +197,32 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
 
     try {
       final allPragasResult = await _pragasRepository.getAll();
-      PragasHive? pragaData;
+      PragaEntity? pragaData;
 
       allPragasResult.fold((failure) => pragaData = null, (allPragas) {
         final matchingPragas = allPragas.where(
-          (PragasHive p) => p.idReg == pragaId || p.objectId == pragaId,
+          (PragaEntity p) => p.idReg == pragaId,
         );
         pragaData = matchingPragas.isNotEmpty ? matchingPragas.first : null;
       });
 
       if (pragaData != null) {
+        // Convert PragaEntity to PragasHive for state compatibility
+        final pragaHive = PragasHive(
+          objectId: pragaData!.idReg,
+          createdAt: 0,
+          updatedAt: 0,
+          idReg: pragaData!.idReg,
+          nomeComum: pragaData!.nomeComum,
+          nomeCientifico: pragaData!.nomeCientifico,
+          tipoPraga: pragaData!.tipoPraga,
+        );
+
         state = AsyncValue.data(
           currentState.copyWith(
             pragaName: pragaData!.nomeComum,
             pragaScientificName: pragaData!.nomeCientifico,
-            pragaData: pragaData,
+            pragaData: pragaHive,
           ),
         );
 
@@ -241,7 +252,7 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     final currentState = state.value;
     if (currentState == null) return;
     final allPragasResult = await _pragasRepository.getAll();
-    PragasHive? pragaData;
+    PragaEntity? pragaData;
 
     allPragasResult.fold(
       (failure) {
@@ -249,7 +260,7 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
       },
       (allPragas) {
         final pragas = allPragas.where(
-          (PragasHive p) => p.nomeComum == currentState.pragaName,
+          (PragaEntity p) => p.nomeComum == currentState.pragaName,
         );
         pragaData = pragas.isNotEmpty ? pragas.first : null;
       },
@@ -262,17 +273,13 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
         'praga',
         itemId,
       );
-      state = AsyncValue.data(
-        currentState.copyWith(pragaData: pragaData, isFavorited: isFavorited),
-      );
+      state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
     } catch (e) {
       final isFavorited = await _favoritosRepository.isFavorito(
         'praga',
         itemId,
       );
-      state = AsyncValue.data(
-        currentState.copyWith(pragaData: pragaData, isFavorited: isFavorited),
-      );
+      state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
     }
   }
 
@@ -282,7 +289,7 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     if (currentState == null) return;
 
     final allPragasResult = await _pragasRepository.getAll();
-    PragasHive? pragaData;
+    PragaEntity? pragaData;
 
     allPragasResult.fold(
       (failure) {
@@ -290,7 +297,7 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
       },
       (allPragas) {
         final pragas = allPragas.where(
-          (PragasHive p) => p.nomeComum == currentState.pragaName,
+          (PragaEntity p) => p.nomeComum == currentState.pragaName,
         );
         pragaData = pragas.isNotEmpty ? pragas.first : null;
       },
@@ -303,17 +310,13 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
         'praga',
         itemId,
       );
-      state = AsyncValue.data(
-        currentState.copyWith(pragaData: pragaData, isFavorited: isFavorited),
-      );
+      state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
     } catch (e) {
       final isFavorited = await _favoritosRepository.isFavorito(
         'praga',
         itemId,
       );
-      state = AsyncValue.data(
-        currentState.copyWith(pragaData: pragaData, isFavorited: isFavorited),
-      );
+      state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
     }
   }
 
@@ -323,8 +326,8 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     if (currentState == null || currentState.pragaData == null) return;
 
     try {
-      PragasInfHive? pragaInfo;
-      PlantasInfHive? plantaInfo;
+      PragasInfData? pragaInfo;
+      PlantasInfData? plantaInfo;
       if (currentState.pragaData!.tipoPraga == '1') {
         pragaInfo = await _pragasInfRepository.findByIdReg(
           currentState.pragaData!.idReg,

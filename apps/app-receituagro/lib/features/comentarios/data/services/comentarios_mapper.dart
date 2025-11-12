@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../../../database/repositories/comentario_repository.dart';
 import '../../domain/entities/comentario_entity.dart';
 import '../comentario_model.dart';
@@ -32,6 +34,7 @@ abstract class IComentariosMapper {
 }
 
 /// Default implementation of ComentariosMapper
+@LazySingleton(as: IComentariosMapper)
 class ComentariosMapper implements IComentariosMapper {
   @override
   ComentarioEntity modelToEntity(ComentarioModel model) {

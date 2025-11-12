@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../domain/entities/defensivo_entity.dart';
 
 /// Service responsible for querying and extracting metadata from defensivos.
@@ -33,6 +35,7 @@ abstract class IDefensivosQueryService {
 }
 
 /// Default implementation of query service
+@LazySingleton(as: IDefensivosQueryService)
 class DefensivosQueryService implements IDefensivosQueryService {
   @override
   List<String> getClassesAgronomicas(List<DefensivoEntity> defensivos) {

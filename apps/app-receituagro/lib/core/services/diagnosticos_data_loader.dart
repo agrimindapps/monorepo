@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../../database/repositories/legacy_type_aliases.dart';
 import '../data/models/diagnostico_legacy.dart';
-import '../data/repositories/diagnostico_legacy_repository.dart';
 import '../di/injection_container.dart' as di;
 
 /// Serviço para carregar dados de diagnósticos dos assets JSON
@@ -21,17 +21,17 @@ class DiagnosticosDataLoader {
       final List<Map<String, dynamic>> allDiagnosticos = [];
       for (int i = 0; i <= 64; i++) {
         try {
-          final String assetPath =
-              kIsWeb
-                  ? 'database/json/tbdiagnostico/TBDIAGNOSTICO$i.json'
-                  : 'assets/database/json/tbdiagnostico/TBDIAGNOSTICO$i.json';
+          final String assetPath = kIsWeb
+              ? 'database/json/tbdiagnostico/TBDIAGNOSTICO$i.json'
+              : 'assets/database/json/tbdiagnostico/TBDIAGNOSTICO$i.json';
 
           final String jsonString = await rootBundle.loadString(assetPath);
 
           final dynamic decodedJson = json.decode(jsonString);
           final List<dynamic> jsonData = decodedJson is List ? decodedJson : [];
-          final List<Map<String, dynamic>> diagnosticos =
-              jsonData.cast<Map<String, dynamic>>().toList();
+          final List<Map<String, dynamic>> diagnosticos = jsonData
+              .cast<Map<String, dynamic>>()
+              .toList();
 
           allDiagnosticos.addAll(diagnosticos);
         } catch (e) {
@@ -42,17 +42,16 @@ class DiagnosticosDataLoader {
           }
         }
       }
-      final List<Map<String, dynamic>> diagnosticos =
-          allDiagnosticos
-              .where(
-                (item) =>
-                    item['IdReg'] != null &&
-                    item['IdReg'].toString().trim().isNotEmpty &&
-                    item['fkIdDefensivo'] != null &&
-                    item['fkIdCultura'] != null &&
-                    item['fkIdPraga'] != null,
-              )
-              .toList();
+      final List<Map<String, dynamic>> diagnosticos = allDiagnosticos
+          .where(
+            (item) =>
+                item['IdReg'] != null &&
+                item['IdReg'].toString().trim().isNotEmpty &&
+                item['fkIdDefensivo'] != null &&
+                item['fkIdCultura'] != null &&
+                item['fkIdPraga'] != null,
+          )
+          .toList();
 
       // Use repository.loadFromJson which will persist items using IdReg as key
       // (provides consistent retrieval by idReg/objectId later).
@@ -82,8 +81,9 @@ class DiagnosticosDataLoader {
     try {
       final repository = di.sl<DiagnosticoLegacyRepository>();
       final result = await repository.getAll();
-      final diagnosticos =
-          result.isSuccess ? result.data! : <DiagnosticoHive>[];
+      final diagnosticos = result.isSuccess
+          ? result.data!
+          : <DiagnosticoHive>[];
       final hasData = diagnosticos.isNotEmpty;
 
       return hasData;
@@ -97,14 +97,17 @@ class DiagnosticosDataLoader {
     try {
       final repository = di.sl<DiagnosticoLegacyRepository>();
       final result = await repository.getAll();
-      final diagnosticos =
-          result.isSuccess ? result.data! : <DiagnosticoHive>[];
+      final diagnosticos = result.isSuccess
+          ? result.data!
+          : <DiagnosticoHive>[];
 
       return {
         'total_diagnosticos': diagnosticos.length,
         'is_loaded': _isLoaded,
-        'sample_diagnosticos':
-            diagnosticos.take(5).map((d) => d.idReg).toList(),
+        'sample_diagnosticos': diagnosticos
+            .take(5)
+            .map((d) => d.idReg)
+            .toList(),
       };
     } catch (e) {
       return {

@@ -1,32 +1,35 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
 
-import '../data/models/comentario_legacy.dart';
-import 'legacy_adapter_registry.dart';
+import '../../database/receituagro_database.dart';
+import '../../database/tables/receituagro_tables.dart';
 
-/// Implementação específica do ReceitaAgro para limpeza de dados
+/// Implementação específica do ReceitaAgro para limpeza de dados usando Drift
 /// Implementa IAppDataCleaner do core package
-/// Baseado na implementação bem-sucedida do app-gasometer
+/// Refatorado completamente para usar Drift ao invés de Hive
 class ReceitaAgroDataCleaner implements IAppDataCleaner {
+  final ReceituagroDatabase _db = GetIt.instance<ReceituagroDatabase>();
+
   @override
   String get appName => 'ReceitaAgro';
 
   @override
-  String get version => '1.0.0';
+  String get version => '2.0.0-drift';
 
   @override
-  String get description => 'Dados agronômicos (culturas, pragas, defensivos, diagnósticos, favoritos, premium)';
+  String get description => 'Dados agronômicos (culturas, pragas, defensivos, diagnósticos, favoritos) - Drift Database';
 
   @override
   Future<Map<String, dynamic>> clearAllAppData() async {
     if (kDebugMode) {
-      debugPrint('🧹 ReceitaAgroDataCleaner: Iniciando limpeza de dados do usuário...');
-      debugPrint('   ✅ Preservando dados estáticos: culturas, pragas, defensivos, diagnósticos');
+      debugPrint('🧹 ReceitaAgroDataCleaner (Drift): Iniciando limpeza de dados do usuário...');
+      debugPrint('   ✅ Preservando dados estáticos: culturas, pragas, defensivos');
     }
 
     final startTime = DateTime.now();
     final results = <String, dynamic>{
-      'clearedBoxes': <String>[],
+      'clearedTables': <String>[],
       'clearedPreferences': <String>[],
       'errors': <String>[],
       'startTime': startTime,
@@ -34,11 +37,12 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
 
     try {
       // Limpar apenas dados do usuário (NOT dados estáticos)
-      final boxResults = await _clearUserDataBoxesOnly();
-      results['clearedBoxes'] = boxResults['clearedBoxes'];
-      if (boxResults['errors'] != null) {
-        results['errors'].addAll(boxResults['errors']);
+      final tableResults = await _clearUserDataTablesOnly();
+      results['clearedTables'] = tableResults['clearedTables'];
+      if (tableResults['errors'] != null) {
+        results['errors'].addAll(tableResults['errors']);
       }
+      
       final prefsResults = await _clearAppSharedPreferences();
       results['clearedPreferences'] = prefsResults['clearedKeys'];
       if (prefsResults['errors'] != null) {
@@ -46,15 +50,15 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       }
 
       results['success'] = true;
-      results['totalClearedBoxes'] = results['clearedBoxes'].length;
+      results['totalClearedTables'] = results['clearedTables'].length;
       results['totalClearedPreferences'] = results['clearedPreferences'].length;
-      results['totalRecordsCleared'] = boxResults['totalRecordsCleared'] ?? 0;
+      results['totalRecordsCleared'] = tableResults['totalRecordsCleared'] ?? 0;
 
     } catch (e) {
       results['success'] = false;
       results['mainError'] = e.toString();
       if (kDebugMode) {
-        debugPrint('❌ ReceitaAgroDataCleaner: Erro na limpeza - $e');
+        debugPrint('❌ ReceitaAgroDataCleaner (Drift): Erro na limpeza - $e');
       }
     }
 
@@ -62,8 +66,8 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
     results['duration'] = results['endTime'].difference(startTime).inMilliseconds;
 
     if (kDebugMode) {
-      debugPrint('✅ ReceitaAgroDataCleaner: Limpeza de dados do usuário finalizada:');
-      debugPrint('   Boxes limpos: ${results['totalClearedBoxes'] ?? 0}');
+      debugPrint('✅ ReceitaAgroDataCleaner (Drift): Limpeza de dados do usuário finalizada:');
+      debugPrint('   Tabelas limpas: ${results['totalClearedTables'] ?? 0}');
       debugPrint('   Preferências limpas: ${results['totalClearedPreferences'] ?? 0}');
       debugPrint('   Registros totais: ${results['totalRecordsCleared'] ?? 0}');
       debugPrint('   Erros: ${(results['errors'] as List).length}');
@@ -77,41 +81,105 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
   Future<Map<String, dynamic>> getDataStatsBeforeCleaning() async {
     try {
       final stats = <String, dynamic>{
-        'boxStats': <String, Map<String, dynamic>>{},
-        'totalBoxes': 0,
+        'tableStats': <String, Map<String, dynamic>>{},
+        'totalTables': 0,
         'totalRecords': 0,
         'appSpecificPrefs': 0,
         'availableCategories': getAvailableCategories(),
       };
 
       int totalRecords = 0;
-      final boxStats = <String, Map<String, dynamic>>{};
-      for (final entry in LegacyAdapterRegistry.boxNames.entries) {
-        final boxName = entry.value;
-        try {
-          if (Hive.isBoxOpen(boxName)) {
-            final box = Hive.box<dynamic>(boxName);
-            final recordCount = box.keys.length;
-            totalRecords += recordCount;
-
-            boxStats[entry.key] = {
-              'boxName': boxName,
-              'totalRecords': recordCount,
-              'category': _getCategoryForBox(entry.key),
-            };
-          }
-        } catch (e) {
-          boxStats[entry.key] = {
-            'boxName': boxName,
-            'totalRecords': 0,
-            'error': e.toString(),
-          };
-        }
+      final tableStats = <String, Map<String, dynamic>>{};
+      
+      // Get count from each Drift table
+      try {
+        final diagnosticosCount = await (_db.select(_db.diagnosticos)..where((tbl) => tbl.isDeleted.equals(false))).get().then((rows) => rows.length);
+        tableStats['diagnosticos'] = {
+          'tableName': 'diagnosticos',
+          'totalRecords': diagnosticosCount,
+          'category': 'diagnosticos',
+        };
+        totalRecords += diagnosticosCount;
+      } catch (e) {
+        tableStats['diagnosticos'] = {'tableName': 'diagnosticos', 'totalRecords': 0, 'error': e.toString()};
       }
 
-      stats['boxStats'] = boxStats;
-      stats['totalBoxes'] = LegacyAdapterRegistry.boxNames.length;
+      try {
+        final favoritosCount = await (_db.select(_db.favoritos)..where((tbl) => tbl.isDeleted.equals(false))).get().then((rows) => rows.length);
+        tableStats['favoritos'] = {
+          'tableName': 'favoritos',
+          'totalRecords': favoritosCount,
+          'category': 'favoritos',
+        };
+        totalRecords += favoritosCount;
+      } catch (e) {
+        tableStats['favoritos'] = {'tableName': 'favoritos', 'totalRecords': 0, 'error': e.toString()};
+      }
+
+      try {
+        final comentariosCount = await (_db.select(_db.comentarios)..where((tbl) => tbl.isDeleted.equals(false))).get().then((rows) => rows.length);
+        tableStats['comentarios'] = {
+          'tableName': 'comentarios',
+          'totalRecords': comentariosCount,
+          'category': 'comentarios',
+        };
+        totalRecords += comentariosCount;
+      } catch (e) {
+        tableStats['comentarios'] = {'tableName': 'comentarios', 'totalRecords': 0, 'error': e.toString()};
+      }
+
+      try {
+        final culturasCount = await _db.select(_db.culturas).get().then((rows) => rows.length);
+        tableStats['culturas'] = {
+          'tableName': 'culturas',
+          'totalRecords': culturasCount,
+          'category': 'culturas',
+        };
+        totalRecords += culturasCount;
+      } catch (e) {
+        tableStats['culturas'] = {'tableName': 'culturas', 'totalRecords': 0, 'error': e.toString()};
+      }
+
+      try {
+        final pragasCount = await _db.select(_db.pragas).get().then((rows) => rows.length);
+        tableStats['pragas'] = {
+          'tableName': 'pragas',
+          'totalRecords': pragasCount,
+          'category': 'pragas',
+        };
+        totalRecords += pragasCount;
+      } catch (e) {
+        tableStats['pragas'] = {'tableName': 'pragas', 'totalRecords': 0, 'error': e.toString()};
+      }
+
+      try {
+        final fitossanitariosCount = await _db.select(_db.fitossanitarios).get().then((rows) => rows.length);
+        tableStats['fitossanitarios'] = {
+          'tableName': 'fitossanitarios',
+          'totalRecords': fitossanitariosCount,
+          'category': 'defensivos',
+        };
+        totalRecords += fitossanitariosCount;
+      } catch (e) {
+        tableStats['fitossanitarios'] = {'tableName': 'fitossanitarios', 'totalRecords': 0, 'error': e.toString()};
+      }
+
+      try {
+        final appSettingsCount = await _db.select(_db.appSettings).get().then((rows) => rows.length);
+        tableStats['app_settings'] = {
+          'tableName': 'app_settings',
+          'totalRecords': appSettingsCount,
+          'category': 'settings',
+        };
+        totalRecords += appSettingsCount;
+      } catch (e) {
+        tableStats['app_settings'] = {'tableName': 'app_settings', 'totalRecords': 0, 'error': e.toString()};
+      }
+
+      stats['tableStats'] = tableStats;
+      stats['totalTables'] = tableStats.length;
       stats['totalRecords'] = totalRecords;
+
       try {
         final prefs = await SharedPreferences.getInstance();
         final allKeys = prefs.getKeys();
@@ -161,7 +229,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
 
     final results = <String, dynamic>{
       'category': category,
-      'clearedBoxes': <String>[],
+      'clearedTables': <String>[],
       'errors': <String>[],
       'totalRecordsCleared': 0,
     };
@@ -171,7 +239,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       if (category == 'favoritos') {
         final softDeleteResult = await _markFavoritosAsDeleted();
         if (softDeleteResult['success'] == true) {
-          results['clearedBoxes'].add('favoritos');
+          results['clearedTables'].add('favoritos');
           results['totalRecordsCleared'] = softDeleteResult['totalMarkedAsDeleted'] ?? 0;
           if (kDebugMode) {
             debugPrint('✅ Favoritos marcados como deletados e sincronização disparada');
@@ -186,7 +254,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       if (category == 'comentarios') {
         final softDeleteResult = await _markComentariosAsDeleted();
         if (softDeleteResult['success'] == true) {
-          results['clearedBoxes'].add('comentarios');
+          results['clearedTables'].add('comentarios');
           results['totalRecordsCleared'] = softDeleteResult['totalMarkedAsDeleted'] ?? 0;
           if (kDebugMode) {
             debugPrint('✅ Comentários marcados como deletados e sincronização disparada');
@@ -199,40 +267,58 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       }
 
       // Para outras categorias, fazer clear normal
-      final boxesToClear = _getBoxesForCategory(category);
+      final tablesToClear = _getTablesForCategory(category);
 
-      if (boxesToClear.isEmpty) {
+      if (tablesToClear.isEmpty) {
         results['errors'].add('Categoria "$category" não encontrada');
         results['success'] = false;
         return results;
       }
 
       if (kDebugMode) {
-        debugPrint('🧹 ReceitaAgroDataCleaner: Limpando categoria "$category" (${boxesToClear.length} boxes)...');
+        debugPrint('🧹 ReceitaAgroDataCleaner (Drift): Limpando categoria "$category" (${tablesToClear.length} tabelas)...');
       }
 
       int totalRecords = 0;
 
-      for (final boxKey in boxesToClear) {
-        final boxName = LegacyAdapterRegistry.boxNames[boxKey];
-        if (boxName == null) continue;
-
+      for (final tableName in tablesToClear) {
         try {
-          if (Hive.isBoxOpen(boxName)) {
-            final box = Hive.box<dynamic>(boxName);
-            final recordCount = box.keys.length;
+          int recordCount = 0;
+          
+          if (tableName == 'diagnosticos') {
+            final rows = await (_db.select(_db.diagnosticos)..where((tbl) => tbl.isDeleted.equals(false))).get();
+            recordCount = rows.length;
+            await (_db.delete(_db.diagnosticos)..where((tbl) => tbl.isDeleted.equals(false))).go();
+          } else if (tableName == 'favoritos') {
+            final rows = await (_db.select(_db.favoritos)..where((tbl) => tbl.isDeleted.equals(false))).get();
+            recordCount = rows.length;
+            await (_db.delete(_db.favoritos)..where((tbl) => tbl.isDeleted.equals(false))).go();
+          } else if (tableName == 'comentarios') {
+            final rows = await (_db.select(_db.comentarios)..where((tbl) => tbl.isDeleted.equals(false))).get();
+            recordCount = rows.length;
+            await (_db.delete(_db.comentarios)..where((tbl) => tbl.isDeleted.equals(false))).go();
+          } else if (tableName == 'culturas') {
+            final rows = await _db.select(_db.culturas).get();
+            recordCount = rows.length;
+            await _db.delete(_db.culturas).go();
+          } else if (tableName == 'pragas') {
+            final rows = await _db.select(_db.pragas).get();
+            recordCount = rows.length;
+            await _db.delete(_db.pragas).go();
+          } else if (tableName == 'fitossanitarios') {
+            final rows = await _db.select(_db.fitossanitarios).get();
+            recordCount = rows.length;
+            await _db.delete(_db.fitossanitarios).go();
+          }
 
-            await box.clear();
+          results['clearedTables'].add(tableName);
+          totalRecords += recordCount;
 
-            results['clearedBoxes'].add(boxKey);
-            totalRecords += recordCount;
-
-            if (kDebugMode) {
-              debugPrint('   ✅ Box "$boxKey" limpo ($recordCount registros)');
-            }
+          if (kDebugMode) {
+            debugPrint('   ✅ Tabela "$tableName" limpa ($recordCount registros)');
           }
         } catch (e) {
-          final error = 'Erro ao limpar box "$boxKey": $e';
+          final error = 'Erro ao limpar tabela "$tableName": $e';
           results['errors'].add(error);
 
           if (kDebugMode) {
@@ -248,7 +334,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       results['success'] = false;
       results['mainError'] = e.toString();
       if (kDebugMode) {
-        debugPrint('❌ ReceitaAgroDataCleaner: Erro na limpeza da categoria "$category": $e');
+        debugPrint('❌ ReceitaAgroDataCleaner (Drift): Erro na limpeza da categoria "$category": $e');
       }
     }
 
@@ -264,7 +350,6 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       'defensivos',
       'diagnosticos',
       'favoritos',
-      'premium',
       'comentarios',
     ];
   }
@@ -272,17 +357,31 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
   @override
   Future<bool> verifyDataCleanup() async {
     try {
-      for (final boxName in LegacyAdapterRegistry.boxNames.values) {
-        if (Hive.isBoxOpen(boxName)) {
-          final box = Hive.box<dynamic>(boxName);
-          if (box.keys.isNotEmpty) {
-            if (kDebugMode) {
-              debugPrint('⚠️ ReceitaAgroDataCleaner: Box "$boxName" ainda contém ${box.keys.length} registros');
-            }
-            return false;
-          }
+      // Verificar se há dados nas tabelas de usuário
+      final diagnosticosCount = await (_db.select(_db.diagnosticos)..where((tbl) => tbl.isDeleted.equals(false))).get().then((rows) => rows.length);
+      if (diagnosticosCount > 0) {
+        if (kDebugMode) {
+          debugPrint('⚠️ ReceitaAgroDataCleaner (Drift): Tabela "diagnosticos" ainda contém $diagnosticosCount registros');
         }
+        return false;
       }
+
+      final favoritosCount = await (_db.select(_db.favoritos)..where((tbl) => tbl.isDeleted.equals(false))).get().then((rows) => rows.length);
+      if (favoritosCount > 0) {
+        if (kDebugMode) {
+          debugPrint('⚠️ ReceitaAgroDataCleaner (Drift): Tabela "favoritos" ainda contém $favoritosCount registros');
+        }
+        return false;
+      }
+
+      final comentariosCount = await (_db.select(_db.comentarios)..where((tbl) => tbl.isDeleted.equals(false))).get().then((rows) => rows.length);
+      if (comentariosCount > 0) {
+        if (kDebugMode) {
+          debugPrint('⚠️ ReceitaAgroDataCleaner (Drift): Tabela "comentarios" ainda contém $comentariosCount registros');
+        }
+        return false;
+      }
+
       final prefs = await SharedPreferences.getInstance();
       final allKeys = prefs.getKeys();
 
@@ -300,7 +399,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
 
       if (remainingAppKeys.isNotEmpty) {
         if (kDebugMode) {
-          debugPrint('⚠️ ReceitaAgroDataCleaner: SharedPreferences ainda contêm chaves do app: $remainingAppKeys');
+          debugPrint('⚠️ ReceitaAgroDataCleaner (Drift): SharedPreferences ainda contêm chaves do app: $remainingAppKeys');
         }
         return false;
       }
@@ -308,60 +407,118 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       return true;
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ ReceitaAgroDataCleaner: Erro na verificação: $e');
+        debugPrint('❌ ReceitaAgroDataCleaner (Drift): Erro na verificação: $e');
       }
       return false;
     }
   }
 
-  /// Limpa APENAS boxes com dados do usuário (preserva dados estáticos como culturas, pragas, etc)
-  /// Boxes do usuário: favoritos, comentarios, premium_status
-  /// Boxes estáticas preservadas: culturas, pragas, fitossanitarios, diagnosticos, plantas_inf
-  Future<Map<String, dynamic>> _clearUserDataBoxesOnly() async {
+  /// Limpa APENAS tabelas com dados do usuário (preserva dados estáticos como culturas, pragas, etc)
+  /// Tabelas do usuário: favoritos, comentarios, diagnosticos, app_settings
+  /// Tabelas estáticas preservadas: culturas, pragas, fitossanitarios, plantas_inf, pragas_inf, fitossanitarios_info
+  Future<Map<String, dynamic>> _clearUserDataTablesOnly() async {
     final results = <String, dynamic>{
-      'clearedBoxes': <String>[],
+      'clearedTables': <String>[],
       'errors': <String>[],
       'totalRecordsCleared': 0,
     };
 
     if (kDebugMode) {
-      debugPrint('🧹 ReceitaAgroDataCleaner: Limpando APENAS boxes de dados do usuário...');
+      debugPrint('🧹 ReceitaAgroDataCleaner (Drift): Limpando APENAS tabelas de dados do usuário...');
     }
-
-    // APENAS boxes de dados do usuário - NÃO tocar em dados estáticos
-    final userDataBoxKeys = ['favoritos', 'comentarios', 'premium_status'];
 
     int totalRecords = 0;
 
-    for (final boxKey in userDataBoxKeys) {
-      final boxName = LegacyAdapterRegistry.boxNames[boxKey];
-      if (boxName == null) continue;
+    // Limpar tabela de diagnósticos (dados do usuário)
+    try {
+      final diagnosticosRows = await (_db.select(_db.diagnosticos)..where((tbl) => tbl.isDeleted.equals(false))).get();
+      final diagnosticosCount = diagnosticosRows.length;
+      
+      // Soft delete: marcar como deletados ao invés de remover
+      await (_db.update(_db.diagnosticos)
+        ..where((tbl) => tbl.isDeleted.equals(false))
+      ).write(const DiagnosticosCompanion(isDeleted: Value(true), isDirty: Value(true)));
+      
+      results['clearedTables'].add('diagnosticos');
+      totalRecords += diagnosticosCount;
 
-      try {
-        if (Hive.isBoxOpen(boxName)) {
-          final box = Hive.box<dynamic>(boxName);
-          final recordCount = box.keys.length;
+      if (kDebugMode) {
+        debugPrint('   ✅ Tabela "diagnosticos" limpa ($diagnosticosCount registros)');
+      }
+    } catch (e) {
+      final error = 'Erro ao limpar tabela "diagnosticos": $e';
+      results['errors'].add(error);
+      if (kDebugMode) {
+        debugPrint('   ❌ $error');
+      }
+    }
 
-          await box.clear();
+    // Limpar tabela de favoritos (dados do usuário)
+    try {
+      final favoritosRows = await (_db.select(_db.favoritos)..where((tbl) => tbl.isDeleted.equals(false))).get();
+      final favoritosCount = favoritosRows.length;
+      
+      // Soft delete
+      await (_db.update(_db.favoritos)
+        ..where((tbl) => tbl.isDeleted.equals(false))
+      ).write(const FavoritosCompanion(isDeleted: Value(true), isDirty: Value(true)));
+      
+      results['clearedTables'].add('favoritos');
+      totalRecords += favoritosCount;
 
-          results['clearedBoxes'].add(boxKey);
-          totalRecords += recordCount;
+      if (kDebugMode) {
+        debugPrint('   ✅ Tabela "favoritos" limpa ($favoritosCount registros)');
+      }
+    } catch (e) {
+      final error = 'Erro ao limpar tabela "favoritos": $e';
+      results['errors'].add(error);
+      if (kDebugMode) {
+        debugPrint('   ❌ $error');
+      }
+    }
 
-          if (kDebugMode) {
-            debugPrint('   ✅ Box "$boxKey" limpo ($recordCount registros)');
-          }
-        } else {
-          if (kDebugMode) {
-            debugPrint('   ⚠️ Box "$boxKey" não está aberto - pulando');
-          }
-        }
-      } catch (e) {
-        final error = 'Erro ao limpar box "$boxKey": $e';
-        results['errors'].add(error);
+    // Limpar tabela de comentários (dados do usuário)
+    try {
+      final comentariosRows = await (_db.select(_db.comentarios)..where((tbl) => tbl.isDeleted.equals(false))).get();
+      final comentariosCount = comentariosRows.length;
+      
+      // Soft delete
+      await (_db.update(_db.comentarios)
+        ..where((tbl) => tbl.isDeleted.equals(false))
+      ).write(const ComentariosCompanion(isDeleted: Value(true), isDirty: Value(true)));
+      
+      results['clearedTables'].add('comentarios');
+      totalRecords += comentariosCount;
 
-        if (kDebugMode) {
-          debugPrint('   ❌ $error');
-        }
+      if (kDebugMode) {
+        debugPrint('   ✅ Tabela "comentarios" limpa ($comentariosCount registros)');
+      }
+    } catch (e) {
+      final error = 'Erro ao limpar tabela "comentarios": $e';
+      results['errors'].add(error);
+      if (kDebugMode) {
+        debugPrint('   ❌ $error');
+      }
+    }
+
+    // Limpar app_settings (dados do usuário)
+    try {
+      final appSettingsRows = await _db.select(_db.appSettings).get();
+      final appSettingsCount = appSettingsRows.length;
+      
+      await _db.delete(_db.appSettings).go();
+      
+      results['clearedTables'].add('app_settings');
+      totalRecords += appSettingsCount;
+
+      if (kDebugMode) {
+        debugPrint('   ✅ Tabela "app_settings" limpa ($appSettingsCount registros)');
+      }
+    } catch (e) {
+      final error = 'Erro ao limpar tabela "app_settings": $e';
+      results['errors'].add(error);
+      if (kDebugMode) {
+        debugPrint('   ❌ $error');
       }
     }
 
@@ -384,56 +541,6 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
     } catch (e) {
       if (kDebugMode) {
         debugPrint('   ⚠️ Erro ao disparar sincronização: $e');
-      }
-    }
-
-    results['totalRecordsCleared'] = totalRecords;
-    return results;
-  }
-
-  /// Limpa todas as HiveBoxes do ReceitaAgro
-  Future<Map<String, dynamic>> _clearAllHiveBoxes() async {
-    final results = <String, dynamic>{
-      'clearedBoxes': <String>[],
-      'errors': <String>[],
-      'totalRecordsCleared': 0,
-    };
-
-    if (kDebugMode) {
-      debugPrint('🧹 ReceitaAgroDataCleaner: Limpando ${LegacyAdapterRegistry.boxNames.length} HiveBoxes...');
-    }
-
-    int totalRecords = 0;
-
-    for (final entry in LegacyAdapterRegistry.boxNames.entries) {
-      final boxKey = entry.key;
-      final boxName = entry.value;
-
-      try {
-        if (Hive.isBoxOpen(boxName)) {
-          final box = Hive.box<dynamic>(boxName);
-          final recordCount = box.keys.length;
-
-          await box.clear();
-
-          results['clearedBoxes'].add(boxKey);
-          totalRecords += recordCount;
-
-          if (kDebugMode) {
-            debugPrint('   ✅ Box "$boxKey" limpo ($recordCount registros)');
-          }
-        } else {
-          if (kDebugMode) {
-            debugPrint('   ⚠️ Box "$boxKey" não está aberto - pulando');
-          }
-        }
-      } catch (e) {
-        final error = 'Erro ao limpar box "$boxKey": $e';
-        results['errors'].add(error);
-
-        if (kDebugMode) {
-          debugPrint('   ❌ $error');
-        }
       }
     }
 
@@ -465,7 +572,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       ).toList();
 
       if (kDebugMode) {
-        debugPrint('🧹 ReceitaAgroDataCleaner: Limpando ${appKeys.length} preferências do app...');
+        debugPrint('🧹 ReceitaAgroDataCleaner (Drift): Limpando ${appKeys.length} preferências do app...');
       }
 
       for (final key in appKeys) {
@@ -495,65 +602,35 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
     } catch (e) {
       results['errors'].add('Erro ao acessar SharedPreferences: $e');
       if (kDebugMode) {
-        debugPrint('❌ ReceitaAgroDataCleaner: Erro ao acessar SharedPreferences - $e');
+        debugPrint('❌ ReceitaAgroDataCleaner (Drift): Erro ao acessar SharedPreferences - $e');
       }
     }
 
     return results;
   }
 
-  /// Mapear categoria para boxes correspondentes
-  List<String> _getBoxesForCategory(String category) {
+  /// Mapear categoria para tabelas correspondentes
+  List<String> _getTablesForCategory(String category) {
     switch (category) {
       case 'culturas':
         return ['culturas'];
       case 'pragas':
-        return ['pragas', 'pragas_inf'];
+        return ['pragas'];
       case 'defensivos':
-        return ['fitossanitarios', 'fitossanitarios_info'];
+        return ['fitossanitarios'];
       case 'diagnosticos':
         return ['diagnosticos'];
       case 'favoritos':
         return ['favoritos'];
-      case 'premium':
-        return ['premium_status'];
       case 'comentarios':
         return ['comentarios'];
-      case 'plantas':
-        return ['plantas_inf'];
       default:
         return [];
     }
   }
 
-  /// Obter categoria de uma box
-  String _getCategoryForBox(String boxKey) {
-    switch (boxKey) {
-      case 'culturas':
-        return 'culturas';
-      case 'pragas':
-      case 'pragas_inf':
-        return 'pragas';
-      case 'fitossanitarios':
-      case 'fitossanitarios_info':
-        return 'defensivos';
-      case 'diagnosticos':
-        return 'diagnosticos';
-      case 'favoritos':
-        return 'favoritos';
-      case 'premium_status':
-        return 'premium';
-      case 'comentarios':
-        return 'comentarios';
-      case 'plantas_inf':
-        return 'plantas';
-      default:
-        return 'outros';
-    }
-  }
-
   /// Limpa favoritos e dispara sincronização com Firestore
-  /// Isso permite que a mudança seja propagada para outros dispositivos
+  /// Usa soft delete para propagar mudanças para outros dispositivos
   Future<Map<String, dynamic>> _markFavoritosAsDeleted() async {
     final results = <String, dynamic>{
       'success': false,
@@ -563,28 +640,19 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
 
     try {
       if (kDebugMode) {
-        debugPrint('🧹 ReceitaAgroDataCleaner: Limpando favoritos e disparando sincronização...');
+        debugPrint('🧹 ReceitaAgroDataCleaner (Drift): Marcando favoritos como deletados...');
       }
 
-      final boxName = LegacyAdapterRegistry.boxNames['favoritos'];
-      if (boxName == null) {
-        results['error'] = 'Box de favoritos não encontrada no registry';
-        return results;
-      }
+      final favoritosRows = await (_db.select(_db.favoritos)..where((tbl) => tbl.isDeleted.equals(false))).get();
+      final favoriteCount = favoritosRows.length;
 
-      if (!Hive.isBoxOpen(boxName)) {
-        results['error'] = 'Box de favoritos não está aberta';
-        return results;
-      }
-
-      final box = Hive.box<dynamic>(boxName);
-      final favoriteCount = box.keys.length;
-
-      // Limpar todos os favoritos locais
-      await box.clear();
+      // Soft delete: marcar todos como deletados
+      await (_db.update(_db.favoritos)
+        ..where((tbl) => tbl.isDeleted.equals(false))
+      ).write(const FavoritosCompanion(isDeleted: Value(true), isDirty: Value(true)));
 
       if (kDebugMode) {
-        debugPrint('   ✅ $favoriteCount favoritos removidos localmente');
+        debugPrint('   ✅ $favoriteCount favoritos marcados como deletados');
       }
 
       // Disparar sincronização com Firestore para propagar mudança
@@ -613,14 +681,14 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       results['totalMarkedAsDeleted'] = favoriteCount;
 
       if (kDebugMode) {
-        debugPrint('✅ ReceitaAgroDataCleaner: Limpeza de favoritos concluída');
+        debugPrint('✅ ReceitaAgroDataCleaner (Drift): Limpeza de favoritos concluída');
       }
 
       return results;
     } catch (e) {
       results['error'] = e.toString();
       if (kDebugMode) {
-        debugPrint('❌ ReceitaAgroDataCleaner: Erro ao limpar favoritos - $e');
+        debugPrint('❌ ReceitaAgroDataCleaner (Drift): Erro ao limpar favoritos - $e');
       }
       return results;
     }
@@ -637,39 +705,16 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
 
     try {
       if (kDebugMode) {
-        debugPrint('🧹 ReceitaAgroDataCleaner: Marcando comentários como deletados (soft delete)...');
+        debugPrint('🧹 ReceitaAgroDataCleaner (Drift): Marcando comentários como deletados (soft delete)...');
       }
 
-      final boxName = LegacyAdapterRegistry.boxNames['comentarios'];
-      if (boxName == null) {
-        results['error'] = 'Box de comentários não encontrada no registry';
-        return results;
-      }
+      final comentariosRows = await (_db.select(_db.comentarios)..where((tbl) => tbl.isDeleted.equals(false))).get();
+      final markedCount = comentariosRows.length;
 
-      if (!Hive.isBoxOpen(boxName)) {
-        results['error'] = 'Box de comentários não está aberta';
-        return results;
-      }
-
-      final box = Hive.box<ComentarioHive>(boxName);
-      int markedCount = 0;
-
-      // Iterar sobre todos os comentários e marcar como deletados
-      for (final key in box.keys) {
-        try {
-          final comentario = box.get(key);
-          if (comentario != null) {
-            // Marcar como deletado (sync_deleted = true)
-            comentario.sync_deleted = true;
-            await box.put(key, comentario);
-            markedCount++;
-          }
-        } catch (e) {
-          if (kDebugMode) {
-            debugPrint('   ⚠️ Erro ao marcar comentário $key: $e');
-          }
-        }
-      }
+      // Soft delete: marcar todos como deletados
+      await (_db.update(_db.comentarios)
+        ..where((tbl) => tbl.isDeleted.equals(false))
+      ).write(const ComentariosCompanion(isDeleted: Value(true), isDirty: Value(true)));
 
       if (kDebugMode) {
         debugPrint('   ✅ $markedCount comentários marcados como deletados');
@@ -701,14 +746,14 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       results['totalMarkedAsDeleted'] = markedCount;
 
       if (kDebugMode) {
-        debugPrint('✅ ReceitaAgroDataCleaner: Soft delete de comentários concluído');
+        debugPrint('✅ ReceitaAgroDataCleaner (Drift): Limpeza de comentários concluída');
       }
 
       return results;
     } catch (e) {
       results['error'] = e.toString();
       if (kDebugMode) {
-        debugPrint('❌ ReceitaAgroDataCleaner: Erro ao marcar comentários como deletados - $e');
+        debugPrint('❌ ReceitaAgroDataCleaner (Drift): Erro ao limpar comentários - $e');
       }
       return results;
     }

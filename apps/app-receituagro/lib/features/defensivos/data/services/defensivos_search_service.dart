@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../domain/entities/defensivo_entity.dart';
 
 /// Service responsible for searching defensivos.
@@ -32,6 +34,7 @@ abstract class IDefensivosSearchService {
 }
 
 /// Default implementation of search service
+@LazySingleton(as: IDefensivosSearchService)
 class DefensivosSearchService implements IDefensivosSearchService {
   @override
   List<DefensivoEntity> search(

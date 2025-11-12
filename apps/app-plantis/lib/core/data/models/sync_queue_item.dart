@@ -1,9 +1,6 @@
-import 'package:core/core.dart' hide Column;
-
-
 enum SyncOperationType { create, update, delete }
 
-class SyncQueueItem extends HiveObject {
+class SyncQueueItem {
   final String id;
 
   final String modelType;

@@ -316,7 +316,7 @@ void _initDataExport() {
       plantsDataSource: sl<PlantsExportDataSource>(),
       settingsDataSource: sl<SettingsExportDataSource>(),
       fileGenerator: sl<ExportFileGenerator>(),
-      hiveManager: sl<IHiveManager>(),
+      prefs: sl<SharedPreferences>(),
     ),
   );
   sl.registerLazySingleton<CheckExportAvailabilityUseCase>(

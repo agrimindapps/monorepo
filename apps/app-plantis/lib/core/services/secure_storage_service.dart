@@ -17,7 +17,6 @@ class SecureStorageService {
   static const String _userCredentialsKey = 'user_credentials';
   static const String _locationDataKey = 'location_data';
   static const String _personalInfoKey = 'personal_info';
-  static const String _encryptionKeyKey = 'hive_encryption_key';
   static const String _biometricDataKey = 'biometric_data';
 
   /// Store user credentials securely
@@ -110,21 +109,6 @@ class SecureStorageService {
         return null;
       },
       (json) => json != null ? PersonalInfo.fromJson(json) : null,
-    );
-  }
-
-  /// Generate and store Hive encryption key
-  Future<List<int>> getOrCreateHiveEncryptionKey() async {
-    final result = await _coreStorage.getOrCreateEncryptionKey(
-      keyName: _encryptionKeyKey,
-    );
-
-    return result.fold(
-      (failure) {
-        debugPrint('❌ Error with Hive encryption key: ${failure.message}');
-        throw Exception(failure.message);
-      },
-      (key) => key,
     );
   }
 

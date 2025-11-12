@@ -2,15 +2,11 @@ import 'package:core/core.dart' hide Column;
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Módulo para registrar dependências externas (Firebase, Hive, Connectivity)
+/// Módulo para registrar dependências externas (Firebase, Connectivity)
 /// IMPORTANTE: Não inclui IAuthRepository, ISubscriptionRepository, ILocalStorageRepository
 /// pois estes são registrados em injection_container.dart para evitar loops
 @module
 abstract class ExternalModule {
-  /// HiveInterface (required by SyncQueue)
-  @lazySingleton
-  HiveInterface get hiveInterface => Hive;
-
   /// Firebase Storage (required by BackupRepository)
   @lazySingleton
   FirebaseStorage get firebaseStorage => FirebaseStorage.instance;

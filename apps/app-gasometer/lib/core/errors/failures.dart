@@ -33,19 +33,19 @@ class FinancialConflictFailure extends core.Failure {
     this.remoteData,
     dynamic details,
   }) : super(
-          message: message,
-          code: code ?? 'FINANCIAL_CONFLICT',
-          details: details,
-        );
+         message: message,
+         code: code ?? 'FINANCIAL_CONFLICT',
+         details: details,
+       );
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        localData,
-        remoteData,
-        entityType,
-        entityId,
-      ];
+    ...super.props,
+    localData,
+    remoteData,
+    entityType,
+    entityId,
+  ];
 
   @override
   String toString() {
@@ -72,18 +72,18 @@ class FinancialIntegrityFailure extends core.ValidationFailure {
     this.constraint,
     dynamic details,
   }) : super(
-          message,
-          code: code ?? 'FINANCIAL_INTEGRITY_ERROR',
-          details: details,
-        );
+         message,
+         code: code ?? 'FINANCIAL_INTEGRITY_ERROR',
+         details: details,
+       );
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        fieldName,
-        invalidValue,
-        constraint,
-      ];
+    ...super.props,
+    fieldName,
+    invalidValue,
+    constraint,
+  ];
 
   @override
   String toString() {
@@ -102,11 +102,7 @@ class ConnectivityFailure extends core.NetworkFailure {
     String message = 'Sem conexão com a internet',
     String? code,
     dynamic details,
-  }) : super(
-          message,
-          code: code ?? 'NO_CONNECTION',
-          details: details,
-        );
+  }) : super(message, code: code ?? 'NO_CONNECTION', details: details);
 }
 
 /// Failure para operações de storage (Hive/Firebase Storage)
@@ -120,11 +116,7 @@ class StorageFailure extends core.CacheFailure {
     this.storageType,
     this.operation,
     dynamic details,
-  }) : super(
-          message,
-          code: code ?? 'STORAGE_ERROR',
-          details: details,
-        );
+  }) : super(message, code: code ?? 'STORAGE_ERROR', details: details);
 
   @override
   List<Object?> get props => [...super.props, storageType, operation];
@@ -153,10 +145,10 @@ class IdReconciliationFailure extends core.SyncFailure {
     String? code,
     dynamic details,
   }) : super(
-          message,
-          code: code ?? 'ID_RECONCILIATION_ERROR',
-          details: details,
-        );
+         message,
+         code: code ?? 'ID_RECONCILIATION_ERROR',
+         details: details,
+       );
 
   @override
   List<Object?> get props => [...super.props, localId, remoteId, entityType];
@@ -183,10 +175,10 @@ class ImageOperationFailure extends core.Failure {
     String? code,
     dynamic details,
   }) : super(
-          message: message,
-          code: code ?? 'IMAGE_OPERATION_ERROR',
-          details: details,
-        );
+         message: message,
+         code: code ?? 'IMAGE_OPERATION_ERROR',
+         details: details,
+       );
 
   @override
   List<Object?> get props => [...super.props, operation, imagePath];

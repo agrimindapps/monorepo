@@ -46,31 +46,38 @@ void main() async {
     debugPrint('Firebase initialized successfully');
   } catch (e) {
     debugPrint('Firebase initialization failed: $e');
-    debugPrint('App will continue without Firebase features (local-first mode)');
+    debugPrint(
+      'App will continue without Firebase features (local-first mode)',
+    );
     // App continues without Firebase - local storage works independently
   }
 
   // Initialize DI with Firebase status (kept for backwards compatibility during migration)
   await configureDependencies(firebaseEnabled: firebaseInitialized);
 
-  if (!kIsWeb && firebaseInitialized && (Platform.isAndroid || Platform.isIOS)) {
-    runZonedGuarded<Future<void>>(() async {
-      runApp(
-        ProviderScope(
-          overrides: [
-            // Override SharedPreferences provider with actual instance
-            sharedPreferencesProvider.overrideWithValue(sharedPrefs),
-          ],
-          child: const App(),
-        ),
-      );
-    }, (error, stackTrace) {
-      crashlyticsService?.recordError(
-        exception: error,
-        stackTrace: stackTrace,
-        fatal: true,
-      );
-    });
+  if (!kIsWeb &&
+      firebaseInitialized &&
+      (Platform.isAndroid || Platform.isIOS)) {
+    runZonedGuarded<Future<void>>(
+      () async {
+        runApp(
+          ProviderScope(
+            overrides: [
+              // Override SharedPreferences provider with actual instance
+              sharedPreferencesProvider.overrideWithValue(sharedPrefs),
+            ],
+            child: const App(),
+          ),
+        );
+      },
+      (error, stackTrace) {
+        crashlyticsService?.recordError(
+          exception: error,
+          stackTrace: stackTrace,
+          fatal: true,
+        );
+      },
+    );
   } else {
     runApp(
       ProviderScope(

@@ -11,13 +11,10 @@ abstract class PingpongModule {
   @lazySingleton
   PingpongLocalDataSource pingpongLocalDataSource(
     SharedPreferences sharedPreferences,
-  ) =>
-      PingpongLocalDataSourceImpl(sharedPreferences);
+  ) => PingpongLocalDataSourceImpl(sharedPreferences);
 
   @lazySingleton
-  PingpongRepository pingpongRepository(
-    PingpongLocalDataSource dataSource,
-  ) =>
+  PingpongRepository pingpongRepository(PingpongLocalDataSource dataSource) =>
       PingpongRepositoryImpl(dataSource);
 
   @lazySingleton

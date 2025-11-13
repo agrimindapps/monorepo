@@ -7,10 +7,7 @@ import 'failures.dart';
 /// Centraliza a lógica de conversão de erros de bibliotecas externas
 class ExceptionMapper {
   /// Mapeia qualquer exception para um Failure apropriado
-  static Failure mapException(
-    dynamic exception, [
-    StackTrace? stackTrace,
-  ]) {
+  static Failure mapException(dynamic exception, [StackTrace? stackTrace]) {
     // ⚠️ IMPORTANTE: Ordem de verificação importa!
     // Verificar tipos específicos ANTES de tipos genéricos
 
@@ -24,10 +21,7 @@ class ExceptionMapper {
       // Distinguir por plugin name
       if (exception.plugin.contains('storage') ||
           exception.plugin.contains('firebase_storage')) {
-        return _mapFirebaseStorageException(
-          exception,
-          stackTrace,
-        );
+        return _mapFirebaseStorageException(exception, stackTrace);
       }
       // Default: Firestore
       return _mapFirebaseException(exception, stackTrace);
@@ -126,7 +120,8 @@ class ExceptionMapper {
       case 'failed-precondition':
       case 'aborted':
         return FinancialConflictFailure(
-          message: 'Conflito ao salvar dados. Os dados foram modificados por outro dispositivo.',
+          message:
+              'Conflito ao salvar dados. Os dados foram modificados por outro dispositivo.',
           entityType: 'unknown',
           entityId: 'unknown',
           code: code,
@@ -213,11 +208,7 @@ class ExceptionMapper {
         );
 
       default:
-        return AuthFailure(
-          message,
-          code: code,
-          details: exception.toString(),
-        );
+        return AuthFailure(message, code: code, details: exception.toString());
     }
   }
 

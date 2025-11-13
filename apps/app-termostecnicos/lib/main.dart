@@ -15,7 +15,6 @@ import 'app_page.dart';
 import 'const/environment_const.dart';
 import 'const/firebase_consts.dart';
 import 'const/revenuecat_const.dart';
-import 'hive_models/comentarios_models.dart';
 import 'core/services/admob_service.dart';
 import 'core/services/in_app_purchase_service.dart';
 import 'core/services/revenuecat_service.dart';
@@ -31,12 +30,6 @@ void main() async {
 
   // Initialize production environment using core's PackageInfo
   await GlobalEnvironment.initialize();
-
-  // Initialize Hive using core package
-  await Hive.initFlutter();
-
-  // Register custom adapters
-  Hive.registerAdapter(ComentariosAdapter());
 
   // Initialize Firebase with error handling (BEFORE DI)
   bool firebaseInitialized = false;

@@ -30,10 +30,7 @@ class SpawnTileUseCase {
       final value = _random.nextInt(10) < 9 ? 2 : 4;
 
       // Create new tile with spawn animation
-      final newTile = TileEntity.spawn(
-        value: value,
-        position: randomPosition,
-      );
+      final newTile = TileEntity.spawn(value: value, position: randomPosition);
 
       // Add tile to grid
       final updatedGrid = grid.addTile(newTile);

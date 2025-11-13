@@ -14,35 +14,34 @@ class SkipWordUseCase {
   Future<Either<Failure, GameStateEntity>> call(GameStateEntity state) async {
     // Validation: game must be active
     if (!state.isActive) {
-      return const Left(
-        ValidationFailure('Jogo não está ativo'),
-      );
+      return const Left(ValidationFailure('Jogo não está ativo'));
     }
 
     // Generate new word
     final generateUseCase = GenerateWordUseCase(repository);
-    final wordResult = await generateUseCase(GenerateWordParams(
-      difficulty: state.difficulty,
-      category: state.currentWord.category,
-    ));
-
-    return wordResult.fold(
-      (failure) => Left(failure),
-      (newWord) {
-        // Create new game state for the new word, keeping score and words completed
-        final newState = GameStateEntity.forWord(
-          word: newWord,
-          difficulty: state.difficulty,
-          score: state.score,
-          wordsCompleted: state.wordsCompleted,
-        );
-
-        // Penalize for skipping (reduce score)
-        final skipPenalty = 50 * state.difficulty.scoreMultiplier;
-        final newScore = (state.score - skipPenalty).clamp(0, double.infinity).toInt();
-
-        return Right(newState.copyWith(score: newScore));
-      },
+    final wordResult = await generateUseCase(
+      GenerateWordParams(
+        difficulty: state.difficulty,
+        category: state.currentWord.category,
+      ),
     );
+
+    return wordResult.fold((failure) => Left(failure), (newWord) {
+      // Create new game state for the new word, keeping score and words completed
+      final newState = GameStateEntity.forWord(
+        word: newWord,
+        difficulty: state.difficulty,
+        score: state.score,
+        wordsCompleted: state.wordsCompleted,
+      );
+
+      // Penalize for skipping (reduce score)
+      final skipPenalty = 50 * state.difficulty.scoreMultiplier;
+      final newScore = (state.score - skipPenalty)
+          .clamp(0, double.infinity)
+          .toInt();
+
+      return Right(newState.copyWith(score: newScore));
+    });
   }
 }

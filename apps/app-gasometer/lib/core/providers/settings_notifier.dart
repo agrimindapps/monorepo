@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dependency_providers.dart';
 
 part 'settings_notifier.g.dart';
+
 class SettingsState {
   const SettingsState({
     this.isDarkMode = false,
@@ -96,6 +97,7 @@ class SettingsState {
       isLoading.hashCode ^
       errorMessage.hashCode;
 }
+
 @riverpod
 class CoreSettingsNotifier extends _$CoreSettingsNotifier {
   static const String _settingsKey = 'gasometer_settings';
@@ -110,17 +112,16 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
   Future<SettingsState> _loadSettings() async {
     try {
       final settingsJson = _storage.getString(_settingsKey);
-      
+
       if (settingsJson != null) {
-        final Map<String, dynamic> settingsMap = 
-            Map<String, dynamic>.from(jsonDecode(settingsJson) as Map);
+        final Map<String, dynamic> settingsMap = Map<String, dynamic>.from(
+          jsonDecode(settingsJson) as Map,
+        );
         return SettingsState.fromJson(settingsMap);
       }
       return const SettingsState();
     } catch (e) {
-      return SettingsState(
-        errorMessage: 'Erro ao carregar configurações: $e',
-      );
+      return SettingsState(errorMessage: 'Erro ao carregar configurações: $e');
     }
   }
 
@@ -133,9 +134,7 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
       await _storage.setString(_settingsKey, settingsJson);
 
       if (currentState.errorMessage != null) {
-        state = AsyncValue.data(
-          currentState.copyWith(errorMessage: null),
-        );
+        state = AsyncValue.data(currentState.copyWith(errorMessage: null));
       }
     } catch (e) {
       final currentState = state.valueOrNull;
@@ -163,9 +162,7 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
     final currentState = state.valueOrNull;
     if (currentState == null) return;
 
-    state = AsyncValue.data(
-      currentState.copyWith(selectedLanguage: language),
-    );
+    state = AsyncValue.data(currentState.copyWith(selectedLanguage: language));
     await _saveSettings();
   }
 
@@ -173,9 +170,7 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
     final currentState = state.valueOrNull;
     if (currentState == null) return;
 
-    state = AsyncValue.data(
-      currentState.copyWith(selectedCurrency: currency),
-    );
+    state = AsyncValue.data(currentState.copyWith(selectedCurrency: currency));
     await _saveSettings();
   }
 
@@ -219,9 +214,7 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
   void clearError() {
     final currentState = state.valueOrNull;
     if (currentState != null && currentState.errorMessage != null) {
-      state = AsyncValue.data(
-        currentState.copyWith(errorMessage: null),
-      );
+      state = AsyncValue.data(currentState.copyWith(errorMessage: null));
     }
   }
 

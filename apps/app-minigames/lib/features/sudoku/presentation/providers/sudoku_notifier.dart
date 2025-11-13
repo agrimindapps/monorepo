@@ -66,10 +66,7 @@ class SudokuGame extends _$SudokuGame {
       (grid) async {
         // Load high score
         final highScoreResult = await _loadHighScoreUseCase(difficulty);
-        final highScore = highScoreResult.fold(
-          (_) => null,
-          (score) => score,
-        );
+        final highScore = highScoreResult.fold((_) => null, (score) => score);
 
         // Update state
         state = GameStateEntity(
@@ -133,10 +130,7 @@ class SudokuGame extends _$SudokuGame {
       }
     }
 
-    state = state.copyWith(
-      grid: updatedGrid,
-      selectedCell: position,
-    );
+    state = state.copyWith(grid: updatedGrid, selectedCell: position);
   }
 
   /// Place number on selected cell

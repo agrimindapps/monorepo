@@ -39,26 +39,10 @@ enum GameDifficulty {
 
 /// Word categories with localized labels and hints
 enum WordCategory {
-  fruits(
-    name: 'Frutas',
-    hint: 'É uma fruta',
-    icon: '🍎',
-  ),
-  animals(
-    name: 'Animais',
-    hint: 'É um animal',
-    icon: '🦁',
-  ),
-  countries(
-    name: 'Países',
-    hint: 'É um país',
-    icon: '🌍',
-  ),
-  professions(
-    name: 'Profissões',
-    hint: 'É uma profissão',
-    icon: '👨‍💼',
-  );
+  fruits(name: 'Frutas', hint: 'É uma fruta', icon: '🍎'),
+  animals(name: 'Animais', hint: 'É um animal', icon: '🦁'),
+  countries(name: 'Países', hint: 'É um país', icon: '🌍'),
+  professions(name: 'Profissões', hint: 'É uma profissão', icon: '👨‍💼');
 
   final String name;
   final String hint;

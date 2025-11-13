@@ -54,7 +54,11 @@ class GeneratePuzzleUseCase {
   }
 
   /// Fill a 3x3 block with random numbers 1-9
-  SudokuGridEntity _fillBlock(SudokuGridEntity grid, int startRow, int startCol) {
+  SudokuGridEntity _fillBlock(
+    SudokuGridEntity grid,
+    int startRow,
+    int startCol,
+  ) {
     var updatedGrid = grid;
     final numbers = List.generate(9, (i) => i + 1)..shuffle();
 
@@ -87,10 +91,7 @@ class GeneratePuzzleUseCase {
           for (int num = 1; num <= 9; num++) {
             if (currentGrid.isValidPlacement(row, col, num)) {
               // Place number
-              final updatedCell = cell.copyWith(
-                value: num,
-                isFixed: true,
-              );
+              final updatedCell = cell.copyWith(value: num, isFixed: true);
               final newGrid = currentGrid.updateCell(updatedCell);
 
               // Recursive solve
@@ -136,10 +137,7 @@ class GeneratePuzzleUseCase {
       final cell = updatedGrid.getCell(row, col);
 
       // Clear value but keep as editable
-      final updatedCell = cell.copyWith(
-        clearValue: true,
-        isFixed: false,
-      );
+      final updatedCell = cell.copyWith(clearValue: true, isFixed: false);
       updatedGrid = updatedGrid.updateCell(updatedCell);
       removed++;
     }

@@ -61,12 +61,9 @@ class MemoryGameNotifier extends _$MemoryGameNotifier {
       LoadHighScoreParams(difficulty: difficulty),
     );
 
-    result.fold(
-      (failure) {},
-      (highScore) {
-        _currentHighScore = highScore;
-      },
-    );
+    result.fold((failure) {}, (highScore) {
+      _currentHighScore = highScore;
+    });
   }
 
   void _startTimer() {
@@ -90,17 +87,14 @@ class MemoryGameNotifier extends _$MemoryGameNotifier {
       FlipCardParams(currentState: state, cardId: cardId),
     );
 
-    result.fold(
-      (failure) {},
-      (newState) {
-        state = newState;
-        HapticFeedback.lightImpact();
+    result.fold((failure) {}, (newState) {
+      state = newState;
+      HapticFeedback.lightImpact();
 
-        if (newState.flippedCards.length == 2) {
-          _checkMatch();
-        }
-      },
-    );
+      if (newState.flippedCards.length == 2) {
+        _checkMatch();
+      }
+    });
   }
 
   Future<void> _checkMatch() async {
@@ -110,24 +104,21 @@ class MemoryGameNotifier extends _$MemoryGameNotifier {
     final checkMatchUseCase = ref.read(checkMatchUseCaseProvider);
     final result = checkMatchUseCase(state);
 
-    result.fold(
-      (failure) {},
-      (newState) {
-        if (!_isMounted) return;
-        state = newState;
+    result.fold((failure) {}, (newState) {
+      if (!_isMounted) return;
+      state = newState;
 
-        if (newState.status == GameStatus.completed) {
-          _handleVictory();
+      if (newState.status == GameStatus.completed) {
+        _handleVictory();
+      } else {
+        final isMatch = newState.matches > state.matches;
+        if (isMatch) {
+          HapticFeedback.mediumImpact();
         } else {
-          final isMatch = newState.matches > state.matches;
-          if (isMatch) {
-            HapticFeedback.mediumImpact();
-          } else {
-            HapticFeedback.lightImpact();
-          }
+          HapticFeedback.lightImpact();
         }
-      },
-    );
+      }
+    });
   }
 
   Future<void> _handleVictory() async {
@@ -135,8 +126,8 @@ class MemoryGameNotifier extends _$MemoryGameNotifier {
     HapticFeedback.heavyImpact();
 
     final currentScore = state.calculateScore();
-    final shouldSave = _currentHighScore == null ||
-        currentScore > _currentHighScore!.score;
+    final shouldSave =
+        _currentHighScore == null || currentScore > _currentHighScore!.score;
 
     if (shouldSave && state.elapsedTime != null) {
       final newHighScore = HighScoreEntity(

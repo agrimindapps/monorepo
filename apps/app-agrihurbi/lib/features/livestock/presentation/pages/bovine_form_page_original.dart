@@ -348,7 +348,7 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<BovineAptitude>(
-              value: _selectedAptitude,
+              initialValue: _selectedAptitude,
               decoration: const InputDecoration(
                 labelText: 'Aptidão',
                 border: OutlineInputBorder(),
@@ -367,7 +367,7 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<BreedingSystem>(
-              value: _selectedBreedingSystem,
+              initialValue: _selectedBreedingSystem,
               decoration: const InputDecoration(
                 labelText: 'Sistema de Criação',
                 border: OutlineInputBorder(),
@@ -500,7 +500,7 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
             SwitchListTile(
               title: const Text('Ativo'),
               subtitle: Text(_isActive ? 'Bovino ativo no rebanho' : 'Bovino inativo'),
-              value: _isActive,
+              initialValue: _isActive,
               onChanged: (value) {
                 setState(() {
                   _isActive = value;

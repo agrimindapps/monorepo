@@ -16,12 +16,10 @@ import '../datasources/calculator_local_datasource.dart';
 class CalculatorRepositoryImpl implements CalculatorRepository {
   final CalculatorLocalDataSource _localDataSource;
   final FirebaseAnalyticsService _analyticsService;
-  final HiveStorageService _hiveStorageService;
 
   CalculatorRepositoryImpl(
     this._localDataSource,
-  ) : _analyticsService = FirebaseAnalyticsService(),
-      _hiveStorageService = HiveStorageService(BoxRegistryService());
+  ) : _analyticsService = FirebaseAnalyticsService();
 
   @override
   Future<Either<Failure, List<CalculatorEntity>>> getAllCalculators() async {
@@ -262,19 +260,19 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
     int durationMs,
   ) async {
     try {
-      final metricKey = 'performance_${operation}_$calculatorId';
-      final metric = {
-        'operation': operation,
-        'calculator_id': calculatorId,
-        'duration_ms': durationMs,
-        'timestamp': DateTime.now().toIso8601String(),
-      };
-      
-      await _hiveStorageService.put(
-        box: 'performance_metrics',
-        key: metricKey,
-        data: metric,
-      );
+      // TODO: Implement performance metrics storage with Drift
+      // final metricKey = 'performance_${operation}_$calculatorId';
+      // final metric = {
+      //   'operation': operation,
+      //   'calculator_id': calculatorId,
+      //   'duration_ms': durationMs,
+      //   'timestamp': DateTime.now().toIso8601String(),
+      // };
+      // await _hiveStorageService.put(
+      //   box: 'performance_metrics',
+      //   key: metricKey,
+      //   data: metric,
+      // );
     } catch (e) {
       debugPrint('Error storing performance metric: $e');
     }

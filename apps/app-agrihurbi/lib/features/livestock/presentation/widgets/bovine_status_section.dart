@@ -91,7 +91,7 @@ class BovineStatusSection extends StatelessWidget {
           text: isActive ? 'Ativo' : 'Inativo',
           isCompact: true,
         ),
-        activeColor: Theme.of(context).colorScheme.primary,
+        activeThumbColor: Theme.of(context).colorScheme.primary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),

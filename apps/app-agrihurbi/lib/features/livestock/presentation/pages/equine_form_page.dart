@@ -223,7 +223,7 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<EquinePrimaryUse>(
-              value: _selectedPrimaryUse,
+              initialValue: _selectedPrimaryUse,
               decoration: const InputDecoration(
                 labelText: 'Uso Principal *',
                 border: OutlineInputBorder(),
@@ -266,7 +266,7 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<EquineTemperament>(
-              value: _selectedTemperament,
+              initialValue: _selectedTemperament,
               decoration: const InputDecoration(
                 labelText: 'Temperamento *',
                 border: OutlineInputBorder(),
@@ -292,7 +292,7 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<CoatColor>(
-              value: _selectedCoat,
+              initialValue: _selectedCoat,
               decoration: const InputDecoration(
                 labelText: 'Pelagem *',
                 border: OutlineInputBorder(),
@@ -425,7 +425,7 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
               subtitle: Text(
                 _isActive ? 'Equino ativo no rebanho' : 'Equino inativo',
               ),
-              value: _isActive,
+              initialValue: _isActive,
               onChanged: (value) {
                 setState(() {
                   _isActive = value;

@@ -50,7 +50,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'hive_adapters_registration.dart';
 import 'modules/subscription_module.dart';
 
 final getIt = GetIt.instance;
@@ -255,14 +254,6 @@ Future<void> init({bool firebaseEnabled = false}) async {
 /// MASSIVE REDUCTION: from 400+ lines to <50 lines!
 /// All @injectable classes are auto-registered by code generation
 Future<void> configureAppDependencies({bool firebaseEnabled = false}) async {
-  registerAgrihurbiHiveAdapters();
-  getIt.registerSingleton<core_lib.IBoxRegistryService>(
-    core_lib.BoxRegistryService(),
-  );
-  getIt.registerSingleton<core_lib.HiveStorageService>(
-    core_lib.HiveStorageService(getIt<core_lib.IBoxRegistryService>()),
-  );
-
   // Register Firebase services only if Firebase is initialized
   if (firebaseEnabled) {
     try {

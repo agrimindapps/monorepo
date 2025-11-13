@@ -36,12 +36,7 @@ class MoveTilesUseCase {
       switch (direction) {
         case Direction.left:
           for (int row = 0; row < size; row++) {
-            final result = _processLine(
-              matrix[row],
-              row,
-              true,
-              (col) => col,
-            );
+            final result = _processLine(matrix[row], row, true, (col) => col);
             newTiles.addAll(result.tiles);
             scoreGained += result.scoreGained;
             moved = moved || result.moved;
@@ -67,12 +62,7 @@ class MoveTilesUseCase {
         case Direction.up:
           for (int col = 0; col < size; col++) {
             final column = List.generate(size, (row) => matrix[row][col]);
-            final result = _processLine(
-              column,
-              col,
-              false,
-              (row) => row,
-            );
+            final result = _processLine(column, col, false, (row) => row);
             newTiles.addAll(result.tiles);
             scoreGained += result.scoreGained;
             moved = moved || result.moved;
@@ -82,8 +72,10 @@ class MoveTilesUseCase {
 
         case Direction.down:
           for (int col = 0; col < size; col++) {
-            final column =
-                List.generate(size, (row) => matrix[row][col]).reversed.toList();
+            final column = List.generate(
+              size,
+              (row) => matrix[row][col],
+            ).reversed.toList();
             final result = _processLine(
               column,
               col,
@@ -192,7 +184,8 @@ class MoveTilesUseCase {
 
         final movedTile = currentTile.copyWith(
           position: newPosition,
-          animationType: originalPositions[currentTile.id]!.isSameAs(newPosition)
+          animationType:
+              originalPositions[currentTile.id]!.isSameAs(newPosition)
               ? AnimationType.none
               : AnimationType.move,
         );

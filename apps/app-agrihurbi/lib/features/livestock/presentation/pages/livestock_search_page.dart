@@ -290,7 +290,7 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _sortBy,
+                      initialValue: _sortBy,
                       decoration: const InputDecoration(
                         labelText: 'Ordenar por',
                         border: OutlineInputBorder(),
@@ -326,7 +326,7 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
               const SizedBox(height: 16),
               SwitchListTile(
                 title: const Text('Apenas ativos'),
-                value: _showActiveOnly,
+                initialValue: _showActiveOnly,
                 onChanged: (value) {
                   setState(() {
                     _showActiveOnly = value;

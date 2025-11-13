@@ -36,8 +36,8 @@ class FinancialLoggingService {
   FinancialLoggingService({
     FirebaseCrashlytics? crashlytics,
     bool enableCrashlytics = true,
-  })  : _crashlytics = crashlytics,
-        _enableCrashlytics = enableCrashlytics;
+  }) : _crashlytics = crashlytics,
+       _enableCrashlytics = enableCrashlytics;
 
   /// Factory para criar instância com Crashlytics ativado
   factory FinancialLoggingService.withCrashlytics() {
@@ -49,10 +49,7 @@ class FinancialLoggingService {
 
   /// Factory para criar instância sem Crashlytics (testes)
   factory FinancialLoggingService.withoutCrashlytics() {
-    return FinancialLoggingService(
-      crashlytics: null,
-      enableCrashlytics: false,
-    );
+    return FinancialLoggingService(crashlytics: null, enableCrashlytics: false);
   }
 
   /// Log estruturado com metadata
@@ -401,7 +398,8 @@ class FinancialLoggingService {
   }) {
     log(
       level: success ? LogLevel.info : LogLevel.error,
-      message: '[Image] $operation ${success ? 'succeeded' : 'failed'}: $imagePath',
+      message:
+          '[Image] $operation ${success ? 'succeeded' : 'failed'}: $imagePath',
       metadata: {
         'operation': operation,
         'image_path': imagePath,
@@ -423,7 +421,8 @@ class FinancialLoggingService {
   }) {
     log(
       level: success ? LogLevel.info : LogLevel.error,
-      message: '[ID Reconciliation] ${success ? 'Success' : 'Failed'}: $entityType',
+      message:
+          '[ID Reconciliation] ${success ? 'Success' : 'Failed'}: $entityType',
       metadata: {
         'entity_type': entityType,
         'local_id': localId,

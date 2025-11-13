@@ -24,7 +24,7 @@ class Environment {
     'plantas',
     'insetos',
     'doenças',
-    'plantas invasoras'
+    'plantas invasoras',
   ];
 
   String siteApp = 'https://receituagro.agrimind.com.br';

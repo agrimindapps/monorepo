@@ -155,7 +155,7 @@ class _NewsFilterWidgetState extends State<NewsFilterWidget> {
         CheckboxListTile(
           title: const Text('Apenas conteúdo premium'),
           subtitle: const Text('Mostrar somente artigos premium'),
-          value: _showOnlyPremium,
+          initialValue: _showOnlyPremium,
           onChanged: (value) {
             setState(() {
               _showOnlyPremium = value ?? false;

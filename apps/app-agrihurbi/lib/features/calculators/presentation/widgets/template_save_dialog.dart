@@ -218,7 +218,7 @@ class _TemplateSaveDialogState extends State<TemplateSaveDialog> {
                   subtitle: const Text(
                     'Outros usuários podem ver e usar este template',
                   ),
-                  value: _isPublic,
+                  initialValue: _isPublic,
                   onChanged: (value) {
                     setState(() {
                       _isPublic = value ?? false;

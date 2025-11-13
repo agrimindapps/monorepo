@@ -37,9 +37,7 @@ class SudokuCellWidget extends StatelessWidget {
           ),
         ),
         child: Center(
-          child: cell.isEmpty
-              ? _buildNotes(theme)
-              : _buildValue(theme),
+          child: cell.isEmpty ? _buildNotes(theme) : _buildValue(theme),
         ),
       ),
     );

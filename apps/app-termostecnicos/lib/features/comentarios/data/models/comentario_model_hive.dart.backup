@@ -1,7 +1,8 @@
+import '../../../../hive_models/comentarios_models.dart';
 import '../../domain/entities/comentario.dart';
 
 /// Data model for Comentario
-/// Handles conversion between Domain Entity and Drift persistence
+/// Handles conversion between Domain Entity and Hive persistence
 class ComentarioModel extends Comentario {
   const ComentarioModel({
     required super.id,
@@ -33,6 +34,36 @@ class ComentarioModel extends Comentario {
   /// Converts to domain entity
   Comentario toEntity() {
     return Comentario(
+      id: id,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      status: status,
+      idReg: idReg,
+      titulo: titulo,
+      conteudo: conteudo,
+      ferramenta: ferramenta,
+      pkIdentificador: pkIdentificador,
+    );
+  }
+
+  /// Creates model from Hive object (legacy compatibility)
+  factory ComentarioModel.fromHive(Comentarios hiveObject) {
+    return ComentarioModel(
+      id: hiveObject.id,
+      createdAt: hiveObject.createdAt,
+      updatedAt: hiveObject.updatedAt,
+      status: hiveObject.status,
+      idReg: hiveObject.idReg,
+      titulo: hiveObject.titulo,
+      conteudo: hiveObject.conteudo,
+      ferramenta: hiveObject.ferramenta,
+      pkIdentificador: hiveObject.pkIdentificador,
+    );
+  }
+
+  /// Converts to Hive object for persistence
+  Comentarios toHive() {
+    return Comentarios(
       id: id,
       createdAt: createdAt,
       updatedAt: updatedAt,

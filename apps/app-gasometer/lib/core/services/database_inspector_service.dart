@@ -1,7 +1,6 @@
 /// Serviço de inspeção de database específico do GasOMeter
 /// Migrado para usar Drift database
 class GasOMeterDatabaseInspectorService {
-
   GasOMeterDatabaseInspectorService._internal();
   static GasOMeterDatabaseInspectorService? _instance;
   static GasOMeterDatabaseInspectorService get instance {
@@ -96,9 +95,11 @@ class GasOMeterDatabaseInspectorService {
 
   /// Obtém resumo rápido de uma tabela
   Map<String, dynamic> getTableSummary(String tableName) {
-    final tableInfo = getGasOMeterTablesInfo()
-        .firstWhere((t) => t['name'] == tableName, orElse: () => {});
-    
+    final tableInfo = getGasOMeterTablesInfo().firstWhere(
+      (t) => t['name'] == tableName,
+      orElse: () => {},
+    );
+
     return {
       'name': tableName,
       'displayName': tableInfo['displayName'] ?? tableName,

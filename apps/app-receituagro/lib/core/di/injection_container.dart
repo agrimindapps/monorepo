@@ -34,7 +34,7 @@ import '../services/receituagro_data_cleaner.dart';
 import '../services/receituagro_navigation_service.dart';
 import '../services/receituagro_notification_service.dart';
 import '../services/remote_config_service.dart';
-import '../services/data_migration_service.dart';
+// ⚠️ REMOVED: import '../services/data_migration_service.dart';
 import '../sync/sync_operations.dart';
 import '../sync/sync_queue.dart';
 import 'core_package_integration.dart';
@@ -60,11 +60,10 @@ Future<void> init() async {
   FavoritosDI.registerRepository(); // ✅ Registra FavoritosRepositorySimplified como classe concreta
   configureAllRepositoriesDependencies();
 
-  // ✅ FIXED: Registrar serviços que dependem de IHiveManager manualmente
-  // (IHiveManager não é anotado com @injectable no core package)
+  // ✅ SIMPLIFIED: SyncQueue now uses in-memory storage (no Hive dependency)
   if (!sl.isRegistered<SyncQueue>()) {
     sl.registerLazySingleton<SyncQueue>(
-      () => SyncQueue(sl<core.IHiveManager>()),
+      () => SyncQueue(),
     );
   }
 
@@ -124,16 +123,17 @@ Future<void> init() async {
       () => core.UnifiedSyncManager.instance,
     );
   }
-  if (!sl.isRegistered<core.IBoxRegistryService>()) {
-    sl.registerLazySingleton<core.IBoxRegistryService>(
-      () => core.BoxRegistryService(),
-    );
-  }
-  if (!sl.isRegistered<core.HiveStorageService>()) {
-    sl.registerLazySingleton<core.HiveStorageService>(
-      () => core.HiveStorageService(sl<core.IBoxRegistryService>()),
-    );
-  }
+  // ⚠️ REMOVED: Services no longer exist in core
+  // if (!sl.isRegistered<core.IBoxRegistryService>()) {
+  //   sl.registerLazySingleton<core.IBoxRegistryService>(
+  //     () => core.BoxRegistryService(),
+  //   );
+  // }
+  // if (!sl.isRegistered<core.HiveStorageService>()) {
+  //   sl.registerLazySingleton<core.HiveStorageService>(
+  //     () => core.HiveStorageService(sl<core.IBoxRegistryService>()),
+  //   );
+  // }
   if (!sl.isRegistered<core.ISubscriptionRepository>()) {
     sl.registerLazySingleton<core.ISubscriptionRepository>(
       () => core.RevenueCatService(),
@@ -163,47 +163,49 @@ Future<void> init() async {
   sl.registerLazySingleton<PromotionalNotificationManager>(
     () => PromotionalNotificationManager(),
   );
-  if (!sl.isRegistered<core.EnhancedStorageService>()) {
-    try {
-      sl.registerLazySingleton<core.EnhancedStorageService>(
-        () => core.EnhancedStorageService(),
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        developer.log(
-          'EnhancedStorageService registration failed',
-          name: 'InjectionContainer',
-          error: e,
-          level: 1000,
-        );
-      }
-    }
-  }
-  if (!kIsWeb && !sl.isRegistered<core.ILocalStorageRepository>()) {
-    try {
-      sl.registerLazySingleton<core.ILocalStorageRepository>(
-        () => sl<core.HiveStorageService>(),
-      );
-      if (kDebugMode) {
-        developer.log(
-          'ILocalStorageRepository registered successfully',
-          name: 'InjectionContainer',
-          level: 500,
-        );
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        developer.log(
-          'ILocalStorageRepository registration failed',
-          name: 'InjectionContainer',
-          error: e,
-          level: 900,
-        );
-      }
-    }
-  } else if (kIsWeb) {
-    // Web storage handled differently - no specific repository needed
-  }
+  // ⚠️ REMOVED: EnhancedStorageService no longer exists
+  // if (!sl.isRegistered<core.EnhancedStorageService>()) {
+  //   try {
+  //     sl.registerLazySingleton<core.EnhancedStorageService>(
+  //       () => core.EnhancedStorageService(),
+  //     );
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       developer.log(
+  //         'EnhancedStorageService registration failed',
+  //         name: 'InjectionContainer',
+  //         error: e,
+  //         level: 1000,
+  //       );
+  //     }
+  //   }
+  // }
+  // ⚠️ REMOVED: ILocalStorageRepository no longer needed
+  // if (!kIsWeb && !sl.isRegistered<core.ILocalStorageRepository>()) {
+  //   try {
+  //     sl.registerLazySingleton<core.ILocalStorageRepository>(
+  //       () => sl<core.HiveStorageService>(),
+  //     );
+  //     if (kDebugMode) {
+  //       developer.log(
+  //         'ILocalStorageRepository registered successfully',
+  //         name: 'InjectionContainer',
+  //         level: 500,
+  //       );
+  //     }
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       developer.log(
+  //         'ILocalStorageRepository registration failed',
+  //         name: 'InjectionContainer',
+  //         error: e,
+  //         level: 900,
+  //       );
+  //     }
+  //   }
+  // } else if (kIsWeb) {
+  //   // Web storage handled differently - no specific repository needed
+  // }
   // Register Drift repositories for services that still use GetIt
   if (!sl.isRegistered<FitossanitariosRepository>()) {
     sl.registerLazySingleton<FitossanitariosRepository>(
@@ -275,10 +277,10 @@ Future<void> init() async {
   SettingsDI.register(sl); // ⚠️ Ainda registra manualmente (sem @LazySingleton)
   await TTSModule.register(sl); // ✅ TTS feature
 
-  // ✅ Registrar DataMigrationService para migração Hive -> Drift
-  sl.registerLazySingleton<DataMigrationService>(
-    () => DataMigrationService(sl<core.PreferencesService>(), sl()),
-  );
+  // ⚠️ REMOVED: DataMigrationService no longer exists
+  // sl.registerLazySingleton<DataMigrationService>(
+  //   () => DataMigrationService(sl<core.PreferencesService>(), sl()),
+  // );
   try {
     sl.registerLazySingleton<ReceitaAgroPremiumService>(() {
       if (!sl.isRegistered<ReceitaAgroAnalyticsService>()) {

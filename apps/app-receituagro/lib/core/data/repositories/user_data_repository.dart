@@ -23,7 +23,6 @@ class UserDataRepository {
   final IComentariosRepository _comentariosRepository;
 
   UserDataRepository({
-    IHiveManager? hiveManager,
     IFavoritosRepository? favoritosRepository,
     IComentariosRepository? comentariosRepository,
   }) : _favoritosRepository =

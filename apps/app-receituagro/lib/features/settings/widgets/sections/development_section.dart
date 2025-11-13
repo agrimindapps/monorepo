@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../constants/settings_design_tokens.dart';
-import '../../presentation/pages/data_inspector_page.dart';
+// ⚠️ REMOVED: import '../../presentation/pages/data_inspector_page.dart';
 import '../shared/section_header.dart';
 import '../shared/settings_card.dart';
 import '../shared/settings_list_tile.dart';
@@ -37,10 +37,14 @@ class DevelopmentSection extends StatelessWidget {
   }
 
   Future<void> _openDataInspector(BuildContext context) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => const DataInspectorPage(),
-      ),
+    // ⚠️ REMOVED: DataInspectorPage no longer exists
+    // await Navigator.of(context).push(
+    //   MaterialPageRoute<void>(
+    //     builder: (context) => const DataInspectorPage(),
+    //   ),
+    // );
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Data Inspector foi removido')),
     );
   }
 }

@@ -1,19 +1,21 @@
 import 'dart:async';
+
 import 'package:dartz/dartz.dart';
-import '../../../../shared/utils/ads_failures.dart';
+
 import '../../../../domain/entities/ads/ad_unit_entity.dart';
+import '../../../../shared/utils/ads_failures.dart';
 import '../../../../shared/utils/failure.dart';
-import 'ad_config_service.dart';
+import 'app_open_ad_service.dart';
 import 'interstitial_ad_service.dart';
 import 'rewarded_ad_service.dart';
 import 'rewarded_interstitial_ad_service.dart';
-import 'app_open_ad_service.dart';
 
 /// Specialized service for preloading ads
 /// Responsible for background ad loading and cache management
 /// Follows SRP - Single Responsibility: Ad Preloading
+///
+/// NOTE: AdConfigService was removed. Ad unit IDs must be provided externally.
 class AdPreloaderService {
-  final AdConfigService _configService;
   final InterstitialAdService _interstitialService;
   final RewardedAdService _rewardedService;
   final RewardedInterstitialAdService _rewardedInterstitialService;
@@ -23,13 +25,11 @@ class AdPreloaderService {
   static const Duration preloadTimeout = Duration(seconds: 30);
 
   AdPreloaderService({
-    required AdConfigService configService,
     required InterstitialAdService interstitialService,
     required RewardedAdService rewardedService,
     required RewardedInterstitialAdService rewardedInterstitialService,
     required AppOpenAdService appOpenService,
-  })  : _configService = configService,
-        _interstitialService = interstitialService,
+  })  : _interstitialService = interstitialService,
         _rewardedService = rewardedService,
         _rewardedInterstitialService = rewardedInterstitialService,
         _appOpenService = appOpenService;
@@ -66,91 +66,76 @@ class AdPreloaderService {
   }
 
   /// Preload interstitial ad
+  /// NOTE: AdConfigService removed - ad unit IDs must be set in services separately
   Future<Either<Failure, void>?> preloadInterstitial() async {
     if (_interstitialService.isReady || _interstitialService.isLoading) {
       return null; // Already loaded or loading
     }
 
-    final adUnitIdResult = _configService.getAdUnitId(AdType.interstitial);
-    if (adUnitIdResult.isLeft()) {
-      return adUnitIdResult;
-    }
-
-    final adUnitId = adUnitIdResult.getOrElse(() => '');
-
     try {
+      // Attempt to load with default/configured ad unit ID
       return await _interstitialService
-          .load(adUnitId: adUnitId)
+          .load(adUnitId: '')
           .timeout(preloadTimeout);
     } on TimeoutException {
       return Left(AdLoadFailure.timeout());
+    } catch (e) {
+      return Left(AdLoadFailure('Failed to preload interstitial: $e'));
     }
   }
 
   /// Preload rewarded ad
+  /// NOTE: AdConfigService removed - ad unit IDs must be set in services separately
   Future<Either<Failure, void>?> preloadRewarded() async {
     if (_rewardedService.isReady || _rewardedService.isLoading) {
       return null; // Already loaded or loading
     }
 
-    final adUnitIdResult = _configService.getAdUnitId(AdType.rewarded);
-    if (adUnitIdResult.isLeft()) {
-      return adUnitIdResult;
-    }
-
-    final adUnitId = adUnitIdResult.getOrElse(() => '');
-
     try {
       return await _rewardedService
-          .load(adUnitId: adUnitId)
+          .load(adUnitId: '')
           .timeout(preloadTimeout);
     } on TimeoutException {
       return Left(AdLoadFailure.timeout());
+    } catch (e) {
+      return Left(AdLoadFailure('Failed to preload rewarded: $e'));
     }
   }
 
   /// Preload rewarded interstitial ad
+  /// NOTE: AdConfigService removed - ad unit IDs must be set in services separately
   Future<Either<Failure, void>?> preloadRewardedInterstitial() async {
     if (_rewardedInterstitialService.isReady ||
         _rewardedInterstitialService.isLoading) {
       return null; // Already loaded or loading
     }
 
-    final adUnitIdResult = _configService.getAdUnitId(AdType.rewardedInterstitial);
-    if (adUnitIdResult.isLeft()) {
-      return adUnitIdResult;
-    }
-
-    final adUnitId = adUnitIdResult.getOrElse(() => '');
-
     try {
       return await _rewardedInterstitialService
-          .load(adUnitId: adUnitId)
+          .load(adUnitId: '')
           .timeout(preloadTimeout);
     } on TimeoutException {
       return Left(AdLoadFailure.timeout());
+    } catch (e) {
+      return Left(AdLoadFailure('Failed to preload rewarded interstitial: $e'));
     }
   }
 
   /// Preload app open ad
+  /// NOTE: AdConfigService removed - ad unit IDs must be set in services separately
   Future<Either<Failure, void>?> preloadAppOpen() async {
     if (_appOpenService.isReady || _appOpenService.isLoading) {
       return null; // Already loaded or loading
     }
 
-    final adUnitIdResult = _configService.getAdUnitId(AdType.appOpen);
-    if (adUnitIdResult.isLeft()) {
-      return adUnitIdResult;
-    }
-
-    final adUnitId = adUnitIdResult.getOrElse(() => '');
-
     try {
       return await _appOpenService
-          .load(adUnitId: adUnitId)
+          .load(adUnitId: '')
           .timeout(preloadTimeout);
     } on TimeoutException {
       return Left(AdLoadFailure.timeout());
+    } catch (e) {
+      return Left(AdLoadFailure('Failed to preload app open: $e'));
     }
   }
 

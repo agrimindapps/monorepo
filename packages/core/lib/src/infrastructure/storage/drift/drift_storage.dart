@@ -6,6 +6,7 @@
 // Interfaces
 export 'interfaces/i_drift_manager.dart';
 export 'interfaces/i_drift_repository.dart';
+export 'interfaces/i_drift_storage_service.dart';
 
 // Services
 export 'services/drift_manager.dart';
@@ -17,3 +18,6 @@ export 'repositories/drift_repository_base.dart';
 
 // Exceptions
 export 'exceptions/drift_exceptions.dart';
+
+// Utils
+export 'utils/drift_result_adapter.dart';

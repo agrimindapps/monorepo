@@ -1,5 +1,5 @@
 name: core
-description: Services de infraestrutura compartilhados - Firebase, RevenueCat, Hive
+description: Services de infraestrutura compartilhados - Firebase, RevenueCat, Drift
 version: 1.0.0
 
 environment:
@@ -23,10 +23,6 @@ dependencies:
   
   # RevenueCat para assinaturas
   purchases_flutter: ^9.2.0
-  
-  # Hive para storage local
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
   
   # Drift para storage local SQL
   sqlite3_flutter_libs: ^0.5.24

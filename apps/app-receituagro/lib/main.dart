@@ -19,7 +19,7 @@ import 'core/services/remote_config_service.dart';
 import 'core/sync/receituagro_sync_config.dart';
 import 'core/theme/receituagro_theme.dart';
 import 'core/utils/diagnostico_logger.dart';
-import 'core/utils/receita_agro_data_inspector_initializer.dart';
+// REMOVED: import 'core/utils/receita_agro_data_inspector_initializer.dart';
 import 'core/utils/theme_preference_migration.dart';
 import 'features/analytics/analytics_service.dart';
 import 'firebase_options.dart';
@@ -42,8 +42,8 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await ThemePreferenceMigration.migratePreferences();
 
-  // ✅ Initialize Hive for sync queue (still required by core package)
-  await Hive.initFlutter();
+  // ✅ REMOVED: Hive no longer needed - using in-memory storage
+  // await Hive.initFlutter();
 
   await di.init();
   await _initializeFirebaseServices();
@@ -95,10 +95,11 @@ void main() async {
       );
     }
   }
-  if (kDebugMode) {
-    ReceitaAgroDataInspectorInitializer.initialize();
-    DiagnosticoLogger.debug('Data Inspector initialization completed');
-  }
+  // ⚠️ REMOVED: Data Inspector no longer exists
+  // if (kDebugMode) {
+  //   ReceitaAgroDataInspectorInitializer.initialize();
+  //   DiagnosticoLogger.debug('Data Inspector initialization completed');
+  // }
 
   // ✅ Drift-based storage is initialized via DI (no manual box registration needed)
   DiagnosticoLogger.debug('✅ Drift database initialized via DI');

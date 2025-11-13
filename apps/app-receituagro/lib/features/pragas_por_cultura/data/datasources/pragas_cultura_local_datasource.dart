@@ -1,9 +1,9 @@
-import 'package:core/core.dart' hide Column;
+import 'package:injectable/injectable.dart';
 
 /// Gerenciamento de cache local para pragas por cultura
 ///
 /// Responsabilidades:
-/// - Armazenar pragas em cache (Hive)
+/// - Armazenar pragas em cache (memória)
 /// - Gerenciar expiração de cache (TTL)
 /// - Limpar cache quando necessário
 ///
@@ -13,15 +13,13 @@ import 'package:core/core.dart' hide Column;
 /// Nota: Cache é armazenado em memória durante a sessão
 @injectable
 class PragasCulturaLocalDataSource {
-  final IHiveManager hiveManager;
-
   static const String _cacheBoxName = 'pragas_cultura_cache';
   static const Duration _cacheDuration = Duration(hours: 24);
 
   // Cache em memória durante a sessão
   final Map<String, _CachedItem> _memoryCache = {};
 
-  PragasCulturaLocalDataSource(this.hiveManager);
+  PragasCulturaLocalDataSource();
 
   /// Obtém pragas em cache para uma cultura
   ///

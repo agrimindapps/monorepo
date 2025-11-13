@@ -63,52 +63,24 @@ class CorePackageIntegration {
 
   /// Register Core Package repositories (primary integration layer)
   static Future<void> _registerCoreRepositories() async {
-    try {
-      final hiveManager = core.HiveManager.instance;
-      _sl.registerLazySingleton<core.IHiveManager>(() => hiveManager);
-      final initResult = await hiveManager.initialize('receituagro');
-      if (!initResult.isError) {
-        if (kDebugMode) {
-          developer.log(
-            'Hive Manager registered and initialized',
-            name: 'CorePackageIntegration',
-            level: 500,
-          );
-        }
-      } else {
-        if (kDebugMode) {
-          developer.log(
-            'Hive Manager initialization failed',
-            name: 'CorePackageIntegration',
-            error: initResult.error,
-            level: 1000,
-          );
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        developer.log(
-          'IHiveManager registration failed',
-          name: 'CorePackageIntegration',
-          error: e,
-          level: 1000,
-        );
-      }
-    }
-    try {
-      _sl.registerLazySingleton<core.EnhancedStorageService>(
-        () => core.EnhancedStorageService(),
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        developer.log(
-          'EnhancedStorageService registration failed',
-          name: 'CorePackageIntegration',
-          error: e,
-          level: 1000,
-        );
-      }
-    }
+    // ✅ REMOVED: Hive dependency - using in-memory storage only
+    // IHiveManager registration removed - no longer needed
+    
+    // ⚠️ REMOVED: EnhancedStorageService no longer exists
+    // try {
+    //   _sl.registerLazySingleton<core.EnhancedStorageService>(
+    //     () => core.EnhancedStorageService(),
+    //   );
+    // } catch (e) {
+    //   if (kDebugMode) {
+    //     developer.log(
+    //       'EnhancedStorageService registration failed',
+    //       name: 'CorePackageIntegration',
+    //       error: e,
+    //       level: 1000,
+    //     );
+    //   }
+    // }
     try {
       _sl.registerLazySingleton<core.IFileRepository>(
         () => core.FileManagerService(),
@@ -349,11 +321,11 @@ class CorePackageIntegration {
       'HttpClientService': _sl.isRegistered<core.HttpClientService>(),
       'EnhancedImageService': _sl.isRegistered<core.EnhancedImageService>(),
       'MonorepoAuthCache': _sl.isRegistered<core.MonorepoAuthCache>(),
-      'DatabaseInspectorService': false, // Constructor requires parameters
-      'SelectiveSyncService':
-          false, // Constructor requires hiveStorage parameter
-      'SyncFirebaseService': false, // Uses factory pattern, not registered
-      'EnhancedStorageService': _sl.isRegistered<core.EnhancedStorageService>(),
+      // ⚠️ REMOVED: Services no longer exist
+      // 'DatabaseInspectorService': false,
+      // 'SelectiveSyncService': false,
+      // 'SyncFirebaseService': false,
+      // 'EnhancedStorageService': _sl.isRegistered<core.EnhancedStorageService>(),
       'FileManagerService': _sl.isRegistered<core.FileManagerService>(),
       'ReceitaAgroValidationService':
           _sl.isRegistered<ReceitaAgroValidationService>(),
@@ -389,7 +361,7 @@ class CorePackageIntegration {
       'EnhancedLoggingService',
       'ValidationService',
       'MonorepoAuthCache',
-      'EnhancedStorageService',
+      // ⚠️ REMOVED: 'EnhancedStorageService' no longer exists
     ];
 
     final status = getIntegrationStatus();
@@ -429,38 +401,9 @@ class CorePackageIntegration {
 
   /// Register only auth services from Core Package
   static Future<void> _registerAuthServices() async {
-    try {
-      final hiveManager = core.HiveManager.instance;
-      _sl.registerLazySingleton<core.IHiveManager>(() => hiveManager);
-      final initResult = await hiveManager.initialize('receituagro');
-      if (!initResult.isError) {
-        if (kDebugMode) {
-          developer.log(
-            'Hive Manager registered and initialized',
-            name: 'CorePackageIntegration',
-            level: 500,
-          );
-        }
-      } else {
-        if (kDebugMode) {
-          developer.log(
-            'Hive Manager initialization failed',
-            name: 'CorePackageIntegration',
-            error: initResult.error,
-            level: 1000,
-          );
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        developer.log(
-          'Hive Manager registration failed',
-          name: 'CorePackageIntegration',
-          error: e,
-          level: 1000,
-        );
-      }
-    }
+    // ✅ REMOVED: Hive dependency - using in-memory storage only
+    // IHiveManager registration removed - no longer needed
+    
     // IAuthRepository is already registered by core.InjectionContainer.init()
     // Skip registration to avoid duplicate registration error
     if (kDebugMode) {

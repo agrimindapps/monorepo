@@ -1,192 +1,91 @@
 import 'dart:async';
-import 'package:core/core.dart' hide SyncQueueItem, Column;
+import 'package:injectable/injectable.dart';
+
 import '../data/models/sync_queue_item.dart' as models;
 
-/// Sync queue for offline-first operations
-/// ✅ FIXED: Changed from HiveInterface to IHiveManager (current pattern)
-/// Note: Not using @singleton because IHiveManager isn't injectable-annotated
-/// Must be registered manually in injection_container.dart
+/// ✅ SIMPLIFIED: In-memory sync queue (no persistence)
+/// Session-based queue for sync operations
+@lazySingleton
 class SyncQueue {
-  final IHiveManager _hiveManager;
-  Box<dynamic>? _syncQueueBox;
-
+  // In-memory queue storage
+  final Map<String, models.SyncQueueItem> _queue = {};
+  
   final StreamController<List<models.SyncQueueItem>> _queueController =
       StreamController<List<models.SyncQueueItem>>.broadcast();
-
+  
   Stream<List<models.SyncQueueItem>> get queueStream => _queueController.stream;
 
-  bool get isInitialized => _syncQueueBox != null;
+  SyncQueue();
 
-  SyncQueue(this._hiveManager);
-
+  /// Initialize sync queue (now a no-op since we use memory)
   Future<void> initialize() async {
-    if (isInitialized) return;
-
-    try {
-      // Use IHiveManager to get box as Box<dynamic> (matches BoxRegistryService pattern)
-      final result = await _hiveManager.getBox<dynamic>('syncQueue');
-      if (result.isFailure) {
-        throw Exception(
-          'Failed to open syncQueue box: ${result.error?.message}',
-        );
-      }
-      _syncQueueBox = result.data;
-      _notifyQueueUpdated();
-    } catch (e) {
-      throw Exception('Failed to initialize SyncQueue: $e');
-    }
+    // No initialization needed for in-memory storage
   }
 
-  void _ensureInitialized() {
-    if (!isInitialized) {
-      throw StateError('SyncQueue not initialized. Call initialize() first.');
-    }
-  }
+  /// Check if queue is initialized (always true for memory)
+  bool get isInitialized => true;
 
   /// Add item to sync queue
-  Future<void> addToQueue({
-    required String modelType,
-    required String operation,
-    required Map<String, dynamic> data,
-  }) async {
-    _ensureInitialized();
-
-    final queueItem = models.SyncQueueItem(
-      sync_id: DateTime.now().millisecondsSinceEpoch.toString(),
-      modelType: modelType,
-      sync_operation: operation,
-      data: data,
-    );
-
-    await _syncQueueBox!.add(queueItem);
-    _notifyQueueUpdated();
+  Future<void> add(models.SyncQueueItem item) async {
+    try {
+      _queue[item.id] = item;
+      _notifyListeners();
+    } catch (e) {
+      throw Exception('Failed to add item to SyncQueue: $e');
+    }
   }
 
-  /// Get all items as SyncQueueItem (with type checking)
-  List<models.SyncQueueItem> _getAllSyncItems() {
-    _ensureInitialized();
+  /// Remove item from queue
+  Future<void> remove(String id) async {
+    try {
+      _queue.remove(id);
+      _notifyListeners();
+    } catch (e) {
+      throw Exception('Failed to remove item from SyncQueue: $e');
+    }
+  }
 
-    final items = <models.SyncQueueItem>[];
-    for (final value in _syncQueueBox!.values) {
-      if (value is models.SyncQueueItem) {
-        items.add(value);
+  /// Update item status
+  Future<void> updateStatus(String id, String status) async {
+    try {
+      final item = _queue[id];
+      if (item != null) {
+        _queue[id] = item.copyWith(status: status);
+        _notifyListeners();
       }
+    } catch (e) {
+      throw Exception('Failed to update item status: $e');
     }
-    return items;
   }
 
-  /// Get all pending items (not synced and should retry now)
+  /// Get all pending items
   List<models.SyncQueueItem> getPendingItems() {
-    _ensureInitialized();
-
-    return _getAllSyncItems()
-        .where((item) => !item.sync_isSynced && item.shouldRetryNow())
+    return _queue.values
+        .where((item) => item.status == 'pending')
         .toList()
-      ..sort((a, b) => a.sync_timestamp.compareTo(b.sync_timestamp));
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
   }
 
-  /// Get all items (including synced)
+  /// Get all items
   List<models.SyncQueueItem> getAllItems() {
-    _ensureInitialized();
-    return _getAllSyncItems();
+    return _queue.values.toList()
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
   }
 
-  /// Get pending count
-  int get pendingCount {
-    _ensureInitialized();
-    return _getAllSyncItems().where((item) => !item.sync_isSynced).length;
+  /// Clear all items
+  Future<void> clear() async {
+    _queue.clear();
+    _notifyListeners();
   }
 
-  /// Mark item as successfully synced
-  Future<void> markItemAsSynced(String itemId) async {
-    _ensureInitialized();
-
-    final item = _getAllSyncItems().firstWhere(
-      (item) => item.sync_id == itemId,
-      orElse: () => throw Exception('Item not found: $itemId'),
-    );
-
-    item.sync_isSynced = true;
-    // TODO: Migrate to Drift - Hive's save() no longer available
-    // await item.save();
-    _notifyQueueUpdated();
-  }
-
-  /// Increment retry count for failed sync
-  Future<void> incrementRetryCount(
-    String itemId, {
-    String? errorMessage,
-  }) async {
-    _ensureInitialized();
-
-    final item = _getAllSyncItems().firstWhere(
-      (item) => item.sync_id == itemId,
-      orElse: () => throw Exception('Item not found: $itemId'),
-    );
-
-    item.sync_retryCount++;
-    item.sync_lastRetryAt = DateTime.now();
-    if (errorMessage != null) {
-      item.sync_errorMessage = errorMessage;
-    }
-    // TODO: Migrate to Drift - Hive's save() no longer available
-    // await item.save();
-    _notifyQueueUpdated();
-  }
-
-  /// Clear all synced items from queue
-  Future<void> clearSyncedItems() async {
-    _ensureInitialized();
-
-    // TODO: Migrate to Drift - Hive's delete() no longer available
-    // final syncedItems = _getAllSyncItems().where((item) => item.sync_isSynced).toList();
-    // for (var item in syncedItems) {
-    //   await item.delete();
-    // }
-    _notifyQueueUpdated();
-  }
-
-  /// Clear all items (including pending) - use with caution
-  Future<void> clearAllItems() async {
-    _ensureInitialized();
-
-    await _syncQueueBox!.clear();
-    _notifyQueueUpdated();
-  }
-
-  /// Remove specific item from queue
-  Future<void> removeItem(String itemId) async {
-    _ensureInitialized();
-
-    // TODO: Migrate to Drift - Hive's delete() no longer available
-    // final item = _getAllSyncItems().firstWhere(
-    //   (item) => item.sync_id == itemId,
-    //   orElse: () => throw Exception('Item not found: $itemId'),
-    // );
-    // await item.delete();
-    _notifyQueueUpdated();
-  }
-
-  /// Remove items that exceeded max retries
-  Future<void> removeFailedItems() async {
-    _ensureInitialized();
-
-    // TODO: Migrate to Drift - Hive's delete() no longer available
-    // final failedItems = _getAllSyncItems()
-    //     .where((item) => item.hasExceededMaxRetries)
-    //     .toList();
-    // for (var item in failedItems) {
-    //   await item.delete();
-    // }
-    _notifyQueueUpdated();
-  }
-
-  void _notifyQueueUpdated() {
-    if (isInitialized) {
-      _queueController.add(getPendingItems());
+  /// Notify listeners of queue changes
+  void _notifyListeners() {
+    if (!_queueController.isClosed) {
+      _queueController.add(getAllItems());
     }
   }
 
+  /// Dispose resources
   void dispose() {
     _queueController.close();
   }

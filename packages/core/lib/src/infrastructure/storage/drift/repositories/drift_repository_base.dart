@@ -8,10 +8,10 @@ import '../interfaces/i_drift_repository.dart';
 
 /// Repositório base para operações Drift
 /// Fornece implementação padrão para CRUD operations
-/// 
+///
 /// Equivalente Drift do BaseHiveRepository
 abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
-    implements IQueryableDriftRepository<T> {
+    implements IQueryableDriftRepository<T, TTable> {
   @override
   final GeneratedDatabase database;
 
@@ -502,5 +502,343 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
         null,
       ),
     );
+  }
+
+  @override
+  Future<Result<bool>> isEmpty() async {
+    try {
+      final countResult = await count();
+      if (countResult.isError) return Result.error(countResult.error!);
+      
+      return Result.success(countResult.data! == 0);
+    } catch (e, stackTrace) {
+      debugPrint('$tableName: Failed to check isEmpty - $e');
+      return Result.error(
+        AppErrorFactory.fromException(
+          DriftTableException(
+            'Failed to check if table is empty',
+            tableName,
+            originalError: e,
+            stackTrace: stackTrace,
+          ),
+          stackTrace,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<List<dynamic>>> getAllIds() async {
+    try {
+      final query = database.selectOnly(table)
+        ..addColumns([idColumn]);
+      
+      final results = await query.get();
+      final ids = results.map((row) => row.read(idColumn)).toList();
+      
+      debugPrint('$tableName: Retrieved ${ids.length} IDs');
+      return Result.success(ids);
+    } catch (e, stackTrace) {
+      debugPrint('$tableName: Failed to get all IDs - $e');
+      return Result.error(
+        AppErrorFactory.fromException(
+          DriftTableException(
+            'Failed to get all IDs',
+            tableName,
+            originalError: e,
+            stackTrace: stackTrace,
+          ),
+          stackTrace,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<Map<String, dynamic>>> getStatistics() async {
+    try {
+      final countResult = await count();
+      if (countResult.isError) return Result.error(countResult.error!);
+      
+      final isEmptyResult = await isEmpty();
+      if (isEmptyResult.isError) return Result.error(isEmptyResult.error!);
+      
+      final stats = {
+        'tableName': tableName,
+        'totalItems': countResult.data!,
+        'isEmpty': isEmptyResult.data!,
+        'cacheEnabled': _cacheEnabled,
+        'cacheSize': _cache.length,
+        'databaseInfo': database.toString(),
+      };
+      
+      return Result.success(stats);
+    } catch (e, stackTrace) {
+      debugPrint('$tableName: Failed to get statistics - $e');
+      return Result.error(
+        AppErrorFactory.fromException(
+          DriftTableException(
+            'Failed to get statistics',
+            tableName,
+            originalError: e,
+            stackTrace: stackTrace,
+          ),
+          stackTrace,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<int> countAsync() async {
+    try {
+      final countResult = await count();
+      return countResult.isSuccess ? countResult.data! : 0;
+    } catch (e) {
+      debugPrint('$tableName: Error in countAsync - $e');
+      return 0;
+    }
+  }
+
+  // ==================== Métodos Adicionais (Convenientes) ====================
+
+  @override
+  Future<Result<List<T>>> getByIds(List<dynamic> ids) async {
+    try {
+      if (ids.isEmpty) {
+        return Result.success([]);
+      }
+
+      final items = await (database.select(table)
+            ..where((tbl) => idColumn.isIn(ids.cast<Object>())))
+          .get();
+
+      debugPrint('$tableName: Retrieved ${items.length}/${ids.length} items by IDs');
+      return Result.success(items);
+    } catch (e, stackTrace) {
+      debugPrint('$tableName: Failed to get items by IDs - $e');
+      return Result.error(
+        AppErrorFactory.fromException(
+          DriftTableException(
+            'Failed to get items by IDs',
+            tableName,
+            originalError: e,
+            stackTrace: stackTrace,
+          ),
+          stackTrace,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<List<T>>> findBy(bool Function(T) predicate) async {
+    try {
+      final allResult = await getAll();
+      if (allResult.isError) return allResult;
+
+      final filteredItems = allResult.data!.where(predicate).toList();
+
+      debugPrint(
+        '$tableName: Found ${filteredItems.length} items matching predicate',
+      );
+      return Result.success(filteredItems);
+    } catch (e, stackTrace) {
+      debugPrint('$tableName: Failed to findBy - $e');
+      return Result.error(
+        AppErrorFactory.fromException(
+          DriftTableException(
+            'Failed to find items by predicate',
+            tableName,
+            originalError: e,
+            stackTrace: stackTrace,
+          ),
+          stackTrace,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<T?>> findFirst(bool Function(T) predicate) async {
+    try {
+      final findResult = await findBy(predicate);
+      if (findResult.isError) return Result.error(findResult.error!);
+
+      final items = findResult.data!;
+      final firstItem = items.isNotEmpty ? items.first : null;
+
+      debugPrint(
+        '$tableName: Found first item: ${firstItem != null}',
+      );
+      return Result.success(firstItem);
+    } catch (e, stackTrace) {
+      debugPrint('$tableName: Failed to findFirst - $e');
+      return Result.error(
+        AppErrorFactory.fromException(
+          DriftTableException(
+            'Failed to find first item by predicate',
+            tableName,
+            originalError: e,
+            stackTrace: stackTrace,
+          ),
+          stackTrace,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<int>> upsert(Insertable<T> item) async {
+    try {
+      // Drift tem insertOnConflictUpdate nativo, mas vamos usar mode
+      final id = await database.into(table).insertOnConflictUpdate(item);
+
+      if (_cacheEnabled) {
+        _cache.clear();
+      }
+
+      debugPrint('$tableName: Upserted item with id: $id');
+      return Result.success(id);
+    } catch (e, stackTrace) {
+      debugPrint('$tableName: Failed to upsert - $e');
+      return Result.error(
+        AppErrorFactory.fromException(
+          DriftTableException(
+            'Failed to upsert item',
+            tableName,
+            originalError: e,
+            stackTrace: stackTrace,
+          ),
+          stackTrace,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<List<int>>> upsertAll(List<Insertable<T>> items) async {
+    try {
+      final ids = <int>[];
+
+      await database.batch((batch) {
+        for (final item in items) {
+          batch.insert(
+            table,
+            item,
+            mode: InsertMode.insertOrReplace,
+          );
+        }
+      });
+
+      if (_cacheEnabled) {
+        _cache.clear();
+      }
+
+      debugPrint('$tableName: Upserted ${items.length} items');
+      return Result.success(ids);
+    } catch (e, stackTrace) {
+      debugPrint('$tableName: Failed to upsert all - $e');
+      return Result.error(
+        AppErrorFactory.fromException(
+          DriftTableException(
+            'Failed to upsert multiple items',
+            tableName,
+            originalError: e,
+            stackTrace: stackTrace,
+          ),
+          stackTrace,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<T?>> getByKey(dynamic key) => getById(key);
+
+  @override
+  Future<Result<bool>> containsKey(dynamic key) => exists(key);
+
+  @override
+  Future<Result<int>> countBy(bool Function(T) predicate) async {
+    try {
+      final findResult = await findBy(predicate);
+      if (findResult.isError) return Result.error(findResult.error!);
+
+      return Result.success(findResult.data!.length);
+    } catch (e, stackTrace) {
+      debugPrint('$tableName: Failed to countBy - $e');
+      return Result.error(
+        AppErrorFactory.fromException(
+          DriftTableException(
+            'Failed to count items by predicate',
+            tableName,
+            originalError: e,
+            stackTrace: stackTrace,
+          ),
+          stackTrace,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<List<T>>> findWhere(
+    Expression<bool> Function(TTable) where,
+  ) async {
+    try {
+      final query = database.select(table)
+        ..where((tbl) => where(tbl));
+
+      final items = await query.get();
+
+      debugPrint('$tableName: Found ${items.length} items with typed where');
+      return Result.success(items);
+    } catch (e, stackTrace) {
+      debugPrint('$tableName: Failed to findWhere - $e');
+      return Result.error(
+        AppErrorFactory.fromException(
+          DriftTableException(
+            'Failed to find items with typed where clause',
+            tableName,
+            originalError: e,
+            stackTrace: stackTrace,
+          ),
+          stackTrace,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<int>> updateWhere(
+    Expression<bool> Function(TTable) where,
+    Insertable<T> update,
+  ) async {
+    try {
+      final updated = await (database.update(table)
+            ..where((tbl) => where(tbl)))
+          .write(update);
+
+      if (_cacheEnabled && updated > 0) {
+        _cache.clear();
+      }
+
+      debugPrint('$tableName: Updated $updated items with typed where');
+      return Result.success(updated);
+    } catch (e, stackTrace) {
+      debugPrint('$tableName: Failed to updateWhere - $e');
+      return Result.error(
+        AppErrorFactory.fromException(
+          DriftTableException(
+            'Failed to update items with typed where clause',
+            tableName,
+            originalError: e,
+            stackTrace: stackTrace,
+          ),
+          stackTrace,
+        ),
+      );
+    }
   }
 }

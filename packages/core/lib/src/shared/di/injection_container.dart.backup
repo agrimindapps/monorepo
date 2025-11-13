@@ -2,30 +2,25 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
-// ⚠️ REMOVED: Hive dependencies
-// import '../../../repositories/license_local_storage.dart';
-// import '../../../repositories/license_repository.dart';
-// import '../../../services/license_service.dart';
+import '../../../repositories/license_local_storage.dart';
+import '../../../repositories/license_repository.dart';
+import '../../../services/license_service.dart';
 import '../../domain/interfaces/i_disposable_service.dart';
 import '../../domain/repositories/i_analytics_repository.dart';
 import '../../domain/repositories/i_auth_repository.dart';
 import '../../domain/repositories/i_crashlytics_repository.dart';
-// ⚠️ REMOVED: Hive dependencies
-// import '../../domain/repositories/i_local_storage_repository.dart';
+import '../../domain/repositories/i_local_storage_repository.dart';
 import '../../domain/repositories/i_storage_repository.dart';
 import '../../domain/repositories/i_subscription_repository.dart';
-// ⚠️ REMOVED: Hive dependencies
-// import '../../domain/services/i_box_registry_service.dart';
+import '../../domain/services/i_box_registry_service.dart';
 import '../../domain/usecases/auth/login_usecase.dart';
 import '../../domain/usecases/auth/logout_usecase.dart';
-// ⚠️ REMOVED: Hive dependencies
-// import '../../infrastructure/services/box_registry_service.dart';
+import '../../infrastructure/services/box_registry_service.dart';
 import '../../infrastructure/services/firebase_analytics_service.dart';
 import '../../infrastructure/services/firebase_auth_service.dart';
 import '../../infrastructure/services/firebase_crashlytics_service.dart';
 import '../../infrastructure/services/firebase_storage_service.dart';
-// ⚠️ REMOVED: Hive dependencies
-// import '../../infrastructure/services/hive_storage_service.dart';
+import '../../infrastructure/services/hive_storage_service.dart';
 import '../../infrastructure/services/revenue_cat_service.dart';
 import '../../sync/config/sync_feature_flags.dart';
 import '../../sync/factories/sync_service_factory.dart';
@@ -83,33 +78,30 @@ class InjectionContainer {
   ///
   /// These can initialize in parallel with Firebase initialization
   static Future<void> _registerLocalServices() async {
-    // ⚠️ REMOVED: Hive dependencies
-    // getIt.registerLazySingleton<IBoxRegistryService>(
-    //   () => BoxRegistryService(),
-    // );
+    getIt.registerLazySingleton<IBoxRegistryService>(
+      () => BoxRegistryService(),
+    );
 
     getIt.registerLazySingleton<DioService>(() => DioService());
 
-    // ⚠️ REMOVED: Hive dependencies
-    // getIt.registerLazySingleton<LicenseRepository>(
-    //   () => LicenseLocalStorage(),
-    // );
-    //
-    // getIt.registerLazySingleton<LicenseService>(
-    //   () => LicenseService(getIt<LicenseRepository>()),
-    // );
+    getIt.registerLazySingleton<LicenseRepository>(
+      () => LicenseLocalStorage(),
+    );
 
-    // ⚠️ REMOVED: Hive storage - use SharedPreferences or Drift instead
+    getIt.registerLazySingleton<LicenseService>(
+      () => LicenseService(getIt<LicenseRepository>()),
+    );
+
     // Platform-specific: Hive storage (local only)
-    // if (!kIsWeb) {
-    //   getIt.registerLazySingleton<ILocalStorageRepository>(
-    //     () => HiveStorageService(getIt<IBoxRegistryService>()),
-    //   );
-    // } else if (kDebugMode) {
-    //   debugPrint(
-    //     '⚠️ [Core Package] ILocalStorageRepository skipped on Web platform (Hive limitations)',
-    //   );
-    // }
+    if (!kIsWeb) {
+      getIt.registerLazySingleton<ILocalStorageRepository>(
+        () => HiveStorageService(getIt<IBoxRegistryService>()),
+      );
+    } else if (kDebugMode) {
+      debugPrint(
+        '⚠️ [Core Package] ILocalStorageRepository skipped on Web platform (Hive limitations)',
+      );
+    }
 
     if (kDebugMode) {
       debugPrint('[InjectionContainer] Local services registered');

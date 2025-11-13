@@ -6,7 +6,7 @@ import '../../database/receituagro_database.dart';
 import '../../database/repositories/culturas_repository.dart';
 import '../../database/repositories/fitossanitarios_repository.dart';
 import '../../database/repositories/pragas_repository.dart';
-import 'data_initialization_service.dart';
+// REMOVED: import 'data_initialization_service.dart';
 
 /// Interface para o gerenciador de dados da aplicação
 abstract class IAppDataManager {
@@ -14,7 +14,7 @@ abstract class IAppDataManager {
   Future<Either<Exception, void>> forceReloadData();
   Future<Map<String, dynamic>> getDataStats();
   Future<bool> isDataReady();
-  DataInitializationService get dataService;
+  // ⚠️ REMOVED: DataInitializationService get dataService;
   Future<void> dispose();
   bool get isInitialized;
 }
@@ -23,7 +23,8 @@ abstract class IAppDataManager {
 /// Responsável por inicializar o Hive, registrar adapters e coordenar o carregamento de dados
 /// Agora integrado com sistema de controle automático de versão
 class AppDataManager implements IAppDataManager {
-  late final DataInitializationService _dataService;
+  // ⚠️ REMOVED: late final DataInitializationService _dataService;
+  // ✅ Keep _isInitialized for interface compliance
   bool _isInitialized = false;
 
   /// Construtor que permite injeção de dependência
@@ -52,14 +53,16 @@ class AppDataManager implements IAppDataManager {
         'Inicializando dados diretamente...',
         name: 'AppDataManager',
       );
-      final isDataReady = await _dataService.isDataLoaded();
-      if (!isDataReady) {
-        return Left(
-          Exception(
-            'Dados não foram carregados corretamente após controle de versão',
-          ),
-        );
-      }
+      // ⚠️ REMOVED: DataInitializationService no longer exists
+      // Just mark as initialized since Drift repos are initialized via DI
+      // final isDataReady = await _dataService.isDataLoaded();
+      // if (!isDataReady) {
+      //   return Left(
+      //     Exception(
+      //       'Dados não foram carregados corretamente após controle de versão',
+      //     ),
+      //   );
+      // }
 
       _isInitialized = true;
 
@@ -86,7 +89,8 @@ class AppDataManager implements IAppDataManager {
         name: 'AppDataManager',
       );
       final assetLoader = AssetLoaderService();
-      final versionManager = VersionManagerService();
+      // ⚠️ REMOVED: VersionManagerService no longer exists
+      // final versionManager = VersionManagerService();
 
       // Create Drift database and repository
       final database = ReceituagroDatabase.production();
@@ -94,14 +98,14 @@ class AppDataManager implements IAppDataManager {
       final pragasRepo = PragasRepository(database);
       final fitossanitarioRepo = FitossanitariosRepository(database);
 
-      // ❌ REMOVED: Legacy Hive repositories
-      _dataService = DataInitializationService(
-        assetLoader: assetLoader,
-        versionManager: versionManager,
-        culturaRepository: culturaRepo,
-        pragasRepository: pragasRepo,
-        fitossanitarioRepository: fitossanitarioRepo,
-      );
+      // ⚠️ REMOVED: DataInitializationService no longer exists
+      // _dataService = DataInitializationService(
+      //   assetLoader: assetLoader,
+      //   versionManager: versionManager,
+      //   culturaRepository: culturaRepo,
+      //   pragasRepository: pragasRepo,
+      //   fitossanitarioRepository: fitossanitarioRepo,
+      // );
 
       developer.log(
         'Serviços criados com sucesso (incluindo controle de versão)',
@@ -149,40 +153,31 @@ class AppDataManager implements IAppDataManager {
       return {'error': 'Sistema não foi inicializado'};
     }
 
-    try {
-      final dataStats = await _dataService.getLoadingStats();
-
-      return {
-        'data_initialization': dataStats,
-        'timestamp': DateTime.now().toIso8601String(),
-      };
-    } catch (e) {
-      developer.log('Erro ao obter estatísticas: $e', name: 'AppDataManager');
-      return {
-        'error': e.toString(),
-        'fallback_data': await _dataService.getLoadingStats(),
-      };
-    }
+    // ⚠️ REMOVED: DataInitializationService no longer exists
+    // Return simplified stats
+    return {
+      'initialized': _isInitialized,
+      'timestamp': DateTime.now().toIso8601String(),
+      'storage': 'Drift',
+    };
   }
 
   /// Verifica se os dados estão carregados
   @override
   Future<bool> isDataReady() async {
-    if (!_isInitialized) {
-      return false;
-    }
-
-    return await _dataService.isDataLoaded();
+    // ⚠️ SIMPLIFIED: Just return initialization status
+    return _isInitialized;
   }
 
   /// Obtém instância do serviço de inicialização (para uso em DI)
-  @override
-  DataInitializationService get dataService {
-    if (!_isInitialized) {
-      throw Exception('Sistema não foi inicializado');
-    }
-    return _dataService;
-  }
+  // ⚠️ REMOVED: DataInitializationService no longer exists
+  // @override
+  // DataInitializationService get dataService {
+  //   if (!_isInitialized) {
+  //     throw Exception('Sistema não foi inicializado');
+  //   }
+  //   return _dataService;
+  // }
 
   /// Version control service removed - no longer available
   dynamic get versionControlService {
@@ -201,9 +196,8 @@ class AppDataManager implements IAppDataManager {
         name: 'AppDataManager',
       );
 
-      // ❌ REMOVIDO: await LegacyAdapterRegistry.closeBoxes();
-      // ✅ BoxRegistryService gerencia fechamento de boxes
-      await Hive.close();
+      // ⚠️ REMOVED: Hive no longer used
+      // await Hive.close();
 
       _isInitialized = false;
 

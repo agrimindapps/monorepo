@@ -1,6 +1,19 @@
 import 'dart:typed_data';
 
-import '../enhanced_storage_service.dart'; // Para acessar StorageType enum
+/// Tipos de storage disponíveis
+enum StorageType {
+  /// Hive - estruturado, rápido, persistente
+  hive,
+
+  /// SharedPreferences - para primitivos e strings pequenas
+  sharedPreferences,
+
+  /// Secure Storage - para dados sensíveis (criptografado)
+  secureStorage,
+
+  /// File System - para arquivos e dados grandes
+  file,
+}
 
 /// Seletor de estratégia de storage
 ///

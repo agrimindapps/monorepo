@@ -67,6 +67,10 @@ class ComentarioModel {
   factory ComentarioModel.fromJson(Map<String, dynamic> json) => ComentarioModel.fromMap(json);
   Map<String, dynamic> toJson() => toMap();
 
+  // ✅ Compatibility getters for datasource
+  String get comentario => conteudo;
+  String? get publicName => userId;
+
   ComentarioModel copyWith({
     String? id,
     String? idReg,

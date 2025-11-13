@@ -1,19 +1,19 @@
-import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../shared/utils/app_error.dart';
 import '../../../../shared/utils/result.dart';
-import '../../hive/interfaces/i_storage_service.dart';
+import '../../common/interfaces/i_storage_service.dart';
 import '../exceptions/drift_exceptions.dart';
 import '../interfaces/i_drift_manager.dart';
+import '../interfaces/i_drift_storage_service.dart';
 import 'drift_manager.dart';
 
 /// Implementação concreta do serviço de storage usando Drift
 /// Orquestra o DriftManager e fornece funcionalidades de alto nível
 /// 
 /// Equivalente Drift do CoreHiveStorageService
-/// Implementa IBoxStorageService (interface agnóstica)
-class CoreDriftStorageService implements IBoxStorageService {
+/// Implementa IBoxStorageService (interface agnóstica) e IDatabaseStorageService (específica Drift)
+class CoreDriftStorageService implements IBoxStorageService, IDatabaseStorageService {
   final IDriftManager _driftManager;
   bool _isInitialized = false;
   String? _appName;
@@ -504,5 +504,101 @@ class CoreDriftStorageService implements IBoxStorageService {
       );
     }
     return Result.success(null);
+  }
+
+  // ==================== IDatabaseStorageService Methods ====================
+
+  @override
+  Future<Result<List<String>>> listDatabases() async {
+    return listBoxes(); // Alias for IBoxStorageService.listBoxes()
+  }
+
+  @override
+  Future<Result<bool>> databaseExists(String databaseName) async {
+    return boxExists(databaseName); // Alias for IBoxStorageService.boxExists()
+  }
+
+  @override
+  Future<Result<Map<String, dynamic>>> getDatabaseStatistics(String databaseName) async {
+    return getBoxStatistics(databaseName); // Alias for IBoxStorageService.getBoxStatistics()
+  }
+
+  @override
+  Future<Result<void>> vacuumDatabase(String databaseName) async {
+    return compactBox(databaseName); // Alias for IBoxStorageService.compactBox()
+  }
+
+  @override
+  Future<Result<void>> deleteDatabase(String databaseName) async {
+    return deleteBox(databaseName); // Alias for IBoxStorageService.deleteBox()
+  }
+
+  @override
+  Future<Result<Map<String, dynamic>>> backupDatabase(String databaseName) async {
+    return backupBox(databaseName); // Alias for IBoxStorageService.backupBox()
+  }
+
+  @override
+  Future<Result<void>> restoreDatabase(
+    String databaseName,
+    Map<String, dynamic> databaseData,
+  ) async {
+    return restoreBox(databaseName, databaseData); // Alias for IBoxStorageService.restoreBox()
+  }
+
+  @override
+  Future<Result<Map<String, dynamic>>> getDatabaseInfo(String databaseName) async {
+    try {
+      final validationResult = _validateInitialized();
+      if (validationResult.isError) {
+        return Result.error(validationResult.error!);
+      }
+
+      final infoResult = await _driftManager.getDatabaseInfo(databaseName);
+      return infoResult;
+    } catch (e, stackTrace) {
+      debugPrint('$serviceName: Failed to get database info - $e');
+      return Result.error(
+        AppErrorFactory.fromException(
+          DriftDatabaseException(
+            'Failed to get info for database: $databaseName',
+            databaseName,
+            originalError: e,
+            stackTrace: stackTrace,
+          ),
+          stackTrace,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> vacuumAllDatabases() async {
+    try {
+      final validationResult = _validateInitialized();
+      if (validationResult.isError) {
+        return validationResult;
+      }
+
+      final vacuumResult = await _driftManager.vacuumAllDatabases();
+      if (vacuumResult.isError) {
+        return vacuumResult;
+      }
+
+      debugPrint('$serviceName: All databases vacuumed successfully');
+      return Result.success(null);
+    } catch (e, stackTrace) {
+      debugPrint('$serviceName: Failed to vacuum all databases - $e');
+      return Result.error(
+        AppErrorFactory.fromException(
+          DriftInitializationException(
+            'Failed to vacuum all databases',
+            originalError: e,
+            stackTrace: stackTrace,
+          ),
+          stackTrace,
+        ),
+      );
+    }
   }
 }

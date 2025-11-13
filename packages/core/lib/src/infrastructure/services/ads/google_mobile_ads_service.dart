@@ -1,11 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+
 import '../../../domain/entities/ads/ad_unit_entity.dart';
 import '../../../domain/repositories/i_ads_repository.dart';
 import '../../../shared/utils/ads_failures.dart';
 import '../../../shared/utils/failure.dart';
-import 'specialized_services/ad_config_service.dart';
-import 'specialized_services/ad_frequency_manager.dart';
 import 'specialized_services/ad_lifecycle_manager.dart';
 import 'specialized_services/banner_ad_service.dart';
 import 'specialized_services/interstitial_ad_service.dart';
@@ -18,15 +17,13 @@ import 'specialized_services/ad_preloader_service.dart';
 /// Follows Facade Pattern - coordinates all specialized services
 /// This is the single entry point for all ad operations
 class GoogleMobileAdsService implements IAdsRepository {
-  final AdConfigService _configService;
-  final AdFrequencyManager _frequencyManager;
   final AdLifecycleManager _lifecycleManager;
   final BannerAdService _bannerService;
   final InterstitialAdService _interstitialService;
   final RewardedAdService _rewardedService;
   final RewardedInterstitialAdService _rewardedInterstitialService;
   final AppOpenAdService _appOpenService;
-  final AdPreloaderService _preloaderService;
+  final AdPreloaderService? _preloaderService;
 
   bool _isInitialized = false;
 
@@ -34,19 +31,15 @@ class GoogleMobileAdsService implements IAdsRepository {
   Future<bool> Function()? premiumStatusChecker;
 
   GoogleMobileAdsService({
-    required AdConfigService configService,
-    required AdFrequencyManager frequencyManager,
     required AdLifecycleManager lifecycleManager,
     required BannerAdService bannerService,
     required InterstitialAdService interstitialService,
     required RewardedAdService rewardedService,
     required RewardedInterstitialAdService rewardedInterstitialService,
     required AppOpenAdService appOpenService,
-    required AdPreloaderService preloaderService,
+    AdPreloaderService? preloaderService,
     this.premiumStatusChecker,
-  })  : _configService = configService,
-        _frequencyManager = frequencyManager,
-        _lifecycleManager = lifecycleManager,
+  })  : _lifecycleManager = lifecycleManager,
         _bannerService = bannerService,
         _interstitialService = interstitialService,
         _rewardedService = rewardedService,
@@ -63,31 +56,15 @@ class GoogleMobileAdsService implements IAdsRepository {
     }
 
     try {
-      // Initialize config service
-      final configResult = await _configService.initialize();
-      if (configResult.isLeft()) {
-        return configResult;
-      }
-
-      // Initialize frequency manager
-      final frequencyResult = await _frequencyManager.initialize();
-      if (frequencyResult.isLeft()) {
-        return frequencyResult;
-      }
-
       // Initialize Google Mobile Ads SDK
       await MobileAds.instance.initialize();
-
-      // Set test devices if configured
-      final testDeviceIds = _configService.testDeviceIds;
-      if (testDeviceIds.isNotEmpty) {
-        await setTestDevices(deviceIds: testDeviceIds);
-      }
 
       _isInitialized = true;
 
       // Preload ads in background
-      _preloadAdsInBackground();
+      if (_preloaderService != null) {
+        _preloadAdsInBackground();
+      }
 
       return const Right(null);
     } catch (e) {
@@ -104,7 +81,7 @@ class GoogleMobileAdsService implements IAdsRepository {
   /// Preload ads in background (non-blocking)
   void _preloadAdsInBackground() {
     Future.delayed(const Duration(seconds: 2), () {
-      _preloaderService.preloadAll();
+      _preloaderService?.preloadAll();
     });
   }
 
@@ -178,14 +155,14 @@ class GoogleMobileAdsService implements IAdsRepository {
     final result = await _interstitialService.show(
       onAdDismissedFullScreenContent: () {
         // Record ad shown
-        _frequencyManager.recordAdShown('interstitial');
+        // _frequencyManager.recordAdShown('interstitial'); // REMOVED: _frequencyManager deleted
 
         // Preload next ad
-        final adUnitIdResult = _configService.getAdUnitId(AdType.interstitial);
-        adUnitIdResult.fold(
-          (_) {},
-          (adUnitId) => _interstitialService.load(adUnitId: adUnitId),
-        );
+        // final adUnitIdResult = _configService.getAdUnitId(AdType.interstitial); // REMOVED: _configService deleted
+        // adUnitIdResult.fold(
+        //   (_) {},
+        //   (adUnitId) => _interstitialService.load(adUnitId: adUnitId),
+        // );
       },
     );
 
@@ -240,14 +217,14 @@ class GoogleMobileAdsService implements IAdsRepository {
       },
       onAdDismissedFullScreenContent: () {
         // Record ad shown
-        _frequencyManager.recordAdShown('rewarded');
+        // _frequencyManager.recordAdShown('rewarded'); // REMOVED: _frequencyManager deleted
 
         // Preload next ad
-        final adUnitIdResult = _configService.getAdUnitId(AdType.rewarded);
-        adUnitIdResult.fold(
-          (_) {},
-          (adUnitId) => _rewardedService.load(adUnitId: adUnitId),
-        );
+        // final adUnitIdResult = _configService.getAdUnitId(AdType.rewarded); // REMOVED: _configService deleted
+        // adUnitIdResult.fold(
+        //   (_) {},
+        //   (adUnitId) => _rewardedService.load(adUnitId: adUnitId),
+        // );
       },
     );
 
@@ -301,15 +278,14 @@ class GoogleMobileAdsService implements IAdsRepository {
       },
       onAdDismissedFullScreenContent: () {
         // Record ad shown
-        _frequencyManager.recordAdShown('rewarded_interstitial');
+        // _frequencyManager.recordAdShown('rewarded_interstitial'); // REMOVED: _frequencyManager deleted
 
         // Preload next ad
-        final adUnitIdResult =
-            _configService.getAdUnitId(AdType.rewardedInterstitial);
-        adUnitIdResult.fold(
-          (_) {},
-          (adUnitId) => _rewardedInterstitialService.load(adUnitId: adUnitId),
-        );
+        // final adUnitIdResult = _configService.getAdUnitId(AdType.rewardedInterstitial); // REMOVED: _configService deleted
+        // adUnitIdResult.fold(
+        //   (_) {},
+        //   (adUnitId) => _rewardedInterstitialService.load(adUnitId: adUnitId),
+        // );
       },
     );
 
@@ -362,14 +338,14 @@ class GoogleMobileAdsService implements IAdsRepository {
     final result = await _appOpenService.show(
       onAdDismissedFullScreenContent: () {
         // Record ad shown
-        _frequencyManager.recordAdShown('app_open');
+        // _frequencyManager.recordAdShown('app_open'); // REMOVED: _frequencyManager deleted
 
         // Preload next ad
-        final adUnitIdResult = _configService.getAdUnitId(AdType.appOpen);
-        adUnitIdResult.fold(
-          (_) {},
-          (adUnitId) => _appOpenService.load(adUnitId: adUnitId),
-        );
+        // final adUnitIdResult = _configService.getAdUnitId(AdType.appOpen); // REMOVED: _configService deleted
+        // adUnitIdResult.fold(
+        //   (_) {},
+        //   (adUnitId) => _appOpenService.load(adUnitId: adUnitId),
+        // );
       },
     );
 
@@ -411,22 +387,26 @@ class GoogleMobileAdsService implements IAdsRepository {
       return Left(AdPremiumBlockFailure());
     }
 
+    // TODO: Frequency checking disabled - _configService and _frequencyManager deleted
     // Get frequency config for placement
-    final adType = _getAdTypeFromPlacement(placement);
-    final configResult = _configService.getFrequencyConfig(adType);
-    if (configResult.isLeft()) {
-      return const Right(false);
-    }
+    // final adType = _getAdTypeFromPlacement(placement);
+    // final configResult = _configService.getFrequencyConfig(adType); // REMOVED: _configService deleted
+    // if (configResult.isLeft()) {
+    //   return const Right(false);
+    // }
+    //
+    // final config = configResult.getOrElse(
+    //   () => throw Exception('Config should be present'),
+    // );
+    //
+    // // Check frequency
+    // return _frequencyManager.canShowAd( // REMOVED: _frequencyManager deleted
+    //   placement: placement,
+    //   config: config,
+    // );
 
-    final config = configResult.getOrElse(
-      () => throw Exception('Config should be present'),
-    );
-
-    // Check frequency
-    return _frequencyManager.canShowAd(
-      placement: placement,
-      config: config,
-    );
+    // Temporary: Always allow ads (no frequency cap)
+    return const Right(true);
   }
 
   // ===== Frequency Management =====
@@ -434,22 +414,28 @@ class GoogleMobileAdsService implements IAdsRepository {
   @override
   Future<Either<Failure, void>> recordAdShown({
     required String placement,
-  }) {
-    return _frequencyManager.recordAdShown(placement);
+  }) async {
+    // REMOVED: _frequencyManager deleted
+    // return _frequencyManager.recordAdShown(placement);
+    return Future.value(const Right<Failure, void>(null));
   }
 
   @override
   Future<Either<Failure, int>> getAdShowCount({
     required String placement,
-  }) {
-    return _frequencyManager.getAdShowCount(placement);
+  }) async {
+    // REMOVED: _frequencyManager deleted
+    // return _frequencyManager.getAdShowCount(placement);
+    return Future.value(const Right<Failure, int>(0));
   }
 
   @override
   Future<Either<Failure, void>> resetFrequency({
     required String placement,
-  }) {
-    return _frequencyManager.resetFrequency(placement);
+  }) async {
+    // REMOVED: _frequencyManager deleted
+    // return _frequencyManager.resetFrequency(placement);
+    return Future.value(const Right<Failure, void>(null));
   }
 
   // ===== Lifecycle =====
@@ -462,8 +448,9 @@ class GoogleMobileAdsService implements IAdsRepository {
       await _rewardedService.dispose();
       await _rewardedInterstitialService.dispose();
       await _appOpenService.dispose();
-      await _frequencyManager.dispose();
-      await _configService.dispose();
+      // REMOVED: _frequencyManager and _configService deleted
+      // await _frequencyManager.dispose();
+      // await _configService.dispose();
 
       _isInitialized = false;
       return const Right(null);
@@ -483,7 +470,8 @@ class GoogleMobileAdsService implements IAdsRepository {
   /// Check if should block ads for premium users
   Future<bool> _shouldBlockForPremium() async {
     if (premiumStatusChecker == null) return false;
-    if (_configService.showAdsForPremium) return false;
+    // REMOVED: _configService deleted
+    // if (_configService.showAdsForPremium) return false;
 
     try {
       return await premiumStatusChecker!();
@@ -507,8 +495,9 @@ class GoogleMobileAdsService implements IAdsRepository {
     return {
       'initialized': _isInitialized,
       'lifecycle': _lifecycleManager.getStatistics(),
-      'frequency': _frequencyManager.getStatistics(),
-      'preload_status': _preloaderService.getPreloadStatus(),
+      // REMOVED: _frequencyManager deleted
+      // 'frequency': _frequencyManager.getStatistics(),
+      'preload_status': _preloaderService?.getPreloadStatus() ?? {},
     };
   }
 }

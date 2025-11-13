@@ -68,6 +68,11 @@ class SyncQueueItem {
     return minutesSinceLastRetry >= backoffMinutes[sync_retryCount];
   }
 
+  // ✅ Compatibility getters for SyncQueue
+  String get id => sync_id;
+  String get status => sync_isSynced ? 'synced' : 'pending';
+  DateTime get createdAt => sync_timestamp;
+
   SyncQueueItem copyWith({
     String? sync_id,
     String? modelType,
@@ -78,7 +83,13 @@ class SyncQueueItem {
     bool? sync_isSynced,
     String? sync_errorMessage,
     DateTime? sync_lastRetryAt,
+    String? status, // ✅ Compatibility parameter
   }) {
+    // ✅ Handle status parameter
+    final bool isSynced = status != null 
+        ? (status == 'synced' || status == 'completed')
+        : (sync_isSynced ?? this.sync_isSynced);
+    
     return SyncQueueItem(
       sync_id: sync_id ?? this.sync_id,
       modelType: modelType ?? this.modelType,
@@ -86,7 +97,7 @@ class SyncQueueItem {
       data: data ?? this.data,
       sync_timestamp: sync_timestamp ?? this.sync_timestamp,
       sync_retryCount: sync_retryCount ?? this.sync_retryCount,
-      sync_isSynced: sync_isSynced ?? this.sync_isSynced,
+      sync_isSynced: isSynced,
       sync_errorMessage: sync_errorMessage ?? this.sync_errorMessage,
       sync_lastRetryAt: sync_lastRetryAt ?? this.sync_lastRetryAt,
     );

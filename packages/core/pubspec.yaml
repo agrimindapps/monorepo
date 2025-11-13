@@ -4,7 +4,7 @@ version: 1.0.0
 
 environment:
   sdk: ">=3.9.0 <4.0.0"
-  flutter: ">=3.35.0"
+  flutter: ">=3.35.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -90,6 +90,7 @@ dependencies:
   
   # Hive - Legacy support for migrating apps
   hive: ^2.2.3
+  hive_flutter: ^1.1.0
   
   # Riverpod State Management
   riverpod: ^2.6.1

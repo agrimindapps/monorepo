@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Core Package - Serviços compartilhados (Firebase, Riverpod, Hive, GetIt, Injectable, Provider, dartz, equatable, etc.)
+  # Core Package - Serviços compartilhados (Firebase, Riverpod, GetIt, Injectable, Provider, dartz, equatable, etc.)
   core:
     path: ../../packages/core
   get_it: any
@@ -19,7 +19,6 @@ dependencies:
   dartz: any
   cloud_firestore: any
   firebase_auth: any
-  hive: any
   flutter_local_notifications: any
   timezone: any
   riverpod_annotation: any

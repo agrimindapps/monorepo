@@ -1,5 +1,3 @@
-import 'package:equatable/equatable.dart';
-
 /// Game difficulty levels with associated configuration
 enum GameDifficulty {
   easy(

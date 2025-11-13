@@ -97,9 +97,9 @@ class OdometerEntity extends BaseSyncEntity {
       'type': type.name,
     };
 
-    // Adicionar campos opcionais apenas se não forem null/empty
-    if (description != null && description!.isNotEmpty) map['description'] = description;
-    if (metadata != null && metadata!.isNotEmpty) map['metadata'] = metadata;
+    // Adicionar campos obrigatórios
+    if (description.isNotEmpty) map['description'] = description;
+    if (metadata.isNotEmpty) map['metadata'] = metadata;
 
     return map;
   }

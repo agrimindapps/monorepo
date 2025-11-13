@@ -231,10 +231,6 @@ extension GasometerFailureExtensions on core.Failure {
     }
 
     // Fallback to core user message
-    if (this is core.Failure) {
-      return (this as core.Failure).userMessage;
-    }
-
-    return 'Ocorreu um erro inesperado. Tente novamente.';
+    return userMessage;
   }
 }

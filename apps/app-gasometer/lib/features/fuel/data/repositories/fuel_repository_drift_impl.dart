@@ -54,7 +54,7 @@ class FuelRepositoryDriftImpl implements FuelRepository {
       final dataList = await _dataSource.findAll();
       final entities = dataList.map(_toEntity).toList();
       return Right(entities);
-    } catch (e, stackTrace) {
+    } catch (e) {
       return Left(CacheFailure(e.toString()));
     }
   }
@@ -68,7 +68,7 @@ class FuelRepositoryDriftImpl implements FuelRepository {
       final dataList = await _dataSource.findByVehicleId(vehicleIdInt);
       final entities = dataList.map(_toEntity).toList();
       return Right(entities);
-    } catch (e, stackTrace) {
+    } catch (e) {
       return Left(CacheFailure(e.toString()));
     }
   }
@@ -82,7 +82,7 @@ class FuelRepositoryDriftImpl implements FuelRepository {
       final data = await _dataSource.findById(idInt);
       final entity = data != null ? _toEntity(data) : null;
       return Right(entity);
-    } catch (e, stackTrace) {
+    } catch (e) {
       return Left(CacheFailure(e.toString()));
     }
   }
@@ -113,7 +113,7 @@ class FuelRepositoryDriftImpl implements FuelRepository {
       }
 
       return Right(_toEntity(created));
-    } catch (e, stackTrace) {
+    } catch (e) {
       return Left(CacheFailure(e.toString()));
     }
   }
@@ -149,7 +149,7 @@ class FuelRepositoryDriftImpl implements FuelRepository {
       }
 
       return Right(_toEntity(updated));
-    } catch (e, stackTrace) {
+    } catch (e) {
       return Left(CacheFailure(e.toString()));
     }
   }
@@ -165,7 +165,7 @@ class FuelRepositoryDriftImpl implements FuelRepository {
       }
 
       return const Right(unit);
-    } catch (e, stackTrace) {
+    } catch (e) {
       return Left(CacheFailure(e.toString()));
     }
   }
@@ -188,7 +188,7 @@ class FuelRepositoryDriftImpl implements FuelRepository {
         return matchesStation || matchesNotes;
       }).toList();
       return Right(entities);
-    } catch (e, stackTrace) {
+    } catch (e) {
       return Left(CacheFailure(e.toString()));
     }
   }
@@ -207,7 +207,7 @@ class FuelRepositoryDriftImpl implements FuelRepository {
               CacheFailure(error.toString()),
             );
           });
-    } catch (e, stackTrace) {
+    } catch (e) {
       return Stream.value(Left(CacheFailure(e.toString())));
     }
   }
@@ -229,7 +229,7 @@ class FuelRepositoryDriftImpl implements FuelRepository {
               CacheFailure(error.toString()),
             );
           });
-    } catch (e, stackTrace) {
+    } catch (e) {
       return Stream.value(Left(CacheFailure(e.toString())));
     }
   }
@@ -269,7 +269,7 @@ class FuelRepositoryDriftImpl implements FuelRepository {
 
       final averageConsumption = totalConsumption / validCalculations;
       return Right(averageConsumption);
-    } catch (e, stackTrace) {
+    } catch (e) {
       return Left(CacheFailure(e.toString()));
     }
   }
@@ -288,7 +288,7 @@ class FuelRepositoryDriftImpl implements FuelRepository {
         endDate: endDate,
       );
       return Right(total);
-    } catch (e, stackTrace) {
+    } catch (e) {
       return Left(CacheFailure(e.toString()));
     }
   }
@@ -306,7 +306,7 @@ class FuelRepositoryDriftImpl implements FuelRepository {
       );
       final entities = dataList.map(_toEntity).toList();
       return Right(entities);
-    } catch (e, stackTrace) {
+    } catch (e) {
       return Left(CacheFailure(e.toString()));
     }
   }

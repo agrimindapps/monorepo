@@ -3,7 +3,6 @@ import 'dart:io' show Platform;
 import 'dart:ui';
 
 import 'package:core/core.dart' hide sharedPreferencesProvider;
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:flutter/material.dart';
@@ -22,8 +21,12 @@ void main() async {
 
   usePathUrlStrategy();
 
-  // Initialize Hive using core package
-  await Hive.initFlutter();
+  // Initialize Drift using core package
+  final driftResult = await DriftManager.instance.initialize('app_minigames');
+  if (driftResult.isError) {
+    debugPrint('Drift initialization failed: ${driftResult.error}');
+    // Continue without local storage - app can still work with memory
+  }
 
   // Initialize async dependencies for Riverpod providers
   final sharedPrefs = await SharedPreferences.getInstance();

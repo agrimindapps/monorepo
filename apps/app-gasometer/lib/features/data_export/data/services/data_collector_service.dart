@@ -1,7 +1,6 @@
 import 'package:core/core.dart';
 
 import '../../../../core/interfaces/i_expenses_repository.dart';
-import '../../../../core/services/database_inspector_service.dart';
 import '../../../maintenance/domain/entities/maintenance_entity.dart';
 import '../../../odometer/domain/entities/odometer_entity.dart';
 import '../../../vehicles/domain/repositories/vehicle_repository.dart';
@@ -22,14 +21,13 @@ class DataCollectorService {
     this._maintenanceRepository,
     this._expensesRepository,
     this._odometerRepository,
-  ) : _databaseInspector = GasOMeterDatabaseInspectorService.instance;
+  );
 
   final VehicleRepository _vehicleRepository;
   final FuelRepository _fuelRepository;
   final MaintenanceRepository _maintenanceRepository;
   final IExpensesRepository _expensesRepository;
   final OdometerRepository _odometerRepository;
-  final GasOMeterDatabaseInspectorService _databaseInspector;
 
   /// Coleta dados de perfil do usuário
   Future<Map<String, dynamic>> collectUserProfile() async {

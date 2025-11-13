@@ -80,7 +80,7 @@ class GeneratePuzzleUseCase {
 
     for (int row = 0; row < 9; row++) {
       for (int col = 0; col < 9; col++) {
-        final cell = currentGrid!.getCell(row, col);
+        final cell = currentGrid.getCell(row, col);
 
         if (cell.isEmpty) {
           // Try numbers 1-9

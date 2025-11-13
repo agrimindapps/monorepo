@@ -306,7 +306,7 @@ class _EnhancedVehicleSelectorState
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(minHeight: 64),
                     child: DropdownButtonFormField<String>(
-                      value: null,
+                      initialValue: null,
                       isDense: true,
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(
@@ -422,7 +422,7 @@ class _EnhancedVehicleSelectorState
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(minHeight: 64),
                     child: DropdownButtonFormField<String>(
-                      value: _currentSelectedVehicleId,
+                      initialValue: _currentSelectedVehicleId,
                       isDense: true,
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(

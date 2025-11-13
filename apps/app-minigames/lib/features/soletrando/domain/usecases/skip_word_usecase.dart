@@ -1,8 +1,6 @@
 import 'package:dartz/dartz.dart';
 
-import '../entities/enums.dart';
 import '../entities/game_state_entity.dart';
-import '../entities/word_entity.dart';
 import '../repositories/soletrando_repository.dart';
 
 import 'generate_word_usecase.dart';

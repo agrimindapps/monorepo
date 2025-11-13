@@ -1,6 +1,5 @@
 import 'package:core/core.dart' show GetIt;
 
-import '../storage/hive_service.dart';
 import 'di_module.dart';
 import 'injectable_config.dart';
 import 'modules/animals_module.dart';
@@ -24,7 +23,7 @@ class ModularInjectionContainer {
 
   /// Initialize all dependencies using modular approach
   static Future<void> init() async {
-    await HiveService.instance.init();
+    // Hive removed - using Drift for all persistence
     configureDependencies();
     final modules = _createModules();
 

@@ -1,5 +1,3 @@
-import 'package:core/core.dart';
-
 /// Serviço de inspeção de database específico do GasOMeter
 /// Migrado para usar Drift database
 class GasOMeterDatabaseInspectorService {

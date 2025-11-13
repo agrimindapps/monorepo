@@ -31,7 +31,6 @@ class MemoryGameNotifier extends _$MemoryGameNotifier {
   }
 
   Future<void> startGame(GameDifficulty difficulty) async {
-    final generateCardsUseCase = ref.read(generateCardsUseCaseProvider);
     final restartGameUseCase = ref.read(restartGameUseCaseProvider);
 
     final result = restartGameUseCase(

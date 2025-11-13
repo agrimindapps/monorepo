@@ -37,36 +37,22 @@ class Environment {
   void initialize() {
     // TODO: Replace with InfoDeviceService when available
     // Using test/hml values by default until InfoDeviceService is restored
-    const bool isProduction = false; // InfoDeviceService().isProduction.value
+    // const bool isProduction = false; // InfoDeviceService().isProduction.value
 
-    if (isProduction) {
-      admobBanner = Platform.isAndroid
-          ? prod['admobBanner-android']
-          : prod['admobBanner-ios'];
-      onOpenApp = Platform.isAndroid
-          ? prod['onOpenApp-android']
-          : prod['onOpenApp-ios'];
-      admobPremiado = Platform.isAndroid
-          ? prod['admobPremiado-android']
-          : prod['admobPremiado-ios'];
-      altAdmobBanner = Platform.isAndroid
-          ? prod['altAdmobBanner-android']
-          : prod['altAdmobBanner-ios'];
-    } else {
-      // Android Test
-      admobBanner = Platform.isAndroid
-          ? hml['admobBanner-android']
-          : hml['admobBanner-ios'];
-      onOpenApp = Platform.isAndroid
-          ? hml['onOpenApp-android']
-          : hml['onOpenApp-ios'];
-      admobPremiado = Platform.isAndroid
-          ? hml['admobPremiado-android']
-          : hml['admobPremiado-ios'];
-      altAdmobBanner = Platform.isAndroid
-          ? hml['altAdmobBanner-android']
-          : hml['altAdmobBanner-ios'];
-    }
+    // Using HML values for now
+    // Android Test
+    admobBanner = Platform.isAndroid
+        ? hml['admobBanner-android']
+        : hml['admobBanner-ios'];
+    onOpenApp = Platform.isAndroid
+        ? hml['onOpenApp-android']
+        : hml['onOpenApp-ios'];
+    admobPremiado = Platform.isAndroid
+        ? hml['admobPremiado-android']
+        : hml['admobPremiado-ios'];
+    altAdmobBanner = Platform.isAndroid
+        ? hml['altAdmobBanner-android']
+        : hml['altAdmobBanner-ios'];
   }
 
   Map<String, dynamic> hml = {

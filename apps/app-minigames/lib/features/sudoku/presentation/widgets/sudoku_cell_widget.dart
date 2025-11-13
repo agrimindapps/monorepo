@@ -60,7 +60,6 @@ class SudokuCellWidget extends StatelessWidget {
       case CellState.error:
         return Colors.red.shade200;
       case CellState.normal:
-      default:
         return Colors.white;
     }
   }

@@ -4,7 +4,6 @@ import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 
 import '../entities/grid_entity.dart';
-import '../entities/position_entity.dart';
 import '../entities/tile_entity.dart';
 
 /// Spawns a new tile (2 or 4) in a random empty position

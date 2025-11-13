@@ -25,7 +25,7 @@ class ExceptionMapper {
       if (exception.plugin.contains('storage') ||
           exception.plugin.contains('firebase_storage')) {
         return _mapFirebaseStorageException(
-          exception as storage.FirebaseException,
+          exception,
           stackTrace,
         );
       }

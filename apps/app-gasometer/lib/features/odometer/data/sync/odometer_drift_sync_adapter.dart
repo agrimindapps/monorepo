@@ -260,12 +260,6 @@ class OdometerDriftSyncAdapter
         name: 'OdometerDriftSyncAdapter',
       );
 
-      // Verificar se o banco está inicializado
-      if (db == null) {
-        developer.log('❌ Database is null!', name: 'OdometerDriftSyncAdapter');
-        return Left(CacheFailure('Database not initialized'));
-      }
-
       developer.log(
         '🔍 Database instance: ${db.hashCode}, type: ${db.runtimeType}',
         name: 'OdometerDriftSyncAdapter',

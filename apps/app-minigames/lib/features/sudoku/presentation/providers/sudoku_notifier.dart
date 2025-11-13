@@ -3,7 +3,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/game_state_entity.dart';
 import '../../domain/entities/position_entity.dart';
-import '../../domain/entities/sudoku_grid_entity.dart';
 import '../../domain/usecases/check_completion_usecase.dart';
 import '../../domain/usecases/generate_puzzle_usecase.dart';
 import '../../domain/usecases/get_hint_usecase.dart';

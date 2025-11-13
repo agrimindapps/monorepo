@@ -442,7 +442,7 @@ class FinancialLoggingService {
     try {
       // Sanitiza valor antes de enviar
       final sanitizedValue = _sanitizeValue(key, value);
-      _crashlytics?.setCustomKey(key, sanitizedValue);
+      _crashlytics.setCustomKey(key, sanitizedValue);
     } catch (e) {
       if (kDebugMode) {
         debugPrint('⚠️ Failed to set custom key in Crashlytics: $e');
@@ -459,7 +459,7 @@ class FinancialLoggingService {
       final maskedUserId = userId.length > 8
           ? '${userId.substring(0, 4)}...${userId.substring(userId.length - 4)}'
           : userId;
-      _crashlytics?.setUserIdentifier(maskedUserId);
+      _crashlytics.setUserIdentifier(maskedUserId);
     } catch (e) {
       if (kDebugMode) {
         debugPrint('⚠️ Failed to set user ID in Crashlytics: $e');

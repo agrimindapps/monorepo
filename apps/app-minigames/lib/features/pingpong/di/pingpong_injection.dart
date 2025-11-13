@@ -1,4 +1,3 @@
-import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/datasources/pingpong_local_datasource.dart';

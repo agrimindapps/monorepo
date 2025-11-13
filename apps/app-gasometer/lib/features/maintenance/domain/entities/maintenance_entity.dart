@@ -377,20 +377,19 @@ class MaintenanceEntity extends BaseSyncEntity {
       'service_date': serviceDate.toIso8601String(),
     };
 
-    // Adicionar campos opcionais apenas se não forem null
-    if (description != null) map['description'] = description;
-    if (cost != null) map['cost'] = cost;
-    if (odometer != null) map['odometer'] = odometer;
+    // Adicionar campos obrigatórios
+    map['description'] = description;
+    map['cost'] = cost;
+    map['odometer'] = odometer;
     if (workshopName != null) map['workshop_name'] = workshopName;
     if (workshopPhone != null) map['workshop_phone'] = workshopPhone;
     if (workshopAddress != null) map['workshop_address'] = workshopAddress;
     if (nextServiceDate != null) map['next_service_date'] = nextServiceDate!.toIso8601String();
     if (nextServiceOdometer != null) map['next_service_odometer'] = nextServiceOdometer;
-    if (photosPaths != null) map['photos_paths'] = photosPaths;
-    if (invoicesPaths != null) map['invoices_paths'] = invoicesPaths;
-    if (parts != null) map['parts'] = parts;
-    if (notes != null) map['notes'] = notes;
-    if (metadata != null) map['metadata'] = metadata;
+    map['photos_paths'] = photosPaths;
+    map['invoices_paths'] = invoicesPaths;
+    map['parts'] = parts;
+    map['metadata'] = metadata;
 
     return map;
   }

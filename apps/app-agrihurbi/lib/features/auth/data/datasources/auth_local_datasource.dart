@@ -56,9 +56,7 @@ abstract class AuthLocalDataSource {
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   final SharedPreferences _sharedPreferences;
   final FlutterSecureStorage _secureStorage;
-  final HiveStorageService _hiveStorageService;
   final FirebaseAnalyticsService _analyticsService;
-  static const String _userBoxKey = 'auth_users';
   static const String _currentUserKey = 'current_user';
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
@@ -67,8 +65,8 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   AuthLocalDataSourceImpl(
     this._sharedPreferences,
     this._secureStorage,
-  ) : _hiveStorageService = HiveStorageService(BoxRegistryService()),
-      _analyticsService = FirebaseAnalyticsService();
+    this._analyticsService,
+  );
 
   @override
   Future<void> cacheUser(UserModel user) async {
@@ -108,18 +106,11 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   Future<UserModel?> getLastUser() async {
     try {
       debugPrint('AuthLocalDataSourceImpl: Obtendo último usuário');
-      final result = await _hiveStorageService.get<Map<String, dynamic>>(
-        box: _userBoxKey,
-        key: _currentUserKey,
-      );
-      
-      final userData = result.fold(
-        (failure) => null,
-        (data) => data,
-      );
+      final userDataString = _sharedPreferences.getString(_currentUserKey);
       
       UserModel? user;
-      if (userData != null) {
+      if (userDataString != null) {
+        final userData = jsonDecode(userDataString) as Map<String, dynamic>;
         user = UserModel.fromJson(userData);
         debugPrint('AuthLocalDataSourceImpl: Usuário encontrado - ${user.id}');
         await _analyticsService.logEvent(
@@ -157,15 +148,8 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   Future<void> clearUser() async {
     try {
       debugPrint('AuthLocalDataSourceImpl: Limpando dados do usuário');
-      final result = await _hiveStorageService.remove(
-        box: _userBoxKey,
-        key: _currentUserKey,
-      );
+      await _sharedPreferences.remove(_currentUserKey);
       
-      result.fold(
-        (failure) => throw Exception('Erro ao remover usuário: ${failure.message}'),
-        (_) => null,
-      );
       await clearTokens();
       await clearSessionData();
       await _analyticsService.logEvent(

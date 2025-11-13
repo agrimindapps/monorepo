@@ -3,45 +3,35 @@ import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.
 import 'package:core/core.dart' hide NotificationSettings, PrivacySettings;
 
 
-/// Settings Model with Hive Serialization
+/// Settings Model
 class SettingsModel extends SettingsEntity {
-  @HiveField(0)
   @override
   final String userId;
   
-  @HiveField(1)
   @override
   final AppTheme theme;
   
-  @HiveField(2)
   @override
   final String language;
   
-  @HiveField(3)
   @override
   final NotificationSettingsModel notifications;
   
-  @HiveField(4)
   @override
   final DataSettingsModel dataSettings;
   
-  @HiveField(5)
   @override
   final PrivacySettingsModel privacy;
   
-  @HiveField(6)
   @override
   final DisplaySettingsModel display;
   
-  @HiveField(7)
   @override
   final SecuritySettingsModel security;
   
-  @HiveField(8)
   @override
   final BackupSettingsModel backup;
   
-  @HiveField(9)
   @override
   final DateTime lastUpdated;
 
@@ -142,35 +132,27 @@ class SettingsModel extends SettingsEntity {
 
 
 class NotificationSettingsModel extends NotificationSettings {
-  @HiveField(0)
   @override
   final bool pushNotifications;
   
-  @HiveField(1)
   @override
   final bool newsNotifications;
   
-  @HiveField(2)
   @override
   final bool marketAlerts;
   
-  @HiveField(3)
   @override
   final bool weatherAlerts;
   
-  @HiveField(4)
   @override
   final bool animalReminders;
   
-  @HiveField(5)
   @override
   final bool calculatorReminders;
   
-  @HiveField(6)
   @override
   final String quietHoursStart;
   
-  @HiveField(7)
   @override
   final String quietHoursEnd;
 
@@ -234,27 +216,21 @@ class NotificationSettingsModel extends NotificationSettings {
   }
 }
 class DataSettingsModel extends DataSettings {
-  @HiveField(0)
   @override
   final bool autoSync;
   
-  @HiveField(1)
   @override
   final bool wifiOnlySync;
   
-  @HiveField(2)
   @override
   final bool cacheImages;
   
-  @HiveField(3)
   @override
   final int cacheRetentionDays;
   
-  @HiveField(4)
   @override
   final bool compressBackups;
   
-  @HiveField(5)
   @override
   final DataExportFormat exportFormat;
 
@@ -311,23 +287,18 @@ class DataSettingsModel extends DataSettings {
   }
 }
 class PrivacySettingsModel extends PrivacySettings {
-  @HiveField(0)
   @override
   final bool analyticsEnabled;
   
-  @HiveField(1)
   @override
   final bool crashReportingEnabled;
   
-  @HiveField(2)
   @override
   final bool shareUsageData;
   
-  @HiveField(3)
   @override
   final bool personalizedAds;
   
-  @HiveField(4)
   @override
   final bool locationTracking;
 

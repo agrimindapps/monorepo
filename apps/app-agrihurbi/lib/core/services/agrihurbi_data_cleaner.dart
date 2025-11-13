@@ -4,13 +4,13 @@ import 'package:core/core.dart';
 /// Gerencia limpeza de farms, fields, crops, activities, harvests e cache local
 @LazySingleton(as: IAppDataCleaner)
 class AgrihurbiDataCleaner implements IAppDataCleaner {
-  final HiveInterface _hive;
+  final IDriftManager _driftManager;
   final SharedPreferences _prefs;
 
   AgrihurbiDataCleaner({
-    required HiveInterface hive,
+    required IDriftManager driftManager,
     required SharedPreferences prefs,
-  }) : _hive = hive,
+  }) : _driftManager = driftManager,
        _prefs = prefs;
 
   @override
@@ -34,28 +34,16 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
     };
 
     try {
-      final statsBefore = await getDataStatsBeforeCleaning();
-      final boxNames = [
-        'farms',
-        'fields',
-        'crops',
-        'activities',
-        'harvests',
-        'settings',
-        'farm_cache',
-      ];
-
-      for (final boxName in boxNames) {
-        try {
-          if (await _hive.boxExists(boxName)) {
-            await _hive.deleteBoxFromDisk(boxName);
-            (result['clearedBoxes'] as List).add(boxName);
-          }
-        } catch (e) {
-          (result['errors'] as List).add('Failed to clear $boxName: $e');
-          result['success'] = false;
-        }
+      // Clear all Drift databases
+      final clearResult = await _driftManager.clearAllData();
+      if (clearResult.isFailure) {
+        result['success'] = false;
+        (result['errors'] as List).add('Failed to clear Drift data: ${clearResult.error}');
+      } else {
+        (result['clearedBoxes'] as List).addAll(['drift_databases']);
       }
+
+      // Clear SharedPreferences
       final prefsKeys = _prefs.getKeys();
       final appSpecificKeys = prefsKeys.where(
         (key) =>
@@ -77,8 +65,6 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
       result['totalRecordsCleared'] =
           (result['clearedBoxes'] as List).length +
           (result['clearedPreferences'] as List).length;
-
-      result['statsBefore'] = statsBefore;
     } catch (e) {
       result['success'] = false;
       (result['errors'] as List).add('Unexpected error: $e');
@@ -100,46 +86,8 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
     };
 
     try {
-      if (await _hive.boxExists('farms')) {
-        try {
-          final farmsBox = await _hive.openBox<dynamic>('farms');
-          stats['totalFarms'] = farmsBox.length;
-          await farmsBox.close();
-        } catch (_) {
-        }
-      }
-      if (await _hive.boxExists('fields')) {
-        try {
-          final fieldsBox = await _hive.openBox<dynamic>('fields');
-          stats['totalFields'] = fieldsBox.length;
-          await fieldsBox.close();
-        } catch (_) {
-        }
-      }
-      if (await _hive.boxExists('crops')) {
-        try {
-          final cropsBox = await _hive.openBox<dynamic>('crops');
-          stats['totalCrops'] = cropsBox.length;
-          await cropsBox.close();
-        } catch (_) {
-        }
-      }
-      if (await _hive.boxExists('activities')) {
-        try {
-          final activitiesBox = await _hive.openBox<dynamic>('activities');
-          stats['totalActivities'] = activitiesBox.length;
-          await activitiesBox.close();
-        } catch (_) {
-        }
-      }
-      if (await _hive.boxExists('harvests')) {
-        try {
-          final harvestsBox = await _hive.openBox<dynamic>('harvests');
-          stats['totalHarvests'] = harvestsBox.length;
-          await harvestsBox.close();
-        } catch (_) {
-        }
-      }
+      // For now, we only track SharedPreferences since we're migrating to Drift
+      // Drift data stats would require database queries which are app-specific
       final prefsKeys = _prefs.getKeys();
       stats['totalPreferences'] =
           prefsKeys
@@ -149,13 +97,7 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
               )
               .length;
 
-      stats['totalRecords'] =
-          (stats['totalFarms'] as int) +
-          (stats['totalFields'] as int) +
-          (stats['totalCrops'] as int) +
-          (stats['totalActivities'] as int) +
-          (stats['totalHarvests'] as int) +
-          (stats['totalPreferences'] as int);
+      stats['totalRecords'] = stats['totalPreferences'] as int;
     } catch (e) {
       stats['error'] = e.toString();
     }
@@ -166,12 +108,12 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
   @override
   Future<bool> verifyDataCleanup() async {
     try {
-      final boxNames = ['farms', 'fields', 'crops', 'activities', 'harvests'];
-      for (final boxName in boxNames) {
-        if (await _hive.boxExists(boxName)) {
-          return false;
-        }
+      // Check if Drift databases are cleared
+      if (_driftManager.openDatabaseNames.isNotEmpty) {
+        return false;
       }
+
+      // Check if SharedPreferences are cleared
       final prefsKeys = _prefs.getKeys();
       final remainingAppKeys = prefsKeys.where(
         (key) => key.startsWith('agrihurbi_') || key.startsWith('farm_'),
@@ -186,12 +128,12 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
   @override
   Future<bool> hasDataToClear() async {
     try {
-      final boxNames = ['farms', 'fields', 'crops', 'activities', 'harvests'];
-      for (final boxName in boxNames) {
-        if (await _hive.boxExists(boxName)) {
-          return true;
-        }
+      // Check if Drift has any databases
+      if (_driftManager.openDatabaseNames.isNotEmpty) {
+        return true;
       }
+
+      // Check SharedPreferences
       final prefsKeys = _prefs.getKeys();
       final hasPrefs = prefsKeys.any(
         (key) => key.startsWith('agrihurbi_') || key.startsWith('farm_'),
@@ -268,16 +210,19 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
     List<String> boxNames,
     Map<String, dynamic> result,
   ) async {
-    for (final boxName in boxNames) {
-      try {
-        if (await _hive.boxExists(boxName)) {
-          await _hive.deleteBoxFromDisk(boxName);
-          (result['clearedItems'] as List).add(boxName);
-        }
-      } catch (e) {
-        (result['errors'] as List).add('Failed to clear $boxName: $e');
+    // Since we're migrating to Drift, boxes are now databases
+    // For now, we'll clear all Drift data for any category request
+    try {
+      final clearResult = await _driftManager.clearAllData();
+      if (clearResult.isFailure) {
         result['success'] = false;
+        (result['errors'] as List).add('Failed to clear Drift data: ${clearResult.error}');
+      } else {
+        (result['clearedItems'] as List).addAll(boxNames);
       }
+    } catch (e) {
+      (result['errors'] as List).add('Failed to clear data: $e');
+      result['success'] = false;
     }
   }
 

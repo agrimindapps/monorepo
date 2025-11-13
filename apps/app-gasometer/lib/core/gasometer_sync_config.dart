@@ -51,55 +51,9 @@ abstract final class GasometerSyncConfig {
     // IMPORTANTE: As boxes precisam estar registradas ANTES do UnifiedSyncManager
     print('🔧 [GasometerSync] Obtendo BoxRegistryService...');
 
-    try {
-      final boxRegistry = getIt<IBoxRegistryService>();
-      print('✅ [GasometerSync] BoxRegistryService obtido com sucesso');
-
-      // Registrar boxes para cada entidade
-      // NOTA: Entidades foram migradas para Drift
-      // Boxes Hive removidas: não há mais necessidade de sync via Hive
-      final boxesToRegister = <String>[
-        // Todas as entidades agora usam Drift para storage local
-        // Premium usa seu próprio sistema de sync (RevenueCat + Firebase)
-      ];
-
-      print(
-        '🔧 [GasometerSync] Iniciando registro de ${boxesToRegister.length} boxes...',
-      );
-
-      // Registrar cada box sequencialmente e aguardar confirmação
-      for (final boxName in boxesToRegister) {
-        print('🔧 [GasometerSync] Registrando box: $boxName...');
-        // ✅ IMPORTANTE: persistent: false porque as boxes JÁ foram abertas pelo HiveService
-        // Isso evita erro de "tipo incompatível" (Box<VehicleModel> vs Box<dynamic>)
-        final config = BoxConfiguration(
-          name: boxName,
-          appId: 'gasometer',
-          persistent: false, // NÃO tentar abrir - já está aberta
-        );
-        final result = await boxRegistry.registerBox(config);
-
-        await result.fold(
-          (failure) async {
-            print(
-              '❌ [GasometerSync] ERRO ao registrar box "$boxName": ${failure.message}',
-            );
-            // Não lançar exceção, apenas logar
-          },
-          (_) async {
-            print('✅ [GasometerSync] Box "$boxName" registrada com sucesso');
-          },
-        );
-      }
-
-      print(
-        '✅ [GasometerSync] Registro de boxes concluído. Iniciando UnifiedSyncManager...',
-      );
-    } catch (e, stackTrace) {
-      print('❌ [GasometerSync] ERRO FATAL ao registrar boxes: $e');
-      print('Stack trace: $stackTrace');
-      rethrow;
-    }
+    // Hive boxes removed - all data now in Drift
+    // BoxRegistry no longer needed for gasometer
+    print('🔧 [GasometerSync] Drift database handles all local storage');
 
     print('🔧 [GasometerSync] Iniciando UnifiedSyncManager...');
 

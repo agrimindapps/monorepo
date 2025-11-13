@@ -76,14 +76,14 @@ class LicenseNotifier extends _$LicenseNotifier {
           }
           final infoResult = await _licenseService.getLicenseInfo();
           return infoResult.fold(
-            (_) => const LicenseInfo.noLicense(),
+            (_) => LicenseInfo.noLicense(),
             (info) => info,
           );
         },
         (_) async {
           final infoResult = await _licenseService.getLicenseInfo();
           return infoResult.fold(
-            (_) => const LicenseInfo.noLicense(),
+            (_) => LicenseInfo.noLicense(),
             (info) => info,
           );
         },
@@ -95,7 +95,7 @@ class LicenseNotifier extends _$LicenseNotifier {
       if (kDebugMode) {
         debugPrint('[LicenseNotifier] Build error: $e');
       }
-      return const LicenseState(
+      return LicenseState(
         licenseInfo: LicenseInfo.noLicense(),
         error: 'Erro ao inicializar licença',
       );
@@ -291,7 +291,7 @@ class LicenseNotifier extends _$LicenseNotifier {
           return false;
         },
         (_) {
-          state = const AsyncValue.data(
+          state = AsyncValue.data(
             LicenseState(licenseInfo: LicenseInfo.noLicense()),
           );
           return true;
@@ -335,7 +335,7 @@ class LicenseNotifier extends _$LicenseNotifier {
   }
 
   LicenseState _defaultState() {
-    return const LicenseState(licenseInfo: LicenseInfo.noLicense());
+    return LicenseState(licenseInfo: LicenseInfo.noLicense());
   }
 }
 

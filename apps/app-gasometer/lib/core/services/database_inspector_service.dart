@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 
 /// Serviço de inspeção de database específico do GasOMeter
-/// Integra o DatabaseInspectorService do core package com as boxes do app
+/// Migrado para usar Drift database
 class GasOMeterDatabaseInspectorService {
 
   GasOMeterDatabaseInspectorService._internal();
@@ -11,189 +11,101 @@ class GasOMeterDatabaseInspectorService {
     return _instance!;
   }
 
-  /// Instance do serviço do core
-  final DatabaseInspectorService _coreInspector = DatabaseInspectorService.instance;
+  /// Database tables do GasOMeter (Drift)
+  static const String vehiclesTableName = 'vehicles';
+  static const String fuelRecordsTableName = 'fuel_supplies';
+  static const String maintenanceTableName = 'maintenances';
+  static const String odometerTableName = 'odometer_readings';
+  static const String expensesTableName = 'expenses';
+  static const String auditTrailTableName = 'audit_trail';
 
-  /// Nomes das boxes do GasOMeter
-  static const String vehiclesBoxName = 'vehicles';
-  static const String fuelRecordsBoxName = 'fuel_records';
-  static const String maintenanceBoxName = 'maintenance';
-  static const String odometerBoxName = 'odometer';
-  static const String expensesBoxName = 'expenses';
-  static const String syncQueueBoxName = 'sync_queue';
-  static const String categoriesBoxName = 'categories';
-
-  /// Inicializa o serviço e registra as boxes customizadas
+  /// Inicializa o serviço (Drift-based)
   void initialize() {
-    final customBoxes = [
-      const CustomBoxType(
-        key: vehiclesBoxName,
-        displayName: 'Veículos',
-        description: 'Dados dos veículos cadastrados no app',
-        module: 'Veículos',
-      ),
-      const CustomBoxType(
-        key: fuelRecordsBoxName,
-        displayName: 'Abastecimentos',
-        description: 'Registros de abastecimento de combustível',
-        module: 'Combustível',
-      ),
-      const CustomBoxType(
-        key: maintenanceBoxName,
-        displayName: 'Manutenções',
-        description: 'Registros de manutenção dos veículos',
-        module: 'Manutenção',
-      ),
-      const CustomBoxType(
-        key: odometerBoxName,
-        displayName: 'Odômetro',
-        description: 'Leituras do odômetro dos veículos',
-        module: 'Odômetro',
-      ),
-      const CustomBoxType(
-        key: expensesBoxName,
-        displayName: 'Despesas',
-        description: 'Despesas relacionadas aos veículos',
-        module: 'Despesas',
-      ),
-      const CustomBoxType(
-        key: syncQueueBoxName,
-        displayName: 'Fila de Sincronização',
-        description: 'Fila de itens pendentes para sincronização',
-        module: 'Sincronização',
-      ),
-      const CustomBoxType(
-        key: categoriesBoxName,
-        displayName: 'Categorias',
-        description: 'Categorias para classificação de despesas',
-        module: 'Categorias',
-      ),
-    ];
-
-    _coreInspector.registerCustomBoxes(customBoxes);
+    print('🔧 GasOMeter Database Inspector initialized (Drift-based)');
   }
-
-  /// Delegação dos métodos principais do core service
-  Future<List<DatabaseRecord>> loadHiveBoxData(String boxKey) => 
-      _coreInspector.loadHiveBoxData(boxKey);
-
-  Future<List<SharedPreferencesRecord>> loadSharedPreferencesData() => 
-      _coreInspector.loadSharedPreferencesData();
-
-  Future<bool> removeSharedPreferencesKey(String key) => 
-      _coreInspector.removeSharedPreferencesKey(key);
-
-  Set<String> extractUniqueFields(List<DatabaseRecord> records) => 
-      _coreInspector.extractUniqueFields(records);
-
-  List<List<String>> convertToTableFormat(List<DatabaseRecord> records) => 
-      _coreInspector.convertToTableFormat(records);
-
-  String formatAsJsonString(Map<String, dynamic> data) => 
-      _coreInspector.formatAsJsonString(data);
-
-  List<String> getAvailableHiveBoxes() => 
-      _coreInspector.getAvailableHiveBoxes();
-
-  Map<String, dynamic> getBoxStats(String boxKey) => 
-      _coreInspector.getBoxStats(boxKey);
-
-  Map<String, dynamic> getGeneralStats() => 
-      _coreInspector.getGeneralStats();
-
-  String getBoxDisplayName(String key) => 
-      _coreInspector.getBoxDisplayName(key);
-
-  String? getBoxDescription(String key) => 
-      _coreInspector.getBoxDescription(key);
-
-  /// Obtém as boxes customizadas registradas
-  List<CustomBoxType> get customBoxes => _coreInspector.customBoxes;
 
   /// Obtém estatísticas específicas do GasOMeter
   Map<String, dynamic> getGasOMeterStats() {
-    final generalStats = getGeneralStats();
-    final availableBoxes = getAvailableHiveBoxes();
-    final moduleStats = <String, Map<String, dynamic>>{};
-    
-    for (final boxKey in availableBoxes) {
-      final boxStats = getBoxStats(boxKey);
-      final customBox = _coreInspector.customBoxes.where((box) => box.key == boxKey).firstOrNull;
-      
-      if (customBox != null) {
-        final module = customBox.module ?? 'Outros';
-        
-        if (!moduleStats.containsKey(module)) {
-          moduleStats[module] = {
-            'totalBoxes': 0,
-            'totalRecords': 0,
-            'boxes': <String>[],
-          };
-        }
-        
-        moduleStats[module]!['totalBoxes'] = (moduleStats[module]!['totalBoxes'] as int) + 1;
-        moduleStats[module]!['totalRecords'] = (moduleStats[module]!['totalRecords'] as int) + (boxStats['totalRecords'] as int? ?? 0);
-        (moduleStats[module]!['boxes'] as List<String>).add(boxKey);
-      }
-    }
-
     return {
-      ...generalStats,
       'appName': 'GasOMeter',
-      'moduleStats': moduleStats,
-      'registeredBoxes': _coreInspector.customBoxes.length,
-      'totalModules': moduleStats.keys.length,
+      'databaseType': 'Drift (SQLite)',
+      'tables': [
+        vehiclesTableName,
+        fuelRecordsTableName,
+        maintenanceTableName,
+        odometerTableName,
+        expensesTableName,
+        auditTrailTableName,
+      ],
+      'totalTables': 6,
     };
   }
 
-  /// Lista todas as boxes do GasOMeter com suas informações
-  List<Map<String, dynamic>> getGasOMeterBoxesInfo() {
-    final availableBoxes = getAvailableHiveBoxes();
-    final boxesInfo = <Map<String, dynamic>>[];
-
-    for (final boxKey in availableBoxes) {
-      final stats = getBoxStats(boxKey);
-      final customBox = _coreInspector.customBoxes.where((box) => box.key == boxKey).firstOrNull;
-
-      boxesInfo.add({
-        'key': boxKey,
-        'displayName': getBoxDisplayName(boxKey),
-        'description': getBoxDescription(boxKey),
-        'module': customBox?.module ?? 'Outros',
-        'totalRecords': stats['totalRecords'] ?? 0,
-        'isOpen': stats['isOpen'] ?? false,
-        'hasError': stats.containsKey('error'),
-        'error': stats['error'],
-      });
-    }
-    boxesInfo.sort((a, b) {
-      final moduleComparison = (a['module'] as String).compareTo(b['module'] as String);
-      if (moduleComparison != 0) return moduleComparison;
-      return (a['displayName'] as String).compareTo(b['displayName'] as String);
-    });
-
-    return boxesInfo;
+  /// Lista todas as tabelas do GasOMeter com suas informações
+  List<Map<String, dynamic>> getGasOMeterTablesInfo() {
+    return [
+      {
+        'name': vehiclesTableName,
+        'displayName': 'Veículos',
+        'description': 'Dados dos veículos cadastrados no app',
+        'module': 'Veículos',
+      },
+      {
+        'name': fuelRecordsTableName,
+        'displayName': 'Abastecimentos',
+        'description': 'Registros de abastecimento de combustível',
+        'module': 'Combustível',
+      },
+      {
+        'name': maintenanceTableName,
+        'displayName': 'Manutenções',
+        'description': 'Registros de manutenção dos veículos',
+        'module': 'Manutenção',
+      },
+      {
+        'name': odometerTableName,
+        'displayName': 'Odômetro',
+        'description': 'Leituras do odômetro dos veículos',
+        'module': 'Odômetro',
+      },
+      {
+        'name': expensesTableName,
+        'displayName': 'Despesas',
+        'description': 'Despesas relacionadas aos veículos',
+        'module': 'Despesas',
+      },
+      {
+        'name': auditTrailTableName,
+        'displayName': 'Trilha de Auditoria',
+        'description': 'Registro de mudanças no sistema',
+        'module': 'Auditoria',
+      },
+    ];
   }
 
-  /// Verifica se uma box está disponível e acessível
-  bool isBoxAvailable(String boxKey) {
-    try {
-      final stats = getBoxStats(boxKey);
-      return !stats.containsKey('error');
-    } catch (e) {
-      return false;
-    }
+  /// Verifica se uma tabela está disponível
+  bool isTableAvailable(String tableName) {
+    final tables = [
+      vehiclesTableName,
+      fuelRecordsTableName,
+      maintenanceTableName,
+      odometerTableName,
+      expensesTableName,
+      auditTrailTableName,
+    ];
+    return tables.contains(tableName);
   }
 
-  /// Obtém resumo rápido de uma box
-  Map<String, dynamic> getBoxSummary(String boxKey) {
-    final stats = getBoxStats(boxKey);
+  /// Obtém resumo rápido de uma tabela
+  Map<String, dynamic> getTableSummary(String tableName) {
+    final tableInfo = getGasOMeterTablesInfo()
+        .firstWhere((t) => t['name'] == tableName, orElse: () => {});
+    
     return {
-      'key': boxKey,
-      'displayName': getBoxDisplayName(boxKey),
-      'totalRecords': stats['totalRecords'] ?? 0,
-      'isAvailable': !stats.containsKey('error'),
-      'module': _coreInspector.customBoxes.where((box) => box.key == boxKey).firstOrNull?.module,
+      'name': tableName,
+      'displayName': tableInfo['displayName'] ?? tableName,
+      'isAvailable': isTableAvailable(tableName),
+      'module': tableInfo['module'] ?? 'Outros',
     };
   }
 }

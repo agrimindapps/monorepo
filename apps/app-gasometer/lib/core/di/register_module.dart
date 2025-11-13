@@ -25,9 +25,8 @@ abstract class RegisterModule {
   @singleton
   Connectivity get connectivity => Connectivity();
 
-  @lazySingleton
-  ILocalStorageRepository get localStorageRepository =>
-      HiveStorageService(GetIt.I<IBoxRegistryService>());
+  // Removed: Hive storage migrated to Drift
+  // Use GasometerDatabase for all local storage
 
   @singleton
   IAppRatingRepository get appRatingRepository => AppRatingService();

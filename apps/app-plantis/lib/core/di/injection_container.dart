@@ -124,22 +124,24 @@ void _initCoreServices({bool firebaseEnabled = false}) {
   sl.registerLazySingleton<IPerformanceRepository>(
     () => _StubPerformanceRepository(),
   );
-  sl.registerLazySingleton<IBoxRegistryService>(() => BoxRegistryService());
-  sl.registerLazySingleton<ILocalStorageRepository>(
-    () => HiveStorageService(sl<IBoxRegistryService>()),
-  );
+  // ⚠️ REMOVED: Hive services no longer exist
+  // sl.registerLazySingleton<IBoxRegistryService>(() => BoxRegistryService());
+  // sl.registerLazySingleton<ILocalStorageRepository>(
+  //   () => HiveStorageService(sl<IBoxRegistryService>()),
+  // );
   sl.registerLazySingleton<EnhancedSecureStorageService>(
     () => EnhancedSecureStorageService(
       appIdentifier: AppConstants.appId,
       config: const SecureStorageConfig.plantis(),
     ),
   );
-  sl.registerLazySingleton<EnhancedEncryptedStorageService>(
-    () => EnhancedEncryptedStorageService(
-      secureStorage: sl<EnhancedSecureStorageService>(),
-      appIdentifier: AppConstants.appId,
-    ),
-  );
+  // ⚠️ REMOVED: EnhancedEncryptedStorageService no longer exists
+  // sl.registerLazySingleton<EnhancedEncryptedStorageService>(
+  //   () => EnhancedEncryptedStorageService(
+  //     secureStorage: sl<EnhancedSecureStorageService>(),
+  //     appIdentifier: AppConstants.appId,
+  //   ),
+  // );
   sl.registerLazySingleton<SecureStorageService>(
     () => SecureStorageService.instance,
   );
@@ -191,10 +193,9 @@ void _initCoreServices({bool firebaseEnabled = false}) {
   );
   sl.registerLazySingleton<IFileRepository>(() => FileManagerService());
   sl.registerLazySingleton(() => UrlLauncherService());
-  sl.registerLazySingleton<LicenseRepository>(() => LicenseLocalStorage());
-  sl.registerLazySingleton<LicenseService>(
-    () => LicenseService(sl<LicenseRepository>()),
-  );
+  // ⚠️ REMOVED: LicenseRepository no longer exists - LicenseService now uses SharedPreferences
+  // sl.registerLazySingleton<LicenseRepository>(() => LicenseLocalStorage());
+  // LicenseService is now registered via injectable in core package
   sl.registerLazySingleton(() => LoginUseCase(sl(), sl()));
   sl.registerLazySingleton(
     () => LogoutUseCase(sl(), sl(), sl<DataCleanerService>()),

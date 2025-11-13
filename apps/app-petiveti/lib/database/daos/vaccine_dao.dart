@@ -1,0 +1,74 @@
+import 'package:drift/drift.dart';
+import '../petiveti_database.dart';
+import '../tables/vaccines_table.dart';
+
+part 'vaccine_dao.g.dart';
+
+@DriftAccessor(tables: [Vaccines])
+class VaccineDao extends DatabaseAccessor<PetivetiDatabase> with _$VaccineDaoMixin {
+  VaccineDao(PetivetiDatabase db) : super(db);
+
+  /// Get all vaccines for a user
+  Future<List<Vaccine>> getAllVaccines(String userId) {
+    return (select(vaccines)
+      ..where((tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false))
+      ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+      .get();
+  }
+
+  /// Get vaccines by animal ID
+  Future<List<Vaccine>> getVaccinesByAnimal(int animalId) {
+    return (select(vaccines)
+      ..where((tbl) => tbl.animalId.equals(animalId) & tbl.isDeleted.equals(false))
+      ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+      .get();
+  }
+
+  /// Watch vaccines for an animal
+  Stream<List<Vaccine>> watchVaccinesByAnimal(int animalId) {
+    return (select(vaccines)
+      ..where((tbl) => tbl.animalId.equals(animalId) & tbl.isDeleted.equals(false))
+      ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+      .watch();
+  }
+
+  /// Get vaccine by ID
+  Future<Vaccine?> getVaccineById(int id) {
+    return (select(vaccines)
+      ..where((tbl) => tbl.id.equals(id) & tbl.isDeleted.equals(false)))
+      .getSingleOrNull();
+  }
+
+  /// Create vaccine
+  Future<int> createVaccine(VaccinesCompanion vaccine) {
+    return into(vaccines).insert(vaccine);
+  }
+
+  /// Update vaccine
+  Future<bool> updateVaccine(int id, VaccinesCompanion vaccine) async {
+    return (update(vaccines)..where((tbl) => tbl.id.equals(id)))
+      .write(vaccine.copyWith(updatedAt: Value(DateTime.now())));
+  }
+
+  /// Delete vaccine
+  Future<bool> deleteVaccine(int id) async {
+    return (update(vaccines)..where((tbl) => tbl.id.equals(id)))
+      .write(VaccinesCompanion(
+        isDeleted: const Value(true),
+        updatedAt: Value(DateTime.now()),
+      ));
+  }
+
+  /// Get upcoming vaccines (next due date in the future)
+  Future<List<Vaccine>> getUpcomingVaccines(int animalId) {
+    final now = DateTime.now();
+    return (select(vaccines)
+      ..where((tbl) => 
+        tbl.animalId.equals(animalId) & 
+        tbl.isDeleted.equals(false) &
+        tbl.nextDueDate.isNotNull() &
+        tbl.nextDueDate.isBiggerOrEqualValue(now))
+      ..orderBy([(t) => OrderingTerm.asc(t.nextDueDate)]))
+      .get();
+  }
+}

@@ -18,9 +18,8 @@ final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
   return GetIt.instance<FirebaseAuthService>();
 });
 
-final hiveStorageServiceProvider = Provider<HiveStorageService>((ref) {
-  return GetIt.instance<HiveStorageService>();
-});
+// Removed: Hive storage migrated to Drift
+// Use GasometerDatabase instead
 
 final firebaseAnalyticsServiceProvider = Provider<FirebaseAnalyticsService>((
   ref,

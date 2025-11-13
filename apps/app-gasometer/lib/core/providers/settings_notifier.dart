@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dependency_providers.dart';
 
@@ -96,31 +97,24 @@ class SettingsState {
 @riverpod
 class CoreSettingsNotifier extends _$CoreSettingsNotifier {
   static const String _settingsKey = 'gasometer_settings';
-  late HiveStorageService _storage;
+  late SharedPreferences _storage;
 
   @override
   Future<SettingsState> build() async {
-    _storage = ref.watch(hiveStorageServiceProvider);
+    _storage = ref.watch(gasometerSharedPreferencesProvider);
     return await _loadSettings();
   }
 
   Future<SettingsState> _loadSettings() async {
     try {
-      final result = await _storage.get<Map<String, dynamic>>(key: _settingsKey);
-
-      return result.fold(
-        (failure) {
-          return SettingsState(
-            errorMessage: 'Erro ao carregar configurações: ${failure.message}',
-          );
-        },
-        (settingsMap) {
-          if (settingsMap != null) {
-            return SettingsState.fromJson(settingsMap);
-          }
-          return const SettingsState();
-        },
-      );
+      final settingsJson = _storage.getString(_settingsKey);
+      
+      if (settingsJson != null) {
+        final Map<String, dynamic> settingsMap = 
+            Map<String, dynamic>.from(jsonDecode(settingsJson) as Map);
+        return SettingsState.fromJson(settingsMap);
+      }
+      return const SettingsState();
     } catch (e) {
       return SettingsState(
         errorMessage: 'Erro ao carregar configurações: $e',
@@ -133,27 +127,14 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
       final currentState = state.valueOrNull;
       if (currentState == null) return;
 
-      final result = await _storage.save<Map<String, dynamic>>(
-        key: _settingsKey,
-        data: currentState.toJson(),
-      );
+      final settingsJson = jsonEncode(currentState.toJson());
+      await _storage.setString(_settingsKey, settingsJson);
 
-      result.fold(
-        (failure) {
-          state = AsyncValue.data(
-            currentState.copyWith(
-              errorMessage: 'Erro ao salvar configurações: ${failure.message}',
-            ),
-          );
-        },
-        (_) {
-          if (currentState.errorMessage != null) {
-            state = AsyncValue.data(
-              currentState.copyWith(errorMessage: null),
-            );
-          }
-        },
-      );
+      if (currentState.errorMessage != null) {
+        state = AsyncValue.data(
+          currentState.copyWith(errorMessage: null),
+        );
+      }
     } catch (e) {
       final currentState = state.valueOrNull;
       if (currentState != null) {

@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
-import 'package:hive/hive.dart';
 import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 
@@ -80,16 +79,14 @@ class SyncProgress {
 /// - Adicionar imagens à fila de upload quando offline
 /// - Sincronizar automaticamente quando volta online
 /// - Retry com backoff exponencial
-/// - Persistir fila no Hive
+/// - Persistir fila em memória (Drift pode ser usado futuramente)
 @lazySingleton
 class ImageSyncService {
-  static const String _boxName = 'pending_image_uploads';
-
   final gasometer_storage.FirebaseStorageService _storageService;
   final ConnectivityService _connectivityService;
   final FirebaseFirestore _firestore;
 
-  late Box<PendingImageUpload> _pendingUploadsBox;
+  final Map<String, PendingImageUpload> _pendingUploads = {};
   bool _initialized = false;
 
   final StreamController<SyncProgress> _progressController =
@@ -99,21 +96,20 @@ class ImageSyncService {
   Stream<SyncProgress> get progressStream => _progressController.stream;
 
   /// Número de uploads pendentes
-  int get pendingCount => _initialized ? _pendingUploadsBox.length : 0;
+  int get pendingCount => _initialized ? _pendingUploads.length : 0;
 
   /// Lista de uploads pendentes
   List<PendingImageUpload> get pendingUploads =>
-      _initialized ? _pendingUploadsBox.values.toList() : [];
+      _initialized ? _pendingUploads.values.toList() : [];
 
   ImageSyncService(this._storageService, this._connectivityService)
     : _firestore = FirebaseFirestore.instance;
 
-  /// Inicializa o serviço (abrir box Hive)
+  /// Inicializa o serviço (migrado de Hive para memória)
   Future<void> initialize() async {
     if (_initialized) return;
 
     try {
-      _pendingUploadsBox = await Hive.openBox<PendingImageUpload>(_boxName);
       _initialized = true;
 
       print(
@@ -154,7 +150,7 @@ class ImageSyncService {
       collectionPath: collectionPath,
     );
 
-    await _pendingUploadsBox.put(id, upload);
+    _pendingUploads[id] = upload;
 
     print(
       '📤 Added pending upload: $recordId ($category) - Queue size: ${pendingCount}',
@@ -178,7 +174,7 @@ class ImageSyncService {
       return SyncResult.offline();
     }
 
-    final pending = _pendingUploadsBox.values.toList();
+    final pending = _pendingUploads.values.toList();
 
     if (pending.isEmpty) {
       print('✅ No pending images to sync');
@@ -213,7 +209,7 @@ class ImageSyncService {
       // Verifica se atingiu máximo de tentativas
       if (upload.hasMaxedRetries) {
         print('❌ Max retries reached for ${upload.id}');
-        await _pendingUploadsBox.delete(upload.id);
+        _pendingUploads.remove(upload.id);
         failed++;
         continue;
       }
@@ -226,7 +222,7 @@ class ImageSyncService {
 
         // Atualiza com erro e incrementa retry count
         final updatedUpload = upload.withRetry(e.toString());
-        await _pendingUploadsBox.put(upload.id, updatedUpload);
+        _pendingUploads[upload.id] = updatedUpload;
 
         failed++;
       }
@@ -298,7 +294,7 @@ class ImageSyncService {
     );
 
     // 4. Remover da fila de pendentes
-    await _pendingUploadsBox.delete(upload.id);
+    _pendingUploads.remove(upload.id);
 
     print('✅ Removed from pending queue: ${upload.id}');
   }
@@ -322,7 +318,7 @@ class ImageSyncService {
       await initialize();
     }
 
-    await _pendingUploadsBox.delete(uploadId);
+    _pendingUploads.remove(uploadId);
     print('🗑️ Removed pending upload: $uploadId');
   }
 
@@ -333,7 +329,7 @@ class ImageSyncService {
     }
 
     final count = pendingCount;
-    await _pendingUploadsBox.clear();
+    _pendingUploads.clear();
     print('🗑️ Cleared $count pending uploads');
   }
 
@@ -343,7 +339,7 @@ class ImageSyncService {
       await initialize();
     }
 
-    final upload = _pendingUploadsBox.get(uploadId);
+    final upload = _pendingUploads[uploadId];
     if (upload == null) {
       print('❌ Upload not found: $uploadId');
       return false;
@@ -357,7 +353,7 @@ class ImageSyncService {
 
       // Atualiza com erro
       final updatedUpload = upload.withRetry(e.toString());
-      await _pendingUploadsBox.put(uploadId, updatedUpload);
+      _pendingUploads[uploadId] = updatedUpload;
 
       return false;
     }

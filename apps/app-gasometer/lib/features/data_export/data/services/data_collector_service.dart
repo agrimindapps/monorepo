@@ -175,14 +175,8 @@ class DataCollectorService {
   /// Coleta dados de categorias
   Future<List<Map<String, dynamic>>> collectCategoryData() async {
     try {
-      final records = await _databaseInspector.loadHiveBoxData('categories');
-      final categories = <Map<String, dynamic>>[];
-
-      for (final record in records) {
-        categories.add(_sanitizeData(record.data));
-      }
-
-      return categories;
+      // Categories are static in gasometer, return empty for now
+      return [];
     } catch (e) {
       SecureLogger.warning('Erro ao coletar categorias', error: e);
       return [

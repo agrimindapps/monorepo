@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:core/core.dart';
 
-import '../../../../core/services/database_inspector_service.dart';
+import '../../../../database/gasometer_database.dart';
 import '../entities/export_metadata.dart';
 import '../entities/export_progress.dart';
 import '../entities/export_request.dart';
@@ -17,7 +17,8 @@ class DataExportService {
     return _instance!;
   }
 
-  final _databaseInspector = GasOMeterDatabaseInspectorService.instance;
+  final _db = GetIt.I<GasometerDatabase>();
+  final _authService = GetIt.I<FirebaseAuthService>();
 
   /// Coleta todos os dados do usuário de acordo com as categorias especificadas
   Future<Map<String, dynamic>> collectUserData(
@@ -198,17 +199,22 @@ class DataExportService {
     ExportRequest request,
   ) async {
     try {
-      final records = await _databaseInspector.loadHiveBoxData('vehicles');
-      final vehicles = <Map<String, dynamic>>[];
+      // Use Drift database instead of Hive
+      final user = await _authService.currentUser.first;
+      final userId = user?.id;
+      if (userId == null) return [];
+      
+      final vehicles = await _db.getVehiclesByUser(userId);
+      final vehiclesData = <Map<String, dynamic>>[];
 
-      for (final record in records) {
-        final vehicleData = record.data;
+      for (final vehicle in vehicles) {
+        final vehicleData = vehicle.toJson();
         if (_isWithinDateRange(vehicleData, request)) {
-          vehicles.add(_sanitizeData(vehicleData));
+          vehiclesData.add(_sanitizeData(vehicleData));
         }
       }
 
-      return vehicles;
+      return vehiclesData;
     } catch (e) {
       return [
         {'error': 'Não foi possível acessar dados dos veículos: $e'},
@@ -220,13 +226,21 @@ class DataExportService {
     ExportRequest request,
   ) async {
     try {
-      final records = await _databaseInspector.loadHiveBoxData('fuel_records');
+      // Use Drift database instead of Hive
+      final user = await _authService.currentUser.first;
+      final userId = user?.id;
+      if (userId == null) return [];
+      
+      final vehicles = await _db.getVehiclesByUser(userId);
       final fuelRecords = <Map<String, dynamic>>[];
 
-      for (final record in records) {
-        final fuelData = record.data;
-        if (_isWithinDateRange(fuelData, request)) {
-          fuelRecords.add(_sanitizeData(fuelData));
+      for (final vehicle in vehicles) {
+        final supplies = await _db.getFuelSuppliesByVehicle(vehicle.id);
+        for (final supply in supplies) {
+          final fuelData = supply.toJson();
+          if (_isWithinDateRange(fuelData, request)) {
+            fuelRecords.add(_sanitizeData(fuelData));
+          }
         }
       }
 
@@ -242,13 +256,24 @@ class DataExportService {
     ExportRequest request,
   ) async {
     try {
-      final records = await _databaseInspector.loadHiveBoxData('maintenance');
+      // Use Drift database instead of Hive
+      final user = await _authService.currentUser.first;
+      final userId = user?.id;
+      if (userId == null) return [];
+      
+      final vehicles = await _db.getVehiclesByUser(userId);
       final maintenanceRecords = <Map<String, dynamic>>[];
 
-      for (final record in records) {
-        final maintenanceData = record.data;
-        if (_isWithinDateRange(maintenanceData, request)) {
-          maintenanceRecords.add(_sanitizeData(maintenanceData));
+      for (final vehicle in vehicles) {
+        final maintenances = await (_db.select(_db.maintenances)
+          ..where((tbl) => tbl.vehicleId.equals(vehicle.id) & tbl.isDeleted.equals(false)))
+          .get();
+        
+        for (final maintenance in maintenances) {
+          final maintenanceData = maintenance.toJson();
+          if (_isWithinDateRange(maintenanceData, request)) {
+            maintenanceRecords.add(_sanitizeData(maintenanceData));
+          }
         }
       }
 
@@ -264,13 +289,24 @@ class DataExportService {
     ExportRequest request,
   ) async {
     try {
-      final records = await _databaseInspector.loadHiveBoxData('odometer');
+      // Use Drift database instead of Hive
+      final user = await _authService.currentUser.first;
+      final userId = user?.id;
+      if (userId == null) return [];
+      
+      final vehicles = await _db.getVehiclesByUser(userId);
       final odometerRecords = <Map<String, dynamic>>[];
 
-      for (final record in records) {
-        final odometerData = record.data;
-        if (_isWithinDateRange(odometerData, request)) {
-          odometerRecords.add(_sanitizeData(odometerData));
+      for (final vehicle in vehicles) {
+        final readings = await (_db.select(_db.odometerReadings)
+          ..where((tbl) => tbl.vehicleId.equals(vehicle.id) & tbl.isDeleted.equals(false)))
+          .get();
+        
+        for (final reading in readings) {
+          final odometerData = reading.toJson();
+          if (_isWithinDateRange(odometerData, request)) {
+            odometerRecords.add(_sanitizeData(odometerData));
+          }
         }
       }
 
@@ -286,13 +322,24 @@ class DataExportService {
     ExportRequest request,
   ) async {
     try {
-      final records = await _databaseInspector.loadHiveBoxData('expenses');
+      // Use Drift database instead of Hive
+      final user = await _authService.currentUser.first;
+      final userId = user?.id;
+      if (userId == null) return [];
+      
+      final vehicles = await _db.getVehiclesByUser(userId);
       final expenseRecords = <Map<String, dynamic>>[];
 
-      for (final record in records) {
-        final expenseData = record.data;
-        if (_isWithinDateRange(expenseData, request)) {
-          expenseRecords.add(_sanitizeData(expenseData));
+      for (final vehicle in vehicles) {
+        final expenses = await (_db.select(_db.expenses)
+          ..where((tbl) => tbl.vehicleId.equals(vehicle.id) & tbl.isDeleted.equals(false)))
+          .get();
+        
+        for (final expense in expenses) {
+          final expenseData = expense.toJson();
+          if (_isWithinDateRange(expenseData, request)) {
+            expenseRecords.add(_sanitizeData(expenseData));
+          }
         }
       }
 
@@ -306,14 +353,8 @@ class DataExportService {
 
   Future<List<Map<String, dynamic>>> _collectCategoryData() async {
     try {
-      final records = await _databaseInspector.loadHiveBoxData('categories');
-      final categories = <Map<String, dynamic>>[];
-
-      for (final record in records) {
-        categories.add(_sanitizeData(record.data));
-      }
-
-      return categories;
+      // Categories are static in gasometer, return empty for now
+      return [];
     } catch (e) {
       return [
         {'error': 'Não foi possível acessar dados de categorias: $e'},

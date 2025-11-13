@@ -48,9 +48,9 @@ flutter:
 
   # Assets para Drift WASM (necessário para web)
   # O drift_worker.dart será compilado automaticamente para JS pelo Flutter
-  assets:
-    - web/sqlite3.wasm
-    - web/drift_worker.dart
+  # assets:
+  #   - web/sqlite3.wasm
+  #   - web/drift_worker.dart
 
   # Diretórios criados mas vazios por enquanto
   # assets:

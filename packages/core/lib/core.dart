@@ -55,9 +55,10 @@ export 'package:shared_preferences/shared_preferences.dart';
 export 'package:shimmer/shimmer.dart';
 export 'package:sign_in_with_apple/sign_in_with_apple.dart';
 export 'package:supabase_flutter/supabase_flutter.dart'
-    hide AuthException, AuthState, OAuthProvider, StorageException, User;
+    hide AuthException, AuthState, OAuthProvider, User;
 export 'package:timezone/timezone.dart';
 export 'package:url_launcher/url_launcher.dart';
+export 'models/license_info.dart';
 export 'repositories/license_repository.dart';
 export 'services/image_compression_service.dart';
 export 'services/license_service.dart';

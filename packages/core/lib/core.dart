@@ -20,6 +20,7 @@ export 'package:font_awesome_flutter/font_awesome_flutter.dart';
 export 'package:get_it/get_it.dart';
 export 'package:go_router/go_router.dart';
 export 'package:google_sign_in/google_sign_in.dart';
+export 'package:hive/hive.dart';
 export 'package:icons_plus/icons_plus.dart';
 export 'package:injectable/injectable.dart' hide Environment, order;
 export 'package:intl/intl.dart';

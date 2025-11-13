@@ -88,6 +88,9 @@ dependencies:
   equatable: ^2.0.7
   rxdart: ^0.28.0
   
+  # Hive - Legacy support for migrating apps
+  hive: ^2.2.3
+  
   # Riverpod State Management
   riverpod: ^2.6.1
   flutter_riverpod: ^2.6.1

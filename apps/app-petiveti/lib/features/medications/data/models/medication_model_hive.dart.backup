@@ -56,13 +56,15 @@ class MedicationModel {
     required this.frequency,
     this.duration,
     required this.startDate,
-    this.endDate,
+    required this.endDate,
     this.notes,
-    this.veterinarian,
-    required this.userId,
+    this.prescribedBy,
+    required this.type,
     required this.createdAt,
-    this.updatedAt,
+    required this.updatedAt,
     this.isDeleted = false,
+    this.discontinuedReason,
+    this.discontinuedAt,
   });
 
   factory MedicationModel.fromEntity(Medication medication) {

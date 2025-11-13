@@ -1,65 +1,79 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 
 import '../../domain/entities/animal.dart';
 import '../../domain/entities/animal_enums.dart';
 
 part 'animal_model.g.dart';
 
+@HiveType(typeId: 0)
 @JsonSerializable()
-class AnimalModel {
+class AnimalModel extends HiveObject {
+  @HiveField(0)
   @JsonKey(name: 'id')
-  final String? id;
+  final String id;
 
+  @HiveField(1)
   @JsonKey(name: 'user_id')
   final String userId;
 
+  @HiveField(2)
   @JsonKey(name: 'name')
   final String name;
 
+  @HiveField(3)
   @JsonKey(name: 'species')
   final AnimalSpecies species;
 
+  @HiveField(4)
   @JsonKey(name: 'breed')
   final String? breed;
 
+  @HiveField(5)
   @JsonKey(name: 'gender')
   final AnimalGender gender;
 
+  @HiveField(6)
   @JsonKey(name: 'birth_date')
   final DateTime? birthDate;
 
+  @HiveField(7)
   @JsonKey(name: 'weight')
   final double? weight;
 
+  @HiveField(8)
   @JsonKey(name: 'size')
   final AnimalSize? size;
 
+  @HiveField(9)
   @JsonKey(name: 'color')
   final String? color;
 
+  @HiveField(10)
   @JsonKey(name: 'microchip_number')
   final String? microchipNumber;
 
+  @HiveField(11)
   @JsonKey(name: 'notes')
   final String? notes;
 
+  @HiveField(12)
   @JsonKey(name: 'photo_url')
   final String? photoUrl;
 
+  @HiveField(13)
   @JsonKey(name: 'is_active')
   final bool isActive;
 
-  @JsonKey(name: 'is_deleted')
-  final bool isDeleted;
-
+  @HiveField(14)
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
 
+  @HiveField(15)
   @JsonKey(name: 'updated_at')
-  final DateTime? updatedAt;
+  final DateTime updatedAt;
 
   AnimalModel({
-    this.id,
+    required this.id,
     required this.userId,
     required this.name,
     required this.species,
@@ -73,9 +87,8 @@ class AnimalModel {
     this.notes,
     this.photoUrl,
     this.isActive = true,
-    this.isDeleted = false,
     required this.createdAt,
-    this.updatedAt,
+    required this.updatedAt,
   });
 
   factory AnimalModel.fromEntity(Animal animal) {

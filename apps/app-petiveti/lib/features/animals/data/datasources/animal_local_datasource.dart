@@ -1,88 +1,147 @@
-import 'package:core/core.dart' show Box;
+import 'package:injectable/injectable.dart';
 
-import '../../../../core/storage/hive_service.dart';
+import '../../../../database/petiveti_database.dart';
+import '../../../../database/tables/animals_table.dart';
+import '../../domain/entities/animal_enums.dart';
 import '../models/animal_model.dart';
-import 'delete_strategy.dart';
 
 abstract class AnimalLocalDataSource {
-  Future<List<AnimalModel>> getAnimals();
-  Future<AnimalModel?> getAnimalById(String id);
-  Future<void> addAnimal(AnimalModel animal);
-  Future<void> updateAnimal(AnimalModel animal);
-  Future<void> deleteAnimal(String id);
-  Stream<List<AnimalModel>> watchAnimals();
+  Future<List<AnimalModel>> getAnimals(String userId);
+  Future<AnimalModel?> getAnimalById(int id);
+  Future<int> addAnimal(AnimalModel animal);
+  Future<bool> updateAnimal(AnimalModel animal);
+  Future<bool> deleteAnimal(int id);
+  Stream<List<AnimalModel>> watchAnimals(String userId);
+  Future<int> getAnimalsCount(String userId);
+  Future<List<AnimalModel>> searchAnimals(String userId, String query);
 }
 
-/// Responsabilidades ÚNICAS (SRP):
-/// 1. Comunicação com Hive (storage)
-/// 2. Operações CRUD básicas
-/// 3. Ordenação e filtragem básica de resultados
-///
-/// Não é responsável por:
-/// - Lógica de delete (delegada para DeleteStrategy)
-/// - Transformações complexas (responsabilidade da Repository)
-/// - Sincronização (responsabilidade do Sync Manager)
+/// Drift-based implementation of AnimalLocalDataSource
+/// 
+/// Responsibilities (SRP):
+/// 1. Communication with Drift database
+/// 2. CRUD operations
+/// 3. Data transformation (Drift entities ↔ Domain models)
+/// 
+/// Not responsible for:
+/// - Business logic (delegated to Repository/Use Cases)
+/// - Complex transformations (Repository responsibility)
+/// - Sync logic (Sync Manager responsibility)
+@LazySingleton(as: AnimalLocalDataSource)
 class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
-  final HiveService _hiveService;
-  final DeleteStrategy _deleteStrategy;
+  final PetivetiDatabase _database;
 
-  AnimalLocalDataSourceImpl(
-    this._hiveService, {
-    DeleteStrategy? deleteStrategy,
-  }) : _deleteStrategy = deleteStrategy ?? SoftDeleteStrategy();
+  AnimalLocalDataSourceImpl(this._database);
 
-  Future<Box<AnimalModel>> get _box async {
-    return await _hiveService.getBox<AnimalModel>(HiveBoxNames.animals);
+  @override
+  Future<List<AnimalModel>> getAnimals(String userId) async {
+    final animals = await _database.animalDao.getAllAnimals(userId);
+    return animals.map(_toModel).toList();
   }
 
   @override
-  Future<List<AnimalModel>> getAnimals() async {
-    final animalsBox = await _box;
-    return _filterAndSort(animalsBox.values.toList());
+  Future<AnimalModel?> getAnimalById(int id) async {
+    final animal = await _database.animalDao.getAnimalById(id);
+    return animal != null ? _toModel(animal) : null;
   }
 
   @override
-  Future<AnimalModel?> getAnimalById(String id) async {
-    final animalsBox = await _box;
-    final animal = animalsBox.get(id);
-    return animal != null && !animal.isDeleted ? animal : null;
+  Future<int> addAnimal(AnimalModel animal) async {
+    final companion = _toCompanion(animal);
+    return await _database.animalDao.createAnimal(companion);
   }
 
   @override
-  Future<void> addAnimal(AnimalModel animal) async {
-    final animalsBox = await _box;
-    await animalsBox.put(animal.id, animal);
+  Future<bool> updateAnimal(AnimalModel animal) async {
+    if (animal.id == null) return false;
+    final companion = _toCompanion(animal, forUpdate: true);
+    return await _database.animalDao.updateAnimal(animal.id!, companion);
   }
 
   @override
-  Future<void> updateAnimal(AnimalModel animal) async {
-    final animalsBox = await _box;
-    await animalsBox.put(animal.id, animal);
+  Future<bool> deleteAnimal(int id) async {
+    return await _database.animalDao.deleteAnimal(id);
   }
 
   @override
-  Future<void> deleteAnimal(String id) async {
-    final animalsBox = await _box;
-    final animal = animalsBox.get(id);
-    if (animal != null) {
-      // Delegar lógica de delete para a estratégia
-      final deletedAnimal = await _deleteStrategy.execute(animal);
-      await animalsBox.put(id, deletedAnimal);
+  Stream<List<AnimalModel>> watchAnimals(String userId) {
+    return _database.animalDao
+        .watchAllAnimals(userId)
+        .map((animals) => animals.map(_toModel).toList());
+  }
+
+  @override
+  Future<int> getAnimalsCount(String userId) async {
+    return await _database.animalDao.getActiveAnimalsCount(userId);
+  }
+
+  @override
+  Future<List<AnimalModel>> searchAnimals(String userId, String query) async {
+    final animals = await _database.animalDao.searchAnimals(userId, query);
+    return animals.map(_toModel).toList();
+  }
+
+  /// Convert Drift Animal entity to domain AnimalModel
+  AnimalModel _toModel(Animal animal) {
+    // Parse species and gender from stored strings
+    final species = AnimalSpeciesExtension.fromString(animal.species);
+    final gender = AnimalGenderExtension.fromString(animal.gender);
+    
+    return AnimalModel(
+      id: animal.id.toString(),
+      name: animal.name,
+      species: species,
+      breed: animal.breed,
+      birthDate: animal.birthDate,
+      gender: gender,
+      weight: animal.weight,
+      photoUrl: animal.photo,
+      color: animal.color,
+      microchipNumber: animal.microchipNumber,
+      notes: animal.notes,
+      userId: animal.userId,
+      isActive: animal.isActive,
+      isDeleted: animal.isDeleted,
+      createdAt: animal.createdAt,
+      updatedAt: animal.updatedAt,
+    );
+  }
+
+  /// Convert domain AnimalModel to Drift AnimalsCompanion
+  AnimalsCompanion _toCompanion(AnimalModel model, {bool forUpdate = false}) {
+    if (forUpdate) {
+      return AnimalsCompanion(
+        id: model.id != null ? Value(int.parse(model.id!)) : const Value.absent(),
+        name: Value(model.name),
+        species: Value(model.species.name),
+        breed: Value.ofNullable(model.breed),
+        birthDate: Value.ofNullable(model.birthDate),
+        gender: Value(model.gender.name),
+        weight: Value.ofNullable(model.weight),
+        photo: Value.ofNullable(model.photoUrl),
+        color: Value.ofNullable(model.color),
+        microchipNumber: Value.ofNullable(model.microchipNumber),
+        notes: Value.ofNullable(model.notes),
+        userId: Value(model.userId),
+        isActive: Value(model.isActive),
+        updatedAt: Value(DateTime.now()),
+      );
     }
-  }
 
-  @override
-  Stream<List<AnimalModel>> watchAnimals() async* {
-    final animalsBox = await _box;
-
-    yield* Stream.periodic(const Duration(milliseconds: 500), (_) {
-      return _filterAndSort(animalsBox.values.toList());
-    });
-  }
-
-  /// Filtrar ativos e ordenar por data de criação (responsabilidade comum)
-  List<AnimalModel> _filterAndSort(List<AnimalModel> animals) {
-    return animals.where((animal) => !animal.isDeleted).toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return AnimalsCompanion.insert(
+      name: model.name,
+      species: model.species.name,
+      breed: Value.ofNullable(model.breed),
+      birthDate: Value.ofNullable(model.birthDate),
+      gender: model.gender.name,
+      weight: Value.ofNullable(model.weight),
+      photo: Value.ofNullable(model.photoUrl),
+      color: Value.ofNullable(model.color),
+      microchipNumber: Value.ofNullable(model.microchipNumber),
+      notes: Value.ofNullable(model.notes),
+      userId: model.userId,
+      isActive: Value(model.isActive),
+      createdAt: Value(model.createdAt),
+    );
   }
 }

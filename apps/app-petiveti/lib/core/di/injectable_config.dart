@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'injectable_config.config.dart';
+import 'modules/database_module.dart';
 
 final getIt = GetIt.instance;
 

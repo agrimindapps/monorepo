@@ -1,153 +1,126 @@
-import 'package:core/core.dart' show Hive, Box;
+import 'package:injectable/injectable.dart';
 
-import '../../../../core/error/exceptions.dart';
+import '../../../../database/petiveti_database.dart';
 import '../models/appointment_model.dart';
 
 abstract class AppointmentLocalDataSource {
-  Future<List<AppointmentModel>> getAppointments(String animalId);
-  Future<List<AppointmentModel>> getUpcomingAppointments(String animalId);
-  Future<AppointmentModel?> getAppointmentById(String id);
-  Future<void> cacheAppointment(AppointmentModel appointment);
-  Future<void> cacheAppointments(List<AppointmentModel> appointments);
-  Future<void> updateAppointment(AppointmentModel appointment);
-  Future<void> deleteAppointment(String id);
-  Future<void> clearCache();
+  Future<List<AppointmentModel>> getAppointments(String userId);
+  Future<List<AppointmentModel>> getAppointmentsByAnimalId(int animalId);
+  Future<List<AppointmentModel>> getUpcomingAppointments(String userId);
+  Future<List<AppointmentModel>> getAppointmentsByStatus(String userId, String status);
+  Future<AppointmentModel?> getAppointmentById(int id);
+  Future<int> addAppointment(AppointmentModel appointment);
+  Future<bool> updateAppointment(AppointmentModel appointment);
+  Future<bool> deleteAppointment(int id);
+  Stream<List<AppointmentModel>> watchAppointmentsByAnimalId(int animalId);
 }
 
+@LazySingleton(as: AppointmentLocalDataSource)
 class AppointmentLocalDataSourceImpl implements AppointmentLocalDataSource {
-  static const String boxName = 'appointments';
-  late Box<AppointmentModel> _box;
+  final PetivetiDatabase _database;
 
-  AppointmentLocalDataSourceImpl() {
-    _initBox();
-  }
+  AppointmentLocalDataSourceImpl(this._database);
 
-  Future<void> _initBox() async {
-    if (!Hive.isBoxOpen(boxName)) {
-      _box = await Hive.openBox<AppointmentModel>(boxName);
-    } else {
-      _box = Hive.box<AppointmentModel>(boxName);
-    }
+  @override
+  Future<List<AppointmentModel>> getAppointments(String userId) async {
+    final appointments = await _database.appointmentDao.getAllAppointments(userId);
+    return appointments.map(_toModel).toList();
   }
 
   @override
-  Future<List<AppointmentModel>> getAppointments(String animalId) async {
-    try {
-      await _initBox();
-      final appointments =
-          _box.values
-              .where(
-                (appointment) =>
-                    appointment.animalId == animalId && !appointment.isDeleted,
-              )
-              .toList();
-      appointments.sort((a, b) => b.dateTimestamp.compareTo(a.dateTimestamp));
-
-      return appointments;
-    } catch (e) {
-      throw CacheException(message: 'Failed to get appointments: $e');
-    }
+  Future<List<AppointmentModel>> getAppointmentsByAnimalId(int animalId) async {
+    final appointments = await _database.appointmentDao.getAppointmentsByAnimal(animalId);
+    return appointments.map(_toModel).toList();
   }
 
   @override
-  Future<List<AppointmentModel>> getUpcomingAppointments(
-    String animalId,
-  ) async {
-    try {
-      await _initBox();
-      final now = DateTime.now().millisecondsSinceEpoch;
+  Future<List<AppointmentModel>> getUpcomingAppointments(String userId) async {
+    final appointments = await _database.appointmentDao.getUpcomingAppointments(userId);
+    return appointments.map(_toModel).toList();
+  }
 
-      final upcomingAppointments =
-          _box.values
-              .where(
-                (appointment) =>
-                    appointment.animalId == animalId &&
-                    !appointment.isDeleted &&
-                    appointment.dateTimestamp > now &&
-                    appointment.status == 0,
-              ) // scheduled status
-              .toList();
-      upcomingAppointments.sort(
-        (a, b) => a.dateTimestamp.compareTo(b.dateTimestamp),
+  @override
+  Future<List<AppointmentModel>> getAppointmentsByStatus(String userId, String status) async {
+    final appointments = await _database.appointmentDao.getAppointmentsByStatus(userId, status);
+    return appointments.map(_toModel).toList();
+  }
+
+  @override
+  Future<AppointmentModel?> getAppointmentById(int id) async {
+    final appointment = await _database.appointmentDao.getAppointmentById(id);
+    return appointment != null ? _toModel(appointment) : null;
+  }
+
+  @override
+  Future<int> addAppointment(AppointmentModel appointment) async {
+    final companion = _toCompanion(appointment);
+    return await _database.appointmentDao.createAppointment(companion);
+  }
+
+  @override
+  Future<bool> updateAppointment(AppointmentModel appointment) async {
+    if (appointment.id == null) return false;
+    final companion = _toCompanion(appointment, forUpdate: true);
+    return await _database.appointmentDao.updateAppointment(int.parse(appointment.id!), companion);
+  }
+
+  @override
+  Future<bool> deleteAppointment(int id) async {
+    return await _database.appointmentDao.deleteAppointment(id);
+  }
+
+  @override
+  Stream<List<AppointmentModel>> watchAppointmentsByAnimalId(int animalId) {
+    return _database.appointmentDao.watchAppointmentsByAnimal(animalId)
+        .map((appointments) => appointments.map(_toModel).toList());
+  }
+
+  AppointmentModel _toModel(Appointment appointment) {
+    return AppointmentModel(
+      id: appointment.id.toString(),
+      animalId: appointment.animalId.toString(),
+      title: appointment.title,
+      description: appointment.description,
+      dateTime: appointment.dateTime,
+      veterinarian: appointment.veterinarian,
+      location: appointment.location,
+      notes: appointment.notes,
+      status: appointment.status,
+      userId: appointment.userId,
+      createdAt: appointment.createdAt,
+      updatedAt: appointment.updatedAt,
+      isDeleted: appointment.isDeleted,
+    );
+  }
+
+  AppointmentsCompanion _toCompanion(AppointmentModel model, {bool forUpdate = false}) {
+    if (forUpdate) {
+      return AppointmentsCompanion(
+        id: model.id != null ? Value(int.parse(model.id!)) : const Value.absent(),
+        animalId: Value(int.parse(model.animalId)),
+        title: Value(model.title),
+        description: Value.ofNullable(model.description),
+        dateTime: Value(model.dateTime),
+        veterinarian: Value.ofNullable(model.veterinarian),
+        location: Value.ofNullable(model.location),
+        notes: Value.ofNullable(model.notes),
+        status: Value(model.status),
+        userId: Value(model.userId),
+        updatedAt: Value(DateTime.now()),
       );
-
-      return upcomingAppointments;
-    } catch (e) {
-      throw CacheException(message: 'Failed to get upcoming appointments: $e');
     }
-  }
 
-  @override
-  Future<AppointmentModel?> getAppointmentById(String id) async {
-    try {
-      await _initBox();
-      return _box.values
-          .where(
-            (appointment) => appointment.id == id && !appointment.isDeleted,
-          )
-          .firstOrNull;
-    } catch (e) {
-      throw CacheException(message: 'Failed to get appointment by id: $e');
-    }
-  }
-
-  @override
-  Future<void> cacheAppointment(AppointmentModel appointment) async {
-    try {
-      await _initBox();
-      await _box.put(appointment.id, appointment);
-    } catch (e) {
-      throw CacheException(message: 'Failed to cache appointment: $e');
-    }
-  }
-
-  @override
-  Future<void> cacheAppointments(List<AppointmentModel> appointments) async {
-    try {
-      await _initBox();
-      final Map<String, AppointmentModel> appointmentMap = {
-        for (var appointment in appointments) appointment.id: appointment,
-      };
-      await _box.putAll(appointmentMap);
-    } catch (e) {
-      throw CacheException(message: 'Failed to cache appointments: $e');
-    }
-  }
-
-  @override
-  Future<void> updateAppointment(AppointmentModel appointment) async {
-    try {
-      await _initBox();
-      await _box.put(appointment.id, appointment);
-    } catch (e) {
-      throw CacheException(message: 'Failed to update appointment: $e');
-    }
-  }
-
-  @override
-  Future<void> deleteAppointment(String id) async {
-    try {
-      await _initBox();
-      final appointment = await getAppointmentById(id);
-      if (appointment != null) {
-        final deletedAppointment = appointment.copyWith(
-          isDeleted: true,
-          updatedAtTimestamp: DateTime.now().millisecondsSinceEpoch,
-        );
-        await _box.put(id, deletedAppointment);
-      }
-    } catch (e) {
-      throw CacheException(message: 'Failed to delete appointment: $e');
-    }
-  }
-
-  @override
-  Future<void> clearCache() async {
-    try {
-      await _initBox();
-      await _box.clear();
-    } catch (e) {
-      throw CacheException(message: 'Failed to clear appointments cache: $e');
-    }
+    return AppointmentsCompanion.insert(
+      animalId: int.parse(model.animalId),
+      title: model.title,
+      description: Value.ofNullable(model.description),
+      dateTime: model.dateTime,
+      veterinarian: Value.ofNullable(model.veterinarian),
+      location: Value.ofNullable(model.location),
+      notes: Value.ofNullable(model.notes),
+      status: model.status,
+      userId: model.userId,
+      createdAt: Value(model.createdAt),
+    );
   }
 }

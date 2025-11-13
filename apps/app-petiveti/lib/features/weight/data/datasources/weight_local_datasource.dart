@@ -1,120 +1,108 @@
+import 'package:injectable/injectable.dart';
+
+import '../../../../database/petiveti_database.dart';
 import '../models/weight_model.dart';
 
 abstract class WeightLocalDataSource {
-  /// Retorna todos os registros de peso não deletados
-  Future<List<WeightModel>> getWeights();
-
-  /// Retorna registros de peso de um animal específico
-  Future<List<WeightModel>> getWeightsByAnimalId(String animalId);
-
-  /// Retorna o último registro de peso de um animal
-  Future<WeightModel?> getLatestWeightByAnimalId(String animalId);
-
-  /// Retorna um registro de peso específico pelo ID
-  Future<WeightModel?> getWeightById(String id);
-
-  /// Adiciona/atualiza um registro de peso no cache local
-  Future<void> cacheWeight(WeightModel weight);
-
-  /// Adiciona/atualiza múltiplos registros de peso no cache local
-  Future<void> cacheWeights(List<WeightModel> weights);
-
-  /// Atualiza um registro de peso existente
-  Future<void> updateWeight(WeightModel weight);
-
-  /// Remove um registro de peso (soft delete)
-  Future<void> deleteWeight(String id);
-
-  /// Remove permanentemente um registro de peso
-  Future<void> hardDeleteWeight(String id);
-
-  Future<void> clearCache();
-
-  /// Retorna stream de registros de peso para observar mudanças em tempo real
-  Stream<List<WeightModel>> watchWeights();
-
-  /// Retorna stream de registros de peso de um animal específico
-  Stream<List<WeightModel>> watchWeightsByAnimalId(String animalId);
-
-  /// Retorna registros de peso por período
-  Future<List<WeightModel>> getWeightHistory(
-    String animalId,
-    DateTime startDate,
-    DateTime endDate,
-  );
-
-  /// Conta total de registros de peso por animal
-  Future<int> getWeightsCount(String animalId);
-
-  /// Retorna estatísticas de peso (min, max, média)
-  Future<Map<String, double>> getWeightStatistics(String animalId);
+  Future<List<WeightModel>> getWeightRecords(String userId);
+  Future<List<WeightModel>> getWeightRecordsByAnimalId(int animalId);
+  Future<WeightModel?> getWeightRecordById(int id);
+  Future<WeightModel?> getLatestWeight(int animalId);
+  Future<int> addWeightRecord(WeightModel record);
+  Future<bool> updateWeightRecord(WeightModel record);
+  Future<bool> deleteWeightRecord(int id);
+  Stream<List<WeightModel>> watchWeightRecordsByAnimalId(int animalId);
 }
 
+@LazySingleton(as: WeightLocalDataSource)
 class WeightLocalDataSourceImpl implements WeightLocalDataSource {
+  final PetivetiDatabase _database;
+
+  WeightLocalDataSourceImpl(this._database);
+
   @override
-  Future<List<WeightModel>> getWeights() async {
-    return [];
+  Future<List<WeightModel>> getWeightRecords(String userId) async {
+    final records = await _database.weightDao.getAllWeightRecords(userId);
+    return records.map(_toModel).toList();
   }
 
   @override
-  Future<List<WeightModel>> getWeightsByAnimalId(String animalId) async {
-    return [];
+  Future<List<WeightModel>> getWeightRecordsByAnimalId(int animalId) async {
+    final records = await _database.weightDao.getWeightRecordsByAnimal(animalId);
+    return records.map(_toModel).toList();
   }
 
   @override
-  Future<WeightModel?> getLatestWeightByAnimalId(String animalId) async {
-    return null;
+  Future<WeightModel?> getWeightRecordById(int id) async {
+    final record = await _database.weightDao.getWeightRecordById(id);
+    return record != null ? _toModel(record) : null;
   }
 
   @override
-  Future<WeightModel?> getWeightById(String id) async {
-    return null;
+  Future<WeightModel?> getLatestWeight(int animalId) async {
+    final record = await _database.weightDao.getLatestWeight(animalId);
+    return record != null ? _toModel(record) : null;
   }
 
   @override
-  Future<void> cacheWeight(WeightModel weight) async {}
-
-  @override
-  Future<void> cacheWeights(List<WeightModel> weights) async {}
-
-  @override
-  Future<void> updateWeight(WeightModel weight) async {}
-
-  @override
-  Future<void> deleteWeight(String id) async {}
-
-  @override
-  Future<void> hardDeleteWeight(String id) async {}
-
-  @override
-  Future<void> clearCache() async {}
-
-  @override
-  Stream<List<WeightModel>> watchWeights() {
-    return Stream.value([]);
+  Future<int> addWeightRecord(WeightModel record) async {
+    final companion = _toCompanion(record);
+    return await _database.weightDao.createWeightRecord(companion);
   }
 
   @override
-  Stream<List<WeightModel>> watchWeightsByAnimalId(String animalId) {
-    return Stream.value([]);
+  Future<bool> updateWeightRecord(WeightModel record) async {
+    if (record.id == null) return false;
+    final companion = _toCompanion(record, forUpdate: true);
+    return await _database.weightDao.updateWeightRecord(int.parse(record.id!), companion);
   }
 
   @override
-  Future<List<WeightModel>> getWeightHistory(
-    String animalId,
-    DateTime startDate,
-    DateTime endDate,
-  ) async {
-    return [];
+  Future<bool> deleteWeightRecord(int id) async {
+    return await _database.weightDao.deleteWeightRecord(id);
   }
 
   @override
-  Future<int> getWeightsCount(String animalId) async {
-    return 0;
+  Stream<List<WeightModel>> watchWeightRecordsByAnimalId(int animalId) {
+    return _database.weightDao.watchWeightRecordsByAnimal(animalId)
+        .map((records) => records.map(_toModel).toList());
   }
 
-  @override
-  Future<Map<String, double>> getWeightStatistics(String animalId) async {
-    return {'min': 0.0, 'max': 0.0, 'average': 0.0, 'current': 0.0};
+  WeightModel _toModel(WeightRecord record) {
+    return WeightModel(
+      id: record.id.toString(),
+      animalId: record.animalId.toString(),
+      weight: record.weight,
+      unit: record.unit,
+      date: record.date,
+      notes: record.notes,
+      userId: record.userId,
+      createdAt: record.createdAt,
+      isDeleted: record.isDeleted,
+    );
+  }
+
+  WeightRecordsCompanion _toCompanion(WeightModel model, {bool forUpdate = false}) {
+    if (forUpdate) {
+      return WeightRecordsCompanion(
+        id: model.id != null ? Value(int.parse(model.id!)) : const Value.absent(),
+        animalId: Value(int.parse(model.animalId)),
+        weight: Value(model.weight),
+        unit: Value(model.unit),
+        date: Value(model.date),
+        notes: Value.ofNullable(model.notes),
+        userId: Value(model.userId),
+      );
+    }
+
+    return WeightRecordsCompanion.insert(
+      animalId: int.parse(model.animalId),
+      weight: model.weight,
+      unit: Value(model.unit),
+      date: model.date,
+      notes: Value.ofNullable(model.notes),
+      userId: model.userId,
+      createdAt: Value(model.createdAt),
+    );
   }
 }

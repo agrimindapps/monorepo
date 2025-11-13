@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import 'app_page.dart';
 import 'core/config/firebase_options.dart';
@@ -31,17 +32,37 @@ void main() async {
   // Use path-based URLs for web (no #)
   usePathUrlStrategy();
 
-  // Initialize Hive using core package
-  await Hive.initFlutter();
-
-  // Initialize Hive boxes for features
-  await VacationLocalDataSourceImpl.initialize();
-  await ThirteenthSalaryLocalDataSourceImplExtension.initialize();
-  await OvertimeLocalDataSourceImplExtension.initialize();
-  await NetSalaryLocalDataSourceImplExtension.initialize();
-  await EmergencyReserveLocalDataSourceImplExtension.initialize();
-  await CashVsInstallmentLocalDataSourceImplExtension.initialize();
-  await UnemploymentInsuranceLocalDataSourceImplExtension.initialize();
+  // Initialize Hive with platform-specific initialization
+  if (!kIsWeb) {
+    await Hive.initFlutter();
+    
+    // Initialize Hive boxes for features (mobile only for now)
+    await VacationLocalDataSourceImpl.initialize();
+    await ThirteenthSalaryLocalDataSourceImplExtension.initialize();
+    await OvertimeLocalDataSourceImplExtension.initialize();
+    await NetSalaryLocalDataSourceImplExtension.initialize();
+    await EmergencyReserveLocalDataSourceImplExtension.initialize();
+    await CashVsInstallmentLocalDataSourceImplExtension.initialize();
+    await UnemploymentInsuranceLocalDataSourceImplExtension.initialize();
+  } else {
+    // For web, use IndexedDB storage
+    Hive.init('app_calculei_web');
+    debugPrint('Hive initialized for web with IndexedDB');
+    
+    // Initialize Hive boxes for features
+    try {
+      await VacationLocalDataSourceImpl.initialize();
+      await ThirteenthSalaryLocalDataSourceImplExtension.initialize();
+      await OvertimeLocalDataSourceImplExtension.initialize();
+      await NetSalaryLocalDataSourceImplExtension.initialize();
+      await EmergencyReserveLocalDataSourceImplExtension.initialize();
+      await CashVsInstallmentLocalDataSourceImplExtension.initialize();
+      await UnemploymentInsuranceLocalDataSourceImplExtension.initialize();
+      debugPrint('Hive boxes initialized successfully on web');
+    } catch (e) {
+      debugPrint('Error initializing Hive boxes on web: $e');
+    }
+  }
 
   // Initialize Firebase with error handling
   bool firebaseInitialized = false;

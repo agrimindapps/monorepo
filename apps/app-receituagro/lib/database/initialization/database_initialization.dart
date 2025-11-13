@@ -59,46 +59,6 @@ class DatabaseInitialization {
     }
   }
 
-  /// Exporta dados do usuário para backup
-  static Future<Map<String, dynamic>> exportUserData({
-    required GetIt getIt,
-    required String userId,
-  }) async {
-    developer.log(
-      '📤 Exportando dados do usuário...',
-      name: 'DatabaseInit.export',
-    );
-
-    final db = getIt<ReceituagroDatabase>();
-    final data = await db.exportUserData(userId);
-
-    developer.log(
-      '✅ Exportação completa: ${data['diagnosticos'].length} diagnosticos, '
-      '${data['favoritos'].length} favoritos, '
-      '${data['comentarios'].length} comentarios',
-      name: 'DatabaseInit.export',
-    );
-
-    return data;
-  }
-
-  /// Limpa todos os dados do usuário (hard delete)
-  ///
-  /// ⚠️ ATENÇÃO: Esta operação é irreversível!
-  static Future<void> clearUserData({
-    required GetIt getIt,
-    required String userId,
-  }) async {
-    developer.log(
-      '🗑️ Limpando dados do usuário...',
-      name: 'DatabaseInit.clear',
-    );
-
-    final db = getIt<ReceituagroDatabase>();
-    await db.clearUserData(userId);
-
-    developer.log('✅ Dados do usuário limpos', name: 'DatabaseInit.clear');
-  }
 }
 
 /// Exemplo de uso no main.dart:

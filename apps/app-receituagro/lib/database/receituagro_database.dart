@@ -253,12 +253,9 @@ class ReceituagroDatabase extends _$ReceituagroDatabase with BaseDriftDatabase {
     return result.read(comentarios.id.count()) ?? 0;
   }
 
-  /// Busca registros que precisam ser sincronizados (isDirty = true)
-  Future<List<Diagnostico>> getDirtyDiagnosticos() async {
-    final query = select(diagnosticos)
-      ..where((tbl) => tbl.isDirty.equals(true));
-    return await query.get();
-  }
+  // ========== SYNC METHODS - REMOVED ==========
+  // NOTE: Diagnosticos table is STATIC (no sync fields)
+  // getDirtyDiagnosticos() removed - table has no isDirty field
 
   // ========== QUERIES ESTÁTICAS (DADOS JSON) ==========
 
@@ -306,42 +303,6 @@ class ReceituagroDatabase extends _$ReceituagroDatabase with BaseDriftDatabase {
 
   // ========== OPERAÇÕES EM LOTE ==========
 
-  // NOTA: softDeleteDiagnosticos removido - Diagnosticos é tabela estática
-
-  /// Limpa todos os dados de um usuário (hard delete)
-  Future<void> clearUserData(String userId) async {
-    await executeTransaction(() async {
-      // Deletar em ordem (respeitar foreign keys)
-      await (delete(
-        comentarios,
-      )..where((tbl) => tbl.userId.equals(userId))).go();
-      await (delete(favoritos)..where((tbl) => tbl.userId.equals(userId))).go();
-      await (delete(
-        diagnosticos,
-      )..where((tbl) => tbl.userId.equals(userId))).go();
-    }, operationName: 'Clear user data');
-  }
-
-  /// Exporta dados do usuário para JSON
-  Future<Map<String, dynamic>> exportUserData(String userId) async {
-    final userDiagnosticos = await (select(
-      diagnosticos,
-    )..where((tbl) => tbl.userId.equals(userId))).get();
-
-    final userFavoritos = await (select(
-      favoritos,
-    )..where((tbl) => tbl.userId.equals(userId))).get();
-
-    final userComentarios = await (select(
-      comentarios,
-    )..where((tbl) => tbl.userId.equals(userId))).get();
-
-    return {
-      'export_date': DateTime.now().toIso8601String(),
-      'user_id': userId,
-      'diagnosticos': userDiagnosticos.map((d) => d.toJson()).toList(),
-      'favoritos': userFavoritos.map((f) => f.toJson()).toList(),
-      'comentarios': userComentarios.map((c) => c.toJson()).toList(),
-    };
-  }
+  // NOTA: clearUserData/exportUserData removidos - Diagnosticos é tabela estática sem userId
+  // Para operações de usuário, usar tabelas Favoritos e Comentarios
 }

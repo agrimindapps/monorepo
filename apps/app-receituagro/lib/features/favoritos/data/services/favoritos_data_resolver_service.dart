@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 
 import 'favoritos_data_resolver_strategy.dart';
 
@@ -10,6 +11,7 @@ import 'favoritos_data_resolver_strategy.dart';
 /// Refatoração: Usa Strategy Pattern via FavoritosDataResolverStrategyRegistry
 /// - Eliminado switch case (OCP violation)
 /// - Agora extensível sem modificar este serviço
+@injectable
 class FavoritosDataResolverService {
   late final FavoritosDataResolverStrategyRegistry _strategyRegistry;
 

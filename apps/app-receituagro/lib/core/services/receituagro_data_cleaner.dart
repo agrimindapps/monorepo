@@ -92,7 +92,8 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       
       // Get count from each Drift table
       try {
-        final diagnosticosCount = await (_db.select(_db.diagnosticos)..where((tbl) => tbl.isDeleted.equals(false))).get().then((rows) => rows.length);
+        // NOTE: Diagnosticos is static table - no isDeleted field, count all
+        final diagnosticosCount = await _db.select(_db.diagnosticos).get().then((rows) => rows.length);
         tableStats['diagnosticos'] = {
           'tableName': 'diagnosticos',
           'totalRecords': diagnosticosCount,
@@ -285,9 +286,9 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
           int recordCount = 0;
           
           if (tableName == 'diagnosticos') {
-            final rows = await (_db.select(_db.diagnosticos)..where((tbl) => tbl.isDeleted.equals(false))).get();
-            recordCount = rows.length;
-            await (_db.delete(_db.diagnosticos)..where((tbl) => tbl.isDeleted.equals(false))).go();
+            // NOTE: Diagnosticos is static table - skip deletion
+            recordCount = 0;
+            debugPrint('⚠️ Skipping diagnosticos - static table');
           } else if (tableName == 'favoritos') {
             final rows = await (_db.select(_db.favoritos)..where((tbl) => tbl.isDeleted.equals(false))).get();
             recordCount = rows.length;
@@ -356,15 +357,9 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
   @override
   Future<bool> verifyDataCleanup() async {
     try {
-      // Verificar se há dados nas tabelas de usuário
-      final diagnosticosCount = await (_db.select(_db.diagnosticos)..where((tbl) => tbl.isDeleted.equals(false))).get().then((rows) => rows.length);
-      if (diagnosticosCount > 0) {
-        if (kDebugMode) {
-          debugPrint('⚠️ ReceitaAgroDataCleaner (Drift): Tabela "diagnosticos" ainda contém $diagnosticosCount registros');
-        }
-        return false;
-      }
-
+      // NOTE: Diagnosticos is static table - skip verification
+      // Only verify user tables (favoritos, comentarios)
+      
       final favoritosCount = await (_db.select(_db.favoritos)..where((tbl) => tbl.isDeleted.equals(false))).get().then((rows) => rows.length);
       if (favoritosCount > 0) {
         if (kDebugMode) {
@@ -428,29 +423,8 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
 
     int totalRecords = 0;
 
-    // Limpar tabela de diagnósticos (dados do usuário)
-    try {
-      final diagnosticosRows = await (_db.select(_db.diagnosticos)..where((tbl) => tbl.isDeleted.equals(false))).get();
-      final diagnosticosCount = diagnosticosRows.length;
-      
-      // Soft delete: marcar como deletados ao invés de remover
-      await (_db.update(_db.diagnosticos)
-        ..where((tbl) => tbl.isDeleted.equals(false))
-      ).write(const DiagnosticosCompanion(isDeleted: Value(true), isDirty: Value(true)));
-      
-      results['clearedTables'].add('diagnosticos');
-      totalRecords += diagnosticosCount;
-
-      if (kDebugMode) {
-        debugPrint('   ✅ Tabela "diagnosticos" limpa ($diagnosticosCount registros)');
-      }
-    } catch (e) {
-      final error = 'Erro ao limpar tabela "diagnosticos": $e';
-      results['errors'].add(error);
-      if (kDebugMode) {
-        debugPrint('   ❌ $error');
-      }
-    }
+    // NOTE: Diagnosticos is static table - skip clearing
+    // Only clear user tables (favoritos, comentarios)
 
     // Limpar tabela de favoritos (dados do usuário)
     try {

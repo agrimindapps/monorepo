@@ -66,24 +66,13 @@ PragasRepository pragasRepository(Ref ref) {
 
 // ========== STREAM PROVIDERS (Reactive UI) ==========
 
-/// Stream de diagnósticos do usuário
-///
-/// A UI pode observar este provider para reagir automaticamente
-/// a mudanças nos diagnósticos
-@riverpod
-Stream<List<DiagnosticoData>> diagnosticosStream(Ref ref, String userId) {
-  final repo = ref.watch(diagnosticoRepositoryProvider);
-  return repo.watchByUserId(userId);
-}
-
 /// Stream de diagnósticos com dados relacionados (JOIN)
 @riverpod
 Stream<List<DiagnosticoEnriched>> diagnosticosEnrichedStream(
   Ref ref,
-  String userId,
 ) {
   final repo = ref.watch(diagnosticoRepositoryProvider);
-  return repo.watchAllWithRelations(userId);
+  return repo.watchAllWithRelations();
 }
 
 /// Stream de favoritos do usuário
@@ -120,17 +109,6 @@ Stream<List<ComentarioData>> comentariosUserStream(Ref ref, String userId) {
 
 // ========== FUTURE PROVIDERS (One-time data fetch) ==========
 
-/// Provider para buscar diagnósticos recentes
-@riverpod
-Future<List<DiagnosticoData>> diagnosticosRecent(
-  Ref ref, {
-  required String userId,
-  int limit = 10,
-}) async {
-  final repo = ref.watch(diagnosticoRepositoryProvider);
-  return repo.findRecent(userId, limit: limit);
-}
-
 /// Provider para verificar se item está favoritado
 @riverpod
 Future<bool> isFavorited(
@@ -148,13 +126,6 @@ Future<bool> isFavorited(
 Future<int> comentariosCount(Ref ref, String itemId) async {
   final repo = ref.watch(comentarioRepositoryProvider);
   return repo.countByItem(itemId);
-}
-
-/// Provider para contar diagnósticos do usuário
-@riverpod
-Future<int> diagnosticosCount(Ref ref, String userId) async {
-  final repo = ref.watch(diagnosticoRepositoryProvider);
-  return repo.countByUserId(userId);
 }
 
 /// Provider para contar favoritos por tipo

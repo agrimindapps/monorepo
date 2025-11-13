@@ -1,32 +1,34 @@
 import 'package:hive/hive.dart';
 
-part 'license_model.g.dart';
+// TODO: Generate with hive_generator when needed
+// part 'license_model.g.dart';
 
 /// Model representing a trial license for the application
-@HiveType(typeId: 10)
+/// NOTE: HiveType annotation commented out until migration to Drift is complete
+// @HiveType(typeId: 10)
 class LicenseModel extends HiveObject {
   /// Unique identifier for the license
-  @HiveField(0)
+  // @HiveField(0)
   final String id;
 
   /// When the license was created/started
-  @HiveField(1)
+  // @HiveField(1)
   final DateTime startDate;
 
   /// When the license expires
-  @HiveField(2)
+  // @HiveField(2)
   final DateTime expirationDate;
 
   /// Whether the license is currently active
-  @HiveField(3)
+  // @HiveField(3)
   final bool isActive;
 
   /// Type of license (trial, premium, etc.)
-  @HiveField(4)
+  // @HiveField(4)
   final LicenseType type;
 
   /// Additional metadata for the license
-  @HiveField(5)
+  // @HiveField(5)
   final Map<String, dynamic>? metadata;
 
   LicenseModel({
@@ -174,13 +176,13 @@ class LicenseModel extends HiveObject {
 /// Enum for different types of licenses
 @HiveType(typeId: 11)
 enum LicenseType {
-  @HiveField(0)
+  // @HiveField(0)
   trial,
-  @HiveField(1)
+  // @HiveField(1)
   premium,
-  @HiveField(2)
+  // @HiveField(2)
   enterprise,
-  @HiveField(3)
+  // @HiveField(3)
   lifetime,
 }
 

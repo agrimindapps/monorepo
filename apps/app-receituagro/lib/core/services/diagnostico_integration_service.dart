@@ -28,11 +28,8 @@ class DiagnosticoIntegrationService {
   /// Obtém um diagnóstico completo com todos os dados relacionais
   Future<DiagnosticoDetalhado?> getDiagnosticoCompleto(String idReg) async {
     try {
-      // Buscar diagnóstico por idReg (usando userId padrão ou do contexto)
-      final diagnostico = await _diagnosticoRepo.findByIdReg(
-        'current_user',
-        idReg,
-      );
+      // Buscar diagnóstico por idReg (NOTE: userId removed - static table)
+      final diagnostico = await _diagnosticoRepo.findByIdReg(idReg);
       if (diagnostico == null) return null;
 
       final defensivo = await _getDefensivoById(diagnostico.defenisivoId);
@@ -58,7 +55,7 @@ class DiagnosticoIntegrationService {
       if (culturaIdInt == null) return [];
 
       final diagnosticos = await _diagnosticoRepo.findByCultura(
-        'current_user',
+        
         culturaIdInt,
       );
       final List<DiagnosticoDetalhado> detalhados = [];
@@ -84,7 +81,7 @@ class DiagnosticoIntegrationService {
       if (pragaIdInt == null) return [];
 
       final diagnosticos = await _diagnosticoRepo.findByPraga(
-        'current_user',
+        
         pragaIdInt,
       );
       final List<DiagnosticoDetalhado> detalhados = [];
@@ -112,7 +109,7 @@ class DiagnosticoIntegrationService {
       if (defensivoIdInt == null) return [];
 
       final diagnosticos = await _diagnosticoRepo.findByDefensivo(
-        'current_user',
+        
         defensivoIdInt,
       );
       final List<DiagnosticoDetalhado> detalhados = [];
@@ -137,8 +134,8 @@ class DiagnosticoIntegrationService {
     String? defensivoId,
   }) async {
     try {
-      final diagnosticos = await _diagnosticoRepo.findByUserId('current_user');
-      List<DiagnosticoData> filtered = diagnosticos;
+      final diagnosticos = await _diagnosticoRepo.findAll(); // Static data - no userId
+      List<Diagnostico> filtered = diagnosticos;
 
       if (culturaId != null && culturaId.isNotEmpty) {
         final culturaIdInt = int.tryParse(culturaId);
@@ -259,7 +256,7 @@ class DiagnosticoIntegrationService {
 
 /// Modelo que representa um diagnóstico com todos os dados relacionais
 class DiagnosticoDetalhado {
-  final DiagnosticoData diagnostico;
+  final Diagnostico diagnostico; // Changed from DiagnosticoData
   final Fitossanitario? defensivo;
   final Cultura? cultura;
   final Praga? praga;

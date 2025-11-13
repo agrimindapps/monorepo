@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/services/diagnostico_compatibility_service.dart';
 import '../../../../core/theme/spacing_tokens.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../providers/enhanced_diagnosticos_praga_notifier.dart';
@@ -33,7 +32,6 @@ class EnhancedDiagnosticosPragaWidget extends ConsumerStatefulWidget {
 class _EnhancedDiagnosticosPragaWidgetState
     extends ConsumerState<EnhancedDiagnosticosPragaWidget> {
   final TextEditingController _searchController = TextEditingController();
-  bool _showCompatibilityIndicators = true;
 
   @override
   void initState() {
@@ -131,22 +129,6 @@ class _EnhancedDiagnosticosPragaWidgetState
           if (state.hasData) ...[
             _buildCacheIndicator(stats.cacheHitRate),
             const SizedBox(width: SpacingTokens.xs),
-            IconButton(
-              icon: Icon(
-                _showCompatibilityIndicators
-                    ? Icons.verified_outlined
-                    : Icons.verified_outlined,
-                size: 20,
-              ),
-              onPressed: () {
-                setState(() {
-                  _showCompatibilityIndicators = !_showCompatibilityIndicators;
-                });
-              },
-              tooltip: _showCompatibilityIndicators
-                  ? 'Ocultar indicadores de compatibilidade'
-                  : 'Mostrar indicadores de compatibilidade',
-            ),
             IconButton(
               icon: const Icon(Icons.refresh, size: 20),
               onPressed: state.isLoading
@@ -530,8 +512,6 @@ class _EnhancedDiagnosticosPragaWidgetState
                       ),
                     ),
                   ),
-                  if (_showCompatibilityIndicators)
-                    _buildCompatibilityIndicator(context, diagnostico),
                 ],
               ),
 
@@ -567,57 +547,6 @@ class _EnhancedDiagnosticosPragaWidgetState
           ),
         ),
       ),
-    );
-  }
-
-  /// Constrói indicador de compatibilidade
-  Widget _buildCompatibilityIndicator(
-    BuildContext context,
-    DiagnosticoEntity diagnostico,
-  ) {
-    final notifier = ref.read(
-      enhancedDiagnosticosPragaNotifierProvider.notifier,
-    );
-
-    return FutureBuilder<CompatibilityValidation?>(
-      future:
-          notifier.validateCompatibility(diagnostico)
-              as Future<CompatibilityValidation?>?,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          );
-        }
-
-        if (snapshot.hasData && snapshot.data != null) {
-          final validation = snapshot.data!;
-          Color color;
-          IconData icon;
-
-          switch (validation.result) {
-            case CompatibilityResult.success:
-              color = Colors.green;
-              icon = Icons.check_circle;
-              break;
-            case CompatibilityResult.warning:
-              color = Colors.orange;
-              icon = Icons.warning;
-              break;
-            case CompatibilityResult.failed:
-            case CompatibilityResult.error:
-              color = Colors.red;
-              icon = Icons.error;
-              break;
-          }
-
-          return Icon(icon, size: 16, color: color);
-        }
-
-        return const SizedBox.shrink();
-      },
     );
   }
 

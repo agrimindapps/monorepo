@@ -4,8 +4,8 @@ import 'package:dartz/dartz.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../domain/repositories/i_local_storage_repository.dart';
-import '../../shared/utils/failure.dart';
+import '../../../../domain/repositories/i_local_storage_repository.dart';
+import '../../../../shared/utils/failure.dart';
 
 /// DriftStorageService - Implementação simplificada usando tabela key-value
 /// 
@@ -23,19 +23,13 @@ class DriftStorageService implements ILocalStorageRepository {
   /// Nome da tabela key-value padrão
   static const String _defaultTableName = 'key_value_storage';
 
+  /// Construtor
   DriftStorageService(this._database);
 
   @override
   Future<Either<Failure, void>> initialize() async {
     try {
       if (_isInitialized) return const Right(null);
-
-      // Validar que a database está disponível
-      if (_database.executor == null) {
-        return const Left(
-          CacheFailure('Database executor not initialized'),
-        );
-      }
 
       _isInitialized = true;
       return const Right(null);
@@ -357,8 +351,6 @@ class DriftStorageService implements ILocalStorageRepository {
     try {
       await _ensureInitialized();
 
-      final tableName = box ?? _defaultTableName;
-
       // Obter todas as chaves
       final keysResult = await getKeys(box: box);
 
@@ -397,7 +389,7 @@ class DriftStorageService implements ILocalStorageRepository {
     required String key,
     required dynamic value,
   }) async {
-    return save<dynamic>(key: key, data: value, box: HiveBoxes.settings);
+    return save<dynamic>(key: key, data: value, box: 'settings');
   }
 
   @override
@@ -406,7 +398,7 @@ class DriftStorageService implements ILocalStorageRepository {
     T? defaultValue,
   }) async {
     try {
-      final result = await get<T>(key: key, box: HiveBoxes.settings);
+      final result = await get<T>(key: key, box: 'settings');
 
       return result.fold(
         (failure) => Left(failure),
@@ -423,7 +415,7 @@ class DriftStorageService implements ILocalStorageRepository {
       await _ensureInitialized();
 
       final results = await _database.customSelect(
-        'SELECT key, value FROM ${HiveBoxes.settings}',
+        'SELECT key, value FROM settings',
       ).get();
 
       final settings = <String, dynamic>{};
@@ -456,7 +448,7 @@ class DriftStorageService implements ILocalStorageRepository {
       return save<Map<String, dynamic>>(
         key: key,
         data: offlineData,
-        box: HiveBoxes.offline,
+        box: 'offline',
       );
     } catch (e) {
       return Left(CacheFailure('Erro ao salvar dados offline: $e'));
@@ -470,7 +462,7 @@ class DriftStorageService implements ILocalStorageRepository {
     try {
       final result = await get<Map<String, dynamic>>(
         key: key,
-        box: HiveBoxes.offline,
+        box: 'offline',
       );
 
       return result.fold(
@@ -538,7 +530,7 @@ class DriftStorageService implements ILocalStorageRepository {
       final results = await _database.customSelect(
         '''
         SELECT key, value 
-        FROM ${HiveBoxes.offline}
+        FROM offline
         ''',
       ).get();
 

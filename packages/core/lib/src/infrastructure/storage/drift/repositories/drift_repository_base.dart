@@ -164,7 +164,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
   Future<Result<bool>> delete(dynamic id) async {
     try {
       final deleted = await (database.delete(table)
-            ..where((tbl) => idColumn.equals(id)))
+            ..where((tbl) => idColumn.equals(id as Object)))
           .go();
 
       if (_cacheEnabled && deleted > 0) {
@@ -193,7 +193,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
   Future<Result<int>> deleteAll(List<dynamic> ids) async {
     try {
       final deleted = await (database.delete(table)
-            ..where((tbl) => idColumn.isIn(ids)))
+            ..where((tbl) => idColumn.isIn(ids.cast<Object>())))
           .go();
 
       if (_cacheEnabled && deleted > 0) {
@@ -256,7 +256,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       }
 
       final item = await (database.select(table)
-            ..where((tbl) => idColumn.equals(id)))
+            ..where((tbl) => idColumn.equals(id as Object)))
           .getSingleOrNull();
 
       if (_cacheEnabled && item != null) {
@@ -359,7 +359,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
   Future<Result<bool>> exists(dynamic id) async {
     try {
       final item = await (database.select(table)
-            ..where((tbl) => idColumn.equals(id)))
+            ..where((tbl) => idColumn.equals(id as Object)))
           .getSingleOrNull();
 
       return Result.success(item != null);
@@ -386,7 +386,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
 
   @override
   Stream<T?> watchById(dynamic id) {
-    return (database.select(table)..where((tbl) => idColumn.equals(id)))
+    return (database.select(table)..where((tbl) => idColumn.equals(id as Object)))
         .watchSingleOrNull();
   }
 

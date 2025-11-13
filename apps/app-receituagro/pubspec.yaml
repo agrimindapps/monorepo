@@ -6,7 +6,7 @@ version: 1.0.0+1
 
 environment:
   sdk: ">=3.9.0 <4.0.0"
-  flutter: 3.35.7
+  flutter: ">=3.35.6 <4.0.0"
 
 dependencies:
   flutter:
@@ -51,6 +51,10 @@ flutter:
 
   # Assets do aplicativo ReceitaAgro
   assets:
+    # Drift WASM (necessário para web)
+    - web/sqlite3.wasm
+    - web/drift_worker.dart
+    
     # Dados JSON do banco de dados
     - assets/database/json/tbculturas/
     - assets/database/json/tbdiagnostico/

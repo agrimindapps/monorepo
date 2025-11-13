@@ -119,9 +119,8 @@ void _initCoreServices({bool firebaseEnabled = false}) {
     }
   }
 
-  sl.registerLazySingleton<NetworkInfo>(
-    () => NetworkInfoAdapter(sl<ConnectivityService>()),
-  );
+  // NetworkInfo is registered via @LazySingleton in network_info.dart
+  // Do NOT register manually to avoid duplicate registration
   sl.registerLazySingleton<IPerformanceRepository>(
     () => _StubPerformanceRepository(),
   );

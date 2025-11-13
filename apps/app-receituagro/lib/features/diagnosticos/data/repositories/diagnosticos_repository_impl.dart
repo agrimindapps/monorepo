@@ -55,7 +55,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         return const Right(null);
       }
 
-      final entity = DiagnosticoMapper.fromDriftData(diagnosticoDrift);
+      final entity = DiagnosticoMapper.fromDrift(diagnosticoDrift); // Changed from fromDriftData
       return Right(entity);
     } catch (e) {
       return Left(
@@ -77,8 +77,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
       );
 
       final diagnosticosDrift = await _repository.findByDefensivo(
-        'current-user', // TODO: Get from auth
-        idDefensivo,
+        int.parse(idDefensivo),
       );
 
       developer.log(
@@ -113,8 +112,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   ) async {
     try {
       final diagnosticosDrift = await _repository.findByCultura(
-        'current-user', // TODO: Get from auth
-        idCultura,
+        int.parse(idCultura),
       );
       final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
 
@@ -130,8 +128,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   ) async {
     try {
       final diagnosticosDrift = await _repository.findByPraga(
-        'current-user', // TODO: Get from auth
-        idPraga,
+        int.parse(idPraga),
       );
       final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
 
@@ -149,10 +146,10 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   }) async {
     try {
       final diagnosticosDrift = await _repository.findByTriplaCombinacao(
-        userId: 'current-user', // TODO: Get from auth
-        defenisivoId: idDefensivo,
-        culturaId: idCultura,
-        pragaId: idPraga,
+        // NOTE: Removed userId - static table
+        defensivoId: int.tryParse(idDefensivo ?? ''),
+        culturaId: int.tryParse(idCultura ?? ''),
+        pragaId: int.tryParse(idPraga ?? ''),
       );
       final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
 
@@ -281,9 +278,9 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   }) async {
     try {
       final diagnosticosDrift = await _repository.findByTriplaCombinacao(
-        userId: 'current-user', // TODO: Get from auth
-        culturaId: culturaId,
-        pragaId: pragaId,
+        
+        culturaId: int.tryParse(culturaId ?? ""),
+        pragaId: int.tryParse(pragaId ?? ""),
       );
 
       final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
@@ -307,10 +304,10 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   }) async {
     try {
       final diagnosticosDrift = await _repository.findByTriplaCombinacao(
-        userId: 'current-user', // TODO: Get from auth
-        defenisivoId: defensivo,
-        culturaId: cultura,
-        pragaId: praga,
+        
+        defensivoId: int.tryParse(defensivo ?? ''),
+        culturaId: int.tryParse(cultura ?? ''),
+        pragaId: int.tryParse(praga ?? ''),
       );
 
       var entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
@@ -352,7 +349,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
 
       final similar = allDiagnosticos
           .where(
-            (DiagnosticoData d) =>
+            (d) => // Changed from DiagnosticoData to inferred type
                 d.firebaseId != diagnostico.id &&
                 d.id.toString() != diagnostico.id &&
                 (d.culturaId.toString() == diagnostico.idCultura ||
@@ -421,10 +418,10 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   }) async {
     try {
       final diagnosticosDrift = await _repository.findByTriplaCombinacao(
-        userId: 'current-user', // TODO: Get from auth
-        defenisivoId: defensivo,
-        culturaId: cultura,
-        pragaId: praga,
+        
+        defensivoId: int.tryParse(defensivo ?? ''),
+        culturaId: int.tryParse(cultura ?? ''),
+        pragaId: int.tryParse(praga ?? ''),
       );
 
       return Right(diagnosticosDrift.length);
@@ -460,10 +457,10 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   }) async {
     try {
       final diagnosticosDrift = await _repository.findByTriplaCombinacao(
-        userId: 'current-user', // TODO: Get from auth
-        defenisivoId: idDefensivo,
-        culturaId: idCultura,
-        pragaId: idPraga,
+        
+        defensivoId: int.tryParse(idDefensivo ?? ''),
+        culturaId: int.tryParse(idCultura ?? ''),
+        pragaId: int.tryParse(idPraga ?? ''),
       );
 
       return Right(diagnosticosDrift.isNotEmpty);

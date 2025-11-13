@@ -43,55 +43,13 @@ class FavoritosDI {
   static void registerServices() {
     if (_servicesRegistered) return;
 
-    // Register factory registry (Strategy Pattern - no more switch case)
-    if (!_getIt.isRegistered<IFavoritoEntityFactoryRegistry>()) {
-      _getIt.registerSingleton<IFavoritoEntityFactoryRegistry>(
-        FavoritoEntityFactoryRegistry(),
-      );
-    }
-
-    // Register specialized services (injetar tudo, não instantiar internamente)
-    if (!_getIt.isRegistered<FavoritosDataResolverService>()) {
-      _getIt.registerLazySingleton<FavoritosDataResolverService>(
-        () => FavoritosDataResolverService(),
-      );
-    }
-
-    if (!_getIt.isRegistered<FavoritosValidatorService>()) {
-      _getIt.registerLazySingleton<FavoritosValidatorService>(
-        () => FavoritosValidatorService(
-          dataResolver: _getIt<FavoritosDataResolverService>(),
-        ),
-      );
-    }
-
-    if (!_getIt.isRegistered<FavoritosSyncService>()) {
-      _getIt.registerLazySingleton<FavoritosSyncService>(
-        () => FavoritosSyncService(
-          dataResolver: _getIt<FavoritosDataResolverService>(),
-        ),
-      );
-    }
-
-    if (!_getIt.isRegistered<FavoritosCacheServiceInline>()) {
-      _getIt.registerLazySingleton<FavoritosCacheServiceInline>(
-        () => FavoritosCacheServiceInline(),
-      );
-    }
-
-    // ✅ FavoritosErrorMessageService: Registrado via @lazySingleton (Injectable)
-    // Não registre manualmente aqui para evitar duplicação com Injectable
-
-    // Service com specialized services injetadas (DIP)
-    _getIt.registerLazySingleton<FavoritosService>(
-      () => FavoritosService(
-        dataResolver: _getIt<FavoritosDataResolverService>(),
-        validator: _getIt<FavoritosValidatorService>(),
-        syncService: _getIt<FavoritosSyncService>(),
-        cache: _getIt<FavoritosCacheServiceInline>(),
-        factoryRegistry: _getIt<IFavoritoEntityFactoryRegistry>(),
-      ),
-    );
+    // FavoritoEntityFactoryRegistry - auto-registered by @LazySingleton via Injectable
+    // FavoritosDataResolverService - auto-registered by @injectable via Injectable
+    // FavoritosValidatorService - auto-registered by @injectable via Injectable  
+    // FavoritosSyncService - auto-registered by @injectable via Injectable
+    // FavoritosCacheServiceInline - auto-registered by @injectable via Injectable
+    // FavoritosService - auto-registered by @lazySingleton via Injectable
+    // All services are now registered automatically - no manual registration needed
 
     _servicesRegistered = true;
   }

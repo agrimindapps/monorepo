@@ -73,8 +73,8 @@ class DriftTableException extends DriftException {
 
 /// Exceção lançada quando uma database não é encontrada
 class DriftDatabaseNotFoundException extends DriftDatabaseException {
-  const DriftDatabaseNotFoundException(super.databaseName)
-    : super('Database not found or not registered');
+  const DriftDatabaseNotFoundException(String databaseName)
+    : super('Database not found or not registered', databaseName);
 
   @override
   String toString() => 'DriftDatabaseNotFoundException: $databaseName';

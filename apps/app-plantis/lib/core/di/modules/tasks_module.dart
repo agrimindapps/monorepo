@@ -16,32 +16,22 @@ class TasksModule {
   static void init(GetIt sl) {
     // TasksProvider agora usa Riverpod @riverpod (tasks_notifier.dart)
     // Não precisa mais de registro no GetIt
-    sl.registerLazySingleton(() => TaskGenerationService());
+    // TaskGenerationService - auto-registered by @injectable in task_generation_service.dart
+    // GenerateInitialTasksUseCase - auto-registered by @injectable
+    // TasksRepository - auto-registered by @LazySingleton in tasks_repository_impl.dart
+    // TasksLocalDataSource - auto-registered by @LazySingleton in tasks_local_datasource.dart
+    // TasksRemoteDataSource - needs manual registration (has factory constructor)
+    
     sl.registerLazySingleton(() => GetTasksUseCase(sl()));
     sl.registerLazySingleton(() => AddTaskUseCase(sl()));
     sl.registerLazySingleton(() => UpdateTaskUseCase(sl()));
     sl.registerLazySingleton(() => CompleteTaskUseCase(sl()));
-    sl.registerLazySingleton(
-      () => GenerateInitialTasksUseCase(
-        tasksRepository: sl(),
-        taskGenerationService: sl(),
-      ),
-    );
     sl.registerLazySingleton(
       () => CompleteTaskWithRegenerationUseCase(
         tasksRepository: sl(),
         plantsRepository: sl(),
         taskGenerationService: sl(),
         taskHistoryRepository: sl(),
-      ),
-    );
-    sl.registerLazySingleton<TasksRepository>(
-      () => TasksRepositoryImpl(
-        remoteDataSource: sl(),
-        localDataSource: sl(),
-        networkInfo: sl(),
-        authService: sl(),
-        plantsRepository: sl(),
       ),
     );
 
@@ -67,10 +57,7 @@ class TasksModule {
     //   () => TaskHistoryLocalDataSourceImpl(sl<ILocalStorageRepository>()),
     // );
 
-    sl.registerLazySingleton<TasksRemoteDataSource>(
-      () => TasksRemoteDataSourceImpl(sl(), rateLimiter: sl()),
-    );
-
+    // TasksRemoteDataSource - auto-registered by @LazySingleton in tasks_remote_datasource.dart
     // TasksLocalDataSource - auto-registered by @LazySingleton with TasksDriftRepository
     // No manual registration needed
   }

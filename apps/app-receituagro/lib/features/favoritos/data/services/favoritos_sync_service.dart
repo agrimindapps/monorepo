@@ -3,12 +3,14 @@ import 'dart:developer' as developer;
 import 'package:core/core.dart' as core;
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/favorito_sync_entity.dart';
 import 'favoritos_data_resolver_service.dart';
 
 /// Service especializado para sincronização de favoritos com Firebase
 /// Responsabilidade: Sincronizar operações de favoritos com Firestore
+@injectable
 class FavoritosSyncService {
   final FavoritosDataResolverService _dataResolver;
 

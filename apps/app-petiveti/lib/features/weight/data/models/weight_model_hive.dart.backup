@@ -1,47 +1,57 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 
 import '../../domain/entities/weight.dart';
 
 part 'weight_model.g.dart';
 
+@HiveType(typeId: 17)
 @JsonSerializable()
-class WeightModel {
+class WeightModel extends HiveObject {
+  @HiveField(0)
   @JsonKey(name: 'id')
-  final String? id;
+  final String id;
 
+  @HiveField(1)
   @JsonKey(name: 'animal_id')
   final String animalId;
 
+  @HiveField(2)
   @JsonKey(name: 'weight')
   final double weight;
 
+  @HiveField(3)
   @JsonKey(name: 'date')
   final DateTime date;
 
+  @HiveField(4)
   @JsonKey(name: 'notes')
   final String? notes;
 
+  @HiveField(5)
   @JsonKey(name: 'body_condition_score')
   final int? bodyConditionScore;
 
+  @HiveField(6)
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
 
+  @HiveField(7)
   @JsonKey(name: 'updated_at')
-  final DateTime? updatedAt;
+  final DateTime updatedAt;
 
+  @HiveField(8)
   @JsonKey(name: 'is_deleted')
   final bool isDeleted;
 
   WeightModel({
-    this.id,
+    required this.id,
     required this.animalId,
     required this.weight,
     required this.date,
     this.notes,
     this.bodyConditionScore,
     required this.createdAt,
-    this.updatedAt,
+    required this.updatedAt,
     this.isDeleted = false,
   });
 
@@ -66,14 +76,14 @@ class WeightModel {
 
   Weight toEntity() {
     return Weight(
-      id: id ?? '',
+      id: id,
       animalId: animalId,
       weight: weight,
       date: date,
       notes: notes,
       bodyConditionScore: bodyConditionScore,
       createdAt: createdAt,
-      updatedAt: updatedAt ?? createdAt,
+      updatedAt: updatedAt,
       isDeleted: isDeleted,
     );
   }

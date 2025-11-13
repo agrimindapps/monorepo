@@ -1,47 +1,65 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 
 import '../../domain/entities/vaccine.dart';
 
 part 'vaccine_model.g.dart';
 
 @JsonSerializable()
-class VaccineModel {
-  final String? id;
+@HiveType(typeId: 16)
+class VaccineModel extends HiveObject {
+  @HiveField(0)
+  final String id;
 
+  @HiveField(1)
   final String animalId;
 
+  @HiveField(2)
   final String name;
 
+  @HiveField(3)
   final String veterinarian;
 
+  @HiveField(4)
   final int dateTimestamp;
 
+  @HiveField(5)
   final int? nextDueDateTimestamp;
 
+  @HiveField(6)
   final String? batch;
 
+  @HiveField(7)
   final String? manufacturer;
 
+  @HiveField(8)
   final String? dosage;
 
+  @HiveField(9)
   final String? notes;
 
+  @HiveField(10)
   final bool isRequired;
 
+  @HiveField(11)
   final bool isCompleted;
 
+  @HiveField(12)
   final int? reminderDateTimestamp;
 
+  @HiveField(13)
   final int status;
 
+  @HiveField(14)
   final int createdAtTimestamp;
 
-  final int? updatedAtTimestamp;
+  @HiveField(15)
+  final int updatedAtTimestamp;
 
+  @HiveField(16)
   final bool isDeleted;
 
   VaccineModel({
-    this.id,
+    required this.id,
     required this.animalId,
     required this.name,
     required this.veterinarian,
@@ -56,13 +74,13 @@ class VaccineModel {
     this.reminderDateTimestamp,
     this.status = 0,
     required this.createdAtTimestamp,
-    this.updatedAtTimestamp,
+    required this.updatedAtTimestamp,
     this.isDeleted = false,
   });
 
   Vaccine toEntity() {
     return Vaccine(
-      id: id ?? '',
+      id: id,
       animalId: animalId,
       name: name,
       veterinarian: veterinarian,
@@ -83,9 +101,7 @@ class VaccineModel {
               : null,
       status: VaccineStatus.values[status],
       createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtTimestamp),
-      updatedAt: updatedAtTimestamp != null 
-          ? DateTime.fromMillisecondsSinceEpoch(updatedAtTimestamp!)
-          : DateTime.fromMillisecondsSinceEpoch(createdAtTimestamp),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(updatedAtTimestamp),
       isDeleted: isDeleted,
     );
   }

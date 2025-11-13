@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart' show HiveType, HiveField, HiveObject;
 
 import '../../domain/entities/calculation_history.dart';
 import '../../domain/entities/calculation_result.dart';
@@ -6,30 +6,34 @@ import '../../domain/entities/calculation_result.dart';
 part 'calculation_history_model.g.dart';
 
 /// Model para persistência do histórico de cálculos
-@JsonSerializable()
-class CalculationHistoryModel {
-  final String? id;
+@HiveType(typeId: 20)
+class CalculationHistoryModel extends HiveObject {
+  @HiveField(0)
+  final String id;
 
+  @HiveField(1)
   final String calculatorId;
 
+  @HiveField(2)
   final String calculatorName;
 
+  @HiveField(3)
   final Map<String, dynamic> inputs;
 
+  @HiveField(4)
   final Map<String, dynamic> resultData;
 
+  @HiveField(5)
   final DateTime createdAt;
 
+  @HiveField(6)
   final String? animalId;
 
+  @HiveField(7)
   final String? notes;
 
-  final String? userId;
-
-  final bool isDeleted;
-
   CalculationHistoryModel({
-    this.id,
+    required this.id,
     required this.calculatorId,
     required this.calculatorName,
     required this.inputs,
@@ -37,8 +41,6 @@ class CalculationHistoryModel {
     required this.createdAt,
     this.animalId,
     this.notes,
-    this.userId,
-    this.isDeleted = false,
   });
 
   /// Converte de entity para model
@@ -58,7 +60,7 @@ class CalculationHistoryModel {
   /// Converte de model para entity
   CalculationHistory toEntity() {
     return CalculationHistory(
-      id: id ?? '',
+      id: id,
       calculatorId: calculatorId,
       calculatorName: calculatorName,
       inputs: Map<String, dynamic>.from(inputs),
@@ -68,11 +70,6 @@ class CalculationHistoryModel {
       notes: notes,
     );
   }
-
-  factory CalculationHistoryModel.fromJson(Map<String, dynamic> json) =>
-      _$CalculationHistoryModelFromJson(json);
-
-  Map<String, dynamic> toJson() => _$CalculationHistoryModelToJson(this);
 
   /// Converte CalculationResult para Map
   static Map<String, dynamic> _resultToMap(CalculationResult result) {

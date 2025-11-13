@@ -1,53 +1,68 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart'
+    show HiveType, JsonSerializable, HiveObject, HiveField;
+import 'package:hive/hive.dart';
+
 
 import '../../domain/entities/appointment.dart';
 
 part 'appointment_model.g.dart';
 
 @JsonSerializable()
-class AppointmentModel {
-  final String? id;
+@HiveType(typeId: 12)
+class AppointmentModel extends HiveObject {
+  @HiveField(0)
+  final String id;
 
+  @HiveField(1)
   final String animalId;
 
+  @HiveField(2)
   final String veterinarianName;
 
-  final int dateTimestamp;
+  @HiveField(3)
+  final int dateTimestamp; // stored as milliseconds since epoch
 
+  @HiveField(4)
   final String reason;
 
+  @HiveField(5)
   final String? diagnosis;
 
+  @HiveField(6)
   final String? notes;
 
-  final int status;
+  @HiveField(7)
+  final int status; // stored as enum index
 
+  @HiveField(8)
   final double? cost;
 
+  @HiveField(9)
   final int createdAtTimestamp;
 
-  final int? updatedAtTimestamp;
+  @HiveField(10)
+  final int updatedAtTimestamp;
 
+  @HiveField(11)
   final bool isDeleted;
 
   AppointmentModel({
-    this.id,
+    required this.id,
     required this.animalId,
     required this.veterinarianName,
     required this.dateTimestamp,
     required this.reason,
     this.diagnosis,
     this.notes,
-    this.status = 0,
+    this.status = 0, // AppointmentStatus.scheduled
     this.cost,
     required this.createdAtTimestamp,
-    this.updatedAtTimestamp,
+    required this.updatedAtTimestamp,
     this.isDeleted = false,
   });
-  
   Appointment toEntity() {
     return Appointment(
-      id: id ?? '',
+      id: id,
       animalId: animalId,
       veterinarianName: veterinarianName,
       date: DateTime.fromMillisecondsSinceEpoch(dateTimestamp),
@@ -57,9 +72,7 @@ class AppointmentModel {
       status: AppointmentStatus.values[status],
       cost: cost,
       createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtTimestamp),
-      updatedAt: updatedAtTimestamp != null
-          ? DateTime.fromMillisecondsSinceEpoch(updatedAtTimestamp!)
-          : DateTime.fromMillisecondsSinceEpoch(createdAtTimestamp),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(updatedAtTimestamp),
       isDeleted: isDeleted,
     );
   }

@@ -1,4 +1,9 @@
-import '../../../../core/storage/hive_service.dart';
+import 'dart:convert';
+
+import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../../database/petiveti_database.dart';
 import '../models/calculation_history_model.dart';
 
 /// Interface abstrata para data source local de calculadoras
@@ -22,26 +27,44 @@ abstract class CalculatorLocalDatasource {
   Future<bool> isFavoriteCalculator(String calculatorId);
 }
 
-/// Implementação do data source local para calculadoras usando HiveService
+/// Drift-based implementation of CalculatorLocalDatasource
+@LazySingleton(as: CalculatorLocalDatasource)
 class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
-  final HiveService _hiveService;
+  final PetivetiDatabase _database;
+  final SharedPreferences _prefs;
 
-  CalculatorLocalDatasourceImpl(this._hiveService);
+  CalculatorLocalDatasourceImpl(this._database, this._prefs);
 
-  static const String _historyBoxName = 'calculation_history';
-  static const String _favoritesBoxName = 'favorite_calculators';
-  static const String _statsBoxName = 'calculator_usage_stats';
+  static const String _favoritesKey = 'favorite_calculators';
+  static const String _statsPrefix = 'calculator_stats_';
 
-  /// Salva item no histórico
   @override
   Future<void> saveCalculationHistory(CalculationHistoryModel history) async {
-    final box = await _hiveService.getBox<CalculationHistoryModel>(
-      _historyBoxName,
+    final inputsJson = jsonEncode(history.inputs);
+    final resultJson = jsonEncode(history.resultData);
+    
+    if (history.id != null) {
+      final existingEntry = await _database.calculatorDao.getHistoryById(int.parse(history.id!));
+      if (existingEntry != null) {
+        await _database.calculatorDao.updateHistoryEntry(
+          int.parse(history.id!),
+          calculatorType: history.calculatorId,
+          inputData: inputsJson,
+          result: resultJson,
+        );
+        return;
+      }
+    }
+    
+    await _database.calculatorDao.createHistoryEntry(
+      calculatorType: history.calculatorId,
+      inputData: inputsJson,
+      result: resultJson,
+      userId: history.userId ?? '',
+      date: history.createdAt,
     );
-    await box.put(history.id, history);
   }
 
-  /// Obtém histórico com filtros
   @override
   Future<List<CalculationHistoryModel>> getCalculationHistory({
     String? calculatorId,
@@ -50,181 +73,124 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
     DateTime? fromDate,
     DateTime? toDate,
   }) async {
-    final box = await _hiveService.getBox<CalculationHistoryModel>(
-      _historyBoxName,
-    );
-    var histories = box.values.toList();
+    final allHistory = await _database.calculatorDao.getAllHistory('');
+    
+    var filtered = allHistory.where((h) => !h.isDeleted).toList();
+    
     if (calculatorId != null) {
-      histories =
-          histories
-              .where(
-                (CalculationHistoryModel h) => h.calculatorId == calculatorId,
-              )
-              .toList();
+      filtered = filtered.where((h) => h.calculatorType == calculatorId).toList();
     }
-
-    if (animalId != null) {
-      histories =
-          histories
-              .where((CalculationHistoryModel h) => h.animalId == animalId)
-              .toList();
-    }
-
+    
     if (fromDate != null) {
-      histories =
-          histories
-              .where(
-                (CalculationHistoryModel h) => h.createdAt.isAfter(fromDate),
-              )
-              .toList();
+      filtered = filtered.where((h) => h.date.isAfter(fromDate)).toList();
     }
-
+    
     if (toDate != null) {
-      histories =
-          histories
-              .where(
-                (CalculationHistoryModel h) => h.createdAt.isBefore(toDate),
-              )
-              .toList();
+      filtered = filtered.where((h) => h.date.isBefore(toDate)).toList();
     }
-    histories.sort(
-      (CalculationHistoryModel a, CalculationHistoryModel b) =>
-          b.createdAt.compareTo(a.createdAt),
-    );
+    
+    filtered.sort((a, b) => b.date.compareTo(a.date));
+    
     if (limit != null && limit > 0) {
-      histories = histories.take(limit).toList();
+      filtered = filtered.take(limit).toList();
     }
-
-    return histories;
+    
+    return filtered.map(_toModel).toList();
   }
 
-  /// Remove item do histórico
-  Future<void> removeCalculationHistory(String historyId) async {
-    final box = await _hiveService.getBox<CalculationHistoryModel>(
-      _historyBoxName,
-    );
-    await box.delete(historyId);
+  @override
+  Future<CalculationHistoryModel?> getCalculationHistoryById(String id) async {
+    try {
+      final entry = await _database.calculatorDao.getHistoryById(int.parse(id));
+      return entry != null ? _toModel(entry) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  @override
+  Future<void> deleteCalculationHistory(String id) async {
+    await _database.calculatorDao.deleteHistoryEntry(int.parse(id));
   }
 
   @override
   Future<void> clearCalculationHistory() async {
-    final box = await _hiveService.getBox<CalculationHistoryModel>(
-      _historyBoxName,
-    );
-    await box.clear();
+    await _database.calculatorDao.clearAllHistory('');
   }
 
-  /// Adiciona calculadora aos favoritos
-  Future<void> addToFavorites(String calculatorId) async {
-    final box = await _hiveService.getBox<String>(_favoritesBoxName);
-    if (!box.values.contains(calculatorId)) {
-      await box.add(calculatorId);
-    }
-  }
-
-  /// Remove calculadora dos favoritos
-  Future<void> removeFromFavorites(String calculatorId) async {
-    final box = await _hiveService.getBox<String>(_favoritesBoxName);
-    final key = box.keys.firstWhere(
-      (key) => box.get(key) == calculatorId,
-      orElse: () => null,
-    );
-    if (key != null) {
-      await box.delete(key);
-    }
-  }
-
-  /// Obtém lista de calculadoras favoritas
-  Future<List<String>> getFavoriteCalculators() async {
-    final box = await _hiveService.getBox<String>(_favoritesBoxName);
-    return box.values.toList();
-  }
-
-  /// Registra uso de calculadora para estatísticas
-  Future<void> recordCalculatorUsage(String calculatorId) async {
-    final box = await _hiveService.getBox<Map<dynamic, dynamic>>(_statsBoxName);
-    final existingStats = box.get(
-      calculatorId,
-      defaultValue: <String, dynamic>{},
-    );
-    final stats = Map<String, dynamic>.from(
-      existingStats ?? <String, dynamic>{},
-    );
-
-    final now = DateTime.now();
-    stats['lastUsed'] = now.millisecondsSinceEpoch;
-    stats['usageCount'] = (stats['usageCount'] ?? 0) + 1;
-
-    await box.put(calculatorId, stats);
-  }
-
-  /// Obtém estatísticas de uso
-  Future<Map<String, dynamic>> getCalculatorStats(String calculatorId) async {
-    final box = await _hiveService.getBox<Map<dynamic, dynamic>>(_statsBoxName);
-    final stats = box.get(calculatorId, defaultValue: <String, dynamic>{});
-    return Map<String, dynamic>.from(stats ?? <String, dynamic>{});
-  }
-
-  /// Incrementa contador de uso da calculadora
-  @override
-  Future<void> incrementCalculatorUsage(String calculatorId) async {
-    await recordCalculatorUsage(calculatorId);
-  }
-
-  /// Obtém item específico do histórico por ID
-  @override
-  Future<CalculationHistoryModel?> getCalculationHistoryById(String id) async {
-    final box = await _hiveService.getBox<CalculationHistoryModel>(
-      _historyBoxName,
-    );
-    return box.get(id);
-  }
-
-  /// Remove item do histórico (alias para compatibilidade)
-  @override
-  Future<void> deleteCalculationHistory(String id) async {
-    await removeCalculationHistory(id);
-  }
-
-  /// Obtém lista de IDs das calculadoras favoritas
-  @override
-  Future<List<String>> getFavoriteCalculatorIds() async {
-    return await getFavoriteCalculators();
-  }
-
-  /// Adiciona calculadora aos favoritos (alias para compatibilidade)
   @override
   Future<void> addFavoriteCalculator(String calculatorId) async {
-    await addToFavorites(calculatorId);
+    final favorites = await getFavoriteCalculatorIds();
+    if (!favorites.contains(calculatorId)) {
+      favorites.add(calculatorId);
+      await _prefs.setStringList(_favoritesKey, favorites);
+    }
   }
 
-  /// Remove calculadora dos favoritos (alias para compatibilidade)
   @override
   Future<void> removeFavoriteCalculator(String calculatorId) async {
-    await removeFromFavorites(calculatorId);
+    final favorites = await getFavoriteCalculatorIds();
+    favorites.remove(calculatorId);
+    await _prefs.setStringList(_favoritesKey, favorites);
   }
 
-  /// Verifica se calculadora é favorita
+  @override
+  Future<List<String>> getFavoriteCalculatorIds() async {
+    return _prefs.getStringList(_favoritesKey) ?? [];
+  }
+
   @override
   Future<bool> isFavoriteCalculator(String calculatorId) async {
-    final favorites = await getFavoriteCalculators();
+    final favorites = await getFavoriteCalculatorIds();
     return favorites.contains(calculatorId);
   }
 
-  /// Obtém estatísticas de uso de todas as calculadoras
+  @override
+  Future<void> incrementCalculatorUsage(String calculatorId) async {
+    final statsKey = '$_statsPrefix$calculatorId';
+    final statsJson = _prefs.getString(statsKey);
+    
+    Map<String, dynamic> stats = {};
+    if (statsJson != null) {
+      stats = jsonDecode(statsJson) as Map<String, dynamic>;
+    }
+    
+    stats['lastUsed'] = DateTime.now().millisecondsSinceEpoch;
+    stats['usageCount'] = (stats['usageCount'] ?? 0) + 1;
+    
+    await _prefs.setString(statsKey, jsonEncode(stats));
+  }
+
   @override
   Future<Map<String, int>> getCalculatorUsageStats() async {
-    final box = await _hiveService.getBox<Map<dynamic, dynamic>>(_statsBoxName);
+    final allKeys = _prefs.getKeys();
+    final statsKeys = allKeys.where((k) => k.startsWith(_statsPrefix));
+    
     final stats = <String, int>{};
-
-    for (final key in box.keys) {
-      final calculatorStats = box.get(key);
-      if (calculatorStats != null) {
-        final usageCount = calculatorStats['usageCount'] ?? 0;
-        stats[key.toString()] = usageCount as int;
+    for (final key in statsKeys) {
+      final calculatorId = key.replaceFirst(_statsPrefix, '');
+      final statsJson = _prefs.getString(key);
+      if (statsJson != null) {
+        final data = jsonDecode(statsJson) as Map<String, dynamic>;
+        stats[calculatorId] = data['usageCount'] ?? 0;
       }
     }
-
+    
     return stats;
+  }
+
+  CalculationHistoryModel _toModel(CalculationHistoryEntry entry) {
+    final inputs = jsonDecode(entry.inputData) as Map<String, dynamic>;
+    final resultData = jsonDecode(entry.result) as Map<String, dynamic>;
+    
+    return CalculationHistoryModel(
+      id: entry.id.toString(),
+      calculatorId: entry.calculatorType,
+      calculatorName: entry.calculatorType,
+      inputs: inputs,
+      resultData: resultData,
+      createdAt: entry.date,
+      userId: entry.userId,
+    );
   }
 }

@@ -1,358 +1,119 @@
-import 'package:core/core.dart';
+import 'package:injectable/injectable.dart';
 
-import '../../../../core/storage/hive_service.dart';
+import '../../../../database/petiveti_database.dart';
 import '../models/vaccine_model.dart';
 
 abstract class VaccineLocalDataSource {
-  /// Basic CRUD operations
-  Future<List<VaccineModel>> getVaccines();
-  Future<List<VaccineModel>> getVaccinesByAnimalId(String animalId);
-  Future<VaccineModel?> getVaccineById(String id);
-  Future<void> addVaccine(VaccineModel vaccine);
-  Future<void> updateVaccine(VaccineModel vaccine);
-  Future<void> deleteVaccine(String id);
-  Future<void> deleteVaccinesByAnimalId(String animalId);
-
-  /// Status-based queries
-  Future<List<VaccineModel>> getPendingVaccines([String? animalId]);
-  Future<List<VaccineModel>> getOverdueVaccines([String? animalId]);
-  Future<List<VaccineModel>> getCompletedVaccines([String? animalId]);
-  Future<List<VaccineModel>> getRequiredVaccines([String? animalId]);
-  Future<List<VaccineModel>> getUpcomingVaccines([String? animalId]);
-  Future<List<VaccineModel>> getDueTodayVaccines([String? animalId]);
-  Future<List<VaccineModel>> getDueSoonVaccines([String? animalId]);
-
-  /// Date-based queries
-  Future<List<VaccineModel>> getVaccinesByDateRange(
-    DateTime startDate,
-    DateTime endDate, [
-    String? animalId,
-  ]);
-  Future<List<VaccineModel>> getVaccinesByMonth(
-    int year,
-    int month, [
-    String? animalId,
-  ]);
-
-  /// Reminder functionality
-  Future<List<VaccineModel>> getVaccinesNeedingReminders();
-  Future<List<VaccineModel>> getVaccinesWithActiveReminders();
-
-  /// Search and filtering
-  Future<List<VaccineModel>> searchVaccines(String query, [String? animalId]);
-  Future<List<VaccineModel>> getVaccinesByVeterinarian(
-    String veterinarian, [
-    String? animalId,
-  ]);
-  Future<List<VaccineModel>> getVaccinesByName(
-    String vaccineName, [
-    String? animalId,
-  ]);
-  Future<List<VaccineModel>> getVaccinesByManufacturer(
-    String manufacturer, [
-    String? animalId,
-  ]);
-
-  /// Bulk operations
-  Future<void> addMultipleVaccines(List<VaccineModel> vaccines);
-  Future<void> updateMultipleVaccines(List<VaccineModel> vaccines);
-  Future<void> markVaccinesAsCompleted(List<String> vaccineIds);
-
-  /// Caching and synchronization
-  Future<void> cacheVaccines(List<VaccineModel> vaccines);
-  Future<void> clearCache();
-
-  /// Reactive streams
-  Stream<List<VaccineModel>> watchVaccines();
-  Stream<List<VaccineModel>> watchVaccinesByAnimalId(String animalId);
+  Future<List<VaccineModel>> getVaccines(String userId);
+  Future<List<VaccineModel>> getVaccinesByAnimalId(int animalId);
+  Future<List<VaccineModel>> getUpcomingVaccines(int animalId);
+  Future<VaccineModel?> getVaccineById(int id);
+  Future<int> addVaccine(VaccineModel vaccine);
+  Future<bool> updateVaccine(VaccineModel vaccine);
+  Future<bool> deleteVaccine(int id);
+  Stream<List<VaccineModel>> watchVaccinesByAnimalId(int animalId);
 }
 
+@LazySingleton(as: VaccineLocalDataSource)
 class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
-  final HiveService _hiveService;
+  final PetivetiDatabase _database;
 
-  VaccineLocalDataSourceImpl(this._hiveService);
+  VaccineLocalDataSourceImpl(this._database);
 
-  Future<Box<VaccineModel>> get _box async {
-    return await _hiveService.getBox<VaccineModel>('vaccines');
-  }
-
-  List<VaccineModel> _filterActive(Iterable<VaccineModel> vaccines) {
-    return vaccines.where((vaccine) => !vaccine.isDeleted).toList();
-  }
-
-  List<VaccineModel> _filterByAnimal(
-    List<VaccineModel> vaccines,
-    String? animalId,
-  ) {
-    if (animalId == null) return vaccines;
-    return vaccines.where((vaccine) => vaccine.animalId == animalId).toList();
-  }
   @override
-  Future<List<VaccineModel>> getVaccines() async {
-    final vaccinesBox = await _box;
-    final vaccines = _filterActive(vaccinesBox.values);
-    vaccines.sort((a, b) => b.dateTimestamp.compareTo(a.dateTimestamp));
-    return vaccines;
+  Future<List<VaccineModel>> getVaccines(String userId) async {
+    final vaccines = await _database.vaccineDao.getAllVaccines(userId);
+    return vaccines.map(_toModel).toList();
   }
 
   @override
-  Future<List<VaccineModel>> getVaccinesByAnimalId(String animalId) async {
-    final vaccines = await getVaccines();
-    return _filterByAnimal(vaccines, animalId);
+  Future<List<VaccineModel>> getVaccinesByAnimalId(int animalId) async {
+    final vaccines = await _database.vaccineDao.getVaccinesByAnimal(animalId);
+    return vaccines.map(_toModel).toList();
   }
 
   @override
-  Future<VaccineModel?> getVaccineById(String id) async {
-    final vaccinesBox = await _box;
-    final vaccine = vaccinesBox.get(id);
-    return (vaccine != null && !vaccine.isDeleted) ? vaccine : null;
+  Future<List<VaccineModel>> getUpcomingVaccines(int animalId) async {
+    final vaccines = await _database.vaccineDao.getUpcomingVaccines(animalId);
+    return vaccines.map(_toModel).toList();
   }
 
   @override
-  Future<void> addVaccine(VaccineModel vaccine) async {
-    final vaccinesBox = await _box;
-    await vaccinesBox.put(vaccine.id, vaccine);
+  Future<VaccineModel?> getVaccineById(int id) async {
+    final vaccine = await _database.vaccineDao.getVaccineById(id);
+    return vaccine != null ? _toModel(vaccine) : null;
   }
 
   @override
-  Future<void> updateVaccine(VaccineModel vaccine) async {
-    final vaccinesBox = await _box;
-    await vaccinesBox.put(vaccine.id, vaccine);
+  Future<int> addVaccine(VaccineModel vaccine) async {
+    final companion = _toCompanion(vaccine);
+    return await _database.vaccineDao.createVaccine(companion);
   }
 
   @override
-  Future<void> deleteVaccine(String id) async {
-    final vaccinesBox = await _box;
-    final vaccine = vaccinesBox.get(id);
-    if (vaccine != null) {
-      final deletedVaccine = VaccineModel.fromEntity(
-        vaccine.toEntity().copyWith(isDeleted: true, updatedAt: DateTime.now()),
-      );
-      await vaccinesBox.put(id, deletedVaccine);
-    }
+  Future<bool> updateVaccine(VaccineModel vaccine) async {
+    if (vaccine.id == null) return false;
+    final companion = _toCompanion(vaccine, forUpdate: true);
+    return await _database.vaccineDao.updateVaccine(int.parse(vaccine.id!), companion);
   }
 
   @override
-  Future<void> deleteVaccinesByAnimalId(String animalId) async {
-    final vaccines = await getVaccinesByAnimalId(animalId);
-    final vaccinesBox = await _box;
-
-    for (final vaccine in vaccines) {
-      final deletedVaccine = VaccineModel.fromEntity(
-        vaccine.toEntity().copyWith(isDeleted: true, updatedAt: DateTime.now()),
-      );
-      await vaccinesBox.put(vaccine.id, deletedVaccine);
-    }
-  }
-  @override
-  Future<List<VaccineModel>> getPendingVaccines([String? animalId]) async {
-    final vaccines = await getVaccines();
-    final filtered = _filterByAnimal(vaccines, animalId);
-    return filtered.where((vaccine) => vaccine.toEntity().isPending).toList();
+  Future<bool> deleteVaccine(int id) async {
+    return await _database.vaccineDao.deleteVaccine(id);
   }
 
   @override
-  Future<List<VaccineModel>> getOverdueVaccines([String? animalId]) async {
-    final vaccines = await getVaccines();
-    final filtered = _filterByAnimal(vaccines, animalId);
-    return filtered.where((vaccine) => vaccine.toEntity().isOverdue).toList();
+  Stream<List<VaccineModel>> watchVaccinesByAnimalId(int animalId) {
+    return _database.vaccineDao.watchVaccinesByAnimal(animalId)
+        .map((vaccines) => vaccines.map(_toModel).toList());
   }
 
-  @override
-  Future<List<VaccineModel>> getCompletedVaccines([String? animalId]) async {
-    final vaccines = await getVaccines();
-    final filtered = _filterByAnimal(vaccines, animalId);
-    return filtered.where((vaccine) => vaccine.isCompleted).toList();
-  }
-
-  @override
-  Future<List<VaccineModel>> getRequiredVaccines([String? animalId]) async {
-    final vaccines = await getVaccines();
-    final filtered = _filterByAnimal(vaccines, animalId);
-    return filtered.where((vaccine) => vaccine.isRequired).toList();
-  }
-
-  @override
-  Future<List<VaccineModel>> getUpcomingVaccines([String? animalId]) async {
-    final vaccines = await getVaccines();
-    final filtered = _filterByAnimal(vaccines, animalId);
-    final now = DateTime.now();
-    final futureDate = now.add(const Duration(days: 30)); // Next 30 days
-
-    return filtered.where((vaccine) {
-      if (vaccine.nextDueDateTimestamp == null) return false;
-      final nextDueDate = DateTime.fromMillisecondsSinceEpoch(
-        vaccine.nextDueDateTimestamp!,
-      );
-      return nextDueDate.isAfter(now) && nextDueDate.isBefore(futureDate);
-    }).toList();
-  }
-
-  @override
-  Future<List<VaccineModel>> getDueTodayVaccines([String? animalId]) async {
-    final vaccines = await getVaccines();
-    final filtered = _filterByAnimal(vaccines, animalId);
-    return filtered.where((vaccine) => vaccine.toEntity().isDueToday).toList();
-  }
-
-  @override
-  Future<List<VaccineModel>> getDueSoonVaccines([String? animalId]) async {
-    final vaccines = await getVaccines();
-    final filtered = _filterByAnimal(vaccines, animalId);
-    return filtered.where((vaccine) => vaccine.toEntity().isDueSoon).toList();
-  }
-  @override
-  Future<List<VaccineModel>> getVaccinesByDateRange(
-    DateTime startDate,
-    DateTime endDate, [
-    String? animalId,
-  ]) async {
-    final vaccines = await getVaccines();
-    final filtered = _filterByAnimal(vaccines, animalId);
-
-    return filtered.where((vaccine) {
-      final vaccineDate = DateTime.fromMillisecondsSinceEpoch(
-        vaccine.dateTimestamp,
-      );
-      return vaccineDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
-          vaccineDate.isBefore(endDate.add(const Duration(days: 1)));
-    }).toList();
-  }
-
-  @override
-  Future<List<VaccineModel>> getVaccinesByMonth(
-    int year,
-    int month, [
-    String? animalId,
-  ]) async {
-    final startDate = DateTime(year, month, 1);
-    final endDate = DateTime(year, month + 1, 0);
-    return await getVaccinesByDateRange(startDate, endDate, animalId);
-  }
-  @override
-  Future<List<VaccineModel>> getVaccinesNeedingReminders() async {
-    final vaccines = await getVaccines();
-    return vaccines
-        .where((vaccine) => vaccine.toEntity().needsReminder)
-        .toList();
-  }
-
-  @override
-  Future<List<VaccineModel>> getVaccinesWithActiveReminders() async {
-    final vaccines = await getVaccines();
-    return vaccines
-        .where(
-          (vaccine) =>
-              vaccine.reminderDateTimestamp != null && !vaccine.isCompleted,
-        )
-        .toList();
-  }
-  @override
-  Future<List<VaccineModel>> searchVaccines(
-    String query, [
-    String? animalId,
-  ]) async {
-    final vaccines = await getVaccines();
-    final filtered = _filterByAnimal(vaccines, animalId);
-    final queryLower = query.toLowerCase();
-
-    return filtered.where((vaccine) {
-      return vaccine.name.toLowerCase().contains(queryLower) ||
-          vaccine.veterinarian.toLowerCase().contains(queryLower) ||
-          (vaccine.manufacturer?.toLowerCase().contains(queryLower) ?? false) ||
-          (vaccine.notes?.toLowerCase().contains(queryLower) ?? false);
-    }).toList();
-  }
-
-  @override
-  Future<List<VaccineModel>> getVaccinesByVeterinarian(
-    String veterinarian, [
-    String? animalId,
-  ]) async {
-    final vaccines = await getVaccines();
-    final filtered = _filterByAnimal(vaccines, animalId);
-    return filtered
-        .where((vaccine) => vaccine.veterinarian == veterinarian)
-        .toList();
-  }
-
-  @override
-  Future<List<VaccineModel>> getVaccinesByName(
-    String vaccineName, [
-    String? animalId,
-  ]) async {
-    final vaccines = await getVaccines();
-    final filtered = _filterByAnimal(vaccines, animalId);
-    return filtered.where((vaccine) => vaccine.name == vaccineName).toList();
-  }
-
-  @override
-  Future<List<VaccineModel>> getVaccinesByManufacturer(
-    String manufacturer, [
-    String? animalId,
-  ]) async {
-    final vaccines = await getVaccines();
-    final filtered = _filterByAnimal(vaccines, animalId);
-    return filtered
-        .where((vaccine) => vaccine.manufacturer == manufacturer)
-        .toList();
-  }
-  @override
-  Future<void> addMultipleVaccines(List<VaccineModel> vaccines) async {
-    final vaccinesBox = await _box;
-    final vaccineMap = Map.fromEntries(
-      vaccines.map((vaccine) => MapEntry(vaccine.id, vaccine)),
+  VaccineModel _toModel(Vaccine vaccine) {
+    return VaccineModel(
+      id: vaccine.id.toString(),
+      animalId: vaccine.animalId.toString(),
+      name: vaccine.name,
+      date: vaccine.date,
+      nextDueDate: vaccine.nextDueDate,
+      veterinarian: vaccine.veterinarian,
+      location: vaccine.location,
+      batchNumber: vaccine.batchNumber,
+      notes: vaccine.notes,
+      userId: vaccine.userId,
+      createdAt: vaccine.createdAt,
+      updatedAt: vaccine.updatedAt,
+      isDeleted: vaccine.isDeleted,
     );
-    await vaccinesBox.putAll(vaccineMap);
   }
 
-  @override
-  Future<void> updateMultipleVaccines(List<VaccineModel> vaccines) async {
-    await addMultipleVaccines(vaccines); // Same implementation
-  }
-
-  @override
-  Future<void> markVaccinesAsCompleted(List<String> vaccineIds) async {
-    final vaccinesBox = await _box;
-
-    for (final id in vaccineIds) {
-      final vaccine = vaccinesBox.get(id);
-      if (vaccine != null && !vaccine.isDeleted) {
-        final entity = vaccine.toEntity();
-        if (entity.canBeMarkedAsCompleted()) {
-          final completedVaccine = VaccineModel.fromEntity(
-            entity.markAsCompleted(),
-          );
-          await vaccinesBox.put(id, completedVaccine);
-        }
-      }
+  VaccinesCompanion _toCompanion(VaccineModel model, {bool forUpdate = false}) {
+    if (forUpdate) {
+      return VaccinesCompanion(
+        id: model.id != null ? Value(int.parse(model.id!)) : const Value.absent(),
+        animalId: Value(int.parse(model.animalId)),
+        name: Value(model.name),
+        date: Value(model.date),
+        nextDueDate: Value.ofNullable(model.nextDueDate),
+        veterinarian: Value.ofNullable(model.veterinarian),
+        location: Value.ofNullable(model.location),
+        batchNumber: Value.ofNullable(model.batchNumber),
+        notes: Value.ofNullable(model.notes),
+        userId: Value(model.userId),
+        updatedAt: Value(DateTime.now()),
+      );
     }
-  }
-  @override
-  Future<void> cacheVaccines(List<VaccineModel> vaccines) async {
-    await addMultipleVaccines(vaccines);
-  }
 
-  @override
-  Future<void> clearCache() async {
-    final vaccinesBox = await _box;
-    await vaccinesBox.clear();
-  }
-  @override
-  Stream<List<VaccineModel>> watchVaccines() async* {
-    final vaccinesBox = await _box;
-
-    yield* Stream.periodic(const Duration(milliseconds: 500), (_) {
-      final vaccines = _filterActive(vaccinesBox.values);
-      vaccines.sort((a, b) => b.dateTimestamp.compareTo(a.dateTimestamp));
-      return vaccines;
-    });
-  }
-
-  @override
-  Stream<List<VaccineModel>> watchVaccinesByAnimalId(String animalId) async* {
-    await for (final vaccines in watchVaccines()) {
-      yield _filterByAnimal(vaccines, animalId);
-    }
+    return VaccinesCompanion.insert(
+      animalId: int.parse(model.animalId),
+      name: model.name,
+      date: model.date,
+      nextDueDate: Value.ofNullable(model.nextDueDate),
+      veterinarian: Value.ofNullable(model.veterinarian),
+      location: Value.ofNullable(model.location),
+      batchNumber: Value.ofNullable(model.batchNumber),
+      notes: Value.ofNullable(model.notes),
+      userId: model.userId,
+      createdAt: Value(model.createdAt),
+    );
   }
 }

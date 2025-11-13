@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 import 'dart:ui';
 
 import 'package:core/core.dart' hide sharedPreferencesProvider;
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:flutter/material.dart';

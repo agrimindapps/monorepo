@@ -2,7 +2,7 @@
 /// Demonstrates the new responsive layout system with desktop/mobile adaptations
 library;
 
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart' ;
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/responsive_constants.dart';

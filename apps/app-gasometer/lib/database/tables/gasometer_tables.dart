@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:core/core.dart';
 
 /// Tabela de Veículos

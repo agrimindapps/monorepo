@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/debounced_search_manager.dart';

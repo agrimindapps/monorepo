@@ -65,8 +65,15 @@ dependencies:
   purchases_flutter: any
 
   # Database
-  drift: ^2.28.0
-  sqlite3_flutter_libs: ^0.5.0
+  # drift:
+  #   version: ^2.28.0
+  #   platforms:
+  #     - android
+  #     - ios
+  #     - linux
+  #     - macos
+  #     - windows
+  # sqlite3_flutter_libs: ^0.5.0
   path_provider: any
   path: any
 
@@ -78,7 +85,14 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 
   # Code Generation
-  drift_dev: ^2.28.0
+  # drift_dev:
+  #   version: ^2.28.0
+  #   platforms:
+  #     - android
+  #     - ios
+  #     - linux
+  #     - macos
+  #     - windows
   build_runner: ^2.4.12
   riverpod_generator: ^2.4.0
   injectable_generator: ^2.6.2
@@ -87,6 +101,9 @@ dev_dependencies:
 
   # Custom Linting
   # riverpod_lint removed - conflicts with hive_generator
+
+dependency_overrides:
+  # Removed
 
 flutter:
   uses-material-design: true

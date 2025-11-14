@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/bovine_entity.dart';

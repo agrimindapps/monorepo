@@ -1,5 +1,4 @@
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
-import 'package:core/core.dart' hide NotificationSettings, PrivacySettings;
 
 /// Settings Model
 class SettingsModel extends SettingsEntity {

@@ -2,7 +2,7 @@
 /// UI for manual resolution of financial data conflicts
 library;
 
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart' ;
 import 'package:flutter/material.dart';
 
 import '../../../features/expenses/data/models/expense_model.dart';

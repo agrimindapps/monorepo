@@ -1,6 +1,10 @@
 # Build configuration for Drift code generation
 targets:
   $default:
+    sources:
+      exclude:
+        - lib/services/drift/**
+        - lib/src/infrastructure/storage/drift/**
     builders:
       drift_dev:
         enabled: true

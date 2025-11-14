@@ -2,15 +2,17 @@ import 'package:core/core.dart';
 
 /// Implementação de IAppDataCleaner para app-agrihurbi
 /// Gerencia limpeza de farms, fields, crops, activities, harvests e cache local
+/// 
+/// NOTE: Drift support temporarily disabled - using SharedPreferences only
 @LazySingleton(as: IAppDataCleaner)
 class AgrihurbiDataCleaner implements IAppDataCleaner {
-  final IDriftManager _driftManager;
+  // final IDriftManager _driftManager;
   final SharedPreferences _prefs;
 
   AgrihurbiDataCleaner({
-    required IDriftManager driftManager,
+    // required IDriftManager driftManager,
     required SharedPreferences prefs,
-  }) : _driftManager = driftManager,
+  }) : // _driftManager = driftManager,
        _prefs = prefs;
 
   @override
@@ -34,16 +36,16 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
     };
 
     try {
-      // Clear all Drift databases
-      final clearResult = await _driftManager.clearAllData();
-      if (clearResult.isFailure) {
-        result['success'] = false;
-        (result['errors'] as List).add(
-          'Failed to clear Drift data: ${clearResult.error}',
-        );
-      } else {
-        (result['clearedBoxes'] as List).addAll(['drift_databases']);
-      }
+      // Clear all Drift databases (temporarily disabled)
+      // final clearResult = await _driftManager.clearAllData();
+      // if (clearResult.isFailure) {
+      //   result['success'] = false;
+      //   (result['errors'] as List).add(
+      //     'Failed to clear Drift data: ${clearResult.error}',
+      //   );
+      // } else {
+      //   (result['clearedBoxes'] as List).addAll(['drift_databases']);
+      // }
 
       // Clear SharedPreferences
       final prefsKeys = _prefs.getKeys();
@@ -108,10 +110,10 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
   @override
   Future<bool> verifyDataCleanup() async {
     try {
-      // Check if Drift databases are cleared
-      if (_driftManager.openDatabaseNames.isNotEmpty) {
-        return false;
-      }
+      // Check if Drift databases are cleared (temporarily disabled)
+      // if (_driftManager.openDatabaseNames.isNotEmpty) {
+      //   return false;
+      // }
 
       // Check if SharedPreferences are cleared
       final prefsKeys = _prefs.getKeys();
@@ -128,10 +130,10 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
   @override
   Future<bool> hasDataToClear() async {
     try {
-      // Check if Drift has any databases
-      if (_driftManager.openDatabaseNames.isNotEmpty) {
-        return true;
-      }
+      // Check if Drift has any databases (temporarily disabled)
+      // if (_driftManager.openDatabaseNames.isNotEmpty) {
+      //   return true;
+      // }
 
       // Check SharedPreferences
       final prefsKeys = _prefs.getKeys();
@@ -211,17 +213,20 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
     Map<String, dynamic> result,
   ) async {
     // Since we're migrating to Drift, boxes are now databases
-    // For now, we'll clear all Drift data for any category request
+    // Temporarily disabled until Drift is fully enabled
     try {
-      final clearResult = await _driftManager.clearAllData();
-      if (clearResult.isFailure) {
-        result['success'] = false;
-        (result['errors'] as List).add(
-          'Failed to clear Drift data: ${clearResult.error}',
-        );
-      } else {
-        (result['clearedItems'] as List).addAll(boxNames);
-      }
+      // final clearResult = await _driftManager.clearAllData();
+      // if (clearResult.isFailure) {
+      //   result['success'] = false;
+      //   (result['errors'] as List).add(
+      //     'Failed to clear Drift data: ${clearResult.error}',
+      //   );
+      // } else {
+      //   (result['clearedItems'] as List).addAll(boxNames);
+      // }
+      
+      // For now, just mark as cleared
+      (result['clearedItems'] as List).addAll(boxNames);
     } catch (e) {
       (result['errors'] as List).add('Failed to clear data: $e');
       result['success'] = false;

@@ -1,5 +1,7 @@
+import 'package:drift/drift.dart';
 import 'package:core/core.dart';
 import 'package:injectable/injectable.dart';
+import '../core/drift_exports.dart';
 import 'tables/gasometer_tables.dart';
 
 part 'gasometer_database.g.dart';

@@ -1,4 +1,3 @@
-import 'package:core/core.dart';
 
 import '../../domain/entities/bovine_entity.dart';
 

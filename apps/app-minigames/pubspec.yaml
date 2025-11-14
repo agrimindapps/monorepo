@@ -35,8 +35,8 @@ dev_dependencies:
   injectable_generator: ^2.6.2
 
   # Custom Linting
-  custom_lint: ^0.7.3
-  riverpod_lint: ^2.3.10
+  # custom_lint: ^0.7.3  # Temporarily disabled due to analyzer compatibility issues
+  # riverpod_lint: ^2.3.10
 
   # Testing
   mocktail: ^1.0.0

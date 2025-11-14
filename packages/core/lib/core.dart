@@ -27,9 +27,9 @@ export 'package:intl/intl.dart';
 export 'package:json_annotation/json_annotation.dart';
 
 // Drift - Sistema de persistência SQL
-export 'package:drift/drift.dart'
-    hide JsonKey, Index, VerificationResult, Query;
-export 'services/drift/drift.dart';
+// export 'package:drift/drift.dart'
+//     hide JsonKey, Index, VerificationResult, Query;
+// export 'services/drift/drift.dart';
 
 export 'package:package_info_plus/package_info_plus.dart';
 export 'package:purchases_flutter/purchases_flutter.dart' hide LogLevel, Store;
@@ -162,7 +162,7 @@ export 'src/infrastructure/services/validation_service.dart';
 export 'src/infrastructure/services/web_notification_service.dart';
 
 // Storage - Drift (Novo)
-export 'src/infrastructure/storage/drift/drift_storage.dart';
+// export 'src/infrastructure/storage/drift/drift_storage.dart';
 
 export 'src/services/cache/cache_service.dart';
 export 'src/services/supabase/supabase_config_service.dart';

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/gasometer_colors.dart';

@@ -1,5 +1,5 @@
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 /// Centralized error handling utility

@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide AuthProvider, getIt, Column;
+import 'package:core/core.dart' hide AuthProvider, getIt;
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection_container.dart';

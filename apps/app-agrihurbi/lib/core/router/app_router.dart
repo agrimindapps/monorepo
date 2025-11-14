@@ -15,7 +15,7 @@ import 'package:app_agrihurbi/features/news/presentation/pages/news_list_page.da
 import 'package:app_agrihurbi/features/promo/presentation/pages/promo_page.dart';
 import 'package:app_agrihurbi/features/settings/presentation/pages/settings_page.dart';
 import 'package:app_agrihurbi/features/weather/presentation/pages/weather_dashboard_page.dart';
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

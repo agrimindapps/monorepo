@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:core/core.dart';
 
 import '../models/sync_results.dart';

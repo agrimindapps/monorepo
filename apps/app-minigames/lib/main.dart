@@ -21,12 +21,12 @@ void main() async {
 
   usePathUrlStrategy();
 
-  // Initialize Drift using core package
-  final driftResult = await DriftManager.instance.initialize('app_minigames');
-  if (driftResult.isError) {
-    debugPrint('Drift initialization failed: ${driftResult.error}');
-    // Continue without local storage - app can still work with memory
-  }
+  // Initialize Drift using core package (temporarily disabled)
+  // final driftResult = await DriftManager.instance.initialize('app_minigames');
+  // if (driftResult.isError) {
+  //   debugPrint('Drift initialization failed: ${driftResult.error}');
+  //   // Continue without local storage - app can still work with memory
+  // }
 
   // Initialize async dependencies for Riverpod providers
   final sharedPrefs = await SharedPreferences.getInstance();

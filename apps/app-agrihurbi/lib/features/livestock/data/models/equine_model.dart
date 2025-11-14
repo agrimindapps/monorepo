@@ -1,6 +1,4 @@
 
-import 'package:core/core.dart';
-
 import '../../domain/entities/equine_entity.dart';
 
 

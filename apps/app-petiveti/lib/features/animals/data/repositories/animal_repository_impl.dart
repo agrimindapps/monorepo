@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/error/failures.dart' as local_failures;
@@ -43,6 +44,13 @@ class AnimalRepositoryImpl implements AnimalRepository {
   final ISyncManager _syncManager;
   final AnimalErrorHandlingService _errorHandlingService;
 
+  /// Get current user ID from Firebase Auth
+  /// Returns 'default-user' if no user is authenticated
+  String get _userId {
+    final user = FirebaseAuth.instance.currentUser;
+    return user?.uid ?? 'default-user';
+  }
+
   // ========================================================================
   // CREATE
   // ========================================================================
@@ -83,7 +91,7 @@ class AnimalRepositoryImpl implements AnimalRepository {
     return _errorHandlingService.executeOperation(
       operation: () async {
         // Sempre lê do cache local (rápido)
-        final localAnimals = await _localDataSource.getAnimals();
+        final localAnimals = await _localDataSource.getAnimals(_userId);
 
         // Filtrar animals deletados (isActive = false)
         final activeAnimals = localAnimals
@@ -134,7 +142,7 @@ class AnimalRepositoryImpl implements AnimalRepository {
   @override
   Stream<List<Animal>> watchAnimals() {
     // Watch do cache local (reactive)
-    return _localDataSource.watchAnimals().map((models) => models
+    return _localDataSource.watchAnimals(_userId).map((models) => models
         .where((model) => !model.isDeleted)
         .map((model) => model.toEntity())
         .toList());

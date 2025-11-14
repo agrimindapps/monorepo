@@ -60,8 +60,9 @@ class AppointmentLocalDataSourceImpl implements AppointmentLocalDataSource {
 
   @override
   Future<bool> updateAppointment(AppointmentModel appointment) async {
+    if (appointment.id == null) return false;
     final companion = _toCompanion(appointment, forUpdate: true);
-    return await _database.appointmentDao.updateAppointment(appointment.id, companion);
+    return await _database.appointmentDao.updateAppointment(appointment.id!, companion);
   }
 
   @override

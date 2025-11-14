@@ -22,14 +22,14 @@ class Exercicio extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        nome,
-        categoria,
-        duracao,
-        caloriasQueimadas,
-        dataRegistro,
-        observacoes,
-      ];
+    id,
+    nome,
+    categoria,
+    duracao,
+    caloriasQueimadas,
+    dataRegistro,
+    observacoes,
+  ];
 
   Exercicio copyWith({
     String? id,

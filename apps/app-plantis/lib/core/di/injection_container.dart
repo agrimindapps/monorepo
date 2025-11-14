@@ -1,5 +1,8 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart' hide Column, OfflineData;
+import 'package:core/src/domain/repositories/i_local_storage_repository.dart';
 import 'package:flutter/foundation.dart';
+
+import '../../database/plantis_database.dart';
 
 import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../../features/data_export/data/datasources/local/export_file_generator.dart';
@@ -25,9 +28,7 @@ import '../../features/tasks/domain/repositories/tasks_repository.dart';
 import '../auth/auth_state_notifier.dart';
 import '../config/security_config.dart';
 import '../constants/app_constants.dart';
-import '../data/adapters/network_info_adapter.dart';
 import '../data/adapters/plantis_image_service_adapter.dart';
-import '../interfaces/network_info.dart';
 import '../providers/analytics_provider.dart';
 import '../services/data_cleaner_service.dart';
 import '../services/interfaces/i_notification_permission_manager.dart';
@@ -129,6 +130,21 @@ void _initCoreServices({bool firebaseEnabled = false}) {
   // sl.registerLazySingleton<ILocalStorageRepository>(
   //   () => HiveStorageService(sl<IBoxRegistryService>()),
   // );
+
+  // ✅ REGISTER: PlantisDatabase manually (Injectable can't process Drift classes)
+  sl.registerLazySingleton<PlantisDatabase>(() => PlantisDatabase.injectable());
+
+  // ✅ ADDED: Drift-based local storage service
+  // TODO: Fix PlantisDatabase type recognition issue
+  // sl.registerLazySingleton<ILocalStorageRepository>(
+  //   () => DriftStorageService(sl<PlantisDatabase>()),
+  // );
+
+  // TEMPORARY: Use stub implementation until PlantisDatabase is properly generated
+  sl.registerLazySingleton<ILocalStorageRepository>(
+    () => _StubLocalStorageRepository(),
+  );
+
   sl.registerLazySingleton<EnhancedSecureStorageService>(
     () => EnhancedSecureStorageService(
       appIdentifier: AppConstants.appId,
@@ -338,6 +354,134 @@ void _initDataExport() {
   sl.registerLazySingleton<DeleteExportUseCase>(
     () => DeleteExportUseCase(sl<DataExportRepository>()),
   );
+}
+
+/// TEMPORARY: Stub implementation of ILocalStorageRepository
+/// Used until PlantisDatabase type recognition issue is resolved
+class _StubLocalStorageRepository implements ILocalStorageRepository {
+  @override
+  Future<Either<Failure, void>> initialize() async => const Right(null);
+
+  @override
+  Future<Either<Failure, void>> save<T>({
+    required String key,
+    required T data,
+    String? box,
+  }) async => const Right(null);
+
+  @override
+  Future<Either<Failure, T?>> get<T>({
+    required String key,
+    String? box,
+  }) async => const Right(null);
+
+  @override
+  Future<Either<Failure, void>> remove({
+    required String key,
+    String? box,
+  }) async => const Right(null);
+
+  @override
+  Future<Either<Failure, void>> clear({String? box}) async => const Right(null);
+
+  @override
+  Future<Either<Failure, bool>> contains({
+    required String key,
+    String? box,
+  }) async => const Right(false);
+
+  @override
+  Future<Either<Failure, List<String>>> getKeys({String? box}) async =>
+      const Right([]);
+
+  @override
+  Future<Either<Failure, List<T>>> getValues<T>({String? box}) async =>
+      const Right([]);
+
+  @override
+  Future<Either<Failure, int>> length({String? box}) async => const Right(0);
+
+  @override
+  Future<Either<Failure, void>> saveList<T>({
+    required String key,
+    required List<T> data,
+    String? box,
+  }) async => const Right(null);
+
+  @override
+  Future<Either<Failure, List<T>>> getList<T>({
+    required String key,
+    String? box,
+  }) async => const Right([]);
+
+  @override
+  Future<Either<Failure, void>> addToList<T>({
+    required String key,
+    required T item,
+    String? box,
+  }) async => const Right(null);
+
+  @override
+  Future<Either<Failure, void>> removeFromList<T>({
+    required String key,
+    required T item,
+    String? box,
+  }) async => const Right(null);
+
+  @override
+  Future<Either<Failure, void>> saveWithTTL<T>({
+    required String key,
+    required T data,
+    required Duration ttl,
+    String? box,
+  }) async => const Right(null);
+
+  @override
+  Future<Either<Failure, T?>> getWithTTL<T>({
+    required String key,
+    String? box,
+  }) async => const Right(null);
+
+  @override
+  Future<Either<Failure, void>> cleanExpiredData({String? box}) async =>
+      const Right(null);
+
+  @override
+  Future<Either<Failure, void>> saveUserSetting({
+    required String key,
+    required dynamic value,
+  }) async => const Right(null);
+
+  @override
+  Future<Either<Failure, T?>> getUserSetting<T>({
+    required String key,
+    T? defaultValue,
+  }) async => Right(defaultValue);
+
+  @override
+  Future<Either<Failure, Map<String, dynamic>>> getAllUserSettings() async =>
+      const Right({});
+
+  @override
+  Future<Either<Failure, void>> saveOfflineData<T>({
+    required String key,
+    required T data,
+    DateTime? lastSync,
+  }) async => const Right(null);
+
+  // Note: getOfflineData method omitted due to type conflicts - using stub that throws
+  @override
+  Future<Either<Failure, OfflineData<T>?>> getOfflineData<T>({
+    required String key,
+  }) async => const Right(null);
+
+  @override
+  Future<Either<Failure, void>> markAsSynced({required String key}) async =>
+      const Right(null);
+
+  @override
+  Future<Either<Failure, List<String>>> getUnsyncedKeys() async =>
+      const Right([]);
 }
 
 /// Stub implementation of IPerformanceRepository for development

@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/error/failures.dart' as local_failures;
@@ -42,6 +43,13 @@ class MedicationRepositoryImpl implements MedicationRepository {
   final MedicationLocalDataSource _localDataSource;
   final MedicationErrorHandlingService _errorHandlingService;
 
+  /// Get current user ID from Firebase Auth
+  /// Returns 'default-user' if no user is authenticated
+  String get _userId {
+    final user = FirebaseAuth.instance.currentUser;
+    return user?.uid ?? 'default-user';
+  }
+
   /// UnifiedSyncManager singleton instance (for future use)
   // ignore: unused_element
   UnifiedSyncManager get _syncManager => UnifiedSyncManager.instance;
@@ -65,7 +73,7 @@ class MedicationRepositoryImpl implements MedicationRepository {
         // 2. Salvar localmente (usando MedicationModel para compatibilidade com Hive)
         final medicationModel =
             MedicationModel.fromEntity(syncEntity.toLegacyMedication());
-        await _localDataSource.cacheMedication(medicationModel);
+        await _localDataSource.addMedication(medicationModel);
 
         if (kDebugMode) {
           debugPrint(
@@ -95,7 +103,7 @@ class MedicationRepositoryImpl implements MedicationRepository {
       getMedications() async {
     return _errorHandlingService.executeOperation(
       operation: () async {
-        final localMedications = await _localDataSource.getMedications();
+        final localMedications = await _localDataSource.getMedications(_userId);
         final activeMedications = localMedications
             .where((model) => !model.isDeleted)
             .map((model) => model.toEntity())
@@ -112,8 +120,9 @@ class MedicationRepositoryImpl implements MedicationRepository {
       getMedicationsByAnimalId(String animalId) async {
     return _errorHandlingService.executeOperation(
       operation: () async {
+        final intId = int.tryParse(animalId) ?? 0;
         final localMedications =
-            await _localDataSource.getMedicationsByAnimalId(animalId);
+            await _localDataSource.getMedicationsByAnimalId(intId);
         final activeMedications = localMedications
             .where((model) => !model.isDeleted)
             .map((model) => model.toEntity())
@@ -145,8 +154,9 @@ class MedicationRepositoryImpl implements MedicationRepository {
       getActiveMedicationsByAnimalId(String animalId) async {
     return _errorHandlingService.executeOperation(
       operation: () async {
+        final intId = int.tryParse(animalId) ?? 0;
         final localMedications =
-            await _localDataSource.getActiveMedicationsByAnimalId(animalId);
+            await _localDataSource.getActiveMedications(intId);
         final medications =
             localMedications.map((model) => model.toEntity()).toList();
         return medications;
@@ -161,9 +171,16 @@ class MedicationRepositoryImpl implements MedicationRepository {
       getExpiringSoonMedications() async {
     return _errorHandlingService.executeOperation(
       operation: () async {
-        final localMedications =
-            await _localDataSource.getExpiringSoonMedications();
-        final medications =
+        // TODO: Implement getExpiringSoonMedications in datasource
+        // For now, return all medications and filter in-memory
+        final localMedications = await _localDataSource.getMedications(_userId);
+        final now = DateTime.now();
+        final soon = now.add(const Duration(days: 30));
+        final medications = localMedications
+            .where((m) => m.endDate != null && m.endDate!.isBefore(soon) && m.endDate!.isAfter(now))
+            .map((model) => model.toEntity())
+            .toList();
+        return medications;
             localMedications.map((model) => model.toEntity()).toList();
         return medications;
       },

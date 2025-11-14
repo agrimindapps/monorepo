@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 // Package imports:
+import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
@@ -14,7 +15,6 @@ import '../repository/perfil_repository.dart';
 import '../widgets/appbar.dart';
 
 // import 'package:image_picker/image_picker.dart';
-
 
 class CadastroPerfilPage extends StatefulWidget {
   const CadastroPerfilPage({super.key, this.perfil});
@@ -63,9 +63,9 @@ class _CadastroPerfilPageState extends State<CadastroPerfilPage> {
       _formKey.currentState!.save();
 
       if (widget.perfil != null) {
-        PerfilRepository().put(_localPerfil);
+        GetIt.I.get<PerfilRepository>().put(_localPerfil);
       } else {
-        PerfilRepository().post(_localPerfil);
+        GetIt.I.get<PerfilRepository>().post(_localPerfil);
       }
 
       Navigator.of(context).pop();
@@ -123,10 +123,12 @@ class _CadastroPerfilPageState extends State<CadastroPerfilPage> {
                   ),
                   const SizedBox(height: 10),
                   TextFormField(
-                    initialValue: DateFormat('dd/MM/yyyy')
-                        .format(_localPerfil.datanascimento),
-                    decoration:
-                        const InputDecoration(labelText: 'Data de Nascimento'),
+                    initialValue: DateFormat(
+                      'dd/MM/yyyy',
+                    ).format(_localPerfil.datanascimento),
+                    decoration: const InputDecoration(
+                      labelText: 'Data de Nascimento',
+                    ),
                     readOnly: true,
                     onTap: () async {
                       DateTime? pickedDate = await showDatePicker(
@@ -137,7 +139,9 @@ class _CadastroPerfilPageState extends State<CadastroPerfilPage> {
                       );
                       if (pickedDate != null) {
                         setState(() {
-                          _localPerfil = _localPerfil.copyWith(datanascimento: pickedDate);
+                          _localPerfil = _localPerfil.copyWith(
+                            datanascimento: pickedDate,
+                          );
                         });
                       }
                     },
@@ -160,7 +164,9 @@ class _CadastroPerfilPageState extends State<CadastroPerfilPage> {
                       return null;
                     },
                     onSaved: (value) {
-                      _localPerfil = _localPerfil.copyWith(altura: double.parse(value!));
+                      _localPerfil = _localPerfil.copyWith(
+                        altura: double.parse(value!),
+                      );
                     },
                   ),
                   const SizedBox(height: 10),
@@ -175,7 +181,9 @@ class _CadastroPerfilPageState extends State<CadastroPerfilPage> {
                       return null;
                     },
                     onSaved: (value) {
-                      _localPerfil = _localPerfil.copyWith(peso: double.parse(value!));
+                      _localPerfil = _localPerfil.copyWith(
+                        peso: double.parse(value!),
+                      );
                     },
                   ),
                   const SizedBox(height: 10),

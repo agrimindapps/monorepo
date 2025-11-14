@@ -19,15 +19,17 @@ class ExercicioRepositoryImpl implements ExercicioRepository {
     try {
       final models = await _localDataSource.getAllExercicios();
       final entities = models
-          .map((model) => Exercicio(
-                id: model.id,
-                nome: model.nome,
-                categoria: model.categoria,
-                duracao: model.duracao,
-                caloriasQueimadas: model.caloriasQueimadas,
-                dataRegistro: model.dataRegistro,
-                observacoes: model.observacoes,
-              ))
+          .map(
+            (model) => Exercicio(
+              id: model.id,
+              nome: model.nome,
+              categoria: model.categoria,
+              duracao: model.duracao,
+              caloriasQueimadas: model.caloriasQueimadas,
+              dataRegistro: model.dataRegistro,
+              observacoes: model.observacoes,
+            ),
+          )
           .toList();
       return Right(entities);
     } on CacheException catch (e) {
@@ -87,7 +89,9 @@ class ExercicioRepositoryImpl implements ExercicioRepository {
   }
 
   @override
-  Future<Either<Failure, Exercicio>> updateExercicio(Exercicio exercicio) async {
+  Future<Either<Failure, Exercicio>> updateExercicio(
+    Exercicio exercicio,
+  ) async {
     try {
       final model = await _localDataSource.updateExercicio(
         ExercicioModel(
@@ -132,17 +136,22 @@ class ExercicioRepositoryImpl implements ExercicioRepository {
     DateTime end,
   ) async {
     try {
-      final models = await _localDataSource.getExerciciosByDateRange(start, end);
+      final models = await _localDataSource.getExerciciosByDateRange(
+        start,
+        end,
+      );
       final entities = models
-          .map((model) => Exercicio(
-                id: model.id,
-                nome: model.nome,
-                categoria: model.categoria,
-                duracao: model.duracao,
-                caloriasQueimadas: model.caloriasQueimadas,
-                dataRegistro: model.dataRegistro,
-                observacoes: model.observacoes,
-              ))
+          .map(
+            (model) => Exercicio(
+              id: model.id,
+              nome: model.nome,
+              categoria: model.categoria,
+              duracao: model.duracao,
+              caloriasQueimadas: model.caloriasQueimadas,
+              dataRegistro: model.dataRegistro,
+              observacoes: model.observacoes,
+            ),
+          )
           .toList();
       return Right(entities);
     } on CacheException catch (e) {
@@ -157,15 +166,17 @@ class ExercicioRepositoryImpl implements ExercicioRepository {
     try {
       final models = await _localDataSource.getExerciciosByCategoria(categoria);
       final entities = models
-          .map((model) => Exercicio(
-                id: model.id,
-                nome: model.nome,
-                categoria: model.categoria,
-                duracao: model.duracao,
-                caloriasQueimadas: model.caloriasQueimadas,
-                dataRegistro: model.dataRegistro,
-                observacoes: model.observacoes,
-              ))
+          .map(
+            (model) => Exercicio(
+              id: model.id,
+              nome: model.nome,
+              categoria: model.categoria,
+              duracao: model.duracao,
+              caloriasQueimadas: model.caloriasQueimadas,
+              dataRegistro: model.dataRegistro,
+              observacoes: model.observacoes,
+            ),
+          )
           .toList();
       return Right(entities);
     } on CacheException catch (e) {
@@ -179,7 +190,10 @@ class ExercicioRepositoryImpl implements ExercicioRepository {
     DateTime end,
   ) async {
     try {
-      final total = await _localDataSource.getTotalCaloriasByDateRange(start, end);
+      final total = await _localDataSource.getTotalCaloriasByDateRange(
+        start,
+        end,
+      );
       return Right(total);
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));

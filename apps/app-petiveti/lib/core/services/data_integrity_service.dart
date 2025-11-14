@@ -164,7 +164,9 @@ class DataIntegrityService {
       final report = IntegrityReport();
 
       // Buscar todos os animals
-      final allAnimals = await _animalLocalDataSource.getAnimals(userId);
+      // TODO: Get userId from auth service instead of hardcoded
+      const defaultUserId = 'default-user';
+      final allAnimals = await _animalLocalDataSource.getAnimals(defaultUserId);
       report.totalAnimals = allAnimals.length;
 
       if (kDebugMode) {

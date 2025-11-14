@@ -3,19 +3,18 @@ import 'package:flutter/foundation.dart';
 
 // Project imports:
 import '../../core/services/hive_service.dart';
-import '../database/comentarios_models.dart';
-import '../database/perfil_model.dart';
-import '../pages/agua/models/beber_agua_model.dart';
-import '../pages/peso/models/peso_model.dart';
 
 // Adapters específicos do módulo app-nutrituti
 
+/// DEPRECATED: Este serviço está sendo migrado para Drift ORM
 /// Serviço de inicialização do Hive específico para o módulo app-nutrituti
+@Deprecated('Migrating to Drift ORM. Use Drift database instead.')
 class NutriTutiHiveService {
   static bool _isInitialized = false;
   static bool get isInitialized => _isInitialized;
 
   /// Inicializa o Hive para o módulo app-nutrituti
+  @Deprecated('Use Drift database initialization instead')
   static Future<void> initialize() async {
     if (_isInitialized) return;
 
@@ -25,28 +24,17 @@ class NutriTutiHiveService {
       // Garantir que o HiveService global está inicializado
       await HiveService().init();
 
-      // Registrar adapters específicos do módulo app-nutrituti
-      _registerNutriTutiAdapters();
+      // REMOVED: Adapters migrados para Drift
+      // _registerNutriTutiAdapters();
 
       _isInitialized = true;
-      debugPrint('✅ Hive inicializado com sucesso para app-nutrituti');
+      debugPrint(
+        '✅ Hive inicializado com sucesso para app-nutrituti (DEPRECATED)',
+      );
     } catch (e) {
       debugPrint('❌ Erro ao inicializar Hive para app-nutrituti: $e');
       rethrow;
     }
-  }
-
-  /// Registra todos os adapters do módulo app-nutrituti
-  static void _registerNutriTutiAdapters() {
-    debugPrint('📦 Registrando adapters do app-nutrituti...');
-
-    // Registrar adapters com typeIds específicos (50-53)
-    HiveService.safeRegisterAdapter(ComentariosAdapter()); // typeId: 50
-    HiveService.safeRegisterAdapter(BeberAguaAdapter()); // typeId: 51
-    HiveService.safeRegisterAdapter(PerfilModelAdapter()); // typeId: 52
-    HiveService.safeRegisterAdapter(PesoModelAdapter()); // typeId: 53
-
-    debugPrint('✅ Todos os adapters do app-nutrituti registrados');
   }
 
   /// Informações de debug específicas do módulo
@@ -55,10 +43,10 @@ class NutriTutiHiveService {
       'module': 'app-nutrituti',
       'isInitialized': _isInitialized,
       'adapters': [
-        'ComentariosAdapter (50)',
-        'BeberAguaAdapter (51)',
-        'PerfilModelAdapter (52)',
-        'PesoModelAdapter (53)',
+        'ComentariosAdapter (50) - MIGRATED TO DRIFT',
+        'BeberAguaAdapter (51) - MIGRATED TO DRIFT',
+        'PerfilModelAdapter (52) - MIGRATED TO DRIFT',
+        'PesoModelAdapter (53) - MIGRATED TO DRIFT',
       ],
       'timestamp': DateTime.now().toIso8601String(),
     };

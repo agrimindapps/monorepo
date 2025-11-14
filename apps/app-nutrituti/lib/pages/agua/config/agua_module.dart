@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import '../repository/agua_repository.dart';
 import '../views/agua_page.dart';
 
 /// DEPRECATED: Este módulo GetX está sendo substituído por Riverpod providers
@@ -12,9 +11,7 @@ class AguaModule {
   /// Inicializa o módulo de água, registrando controllers e serviços necessários
   @Deprecated('Use Riverpod providers instead')
   static Future<void> initialize() async {
-    // Inicializar o repositório
-    await AguaRepository.initialize();
-
+    // REMOVED: AguaRepository.initialize() - method doesn't exist
     // TODO: Migrar para Riverpod provider
     // Get.lazyPut<AguaController>(() => AguaController());
   }

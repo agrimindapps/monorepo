@@ -68,7 +68,7 @@ class ExpenseDao extends DatabaseAccessor<PetivetiDatabase> with _$ExpenseDaoMix
         tbl.userId.equals(userId) & 
         tbl.isDeleted.equals(false) &
         tbl.category.equals(category))
-      ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+      ..orderBy([(t) => OrderingTerm.desc(t.expenseDate)]))
       .get();
   }
 

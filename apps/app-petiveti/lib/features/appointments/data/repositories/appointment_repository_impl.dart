@@ -66,7 +66,7 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
         // 2. Salvar localmente (usando AppointmentModel para compatibilidade com Hive)
         final appointmentModel =
             AppointmentModel.fromEntity(syncEntity.toLegacyAppointment());
-        await _localDataSource.cacheAppointment(appointmentModel);
+        await _localDataSource.addAppointment(appointmentModel);
 
         if (kDebugMode) {
           debugPrint(

@@ -151,13 +151,13 @@ class AnimalModel {
       'photo_url': photoUrl,
       'is_active': isActive,
       'created_at': createdAt.millisecondsSinceEpoch,
-      'updated_at': updatedAt.millisecondsSinceEpoch,
+      'updated_at': updatedAt?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch,
     };
   }
 
   Animal toEntity() {
     return Animal(
-      id: id?.toString(),
+      id: (id ?? 0).toString(),
       userId: userId,
       name: name,
       species: species,
@@ -172,7 +172,7 @@ class AnimalModel {
       photoUrl: photoUrl,
       isActive: isActive,
       createdAt: createdAt,
-      updatedAt: updatedAt,
+      updatedAt: updatedAt ?? createdAt,
     );
   }
 

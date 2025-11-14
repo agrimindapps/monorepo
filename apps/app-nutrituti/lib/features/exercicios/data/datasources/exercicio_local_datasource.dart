@@ -25,7 +25,10 @@ abstract class ExercicioLocalDataSource {
   Future<ExercicioModel?> getExercicioById(String id);
 
   /// Get exercises by date range
-  Future<List<ExercicioModel>> getExerciciosByDateRange(DateTime start, DateTime end);
+  Future<List<ExercicioModel>> getExerciciosByDateRange(
+    DateTime start,
+    DateTime end,
+  );
 
   /// Get exercises by category
   Future<List<ExercicioModel>> getExerciciosByCategoria(String categoria);
@@ -111,9 +114,15 @@ class ExercicioLocalDataSourceImpl implements ExercicioLocalDataSource {
   }
 
   @override
-  Future<List<ExercicioModel>> getExerciciosByDateRange(DateTime start, DateTime end) async {
+  Future<List<ExercicioModel>> getExerciciosByDateRange(
+    DateTime start,
+    DateTime end,
+  ) async {
     try {
-      final exercicios = await _exercicioDao.getExerciciosByDateRange(start, end);
+      final exercicios = await _exercicioDao.getExerciciosByDateRange(
+        start,
+        end,
+      );
       return exercicios.map(_exercicioFromDrift).toList();
     } catch (e) {
       throw CacheException('Failed to get exercises by date range: $e');
@@ -121,9 +130,13 @@ class ExercicioLocalDataSourceImpl implements ExercicioLocalDataSource {
   }
 
   @override
-  Future<List<ExercicioModel>> getExerciciosByCategoria(String categoria) async {
+  Future<List<ExercicioModel>> getExerciciosByCategoria(
+    String categoria,
+  ) async {
     try {
-      final exercicios = await _exercicioDao.getExerciciosByCategoria(categoria);
+      final exercicios = await _exercicioDao.getExerciciosByCategoria(
+        categoria,
+      );
       return exercicios.map(_exercicioFromDrift).toList();
     } catch (e) {
       throw CacheException('Failed to get exercises by category: $e');
@@ -131,7 +144,10 @@ class ExercicioLocalDataSourceImpl implements ExercicioLocalDataSource {
   }
 
   @override
-  Future<double> getTotalCaloriasByDateRange(DateTime start, DateTime end) async {
+  Future<double> getTotalCaloriasByDateRange(
+    DateTime start,
+    DateTime end,
+  ) async {
     try {
       return await _exercicioDao.getTotalCaloriasByDateRange(start, end);
     } catch (e) {
@@ -197,7 +213,9 @@ class ExercicioLocalDataSourceImpl implements ExercicioLocalDataSource {
       categoria: drift.Value(exercicio.categoria),
       duracao: drift.Value(exercicio.duracao),
       caloriasQueimadas: drift.Value(exercicio.caloriasQueimadas.toDouble()),
-      dataRegistro: drift.Value(DateTime.fromMillisecondsSinceEpoch(exercicio.dataRegistro)),
+      dataRegistro: drift.Value(
+        DateTime.fromMillisecondsSinceEpoch(exercicio.dataRegistro),
+      ),
       observacoes: drift.Value(exercicio.observacoes),
       isSynced: const drift.Value(false),
       isPending: const drift.Value(true),

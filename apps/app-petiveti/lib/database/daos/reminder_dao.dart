@@ -12,7 +12,7 @@ class ReminderDao extends DatabaseAccessor<PetivetiDatabase> with _$ReminderDaoM
   Future<List<Reminder>> getAllReminders(String userId) {
     return (select(reminders)
       ..where((tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false))
-      ..orderBy([(t) => OrderingTerm.asc(t.dateTime)]))
+      ..orderBy([(t) => OrderingTerm.asc(t.reminderDateTime)]))
       .get();
   }
 
@@ -20,7 +20,7 @@ class ReminderDao extends DatabaseAccessor<PetivetiDatabase> with _$ReminderDaoM
   Future<List<Reminder>> getRemindersByAnimal(int animalId) {
     return (select(reminders)
       ..where((tbl) => tbl.animalId.equals(animalId) & tbl.isDeleted.equals(false))
-      ..orderBy([(t) => OrderingTerm.asc(t.dateTime)]))
+      ..orderBy([(t) => OrderingTerm.asc(t.reminderDateTime)]))
       .get();
   }
 
@@ -28,7 +28,7 @@ class ReminderDao extends DatabaseAccessor<PetivetiDatabase> with _$ReminderDaoM
   Stream<List<Reminder>> watchRemindersByAnimal(int animalId) {
     return (select(reminders)
       ..where((tbl) => tbl.animalId.equals(animalId) & tbl.isDeleted.equals(false))
-      ..orderBy([(t) => OrderingTerm.asc(t.dateTime)]))
+      ..orderBy([(t) => OrderingTerm.asc(t.reminderDateTime)]))
       .watch();
   }
 
@@ -46,13 +46,15 @@ class ReminderDao extends DatabaseAccessor<PetivetiDatabase> with _$ReminderDaoM
 
   /// Update reminder
   Future<bool> updateReminder(int id, RemindersCompanion reminder) async {
-    return (update(reminders)..where((tbl) => tbl.id.equals(id))).write(reminder);
+    final count = await (update(reminders)..where((tbl) => tbl.id.equals(id))).write(reminder);
+    return count > 0;
   }
 
   /// Delete reminder
   Future<bool> deleteReminder(int id) async {
-    return (update(reminders)..where((tbl) => tbl.id.equals(id)))
+    final count = await (update(reminders)..where((tbl) => tbl.id.equals(id)))
       .write(const RemindersCompanion(isDeleted: Value(true)));
+    return count > 0;
   }
 
   /// Get active (not completed) reminders
@@ -62,7 +64,7 @@ class ReminderDao extends DatabaseAccessor<PetivetiDatabase> with _$ReminderDaoM
         tbl.userId.equals(userId) & 
         tbl.isDeleted.equals(false) &
         tbl.isCompleted.equals(false))
-      ..orderBy([(t) => OrderingTerm.asc(t.dateTime)]))
+      ..orderBy([(t) => OrderingTerm.asc(t.reminderDateTime)]))
       .get();
   }
 
@@ -74,14 +76,15 @@ class ReminderDao extends DatabaseAccessor<PetivetiDatabase> with _$ReminderDaoM
         tbl.userId.equals(userId) & 
         tbl.isDeleted.equals(false) &
         tbl.isCompleted.equals(false) &
-        tbl.dateTime.isBiggerOrEqualValue(now))
-      ..orderBy([(t) => OrderingTerm.asc(t.dateTime)]))
+        tbl.reminderDateTime.isBiggerOrEqualValue(now))
+      ..orderBy([(t) => OrderingTerm.asc(t.reminderDateTime)]))
       .get();
   }
 
   /// Mark reminder as completed
   Future<bool> markAsCompleted(int id) async {
-    return (update(reminders)..where((tbl) => tbl.id.equals(id)))
+    final count = await (update(reminders)..where((tbl) => tbl.id.equals(id)))
       .write(const RemindersCompanion(isCompleted: Value(true)));
+    return count > 0;
   }
 }

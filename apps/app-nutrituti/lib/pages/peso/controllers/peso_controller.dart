@@ -2,11 +2,13 @@
 import 'package:flutter/foundation.dart';
 
 // Package imports:
+import 'package:get_it/get_it.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../drift_database/nutrituti_database.dart';
 import '../../../../core/services/firebase_firestore_service.dart';
 import '../models/achievement_model.dart';
 import '../models/peso_model.dart';
@@ -54,7 +56,10 @@ class PesoState {
 /// Provider for PesoRepository
 @riverpod
 PesoRepository pesoRepository(PesoRepositoryRef ref) {
-  return PesoRepository(FirestoreService(FirebaseFirestore.instance));
+  return PesoRepository(
+    FirestoreService(FirebaseFirestore.instance),
+    GetIt.I<NutitutiDatabase>(),
+  );
 }
 
 /// Main Peso Notifier
@@ -230,11 +235,13 @@ class PesoNotifier extends _$PesoNotifier {
         }
       }
 
-      state = AsyncValue.data(currentState.copyWith(
-        registros: updatedRegistros,
-        pesoAtual: pesoAtual,
-        isLoading: false,
-      ));
+      state = AsyncValue.data(
+        currentState.copyWith(
+          registros: updatedRegistros,
+          pesoAtual: pesoAtual,
+          isLoading: false,
+        ),
+      );
 
       await _checkProgressAchievements();
     } catch (e) {
@@ -265,11 +272,13 @@ class PesoNotifier extends _$PesoNotifier {
         }
       }
 
-      state = AsyncValue.data(currentState.copyWith(
-        registros: updatedRegistros,
-        pesoAtual: pesoAtual,
-        isLoading: false,
-      ));
+      state = AsyncValue.data(
+        currentState.copyWith(
+          registros: updatedRegistros,
+          pesoAtual: pesoAtual,
+          isLoading: false,
+        ),
+      );
     } catch (e) {
       debugPrint('Erro ao deletar registro: $e');
       state = AsyncValue.data(currentState.copyWith(isLoading: false));
@@ -285,10 +294,9 @@ class PesoNotifier extends _$PesoNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setDouble('peso_meta', meta);
 
-      state = AsyncValue.data(currentState.copyWith(
-        pesoMeta: meta,
-        isLoading: false,
-      ));
+      state = AsyncValue.data(
+        currentState.copyWith(pesoMeta: meta, isLoading: false),
+      );
     } catch (e) {
       debugPrint('Erro ao salvar meta de peso: $e');
       state = AsyncValue.data(currentState.copyWith(isLoading: false));
@@ -304,10 +312,9 @@ class PesoNotifier extends _$PesoNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setDouble('peso_inicial', peso);
 
-      state = AsyncValue.data(currentState.copyWith(
-        pesoInicial: peso,
-        isLoading: false,
-      ));
+      state = AsyncValue.data(
+        currentState.copyWith(pesoInicial: peso, isLoading: false),
+      );
     } catch (e) {
       debugPrint('Erro ao salvar peso inicial: $e');
       state = AsyncValue.data(currentState.copyWith(isLoading: false));
@@ -323,7 +330,8 @@ class PesoNotifier extends _$PesoNotifier {
 
     // Check percentage of weight lost
     if (currentState.pesoInicial > 0 && currentState.pesoAtual > 0) {
-      double percentageLost = ((currentState.pesoInicial - currentState.pesoAtual) /
+      double percentageLost =
+          ((currentState.pesoInicial - currentState.pesoAtual) /
               currentState.pesoInicial) *
           100;
 
@@ -349,8 +357,9 @@ class PesoNotifier extends _$PesoNotifier {
       Set<String> uniqueDays = {};
 
       for (var registro in registrosOrdenados) {
-        DateTime date =
-            DateTime.fromMillisecondsSinceEpoch(registro.dataRegistro);
+        DateTime date = DateTime.fromMillisecondsSinceEpoch(
+          registro.dataRegistro,
+        );
         String dayKey = '${date.year}-${date.month}-${date.day}';
         uniqueDays.add(dayKey);
       }
@@ -380,9 +389,9 @@ class PesoNotifier extends _$PesoNotifier {
         await prefs.setStringList('weight_achievements', unlockedAchievements);
       }
 
-      state = AsyncValue.data(currentState.copyWith(
-        achievements: achievements,
-      ));
+      state = AsyncValue.data(
+        currentState.copyWith(achievements: achievements),
+      );
     }
   }
 

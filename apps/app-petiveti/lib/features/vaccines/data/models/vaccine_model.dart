@@ -6,9 +6,9 @@ part 'vaccine_model.g.dart';
 
 @JsonSerializable()
 class VaccineModel {
-  final String? id;
+  final int? id;
 
-  final String animalId;
+  final int animalId;
 
   final String name;
 
@@ -62,8 +62,8 @@ class VaccineModel {
 
   Vaccine toEntity() {
     return Vaccine(
-      id: id ?? '',
-      animalId: animalId,
+      id: id?.toString() ?? '',
+      animalId: animalId.toString(),
       name: name,
       veterinarian: veterinarian,
       date: DateTime.fromMillisecondsSinceEpoch(dateTimestamp),
@@ -92,8 +92,8 @@ class VaccineModel {
 
   factory VaccineModel.fromEntity(Vaccine vaccine) {
     return VaccineModel(
-      id: vaccine.id,
-      animalId: vaccine.animalId,
+      id: vaccine.id.isNotEmpty ? int.tryParse(vaccine.id) : null,
+      animalId: int.tryParse(vaccine.animalId) ?? 0,
       name: vaccine.name,
       veterinarian: vaccine.veterinarian,
       dateTimestamp: vaccine.date.millisecondsSinceEpoch,
@@ -141,8 +141,8 @@ class VaccineModel {
 
   factory VaccineModel.fromMap(Map<String, dynamic> map) {
     return VaccineModel(
-      id: (map['id'] as String?) ?? '',
-      animalId: (map['animalId'] as String?) ?? '',
+      id: map['id'] as int?,
+      animalId: (map['animalId'] as int?) ?? 0,
       name: (map['nomeVacina'] as String?) ?? (map['name'] as String?) ?? '',
       veterinarian:
           (map['veterinario'] as String?) ??

@@ -114,37 +114,36 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
             ),
         ],
       ),
-      body:
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _buildBasicInfoSection(),
-                            const SizedBox(height: 24),
-                            _buildCharacteristicsSection(),
-                            const SizedBox(height: 24),
-                            _buildPhysicalInfoSection(),
-                            const SizedBox(height: 24),
-                            _buildAdditionalInfoSection(),
-                            const SizedBox(height: 24),
-                            if (widget.isEditing) _buildStatusSection(),
-                          ],
-                        ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildBasicInfoSection(),
+                          const SizedBox(height: 24),
+                          _buildCharacteristicsSection(),
+                          const SizedBox(height: 24),
+                          _buildPhysicalInfoSection(),
+                          const SizedBox(height: 24),
+                          _buildAdditionalInfoSection(),
+                          const SizedBox(height: 24),
+                          if (widget.isEditing) _buildStatusSection(),
+                        ],
                       ),
                     ),
-                    _buildActionButtons(),
-                  ],
-                ),
+                  ),
+                  _buildActionButtons(),
+                ],
               ),
+            ),
     );
   }
 
@@ -228,13 +227,12 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
                 labelText: 'Uso Principal *',
                 border: OutlineInputBorder(),
               ),
-              items:
-                  EquinePrimaryUse.values.map((use) {
-                    return DropdownMenuItem(
-                      value: use,
-                      child: Text(use.displayName),
-                    );
-                  }).toList(),
+              items: EquinePrimaryUse.values.map((use) {
+                return DropdownMenuItem(
+                  value: use,
+                  child: Text(use.displayName),
+                );
+              }).toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedPrimaryUse = value;
@@ -271,13 +269,12 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
                 labelText: 'Temperamento *',
                 border: OutlineInputBorder(),
               ),
-              items:
-                  EquineTemperament.values.map((temperament) {
-                    return DropdownMenuItem(
-                      value: temperament,
-                      child: Text(temperament.displayName),
-                    );
-                  }).toList(),
+              items: EquineTemperament.values.map((temperament) {
+                return DropdownMenuItem(
+                  value: temperament,
+                  child: Text(temperament.displayName),
+                );
+              }).toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedTemperament = value;
@@ -297,13 +294,12 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
                 labelText: 'Pelagem *',
                 border: OutlineInputBorder(),
               ),
-              items:
-                  CoatColor.values.map((coat) {
-                    return DropdownMenuItem(
-                      value: coat,
-                      child: Text(coat.displayName),
-                    );
-                  }).toList(),
+              items: CoatColor.values.map((coat) {
+                return DropdownMenuItem(
+                  value: coat,
+                  child: Text(coat.displayName),
+                );
+              }).toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedCoat = value;
@@ -425,7 +421,7 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
               subtitle: Text(
                 _isActive ? 'Equino ativo no rebanho' : 'Equino inativo',
               ),
-              initialValue: _isActive,
+              value: _isActive,
               onChanged: (value) {
                 setState(() {
                   _isActive = value;
@@ -498,30 +494,29 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
   void _confirmDelete() {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Confirmar Exclusão'),
-            content: const Text(
-              'Tem certeza que deseja excluir este equino?\n\n'
-              'Esta ação não pode ser desfeita.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _deleteEquine();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                ),
-                child: const Text('Excluir'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar Exclusão'),
+        content: const Text(
+          'Tem certeza que deseja excluir este equino?\n\n'
+          'Esta ação não pode ser desfeita.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
           ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _deleteEquine();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
     );
   }
 

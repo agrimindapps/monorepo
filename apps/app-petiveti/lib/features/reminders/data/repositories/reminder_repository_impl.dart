@@ -89,7 +89,14 @@ class ReminderRepositoryImpl implements ReminderRepository {
   @override
   Future<Either<Failure, void>> deleteReminder(String reminderId) async {
     return _errorHandlingService.executeVoidOperation(
-      operation: () => localDataSource.deleteReminder(reminderId),
+      operation: () async {
+        // Convert String ID to int for datasource
+        final intId = int.tryParse(reminderId);
+        if (intId == null) {
+          throw Exception('Invalid reminder ID format');
+        }
+        await localDataSource.deleteReminder(intId);
+      },
       operationName: 'deletar lembrete',
     );
   }

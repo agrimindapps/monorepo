@@ -29,7 +29,7 @@ class ExpensesModule implements DIModule {
 
     // Data Sources
     getIt.registerLazySingleton<ExpenseLocalDataSource>(
-      () => ExpenseLocalDataSourceImpl(),
+      () => ExpenseLocalDataSourceImpl(getIt()),
     );
 
     getIt.registerLazySingleton<ExpenseRemoteDataSource>(

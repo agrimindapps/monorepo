@@ -1,37 +1,35 @@
-
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
 import 'package:core/core.dart' hide NotificationSettings, PrivacySettings;
-
 
 /// Settings Model
 class SettingsModel extends SettingsEntity {
   @override
   final String userId;
-  
+
   @override
   final AppTheme theme;
-  
+
   @override
   final String language;
-  
+
   @override
   final NotificationSettingsModel notifications;
-  
+
   @override
   final DataSettingsModel dataSettings;
-  
+
   @override
   final PrivacySettingsModel privacy;
-  
+
   @override
   final DisplaySettingsModel display;
-  
+
   @override
   final SecuritySettingsModel security;
-  
+
   @override
   final BackupSettingsModel backup;
-  
+
   @override
   final DateTime lastUpdated;
 
@@ -47,17 +45,17 @@ class SettingsModel extends SettingsEntity {
     this.backup = const BackupSettingsModel(),
     required this.lastUpdated,
   }) : super(
-          userId: userId,
-          theme: theme,
-          language: language,
-          notifications: notifications,
-          dataSettings: dataSettings,
-          privacy: privacy,
-          display: display,
-          security: security,
-          backup: backup,
-          lastUpdated: lastUpdated,
-        );
+         userId: userId,
+         theme: theme,
+         language: language,
+         notifications: notifications,
+         dataSettings: dataSettings,
+         privacy: privacy,
+         display: display,
+         security: security,
+         backup: backup,
+         lastUpdated: lastUpdated,
+       );
 
   factory SettingsModel.fromEntity(SettingsEntity entity) {
     return SettingsModel(
@@ -80,24 +78,26 @@ class SettingsModel extends SettingsEntity {
       theme: _parseThemeFromString(json['theme']?.toString() ?? 'system'),
       language: json['language']?.toString() ?? 'pt_BR',
       notifications: NotificationSettingsModel.fromJson(
-        (json['notifications'] as Map<String, dynamic>?) ?? <String, dynamic>{}
+        (json['notifications'] as Map<String, dynamic>?) ?? <String, dynamic>{},
       ),
       dataSettings: DataSettingsModel.fromJson(
-        (json['dataSettings'] as Map<String, dynamic>?) ?? <String, dynamic>{}
+        (json['dataSettings'] as Map<String, dynamic>?) ?? <String, dynamic>{},
       ),
       privacy: PrivacySettingsModel.fromJson(
-        (json['privacy'] as Map<String, dynamic>?) ?? <String, dynamic>{}
+        (json['privacy'] as Map<String, dynamic>?) ?? <String, dynamic>{},
       ),
       display: DisplaySettingsModel.fromJson(
-        (json['display'] as Map<String, dynamic>?) ?? <String, dynamic>{}
+        (json['display'] as Map<String, dynamic>?) ?? <String, dynamic>{},
       ),
       security: SecuritySettingsModel.fromJson(
-        (json['security'] as Map<String, dynamic>?) ?? <String, dynamic>{}
+        (json['security'] as Map<String, dynamic>?) ?? <String, dynamic>{},
       ),
       backup: BackupSettingsModel.fromJson(
-        (json['backup'] as Map<String, dynamic>?) ?? <String, dynamic>{}
+        (json['backup'] as Map<String, dynamic>?) ?? <String, dynamic>{},
       ),
-      lastUpdated: DateTime.tryParse(json['lastUpdated']?.toString() ?? '') ?? DateTime.now(),
+      lastUpdated:
+          DateTime.tryParse(json['lastUpdated']?.toString() ?? '') ??
+          DateTime.now(),
     );
   }
 
@@ -130,29 +130,28 @@ class SettingsModel extends SettingsEntity {
   }
 }
 
-
 class NotificationSettingsModel extends NotificationSettings {
   @override
   final bool pushNotifications;
-  
+
   @override
   final bool newsNotifications;
-  
+
   @override
   final bool marketAlerts;
-  
+
   @override
   final bool weatherAlerts;
-  
+
   @override
   final bool animalReminders;
-  
+
   @override
   final bool calculatorReminders;
-  
+
   @override
   final String quietHoursStart;
-  
+
   @override
   final String quietHoursEnd;
 
@@ -166,15 +165,15 @@ class NotificationSettingsModel extends NotificationSettings {
     this.quietHoursStart = '22:00',
     this.quietHoursEnd = '07:00',
   }) : super(
-          pushNotifications: pushNotifications,
-          newsNotifications: newsNotifications,
-          marketAlerts: marketAlerts,
-          weatherAlerts: weatherAlerts,
-          animalReminders: animalReminders,
-          calculatorReminders: calculatorReminders,
-          quietHoursStart: quietHoursStart,
-          quietHoursEnd: quietHoursEnd,
-        );
+         pushNotifications: pushNotifications,
+         newsNotifications: newsNotifications,
+         marketAlerts: marketAlerts,
+         weatherAlerts: weatherAlerts,
+         animalReminders: animalReminders,
+         calculatorReminders: calculatorReminders,
+         quietHoursStart: quietHoursStart,
+         quietHoursEnd: quietHoursEnd,
+       );
 
   factory NotificationSettingsModel.fromEntity(NotificationSettings entity) {
     return NotificationSettingsModel(
@@ -215,22 +214,23 @@ class NotificationSettingsModel extends NotificationSettings {
     };
   }
 }
+
 class DataSettingsModel extends DataSettings {
   @override
   final bool autoSync;
-  
+
   @override
   final bool wifiOnlySync;
-  
+
   @override
   final bool cacheImages;
-  
+
   @override
   final int cacheRetentionDays;
-  
+
   @override
   final bool compressBackups;
-  
+
   @override
   final DataExportFormat exportFormat;
 
@@ -242,13 +242,13 @@ class DataSettingsModel extends DataSettings {
     this.compressBackups = true,
     this.exportFormat = DataExportFormat.json,
   }) : super(
-          autoSync: autoSync,
-          wifiOnlySync: wifiOnlySync,
-          cacheImages: cacheImages,
-          cacheRetentionDays: cacheRetentionDays,
-          compressBackups: compressBackups,
-          exportFormat: exportFormat,
-        );
+         autoSync: autoSync,
+         wifiOnlySync: wifiOnlySync,
+         cacheImages: cacheImages,
+         cacheRetentionDays: cacheRetentionDays,
+         compressBackups: compressBackups,
+         exportFormat: exportFormat,
+       );
 
   factory DataSettingsModel.fromEntity(DataSettings entity) {
     return DataSettingsModel(
@@ -286,19 +286,20 @@ class DataSettingsModel extends DataSettings {
     };
   }
 }
+
 class PrivacySettingsModel extends PrivacySettings {
   @override
   final bool analyticsEnabled;
-  
+
   @override
   final bool crashReportingEnabled;
-  
+
   @override
   final bool shareUsageData;
-  
+
   @override
   final bool personalizedAds;
-  
+
   @override
   final bool locationTracking;
 
@@ -309,14 +310,15 @@ class PrivacySettingsModel extends PrivacySettings {
     this.personalizedAds = false,
     this.locationTracking = false,
   }) : super(
-          analyticsEnabled: analyticsEnabled,
-          crashReportingEnabled: crashReportingEnabled,
-          shareUsageData: shareUsageData,
-          personalizedAds: personalizedAds,
-          locationTracking: locationTracking,
-        );
+         analyticsEnabled: analyticsEnabled,
+         crashReportingEnabled: crashReportingEnabled,
+         shareUsageData: shareUsageData,
+         personalizedAds: personalizedAds,
+         locationTracking: locationTracking,
+       );
 
-  factory PrivacySettingsModel.fromEntity(PrivacySettings entity) => PrivacySettingsModel(
+  factory PrivacySettingsModel.fromEntity(PrivacySettings entity) =>
+      PrivacySettingsModel(
         analyticsEnabled: entity.analyticsEnabled,
         crashReportingEnabled: entity.crashReportingEnabled,
         shareUsageData: entity.shareUsageData,
@@ -324,7 +326,8 @@ class PrivacySettingsModel extends PrivacySettings {
         locationTracking: entity.locationTracking,
       );
 
-  factory PrivacySettingsModel.fromJson(Map<String, dynamic> json) => PrivacySettingsModel(
+  factory PrivacySettingsModel.fromJson(Map<String, dynamic> json) =>
+      PrivacySettingsModel(
         analyticsEnabled: json['analyticsEnabled'] as bool? ?? true,
         crashReportingEnabled: json['crashReportingEnabled'] as bool? ?? true,
         shareUsageData: json['shareUsageData'] as bool? ?? false,
@@ -333,12 +336,12 @@ class PrivacySettingsModel extends PrivacySettings {
       );
 
   Map<String, dynamic> toJson() => {
-        'analyticsEnabled': analyticsEnabled,
-        'crashReportingEnabled': crashReportingEnabled,
-        'shareUsageData': shareUsageData,
-        'personalizedAds': personalizedAds,
-        'locationTracking': locationTracking,
-      };
+    'analyticsEnabled': analyticsEnabled,
+    'crashReportingEnabled': crashReportingEnabled,
+    'shareUsageData': shareUsageData,
+    'personalizedAds': personalizedAds,
+    'locationTracking': locationTracking,
+  };
 }
 
 class DisplaySettingsModel extends DisplaySettings {
@@ -353,7 +356,8 @@ class DisplaySettingsModel extends DisplaySettings {
     super.unitSystem = 'metric',
   });
 
-  factory DisplaySettingsModel.fromEntity(DisplaySettings entity) => DisplaySettingsModel(
+  factory DisplaySettingsModel.fromEntity(DisplaySettings entity) =>
+      DisplaySettingsModel(
         fontSize: entity.fontSize,
         highContrast: entity.highContrast,
         animations: entity.animations,
@@ -364,7 +368,8 @@ class DisplaySettingsModel extends DisplaySettings {
         unitSystem: entity.unitSystem,
       );
 
-  factory DisplaySettingsModel.fromJson(Map<String, dynamic> json) => DisplaySettingsModel(
+  factory DisplaySettingsModel.fromJson(Map<String, dynamic> json) =>
+      DisplaySettingsModel(
         fontSize: (json['fontSize'] as num? ?? 1.0).toDouble(),
         highContrast: json['highContrast'] as bool? ?? false,
         animations: json['animations'] as bool? ?? true,
@@ -376,15 +381,15 @@ class DisplaySettingsModel extends DisplaySettings {
       );
 
   Map<String, dynamic> toJson() => {
-        'fontSize': fontSize,
-        'highContrast': highContrast,
-        'animations': animations,
-        'showTutorials': showTutorials,
-        'dateFormat': dateFormat,
-        'timeFormat': timeFormat,
-        'currency': currency,
-        'unitSystem': unitSystem,
-      };
+    'fontSize': fontSize,
+    'highContrast': highContrast,
+    'animations': animations,
+    'showTutorials': showTutorials,
+    'dateFormat': dateFormat,
+    'timeFormat': timeFormat,
+    'currency': currency,
+    'unitSystem': unitSystem,
+  };
 }
 
 class SecuritySettingsModel extends SecuritySettings {
@@ -396,7 +401,8 @@ class SecuritySettingsModel extends SecuritySettings {
     super.encryptBackups = true,
   });
 
-  factory SecuritySettingsModel.fromEntity(SecuritySettings entity) => SecuritySettingsModel(
+  factory SecuritySettingsModel.fromEntity(SecuritySettings entity) =>
+      SecuritySettingsModel(
         biometricAuth: entity.biometricAuth,
         requireAuthOnOpen: entity.requireAuthOnOpen,
         autoLockMinutes: entity.autoLockMinutes,
@@ -404,7 +410,8 @@ class SecuritySettingsModel extends SecuritySettings {
         encryptBackups: entity.encryptBackups,
       );
 
-  factory SecuritySettingsModel.fromJson(Map<String, dynamic> json) => SecuritySettingsModel(
+  factory SecuritySettingsModel.fromJson(Map<String, dynamic> json) =>
+      SecuritySettingsModel(
         biometricAuth: json['biometricAuth'] as bool? ?? false,
         requireAuthOnOpen: json['requireAuthOnOpen'] as bool? ?? false,
         autoLockMinutes: json['autoLockMinutes'] as int? ?? 5,
@@ -413,12 +420,12 @@ class SecuritySettingsModel extends SecuritySettings {
       );
 
   Map<String, dynamic> toJson() => {
-        'biometricAuth': biometricAuth,
-        'requireAuthOnOpen': requireAuthOnOpen,
-        'autoLockMinutes': autoLockMinutes,
-        'hideDataInRecents': hideDataInRecents,
-        'encryptBackups': encryptBackups,
-      };
+    'biometricAuth': biometricAuth,
+    'requireAuthOnOpen': requireAuthOnOpen,
+    'autoLockMinutes': autoLockMinutes,
+    'hideDataInRecents': hideDataInRecents,
+    'encryptBackups': encryptBackups,
+  };
 }
 
 class BackupSettingsModel extends BackupSettings {
@@ -430,7 +437,8 @@ class BackupSettingsModel extends BackupSettings {
     super.storage = BackupStorage.cloud,
   });
 
-  factory BackupSettingsModel.fromEntity(BackupSettings entity) => BackupSettingsModel(
+  factory BackupSettingsModel.fromEntity(BackupSettings entity) =>
+      BackupSettingsModel(
         autoBackup: entity.autoBackup,
         frequency: entity.frequency,
         includeImages: entity.includeImages,
@@ -438,7 +446,8 @@ class BackupSettingsModel extends BackupSettings {
         storage: entity.storage,
       );
 
-  factory BackupSettingsModel.fromJson(Map<String, dynamic> json) => BackupSettingsModel(
+  factory BackupSettingsModel.fromJson(Map<String, dynamic> json) =>
+      BackupSettingsModel(
         autoBackup: json['autoBackup'] as bool? ?? true,
         frequency: BackupFrequency.values.firstWhere(
           (e) => e.name == (json['frequency'] as String? ?? 'weekly'),
@@ -453,10 +462,10 @@ class BackupSettingsModel extends BackupSettings {
       );
 
   Map<String, dynamic> toJson() => {
-        'autoBackup': autoBackup,
-        'frequency': frequency.name,
-        'includeImages': includeImages,
-        'lastBackupDate': lastBackupDate,
-        'storage': storage.name,
-      };
+    'autoBackup': autoBackup,
+    'frequency': frequency.name,
+    'includeImages': includeImages,
+    'lastBackupDate': lastBackupDate,
+    'storage': storage.name,
+  };
 }

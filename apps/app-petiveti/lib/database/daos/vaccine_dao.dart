@@ -46,17 +46,19 @@ class VaccineDao extends DatabaseAccessor<PetivetiDatabase> with _$VaccineDaoMix
 
   /// Update vaccine
   Future<bool> updateVaccine(int id, VaccinesCompanion vaccine) async {
-    return (update(vaccines)..where((tbl) => tbl.id.equals(id)))
+    final count = await (update(vaccines)..where((tbl) => tbl.id.equals(id)))
       .write(vaccine.copyWith(updatedAt: Value(DateTime.now())));
+    return count > 0;
   }
 
   /// Delete vaccine
   Future<bool> deleteVaccine(int id) async {
-    return (update(vaccines)..where((tbl) => tbl.id.equals(id)))
+    final count = await (update(vaccines)..where((tbl) => tbl.id.equals(id)))
       .write(VaccinesCompanion(
         isDeleted: const Value(true),
         updatedAt: Value(DateTime.now()),
       ));
+    return count > 0;
   }
 
   /// Get upcoming vaccines (next due date in the future)

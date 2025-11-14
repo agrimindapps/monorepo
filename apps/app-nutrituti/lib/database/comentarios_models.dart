@@ -1,35 +1,22 @@
-// Package imports:
-import 'package:hive/hive.dart';
-
 // Project imports:
 import '../../../core/models/base_model.dart';
 
-part 'comentarios_models.g.dart';
-
-@HiveType(typeId: 50)
 class Comentarios extends BaseModel {
-  @HiveField(0)
   @override
   final String? id;
 
-  @HiveField(1)
   @override
   final DateTime? createdAt;
 
-  @HiveField(2)
   @override
   final DateTime? updatedAt;
 
-  @HiveField(7)
   final String titulo;
 
-  @HiveField(8)
   final String conteudo;
 
-  @HiveField(9)
   final String ferramenta;
 
-  @HiveField(10)
   final String pkIdentificador;
 
   const Comentarios({

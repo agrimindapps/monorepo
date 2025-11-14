@@ -2,58 +2,96 @@
 import 'package:flutter/foundation.dart';
 
 // Package imports:
-import 'package:hive/hive.dart';
 import 'package:injectable/injectable.dart';
+import 'package:drift/drift.dart' as drift;
 
 // Project imports:
 import '../database/perfil_model.dart';
+import '../drift_database/nutrituti_database.dart';
+import '../drift_database/daos/perfil_dao.dart';
+import '../drift_database/tables/perfis_table.dart';
 
 @injectable
 class PerfilRepository {
-  static const String _boxName = 'box_perfil';
-  late Box<PerfilModel> _pesoBox;
+  final NutitutiDatabase _database;
+
+  PerfilRepository(this._database);
 
   final ValueNotifier<List<PerfilModel>> perfils = ValueNotifier([]);
 
-  Future<void> initialize() async {
-    if (!Hive.isBoxOpen(_boxName)) {
-      _pesoBox = await Hive.openBox<PerfilModel>(_boxName);
-      perfils.value = _pesoBox.values.toList();
-    }
-  }
+  PerfilDao get _dao => _database.perfilDao;
 
-  Box<PerfilModel> get _box {
-    if (!Hive.isBoxOpen(_boxName)) {
-      throw StateError('Box $_boxName is not open. Call initialize() first.');
+  Future<void> initialize() async {
+    final perfisData = await _dao.getPerfil();
+    if (perfisData != null) {
+      perfils.value = [_fromDrift(perfisData)];
+    } else {
+      perfils.value = [];
     }
-    return Hive.box<PerfilModel>(_boxName);
   }
 
   Future<void> getAll(PerfilModel perfil) async {
-    await _box.put(perfil.id, perfil);
-    perfils.value = _box.values.toList();
+    await _dao.savePerfil(_toCompanion(perfil));
+    final updatedPerfil = await _dao.getPerfil();
+    perfils.value = updatedPerfil != null ? [_fromDrift(updatedPerfil)] : [];
   }
 
   Future<PerfilModel?> get(String idReg) async {
-    return _box.get(idReg);
+    final perfil = await _dao.getPerfilById(idReg);
+    return perfil != null ? _fromDrift(perfil) : null;
   }
 
   Future<void> post(PerfilModel perfil) async {
-    await _box.put(perfil.id, perfil);
-    perfils.value = _box.values.toList();
+    await _dao.savePerfil(_toCompanion(perfil));
+    final updatedPerfil = await _dao.getPerfil();
+    perfils.value = updatedPerfil != null ? [_fromDrift(updatedPerfil)] : [];
   }
 
   Future<void> put(PerfilModel perfil) async {
-    await _box.put(perfil.id, perfil);
-    perfils.value = _box.values.toList();
+    await _dao.savePerfil(_toCompanion(perfil));
+    final updatedPerfil = await _dao.getPerfil();
+    perfils.value = updatedPerfil != null ? [_fromDrift(updatedPerfil)] : [];
   }
 
   Future<void> delete(String idReg) async {
-    await _box.delete(idReg);
-    perfils.value = _box.values.toList();
+    await _dao.deletePerfil(idReg);
+    perfils.value = [];
   }
 
   void dispose() {
     perfils.dispose();
+  }
+
+  // Conversion methods
+  PerfilModel _fromDrift(Perfil perfil) {
+    return PerfilModel(
+      id: perfil.id,
+      createdAt: perfil.createdAt,
+      updatedAt: perfil.updatedAt,
+      nome: perfil.nome,
+      datanascimento: perfil.dataNascimento,
+      altura: perfil.altura,
+      peso: perfil.peso,
+      genero: perfil.genero,
+      imagePath: perfil.imagePath,
+    );
+  }
+
+  PerfisCompanion _toCompanion(PerfilModel model) {
+    return PerfisCompanion(
+      id: drift.Value(model.id ?? ''),
+      nome: drift.Value(model.nome),
+      dataNascimento: drift.Value(model.datanascimento),
+      altura: drift.Value(model.altura),
+      peso: drift.Value(model.peso),
+      genero: drift.Value(model.genero),
+      imagePath: drift.Value(model.imagePath),
+      createdAt: model.createdAt != null 
+        ? drift.Value(model.createdAt!) 
+        : const drift.Value.absent(),
+      updatedAt: model.updatedAt != null 
+        ? drift.Value(model.updatedAt!) 
+        : drift.Value(DateTime.now()),
+    );
   }
 }

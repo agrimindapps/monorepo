@@ -2,63 +2,40 @@
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
+import '../../../drift_database/daos/agua_dao.dart';
+import '../../../drift_database/nutrituti_database.dart';
 import '../models/beber_agua_model.dart';
 
 @injectable
 class AguaRepository {
-  static const String _boxName = 'box_nut_beberagua';
   static const String _collection = 'box_nut_beberagua';
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AguaDao _aguaDao;
 
   // Constructor
-  AguaRepository();
-
-  AguaRepository._internal();
-
-  // Initialization
-  static Future<void> initialize() async {
-    try {
-      if (!Hive.isAdapterRegistered(41)) {
-        Hive.registerAdapter(BeberAguaAdapter());
-      }
-    } catch (e) {
-      debugPrint('Error initializing AguaRepository: $e');
-      rethrow;
-    }
-  }
-
-  Box<BeberAgua> get _box => Hive.box<BeberAgua>(_boxName);
-
-  // Função para verificar se a caixa está aberta e caso não esteja, abri-la
-  Future<void> openBox() async {
-    if (!Hive.isBoxOpen(_boxName)) {
-      await Hive.openBox<BeberAgua>(_boxName);
-    }
-  }
+  AguaRepository(this._aguaDao);
 
   // CRUD Operations
   Future<List<BeberAgua>> getAll() async {
-    await openBox();
-    final beberAguaBox = Hive.box<BeberAgua>(_boxName);
-    return beberAguaBox.values.toList();
+    // TODO: Get perfilId from somewhere (maybe pass as parameter or get from auth)
+    const perfilId = 'default'; // Temporary - should be injected or passed
+    final registros = await _aguaDao.getAllRegistros(perfilId);
+    return registros.map(_fromDrift).toList();
   }
 
   Future<BeberAgua?> get(String id) async {
-    await openBox();
-    final beberAguaBox = Hive.box<BeberAgua>(_boxName);
-    return beberAguaBox.values.firstWhere((a) => a.id == id);
+    final registro = await _aguaDao.getRegistroById(id);
+    return registro != null ? _fromDrift(registro) : null;
   }
 
   Future<void> add(BeberAgua registro) async {
-    await openBox();
-    final beberAguaBox = Hive.box<BeberAgua>(_boxName);
-    beberAguaBox.add(registro);
+    final companion = _toCompanion(registro);
+    await _aguaDao.createRegistro(companion);
 
     if (await _hasInternetConnection()) {
       await _firestore
@@ -69,11 +46,8 @@ class AguaRepository {
   }
 
   Future<void> updated(BeberAgua registro) async {
-    await openBox();
-    final beberAguaBox = Hive.box<BeberAgua>(_boxName);
-    final index =
-        beberAguaBox.values.toList().indexWhere((a) => a.id == registro.id);
-    beberAguaBox.putAt(index, registro);
+    final companion = _toCompanion(registro);
+    await _aguaDao.updateRegistro(registro.id!, companion);
 
     if (await _hasInternetConnection()) {
       await _firestore
@@ -84,11 +58,7 @@ class AguaRepository {
   }
 
   Future<void> delete(BeberAgua registro) async {
-    await openBox();
-    final beberAguaBox = Hive.box<BeberAgua>(_boxName);
-    final index =
-        beberAguaBox.values.toList().indexWhere((a) => a.id == registro.id);
-    beberAguaBox.deleteAt(index);
+    await _aguaDao.deleteRegistro(registro.id!);
 
     if (await _hasInternetConnection()) {
       await _firestore
@@ -100,7 +70,7 @@ class AguaRepository {
 
   Future<bool> _hasInternetConnection() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
-    return connectivityResult != ConnectivityResult.none;
+    return !connectivityResult.contains(ConnectivityResult.none);
   }
 
   // Constantes para SharedPreferences
@@ -127,11 +97,13 @@ class AguaRepository {
     final lastUpdateMillis = prefs.getInt(_keyLastUpdate) ?? 0;
 
     // Converter para DateTime para comparar apenas a data
-    final lastUpdateDate =
-        DateTime.fromMillisecondsSinceEpoch(lastUpdateMillis);
+    final lastUpdateDate = DateTime.fromMillisecondsSinceEpoch(
+      lastUpdateMillis,
+    );
     final todayDate = DateTime.fromMillisecondsSinceEpoch(today);
 
-    final isSameDay = lastUpdateDate.year == todayDate.year &&
+    final isSameDay =
+        lastUpdateDate.year == todayDate.year &&
         lastUpdateDate.month == todayDate.month &&
         lastUpdateDate.day == todayDate.day;
 
@@ -142,7 +114,9 @@ class AguaRepository {
     } else {
       final currentProgress = prefs.getDouble(_keyTodayProgress) ?? 0.0;
       await prefs.setDouble(
-          _keyTodayProgress, currentProgress + additionalProgress);
+        _keyTodayProgress,
+        currentProgress + additionalProgress,
+      );
     }
   }
 
@@ -152,11 +126,13 @@ class AguaRepository {
     final lastUpdateMillis = prefs.getInt(_keyLastUpdate) ?? 0;
 
     // Converter para DateTime para comparar apenas a data
-    final lastUpdateDate =
-        DateTime.fromMillisecondsSinceEpoch(lastUpdateMillis);
+    final lastUpdateDate = DateTime.fromMillisecondsSinceEpoch(
+      lastUpdateMillis,
+    );
     final todayDate = DateTime.fromMillisecondsSinceEpoch(today);
 
-    final isSameDay = lastUpdateDate.year == todayDate.year &&
+    final isSameDay =
+        lastUpdateDate.year == todayDate.year &&
         lastUpdateDate.month == todayDate.month &&
         lastUpdateDate.day == todayDate.day;
 
@@ -205,21 +181,22 @@ class AguaRepository {
 
   // Método para obter estatísticas
   Future<Map<String, dynamic>> getStatistics() async {
-    await openBox();
     final registros = await getAll();
 
-    // Calcular estatísticas básicas
     double totalQuantidade = 0;
     if (registros.isNotEmpty) {
-      totalQuantidade =
-          registros.fold(0.0, (sum, registro) => sum + registro.quantidade);
+      totalQuantidade = registros.fold(
+        0.0,
+        (total, registro) => total + registro.quantidade,
+      );
     }
 
     return {
       'totalRegistros': registros.length,
       'totalQuantidade': totalQuantidade,
-      'mediaQuantidade':
-          registros.isEmpty ? 0.0 : totalQuantidade / registros.length,
+      'mediaQuantidade': registros.isEmpty
+          ? 0.0
+          : totalQuantidade / registros.length,
       'streak': await getStreak(),
     };
   }
@@ -233,5 +210,28 @@ class AguaRepository {
   Future<void> setLastUpdate(int timestamp) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_keyLastUpdate, timestamp);
+  }
+
+  // Conversion methods
+  BeberAgua _fromDrift(AguaRegistro registro) {
+    return BeberAgua(
+      id: registro.id,
+      createdAt: registro.createdAt,
+      updatedAt: registro.updatedAt,
+      dataRegistro: registro.dataRegistro,
+      quantidade: registro.quantidade.toDouble(),
+      fkIdPerfil: registro.fkIdPerfil,
+    );
+  }
+
+  AguaRegistrosCompanion _toCompanion(BeberAgua model) {
+    return AguaRegistrosCompanion(
+      id: drift.Value(model.id!),
+      dataRegistro: drift.Value(model.dataRegistro),
+      quantidade: drift.Value(model.quantidade.toInt()),
+      fkIdPerfil: drift.Value(model.fkIdPerfil),
+      createdAt: drift.Value(model.createdAt ?? DateTime.now()),
+      updatedAt: drift.Value(model.updatedAt ?? DateTime.now()),
+    );
   }
 }

@@ -1,7 +1,9 @@
+import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../database/petiveti_database.dart';
 import '../models/expense_model.dart';
+import '../../domain/entities/expense.dart';
 
 abstract class ExpenseLocalDataSource {
   Future<List<ExpenseModel>> getExpenses(String userId);
@@ -58,9 +60,8 @@ class ExpenseLocalDataSourceImpl implements ExpenseLocalDataSource {
 
   @override
   Future<bool> updateExpense(ExpenseModel expense) async {
-    if (expense.id == null) return false;
     final companion = _toCompanion(expense, forUpdate: true);
-    return await _database.expenseDao.updateExpense(int.parse(expense.id!), companion);
+    return await _database.expenseDao.updateExpense(expense.intId, companion);
   }
 
   @override
@@ -75,43 +76,98 @@ class ExpenseLocalDataSourceImpl implements ExpenseLocalDataSource {
   }
 
   ExpenseModel _toModel(Expense expense) {
+    // Parse enum from string
+    final category = ExpenseCategory.values.firstWhere(
+      (e) => e.toString() == 'ExpenseCategory.${expense.category}',
+      orElse: () => ExpenseCategory.other,
+    );
+    
+    final paymentMethod = PaymentMethod.values.firstWhere(
+      (e) => e.toString() == 'PaymentMethod.${expense.paymentMethod}',
+      orElse: () => PaymentMethod.cash,
+    );
+    
+    RecurrenceType? recurrenceType;
+    if (expense.recurrenceType != null) {
+      recurrenceType = RecurrenceType.values.firstWhere(
+        (e) => e.toString() == 'RecurrenceType.${expense.recurrenceType}',
+        orElse: () => RecurrenceType.monthly,
+      );
+    }
+    
     return ExpenseModel(
       id: expense.id.toString(),
       animalId: expense.animalId.toString(),
+      userId: expense.userId,
+      title: expense.title,
       description: expense.description,
       amount: expense.amount,
-      category: expense.category,
-      date: expense.date,
+      category: category,
+      paymentMethod: paymentMethod,
+      expenseDate: expense.expenseDate,
+      veterinaryClinic: expense.veterinaryClinic,
+      veterinarianName: expense.veterinarianName,
+      invoiceNumber: expense.invoiceNumber,
       notes: expense.notes,
-      userId: expense.userId,
-      createdAt: expense.createdAt,
-      updatedAt: expense.updatedAt,
+      veterinarian: expense.veterinarian,
+      receiptNumber: expense.receiptNumber,
+      isPaid: expense.isPaid,
+      isRecurring: expense.isRecurring,
+      recurrenceType: recurrenceType,
       isDeleted: expense.isDeleted,
+      attachments: const [], // Not stored in Drift yet
+      metadata: null, // Not stored in Drift yet
+      createdAt: expense.createdAt,
+      updatedAt: expense.updatedAt ?? expense.createdAt,
     );
   }
 
   ExpensesCompanion _toCompanion(ExpenseModel model, {bool forUpdate = false}) {
+    final categoryStr = model.category.toString().split('.').last;
+    final paymentMethodStr = model.paymentMethod.toString().split('.').last;
+    final recurrenceTypeStr = model.recurrenceType?.toString().split('.').last;
+    
     if (forUpdate) {
       return ExpensesCompanion(
-        id: model.id != null ? Value(int.parse(model.id!)) : const Value.absent(),
-        animalId: Value(int.parse(model.animalId)),
+        id: Value(model.intId),
+        animalId: Value(model.intAnimalId),
+        title: Value(model.title),
         description: Value(model.description),
         amount: Value(model.amount),
-        category: Value(model.category),
-        date: Value(model.date),
+        category: Value(categoryStr),
+        paymentMethod: Value(paymentMethodStr),
+        expenseDate: Value(model.expenseDate),
+        veterinaryClinic: Value.ofNullable(model.veterinaryClinic),
+        veterinarianName: Value.ofNullable(model.veterinarianName),
+        invoiceNumber: Value.ofNullable(model.invoiceNumber),
         notes: Value.ofNullable(model.notes),
+        veterinarian: Value.ofNullable(model.veterinarian),
+        receiptNumber: Value.ofNullable(model.receiptNumber),
+        isPaid: Value(model.isPaid),
+        isRecurring: Value(model.isRecurring),
+        recurrenceType: Value.ofNullable(recurrenceTypeStr),
         userId: Value(model.userId),
         updatedAt: Value(DateTime.now()),
       );
     }
 
     return ExpensesCompanion.insert(
-      animalId: int.parse(model.animalId),
+      animalId: model.intAnimalId,
+      title: model.title,
       description: model.description,
       amount: model.amount,
-      category: model.category,
-      date: model.date,
+      category: categoryStr,
+      paymentMethod: paymentMethodStr,
+      expenseDate: model.expenseDate,
+      veterinaryClinic: Value.ofNullable(model.veterinaryClinic),
+      veterinarianName: Value.ofNullable(model.veterinarianName),
+      invoiceNumber: Value.ofNullable(model.invoiceNumber),
       notes: Value.ofNullable(model.notes),
+      veterinarian: Value.ofNullable(model.veterinarian),
+      receiptNumber: Value.ofNullable(model.receiptNumber),
+      isPaid: Value(model.isPaid),
+      isRecurring: Value(model.isRecurring),
+      recurrenceType: Value.ofNullable(recurrenceTypeStr),
       userId: model.userId,
       createdAt: Value(model.createdAt),
     );

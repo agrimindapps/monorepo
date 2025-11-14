@@ -92,7 +92,14 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   @override
   Future<Either<Failure, void>> deleteExpense(String expenseId) async {
     return errorHandlingService.executeVoidOperation(
-      operation: () => localDataSource.deleteExpense(expenseId),
+      operation: () async {
+        // Convert String ID to int for datasource
+        final intId = int.tryParse(expenseId);
+        if (intId == null) {
+          throw Exception('Invalid expense ID format');
+        }
+        await localDataSource.deleteExpense(intId);
+      },
       operationName: 'deletar despesa',
     );
   }

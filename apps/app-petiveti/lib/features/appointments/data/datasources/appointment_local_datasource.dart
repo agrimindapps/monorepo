@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../database/petiveti_database.dart';
@@ -59,9 +60,8 @@ class AppointmentLocalDataSourceImpl implements AppointmentLocalDataSource {
 
   @override
   Future<bool> updateAppointment(AppointmentModel appointment) async {
-    if (appointment.id == null) return false;
     final companion = _toCompanion(appointment, forUpdate: true);
-    return await _database.appointmentDao.updateAppointment(int.parse(appointment.id!), companion);
+    return await _database.appointmentDao.updateAppointment(appointment.id, companion);
   }
 
   @override
@@ -76,51 +76,80 @@ class AppointmentLocalDataSourceImpl implements AppointmentLocalDataSource {
   }
 
   AppointmentModel _toModel(Appointment appointment) {
+    // Map Drift Appointment to AppointmentModel
+    // Drift: title -> Model: reason
+    // Drift: description -> Model: diagnosis
+    // Drift: appointmentDateTime -> Model: dateTimestamp
+    // Drift: veterinarian -> Model: veterinarianName
+    // Drift: status (text) -> Model: status (int)
+    
+    int statusInt = 0; // default to scheduled
+    if (appointment.status == 'completed') {
+      statusInt = 1;
+    } else if (appointment.status == 'cancelled') {
+      statusInt = 2;
+    }
+    
     return AppointmentModel(
-      id: appointment.id.toString(),
-      animalId: appointment.animalId.toString(),
-      title: appointment.title,
-      description: appointment.description,
-      dateTime: appointment.dateTime,
-      veterinarian: appointment.veterinarian,
-      location: appointment.location,
+      id: appointment.id,
+      animalId: appointment.animalId,
+      veterinarianName: appointment.veterinarian ?? '',
+      dateTimestamp: appointment.appointmentDateTime.millisecondsSinceEpoch,
+      reason: appointment.title,
+      diagnosis: appointment.description,
       notes: appointment.notes,
-      status: appointment.status,
-      userId: appointment.userId,
-      createdAt: appointment.createdAt,
-      updatedAt: appointment.updatedAt,
+      status: statusInt,
+      cost: null, // Not stored in Drift table yet
+      createdAtTimestamp: appointment.createdAt.millisecondsSinceEpoch,
+      updatedAtTimestamp: appointment.updatedAt?.millisecondsSinceEpoch,
       isDeleted: appointment.isDeleted,
     );
   }
 
   AppointmentsCompanion _toCompanion(AppointmentModel model, {bool forUpdate = false}) {
+    // Map AppointmentModel to Drift Companion
+    // Model: reason -> Drift: title
+    // Model: diagnosis -> Drift: description
+    // Model: dateTimestamp -> Drift: appointmentDateTime
+    // Model: veterinarianName -> Drift: veterinarian
+    // Model: status (int) -> Drift: status (text)
+    
+    String statusText = 'scheduled';
+    if (model.status == 1) {
+      statusText = 'completed';
+    } else if (model.status == 2) {
+      statusText = 'cancelled';
+    }
+    
+    final dateTime = DateTime.fromMillisecondsSinceEpoch(model.dateTimestamp);
+    
     if (forUpdate) {
       return AppointmentsCompanion(
-        id: model.id != null ? Value(int.parse(model.id!)) : const Value.absent(),
-        animalId: Value(int.parse(model.animalId)),
-        title: Value(model.title),
-        description: Value.ofNullable(model.description),
-        dateTime: Value(model.dateTime),
-        veterinarian: Value.ofNullable(model.veterinarian),
-        location: Value.ofNullable(model.location),
+        id: model.id != null ? Value(model.id!) : const Value.absent(),
+        animalId: Value(model.animalId),
+        title: Value(model.reason),
+        description: Value.ofNullable(model.diagnosis),
+        appointmentDateTime: Value(dateTime),
+        veterinarian: Value.ofNullable(model.veterinarianName.isEmpty ? null : model.veterinarianName),
+        location: const Value.absent(), // Not in new model
         notes: Value.ofNullable(model.notes),
-        status: Value(model.status),
-        userId: Value(model.userId),
+        status: Value(statusText),
+        userId: const Value.absent(), // Will be set by repository/service
         updatedAt: Value(DateTime.now()),
       );
     }
 
     return AppointmentsCompanion.insert(
-      animalId: int.parse(model.animalId),
-      title: model.title,
-      description: Value.ofNullable(model.description),
-      dateTime: model.dateTime,
-      veterinarian: Value.ofNullable(model.veterinarian),
-      location: Value.ofNullable(model.location),
+      animalId: model.animalId,
+      title: model.reason,
+      description: Value.ofNullable(model.diagnosis),
+      appointmentDateTime: dateTime,
+      veterinarian: Value.ofNullable(model.veterinarianName.isEmpty ? null : model.veterinarianName),
+      location: const Value.absent(), // Not in new model
       notes: Value.ofNullable(model.notes),
-      status: model.status,
-      userId: model.userId,
-      createdAt: Value(model.createdAt),
+      status: statusText,
+      userId: '', // Will be set by repository/service
+      createdAt: Value(DateTime.fromMillisecondsSinceEpoch(model.createdAtTimestamp)),
     );
   }
 }

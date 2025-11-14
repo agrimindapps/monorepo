@@ -3,11 +3,11 @@ import 'package:drift/drift.dart';
 @DataClassName('Appointment')
 class Appointments extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get animalId => integer().references(Animals, #id)();
+  IntColumn get animalId => integer()();
   
   TextColumn get title => text()();
   TextColumn get description => text().nullable()();
-  DateTimeColumn get dateTime => dateTime()();
+  DateTimeColumn get appointmentDateTime => dateTime()();
   TextColumn get veterinarian => text().nullable()();
   TextColumn get location => text().nullable()();
   TextColumn get notes => text().nullable()();

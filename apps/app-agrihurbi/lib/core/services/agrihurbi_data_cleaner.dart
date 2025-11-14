@@ -38,7 +38,9 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
       final clearResult = await _driftManager.clearAllData();
       if (clearResult.isFailure) {
         result['success'] = false;
-        (result['errors'] as List).add('Failed to clear Drift data: ${clearResult.error}');
+        (result['errors'] as List).add(
+          'Failed to clear Drift data: ${clearResult.error}',
+        );
       } else {
         (result['clearedBoxes'] as List).addAll(['drift_databases']);
       }
@@ -89,13 +91,11 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
       // For now, we only track SharedPreferences since we're migrating to Drift
       // Drift data stats would require database queries which are app-specific
       final prefsKeys = _prefs.getKeys();
-      stats['totalPreferences'] =
-          prefsKeys
-              .where(
-                (key) =>
-                    key.startsWith('agrihurbi_') || key.startsWith('farm_'),
-              )
-              .length;
+      stats['totalPreferences'] = prefsKeys
+          .where(
+            (key) => key.startsWith('agrihurbi_') || key.startsWith('farm_'),
+          )
+          .length;
 
       stats['totalRecords'] = stats['totalPreferences'] as int;
     } catch (e) {
@@ -216,7 +216,9 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
       final clearResult = await _driftManager.clearAllData();
       if (clearResult.isFailure) {
         result['success'] = false;
-        (result['errors'] as List).add('Failed to clear Drift data: ${clearResult.error}');
+        (result['errors'] as List).add(
+          'Failed to clear Drift data: ${clearResult.error}',
+        );
       } else {
         (result['clearedItems'] as List).addAll(boxNames);
       }

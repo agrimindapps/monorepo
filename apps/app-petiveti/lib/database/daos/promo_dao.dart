@@ -46,12 +46,14 @@ class PromoDao extends DatabaseAccessor<PetivetiDatabase> with _$PromoDaoMixin {
 
   /// Update promo
   Future<bool> updatePromo(int id, PromoContentCompanion promo) async {
-    return (update(promoContent)..where((tbl) => tbl.id.equals(id))).write(promo);
+    final count = await (update(promoContent)..where((tbl) => tbl.id.equals(id))).write(promo);
+    return count > 0;
   }
 
   /// Delete promo
   Future<bool> deletePromo(int id) async {
-    return (update(promoContent)..where((tbl) => tbl.id.equals(id)))
+    final count = await (update(promoContent)..where((tbl) => tbl.id.equals(id)))
       .write(const PromoContentCompanion(isDeleted: Value(true)));
+    return count > 0;
   }
 }

@@ -1,50 +1,23 @@
-import 'package:hive/hive.dart';
 import '../../domain/entities/water_achievement.dart';
-
-part 'water_achievement_model.g.dart';
-
-/// Hive adapter for AchievementType enum
-@HiveType(typeId: 11)
-enum AchievementTypeAdapter {
-  @HiveField(0)
-  firstRecord,
-  @HiveField(1)
-  threeDayStreak,
-  @HiveField(2)
-  sevenDayStreak,
-  @HiveField(3)
-  monthlyGoal,
-  @HiveField(4)
-  perfectWeek,
-  @HiveField(5)
-  hydrationHero,
-}
 
 /// Data model for water achievements with persistence support
 /// Extends pure domain entity with serialization capabilities
-@HiveType(typeId: 12)
 class WaterAchievementModel extends WaterAchievement {
-  @HiveField(0)
   @override
   final String id;
 
-  @HiveField(1)
   @override
   final AchievementType type;
 
-  @HiveField(2)
   @override
   final String title;
 
-  @HiveField(3)
   @override
   final String description;
 
-  @HiveField(4)
   @override
   final DateTime unlockedAt;
 
-  @HiveField(5)
   @override
   final String? iconName;
 
@@ -56,13 +29,13 @@ class WaterAchievementModel extends WaterAchievement {
     required this.unlockedAt,
     this.iconName,
   }) : super(
-          id: id,
-          type: type,
-          title: title,
-          description: description,
-          unlockedAt: unlockedAt,
-          iconName: iconName,
-        );
+         id: id,
+         type: type,
+         title: title,
+         description: description,
+         unlockedAt: unlockedAt,
+         iconName: iconName,
+       );
 
   /// Create model from domain entity
   factory WaterAchievementModel.fromEntity(WaterAchievement entity) {

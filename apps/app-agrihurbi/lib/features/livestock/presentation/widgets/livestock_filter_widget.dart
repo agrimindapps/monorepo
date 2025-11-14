@@ -120,7 +120,7 @@ class LivestockFilterWidget extends StatelessWidget {
         ),
         const SizedBox(height: 8.0),
         DropdownButtonFormField<String>(
-          value: selectedBreed,
+          initialValue: selectedBreed,
           onChanged: onBreedChanged,
           decoration: InputDecoration(
             hintText: 'Todas as raças',
@@ -159,7 +159,7 @@ class LivestockFilterWidget extends StatelessWidget {
         ),
         const SizedBox(height: 8.0),
         DropdownButtonFormField<String>(
-          value: selectedOriginCountry,
+          initialValue: selectedOriginCountry,
           onChanged: onOriginCountryChanged,
           decoration: InputDecoration(
             hintText: 'Todos os países',
@@ -198,7 +198,7 @@ class LivestockFilterWidget extends StatelessWidget {
         ),
         const SizedBox(height: 8.0),
         DropdownButtonFormField<BovineAptitude>(
-          value: selectedAptitude,
+          initialValue: selectedAptitude,
           onChanged: onAptitudeChanged,
           decoration: InputDecoration(
             hintText: 'Todas as aptidões',
@@ -237,7 +237,7 @@ class LivestockFilterWidget extends StatelessWidget {
         ),
         const SizedBox(height: 8.0),
         DropdownButtonFormField<BreedingSystem>(
-          value: selectedBreedingSystem,
+          initialValue: selectedBreedingSystem,
           onChanged: onBreedingSystemChanged,
           decoration: InputDecoration(
             hintText: 'Todos os sistemas',
@@ -541,7 +541,7 @@ class _AdvancedLivestockFilterWidgetState
         ),
         const SizedBox(height: 8.0),
         DropdownButtonFormField<String>(
-          value: widget.sortBy,
+          initialValue: widget.sortBy,
           onChanged: widget.onSortChanged,
           decoration: InputDecoration(
             hintText: 'Ordenar por',

@@ -134,7 +134,13 @@ class VaccineRepositoryImpl implements VaccineRepository {
   @override
   Future<Either<Failure, void>> deleteVaccine(String id) async {
     try {
-      await localDataSource.deleteVaccine(id);
+      // Convert String ID to int for datasource
+      final intId = int.tryParse(id);
+      if (intId == null) {
+        return const Left(CacheFailure(message: 'Invalid vaccine ID format'));
+      }
+      
+      await localDataSource.deleteVaccine(intId);
       await _syncToRemote(() => remoteDataSource.deleteVaccine(id));
 
       return const Right(null);

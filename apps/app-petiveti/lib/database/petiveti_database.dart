@@ -1,10 +1,7 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
+
+// Database Connection (Platform-specific)
+import 'database_connection.dart';
 
 // Tables
 import 'tables/animals_table.dart';
@@ -55,7 +52,7 @@ part 'petiveti_database.g.dart';
   ],
 )
 class PetivetiDatabase extends _$PetivetiDatabase {
-  PetivetiDatabase() : super(_openConnection());
+  PetivetiDatabase() : super(openConnection());
 
   @override
   int get schemaVersion => 1;
@@ -69,18 +66,4 @@ class PetivetiDatabase extends _$PetivetiDatabase {
       // Future schema migrations will go here
     },
   );
-}
-
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    if (kIsWeb) {
-      // Web support - use in-memory or IndexedDB
-      return NativeDatabase.memory();
-    } else {
-      // Mobile/Desktop - use SQLite file
-      final dbFolder = await getApplicationDocumentsDirectory();
-      final file = File(p.join(dbFolder.path, 'petiveti_database.db'));
-      return NativeDatabase(file);
-    }
-  });
 }

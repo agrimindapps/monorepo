@@ -1,25 +1,17 @@
-import 'package:hive/hive.dart';
 import '../../domain/entities/water_record.dart';
-
-part 'water_record_model.g.dart';
 
 /// Data model for water intake records with persistence support
 /// Extends pure domain entity with serialization capabilities
-@HiveType(typeId: 10)
 class WaterRecordModel extends WaterRecord {
-  @HiveField(0)
   @override
   final String id;
 
-  @HiveField(1)
   @override
   final int amount;
 
-  @HiveField(2)
   @override
   final DateTime timestamp;
 
-  @HiveField(3)
   @override
   final String? note;
 
@@ -28,12 +20,7 @@ class WaterRecordModel extends WaterRecord {
     required this.amount,
     required this.timestamp,
     this.note,
-  }) : super(
-          id: id,
-          amount: amount,
-          timestamp: timestamp,
-          note: note,
-        );
+  }) : super(id: id, amount: amount, timestamp: timestamp, note: note);
 
   /// Create model from domain entity
   factory WaterRecordModel.fromEntity(WaterRecord entity) {

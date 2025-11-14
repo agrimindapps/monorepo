@@ -19,7 +19,7 @@ class WeightsModule implements DIModule {
   @override
   Future<void> register(GetIt getIt) async {
     getIt.registerLazySingleton<WeightLocalDataSource>(
-      () => WeightLocalDataSourceImpl(),
+      () => WeightLocalDataSourceImpl(getIt()),
     );
 
     getIt.registerLazySingleton<WeightRepository>(

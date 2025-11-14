@@ -44,10 +44,10 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
     final resultJson = jsonEncode(history.resultData);
     
     if (history.id != null) {
-      final existingEntry = await _database.calculatorDao.getHistoryById(int.parse(history.id!));
+      final existingEntry = await _database.calculatorDao.getHistoryById(history.id!);
       if (existingEntry != null) {
         await _database.calculatorDao.updateHistoryEntry(
-          int.parse(history.id!),
+          history.id!,
           calculatorType: history.calculatorId,
           inputData: inputsJson,
           result: resultJson,
@@ -184,7 +184,7 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
     final resultData = jsonDecode(entry.result) as Map<String, dynamic>;
     
     return CalculationHistoryModel(
-      id: entry.id.toString(),
+      id: entry.id,
       calculatorId: entry.calculatorType,
       calculatorName: entry.calculatorType,
       inputs: inputs,

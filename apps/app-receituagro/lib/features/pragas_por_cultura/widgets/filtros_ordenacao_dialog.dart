@@ -163,16 +163,14 @@ class FiltrosOrdenacaoDialog extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color:
-            isSelected
-                ? theme.colorScheme.primary.withValues(alpha: 0.1)
-                : Colors.transparent,
+        color: isSelected
+            ? theme.colorScheme.primary.withValues(alpha: 0.1)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color:
-              isSelected
-                  ? theme.colorScheme.primary
-                  : theme.dividerColor.withValues(alpha: 0.3),
+          color: isSelected
+              ? theme.colorScheme.primary
+              : theme.dividerColor.withValues(alpha: 0.3),
         ),
       ),
       child: RadioListTile<String>(
@@ -202,14 +200,7 @@ class FiltrosOrdenacaoDialog extends StatelessWidget {
           ],
         ),
         value: valor,
-        groupValue: ordenacaoAtual,
         activeColor: theme.colorScheme.primary,
-        onChanged: (value) {
-          if (value != null) {
-            onOrdenacaoChanged(value);
-            Navigator.of(context).pop();
-          }
-        },
       ),
     );
   }
@@ -227,16 +218,14 @@ class FiltrosOrdenacaoDialog extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color:
-            isSelected
-                ? theme.colorScheme.primary.withValues(alpha: 0.1)
-                : Colors.transparent,
+        color: isSelected
+            ? theme.colorScheme.primary.withValues(alpha: 0.1)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color:
-              isSelected
-                  ? theme.colorScheme.primary
-                  : theme.dividerColor.withValues(alpha: 0.3),
+          color: isSelected
+              ? theme.colorScheme.primary
+              : theme.dividerColor.withValues(alpha: 0.3),
         ),
       ),
       child: RadioListTile<String>(
@@ -266,14 +255,7 @@ class FiltrosOrdenacaoDialog extends StatelessWidget {
           ],
         ),
         value: valor,
-        groupValue: filtroTipoAtual,
         activeColor: theme.colorScheme.primary,
-        onChanged: (value) {
-          if (value != null) {
-            onFiltroTipoChanged(value);
-            Navigator.of(context).pop();
-          }
-        },
       ),
     );
   }
@@ -287,13 +269,12 @@ class FiltrosOrdenacaoDialog extends StatelessWidget {
   }) {
     return showDialog<void>(
       context: context,
-      builder:
-          (context) => FiltrosOrdenacaoDialog(
-            ordenacaoAtual: ordenacaoAtual,
-            filtroTipoAtual: filtroTipoAtual,
-            onOrdenacaoChanged: onOrdenacaoChanged,
-            onFiltroTipoChanged: onFiltroTipoChanged,
-          ),
+      builder: (context) => FiltrosOrdenacaoDialog(
+        ordenacaoAtual: ordenacaoAtual,
+        filtroTipoAtual: filtroTipoAtual,
+        onOrdenacaoChanged: onOrdenacaoChanged,
+        onFiltroTipoChanged: onFiltroTipoChanged,
+      ),
     );
   }
 }

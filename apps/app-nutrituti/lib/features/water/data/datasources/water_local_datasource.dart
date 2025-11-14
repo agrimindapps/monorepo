@@ -1,10 +1,13 @@
-import 'package:hive/hive.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/error/exceptions.dart';
+import '../../../../drift_database/daos/water_dao.dart';
+import '../../../../drift_database/nutrituti_database.dart';
 import '../models/water_achievement_model.dart';
 import '../models/water_record_model.dart';
+import '../../domain/entities/water_achievement.dart' as domain;
 
 /// Local data source for water intake data using Hive and SharedPreferences
 abstract class WaterLocalDataSource {
@@ -45,7 +48,9 @@ abstract class WaterLocalDataSource {
   Future<List<WaterAchievementModel>> getAchievements();
 
   /// Add a new achievement
-  Future<WaterAchievementModel> addAchievement(WaterAchievementModel achievement);
+  Future<WaterAchievementModel> addAchievement(
+    WaterAchievementModel achievement,
+  );
 
   /// Check if a specific achievement exists
   Future<bool> hasAchievement(String achievementId);
@@ -56,37 +61,25 @@ abstract class WaterLocalDataSource {
 
 @Injectable(as: WaterLocalDataSource)
 class WaterLocalDataSourceImpl implements WaterLocalDataSource {
-  static const String _waterRecordsBoxName = 'water_records';
-  static const String _waterAchievementsBoxName = 'water_achievements';
   static const String _dailyGoalKey = 'water_daily_goal';
   static const String _currentStreakKey = 'water_current_streak';
   static const int _defaultDailyGoal = 2000; // 2000ml = 2 liters
 
   final SharedPreferences _prefs;
+  final WaterDao _waterDao;
 
-  WaterLocalDataSourceImpl(this._prefs);
-
-  /// Get or open the water records Hive box
-  Future<Box<WaterRecordModel>> get _waterRecordsBox async {
-    if (Hive.isBoxOpen(_waterRecordsBoxName)) {
-      return Hive.box<WaterRecordModel>(_waterRecordsBoxName);
-    }
-    return await Hive.openBox<WaterRecordModel>(_waterRecordsBoxName);
-  }
-
-  /// Get or open the water achievements Hive box
-  Future<Box<WaterAchievementModel>> get _achievementsBox async {
-    if (Hive.isBoxOpen(_waterAchievementsBoxName)) {
-      return Hive.box<WaterAchievementModel>(_waterAchievementsBoxName);
-    }
-    return await Hive.openBox<WaterAchievementModel>(_waterAchievementsBoxName);
-  }
+  WaterLocalDataSourceImpl(this._prefs, this._waterDao);
 
   @override
   Future<WaterRecordModel> addRecord(WaterRecordModel record) async {
     try {
-      final box = await _waterRecordsBox;
-      await box.put(record.id, record);
+      final companion = WaterRecordsCompanion(
+        id: drift.Value(record.id),
+        amount: drift.Value(record.amount),
+        timestamp: drift.Value(record.timestamp),
+        note: drift.Value(record.note),
+      );
+      await _waterDao.addRecord(companion);
       return record;
     } catch (e) {
       throw CacheException('Failed to add water record: $e');
@@ -96,16 +89,15 @@ class WaterLocalDataSourceImpl implements WaterLocalDataSource {
   @override
   Future<WaterRecordModel> updateRecord(WaterRecordModel record) async {
     try {
-      final box = await _waterRecordsBox;
-
-      if (!box.containsKey(record.id)) {
-        throw CacheException('Water record not found: ${record.id}');
-      }
-
-      await box.put(record.id, record);
+      final companion = WaterRecordsCompanion(
+        id: drift.Value(record.id),
+        amount: drift.Value(record.amount),
+        timestamp: drift.Value(record.timestamp),
+        note: drift.Value(record.note),
+      );
+      await _waterDao.updateRecord(record.id, companion);
       return record;
     } catch (e) {
-      if (e is CacheException) rethrow;
       throw CacheException('Failed to update water record: $e');
     }
   }
@@ -113,15 +105,8 @@ class WaterLocalDataSourceImpl implements WaterLocalDataSource {
   @override
   Future<void> deleteRecord(String id) async {
     try {
-      final box = await _waterRecordsBox;
-
-      if (!box.containsKey(id)) {
-        throw CacheException('Water record not found: $id');
-      }
-
-      await box.delete(id);
+      await _waterDao.deleteRecord(id);
     } catch (e) {
-      if (e is CacheException) rethrow;
       throw CacheException('Failed to delete water record: $e');
     }
   }
@@ -129,8 +114,8 @@ class WaterLocalDataSourceImpl implements WaterLocalDataSource {
   @override
   Future<List<WaterRecordModel>> getRecords() async {
     try {
-      final box = await _waterRecordsBox;
-      return box.values.toList();
+      final records = await _waterDao.getAllRecords();
+      return records.map(_recordFromDrift).toList();
     } catch (e) {
       throw CacheException('Failed to get water records: $e');
     }
@@ -139,16 +124,13 @@ class WaterLocalDataSourceImpl implements WaterLocalDataSource {
   @override
   Future<List<WaterRecordModel>> getRecordsByDate(DateTime date) async {
     try {
-      final box = await _waterRecordsBox;
       final startOfDay = DateTime(date.year, date.month, date.day);
-      final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
-
-      return box.values
-          .where((record) =>
-              record.timestamp.isAfter(startOfDay) &&
-              record.timestamp.isBefore(endOfDay))
-          .toList()
-        ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+      final records = await _waterDao.getRecordsByDateRange(
+        startOfDay,
+        endOfDay,
+      );
+      return records.map(_recordFromDrift).toList();
     } catch (e) {
       throw CacheException('Failed to get water records by date: $e');
     }
@@ -160,15 +142,17 @@ class WaterLocalDataSourceImpl implements WaterLocalDataSource {
     required DateTime endDate,
   }) async {
     try {
-      final box = await _waterRecordsBox;
       final start = DateTime(startDate.year, startDate.month, startDate.day);
-      final end = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
-
-      return box.values
-          .where((record) =>
-              record.timestamp.isAfter(start) && record.timestamp.isBefore(end))
-          .toList()
-        ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+      final end = DateTime(
+        endDate.year,
+        endDate.month,
+        endDate.day,
+        23,
+        59,
+        59,
+      );
+      final records = await _waterDao.getRecordsByDateRange(start, end);
+      return records.map(_recordFromDrift).toList();
     } catch (e) {
       throw CacheException('Failed to get water records in range: $e');
     }
@@ -223,9 +207,8 @@ class WaterLocalDataSourceImpl implements WaterLocalDataSource {
   @override
   Future<List<WaterAchievementModel>> getAchievements() async {
     try {
-      final box = await _achievementsBox;
-      return box.values.toList()
-        ..sort((a, b) => b.unlockedAt.compareTo(a.unlockedAt));
+      final achievements = await _waterDao.getAllAchievements();
+      return achievements.map(_achievementFromDrift).toList();
     } catch (e) {
       throw CacheException('Failed to get achievements: $e');
     }
@@ -233,16 +216,25 @@ class WaterLocalDataSourceImpl implements WaterLocalDataSource {
 
   @override
   Future<WaterAchievementModel> addAchievement(
-      WaterAchievementModel achievement) async {
+    WaterAchievementModel achievement,
+  ) async {
     try {
-      final box = await _achievementsBox;
-
       // Check if achievement already exists
-      if (box.containsKey(achievement.id)) {
+      final existing = await _waterDao.getAchievementById(achievement.id);
+      if (existing != null) {
         throw CacheException('Achievement already exists: ${achievement.id}');
       }
 
-      await box.put(achievement.id, achievement);
+      final companion = WaterAchievementsCompanion(
+        id: drift.Value(achievement.id),
+        type: drift.Value(achievement.type.toString().split('.').last),
+        title: drift.Value(achievement.title),
+        description: drift.Value(achievement.description),
+        unlockedAt: drift.Value(achievement.unlockedAt),
+        iconName: drift.Value(achievement.iconName),
+      );
+
+      await _waterDao.addAchievement(companion);
       return achievement;
     } catch (e) {
       if (e is CacheException) rethrow;
@@ -253,8 +245,8 @@ class WaterLocalDataSourceImpl implements WaterLocalDataSource {
   @override
   Future<bool> hasAchievement(String achievementId) async {
     try {
-      final box = await _achievementsBox;
-      return box.containsKey(achievementId);
+      final achievement = await _waterDao.getAchievementById(achievementId);
+      return achievement != null;
     } catch (e) {
       throw CacheException('Failed to check achievement: $e');
     }
@@ -263,15 +255,52 @@ class WaterLocalDataSourceImpl implements WaterLocalDataSource {
   @override
   Future<void> clearAllData() async {
     try {
-      final recordsBox = await _waterRecordsBox;
-      final achievementsBox = await _achievementsBox;
-
-      await recordsBox.clear();
-      await achievementsBox.clear();
+      await _waterDao.deleteAllRecords();
+      await _waterDao.deleteAllAchievements();
       await _prefs.remove(_dailyGoalKey);
       await _prefs.remove(_currentStreakKey);
     } catch (e) {
       throw CacheException('Failed to clear all data: $e');
+    }
+  }
+
+  // Conversion methods
+  WaterRecordModel _recordFromDrift(WaterRecord record) {
+    return WaterRecordModel(
+      id: record.id,
+      amount: record.amount,
+      timestamp: record.timestamp,
+      note: record.note,
+    );
+  }
+
+  WaterAchievementModel _achievementFromDrift(WaterAchievement achievement) {
+    return WaterAchievementModel(
+      id: achievement.id,
+      type: _parseAchievementType(achievement.type),
+      title: achievement.title,
+      description: achievement.description,
+      unlockedAt: achievement.unlockedAt,
+      iconName: achievement.iconName,
+    );
+  }
+
+  domain.AchievementType _parseAchievementType(String type) {
+    switch (type) {
+      case 'firstRecord':
+        return domain.AchievementType.firstRecord;
+      case 'threeDayStreak':
+        return domain.AchievementType.threeDayStreak;
+      case 'sevenDayStreak':
+        return domain.AchievementType.sevenDayStreak;
+      case 'monthlyGoal':
+        return domain.AchievementType.monthlyGoal;
+      case 'perfectWeek':
+        return domain.AchievementType.perfectWeek;
+      case 'hydrationHero':
+        return domain.AchievementType.hydrationHero;
+      default:
+        return domain.AchievementType.firstRecord;
     }
   }
 }

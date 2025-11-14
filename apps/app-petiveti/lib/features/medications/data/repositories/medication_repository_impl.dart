@@ -285,8 +285,14 @@ class MedicationRepositoryImpl implements MedicationRepository {
       String id) async {
     return _errorHandlingService.executeVoidOperation(
       operation: () async {
+        // Convert String ID to int for datasource
+        final intId = int.tryParse(id);
+        if (intId == null) {
+          throw Exception('Invalid medication ID format');
+        }
+        
         // Soft delete (datasource já implementa)
-        await _localDataSource.deleteMedication(id);
+        await _localDataSource.deleteMedication(intId);
 
         if (kDebugMode) {
           debugPrint('[MedicationRepository] Medication soft-deleted: $id');

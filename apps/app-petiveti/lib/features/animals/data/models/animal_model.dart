@@ -8,7 +8,7 @@ part 'animal_model.g.dart';
 @JsonSerializable()
 class AnimalModel {
   @JsonKey(name: 'id')
-  final String? id;
+  final int? id;
 
   @JsonKey(name: 'user_id')
   final String userId;
@@ -80,7 +80,7 @@ class AnimalModel {
 
   factory AnimalModel.fromEntity(Animal animal) {
     return AnimalModel(
-      id: animal.id,
+      id: animal.id != null ? int.tryParse(animal.id!) : null,
       userId: animal.userId,
       name: animal.name,
       species: animal.species,
@@ -101,7 +101,7 @@ class AnimalModel {
 
   factory AnimalModel.fromJson(Map<String, dynamic> json) {
     return AnimalModel(
-      id: json['id'] as String,
+      id: json['id'] as int?,
       userId: json['user_id'] as String,
       name: json['name'] as String,
       species:
@@ -157,7 +157,7 @@ class AnimalModel {
 
   Animal toEntity() {
     return Animal(
-      id: id,
+      id: id?.toString(),
       userId: userId,
       name: name,
       species: species,
@@ -177,7 +177,7 @@ class AnimalModel {
   }
 
   AnimalModel copyWith({
-    String? id,
+    int? id,
     String? userId,
     String? name,
     AnimalSpecies? species,
@@ -213,7 +213,7 @@ class AnimalModel {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
-  bool get isDeleted => !isActive;
+  bool get isDeletedComputed => !isActive;
   static AnimalModel fromMap(Map<String, dynamic> map) {
     return AnimalModel.fromJson(map);
   }

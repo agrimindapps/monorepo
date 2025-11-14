@@ -6,7 +6,7 @@ version: 1.0.0+1
 
 environment:
   sdk: ">=3.9.0 <4.0.0"
-  flutter: 3.35.0
+  flutter: ">=3.35.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -18,9 +18,9 @@ dependencies:
   collection: ^1.18.0
   flutter_riverpod: ^2.6.1
 
-  # Drift - SQL Database (NOT USED - using in-memory storage)
-  # drift: ^2.28.0
-  # sqlite3_flutter_libs: ^0.5.0
+  # Drift - SQL Database
+  drift: ^2.28.0
+  sqlite3_flutter_libs: ^0.5.0
   path_provider: ^2.1.0
   path: ^1.9.0
 
@@ -42,7 +42,7 @@ dev_dependencies:
 
   build_runner: ^2.4.6
   freezed: ^2.5.2
-  # drift_dev: ^2.28.0  # NOT USED
+  drift_dev: ^2.28.0
   riverpod_generator: any
   injectable_generator: any
 

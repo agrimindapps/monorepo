@@ -46,13 +46,15 @@ class WeightDao extends DatabaseAccessor<PetivetiDatabase> with _$WeightDaoMixin
 
   /// Update weight record
   Future<bool> updateWeightRecord(int id, WeightRecordsCompanion record) async {
-    return (update(weightRecords)..where((tbl) => tbl.id.equals(id))).write(record);
+    final count = await (update(weightRecords)..where((tbl) => tbl.id.equals(id))).write(record);
+    return count > 0;
   }
 
   /// Delete weight record
   Future<bool> deleteWeightRecord(int id) async {
-    return (update(weightRecords)..where((tbl) => tbl.id.equals(id)))
+    final count = await (update(weightRecords)..where((tbl) => tbl.id.equals(id)))
       .write(const WeightRecordsCompanion(isDeleted: Value(true)));
+    return count > 0;
   }
 
   /// Get latest weight for an animal

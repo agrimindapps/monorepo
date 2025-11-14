@@ -1,41 +1,26 @@
-// Package imports:
-import 'package:hive/hive.dart';
-
 // Project imports:
 import '../../../core/models/base_model.dart';
 
-part 'perfil_model.g.dart';
-
-@HiveType(typeId: 52)
 class PerfilModel extends BaseModel {
-  @HiveField(0)
   @override
   final String? id;
 
-  @HiveField(1)
   @override
   final DateTime? createdAt;
 
-  @HiveField(2)
   @override
   final DateTime? updatedAt;
 
-  @HiveField(7)
   final String nome;
 
-  @HiveField(8)
   final DateTime datanascimento;
 
-  @HiveField(9)
   final double altura;
 
-  @HiveField(10)
   final double peso;
 
-  @HiveField(11)
   final int genero;
 
-  @HiveField(12)
   final String? imagePath;
 
   const PerfilModel({

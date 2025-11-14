@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../database/petiveti_database.dart';
@@ -88,7 +89,7 @@ class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
     final gender = AnimalGenderExtension.fromString(animal.gender);
     
     return AnimalModel(
-      id: animal.id.toString(),
+      id: animal.id,
       name: animal.name,
       species: species,
       breed: animal.breed,
@@ -111,7 +112,7 @@ class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
   AnimalsCompanion _toCompanion(AnimalModel model, {bool forUpdate = false}) {
     if (forUpdate) {
       return AnimalsCompanion(
-        id: model.id != null ? Value(int.parse(model.id!)) : const Value.absent(),
+        id: model.id != null ? Value(model.id!) : const Value.absent(),
         name: Value(model.name),
         species: Value(model.species.name),
         breed: Value.ofNullable(model.breed),

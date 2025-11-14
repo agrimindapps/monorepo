@@ -53,7 +53,8 @@ Future<void> configureAppDependencies({bool firebaseEnabled = false}) async {
   );
 
   // Register PremiumService conditionally based on Firebase availability
-  if (firebaseEnabled && getIt.isRegistered<core_lib.FirebaseAnalyticsService>()) {
+  if (firebaseEnabled &&
+      getIt.isRegistered<core_lib.FirebaseAnalyticsService>()) {
     getIt.registerSingleton(
       PremiumService(
         getIt<core_lib.RevenueCatService>(),

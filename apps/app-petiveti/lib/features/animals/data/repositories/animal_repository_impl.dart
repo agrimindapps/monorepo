@@ -103,8 +103,14 @@ class AnimalRepositoryImpl implements AnimalRepository {
       String id) async {
     return _errorHandlingService.executeWithValidation(
       operation: () async {
+        // Convert String ID to int for datasource
+        final intId = int.tryParse(id);
+        if (intId == null) {
+          throw Exception('Invalid animal ID format');
+        }
+        
         // Sempre lê do cache local (rápido)
-        final localAnimal = await _localDataSource.getAnimalById(id);
+        final localAnimal = await _localDataSource.getAnimalById(intId);
 
         if (localAnimal != null && localAnimal.isDeleted) {
           throw Exception('Animal was deleted');
@@ -143,8 +149,14 @@ class AnimalRepositoryImpl implements AnimalRepository {
       Animal animal) async {
     return _errorHandlingService.executeVoidOperation(
       operation: () async {
+        // Convert String ID to int for datasource
+        final intId = int.tryParse(animal.id);
+        if (intId == null) {
+          throw Exception('Invalid animal ID format');
+        }
+        
         // 1. Buscar animal atual para preservar sync fields
-        final currentAnimal = await _localDataSource.getAnimalById(animal.id);
+        final currentAnimal = await _localDataSource.getAnimalById(intId);
         if (currentAnimal == null) {
           throw Exception('Animal not found');
         }
@@ -179,14 +191,20 @@ class AnimalRepositoryImpl implements AnimalRepository {
   Future<Either<local_failures.Failure, void>> deleteAnimal(String id) async {
     return _errorHandlingService.executeVoidOperation(
       operation: () async {
-        final localAnimal = await _localDataSource.getAnimalById(id);
+        // Convert String ID to int for datasource
+        final intId = int.tryParse(id);
+        if (intId == null) {
+          throw Exception('Invalid animal ID format');
+        }
+        
+        final localAnimal = await _localDataSource.getAnimalById(intId);
         if (localAnimal == null) {
           throw Exception('Animal not found');
         }
 
         // Soft delete: marcar como deleted (isActive = false)
         // O datasource já implementa isso via copyWith(isActive: false)
-        await _localDataSource.deleteAnimal(id);
+        await _localDataSource.deleteAnimal(intId);
 
         if (kDebugMode) {
           debugPrint('[AnimalRepository] Animal soft-deleted: $id');

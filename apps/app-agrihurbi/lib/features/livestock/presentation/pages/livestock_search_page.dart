@@ -16,7 +16,8 @@ class LivestockSearchPage extends ConsumerStatefulWidget {
   const LivestockSearchPage({super.key});
 
   @override
-  ConsumerState<LivestockSearchPage> createState() => _LivestockSearchPageState();
+  ConsumerState<LivestockSearchPage> createState() =>
+      _LivestockSearchPageState();
 }
 
 class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
@@ -75,9 +76,12 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
     final provider = ref.read(livestockProviderProvider);
     List<AnimalBaseEntity> results = [];
     if (_selectedAnimalTypes.contains('bovine')) {
-      final bovines = provider.filteredBovines.where((bovine) {
-        return _matchesFilters(bovine) && _matchesSearch(bovine);
-      }).cast<AnimalBaseEntity>().toList();
+      final bovines = provider.filteredBovines
+          .where((bovine) {
+            return _matchesFilters(bovine) && _matchesSearch(bovine);
+          })
+          .cast<AnimalBaseEntity>()
+          .toList();
       results.addAll(bovines);
     }
     _sortResults(results);
@@ -91,12 +95,17 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
   bool _matchesFilters(AnimalBaseEntity animal) {
     if (_showActiveOnly && !animal.isActive) return false;
     if (animal is BovineEntity) {
-      if (_selectedBreed != null && animal.breed != _selectedBreed) return false;
-      if (_selectedAptitude != null && animal.aptitude != _selectedAptitude) return false;
+      if (_selectedBreed != null && animal.breed != _selectedBreed)
+        return false;
+      if (_selectedAptitude != null && animal.aptitude != _selectedAptitude)
+        return false;
     } else if (animal is EquineEntity) {
-      if (_selectedTemperament != null && animal.temperament != _selectedTemperament) return false;
+      if (_selectedTemperament != null &&
+          animal.temperament != _selectedTemperament)
+        return false;
     }
-    if (_selectedOriginCountry != null && animal.originCountry != _selectedOriginCountry) {
+    if (_selectedOriginCountry != null &&
+        animal.originCountry != _selectedOriginCountry) {
       return false;
     }
 
@@ -141,17 +150,21 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
           comparison = a.commonName.compareTo(b.commonName);
           break;
         case 'date':
-          comparison = (a.createdAt ?? DateTime.now())
-              .compareTo(b.createdAt ?? DateTime.now());
+          comparison = (a.createdAt ?? DateTime.now()).compareTo(
+            b.createdAt ?? DateTime.now(),
+          );
           break;
         case 'breed':
           if (a is BovineEntity && b is BovineEntity) {
             comparison = a.breed.compareTo(b.breed);
           } else if (a is EquineEntity && b is EquineEntity) {
-            comparison = a.temperament.displayName
-                .compareTo(b.temperament.displayName);
+            comparison = a.temperament.displayName.compareTo(
+              b.temperament.displayName,
+            );
           } else {
-            comparison = a.runtimeType.toString().compareTo(b.runtimeType.toString());
+            comparison = a.runtimeType.toString().compareTo(
+              b.runtimeType.toString(),
+            );
           }
           break;
       }
@@ -168,7 +181,9 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
-            icon: Icon(_showFilters ? Icons.filter_list : Icons.filter_list_off),
+            icon: Icon(
+              _showFilters ? Icons.filter_list : Icons.filter_list_off,
+            ),
             onPressed: () {
               setState(() {
                 _showFilters = !_showFilters;
@@ -250,7 +265,10 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 16),
-              Text('Tipos de Animal:', style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                'Tipos de Animal:',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -298,7 +316,10 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
                       items: const [
                         DropdownMenuItem(value: 'name', child: Text('Nome')),
                         DropdownMenuItem(value: 'date', child: Text('Data')),
-                        DropdownMenuItem(value: 'breed', child: Text('Raça/Tipo')),
+                        DropdownMenuItem(
+                          value: 'breed',
+                          child: Text('Raça/Tipo'),
+                        ),
                       ],
                       onChanged: (value) {
                         if (value != null) {
@@ -312,7 +333,11 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
                   ),
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: Icon(_sortAscending ? Icons.arrow_upward : Icons.arrow_downward),
+                    icon: Icon(
+                      _sortAscending
+                          ? Icons.arrow_upward
+                          : Icons.arrow_downward,
+                    ),
                     onPressed: () {
                       setState(() {
                         _sortAscending = !_sortAscending;
@@ -326,7 +351,7 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
               const SizedBox(height: 16),
               SwitchListTile(
                 title: const Text('Apenas ativos'),
-                initialValue: _showActiveOnly,
+                value: _showActiveOnly,
                 onChanged: (value) {
                   setState(() {
                     _showActiveOnly = value;
@@ -357,8 +382,8 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
           Text(
             '${_searchResults.length} resultado(s) encontrado(s)',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+              color: Theme.of(context).colorScheme.outline,
+            ),
           ),
           const Spacer(),
           if (_isSearching)
@@ -425,18 +450,20 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
         itemCount: _searchResults.length,
         itemBuilder: (context, index) {
           final animal = _searchResults[index];
-          
+
           if (animal is BovineEntity) {
             return BovineCardWidget(
               bovine: animal,
-              onTap: () => context.push('/home/livestock/bovines/detail/${animal.id}'),
-              onEdit: () => context.push('/home/livestock/bovines/edit/${animal.id}'),
+              onTap: () =>
+                  context.push('/home/livestock/bovines/detail/${animal.id}'),
+              onEdit: () =>
+                  context.push('/home/livestock/bovines/edit/${animal.id}'),
               onDelete: () => _confirmDeleteAnimal(animal),
             );
           } else if (animal is EquineEntity) {
             return _buildEquineCard(animal);
           }
-          
+
           return const SizedBox.shrink();
         },
       ),
@@ -498,7 +525,8 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
             ),
           ],
         ),
-        onTap: () => context.push('/home/livestock/equines/detail/${equine.id}'),
+        onTap: () =>
+            context.push('/home/livestock/equines/detail/${equine.id}'),
       ),
     );
   }
@@ -581,9 +609,7 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
       success = await provider.deleteBovine(animal.id);
     } else if (animal is EquineEntity) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Exclusão de equinos em desenvolvimento'),
-        ),
+        const SnackBar(content: Text('Exclusão de equinos em desenvolvimento')),
       );
       return;
     }

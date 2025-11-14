@@ -11,8 +11,6 @@ import 'app_page.dart';
 import 'const/environment_const.dart';
 import 'const/firebase_options.dart';
 import 'core/di/injection.dart';
-import 'features/water/data/models/water_achievement_model.dart';
-import 'features/water/data/models/water_record_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,15 +27,7 @@ void main() async {
     anonKey: AppEnvironment().supabaseAnnoKey,
   );
 
-  // Initialize Hive using core package
-  await Hive.initFlutter();
-
-  // Register custom adapters for Water feature
-  Hive.registerAdapter(WaterRecordModelAdapter());
-  Hive.registerAdapter(WaterAchievementModelAdapter());
-  Hive.registerAdapter(AchievementTypeAdapterAdapter());
-
-  // Initialize DI (this will open Hive boxes)
+  // Initialize DI (includes Drift database initialization)
   await configureDependencies();
 
   // Initialize Firebase

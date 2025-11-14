@@ -7,10 +7,10 @@ part 'weight_model.g.dart';
 @JsonSerializable()
 class WeightModel {
   @JsonKey(name: 'id')
-  final String? id;
+  final int? id;
 
   @JsonKey(name: 'animal_id')
-  final String animalId;
+  final int animalId;
 
   @JsonKey(name: 'weight')
   final double weight;
@@ -47,8 +47,8 @@ class WeightModel {
 
   factory WeightModel.fromEntity(Weight weight) {
     return WeightModel(
-      id: weight.id,
-      animalId: weight.animalId,
+      id: weight.id.isNotEmpty ? int.tryParse(weight.id) : null,
+      animalId: int.tryParse(weight.animalId) ?? 0,
       weight: weight.weight,
       date: weight.date,
       notes: weight.notes,
@@ -66,8 +66,8 @@ class WeightModel {
 
   Weight toEntity() {
     return Weight(
-      id: id ?? '',
-      animalId: animalId,
+      id: id?.toString() ?? '',
+      animalId: animalId.toString(),
       weight: weight,
       date: date,
       notes: notes,
@@ -79,8 +79,8 @@ class WeightModel {
   }
 
   WeightModel copyWith({
-    String? id,
-    String? animalId,
+    int? id,
+    int? animalId,
     double? weight,
     DateTime? date,
     String? notes,

@@ -32,7 +32,7 @@ class AppointmentsModule implements DIModule {
 
     // Data Sources
     getIt.registerLazySingleton<AppointmentLocalDataSource>(
-      () => AppointmentLocalDataSourceImpl(),
+      () => AppointmentLocalDataSourceImpl(getIt()),
     );
 
     // Repository

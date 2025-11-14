@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../database/petiveti_database.dart';
@@ -62,7 +63,7 @@ class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
   Future<bool> updateReminder(ReminderModel reminder) async {
     if (reminder.id == null) return false;
     final companion = _toCompanion(reminder, forUpdate: true);
-    return await _database.reminderDao.updateReminder(int.parse(reminder.id!), companion);
+    return await _database.reminderDao.updateReminder(reminder.id!, companion);
   }
 
   @override
@@ -83,11 +84,11 @@ class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
 
   ReminderModel _toModel(Reminder reminder) {
     return ReminderModel(
-      id: reminder.id.toString(),
-      animalId: reminder.animalId?.toString(),
+      id: reminder.id,
+      animalId: reminder.animalId,
       title: reminder.title,
       description: reminder.description,
-      dateTime: reminder.dateTime,
+      dateTime: reminder.reminderDateTime,
       frequency: reminder.frequency,
       isCompleted: reminder.isCompleted,
       notificationEnabled: reminder.notificationEnabled,
@@ -100,11 +101,11 @@ class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
   RemindersCompanion _toCompanion(ReminderModel model, {bool forUpdate = false}) {
     if (forUpdate) {
       return RemindersCompanion(
-        id: model.id != null ? Value(int.parse(model.id!)) : const Value.absent(),
-        animalId: model.animalId != null ? Value(int.parse(model.animalId!)) : const Value.absent(),
+        id: model.id != null ? Value(model.id!) : const Value.absent(),
+        animalId: model.animalId != null ? Value(model.animalId) : const Value.absent(),
         title: Value(model.title),
         description: Value.ofNullable(model.description),
-        dateTime: Value(model.dateTime),
+        reminderDateTime: Value(model.dateTime),
         frequency: Value.ofNullable(model.frequency),
         isCompleted: Value(model.isCompleted),
         notificationEnabled: Value(model.notificationEnabled),
@@ -113,10 +114,10 @@ class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
     }
 
     return RemindersCompanion.insert(
-      animalId: model.animalId != null ? Value(int.parse(model.animalId!)) : const Value.absent(),
+      animalId: model.animalId != null ? Value(model.animalId) : const Value.absent(),
       title: model.title,
       description: Value.ofNullable(model.description),
-      dateTime: model.dateTime,
+      reminderDateTime: model.dateTime,
       frequency: Value.ofNullable(model.frequency),
       isCompleted: Value(model.isCompleted),
       notificationEnabled: Value(model.notificationEnabled),

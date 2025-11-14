@@ -2,10 +2,12 @@
 import 'package:flutter/foundation.dart';
 
 // Package imports:
+import 'package:get_it/get_it.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 // Project imports:
-import '../models/achievement_model.dart';
+import '../../../drift_database/daos/agua_dao.dart';
+import '../models/achievement_model.dart' as local_models;
 import '../models/beber_agua_model.dart';
 import '../repository/agua_repository.dart';
 
@@ -16,7 +18,7 @@ class AguaState {
   final double dailyWaterGoal;
   final double todayProgress;
   final List<BeberAgua> registros;
-  final List<WaterAchievement> achievements;
+  final List<local_models.WaterAchievement> achievements;
   final bool isLoading;
 
   const AguaState({
@@ -31,7 +33,7 @@ class AguaState {
     double? dailyWaterGoal,
     double? todayProgress,
     List<BeberAgua>? registros,
-    List<WaterAchievement>? achievements,
+    List<local_models.WaterAchievement>? achievements,
     bool? isLoading,
   }) {
     return AguaState(
@@ -47,7 +49,10 @@ class AguaState {
 /// Provider for AguaRepository
 @riverpod
 AguaRepository aguaRepository(AguaRepositoryRef ref) {
-  return AguaRepository();
+  // Get AguaDao from GetIt (since it's already configured in DI)
+  final getIt = GetIt.instance;
+  final aguaDao = getIt<AguaDao>();
+  return AguaRepository(aguaDao);
 }
 
 /// Main Agua Notifier
@@ -89,20 +94,20 @@ class AguaNotifier extends _$AguaNotifier {
   }
 
   /// Initialize achievements
-  Future<List<WaterAchievement>> _initializeAchievements() async {
+  Future<List<local_models.WaterAchievement>> _initializeAchievements() async {
     final repository = ref.read(aguaRepositoryProvider);
     final unlockedAchievements = await repository.getUnlockedAchievements();
 
     final achievements = [
-      WaterAchievement(
+      local_models.WaterAchievement(
         title: '🌱 Iniciante',
         description: 'Registrou água por 3 dias seguidos',
       ),
-      WaterAchievement(
+      local_models.WaterAchievement(
         title: '💧 Hidratado',
         description: 'Atingiu a meta diária 7 dias seguidos',
       ),
-      WaterAchievement(
+      local_models.WaterAchievement(
         title: '🌊 Mestre da Hidratação',
         description: 'Completou 30 dias seguidos',
       ),
@@ -131,11 +136,13 @@ class AguaNotifier extends _$AguaNotifier {
       final updatedProgress = await repository.getTodayProgress();
       final updatedRegistros = await repository.getAll();
 
-      state = AsyncValue.data(currentState.copyWith(
-        todayProgress: updatedProgress,
-        registros: updatedRegistros,
-        isLoading: false,
-      ));
+      state = AsyncValue.data(
+        currentState.copyWith(
+          todayProgress: updatedProgress,
+          registros: updatedRegistros,
+          isLoading: false,
+        ),
+      );
 
       await checkGoalAchievement();
     } catch (e) {
@@ -155,10 +162,9 @@ class AguaNotifier extends _$AguaNotifier {
       await repository.updated(registro);
       final updatedRegistros = await repository.getAll();
 
-      state = AsyncValue.data(currentState.copyWith(
-        registros: updatedRegistros,
-        isLoading: false,
-      ));
+      state = AsyncValue.data(
+        currentState.copyWith(registros: updatedRegistros, isLoading: false),
+      );
     } catch (e) {
       debugPrint('Erro ao atualizar registro: $e');
       state = AsyncValue.data(currentState.copyWith(isLoading: false));
@@ -176,10 +182,9 @@ class AguaNotifier extends _$AguaNotifier {
       await repository.delete(registro);
       final updatedRegistros = await repository.getAll();
 
-      state = AsyncValue.data(currentState.copyWith(
-        registros: updatedRegistros,
-        isLoading: false,
-      ));
+      state = AsyncValue.data(
+        currentState.copyWith(registros: updatedRegistros, isLoading: false),
+      );
     } catch (e) {
       debugPrint('Erro ao deletar registro: $e');
       state = AsyncValue.data(currentState.copyWith(isLoading: false));
@@ -196,10 +201,9 @@ class AguaNotifier extends _$AguaNotifier {
 
       await repository.setDailyGoal(newGoal);
 
-      state = AsyncValue.data(currentState.copyWith(
-        dailyWaterGoal: newGoal,
-        isLoading: false,
-      ));
+      state = AsyncValue.data(
+        currentState.copyWith(dailyWaterGoal: newGoal, isLoading: false),
+      );
     } catch (e) {
       debugPrint('Erro ao atualizar meta diária: $e');
       state = AsyncValue.data(currentState.copyWith(isLoading: false));
@@ -262,9 +266,9 @@ class AguaNotifier extends _$AguaNotifier {
       final repository = ref.read(aguaRepositoryProvider);
       await repository.addUnlockedAchievement(title);
 
-      state = AsyncValue.data(currentState.copyWith(
-        achievements: achievements,
-      ));
+      state = AsyncValue.data(
+        currentState.copyWith(achievements: achievements),
+      );
     }
   }
 

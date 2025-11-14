@@ -6,9 +6,9 @@ part 'appointment_model.g.dart';
 
 @JsonSerializable()
 class AppointmentModel {
-  final String? id;
+  final int? id;
 
-  final String animalId;
+  final int animalId;
 
   final String veterinarianName;
 
@@ -47,8 +47,8 @@ class AppointmentModel {
   
   Appointment toEntity() {
     return Appointment(
-      id: id ?? '',
-      animalId: animalId,
+      id: id?.toString() ?? '',
+      animalId: animalId.toString(),
       veterinarianName: veterinarianName,
       date: DateTime.fromMillisecondsSinceEpoch(dateTimestamp),
       reason: reason,
@@ -65,8 +65,8 @@ class AppointmentModel {
   }
   factory AppointmentModel.fromEntity(Appointment appointment) {
     return AppointmentModel(
-      id: appointment.id,
-      animalId: appointment.animalId,
+      id: appointment.id.isNotEmpty ? int.tryParse(appointment.id) : null,
+      animalId: int.tryParse(appointment.animalId) ?? 0,
       veterinarianName: appointment.veterinarianName,
       dateTimestamp: appointment.date.millisecondsSinceEpoch,
       reason: appointment.reason,
@@ -105,8 +105,8 @@ class AppointmentModel {
 
   factory AppointmentModel.fromMap(Map<String, dynamic> map) {
     return AppointmentModel(
-      id: (map['id'] as String?) ?? '',
-      animalId: (map['animalId'] as String?) ?? '',
+      id: map['id'] as int?,
+      animalId: (map['animalId'] as int?) ?? 0,
       veterinarianName:
           (map['veterinario'] as String?) ??
           (map['veterinarianName'] as String?) ??
@@ -128,8 +128,8 @@ class AppointmentModel {
   }
 
   AppointmentModel copyWith({
-    String? id,
-    String? animalId,
+    int? id,
+    int? animalId,
     String? veterinarianName,
     int? dateTimestamp,
     String? reason,

@@ -1,35 +1,22 @@
-// Package imports:
-import 'package:hive/hive.dart';
-
 // Project imports:
 import '../../../../../core/models/base_model.dart';
 
-part 'peso_model.g.dart';
-
-@HiveType(typeId: 53)
 class PesoModel extends BaseModel {
-  @HiveField(0)
   @override
   final String? id;
 
-  @HiveField(1)
   @override
   final DateTime? createdAt;
 
-  @HiveField(2)
   @override
   final DateTime? updatedAt;
 
-  @HiveField(7)
   int dataRegistro;
 
-  @HiveField(8)
   double peso;
 
-  @HiveField(9)
   final String fkIdPerfil;
 
-  @HiveField(10)
   final bool isDeleted;
 
   PesoModel({

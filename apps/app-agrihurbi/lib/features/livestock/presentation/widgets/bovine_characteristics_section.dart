@@ -84,7 +84,7 @@ class BovineCharacteristicsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         DropdownButtonFormField<BovineAptitude>(
-          value: selectedAptitude,
+          initialValue: selectedAptitude,
           decoration: InputDecoration(
             labelText: 'Aptidão',
             border: const OutlineInputBorder(),
@@ -154,7 +154,7 @@ class BovineCharacteristicsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         DropdownButtonFormField<BreedingSystem>(
-          value: selectedBreedingSystem,
+          initialValue: selectedBreedingSystem,
           decoration: InputDecoration(
             labelText: 'Sistema de Criação',
             border: const OutlineInputBorder(),

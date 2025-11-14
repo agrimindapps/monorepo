@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../database/petiveti_database.dart';
@@ -54,7 +55,7 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
   Future<bool> updateVaccine(VaccineModel vaccine) async {
     if (vaccine.id == null) return false;
     final companion = _toCompanion(vaccine, forUpdate: true);
-    return await _database.vaccineDao.updateVaccine(int.parse(vaccine.id!), companion);
+    return await _database.vaccineDao.updateVaccine(vaccine.id!, companion);
   }
 
   @override
@@ -70,8 +71,8 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
 
   VaccineModel _toModel(Vaccine vaccine) {
     return VaccineModel(
-      id: vaccine.id.toString(),
-      animalId: vaccine.animalId.toString(),
+      id: vaccine.id,
+      animalId: vaccine.animalId,
       name: vaccine.name,
       date: vaccine.date,
       nextDueDate: vaccine.nextDueDate,
@@ -89,8 +90,8 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
   VaccinesCompanion _toCompanion(VaccineModel model, {bool forUpdate = false}) {
     if (forUpdate) {
       return VaccinesCompanion(
-        id: model.id != null ? Value(int.parse(model.id!)) : const Value.absent(),
-        animalId: Value(int.parse(model.animalId)),
+        id: model.id != null ? Value(model.id!) : const Value.absent(),
+        animalId: Value(model.animalId),
         name: Value(model.name),
         date: Value(model.date),
         nextDueDate: Value.ofNullable(model.nextDueDate),
@@ -104,7 +105,7 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
     }
 
     return VaccinesCompanion.insert(
-      animalId: int.parse(model.animalId),
+      animalId: model.animalId,
       name: model.name,
       date: model.date,
       nextDueDate: Value.ofNullable(model.nextDueDate),

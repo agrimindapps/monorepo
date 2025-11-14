@@ -12,7 +12,7 @@ class ExpenseDao extends DatabaseAccessor<PetivetiDatabase> with _$ExpenseDaoMix
   Future<List<Expense>> getAllExpenses(String userId) {
     return (select(expenses)
       ..where((tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false))
-      ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+      ..orderBy([(t) => OrderingTerm.desc(t.expenseDate)]))
       .get();
   }
 
@@ -20,7 +20,7 @@ class ExpenseDao extends DatabaseAccessor<PetivetiDatabase> with _$ExpenseDaoMix
   Future<List<Expense>> getExpensesByAnimal(int animalId) {
     return (select(expenses)
       ..where((tbl) => tbl.animalId.equals(animalId) & tbl.isDeleted.equals(false))
-      ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+      ..orderBy([(t) => OrderingTerm.desc(t.expenseDate)]))
       .get();
   }
 
@@ -28,7 +28,7 @@ class ExpenseDao extends DatabaseAccessor<PetivetiDatabase> with _$ExpenseDaoMix
   Stream<List<Expense>> watchExpensesByAnimal(int animalId) {
     return (select(expenses)
       ..where((tbl) => tbl.animalId.equals(animalId) & tbl.isDeleted.equals(false))
-      ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+      ..orderBy([(t) => OrderingTerm.desc(t.expenseDate)]))
       .watch();
   }
 
@@ -46,17 +46,19 @@ class ExpenseDao extends DatabaseAccessor<PetivetiDatabase> with _$ExpenseDaoMix
 
   /// Update expense
   Future<bool> updateExpense(int id, ExpensesCompanion expense) async {
-    return (update(expenses)..where((tbl) => tbl.id.equals(id)))
+    final count = await (update(expenses)..where((tbl) => tbl.id.equals(id)))
       .write(expense.copyWith(updatedAt: Value(DateTime.now())));
+    return count > 0;
   }
 
   /// Delete expense
   Future<bool> deleteExpense(int id) async {
-    return (update(expenses)..where((tbl) => tbl.id.equals(id)))
+    final count = await (update(expenses)..where((tbl) => tbl.id.equals(id)))
       .write(ExpensesCompanion(
         isDeleted: const Value(true),
         updatedAt: Value(DateTime.now()),
       ));
+    return count > 0;
   }
 
   /// Get expenses by category
@@ -91,8 +93,8 @@ class ExpenseDao extends DatabaseAccessor<PetivetiDatabase> with _$ExpenseDaoMix
       ..where((tbl) => 
         tbl.animalId.equals(animalId) & 
         tbl.isDeleted.equals(false) &
-        tbl.date.isBetweenValues(startDate, endDate))
-      ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+        tbl.expenseDate.isBetweenValues(startDate, endDate))
+      ..orderBy([(t) => OrderingTerm.desc(t.expenseDate)]))
       .get();
   }
 }

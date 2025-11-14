@@ -47,7 +47,7 @@ class MarketStatsGrid extends StatelessWidget {
         _buildStatCard(
           context,
           title: 'Volume',
-          initialValue: _formatVolume(market.volume),
+          value: _formatVolume(market.volume),
           icon: Icons.bar_chart,
           color: AppTheme.infoColor,
         ),

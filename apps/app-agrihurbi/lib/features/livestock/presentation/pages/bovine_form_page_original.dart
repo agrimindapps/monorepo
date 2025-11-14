@@ -11,10 +11,7 @@ import '../providers/bovines_provider.dart';
 /// Unifica as funcionalidades de cadastro e edição em uma única página
 /// Implementa validação completa e integração com BovinesProvider
 class BovineFormPage extends ConsumerStatefulWidget {
-  const BovineFormPage({
-    super.key,
-    this.bovineId,
-  });
+  const BovineFormPage({super.key, this.bovineId});
 
   /// ID do bovino para edição (null para criação)
   final String? bovineId;
@@ -90,7 +87,8 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
       }
     }
 
-    if (mounted) { // ✅ Safety check before setState
+    if (mounted) {
+      // ✅ Safety check before setState
       setState(() {
         _isLoading = false;
       });
@@ -107,7 +105,7 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
     _characteristicsController.text = bovine.characteristics;
     _purposeController.text = bovine.purpose;
     _tagsController.text = bovine.tags.join(', ');
-    
+
     _selectedAptitude = bovine.aptitude;
     _selectedBreedingSystem = bovine.breedingSystem;
     _selectedTags = List.from(bovine.tags);
@@ -154,9 +152,12 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
                         const SizedBox(height: 8),
                         Text(
                           'ID: ${widget.bovineId}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                       ],
                     ),
@@ -181,9 +182,12 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
                         Text(
                           provider.errorMessage!,
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                         const SizedBox(height: 24),
                         Row(
@@ -207,7 +211,7 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
                     ),
                   );
                 }
-                
+
                 return Form(
                   key: _formKey,
                   child: Column(
@@ -225,8 +229,7 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
                               const SizedBox(height: 24),
                               _buildAdditionalInfoSection(),
                               const SizedBox(height: 24),
-                              if (widget.isEditing)
-                                _buildStatusSection(),
+                              if (widget.isEditing) _buildStatusSection(),
                             ],
                           ),
                         ),
@@ -492,15 +495,14 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Status',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('Status', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 16),
             SwitchListTile(
               title: const Text('Ativo'),
-              subtitle: Text(_isActive ? 'Bovino ativo no rebanho' : 'Bovino inativo'),
-              initialValue: _isActive,
+              subtitle: Text(
+                _isActive ? 'Bovino ativo no rebanho' : 'Bovino inativo',
+              ),
+              value: _isActive,
               onChanged: (value) {
                 setState(() {
                   _isActive = value;
@@ -581,11 +583,11 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
       tags: _selectedTags,
       aptitude: _selectedAptitude ?? BovineAptitude.beef,
       breedingSystem: _selectedBreedingSystem ?? BreedingSystem.extensive,
-      imageUrls: widget.isEditing 
+      imageUrls: widget.isEditing
           ? (provider.selectedBovine?.imageUrls ?? [])
           : <String>[],
       isActive: _isActive,
-      createdAt: widget.isEditing 
+      createdAt: widget.isEditing
           ? (provider.selectedBovine?.createdAt ?? now)
           : now,
       updatedAt: now,
@@ -604,7 +606,7 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            widget.isEditing 
+            widget.isEditing
                 ? 'Bovino atualizado com sucesso!'
                 : 'Bovino criado com sucesso!',
           ),
@@ -674,10 +676,13 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
 
   void _deleteBovine() async {
     final provider = ref.read(bovinesProviderProvider);
-    final success = await provider.deleteBovine(widget.bovineId!, confirmed: true);
-    
+    final success = await provider.deleteBovine(
+      widget.bovineId!,
+      confirmed: true,
+    );
+
     if (!mounted) return; // ✅ Safety check after async operation
-    
+
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

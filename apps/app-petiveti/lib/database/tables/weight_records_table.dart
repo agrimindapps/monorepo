@@ -3,7 +3,7 @@ import 'package:drift/drift.dart';
 @DataClassName('WeightRecord')
 class WeightRecords extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get animalId => integer().references(Animals, #id)();
+  IntColumn get animalId => integer()();
   
   RealColumn get weight => real()();
   TextColumn get unit => text().withDefault(const Constant('kg'))();

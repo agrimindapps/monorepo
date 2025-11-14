@@ -7,10 +7,10 @@ part 'medication_model.g.dart';
 @JsonSerializable()
 class MedicationModel {
   @JsonKey(name: 'id')
-  final String? id;
+  final int? id;
 
   @JsonKey(name: 'animal_id')
-  final String animalId;
+  final int animalId;
 
   @JsonKey(name: 'name')
   final String name;
@@ -36,6 +36,9 @@ class MedicationModel {
   @JsonKey(name: 'prescribed_by')
   final String? veterinarian;
 
+  @JsonKey(name: 'type')
+  final String type;
+
   @JsonKey(name: 'user_id')
   final String userId;
 
@@ -59,6 +62,7 @@ class MedicationModel {
     this.endDate,
     this.notes,
     this.veterinarian,
+    required this.type,
     required this.userId,
     required this.createdAt,
     this.updatedAt,
@@ -67,8 +71,8 @@ class MedicationModel {
 
   factory MedicationModel.fromEntity(Medication medication) {
     return MedicationModel(
-      id: medication.id,
-      animalId: medication.animalId,
+      id: medication.id.isNotEmpty ? int.tryParse(medication.id) : null,
+      animalId: int.tryParse(medication.animalId) ?? 0,
       name: medication.name,
       dosage: medication.dosage,
       frequency: medication.frequency,
@@ -76,8 +80,9 @@ class MedicationModel {
       startDate: medication.startDate,
       endDate: medication.endDate,
       notes: medication.notes,
-      prescribedBy: medication.prescribedBy,
-      type: medication.type.name, // Convert enum to string
+      veterinarian: medication.prescribedBy,
+      type: medication.type.name,
+      userId: '', // Will be set by repository
       createdAt: medication.createdAt,
       updatedAt: medication.updatedAt,
       isDeleted: medication.isDeleted,
@@ -99,26 +104,26 @@ class MedicationModel {
 
   Medication toEntity() {
     return Medication(
-      id: id,
-      animalId: animalId,
+      id: id?.toString() ?? '',
+      animalId: animalId.toString(),
       name: name,
       dosage: dosage,
       frequency: frequency,
       duration: duration,
       startDate: startDate,
-      endDate: endDate,
+      endDate: endDate ?? DateTime.now(),
       notes: notes,
-      prescribedBy: prescribedBy,
+      prescribedBy: veterinarian,
       type: _stringToMedicationType(type),
       createdAt: createdAt,
-      updatedAt: updatedAt,
+      updatedAt: updatedAt ?? DateTime.now(),
       isDeleted: isDeleted,
     );
   }
 
   MedicationModel copyWith({
-    String? id,
-    String? animalId,
+    int? id,
+    int? animalId,
     String? name,
     String? dosage,
     String? frequency,
@@ -126,13 +131,12 @@ class MedicationModel {
     DateTime? startDate,
     DateTime? endDate,
     String? notes,
-    String? prescribedBy,
+    String? veterinarian,
     String? type,
+    String? userId,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isDeleted,
-    String? discontinuedReason,
-    DateTime? discontinuedAt,
   }) {
     return MedicationModel(
       id: id ?? this.id,
@@ -144,13 +148,12 @@ class MedicationModel {
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       notes: notes ?? this.notes,
-      prescribedBy: prescribedBy ?? this.prescribedBy,
+      veterinarian: veterinarian ?? this.veterinarian,
       type: type ?? this.type,
+      userId: userId ?? this.userId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isDeleted: isDeleted ?? this.isDeleted,
-      discontinuedReason: discontinuedReason ?? this.discontinuedReason,
-      discontinuedAt: discontinuedAt ?? this.discontinuedAt,
     );
   }
 

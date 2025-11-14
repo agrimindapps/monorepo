@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../database/petiveti_database.dart';
@@ -54,7 +55,7 @@ class WeightLocalDataSourceImpl implements WeightLocalDataSource {
   Future<bool> updateWeightRecord(WeightModel record) async {
     if (record.id == null) return false;
     final companion = _toCompanion(record, forUpdate: true);
-    return await _database.weightDao.updateWeightRecord(int.parse(record.id!), companion);
+    return await _database.weightDao.updateWeightRecord(record.id!, companion);
   }
 
   @override
@@ -70,8 +71,8 @@ class WeightLocalDataSourceImpl implements WeightLocalDataSource {
 
   WeightModel _toModel(WeightRecord record) {
     return WeightModel(
-      id: record.id.toString(),
-      animalId: record.animalId.toString(),
+      id: record.id,
+      animalId: record.animalId,
       weight: record.weight,
       unit: record.unit,
       date: record.date,
@@ -85,8 +86,8 @@ class WeightLocalDataSourceImpl implements WeightLocalDataSource {
   WeightRecordsCompanion _toCompanion(WeightModel model, {bool forUpdate = false}) {
     if (forUpdate) {
       return WeightRecordsCompanion(
-        id: model.id != null ? Value(int.parse(model.id!)) : const Value.absent(),
-        animalId: Value(int.parse(model.animalId)),
+        id: model.id != null ? Value(model.id!) : const Value.absent(),
+        animalId: Value(model.animalId),
         weight: Value(model.weight),
         unit: Value(model.unit),
         date: Value(model.date),
@@ -96,7 +97,7 @@ class WeightLocalDataSourceImpl implements WeightLocalDataSource {
     }
 
     return WeightRecordsCompanion.insert(
-      animalId: int.parse(model.animalId),
+      animalId: model.animalId,
       weight: model.weight,
       unit: Value(model.unit),
       date: model.date,

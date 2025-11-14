@@ -135,7 +135,13 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   ) async {
     return _errorHandlingService.executeNullableOperation(
       operation: () async {
-        final localAppointment = await _localDataSource.getAppointmentById(id);
+        // Convert String ID to int for datasource
+        final intId = int.tryParse(id);
+        if (intId == null) {
+          throw Exception('Invalid appointment ID format');
+        }
+        
+        final localAppointment = await _localDataSource.getAppointmentById(intId);
 
         if (localAppointment != null) {
           if (localAppointment.isDeleted) {
@@ -192,9 +198,15 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   ) async {
     return _errorHandlingService.executeOperation(
       operation: () async {
+        // Convert String ID to int for datasource
+        final intId = int.tryParse(appointment.id);
+        if (intId == null) {
+          throw Exception('Invalid appointment ID format');
+        }
+        
         // 1. Buscar appointment atual para preservar sync fields
         final currentAppointment =
-            await _localDataSource.getAppointmentById(appointment.id);
+            await _localDataSource.getAppointmentById(intId);
         if (currentAppointment == null) {
           throw Exception('Appointment not found');
         }
@@ -235,8 +247,14 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   ) async {
     return _errorHandlingService.executeVoidOperation(
       operation: () async {
+        // Convert String ID to int for datasource
+        final intId = int.tryParse(id);
+        if (intId == null) {
+          throw Exception('Invalid appointment ID format');
+        }
+        
         // Soft delete (datasource implementa)
-        await _localDataSource.deleteAppointment(id);
+        await _localDataSource.deleteAppointment(intId);
 
         if (kDebugMode) {
           debugPrint('[AppointmentRepository] Appointment soft-deleted: $id');

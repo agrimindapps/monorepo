@@ -1,55 +1,51 @@
-// Package imports:
-import 'package:hive/hive.dart';
+import 'package:injectable/injectable.dart';
 
-// Project imports:
-import '../database/comentarios_models.dart';
+import '../drift_database/nutrituti_database.dart';
+import '../drift_database/daos/comentario_dao.dart';
+import '../drift_database/tables/comentarios_table.dart';
+import 'package:drift/drift.dart' as drift;
 
+@injectable
 class ComentariosRepository {
-  final String _boxName = 'box_comentarios';
-  final int maxComentarios = 10;
+  final NutitutiDatabase _database;
+  
+  ComentariosRepository(this._database);
 
-  Future<Box<Comentarios>> _openBox() async {
-    return await Hive.openBox<Comentarios>(_boxName);
+  ComentarioDao get _dao => _database.comentarioDao;
+
+  Future<void> addComentario(ComentariosCompanion comentario) async {
+    await _dao.addComentario(comentario);
   }
 
-  Future<void> addComentario(Comentarios comentario) async {
-    final box = await _openBox();
-    await box.put(comentario.id, comentario);
+  Future<List<Comentario>> getAllComentarios() async {
+    return await _dao.getAllComentarios();
   }
 
-  Future<List<Comentarios>> getAllComentarios() async {
-    final box = await _openBox();
-    return box.values.toList();
+  Future<Comentario?> getComentarioById(String id) async {
+    return await _dao.getComentarioById(id);
   }
 
-  Future<Comentarios?> getComentarioById(String id) async {
-    final box = await _openBox();
-    return box.get(id);
+  Future<List<Comentario>> getComentariosByFerramenta(String ferramenta) async {
+    return await _dao.getComentariosByFerramenta(ferramenta);
   }
 
-  Future<List<Comentarios>> getComentariosByFerramenta(
-      String ferramenta) async {
-    final box = await _openBox();
-    return box.values.where((c) => c.ferramenta.contains(ferramenta)).toList();
-  }
-
-  Future<void> updateComentario(Comentarios comentario) async {
-    final box = await _openBox();
-    await box.put(comentario.id, comentario);
+  Future<void> updateComentario(String id, ComentariosCompanion comentario) async {
+    await _dao.updateComentario(id, comentario);
   }
 
   Future<void> deleteComentario(String id) async {
-    final box = await _openBox();
-    await box.delete(id);
+    await _dao.deleteComentario(id);
   }
 
   Future<void> deleteAllComentarios() async {
-    final box = await _openBox();
-    await box.clear();
+    await _dao.deleteAll();
   }
 
-  Future<void> closeBox() async {
-    final box = await _openBox();
-    await box.close();
+  Stream<List<Comentario>> watchAllComentarios() {
+    return _dao.watchAllComentarios();
+  }
+
+  Future<List<Comentario>> searchComentarios(String query) async {
+    return await _dao.searchComentarios(query);
   }
 }

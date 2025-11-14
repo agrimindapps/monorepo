@@ -2,8 +2,8 @@ import '../../domain/entities/reminder.dart';
 
 class ReminderModel extends Reminder {
   const ReminderModel({
-    required super.id,
-    required super.animalId,
+    required int super.id,
+    required int? super.animalId,
     required super.userId,
     required super.title,
     required super.description,
@@ -22,8 +22,8 @@ class ReminderModel extends Reminder {
 
   factory ReminderModel.fromMap(Map<String, dynamic> map) {
     return ReminderModel(
-      id: map['id']?.toString() ?? '',
-      animalId: map['animalId']?.toString() ?? '',
+      id: (map['id'] as int?) ?? 0,
+      animalId: map['animalId'] as int?,
       userId: map['userId']?.toString() ?? '',
       title: map['title']?.toString() ?? '',
       description: map['description']?.toString() ?? '',
@@ -79,8 +79,8 @@ class ReminderModel extends Reminder {
 
   factory ReminderModel.fromEntity(Reminder reminder) {
     return ReminderModel(
-      id: reminder.id,
-      animalId: reminder.animalId,
+      id: int.tryParse(reminder.id) ?? 0,
+      animalId: int.tryParse(reminder.animalId) ?? 0,
       userId: reminder.userId,
       title: reminder.title,
       description: reminder.description,
@@ -100,8 +100,8 @@ class ReminderModel extends Reminder {
 
   @override
   ReminderModel copyWith({
-    String? id,
-    String? animalId,
+    int? id,
+    int? animalId,
     String? userId,
     String? title,
     String? description,

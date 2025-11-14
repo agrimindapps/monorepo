@@ -12,7 +12,7 @@ class AppointmentDao extends DatabaseAccessor<PetivetiDatabase> with _$Appointme
   Future<List<Appointment>> getAllAppointments(String userId) {
     return (select(appointments)
       ..where((tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false))
-      ..orderBy([(t) => OrderingTerm.desc(t.dateTime)]))
+      ..orderBy([(t) => OrderingTerm.desc(t.appointmentDateTime)]))
       .get();
   }
 
@@ -20,7 +20,7 @@ class AppointmentDao extends DatabaseAccessor<PetivetiDatabase> with _$Appointme
   Future<List<Appointment>> getAppointmentsByAnimal(int animalId) {
     return (select(appointments)
       ..where((tbl) => tbl.animalId.equals(animalId) & tbl.isDeleted.equals(false))
-      ..orderBy([(t) => OrderingTerm.desc(t.dateTime)]))
+      ..orderBy([(t) => OrderingTerm.desc(t.appointmentDateTime)]))
       .get();
   }
 
@@ -28,7 +28,7 @@ class AppointmentDao extends DatabaseAccessor<PetivetiDatabase> with _$Appointme
   Stream<List<Appointment>> watchAppointmentsByAnimal(int animalId) {
     return (select(appointments)
       ..where((tbl) => tbl.animalId.equals(animalId) & tbl.isDeleted.equals(false))
-      ..orderBy([(t) => OrderingTerm.desc(t.dateTime)]))
+      ..orderBy([(t) => OrderingTerm.desc(t.appointmentDateTime)]))
       .watch();
   }
 
@@ -46,17 +46,19 @@ class AppointmentDao extends DatabaseAccessor<PetivetiDatabase> with _$Appointme
 
   /// Update appointment
   Future<bool> updateAppointment(int id, AppointmentsCompanion appointment) async {
-    return (update(appointments)..where((tbl) => tbl.id.equals(id)))
+    final count = await (update(appointments)..where((tbl) => tbl.id.equals(id)))
       .write(appointment.copyWith(updatedAt: Value(DateTime.now())));
+    return count > 0;
   }
 
   /// Delete appointment
   Future<bool> deleteAppointment(int id) async {
-    return (update(appointments)..where((tbl) => tbl.id.equals(id)))
+    final count = await (update(appointments)..where((tbl) => tbl.id.equals(id)))
       .write(AppointmentsCompanion(
         isDeleted: const Value(true),
         updatedAt: Value(DateTime.now()),
       ));
+    return count > 0;
   }
 
   /// Get upcoming appointments
@@ -66,9 +68,9 @@ class AppointmentDao extends DatabaseAccessor<PetivetiDatabase> with _$Appointme
       ..where((tbl) => 
         tbl.userId.equals(userId) & 
         tbl.isDeleted.equals(false) &
-        tbl.dateTime.isBiggerOrEqualValue(now) &
+        tbl.appointmentDateTime.isBiggerOrEqualValue(now) &
         tbl.status.equals('scheduled'))
-      ..orderBy([(t) => OrderingTerm.asc(t.dateTime)]))
+      ..orderBy([(t) => OrderingTerm.asc(t.appointmentDateTime)]))
       .get();
   }
 
@@ -79,7 +81,7 @@ class AppointmentDao extends DatabaseAccessor<PetivetiDatabase> with _$Appointme
         tbl.userId.equals(userId) & 
         tbl.isDeleted.equals(false) &
         tbl.status.equals(status))
-      ..orderBy([(t) => OrderingTerm.desc(t.dateTime)]))
+      ..orderBy([(t) => OrderingTerm.desc(t.appointmentDateTime)]))
       .get();
   }
 }

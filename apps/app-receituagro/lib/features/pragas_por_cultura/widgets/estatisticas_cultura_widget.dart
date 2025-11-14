@@ -27,12 +27,10 @@ class EstatisticasCulturaWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -51,7 +49,7 @@ class EstatisticasCulturaWidget extends StatelessWidget {
 
   Widget _buildHeader(ThemeData theme) {
     final pragasCriticas = pragasPorCultura.where((p) => p.isCritica).length;
-    
+
     return Row(
       children: [
         Container(
@@ -64,11 +62,7 @@ class EstatisticasCulturaWidget extends StatelessWidget {
             ),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Icon(
-            Icons.analytics,
-            color: Colors.white,
-            size: 20,
-          ),
+          child: const Icon(Icons.analytics, color: Colors.white, size: 20),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -107,11 +101,7 @@ class EstatisticasCulturaWidget extends StatelessWidget {
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.warning,
-                  color: Colors.red,
-                  size: 14,
-                ),
+                Icon(Icons.warning, color: Colors.red, size: 14),
                 SizedBox(width: 4),
                 Text(
                   'ATENÇÃO',
@@ -132,15 +122,17 @@ class EstatisticasCulturaWidget extends StatelessWidget {
     final totalDiagnosticos = pragasPorCultura
         .map((p) => p.quantidadeDiagnosticos)
         .fold(0, (a, b) => a + b);
-    
+
     final totalDefensivos = pragasPorCultura
         .expand((p) => p.defensivosRelacionados)
         .toSet()
         .length;
-    
+
     final pragasCriticas = pragasPorCultura.where((p) => p.isCritica).length;
-    
-    final pragasAltoRisco = pragasPorCultura.where((p) => p.nivelAmeaca == 'Alto').length;
+
+    final pragasAltoRisco = pragasPorCultura
+        .where((p) => p.nivelAmeaca == 'Alto')
+        .length;
 
     final metricas = [
       {
@@ -258,11 +250,7 @@ class EstatisticasCulturaWidget extends StatelessWidget {
                   color: Colors.purple,
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Icon(
-                  Icons.tune,
-                  size: 14,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.tune, size: 14, color: Colors.white),
               ),
               const SizedBox(width: 8),
               Text(
@@ -358,11 +346,7 @@ class EstatisticasCulturaWidget extends StatelessWidget {
                         : theme.colorScheme.onSurfaceVariant,
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: Icon(
-                    icon,
-                    size: 12,
-                    color: Colors.white,
-                  ),
+                  child: Icon(icon, size: 12, color: Colors.white),
                 ),
                 const SizedBox(width: 6),
                 Text(
@@ -381,7 +365,7 @@ class EstatisticasCulturaWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: DropdownButtonFormField<String>(
-              value: valor,
+              initialValue: valor,
               decoration: const InputDecoration(
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,

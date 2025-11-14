@@ -11,7 +11,8 @@ part 'license_provider.g.dart';
 @freezed
 class LicenseState with _$LicenseState {
   const factory LicenseState({
-    @Default(LicenseInfo.noLicense()) LicenseInfo licenseInfo,
+    @Default(LicenseInfo(isActive: false, type: 'none', isExpired: false))
+    LicenseInfo licenseInfo,
     @Default(false) bool isLoading,
     String? error,
   }) = _LicenseState;
@@ -62,10 +63,8 @@ class LicenseNotifier extends _$LicenseNotifier {
       final result = await _licenseService.initializeLicense();
 
       result.fold(
-        (failure) => state = state.copyWith(
-          error: failure.toString(),
-          isLoading: false,
-        ),
+        (failure) =>
+            state = state.copyWith(error: failure.toString(), isLoading: false),
         (license) {
           _refreshLicenseInfo();
           state = state.copyWith(isLoading: false);
@@ -94,9 +93,7 @@ class LicenseNotifier extends _$LicenseNotifier {
         (info) => state = state.copyWith(licenseInfo: info, error: null),
       );
     } catch (e) {
-      state = state.copyWith(
-        error: 'Erro ao obter informações da licença: $e',
-      );
+      state = state.copyWith(error: 'Erro ao obter informações da licença: $e');
     }
   }
 
@@ -214,7 +211,11 @@ class LicenseNotifier extends _$LicenseNotifier {
         },
         (_) {
           state = state.copyWith(
-            licenseInfo: const LicenseInfo.noLicense(),
+            licenseInfo: const LicenseInfo(
+              isActive: false,
+              type: 'none',
+              isExpired: false,
+            ),
             error: null,
             isLoading: false,
           );

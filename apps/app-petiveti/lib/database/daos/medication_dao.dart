@@ -46,17 +46,19 @@ class MedicationDao extends DatabaseAccessor<PetivetiDatabase> with _$Medication
 
   /// Update medication
   Future<bool> updateMedication(int id, MedicationsCompanion medication) async {
-    return (update(medications)..where((tbl) => tbl.id.equals(id)))
+    final count = await (update(medications)..where((tbl) => tbl.id.equals(id)))
       .write(medication.copyWith(updatedAt: Value(DateTime.now())));
+    return count > 0;
   }
 
   /// Delete medication
   Future<bool> deleteMedication(int id) async {
-    return (update(medications)..where((tbl) => tbl.id.equals(id)))
+    final count = await (update(medications)..where((tbl) => tbl.id.equals(id)))
       .write(MedicationsCompanion(
         isDeleted: const Value(true),
         updatedAt: Value(DateTime.now()),
       ));
+    return count > 0;
   }
 
   /// Get active medications (not ended yet)

@@ -2,8 +2,8 @@ import '../../domain/entities/expense.dart';
 
 class ExpenseModel extends Expense {
   const ExpenseModel({
-    required super.id,
-    required super.animalId,
+    required String super.id,
+    required String super.animalId,
     required super.userId,
     required super.title,
     required super.description,
@@ -27,10 +27,14 @@ class ExpenseModel extends Expense {
     required super.updatedAt,
   });
 
+  // Internal int IDs for database
+  int get intId => int.tryParse(id) ?? 0;
+  int get intAnimalId => int.tryParse(animalId) ?? 0;
+
   factory ExpenseModel.fromMap(Map<String, dynamic> map) {
     return ExpenseModel(
-      id: map['id']?.toString() ?? '',
-      animalId: map['animalId']?.toString() ?? '',
+      id: (map['id'] as int? ?? 0).toString(),
+      animalId: (map['animalId'] as int? ?? 0).toString(),
       userId: map['userId']?.toString() ?? '',
       title: map['title']?.toString() ?? '',
       description: map['description']?.toString() ?? '',
@@ -72,8 +76,8 @@ class ExpenseModel extends Expense {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
-      'animalId': animalId,
+      'id': intId,
+      'animalId': intAnimalId,
       'userId': userId,
       'title': title,
       'description': description,

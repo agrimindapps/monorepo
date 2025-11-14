@@ -175,7 +175,7 @@ class _ParameterInputWidgetState extends State<ParameterInputWidget> {
 
   Widget _buildSelectionInput() {
     return DropdownButtonFormField<String>(
-      value: widget.value?.toString(),
+      initialValue: widget.value?.toString(),
       decoration: InputDecoration(
         border: const OutlineInputBorder(),
         errorText: _errorText,

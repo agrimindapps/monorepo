@@ -3,7 +3,7 @@ import 'package:drift/drift.dart';
 @DataClassName('Vaccine')
 class Vaccines extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get animalId => integer().references(Animals, #id)();
+  IntColumn get animalId => integer()();
   
   TextColumn get name => text()();
   DateTimeColumn get date => dateTime()();

@@ -80,7 +80,10 @@ class DataIntegrityService {
       }
 
       // 1. Buscar animal local
-      final localAnimal = await _animalLocalDataSource.getAnimalById(localId);
+      final localAnimalId = int.tryParse(localId);
+      if (localAnimalId == null) return const Right(null);
+      
+      final localAnimal = await _animalLocalDataSource.getAnimalById(localAnimalId);
       if (localAnimal == null) {
         // Animal local já foi removido ou nunca existiu
         if (kDebugMode) {
@@ -92,11 +95,14 @@ class DataIntegrityService {
       }
 
       // 2. Verificar se animal remoto já existe
+      final remoteAnimalId = int.tryParse(remoteId);
+      if (remoteAnimalId == null) return const Right(null);
+      
       final remoteAnimal =
-          await _animalLocalDataSource.getAnimalById(remoteId);
+          await _animalLocalDataSource.getAnimalById(remoteAnimalId);
       if (remoteAnimal != null) {
         // Animal remoto já existe - apenas remover duplicata local
-        await _animalLocalDataSource.deleteAnimal(localId);
+        await _animalLocalDataSource.deleteAnimal(localAnimalId);
 
         if (kDebugMode) {
           debugPrint(
@@ -109,7 +115,7 @@ class DataIntegrityService {
           localAnimal.toEntity().copyWith(id: remoteId),
         );
         await _animalLocalDataSource.updateAnimal(updatedAnimal);
-        await _animalLocalDataSource.deleteAnimal(localId);
+        await _animalLocalDataSource.deleteAnimal(localAnimalId);
 
         if (kDebugMode) {
           debugPrint(
@@ -158,7 +164,7 @@ class DataIntegrityService {
       final report = IntegrityReport();
 
       // Buscar todos os animals
-      final allAnimals = await _animalLocalDataSource.getAnimals();
+      final allAnimals = await _animalLocalDataSource.getAnimals(userId);
       report.totalAnimals = allAnimals.length;
 
       if (kDebugMode) {
@@ -203,16 +209,18 @@ class DataIntegrityService {
     List<AnimalModel> animals,
     IntegrityReport report,
   ) async {
-    final idCounts = <String, int>{};
+    final idCounts = <int, int>{};
 
     for (final animal in animals) {
-      idCounts[animal.id] = (idCounts[animal.id] ?? 0) + 1;
+      if (animal.id != null) {
+        idCounts[animal.id!] = (idCounts[animal.id!] ?? 0) + 1;
+      }
     }
 
     final duplicates = idCounts.entries.where((entry) => entry.value > 1);
 
     if (duplicates.isNotEmpty) {
-      report.duplicateIds.addAll(duplicates.map((e) => e.key));
+      report.duplicateIds.addAll(duplicates.map((e) => e.key.toString()));
 
       if (kDebugMode) {
         debugPrint(
@@ -221,7 +229,10 @@ class DataIntegrityService {
       }
 
       // Auto-fix: Remover duplicatas (manter apenas primeira ocorrência)
-      for (final duplicateId in report.duplicateIds) {
+      for (final duplicateIdStr in report.duplicateIds) {
+        final duplicateId = int.tryParse(duplicateIdStr);
+        if (duplicateId == null) continue;
+        
         final duplicateAnimals =
             animals.where((a) => a.id == duplicateId).toList();
         // Remover todas exceto a primeira
@@ -240,7 +251,7 @@ class DataIntegrityService {
   ) async {
     for (final animal in animals) {
       if (animal.name.trim().isEmpty) {
-        report.invalidDataIds.add(animal.id);
+        report.invalidDataIds.add(animal.id.toString());
 
         if (kDebugMode) {
           debugPrint(

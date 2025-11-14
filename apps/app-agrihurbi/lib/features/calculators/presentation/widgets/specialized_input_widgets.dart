@@ -419,7 +419,7 @@ class _SliderInputWidgetState extends State<SliderInputWidget> {
           children: [
             Expanded(
               child: Slider(
-                initialValue: _currentValue,
+                value: _currentValue,
                 min: widget.min,
                 max: widget.max,
                 divisions: widget.divisions,

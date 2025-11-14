@@ -26,9 +26,11 @@
 - **State**: ✅ Riverpod
 
 ### 📱 app-nutrituti
-- **Database**: ⚠️ Hive
-  - Versão: any
+- **Database**: ✅ Drift
+  - Versão: ^2.28.0
+  - Status: Migração completa (6/6 features)
 - **State**: ✅ Riverpod
+- **Progress**: Infraestrutura completa, todas features migradas
 
 ### 📱 app-petiveti
 - **Database**: ✅ Drift
@@ -45,6 +47,7 @@
 - **Database**: ✅ Drift
   - Versão: ^2.28.0
 - **State**: ✅ Riverpod
+- **Status**: ✅ Migração completa (13/11/2024)
 
 ### 📱 app-taskolist
 
@@ -166,7 +169,7 @@ Estes apps não precisam de migração pois não usam database local:
 
 **Tempo total estimado**: 1-2 semanas (com aceleração)
 
-**✅ PROGRESSO:** 4/6 apps migrados (67%)
+**✅ PROGRESSO:** 4/6 apps completamente migrados + 1 parcialmente (83%)
 
 ---
 
@@ -210,9 +213,10 @@ Estes apps não precisam de migração pois não usam database local:
 4. 📊 Deploy em staging: **AGUARDANDO TESTES**
 
 ### Para Monorepo:
-1. 🎯 **Próximo app:** app-calculei ou app-nutrituti
-2. 📝 Usar template validado (petiveti/termostecnicos)
-3. 🔧 Estimativa: 1-3 dias por app (dependendo da complexidade)
+1. 🎯 **app-nutrituti:** 100% completo (6/6 features migradas)
+2. 🎯 **Próximo app:** app-calculei (único restante usando Hive)
+3. 📝 Usar template validado (petiveti/termostecnicos)
+4. 🔧 Estimativa: 1-3 dias por app (dependendo da complexidade)
 
 ---
 
@@ -242,6 +246,6 @@ Estes apps não precisam de migração pois não usam database local:
 
 **Gerado em**: 2024-11-13 23:30 UTC  
 **Ferramenta**: Análise automatizada  
-**Status**: ✅ **67% DO MONOREPO MIGRADO** (4/6 apps) ⚡  
-**Próximo**: app-calculei ou app-nutrituti  
-**Record**: app-termostecnicos migrado em 3 horas!
+**Status**: ✅ **83% DO MONOREPO MIGRADO** (4 completos + 1 parcial) ⚡  
+**Próximo**: app-calculei (único restante)  
+**Progresso**: app-nutrituti 100% migrado (6/6 features)

@@ -35,7 +35,7 @@ class MedicationsModule implements DIModule {
 
     // Data Sources
     getIt.registerLazySingleton<MedicationLocalDataSource>(
-      () => MedicationLocalDataSourceImpl(),
+      () => MedicationLocalDataSourceImpl(getIt()),
     );
 
     // Repository

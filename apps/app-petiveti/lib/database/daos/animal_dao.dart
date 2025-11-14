@@ -45,17 +45,19 @@ class AnimalDao extends DatabaseAccessor<PetivetiDatabase> with _$AnimalDaoMixin
 
   /// Update animal
   Future<bool> updateAnimal(int id, AnimalsCompanion animal) async {
-    return (update(animals)..where((tbl) => tbl.id.equals(id)))
+    final count = await (update(animals)..where((tbl) => tbl.id.equals(id)))
       .write(animal.copyWith(updatedAt: Value(DateTime.now())));
+    return count > 0;
   }
 
   /// Soft delete animal
   Future<bool> deleteAnimal(int id) async {
-    return (update(animals)..where((tbl) => tbl.id.equals(id)))
+    final count = await (update(animals)..where((tbl) => tbl.id.equals(id)))
       .write(AnimalsCompanion(
         isDeleted: const Value(true),
         updatedAt: Value(DateTime.now()),
       ));
+    return count > 0;
   }
 
   /// Hard delete animal (permanent)

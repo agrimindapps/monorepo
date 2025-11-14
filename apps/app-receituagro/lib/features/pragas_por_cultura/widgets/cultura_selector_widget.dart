@@ -18,12 +18,10 @@ class CulturaSelectorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -174,7 +172,7 @@ class CulturaSelectorWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: DropdownButtonFormField<String>(
-              value: culturaIdSelecionada,
+              initialValue: culturaIdSelecionada,
               decoration: InputDecoration(
                 hintText: 'Selecione uma cultura',
                 hintStyle: TextStyle(
@@ -221,10 +219,7 @@ class CulturaSelectorWidget extends StatelessWidget {
                   value: '',
                   child: Text(
                     'Selecione uma cultura...',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontStyle: FontStyle.italic,
-                    ),
+                    style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
                   ),
                 ),
                 ...culturas.map((cultura) {
@@ -268,7 +263,8 @@ class CulturaSelectorWidget extends StatelessWidget {
               ),
             ),
           ),
-          if (culturaIdSelecionada != null && culturaIdSelecionada!.isNotEmpty) ...[
+          if (culturaIdSelecionada != null &&
+              culturaIdSelecionada!.isNotEmpty) ...[
             Container(
               margin: const EdgeInsets.all(12),
               padding: const EdgeInsets.all(12),
@@ -327,7 +323,10 @@ class CulturaSelectorWidget extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.green.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),

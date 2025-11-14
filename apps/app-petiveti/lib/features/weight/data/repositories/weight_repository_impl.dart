@@ -270,8 +270,16 @@ class WeightRepositoryImpl implements WeightRepository {
   @override
   Future<Either<local_failures.Failure, void>> deleteWeight(String id) async {
     try {
+      // Convert String ID to int for datasource
+      final intId = int.tryParse(id);
+      if (intId == null) {
+        return const Left(
+          local_failures.CacheFailure(message: 'Invalid weight ID format'),
+        );
+      }
+      
       // Soft delete (datasource implementa)
-      await _localDataSource.deleteWeight(id);
+      await _localDataSource.deleteWeight(intId);
 
       if (kDebugMode) {
         debugPrint('[WeightRepository] Weight soft-deleted: $id');

@@ -8,7 +8,7 @@ part 'calculation_history_model.g.dart';
 /// Model para persistência do histórico de cálculos
 @JsonSerializable()
 class CalculationHistoryModel {
-  final String? id;
+  final int? id;
 
   final String calculatorId;
 
@@ -44,7 +44,7 @@ class CalculationHistoryModel {
   /// Converte de entity para model
   factory CalculationHistoryModel.fromEntity(CalculationHistory entity) {
     return CalculationHistoryModel(
-      id: entity.id,
+      id: entity.id.isNotEmpty ? int.tryParse(entity.id) : null,
       calculatorId: entity.calculatorId,
       calculatorName: entity.calculatorName,
       inputs: Map<String, dynamic>.from(entity.inputs),
@@ -58,7 +58,7 @@ class CalculationHistoryModel {
   /// Converte de model para entity
   CalculationHistory toEntity() {
     return CalculationHistory(
-      id: id ?? '',
+      id: id?.toString() ?? '',
       calculatorId: calculatorId,
       calculatorName: calculatorName,
       inputs: Map<String, dynamic>.from(inputs),

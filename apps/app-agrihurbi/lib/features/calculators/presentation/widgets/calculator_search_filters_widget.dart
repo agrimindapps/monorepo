@@ -205,7 +205,7 @@ class _CalculatorSearchFiltersWidgetState extends State<CalculatorSearchFiltersW
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<search_service.CalculatorSortOrder>(
-          value: widget.sortOrder,
+          initialValue: widget.sortOrder,
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),

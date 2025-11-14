@@ -8,10 +8,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../repository/database.dart';
 import 'controllers/agua_controller.dart';
 import 'models/beber_agua_model.dart';
-import 'repository/agua_repository.dart';
 
 Future<bool?> beberAguaCadastro(
-    BuildContext context, BeberAgua? beberAgua) async {
+  BuildContext context,
+  BeberAgua? beberAgua,
+) async {
   return showDialog<bool>(
     context: context,
     builder: (context) {
@@ -42,7 +43,7 @@ Future<bool?> beberAguaCadastro(
                 ],
               ),
             ),
-            const Divider()
+            const Divider(),
           ],
         ),
         content: SizedBox(
@@ -67,12 +68,12 @@ class BeberAguaFormWidget extends ConsumerStatefulWidget {
 class _BeberAguaFormWidgetState extends ConsumerState<BeberAguaFormWidget> {
   final _formKey = GlobalKey<FormState>();
   late BeberAgua _registro;
-  final AguaRepository _repository = AguaRepository();
 
   @override
   void initState() {
     super.initState();
-    _registro = widget.registro ??
+    _registro =
+        widget.registro ??
         BeberAgua(
           id: DatabaseRepository.generateIdReg(),
           createdAt: DateTime.now(),
@@ -132,8 +133,9 @@ class _BeberAguaFormWidgetState extends ConsumerState<BeberAguaFormWidget> {
             Text('Parabéns!'),
           ],
         ),
-        content:
-            const Text('Você atingiu sua meta diária de água! Continue assim!'),
+        content: const Text(
+          'Você atingiu sua meta diária de água! Continue assim!',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -228,19 +230,16 @@ class _BeberAguaFormWidgetState extends ConsumerState<BeberAguaFormWidget> {
           _formKey.currentState?.save();
         });
       },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blue[100],
-      ),
+      style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[100]),
       child: Text(label),
     );
   }
 
   Widget _buildDataField(BuildContext context) {
     return TextFormField(
-      initialValue: DateTime.fromMillisecondsSinceEpoch(_registro.dataRegistro)
-          .toLocal()
-          .toString()
-          .split(' ')[0],
+      initialValue: DateTime.fromMillisecondsSinceEpoch(
+        _registro.dataRegistro,
+      ).toLocal().toString().split(' ')[0],
       decoration: const InputDecoration(labelText: 'Data'),
       readOnly: true,
       onTap: () => _selectDate(context),
@@ -248,15 +247,13 @@ class _BeberAguaFormWidgetState extends ConsumerState<BeberAguaFormWidget> {
   }
 
   Widget _buildSaveButton() {
-    return ElevatedButton(
-      onPressed: _saveForm,
-      child: const Text('Salvar'),
-    );
+    return ElevatedButton(onPressed: _saveForm, child: const Text('Salvar'));
   }
 
   Future<Widget> _buildProgressPreview() async {
-    final todayProgress = await _repository.getTodayProgress();
-    final dailyGoal = await _repository.getDailyGoal();
+    final repository = ref.watch(aguaRepositoryProvider);
+    final todayProgress = await repository.getTodayProgress();
+    final dailyGoal = await repository.getDailyGoal();
 
     return Card(
       child: Padding(
@@ -264,7 +261,8 @@ class _BeberAguaFormWidgetState extends ConsumerState<BeberAguaFormWidget> {
         child: Column(
           children: [
             Text(
-                'Progresso Hoje: ${todayProgress.toInt()}ml / ${dailyGoal.toInt()}ml'),
+              'Progresso Hoje: ${todayProgress.toInt()}ml / ${dailyGoal.toInt()}ml',
+            ),
             LinearProgressIndicator(
               value: todayProgress / dailyGoal,
               backgroundColor: Colors.blue[100],

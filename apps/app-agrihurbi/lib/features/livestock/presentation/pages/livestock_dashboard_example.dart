@@ -143,7 +143,7 @@ class _LivestockDashboardExampleState
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     decoration: const InputDecoration(labelText: 'Raça'),
-                    value: coordinator.filtersProvider.selectedBreed,
+                    initialValue: coordinator.filtersProvider.selectedBreed,
                     items:
                         coordinator.filtersProvider.availableBreeds
                             .map(
@@ -160,7 +160,7 @@ class _LivestockDashboardExampleState
                 Expanded(
                   child: DropdownButtonFormField<BovineAptitude>(
                     decoration: const InputDecoration(labelText: 'Aptidão'),
-                    value: coordinator.filtersProvider.selectedAptitude,
+                    initialValue: coordinator.filtersProvider.selectedAptitude,
                     items:
                         coordinator.filtersProvider.availableAptitudes
                             .map(

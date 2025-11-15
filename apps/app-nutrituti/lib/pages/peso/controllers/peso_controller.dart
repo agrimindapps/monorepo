@@ -58,7 +58,7 @@ class PesoState {
 PesoRepository pesoRepository(PesoRepositoryRef ref) {
   return PesoRepository(
     FirestoreService(FirebaseFirestore.instance),
-    GetIt.I<NutitutiDatabase>(),
+    GetIt.I<NutritutiDatabase>(),
   );
 }
 

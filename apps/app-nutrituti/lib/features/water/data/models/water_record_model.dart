@@ -62,8 +62,8 @@ class WaterRecordModel extends WaterRecord {
     );
   }
 
-  /// Deserialize from Hive map (for manual operations)
-  factory WaterRecordModel.fromHiveMap(Map<dynamic, dynamic> map) {
+  /// Deserialize from map (for manual operations)
+  factory WaterRecordModel.fromMap(Map<dynamic, dynamic> map) {
     return WaterRecordModel(
       id: map['id'] as String,
       amount: (map['amount'] as num).toInt(),

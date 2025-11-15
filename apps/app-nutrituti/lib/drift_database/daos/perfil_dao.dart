@@ -5,12 +5,15 @@ import '../tables/perfis_table.dart';
 part 'perfil_dao.g.dart';
 
 @DriftAccessor(tables: [Perfis])
-class PerfilDao extends DatabaseAccessor<NutitutiDatabase> with _$PerfilDaoMixin {
-  PerfilDao(NutitutiDatabase db) : super(db);
+class PerfilDao extends DatabaseAccessor<NutritutiDatabase>
+    with _$PerfilDaoMixin {
+  PerfilDao(NutritutiDatabase db) : super(db);
 
   /// Get perfil by ID
   Future<Perfil?> getPerfilById(String id) {
-    return (select(perfis)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+    return (select(
+      perfis,
+    )..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
   }
 
   /// Get first perfil (single user app)
@@ -30,8 +33,9 @@ class PerfilDao extends DatabaseAccessor<NutitutiDatabase> with _$PerfilDaoMixin
 
   /// Update perfil
   Future<int> updatePerfil(String id, PerfisCompanion perfil) {
-    return (update(perfis)..where((tbl) => tbl.id.equals(id)))
-        .write(perfil.copyWith(updatedAt: Value(DateTime.now())));
+    return (update(perfis)..where((tbl) => tbl.id.equals(id))).write(
+      perfil.copyWith(updatedAt: Value(DateTime.now())),
+    );
   }
 
   /// Delete perfil

@@ -9,14 +9,13 @@ import 'package:drift/drift.dart' as drift;
 import '../../../../core/services/firebase_firestore_service.dart';
 import '../../../../drift_database/nutrituti_database.dart';
 import '../../../../drift_database/daos/peso_dao.dart';
-import '../../../../drift_database/tables/pesos_table.dart';
 import '../models/peso_model.dart';
 
 @injectable
 class PesoRepository {
   static const String collectionName = 'box_peso';
   final FirestoreService _firestore;
-  final NutitutiDatabase _database;
+  final NutritutiDatabase _database;
 
   // Observable state
   final ValueNotifier<List<PesoModel>> pesos = ValueNotifier([]);
@@ -51,10 +50,7 @@ class PesoRepository {
   Future<void> add(PesoModel registro) async {
     try {
       await _dao.createPeso(_toCompanion(registro));
-      await _firestore.createRecord(
-        collectionName,
-        registro.toMap(),
-      );
+      await _firestore.createRecord(collectionName, registro.toMap());
       await getAll(); // Update observable list
     } catch (e) {
       debugPrint('Error adding Peso: $e');
@@ -118,12 +114,12 @@ class PesoRepository {
       peso: drift.Value(model.peso),
       fkIdPerfil: drift.Value(model.fkIdPerfil),
       isDeleted: drift.Value(model.isDeleted),
-      createdAt: model.createdAt != null 
-        ? drift.Value(model.createdAt!) 
-        : const drift.Value.absent(),
-      updatedAt: model.updatedAt != null 
-        ? drift.Value(model.updatedAt!) 
-        : drift.Value(DateTime.now()),
+      createdAt: model.createdAt != null
+          ? drift.Value(model.createdAt!)
+          : const drift.Value.absent(),
+      updatedAt: model.updatedAt != null
+          ? drift.Value(model.updatedAt!)
+          : drift.Value(DateTime.now()),
     );
   }
 }

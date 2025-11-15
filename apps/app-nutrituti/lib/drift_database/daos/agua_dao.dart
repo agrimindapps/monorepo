@@ -5,35 +5,39 @@ import '../tables/agua_registros_table.dart';
 part 'agua_dao.g.dart';
 
 @DriftAccessor(tables: [AguaRegistros])
-class AguaDao extends DatabaseAccessor<NutitutiDatabase> with _$AguaDaoMixin {
-  AguaDao(NutitutiDatabase db) : super(db);
+class AguaDao extends DatabaseAccessor<NutritutiDatabase> with _$AguaDaoMixin {
+  AguaDao(NutritutiDatabase db) : super(db);
 
   /// Get all registros for a perfil
   Future<List<AguaRegistro>> getAllRegistros(String perfilId) {
     return (select(aguaRegistros)
-      ..where((tbl) => tbl.fkIdPerfil.equals(perfilId))
-      ..orderBy([(t) => OrderingTerm.desc(t.dataRegistro)]))
-      .get();
+          ..where((tbl) => tbl.fkIdPerfil.equals(perfilId))
+          ..orderBy([(t) => OrderingTerm.desc(t.dataRegistro)]))
+        .get();
   }
 
   /// Get registros by date
   Future<List<AguaRegistro>> getRegistrosByDate(String perfilId, int date) {
-    return (select(aguaRegistros)
-      ..where((tbl) => tbl.fkIdPerfil.equals(perfilId) & tbl.dataRegistro.equals(date)))
-      .get();
+    return (select(aguaRegistros)..where(
+          (tbl) =>
+              tbl.fkIdPerfil.equals(perfilId) & tbl.dataRegistro.equals(date),
+        ))
+        .get();
   }
 
   /// Get registro by ID
   Future<AguaRegistro?> getRegistroById(String id) {
-    return (select(aguaRegistros)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+    return (select(
+      aguaRegistros,
+    )..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
   }
 
   /// Watch all registros
   Stream<List<AguaRegistro>> watchAllRegistros(String perfilId) {
     return (select(aguaRegistros)
-      ..where((tbl) => tbl.fkIdPerfil.equals(perfilId))
-      ..orderBy([(t) => OrderingTerm.desc(t.dataRegistro)]))
-      .watch();
+          ..where((tbl) => tbl.fkIdPerfil.equals(perfilId))
+          ..orderBy([(t) => OrderingTerm.desc(t.dataRegistro)]))
+        .watch();
   }
 
   /// Create registro
@@ -43,8 +47,9 @@ class AguaDao extends DatabaseAccessor<NutitutiDatabase> with _$AguaDaoMixin {
 
   /// Update registro
   Future<int> updateRegistro(String id, AguaRegistrosCompanion registro) {
-    return (update(aguaRegistros)..where((tbl) => tbl.id.equals(id)))
-        .write(registro.copyWith(updatedAt: Value(DateTime.now())));
+    return (update(aguaRegistros)..where((tbl) => tbl.id.equals(id))).write(
+      registro.copyWith(updatedAt: Value(DateTime.now())),
+    );
   }
 
   /// Delete registro

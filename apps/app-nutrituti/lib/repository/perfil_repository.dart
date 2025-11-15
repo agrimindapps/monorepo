@@ -9,11 +9,10 @@ import 'package:drift/drift.dart' as drift;
 import '../database/perfil_model.dart';
 import '../drift_database/nutrituti_database.dart';
 import '../drift_database/daos/perfil_dao.dart';
-import '../drift_database/tables/perfis_table.dart';
 
 @injectable
 class PerfilRepository {
-  final NutitutiDatabase _database;
+  final NutritutiDatabase _database;
 
   PerfilRepository(this._database);
 
@@ -86,12 +85,12 @@ class PerfilRepository {
       peso: drift.Value(model.peso),
       genero: drift.Value(model.genero),
       imagePath: drift.Value(model.imagePath),
-      createdAt: model.createdAt != null 
-        ? drift.Value(model.createdAt!) 
-        : const drift.Value.absent(),
-      updatedAt: model.updatedAt != null 
-        ? drift.Value(model.updatedAt!) 
-        : drift.Value(DateTime.now()),
+      createdAt: model.createdAt != null
+          ? drift.Value(model.createdAt!)
+          : const drift.Value.absent(),
+      updatedAt: model.updatedAt != null
+          ? drift.Value(model.updatedAt!)
+          : drift.Value(DateTime.now()),
     );
   }
 }

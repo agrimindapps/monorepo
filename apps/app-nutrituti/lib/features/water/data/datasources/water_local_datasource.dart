@@ -9,7 +9,7 @@ import '../models/water_achievement_model.dart';
 import '../models/water_record_model.dart';
 import '../../domain/entities/water_achievement.dart' as domain;
 
-/// Local data source for water intake data using Hive and SharedPreferences
+/// Local data source for water intake data
 abstract class WaterLocalDataSource {
   /// Add a new water record
   Future<WaterRecordModel> addRecord(WaterRecordModel record);

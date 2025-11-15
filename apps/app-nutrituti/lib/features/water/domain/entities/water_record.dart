@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 /// Pure Dart entity for water intake records
-/// No dependencies on infrastructure (Hive, JSON, etc.)
+/// No dependencies on infrastructure
 class WaterRecord extends Equatable {
   final String id;
   final int amount; // ml

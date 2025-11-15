@@ -88,8 +88,8 @@ class WaterAchievementModel extends WaterAchievement {
     );
   }
 
-  /// Deserialize from Hive map (for manual operations)
-  factory WaterAchievementModel.fromHiveMap(Map<dynamic, dynamic> map) {
+  /// Deserialize from map (for manual operations)
+  factory WaterAchievementModel.fromMap(Map<dynamic, dynamic> map) {
     return WaterAchievementModel(
       id: map['id'] as String,
       type: map['type'] as AchievementType,

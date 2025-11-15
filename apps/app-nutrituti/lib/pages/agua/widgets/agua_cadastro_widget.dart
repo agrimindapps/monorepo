@@ -9,11 +9,7 @@ class AguaCadastroWidget extends StatefulWidget {
   final BeberAgua? registro;
   final Function(BeberAgua) onSave;
 
-  const AguaCadastroWidget({
-    super.key,
-    this.registro,
-    required this.onSave,
-  });
+  const AguaCadastroWidget({super.key, this.registro, required this.onSave});
 
   @override
   State<AguaCadastroWidget> createState() => _AguaCadastroWidgetState();
@@ -29,14 +25,15 @@ class _AguaCadastroWidgetState extends State<AguaCadastroWidget> {
     300.0,
     500.0,
     750.0,
-    1000.0
+    1000.0,
   ];
   double _selectedQuantidade = 0.0;
 
   @override
   void initState() {
     super.initState();
-    _registro = widget.registro ??
+    _registro =
+        widget.registro ??
         BeberAgua(
           id: DatabaseRepository.generateIdReg(),
           createdAt: DateTime.now(),
@@ -54,10 +51,12 @@ class _AguaCadastroWidgetState extends State<AguaCadastroWidget> {
       _formKey.currentState!.save();
 
       // Atualizar o valor da quantidade
-      _registro.quantidade = _selectedQuantidade;
+      final registroAtualizado = _registro.copyWith(
+        quantidade: _selectedQuantidade,
+      );
 
       // Chamar a função de salvamento
-      widget.onSave(_registro);
+      widget.onSave(registroAtualizado);
 
       // Fechar o diálogo
       Navigator.pop(context);
@@ -78,8 +77,10 @@ class _AguaCadastroWidgetState extends State<AguaCadastroWidget> {
                 widget.registro == null
                     ? 'Novo Registro de Água'
                     : 'Editar Registro de Água',
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -122,10 +123,7 @@ class _AguaCadastroWidgetState extends State<AguaCadastroWidget> {
                 }).toList(),
               ),
               const Spacer(),
-              ElevatedButton(
-                onPressed: _saveForm,
-                child: const Text('Salvar'),
-              ),
+              ElevatedButton(onPressed: _saveForm, child: const Text('Salvar')),
             ],
           ),
         ),

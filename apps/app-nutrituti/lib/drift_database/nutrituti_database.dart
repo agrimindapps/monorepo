@@ -1,6 +1,10 @@
 import 'package:core/core.dart';
 import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
 import 'package:injectable/injectable.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 // Tables
 import 'tables/perfis_table.dart';
@@ -33,15 +37,14 @@ part 'nutrituti_database.g.dart';
   ],
   daos: [PerfilDao, PesoDao, AguaDao, WaterDao, ExercicioDao, ComentarioDao],
 )
-class NutitutiDatabase extends _$NutitutiDatabase with BaseDriftDatabase {
-  NutitutiDatabase(QueryExecutor e) : super(e);
+@lazySingleton
+class NutritutiDatabase extends _$NutritutiDatabase {
+  NutritutiDatabase(super.e);
 
   /// Factory constructor para Injectable (DI)
   @factoryMethod
-  factory NutitutiDatabase.injectable() {
-    print('🏭 Creating NutitutiDatabase via injectable factory');
-    final db = NutitutiDatabase.production();
-    print('✅ NutitutiDatabase created successfully: ${db.hashCode}');
+  factory NutritutiDatabase.injectable() {
+    final db = NutritutiDatabase.production();
     return db;
   }
 
@@ -50,29 +53,33 @@ class NutitutiDatabase extends _$NutitutiDatabase with BaseDriftDatabase {
   int get schemaVersion => 1;
 
   /// Factory constructor para ambiente de produção
-  factory NutitutiDatabase.production() {
-    return NutitutiDatabase(
-      DriftDatabaseConfig.createExecutor(
-        databaseName: 'nutrituti_drift.db',
-        logStatements: false,
-      ),
+  factory NutritutiDatabase.production() {
+    return NutritutiDatabase(
+      LazyDatabase(() async {
+        final dbFolder = await getApplicationDocumentsDirectory();
+        final file = File(p.join(dbFolder.path, 'nutrituti_drift.db'));
+        return NativeDatabase(file);
+      }),
     );
   }
 
   /// Factory constructor para ambiente de desenvolvimento
-  factory NutitutiDatabase.development() {
-    return NutitutiDatabase(
-      DriftDatabaseConfig.createExecutor(
-        databaseName: 'nutrituti_drift_dev.db',
-        logStatements: true,
-      ),
+  factory NutritutiDatabase.development() {
+    return NutritutiDatabase(
+      LazyDatabase(() async {
+        final dbFolder = await getApplicationDocumentsDirectory();
+        final file = File(p.join(dbFolder.path, 'nutrituti_drift_dev.db'));
+        return NativeDatabase(file, logStatements: true);
+      }),
     );
   }
 
   /// Factory constructor para testes
-  factory NutitutiDatabase.test() {
-    return NutitutiDatabase(
-      DriftDatabaseConfig.createInMemoryExecutor(logStatements: true),
+  factory NutritutiDatabase.test() {
+    return NutritutiDatabase(
+      LazyDatabase(() async {
+        return NativeDatabase.memory();
+      }),
     );
   }
 }

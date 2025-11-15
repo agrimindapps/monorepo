@@ -157,7 +157,9 @@ class _BeberAguaFormWidgetState extends ConsumerState<BeberAguaFormWidget> {
   }
 
   void _onSavedQuantidade(String? value) {
-    _registro.quantidade = double.parse(value!);
+    setState(() {
+      _registro = _registro.copyWith(quantidade: double.parse(value!));
+    });
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -170,7 +172,9 @@ class _BeberAguaFormWidgetState extends ConsumerState<BeberAguaFormWidget> {
     if (pickedDate != null &&
         pickedDate.millisecondsSinceEpoch != _registro.dataRegistro) {
       setState(() {
-        _registro.dataRegistro = pickedDate.millisecondsSinceEpoch;
+        _registro = _registro.copyWith(
+          dataRegistro: pickedDate.millisecondsSinceEpoch,
+        );
       });
     }
   }
@@ -226,7 +230,7 @@ class _BeberAguaFormWidgetState extends ConsumerState<BeberAguaFormWidget> {
     return ElevatedButton(
       onPressed: () {
         setState(() {
-          _registro.quantidade = amount;
+          _registro = _registro.copyWith(quantidade: amount);
           _formKey.currentState?.save();
         });
       },
@@ -248,29 +252,5 @@ class _BeberAguaFormWidgetState extends ConsumerState<BeberAguaFormWidget> {
 
   Widget _buildSaveButton() {
     return ElevatedButton(onPressed: _saveForm, child: const Text('Salvar'));
-  }
-
-  Future<Widget> _buildProgressPreview() async {
-    final repository = ref.watch(aguaRepositoryProvider);
-    final todayProgress = await repository.getTodayProgress();
-    final dailyGoal = await repository.getDailyGoal();
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Text(
-              'Progresso Hoje: ${todayProgress.toInt()}ml / ${dailyGoal.toInt()}ml',
-            ),
-            LinearProgressIndicator(
-              value: todayProgress / dailyGoal,
-              backgroundColor: Colors.blue[100],
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

@@ -1,18 +1,28 @@
+// Package imports:
+import 'package:uuid/uuid.dart';
+
 // Project imports:
+import '../../../drift_database/nutrituti_database.dart';
+import '../../../core/di/injection.dart';
 import '../models/exercicio_model.dart';
 import '../repository/exercicio_repository.dart';
+import 'exercicio_drift_adapter.dart';
 import 'exercicio_exception_service.dart';
-import 'exercicio_persistence_service.dart';
 import 'exercicio_validation_service.dart';
 
 /// Service responsável pela lógica de negócio de exercícios
 class ExercicioBusinessService {
   final ExercicioRepository _repository = ExercicioRepository();
-  final ExercicioPersistenceService _persistenceService = ExercicioPersistenceService();
+  late final NutritutiDatabase _database;
+  final _uuid = const Uuid();
 
-  /// Inicializa o serviço
+  ExercicioBusinessService() {
+    _database = getIt<NutritutiDatabase>();
+  }
+
+  /// Inicializa o serviço (não necessário mais com Drift)
   Future<void> initialize() async {
-    await _persistenceService.initialize();
+    // Drift database já é inicializado pelo DI container
   }
 
   /// Salva um exercício com validações de negócio
@@ -21,12 +31,27 @@ class ExercicioBusinessService {
       // Usar validação centralizada
       if (exercicio.id == null || exercicio.id!.isEmpty) {
         ExercicioValidationService.validateExercicioForCreation(exercicio);
+        
+        // Gerar ID se não existir
+        final novoExercicio = exercicio.copyWith(id: _uuid.v4());
+        
+        // Salvar com Drift
+        await _database.exercicioDao.addExercicio(
+          novoExercicio.toCompanion(),
+        );
+        
+        return novoExercicio;
       } else {
         ExercicioValidationService.validateExercicioForUpdate(exercicio);
+        
+        // Atualizar com Drift (precisa passar ID separadamente)
+        await _database.exercicioDao.updateExercicio(
+          exercicio.id!,
+          exercicio.toUpdateCompanion(),
+        );
+        
+        return exercicio;
       }
-      
-      // Usar persistência híbrida (offline-first)
-      return await _persistenceService.saveExercicio(exercicio);
     } on ExercicioValidationException catch (e) {
       throw Exception('Validação falhou: ${e.message}');
     } catch (e) {
@@ -40,8 +65,8 @@ class ExercicioBusinessService {
       // Usar validação centralizada
       ExercicioValidationService.validateExercicioId(exercicioId);
       
-      // Usar persistência híbrida (offline-first)
-      await _persistenceService.deleteExercicio(exercicioId);
+      // Deletar com Drift
+      await _database.exercicioDao.deleteExercicio(exercicioId);
     } on ExercicioValidationException catch (e) {
       throw Exception('Validação falhou: ${e.message}');
     } catch (e) {
@@ -52,8 +77,9 @@ class ExercicioBusinessService {
   /// Carrega todos os exercícios
   Future<List<ExercicioModel>> carregarExercicios() async {
     try {
-      // Usar persistência híbrida (offline-first)
-      return await _persistenceService.loadExercicios();
+      // Carregar com Drift e converter para model
+      final exercicios = await _database.exercicioDao.getAllExercicios();
+      return exercicios.map((e) => e.toModel()).toList();
     } catch (e) {
       throw Exception('Falha ao carregar exercícios: $e');
     }

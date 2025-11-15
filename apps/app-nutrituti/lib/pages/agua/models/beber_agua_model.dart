@@ -1,53 +1,26 @@
-// Package imports:
-import 'package:hive/hive.dart';
-
 // Project imports:
 import '../../../../../core/models/base_model.dart';
 
-part 'beber_agua_model.g.dart';
-
-@HiveType(typeId: 51)
 class BeberAgua extends BaseModel {
-  @HiveField(0)
-  @override
-  final String? id;
-
-  @HiveField(1)
-  @override
-  final DateTime? createdAt;
-
-  @HiveField(2)
-  @override
-  final DateTime? updatedAt;
-
-  @HiveField(7)
-  int dataRegistro;
-
-  @HiveField(8)
-  double quantidade;
-
-  @HiveField(9)
+  final int dataRegistro;
+  final double quantidade;
   final String fkIdPerfil;
 
   BeberAgua({
-    required this.id,
-    required this.createdAt,
-    required this.updatedAt,
+    required String? id,
+    required DateTime? createdAt,
+    required DateTime? updatedAt,
     required this.dataRegistro,
     required this.quantidade,
     required this.fkIdPerfil,
-  }) : super(
-          id: id,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
-        );
+  }) : super(id: id, createdAt: createdAt, updatedAt: updatedAt);
 
   @override
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
+      'createdAt': createdAt?.millisecondsSinceEpoch,
+      'updatedAt': updatedAt?.millisecondsSinceEpoch,
       'dataRegistro': dataRegistro,
       'quantidade': quantidade,
       'fkIdPerfil': fkIdPerfil,
@@ -56,16 +29,16 @@ class BeberAgua extends BaseModel {
 
   factory BeberAgua.fromMap(Map<String, dynamic> map) {
     return BeberAgua(
-      id: map['id'] as String? ?? '',
+      id: map['id'] as String?,
       createdAt: map['createdAt'] != null
           ? (map['createdAt'] is DateTime
-              ? map['createdAt'] as DateTime
-              : DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int))
+                ? map['createdAt'] as DateTime
+                : DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int))
           : null,
       updatedAt: map['updatedAt'] != null
           ? (map['updatedAt'] is DateTime
-              ? map['updatedAt'] as DateTime
-              : DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int))
+                ? map['updatedAt'] as DateTime
+                : DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int))
           : null,
       dataRegistro: (map['dataRegistro'] as num?)?.toInt() ?? 0,
       quantidade: (map['quantidade'] as num?)?.toDouble() ?? 0.0,
@@ -74,4 +47,25 @@ class BeberAgua extends BaseModel {
   }
 
   Map<String, dynamic> toJson() => toMap();
+
+  factory BeberAgua.fromJson(Map<String, dynamic> json) =>
+      BeberAgua.fromMap(json);
+
+  BeberAgua copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    int? dataRegistro,
+    double? quantidade,
+    String? fkIdPerfil,
+  }) {
+    return BeberAgua(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      dataRegistro: dataRegistro ?? this.dataRegistro,
+      quantidade: quantidade ?? this.quantidade,
+      fkIdPerfil: fkIdPerfil ?? this.fkIdPerfil,
+    );
+  }
 }

@@ -5,15 +5,18 @@ import '../tables/pesos_table.dart';
 part 'peso_dao.g.dart';
 
 @DriftAccessor(tables: [Pesos])
-class PesoDao extends DatabaseAccessor<NutitutiDatabase> with _$PesoDaoMixin {
-  PesoDao(NutitutiDatabase db) : super(db);
+class PesoDao extends DatabaseAccessor<NutritutiDatabase> with _$PesoDaoMixin {
+  PesoDao(NutritutiDatabase db) : super(db);
 
   /// Get all pesos for a perfil (not deleted)
   Future<List<Peso>> getAllPesos(String perfilId) {
     return (select(pesos)
-      ..where((tbl) => tbl.fkIdPerfil.equals(perfilId) & tbl.isDeleted.equals(false))
-      ..orderBy([(t) => OrderingTerm.desc(t.dataRegistro)]))
-      .get();
+          ..where(
+            (tbl) =>
+                tbl.fkIdPerfil.equals(perfilId) & tbl.isDeleted.equals(false),
+          )
+          ..orderBy([(t) => OrderingTerm.desc(t.dataRegistro)]))
+        .get();
   }
 
   /// Get peso by ID
@@ -24,9 +27,12 @@ class PesoDao extends DatabaseAccessor<NutitutiDatabase> with _$PesoDaoMixin {
   /// Watch all pesos
   Stream<List<Peso>> watchAllPesos(String perfilId) {
     return (select(pesos)
-      ..where((tbl) => tbl.fkIdPerfil.equals(perfilId) & tbl.isDeleted.equals(false))
-      ..orderBy([(t) => OrderingTerm.desc(t.dataRegistro)]))
-      .watch();
+          ..where(
+            (tbl) =>
+                tbl.fkIdPerfil.equals(perfilId) & tbl.isDeleted.equals(false),
+          )
+          ..orderBy([(t) => OrderingTerm.desc(t.dataRegistro)]))
+        .watch();
   }
 
   /// Create peso
@@ -36,17 +42,19 @@ class PesoDao extends DatabaseAccessor<NutitutiDatabase> with _$PesoDaoMixin {
 
   /// Update peso
   Future<int> updatePeso(String id, PesosCompanion peso) {
-    return (update(pesos)..where((tbl) => tbl.id.equals(id)))
-        .write(peso.copyWith(updatedAt: Value(DateTime.now())));
+    return (update(pesos)..where((tbl) => tbl.id.equals(id))).write(
+      peso.copyWith(updatedAt: Value(DateTime.now())),
+    );
   }
 
   /// Soft delete peso
   Future<int> softDeletePeso(String id) {
-    return (update(pesos)..where((tbl) => tbl.id.equals(id)))
-        .write(PesosCompanion(
-          isDeleted: const Value(true),
-          updatedAt: Value(DateTime.now()),
-        ));
+    return (update(pesos)..where((tbl) => tbl.id.equals(id))).write(
+      PesosCompanion(
+        isDeleted: const Value(true),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
   }
 
   /// Hard delete peso
@@ -55,15 +63,21 @@ class PesoDao extends DatabaseAccessor<NutitutiDatabase> with _$PesoDaoMixin {
   }
 
   /// Get pesos by date range
-  Future<List<Peso>> getPesosByDateRange(String perfilId, int startDate, int endDate) {
+  Future<List<Peso>> getPesosByDateRange(
+    String perfilId,
+    int startDate,
+    int endDate,
+  ) {
     return (select(pesos)
-      ..where((tbl) => 
-        tbl.fkIdPerfil.equals(perfilId) & 
-        tbl.isDeleted.equals(false) &
-        tbl.dataRegistro.isBiggerOrEqualValue(startDate) &
-        tbl.dataRegistro.isSmallerOrEqualValue(endDate))
-      ..orderBy([(t) => OrderingTerm.asc(t.dataRegistro)]))
-      .get();
+          ..where(
+            (tbl) =>
+                tbl.fkIdPerfil.equals(perfilId) &
+                tbl.isDeleted.equals(false) &
+                tbl.dataRegistro.isBiggerOrEqualValue(startDate) &
+                tbl.dataRegistro.isSmallerOrEqualValue(endDate),
+          )
+          ..orderBy([(t) => OrderingTerm.asc(t.dataRegistro)]))
+        .get();
   }
 
   /// Delete all pesos

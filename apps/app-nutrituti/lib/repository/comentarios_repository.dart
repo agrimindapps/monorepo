@@ -2,13 +2,11 @@ import 'package:injectable/injectable.dart';
 
 import '../drift_database/nutrituti_database.dart';
 import '../drift_database/daos/comentario_dao.dart';
-import '../drift_database/tables/comentarios_table.dart';
-import 'package:drift/drift.dart' as drift;
 
 @injectable
 class ComentariosRepository {
-  final NutitutiDatabase _database;
-  
+  final NutritutiDatabase _database;
+
   ComentariosRepository(this._database);
 
   ComentarioDao get _dao => _database.comentarioDao;
@@ -29,7 +27,10 @@ class ComentariosRepository {
     return await _dao.getComentariosByFerramenta(ferramenta);
   }
 
-  Future<void> updateComentario(String id, ComentariosCompanion comentario) async {
+  Future<void> updateComentario(
+    String id,
+    ComentariosCompanion comentario,
+  ) async {
     await _dao.updateComentario(id, comentario);
   }
 

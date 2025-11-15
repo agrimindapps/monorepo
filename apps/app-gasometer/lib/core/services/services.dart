@@ -17,4 +17,4 @@
 /// );
 /// ```
 
-export 'financial_logging_service.dart';
+export '../../features/financial/domain/services/financial_logging_service.dart';

@@ -1,46 +1,21 @@
 import 'package:core/core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/list_item_entity.dart' as entities;
-
-part 'list_item_model.g.dart';
 
 /// Data model for ListItem
 /// Provides serialization for Hive and Firestore
-@HiveType(typeId: 2)
 class ListItemModel {
-  @HiveField(0)
   final String id;
-
-  @HiveField(1)
   final String listId;
-
-  @HiveField(2)
   final String itemMasterId;
-
-  @HiveField(3)
   final String quantity;
-
-  @HiveField(4)
   final int priorityIndex;
-
-  @HiveField(5)
   final bool isCompleted;
-
-  @HiveField(6)
   final DateTime? completedAt;
-
-  @HiveField(7)
   final String? notes;
-
-  @HiveField(8)
   final int order;
-
-  @HiveField(9)
   final DateTime createdAt;
-
-  @HiveField(10)
   final DateTime updatedAt;
-
-  @HiveField(11)
   final String? addedBy;
 
   const ListItemModel({
@@ -87,8 +62,9 @@ class ListItemModel {
       'quantity': quantity,
       'priority': priorityIndex,
       'isCompleted': isCompleted,
-      'completedAt':
-          completedAt != null ? Timestamp.fromDate(completedAt!) : null,
+      'completedAt': completedAt != null
+          ? Timestamp.fromDate(completedAt!)
+          : null,
       'notes': notes,
       'order': order,
       'createdAt': Timestamp.fromDate(createdAt),
@@ -129,19 +105,19 @@ class ListItemModel {
 
   /// Convert to entity
   entities.ListItemEntity toEntity() => entities.ListItemEntity(
-        id: id,
-        listId: listId,
-        itemMasterId: itemMasterId,
-        quantity: quantity,
-        priority: _priorityFromIndex(priorityIndex),
-        isCompleted: isCompleted,
-        completedAt: completedAt,
-        notes: notes,
-        order: order,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-        addedBy: addedBy,
-      );
+    id: id,
+    listId: listId,
+    itemMasterId: itemMasterId,
+    quantity: quantity,
+    priority: _priorityFromIndex(priorityIndex),
+    isCompleted: isCompleted,
+    completedAt: completedAt,
+    notes: notes,
+    order: order,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    addedBy: addedBy,
+  );
 
   /// Convert priority index to enum
   entities.Priority _priorityFromIndex(int index) {

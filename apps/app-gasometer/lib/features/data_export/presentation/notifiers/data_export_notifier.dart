@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/services/gasometer_analytics_service.dart';
+import '../../../../core/services/analytics/gasometer_analytics_service.dart';
 import '../../data/repositories/data_export_repository_impl.dart';
 import '../../domain/entities/export_progress.dart';
 import '../../domain/entities/export_request.dart';

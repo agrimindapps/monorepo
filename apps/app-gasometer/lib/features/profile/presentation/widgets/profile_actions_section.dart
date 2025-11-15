@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/services/data_sanitization_service.dart';
+import '../../../../features/data_management/domain/services/data_sanitization_service.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../auth/presentation/notifiers/notifiers.dart';
 import 'profile_dialogs.dart';

@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container_modular.dart';
-import '../../../../core/services/gasometer_analytics_service.dart';
+import '../../../../core/services/analytics/gasometer_analytics_service.dart';
 import '../../data/datasources/auth_local_data_source.dart';
 import '../../domain/entities/user_entity.dart' as gasometer_auth;
 import '../../domain/usecases/update_profile.dart';

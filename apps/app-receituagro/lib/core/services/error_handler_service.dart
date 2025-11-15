@@ -106,7 +106,7 @@ class ErrorHandlerService {
         suggestions: ['Comentários antigos não podem ser removidos'],
       );
     }
-    if (error.toString().contains('SocketException') || 
+    if (error.toString().contains('SocketException') ||
         error.toString().contains('HttpException') ||
         error.toString().contains('TimeoutException')) {
       return ErrorInfo(
@@ -117,8 +117,8 @@ class ErrorHandlerService {
         suggestions: ['Verifique sua conexão', 'Tente novamente'],
       );
     }
-    || 
-        error.toString().contains('DatabaseException')) {
+
+    if (error.toString().contains('DatabaseException')) {
       return ErrorInfo(
         type: ErrorType.storage,
         userMessage: 'Erro ao salvar dados',
@@ -153,7 +153,7 @@ class ErrorHandlerService {
     ErrorInfo errorInfo,
   ) {
     final logMessage = 'ERROR in $context: ${errorInfo.technicalMessage}';
-    
+
     if (kDebugMode) {
       debugPrint(logMessage);
       if (metadata != null && metadata.isNotEmpty) {
@@ -269,14 +269,8 @@ abstract class AppException implements Exception {
 
 /// Validation exception
 class ValidationException extends AppException {
-  const ValidationException(
-    String message, {
-    super.suggestions,
-  }) : super(
-          type: ErrorType.validation,
-          userMessage: message,
-          canRetry: true,
-        );
+  const ValidationException(String message, {super.suggestions})
+    : super(type: ErrorType.validation, userMessage: message, canRetry: true);
 }
 
 /// Business rule exception
@@ -285,10 +279,7 @@ class BusinessException extends AppException {
     String message, {
     super.canRetry = false,
     super.suggestions,
-  }) : super(
-          type: ErrorType.business,
-          userMessage: message,
-        );
+  }) : super(type: ErrorType.business, userMessage: message);
 }
 
 /// Network exception
@@ -298,11 +289,12 @@ class NetworkException extends AppException {
     super.technicalMessage,
     List<String>? suggestions,
   }) : super(
-          type: ErrorType.network,
-          userMessage: message,
-          canRetry: true,
-          suggestions: suggestions ?? const ['Verifique sua conexão', 'Tente novamente'],
-        );
+         type: ErrorType.network,
+         userMessage: message,
+         canRetry: true,
+         suggestions:
+             suggestions ?? const ['Verifique sua conexão', 'Tente novamente'],
+       );
 }
 
 /// Storage exception
@@ -312,22 +304,24 @@ class StorageException extends AppException {
     super.technicalMessage,
     List<String>? suggestions,
   }) : super(
-          type: ErrorType.storage,
-          userMessage: message,
-          canRetry: true,
-          suggestions: suggestions ?? const ['Tente novamente', 'Reinicie o app se persistir'],
-        );
+         type: ErrorType.storage,
+         userMessage: message,
+         canRetry: true,
+         suggestions:
+             suggestions ??
+             const ['Tente novamente', 'Reinicie o app se persistir'],
+       );
 }
 
 /// Not found exception
 class NotFoundException extends AppException {
-  NotFoundException(
-    String message, {
-    List<String>? suggestions,
-  }) : super(
-          type: ErrorType.notFound,
-          userMessage: message,
-          canRetry: true,
-          suggestions: suggestions ?? const ['Recarregue a lista', 'Verifique se ainda existe'],
-        );
+  NotFoundException(String message, {List<String>? suggestions})
+    : super(
+        type: ErrorType.notFound,
+        userMessage: message,
+        canRetry: true,
+        suggestions:
+            suggestions ??
+            const ['Recarregue a lista', 'Verifique se ainda existe'],
+      );
 }

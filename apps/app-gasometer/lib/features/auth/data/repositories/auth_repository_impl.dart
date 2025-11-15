@@ -4,7 +4,7 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/error/exceptions.dart' as local_exceptions;
-import '../../../../core/services/data_cleaner_service.dart';
+import '../../../../features/data_management/domain/services/data_cleaner_service.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_local_data_source.dart';
 import '../datasources/auth_remote_data_source.dart';

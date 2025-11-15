@@ -1,7 +1,6 @@
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection.dart' as di;
 import '../../domain/create_task.dart';
 import '../../domain/delete_task.dart';
 import '../../domain/get_subtasks.dart';
@@ -10,60 +9,16 @@ import '../../domain/reorder_tasks.dart';
 import '../../domain/task_entity.dart';
 import '../../domain/update_task.dart';
 import '../../domain/watch_tasks.dart';
+import '../../providers/task_providers.dart';
 
 part 'task_notifier.g.dart';
 
 @riverpod
-CreateTask createTaskUseCase(Ref ref) {
-  return di.getIt<CreateTask>();
-}
-
-@riverpod
-DeleteTask deleteTaskUseCase(Ref ref) {
-  return di.getIt<DeleteTask>();
-}
-
-@riverpod
-GetTasks getTasksUseCase(Ref ref) {
-  return di.getIt<GetTasks>();
-}
-
-@riverpod
-ReorderTasks reorderTasksUseCase(Ref ref) {
-  return di.getIt<ReorderTasks>();
-}
-
-@riverpod
-UpdateTask updateTaskUseCase(Ref ref) {
-  return di.getIt<UpdateTask>();
-}
-
-@riverpod
-WatchTasks watchTasksUseCase(Ref ref) {
-  return di.getIt<WatchTasks>();
-}
-
-@riverpod
-GetSubtasks getSubtasksUseCase(Ref ref) {
-  return di.getIt<GetSubtasks>();
-}
-
-@riverpod
 class TaskNotifier extends _$TaskNotifier {
-  late final CreateTask _createTask;
-  late final DeleteTask _deleteTask;
-  late final GetTasks _getTasks;
-  late final ReorderTasks _reorderTasks;
-  late final UpdateTask _updateTask;
-
   @override
   Future<List<TaskEntity>> build() async {
-    _createTask = ref.read(createTaskUseCaseProvider);
-    _deleteTask = ref.read(deleteTaskUseCaseProvider);
-    _getTasks = ref.read(getTasksUseCaseProvider);
-    _reorderTasks = ref.read(reorderTasksUseCaseProvider);
-    _updateTask = ref.read(updateTaskUseCaseProvider);
-    final result = await _getTasks(const GetTasksParams());
+    final getTasks = ref.read(getTasksProvider);
+    final result = await getTasks(const GetTasksParams());
 
     return result.fold(
       (failure) => throw Exception(failure.message),
@@ -81,7 +36,8 @@ class TaskNotifier extends _$TaskNotifier {
     state = const AsyncValue<List<TaskEntity>>.loading();
 
     state = await AsyncValue.guard(() async {
-      final result = await _getTasks(
+      final getTasks = ref.read(getTasksProvider);
+      final result = await getTasks(
         GetTasksParams(
           listId: listId,
           userId: userId,
@@ -102,7 +58,8 @@ class TaskNotifier extends _$TaskNotifier {
     state = const AsyncValue<List<TaskEntity>>.loading();
 
     state = await AsyncValue.guard(() async {
-      final result = await _createTask(CreateTaskParams(task: task));
+      final createTask = ref.read(createTaskProvider);
+      final result = await createTask(CreateTaskParams(task: task));
 
       return result.fold((failure) => throw Exception(failure.message), (
         taskId,
@@ -122,7 +79,8 @@ class TaskNotifier extends _$TaskNotifier {
     state = const AsyncValue<List<TaskEntity>>.loading();
 
     state = await AsyncValue.guard(() async {
-      final result = await _updateTask(UpdateTaskParams(task: task));
+      final updateTask = ref.read(updateTaskProvider);
+      final result = await updateTask(UpdateTaskParams(task: task));
 
       return result.fold((failure) => throw Exception(failure.message), (_) {
         final currentTasks = state.value ?? [];
@@ -137,7 +95,8 @@ class TaskNotifier extends _$TaskNotifier {
     state = const AsyncValue<List<TaskEntity>>.loading();
 
     state = await AsyncValue.guard(() async {
-      final result = await _deleteTask(DeleteTaskParams(taskId: taskId));
+      final deleteTask = ref.read(deleteTaskProvider);
+      final result = await deleteTask(DeleteTaskParams(taskId: taskId));
 
       return result.fold((failure) => throw Exception(failure.message), (_) {
         final currentTasks = state.value ?? [];
@@ -159,7 +118,8 @@ class TaskNotifier extends _$TaskNotifier {
     state = const AsyncValue<List<TaskEntity>>.loading();
 
     state = await AsyncValue.guard(() async {
-      final result = await _reorderTasks(ReorderTasksParams(taskIds: taskIds));
+      final reorderTasks = ref.read(reorderTasksProvider);
+      final result = await reorderTasks(ReorderTasksParams(taskIds: taskIds));
 
       return result.fold((failure) => throw Exception(failure.message), (_) {
         final currentTasks = state.value ?? [];
@@ -224,7 +184,7 @@ class TasksStreamParams {
 /// Provider para stream de tasks
 @riverpod
 Stream<List<TaskEntity>> tasksStream(Ref ref, TasksStreamParams params) {
-  final watchTasks = ref.watch(watchTasksUseCaseProvider);
+  final watchTasks = ref.watch(watchTasksProvider);
 
   return watchTasks(
     WatchTasksParams(
@@ -272,7 +232,7 @@ class TaskCreationData {
 /// Provider para criar task com ID automático
 @riverpod
 Future<String> createTaskWithId(Ref ref, TaskCreationData taskData) async {
-  final createTask = ref.watch(createTaskUseCaseProvider);
+  final createTask = ref.watch(createTaskProvider);
 
   final task = TaskEntity(
     id: FirebaseFirestore.instance.collection('_').doc().id,
@@ -344,7 +304,7 @@ Future<List<TaskEntity>> getTasksFuture(
   Ref ref,
   GetTasksRequest request,
 ) async {
-  final getTasks = ref.watch(getTasksUseCaseProvider);
+  final getTasks = ref.watch(getTasksProvider);
 
   final result = await getTasks(
     GetTasksParams(
@@ -365,7 +325,7 @@ Future<List<TaskEntity>> getTasksFuture(
 /// Provider para buscar subtasks de uma tarefa específica
 @riverpod
 Future<List<TaskEntity>> subtasks(Ref ref, String parentTaskId) async {
-  final getSubtasks = ref.watch(getSubtasksUseCaseProvider);
+  final getSubtasks = ref.watch(getSubtasksProvider);
 
   final result = await getSubtasks(
     GetSubtasksParams(parentTaskId: parentTaskId),

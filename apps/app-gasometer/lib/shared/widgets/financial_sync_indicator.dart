@@ -5,8 +5,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/services/financial_sync_service.dart';
-import '../../core/services/financial_sync_service_provider.dart';
+import '../../features/financial/domain/services/financial_sync_service.dart';
+import '../../features/financial/domain/services/financial_sync_service_provider.dart';
 
 /// Financial sync status indicator widget
 class FinancialSyncIndicator extends ConsumerWidget {

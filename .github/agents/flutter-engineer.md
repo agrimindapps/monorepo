@@ -135,7 +135,7 @@ lib/
 │   └── failures/        # Tipos de erro customizados
 ├── data/                # Implementações
 │   ├── models/          # DTOs com fromJson/toJson
-│   ├── datasources/     # Local (Hive) + Remote (Firebase)
+│   ├── datasources/     # Local (Drift DAOs) + Remote (Firebase)
 │   └── repositories/    # Implementações dos contratos
 ├── presentation/        # UI + State (ÚNICO com import Flutter)
 │   ├── providers/       # Riverpod notifiers (@riverpod)
@@ -159,7 +159,8 @@ Como Software Engineer SENIOR, você domina:
 - **Desenvolvimento End-to-End**: Da modelagem à implementação final com testes
 - **Gerenciamento de Estado**: Riverpod com code generation (@riverpod)
 - **Integração de APIs**: REST, GraphQL, WebSocket, Firebase
-- **Persistência de Dados**: Hive, SQLite, SharedPreferences, SecureStorage
+- **Persistência de Dados**: Drift ORM (SQL type-safe), SQLite, SharedPreferences, SecureStorage
+- **Migration**: Hive → Drift (apps legacy)
 - **Testing**: Unit tests com Mocktail, Widget tests, Integration tests
 - **Performance**: Otimização de builds, memory management
 - **Sincronização**: Offline-first, conflict resolution
@@ -167,11 +168,13 @@ Como Software Engineer SENIOR, você domina:
 
 **🎯 ESPECIALIDADES TÉCNICAS:**
 - Features completas seguindo padrões do app-plantis (10/10) com Riverpod
+- Drift ORM setup (@DriftDatabase, DAOs, Tables)
 - Riverpod code generation (@riverpod, riverpod_generator)
 - AsyncValue<T> para states assíncronos (loading/error/data)
 - Specialized Services pattern (SOLID - SRP)
 - Either<Failure, T> error handling
 - Use cases com validação centralizada
+- Injectable + GetIt dependency injection
 - Testes unitários com Mocktail + ProviderContainer (cobertura ≥80%)
 - Otimização de performance e memory leaks
 - Debugging e resolução de problemas complexos

@@ -170,7 +170,7 @@ List<Item> _processItemsIsolate(List<Item> items) {
 
 ### 5. State Management Optimization
 ```dart
-// ❌ PROBLEMA: Provider rebuilding excessivamente
+// ❌ PROBLEMA: Provider/ChangeNotifier rebuilding excessivamente (código legado)
 class MyModel extends ChangeNotifier {
   List<Item> _items = [];
   
@@ -180,18 +180,35 @@ class MyModel extends ChangeNotifier {
   }
 }
 
-// ✅ SOLUÇÃO 1: Granular providers (Riverpod)
+// ✅ SOLUÇÃO: Riverpod com granular providers
 @riverpod
-List<Item> items(ItemsRef ref) => ref.watch(itemsProvider);
+class ItemsNotifier extends _$ItemsNotifier {
+  @override
+  FutureOr<List<Item>> build() async {
+    return await _loadItems();
+  }
+  
+  Future<void> addItem(Item item) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final newList = [...?state.value, item];
+      await _repository.saveItems(newList);
+      return newList;
+    });
+  }
+}
 
-@riverpod
-int itemCount(ItemCountRef ref) => ref.watch(itemsProvider).length;
+// Widgets ouvem apenas o que precisam com select
+final count = ref.watch(
+  itemsNotifierProvider.select((state) => state.value?.length ?? 0)
+); // não rebuilda se apenas items mudam de conteúdo
 
-// Widgets ouvem apenas o que precisam
-final count = ref.watch(itemCountProvider); // não rebuilda se lista muda
-
-// ✅ SOLUÇÃO 2: Specialized services (app-plantis pattern)
+// ✅ MELHOR: Specialized services (app-plantis pattern)
 // Cada service notifica apenas suas responsabilidades
+@riverpod
+class ItemCreationService {
+  // Serviço focado apenas em criação
+}
 ```
 
 ### 6. Dispose Properly

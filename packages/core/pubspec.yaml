@@ -4,7 +4,7 @@ version: 1.0.0
 
 environment:
   sdk: ">=3.9.0 <4.0.0"
-  flutter: 3.35.0
+  flutter: ">=3.35.0"
 
 dependencies:
   flutter:
@@ -88,9 +88,6 @@ dependencies:
   equatable: ^2.0.7
   rxdart: ^0.28.0
   
-  # Hive - Legacy support for migrating apps
-  hive: ^2.2.3
-  
   # Riverpod State Management
   riverpod: ^2.6.1
   flutter_riverpod: ^2.6.1
@@ -127,16 +124,10 @@ dependencies:
   # Analysis/Linting (needed for transitive analysis_options.yaml inheritance)
   flutter_lints: ^5.0.0
 
-  # Drift - SQL Database
-  # drift:
-  #   version: ^2.28.2
-  #   platforms:
-  #     - android
-  #     - ios
-  #     - linux
-  #     - macos
-  #     - windows
-  # sqlite3_web: ^0.4.1  # Suporte web WASM para Drift
+  # Drift - SQL Database (Production-ready)
+  drift: ^2.28.2
+  sqlite3_flutter_libs: ^0.5.24
+  sqlite3_web: ^0.4.1  # Web support with WASM
   
 dev_dependencies:
   flutter_test:
@@ -147,14 +138,7 @@ dev_dependencies:
   injectable_generator: ^2.6.2
   json_serializable: ^6.8.0
   freezed: ^2.5.2
-  # drift_dev:
-  #   version: ^2.28.0
-  #   platforms:
-  #     - android
-  #     - ios
-  #     - linux
-  #     - macos
-  #     - windows
+  drift_dev: ^2.28.0
   riverpod_generator: ^2.6.4
   
   # Testing

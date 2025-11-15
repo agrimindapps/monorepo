@@ -1,45 +1,48 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/services/preferences_local_datasource.dart';
 import '../../../../core/services/preferences_local_datasource_impl.dart';
 import '../../../../core/theme/theme_mode_enum.dart';
-final preferencesDataSourceProvider = Provider<PreferencesLocalDataSource>((
-  ref,
-) {
-  return PreferencesLocalDataSourceImpl();
-});
-class ThemeNotifier extends StateNotifier<AsyncValue<AppThemeMode>> {
-  final PreferencesLocalDataSource _preferencesDataSource;
 
-  ThemeNotifier(this._preferencesDataSource)
-    : super(const AsyncValue.loading()) {
-    _loadTheme();
-  }
-  Future<void> _loadTheme() async {
+part 'theme_provider.g.dart';
+
+/// Provider para PreferencesLocalDataSource
+@riverpod
+PreferencesLocalDataSource preferencesDataSource(Ref ref) {
+  return PreferencesLocalDataSourceImpl();
+}
+
+/// AsyncNotifier para gerenciar tema do app
+@riverpod
+class ThemeNotifier extends _$ThemeNotifier {
+  late final PreferencesLocalDataSource _preferencesDataSource;
+
+  @override
+  Future<AppThemeMode> build() async {
+    _preferencesDataSource = ref.watch(preferencesDataSourceProvider);
+
     try {
       final themeMode = await _preferencesDataSource.getThemeMode();
-      state = AsyncValue.data(themeMode);
-    } catch (error, stackTrace) {
+      return themeMode;
+    } catch (error) {
       if (kDebugMode) {
         debugPrint('Erro ao carregar tema: $error');
       }
-      state = AsyncValue.error(error, stackTrace);
-      state = const AsyncValue.data(AppThemeMode.system);
+      return AppThemeMode.system;
     }
   }
+
   Future<void> setThemeMode(AppThemeMode themeMode) async {
-    try {
-      state = AsyncValue.data(themeMode);
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
       await _preferencesDataSource.setThemeMode(themeMode);
-    } catch (error, stackTrace) {
-      if (kDebugMode) {
-        debugPrint('Erro ao salvar tema: $error');
-      }
-      state = AsyncValue.error(error, stackTrace);
-    }
+      return themeMode;
+    });
   }
+
   Future<void> toggleTheme() async {
     final currentTheme = state.value ?? AppThemeMode.system;
 
@@ -52,41 +55,50 @@ class ThemeNotifier extends StateNotifier<AsyncValue<AppThemeMode>> {
         newTheme = AppThemeMode.light;
         break;
       case AppThemeMode.system:
-        newTheme =
-            AppThemeMode.light; // Default para claro quando vem do sistema
+        newTheme = AppThemeMode.light;
         break;
     }
 
     await setThemeMode(newTheme);
   }
+
   Future<void> resetToSystem() async {
     await setThemeMode(AppThemeMode.system);
   }
+
   bool get isSystemMode {
     return (state.value ?? AppThemeMode.system) == AppThemeMode.system;
   }
+
   AppThemeMode get currentTheme {
     return state.value ?? AppThemeMode.system;
   }
 }
-final themeNotifierProvider =
-    StateNotifierProvider<ThemeNotifier, AsyncValue<AppThemeMode>>((ref) {
-      final dataSource = ref.watch(preferencesDataSourceProvider);
-      return ThemeNotifier(dataSource);
-    });
-final currentThemeProvider = Provider<AppThemeMode>((ref) {
+
+/// Provider para tema atual
+@riverpod
+AppThemeMode currentTheme(Ref ref) {
   final asyncTheme = ref.watch(themeNotifierProvider);
   return asyncTheme.value ?? AppThemeMode.system;
-});
-final themeLoadingProvider = Provider<bool>((ref) {
+}
+
+/// Provider para estado de loading do tema
+@riverpod
+bool themeLoading(Ref ref) {
   final asyncTheme = ref.watch(themeNotifierProvider);
   return asyncTheme.isLoading;
-});
-final themeErrorProvider = Provider<String?>((ref) {
+}
+
+/// Provider para erro do tema
+@riverpod
+String? themeError(Ref ref) {
   final asyncTheme = ref.watch(themeNotifierProvider);
   return asyncTheme.hasError ? asyncTheme.error.toString() : null;
-});
-final flutterThemeModeProvider = Provider<ThemeMode>((ref) {
+}
+
+/// Provider para ThemeMode do Flutter
+@riverpod
+ThemeMode flutterThemeMode(Ref ref) {
   final appThemeMode = ref.watch(currentThemeProvider);
   return appThemeMode.themeMode;
-});
+}

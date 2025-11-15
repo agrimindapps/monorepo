@@ -45,6 +45,9 @@ dev_dependencies:
   riverpod_generator: any
   injectable_generator: any
   analyzer: ^7.6.0
+  mocktail: ^1.0.4
+  fake_async: ^1.3.1
+  flutter_riverpod: any
 
 # The following section is specific to Flutter packages.
 flutter:
@@ -52,9 +55,8 @@ flutter:
 
   # Assets para Drift WASM (necessário para web)
   # O drift_worker.dart será compilado automaticamente para JS pelo Flutter
-  # assets:
-  #   - web/sqlite3.wasm
-  #   - web/drift_worker.dart
+  assets:
+    - web/sqlite3.wasm
 
   # Diretórios criados mas vazios por enquanto
   # assets:

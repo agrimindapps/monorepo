@@ -1,41 +1,38 @@
 import 'package:core/core.dart' as core;
 import 'package:core/core.dart' hide getIt, Column;
 
-import '../../core/di/injection.dart' as di;
+import '../../core/providers/core_providers.dart';
 import '../../features/notifications/presentation/notification_stats.dart' as local_stats;
 import '../../infrastructure/services/notification_service.dart';
-final notificationServiceProvider = Provider<TaskManagerNotificationService>((ref) {
-  return di.getIt<TaskManagerNotificationService>();
-});
 final notificationPermissionProvider = FutureProvider<core.NotificationPermissionEntity>((ref) async {
-  final notificationService = ref.watch(notificationServiceProvider);
+  final notificationService = ref.watch(taskManagerNotificationServiceProvider);
   return await notificationService.getPermissionStatus();
 });
 final requestNotificationPermissionProvider = FutureProvider<core.NotificationPermissionEntity>((ref) async {
-  final notificationService = ref.watch(notificationServiceProvider);
+  final notificationService = ref.watch(taskManagerNotificationServiceProvider);
   return await notificationService.requestPermissions();
 });
 final pendingNotificationsProvider = FutureProvider<List<core.PendingNotificationEntity>>((ref) async {
-  final notificationService = ref.watch(notificationServiceProvider);
+  final notificationService = ref.watch(taskManagerNotificationServiceProvider);
   return await notificationService.getPendingNotifications();
 });
 final activeNotificationsProvider = FutureProvider<List<core.PendingNotificationEntity>>((ref) async {
-  final notificationService = ref.watch(notificationServiceProvider);
+  final notificationService = ref.watch(taskManagerNotificationServiceProvider);
   return await notificationService.getActiveNotifications();
 });
 final notificationStatsProvider = FutureProvider<local_stats.NotificationStats>((ref) async {
-  final notificationService = ref.watch(notificationServiceProvider);
+  final notificationService = ref.watch(taskManagerNotificationServiceProvider);
   return await notificationService.getNotificationStats();
 });
 final isNotificationScheduledProvider = FutureProvider.family<bool, int>((ref, notificationId) async {
-  final notificationService = ref.watch(notificationServiceProvider);
+  final notificationService = ref.watch(taskManagerNotificationServiceProvider);
   return await notificationService.isNotificationScheduled(notificationId);
 });
 final notificationSettingsProvider = StateNotifierProvider<NotificationSettingsNotifier, NotificationSettings>((ref) {
   return NotificationSettingsNotifier();
 });
 final notificationActionsProvider = Provider<NotificationActions>((ref) {
-  final notificationService = ref.watch(notificationServiceProvider);
+  final notificationService = ref.watch(taskManagerNotificationServiceProvider);
   return NotificationActions(notificationService, ref);
 });
 

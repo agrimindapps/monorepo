@@ -8,7 +8,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container_modular.dart';
 import '../../../../core/services/auth_rate_limiter.dart';
-import '../../../../core/services/gasometer_analytics_service.dart';
+import '../../../../core/services/analytics/gasometer_analytics_service.dart';
 import '../../../../core/services/platform_service.dart';
 import '../../../../core/widgets/logout_loading_dialog.dart';
 import '../../domain/entities/user_entity.dart' as gasometer_auth;

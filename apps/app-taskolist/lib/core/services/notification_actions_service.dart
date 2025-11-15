@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 
 import '../../features/tasks/domain/task_entity.dart';
 import '../../features/tasks/domain/update_task.dart';
+import '../../features/tasks/providers/task_providers.dart';
+import '../../shared/providers/notification_providers.dart';
+import '../providers/core_providers.dart';
 import '../providers/service_providers.dart';
 import 'navigation_service.dart' as local_nav;
 
@@ -52,7 +55,7 @@ class NotificationActionsService {
   /// Marca tarefa como concluída
   static Future<void> _markTaskAsDone(String taskId, BuildContext? context) async {
     try {
-      final updateTaskUseCase = _container.read(updateTaskProvider);
+      final updateTaskUseCase = _container.read(updateTaskUseCaseProvider);
       final tasksFuture = _container.read(tasksProvider.future);
       
       try {
@@ -100,7 +103,7 @@ class NotificationActionsService {
   /// Adia lembrete por 1 hora
   static Future<void> _snoozeTaskFor1Hour(String taskId, BuildContext? context) async {
     try {
-      final notificationService = _container.read(notificationServiceProvider);
+      final notificationService = _container.read(taskManagerNotificationServiceProvider);
       await notificationService.cancelNotification(taskId.hashCode);
       final newReminderTime = DateTime.now().add(const Duration(hours: 1));
       
@@ -147,7 +150,7 @@ class NotificationActionsService {
   /// Cancela todas as notificações relacionadas a uma tarefa
   static Future<void> _cancelTaskNotifications(String taskId) async {
     try {
-      final notificationService = _container.read(notificationServiceProvider);
+      final notificationService = _container.read(taskManagerNotificationServiceProvider);
       await notificationService.cancelNotification(taskId.hashCode);
       await notificationService.cancelNotification('${taskId}_deadline'.hashCode);
       

@@ -1,6 +1,4 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart';
-
 import '../../domain/entities/rain_gauge_entity.dart';
 import '../../domain/entities/weather_measurement_entity.dart';
 import '../../domain/entities/weather_statistics_entity.dart';
@@ -10,32 +8,19 @@ import '../datasources/weather_local_datasource.dart';
 import '../datasources/weather_remote_datasource.dart';
 import '../models/rain_gauge_model.dart';
 import '../models/weather_measurement_model.dart';
+import '../models/weather_statistics_model.dart';
 
 /// Implementation of weather repository following Clean Architecture
 /// Implements offline-first strategy with automatic sync when online
 class WeatherRepositoryImpl implements WeatherRepository {
   final WeatherLocalDataSource _localDataSource;
   final WeatherRemoteDataSource _remoteDataSource;
-  final Connectivity _connectivity;
 
-  WeatherRepositoryImpl(
-    this._localDataSource,
-    this._remoteDataSource,
-    this._connectivity,
-  );
-
-  /// Check if device is online
-  Future<bool> get _isOnline async {
-    try {
-      final result = await _connectivity.checkConnectivity();
-      return result.isNotEmpty && !result.contains(ConnectivityResult.none);
-    } catch (e) {
-      return false; // Assume offline if check fails
-    }
-  }
+  WeatherRepositoryImpl(this._localDataSource, this._remoteDataSource);
 
   @override
-  Future<Either<WeatherFailure, List<WeatherMeasurementEntity>>> getAllMeasurements({
+  Future<Either<WeatherFailure, List<WeatherMeasurementEntity>>>
+  getAllMeasurements({
     String? locationId,
     DateTime? startDate,
     DateTime? endDate,
@@ -48,83 +33,85 @@ class WeatherRepositoryImpl implements WeatherRepository {
         endDate: endDate,
         limit: limit,
       );
-      if (localMeasurements.isNotEmpty) {
-        return Right(localMeasurements.map((model) => model.toEntity()).toList());
-      }
-      if (await _isOnline) {
-        try {
-          final remoteMeasurements = await _remoteDataSource.getAllMeasurements(
-            locationId: locationId,
-            startDate: startDate,
-            endDate: endDate,
-            limit: limit,
-          );
-          await _localDataSource.saveMeasurements(remoteMeasurements);
+      try {
+        final remoteMeasurements = await _remoteDataSource.getAllMeasurements(
+          locationId: locationId,
+          startDate: startDate,
+          endDate: endDate,
+          limit: limit,
+        );
+        await _localDataSource.saveMeasurements(remoteMeasurements);
 
-          return Right(remoteMeasurements.map((model) => model.toEntity()).toList());
-        } catch (e) {
-          if (localMeasurements.isNotEmpty) {
-            return Right(localMeasurements.map((model) => model.toEntity()).toList());
-          }
-          return Left(WeatherNetworkFailure(e.toString()));
+        return Right(
+          remoteMeasurements.map((model) => model.toEntity()).toList(),
+        );
+      } catch (e) {
+        if (localMeasurements.isNotEmpty) {
+          return Right(
+            localMeasurements.map((model) => model.toEntity()).toList(),
+          );
         }
+        return Left(WeatherNetworkFailure(e.toString()));
       }
-      return Right(localMeasurements.map((model) => model.toEntity()).toList());
     } catch (e) {
       return Left(WeatherMeasurementFetchFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<WeatherFailure, WeatherMeasurementEntity>> getMeasurementById(String id) async {
+  Future<Either<WeatherFailure, WeatherMeasurementEntity>> getMeasurementById(
+    String id,
+  ) async {
     try {
       final localMeasurement = await _localDataSource.getMeasurementById(id);
-      if (localMeasurement != null) {
-        return Right(localMeasurement.toEntity());
-      }
-      if (await _isOnline) {
-        try {
-          final remoteMeasurement = await _remoteDataSource.getMeasurementById(id);
-          await _localDataSource.saveMeasurement(remoteMeasurement);
-          
-          return Right(remoteMeasurement.toEntity());
-        } catch (e) {
-          return Left(WeatherMeasurementNotFoundFailure(id));
-        }
-      }
+      try {
+        final remoteMeasurement = await _remoteDataSource.getMeasurementById(
+          id,
+        );
+        await _localDataSource.saveMeasurement(remoteMeasurement);
 
-      return Left(WeatherMeasurementNotFoundFailure(id));
+        return Right(remoteMeasurement.toEntity());
+      } catch (e) {
+        if (localMeasurement != null) {
+          return Right(localMeasurement.toEntity());
+        }
+        return Left(WeatherMeasurementNotFoundFailure(id));
+      }
     } catch (e) {
       return Left(WeatherMeasurementFetchFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<WeatherFailure, WeatherMeasurementEntity>> getLatestMeasurement([String? locationId]) async {
+  Future<Either<WeatherFailure, WeatherMeasurementEntity>>
+  getLatestMeasurement([String? locationId]) async {
     try {
-      final localMeasurement = await _localDataSource.getLatestMeasurement(locationId);
-      if (localMeasurement != null) {
-        return Right(localMeasurement.toEntity());
-      }
-      if (await _isOnline) {
-        try {
-          final remoteMeasurement = await _remoteDataSource.getLatestMeasurement(locationId);
-          await _localDataSource.saveMeasurement(remoteMeasurement);
-          
-          return Right(remoteMeasurement.toEntity());
-        } catch (e) {
-          return Left(WeatherMeasurementFetchFailure(e.toString()));
-        }
-      }
+      final localMeasurement = await _localDataSource.getLatestMeasurement(
+        locationId,
+      );
+      try {
+        final remoteMeasurement = await _remoteDataSource.getLatestMeasurement(
+          locationId,
+        );
+        await _localDataSource.saveMeasurement(remoteMeasurement);
 
-      return const Left(WeatherMeasurementFetchFailure('No measurements available offline'));
+        return Right(remoteMeasurement.toEntity());
+      } catch (e) {
+        if (localMeasurement != null) {
+          return Right(localMeasurement.toEntity());
+        }
+        return const Left(
+          WeatherMeasurementFetchFailure('No measurements available offline'),
+        );
+      }
     } catch (e) {
       return Left(WeatherMeasurementFetchFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<WeatherFailure, List<WeatherMeasurementEntity>>> getMeasurementsByDateRange(
+  Future<Either<WeatherFailure, List<WeatherMeasurementEntity>>>
+  getMeasurementsByDateRange(
     DateTime startDate,
     DateTime endDate, {
     String? locationId,
@@ -137,10 +124,8 @@ class WeatherRepositoryImpl implements WeatherRepository {
   }
 
   @override
-  Future<Either<WeatherFailure, List<WeatherMeasurementEntity>>> getMeasurementsByLocation(
-    String locationId, {
-    int? limit,
-  }) async {
+  Future<Either<WeatherFailure, List<WeatherMeasurementEntity>>>
+  getMeasurementsByLocation(String locationId, {int? limit}) async {
     return await getAllMeasurements(locationId: locationId, limit: limit);
   }
 
@@ -151,18 +136,14 @@ class WeatherRepositoryImpl implements WeatherRepository {
     try {
       final model = WeatherMeasurementModel.fromEntity(measurement);
       await _localDataSource.saveMeasurement(model);
-      if (await _isOnline) {
-        try {
-          final remoteModel = await _remoteDataSource.createMeasurement(model);
-          await _localDataSource.updateMeasurement(remoteModel);
-          
-          return Right(remoteModel.toEntity());
-        } catch (e) {
-          return Right(model.toEntity());
-        }
-      }
+      try {
+        final remoteModel = await _remoteDataSource.createMeasurement(model);
+        await _localDataSource.updateMeasurement(remoteModel);
 
-      return Right(model.toEntity());
+        return Right(remoteModel.toEntity());
+      } catch (e) {
+        return Right(model.toEntity());
+      }
     } catch (e) {
       return Left(WeatherMeasurementSaveFailure(e.toString()));
     }
@@ -173,22 +154,18 @@ class WeatherRepositoryImpl implements WeatherRepository {
     WeatherMeasurementEntity measurement,
   ) async {
     try {
-      final model = WeatherMeasurementModel.fromEntity(measurement.copyWith(
-        updatedAt: DateTime.now(),
-      ));
+      final model = WeatherMeasurementModel.fromEntity(
+        measurement.copyWith(updatedAt: DateTime.now()),
+      );
       await _localDataSource.updateMeasurement(model);
-      if (await _isOnline) {
-        try {
-          final remoteModel = await _remoteDataSource.updateMeasurement(model);
-          await _localDataSource.updateMeasurement(remoteModel);
-          
-          return Right(remoteModel.toEntity());
-        } catch (e) {
-          return Right(model.toEntity());
-        }
-      }
+      try {
+        final remoteModel = await _remoteDataSource.updateMeasurement(model);
+        await _localDataSource.updateMeasurement(remoteModel);
 
-      return Right(model.toEntity());
+        return Right(remoteModel.toEntity());
+      } catch (e) {
+        return Right(model.toEntity());
+      }
     } catch (e) {
       return Left(WeatherMeasurementSaveFailure(e.toString()));
     }
@@ -198,13 +175,12 @@ class WeatherRepositoryImpl implements WeatherRepository {
   Future<Either<WeatherFailure, void>> deleteMeasurement(String id) async {
     try {
       await _localDataSource.deleteMeasurement(id);
-      if (await _isOnline) {
-        try {
-          await _remoteDataSource.deleteMeasurement(id);
-        } catch (e) {
-        }
+      try {
+        await _remoteDataSource.deleteMeasurement(id);
+      } catch (e) {
+        // If remote delete fails, we still consider local delete successful.
+        // The item will be re-synced later if needed.
       }
-
       return const Right(null);
     } catch (e) {
       return Left(WeatherMeasurementFetchFailure(e.toString()));
@@ -212,7 +188,8 @@ class WeatherRepositoryImpl implements WeatherRepository {
   }
 
   @override
-  Future<Either<WeatherFailure, List<WeatherMeasurementEntity>>> searchMeasurements({
+  Future<Either<WeatherFailure, List<WeatherMeasurementEntity>>>
+  searchMeasurements({
     String? locationId,
     DateTime? fromDate,
     DateTime? toDate,
@@ -243,57 +220,56 @@ class WeatherRepositoryImpl implements WeatherRepository {
   }
 
   @override
-  Future<Either<WeatherFailure, List<RainGaugeEntity>>> getAllRainGauges() async {
+  Future<Either<WeatherFailure, List<RainGaugeEntity>>>
+  getAllRainGauges() async {
     try {
       final localGauges = await _localDataSource.getAllRainGauges();
-      if (localGauges.isNotEmpty) {
-        return Right(localGauges.map((model) => model.toEntity()).toList());
-      }
-      if (await _isOnline) {
-        try {
-          final remoteGauges = await _remoteDataSource.getAllRainGauges();
-          await _localDataSource.saveRainGauges(remoteGauges);
-          
-          return Right(remoteGauges.map((model) => model.toEntity()).toList());
-        } catch (e) {
-          return Left(RainGaugeFetchFailure(e.toString()));
-        }
-      }
+      try {
+        final remoteGauges = await _remoteDataSource.getAllRainGauges();
+        await _localDataSource.saveRainGauges(remoteGauges);
 
-      return Right(localGauges.map((model) => model.toEntity()).toList());
+        return Right(remoteGauges.map((model) => model.toEntity()).toList());
+      } catch (e) {
+        if (localGauges.isNotEmpty) {
+          return Right(localGauges.map((model) => model.toEntity()).toList());
+        }
+        return Left(RainGaugeFetchFailure(e.toString()));
+      }
     } catch (e) {
       return Left(RainGaugeFetchFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<WeatherFailure, RainGaugeEntity>> getRainGaugeById(String id) async {
+  Future<Either<WeatherFailure, RainGaugeEntity>> getRainGaugeById(
+    String id,
+  ) async {
     try {
       final localGauge = await _localDataSource.getRainGaugeById(id);
-      if (localGauge != null) {
-        return Right(localGauge.toEntity());
-      }
-      if (await _isOnline) {
-        try {
-          final remoteGauge = await _remoteDataSource.getRainGaugeById(id);
-          await _localDataSource.saveRainGauge(remoteGauge);
-          
-          return Right(remoteGauge.toEntity());
-        } catch (e) {
-          return Left(RainGaugeNotFoundFailure(id));
-        }
-      }
+      try {
+        final remoteGauge = await _remoteDataSource.getRainGaugeById(id);
+        await _localDataSource.saveRainGauge(remoteGauge);
 
-      return Left(RainGaugeNotFoundFailure(id));
+        return Right(remoteGauge.toEntity());
+      } catch (e) {
+        if (localGauge != null) {
+          return Right(localGauge.toEntity());
+        }
+        return Left(RainGaugeNotFoundFailure(id));
+      }
     } catch (e) {
       return Left(RainGaugeFetchFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<WeatherFailure, List<RainGaugeEntity>>> getRainGaugesByLocation(String locationId) async {
+  Future<Either<WeatherFailure, List<RainGaugeEntity>>> getRainGaugesByLocation(
+    String locationId,
+  ) async {
     try {
-      final localGauges = await _localDataSource.getRainGaugesByLocation(locationId);
+      final localGauges = await _localDataSource.getRainGaugesByLocation(
+        locationId,
+      );
       return Right(localGauges.map((model) => model.toEntity()).toList());
     } catch (e) {
       return Left(RainGaugeFetchFailure(e.toString()));
@@ -301,7 +277,8 @@ class WeatherRepositoryImpl implements WeatherRepository {
   }
 
   @override
-  Future<Either<WeatherFailure, List<RainGaugeEntity>>> getActiveRainGauges() async {
+  Future<Either<WeatherFailure, List<RainGaugeEntity>>>
+  getActiveRainGauges() async {
     try {
       final localGauges = await _localDataSource.getActiveRainGauges();
       return Right(localGauges.map((model) => model.toEntity()).toList());
@@ -311,14 +288,15 @@ class WeatherRepositoryImpl implements WeatherRepository {
   }
 
   @override
-  Future<Either<WeatherFailure, List<RainGaugeEntity>>> getRainGaugesNeedingMaintenance() async {
+  Future<Either<WeatherFailure, List<RainGaugeEntity>>>
+  getRainGaugesNeedingMaintenance() async {
     try {
       final allGauges = await _localDataSource.getAllRainGauges();
       final needingMaintenance = allGauges
           .where((gauge) => gauge.needsMaintenance)
           .map((model) => model.toEntity())
           .toList();
-      
+
       return Right(needingMaintenance);
     } catch (e) {
       return Left(RainGaugeFetchFailure(e.toString()));
@@ -326,46 +304,42 @@ class WeatherRepositoryImpl implements WeatherRepository {
   }
 
   @override
-  Future<Either<WeatherFailure, RainGaugeEntity>> createRainGauge(RainGaugeEntity rainGauge) async {
+  Future<Either<WeatherFailure, RainGaugeEntity>> createRainGauge(
+    RainGaugeEntity rainGauge,
+  ) async {
     try {
       final model = RainGaugeModel.fromEntity(rainGauge);
       await _localDataSource.saveRainGauge(model);
-      if (await _isOnline) {
-        try {
-          final remoteModel = await _remoteDataSource.createRainGauge(model);
-          await _localDataSource.updateRainGauge(remoteModel);
-          
-          return Right(remoteModel.toEntity());
-        } catch (e) {
-          return Right(model.toEntity());
-        }
-      }
+      try {
+        final remoteModel = await _remoteDataSource.createRainGauge(model);
+        await _localDataSource.updateRainGauge(remoteModel);
 
-      return Right(model.toEntity());
+        return Right(remoteModel.toEntity());
+      } catch (e) {
+        return Right(model.toEntity());
+      }
     } catch (e) {
       return Left(RainGaugeSaveFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<WeatherFailure, RainGaugeEntity>> updateRainGauge(RainGaugeEntity rainGauge) async {
+  Future<Either<WeatherFailure, RainGaugeEntity>> updateRainGauge(
+    RainGaugeEntity rainGauge,
+  ) async {
     try {
-      final model = RainGaugeModel.fromEntity(rainGauge.copyWith(
-        updatedAt: DateTime.now(),
-      ));
+      final model = RainGaugeModel.fromEntity(
+        rainGauge.copyWith(updatedAt: DateTime.now()),
+      );
       await _localDataSource.updateRainGauge(model);
-      if (await _isOnline) {
-        try {
-          final remoteModel = await _remoteDataSource.updateRainGauge(model);
-          await _localDataSource.updateRainGauge(remoteModel);
-          
-          return Right(remoteModel.toEntity());
-        } catch (e) {
-          return Right(model.toEntity());
-        }
-      }
+      try {
+        final remoteModel = await _remoteDataSource.updateRainGauge(model);
+        await _localDataSource.updateRainGauge(remoteModel);
 
-      return Right(model.toEntity());
+        return Right(remoteModel.toEntity());
+      } catch (e) {
+        return Right(model.toEntity());
+      }
     } catch (e) {
       return Left(RainGaugeSaveFailure(e.toString()));
     }
@@ -375,13 +349,12 @@ class WeatherRepositoryImpl implements WeatherRepository {
   Future<Either<WeatherFailure, void>> deleteRainGauge(String id) async {
     try {
       await _localDataSource.deleteRainGauge(id);
-      if (await _isOnline) {
-        try {
-          await _remoteDataSource.deleteRainGauge(id);
-        } catch (e) {
-        }
+      try {
+        await _remoteDataSource.deleteRainGauge(id);
+      } catch (e) {
+        // If remote delete fails, we still consider local delete successful.
+        // The item will be re-synced later if needed.
       }
-
       return const Right(null);
     } catch (e) {
       return Left(RainGaugeFailure(e.toString()));
@@ -404,22 +377,18 @@ class WeatherRepositoryImpl implements WeatherRepository {
         measurementTime: measurementTime,
       );
       await _localDataSource.updateRainGauge(updatedModel);
-      if (await _isOnline) {
-        try {
-          final remoteModel = await _remoteDataSource.updateRainGaugeMeasurement(
-            gaugeId,
-            newRainfall,
-            measurementTime,
-          );
-          await _localDataSource.updateRainGauge(remoteModel);
-          
-          return Right(remoteModel.toEntity());
-        } catch (e) {
-          return Right(updatedModel.toEntity());
-        }
-      }
+      try {
+        final remoteModel = await _remoteDataSource.updateRainGaugeMeasurement(
+          gaugeId,
+          newRainfall,
+          measurementTime,
+        );
+        await _localDataSource.updateRainGauge(remoteModel);
 
-      return Right(updatedModel.toEntity());
+        return Right(remoteModel.toEntity());
+      } catch (e) {
+        return Right(updatedModel.toEntity());
+      }
     } catch (e) {
       return Left(RainGaugeSaveFailure(e.toString()));
     }
@@ -445,17 +414,15 @@ class WeatherRepositoryImpl implements WeatherRepository {
         resetYearly: resetYearly,
       );
       await _localDataSource.updateRainGauge(updatedModel);
-      if (await _isOnline) {
-        try {
-          final remoteModel = await _remoteDataSource.updateRainGauge(updatedModel);
-          await _localDataSource.updateRainGauge(remoteModel);
-          return Right(remoteModel.toEntity());
-        } catch (e) {
-          return Right(updatedModel.toEntity());
-        }
+      try {
+        final remoteModel = await _remoteDataSource.updateRainGauge(
+          updatedModel,
+        );
+        await _localDataSource.updateRainGauge(remoteModel);
+        return Right(remoteModel.toEntity());
+      } catch (e) {
+        return Right(updatedModel.toEntity());
       }
-
-      return Right(updatedModel.toEntity());
     } catch (e) {
       return Left(RainGaugeSaveFailure(e.toString()));
     }
@@ -476,17 +443,15 @@ class WeatherRepositoryImpl implements WeatherRepository {
         updatedAt: DateTime.now(),
       );
       await _localDataSource.updateRainGauge(updatedModel);
-      if (await _isOnline) {
-        try {
-          final remoteModel = await _remoteDataSource.updateRainGauge(updatedModel);
-          await _localDataSource.updateRainGauge(remoteModel);
-          return Right(remoteModel.toEntity());
-        } catch (e) {
-          return Right(updatedModel.toEntity());
-        }
+      try {
+        final remoteModel = await _remoteDataSource.updateRainGauge(
+          updatedModel,
+        );
+        await _localDataSource.updateRainGauge(remoteModel);
+        return Right(remoteModel.toEntity());
+      } catch (e) {
+        return Right(updatedModel.toEntity());
       }
-
-      return Right(updatedModel.toEntity());
     } catch (e) {
       return Left(RainGaugeCalibrationFailure(gaugeId, e.toString()));
     }
@@ -500,46 +465,53 @@ class WeatherRepositoryImpl implements WeatherRepository {
     required DateTime endDate,
   }) async {
     try {
-      final localStats = await _localDataSource.getStatisticsByLocation(locationId);
-      final matchingStats = localStats.where((stats) =>
-          stats.period == period &&
-          stats.startDate.isAtSameMomentAs(startDate) &&
-          stats.endDate.isAtSameMomentAs(endDate)).toList();
+      final localStats = await _localDataSource.getStatisticsByLocation(
+        locationId,
+      );
+      final matchingStats = localStats
+          .where(
+            (stats) =>
+                stats.period == period &&
+                stats.startDate.isAtSameMomentAs(startDate) &&
+                stats.endDate.isAtSameMomentAs(endDate),
+          )
+          .toList();
 
-      if (matchingStats.isNotEmpty) {
-        return Right(matchingStats.first.toEntity());
-      }
-      if (await _isOnline) {
-        try {
-          final remoteStats = await _remoteDataSource.calculateStatistics(
-            locationId: locationId,
-            period: period,
-            startDate: startDate,
-            endDate: endDate,
-          );
-          await _localDataSource.saveStatistics(remoteStats);
+      try {
+        final remoteStats = await _remoteDataSource.calculateStatistics(
+          locationId: locationId,
+          period: period,
+          startDate: startDate,
+          endDate: endDate,
+        );
+        await _localDataSource.saveStatistics(remoteStats);
 
-          return Right(remoteStats.toEntity());
-        } catch (e) {
-          return Left(WeatherStatisticsCalculationFailure(e.toString(), period));
+        return Right(remoteStats.toEntity());
+      } catch (e) {
+        if (matchingStats.isNotEmpty) {
+          return Right(matchingStats.first.toEntity());
         }
+        return Left(WeatherStatisticsCalculationFailure(e.toString(), period));
       }
-
-      return const Left(WeatherStatisticsFailure('Statistics not available offline'));
     } catch (e) {
       return Left(WeatherStatisticsFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<WeatherFailure, List<WeatherStatisticsEntity>>> getHistoricalStatistics({
+  Future<Either<WeatherFailure, List<WeatherStatisticsEntity>>>
+  getHistoricalStatistics({
     required String locationId,
     required String period,
     int? years,
   }) async {
     try {
-      final localStats = await _localDataSource.getStatisticsByLocation(locationId);
-      final filtered = localStats.where((stats) => stats.period == period).toList();
+      final localStats = await _localDataSource.getStatisticsByLocation(
+        locationId,
+      );
+      final filtered = localStats
+          .where((stats) => stats.period == period)
+          .toList();
 
       if (years != null) {
         final cutoffDate = DateTime.now().subtract(Duration(days: years * 365));
@@ -560,23 +532,19 @@ class WeatherRepositoryImpl implements WeatherRepository {
     required DateTime endDate,
     bool forceRecalculate = false,
   }) async {
-    if (await _isOnline) {
-      try {
-        final remoteStats = await _remoteDataSource.calculateStatistics(
-          locationId: locationId,
-          period: period,
-          startDate: startDate,
-          endDate: endDate,
-        );
-        await _localDataSource.saveStatistics(remoteStats);
+    try {
+      final remoteStats = await _remoteDataSource.calculateStatistics(
+        locationId: locationId,
+        period: period,
+        startDate: startDate,
+        endDate: endDate,
+      );
+      await _localDataSource.saveStatistics(remoteStats);
 
-        return Right(remoteStats.toEntity());
-      } catch (e) {
-        return Left(WeatherStatisticsCalculationFailure(e.toString(), period));
-      }
+      return Right(remoteStats.toEntity());
+    } catch (e) {
+      return Left(WeatherStatisticsCalculationFailure(e.toString(), period));
     }
-
-    return const Left(WeatherStatisticsFailure('Statistics calculation not available offline'));
   }
 
   @override
@@ -593,25 +561,22 @@ class WeatherRepositoryImpl implements WeatherRepository {
         endDate: endDate,
       );
 
-      return measurements.fold(
-        (failure) => Left(failure),
-        (measurementList) {
-          if (measurementList.isEmpty) {
-            return const Left(InsufficientWeatherDataFailure('trends', 0, 30));
-          }
-          final trends = {
-            'location_id': locationId,
-            'period_start': startDate.toIso8601String(),
-            'period_end': endDate.toIso8601String(),
-            'total_measurements': measurementList.length,
-            'temperature_trend': 'stable', // Simplified
-            'rainfall_trend': 'stable', // Simplified
-            'calculated_at': DateTime.now().toIso8601String(),
-          };
+      return measurements.fold((failure) => Left(failure), (measurementList) {
+        if (measurementList.isEmpty) {
+          return const Left(InsufficientWeatherDataFailure('trends', 0, 30));
+        }
+        final trends = {
+          'location_id': locationId,
+          'period_start': startDate.toIso8601String(),
+          'period_end': endDate.toIso8601String(),
+          'total_measurements': measurementList.length,
+          'temperature_trend': 'stable', // Simplified
+          'rainfall_trend': 'stable', // Simplified
+          'calculated_at': DateTime.now().toIso8601String(),
+        };
 
-          return Right(trends);
-        },
-      );
+        return Right(trends);
+      });
     } catch (e) {
       return Left(WeatherStatisticsFailure(e.toString()));
     }
@@ -630,45 +595,34 @@ class WeatherRepositoryImpl implements WeatherRepository {
         endDate: endDate,
       );
 
-      return measurements.fold(
-        (failure) => Left(failure),
-        (measurementList) {
-          final anomalies = <String>[];
-          
-          for (final measurement in measurementList) {
-            if (measurement.temperature > 45 || measurement.temperature < -20) {
-              anomalies.add('extreme_temperature_${measurement.id}');
-            }
-            if (measurement.windSpeed > 100) {
-              anomalies.add('high_wind_${measurement.id}');
-            }
-            if (measurement.rainfall > 100) {
-              anomalies.add('heavy_rain_${measurement.id}');
-            }
-          }
+      return measurements.fold((failure) => Left(failure), (measurementList) {
+        final anomalies = <String>[];
 
-          return Right(anomalies);
-        },
-      );
+        for (final measurement in measurementList) {
+          if (measurement.temperature > 45 || measurement.temperature < -20) {
+            anomalies.add('extreme_temperature_${measurement.id}');
+          }
+          if (measurement.windSpeed > 100) {
+            anomalies.add('high_wind_${measurement.id}');
+          }
+          if (measurement.rainfall > 100) {
+            anomalies.add('heavy_rain_${measurement.id}');
+          }
+        }
+
+        return Right(anomalies);
+      });
     } catch (e) {
       return Left(WeatherStatisticsFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<WeatherFailure, WeatherMeasurementEntity>> getCurrentWeatherFromAPI(
-    double latitude,
-    double longitude,
-  ) async {
+  Future<Either<WeatherFailure, WeatherMeasurementEntity>>
+  getCurrentWeatherFromAPI(double latitude, double longitude) async {
     try {
-      if (!(await _isOnline)) {
-        return const Left(WeatherNetworkFailure('No internet connection'));
-      }
-
-      final remoteMeasurement = await _remoteDataSource.getCurrentWeatherFromAPI(
-        latitude,
-        longitude,
-      );
+      final remoteMeasurement = await _remoteDataSource
+          .getCurrentWeatherFromAPI(latitude, longitude);
       await _localDataSource.saveMeasurement(remoteMeasurement);
 
       return Right(remoteMeasurement.toEntity());
@@ -679,16 +633,9 @@ class WeatherRepositoryImpl implements WeatherRepository {
   }
 
   @override
-  Future<Either<WeatherFailure, List<WeatherMeasurementEntity>>> getWeatherForecast(
-    double latitude,
-    double longitude, {
-    int days = 7,
-  }) async {
+  Future<Either<WeatherFailure, List<WeatherMeasurementEntity>>>
+  getWeatherForecast(double latitude, double longitude, {int days = 7}) async {
     try {
-      if (!(await _isOnline)) {
-        return const Left(WeatherNetworkFailure('No internet connection'));
-      }
-
       final remoteForecast = await _remoteDataSource.getWeatherForecast(
         latitude,
         longitude,
@@ -706,19 +653,15 @@ class WeatherRepositoryImpl implements WeatherRepository {
   @override
   Future<Either<WeatherFailure, int>> syncWeatherData() async {
     try {
-      if (!(await _isOnline)) {
-        return const Left(WeatherNetworkFailure('No internet connection for sync'));
-      }
-
       int syncedCount = 0;
       final pendingResult = await uploadPendingMeasurements();
       pendingResult.fold(
-        (failure) => <String, dynamic>{}, // Log but continue
+        (failure) => null, // Log but continue
         (count) => syncedCount += count,
       );
       final updatesResult = await downloadWeatherUpdates();
       updatesResult.fold(
-        (failure) => <String, dynamic>{}, // Log but continue
+        (failure) => null, // Log but continue
         (count) => syncedCount += count,
       );
       await _localDataSource.setLastSyncTime(DateTime.now());
@@ -732,16 +675,15 @@ class WeatherRepositoryImpl implements WeatherRepository {
   @override
   Future<Either<WeatherFailure, int>> uploadPendingMeasurements() async {
     try {
-      if (!(await _isOnline)) {
-        return const Left(WeatherNetworkFailure('No internet connection'));
-      }
-
-      final pendingMeasurements = await _localDataSource.getPendingMeasurements();
+      final pendingMeasurements = await _localDataSource
+          .getPendingMeasurements();
       if (pendingMeasurements.isEmpty) {
         return const Right(0);
       }
 
-      final uploadedMeasurements = await _remoteDataSource.uploadMeasurements(pendingMeasurements);
+      final uploadedMeasurements = await _remoteDataSource.uploadMeasurements(
+        pendingMeasurements,
+      );
       final ids = uploadedMeasurements.map((m) => m.id).toList();
       await _localDataSource.markMeasurementsAsSynced(ids);
 
@@ -752,18 +694,20 @@ class WeatherRepositoryImpl implements WeatherRepository {
   }
 
   @override
-  Future<Either<WeatherFailure, int>> downloadWeatherUpdates({DateTime? since}) async {
+  Future<Either<WeatherFailure, int>> downloadWeatherUpdates({
+    DateTime? since,
+  }) async {
     try {
-      if (!(await _isOnline)) {
-        return const Left(WeatherNetworkFailure('No internet connection'));
-      }
-
       final lastSync = since ?? await _localDataSource.getLastSyncTime();
-      final measurements = await _remoteDataSource.downloadMeasurements(since: lastSync);
+      final measurements = await _remoteDataSource.downloadMeasurements(
+        since: lastSync,
+      );
       if (measurements.isNotEmpty) {
         await _localDataSource.saveMeasurements(measurements);
       }
-      final rainGauges = await _remoteDataSource.downloadRainGauges(since: lastSync);
+      final rainGauges = await _remoteDataSource.downloadRainGauges(
+        since: lastSync,
+      );
       if (rainGauges.isNotEmpty) {
         await _localDataSource.saveRainGauges(rainGauges);
       }
@@ -775,12 +719,17 @@ class WeatherRepositoryImpl implements WeatherRepository {
   }
 
   @override
-  Future<Either<WeatherFailure, bool>> validateMeasurement(WeatherMeasurementEntity measurement) async {
+  Future<Either<WeatherFailure, bool>> validateMeasurement(
+    WeatherMeasurementEntity measurement,
+  ) async {
     try {
-      if (measurement.temperature < -100 || measurement.temperature > 70) return const Right(false);
-      if (measurement.humidity < 0 || measurement.humidity > 100) return const Right(false);
-      if (measurement.pressure < 800 || measurement.pressure > 1200) return const Right(false);
-      
+      if (measurement.temperature < -100 || measurement.temperature > 70)
+        return const Right(false);
+      if (measurement.humidity < 0 || measurement.humidity > 100)
+        return const Right(false);
+      if (measurement.pressure < 800 || measurement.pressure > 1200)
+        return const Right(false);
+
       return const Right(true);
     } catch (e) {
       return Left(WeatherDataFailure(e.toString()));
@@ -800,23 +749,24 @@ class WeatherRepositoryImpl implements WeatherRepository {
         endDate: endDate,
       );
 
-      return measurements.fold(
-        (failure) => Left(failure),
-        (measurementList) {
-          final qualityReport = {
-            'location_id': locationId,
-            'total_measurements': measurementList.length,
-            'period_days': endDate.difference(startDate).inDays,
-            'data_completeness': measurementList.isNotEmpty ? 1.0 : 0.0,
-            'quality_score': 0.9, // Simplified
-            'issues': <String>[],
-          };
+      return measurements.fold((failure) => Left(failure), (measurementList) {
+        if (measurementList.isEmpty) {
+          return const Left(InsufficientWeatherDataFailure('trends', 0, 30));
+        }
+        final trends = {
+          'location_id': locationId,
+          'period_start': startDate.toIso8601String(),
+          'period_end': endDate.toIso8601String(),
+          'total_measurements': measurementList.length,
+          'temperature_trend': 'stable', // Simplified
+          'rainfall_trend': 'stable', // Simplified
+          'calculated_at': DateTime.now().toIso8601String(),
+        };
 
-          return Right(qualityReport);
-        },
-      );
+        return Right(trends);
+      });
     } catch (e) {
-      return Left(WeatherDataFailure(e.toString()));
+      return Left(WeatherStatisticsFailure(e.toString()));
     }
   }
 
@@ -839,7 +789,8 @@ class WeatherRepositoryImpl implements WeatherRepository {
   }
 
   @override
-  Future<Either<WeatherFailure, List<Map<String, dynamic>>>> getWeatherLocations() async {
+  Future<Either<WeatherFailure, List<Map<String, dynamic>>>>
+  getWeatherLocations() async {
     return const Right([]); // Would fetch from local/remote
   }
 
@@ -862,12 +813,15 @@ class WeatherRepositoryImpl implements WeatherRepository {
   }
 
   @override
-  Future<Either<WeatherFailure, void>> deleteWeatherLocation(String locationId) async {
+  Future<Either<WeatherFailure, void>> deleteWeatherLocation(
+    String locationId,
+  ) async {
     return const Right(null);
   }
 
   @override
-  Future<Either<WeatherFailure, List<Map<String, dynamic>>>> getDevicesStatus() async {
+  Future<Either<WeatherFailure, List<Map<String, dynamic>>>>
+  getDevicesStatus() async {
     return const Right([]);
   }
 
@@ -916,7 +870,9 @@ class WeatherRepositoryImpl implements WeatherRepository {
   }
 
   @override
-  Stream<WeatherMeasurementEntity> subscribeToWeatherUpdates(String? locationId) {
+  Stream<WeatherMeasurementEntity> subscribeToWeatherUpdates(
+    String? locationId,
+  ) {
     return const Stream.empty();
   }
 
@@ -941,14 +897,15 @@ class WeatherRepositoryImpl implements WeatherRepository {
   }
 
   @override
-  Future<Either<WeatherFailure, void>> deleteWeatherAlert(String alertId) async {
+  Future<Either<WeatherFailure, void>> deleteWeatherAlert(
+    String alertId,
+  ) async {
     return const Right(null);
   }
 
   @override
-  Future<Either<WeatherFailure, List<Map<String, dynamic>>>> getActiveWeatherAlerts({
-    String? locationId,
-  }) async {
+  Future<Either<WeatherFailure, List<Map<String, dynamic>>>>
+  getActiveWeatherAlerts({String? locationId}) async {
     return const Right([]);
   }
 }

@@ -55,9 +55,10 @@ packages/
 - **Padrão**: AsyncValue<T> para estados assíncronos
 
 #### **Persistence & Sync**
-- **Local**: Hive (BoxManager pattern)
+- **Local**: Drift ORM (Type-safe SQL com DAOs)
 - **Remote**: Firebase Firestore
 - **Strategy**: Offline-first com sync
+- **Migration**: Hive → Drift (deprecated)
 
 #### **Architecture Layers**
 ```
@@ -68,8 +69,12 @@ lib/
 │   └── usecases/    # Casos de uso
 ├── data/            # Implementações
 │   ├── models/      # DTOs com serialization
-│   ├── datasources/ # Local (Hive) + Remote (Firebase)
+│   ├── datasources/ # Local (Drift DAOs) + Remote (Firebase)
 │   └── repositories/# Implementações dos contratos
+├── database/        # Drift ORM (apenas se centralizado)
+│   ├── tables/      # Table definitions
+│   ├── daos/        # Data Access Objects
+│   └── app_database.dart  # @DriftDatabase
 └── presentation/    # UI + State
     ├── providers/   # Riverpod notifiers
     ├── pages/       # Telas
@@ -172,10 +177,28 @@ Domain Layer (Entities/Use Cases/Repository Interfaces)
 Data Layer (Repository Impl + Hive/Firebase DataSources)
 ```
 
-### **Repository + Hive Pattern (Padrão Local)**
+### **Repository + Drift Pattern (Padrão Local)**
 ```
-Provider → Repository → HiveDataSource → BoxManager → Hive Box
+Provider → Repository → DriftDataSource → DAO → Drift Database
                    ↘ FirebaseDataSource → Firestore
+```
+
+**Drift Setup:**
+```dart
+@DriftDatabase(tables: [Users, Tasks], daos: [UserDao, TaskDao])
+@lazySingleton
+class AppDatabase extends _$AppDatabase {
+  @factoryMethod
+  factory AppDatabase.injectable() => AppDatabase.production();
+  
+  factory AppDatabase.production() {
+    return AppDatabase(LazyDatabase(() async {
+      final dbFolder = await getApplicationDocumentsDirectory();
+      final file = File(p.join(dbFolder.path, 'app.db'));
+      return NativeDatabase(file);
+    }));
+  }
+}
 ```
 
 ### **State Management Patterns**

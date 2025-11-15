@@ -7,7 +7,7 @@ import 'app.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/di/modules/sync_module.dart';
 import 'core/gasometer_sync_config.dart';
-import 'core/services/auto_sync_service.dart';
+import 'features/sync/domain/services/auto_sync_service.dart';
 import 'core/services/connectivity_state_manager.dart';
 import 'core/services/connectivity_sync_integration.dart';
 import 'firebase_options.dart';

@@ -15,7 +15,7 @@ Criar e manter documentação de alta qualidade que facilite manutenção, onboa
 /// Gerencia operações CRUD para veículos no sistema.
 ///
 /// Este serviço implementa o [Repository Pattern] para abstrair
-/// a fonte de dados (local Hive ou remote Firebase) e fornecer
+/// a fonte de dados (local Drift DAO ou remote Firebase) e fornecer
 /// uma API consistente para a camada de domínio.
 ///
 /// **Exemplo de uso:**
@@ -34,12 +34,12 @@ Criar e manter documentação de alta qualidade que facilite manutenção, onboa
 ///
 /// See also:
 /// * [Vehicle] - Modelo de dados
-/// * [VehicleLocalDataSource] - Implementação Hive
+/// * [VehicleLocalDataSource] - Implementação Drift DAO
 /// * [VehicleRemoteDataSource] - Implementação Firebase
 class VehicleRepository {
   /// Retorna um veículo específico pelo [id].
   ///
-  /// Busca primeiro no cache local (Hive) e fallback para
+  /// Busca primeiro no cache local (Drift) e fallback para
   /// Firebase se não encontrado ou se dados estiverem stale.
   ///
   /// Retorna [Right<Vehicle>] em sucesso ou [Left<Failure>]
@@ -104,7 +104,7 @@ lib/
 
 ## 🛠️ Stack Técnica
 - **State Management**: Provider (migração para Riverpod planejada)
-- **Local Storage**: Hive
+- **Local Storage**: Drift ORM
 - **Analytics**: Firebase Analytics
 - **Architecture**: Clean Architecture + Repository Pattern
 

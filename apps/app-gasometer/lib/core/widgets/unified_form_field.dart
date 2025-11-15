@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../services/unified_formatters.dart';
-import '../services/unified_validators.dart';
+import '../services/formatters/unified_formatters.dart';
+import '../validation/unified_validators.dart';
 import '../theme/unified_design_tokens.dart';
 
 /// Componente de formulário unificado que substitui todos os outros campos

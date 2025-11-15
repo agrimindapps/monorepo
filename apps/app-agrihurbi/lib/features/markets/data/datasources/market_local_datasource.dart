@@ -58,16 +58,6 @@ abstract class MarketLocalDataSource {
 /// Implementation of Market Local DataSource
 @Injectable(as: MarketLocalDataSource)
 class MarketLocalDataSourceImpl implements MarketLocalDataSource {
-  static const String _marketsBoxName = 'markets';
-  static const String _favoritesBoxName = 'market_favorites';
-  static const String _searchHistoryBoxName = 'market_search_history';
-  static const String _cacheInfoBoxName = 'market_cache_info';
-
-  static const String _marketsKey = 'cached_markets';
-  static const String _summaryKey = 'market_summary';
-  static const String _favoritesKey = 'favorite_market_ids';
-  static const String _searchHistoryKey = 'search_queries';
-  static const String _lastUpdateKey = 'last_update';
 
   @override
   Future<void> cacheMarkets(List<MarketModel> markets) async {

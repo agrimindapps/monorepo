@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/services/data_cleaner_service.dart';
+import '../../../../features/data_management/domain/services/data_cleaner_service.dart';
 import '../../../../core/di/injection.dart' as gasometer_di;
 
 /// 🏗️ REFACTORED COMPONENT: Extracted from SettingsPage monolith

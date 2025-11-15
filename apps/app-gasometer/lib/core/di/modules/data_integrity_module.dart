@@ -1,10 +1,10 @@
 import 'package:core/core.dart';
 
-import '../../services/data_integrity_service.dart';
-import '../../services/data_integrity_facade.dart';
-import '../../services/vehicle_id_reconciliation_service.dart';
-import '../../services/fuel_supply_id_reconciliation_service.dart';
-import '../../services/maintenance_id_reconciliation_service.dart';
+import '../../../features/data_management/domain/services/data_integrity_service.dart';
+import '../../../features/data_management/domain/services/data_integrity_facade.dart';
+import '../../../features/vehicles/domain/services/vehicle_id_reconciliation_service.dart';
+import '../../../features/fuel/domain/services/fuel_supply_id_reconciliation_service.dart';
+import '../../../features/maintenance/domain/services/maintenance_id_reconciliation_service.dart';
 
 /// DI Module para Data Integrity Services
 ///

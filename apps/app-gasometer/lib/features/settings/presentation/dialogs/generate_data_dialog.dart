@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/services/data_generator_service.dart';
+import '../../../../features/data_management/domain/services/data_generator_service.dart';
 
 /// 🏗️ REFACTORED COMPONENT: Extracted from SettingsPage monolith
 /// 

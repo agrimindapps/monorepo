@@ -6,7 +6,7 @@ import '../../database/receituagro_database.dart';
 import '../../database/repositories/culturas_repository.dart';
 import '../../database/repositories/fitossanitarios_repository.dart';
 import '../../database/repositories/pragas_repository.dart';
-// REMOVED: import 'data_initialization_service.dart';
+
 
 /// Interface para o gerenciador de dados da aplicação
 abstract class IAppDataManager {
@@ -14,7 +14,7 @@ abstract class IAppDataManager {
   Future<Either<Exception, void>> forceReloadData();
   Future<Map<String, dynamic>> getDataStats();
   Future<bool> isDataReady();
-  // ⚠️ REMOVED: DataInitializationService get dataService;
+
   Future<void> dispose();
   bool get isInitialized;
 }
@@ -23,7 +23,7 @@ abstract class IAppDataManager {
 /// Responsável por inicializar o Hive, registrar adapters e coordenar o carregamento de dados
 /// Agora integrado com sistema de controle automático de versão
 class AppDataManager implements IAppDataManager {
-  // ⚠️ REMOVED: late final DataInitializationService _dataService;
+
   // ✅ Keep _isInitialized for interface compliance
   bool _isInitialized = false;
 
@@ -53,16 +53,7 @@ class AppDataManager implements IAppDataManager {
         'Inicializando dados diretamente...',
         name: 'AppDataManager',
       );
-      // ⚠️ REMOVED: DataInitializationService no longer exists
-      // Just mark as initialized since Drift repos are initialized via DI
-      // final isDataReady = await _dataService.isDataLoaded();
-      // if (!isDataReady) {
-      //   return Left(
-      //     Exception(
-      //       'Dados não foram carregados corretamente após controle de versão',
-      //     ),
-      //   );
-      // }
+
 
       _isInitialized = true;
 
@@ -89,8 +80,7 @@ class AppDataManager implements IAppDataManager {
         name: 'AppDataManager',
       );
       final assetLoader = AssetLoaderService();
-      // ⚠️ REMOVED: VersionManagerService no longer exists
-      // final versionManager = VersionManagerService();
+
 
       // Create Drift database and repository
       final database = ReceituagroDatabase.production();
@@ -98,14 +88,7 @@ class AppDataManager implements IAppDataManager {
       final pragasRepo = PragasRepository(database);
       final fitossanitarioRepo = FitossanitariosRepository(database);
 
-      // ⚠️ REMOVED: DataInitializationService no longer exists
-      // _dataService = DataInitializationService(
-      //   assetLoader: assetLoader,
-      //   versionManager: versionManager,
-      //   culturaRepository: culturaRepo,
-      //   pragasRepository: pragasRepo,
-      //   fitossanitarioRepository: fitossanitarioRepo,
-      // );
+
 
       developer.log(
         'Serviços criados com sucesso (incluindo controle de versão)',
@@ -153,8 +136,7 @@ class AppDataManager implements IAppDataManager {
       return {'error': 'Sistema não foi inicializado'};
     }
 
-    // ⚠️ REMOVED: DataInitializationService no longer exists
-    // Return simplified stats
+
     return {
       'initialized': _isInitialized,
       'timestamp': DateTime.now().toIso8601String(),
@@ -169,15 +151,7 @@ class AppDataManager implements IAppDataManager {
     return _isInitialized;
   }
 
-  /// Obtém instância do serviço de inicialização (para uso em DI)
-  // ⚠️ REMOVED: DataInitializationService no longer exists
-  // @override
-  // DataInitializationService get dataService {
-  //   if (!_isInitialized) {
-  //     throw Exception('Sistema não foi inicializado');
-  //   }
-  //   return _dataService;
-  // }
+
 
   /// Version control service removed - no longer available
   dynamic get versionControlService {
@@ -196,8 +170,7 @@ class AppDataManager implements IAppDataManager {
         name: 'AppDataManager',
       );
 
-      // ⚠️ REMOVED: Hive no longer used
-      // await Hive.close();
+
 
       _isInitialized = false;
 

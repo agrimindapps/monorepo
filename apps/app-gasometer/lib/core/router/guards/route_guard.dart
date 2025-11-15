@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../features/auth/presentation/state/auth_state.dart';
-import '../../services/platform_service.dart';
+import '../../services/platform/platform_service.dart';
 
 /// Guard de rotas centralizado para gerenciar redirecionamentos baseados em autenticação
 ///

@@ -8,9 +8,6 @@ import 'weather_local_datasource.dart';
 /// Concrete implementation of WeatherLocalDataSource
 @LazySingleton(as: WeatherLocalDataSource)
 class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
-  static const String _weatherMeasurementsBox = 'weather_measurements';
-  static const String _rainGaugesBox = 'rain_gauges';
-  static const String _weatherStatisticsBox = 'weather_statistics';
   
   @override
   Future<List<WeatherMeasurementModel>> getAllMeasurements({

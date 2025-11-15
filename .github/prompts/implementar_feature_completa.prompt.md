@@ -38,7 +38,7 @@ lib/data/
 ├── models/
 │   └── [feature_name]_model.dart    # Model com JSON serialization
 ├── datasources/
-│   ├── [feature_name]_local_datasource.dart   # Hive/SQLite
+│   ├── [feature_name]_local_datasource.dart   # Drift DAO
 │   └── [feature_name]_remote_datasource.dart  # Firebase/API
 └── repositories/
     └── [feature_name]_repository_impl.dart    # Implementação

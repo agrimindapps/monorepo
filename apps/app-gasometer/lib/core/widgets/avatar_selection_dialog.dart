@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../features/auth/presentation/notifiers/profile_notifier.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
-import '../services/avatar_service.dart';
+import '../../features/auth/domain/services/avatar_service.dart';
 
 /// Dialog for avatar selection with camera, gallery and remove options
 class AvatarSelectionDialog extends ConsumerStatefulWidget {

@@ -4,17 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:core/core.dart' as core;
 import 'package:core/core.dart' hide getIt, Column;
 
-import '../../core/di/injection.dart' as di;
+import '../../core/providers/core_providers.dart';
 import '../../infrastructure/services/auth_service.dart';
-import '../../infrastructure/services/crashlytics_service.dart';
 import '../../infrastructure/services/sync_service.dart';
-
-final taskManagerAuthServiceProvider = Provider<TaskManagerAuthService>((ref) {
-  return di.getIt<TaskManagerAuthService>();
-});
-final taskManagerSyncServiceProvider = Provider<TaskManagerSyncService>((ref) {
-  return di.getIt<TaskManagerSyncService>();
-});
 final authStateStreamProvider = StreamProvider<core.UserEntity?>((ref) {
   final authService = ref.watch(taskManagerAuthServiceProvider);
   return authService.currentUser;
@@ -52,7 +44,7 @@ final signInProvider = FutureProvider.family<core.UserEntity, SignInRequest>((
   request,
 ) async {
   final authService = ref.watch(taskManagerAuthServiceProvider);
-  final crashlyticsService = di.getIt<TaskManagerCrashlyticsService>();
+  final crashlyticsService = ref.watch(taskManagerCrashlyticsServiceProvider);
 
   try {
     final result = await authService.signInWithEmailAndPassword(
@@ -91,7 +83,7 @@ final signUpProvider = FutureProvider.family<core.UserEntity, SignUpRequest>((
   request,
 ) async {
   final authService = ref.watch(taskManagerAuthServiceProvider);
-  final crashlyticsService = di.getIt<TaskManagerCrashlyticsService>();
+  final crashlyticsService = ref.watch(taskManagerCrashlyticsServiceProvider);
 
   try {
     final result = await authService.signUpWithEmailAndPassword(

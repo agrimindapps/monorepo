@@ -27,7 +27,6 @@ abstract class SettingsLocalDataSource {
 
 @injectable
 class SettingsLocalDataSourceImpl implements SettingsLocalDataSource {
-  static const String _settingsBoxName = 'app_settings';
   final SharedPreferences _prefs;
 
   const SettingsLocalDataSourceImpl(this._prefs);

@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:hive/hive.dart';
 import 'package:injectable/injectable.dart';
 import '../models/list_model.dart';
 
@@ -52,8 +53,9 @@ class ListLocalDataSourceImpl implements IListLocalDataSource {
   @override
   Future<List<ListModel>> getActiveLists(String userId) async {
     try {
-      final activeLists = _box.values
-          .where((list) => list.ownerId == userId && !list.isArchived);
+      final activeLists = _box.values.where(
+        (list) => list.ownerId == userId && !list.isArchived,
+      );
       return activeLists.toList();
     } catch (e) {
       throw CacheException('Failed to get active lists: $e');

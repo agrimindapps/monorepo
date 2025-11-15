@@ -1,7 +1,7 @@
 import 'package:core/core.dart' show Provider;
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/di/injection.dart';
+import 'package:core/core.dart';
 import '../../domain/entities/rain_gauge_entity.dart';
 import '../../domain/entities/weather_measurement_entity.dart';
 import '../../domain/entities/weather_statistics_entity.dart';

@@ -130,43 +130,43 @@ void main() {
 ```dart
 // vehicle_repository.dart
 class VehicleRepository {
-  final HiveInterface hive;
+  final VehicleDao dao;
   
-  VehicleRepository(this.hive);
+  VehicleRepository(this.dao);
   
   Future<List<Vehicle>> getVehicles() async {
-    final box = await hive.openBox<Vehicle>('vehicles');
-    return box.values.toList();
+    return await dao.getAllVehicles();
   }
 }
 
 // DI com Provider
 final vehicleRepositoryProvider = Provider<VehicleRepository>((ref) {
-  return VehicleRepository(Hive);
+  final database = ref.watch(databaseProvider);
+  return VehicleRepository(database.vehicleDao);
 });
 ```
 
 **DEPOIS (Riverpod com code generation):**
 ```dart
-// vehicle_repository.dart
+// vehicle_repository.dart (domain/repositories)
 abstract class VehicleRepository {
   Future<Either<Failure, List<Vehicle>>> getVehicles();
   Future<Either<Failure, void>> addVehicle(Vehicle vehicle);
 }
 
-// vehicle_local_repository.dart
-class VehicleLocalRepository implements VehicleRepository {
-  final HiveInterface hive;
+// vehicle_repository_impl.dart (data/repositories)
+class VehicleRepositoryImpl implements VehicleRepository {
+  final VehicleDao dao;
   
-  VehicleLocalRepository(this.hive);
+  VehicleRepositoryImpl(this.dao);
   
   @override
   Future<Either<Failure, List<Vehicle>>> getVehicles() async {
     try {
-      final box = await hive.openBox<Vehicle>('vehicles');
-      return Right(box.values.toList());
+      final entities = await dao.getAllVehicles();
+      return Right(entities.map((e) => e.toEntity()).toList());
     } catch (e) {
-      return Left(CacheFailure(e.toString()));
+      return Left(DatabaseFailure(e.toString()));
     }
   }
 }
@@ -178,7 +178,8 @@ part 'vehicle_repository_provider.g.dart';
 
 @riverpod
 VehicleRepository vehicleRepository(VehicleRepositoryRef ref) {
-  return VehicleLocalRepository(Hive);
+  final database = ref.watch(databaseProvider);
+  return VehicleRepositoryImpl(database.vehicleDao);
 }
 ```
 

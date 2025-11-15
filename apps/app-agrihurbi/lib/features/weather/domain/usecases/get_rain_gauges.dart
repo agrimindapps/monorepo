@@ -1,4 +1,4 @@
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 
 import '../entities/rain_gauge_entity.dart';
 import '../failures/weather_failures.dart';

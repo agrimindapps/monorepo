@@ -6,7 +6,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/services/financial_core.dart';
+import '../../features/financial/domain/services/financial_core.dart';
 
 /// Types of financial warnings
 enum FinancialWarningType {

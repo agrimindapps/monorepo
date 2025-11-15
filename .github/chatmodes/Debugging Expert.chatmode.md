@@ -132,7 +132,7 @@ flutter run --profile
 ## 🎯 FOCO DO MONOREPO
 
 - **Provider/Riverpod**: Verificar rebuilds e listeners
-- **Hive**: Validar box initialization e sync
+- **Drift**: Validar database initialization e migrations
 - **Firebase**: Checar auth state e error handling
 - **Either<Failure, T>**: Garantir propagação correta de erros
 

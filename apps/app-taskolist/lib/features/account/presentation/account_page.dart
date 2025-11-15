@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../../core/providers/core_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/providers/auth_providers.dart';
 import '../../../shared/providers/subscription_providers.dart';

@@ -118,12 +118,15 @@ class LazyLoadingNotifier extends StateNotifier<LazyLoadingState> {
 
   /// Pré-carrega providers com prioridade
   Future<void> preloadProviders(List<String> keys, {int? priority}) async {
-    final futures = keys.where((key) => !isLoaded(key)).map((key) async {
-      return await getProvider<dynamic>(key);
-    });
+    final List<Future<dynamic>> futuresToLoad = [];
+    for (final key in keys) {
+      if (!isLoaded(key)) {
+        futuresToLoad.add(getProvider<dynamic>(key));
+      }
+    }
 
-    if (futures.isNotEmpty) {
-      await Future.wait(futures);
+    if (futuresToLoad.isNotEmpty) {
+      await Future.wait(futuresToLoad);
     }
   }
 

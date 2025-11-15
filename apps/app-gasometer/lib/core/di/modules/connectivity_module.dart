@@ -1,8 +1,8 @@
 import 'package:core/core.dart' show ConnectivityService, GetIt;
 import 'package:flutter/foundation.dart';
 
-import '../../services/auto_sync_service.dart';
-import '../../services/connectivity_state_manager.dart';
+import '../../../features/sync/domain/services/auto_sync_service.dart';
+import '../../services/connectivity/connectivity_state_manager.dart';
 import '../di_module.dart';
 
 /// Connectivity module responsible for connectivity monitoring services

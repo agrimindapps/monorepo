@@ -5,6 +5,7 @@ export 'package:carousel_slider/carousel_slider.dart';
 export 'package:cloud_firestore/cloud_firestore.dart' hide Order;
 export 'package:cloud_functions/cloud_functions.dart' hide Result;
 export 'package:connectivity_plus/connectivity_plus.dart';
+export 'package:flutter/material.dart' show Column;
 export 'package:dartz/dartz.dart' hide Order, State, id;
 export 'package:device_info_plus/device_info_plus.dart';
 export 'package:equatable/equatable.dart';
@@ -20,7 +21,6 @@ export 'package:font_awesome_flutter/font_awesome_flutter.dart';
 export 'package:get_it/get_it.dart';
 export 'package:go_router/go_router.dart';
 export 'package:google_sign_in/google_sign_in.dart';
-export 'package:hive/hive.dart';
 export 'package:icons_plus/icons_plus.dart';
 export 'package:injectable/injectable.dart' hide Environment, order;
 export 'package:intl/intl.dart';
@@ -30,6 +30,11 @@ export 'package:json_annotation/json_annotation.dart';
 // export 'package:drift/drift.dart'
 //     hide JsonKey, Index, VerificationResult, Query;
 // export 'services/drift/drift.dart';
+
+// Export Drift services used in app-plantis and other apps
+export 'services/drift_disabled/base_drift_database.dart';
+export 'services/drift_disabled/drift_database_config.dart';
+export 'services/drift_disabled/base_drift_repository.dart';
 
 export 'package:package_info_plus/package_info_plus.dart';
 export 'package:purchases_flutter/purchases_flutter.dart' hide LogLevel, Store;

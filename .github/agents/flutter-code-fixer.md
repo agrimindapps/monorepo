@@ -66,7 +66,7 @@ packages/core/
 │   ├── firebase_service.dart      # Auth, Firestore, Storage
 │   ├── revenue_cat_service.dart   # Premium subscriptions
 │   ├── analytics_service.dart     # Firebase Analytics
-│   └── hive_service.dart          # Local persistence
+│   └── drift/                     # Drift ORM utilities
 └── models/                         # Shared DTOs
 ```
 
@@ -322,7 +322,7 @@ State Management Check:
 
 Packages Integration Check:
 ✓ Identifica código duplicado que deveria usar packages/core
-✓ Valida uso correto de Firebase, RevenueCat, Hive services
+✓ Valida uso correto de Firebase, RevenueCat, Drift DAOs
 
 Cross-App Patterns:
 ✓ Identifica oportunidades de extração para packages

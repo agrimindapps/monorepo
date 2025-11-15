@@ -1,17 +1,12 @@
 import 'package:core/core.dart';
 
-import '../../core/di/injection.dart' as di;
+import '../../core/providers/core_providers.dart';
 import '../../features/account/presentation/usage_stats.dart' as local;
 import '../../features/auth/domain/user_limits.dart' as local;
 import '../../features/premium/presentation/subscription_status.dart' as local_sub;
 import '../../infrastructure/services/subscription_service.dart';
 
 part 'subscription_notifier.g.dart';
-
-@riverpod
-TaskManagerSubscriptionService subscriptionService(SubscriptionServiceRef ref) {
-  return di.getIt<TaskManagerSubscriptionService>();
-}
 
 /// Async Notifier para o estado de subscription
 @riverpod
@@ -37,39 +32,39 @@ class SubscriptionStatusNotifier extends _$SubscriptionStatusNotifier {
 
 /// Provider para verificar se tem premium
 @riverpod
-Future<bool> hasPremium(HasPremiumRef ref) async {
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
+Future<bool> hasPremium(Ref ref) async {
+  final subscriptionService = ref.watch(taskManagerSubscriptionServiceProvider);
   return await subscriptionService.hasPremiumSubscription();
 }
 
 /// Provider para o status da subscription atual
 @riverpod
-Future<SubscriptionEntity?> currentSubscription(CurrentSubscriptionRef ref) async {
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
+Future<SubscriptionEntity?> currentSubscription(Ref ref) async {
+  final subscriptionService = ref.watch(taskManagerSubscriptionServiceProvider);
   return await subscriptionService.getCurrentSubscription();
 }
 
 /// Provider para features disponíveis
 @riverpod
-Future<List<String>> availableFeatures(AvailableFeaturesRef ref) async {
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
+Future<List<String>> availableFeatures(Ref ref) async {
+  final subscriptionService = ref.watch(taskManagerSubscriptionServiceProvider);
   return await subscriptionService.getAvailableFeatures();
 }
 
 /// Provider para produtos disponíveis
 @riverpod
-Future<List<ProductInfo>> availableProducts(AvailableProductsRef ref) async {
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
+Future<List<ProductInfo>> availableProducts(Ref ref) async {
+  final subscriptionService = ref.watch(taskManagerSubscriptionServiceProvider);
   return await subscriptionService.getTaskManagerProducts();
 }
 
 /// Provider para limites do usuário
 @riverpod
 Future<local.UserLimits> userLimits(
-  UserLimitsRef ref,
+  Ref ref,
   UserLimitsParams params,
 ) async {
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
+  final subscriptionService = ref.watch(taskManagerSubscriptionServiceProvider);
   return await subscriptionService.getUserLimits(
     currentTasks: params.currentTasks,
     currentSubtasks: params.currentSubtasks,
@@ -81,76 +76,76 @@ Future<local.UserLimits> userLimits(
 
 /// Provider para verificar features específicas
 @riverpod
-Future<bool> hasFeature(HasFeatureRef ref, String featureName) async {
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
+Future<bool> hasFeature(Ref ref, String featureName) async {
+  final subscriptionService = ref.watch(taskManagerSubscriptionServiceProvider);
   return await subscriptionService.hasFeature(featureName);
 }
 
 /// Provider para verificar se pode criar mais tarefas
 @riverpod
-Future<bool> canCreateTasks(CanCreateTasksRef ref, int currentTaskCount) async {
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
+Future<bool> canCreateTasks(Ref ref, int currentTaskCount) async {
+  final subscriptionService = ref.watch(taskManagerSubscriptionServiceProvider);
   return await subscriptionService.canCreateMoreTasks(currentTaskCount);
 }
 
 /// Provider para verificar se pode criar mais subtarefas
 @riverpod
 Future<bool> canCreateSubtasks(
-  CanCreateSubtasksRef ref,
+  Ref ref,
   int currentSubtaskCount,
 ) async {
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
+  final subscriptionService = ref.watch(taskManagerSubscriptionServiceProvider);
   return await subscriptionService.canCreateMoreSubtasks(currentSubtaskCount);
 }
 
 /// Provider para verificar se pode criar mais tags
 @riverpod
-Future<bool> canCreateTags(CanCreateTagsRef ref, int currentTagCount) async {
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
+Future<bool> canCreateTags(Ref ref, int currentTagCount) async {
+  final subscriptionService = ref.watch(taskManagerSubscriptionServiceProvider);
   return await subscriptionService.canCreateMoreTags(currentTagCount);
 }
 
 /// Provider para verificar elegibilidade para trial
 @riverpod
-Future<bool> isEligibleForTrial(IsEligibleForTrialRef ref) async {
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
+Future<bool> isEligibleForTrial(Ref ref) async {
+  final subscriptionService = ref.watch(taskManagerSubscriptionServiceProvider);
   return await subscriptionService.isEligibleForTrial();
 }
 
 /// Provider para URL de gerenciamento
 @riverpod
-Future<String?> managementUrl(ManagementUrlRef ref) async {
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
+Future<String?> managementUrl(Ref ref) async {
+  final subscriptionService = ref.watch(taskManagerSubscriptionServiceProvider);
   return await subscriptionService.getManagementUrl();
 }
 
 /// Provider para histórico de subscriptions
 @riverpod
 Future<List<SubscriptionEntity>> subscriptionHistory(
-  SubscriptionHistoryRef ref,
+  Ref ref,
 ) async {
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
+  final subscriptionService = ref.watch(taskManagerSubscriptionServiceProvider);
   return await subscriptionService.getUserSubscriptions();
 }
 
 /// Provider para o stream de subscription status
 @riverpod
 Stream<SubscriptionEntity?> subscriptionStatusStream(
-  SubscriptionStatusStreamRef ref,
+  Ref ref,
 ) {
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
+  final subscriptionService = ref.watch(taskManagerSubscriptionServiceProvider);
   return subscriptionService.subscriptionStatus;
 }
 
 @riverpod
-SubscriptionActions subscriptionActions(SubscriptionActionsRef ref) {
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
+SubscriptionActions subscriptionActions(Ref ref) {
+  final subscriptionService = ref.watch(taskManagerSubscriptionServiceProvider);
   return SubscriptionActions(subscriptionService, ref);
 }
 
 class SubscriptionActions {
   final TaskManagerSubscriptionService _subscriptionService;
-  final SubscriptionActionsRef _ref;
+  final Ref _ref;
 
   SubscriptionActions(this._subscriptionService, this._ref);
 

@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:hive/hive.dart';
 import 'package:injectable/injectable.dart';
 import '../models/list_item_model.dart';
 
@@ -7,7 +8,14 @@ import '../models/list_item_model.dart';
 class ListItemLocalDataSource {
   static const String _boxName = 'list_items';
 
-  Box<ListItemModel> get _box => Hive.box<ListItemModel>(_boxName);
+  Box<ListItemModel> get _box {
+    if (!Hive.isBoxOpen(_boxName)) {
+      throw StateError(
+        'Box $_boxName is not open. Make sure BoxesSetup.init() is called before using this data source.',
+      );
+    }
+    return Hive.box<ListItemModel>(_boxName);
+  }
 
   /// Get all ListItems for a specific list
   List<ListItemModel> getListItems(String listId) {

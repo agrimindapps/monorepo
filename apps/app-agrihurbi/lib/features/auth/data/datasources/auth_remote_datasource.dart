@@ -1,7 +1,8 @@
+import 'package:app_agrihurbi/core/error/exceptions.dart';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/network/dio_client.dart';
+import 'package:dio/dio.dart';
 import '../models/user_model.dart';
 
 /// DataSource abstrato para operações remotas de autenticação
@@ -62,7 +63,7 @@ abstract class AuthRemoteDataSource {
 /// Inclui tratamento robusto de erros e timeout
 @LazySingleton(as: AuthRemoteDataSource)
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  final DioClient _dioClient;
+  final Dio _dioClient;
 
   const AuthRemoteDataSourceImpl(this._dioClient);
 
@@ -74,17 +75,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       debugPrint('AuthRemoteDataSourceImpl: Fazendo login para $email');
 
-      final response = await _dioClient.post(
+      final response = await _dioClient.post<Map<String, dynamic>>(
         '/auth/login',
         data: {'email': email, 'password': password},
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final userData = response.data['user'] ?? response.data;
+        final userData = response.data!['user'] ?? response.data;
         debugPrint('AuthRemoteDataSourceImpl: Login bem-sucedido');
         return UserModel.fromJson(userData as Map<String, dynamic>);
       } else {
-        final message = response.data['message'] as String? ?? 'Falha no login';
+        final message = response.data!['message'] as String? ?? 'Falha no login';
         debugPrint('AuthRemoteDataSourceImpl: Login falhou - $message');
         throw _mapStatusCodeToFailure(response.statusCode, message);
       }
@@ -104,7 +105,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       debugPrint('AuthRemoteDataSourceImpl: Registrando usuário $email');
 
-      final response = await _dioClient.post(
+      final response = await _dioClient.post<Map<String, dynamic>>(
         '/auth/register',
         data: {
           'name': name,
@@ -115,12 +116,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final userData = response.data['user'] ?? response.data;
+        final userData = response.data!['user'] ?? response.data;
         debugPrint('AuthRemoteDataSourceImpl: Registro bem-sucedido');
         return UserModel.fromJson(userData as Map<String, dynamic>);
       } else {
         final message =
-            response.data['message'] as String? ?? 'Falha no registro';
+            response.data!['message'] as String? ?? 'Falha no registro';
         debugPrint('AuthRemoteDataSourceImpl: Registro falhou - $message');
         throw _mapStatusCodeToFailure(response.statusCode, message);
       }
@@ -135,7 +136,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       debugPrint('AuthRemoteDataSourceImpl: Fazendo logout');
 
-      await _dioClient.post('/auth/logout');
+      await _dioClient.post<Map<String, dynamic>>('/auth/logout');
 
       debugPrint('AuthRemoteDataSourceImpl: Logout bem-sucedido');
     } catch (e) {
@@ -149,10 +150,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       debugPrint('AuthRemoteDataSourceImpl: Obtendo usuário atual');
 
-      final response = await _dioClient.get('/auth/me');
+      final response = await _dioClient.get<Map<String, dynamic>>('/auth/me');
 
       if (response.statusCode == 200) {
-        final userData = response.data['user'] ?? response.data;
+        final userData = response.data!['user'] ?? response.data;
         debugPrint('AuthRemoteDataSourceImpl: Usuário obtido do servidor');
         return UserModel.fromJson(userData as Map<String, dynamic>);
       } else if (response.statusCode == 401) {
@@ -160,7 +161,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         return null;
       } else {
         final message =
-            response.data['message'] as String? ?? 'Falha ao obter usuário';
+            response.data!['message'] as String? ?? 'Falha ao obter usuário';
         debugPrint(
           'AuthRemoteDataSourceImpl: Erro ao obter usuário - $message',
         );
@@ -177,15 +178,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       debugPrint('AuthRemoteDataSourceImpl: Renovando token');
 
-      final response = await _dioClient.post('/auth/refresh');
+      final response = await _dioClient.post<Map<String, dynamic>>('/auth/refresh');
 
       if (response.statusCode == 200) {
-        final token = response.data['access_token'] ?? response.data['token'];
+        final token = response.data!['access_token'] ?? response.data!['token'];
         debugPrint('AuthRemoteDataSourceImpl: Token renovado');
         return token as String;
       } else {
         final message =
-            response.data['message'] as String? ??
+            response.data!['message'] as String? ??
             'Falha na renovação do token';
         debugPrint('AuthRemoteDataSourceImpl: Falha na renovação - $message');
         throw _mapStatusCodeToFailure(response.statusCode, message);
@@ -216,15 +217,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         return null;
       }
 
-      final response = await _dioClient.put('/users/$userId', data: data);
+      final response = await _dioClient.put<Map<String, dynamic>>('/users/$userId', data: data);
 
       if (response.statusCode == 200) {
-        final userData = response.data['user'] ?? response.data;
+        final userData = response.data!['user'] ?? response.data;
         debugPrint('AuthRemoteDataSourceImpl: Perfil atualizado');
         return UserModel.fromJson(userData as Map<String, dynamic>);
       } else {
         final message =
-            response.data['message'] as String? ??
+            response.data!['message'] as String? ??
             'Falha na atualização do perfil';
         debugPrint('AuthRemoteDataSourceImpl: Falha na atualização - $message');
         throw _mapStatusCodeToFailure(response.statusCode, message);
@@ -243,7 +244,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       debugPrint('AuthRemoteDataSourceImpl: Alterando senha');
 
-      final response = await _dioClient.put(
+      final response = await _dioClient.put<Map<String, dynamic>>(
         '/auth/change-password',
         data: {
           'current_password': currentPassword,
@@ -255,7 +256,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         debugPrint('AuthRemoteDataSourceImpl: Senha alterada com sucesso');
       } else {
         final message =
-            response.data['message'] as String? ??
+            response.data!['message'] as String? ??
             'Falha na alteração da senha';
         debugPrint('AuthRemoteDataSourceImpl: Falha na alteração - $message');
         throw _mapStatusCodeToFailure(response.statusCode, message);
@@ -273,7 +274,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'AuthRemoteDataSourceImpl: Solicitando recuperação para $email',
       );
 
-      final response = await _dioClient.post(
+      final response = await _dioClient.post<Map<String, dynamic>>(
         '/auth/forgot-password',
         data: {'email': email},
       );
@@ -282,7 +283,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         debugPrint('AuthRemoteDataSourceImpl: Email de recuperação enviado');
       } else {
         final message =
-            response.data['message'] as String? ??
+            response.data!['message'] as String? ??
             'Falha na recuperação de senha';
         debugPrint('AuthRemoteDataSourceImpl: Falha na recuperação - $message');
         throw _mapStatusCodeToFailure(response.statusCode, message);
@@ -301,7 +302,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       debugPrint('AuthRemoteDataSourceImpl: Redefinindo senha com token');
 
-      final response = await _dioClient.post(
+      final response = await _dioClient.post<Map<String, dynamic>>(
         '/auth/reset-password',
         data: {'token': token, 'new_password': newPassword},
       );
@@ -310,7 +311,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         debugPrint('AuthRemoteDataSourceImpl: Senha redefinida com sucesso');
       } else {
         final message =
-            response.data['message'] as String? ??
+            response.data!['message'] as String? ??
             'Falha na redefinição da senha';
         debugPrint('AuthRemoteDataSourceImpl: Falha na redefinição - $message');
         throw _mapStatusCodeToFailure(response.statusCode, message);
@@ -326,18 +327,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       debugPrint('AuthRemoteDataSourceImpl: Verificando email $email');
 
-      final response = await _dioClient.post(
+      final response = await _dioClient.post<Map<String, dynamic>>(
         '/auth/check-email',
         data: {'email': email},
       );
 
       if (response.statusCode == 200) {
-        final isTaken = response.data['is_taken'] ?? false;
+        final isTaken = response.data!['is_taken'] ?? false;
         debugPrint('AuthRemoteDataSourceImpl: Email em uso: $isTaken');
         return isTaken as bool;
       } else {
         final message =
-            response.data['message'] as String? ??
+            response.data!['message'] as String? ??
             'Falha na verificação de email';
         debugPrint('AuthRemoteDataSourceImpl: Falha na verificação - $message');
         throw _mapStatusCodeToFailure(response.statusCode, message);
@@ -349,52 +350,52 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   /// Mapeia códigos de status para failures específicas
-  Exception _mapStatusCodeToFailure(int? statusCode, String message) {
+  ServerException _mapStatusCodeToFailure(int? statusCode, String message) {
     switch (statusCode) {
       case 400:
-        return Exception('Dados inválidos');
+        return const ServerException('Dados inválidos');
       case 401:
-        return Exception('Credenciais inválidas');
+        return const ServerException('Credenciais inválidas');
       case 403:
-        return Exception('Permissão negada');
+        return const ServerException('Permissão negada');
       case 404:
-        return Exception('Usuário não encontrado');
+        return const ServerException('Usuário não encontrado');
       case 409:
-        return Exception('Email já em uso');
+        return const ServerException('Email já em uso');
       case 422:
-        return Exception(message);
+        return ServerException(message);
       case 429:
-        return Exception('Muitas tentativas');
+        return const ServerException('Muitas tentativas');
       case 500:
       case 502:
       case 503:
-        return Exception('Erro no servidor: $message');
+        return ServerException('Erro no servidor: $message');
       default:
-        return Exception('Erro desconhecido ($statusCode): $message');
+        return ServerException('Erro desconhecido ($statusCode): $message');
     }
   }
 
   /// Mapeia exceções para failures específicas
-  Exception _mapExceptionToFailure(dynamic exception) {
+  ServerException _mapExceptionToFailure(dynamic exception) {
     final errorMessage = exception.toString().toLowerCase();
 
     if (errorMessage.contains('network') ||
         errorMessage.contains('connection')) {
-      return Exception('Erro de conexão');
+      return const ServerException('Erro de conexão');
     } else if (errorMessage.contains('timeout')) {
-      return Exception('Timeout na conexão');
+      return const ServerException('Timeout na conexão');
     } else if (errorMessage.contains('unauthorized')) {
-      return Exception('Credenciais inválidas');
+      return const ServerException('Credenciais inválidas');
     } else if (errorMessage.contains('email already')) {
-      return Exception('Email já em uso');
+      return const ServerException('Email já em uso');
     } else if (errorMessage.contains('user not found')) {
-      return Exception('Usuário não encontrado');
+      return const ServerException('Usuário não encontrado');
     } else if (errorMessage.contains('token expired')) {
-      return Exception('Token expirado');
+      return const ServerException('Token expirado');
     } else if (errorMessage.contains('invalid token')) {
-      return Exception('Token inválido');
+      return const ServerException('Token inválido');
     } else {
-      return Exception('Erro inesperado: ${exception.toString()}');
+      return ServerException('Erro inesperado: ${exception.toString()}');
     }
   }
 }

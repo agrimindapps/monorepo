@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/services/data_cleaner_service.dart';
+import '../../../../features/data_management/domain/services/data_cleaner_service.dart';
 import '../../../fuel/domain/repositories/fuel_repository.dart';
 import '../../../vehicles/domain/repositories/vehicle_repository.dart';
 import '../../domain/entities/gasometer_account_data.dart';

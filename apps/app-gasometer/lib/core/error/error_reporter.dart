@@ -4,7 +4,7 @@ import 'package:core/core.dart' show injectable;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import '../di/injection.dart';
-import '../services/gasometer_analytics_service.dart';
+import '../services/analytics/gasometer_analytics_service.dart';
 
 import 'app_error.dart';
 

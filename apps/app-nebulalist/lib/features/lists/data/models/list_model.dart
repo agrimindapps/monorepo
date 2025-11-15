@@ -1,55 +1,23 @@
 import 'package:core/core.dart';
 import '../../domain/entities/list_entity.dart';
 
-part 'list_model.g.dart';
-
 /// Data model for List
 /// Provides serialization for Hive and Firestore
-@HiveType(typeId: 0)
 class ListModel {
-  @HiveField(0)
   final String id;
-
-  @HiveField(1)
   final String name;
-
-  @HiveField(2)
   final String ownerId;
-
-  @HiveField(3)
   final String description;
-
-  @HiveField(4)
   final List<String> tags;
-
-  @HiveField(5)
   final String category;
-
-  @HiveField(6)
   final bool isFavorite;
-
-  @HiveField(7)
   final bool isArchived;
-
-  @HiveField(8)
   final DateTime createdAt;
-
-  @HiveField(9)
   final DateTime updatedAt;
-
-  @HiveField(10)
   final String? shareToken;
-
-  @HiveField(11)
   final bool isShared;
-
-  @HiveField(12)
   final DateTime? archivedAt;
-
-  @HiveField(13)
   final int itemCount;
-
-  @HiveField(14)
   final int completedCount;
 
   const ListModel({
@@ -149,22 +117,22 @@ class ListModel {
 
   /// Convert to entity
   ListEntity toEntity() => ListEntity(
-        id: id,
-        name: name,
-        ownerId: ownerId,
-        description: description,
-        tags: tags,
-        category: category,
-        isFavorite: isFavorite,
-        isArchived: isArchived,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-        shareToken: shareToken,
-        isShared: isShared,
-        archivedAt: archivedAt,
-        itemCount: itemCount,
-        completedCount: completedCount,
-      );
+    id: id,
+    name: name,
+    ownerId: ownerId,
+    description: description,
+    tags: tags,
+    category: category,
+    isFavorite: isFavorite,
+    isArchived: isArchived,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    shareToken: shareToken,
+    isShared: isShared,
+    archivedAt: archivedAt,
+    itemCount: itemCount,
+    completedCount: completedCount,
+  );
 
   /// Computed getters (similar to ListEntity)
   double get completionPercentage {

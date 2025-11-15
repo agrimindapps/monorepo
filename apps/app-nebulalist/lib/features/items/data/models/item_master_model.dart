@@ -1,49 +1,22 @@
 import 'package:core/core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/item_master_entity.dart';
-
-part 'item_master_model.g.dart';
 
 /// Data model for ItemMaster
 /// Provides serialization for Hive and Firestore
-@HiveType(typeId: 1)
 class ItemMasterModel {
-  @HiveField(0)
   final String id;
-
-  @HiveField(1)
   final String ownerId;
-
-  @HiveField(2)
   final String name;
-
-  @HiveField(3)
   final String description;
-
-  @HiveField(4)
   final List<String> tags;
-
-  @HiveField(5)
   final String category;
-
-  @HiveField(6)
   final String? photoUrl;
-
-  @HiveField(7)
   final double? estimatedPrice;
-
-  @HiveField(8)
   final String? preferredBrand;
-
-  @HiveField(9)
   final String? notes;
-
-  @HiveField(10)
   final int usageCount;
-
-  @HiveField(11)
   final DateTime createdAt;
-
-  @HiveField(12)
   final DateTime updatedAt;
 
   const ItemMasterModel({
@@ -133,20 +106,20 @@ class ItemMasterModel {
 
   /// Convert to entity
   ItemMasterEntity toEntity() => ItemMasterEntity(
-        id: id,
-        ownerId: ownerId,
-        name: name,
-        description: description,
-        tags: tags,
-        category: category,
-        photoUrl: photoUrl,
-        estimatedPrice: estimatedPrice,
-        preferredBrand: preferredBrand,
-        notes: notes,
-        usageCount: usageCount,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-      );
+    id: id,
+    ownerId: ownerId,
+    name: name,
+    description: description,
+    tags: tags,
+    category: category,
+    photoUrl: photoUrl,
+    estimatedPrice: estimatedPrice,
+    preferredBrand: preferredBrand,
+    notes: notes,
+    usageCount: usageCount,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+  );
 
   @override
   bool operator ==(Object other) =>

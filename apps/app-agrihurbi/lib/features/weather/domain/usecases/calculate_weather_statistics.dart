@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 
 import '../entities/weather_measurement_entity.dart';
 import '../entities/weather_statistics_entity.dart';

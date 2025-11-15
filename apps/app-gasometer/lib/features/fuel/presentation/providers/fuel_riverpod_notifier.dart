@@ -4,9 +4,9 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/di/injection_container.dart';
-import '../../../../core/services/fuel_crud_service.dart';
-import '../../../../core/services/fuel_query_service.dart';
-import '../../../../core/services/fuel_sync_service.dart';
+import '../../domain/services/fuel_crud_service.dart';
+import '../../domain/services/fuel_query_service.dart';
+import '../../domain/services/fuel_sync_service.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../../domain/services/fuel_calculation_service.dart';

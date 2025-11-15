@@ -1,9 +1,9 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../services/fuel_crud_service.dart';
-import '../../services/fuel_query_service.dart';
-import '../../services/fuel_sync_service.dart';
+import '../../../features/fuel/domain/services/fuel_crud_service.dart';
+import '../../../features/fuel/domain/services/fuel_query_service.dart';
+import '../../../features/fuel/domain/services/fuel_sync_service.dart';
 import '../../../features/fuel/data/datasources/fuel_supply_local_datasource.dart';
 import '../../../features/fuel/domain/usecases/add_fuel_record.dart';
 import '../../../features/fuel/domain/usecases/delete_fuel_record.dart';

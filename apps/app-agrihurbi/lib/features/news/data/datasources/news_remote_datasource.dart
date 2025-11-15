@@ -1,8 +1,9 @@
 import 'package:app_agrihurbi/core/error/exceptions.dart';
-import 'package:app_agrihurbi/core/network/dio_client.dart';
+
 import 'package:app_agrihurbi/features/news/data/models/commodity_price_model.dart';
 import 'package:app_agrihurbi/features/news/data/models/news_article_model.dart';
 import 'package:core/core.dart' show injectable;
+import 'package:dio/dio.dart';
 import 'package:xml/xml.dart';
 
 /// News Remote Data Source
@@ -11,7 +12,7 @@ import 'package:xml/xml.dart';
 /// for agriculture news and commodity prices
 @injectable
 class NewsRemoteDataSource {
-  final DioClient _client;
+  final Dio _client;
 
   const NewsRemoteDataSource(this._client);
 
@@ -66,12 +67,12 @@ class NewsRemoteDataSource {
         params.addAll(filter.toQueryParams());
       }
 
-      final response = await _client.get(
+      final response = await _client.get<Map<String, dynamic>>(
         '/api/v1/news/search',
         queryParameters: params,
       );
 
-      final articlesData = response.data['articles'];
+      final articlesData = response.data!['articles'];
       if (articlesData is! List) {
         throw const ServerException(
           'Invalid response format: articles should be a list',
@@ -97,12 +98,12 @@ class NewsRemoteDataSource {
     int offset = 0,
   }) async {
     try {
-      final response = await _client.get(
+      final response = await _client.get<Map<String, dynamic>>(
         '/api/v1/news/premium',
         queryParameters: {'limit': limit, 'offset': offset},
       );
 
-      final articlesData = response.data['articles'];
+      final articlesData = response.data!['articles'];
       if (articlesData is! List) {
         throw const ServerException(
           'Invalid response format: articles should be a list',
@@ -133,12 +134,12 @@ class NewsRemoteDataSource {
         params['types'] = types.map((t) => t.name).join(',');
       }
 
-      final response = await _client.get(
+      final response = await _client.get<Map<String, dynamic>>(
         '/api/v1/commodities/prices',
         queryParameters: params,
       );
 
-      final commoditiesData = response.data['commodities'];
+      final commoditiesData = response.data!['commodities'];
       if (commoditiesData is! List) {
         throw const ServerException(
           'Invalid response format: commodities should be a list',
@@ -165,7 +166,7 @@ class NewsRemoteDataSource {
     required DateTime endDate,
   }) async {
     try {
-      final response = await _client.get(
+      final response = await _client.get<Map<String, dynamic>>(
         '/api/v1/commodities/$commodityId/history',
         queryParameters: {
           'start': startDate.toIso8601String(),
@@ -173,7 +174,7 @@ class NewsRemoteDataSource {
         },
       );
 
-      final historyData = response.data['history'];
+      final historyData = response.data!['history'];
       if (historyData is! List) {
         throw const ServerException(
           'Invalid response format: history should be a list',
@@ -196,7 +197,7 @@ class NewsRemoteDataSource {
   /// Get market summary
   Future<CommodityMarketSummaryModel> fetchMarketSummary() async {
     try {
-      final response = await _client.get('/api/v1/markets/summary');
+      final response = await _client.get<Map<String, dynamic>>('/api/v1/markets/summary');
       if (response.data is! Map<String, dynamic>) {
         throw const ServerException(
           'Invalid response format: expected Map<String, dynamic>',
@@ -211,7 +212,7 @@ class NewsRemoteDataSource {
   /// Parse RSS feed from URL
   Future<List<NewsArticleModel>> _parseRSSFeed(String feedUrl) async {
     try {
-      final response = await _client.dio.get<String>(feedUrl);
+      final response = await _client.get<String>(feedUrl);
       final xmlString = response.data as String;
       final document = XmlDocument.parse(xmlString);
 

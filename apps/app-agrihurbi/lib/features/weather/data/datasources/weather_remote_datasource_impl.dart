@@ -1,8 +1,5 @@
-
-import 'package:core/core.dart' show LazySingleton;
 import 'package:dio/dio.dart';
-
-import '../../../../core/network/dio_client.dart';
+import 'package:injectable/injectable.dart';
 import '../../domain/failures/weather_failures.dart';
 import '../models/rain_gauge_model.dart';
 import '../models/weather_measurement_model.dart';
@@ -12,7 +9,7 @@ import 'weather_remote_datasource.dart';
 /// Concrete implementation of WeatherRemoteDataSource using REST API
 @LazySingleton(as: WeatherRemoteDataSource)
 class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
-  final DioClient _dioClient;
+  final Dio _dioClient;
   static const String _baseEndpoint = '/weather';
 
   WeatherRemoteDataSourceImpl(this._dioClient);
@@ -36,13 +33,14 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       }
       if (limit != null) queryParameters['limit'] = limit.toString();
 
-      final response = await _dioClient.get(
+      final response = await _dioClient.get<Map<String, dynamic>>(
         '$_baseEndpoint/measurements',
         queryParameters: queryParameters,
       );
 
+      final responseData = response.data as Map<String, dynamic>;
       final List<dynamic> data =
-          (response.data['data'] ?? <dynamic>[]) as List<dynamic>;
+          (responseData['data'] ?? <dynamic>[]) as List<dynamic>;
       return data
           .map(
             (json) =>
@@ -59,9 +57,12 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   @override
   Future<WeatherMeasurementModel> getMeasurementById(String id) async {
     try {
-      final response = await _dioClient.get('$_baseEndpoint/measurements/$id');
+      final response = await _dioClient.get<Map<String, dynamic>>(
+        '$_baseEndpoint/measurements/$id',
+      );
+      final responseData = response.data as Map<String, dynamic>;
       return WeatherMeasurementModel.fromJson(
-        response.data['data'] as Map<String, dynamic>,
+        responseData['data'] as Map<String, dynamic>,
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
@@ -117,13 +118,13 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     WeatherMeasurementModel measurement,
   ) async {
     try {
-      final response = await _dioClient.post(
+      final response = await _dioClient.post<Map<String, dynamic>>(
         '$_baseEndpoint/measurements',
         data: measurement.toJson(),
       );
 
       return WeatherMeasurementModel.fromJson(
-        response.data['data'] as Map<String, dynamic>,
+        response.data!['data'] as Map<String, dynamic>,
       );
     } on DioException catch (e) {
       throw WeatherNetworkFailure('Failed to create measurement: ${e.message}');
@@ -137,13 +138,13 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     WeatherMeasurementModel measurement,
   ) async {
     try {
-      final response = await _dioClient.put(
+      final response = await _dioClient.put<Map<String, dynamic>>(
         '$_baseEndpoint/measurements/${measurement.id}',
         data: measurement.toJson(),
       );
 
       return WeatherMeasurementModel.fromJson(
-        response.data['data'] as Map<String, dynamic>,
+        response.data!['data'] as Map<String, dynamic>,
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
@@ -158,7 +159,9 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   @override
   Future<void> deleteMeasurement(String id) async {
     try {
-      await _dioClient.delete('$_baseEndpoint/measurements/$id');
+      await _dioClient.delete<Map<String, dynamic>>(
+        '$_baseEndpoint/measurements/$id',
+      );
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
         return;
@@ -174,13 +177,13 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     List<WeatherMeasurementModel> measurements,
   ) async {
     try {
-      final response = await _dioClient.post(
+      final response = await _dioClient.post<Map<String, dynamic>>(
         '$_baseEndpoint/measurements/batch',
         data: {'measurements': measurements.map((m) => m.toJson()).toList()},
       );
 
       final List<dynamic> data =
-          (response.data['data'] ?? <dynamic>[]) as List<dynamic>;
+          (response.data!['data'] ?? <dynamic>[]) as List<dynamic>;
       return data
           .map(
             (json) =>
@@ -199,10 +202,12 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   @override
   Future<List<RainGaugeModel>> getAllRainGauges() async {
     try {
-      final response = await _dioClient.get('$_baseEndpoint/rain-gauges');
+      final response = await _dioClient.get<Map<String, dynamic>>(
+        '$_baseEndpoint/rain-gauges',
+      );
 
       final List<dynamic> data =
-          (response.data['data'] ?? <dynamic>[]) as List<dynamic>;
+          (response.data!['data'] ?? <dynamic>[]) as List<dynamic>;
       return data
           .map((json) => RainGaugeModel.fromJson(json as Map<String, dynamic>))
           .toList();
@@ -216,9 +221,11 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   @override
   Future<RainGaugeModel> getRainGaugeById(String id) async {
     try {
-      final response = await _dioClient.get('$_baseEndpoint/rain-gauges/$id');
+      final response = await _dioClient.get<Map<String, dynamic>>(
+        '$_baseEndpoint/rain-gauges/$id',
+      );
       return RainGaugeModel.fromJson(
-        response.data['data'] as Map<String, dynamic>,
+        response.data!['data'] as Map<String, dynamic>,
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
@@ -235,13 +242,13 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     String locationId,
   ) async {
     try {
-      final response = await _dioClient.get(
+      final response = await _dioClient.get<Map<String, dynamic>>(
         '$_baseEndpoint/rain-gauges',
         queryParameters: {'locationId': locationId},
       );
 
       final List<dynamic> data =
-          (response.data['data'] ?? <dynamic>[]) as List<dynamic>;
+          (response.data!['data'] ?? <dynamic>[]) as List<dynamic>;
       return data
           .map((json) => RainGaugeModel.fromJson(json as Map<String, dynamic>))
           .toList();
@@ -257,13 +264,13 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   @override
   Future<List<RainGaugeModel>> getActiveRainGauges() async {
     try {
-      final response = await _dioClient.get(
+      final response = await _dioClient.get<Map<String, dynamic>>(
         '$_baseEndpoint/rain-gauges',
         queryParameters: {'status': 'active'},
       );
 
       final List<dynamic> data =
-          (response.data['data'] ?? <dynamic>[]) as List<dynamic>;
+          (response.data!['data'] ?? <dynamic>[]) as List<dynamic>;
       return data
           .map((json) => RainGaugeModel.fromJson(json as Map<String, dynamic>))
           .toList();
@@ -279,13 +286,13 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   @override
   Future<RainGaugeModel> createRainGauge(RainGaugeModel rainGauge) async {
     try {
-      final response = await _dioClient.post(
+      final response = await _dioClient.post<Map<String, dynamic>>(
         '$_baseEndpoint/rain-gauges',
         data: rainGauge.toJson(),
       );
 
       return RainGaugeModel.fromJson(
-        response.data['data'] as Map<String, dynamic>,
+        response.data!['data'] as Map<String, dynamic>,
       );
     } on DioException catch (e) {
       throw WeatherNetworkFailure('Failed to create rain gauge: ${e.message}');
@@ -297,13 +304,13 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   @override
   Future<RainGaugeModel> updateRainGauge(RainGaugeModel rainGauge) async {
     try {
-      final response = await _dioClient.put(
+      final response = await _dioClient.put<Map<String, dynamic>>(
         '$_baseEndpoint/rain-gauges/${rainGauge.id}',
         data: rainGauge.toJson(),
       );
 
       return RainGaugeModel.fromJson(
-        response.data['data'] as Map<String, dynamic>,
+        response.data!['data'] as Map<String, dynamic>,
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
@@ -318,7 +325,9 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   @override
   Future<void> deleteRainGauge(String id) async {
     try {
-      await _dioClient.delete('$_baseEndpoint/rain-gauges/$id');
+      await _dioClient.delete<Map<String, dynamic>>(
+        '$_baseEndpoint/rain-gauges/$id',
+      );
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
         return;
@@ -333,13 +342,13 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     List<RainGaugeModel> localGauges,
   ) async {
     try {
-      final response = await _dioClient.post(
+      final response = await _dioClient.post<Map<String, dynamic>>(
         '$_baseEndpoint/rain-gauges/sync',
         data: {'gauges': localGauges.map((g) => g.toJson()).toList()},
       );
 
       final List<dynamic> data =
-          (response.data['data'] ?? <dynamic>[]) as List<dynamic>;
+          (response.data!['data'] ?? <dynamic>[]) as List<dynamic>;
       return data
           .map((json) => RainGaugeModel.fromJson(json as Map<String, dynamic>))
           .toList();
@@ -357,13 +366,13 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     DateTime timestamp,
   ) async {
     try {
-      final response = await _dioClient.patch(
+      final response = await _dioClient.patch<Map<String, dynamic>>(
         '$_baseEndpoint/rain-gauges/$gaugeId/measurement',
         data: {'rainfall': rainfall, 'timestamp': timestamp.toIso8601String()},
       );
 
       return RainGaugeModel.fromJson(
-        response.data['data'] as Map<String, dynamic>,
+        response.data!['data'] as Map<String, dynamic>,
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
@@ -396,13 +405,13 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         queryParameters['endDate'] = endDate.toIso8601String();
       }
 
-      final response = await _dioClient.get(
+      final response = await _dioClient.get<Map<String, dynamic>>(
         '$_baseEndpoint/statistics',
         queryParameters: queryParameters,
       );
 
       final List<dynamic> data =
-          (response.data['data'] ?? <dynamic>[]) as List<dynamic>;
+          (response.data!['data'] ?? <dynamic>[]) as List<dynamic>;
       return data
           .map(
             (json) =>
@@ -418,9 +427,11 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
 
   Future<WeatherStatisticsModel> getStatisticsById(String id) async {
     try {
-      final response = await _dioClient.get('$_baseEndpoint/statistics/$id');
+      final response = await _dioClient.get<Map<String, dynamic>>(
+        '$_baseEndpoint/statistics/$id',
+      );
       return WeatherStatisticsModel.fromJson(
-        response.data['data'] as Map<String, dynamic>,
+        response.data!['data'] as Map<String, dynamic>,
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
@@ -451,7 +462,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     required DateTime endDate,
   }) async {
     try {
-      final response = await _dioClient.post(
+      final response = await _dioClient.post<Map<String, dynamic>>(
         '$_baseEndpoint/statistics/generate',
         data: {
           'locationId': locationId,
@@ -462,7 +473,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       );
 
       return WeatherStatisticsModel.fromJson(
-        response.data['data'] as Map<String, dynamic>,
+        response.data!['data'] as Map<String, dynamic>,
       );
     } on DioException catch (e) {
       throw WeatherNetworkFailure(
@@ -477,13 +488,13 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     WeatherStatisticsModel statistics,
   ) async {
     try {
-      final response = await _dioClient.put(
+      final response = await _dioClient.put<Map<String, dynamic>>(
         '$_baseEndpoint/statistics/${statistics.id}',
         data: statistics.toJson(),
       );
 
       return WeatherStatisticsModel.fromJson(
-        response.data['data'] as Map<String, dynamic>,
+        response.data!['data'] as Map<String, dynamic>,
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
@@ -497,7 +508,9 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
 
   Future<void> deleteStatistics(String id) async {
     try {
-      await _dioClient.delete('$_baseEndpoint/statistics/$id');
+      await _dioClient.delete<Map<String, dynamic>>(
+        '$_baseEndpoint/statistics/$id',
+      );
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
         return;
@@ -516,7 +529,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     required DateTime endDate,
   }) async {
     try {
-      final response = await _dioClient.post(
+      final response = await _dioClient.post<Map<String, dynamic>>(
         '$_baseEndpoint/statistics/calculate',
         data: {
           'locationId': locationId,
@@ -527,7 +540,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       );
 
       return WeatherStatisticsModel.fromJson(
-        response.data['data'] as Map<String, dynamic>,
+        response.data!['data'] as Map<String, dynamic>,
       );
     } on DioException catch (e) {
       throw WeatherNetworkFailure(
@@ -545,7 +558,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     String provider = 'openweathermap',
   }) async {
     try {
-      final response = await _dioClient.get(
+      final response = await _dioClient.get<Map<String, dynamic>>(
         '$_baseEndpoint/current',
         queryParameters: {
           'lat': latitude.toString(),
@@ -555,7 +568,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       );
 
       return WeatherMeasurementModel.fromJson(
-        response.data['data'] as Map<String, dynamic>,
+        response.data!['data'] as Map<String, dynamic>,
       );
     } on DioException catch (e) {
       throw WeatherNetworkFailure(
@@ -574,7 +587,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     String provider = 'openweathermap',
   }) async {
     try {
-      final response = await _dioClient.get(
+      final response = await _dioClient.get<Map<String, dynamic>>(
         '$_baseEndpoint/forecast',
         queryParameters: {
           'lat': latitude.toString(),
@@ -584,7 +597,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         },
       );
 
-      final List<dynamic> data = response.data['data'] as List<dynamic>;
+      final List<dynamic> data = response.data!['data'] as List<dynamic>;
       return data
           .map(
             (json) =>
@@ -610,12 +623,12 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       if (locationId != null) queryParams['locationId'] = locationId;
       if (since != null) queryParams['since'] = since.toIso8601String();
 
-      final response = await _dioClient.get(
+      final response = await _dioClient.get<Map<String, dynamic>>(
         '$_baseEndpoint/measurements/download',
         queryParameters: queryParams,
       );
 
-      final List<dynamic> data = response.data['data'] as List<dynamic>;
+      final List<dynamic> data = response.data!['data'] as List<dynamic>;
       return data
           .map(
             (json) =>
@@ -637,12 +650,12 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       final queryParams = <String, dynamic>{};
       if (since != null) queryParams['since'] = since.toIso8601String();
 
-      final response = await _dioClient.get(
+      final response = await _dioClient.get<Map<String, dynamic>>(
         '$_baseEndpoint/rain-gauges/download',
         queryParameters: queryParams,
       );
 
-      final List<dynamic> data = response.data['data'] as List<dynamic>;
+      final List<dynamic> data = response.data!['data'] as List<dynamic>;
       return data
           .map((json) => RainGaugeModel.fromJson(json as Map<String, dynamic>))
           .toList();
@@ -657,7 +670,10 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
 
   Future<void> uploadSyncData(Map<String, dynamic> syncData) async {
     try {
-      await _dioClient.post('$_baseEndpoint/sync/upload', data: syncData);
+      await _dioClient.post<Map<String, dynamic>>(
+        '$_baseEndpoint/sync/upload',
+        data: syncData,
+      );
     } on DioException catch (e) {
       throw WeatherNetworkFailure('Failed to upload sync data: ${e.message}');
     } catch (e) {
@@ -668,7 +684,9 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   @override
   Future<Map<String, dynamic>> getServerStatus() async {
     try {
-      final response = await _dioClient.get('$_baseEndpoint/server-status');
+      final response = await _dioClient.get<Map<String, dynamic>>(
+        '$_baseEndpoint/server-status',
+      );
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
       throw WeatherNetworkFailure('Failed to get server status: ${e.message}');

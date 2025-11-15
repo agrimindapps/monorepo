@@ -492,10 +492,7 @@ class LivestockProvider extends ChangeNotifier {
     return countries.toList()..sort();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
+
 }
 
 /// Provider específico para operações de bovinos

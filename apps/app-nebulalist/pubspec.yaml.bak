@@ -1,0 +1,53 @@
+name: app_nebulalist
+description: NebulaList - A modern task management application
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.9.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Core Package - Shared services (Firebase, Riverpod, Hive, GetIt, Injectable, dartz, equatable)
+  core:
+    path: ../../packages/core
+
+  # Specific dependencies not in core
+  uuid: any
+  hive_flutter: any
+  freezed_annotation: ^2.4.1
+  riverpod_annotation: any
+  injectable: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code Generation
+  build_runner: any
+  freezed: ^2.5.2
+  json_serializable: ^6.8.0
+  riverpod_generator: any
+  injectable_generator: any
+  hive_generator: any
+
+flutter:
+  uses-material-design: true
+
+  # TODO: Add your assets here
+  # assets:
+  #   - assets/images/
+  #   - assets/icons/
+
+  # TODO: Add custom fonts if needed
+  # fonts:
+  #   - family: YourFont
+  #     fonts:
+  #       - asset: assets/fonts/YourFont-Regular.ttf
+  #       - asset: assets/fonts/YourFont-Bold.ttf
+  #         weight: 700

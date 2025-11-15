@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:dio/dio.dart';
 
 import 'injection.config.dart';
 
@@ -7,6 +8,9 @@ final getIt = GetIt.instance;
 /// Module for registering external dependencies from core package
 @module
 abstract class RegisterModule {
+  @lazySingleton
+  Dio get dio => Dio();
+
   // @lazySingleton
   // IAnalyticsRepository get analyticsRepository => FirebaseAnalyticsService();
 

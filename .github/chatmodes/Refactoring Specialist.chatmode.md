@@ -106,9 +106,9 @@ class AnalyticsService {
 ```dart
 // ❌ ANTES: Lógica de dados no controller/provider
 class VehicleProvider extends ChangeNotifier {
-  Future<void> loadVehicles() {
-    final box = await Hive.openBox('vehicles');
-    _vehicles = box.values.toList();
+  Future<void> loadVehicles() async {
+    final vehicles = await database.vehicleDao.getAllVehicles();
+    _vehicles = vehicles.map((e) => e.toEntity()).toList();
     notifyListeners();
   }
 }
@@ -118,14 +118,18 @@ abstract class VehicleRepository {
   Future<Either<Failure, List<Vehicle>>> getVehicles();
 }
 
-class VehicleLocalRepository implements VehicleRepository {
+class VehicleRepositoryImpl implements VehicleRepository {
+  final VehicleDao dao;
+  
+  VehicleRepositoryImpl(this.dao);
+  
   @override
   Future<Either<Failure, List<Vehicle>>> getVehicles() async {
     try {
-      final box = await Hive.openBox<Vehicle>('vehicles');
-      return Right(box.values.toList());
+      final entities = await dao.getAllVehicles();
+      return Right(entities.map((e) => e.toEntity()).toList());
     } catch (e) {
-      return Left(CacheFailure(e.toString()));
+      return Left(DatabaseFailure(e.toString()));
     }
   }
 }

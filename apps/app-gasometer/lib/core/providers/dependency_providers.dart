@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 
-import '../services/image_sync_service.dart';
+import '../../features/image/domain/services/image_sync_service.dart';
 import '../../features/fuel/domain/repositories/fuel_repository.dart';
 import '../../features/fuel/domain/usecases/add_fuel_record.dart';
 import '../../features/fuel/domain/usecases/delete_fuel_record.dart';

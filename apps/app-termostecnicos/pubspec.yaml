@@ -65,14 +65,7 @@ dependencies:
   purchases_flutter: any
 
   # Database
-  # drift:
-  #   version: ^2.28.0
-  #   platforms:
-  #     - android
-  #     - ios
-  #     - linux
-  #     - macos
-  #     - windows
+  drift: ^2.28.0
   # sqlite3_flutter_libs: ^0.5.0
   path_provider: any
   path: any
@@ -85,14 +78,7 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 
   # Code Generation
-  # drift_dev:
-  #   version: ^2.28.0
-  #   platforms:
-  #     - android
-  #     - ios
-  #     - linux
-  #     - macos
-  #     - windows
+  drift_dev: ^2.28.0
   build_runner: ^2.4.12
   riverpod_generator: ^2.4.0
   injectable_generator: ^2.6.2

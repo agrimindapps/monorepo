@@ -1,7 +1,8 @@
-import 'package:app_agrihurbi/core/network/dio_client.dart';
 import 'package:app_agrihurbi/features/markets/data/models/market_model.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_filter_entity.dart';
+import 'package:core/core.dart' hide Environment;
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
 /// Abstract Market Remote DataSource
@@ -33,22 +34,13 @@ abstract class MarketRemoteDataSource {
   Future<MarketSummaryModel> getMarketSummary();
 
   /// Get top gainers from API
-  Future<List<MarketModel>> getTopGainers({
-    int limit = 10,
-    MarketType? type,
-  });
+  Future<List<MarketModel>> getTopGainers({int limit = 10, MarketType? type});
 
   /// Get top losers from API
-  Future<List<MarketModel>> getTopLosers({
-    int limit = 10,
-    MarketType? type,
-  });
+  Future<List<MarketModel>> getTopLosers({int limit = 10, MarketType? type});
 
   /// Get most active markets from API
-  Future<List<MarketModel>> getMostActive({
-    int limit = 10,
-    MarketType? type,
-  });
+  Future<List<MarketModel>> getMostActive({int limit = 10, MarketType? type});
 
   /// Get market price history from API
   Future<List<PriceHistoryModel>> getMarketHistory({
@@ -63,7 +55,7 @@ abstract class MarketRemoteDataSource {
 @Injectable(as: MarketRemoteDataSource)
 @Environment('prod')
 class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
-  final DioClient _dioClient;
+  final Dio _dioClient;
 
   MarketRemoteDataSourceImpl(this._dioClient);
 
@@ -75,10 +67,7 @@ class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
     int limit = 50,
     int offset = 0,
   }) async {
-    final queryParameters = <String, dynamic>{
-      'limit': limit,
-      'offset': offset,
-    };
+    final queryParameters = <String, dynamic>{'limit': limit, 'offset': offset};
     if (filter != null) {
       if (filter.types?.isNotEmpty == true) {
         queryParameters['types'] = filter.types!.map((t) => t.name).join(',');
@@ -101,7 +90,7 @@ class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
       queryParameters['sort_order'] = filter.sortOrder.name;
     }
 
-    final response = await _dioClient.get(
+    final response = await _dioClient.get<Map<String, dynamic>>(
       _baseEndpoint,
       queryParameters: queryParameters,
     );
@@ -116,8 +105,10 @@ class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
 
   @override
   Future<MarketModel> getMarketById(String id) async {
-    final response = await _dioClient.get('$_baseEndpoint/$id');
-    
+    final response = await _dioClient.get<Map<String, dynamic>>(
+      '$_baseEndpoint/$id',
+    );
+
     final data = response.data as Map<String, dynamic>;
     return MarketModel.fromJson(data['market'] as Map<String, dynamic>);
   }
@@ -128,10 +119,7 @@ class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
     MarketFilter? filter,
     int limit = 20,
   }) async {
-    final queryParameters = <String, dynamic>{
-      'q': query,
-      'limit': limit,
-    };
+    final queryParameters = <String, dynamic>{'q': query, 'limit': limit};
     if (filter != null) {
       if (filter.types?.isNotEmpty == true) {
         queryParameters['types'] = filter.types!.map((t) => t.name).join(',');
@@ -141,7 +129,7 @@ class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
       }
     }
 
-    final response = await _dioClient.get(
+    final response = await _dioClient.get<Map<String, dynamic>>(
       '$_baseEndpoint/search',
       queryParameters: queryParameters,
     );
@@ -159,7 +147,7 @@ class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
     required MarketType type,
     int limit = 20,
   }) async {
-    final response = await _dioClient.get(
+    final response = await _dioClient.get<Map<String, dynamic>>(
       '$_baseEndpoint/type/${type.name}',
       queryParameters: {'limit': limit},
     );
@@ -174,8 +162,10 @@ class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
 
   @override
   Future<MarketSummaryModel> getMarketSummary() async {
-    final response = await _dioClient.get('$_baseEndpoint/summary');
-    
+    final response = await _dioClient.get<Map<String, dynamic>>(
+      '$_baseEndpoint/summary',
+    );
+
     final data = response.data as Map<String, dynamic>;
     return MarketSummaryModel.fromJson(data['summary'] as Map<String, dynamic>);
   }
@@ -190,7 +180,7 @@ class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
       queryParameters['type'] = type.name;
     }
 
-    final response = await _dioClient.get(
+    final response = await _dioClient.get<Map<String, dynamic>>(
       '$_baseEndpoint/top/gainers',
       queryParameters: queryParameters,
     );
@@ -213,7 +203,7 @@ class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
       queryParameters['type'] = type.name;
     }
 
-    final response = await _dioClient.get(
+    final response = await _dioClient.get<Map<String, dynamic>>(
       '$_baseEndpoint/top/losers',
       queryParameters: queryParameters,
     );
@@ -236,7 +226,7 @@ class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
       queryParameters['type'] = type.name;
     }
 
-    final response = await _dioClient.get(
+    final response = await _dioClient.get<Map<String, dynamic>>(
       '$_baseEndpoint/top/active',
       queryParameters: queryParameters,
     );
@@ -262,7 +252,7 @@ class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
       'interval': interval,
     };
 
-    final response = await _dioClient.get(
+    final response = await _dioClient.get<Map<String, dynamic>>(
       '$_baseEndpoint/$marketId/history',
       queryParameters: queryParameters,
     );
@@ -280,7 +270,6 @@ class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
 @Injectable(as: MarketRemoteDataSource)
 @Environment('dev') // Use this annotation for development environment
 class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
-  
   /// Generate mock market data
   List<MarketModel> _generateMockMarkets() {
     return [
@@ -375,7 +364,7 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
     int offset = 0,
   }) async {
     await Future<void>.delayed(const Duration(milliseconds: 500));
-    
+
     var markets = _generateMockMarkets();
     if (filter != null) {
       if (filter.types?.isNotEmpty == true) {
@@ -383,22 +372,25 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
       }
       if (filter.searchQuery?.isNotEmpty == true) {
         final query = filter.searchQuery!.toLowerCase();
-        markets = markets.where((m) => 
-          m.name.toLowerCase().contains(query) ||
-          m.symbol.toLowerCase().contains(query)
-        ).toList();
+        markets = markets
+            .where(
+              (m) =>
+                  m.name.toLowerCase().contains(query) ||
+                  m.symbol.toLowerCase().contains(query),
+            )
+            .toList();
       }
     }
     final startIndex = offset.clamp(0, markets.length);
     final endIndex = (offset + limit).clamp(0, markets.length);
-    
+
     return markets.sublist(startIndex, endIndex);
   }
 
   @override
   Future<MarketModel> getMarketById(String id) async {
     await Future<void>.delayed(const Duration(milliseconds: 300));
-    
+
     final markets = _generateMockMarkets();
     final market = markets.firstWhere((m) => m.id == id);
     return market;
@@ -411,7 +403,7 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
     int limit = 20,
   }) async {
     await Future<void>.delayed(const Duration(milliseconds: 400));
-    
+
     return getMarkets(
       filter: filter?.copyWith(searchQuery: query),
       limit: limit,
@@ -424,7 +416,7 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
     int limit = 20,
   }) async {
     await Future<void>.delayed(const Duration(milliseconds: 350));
-    
+
     final markets = _generateMockMarkets();
     return markets.where((m) => m.type == type).take(limit).toList();
   }
@@ -432,11 +424,11 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
   @override
   Future<MarketSummaryModel> getMarketSummary() async {
     await Future<void>.delayed(const Duration(milliseconds: 600));
-    
+
     final markets = _generateMockMarkets();
     final gainers = markets.where((m) => m.isUp).toList();
     final losers = markets.where((m) => m.isDown).toList();
-    
+
     return MarketSummaryModel(
       marketName: 'Mercado Agrícola Brasileiro',
       lastUpdated: DateTime.now(),
@@ -458,14 +450,14 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
     MarketType? type,
   }) async {
     await Future<void>.delayed(const Duration(milliseconds: 400));
-    
+
     var markets = _generateMockMarkets();
     markets = markets.where((m) => m.isUp).toList();
-    
+
     if (type != null) {
       markets = markets.where((m) => m.type == type).toList();
     }
-    
+
     markets.sort((a, b) => b.changePercent.compareTo(a.changePercent));
     return markets.take(limit).toList();
   }
@@ -476,14 +468,14 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
     MarketType? type,
   }) async {
     await Future<void>.delayed(const Duration(milliseconds: 400));
-    
+
     var markets = _generateMockMarkets();
     markets = markets.where((m) => m.isDown).toList();
-    
+
     if (type != null) {
       markets = markets.where((m) => m.type == type).toList();
     }
-    
+
     markets.sort((a, b) => a.changePercent.compareTo(b.changePercent));
     return markets.take(limit).toList();
   }
@@ -494,13 +486,13 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
     MarketType? type,
   }) async {
     await Future<void>.delayed(const Duration(milliseconds: 400));
-    
+
     var markets = _generateMockMarkets();
-    
+
     if (type != null) {
       markets = markets.where((m) => m.type == type).toList();
     }
-    
+
     markets.sort((a, b) => b.volume.compareTo(a.volume));
     return markets.take(limit).toList();
   }
@@ -516,23 +508,25 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
     final history = <PriceHistoryModel>[];
     final days = endDate.difference(startDate).inDays;
     var currentPrice = 100.0;
-    
+
     for (int i = 0; i <= days; i++) {
       final date = startDate.add(Duration(days: i));
       final variance = (i % 5 - 2) * 2.5; // Mock price variation
       currentPrice += variance;
-      
-      history.add(PriceHistoryModel(
-        date: date,
-        price: currentPrice,
-        volume: 1000 + (i * 100),
-        high: currentPrice + 2.5,
-        low: currentPrice - 2.0,
-        open: currentPrice - 1.0,
-        close: currentPrice,
-      ));
+
+      history.add(
+        PriceHistoryModel(
+          date: date,
+          price: currentPrice,
+          volume: 1000 + (i * 100),
+          high: currentPrice + 2.5,
+          low: currentPrice - 2.0,
+          open: currentPrice - 1.0,
+          close: currentPrice,
+        ),
+      );
     }
-    
+
     return history;
   }
 }

@@ -19,10 +19,15 @@ dependencies:
 
   # Specific dependencies not in core
   uuid: any
-  hive_flutter: any
+  drift: any
+  sqlite3_flutter_libs: any
+  path_provider: any
+  path: any
   freezed_annotation: ^2.4.1
   riverpod_annotation: any
   injectable: any
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -34,7 +39,7 @@ dev_dependencies:
   json_serializable: ^6.8.0
   riverpod_generator: any
   injectable_generator: any
-  hive_generator: any
+  drift_dev: any
 
 flutter:
   uses-material-design: true

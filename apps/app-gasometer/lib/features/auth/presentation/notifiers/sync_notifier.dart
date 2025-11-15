@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container_modular.dart';
-import '../../../../core/services/gasometer_analytics_service.dart';
+import '../../../../core/services/analytics/gasometer_analytics_service.dart';
 import '../state/auth_state.dart' as gasometer_auth;
 import '../state/sync_state.dart';
 import 'auth_notifier.dart';

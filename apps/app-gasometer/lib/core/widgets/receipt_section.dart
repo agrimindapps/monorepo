@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../features/expenses/presentation/widgets/receipt_image_picker.dart';
-import '../services/image_picker_service.dart';
+import '../../features/image/domain/services/image_picker_service.dart';
 import '../theme/design_tokens.dart';
 import 'form_section_header.dart';
 

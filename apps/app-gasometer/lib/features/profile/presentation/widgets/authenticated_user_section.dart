@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/services/data_sanitization_service.dart';
+import '../../../../features/data_management/domain/services/data_sanitization_service.dart';
 import '../../../../core/theme/design_tokens.dart';
 
 /// Widget para exibir informações do perfil do usuário autenticado

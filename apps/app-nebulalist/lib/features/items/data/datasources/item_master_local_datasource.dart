@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:hive/hive.dart';
 import 'package:injectable/injectable.dart';
 import '../models/item_master_model.dart';
 
@@ -7,7 +8,14 @@ import '../models/item_master_model.dart';
 class ItemMasterLocalDataSource {
   static const String _boxName = 'item_masters';
 
-  Box<ItemMasterModel> get _box => Hive.box<ItemMasterModel>(_boxName);
+  Box<ItemMasterModel> get _box {
+    if (!Hive.isBoxOpen(_boxName)) {
+      throw StateError(
+        'Box $_boxName is not open. Make sure BoxesSetup.init() is called before using this data source.',
+      );
+    }
+    return Hive.box<ItemMasterModel>(_boxName);
+  }
 
   /// Get all ItemMasters from local storage
   List<ItemMasterModel> getItemMasters() {

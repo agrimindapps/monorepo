@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 
 import '../../../../core/error/failures.dart';
-import '../../../../core/services/gasometer_analytics_service.dart';
+import '../../../../core/services/analytics/gasometer_analytics_service.dart';
 
 /// Alias para Result até encontrarmos o import correto
 class Result<T> {

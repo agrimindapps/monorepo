@@ -1,7 +1,8 @@
 import 'package:core/core.dart' as core_lib;
-import 'package:core/core.dart' show GetIt, SharedPreferences;
+import 'package:core/core.dart' show GetIt;
 import 'package:flutter/foundation.dart';
 
+import '../network/auth_interceptor.dart';
 import '../services/premium_service.dart';
 
 final getIt = GetIt.instance;
@@ -61,6 +62,11 @@ Future<void> configureAppDependencies({bool firebaseEnabled = false}) async {
   getIt.registerSingleton<core_lib.EnhancedSecureStorageService>(
     core_lib.EnhancedSecureStorageService(appIdentifier: 'app_agrihurbi'),
   );
+
+  // Register DioService from core and add AuthInterceptor
+  getIt.registerSingleton<core_lib.DioService>(core_lib.DioService());
+  getIt<core_lib.DioService>().addInterceptor(AuthInterceptor());
+
   configureDependencies();
 
   debugPrint('✅ App Dependencies configured successfully!');

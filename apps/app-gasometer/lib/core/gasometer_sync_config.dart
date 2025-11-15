@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 
-import 'services/gasometer_sync_service.dart';
+import '../features/sync/domain/services/gasometer_sync_service.dart';
 
 // import 'extensions/user_entity_gasometer_extension.dart'; // Não usado mais
 

@@ -41,10 +41,9 @@ packages/core/
 │   │   ├── Subscription status
 │   │   └── Entitlement checks
 │   │
-│   ├── hive_service.dart          # 10 apps persistem
-│   │   ├── BoxManager pattern
-│   │   ├── Encryption support
-│   │   └── Type adapters
+│   ├── drift/                     # Drift ORM utilities
+│   │   ├── base_drift_database.dart
+│   │   └── drift_extensions.dart
 │   │
 │   └── notification_service.dart  # 5 apps notificam
 │       ├── Local notifications
@@ -76,13 +75,27 @@ packages/core/
 Riverpod Migration Status:
 ✅ app-plantis (100% - GOLD STANDARD)
 ✅ app_taskolist (100%)
-🔄 app-gasometer (0% - Planejado Q1)
-🔄 app-receituagro (0% - Planejado Q2)
+🔄 app-gasometer (50% - Em progresso)
+🔄 app-receituagro (30% - Em progresso)
 ⏳ Outros apps (Aguardando padrões consolidados)
 
+Drift ORM Migration Status:
+✅ app-plantis (100%)
+✅ app-gasometer (100%)
+✅ app-nutrituti (100%)
+✅ app-petiveti (100%)
+✅ app-taskolist (100%)
+✅ app-receituagro (100%)
+✅ app-calculei, app-termostecnicos (100%)
+⚠️ Apps restantes: Migration planejada
+
 Provider Apps (Legacy):
-- app-gasometer, app-receituagro, app-agrihurbi, outros
+- app-gasometer, app-receituagro (migração parcial)
 - Migration: Faseada, validada com app-plantis como referência
+
+Hive Apps (Deprecated):
+- Todos migrados ou em migração para Drift ORM
+- Hive não é mais padrão do monorepo
 ```
 
 ### **Padrões Consolidados:**

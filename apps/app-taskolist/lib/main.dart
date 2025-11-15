@@ -2,9 +2,7 @@ import 'package:core/core.dart' hide getIt, Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'core/di/injection.dart';
-import 'core/di/modules/account_deletion_module.dart';
-import 'core/di/modules/sync_module.dart';
+import 'core/providers/core_providers.dart';
 import 'core/services/navigation_service.dart' as local_nav;
 import 'core/services/notification_actions_service.dart';
 import 'core/theme/app_theme.dart';
@@ -13,20 +11,19 @@ import 'features/auth/presentation/login_page.dart';
 import 'features/premium/presentation/promotional_page.dart';
 import 'features/tasks/presentation/providers/theme_provider.dart';
 import 'firebase_options.dart';
-import 'infrastructure/services/analytics_service.dart';
-import 'infrastructure/services/crashlytics_service.dart';
-import 'infrastructure/services/notification_service.dart';
-import 'infrastructure/services/performance_service.dart';
-late ICrashlyticsRepository _crashlyticsRepository;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await configureDependencies();
-  _crashlyticsRepository = getIt<ICrashlyticsRepository>();
+
+  // Create ProviderContainer
+  final providerContainer = ProviderContainer();
+
+  // Get crashlytics repository from Riverpod
+  final crashlyticsRepository = providerContainer.read(crashlyticsRepositoryProvider);
   if (!kIsWeb) {
     FlutterError.onError = (errorDetails) {
-      _crashlyticsRepository.recordError(
+      crashlyticsRepository.recordError(
         exception: errorDetails.exception,
         stackTrace: errorDetails.stack ?? StackTrace.empty,
         reason: errorDetails.summary.toString(),
@@ -34,7 +31,7 @@ void main() async {
       );
     };
     PlatformDispatcher.instance.onError = (error, stack) {
-      _crashlyticsRepository.recordError(
+      crashlyticsRepository.recordError(
         exception: error,
         stackTrace: stack,
         fatal: true,
@@ -42,23 +39,11 @@ void main() async {
       return true;
     };
   }
-  try {
-    debugPrint('🔐 MAIN: Initializing account deletion module...');
-    AccountDeletionModule.init(getIt);
-    debugPrint('✅ MAIN: Account deletion module initialized successfully');
-  } catch (e) {
-    debugPrint('❌ MAIN: Account deletion initialization failed: $e');
-  }
-  try {
-    debugPrint('🔄 MAIN: Forcing Taskolist sync initialization...');
-    await TaskolistSyncDIModule.init();
-    await TaskolistSyncDIModule.initializeSyncService();
-    debugPrint('✅ MAIN: Taskolist sync initialization completed successfully');
-  } catch (e) {
-    debugPrint('❌ MAIN: Sync initialization failed: $e');
-  }
-  await _initializeFirebaseServices();
-  final providerContainer = ProviderContainer();
+
+  // Initialize Firebase services
+  await _initializeFirebaseServices(providerContainer);
+
+  // Initialize navigation and notification services
   local_nav.NavigationService.initialize(providerContainer);
   NotificationActionsService.initialize(providerContainer);
 
@@ -70,12 +55,12 @@ void main() async {
   );
 }
 
-Future<void> _initializeFirebaseServices() async {
+Future<void> _initializeFirebaseServices(ProviderContainer container) async {
   try {
-    final analyticsService = getIt<TaskManagerAnalyticsService>();
-    final crashlyticsService = getIt<TaskManagerCrashlyticsService>();
-    final performanceService = getIt<TaskManagerPerformanceService>();
-    final notificationService = getIt<TaskManagerNotificationService>();
+    final analyticsService = container.read(taskManagerAnalyticsServiceProvider);
+    final crashlyticsService = container.read(taskManagerCrashlyticsServiceProvider);
+    final performanceService = container.read(taskManagerPerformanceServiceProvider);
+    final notificationService = container.read(taskManagerNotificationServiceProvider);
     await crashlyticsService.setTaskManagerContext(
       userId: 'anonymous', // Será atualizado quando usuário fizer login
       version: '1.0.0',
@@ -111,7 +96,8 @@ Future<void> _initializeFirebaseServices() async {
   } catch (e, stackTrace) {
     debugPrint('❌ Error initializing Firebase services: $e');
     try {
-      await _crashlyticsRepository.recordError(
+      final crashlyticsRepository = container.read(crashlyticsRepositoryProvider);
+      await crashlyticsRepository.recordError(
         exception: e,
         stackTrace: stackTrace,
         reason: 'Firebase services initialization failed',

@@ -1,94 +1,71 @@
 // Package imports:
-import 'package:hive/hive.dart';
 
 // Project imports:
 import '../../domain/entities/thirteenth_salary_calculation.dart';
 
-part 'thirteenth_salary_calculation_model.g.dart';
 
 /// Hive model for 13th salary calculation
 ///
 /// Extends domain entity to maintain LSP (Liskov Substitution Principle)
 /// Uses Hive annotations for local storage persistence
-@HiveType(typeId: 11) // typeId must be unique across all Hive models
 class ThirteenthSalaryCalculationModel extends ThirteenthSalaryCalculation {
-  @HiveField(0)
   @override
   final String id;
 
-  @HiveField(1)
   @override
   final double grossSalary;
 
-  @HiveField(2)
   @override
   final int monthsWorked;
 
-  @HiveField(3)
   @override
   final DateTime admissionDate;
 
-  @HiveField(4)
   @override
   final DateTime calculationDate;
 
-  @HiveField(5)
   @override
   final int unjustifiedAbsences;
 
-  @HiveField(6)
   @override
   final bool isAdvancePayment;
 
-  @HiveField(7)
   @override
   final int dependents;
 
-  @HiveField(8)
   @override
   final int consideredMonths;
 
-  @HiveField(9)
   @override
   final double valuePerMonth;
 
-  @HiveField(10)
   @override
   final double grossThirteenthSalary;
 
-  @HiveField(11)
   @override
   final double inssDiscount;
 
-  @HiveField(12)
   @override
   final double inssRate;
 
-  @HiveField(13)
   @override
   final double irrfDiscount;
 
-  @HiveField(14)
   @override
   final double irrfRate;
 
-  @HiveField(15)
   @override
   final double irrfBaseCalculation;
 
-  @HiveField(16)
   @override
   final double netThirteenthSalary;
 
-  @HiveField(17)
   @override
   final double firstInstallment;
 
-  @HiveField(18)
   @override
   final double secondInstallment;
 
-  @HiveField(19)
   @override
   final DateTime calculatedAt;
 

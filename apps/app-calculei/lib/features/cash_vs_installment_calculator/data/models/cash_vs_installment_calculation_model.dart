@@ -1,51 +1,36 @@
-import 'package:hive/hive.dart';
 import '../../domain/entities/cash_vs_installment_calculation.dart';
 
-part 'cash_vs_installment_calculation_model.g.dart';
-
-@HiveType(typeId: 15)
 class CashVsInstallmentCalculationModel extends CashVsInstallmentCalculation {
-  @HiveField(0)
   @override
   final String id;
 
-  @HiveField(1)
   @override
   final double cashPrice;
 
-  @HiveField(2)
   @override
   final double installmentPrice;
 
-  @HiveField(3)
   @override
   final int numberOfInstallments;
 
-  @HiveField(4)
   @override
   final double monthlyInterestRate;
 
-  @HiveField(5)
   @override
   final double totalInstallmentPrice;
 
-  @HiveField(6)
   @override
   final double implicitRate;
 
-  @HiveField(7)
   @override
   final double presentValueOfInstallments;
 
-  @HiveField(8)
   @override
   final String bestOption;
 
-  @HiveField(9)
   @override
   final double savingsOrAdditionalCost;
 
-  @HiveField(10)
   @override
   final DateTime calculatedAt;
 
@@ -62,20 +47,22 @@ class CashVsInstallmentCalculationModel extends CashVsInstallmentCalculation {
     required this.savingsOrAdditionalCost,
     required this.calculatedAt,
   }) : super(
-          id: id,
-          cashPrice: cashPrice,
-          installmentPrice: installmentPrice,
-          numberOfInstallments: numberOfInstallments,
-          monthlyInterestRate: monthlyInterestRate,
-          totalInstallmentPrice: totalInstallmentPrice,
-          implicitRate: implicitRate,
-          presentValueOfInstallments: presentValueOfInstallments,
-          bestOption: bestOption,
-          savingsOrAdditionalCost: savingsOrAdditionalCost,
-          calculatedAt: calculatedAt,
-        );
+         id: id,
+         cashPrice: cashPrice,
+         installmentPrice: installmentPrice,
+         numberOfInstallments: numberOfInstallments,
+         monthlyInterestRate: monthlyInterestRate,
+         totalInstallmentPrice: totalInstallmentPrice,
+         implicitRate: implicitRate,
+         presentValueOfInstallments: presentValueOfInstallments,
+         bestOption: bestOption,
+         savingsOrAdditionalCost: savingsOrAdditionalCost,
+         calculatedAt: calculatedAt,
+       );
 
-  factory CashVsInstallmentCalculationModel.fromEntity(CashVsInstallmentCalculation entity) {
+  factory CashVsInstallmentCalculationModel.fromEntity(
+    CashVsInstallmentCalculation entity,
+  ) {
     return CashVsInstallmentCalculationModel(
       id: entity.id,
       cashPrice: entity.cashPrice,
@@ -92,4 +79,40 @@ class CashVsInstallmentCalculationModel extends CashVsInstallmentCalculation {
   }
 
   CashVsInstallmentCalculation toEntity() => this;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'cashPrice': cashPrice,
+      'installmentPrice': installmentPrice,
+      'numberOfInstallments': numberOfInstallments,
+      'monthlyInterestRate': monthlyInterestRate,
+      'totalInstallmentPrice': totalInstallmentPrice,
+      'implicitRate': implicitRate,
+      'presentValueOfInstallments': presentValueOfInstallments,
+      'bestOption': bestOption,
+      'savingsOrAdditionalCost': savingsOrAdditionalCost,
+      'calculatedAt': calculatedAt.toIso8601String(),
+    };
+  }
+
+  factory CashVsInstallmentCalculationModel.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return CashVsInstallmentCalculationModel(
+      id: json['id'] as String,
+      cashPrice: (json['cashPrice'] as num).toDouble(),
+      installmentPrice: (json['installmentPrice'] as num).toDouble(),
+      numberOfInstallments: json['numberOfInstallments'] as int,
+      monthlyInterestRate: (json['monthlyInterestRate'] as num).toDouble(),
+      totalInstallmentPrice: (json['totalInstallmentPrice'] as num).toDouble(),
+      implicitRate: (json['implicitRate'] as num).toDouble(),
+      presentValueOfInstallments: (json['presentValueOfInstallments'] as num)
+          .toDouble(),
+      bestOption: json['bestOption'] as String,
+      savingsOrAdditionalCost: (json['savingsOrAdditionalCost'] as num)
+          .toDouble(),
+      calculatedAt: DateTime.parse(json['calculatedAt'] as String),
+    );
+  }
 }

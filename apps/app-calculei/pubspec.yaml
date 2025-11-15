@@ -52,8 +52,10 @@ dependencies:
   firebase_core: any
   intl: any
   icons_plus: any
-  hive: any
-  hive_flutter: any
+  drift: any
+  sqlite3_flutter_libs: any
+  path_provider: any
+  path: any
   shared_preferences: any
   provider: any  # Coexist with Riverpod during migration
 
@@ -66,9 +68,9 @@ dev_dependencies:
 
   # Code Generation
   build_runner: ^2.4.12
-  riverpod_generator: ^2.4.0  # Downgraded for compatibility with hive_generator
+  riverpod_generator: ^2.6.1
   injectable_generator: ^2.6.2
-  hive_generator: any  # Use version from core package
+  drift_dev: any  # Use version from core package
 
   # Custom Linting (temporarily commented due to dependency conflicts)
   # custom_lint: ^0.7.0

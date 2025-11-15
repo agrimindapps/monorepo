@@ -1,6 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
@@ -16,25 +13,17 @@ final getIt = GetIt.instance;
   asExtension: true,
 )
 Future<void> configureDependencies({bool firebaseEnabled = false}) async {
-  // Register external dependencies
-  final sharedPrefs = await SharedPreferences.getInstance();
-  getIt.registerSingleton<SharedPreferences>(sharedPrefs);
-
-  // Register Firebase services only if Firebase is initialized
-  if (firebaseEnabled) {
-    try {
-      getIt.registerSingleton<FirebaseFirestore>(FirebaseFirestore.instance);
-      getIt.registerSingleton<FirebaseAuth>(FirebaseAuth.instance);
-      debugPrint('Firebase services registered in DI');
-    } catch (e) {
-      debugPrint('Failed to register Firebase services: $e');
-    }
-  } else {
-    debugPrint('Firebase services not registered (running in local-only mode)');
-  }
-
-  getIt.registerSingleton<Logger>(Logger());
-
   // Initialize generated dependencies
-  getIt.init();
+  await getIt.init();
+
+  // Register Logger
+  getIt.registerSingleton<Logger>(Logger());
+}
+
+/// Module for registering external dependencies
+@module
+abstract class ExternalDependenciesModule {
+  @preResolve
+  Future<SharedPreferences> get sharedPreferences =>
+      SharedPreferences.getInstance();
 }

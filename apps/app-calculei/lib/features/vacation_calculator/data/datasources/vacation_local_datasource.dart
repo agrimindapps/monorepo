@@ -1,9 +1,10 @@
-import 'package:hive/hive.dart';
+import 'dart:convert';
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/vacation_calculation_model.dart';
 
-/// Local data source for vacation calculations using Hive
+/// Local data source for vacation calculations
 abstract class VacationLocalDataSource {
   /// Save calculation to local storage
   Future<void> saveCalculation(VacationCalculationModel calculation);
@@ -23,31 +24,47 @@ abstract class VacationLocalDataSource {
 
 @Injectable(as: VacationLocalDataSource)
 class VacationLocalDataSourceImpl implements VacationLocalDataSource {
-  static const String _boxName = 'vacation_calculations';
+  static const String _storagePrefix = 'vacation_calculations';
+  static const String _idsKey = '${_storagePrefix}_ids';
+  final SharedPreferences _prefs;
 
-  Box<VacationCalculationModel> get _box =>
-      Hive.box<VacationCalculationModel>(_boxName);
+  VacationLocalDataSourceImpl(this._prefs);
 
-  /// Initialize Hive box (call this during app startup)
-  static Future<void> initialize() async {
-    if (!Hive.isAdapterRegistered(10)) {
-      Hive.registerAdapter(VacationCalculationModelAdapter());
-    }
-    await Hive.openBox<VacationCalculationModel>(_boxName);
+  String _getKey(String id) => '${_storagePrefix}:$id';
+
+  Future<List<String>> _getStoredIds() async {
+    return _prefs.getStringList(_idsKey) ?? [];
+  }
+
+  Future<void> _saveIds(List<String> ids) async {
+    await _prefs.setStringList(_idsKey, ids);
   }
 
   @override
   Future<void> saveCalculation(VacationCalculationModel calculation) async {
-    await _box.put(calculation.id, calculation);
+    final jsonString = jsonEncode(calculation.toJson());
+    await _prefs.setString(_getKey(calculation.id), jsonString);
+
+    final ids = await _getStoredIds();
+    if (!ids.contains(calculation.id)) {
+      ids.add(calculation.id);
+      await _saveIds(ids);
+    }
   }
 
   @override
-  Future<List<VacationCalculationModel>> getCalculations({
-    int? limit,
-  }) async {
-    final calculations = _box.values.toList();
+  Future<List<VacationCalculationModel>> getCalculations({int? limit}) async {
+    final ids = await _getStoredIds();
+    final calculations = <VacationCalculationModel>[];
 
-    // Sort by calculatedAt (most recent first)
+    for (final id in ids) {
+      final jsonString = _prefs.getString(_getKey(id));
+      if (jsonString != null) {
+        final json = jsonDecode(jsonString) as Map<String, dynamic>;
+        calculations.add(VacationCalculationModel.fromJson(json));
+      }
+    }
+
     calculations.sort((a, b) => b.calculatedAt.compareTo(a.calculatedAt));
 
     if (limit != null && limit > 0) {
@@ -59,16 +76,34 @@ class VacationLocalDataSourceImpl implements VacationLocalDataSource {
 
   @override
   Future<VacationCalculationModel?> getCalculationById(String id) async {
-    return _box.get(id);
+    final jsonString = _prefs.getString(_getKey(id));
+    if (jsonString == null) return null;
+    final json = jsonDecode(jsonString) as Map<String, dynamic>;
+    return VacationCalculationModel.fromJson(json);
   }
 
   @override
   Future<void> deleteCalculation(String id) async {
-    await _box.delete(id);
+    await _prefs.remove(_getKey(id));
+
+    final ids = await _getStoredIds();
+    ids.remove(id);
+    await _saveIds(ids);
   }
 
   @override
   Future<void> clearAll() async {
-    await _box.clear();
+    final ids = await _getStoredIds();
+    for (final id in ids) {
+      await _prefs.remove(_getKey(id));
+    }
+    await _prefs.remove(_idsKey);
+  }
+}
+
+/// Initialize method for backwards compatibility
+extension VacationLocalDataSourceImplExtension on VacationLocalDataSourceImpl {
+  static Future<void> initialize() async {
+    // No initialization needed for SharedPreferences
   }
 }

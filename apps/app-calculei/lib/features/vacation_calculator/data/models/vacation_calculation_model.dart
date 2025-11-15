@@ -1,57 +1,42 @@
-import 'package:hive/hive.dart';
 
 import '../../domain/entities/vacation_calculation.dart';
 
-part 'vacation_calculation_model.g.dart';
 
 /// Hive adapter for VacationCalculation entity
-@HiveType(typeId: 10) // Use unique typeId for app-calculei
 class VacationCalculationModel extends VacationCalculation {
-  @HiveField(0)
   @override
   final String id;
 
-  @HiveField(1)
   @override
   final double grossSalary;
 
-  @HiveField(2)
   @override
   final int vacationDays;
 
-  @HiveField(3)
   @override
   final bool sellVacationDays;
 
-  @HiveField(4)
   @override
   final double baseValue;
 
-  @HiveField(5)
   @override
   final double constitutionalBonus;
 
-  @HiveField(6)
   @override
   final double soldDaysValue;
 
-  @HiveField(7)
   @override
   final double grossTotal;
 
-  @HiveField(8)
   @override
   final double inssDiscount;
 
-  @HiveField(9)
   @override
   final double irDiscount;
 
-  @HiveField(10)
   @override
   final double netTotal;
 
-  @HiveField(11)
   @override
   final DateTime calculatedAt;
 

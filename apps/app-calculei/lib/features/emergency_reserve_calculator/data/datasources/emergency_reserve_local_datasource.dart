@@ -1,11 +1,13 @@
-import 'package:core/core.dart';
-import 'package:hive/hive.dart';
+import 'dart:convert';
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/emergency_reserve_calculation_model.dart';
 
 abstract class EmergencyReserveLocalDataSource {
-  Future<EmergencyReserveCalculationModel> save(EmergencyReserveCalculationModel model);
+  Future<EmergencyReserveCalculationModel> save(
+    EmergencyReserveCalculationModel model,
+  );
   Future<List<EmergencyReserveCalculationModel>> getAll({int limit = 10});
   Future<EmergencyReserveCalculationModel?> getById(String id);
   Future<void> delete(String id);
@@ -13,16 +15,38 @@ abstract class EmergencyReserveLocalDataSource {
 }
 
 @Injectable(as: EmergencyReserveLocalDataSource)
-class EmergencyReserveLocalDataSourceImpl implements EmergencyReserveLocalDataSource {
-  static const String boxName = 'emergency_reserve_calculations';
-  final Box<EmergencyReserveCalculationModel> _box;
+class EmergencyReserveLocalDataSourceImpl
+    implements EmergencyReserveLocalDataSource {
+  static const String _storagePrefix = 'emergency_reserve_calculations';
+  static const String _idsKey = '${_storagePrefix}_ids';
+  final SharedPreferences _prefs;
 
-  EmergencyReserveLocalDataSourceImpl(this._box);
+  EmergencyReserveLocalDataSourceImpl(this._prefs);
+
+  String _getKey(String id) => '${_storagePrefix}:$id';
+
+  Future<List<String>> _getStoredIds() async {
+    return _prefs.getStringList(_idsKey) ?? [];
+  }
+
+  Future<void> _saveIds(List<String> ids) async {
+    await _prefs.setStringList(_idsKey, ids);
+  }
 
   @override
-  Future<EmergencyReserveCalculationModel> save(EmergencyReserveCalculationModel model) async {
+  Future<EmergencyReserveCalculationModel> save(
+    EmergencyReserveCalculationModel model,
+  ) async {
     try {
-      await _box.put(model.id, model);
+      final jsonString = jsonEncode(model.toJson());
+      await _prefs.setString(_getKey(model.id), jsonString);
+
+      final ids = await _getStoredIds();
+      if (!ids.contains(model.id)) {
+        ids.add(model.id);
+        await _saveIds(ids);
+      }
+
       return model;
     } catch (e) {
       throw CacheException('Erro ao salvar cálculo: $e');
@@ -30,9 +54,21 @@ class EmergencyReserveLocalDataSourceImpl implements EmergencyReserveLocalDataSo
   }
 
   @override
-  Future<List<EmergencyReserveCalculationModel>> getAll({int limit = 10}) async {
+  Future<List<EmergencyReserveCalculationModel>> getAll({
+    int limit = 10,
+  }) async {
     try {
-      final values = _box.values.toList();
+      final ids = await _getStoredIds();
+      final values = <EmergencyReserveCalculationModel>[];
+
+      for (final id in ids) {
+        final jsonString = _prefs.getString(_getKey(id));
+        if (jsonString != null) {
+          final json = jsonDecode(jsonString) as Map<String, dynamic>;
+          values.add(EmergencyReserveCalculationModel.fromJson(json));
+        }
+      }
+
       values.sort((a, b) => b.calculatedAt.compareTo(a.calculatedAt));
       return values.length > limit ? values.sublist(0, limit) : values;
     } catch (e) {
@@ -43,7 +79,10 @@ class EmergencyReserveLocalDataSourceImpl implements EmergencyReserveLocalDataSo
   @override
   Future<EmergencyReserveCalculationModel?> getById(String id) async {
     try {
-      return _box.get(id);
+      final jsonString = _prefs.getString(_getKey(id));
+      if (jsonString == null) return null;
+      final json = jsonDecode(jsonString) as Map<String, dynamic>;
+      return EmergencyReserveCalculationModel.fromJson(json);
     } catch (e) {
       throw CacheException('Erro ao recuperar cálculo: $e');
     }
@@ -52,7 +91,11 @@ class EmergencyReserveLocalDataSourceImpl implements EmergencyReserveLocalDataSo
   @override
   Future<void> delete(String id) async {
     try {
-      await _box.delete(id);
+      await _prefs.remove(_getKey(id));
+
+      final ids = await _getStoredIds();
+      ids.remove(id);
+      await _saveIds(ids);
     } catch (e) {
       throw CacheException('Erro ao deletar cálculo: $e');
     }
@@ -61,28 +104,13 @@ class EmergencyReserveLocalDataSourceImpl implements EmergencyReserveLocalDataSo
   @override
   Future<void> clearAll() async {
     try {
-      await _box.clear();
+      final ids = await _getStoredIds();
+      for (final id in ids) {
+        await _prefs.remove(_getKey(id));
+      }
+      await _prefs.remove(_idsKey);
     } catch (e) {
       throw CacheException('Erro ao limpar histórico: $e');
-    }
-  }
-}
-
-@module
-abstract class EmergencyReserveLocalDataSourceModule {
-  @injectable
-  Box<EmergencyReserveCalculationModel> get emergencyReserveBox {
-    return Hive.box<EmergencyReserveCalculationModel>(EmergencyReserveLocalDataSourceImpl.boxName);
-  }
-}
-
-extension EmergencyReserveLocalDataSourceImplExtension on EmergencyReserveLocalDataSourceImpl {
-  static Future<void> initialize() async {
-    if (!Hive.isAdapterRegistered(14)) {
-      Hive.registerAdapter(EmergencyReserveCalculationModelAdapter());
-    }
-    if (!Hive.isBoxOpen(EmergencyReserveLocalDataSourceImpl.boxName)) {
-      await Hive.openBox<EmergencyReserveCalculationModel>(EmergencyReserveLocalDataSourceImpl.boxName);
     }
   }
 }

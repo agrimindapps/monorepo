@@ -1,71 +1,52 @@
-import 'package:hive/hive.dart';
 import '../../domain/entities/unemployment_insurance_calculation.dart';
 
-part 'unemployment_insurance_calculation_model.g.dart';
-
-@HiveType(typeId: 16)
-class UnemploymentInsuranceCalculationModel extends UnemploymentInsuranceCalculation {
-  @HiveField(0)
+class UnemploymentInsuranceCalculationModel
+    extends UnemploymentInsuranceCalculation {
   @override
   final String id;
 
-  @HiveField(1)
   @override
   final double averageSalary;
 
-  @HiveField(2)
   @override
   final int workMonths;
 
-  @HiveField(3)
   @override
   final int timesReceived;
 
-  @HiveField(4)
   @override
   final DateTime dismissalDate;
 
-  @HiveField(5)
   @override
   final double installmentValue;
 
-  @HiveField(6)
   @override
   final int numberOfInstallments;
 
-  @HiveField(7)
   @override
   final double totalValue;
 
-  @HiveField(8)
   @override
   final DateTime deadlineToRequest;
 
-  @HiveField(9)
   @override
   final DateTime paymentStart;
 
-  @HiveField(10)
   @override
   final DateTime paymentEnd;
 
-  @HiveField(11)
   @override
   final List<DateTime> paymentSchedule;
 
-  @HiveField(12)
   @override
   final bool eligible;
 
-  @HiveField(13)
   @override
   final String ineligibilityReason;
 
-  @HiveField(14)
   @override
   final int requiredCarencyMonths;
 
-  @HiveField(15)
   @override
   final DateTime calculatedAt;
 
@@ -87,25 +68,27 @@ class UnemploymentInsuranceCalculationModel extends UnemploymentInsuranceCalcula
     required this.requiredCarencyMonths,
     required this.calculatedAt,
   }) : super(
-          id: id,
-          averageSalary: averageSalary,
-          workMonths: workMonths,
-          timesReceived: timesReceived,
-          dismissalDate: dismissalDate,
-          installmentValue: installmentValue,
-          numberOfInstallments: numberOfInstallments,
-          totalValue: totalValue,
-          deadlineToRequest: deadlineToRequest,
-          paymentStart: paymentStart,
-          paymentEnd: paymentEnd,
-          paymentSchedule: paymentSchedule,
-          eligible: eligible,
-          ineligibilityReason: ineligibilityReason,
-          requiredCarencyMonths: requiredCarencyMonths,
-          calculatedAt: calculatedAt,
-        );
+         id: id,
+         averageSalary: averageSalary,
+         workMonths: workMonths,
+         timesReceived: timesReceived,
+         dismissalDate: dismissalDate,
+         installmentValue: installmentValue,
+         numberOfInstallments: numberOfInstallments,
+         totalValue: totalValue,
+         deadlineToRequest: deadlineToRequest,
+         paymentStart: paymentStart,
+         paymentEnd: paymentEnd,
+         paymentSchedule: paymentSchedule,
+         eligible: eligible,
+         ineligibilityReason: ineligibilityReason,
+         requiredCarencyMonths: requiredCarencyMonths,
+         calculatedAt: calculatedAt,
+       );
 
-  factory UnemploymentInsuranceCalculationModel.fromEntity(UnemploymentInsuranceCalculation entity) {
+  factory UnemploymentInsuranceCalculationModel.fromEntity(
+    UnemploymentInsuranceCalculation entity,
+  ) {
     return UnemploymentInsuranceCalculationModel(
       id: entity.id,
       averageSalary: entity.averageSalary,
@@ -127,4 +110,52 @@ class UnemploymentInsuranceCalculationModel extends UnemploymentInsuranceCalcula
   }
 
   UnemploymentInsuranceCalculation toEntity() => this;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'averageSalary': averageSalary,
+      'workMonths': workMonths,
+      'timesReceived': timesReceived,
+      'dismissalDate': dismissalDate.toIso8601String(),
+      'installmentValue': installmentValue,
+      'numberOfInstallments': numberOfInstallments,
+      'totalValue': totalValue,
+      'deadlineToRequest': deadlineToRequest.toIso8601String(),
+      'paymentStart': paymentStart.toIso8601String(),
+      'paymentEnd': paymentEnd.toIso8601String(),
+      'paymentSchedule': paymentSchedule
+          .map((date) => date.toIso8601String())
+          .toList(),
+      'eligible': eligible,
+      'ineligibilityReason': ineligibilityReason,
+      'requiredCarencyMonths': requiredCarencyMonths,
+      'calculatedAt': calculatedAt.toIso8601String(),
+    };
+  }
+
+  factory UnemploymentInsuranceCalculationModel.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return UnemploymentInsuranceCalculationModel(
+      id: json['id'] as String,
+      averageSalary: (json['averageSalary'] as num).toDouble(),
+      workMonths: json['workMonths'] as int,
+      timesReceived: json['timesReceived'] as int,
+      dismissalDate: DateTime.parse(json['dismissalDate'] as String),
+      installmentValue: (json['installmentValue'] as num).toDouble(),
+      numberOfInstallments: json['numberOfInstallments'] as int,
+      totalValue: (json['totalValue'] as num).toDouble(),
+      deadlineToRequest: DateTime.parse(json['deadlineToRequest'] as String),
+      paymentStart: DateTime.parse(json['paymentStart'] as String),
+      paymentEnd: DateTime.parse(json['paymentEnd'] as String),
+      paymentSchedule: (json['paymentSchedule'] as List<dynamic>)
+          .map((date) => DateTime.parse(date as String))
+          .toList(),
+      eligible: json['eligible'] as bool,
+      ineligibilityReason: json['ineligibilityReason'] as String,
+      requiredCarencyMonths: json['requiredCarencyMonths'] as int,
+      calculatedAt: DateTime.parse(json['calculatedAt'] as String),
+    );
+  }
 }

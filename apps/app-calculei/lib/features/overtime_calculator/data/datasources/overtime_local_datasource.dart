@@ -1,6 +1,6 @@
-import 'package:core/core.dart';
-import 'package:hive/hive.dart';
+import 'dart:convert';
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/overtime_calculation_model.dart';
 
@@ -14,14 +14,34 @@ abstract class OvertimeLocalDataSource {
 
 @Injectable(as: OvertimeLocalDataSource)
 class OvertimeLocalDataSourceImpl implements OvertimeLocalDataSource {
-  static const String boxName = 'overtime_calculations';
-  final Box<OvertimeCalculationModel> _box;
-  OvertimeLocalDataSourceImpl(this._box);
+  static const String _storagePrefix = 'overtime_calculations';
+  static const String _idsKey = '${_storagePrefix}_ids';
+  final SharedPreferences _prefs;
+
+  OvertimeLocalDataSourceImpl(this._prefs);
+
+  String _getKey(String id) => '${_storagePrefix}:$id';
+
+  Future<List<String>> _getStoredIds() async {
+    return _prefs.getStringList(_idsKey) ?? [];
+  }
+
+  Future<void> _saveIds(List<String> ids) async {
+    await _prefs.setStringList(_idsKey, ids);
+  }
 
   @override
   Future<OvertimeCalculationModel> save(OvertimeCalculationModel model) async {
     try {
-      await _box.put(model.id, model);
+      final jsonString = jsonEncode(model.toJson());
+      await _prefs.setString(_getKey(model.id), jsonString);
+
+      final ids = await _getStoredIds();
+      if (!ids.contains(model.id)) {
+        ids.add(model.id);
+        await _saveIds(ids);
+      }
+
       return model;
     } catch (e) {
       throw CacheException('Erro ao salvar cálculo: $e');
@@ -31,7 +51,17 @@ class OvertimeLocalDataSourceImpl implements OvertimeLocalDataSource {
   @override
   Future<List<OvertimeCalculationModel>> getAll({int limit = 10}) async {
     try {
-      final values = _box.values.toList();
+      final ids = await _getStoredIds();
+      final values = <OvertimeCalculationModel>[];
+
+      for (final id in ids) {
+        final jsonString = _prefs.getString(_getKey(id));
+        if (jsonString != null) {
+          final json = jsonDecode(jsonString) as Map<String, dynamic>;
+          values.add(OvertimeCalculationModel.fromJson(json));
+        }
+      }
+
       values.sort((a, b) => b.calculatedAt.compareTo(a.calculatedAt));
       return values.length > limit ? values.sublist(0, limit) : values;
     } catch (e) {
@@ -42,7 +72,10 @@ class OvertimeLocalDataSourceImpl implements OvertimeLocalDataSource {
   @override
   Future<OvertimeCalculationModel?> getById(String id) async {
     try {
-      return _box.get(id);
+      final jsonString = _prefs.getString(_getKey(id));
+      if (jsonString == null) return null;
+      final json = jsonDecode(jsonString) as Map<String, dynamic>;
+      return OvertimeCalculationModel.fromJson(json);
     } catch (e) {
       throw CacheException('Erro ao recuperar cálculo: $e');
     }
@@ -51,7 +84,11 @@ class OvertimeLocalDataSourceImpl implements OvertimeLocalDataSource {
   @override
   Future<void> delete(String id) async {
     try {
-      await _box.delete(id);
+      await _prefs.remove(_getKey(id));
+
+      final ids = await _getStoredIds();
+      ids.remove(id);
+      await _saveIds(ids);
     } catch (e) {
       throw CacheException('Erro ao deletar cálculo: $e');
     }
@@ -60,28 +97,13 @@ class OvertimeLocalDataSourceImpl implements OvertimeLocalDataSource {
   @override
   Future<void> clearAll() async {
     try {
-      await _box.clear();
+      final ids = await _getStoredIds();
+      for (final id in ids) {
+        await _prefs.remove(_getKey(id));
+      }
+      await _prefs.remove(_idsKey);
     } catch (e) {
       throw CacheException('Erro ao limpar histórico: $e');
-    }
-  }
-}
-
-@module
-abstract class OvertimeLocalDataSourceModule {
-  @injectable
-  Box<OvertimeCalculationModel> get overtimeBox {
-    return Hive.box<OvertimeCalculationModel>(OvertimeLocalDataSourceImpl.boxName);
-  }
-}
-
-extension OvertimeLocalDataSourceImplExtension on OvertimeLocalDataSourceImpl {
-  static Future<void> initialize() async {
-    if (!Hive.isAdapterRegistered(12)) {
-      Hive.registerAdapter(OvertimeCalculationModelAdapter());
-    }
-    if (!Hive.isBoxOpen(OvertimeLocalDataSourceImpl.boxName)) {
-      await Hive.openBox<OvertimeCalculationModel>(OvertimeLocalDataSourceImpl.boxName);
     }
   }
 }

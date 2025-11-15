@@ -1,11 +1,13 @@
-import 'package:core/core.dart';
-import 'package:hive/hive.dart';
+import 'dart:convert';
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/unemployment_insurance_calculation_model.dart';
 
 abstract class UnemploymentInsuranceLocalDataSource {
-  Future<UnemploymentInsuranceCalculationModel> save(UnemploymentInsuranceCalculationModel model);
+  Future<UnemploymentInsuranceCalculationModel> save(
+    UnemploymentInsuranceCalculationModel model,
+  );
   Future<List<UnemploymentInsuranceCalculationModel>> getAll({int limit = 10});
   Future<UnemploymentInsuranceCalculationModel?> getById(String id);
   Future<void> delete(String id);
@@ -13,16 +15,38 @@ abstract class UnemploymentInsuranceLocalDataSource {
 }
 
 @Injectable(as: UnemploymentInsuranceLocalDataSource)
-class UnemploymentInsuranceLocalDataSourceImpl implements UnemploymentInsuranceLocalDataSource {
-  static const String boxName = 'unemployment_insurance_calculations';
-  final Box<UnemploymentInsuranceCalculationModel> _box;
+class UnemploymentInsuranceLocalDataSourceImpl
+    implements UnemploymentInsuranceLocalDataSource {
+  static const String _storagePrefix = 'unemployment_insurance_calculations';
+  static const String _idsKey = '${_storagePrefix}_ids';
+  final SharedPreferences _prefs;
 
-  UnemploymentInsuranceLocalDataSourceImpl(this._box);
+  UnemploymentInsuranceLocalDataSourceImpl(this._prefs);
+
+  String _getKey(String id) => '${_storagePrefix}:$id';
+
+  Future<List<String>> _getStoredIds() async {
+    return _prefs.getStringList(_idsKey) ?? [];
+  }
+
+  Future<void> _saveIds(List<String> ids) async {
+    await _prefs.setStringList(_idsKey, ids);
+  }
 
   @override
-  Future<UnemploymentInsuranceCalculationModel> save(UnemploymentInsuranceCalculationModel model) async {
+  Future<UnemploymentInsuranceCalculationModel> save(
+    UnemploymentInsuranceCalculationModel model,
+  ) async {
     try {
-      await _box.put(model.id, model);
+      final jsonString = jsonEncode(model.toJson());
+      await _prefs.setString(_getKey(model.id), jsonString);
+
+      final ids = await _getStoredIds();
+      if (!ids.contains(model.id)) {
+        ids.add(model.id);
+        await _saveIds(ids);
+      }
+
       return model;
     } catch (e) {
       throw CacheException('Erro ao salvar cálculo: $e');
@@ -30,9 +54,21 @@ class UnemploymentInsuranceLocalDataSourceImpl implements UnemploymentInsuranceL
   }
 
   @override
-  Future<List<UnemploymentInsuranceCalculationModel>> getAll({int limit = 10}) async {
+  Future<List<UnemploymentInsuranceCalculationModel>> getAll({
+    int limit = 10,
+  }) async {
     try {
-      final values = _box.values.toList();
+      final ids = await _getStoredIds();
+      final values = <UnemploymentInsuranceCalculationModel>[];
+
+      for (final id in ids) {
+        final jsonString = _prefs.getString(_getKey(id));
+        if (jsonString != null) {
+          final json = jsonDecode(jsonString) as Map<String, dynamic>;
+          values.add(UnemploymentInsuranceCalculationModel.fromJson(json));
+        }
+      }
+
       values.sort((a, b) => b.calculatedAt.compareTo(a.calculatedAt));
       return values.length > limit ? values.sublist(0, limit) : values;
     } catch (e) {
@@ -43,7 +79,10 @@ class UnemploymentInsuranceLocalDataSourceImpl implements UnemploymentInsuranceL
   @override
   Future<UnemploymentInsuranceCalculationModel?> getById(String id) async {
     try {
-      return _box.get(id);
+      final jsonString = _prefs.getString(_getKey(id));
+      if (jsonString == null) return null;
+      final json = jsonDecode(jsonString) as Map<String, dynamic>;
+      return UnemploymentInsuranceCalculationModel.fromJson(json);
     } catch (e) {
       throw CacheException('Erro ao recuperar cálculo: $e');
     }
@@ -52,7 +91,11 @@ class UnemploymentInsuranceLocalDataSourceImpl implements UnemploymentInsuranceL
   @override
   Future<void> delete(String id) async {
     try {
-      await _box.delete(id);
+      await _prefs.remove(_getKey(id));
+
+      final ids = await _getStoredIds();
+      ids.remove(id);
+      await _saveIds(ids);
     } catch (e) {
       throw CacheException('Erro ao deletar cálculo: $e');
     }
@@ -61,28 +104,20 @@ class UnemploymentInsuranceLocalDataSourceImpl implements UnemploymentInsuranceL
   @override
   Future<void> clearAll() async {
     try {
-      await _box.clear();
+      final ids = await _getStoredIds();
+      for (final id in ids) {
+        await _prefs.remove(_getKey(id));
+      }
+      await _prefs.remove(_idsKey);
     } catch (e) {
       throw CacheException('Erro ao limpar histórico: $e');
     }
   }
 }
 
-@module
-abstract class UnemploymentInsuranceLocalDataSourceModule {
-  @injectable
-  Box<UnemploymentInsuranceCalculationModel> get unemploymentInsuranceBox {
-    return Hive.box<UnemploymentInsuranceCalculationModel>(UnemploymentInsuranceLocalDataSourceImpl.boxName);
-  }
-}
-
-extension UnemploymentInsuranceLocalDataSourceImplExtension on UnemploymentInsuranceLocalDataSourceImpl {
+extension UnemploymentInsuranceLocalDataSourceImplExtension
+    on UnemploymentInsuranceLocalDataSourceImpl {
   static Future<void> initialize() async {
-    if (!Hive.isAdapterRegistered(16)) {
-      Hive.registerAdapter(UnemploymentInsuranceCalculationModelAdapter());
-    }
-    if (!Hive.isBoxOpen(UnemploymentInsuranceLocalDataSourceImpl.boxName)) {
-      await Hive.openBox<UnemploymentInsuranceCalculationModel>(UnemploymentInsuranceLocalDataSourceImpl.boxName);
-    }
+    // No initialization needed for SharedPreferences
   }
 }

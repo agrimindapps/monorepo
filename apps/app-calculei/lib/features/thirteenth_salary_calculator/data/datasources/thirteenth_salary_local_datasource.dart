@@ -1,9 +1,6 @@
-// Package imports:
-import 'package:core/core.dart';
-import 'package:hive/hive.dart';
+import 'dart:convert';
 import 'package:injectable/injectable.dart';
-
-// Project imports:
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/thirteenth_salary_calculation_model.dart';
 
@@ -33,25 +30,43 @@ abstract class ThirteenthSalaryLocalDataSource {
   Future<void> clearAll();
 }
 
-/// Hive implementation of 13th salary local data source
+/// Implementation of 13th salary local data source
 ///
 /// Follows Dependency Inversion Principle (DIP):
-/// - Depends on Hive Box abstraction, not concrete implementation
+/// - Depends on SharedPreferences abstraction
 @Injectable(as: ThirteenthSalaryLocalDataSource)
 class ThirteenthSalaryLocalDataSourceImpl
     implements ThirteenthSalaryLocalDataSource {
-  static const String boxName = 'thirteenth_salary_calculations';
+  static const String _storagePrefix = 'thirteenth_salary_calculations';
+  static const String _idsKey = '${_storagePrefix}_ids';
+  final SharedPreferences _prefs;
 
-  final Box<ThirteenthSalaryCalculationModel> _box;
+  ThirteenthSalaryLocalDataSourceImpl(this._prefs);
 
-  ThirteenthSalaryLocalDataSourceImpl(this._box);
+  String _getKey(String id) => '${_storagePrefix}:$id';
+
+  Future<List<String>> _getStoredIds() async {
+    return _prefs.getStringList(_idsKey) ?? [];
+  }
+
+  Future<void> _saveIds(List<String> ids) async {
+    await _prefs.setStringList(_idsKey, ids);
+  }
 
   @override
   Future<ThirteenthSalaryCalculationModel> save(
     ThirteenthSalaryCalculationModel model,
   ) async {
     try {
-      await _box.put(model.id, model);
+      final jsonString = jsonEncode(model.toJson());
+      await _prefs.setString(_getKey(model.id), jsonString);
+
+      final ids = await _getStoredIds();
+      if (!ids.contains(model.id)) {
+        ids.add(model.id);
+        await _saveIds(ids);
+      }
+
       return model;
     } catch (e) {
       throw CacheException('Erro ao salvar cálculo: $e');
@@ -59,14 +74,23 @@ class ThirteenthSalaryLocalDataSourceImpl
   }
 
   @override
-  Future<List<ThirteenthSalaryCalculationModel>> getAll({int limit = 10}) async {
+  Future<List<ThirteenthSalaryCalculationModel>> getAll({
+    int limit = 10,
+  }) async {
     try {
-      final values = _box.values.toList();
+      final ids = await _getStoredIds();
+      final values = <ThirteenthSalaryCalculationModel>[];
 
-      // Sort by calculatedAt (most recent first)
+      for (final id in ids) {
+        final jsonString = _prefs.getString(_getKey(id));
+        if (jsonString != null) {
+          final json = jsonDecode(jsonString) as Map<String, dynamic>;
+          values.add(ThirteenthSalaryCalculationModel.fromJson(json));
+        }
+      }
+
       values.sort((a, b) => b.calculatedAt.compareTo(a.calculatedAt));
 
-      // Apply limit
       if (values.length > limit) {
         return values.sublist(0, limit);
       }
@@ -80,7 +104,10 @@ class ThirteenthSalaryLocalDataSourceImpl
   @override
   Future<ThirteenthSalaryCalculationModel?> getById(String id) async {
     try {
-      return _box.get(id);
+      final jsonString = _prefs.getString(_getKey(id));
+      if (jsonString == null) return null;
+      final json = jsonDecode(jsonString) as Map<String, dynamic>;
+      return ThirteenthSalaryCalculationModel.fromJson(json);
     } catch (e) {
       throw CacheException('Erro ao recuperar cálculo: $e');
     }
@@ -89,7 +116,11 @@ class ThirteenthSalaryLocalDataSourceImpl
   @override
   Future<void> delete(String id) async {
     try {
-      await _box.delete(id);
+      await _prefs.remove(_getKey(id));
+
+      final ids = await _getStoredIds();
+      ids.remove(id);
+      await _saveIds(ids);
     } catch (e) {
       throw CacheException('Erro ao deletar cálculo: $e');
     }
@@ -98,41 +129,21 @@ class ThirteenthSalaryLocalDataSourceImpl
   @override
   Future<void> clearAll() async {
     try {
-      await _box.clear();
+      final ids = await _getStoredIds();
+      for (final id in ids) {
+        await _prefs.remove(_getKey(id));
+      }
+      await _prefs.remove(_idsKey);
     } catch (e) {
       throw CacheException('Erro ao limpar histórico: $e');
     }
   }
 }
 
-/// Provides Hive Box for 13th salary calculations
-@module
-abstract class ThirteenthSalaryLocalDataSourceModule {
-  @injectable
-  Box<ThirteenthSalaryCalculationModel> get thirteenthSalaryBox {
-    return Hive.box<ThirteenthSalaryCalculationModel>(
-      ThirteenthSalaryLocalDataSourceImpl.boxName,
-    );
-  }
-}
-
-/// Extension to add initialization method
+/// Extension to add initialization method for backwards compatibility
 extension ThirteenthSalaryLocalDataSourceImplExtension
     on ThirteenthSalaryLocalDataSourceImpl {
-  /// Initializes Hive box for 13th salary calculations
-  ///
-  /// Must be called before using the datasource
   static Future<void> initialize() async {
-    // Register adapter if not already registered
-    if (!Hive.isAdapterRegistered(11)) {
-      Hive.registerAdapter(ThirteenthSalaryCalculationModelAdapter());
-    }
-
-    // Open box if not already open
-    if (!Hive.isBoxOpen(ThirteenthSalaryLocalDataSourceImpl.boxName)) {
-      await Hive.openBox<ThirteenthSalaryCalculationModel>(
-        ThirteenthSalaryLocalDataSourceImpl.boxName,
-      );
-    }
+    // No initialization needed for SharedPreferences
   }
 }

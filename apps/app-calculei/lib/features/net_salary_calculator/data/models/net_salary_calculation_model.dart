@@ -1,67 +1,48 @@
-import 'package:hive/hive.dart';
 import '../../domain/entities/net_salary_calculation.dart';
 
-part 'net_salary_calculation_model.g.dart';
-
-@HiveType(typeId: 13)
 class NetSalaryCalculationModel extends NetSalaryCalculation {
-  @HiveField(0)
   @override
   final String id;
 
-  @HiveField(1)
   @override
   final double grossSalary;
 
-  @HiveField(2)
   @override
   final int dependents;
 
-  @HiveField(3)
   @override
   final double transportationVoucher;
 
-  @HiveField(4)
   @override
   final double healthInsurance;
 
-  @HiveField(5)
   @override
   final double otherDiscounts;
 
-  @HiveField(6)
   @override
   final double inssDiscount;
 
-  @HiveField(7)
   @override
   final double irrfDiscount;
 
-  @HiveField(8)
   @override
   final double transportationVoucherDiscount;
 
-  @HiveField(9)
   @override
   final double totalDiscounts;
 
-  @HiveField(10)
   @override
   final double netSalary;
 
-  @HiveField(11)
   @override
   final double inssRate;
 
-  @HiveField(12)
   @override
   final double irrfRate;
 
-  @HiveField(13)
   @override
   final double irrfCalculationBase;
 
-  @HiveField(14)
   @override
   final DateTime calculatedAt;
 
@@ -82,22 +63,22 @@ class NetSalaryCalculationModel extends NetSalaryCalculation {
     required this.irrfCalculationBase,
     required this.calculatedAt,
   }) : super(
-          id: id,
-          grossSalary: grossSalary,
-          dependents: dependents,
-          transportationVoucher: transportationVoucher,
-          healthInsurance: healthInsurance,
-          otherDiscounts: otherDiscounts,
-          inssDiscount: inssDiscount,
-          irrfDiscount: irrfDiscount,
-          transportationVoucherDiscount: transportationVoucherDiscount,
-          totalDiscounts: totalDiscounts,
-          netSalary: netSalary,
-          inssRate: inssRate,
-          irrfRate: irrfRate,
-          irrfCalculationBase: irrfCalculationBase,
-          calculatedAt: calculatedAt,
-        );
+         id: id,
+         grossSalary: grossSalary,
+         dependents: dependents,
+         transportationVoucher: transportationVoucher,
+         healthInsurance: healthInsurance,
+         otherDiscounts: otherDiscounts,
+         inssDiscount: inssDiscount,
+         irrfDiscount: irrfDiscount,
+         transportationVoucherDiscount: transportationVoucherDiscount,
+         totalDiscounts: totalDiscounts,
+         netSalary: netSalary,
+         inssRate: inssRate,
+         irrfRate: irrfRate,
+         irrfCalculationBase: irrfCalculationBase,
+         calculatedAt: calculatedAt,
+       );
 
   factory NetSalaryCalculationModel.fromEntity(NetSalaryCalculation entity) {
     return NetSalaryCalculationModel(
@@ -120,4 +101,45 @@ class NetSalaryCalculationModel extends NetSalaryCalculation {
   }
 
   NetSalaryCalculation toEntity() => this;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'grossSalary': grossSalary,
+      'dependents': dependents,
+      'transportationVoucher': transportationVoucher,
+      'healthInsurance': healthInsurance,
+      'otherDiscounts': otherDiscounts,
+      'inssDiscount': inssDiscount,
+      'irrfDiscount': irrfDiscount,
+      'transportationVoucherDiscount': transportationVoucherDiscount,
+      'totalDiscounts': totalDiscounts,
+      'netSalary': netSalary,
+      'inssRate': inssRate,
+      'irrfRate': irrfRate,
+      'irrfCalculationBase': irrfCalculationBase,
+      'calculatedAt': calculatedAt.toIso8601String(),
+    };
+  }
+
+  factory NetSalaryCalculationModel.fromJson(Map<String, dynamic> json) {
+    return NetSalaryCalculationModel(
+      id: json['id'] as String,
+      grossSalary: (json['grossSalary'] as num).toDouble(),
+      dependents: json['dependents'] as int,
+      transportationVoucher: (json['transportationVoucher'] as num).toDouble(),
+      healthInsurance: (json['healthInsurance'] as num).toDouble(),
+      otherDiscounts: (json['otherDiscounts'] as num).toDouble(),
+      inssDiscount: (json['inssDiscount'] as num).toDouble(),
+      irrfDiscount: (json['irrfDiscount'] as num).toDouble(),
+      transportationVoucherDiscount:
+          (json['transportationVoucherDiscount'] as num).toDouble(),
+      totalDiscounts: (json['totalDiscounts'] as num).toDouble(),
+      netSalary: (json['netSalary'] as num).toDouble(),
+      inssRate: (json['inssRate'] as num).toDouble(),
+      irrfRate: (json['irrfRate'] as num).toDouble(),
+      irrfCalculationBase: (json['irrfCalculationBase'] as num).toDouble(),
+      calculatedAt: DateTime.parse(json['calculatedAt'] as String),
+    );
+  }
 }

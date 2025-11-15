@@ -3,106 +3,73 @@ import 'package:core/core.dart';
 import '../../domain/entities/rain_gauge_entity.dart';
 
 
-/// Rain gauge model with Hive serialization
-/// Converts between domain entity and data model for persistence
+/// Rain gauge model
+/// Converts between domain entity and data model
 class RainGaugeModel extends Equatable {
-  @HiveField(0)
   final String id;
 
-  @HiveField(1)
   final String locationId;
 
-  @HiveField(2)
   final String locationName;
 
-  @HiveField(3)
   final String deviceId;
 
-  @HiveField(4)
   final String deviceModel;
 
-  @HiveField(5)
   final DateTime installationDate;
 
-  @HiveField(6)
   final double currentRainfall;
 
-  @HiveField(7)
   final double dailyAccumulation;
 
-  @HiveField(8)
   final double weeklyAccumulation;
 
-  @HiveField(9)
   final double monthlyAccumulation;
 
-  @HiveField(10)
   final double yearlyAccumulation;
 
-  @HiveField(11)
   final double maxRainfallRate;
 
-  @HiveField(12)
   final double avgRainfallRate;
 
-  @HiveField(13)
   final DateTime lastMeasurement;
 
-  @HiveField(14)
   final DateTime nextMeasurement;
 
-  @HiveField(15)
   final int measurementInterval;
 
-  @HiveField(16)
   final double latitude;
 
-  @HiveField(17)
   final double longitude;
 
-  @HiveField(18)
   final double heightAboveGround;
 
-  @HiveField(19)
   final double calibrationFactor;
 
-  @HiveField(20)
   final String status;
 
-  @HiveField(21)
   final double? batteryLevel;
 
-  @HiveField(22)
   final double? signalStrength;
 
-  @HiveField(23)
   final double? temperature;
 
-  @HiveField(24)
   final double dataQuality;
 
-  @HiveField(25)
   final bool needsMaintenance;
 
-  @HiveField(26)
   final DateTime? lastMaintenance;
 
-  @HiveField(27)
   final DateTime? nextMaintenance;
 
-  @HiveField(28)
   final String? maintenanceNotes;
 
-  @HiveField(29)
   final String sourceType;
 
-  @HiveField(30)
   final bool isActive;
 
-  @HiveField(31)
   final DateTime createdAt;
 
-  @HiveField(32)
   final DateTime updatedAt;
 
   const RainGaugeModel({

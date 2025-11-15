@@ -4,38 +4,45 @@ import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.
 import 'package:core/core.dart';
 
 /// Settings Local Data Source
+abstract class SettingsLocalDataSource {
+
+  /// Save settings
+  Future<void> saveSettings(SettingsModel settings);
+
+  /// Get settings
+  Future<SettingsModel?> getSettings();
+
+  /// Get default settings
+  Future<SettingsModel> getDefaultSettings(String userId);
+
+  /// Save quick preference
+  Future<void> saveQuickPreference(String key, dynamic value);
+
+  /// Get quick preference
+  T? getQuickPreference<T>(String key);
+
+  /// Clear all settings
+  Future<void> clearSettings();
+}
+
 @injectable
-class SettingsLocalDataSource {
+class SettingsLocalDataSourceImpl implements SettingsLocalDataSource {
   static const String _settingsBoxName = 'app_settings';
   final SharedPreferences _prefs;
 
-  const SettingsLocalDataSource(this._prefs);
+  const SettingsLocalDataSourceImpl(this._prefs);
 
-  Box<SettingsModel> get _settingsBox => Hive.box<SettingsModel>(_settingsBoxName);
-
-  static Future<void> initialize() async {
-    await Hive.openBox<SettingsModel>(_settingsBoxName);
-  }
-
-  /// Save settings
+  @override
   Future<void> saveSettings(SettingsModel settings) async {
-    try {
-      await _settingsBox.put('current', settings);
-    } catch (e) {
-      throw CacheException('Failed to save settings: $e');
-    }
+    throw UnimplementedError('saveSettings has not been implemented');
   }
 
-  /// Get settings
+  @override
   Future<SettingsModel?> getSettings() async {
-    try {
-      return _settingsBox.get('current');
-    } catch (e) {
-      throw CacheException('Failed to get settings: $e');
-    }
+    throw UnimplementedError('getSettings has not been implemented');
   }
 
-  /// Get default settings
+  @override
   Future<SettingsModel> getDefaultSettings(String userId) async {
     return SettingsModel(
       userId: userId,
@@ -45,7 +52,7 @@ class SettingsLocalDataSource {
     );
   }
 
-  /// Save quick preference
+  @override
   Future<void> saveQuickPreference(String key, dynamic value) async {
     try {
       if (value is String) {
@@ -62,7 +69,7 @@ class SettingsLocalDataSource {
     }
   }
 
-  /// Get quick preference
+  @override
   T? getQuickPreference<T>(String key) {
     try {
       return _prefs.get(key) as T?;
@@ -71,12 +78,8 @@ class SettingsLocalDataSource {
     }
   }
 
-  /// Clear all settings
+  @override
   Future<void> clearSettings() async {
-    try {
-      await _settingsBox.clear();
-    } catch (e) {
-      throw CacheException('Failed to clear settings: $e');
-    }
+    throw UnimplementedError('clearSettings has not been implemented');
   }
 }

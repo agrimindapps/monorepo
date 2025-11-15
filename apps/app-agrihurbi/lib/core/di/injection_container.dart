@@ -1,13 +1,7 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart' as core_lib;
-import 'package:core/core.dart' show GetIt;
-import 'package:dio/dio.dart';
+import 'package:core/core.dart' show GetIt, SharedPreferences;
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../network/dio_client.dart';
-import '../network/network_info.dart';
 import '../services/premium_service.dart';
 
 final getIt = GetIt.instance;
@@ -62,16 +56,12 @@ Future<void> configureAppDependencies({bool firebaseEnabled = false}) async {
       ),
     );
   }
-  getIt.registerSingleton<Connectivity>(Connectivity());
-  getIt.registerSingleton<NetworkInfo>(NetworkInfoImpl(getIt<Connectivity>()));
-  getIt.registerSingleton<Dio>(Dio());
-  getIt.registerSingleton<DioClient>(DioClient(getIt<Dio>()));
-
-  final sharedPrefs = await SharedPreferences.getInstance();
-  getIt.registerSingleton<SharedPreferences>(sharedPrefs);
-  getIt.registerSingleton<FlutterSecureStorage>(const FlutterSecureStorage());
+  final sharedPrefs = await core_lib.SharedPreferences.getInstance();
+  getIt.registerSingleton<core_lib.SharedPreferences>(sharedPrefs);
+  getIt.registerSingleton<core_lib.EnhancedSecureStorageService>(
+    core_lib.EnhancedSecureStorageService(appIdentifier: 'app_agrihurbi'),
+  );
   configureDependencies();
-  // initSubscriptionModule(getIt); // Commented out as it's not defined
 
   debugPrint('✅ App Dependencies configured successfully!');
   debugPrint(

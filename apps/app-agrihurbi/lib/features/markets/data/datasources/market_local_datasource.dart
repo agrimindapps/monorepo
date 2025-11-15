@@ -55,7 +55,7 @@ abstract class MarketLocalDataSource {
   Future<DateTime?> getLastUpdate();
 }
 
-/// Implementation of Market Local DataSource using Hive
+/// Implementation of Market Local DataSource
 @Injectable(as: MarketLocalDataSource)
 class MarketLocalDataSourceImpl implements MarketLocalDataSource {
   static const String _marketsBoxName = 'markets';
@@ -69,151 +69,88 @@ class MarketLocalDataSourceImpl implements MarketLocalDataSource {
   static const String _searchHistoryKey = 'search_queries';
   static const String _lastUpdateKey = 'last_update';
 
-  Box<dynamic>? _marketsBox;
-  Box<dynamic>? _favoritesBox;
-  Box<dynamic>? _searchHistoryBox;
-  Box<dynamic>? _cacheInfoBox;
-
-  /// Initialize boxes
-  Future<void> _ensureBoxesAreOpen() async {
-    _marketsBox ??= await Hive.openBox(_marketsBoxName);
-    _favoritesBox ??= await Hive.openBox(_favoritesBoxName);
-    _searchHistoryBox ??= await Hive.openBox(_searchHistoryBoxName);
-    _cacheInfoBox ??= await Hive.openBox(_cacheInfoBoxName);
-  }
-
   @override
   Future<void> cacheMarkets(List<MarketModel> markets) async {
-    await _ensureBoxesAreOpen();
-    final marketsJson = markets.map((m) => m.toJson()).toList();
-    await _marketsBox!.put(_marketsKey, marketsJson);
+    throw UnimplementedError('cacheMarkets has not been implemented');
   }
 
   @override
   Future<List<MarketModel>> getCachedMarkets() async {
-    await _ensureBoxesAreOpen();
-    final marketsJson = _marketsBox!.get(_marketsKey) as List<dynamic>?;
-    
-    if (marketsJson == null) return [];
-    
-    return marketsJson
-        .cast<Map<String, dynamic>>()
-        .map((json) => MarketModel.fromJson(Map<String, dynamic>.from(json)))
-        .toList();
+    throw UnimplementedError('getCachedMarkets has not been implemented');
   }
 
   @override
   Future<void> cacheMarket(MarketModel market) async {
-    await _ensureBoxesAreOpen();
-    await _marketsBox!.put('market_${market.id}', market.toJson());
+    throw UnimplementedError('cacheMarket has not been implemented');
   }
 
   @override
   Future<MarketModel?> getCachedMarket(String id) async {
-    await _ensureBoxesAreOpen();
-    final marketJson = _marketsBox!.get('market_$id') as Map<String, dynamic>?;
-    
-    if (marketJson == null) return null;
-    
-    return MarketModel.fromJson(Map<String, dynamic>.from(marketJson));
+    throw UnimplementedError('getCachedMarket has not been implemented');
   }
 
   @override
   Future<void> clearMarketsCache() async {
-    await _ensureBoxesAreOpen();
-    await _marketsBox!.clear();
+    throw UnimplementedError('clearMarketsCache has not been implemented');
   }
 
   @override
   Future<void> cacheMarketSummary(MarketSummaryModel summary) async {
-    await _ensureBoxesAreOpen();
-    await _marketsBox!.put(_summaryKey, summary.toJson());
+    throw UnimplementedError('cacheMarketSummary has not been implemented');
   }
 
   @override
   Future<MarketSummaryModel?> getCachedMarketSummary() async {
-    await _ensureBoxesAreOpen();
-    final summaryJson = _marketsBox!.get(_summaryKey) as Map<String, dynamic>?;
-    
-    if (summaryJson == null) return null;
-    
-    return MarketSummaryModel.fromJson(Map<String, dynamic>.from(summaryJson));
+    throw UnimplementedError('getCachedMarketSummary has not been implemented');
   }
 
   @override
   Future<void> saveFavoriteMarkets(List<String> marketIds) async {
-    await _ensureBoxesAreOpen();
-    await _favoritesBox!.put(_favoritesKey, marketIds);
+    throw UnimplementedError('saveFavoriteMarkets has not been implemented');
   }
 
   @override
   Future<List<String>> getFavoriteMarketIds() async {
-    await _ensureBoxesAreOpen();
-    final favoriteIds = _favoritesBox!.get(_favoritesKey) as List<dynamic>?;
-    return favoriteIds?.cast<String>() ?? [];
+    throw UnimplementedError('getFavoriteMarketIds has not been implemented');
   }
 
   @override
   Future<void> addToFavorites(String marketId) async {
-    await _ensureBoxesAreOpen();
-    final favoriteIds = await getFavoriteMarketIds();
-    if (!favoriteIds.contains(marketId)) {
-      favoriteIds.add(marketId);
-      await saveFavoriteMarkets(favoriteIds);
-    }
+    throw UnimplementedError('addToFavorites has not been implemented');
   }
 
   @override
   Future<void> removeFromFavorites(String marketId) async {
-    await _ensureBoxesAreOpen();
-    final favoriteIds = await getFavoriteMarketIds();
-    favoriteIds.remove(marketId);
-    await saveFavoriteMarkets(favoriteIds);
+    throw UnimplementedError('removeFromFavorites has not been implemented');
   }
 
   @override
   Future<bool> isMarketFavorite(String marketId) async {
-    await _ensureBoxesAreOpen();
-    final favoriteIds = await getFavoriteMarketIds();
-    return favoriteIds.contains(marketId);
+    throw UnimplementedError('isMarketFavorite has not been implemented');
   }
 
   @override
   Future<void> saveSearchQuery(String query) async {
-    await _ensureBoxesAreOpen();
-    final searchHistory = await getSearchHistory();
-    searchHistory.remove(query);
-    searchHistory.insert(0, query);
-    if (searchHistory.length > 20) {
-      searchHistory.removeRange(20, searchHistory.length);
-    }
-    
-    await _searchHistoryBox!.put(_searchHistoryKey, searchHistory);
+    throw UnimplementedError('saveSearchQuery has not been implemented');
   }
 
   @override
   Future<List<String>> getSearchHistory() async {
-    await _ensureBoxesAreOpen();
-    final history = _searchHistoryBox!.get(_searchHistoryKey) as List<dynamic>?;
-    return history?.cast<String>() ?? [];
+    throw UnimplementedError('getSearchHistory has not been implemented');
   }
 
   @override
   Future<void> clearSearchHistory() async {
-    await _ensureBoxesAreOpen();
-    await _searchHistoryBox!.delete(_searchHistoryKey);
+    throw UnimplementedError('clearSearchHistory has not been implemented');
   }
 
   @override
   Future<void> cacheLastUpdate(DateTime timestamp) async {
-    await _ensureBoxesAreOpen();
-    await _cacheInfoBox!.put(_lastUpdateKey, timestamp.toIso8601String());
+    throw UnimplementedError('cacheLastUpdate has not been implemented');
   }
 
   @override
   Future<DateTime?> getLastUpdate() async {
-    await _ensureBoxesAreOpen();
-    final timestampStr = _cacheInfoBox!.get(_lastUpdateKey) as String?;
-    return timestampStr != null ? DateTime.tryParse(timestampStr) : null;
+    throw UnimplementedError('getLastUpdate has not been implemented');
   }
 }

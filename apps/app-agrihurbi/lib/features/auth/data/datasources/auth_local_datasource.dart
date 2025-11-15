@@ -8,7 +8,7 @@ import '../models/user_model.dart';
 
 /// DataSource abstrato para operações locais de autenticação
 ///
-/// Define contratos para persistência local usando Hive e Flutter Secure Storage
+/// Define contratos para persistência local e Flutter Secure Storage
 /// Segue padrão Clean Architecture com separação de responsabilidades
 abstract class AuthLocalDataSource {
   /// Salva usuário no cache local
@@ -50,7 +50,7 @@ abstract class AuthLocalDataSource {
 
 /// Implementação do datasource local de autenticação
 ///
-/// Usa Hive para dados do usuário e Flutter Secure Storage para tokens
+/// Usa Flutter Secure Storage para tokens
 /// Aplica estratégia local-first com persistência robusta
 @LazySingleton(as: AuthLocalDataSource)
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {

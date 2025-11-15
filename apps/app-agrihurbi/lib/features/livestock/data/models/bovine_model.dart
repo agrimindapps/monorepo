@@ -2,10 +2,9 @@
 import '../../domain/entities/bovine_entity.dart';
 
 
-/// Model de dados para bovinos com suporte ao Hive
-/// 
-/// Implementa serialização local (Hive) e conversões para entidades do domínio
-/// TypeId: 0 - Reservado para bovinos no sistema Hive
+/// Model de dados para bovinos com suporte a persistência local
+///
+/// Implementa conversões para entidades do domínio
 class BovineModel extends BovineEntity {
   const BovineModel({
     required super.id,

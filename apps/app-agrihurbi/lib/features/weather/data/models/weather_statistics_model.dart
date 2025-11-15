@@ -3,163 +3,111 @@ import 'package:core/core.dart';
 import '../../domain/entities/weather_statistics_entity.dart';
 
 
-/// Weather statistics model with Hive serialization
-/// Converts between domain entity and data model for persistence
+/// Weather statistics model
+/// Converts between domain entity and data model
 class WeatherStatisticsModel extends Equatable {
-  @HiveField(0)
   final String id;
 
-  @HiveField(1)
   final String locationId;
 
-  @HiveField(2)
   final String locationName;
 
-  @HiveField(3)
   final String period;
 
-  @HiveField(4)
   final DateTime startDate;
 
-  @HiveField(5)
   final DateTime endDate;
 
-  @HiveField(6)
   final double avgTemperature;
 
-  @HiveField(7)
   final double minTemperature;
 
-  @HiveField(8)
   final double maxTemperature;
 
-  @HiveField(9)
   final double temperatureVariance;
 
-  @HiveField(10)
   final double avgHumidity;
 
-  @HiveField(11)
   final double minHumidity;
 
-  @HiveField(12)
   final double maxHumidity;
 
-  @HiveField(13)
   final double humidityVariance;
 
-  @HiveField(14)
   final double avgPressure;
 
-  @HiveField(15)
   final double minPressure;
 
-  @HiveField(16)
   final double maxPressure;
 
-  @HiveField(17)
   final double pressureVariance;
 
-  @HiveField(18)
   final double avgWindSpeed;
 
-  @HiveField(19)
   final double maxWindSpeed;
 
-  @HiveField(20)
   final double avgWindDirection;
 
-  @HiveField(21)
   final String predominantWindDirection;
 
-  @HiveField(22)
   final double totalRainfall;
 
-  @HiveField(23)
   final double avgDailyRainfall;
 
-  @HiveField(24)
   final double maxDailyRainfall;
 
-  @HiveField(25)
   final int rainyDays;
 
-  @HiveField(26)
   final int dryDays;
 
-  @HiveField(27)
   final double avgUVIndex;
 
-  @HiveField(28)
   final double maxUVIndex;
 
-  @HiveField(29)
   final double avgVisibility;
 
-  @HiveField(30)
   final double minVisibility;
 
-  @HiveField(31)
   final Map<String, int> weatherConditionCounts;
 
-  @HiveField(32)
   final String predominantCondition;
 
-  @HiveField(33)
   final int favorableDays;
 
-  @HiveField(34)
   final int unfavorableDays;
 
-  @HiveField(35)
   final double avgHeatIndex;
 
-  @HiveField(36)
   final double avgDewPoint;
 
-  @HiveField(37)
   final int totalMeasurements;
 
-  @HiveField(38)
   final int validMeasurements;
 
-  @HiveField(39)
   final double dataCompleteness;
 
-  @HiveField(40)
   final double avgDataQuality;
 
-  @HiveField(41)
   final double temperatureTrend;
 
-  @HiveField(42)
   final double humidityTrend;
 
-  @HiveField(43)
   final double pressureTrend;
 
-  @HiveField(44)
   final double rainfallTrend;
 
-  @HiveField(45)
   final List<String> detectedAnomalies;
 
-  @HiveField(46)
   final double anomalyScore;
 
-  @HiveField(47)
   final bool isSeasonalDataAvailable;
 
-  @HiveField(48)
   final double seasonalDeviationScore;
 
-  @HiveField(49)
   final DateTime calculatedAt;
 
-  @HiveField(50)
   final DateTime createdAt;
 
-  @HiveField(51)
   final DateTime updatedAt;
 
   const WeatherStatisticsModel({

@@ -281,7 +281,7 @@ class BovinesProvider extends ChangeNotifier {
   /// Esta implementação:
   /// 1. Busca localmente primeiro no cache em memória
   /// 2. Se não encontrar, usa o use case que implementa local-first strategy
-  /// 3. O repository busca no cache Hive e depois remotamente se necessário
+  /// 3. O repository busca no cache local e depois remotamente se necessário
   /// 4. Define automaticamente o bovino como selecionado se encontrado
   Future<bool> loadBovineById(String id) async {
     _isLoadingBovine = true;

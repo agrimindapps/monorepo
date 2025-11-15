@@ -11,7 +11,7 @@ import '../datasources/calculator_local_datasource.dart';
 /// Implementação do repositório de calculadoras
 ///
 /// Segue padrão clean architecture com local-first strategy
-/// Integra com Hive para armazenamento local de histórico e favoritos
+/// Integra com armazenamento local de histórico e favoritos
 @LazySingleton(as: CalculatorRepository)
 class CalculatorRepositoryImpl implements CalculatorRepository {
   final CalculatorLocalDataSource _localDataSource;
@@ -269,16 +269,6 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
   ) async {
     try {
       // TODO: Implement performance metrics storage with Drift
-      // final metricKey = 'performance_${operation}_$calculatorId';
-      // final metric = {
-      //   'operation': operation,
-      //   'calculator_id': calculatorId,
-      //   'duration_ms': durationMs,
-      //   'timestamp': DateTime.now().toIso8601String(),
-      // };
-      // await _hiveStorageService.put(
-      //   box: 'performance_metrics',
-      //   key: metricKey,
       //   data: metric,
       // );
     } catch (e) {

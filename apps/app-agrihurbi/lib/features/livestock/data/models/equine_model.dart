@@ -2,10 +2,9 @@
 import '../../domain/entities/equine_entity.dart';
 
 
-/// Model de dados para equinos com suporte ao Hive
-/// 
-/// Implementa serialização local (Hive) e conversões para entidades do domínio
-/// TypeId: 1 - Reservado para equinos no sistema Hive
+/// Model de dados para equinos com suporte a persistência local
+///
+/// Implementa conversões para entidades do domínio
 class EquineModel extends EquineEntity {
   const EquineModel({
     required super.id,

@@ -1,3 +1,5 @@
+
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 /// Abstract class for network information

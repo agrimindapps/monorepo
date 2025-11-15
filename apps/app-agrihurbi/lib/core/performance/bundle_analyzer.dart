@@ -134,7 +134,7 @@ class BundleAnalyzer {
         'provider': 150 * 1024, // ~150KB
         'dartz': 80 * 1024, // ~80KB
         'injectable': 120 * 1024, // ~120KB
-        'hive': 200 * 1024, // ~200KB
+        'drift': 200 * 1024, // ~200KB
         'dio': 300 * 1024, // ~300KB
         'shared_preferences': 45 * 1024, // ~45KB
         'path_provider': 60 * 1024, // ~60KB

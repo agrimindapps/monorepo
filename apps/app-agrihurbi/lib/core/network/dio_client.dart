@@ -117,16 +117,4 @@ class DioClient {
 }
 
 /// Auth interceptor to add authorization headers
-class AuthInterceptor extends Interceptor {
-  @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    super.onRequest(options, handler);
-  }
-
-  @override
-  void onError(DioException err, ErrorInterceptorHandler handler) {
-    if (err.response?.statusCode == 401) {
-    }
-    super.onError(err, handler);
-  }
-}
+class AuthInterceptor extends Interceptor {}

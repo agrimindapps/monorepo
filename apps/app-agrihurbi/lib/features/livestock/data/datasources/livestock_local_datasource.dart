@@ -29,67 +29,29 @@ abstract class LivestockLocalDataSource {
   Future<void> importData(String backupData);
 }
 
-/// Implementação do data source local usando Hive diretamente
+/// Implementação do data source local
 @LazySingleton(as: LivestockLocalDataSource)
 class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
-  static const String _bovinesBoxName = 'bovines';
-  static const String _equinesBoxName = 'equines';
-
   LivestockLocalDataSourceImpl();
-
-  /// Getter para box de bovinos
-  Box<BovineModel> get _bovinesBox => Hive.box<BovineModel>(_bovinesBoxName);
-
-  /// Getter para box de equinos
-  Box<EquineModel> get _equinesBox => Hive.box<EquineModel>(_equinesBoxName);
 
   @override
   Future<List<BovineModel>> getAllBovines() async {
-    try {
-      return _bovinesBox.values.where((bovine) => bovine.isActive).toList();
-    } catch (e) {
-      throw CacheException('Erro ao buscar bovinos: $e');
-    }
+    throw UnimplementedError('getAllBovines has not been implemented');
   }
 
   @override
   Future<BovineModel?> getBovineById(String id) async {
-    try {
-      return _bovinesBox.get(id);
-    } catch (e) {
-      throw CacheException('Erro ao buscar bovino por ID: $e');
-    }
+    throw UnimplementedError('getBovineById has not been implemented');
   }
 
   @override
   Future<void> saveBovine(BovineModel bovine) async {
-    try {
-      final now = DateTime.now();
-      final updatedBovine = bovine.copyWith(
-        updatedAt: now,
-        createdAt: bovine.createdAt ?? now,
-      );
-
-      await _bovinesBox.put(updatedBovine.id, updatedBovine);
-    } catch (e) {
-      throw CacheException('Erro ao salvar bovino: $e');
-    }
+    throw UnimplementedError('saveBovine has not been implemented');
   }
 
   @override
   Future<void> deleteBovine(String id) async {
-    try {
-      final bovine = _bovinesBox.get(id);
-      if (bovine != null) {
-        final inactiveBovine = bovine.copyWith(
-          isActive: false,
-          updatedAt: DateTime.now(),
-        );
-        await _bovinesBox.put(id, inactiveBovine);
-      }
-    } catch (e) {
-      throw CacheException('Erro ao deletar bovino: $e');
-    }
+    throw UnimplementedError('deleteBovine has not been implemented');
   }
 
   @override
@@ -99,97 +61,27 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
     String? purpose,
     List<String>? tags,
   }) async {
-    try {
-      final allBovines = await getAllBovines();
-
-      return allBovines.where((bovine) {
-        bool matches = true;
-
-        if (breed != null && breed.isNotEmpty) {
-          matches =
-              matches &&
-              bovine.breed.toLowerCase().contains(breed.toLowerCase());
-        }
-
-        if (aptitude != null && aptitude.isNotEmpty) {
-          matches =
-              matches &&
-              bovine.aptitude.displayName.toLowerCase().contains(
-                aptitude.toLowerCase(),
-              );
-        }
-
-        if (purpose != null && purpose.isNotEmpty) {
-          matches =
-              matches &&
-              bovine.purpose.toLowerCase().contains(purpose.toLowerCase());
-        }
-
-        if (tags != null && tags.isNotEmpty) {
-          matches =
-              matches &&
-              tags.any(
-                (tag) => bovine.tags.any(
-                  (bovineTag) =>
-                      bovineTag.toLowerCase().contains(tag.toLowerCase()),
-                ),
-              );
-        }
-
-        return matches;
-      }).toList();
-    } catch (e) {
-      throw CacheException('Erro ao buscar bovinos com filtros: $e');
-    }
+    throw UnimplementedError('searchBovines has not been implemented');
   }
 
   @override
   Future<List<EquineModel>> getAllEquines() async {
-    try {
-      return _equinesBox.values.where((equine) => equine.isActive).toList();
-    } catch (e) {
-      throw CacheException('Erro ao buscar equinos: $e');
-    }
+    throw UnimplementedError('getAllEquines has not been implemented');
   }
 
   @override
   Future<EquineModel?> getEquineById(String id) async {
-    try {
-      return _equinesBox.get(id);
-    } catch (e) {
-      throw CacheException('Erro ao buscar equino por ID: $e');
-    }
+    throw UnimplementedError('getEquineById has not been implemented');
   }
 
   @override
   Future<void> saveEquine(EquineModel equine) async {
-    try {
-      final now = DateTime.now();
-      final updatedEquine = equine.copyWith(
-        updatedAt: now,
-        createdAt: equine.createdAt ?? now,
-      );
-
-      await _equinesBox.put(updatedEquine.id, updatedEquine);
-    } catch (e) {
-      throw CacheException('Erro ao salvar equino: $e');
-    }
+    throw UnimplementedError('saveEquine has not been implemented');
   }
 
   @override
   Future<void> deleteEquine(String id) async {
-    try {
-      final equine = _equinesBox.get(id);
-      if (equine != null) {
-        final inactiveEquine = equine.copyWith(
-          isActive: false,
-          updatedAt: DateTime.now(),
-        );
-        await _equinesBox.put(id, inactiveEquine);
-      }
-    } catch (e) {
-      throw CacheException('Erro ao deletar equino: $e');
-    }
+    throw UnimplementedError('deleteEquine has not been implemented');
   }
 
   @override
@@ -199,104 +91,18 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
     String? primaryUse,
     String? geneticInfluences,
   }) async {
-    try {
-      final allEquines = await getAllEquines();
-
-      return allEquines.where((equine) {
-        bool matches = true;
-
-        if (temperament != null && temperament.isNotEmpty) {
-          matches =
-              matches &&
-              equine.temperament.displayName.toLowerCase().contains(
-                temperament.toLowerCase(),
-              );
-        }
-
-        if (coat != null && coat.isNotEmpty) {
-          matches =
-              matches &&
-              equine.coat.displayName.toLowerCase().contains(
-                coat.toLowerCase(),
-              );
-        }
-
-        if (primaryUse != null && primaryUse.isNotEmpty) {
-          matches =
-              matches &&
-              equine.primaryUse.displayName.toLowerCase().contains(
-                primaryUse.toLowerCase(),
-              );
-        }
-
-        if (geneticInfluences != null && geneticInfluences.isNotEmpty) {
-          matches =
-              matches &&
-              equine.geneticInfluences.toLowerCase().contains(
-                geneticInfluences.toLowerCase(),
-              );
-        }
-
-        return matches;
-      }).toList();
-    } catch (e) {
-      throw CacheException('Erro ao buscar equinos com filtros: $e');
-    }
+    throw UnimplementedError('searchEquines has not been implemented');
   }
 
   @override
   Future<String> exportData() async {
-    try {
-      final bovines = await getAllBovines();
-      final equines = await getAllEquines();
-
-      final exportData = {
-        'bovines': bovines.map((b) => b.toJson()).toList(),
-        'equines': equines.map((e) => e.toJson()).toList(),
-        'exportDate': DateTime.now().toIso8601String(),
-        'version': '1.0.0',
-      };
-
-      return exportData.toString();
-    } catch (e) {
-      throw CacheException('Erro ao exportar dados: $e');
-    }
+    throw UnimplementedError('exportData has not been implemented');
   }
 
   @override
   Future<void> importData(String backupData) async {
-    try {
-      throw UnimplementedError('Import de dados não implementado ainda');
-    } catch (e) {
-      throw CacheException('Erro ao importar dados: $e');
-    }
-  }
-
-  static Future<void> initializeBoxes() async {
-    if (!Hive.isBoxOpen(_bovinesBoxName)) {
-      await Hive.openBox<BovineModel>(_bovinesBoxName);
-    }
-    if (!Hive.isBoxOpen(_equinesBoxName)) {
-      await Hive.openBox<EquineModel>(_equinesBoxName);
-    }
-  }
-
-  static Future<void> closeBoxes() async {
-    if (Hive.isBoxOpen(_bovinesBoxName)) {
-      await Hive.box<BovineModel>(_bovinesBoxName).close();
-    }
-    if (Hive.isBoxOpen(_equinesBoxName)) {
-      await Hive.box<EquineModel>(_equinesBoxName).close();
-    }
+    throw UnimplementedError('importData has not been implemented');
   }
 }
 
-/// Exceção específica para problemas de cache local
-class CacheException implements Exception {
-  final String message;
 
-  const CacheException(this.message);
-
-  @override
-  String toString() => 'CacheException: $message';
-}

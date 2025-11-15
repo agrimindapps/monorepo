@@ -3,12 +3,11 @@ import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.
 import 'package:core/core.dart';
 
 
-/// News Article Model with Hive Serialization
+/// News Article Model
 ///
 /// Represents a news article with complete information
 /// for RSS feeds and agriculture news display
 class NewsArticleModel extends NewsArticleEntity {
-  @HiveField(8)
   final NewsCategoryModel _category;
 
   const NewsArticleModel({
@@ -119,30 +118,22 @@ class NewsArticleModel extends NewsArticleEntity {
   }
 }
 
-/// News Category Model with Hive Serialization
+/// News Category Model
 enum NewsCategoryModel {
-  @HiveField(0)
   crops,
   
-  @HiveField(1)
   livestock,
   
-  @HiveField(2)
   technology,
   
-  @HiveField(3)
   market,
   
-  @HiveField(4)
   weather,
   
-  @HiveField(5)
   sustainability,
   
-  @HiveField(6)
   government,
   
-  @HiveField(7)
   research;
 
   /// Convert to domain entity

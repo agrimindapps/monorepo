@@ -3,73 +3,51 @@ import 'package:core/core.dart';
 import '../../domain/entities/weather_measurement_entity.dart';
 
 
-/// Weather measurement model with Hive serialization
-/// Converts between domain entity and data model for persistence
+/// Weather measurement model
+/// Converts between domain entity and data model
 class WeatherMeasurementModel extends Equatable {
-  @HiveField(0)
   final String id;
 
-  @HiveField(1)
   final String locationId;
 
-  @HiveField(2)
   final String locationName;
 
-  @HiveField(3)
   final DateTime timestamp;
 
-  @HiveField(4)
   final double temperature;
 
-  @HiveField(5)
   final double humidity;
 
-  @HiveField(6)
   final double pressure;
 
-  @HiveField(7)
   final double windSpeed;
 
-  @HiveField(8)
   final double windDirection;
 
-  @HiveField(9)
   final double rainfall;
 
-  @HiveField(10)
   final double uvIndex;
 
-  @HiveField(11)
   final double visibility;
 
-  @HiveField(12)
   final String weatherCondition;
 
-  @HiveField(13)
   final String description;
 
-  @HiveField(14)
   final double latitude;
 
-  @HiveField(15)
   final double longitude;
 
-  @HiveField(16)
   final String source;
 
-  @HiveField(17)
   final double qualityScore;
 
-  @HiveField(18)
   final bool isRealTime;
 
-  @HiveField(19)
   final String? notes;
 
-  @HiveField(20)
   final DateTime createdAt;
 
-  @HiveField(21)
   final DateTime updatedAt;
 
   const WeatherMeasurementModel({

@@ -1,7 +1,6 @@
-/// Registra todos os adapters de enums para o Hive
+/// Registra todos os adapters de enums para armazenamento local
 ///
-/// ⚠️ TEMPORARIAMENTE DESABILITADO: Adapters removidos devido a conflito
-/// com riverpod_generator (incompatibilidade hive_generator)
+/// ⚠️ TEMPORARIAMENTE DESABILITADO: Adapters removidos
 void registerLivestockEnumAdapters() {
   // TODO: Implementar adapters manuais
   print('⚠️  Livestock enum adapters registration SKIPPED');

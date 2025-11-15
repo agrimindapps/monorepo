@@ -25,7 +25,7 @@ abstract class CalculatorLocalDataSource {
   Future<void> removeFromFavorites(String calculatorId);
 }
 
-/// Implementação do datasource local com Hive
+/// Implementação do datasource local
 /// 
 /// Gerencia calculadoras hardcoded e armazenamento local de histórico/favoritos
 @LazySingleton(as: CalculatorLocalDataSource)

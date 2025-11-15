@@ -1,14 +1,12 @@
 import 'package:core/core.dart';
+
 import 'animal_base_entity.dart';
 
 
 /// Enumeração para aptidão bovina
 enum BovineAptitude {
-  @HiveField(0)
   dairy('Leiteira'),
-  @HiveField(1)
   beef('Corte'),
-  @HiveField(2)
   mixed('Mista');
 
   const BovineAptitude(this.displayName);
@@ -17,11 +15,8 @@ enum BovineAptitude {
 
 /// Enumeração para sistema de criação
 enum BreedingSystem {
-  @HiveField(0)
   extensive('Extensivo'),
-  @HiveField(1)
   intensive('Intensivo'),
-  @HiveField(2)
   semiIntensive('Semi-intensivo');
 
   const BreedingSystem(this.displayName);

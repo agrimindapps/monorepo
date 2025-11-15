@@ -3,52 +3,41 @@ import 'package:app_agrihurbi/features/news/domain/entities/commodity_price_enti
 import 'package:core/core.dart';
 
 
-/// Commodity Price Model with Hive Serialization
+/// Commodity Price Model
 /// 
 /// Represents current and historical pricing data
 /// for agricultural commodities and products
 class CommodityPriceModel extends CommodityPriceEntity {
   @override
-  @HiveField(0)
   final String id;
   
   @override
-  @HiveField(1)
   final String commodityName;
   
-  @HiveField(2)
   final CommodityTypeModel _type;
   
   @override
-  @HiveField(3)
   final double currentPrice;
   
   @override
-  @HiveField(4)
   final double previousPrice;
   
   @override
-  @HiveField(5)
   final double changePercent;
   
   @override
-  @HiveField(6)
   final String currency;
   
   @override
-  @HiveField(7)
   final String unit;
   
   @override
-  @HiveField(8)
   final String market;
   
   @override
-  @HiveField(9)
   final DateTime lastUpdated;
   
   @override
-  @HiveField(10)
   final List<HistoricalPriceModel> history;
 
   const CommodityPriceModel({
@@ -165,33 +154,24 @@ class CommodityPriceModel extends CommodityPriceEntity {
   }
 }
 
-/// Commodity Type Model with Hive Serialization
+/// Commodity Type Model
 enum CommodityTypeModel {
-  @HiveField(0)
   grains,
   
-  @HiveField(1)
   livestock,
   
-  @HiveField(2)
   dairy,
   
-  @HiveField(3)
   vegetables,
   
-  @HiveField(4)
   fruits,
   
-  @HiveField(5)
   coffee,
   
-  @HiveField(6)
   sugar,
   
-  @HiveField(7)
   cotton,
   
-  @HiveField(8)
   fertilizer;
 
   /// Convert to domain entity
@@ -331,18 +311,15 @@ enum CommodityTypeModel {
   }
 }
 
-/// Historical Price Model with Hive Serialization
+/// Historical Price Model
 class HistoricalPriceModel extends HistoricalPrice {
   @override
-  @HiveField(0)
   final DateTime date;
   
   @override
-  @HiveField(1)
   final double price;
   
   @override
-  @HiveField(2)
   final double volume;
 
   const HistoricalPriceModel({
@@ -383,30 +360,24 @@ class HistoricalPriceModel extends HistoricalPrice {
   }
 }
 
-/// Market Summary Model with Hive Serialization
+/// Market Summary Model
 class CommodityMarketSummaryModel extends MarketSummaryEntity {
   @override
-  @HiveField(0)
   final String marketName;
   
   @override
-  @HiveField(1)
   final DateTime lastUpdated;
   
   @override
-  @HiveField(2)
   final List<CommodityPriceModel> topGainers;
   
   @override
-  @HiveField(3)
   final List<CommodityPriceModel> topLosers;
   
   @override
-  @HiveField(4)
   final double marketIndex;
   
   @override
-  @HiveField(5)
   final double marketIndexChange;
 
   const CommodityMarketSummaryModel({

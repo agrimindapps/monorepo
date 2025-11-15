@@ -4,86 +4,30 @@ import 'package:core/core.dart';
 part 'market_model.g.dart';
 
 
-/// Hive Adapter for MarketType enum
-enum MarketTypeAdapter {
-  @HiveField(0)
-  grains,
-  @HiveField(1)
-  livestock,
-  @HiveField(2)
-  dairy,
-  @HiveField(3)
-  vegetables,
-  @HiveField(4)
-  fruits,
-  @HiveField(5)
-  coffee,
-  @HiveField(6)
-  sugar,
-  @HiveField(7)
-  cotton,
-  @HiveField(8)
-  fertilizer,
-  @HiveField(9)
-  soybean,
-  @HiveField(10)
-  corn,
-  @HiveField(11)
-  beef,
-}
 
-/// Hive Adapter for MarketStatus enum
-enum MarketStatusAdapter {
-  @HiveField(0)
-  open,
-  @HiveField(1)
-  closed,
-  @HiveField(2)
-  suspended,
-  @HiveField(3)
-  preMarket,
-  @HiveField(4)
-  afterMarket,
-}
 
 /// Market Model for Data Layer
 ///
-/// Extends MarketEntity with JSON serialization and Hive persistence
+/// Extends MarketEntity with JSON serialization
 @JsonSerializable(explicitToJson: true)
 class MarketModel {
-  @HiveField(0)
   final String id;
-  @HiveField(1)
   final String name;
-  @HiveField(2)
   final String symbol;
-  @HiveField(3)
   @JsonKey(fromJson: _marketTypeFromJson, toJson: _marketTypeToJson)
   final MarketType type;
-  @HiveField(4)
   final double currentPrice;
-  @HiveField(5)
   final double previousPrice;
-  @HiveField(6)
   final double changePercent;
-  @HiveField(7)
   final double volume;
-  @HiveField(8)
   final String currency;
-  @HiveField(9)
   final String unit;
-  @HiveField(10)
   final String exchange;
-  @HiveField(11)
   final DateTime lastUpdated;
-  @HiveField(12)
   @JsonKey(fromJson: _marketStatusFromJson, toJson: _marketStatusToJson)
   final MarketStatus status;
-  @HiveField(13)
   final List<PriceHistoryModel> history;
-  @HiveField(14)
   final String? description;
-  @HiveField(15)
   final String? imageUrl;
 
   const MarketModel({
@@ -267,27 +211,16 @@ class PriceHistoryModel extends PriceHistory {
 /// Market Summary Model
 @JsonSerializable(explicitToJson: true)
 class MarketSummaryModel {
-  @HiveField(0)
   final String marketName;
-  @HiveField(1)
   final DateTime lastUpdated;
-  @HiveField(2)
   final List<MarketModel> topGainers;
-  @HiveField(3)
   final List<MarketModel> topLosers;
-  @HiveField(4)
   final List<MarketModel> mostActive;
-  @HiveField(5)
   final double marketIndex;
-  @HiveField(6)
   final double marketIndexChange;
-  @HiveField(7)
   final int totalMarkets;
-  @HiveField(8)
   final int marketsUp;
-  @HiveField(9)
   final int marketsDown;
-  @HiveField(10)
   final int marketsUnchanged;
 
   const MarketSummaryModel({

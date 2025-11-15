@@ -14,7 +14,7 @@ import '../models/equine_model.dart';
 /// Implementação do repositório de livestock com estratégia local-first
 ///
 /// ESTRATÉGIA LOCAL-FIRST:
-/// 1. Sempre retorna dados locais primeiro (Hive)
+/// 1. Sempre retorna dados locais primeiro (persistência local)
 /// 2. Sync com Supabase em background quando há conectividade
 /// 3. Conflict resolution: local wins (last-write-wins)
 /// 4. Offline-first approach para melhor UX
@@ -466,7 +466,7 @@ class LivestockRepositoryImpl implements LivestockRepository {
 
   /// Converte exceções em Failures apropriados
   Failure _handleException(dynamic exception) {
-    if (exception is CacheException) {
+    if (exception is core_exceptions.CacheException) {
       return LivestockFailure(message: exception.message);
     } else if (exception is core_exceptions.ServerException) {
       return LivestockFailure(message: exception.message);

@@ -2,8 +2,8 @@ import 'package:core/core.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/interfaces/usecase.dart' as local;
-import '../../../../core/logging/entities/log_entry.dart';
-import '../../../../core/logging/services/logging_service.dart';
+import '../../../../core/interfaces/logging_service.dart';
+import '../../../../core/providers/logging_providers.dart';
 import '../../domain/entities/animal.dart';
 import '../../domain/entities/animal_enums.dart';
 import '../../domain/repositories/animal_repository.dart';
@@ -88,6 +88,7 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
   final AddAnimal _addAnimal;
   final UpdateAnimal _updateAnimal;
   final DeleteAnimal _deleteAnimal;
+  final ILoggingService _logger;
 
   AnimalsNotifier({
     required GetAnimals getAnimals,
@@ -95,17 +96,19 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
     required AddAnimal addAnimal,
     required UpdateAnimal updateAnimal,
     required DeleteAnimal deleteAnimal,
+    required ILoggingService logger,
   })  : _getAnimals = getAnimals,
         _getAnimalById = getAnimalById,
         _addAnimal = addAnimal,
         _updateAnimal = updateAnimal,
         _deleteAnimal = deleteAnimal,
+        _logger = logger,
         super(const AnimalsState());
 
   Future<void> loadAnimals() async {
-    await LoggingService.instance.trackUserAction(
-      category: LogCategory.animals,
-      operation: LogOperation.read,
+    await _logger.trackUserAction(
+      category: 'animals',
+      operation: 'read',
       action: 'load_animals_initiated',
       metadata: {'from': 'animals_provider'},
     );
@@ -116,9 +119,9 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
 
     result.fold(
       (failure) {
-        LoggingService.instance.logError(
-          category: LogCategory.animals,
-          operation: LogOperation.read,
+        _logger.logError(
+          category: 'animals',
+          operation: 'read',
           message: 'Failed to load animals in provider',
           error: failure.message,
           metadata: {'provider': 'animals_provider'},
@@ -130,9 +133,9 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
         );
       },
       (animals) {
-        LoggingService.instance.logInfo(
-          category: LogCategory.animals,
-          operation: LogOperation.read,
+        _logger.logInfo(
+          category: 'animals',
+          operation: 'read',
           message: 'Successfully loaded animals in provider',
           metadata: {
             'provider': 'animals_provider',
@@ -289,14 +292,81 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
   }
 }
 final animalsProvider = StateNotifierProvider<AnimalsNotifier, AnimalsState>((ref) {
+  final logger = ref.watch(loggingServiceProvider);
   return AnimalsNotifier(
     getAnimals: di.getIt<GetAnimals>(),
     getAnimalById: di.getIt<GetAnimalById>(),
     addAnimal: di.getIt<AddAnimal>(),
     updateAnimal: di.getIt<UpdateAnimal>(),
     deleteAnimal: di.getIt<DeleteAnimal>(),
+    logger: logger,
   );
 });
+
+class _NoOpLoggingService implements ILoggingService {
+  @override
+  Future<void> logError({
+    required String category,
+    required String operation,
+    required String message,
+    required dynamic error,
+    StackTrace? stackTrace,
+    Map<String, dynamic>? metadata,
+    Duration? duration,
+  }) async {}
+
+  @override
+  Future<void> logInfo({
+    required String category,
+    required String operation,
+    required String message,
+    Map<String, dynamic>? metadata,
+    Duration? duration,
+  }) async {}
+
+  @override
+  Future<void> logWarning({
+    required String category,
+    required String operation,
+    required String message,
+    Map<String, dynamic>? metadata,
+    Duration? duration,
+  }) async {}
+
+  @override
+  Future<T> logTimedOperation<T>({
+    required String category,
+    required String operation,
+    required String message,
+    required Future<T> Function() operationFunction,
+    Map<String, dynamic>? metadata,
+  }) async => await operationFunction();
+
+  @override
+  Future<void> trackEvent({
+    required String eventName,
+    required String category,
+    Map<String, dynamic>? parameters,
+  }) async {}
+
+  @override
+  Future<void> trackUserAction({
+    required String category,
+    required String operation,
+    required String action,
+    Map<String, dynamic>? metadata,
+  }) async {}
+
+  @override
+  void setUserId(String? userId) {}
+
+  @override
+  Future<void> performMaintenance({int daysToKeep = 30}) async {}
+
+  @override
+  Future<Map<String, dynamic>> getLoggingStats() async => {};
+}
+
 final animalProvider = FutureProvider.family<Animal?, String>((ref, id) async {
   final notifier = ref.read(animalsProvider.notifier);
   return await notifier.getAnimalById(id);

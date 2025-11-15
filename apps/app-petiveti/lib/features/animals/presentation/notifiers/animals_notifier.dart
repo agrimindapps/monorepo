@@ -2,8 +2,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/interfaces/usecase.dart' as local;
-import '../../../../core/logging/entities/log_entry.dart';
-import '../../../../core/logging/services/logging_service.dart';
+import '../../../../core/interfaces/logging_service.dart';
+import '../../../../core/providers/logging_providers.dart';
 import '../../domain/entities/animal.dart';
 import '../../domain/repositories/animal_repository.dart';
 import '../../domain/usecases/add_animal.dart';
@@ -56,6 +56,7 @@ class AnimalsNotifier extends _$AnimalsNotifier {
   late final AddAnimal _addAnimal;
   late final UpdateAnimal _updateAnimal;
   late final DeleteAnimal _deleteAnimal;
+  late final ILoggingService _logger;
 
   @override
   AnimalsState build() {
@@ -64,15 +65,16 @@ class AnimalsNotifier extends _$AnimalsNotifier {
     _addAnimal = di.getIt<AddAnimal>();
     _updateAnimal = di.getIt<UpdateAnimal>();
     _deleteAnimal = di.getIt<DeleteAnimal>();
+    _logger = ref.watch(loggingServiceProvider);
 
     return const AnimalsState();
   }
 
   /// Carregar todos os animais
   Future<void> loadAnimals() async {
-    await LoggingService.instance.trackUserAction(
-      category: LogCategory.animals,
-      operation: LogOperation.read,
+    await _logger.trackUserAction(
+      category: 'animals',
+      operation: 'read',
       action: 'load_animals_initiated',
       metadata: {'from': 'animals_notifier'},
     );
@@ -83,9 +85,9 @@ class AnimalsNotifier extends _$AnimalsNotifier {
 
     result.fold(
       (failure) {
-        LoggingService.instance.logError(
-          category: LogCategory.animals,
-          operation: LogOperation.read,
+        _logger.logError(
+          category: 'animals',
+          operation: 'read',
           message: 'Failed to load animals in notifier',
           error: failure.message,
           metadata: {'notifier': 'animals_notifier'},
@@ -97,9 +99,9 @@ class AnimalsNotifier extends _$AnimalsNotifier {
         );
       },
       (animals) {
-        LoggingService.instance.logInfo(
-          category: LogCategory.animals,
-          operation: LogOperation.read,
+        _logger.logInfo(
+          category: 'animals',
+          operation: 'read',
           message: 'Successfully loaded animals in notifier',
           metadata: {
             'notifier': 'animals_notifier',

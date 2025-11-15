@@ -1,8 +1,7 @@
 import 'package:core/core.dart' hide subscriptionProvider, SubscriptionState;
 import 'package:flutter/material.dart';
 import '../../features/subscription/presentation/providers/subscription_provider.dart';
-import '../logging/entities/log_entry.dart';
-import '../logging/services/logging_service.dart';
+import '../interfaces/logging_service.dart';
 
 /// Base abstract class for all authentication guards
 abstract class AuthGuard {
@@ -11,6 +10,13 @@ abstract class AuthGuard {
 
 /// Guard that ensures user is authenticated
 class AuthenticatedGuard implements AuthGuard {
+  final ILoggingService _logger;
+
+  AuthenticatedGuard({ILoggingService? logger})
+      : _logger = logger ?? _defaultLogger;
+
+  static final ILoggingService _defaultLogger = _DefaultLoggingService();
+
   @override
   Future<String?> check(BuildContext context, GoRouterState state) async {
     try {
@@ -25,9 +31,9 @@ class AuthenticatedGuard implements AuthGuard {
       return null; // Allow access
     } catch (e) {
       // If provider is not available, redirect to login for safety
-      LoggingService.instance.logError(
-        category: LogCategory.auth,
-        operation: LogOperation.validate,
+      await _logger.logError(
+        category: 'auth',
+        operation: 'validate',
         message: 'AuthGuard: Error checking authentication',
         error: e,
       );
@@ -38,6 +44,13 @@ class AuthenticatedGuard implements AuthGuard {
 
 /// Guard that ensures user has premium subscription
 class PremiumGuard implements AuthGuard {
+  final ILoggingService _logger;
+
+  PremiumGuard({ILoggingService? logger})
+      : _logger = logger ?? _defaultLogger;
+
+  static final ILoggingService _defaultLogger = _DefaultLoggingService();
+
   @override
   Future<String?> check(BuildContext context, GoRouterState state) async {
     try {
@@ -59,9 +72,9 @@ class PremiumGuard implements AuthGuard {
       return null; // Allow access
     } catch (e) {
       // If provider is not available, redirect to subscription for safety
-      LoggingService.instance.logError(
-        category: LogCategory.auth,
-        operation: LogOperation.validate,
+      await _logger.logError(
+        category: 'auth',
+        operation: 'validate',
         message: 'PremiumGuard: Error checking premium status',
         error: e,
       );
@@ -72,6 +85,13 @@ class PremiumGuard implements AuthGuard {
 
 /// Guard that ensures user is not authenticated (for login/register pages)
 class UnauthenticatedGuard implements AuthGuard {
+  final ILoggingService _logger;
+
+  UnauthenticatedGuard({ILoggingService? logger})
+      : _logger = logger ?? _defaultLogger;
+
+  static final ILoggingService _defaultLogger = _DefaultLoggingService();
+
   @override
   Future<String?> check(BuildContext context, GoRouterState state) async {
     try {
@@ -86,9 +106,9 @@ class UnauthenticatedGuard implements AuthGuard {
       return null; // Allow access to login/register
     } catch (e) {
       // If provider is not available, allow access (assume not authenticated)
-      LoggingService.instance.logError(
-        category: LogCategory.auth,
-        operation: LogOperation.validate,
+      await _logger.logError(
+        category: 'auth',
+        operation: 'validate',
         message: 'UnauthenticatedGuard: Error checking authentication',
         error: e,
       );
@@ -125,6 +145,9 @@ class AuthMiddleware {
 mixin PremiumFeatureAccess {
   bool get requiresPremium => true;
   String get premiumFeatureName;
+  ILoggingService get _logger => _defaultLogger;
+
+  static final ILoggingService _defaultLogger = _DefaultLoggingService();
 
   Future<bool> canAccessPremiumFeature(BuildContext context) async {
     if (!requiresPremium) return true;
@@ -134,9 +157,9 @@ mixin PremiumFeatureAccess {
       final hasPremium = container.read<SubscriptionState>(subscriptionProvider).hasPremium;
       return hasPremium;
     } catch (e) {
-      LoggingService.instance.logError(
-        category: LogCategory.subscriptions,
-        operation: LogOperation.validate,
+      await _logger.logError(
+        category: 'subscriptions',
+        operation: 'validate',
         message: 'PremiumFeatureAccess: Error checking premium access for $premiumFeatureName',
         error: e,
       );
@@ -203,5 +226,88 @@ class RouteProtection {
   static bool requiresAuth(String path) {
     final guards = routeGuards[path] ?? [];
     return guards.contains(AuthenticatedGuard) || guards.contains(PremiumGuard);
+  }
+}
+
+/// Fallback logging service for cases where Riverpod context is not available
+class _DefaultLoggingService implements ILoggingService {
+  @override
+  Future<void> logError({
+    required String category,
+    required String operation,
+    required String message,
+    required dynamic error,
+    StackTrace? stackTrace,
+    Map<String, dynamic>? metadata,
+    Duration? duration,
+  }) async {
+    // Silent fallback - no dependencies available
+  }
+
+  @override
+  Future<void> logInfo({
+    required String category,
+    required String operation,
+    required String message,
+    Map<String, dynamic>? metadata,
+    Duration? duration,
+  }) async {
+    // Silent fallback
+  }
+
+  @override
+  Future<void> logWarning({
+    required String category,
+    required String operation,
+    required String message,
+    Map<String, dynamic>? metadata,
+    Duration? duration,
+  }) async {
+    // Silent fallback
+  }
+
+  @override
+  Future<T> logTimedOperation<T>({
+    required String category,
+    required String operation,
+    required String message,
+    required Future<T> Function() operationFunction,
+    Map<String, dynamic>? metadata,
+  }) async {
+    return await operationFunction();
+  }
+
+  @override
+  Future<void> trackEvent({
+    required String eventName,
+    required String category,
+    Map<String, dynamic>? parameters,
+  }) async {
+    // Silent fallback
+  }
+
+  @override
+  Future<void> trackUserAction({
+    required String category,
+    required String operation,
+    required String action,
+    Map<String, dynamic>? metadata,
+  }) async {
+    // Silent fallback
+  }
+
+  @override
+  void setUserId(String? userId) {
+    // Silent fallback
+  }
+
+  @override
+  Future<void> performMaintenance({int daysToKeep = 30}) async {
+    // Silent fallback
+  }
+
+  @override
+  Future<Map<String, dynamic>> getLoggingStats() async {
+    return {};
   }
 }

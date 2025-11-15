@@ -1,4 +1,4 @@
-import '../entities/log_entry.dart';
+import 'package:core/core.dart';
 import 'log_local_datasource.dart';
 
 /// Disabled implementation - Hive removed from app-petiveti
@@ -15,7 +15,7 @@ class LogLocalDataSourceSimpleImpl implements LogLocalDataSource {
   @override
   Future<List<LogEntry>> getLogs({
     LogLevel? level,
-    LogCategory? category,
+    String? context,
     DateTime? startDate,
     DateTime? endDate,
     int? limit,
@@ -24,10 +24,7 @@ class LogLocalDataSourceSimpleImpl implements LogLocalDataSource {
   }
 
   @override
-  Future<List<LogEntry>> getLogsByCategory(
-    LogCategory category, {
-    int? limit,
-  }) async {
+  Future<List<LogEntry>> getLogsByCategory(String context, {int? limit}) async {
     return [];
   }
 

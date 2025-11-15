@@ -48,7 +48,7 @@ class WeightRepositoryImpl implements WeightRepository {
         moduleName: 'petiveti',
       ).markAsDirty();
 
-      // 2. Salvar localmente (usando WeightModel para compatibilidade com Hive)
+      // 2. Salvar localmente (usando WeightModel)
       final weightModel = WeightModel.fromEntity(syncEntity.toLegacyWeight());
       await _localDataSource.cacheWeight(weightModel);
 

@@ -25,7 +25,7 @@ abstract class BaseRepository {
   ///
   /// **Parameters**:
   /// - [remoteOperation]: Fetches data from remote source (Firebase)
-  /// - [localOperation]: Fetches data from local source (Hive)
+  /// - [localOperation]: Fetches data from local source (Drift)
   /// - [cacheOperation]: Caches remote data locally
   /// - [toEntity]: Converts model to entity
   Future<Either<Failure, List<T>>> executeWithSync<T, M>({

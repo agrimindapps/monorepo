@@ -63,7 +63,7 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
           moduleName: 'petiveti',
         ).markAsDirty();
 
-        // 2. Salvar localmente (usando AppointmentModel para compatibilidade com Hive)
+        // 2. Salvar localmente (usando AppointmentModel para compatibilidade)
         final appointmentModel =
             AppointmentModel.fromEntity(syncEntity.toLegacyAppointment());
         await _localDataSource.addAppointment(appointmentModel);

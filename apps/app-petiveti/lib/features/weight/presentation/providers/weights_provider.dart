@@ -10,6 +10,53 @@ import '../../domain/usecases/get_weight_statistics.dart';
 import '../../domain/usecases/get_weights.dart';
 import '../../domain/usecases/get_weights_by_animal_id.dart';
 import '../../domain/usecases/update_weight.dart';
+import '../states/weights_crud_state.dart';
+import '../states/weights_filter_state.dart';
+import '../states/weights_query_state.dart';
+import '../states/weights_sort_state.dart';
+import './notifiers/weights_crud_notifier.dart';
+import './notifiers/weights_filter_notifier.dart';
+import './notifiers/weights_query_notifier.dart';
+import './notifiers/weights_sort_notifier.dart';
+
+// ============================================================================
+// ENUMS AND EXTENSIONS
+// ============================================================================
+
+enum WeightSortOrder { dateAsc, dateDesc, weightAsc, weightDesc }
+
+extension WeightSortOrderExtension on WeightSortOrder {
+  String get displayName {
+    switch (this) {
+      case WeightSortOrder.dateAsc:
+        return 'Data (Antiga → Recente)';
+      case WeightSortOrder.dateDesc:
+        return 'Data (Recente → Antiga)';
+      case WeightSortOrder.weightAsc:
+        return 'Peso (Menor → Maior)';
+      case WeightSortOrder.weightDesc:
+        return 'Peso (Maior → Menor)';
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case WeightSortOrder.dateAsc:
+        return Icons.arrow_upward;
+      case WeightSortOrder.dateDesc:
+        return Icons.arrow_downward;
+      case WeightSortOrder.weightAsc:
+        return Icons.arrow_upward;
+      case WeightSortOrder.weightDesc:
+        return Icons.arrow_downward;
+    }
+  }
+}
+
+// ============================================================================
+// LEGACY STATE CLASS (Maintained for backward compatibility)
+// ============================================================================
+
 class WeightsState {
   final List<Weight> weights;
   final Map<String, List<Weight>> weightsByAnimal;
@@ -58,7 +105,7 @@ class WeightsState {
 
   List<Weight> get sortedWeights {
     final weightList = List<Weight>.from(currentWeights);
-    
+
     switch (sortOrder) {
       case WeightSortOrder.dateAsc:
         weightList.sort((a, b) => a.date.compareTo(b.date));
@@ -73,34 +120,35 @@ class WeightsState {
         weightList.sort((a, b) => b.weight.compareTo(a.weight));
         break;
     }
-    
+
     return weightList;
   }
 
   Weight? get latestWeight {
     if (currentWeights.isEmpty) return null;
-    
-    return currentWeights.reduce((a, b) => 
-        a.date.isAfter(b.date) ? a : b);
+
+    return currentWeights.reduce((a, b) => a.date.isAfter(b.date) ? a : b);
   }
 
   double? get averageWeight {
     if (currentWeights.isEmpty) return null;
-    
+
     final total = currentWeights.fold<double>(
-      0, (sum, weight) => sum + weight.weight);
+      0,
+      (total, weight) => total + weight.weight,
+    );
     return total / currentWeights.length;
   }
 
   WeightTrend? get overallTrend {
     if (currentWeights.length < 2) return null;
-    
+
     final sortedByDate = List<Weight>.from(currentWeights)
       ..sort((a, b) => a.date.compareTo(b.date));
-    
+
     final first = sortedByDate.first;
     final last = sortedByDate.last;
-    
+
     return last.calculateDifference(first)?.trend;
   }
 
@@ -113,40 +161,20 @@ class WeightsState {
   int get totalRecords => currentWeights.length;
 }
 
-enum WeightSortOrder {
-  dateAsc,
-  dateDesc,
-  weightAsc,
-  weightDesc,
-}
+// ============================================================================
+// LEGACY NOTIFIER (Maintained for backward compatibility)
+// ============================================================================
 
-extension WeightSortOrderExtension on WeightSortOrder {
-  String get displayName {
-    switch (this) {
-      case WeightSortOrder.dateAsc:
-        return 'Data (Antiga → Recente)';
-      case WeightSortOrder.dateDesc:
-        return 'Data (Recente → Antiga)';
-      case WeightSortOrder.weightAsc:
-        return 'Peso (Menor → Maior)';
-      case WeightSortOrder.weightDesc:
-        return 'Peso (Maior → Menor)';
-    }
-  }
+// NOTE: The old WeightsNotifier has been split into specialized notifiers:
+// - WeightsCrudNotifier: Handles ADD, UPDATE, DELETE operations
+// - WeightsQueryNotifier: Handles READ, LIST, SEARCH operations
+// - WeightsSortNotifier: Handles SORTING operations
+// - WeightsFilterNotifier: Handles FILTERING operations
+//
+// This provides better SRP (Single Responsibility Principle) compliance.
+// The monolithic WeightsNotifier class has been DEPRECATED but is kept here
+// as a legacy fallback for backward compatibility during the migration phase.
 
-  IconData get icon {
-    switch (this) {
-      case WeightSortOrder.dateAsc:
-        return Icons.arrow_upward;
-      case WeightSortOrder.dateDesc:
-        return Icons.arrow_downward;
-      case WeightSortOrder.weightAsc:
-        return Icons.arrow_upward;
-      case WeightSortOrder.weightDesc:
-        return Icons.arrow_downward;
-    }
-  }
-}
 class WeightsNotifier extends StateNotifier<WeightsState> {
   final GetWeights _getWeights;
   final GetWeightsByAnimalId _getWeightsByAnimalId;
@@ -160,12 +188,12 @@ class WeightsNotifier extends StateNotifier<WeightsState> {
     required GetWeightStatistics getWeightStatistics,
     required AddWeight addWeight,
     required UpdateWeight updateWeight,
-  })  : _getWeights = getWeights,
-        _getWeightsByAnimalId = getWeightsByAnimalId,
-        _getWeightStatistics = getWeightStatistics,
-        _addWeight = addWeight,
-        _updateWeight = updateWeight,
-        super(const WeightsState());
+  }) : _getWeights = getWeights,
+       _getWeightsByAnimalId = getWeightsByAnimalId,
+       _getWeightStatistics = getWeightStatistics,
+       _addWeight = addWeight,
+       _updateWeight = updateWeight,
+       super(const WeightsState());
 
   Future<void> loadWeights() async {
     state = state.copyWith(isLoading: true, error: null);
@@ -173,10 +201,8 @@ class WeightsNotifier extends StateNotifier<WeightsState> {
     final result = await _getWeights(const local.NoParams());
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoading: false,
-        error: failure.message,
-      ),
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
       (weights) => state = state.copyWith(
         weights: weights,
         isLoading: false,
@@ -186,19 +212,23 @@ class WeightsNotifier extends StateNotifier<WeightsState> {
   }
 
   Future<void> loadWeightsByAnimal(String animalId) async {
-    state = state.copyWith(isLoading: true, error: null, selectedAnimalId: animalId);
+    state = state.copyWith(
+      isLoading: true,
+      error: null,
+      selectedAnimalId: animalId,
+    );
 
     final result = await _getWeightsByAnimalId(animalId);
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoading: false,
-        error: failure.message,
-      ),
+      (failure) =>
+          state = state.copyWith(isLoading: false, error: failure.message),
       (weights) {
-        final updatedWeightsByAnimal = Map<String, List<Weight>>.from(state.weightsByAnimal);
+        final updatedWeightsByAnimal = Map<String, List<Weight>>.from(
+          state.weightsByAnimal,
+        );
         updatedWeightsByAnimal[animalId] = weights;
-        
+
         state = state.copyWith(
           weightsByAnimal: updatedWeightsByAnimal,
           isLoading: false,
@@ -213,60 +243,62 @@ class WeightsNotifier extends StateNotifier<WeightsState> {
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
-      (statistics) => state = state.copyWith(
-        statistics: statistics,
-        error: null,
-      ),
+      (statistics) =>
+          state = state.copyWith(statistics: statistics, error: null),
     );
   }
 
   Future<void> addWeight(Weight weight) async {
     final result = await _addWeight(weight);
 
-    result.fold(
-      (failure) => state = state.copyWith(error: failure.message),
-      (_) {
-        final updatedWeights = [weight, ...state.weights];
-        final updatedWeightsByAnimal = Map<String, List<Weight>>.from(state.weightsByAnimal);
-        if (updatedWeightsByAnimal.containsKey(weight.animalId)) {
-          final animalWeights = List<Weight>.from(updatedWeightsByAnimal[weight.animalId]!);
-          animalWeights.insert(0, weight);
-          updatedWeightsByAnimal[weight.animalId] = animalWeights;
-        }
-        
-        state = state.copyWith(
-          weights: updatedWeights,
-          weightsByAnimal: updatedWeightsByAnimal,
-          error: null,
+    result.fold((failure) => state = state.copyWith(error: failure.message), (
+      _,
+    ) {
+      final updatedWeights = [weight, ...state.weights];
+      final updatedWeightsByAnimal = Map<String, List<Weight>>.from(
+        state.weightsByAnimal,
+      );
+      if (updatedWeightsByAnimal.containsKey(weight.animalId)) {
+        final animalWeights = List<Weight>.from(
+          updatedWeightsByAnimal[weight.animalId]!,
         );
-      },
-    );
+        animalWeights.insert(0, weight);
+        updatedWeightsByAnimal[weight.animalId] = animalWeights;
+      }
+
+      state = state.copyWith(
+        weights: updatedWeights,
+        weightsByAnimal: updatedWeightsByAnimal,
+        error: null,
+      );
+    });
   }
 
   Future<void> updateWeight(Weight weight) async {
     final result = await _updateWeight(weight);
 
-    result.fold(
-      (failure) => state = state.copyWith(error: failure.message),
-      (_) {
-        final updatedWeights = state.weights.map((w) {
+    result.fold((failure) => state = state.copyWith(error: failure.message), (
+      _,
+    ) {
+      final updatedWeights = state.weights.map((w) {
+        return w.id == weight.id ? weight : w;
+      }).toList();
+      final updatedWeightsByAnimal = Map<String, List<Weight>>.from(
+        state.weightsByAnimal,
+      );
+      if (updatedWeightsByAnimal.containsKey(weight.animalId)) {
+        final animalWeights = updatedWeightsByAnimal[weight.animalId]!.map((w) {
           return w.id == weight.id ? weight : w;
         }).toList();
-        final updatedWeightsByAnimal = Map<String, List<Weight>>.from(state.weightsByAnimal);
-        if (updatedWeightsByAnimal.containsKey(weight.animalId)) {
-          final animalWeights = updatedWeightsByAnimal[weight.animalId]!.map((w) {
-            return w.id == weight.id ? weight : w;
-          }).toList();
-          updatedWeightsByAnimal[weight.animalId] = animalWeights;
-        }
-        
-        state = state.copyWith(
-          weights: updatedWeights,
-          weightsByAnimal: updatedWeightsByAnimal,
-          error: null,
-        );
-      },
-    );
+        updatedWeightsByAnimal[weight.animalId] = animalWeights;
+      }
+
+      state = state.copyWith(
+        weights: updatedWeights,
+        weightsByAnimal: updatedWeightsByAnimal,
+        error: null,
+      );
+    });
   }
 
   Future<void> deleteWeight(String id) async {
@@ -275,13 +307,16 @@ class WeightsNotifier extends StateNotifier<WeightsState> {
       orElse: () => state.currentWeights.firstWhere((w) => w.id == id),
     );
     final updatedWeights = state.weights.where((w) => w.id != id).toList();
-    final updatedWeightsByAnimal = Map<String, List<Weight>>.from(state.weightsByAnimal);
+    final updatedWeightsByAnimal = Map<String, List<Weight>>.from(
+      state.weightsByAnimal,
+    );
     if (updatedWeightsByAnimal.containsKey(weightToDelete.animalId)) {
       final animalWeights = updatedWeightsByAnimal[weightToDelete.animalId]!
-          .where((w) => w.id != id).toList();
+          .where((w) => w.id != id)
+          .toList();
       updatedWeightsByAnimal[weightToDelete.animalId] = animalWeights;
     }
-    
+
     state = state.copyWith(
       weights: updatedWeights,
       weightsByAnimal: updatedWeightsByAnimal,
@@ -309,32 +344,101 @@ class WeightsNotifier extends StateNotifier<WeightsState> {
     final weights = state.weightsByAnimal[animalId] ?? [];
     final sorted = List<Weight>.from(weights)
       ..sort((a, b) => b.date.compareTo(a.date));
-    
+
     if (limit != null && limit > 0) {
       return sorted.take(limit).toList();
     }
-    
+
     return sorted;
   }
 
   WeightDifference? getWeightProgress(String animalId) {
     final weights = getWeightHistory(animalId, limit: 2);
     if (weights.length < 2) return null;
-    
+
     return weights.first.calculateDifference(weights[1]);
   }
 
   List<Weight> getRecentWeights(String animalId, {int days = 30}) {
     final cutoffDate = DateTime.now().subtract(Duration(days: days));
     final weights = state.weightsByAnimal[animalId] ?? [];
-    
-    return weights
-        .where((w) => w.date.isAfter(cutoffDate))
-        .toList()
+
+    return weights.where((w) => w.date.isAfter(cutoffDate)).toList()
       ..sort((a, b) => b.date.compareTo(a.date));
   }
 }
-final weightsProvider = StateNotifierProvider<WeightsNotifier, WeightsState>((ref) {
+
+// NOTE: The old WeightsNotifier has been split into specialized notifiers:
+// - WeightsCrudNotifier: Handles ADD, UPDATE, DELETE operations
+// - WeightsQueryNotifier: Handles READ, LIST, SEARCH operations
+// - WeightsSortNotifier: Handles SORTING operations
+// - WeightsFilterNotifier: Handles FILTERING operations
+//
+// This provides better SRP (Single Responsibility Principle) compliance.
+// The monolithic WeightsNotifier class has been DEPRECATED but is kept here
+// as a legacy fallback for backward compatibility during the migration phase.
+// ============================================================================
+// NEW SPECIALIZED PROVIDERS (Phase 1 SOLID Refactoring)
+// ============================================================================
+
+/// Provider for CRUD operations (Add, Update, Delete)
+/// Single Responsibility: Weight creation, modification, and deletion
+final weightsCrudProvider =
+    StateNotifierProvider<WeightsCrudNotifier, WeightsCrudState>((ref) {
+      return WeightsCrudNotifier(
+        addWeight: di.getIt<AddWeight>(),
+        updateWeight: di.getIt<UpdateWeight>(),
+      );
+    });
+
+/// Provider for READ and QUERY operations (Fetch, List, Search)
+/// Single Responsibility: Weight retrieval and loading
+final weightsQueryProvider =
+    StateNotifierProvider<WeightsQueryNotifier, WeightsQueryState>((ref) {
+      return WeightsQueryNotifier(
+        getWeights: di.getIt<GetWeights>(),
+        getWeightsByAnimalId: di.getIt<GetWeightsByAnimalId>(),
+      );
+    });
+
+/// Provider for SORTING operations
+/// Single Responsibility: Weight list sorting
+final weightsSortProvider =
+    StateNotifierProvider<WeightsSortNotifier, WeightsSortState>((ref) {
+      return WeightsSortNotifier();
+    });
+
+/// Provider for FILTERING operations
+/// Single Responsibility: Weight filtering by animal and criteria
+final weightsFilterProvider =
+    StateNotifierProvider<WeightsFilterNotifier, WeightsFilterState>((ref) {
+      return WeightsFilterNotifier();
+    });
+
+/// Composed provider for sorted and filtered weights
+/// Combines sort and filter operations for UI consumption
+final sortedAndFilteredWeightsProvider = Provider<List<Weight>>((ref) {
+  final queryState = ref.watch(weightsQueryProvider);
+  final filterState = ref.watch(weightsFilterProvider);
+  final sortNotifier = ref.watch(weightsSortProvider.notifier);
+
+  final filtered = filterState.selectedAnimalId != null
+      ? queryState.weightsByAnimal[filterState.selectedAnimalId] ?? []
+      : queryState.weights;
+
+  return sortNotifier.sortWeights(filtered);
+});
+
+// ============================================================================
+// LEGACY PROVIDERS (Maintained for backward compatibility)
+// ============================================================================
+
+// NOTE: These legacy providers are kept for backward compatibility during migration.
+// New code should use the specialized providers above instead.
+
+final weightsProvider = StateNotifierProvider<WeightsNotifier, WeightsState>((
+  ref,
+) {
   return WeightsNotifier(
     getWeights: di.getIt<GetWeights>(),
     getWeightsByAnimalId: di.getIt<GetWeightsByAnimalId>(),
@@ -343,21 +447,28 @@ final weightsProvider = StateNotifierProvider<WeightsNotifier, WeightsState>((re
     updateWeight: di.getIt<UpdateWeight>(),
   );
 });
-final weightsByAnimalProvider = FutureProvider.family<List<Weight>, String>((ref, animalId) async {
+final weightsByAnimalProvider = FutureProvider.family<List<Weight>, String>((
+  ref,
+  animalId,
+) async {
   final notifier = ref.read(weightsProvider.notifier);
   await notifier.loadWeightsByAnimal(animalId);
   return ref.read(weightsProvider).weightsByAnimal[animalId] ?? [];
 });
-final weightStatisticsProvider = FutureProvider.family<WeightStatistics, String>((ref, animalId) async {
-  final useCase = di.getIt<GetWeightStatistics>();
-  final result = await useCase(animalId);
-  
-  return result.fold(
-    (failure) => throw Exception(failure.message),
-    (statistics) => statistics,
-  );
-});
-final weightsStreamProvider = StreamProvider.family<List<Weight>, String?>((ref, animalId) {
+final weightStatisticsProvider =
+    FutureProvider.family<WeightStatistics, String>((ref, animalId) async {
+      final useCase = di.getIt<GetWeightStatistics>();
+      final result = await useCase(animalId);
+
+      return result.fold(
+        (failure) => throw Exception(failure.message),
+        (statistics) => statistics,
+      );
+    });
+final weightsStreamProvider = StreamProvider.family<List<Weight>, String?>((
+  ref,
+  animalId,
+) {
   final repository = di.getIt.get<WeightRepository>();
   if (animalId != null) {
     return repository.watchWeightsByAnimalId(animalId);
@@ -369,23 +480,26 @@ final weightSortOrderProvider = Provider<WeightSortOrder>((ref) {
   return state.sortOrder;
 });
 final selectedAnimalForWeightProvider = StateProvider<String?>((ref) => null);
-final weightTrendProvider = Provider.family<WeightTrend?, String>((ref, animalId) {
+final weightTrendProvider = Provider.family<WeightTrend?, String>((
+  ref,
+  animalId,
+) {
   final weights = ref.watch(weightsProvider).weightsByAnimal[animalId] ?? [];
-  
+
   if (weights.length < 2) return null;
-  
+
   final sortedByDate = List<Weight>.from(weights)
     ..sort((a, b) => a.date.compareTo(b.date));
-  
+
   final first = sortedByDate.first;
   final last = sortedByDate.last;
-  
+
   return last.calculateDifference(first)?.trend;
 });
 final latestWeightProvider = Provider.family<Weight?, String>((ref, animalId) {
   final weights = ref.watch(weightsProvider).weightsByAnimal[animalId] ?? [];
-  
+
   if (weights.isEmpty) return null;
-  
+
   return weights.reduce((a, b) => a.date.isAfter(b.date) ? a : b);
 });

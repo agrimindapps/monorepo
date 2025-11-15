@@ -2,16 +2,13 @@ import 'package:flutter/material.dart';
 import '../providers/home_provider.dart';
 
 /// **Home Stats Section Component**
-/// 
+///
 /// Displays comprehensive statistics about pets, appointments, vaccines, and medications.
 /// Includes health status overview and detailed metrics.
 class HomeStatsSection extends StatelessWidget {
   final HomeStatsState stats;
 
-  const HomeStatsSection({
-    super.key,
-    required this.stats,
-  });
+  const HomeStatsSection({super.key, required this.stats});
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +29,12 @@ class _HealthStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = stats.hasUrgentTasks 
-        ? Theme.of(context).colorScheme.error 
+    final statusColor = stats.hasUrgentTasks
+        ? Theme.of(context).colorScheme.error
         : Theme.of(context).colorScheme.primary;
-    final statusIcon = stats.hasUrgentTasks ? Icons.warning : Icons.check_circle;
+    final statusIcon = stats.hasUrgentTasks
+        ? Icons.warning
+        : Icons.check_circle;
 
     return Card(
       child: DecoratedBox(
@@ -113,9 +112,9 @@ class _StatsOverview extends StatelessWidget {
             children: [
               Text(
                 'Resumo Geral',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               Row(
@@ -174,9 +173,9 @@ class _StatsOverview extends StatelessWidget {
                       label: 'Atrasados',
                       count: stats.overdueItems,
                       icon: Icons.warning,
-                      color: stats.overdueItems > 0 
-                        ? Theme.of(context).colorScheme.error 
-                        : null,
+                      color: stats.overdueItems > 0
+                          ? Theme.of(context).colorScheme.error
+                          : null,
                     ),
                   ],
                 ),
@@ -208,7 +207,7 @@ class _StatItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final displayText = suffix != null ? '$count$suffix' : count.toString();
     final iconColor = color ?? Theme.of(context).primaryColor;
-    
+
     return Semantics(
       label: '$count $label',
       child: Column(

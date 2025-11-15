@@ -2,82 +2,25 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/failures.dart';
 import '../entities/weight.dart';
+import 'weight_crud_repository.dart';
+import 'weight_query_repository.dart';
+import 'weight_analytics_repository.dart';
+import 'weight_stream_repository.dart';
 
-abstract class WeightRepository {
-  /// Retorna todos os registros de peso não deletados
-  Future<Either<Failure, List<Weight>>> getWeights();
-
-  /// Retorna registros de peso de um animal específico
-  Future<Either<Failure, List<Weight>>> getWeightsByAnimalId(String animalId);
-
-  /// Retorna o último registro de peso de um animal
-  Future<Either<Failure, Weight?>> getLatestWeightByAnimalId(String animalId);
-
-  /// Retorna histórico de peso por período
-  Future<Either<Failure, List<Weight>>> getWeightHistory(
-    String animalId,
-    DateTime startDate,
-    DateTime endDate,
-  );
-
-  /// Retorna um registro de peso específico pelo ID
-  Future<Either<Failure, Weight>> getWeightById(String id);
-
-  /// Adiciona um novo registro de peso
-  Future<Either<Failure, void>> addWeight(Weight weight);
-
-  /// Atualiza um registro de peso existente
-  Future<Either<Failure, void>> updateWeight(Weight weight);
-
-  /// Remove um registro de peso (soft delete)
-  Future<Either<Failure, void>> deleteWeight(String id);
-
-  /// Remove permanentemente um registro de peso
-  Future<Either<Failure, void>> hardDeleteWeight(String id);
-
-  /// Retorna stream de registros de peso para observar mudanças em tempo real
-  Stream<List<Weight>> watchWeights();
-
-  /// Retorna stream de registros de peso de um animal específico
-  Stream<List<Weight>> watchWeightsByAnimalId(String animalId);
-
-  /// Busca registros de peso por critérios
-  Future<Either<Failure, List<Weight>>> searchWeights(
-    String animalId, {
-    double? minWeight,
-    double? maxWeight,
-    DateTime? startDate,
-    DateTime? endDate,
-    int? bodyConditionScore,
-  });
-
-  /// Calcula estatísticas de peso para um animal
-  Future<Either<Failure, WeightStatistics>> getWeightStatistics(String animalId);
-
-  /// Identifica tendências de peso para um animal
-  Future<Either<Failure, WeightTrendAnalysis>> analyzeWeightTrend(
-    String animalId, {
-    int periodInDays = 90,
-  });
-
-  /// Identifica variações bruscas de peso
-  Future<Either<Failure, List<Weight>>> getAbnormalWeightChanges(
-    String animalId, {
-    double thresholdPercentage = 10.0,
-    int timeFrameDays = 30,
-  });
-
+/// **ISP - Interface Segregation Principle**
+/// Composite repository interface combining all weight concerns
+/// Maintains backward compatibility with existing code
+abstract class WeightRepository
+    implements
+        WeightCrudRepository,
+        WeightQueryRepository,
+        WeightAnalyticsRepository,
+        WeightStreamRepository {
   /// Exporta dados de peso para backup/sync
   Future<Either<Failure, List<Map<String, dynamic>>>> exportWeightData();
 
   /// Importa dados de peso de backup/sync
   Future<Either<Failure, void>> importWeightData(List<Map<String, dynamic>> data);
-
-  /// Conta total de registros de peso por animal
-  Future<Either<Failure, int>> getWeightRecordsCount(String animalId);
-
-  /// Calcula IMC animal (se aplicável para a espécie)
-  Future<Either<Failure, double?>> calculateAnimalBMI(String animalId);
 }
 
 /// Classe para estatísticas de peso

@@ -53,7 +53,7 @@ class DataIntegrityService {
   /// 1. Usuário cria animal offline → ID local (ex: 'local_abc123')
   /// 2. Sync envia ao Firebase → Firebase retorna ID remoto (ex: 'firebase_xyz789')
   /// 3. Este método:
-  ///    - Remove entrada com ID local do HiveBox
+  ///    - Remove entrada com ID local do banco
   ///    - Mantém apenas entrada com ID remoto
   ///    - Atualiza referências em medications/appointments/weights
   ///
@@ -61,7 +61,7 @@ class DataIntegrityService {
   /// ```dart
   /// // Após sync bem-sucedido
   /// await reconcileAnimalId('local_abc123', 'firebase_xyz789');
-  /// // HiveBox agora contém apenas 'firebase_xyz789'
+  /// // Database agora contém apenas 'firebase_xyz789'
   /// ```
   Future<Either<Failure, void>> reconcileAnimalId(
     String localId,
@@ -144,7 +144,7 @@ class DataIntegrityService {
   // INTEGRITY VERIFICATION
   // ========================================================================
 
-  /// Verifica integridade completa de todos os animals no HiveBox
+  /// Verifica integridade completa de todos os animals no banco de dados
   ///
   /// **Verificações:**
   /// 1. **Duplicate IDs**: Animals com IDs duplicados (improvável mas possível)

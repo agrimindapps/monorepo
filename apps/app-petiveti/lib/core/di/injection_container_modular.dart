@@ -5,6 +5,7 @@ import 'injectable_config.dart';
 import 'modules/animals_module.dart';
 import 'modules/appointments_module.dart';
 import 'modules/core_module.dart';
+import 'modules/home_module.dart';
 // import 'modules/expenses_module.dart'; // TEMP DISABLED - 30+ errors
 // import 'modules/medications_module.dart'; // TEMP DISABLED - 20+ errors (missing datasource methods)
 import 'modules/subscription_module.dart';
@@ -39,6 +40,7 @@ class ModularInjectionContainer {
   static List<DIModule> _createModules() {
     return [
       CoreModule(), // External services and core infrastructure
+      HomeModule(), // Home/Dashboard feature ✅ NEW PHASE 3
       SubscriptionModule(), // Subscription services (uses core ISubscriptionRepository)
       AnimalsModule(), // Animals feature ✅ PRIORITY 1 - CORE MVP
       AppointmentsModule(), // Appointments feature ✅ PRIORITY 2 - CORE MVP

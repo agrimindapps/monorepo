@@ -1,40 +1,35 @@
-import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
 
-import '../../utils/uuid_generator.dart';
-import '../repositories/log_repository.dart';
+import '../interfaces/logging_service.dart';
+import '../logging/repositories/log_repository.dart';
+import '../utils/uuid_generator.dart';
 
-/// Centralized logging service that handles all application logging
-class LoggingService {
-  static LoggingService? _instance;
-  static LoggingService get instance => _instance ??= LoggingService._();
+/// **DIP - Dependency Inversion Principle**
+/// Concrete implementation of ILoggingService
+/// Centralizes logging logic without singleton pattern
+class LoggingServiceImpl implements ILoggingService {
+  final LogRepository _logRepository;
+  final IAnalyticsRepository? _analyticsRepository;
+  final ICrashlyticsRepository? _crashlyticsRepository;
 
-  LoggingService._();
-
-  LogRepository? _logRepository;
-  IAnalyticsRepository? _analyticsRepository;
-  ICrashlyticsRepository? _crashlyticsRepository;
   String? _currentUserId;
 
-  /// Initialize the logging service with dependencies
-  Future<void> initialize({
+  LoggingServiceImpl({
     required LogRepository logRepository,
     IAnalyticsRepository? analyticsRepository,
     ICrashlyticsRepository? crashlyticsRepository,
-  }) async {
-    _logRepository = logRepository;
-    _analyticsRepository = analyticsRepository;
-    _crashlyticsRepository = crashlyticsRepository;
-  }
+  }) : _logRepository = logRepository,
+       _analyticsRepository = analyticsRepository,
+       _crashlyticsRepository = crashlyticsRepository;
 
-  /// Set the current user ID for log entries
+  @override
   void setUserId(String? userId) {
     _currentUserId = userId;
   }
 
-  /// Log an info message
+  @override
   Future<void> logInfo({
     required String context,
     required String operation,
@@ -52,7 +47,7 @@ class LoggingService {
     );
   }
 
-  /// Log a warning message
+  @override
   Future<void> logWarning({
     required String context,
     required String operation,
@@ -70,7 +65,7 @@ class LoggingService {
     );
   }
 
-  /// Log an error message
+  @override
   Future<void> logError({
     required String context,
     required String operation,
@@ -99,7 +94,7 @@ class LoggingService {
     });
   }
 
-  /// Log a timed operation
+  @override
   Future<T> logTimedOperation<T>({
     required String context,
     required String operation,
@@ -146,7 +141,8 @@ class LoggingService {
     }
   }
 
-  /// Track analytics event
+  @override
+  @override
   Future<void> trackEvent({
     required String eventName,
     required String context,
@@ -170,7 +166,7 @@ class LoggingService {
     );
   }
 
-  /// Track user action
+  @override
   Future<void> trackUserAction({
     required String context,
     required String operation,
@@ -210,7 +206,7 @@ class LoggingService {
       descricao:
           '[$operation] $message${error != null ? ' | Error: $error' : ''}${stackTrace != null ? ' | StackTrace: $stackTrace' : ''}${metadata != null ? ' | Metadata: $metadata' : ''}${_currentUserId != null ? ' | User: $_currentUserId' : ''}${duration != null ? ' | Duration: $duration' : ''}',
     );
-    await _logRepository?.saveLog(logEntry);
+    await _logRepository.saveLog(logEntry);
     developer.log(
       logEntry.toString(),
       name: 'PetivetiLog',
@@ -242,7 +238,7 @@ class LoggingService {
     } catch (e) {
       developer.log(
         'Failed to report to Crashlytics: $e',
-        name: 'LoggingService',
+        name: 'LoggingServiceImpl',
       );
     }
   }
@@ -265,10 +261,10 @@ class LoggingService {
     }
   }
 
-  /// Clean up old logs periodically
+  @override
   Future<void> performMaintenance({int daysToKeep = 30}) async {
     try {
-      await _logRepository?.clearOldLogs(daysToKeep);
+      await _logRepository.clearOldLogs(daysToKeep);
       await logInfo(
         context: 'system',
         operation: 'maintenance',
@@ -284,13 +280,13 @@ class LoggingService {
     }
   }
 
-  /// Get logging statistics
+  @override
   Future<Map<String, dynamic>> getLoggingStats() async {
     try {
-      final countsResult = await _logRepository?.getLogsCount();
+      final countsResult = await _logRepository.getLogsCount();
       Map<LogLevel, int> counts = {};
 
-      countsResult?.fold(
+      countsResult.fold(
         (failure) => counts = {},
         (success) => counts = success,
       );

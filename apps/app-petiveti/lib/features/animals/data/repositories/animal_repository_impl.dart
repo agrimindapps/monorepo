@@ -20,7 +20,7 @@ import '../services/animal_error_handling_service.dart';
 ///
 /// O que NÃO faz:
 /// - Gerenciar detalhes de sincronização (responsabilidade do SyncManager)
-/// - Acesso direto ao Hive (responsabilidade do DataSource)
+/// - Acesso direto ao banco de dados (responsabilidade do DataSource)
 /// - Transformações de dados complexas (responsabilidade de Adapters)
 ///
 /// **Fluxo de operações:**
@@ -65,7 +65,7 @@ class AnimalRepositoryImpl implements AnimalRepository {
           moduleName: 'petiveti',
         ).markAsDirty();
 
-        // 2. Salvar localmente (usando AnimalModel para compatibilidade com Hive)
+        // 2. Salvar localmente (usando AnimalModel para compatibilidade)
         final animalModel = AnimalModel.fromEntity(syncEntity.toLegacyAnimal());
         await _localDataSource.addAnimal(animalModel);
 

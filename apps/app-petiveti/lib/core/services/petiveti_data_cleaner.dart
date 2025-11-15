@@ -1,17 +1,15 @@
 import 'package:core/core.dart';
 
 /// Implementação de IAppDataCleaner para app-petiveti
-/// Gerencia limpeza de pets, reminders, schedules, health_records e cache local
+/// Gerencia limpeza de dados através do Drift database e SharedPreferences
+/// Note: Hive foi removido - agora usa apenas Drift para persistência
 @LazySingleton(as: IAppDataCleaner)
 class PetivetiDataCleaner implements IAppDataCleaner {
-  final HiveInterface _hive;
   final SharedPreferences _prefs;
 
   PetivetiDataCleaner({
-    required HiveInterface hive,
     required SharedPreferences prefs,
-  }) : _hive = hive,
-       _prefs = prefs;
+  }) : _prefs = prefs;
 
   @override
   String get appName => 'Petiveti';
@@ -27,7 +25,6 @@ class PetivetiDataCleaner implements IAppDataCleaner {
   Future<Map<String, dynamic>> clearAllAppData() async {
     final result = <String, dynamic>{
       'success': true,
-      'clearedBoxes': <String>[],
       'clearedPreferences': <String>[],
       'totalRecordsCleared': 0,
       'errors': <String>[],
@@ -35,27 +32,8 @@ class PetivetiDataCleaner implements IAppDataCleaner {
 
     try {
       final statsBefore = await getDataStatsBeforeCleaning();
-      final boxNames = [
-        'pets',
-        'pet_box',
-        'reminders',
-        'schedules',
-        'health_records',
-        'settings',
-        'pet_cache',
-      ];
 
-      for (final boxName in boxNames) {
-        try {
-          if (await _hive.boxExists(boxName)) {
-            await _hive.deleteBoxFromDisk(boxName);
-            (result['clearedBoxes'] as List).add(boxName);
-          }
-        } catch (e) {
-          (result['errors'] as List).add('Failed to clear $boxName: $e');
-          result['success'] = false;
-        }
-      }
+      // Clear SharedPreferences only (Drift database cleared separately via database APIs)
       final prefsKeys = _prefs.getKeys();
       final appSpecificKeys = prefsKeys.where(
         (key) =>
@@ -73,10 +51,7 @@ class PetivetiDataCleaner implements IAppDataCleaner {
         }
       }
 
-      result['totalRecordsCleared'] =
-          (result['clearedBoxes'] as List).length +
-          (result['clearedPreferences'] as List).length;
-
+      result['totalRecordsCleared'] = (result['clearedPreferences'] as List).length;
       result['statsBefore'] = statsBefore;
     } catch (e) {
       result['success'] = false;
@@ -89,69 +64,19 @@ class PetivetiDataCleaner implements IAppDataCleaner {
   @override
   Future<Map<String, dynamic>> getDataStatsBeforeCleaning() async {
     final stats = <String, dynamic>{
-      'totalPets': 0,
-      'totalReminders': 0,
-      'totalSchedules': 0,
-      'totalHealthRecords': 0,
       'totalPreferences': 0,
       'totalRecords': 0,
+      'note': 'Drift database stats not included - query database directly for detailed stats',
     };
 
     try {
-      if (await _hive.boxExists('pets') || await _hive.boxExists('pet_box')) {
-        try {
-          final petsBox = await _hive.openBox<dynamic>('pets');
-          stats['totalPets'] = petsBox.length;
-          await petsBox.close();
-        } catch (e) {
-          try {
-            final petsBox = await _hive.openBox<dynamic>('pet_box');
-            stats['totalPets'] = petsBox.length;
-            await petsBox.close();
-          } catch (_) {
-          }
-        }
-      }
-      if (await _hive.boxExists('reminders')) {
-        try {
-          final remindersBox = await _hive.openBox<dynamic>('reminders');
-          stats['totalReminders'] = remindersBox.length;
-          await remindersBox.close();
-        } catch (_) {
-        }
-      }
-      if (await _hive.boxExists('schedules')) {
-        try {
-          final schedulesBox = await _hive.openBox<dynamic>('schedules');
-          stats['totalSchedules'] = schedulesBox.length;
-          await schedulesBox.close();
-        } catch (_) {
-        }
-      }
-      if (await _hive.boxExists('health_records')) {
-        try {
-          final healthRecordsBox = await _hive.openBox<dynamic>(
-            'health_records',
-          );
-          stats['totalHealthRecords'] = healthRecordsBox.length;
-          await healthRecordsBox.close();
-        } catch (_) {
-        }
-      }
+      // Only count SharedPreferences (Drift data queried separately)
       final prefsKeys = _prefs.getKeys();
-      stats['totalPreferences'] =
-          prefsKeys
-              .where(
-                (key) => key.startsWith('petiveti_') || key.startsWith('pet_'),
-              )
-              .length;
+      stats['totalPreferences'] = prefsKeys
+          .where((key) => key.startsWith('petiveti_') || key.startsWith('pet_'))
+          .length;
 
-      stats['totalRecords'] =
-          (stats['totalPets'] as int) +
-          (stats['totalReminders'] as int) +
-          (stats['totalSchedules'] as int) +
-          (stats['totalHealthRecords'] as int) +
-          (stats['totalPreferences'] as int);
+      stats['totalRecords'] = stats['totalPreferences'] as int;
     } catch (e) {
       stats['error'] = e.toString();
     }
@@ -162,18 +87,7 @@ class PetivetiDataCleaner implements IAppDataCleaner {
   @override
   Future<bool> verifyDataCleanup() async {
     try {
-      final boxNames = [
-        'pets',
-        'pet_box',
-        'reminders',
-        'schedules',
-        'health_records',
-      ];
-      for (final boxName in boxNames) {
-        if (await _hive.boxExists(boxName)) {
-          return false;
-        }
-      }
+      // Verify SharedPreferences are cleared (Drift database verified separately)
       final prefsKeys = _prefs.getKeys();
       final remainingAppKeys = prefsKeys.where(
         (key) => key.startsWith('petiveti_') || key.startsWith('pet_'),
@@ -188,18 +102,7 @@ class PetivetiDataCleaner implements IAppDataCleaner {
   @override
   Future<bool> hasDataToClear() async {
     try {
-      final boxNames = [
-        'pets',
-        'pet_box',
-        'reminders',
-        'schedules',
-        'health_records',
-      ];
-      for (final boxName in boxNames) {
-        if (await _hive.boxExists(boxName)) {
-          return true;
-        }
-      }
+      // Check SharedPreferences only (Drift database checked separately)
       final prefsKeys = _prefs.getKeys();
       final hasPrefs = prefsKeys.any(
         (key) => key.startsWith('petiveti_') || key.startsWith('pet_'),
@@ -272,16 +175,10 @@ class PetivetiDataCleaner implements IAppDataCleaner {
     List<String> boxNames,
     Map<String, dynamic> result,
   ) async {
+    // No-op: Hive removed - Drift database cleared via database APIs
+    // This method kept for interface compatibility
     for (final boxName in boxNames) {
-      try {
-        if (await _hive.boxExists(boxName)) {
-          await _hive.deleteBoxFromDisk(boxName);
-          (result['clearedItems'] as List).add(boxName);
-        }
-      } catch (e) {
-        (result['errors'] as List).add('Failed to clear $boxName: $e');
-        result['success'] = false;
-      }
+      (result['clearedItems'] as List).add('$boxName (Drift - use database API)');
     }
   }
 

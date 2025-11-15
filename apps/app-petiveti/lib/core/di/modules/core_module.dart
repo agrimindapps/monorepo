@@ -9,6 +9,8 @@ import '../../logging/datasources/log_local_datasource_simple_impl.dart';
 import '../../logging/repositories/log_repository.dart';
 import '../../logging/repositories/log_repository_impl.dart';
 import '../../logging/services/logging_service.dart';
+import '../../interfaces/logging_service.dart';
+import '../../services/logging_service_impl.dart';
 import '../../notifications/notification_service.dart';
 import '../../performance/lazy_loader.dart';
 import '../../performance/performance_service.dart' as local_perf;
@@ -83,6 +85,14 @@ class CoreModule implements DIModule {
     );
     getIt.registerLazySingleton<LogRepository>(
       () => LogRepositoryImpl(localDataSource: getIt<LogLocalDataSource>()),
+    );
+    // FASE 2: Register ILoggingService implementation (DIP)
+    getIt.registerLazySingleton<ILoggingService>(
+      () => LoggingServiceImpl(
+        logRepository: getIt<LogRepository>(),
+        analyticsRepository: getIt<core.IAnalyticsRepository>(),
+        crashlyticsRepository: getIt<core.ICrashlyticsRepository>(),
+      ),
     );
   }
 

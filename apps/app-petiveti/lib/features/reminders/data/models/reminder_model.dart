@@ -2,8 +2,8 @@ import '../../domain/entities/reminder.dart';
 
 class ReminderModel extends Reminder {
   const ReminderModel({
-    required int super.id,
-    required int? super.animalId,
+    required String super.id,
+    required String super.animalId,
     required super.userId,
     required super.title,
     required super.description,
@@ -22,12 +22,14 @@ class ReminderModel extends Reminder {
 
   factory ReminderModel.fromMap(Map<String, dynamic> map) {
     return ReminderModel(
-      id: (map['id'] as int?) ?? 0,
-      animalId: map['animalId'] as int?,
+      id: (map['id'] as String?) ?? '',
+      animalId: (map['animalId'] as String?) ?? '',
       userId: map['userId']?.toString() ?? '',
       title: map['title']?.toString() ?? '',
       description: map['description']?.toString() ?? '',
-      scheduledDate: DateTime.fromMillisecondsSinceEpoch((map['scheduledDate'] as int?) ?? 0),
+      scheduledDate: DateTime.fromMillisecondsSinceEpoch(
+        (map['scheduledDate'] as int?) ?? 0,
+      ),
       type: ReminderType.values.firstWhere(
         (e) => e.toString() == 'ReminderType.${map['type']}',
         orElse: () => ReminderType.general,
@@ -42,17 +44,21 @@ class ReminderModel extends Reminder {
       ),
       isRecurring: (map['isRecurring'] as bool?) ?? false,
       recurringDays: (map['recurringDays'] as int?),
-      completedAt: map['completedAt'] != null 
+      completedAt: map['completedAt'] != null
           ? DateTime.fromMillisecondsSinceEpoch((map['completedAt'] as int))
           : null,
-      snoozeUntil: map['snoozeUntil'] != null 
+      snoozeUntil: map['snoozeUntil'] != null
           ? DateTime.fromMillisecondsSinceEpoch((map['snoozeUntil'] as int))
           : null,
-      metadata: map['metadata'] != null 
+      metadata: map['metadata'] != null
           ? Map<String, dynamic>.from(map['metadata'] as Map)
           : null,
-      createdAt: DateTime.fromMillisecondsSinceEpoch((map['createdAt'] as int?) ?? 0),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch((map['updatedAt'] as int?) ?? 0),
+      createdAt: DateTime.fromMillisecondsSinceEpoch(
+        (map['createdAt'] as int?) ?? 0,
+      ),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(
+        (map['updatedAt'] as int?) ?? 0,
+      ),
     );
   }
 
@@ -79,8 +85,8 @@ class ReminderModel extends Reminder {
 
   factory ReminderModel.fromEntity(Reminder reminder) {
     return ReminderModel(
-      id: int.tryParse(reminder.id) ?? 0,
-      animalId: int.tryParse(reminder.animalId) ?? 0,
+      id: reminder.id,
+      animalId: reminder.animalId,
       userId: reminder.userId,
       title: reminder.title,
       description: reminder.description,
@@ -100,8 +106,8 @@ class ReminderModel extends Reminder {
 
   @override
   ReminderModel copyWith({
-    int? id,
-    int? animalId,
+    String? id,
+    String? animalId,
     String? userId,
     String? title,
     String? description,

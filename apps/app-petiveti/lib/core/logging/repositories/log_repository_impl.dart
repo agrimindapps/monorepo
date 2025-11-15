@@ -1,8 +1,7 @@
 import 'dart:convert';
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart' hide Failure, CacheFailure;
 import '../../error/failures.dart';
 import '../datasources/log_local_datasource.dart';
-import '../entities/log_entry.dart';
 import 'log_repository.dart';
 
 class LogRepositoryImpl implements LogRepository {
@@ -23,7 +22,7 @@ class LogRepositoryImpl implements LogRepository {
   @override
   Future<Either<Failure, List<LogEntry>>> getLogs({
     LogLevel? level,
-    LogCategory? category,
+    String? context,
     DateTime? startDate,
     DateTime? endDate,
     int? limit,
@@ -31,7 +30,7 @@ class LogRepositoryImpl implements LogRepository {
     try {
       final logs = await localDataSource.getLogs(
         level: level,
-        category: category,
+        context: context,
         startDate: startDate,
         endDate: endDate,
         limit: limit,
@@ -44,11 +43,14 @@ class LogRepositoryImpl implements LogRepository {
 
   @override
   Future<Either<Failure, List<LogEntry>>> getLogsByCategory(
-    LogCategory category, {
+    String context, {
     int? limit,
   }) async {
     try {
-      final logs = await localDataSource.getLogsByCategory(category, limit: limit);
+      final logs = await localDataSource.getLogsByCategory(
+        context,
+        limit: limit,
+      );
       return Right(logs);
     } catch (e) {
       return Left(CacheFailure(message: 'Failed to get logs by category: $e'));
@@ -56,9 +58,7 @@ class LogRepositoryImpl implements LogRepository {
   }
 
   @override
-  Future<Either<Failure, List<LogEntry>>> getErrorLogs({
-    int? limit,
-  }) async {
+  Future<Either<Failure, List<LogEntry>>> getErrorLogs({int? limit}) async {
     try {
       final logs = await localDataSource.getErrorLogs(limit: limit);
       return Right(logs);
@@ -107,7 +107,7 @@ class LogRepositoryImpl implements LogRepository {
         startDate: startDate,
         endDate: endDate,
       );
-      
+
       final exportData = {
         'exported_at': DateTime.now().toIso8601String(),
         'total_logs': logs.length,
@@ -117,7 +117,7 @@ class LogRepositoryImpl implements LogRepository {
         },
         'logs': logs.map((log) => log.toJson()).toList(),
       };
-      
+
       return Right(jsonEncode(exportData));
     } catch (e) {
       return Left(CacheFailure(message: 'Failed to export logs: $e'));

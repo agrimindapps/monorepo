@@ -70,7 +70,7 @@ class MedicationRepositoryImpl implements MedicationRepository {
           moduleName: 'petiveti',
         ).markAsDirty();
 
-        // 2. Salvar localmente (usando MedicationModel para compatibilidade com Hive)
+        // 2. Salvar localmente (usando MedicationModel para compatibilidade)
         final medicationModel =
             MedicationModel.fromEntity(syncEntity.toLegacyMedication());
         await _localDataSource.addMedication(medicationModel);

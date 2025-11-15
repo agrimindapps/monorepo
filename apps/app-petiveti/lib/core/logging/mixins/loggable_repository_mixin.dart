@@ -1,4 +1,3 @@
-import '../entities/log_entry.dart';
 import '../services/logging_service.dart';
 
 /// Mixin to provide consistent logging functionality across all repositories
@@ -7,13 +6,13 @@ mixin LoggableRepositoryMixin {
 
   /// Log the start of a repository operation
   Future<void> logOperationStart({
-    required LogCategory category,
-    required LogOperation operation,
+    required String context,
+    required String operation,
     required String message,
     Map<String, dynamic>? metadata,
   }) async {
     await _logger.logInfo(
-      category: category,
+      context: context,
       operation: operation,
       message: 'Starting $message',
       metadata: metadata,
@@ -22,14 +21,14 @@ mixin LoggableRepositoryMixin {
 
   /// Log successful completion of a repository operation
   Future<void> logOperationSuccess({
-    required LogCategory category,
-    required LogOperation operation,
+    required String context,
+    required String operation,
     required String message,
     Map<String, dynamic>? metadata,
     Duration? duration,
   }) async {
     await _logger.logInfo(
-      category: category,
+      context: context,
       operation: operation,
       message: 'Successfully completed $message',
       metadata: metadata,
@@ -39,8 +38,8 @@ mixin LoggableRepositoryMixin {
 
   /// Log a repository operation failure
   Future<void> logOperationError({
-    required LogCategory category,
-    required LogOperation operation,
+    required String context,
+    required String operation,
     required String message,
     required dynamic error,
     StackTrace? stackTrace,
@@ -48,7 +47,7 @@ mixin LoggableRepositoryMixin {
     Duration? duration,
   }) async {
     await _logger.logError(
-      category: category,
+      context: context,
       operation: operation,
       message: 'Failed to $message',
       error: error,
@@ -60,14 +59,14 @@ mixin LoggableRepositoryMixin {
 
   /// Log validation failure
   Future<void> logValidationError({
-    required LogCategory category,
+    required String context,
     required String message,
     required dynamic error,
     Map<String, dynamic>? metadata,
   }) async {
     await _logger.logError(
-      category: category,
-      operation: LogOperation.validate,
+      context: context,
+      operation: 'validate',
       message: 'Validation failed: $message',
       error: error,
       metadata: metadata,
@@ -76,13 +75,13 @@ mixin LoggableRepositoryMixin {
 
   /// Log data synchronization start
   Future<void> logSyncStart({
-    required LogCategory category,
+    required String context,
     required String message,
     Map<String, dynamic>? metadata,
   }) async {
     await _logger.logInfo(
-      category: category,
-      operation: LogOperation.sync,
+      context: context,
+      operation: 'sync',
       message: 'Starting sync: $message',
       metadata: metadata,
     );
@@ -90,14 +89,14 @@ mixin LoggableRepositoryMixin {
 
   /// Log successful data synchronization
   Future<void> logSyncSuccess({
-    required LogCategory category,
+    required String context,
     required String message,
     Map<String, dynamic>? metadata,
     Duration? duration,
   }) async {
     await _logger.logInfo(
-      category: category,
-      operation: LogOperation.sync,
+      context: context,
+      operation: 'sync',
       message: 'Successfully synced: $message',
       metadata: metadata,
       duration: duration,
@@ -106,7 +105,7 @@ mixin LoggableRepositoryMixin {
 
   /// Log data synchronization failure
   Future<void> logSyncError({
-    required LogCategory category,
+    required String context,
     required String message,
     required dynamic error,
     StackTrace? stackTrace,
@@ -114,8 +113,8 @@ mixin LoggableRepositoryMixin {
     Duration? duration,
   }) async {
     await _logger.logError(
-      category: category,
-      operation: LogOperation.sync,
+      context: context,
+      operation: 'sync',
       message: 'Failed to sync: $message',
       error: error,
       stackTrace: stackTrace,
@@ -126,14 +125,14 @@ mixin LoggableRepositoryMixin {
 
   /// Log a timed repository operation
   Future<T> logTimedOperation<T>({
-    required LogCategory category,
-    required LogOperation operation,
+    required String context,
+    required String operation,
     required String message,
     required Future<T> Function() operationFunction,
     Map<String, dynamic>? metadata,
   }) async {
     return await _logger.logTimedOperation<T>(
-      category: category,
+      context: context,
       operation: operation,
       message: message,
       operationFunction: operationFunction,
@@ -160,17 +159,18 @@ mixin LoggableRepositoryMixin {
 
   /// Log CRUD operation with standardized format
   Future<void> logCrudOperation({
-    required LogCategory category,
-    required LogOperation operation,
+    required String context,
+    required String operation,
     required String entityType,
     String? entityId,
     Map<String, dynamic>? metadata,
   }) async {
-    final operationName = operation.name.toUpperCase();
-    final message = '$operationName $entityType${entityId != null ? ' (ID: $entityId)' : ''}';
+    final operationName = operation.toUpperCase();
+    final message =
+        '$operationName $entityType${entityId != null ? ' (ID: $entityId)' : ''}';
 
     await _logger.logInfo(
-      category: category,
+      context: context,
       operation: operation,
       message: message,
       metadata: createMetadata(
@@ -183,17 +183,17 @@ mixin LoggableRepositoryMixin {
 
   /// Log batch operation
   Future<void> logBatchOperation({
-    required LogCategory category,
-    required LogOperation operation,
+    required String context,
+    required String operation,
     required String entityType,
     required int count,
     Map<String, dynamic>? metadata,
   }) async {
-    final operationName = operation.name.toUpperCase();
+    final operationName = operation.toUpperCase();
     final message = 'Batch $operationName $count $entityType records';
 
     await _logger.logInfo(
-      category: category,
+      context: context,
       operation: operation,
       message: message,
       metadata: createMetadata(
@@ -206,37 +206,31 @@ mixin LoggableRepositoryMixin {
 
   /// Log local storage operation
   Future<void> logLocalStorageOperation({
-    required LogCategory category,
-    required LogOperation operation,
+    required String context,
+    required String operation,
     required String message,
     Map<String, dynamic>? metadata,
   }) async {
     await _logger.logInfo(
-      category: LogCategory.storage,
+      context: 'storage',
       operation: operation,
       message: 'Local storage: $message',
-      metadata: {
-        'original_category': category.name,
-        ...?metadata,
-      },
+      metadata: {'original_context': context, ...?metadata},
     );
   }
 
   /// Log remote storage operation
   Future<void> logRemoteStorageOperation({
-    required LogCategory category,
-    required LogOperation operation,
+    required String context,
+    required String operation,
     required String message,
     Map<String, dynamic>? metadata,
   }) async {
     await _logger.logInfo(
-      category: LogCategory.network,
+      context: 'network',
       operation: operation,
       message: 'Remote storage: $message',
-      metadata: {
-        'original_category': category.name,
-        ...?metadata,
-      },
+      metadata: {'original_context': context, ...?metadata},
     );
   }
 }

@@ -1,7 +1,8 @@
 import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../database/petiveti_database.dart';
+import '../../../../database/petiveti_database.dart' as db;
+import '../../domain/entities/reminder.dart';
 import '../models/reminder_model.dart';
 
 abstract class ReminderLocalDataSource {
@@ -19,7 +20,7 @@ abstract class ReminderLocalDataSource {
 
 @LazySingleton(as: ReminderLocalDataSource)
 class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
-  final PetivetiDatabase _database;
+  final db.PetivetiDatabase _database;
 
   ReminderLocalDataSourceImpl(this._database);
 
@@ -31,7 +32,9 @@ class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
 
   @override
   Future<List<ReminderModel>> getRemindersByAnimalId(int animalId) async {
-    final reminders = await _database.reminderDao.getRemindersByAnimal(animalId);
+    final reminders = await _database.reminderDao.getRemindersByAnimal(
+      animalId,
+    );
     return reminders.map(_toModel).toList();
   }
 
@@ -61,9 +64,9 @@ class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
 
   @override
   Future<bool> updateReminder(ReminderModel reminder) async {
-    if (reminder.id == null) return false;
+    final id = int.tryParse(reminder.id) ?? 0;
     final companion = _toCompanion(reminder, forUpdate: true);
-    return await _database.reminderDao.updateReminder(reminder.id!, companion);
+    return await _database.reminderDao.updateReminder(id, companion);
   }
 
   @override
@@ -78,49 +81,57 @@ class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
 
   @override
   Stream<List<ReminderModel>> watchRemindersByAnimalId(int animalId) {
-    return _database.reminderDao.watchRemindersByAnimal(animalId)
+    return _database.reminderDao
+        .watchRemindersByAnimal(animalId)
         .map((reminders) => reminders.map(_toModel).toList());
   }
 
-  ReminderModel _toModel(Reminder reminder) {
+  ReminderModel _toModel(db.Reminder reminder) {
     return ReminderModel(
-      id: reminder.id,
-      animalId: reminder.animalId,
+      id: reminder.id.toString(),
+      animalId: reminder.animalId?.toString() ?? '',
       title: reminder.title,
-      description: reminder.description,
-      dateTime: reminder.reminderDateTime,
-      frequency: reminder.frequency,
-      isCompleted: reminder.isCompleted,
-      notificationEnabled: reminder.notificationEnabled,
+      description: reminder.description ?? '',
+      scheduledDate: reminder.reminderDateTime,
+      type: ReminderType.general,
+      priority: ReminderPriority.medium,
+      status: reminder.isCompleted
+          ? ReminderStatus.completed
+          : ReminderStatus.active,
+      isRecurring: reminder.frequency != null && reminder.frequency != 'once',
+      recurringDays: null,
       userId: reminder.userId,
       createdAt: reminder.createdAt,
-      isDeleted: reminder.isDeleted,
+      updatedAt: reminder.createdAt,
     );
   }
 
-  RemindersCompanion _toCompanion(ReminderModel model, {bool forUpdate = false}) {
+  db.RemindersCompanion _toCompanion(
+    ReminderModel model, {
+    bool forUpdate = false,
+  }) {
     if (forUpdate) {
-      return RemindersCompanion(
-        id: model.id != null ? Value(model.id!) : const Value.absent(),
-        animalId: model.animalId != null ? Value(model.animalId) : const Value.absent(),
+      return db.RemindersCompanion(
+        id: Value(int.tryParse(model.id) ?? 0),
+        animalId: Value(int.tryParse(model.animalId) ?? 0),
         title: Value(model.title),
         description: Value.ofNullable(model.description),
-        reminderDateTime: Value(model.dateTime),
-        frequency: Value.ofNullable(model.frequency),
-        isCompleted: Value(model.isCompleted),
-        notificationEnabled: Value(model.notificationEnabled),
+        reminderDateTime: Value(model.scheduledDate),
+        frequency: Value('once'),
+        isCompleted: Value(model.status == ReminderStatus.completed),
+        notificationEnabled: Value(true),
         userId: Value(model.userId),
       );
     }
 
-    return RemindersCompanion.insert(
-      animalId: model.animalId != null ? Value(model.animalId) : const Value.absent(),
+    return db.RemindersCompanion.insert(
+      animalId: Value(int.tryParse(model.animalId) ?? 0),
       title: model.title,
       description: Value.ofNullable(model.description),
-      reminderDateTime: model.dateTime,
-      frequency: Value.ofNullable(model.frequency),
-      isCompleted: Value(model.isCompleted),
-      notificationEnabled: Value(model.notificationEnabled),
+      reminderDateTime: model.scheduledDate,
+      frequency: Value('once'),
+      isCompleted: Value(model.status == ReminderStatus.completed),
+      notificationEnabled: Value(true),
       userId: model.userId,
       createdAt: Value(model.createdAt),
     );

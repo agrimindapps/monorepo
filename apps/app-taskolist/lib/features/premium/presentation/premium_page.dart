@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide getIt, Column;
 import 'package:flutter/material.dart';
 
-import '../../../core/di/injection.dart' as di;
+import '../../../core/providers/core_providers.dart';
 import '../../../infrastructure/services/subscription_service.dart';
 import '../../../shared/widgets/auth_guard.dart';
 import '../../tasks/presentation/home_page.dart';
@@ -14,8 +14,7 @@ class PremiumPage extends ConsumerStatefulWidget {
 }
 
 class _PremiumPageState extends ConsumerState<PremiumPage> {
-  final TaskManagerSubscriptionService _subscriptionService =
-      di.getIt<TaskManagerSubscriptionService>();
+  late TaskManagerSubscriptionService _subscriptionService;
   
   List<ProductInfo> _products = [];
   bool _isLoading = true;
@@ -24,6 +23,10 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
   @override
   void initState() {
     super.initState();
+    _subscriptionService =
+        WidgetsBinding.instance.platformDispatcher.implicitView != null
+            ? ref.read(taskManagerSubscriptionServiceProvider)
+            : ref.read(taskManagerSubscriptionServiceProvider);
     _loadProducts();
   }
 

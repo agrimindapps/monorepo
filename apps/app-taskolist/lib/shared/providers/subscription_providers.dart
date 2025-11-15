@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide getIt, Column;
 
-import '../../core/di/injection.dart' as di;
+import '../../core/providers/core_providers.dart';
 import '../../features/account/presentation/usage_stats.dart' as local;
 import '../../features/auth/domain/user_limits.dart' as local;
 import '../../features/premium/presentation/subscription_status.dart'
@@ -34,10 +34,12 @@ class SubscriptionStatusNotifier
     }
   }
 }
+// subscriptionServiceProvider is now defined in core_providers.dart as taskManagerSubscriptionServiceProvider
+// Alias for backward compatibility
 final subscriptionServiceProvider = Provider<TaskManagerSubscriptionService>((
   ref,
 ) {
-  return di.getIt<TaskManagerSubscriptionService>();
+  return ref.watch(taskManagerSubscriptionServiceProvider);
 });
 final hasPremiumProvider = FutureProvider<bool>((ref) async {
   final subscriptionService = ref.watch(subscriptionServiceProvider);

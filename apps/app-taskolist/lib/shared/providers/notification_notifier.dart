@@ -1,7 +1,7 @@
 import 'package:core/core.dart' as core;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../core/di/injection.dart' as di;
+import '../../core/providers/core_providers.dart';
 import '../../features/notifications/presentation/notification_stats.dart' as local_stats;
 import '../../infrastructure/services/notification_service.dart';
 
@@ -9,7 +9,7 @@ part 'notification_notifier.g.dart';
 
 @riverpod
 TaskManagerNotificationService notificationService(NotificationServiceRef ref) {
-  return di.getIt<TaskManagerNotificationService>();
+  return ref.watch(taskManagerNotificationServiceProvider);
 }
 
 /// Provider para status de permissões

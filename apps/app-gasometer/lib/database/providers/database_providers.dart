@@ -1,12 +1,33 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../gasometer_database.dart';
 import '../repositories/repositories.dart';
+import '../adapters/database_strategy_selector.dart';
 
 /// Provider do banco de dados principal
 ///
-/// Fornece uma instância singleton do GasometerDatabase
-/// IMPORTANTE: Não usa autoDispose para garantir uma única instância global
-final gasometerDatabaseProvider = Provider<GasometerDatabase>((ref) {
+/// **Lógica por Plataforma:**
+/// - **Web (kIsWeb)**: Retorna `null` para usar Firestore (veja `isUsingFirestoreProvider`)
+/// - **Mobile/Desktop**: Retorna instância de GasometerDatabase (Drift)
+///
+/// **Fluxo de dados:**
+/// 1. App consulta `isDatabaseAvailableProvider`
+/// 2. Se false (web), usa Firestore diretamente via Cloud Firestore package
+/// 3. Se true (mobile), usa Drift normalmente
+///
+/// IMPORTANTE: Este provider NÃO é usado quando `kIsWeb == true`
+/// para evitar erros WASM do Drift na web.
+final gasometerDatabaseProvider = Provider<GasometerDatabase?>((ref) {
+  // Em web, Drift não é suportado - Firestore é usado como backend
+  if (kIsWeb) {
+    print(
+      '⚠️  Drift database unavailable on web. '
+      'Firestore will be used as backend.',
+    );
+    return null;
+  }
+
+  // Em mobile/desktop, usa Drift normalmente
   final db = GasometerDatabase.production();
 
   // Garante que o banco seja fechado quando o provider for descartado
@@ -20,11 +41,29 @@ final gasometerDatabaseProvider = Provider<GasometerDatabase>((ref) {
   return db;
 });
 
+// ========== DATABASE AVAILABILITY PROVIDER ==========
+
+/// Provider que indica se o banco Drift está disponível
+///
+/// Usado para decidir se deve usar Drift ou Firestore como backend primário
+final isDatabaseAvailableProvider = Provider<bool>((ref) {
+  final isAvailable = !kIsWeb;
+  if (!isAvailable) {
+    DatabaseStrategySelector.logStrategyInfo();
+  }
+  return isAvailable;
+});
+
 // ========== REPOSITORY PROVIDERS ==========
 
 /// Provider do repositório de veículos
+///
+/// **Comportamento:**
+/// - **Mobile**: Usa Drift database (local storage)
+/// - **Web**: Usa null database + fallback para Firestore (veja repository)
 final vehicleRepositoryProvider = Provider<VehicleRepository>((ref) {
   final db = ref.watch(gasometerDatabaseProvider);
+  // Repositories lidam com db = null em web, usando Firestore como backend
   return VehicleRepository(db);
 });
 

@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:core/core.dart' hide Column;
 import 'package:injectable/injectable.dart';
 
@@ -52,7 +53,7 @@ class TasksDriftRepository {
     final tasks =
         await (_db.select(_db.tasks)
               ..where((t) => t.isDeleted.equals(false))
-              ..orderBy([(t) => OrderingTerm(expression: t.dueDate)]))
+              ..orderBy([(t) => OrderingTerm.asc(t.dueDate)]))
             .get();
 
     return tasks.map(_taskDriftToModel).toList();
@@ -72,7 +73,7 @@ class TasksDriftRepository {
               ..where(
                 (t) => t.isDeleted.equals(false) & t.status.equals('pending'),
               )
-              ..orderBy([(t) => OrderingTerm(expression: t.dueDate)]))
+              ..orderBy([(t) => OrderingTerm.asc(t.dueDate)]))
             .get();
 
     return tasks.map(_taskDriftToModel).toList();
@@ -88,7 +89,7 @@ class TasksDriftRepository {
                 (t) =>
                     t.plantId.equals(localPlantId) & t.isDeleted.equals(false),
               )
-              ..orderBy([(t) => OrderingTerm(expression: t.dueDate)]))
+              ..orderBy([(t) => OrderingTerm.asc(t.dueDate)]))
             .get();
 
     return tasks.map(_taskDriftToModel).toList();
@@ -130,9 +131,9 @@ class TasksDriftRepository {
           _db.tasks,
         )..where((t) => t.firebaseId.equals(firebaseId))).write(
           db.TasksCompanion(
-            status: const Value('completed'),
+            status: Value('completed'),
             completedAt: Value(DateTime.now()),
-            isDirty: const Value(true),
+            isDirty: Value(true),
             updatedAt: Value(DateTime.now()),
           ),
         );
@@ -148,8 +149,8 @@ class TasksDriftRepository {
           _db.tasks,
         )..where((t) => t.firebaseId.equals(firebaseId))).write(
           db.TasksCompanion(
-            isDeleted: const Value(true),
-            isDirty: const Value(true),
+            isDeleted: Value(true),
+            isDirty: Value(true),
             updatedAt: Value(DateTime.now()),
           ),
         );
@@ -166,15 +167,16 @@ class TasksDriftRepository {
   Stream<List<TaskModel>> watchTasks() {
     return (_db.select(_db.tasks)
           ..where((t) => t.isDeleted.equals(false))
-          ..orderBy([(t) => OrderingTerm(expression: t.dueDate)]))
+          ..orderBy([(t) => OrderingTerm.asc(t.dueDate)]))
         .watch()
         .map((tasks) => tasks.map(_taskDriftToModel).toList());
   }
 
   Stream<List<TaskModel>> watchPendingTasks() {
     return (_db.select(_db.tasks)
-          ..where((t) => t.isDeleted.equals(false) & t.status.equals('pending'))
-          ..orderBy([(t) => OrderingTerm(expression: t.dueDate)]))
+          ..where((t) =>
+              t.isDeleted.equals(false) & t.status.equals('pending'))
+          ..orderBy([(t) => OrderingTerm.asc(t.dueDate)]))
         .watch()
         .map((tasks) => tasks.map(_taskDriftToModel).toList());
   }
@@ -194,7 +196,7 @@ class TasksDriftRepository {
       _db.tasks,
     )..where((t) => t.firebaseId.equals(firebaseId))).write(
       db.TasksCompanion(
-        isDirty: const Value(false),
+        isDirty: Value(false),
         lastSyncAt: Value(DateTime.now()),
       ),
     );
@@ -266,7 +268,7 @@ class TasksDriftRepository {
   // ==================== STATISTICS ====================
 
   Future<int> countPendingTasks() async {
-    final count = _db.tasks.id.count();
+    final count = countAll();
     final query = _db.selectOnly(_db.tasks)
       ..addColumns([count])
       ..where(
@@ -277,7 +279,7 @@ class TasksDriftRepository {
   }
 
   Future<int> countCompletedTasks() async {
-    final count = _db.tasks.id.count();
+    final count = countAll();
     final query = _db.selectOnly(_db.tasks)
       ..addColumns([count])
       ..where(

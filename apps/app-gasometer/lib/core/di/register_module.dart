@@ -25,8 +25,6 @@ abstract class RegisterModule {
   @singleton
   Connectivity get connectivity => Connectivity();
 
-  // Removed: Hive storage migrated to Drift
-  // Use GasometerDatabase for all local storage
 
   @singleton
   IAppRatingRepository get appRatingRepository => AppRatingService();

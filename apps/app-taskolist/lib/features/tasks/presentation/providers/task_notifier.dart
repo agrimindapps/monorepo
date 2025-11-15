@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -15,37 +14,37 @@ import '../../domain/watch_tasks.dart';
 part 'task_notifier.g.dart';
 
 @riverpod
-CreateTask createTaskUseCase(CreateTaskUseCaseRef ref) {
+CreateTask createTaskUseCase(Ref ref) {
   return di.getIt<CreateTask>();
 }
 
 @riverpod
-DeleteTask deleteTaskUseCase(DeleteTaskUseCaseRef ref) {
+DeleteTask deleteTaskUseCase(Ref ref) {
   return di.getIt<DeleteTask>();
 }
 
 @riverpod
-GetTasks getTasksUseCase(GetTasksUseCaseRef ref) {
+GetTasks getTasksUseCase(Ref ref) {
   return di.getIt<GetTasks>();
 }
 
 @riverpod
-ReorderTasks reorderTasksUseCase(ReorderTasksUseCaseRef ref) {
+ReorderTasks reorderTasksUseCase(Ref ref) {
   return di.getIt<ReorderTasks>();
 }
 
 @riverpod
-UpdateTask updateTaskUseCase(UpdateTaskUseCaseRef ref) {
+UpdateTask updateTaskUseCase(Ref ref) {
   return di.getIt<UpdateTask>();
 }
 
 @riverpod
-WatchTasks watchTasksUseCase(WatchTasksUseCaseRef ref) {
+WatchTasks watchTasksUseCase(Ref ref) {
   return di.getIt<WatchTasks>();
 }
 
 @riverpod
-GetSubtasks getSubtasksUseCase(GetSubtasksUseCaseRef ref) {
+GetSubtasks getSubtasksUseCase(Ref ref) {
   return di.getIt<GetSubtasks>();
 }
 
@@ -66,7 +65,10 @@ class TaskNotifier extends _$TaskNotifier {
     _updateTask = ref.read(updateTaskUseCaseProvider);
     final result = await _getTasks(const GetTasksParams());
 
-    return result.fold((failure) => throw failure, (tasks) => tasks);
+    return result.fold(
+      (failure) => throw Exception(failure.message),
+      (tasks) => tasks,
+    );
   }
 
   Future<void> getTasks({
@@ -76,7 +78,7 @@ class TaskNotifier extends _$TaskNotifier {
     TaskPriority? priority,
     bool? isStarred,
   }) async {
-    state = const AsyncValue.loading();
+    state = const AsyncValue<List<TaskEntity>>.loading();
 
     state = await AsyncValue.guard(() async {
       final result = await _getTasks(
@@ -89,17 +91,22 @@ class TaskNotifier extends _$TaskNotifier {
         ),
       );
 
-      return result.fold((failure) => throw failure, (tasks) => tasks);
+      return result.fold(
+        (failure) => throw Exception(failure.message),
+        (tasks) => tasks,
+      );
     });
   }
 
   Future<void> createTask(TaskEntity task) async {
-    state = const AsyncValue.loading();
+    state = const AsyncValue<List<TaskEntity>>.loading();
 
     state = await AsyncValue.guard(() async {
       final result = await _createTask(CreateTaskParams(task: task));
 
-      return result.fold((failure) => throw failure, (taskId) {
+      return result.fold((failure) => throw Exception(failure.message), (
+        taskId,
+      ) {
         final updatedTask = task.copyWith(id: taskId);
         final currentTasks = state.value ?? [];
         return [...currentTasks, updatedTask];
@@ -112,14 +119,14 @@ class TaskNotifier extends _$TaskNotifier {
   }
 
   Future<void> updateTask(TaskEntity task) async {
-    state = const AsyncValue.loading();
+    state = const AsyncValue<List<TaskEntity>>.loading();
 
     state = await AsyncValue.guard(() async {
       final result = await _updateTask(UpdateTaskParams(task: task));
 
-      return result.fold((failure) => throw failure, (_) {
+      return result.fold((failure) => throw Exception(failure.message), (_) {
         final currentTasks = state.value ?? [];
-        return currentTasks.map((t) {
+        return currentTasks.map<TaskEntity>((TaskEntity t) {
           return t.id == task.id ? task : t;
         }).toList();
       });
@@ -127,14 +134,14 @@ class TaskNotifier extends _$TaskNotifier {
   }
 
   Future<void> deleteTask(String taskId) async {
-    state = const AsyncValue.loading();
+    state = const AsyncValue<List<TaskEntity>>.loading();
 
     state = await AsyncValue.guard(() async {
       final result = await _deleteTask(DeleteTaskParams(taskId: taskId));
 
-      return result.fold((failure) => throw failure, (_) {
+      return result.fold((failure) => throw Exception(failure.message), (_) {
         final currentTasks = state.value ?? [];
-        return currentTasks.where((t) => t.id != taskId).toList();
+        return currentTasks.where((TaskEntity t) => t.id != taskId).toList();
       });
     });
   }
@@ -149,24 +156,25 @@ class TaskNotifier extends _$TaskNotifier {
   }
 
   Future<void> reorderTasks(List<String> taskIds) async {
-    state = const AsyncValue.loading();
+    state = const AsyncValue<List<TaskEntity>>.loading();
 
     state = await AsyncValue.guard(() async {
       final result = await _reorderTasks(ReorderTasksParams(taskIds: taskIds));
 
-      return result.fold((failure) => throw failure, (_) {
+      return result.fold((failure) => throw Exception(failure.message), (_) {
         final currentTasks = state.value ?? [];
         final reorderedTasks = <TaskEntity>[];
         for (int i = 0; i < taskIds.length; i++) {
           final taskId = taskIds[i];
           final task = currentTasks.firstWhere(
-            (t) => t.id == taskId,
+            (TaskEntity t) => t.id == taskId,
             orElse: () => currentTasks.first, // fallback, não deveria acontecer
           );
           reorderedTasks.add(task.copyWith(position: i));
         }
-        final remainingTasks =
-            currentTasks.where((task) => !taskIds.contains(task.id)).toList();
+        final remainingTasks = currentTasks
+            .where((TaskEntity task) => !taskIds.contains(task.id))
+            .toList();
         reorderedTasks.addAll(remainingTasks);
 
         return reorderedTasks;
@@ -215,10 +223,7 @@ class TasksStreamParams {
 
 /// Provider para stream de tasks
 @riverpod
-Stream<List<TaskEntity>> tasksStream(
-  TasksStreamRef ref,
-  TasksStreamParams params,
-) {
+Stream<List<TaskEntity>> tasksStream(Ref ref, TasksStreamParams params) {
   final watchTasks = ref.watch(watchTasksUseCaseProvider);
 
   return watchTasks(
@@ -266,10 +271,7 @@ class TaskCreationData {
 
 /// Provider para criar task com ID automático
 @riverpod
-Future<String> createTaskWithId(
-  CreateTaskWithIdRef ref,
-  TaskCreationData taskData,
-) async {
+Future<String> createTaskWithId(Ref ref, TaskCreationData taskData) async {
   final createTask = ref.watch(createTaskUseCaseProvider);
 
   final task = TaskEntity(
@@ -339,7 +341,7 @@ class GetTasksRequest {
 /// Provider para buscar tasks
 @riverpod
 Future<List<TaskEntity>> getTasksFuture(
-  GetTasksFutureRef ref,
+  Ref ref,
   GetTasksRequest request,
 ) async {
   final getTasks = ref.watch(getTasksUseCaseProvider);
@@ -362,7 +364,7 @@ Future<List<TaskEntity>> getTasksFuture(
 
 /// Provider para buscar subtasks de uma tarefa específica
 @riverpod
-Future<List<TaskEntity>> subtasks(SubtasksRef ref, String parentTaskId) async {
+Future<List<TaskEntity>> subtasks(Ref ref, String parentTaskId) async {
   final getSubtasks = ref.watch(getSubtasksUseCaseProvider);
 
   final result = await getSubtasks(

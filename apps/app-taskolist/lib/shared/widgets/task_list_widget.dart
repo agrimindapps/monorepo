@@ -21,12 +21,12 @@ class TaskListWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tasksState = ref.watch(taskNotifierProvider);
+    final tasksState = ref.watch<AsyncValue<List<TaskEntity>>>(taskNotifierProvider);
 
     return tasksState.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error:
-          (error, stackTrace) => Center(
+          (Object error, StackTrace stackTrace) => Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -43,7 +43,7 @@ class TaskListWidget extends ConsumerWidget {
               ],
             ),
           ),
-      data: (tasks) {
+      data: (List<TaskEntity> tasks) {
         final filteredTasks = _filterTasks(tasks);
 
         if (filteredTasks.isEmpty) {
@@ -139,7 +139,7 @@ class TaskListWidget extends ConsumerWidget {
                   status: newStatus,
                   updatedAt: DateTime.now(),
                 );
-                ref.read(taskNotifierProvider.notifier).updateTask(updatedTask);
+                ref.read<TaskNotifier>(taskNotifierProvider.notifier).updateTask(updatedTask);
               },
             ),
           ],
@@ -164,7 +164,7 @@ class TaskListWidget extends ConsumerWidget {
               isStarred: !task.isStarred,
               updatedAt: DateTime.now(),
             );
-            ref.read(taskNotifierProvider.notifier).updateTask(updatedTask);
+            ref.read<TaskNotifier>(taskNotifierProvider.notifier).updateTask(updatedTask);
           },
         ),
         onTap: () {
@@ -189,6 +189,6 @@ class TaskListWidget extends ConsumerWidget {
     final movedTask = reorderedTasks.removeAt(oldIndex);
     reorderedTasks.insert(newIndex, movedTask);
     final taskIds = reorderedTasks.map((task) => task.id).toList();
-    ref.read(taskNotifierProvider.notifier).reorderTasks(taskIds);
+    ref.read<TaskNotifier>(taskNotifierProvider.notifier).reorderTasks(taskIds);
   }
 }

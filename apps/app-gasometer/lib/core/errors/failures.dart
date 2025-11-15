@@ -105,9 +105,9 @@ class ConnectivityFailure extends core.NetworkFailure {
   }) : super(message, code: code ?? 'NO_CONNECTION', details: details);
 }
 
-/// Failure para operações de storage (Hive/Firebase Storage)
+/// Failure para operações de storage (Firebase Storage, Drift)
 class StorageFailure extends core.CacheFailure {
-  final String? storageType; // 'hive', 'firebase_storage', etc
+  final String? storageType; // 'firebase_storage', 'drift', etc
   final String? operation; // 'read', 'write', 'delete', etc
 
   const StorageFailure({

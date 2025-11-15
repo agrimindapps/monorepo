@@ -24,7 +24,6 @@ import 'gasometer_sync_service.dart';
 /// **Retry Strategy:**
 /// - Max 3 falhas consecutivas antes de desabilitar auto-sync
 /// - Logging detalhado de todas as operações
-@lazySingleton
 class GasometerBatchSyncService {
   GasometerBatchSyncService({
     required GasometerSyncService syncService,

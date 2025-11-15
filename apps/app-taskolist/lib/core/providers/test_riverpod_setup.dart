@@ -11,7 +11,7 @@ String helloRiverpod(HelloRiverpodRef ref) {
 /// Provider assíncrono de teste
 @riverpod
 Future<int> asyncCounter(AsyncCounterRef ref) async {
-  await Future.delayed(const Duration(milliseconds: 100));
+  await Future<int>.delayed(const Duration(milliseconds: 100));
   return 42;
 }
 

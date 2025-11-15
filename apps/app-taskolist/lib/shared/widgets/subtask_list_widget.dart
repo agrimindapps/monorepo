@@ -12,7 +12,7 @@ class SubtaskListWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final subtasksState = ref.watch(subtasksProvider(parentTaskId));
+    final subtasksState = ref.watch<AsyncValue<List<TaskEntity>>>(subtasksProvider(parentTaskId));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,7 +43,7 @@ class SubtaskListWidget extends ConsumerWidget {
                 ),
               ),
           error:
-              (error, stackTrace) => Card(
+              (Object error, StackTrace stackTrace) => Card(
                 color: Colors.red[50],
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -58,7 +58,7 @@ class SubtaskListWidget extends ConsumerWidget {
                   ),
                 ),
               ),
-          data: (subtasks) {
+          data: (List<TaskEntity> subtasks) {
             if (subtasks.isEmpty) {
               return Card(
                 color: Colors.grey[50],
@@ -77,7 +77,7 @@ class SubtaskListWidget extends ConsumerWidget {
 
             return Column(
               children:
-                  subtasks.map((subtask) {
+                  subtasks.map((TaskEntity subtask) {
                     return Card(
                       margin: const EdgeInsets.only(bottom: 4),
                       child: ListTile(

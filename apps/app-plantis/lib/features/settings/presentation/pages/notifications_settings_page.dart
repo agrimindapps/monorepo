@@ -373,7 +373,9 @@ class NotificationsSettingsPage extends ConsumerWidget {
             return RadioListTile<int>(
               title: Text('$minutes minutos'),
               value: minutes,
+              // ignore: deprecated_member_use
               groupValue: currentValue,
+              // ignore: deprecated_member_use
               onChanged: (int? value) {
                 if (value != null) {
                   ref.read(settingsNotifierProvider.notifier).setReminderMinutesBefore(value);

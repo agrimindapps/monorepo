@@ -4,17 +4,14 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/services/fuel_crud_service.dart';
+import '../../../../core/services/fuel_query_service.dart';
+import '../../../../core/services/fuel_sync_service.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
-import '../../data/datasources/fuel_supply_local_datasource.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../../domain/services/fuel_calculation_service.dart';
 import '../../domain/services/fuel_connectivity_service.dart';
-import '../../domain/usecases/add_fuel_record.dart';
-import '../../domain/usecases/delete_fuel_record.dart';
-import '../../domain/usecases/get_all_fuel_records.dart';
 import '../../domain/usecases/get_fuel_analytics.dart';
-import '../../domain/usecases/get_fuel_records_by_vehicle.dart';
-import '../../domain/usecases/update_fuel_record.dart';
 
 part 'fuel_riverpod_notifier.g.dart';
 
@@ -140,22 +137,17 @@ class FuelState {
 
 @riverpod
 class FuelRiverpod extends _$FuelRiverpod {
-  // Use cases
-  late GetAllFuelRecords _getAllFuelRecords;
-  late GetFuelRecordsByVehicle _getFuelRecordsByVehicle;
-  late AddFuelRecord _addFuelRecord;
-  late UpdateFuelRecord _updateFuelRecord;
-  late DeleteFuelRecord _deleteFuelRecord;
-  late GetAverageConsumption _getAverageConsumption;
-  late GetTotalSpent _getTotalSpent;
-  late GetRecentFuelRecords _getRecentFuelRecords;
-
   // Specialized Services (SRP)
+  late FuelCrudService _crudService;
+  late FuelQueryService _queryService;
+  late FuelSyncService _syncService;
   late FuelCalculationService _calculationService;
   late FuelConnectivityService _connectivityService;
 
-  // Drift DataSource for sync operations
-  late FuelSupplyLocalDataSource _localDataSource;
+  // Use cases
+  late GetAverageConsumption _getAverageConsumption;
+  late GetTotalSpent _getTotalSpent;
+  late GetRecentFuelRecords _getRecentFuelRecords;
 
   StreamSubscription<bool>? _connectivitySubscription;
 
@@ -163,20 +155,17 @@ class FuelRiverpod extends _$FuelRiverpod {
   FutureOr<FuelState> build() async {
     final getIt = ModularInjectionContainer.instance;
 
-    // Initialize use cases
-    _getAllFuelRecords = getIt<GetAllFuelRecords>();
-    _getFuelRecordsByVehicle = getIt<GetFuelRecordsByVehicle>();
-    _addFuelRecord = getIt<AddFuelRecord>();
-    _updateFuelRecord = getIt<UpdateFuelRecord>();
-    _deleteFuelRecord = getIt<DeleteFuelRecord>();
+    // Initialize specialized services
+    _crudService = getIt<FuelCrudService>();
+    _queryService = getIt<FuelQueryService>();
+    _syncService = getIt<FuelSyncService>();
+    _calculationService = getIt<FuelCalculationService>();
+    _connectivityService = getIt<FuelConnectivityService>();
+
+    // Initialize use cases for analytics
     _getAverageConsumption = getIt<GetAverageConsumption>();
     _getTotalSpent = getIt<GetTotalSpent>();
     _getRecentFuelRecords = getIt<GetRecentFuelRecords>();
-
-    // Initialize specialized services
-    _calculationService = getIt<FuelCalculationService>();
-    _connectivityService = getIt<FuelConnectivityService>();
-    _localDataSource = getIt<FuelSupplyLocalDataSource>();
 
     ref.onDispose(() {
       _connectivitySubscription?.cancel();
@@ -184,7 +173,7 @@ class FuelRiverpod extends _$FuelRiverpod {
     });
 
     await _setupConnectivityListener();
-    final pendingRecords = await _loadPendingRecordsFromDrift();
+    final pendingRecords = await _loadPendingRecords();
 
     final initialState = await _loadAllRecords();
     final stateWithPending = initialState.copyWith(
@@ -226,7 +215,7 @@ class FuelRiverpod extends _$FuelRiverpod {
   }
 
   Future<FuelState> _loadAllRecords() async {
-    final result = await _getAllFuelRecords();
+    final result = await _queryService.loadAllRecords();
 
     return result.fold(
       (failure) => FuelState(
@@ -241,60 +230,24 @@ class FuelRiverpod extends _$FuelRiverpod {
     );
   }
 
-  /// Carrega registros pendentes (isDirty) do Drift
-  Future<List<FuelRecordEntity>> _loadPendingRecordsFromDrift() async {
-    try {
-      final dirtyData = await _localDataSource.findDirtyRecords();
-
-      // Converter FuelSupplyData para FuelRecordEntity
-      return dirtyData.map((data) {
-        return FuelRecordEntity(
-          id: data.id.toString(),
-          vehicleId: data.vehicleId.toString(),
-          fuelType: FuelType.values[data.fuelType],
-          liters: data.liters,
-          pricePerLiter: data.pricePerLiter,
-          totalPrice: data.totalPrice,
-          odometer: data.odometer,
-          date: DateTime.fromMillisecondsSinceEpoch(data.date),
-          gasStationName: data.gasStationName,
-          fullTank: data.fullTank ?? true,
-          notes: data.notes,
-          createdAt: data.createdAt,
-          updatedAt: data.updatedAt,
-          lastSyncAt: data.lastSyncAt,
-          isDirty: data.isDirty,
-          isDeleted: data.isDeleted,
-          version: data.version,
-          userId: data.userId,
-          moduleName: data.moduleName,
-        );
-      }).toList();
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('🚗 Erro ao carregar registros pendentes do Drift: $e');
-      }
-      return [];
-    }
-  }
-
-  /// Marca registros como sincronizados no Drift
-  Future<void> _markRecordsAsSynced(List<String> recordIds) async {
-    try {
-      final intIds = recordIds.map((id) => int.parse(id)).toList();
-      await _localDataSource.markAsSynced(intIds);
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('🚗 Erro ao marcar registros como sincronizados: $e');
-      }
-    }
+  Future<List<FuelRecordEntity>> _loadPendingRecords() async {
+    final result = await _syncService.loadPendingRecords();
+    return result.fold(
+      (failure) {
+        if (kDebugMode) {
+          debugPrint('🚗 Erro ao carregar registros pendentes: ${failure.message}');
+        }
+        return [];
+      },
+      (records) => records,
+    );
   }
 
   Future<void> loadFuelRecords() async {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      final result = await _getAllFuelRecords();
+      final result = await _queryService.loadAllRecords(forceRefresh: true);
 
       return result.fold(
         (failure) => FuelState(
@@ -331,9 +284,7 @@ class FuelRiverpod extends _$FuelRiverpod {
       );
     });
 
-    final result = await _getFuelRecordsByVehicle(
-      GetFuelRecordsByVehicleParams(vehicleId: vehicleId),
-    );
+    final result = await _queryService.loadRecordsByVehicle(vehicleId);
 
     state.whenData((currentState) {
       result.fold(
@@ -372,74 +323,52 @@ class FuelRiverpod extends _$FuelRiverpod {
       currentState.copyWith(isLoading: true, clearError: true),
     );
 
-    try {
-      // O repositório Drift sempre salva localmente com isDirty=true
-      // Se offline, fica marcado para sync posterior
-      // Se online, tenta sincronizar imediatamente
-      final result = await _addFuelRecord(
-        AddFuelRecordParams(fuelRecord: record),
-      );
+    final result = await _crudService.addFuel(record);
 
-      return result.fold(
-        (failure) async {
-          // Mesmo com falha, o registro já foi salvo localmente pelo Drift
-          // com isDirty=true para sincronização posterior
-          final updatedPending = await _loadPendingRecordsFromDrift();
-          final updatedRecords = [record, ...currentState.fuelRecords];
+    return result.fold(
+      (failure) async {
+        final updatedPending = await _loadPendingRecords();
+        final updatedRecords = [record, ...currentState.fuelRecords];
 
-          state = AsyncValue.data(
-            currentState.copyWith(
-              fuelRecords: updatedRecords,
-              isLoading: false,
-              statistics: _calculationService.calculateStatistics(
-                updatedRecords,
-              ),
-              pendingRecords: updatedPending,
-            ),
+        state = AsyncValue.data(
+          currentState.copyWith(
+            fuelRecords: updatedRecords,
+            isLoading: false,
+            statistics: _calculationService.calculateStatistics(updatedRecords),
+            pendingRecords: updatedPending,
+          ),
+        );
+
+        if (kDebugMode) {
+          debugPrint(
+            '🔌 Registro salvo localmente (Drift), será sincronizado: ${failure.message}',
           );
+        }
 
-          if (kDebugMode) {
-            debugPrint(
-              '🔌 Registro salvo localmente (Drift), será sincronizado: ${failure.message}',
-            );
-          }
+        return true;
+      },
+      (addedRecord) async {
+        final updatedRecords = [addedRecord, ...currentState.fuelRecords];
+        final updatedPending = await _loadPendingRecords();
 
-          return true;
-        },
-        (addedRecord) async {
-          // Sucesso - registro sincronizado e salvo localmente
-          final updatedRecords = [addedRecord, ...currentState.fuelRecords];
-          final updatedPending = await _loadPendingRecordsFromDrift();
+        state = AsyncValue.data(
+          currentState.copyWith(
+            fuelRecords: updatedRecords,
+            isLoading: false,
+            statistics: _calculationService.calculateStatistics(updatedRecords),
+            pendingRecords: updatedPending,
+          ),
+        );
 
-          state = AsyncValue.data(
-            currentState.copyWith(
-              fuelRecords: updatedRecords,
-              isLoading: false,
-              statistics: _calculationService.calculateStatistics(
-                updatedRecords,
-              ),
-              pendingRecords: updatedPending,
-            ),
+        if (kDebugMode) {
+          debugPrint(
+            '🚗 Registro adicionado e sincronizado: ${addedRecord.id}',
           );
+        }
 
-          if (kDebugMode) {
-            debugPrint(
-              '🚗 Registro adicionado e sincronizado: ${addedRecord.id}',
-            );
-          }
-
-          return true;
-        },
-      );
-    } catch (e) {
-      state = AsyncValue.data(
-        currentState.copyWith(
-          isLoading: false,
-          errorMessage: 'Erro ao adicionar registro: $e',
-        ),
-      );
-      return false;
-    }
+        return true;
+      },
+    );
   }
 
   Future<bool> updateFuelRecord(FuelRecordEntity record) async {
@@ -450,9 +379,7 @@ class FuelRiverpod extends _$FuelRiverpod {
       currentState.copyWith(isLoading: true, clearError: true),
     );
 
-    final result = await _updateFuelRecord(
-      UpdateFuelRecordParams(fuelRecord: record),
-    );
+    final result = await _crudService.updateFuel(record);
 
     return result.fold(
       (failure) {
@@ -496,9 +423,7 @@ class FuelRiverpod extends _$FuelRiverpod {
       currentState.copyWith(isLoading: true, clearError: true),
     );
 
-    final result = await _deleteFuelRecord(
-      DeleteFuelRecordParams(id: recordId),
-    );
+    final result = await _crudService.deleteFuel(recordId);
 
     return result.fold(
       (failure) {
@@ -547,6 +472,7 @@ class FuelRiverpod extends _$FuelRiverpod {
       );
     }
 
+    // Delegate sync to FuelSyncService
     final recordsToSync = List<FuelRecordEntity>.from(
       currentState.pendingRecords,
     );
@@ -555,9 +481,7 @@ class FuelRiverpod extends _$FuelRiverpod {
 
     for (final record in recordsToSync) {
       try {
-        final result = await _addFuelRecord(
-          AddFuelRecordParams(fuelRecord: record),
-        );
+        final result = await _crudService.addFuel(record);
 
         result.fold(
           (failure) {
@@ -583,13 +507,13 @@ class FuelRiverpod extends _$FuelRiverpod {
       }
     }
 
-    // Marca registros sincronizados como limpos no Drift
+    // Mark synced records
     if (syncedIds.isNotEmpty) {
-      await _markRecordsAsSynced(syncedIds);
+      await _syncService.markRecordsAsSynced(syncedIds);
     }
 
-    // Recarrega lista de pendentes do Drift
-    final updatedPending = await _loadPendingRecordsFromDrift();
+    // Reload pending records
+    final updatedPending = await _loadPendingRecords();
 
     state = AsyncValue.data(
       currentState.copyWith(pendingRecords: updatedPending, isSyncing: false),

@@ -70,7 +70,7 @@ class _CreateSubtaskDialogState extends ConsumerState<CreateSubtaskDialog> {
         );
 
         await ref
-            .read(taskNotifierProvider.notifier)
+            .read<TaskNotifier>(taskNotifierProvider.notifier)
             .updateSubtask(updatedSubtask);
 
         if (mounted) {
@@ -95,7 +95,7 @@ class _CreateSubtaskDialogState extends ConsumerState<CreateSubtaskDialog> {
         );
 
         await ref
-            .read(taskNotifierProvider.notifier)
+            .read<TaskNotifier>(taskNotifierProvider.notifier)
             .createSubtask(newSubtask);
 
         if (mounted) {

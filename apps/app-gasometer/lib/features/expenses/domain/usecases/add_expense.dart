@@ -7,7 +7,7 @@ import '../entities/expense_entity.dart';
 ///
 /// Responsável por:
 /// - Validar dados da despesa
-/// - Persistir localmente (Hive)
+/// - Persistir localmente (Drift)
 /// - Sincronizar com Firebase em background
 /// - Invalidar caches relacionados
 @injectable

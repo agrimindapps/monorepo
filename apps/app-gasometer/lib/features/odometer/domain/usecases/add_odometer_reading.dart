@@ -7,7 +7,7 @@ import '../repositories/odometer_repository.dart';
 ///
 /// Responsável por:
 /// - Validar dados da leitura
-/// - Persistir localmente (Hive)
+/// - Persistir localmente (Drift)
 /// - Sincronizar com Firebase em background
 @injectable
 class AddOdometerReadingUseCase

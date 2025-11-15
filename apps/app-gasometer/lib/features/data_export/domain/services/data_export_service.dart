@@ -200,7 +200,6 @@ class DataExportService {
     ExportRequest request,
   ) async {
     try {
-      // Use Drift database instead of Hive
       final user = await _authService.currentUser.first;
       final userId = user?.id;
       if (userId == null) return [];
@@ -227,7 +226,6 @@ class DataExportService {
     ExportRequest request,
   ) async {
     try {
-      // Use Drift database instead of Hive
       final user = await _authService.currentUser.first;
       final userId = user?.id;
       if (userId == null) return [];
@@ -257,7 +255,6 @@ class DataExportService {
     ExportRequest request,
   ) async {
     try {
-      // Use Drift database instead of Hive
       final user = await _authService.currentUser.first;
       final userId = user?.id;
       if (userId == null) return [];
@@ -290,7 +287,6 @@ class DataExportService {
     ExportRequest request,
   ) async {
     try {
-      // Use Drift database instead of Hive
       final user = await _authService.currentUser.first;
       final userId = user?.id;
       if (userId == null) return [];
@@ -323,7 +319,6 @@ class DataExportService {
     ExportRequest request,
   ) async {
     try {
-      // Use Drift database instead of Hive
       final user = await _authService.currentUser.first;
       final userId = user?.id;
       if (userId == null) return [];

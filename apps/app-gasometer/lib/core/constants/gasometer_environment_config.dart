@@ -44,14 +44,6 @@ class GasometerEnvironmentConfig extends AppEnvironmentConfig {
   }
 }
 
-/// Deprecated: Use HiveBoxNames from hive_service.dart instead
-/// All Hive box names are unified in HiveBoxNames (no prefixes, single environment)
-@Deprecated('Use HiveBoxNames from hive_service.dart')
-class GasometerBoxes {
-  static const String main = 'gasometer_main';
-  static const String readings = 'gasometer_readings';
-  static const String vehicles = 'gasometer_vehicles';
-  static const String statistics = 'gasometer_statistics';
   static const String backups = 'gasometer_backups';
 }
 

@@ -8,18 +8,27 @@ import '../tables/gasometer_tables.dart';
 /// Repositório de Manutenções usando Drift
 ///
 /// Gerencia operações de CRUD e queries para manutenções de veículos
-@lazySingleton
 class MaintenanceRepository
     extends BaseDriftRepositoryImpl<MaintenanceData, Maintenance> {
   MaintenanceRepository(this._db);
 
-  final GasometerDatabase _db;
+  final GasometerDatabase? _db;
 
   @override
-  TableInfo<Maintenances, Maintenance> get table => _db.maintenances;
+  TableInfo<Maintenances, Maintenance> get table {
+    if (_db == null) {
+      throw UnsupportedError('Drift database is not available on web.');
+    }
+    return _db!.maintenances;
+  }
 
   @override
-  GeneratedDatabase get database => _db;
+  GeneratedDatabase get database {
+    if (_db == null) {
+      throw UnsupportedError('Drift database is not available on web.');
+    }
+    return _db!;
+  }
 
   @override
   MaintenanceData fromData(Maintenance data) {
@@ -79,7 +88,8 @@ class MaintenanceRepository
 
   /// Busca manutenções de um veículo
   Future<List<MaintenanceData>> findByVehicleId(int vehicleId) async {
-    final query = _db.select(_db.maintenances)
+    if (_db == null) return [];
+    final query = _db!.select(_db!.maintenances)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
       )
@@ -91,7 +101,8 @@ class MaintenanceRepository
 
   /// Stream de manutenções de um veículo
   Stream<List<MaintenanceData>> watchByVehicleId(int vehicleId) {
-    final query = _db.select(_db.maintenances)
+    if (_db == null) return Stream.empty();
+    final query = _db!.select(_db!.maintenances)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
       )
@@ -104,7 +115,8 @@ class MaintenanceRepository
 
   /// Busca manutenções pendentes (não concluídas)
   Future<List<MaintenanceData>> findPendingByVehicleId(int vehicleId) async {
-    final query = _db.select(_db.maintenances)
+    if (_db == null) return [];
+    final query = _db!.select(_db!.maintenances)
       ..where(
         (tbl) =>
             tbl.vehicleId.equals(vehicleId) &
@@ -119,7 +131,8 @@ class MaintenanceRepository
 
   /// Stream de manutenções pendentes
   Stream<List<MaintenanceData>> watchPendingByVehicleId(int vehicleId) {
-    final query = _db.select(_db.maintenances)
+    if (_db == null) return Stream.empty();
+    final query = _db!.select(_db!.maintenances)
       ..where(
         (tbl) =>
             tbl.vehicleId.equals(vehicleId) &
@@ -135,7 +148,8 @@ class MaintenanceRepository
 
   /// Busca manutenções concluídas
   Future<List<MaintenanceData>> findCompletedByVehicleId(int vehicleId) async {
-    final query = _db.select(_db.maintenances)
+    if (_db == null) return [];
+    final query = _db!.select(_db!.maintenances)
       ..where(
         (tbl) =>
             tbl.vehicleId.equals(vehicleId) &
@@ -150,7 +164,8 @@ class MaintenanceRepository
 
   /// Busca manutenções por tipo
   Future<List<MaintenanceData>> findByType(int vehicleId, String tipo) async {
-    final query = _db.select(_db.maintenances)
+    if (_db == null) return [];
+    final query = _db!.select(_db!.maintenances)
       ..where(
         (tbl) =>
             tbl.vehicleId.equals(vehicleId) &
@@ -169,10 +184,11 @@ class MaintenanceRepository
     required DateTime startDate,
     required DateTime endDate,
   }) async {
+    if (_db == null) return [];
     final startMs = startDate.millisecondsSinceEpoch;
     final endMs = endDate.millisecondsSinceEpoch;
 
-    final query = _db.select(_db.maintenances)
+    final query = _db!.select(_db!.maintenances)
       ..where(
         (tbl) =>
             tbl.vehicleId.equals(vehicleId) &
@@ -192,17 +208,18 @@ class MaintenanceRepository
     DateTime? startDate,
     DateTime? endDate,
   }) async {
-    var query = _db.selectOnly(_db.maintenances)
-      ..addColumns([_db.maintenances.valor.sum()])
+    if (_db == null) return 0.0;
+    var query = _db!.selectOnly(_db!.maintenances)
+      ..addColumns([_db!.maintenances.valor.sum()])
       ..where(
-        _db.maintenances.vehicleId.equals(vehicleId) &
-            _db.maintenances.isDeleted.equals(false),
+        _db!.maintenances.vehicleId.equals(vehicleId) &
+            _db!.maintenances.isDeleted.equals(false),
       );
 
     if (startDate != null) {
       query = query
         ..where(
-          _db.maintenances.data.isBiggerOrEqualValue(
+          _db!.maintenances.data.isBiggerOrEqualValue(
             startDate.millisecondsSinceEpoch,
           ),
         );
@@ -210,48 +227,51 @@ class MaintenanceRepository
     if (endDate != null) {
       query = query
         ..where(
-          _db.maintenances.data.isSmallerOrEqualValue(
+          _db!.maintenances.data.isSmallerOrEqualValue(
             endDate.millisecondsSinceEpoch,
           ),
         );
     }
 
     final result = await query.getSingle();
-    return result.read(_db.maintenances.valor.sum()) ?? 0.0;
+    return result.read(_db!.maintenances.valor.sum()) ?? 0.0;
   }
 
   /// Conta total de manutenções de um veículo
   Future<int> countByVehicleId(int vehicleId) async {
-    final query = _db.selectOnly(_db.maintenances)
-      ..addColumns([_db.maintenances.id.count()])
+    if (_db == null) return 0;
+    final query = _db!.selectOnly(_db!.maintenances)
+      ..addColumns([_db!.maintenances.id.count()])
       ..where(
-        _db.maintenances.vehicleId.equals(vehicleId) &
-            _db.maintenances.isDeleted.equals(false),
+        _db!.maintenances.vehicleId.equals(vehicleId) &
+            _db!.maintenances.isDeleted.equals(false),
       );
 
     final result = await query.getSingle();
-    return result.read(_db.maintenances.id.count()) ?? 0;
+    return result.read(_db!.maintenances.id.count()) ?? 0;
   }
 
   /// Conta manutenções pendentes
   Future<int> countPendingByVehicleId(int vehicleId) async {
-    final query = _db.selectOnly(_db.maintenances)
-      ..addColumns([_db.maintenances.id.count()])
+    if (_db == null) return 0;
+    final query = _db!.selectOnly(_db!.maintenances)
+      ..addColumns([_db!.maintenances.id.count()])
       ..where(
-        _db.maintenances.vehicleId.equals(vehicleId) &
-            _db.maintenances.concluida.equals(false) &
-            _db.maintenances.isDeleted.equals(false),
+        _db!.maintenances.vehicleId.equals(vehicleId) &
+            _db!.maintenances.concluida.equals(false) &
+            _db!.maintenances.isDeleted.equals(false),
       );
 
     final result = await query.getSingle();
-    return result.read(_db.maintenances.id.count()) ?? 0;
+    return result.read(_db!.maintenances.id.count()) ?? 0;
   }
 
   /// Marca uma manutenção como concluída
   Future<bool> markAsCompleted(int maintenanceId) async {
+    if (_db == null) return false;
     final rowsAffected =
-        await (_db.update(
-          _db.maintenances,
+        await (_db!.update(
+          _db!.maintenances,
         )..where((tbl) => tbl.id.equals(maintenanceId))).write(
           MaintenancesCompanion(
             concluida: const Value(true),
@@ -264,17 +284,18 @@ class MaintenanceRepository
 
   /// Busca tipos de manutenção distintos
   Future<List<String>> findDistinctTypes(int vehicleId) async {
-    final query = _db.selectOnly(_db.maintenances, distinct: true)
-      ..addColumns([_db.maintenances.tipo])
+    if (_db == null) return [];
+    final query = _db!.selectOnly(_db!.maintenances, distinct: true)
+      ..addColumns([_db!.maintenances.tipo])
       ..where(
-        _db.maintenances.vehicleId.equals(vehicleId) &
-            _db.maintenances.isDeleted.equals(false),
+        _db!.maintenances.vehicleId.equals(vehicleId) &
+            _db!.maintenances.isDeleted.equals(false),
       )
-      ..orderBy([OrderingTerm.asc(_db.maintenances.tipo)]);
+      ..orderBy([OrderingTerm.asc(_db!.maintenances.tipo)]);
 
     final results = await query.get();
     return results
-        .map((row) => row.read(_db.maintenances.tipo))
+        .map((row) => row.read(_db!.maintenances.tipo))
         .where((tipo) => tipo != null && tipo.isNotEmpty)
         .cast<String>()
         .toList();
@@ -282,7 +303,8 @@ class MaintenanceRepository
 
   /// Busca manutenções que precisam ser sincronizadas
   Future<List<MaintenanceData>> findDirtyRecords() async {
-    final query = _db.select(_db.maintenances)
+    if (_db == null) return [];
+    final query = _db!.select(_db!.maintenances)
       ..where((tbl) => tbl.isDirty.equals(true));
 
     final results = await query.get();
@@ -291,10 +313,11 @@ class MaintenanceRepository
 
   /// Marca registros como sincronizados
   Future<void> markAsSynced(List<int> maintenanceIds) async {
-    await _db.executeTransaction(() async {
+    if (_db == null) return;
+    await _db!.executeTransaction(() async {
       for (final id in maintenanceIds) {
-        await (_db.update(
-          _db.maintenances,
+        await (_db!.update(
+          _db!.maintenances,
         )..where((tbl) => tbl.id.equals(id))).write(
           MaintenancesCompanion(
             isDirty: const Value(false),
@@ -307,9 +330,10 @@ class MaintenanceRepository
 
   /// Soft delete de uma manutenção
   Future<bool> softDelete(int maintenanceId) async {
+    if (_db == null) return false;
     final rowsAffected =
-        await (_db.update(
-          _db.maintenances,
+        await (_db!.update(
+          _db!.maintenances,
         )..where((tbl) => tbl.id.equals(maintenanceId))).write(
           MaintenancesCompanion(
             isDeleted: const Value(true),

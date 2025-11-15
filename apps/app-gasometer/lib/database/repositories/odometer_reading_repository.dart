@@ -8,19 +8,27 @@ import '../tables/gasometer_tables.dart';
 /// Repositório de Leituras de Odômetro usando Drift
 ///
 /// Gerencia operações de CRUD e queries para registros de odômetro
-@lazySingleton
 class OdometerReadingRepository
     extends BaseDriftRepositoryImpl<OdometerReadingData, OdometerReading> {
   OdometerReadingRepository(this._db);
 
-  final GasometerDatabase _db;
+  final GasometerDatabase? _db;
 
   @override
-  TableInfo<OdometerReadings, OdometerReading> get table =>
-      _db.odometerReadings;
+  TableInfo<OdometerReadings, OdometerReading> get table {
+    if (_db == null) {
+      throw UnsupportedError('Drift database is not available on web.');
+    }
+    return _db!.odometerReadings;
+  }
 
   @override
-  GeneratedDatabase get database => _db;
+  GeneratedDatabase get database {
+    if (_db == null) {
+      throw UnsupportedError('Drift database is not available on web.');
+    }
+    return _db!;
+  }
 
   @override
   OdometerReadingData fromData(OdometerReading data) {
@@ -68,7 +76,8 @@ class OdometerReadingRepository
 
   /// Busca leituras de odômetro de um veículo
   Future<List<OdometerReadingData>> findByVehicleId(int vehicleId) async {
-    final query = _db.select(_db.odometerReadings)
+    if (_db == null) return [];
+    final query = _db!.select(_db!.odometerReadings)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
       )
@@ -80,7 +89,8 @@ class OdometerReadingRepository
 
   /// Stream de leituras de odômetro de um veículo
   Stream<List<OdometerReadingData>> watchByVehicleId(int vehicleId) {
-    final query = _db.select(_db.odometerReadings)
+    if (_db == null) return Stream.empty();
+    final query = _db!.select(_db!.odometerReadings)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
       )
@@ -93,7 +103,8 @@ class OdometerReadingRepository
 
   /// Busca última leitura de odômetro
   Future<OdometerReadingData?> findLatestByVehicleId(int vehicleId) async {
-    final query = _db.select(_db.odometerReadings)
+    if (_db == null) return null;
+    final query = _db!.select(_db!.odometerReadings)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
       )
@@ -106,7 +117,8 @@ class OdometerReadingRepository
 
   /// Stream da última leitura de odômetro
   Stream<OdometerReadingData?> watchLatestByVehicleId(int vehicleId) {
-    final query = _db.select(_db.odometerReadings)
+    if (_db == null) return Stream.value(null);
+    final query = _db!.select(_db!.odometerReadings)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
       )
@@ -124,10 +136,11 @@ class OdometerReadingRepository
     required DateTime startDate,
     required DateTime endDate,
   }) async {
+    if (_db == null) return [];
     final startMs = startDate.millisecondsSinceEpoch;
     final endMs = endDate.millisecondsSinceEpoch;
 
-    final query = _db.select(_db.odometerReadings)
+    final query = _db!.select(_db!.odometerReadings)
       ..where(
         (tbl) =>
             tbl.vehicleId.equals(vehicleId) &
@@ -143,7 +156,8 @@ class OdometerReadingRepository
 
   /// Busca primeira leitura de odômetro
   Future<OdometerReadingData?> findFirstByVehicleId(int vehicleId) async {
-    final query = _db.select(_db.odometerReadings)
+    if (_db == null) return null;
+    final query = _db!.select(_db!.odometerReadings)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
       )
@@ -186,7 +200,8 @@ class OdometerReadingRepository
 
   /// Calcula odômetro médio por mês
   Future<Map<String, double>> getAverageOdometerByMonth(int vehicleId) async {
-    final query = _db.select(_db.odometerReadings)
+    if (_db == null) return {};
+    final query = _db!.select(_db!.odometerReadings)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
       )
@@ -211,15 +226,16 @@ class OdometerReadingRepository
 
   /// Conta total de leituras de um veículo
   Future<int> countByVehicleId(int vehicleId) async {
-    final query = _db.selectOnly(_db.odometerReadings)
-      ..addColumns([_db.odometerReadings.id.count()])
+    if (_db == null) return 0;
+    final query = _db!.selectOnly(_db!.odometerReadings)
+      ..addColumns([_db!.odometerReadings.id.count()])
       ..where(
-        _db.odometerReadings.vehicleId.equals(vehicleId) &
-            _db.odometerReadings.isDeleted.equals(false),
+        _db!.odometerReadings.vehicleId.equals(vehicleId) &
+            _db!.odometerReadings.isDeleted.equals(false),
       );
 
     final result = await query.getSingle();
-    return result.read(_db.odometerReadings.id.count()) ?? 0;
+    return result.read(_db!.odometerReadings.id.count()) ?? 0;
   }
 
   /// Busca leituras mais recentes
@@ -227,7 +243,8 @@ class OdometerReadingRepository
     int vehicleId, {
     int limit = 10,
   }) async {
-    final query = _db.select(_db.odometerReadings)
+    if (_db == null) return [];
+    final query = _db!.select(_db!.odometerReadings)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
       )
@@ -244,7 +261,8 @@ class OdometerReadingRepository
     double reading,
     int date,
   ) async {
-    final query = _db.select(_db.odometerReadings)
+    if (_db == null) return false;
+    final query = _db!.select(_db!.odometerReadings)
       ..where(
         (tbl) =>
             tbl.vehicleId.equals(vehicleId) &
@@ -260,7 +278,8 @@ class OdometerReadingRepository
 
   /// Busca leituras que precisam ser sincronizadas
   Future<List<OdometerReadingData>> findDirtyRecords() async {
-    final query = _db.select(_db.odometerReadings)
+    if (_db == null) return [];
+    final query = _db!.select(_db!.odometerReadings)
       ..where((tbl) => tbl.isDirty.equals(true));
 
     final results = await query.get();
@@ -269,10 +288,11 @@ class OdometerReadingRepository
 
   /// Marca registros como sincronizados
   Future<void> markAsSynced(List<int> readingIds) async {
-    await _db.executeTransaction(() async {
+    if (_db == null) return;
+    await _db!.executeTransaction(() async {
       for (final id in readingIds) {
-        await (_db.update(
-          _db.odometerReadings,
+        await (_db!.update(
+          _db!.odometerReadings,
         )..where((tbl) => tbl.id.equals(id))).write(
           OdometerReadingsCompanion(
             isDirty: const Value(false),
@@ -285,9 +305,10 @@ class OdometerReadingRepository
 
   /// Soft delete de uma leitura
   Future<bool> softDelete(int readingId) async {
+    if (_db == null) return false;
     final rowsAffected =
-        await (_db.update(
-          _db.odometerReadings,
+        await (_db!.update(
+          _db!.odometerReadings,
         )..where((tbl) => tbl.id.equals(readingId))).write(
           OdometerReadingsCompanion(
             isDeleted: const Value(true),

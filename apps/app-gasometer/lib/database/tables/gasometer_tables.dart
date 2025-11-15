@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
 
 /// Tabela de Veículos
 ///
@@ -94,7 +94,7 @@ class Vehicles extends Table {
   // ========== ÍNDICES ==========
 
   @override
-  List<Set<Column>> get uniqueKeys => [
+  List<Set<Column<Object>>> get uniqueKeys => [
     // Garante que não haja placas duplicadas para o mesmo usuário
     {userId, placa},
   ];
@@ -173,7 +173,7 @@ class FuelSupplies extends Table {
   // ========== ÍNDICES ==========
 
   @override
-  List<Set<Column>> get uniqueKeys => [];
+  List<Set<Column<Object>>> get uniqueKeys => [];
 }
 
 /// Tabela de Manutenções (Maintenances)

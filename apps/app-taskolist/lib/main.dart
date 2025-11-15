@@ -2,7 +2,6 @@ import 'package:core/core.dart' hide getIt, Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'core/database/hive_config.dart';
 import 'core/di/injection.dart';
 import 'core/di/modules/account_deletion_module.dart';
 import 'core/di/modules/sync_module.dart';
@@ -23,7 +22,6 @@ late ICrashlyticsRepository _crashlyticsRepository;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await HiveConfig.initialize();
   await configureDependencies();
   _crashlyticsRepository = getIt<ICrashlyticsRepository>();
   if (!kIsWeb) {

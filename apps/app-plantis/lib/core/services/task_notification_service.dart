@@ -1,19 +1,26 @@
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../features/tasks/core/constants/tasks_constants.dart';
 import '../../features/tasks/domain/entities/task.dart' as task_entity;
-import '../localization/app_strings.dart';
+import 'interfaces/i_overdue_task_monitor.dart';
+import 'interfaces/i_permission_manager.dart';
+import 'interfaces/i_task_notification_scheduler.dart';
+import 'notification_permission_manager.dart';
+import 'notification_permission_status.dart';
+import 'overdue_task_monitor.dart';
 import 'plantis_notification_service.dart';
+import 'task_notification_scheduler.dart';
 
-/// Comprehensive task notification service with offline support and intelligent scheduling
+/// Orchestrator for task notification management
 ///
-/// This service manages all aspects of task-related notifications in the Plantis app,
-/// providing users with timely reminders for plant care activities. It integrates deeply
-/// with the core notification system and provides advanced features like:
+/// This service coordinates all task-related notifications in the Plantis app,
+/// delegating specialized responsibilities to dedicated services:
+///
+/// - **TaskNotificationScheduler**: Handles notification scheduling and cancellation
+/// - **OverdueTaskMonitor**: Detects and notifies overdue tasks
+/// - **NotificationPermissionManager**: Manages permission requests and status
 ///
 /// **Core Features:**
 /// - **Smart Scheduling**: Notifications 1 hour before due time with intelligent titles
@@ -28,18 +35,6 @@ import 'plantis_notification_service.dart';
 /// - **Background Processing**: Uses WorkManager for reliable background operations
 /// - **System Integration**: Respects system notification settings and Do Not Disturb
 /// - **Permission Management**: Handles notification permissions gracefully
-///
-/// **Notification Types:**
-/// 1. **Task Reminders**: 1 hour before due time with task-specific titles and emojis
-/// 2. **Overdue Alerts**: Immediate notifications for missed tasks
-/// 3. **Daily Summaries**: Morning briefing of all tasks for the day
-/// 4. **Background Checks**: Periodic system health checks for overdue tasks
-///
-/// **Smart Features:**
-/// - **Contextual Titles**: "Time to water! 💧", "Time for pruning! ✂️"
-/// - **Priority Indicators**: Emoji-based priority levels (⚡🔴🟡🟢)
-/// - **Action Buttons**: Complete, snooze, reschedule, and view details
-/// - **Conflict Resolution**: Handles overlapping notifications intelligently
 ///
 /// Usage:
 /// ```dart
@@ -60,37 +55,26 @@ class TaskNotificationService {
   static final TaskNotificationService _instance =
       TaskNotificationService._internal();
   factory TaskNotificationService() => _instance;
-  TaskNotificationService._internal();
+  TaskNotificationService._internal() {
+    _initializeServices();
+  }
 
-  final PlantisNotificationService _notificationService =
-      PlantisNotificationService();
+  late ITaskNotificationScheduler _scheduler;
+  late IOverdueTaskMonitor _overdueMonitor;
+  late IPermissionManager _permissionManager;
+  late PlantisNotificationService _notificationService;
 
   bool _isInitialized = false;
 
+  /// Initialize specialized services
+  void _initializeServices() {
+    _notificationService = PlantisNotificationService();
+    _scheduler = TaskNotificationScheduler(_notificationService);
+    _overdueMonitor = OverdueTaskMonitor(_scheduler);
+    _permissionManager = NotificationPermissionManager(_notificationService);
+  }
+
   /// Initializes the notification service with comprehensive platform setup
-  ///
-  /// This method performs complete service initialization including:
-  /// - **Core Service Setup**: Initializes the underlying notification system
-  /// - **Permission Handling**: Requests necessary notification permissions
-  /// - **Background Processing**: Sets up WorkManager for reliable operation
-  /// - **Error Recovery**: Graceful handling of initialization failures
-  ///
-  /// The initialization process is designed to be resilient - the app will continue
-  /// to function even if some notification features fail to initialize.
-  ///
-  /// Returns:
-  /// - `true` if initialization completed successfully
-  /// - `false` if there were critical failures (service will still attempt to work)
-  ///
-  /// Example:
-  /// ```dart
-  /// final success = await taskNotificationService.initialize();
-  /// if (success) {
-  ///   debugPrint('Notifications ready');
-  /// } else {
-  ///   debugPrint('Limited notification functionality');
-  /// }
-  /// ```
   Future<bool> initialize() async {
     if (_isInitialized) return true;
 
@@ -100,10 +84,12 @@ class TaskNotificationService {
         debugPrint('❌ Failed to initialize core notification service');
         return false;
       }
-      final hasPermission = await _requestNotificationPermissions();
+
+      final hasPermission = await _permissionManager.requestNotificationPermissions();
       if (!hasPermission) {
         debugPrint('⚠️ Notification permissions not granted');
       }
+
       await _initializeWorkManager();
 
       _isInitialized = true;
@@ -111,27 +97,6 @@ class TaskNotificationService {
       return true;
     } catch (e) {
       debugPrint('❌ Error initializing TaskNotificationService: $e');
-      return false;
-    }
-  }
-
-  /// Request notification permissions with user-friendly flow
-  Future<bool> _requestNotificationPermissions() async {
-    try {
-      final currentPermission =
-          await _notificationService.areNotificationsEnabled();
-      if (currentPermission) {
-        return true;
-      }
-      final permissionGranted = await _notificationService.requestPermission();
-
-      if (!permissionGranted) {
-        debugPrint('⚠️ User denied notification permissions');
-      }
-
-      return permissionGranted;
-    } catch (e) {
-      debugPrint('❌ Error requesting notification permissions: $e');
       return false;
     }
   }
@@ -145,473 +110,160 @@ class TaskNotificationService {
     }
   }
 
-  /// Schedule notification with proper platform integration
-  Future<void> _scheduleNotificationWithActions({
-    required int id,
-    required String title,
-    required String body,
-    required DateTime scheduledDate,
-    String? payload,
-    List<Map<String, String>>? actions,
-  }) async {
-    try {
-      await _ensureInitialized();
-      NotificationHelper.createReminderNotification(
-        appName: 'Plantis',
-        id: id,
-        title: title,
-        body: body,
-        payload: payload,
-        color: TasksConstants.notificationColor,
-        scheduledDate: scheduledDate,
-      );
-      await _notificationService.scheduleDirectNotification(
-        notificationId: id,
-        title: title,
-        body: body,
-        scheduledTime: scheduledDate,
-        payload: payload,
-      );
-
-      debugPrint(
-        '✅ Scheduled notification: $title at ${scheduledDate.toString()}',
-      );
-    } catch (e) {
-      debugPrint('❌ Error scheduling notification: $e');
-    }
-  }
-
   Future<void> _ensureInitialized() async {
     if (!_isInitialized) {
       await initialize();
     }
   }
 
-  /// Schedules a comprehensive task reminder notification with interactive actions
-  ///
-  /// This method creates intelligent, contextual notifications for task reminders:
-  ///
-  /// **Scheduling Logic:**
-  /// - Notifications appear 1 hour before the task due time
-  /// - Past due times are automatically skipped
-  /// - Respects user notification preferences and Do Not Disturb settings
-  ///
-  /// **Smart Content:**
-  /// - Task-specific titles with emojis ("Time to water! 💧")
-  /// - Priority-based visual indicators (⚡🔴🟡🟢)
-  /// - Plant name and task details in the body
-  ///
-  /// **Interactive Actions:**
-  /// - **Complete**: Mark task as done directly from notification
-  /// - **Snooze**: Remind again in 1 hour
-  /// - **View Details**: Open the app to the specific task
-  ///
-  /// Parameters:
-  /// - [task]: The task entity to schedule a notification for
-  ///
-  /// Example:
-  /// ```dart
-  /// await notificationService.scheduleTaskNotification(wateringTask);
-  /// // User will see: "Time to water! 💧" 1 hour before due time
-  /// ```
+  /// Schedules a comprehensive task reminder notification
   Future<void> scheduleTaskNotification(task_entity.Task task) async {
     try {
       await _ensureInitialized();
-      final bool enabled = await _notificationService.areNotificationsEnabled();
-      if (!enabled) {
-        debugPrint('⚠️ Notifications not enabled, skipping task notification');
-        return;
-      }
-      final DateTime notificationTime = await _getScheduledDateInUserTimezone(
-        task,
-      );
-      if (notificationTime.isBefore(DateTime.now())) {
-        debugPrint('⚠️ Notification time has passed, skipping: ${task.title}');
-        return;
-      }
-
-      final String title = _getNotificationTitle(task);
-      final String body = _getNotificationBody(task);
-      final String payload = _createNotificationPayload(
-        task,
-        PlantisNotificationType.taskReminder,
-      );
-
-      final int notificationId = _createNotificationId('${task.id}_reminder');
-      final actions = _createTaskNotificationActions(task);
-
-      await _scheduleNotificationWithActions(
-        id: notificationId,
-        title: title,
-        body: body,
-        scheduledDate: notificationTime,
-        payload: payload,
-        actions: actions,
-      );
-
-      debugPrint(
-        '✅ Scheduled task notification: ${task.title} at ${notificationTime.toString()}',
-      );
+      await _scheduler.scheduleTaskNotification(task);
     } catch (e) {
       debugPrint('❌ Error scheduling task notification: $e');
     }
   }
 
-  /// Create notification actions for task notifications
-  List<Map<String, String>> _createTaskNotificationActions(
-    task_entity.Task task,
-  ) {
-    return [
-      {
-        'id': TasksConstants.completeTaskActionId,
-        'title': AppStrings.completeAction,
-        'icon': Platform.isAndroid ? TasksConstants.androidCheckIcon : '',
-      },
-      {
-        'id': TasksConstants.snoozeTaskActionId,
-        'title': AppStrings.remindLaterAction,
-        'icon': Platform.isAndroid ? TasksConstants.androidSnoozeIcon : '',
-      },
-      {
-        'id': TasksConstants.viewDetailsActionId,
-        'title': AppStrings.viewDetailsAction,
-        'icon': Platform.isAndroid ? TasksConstants.androidInfoIcon : '',
-      },
-    ];
-  }
-
   /// Creates immediate notification for overdue tasks with urgent styling
-  ///
-  /// This method generates high-priority notifications for tasks that have
-  /// passed their due date without being completed:
-  ///
-  /// **Immediate Delivery:**
-  /// - Shows notification immediately (no scheduling delay)
-  /// - Uses urgent visual styling and alert emoji 🚨
-  /// - Bypasses normal notification timing logic
-  ///
-  /// **Enhanced Actions:**
-  /// - **Complete Now**: Mark task as done with current timestamp
-  /// - **Reschedule**: Set a new due date for the task
-  /// - **View Details**: Open the app for detailed task management
-  ///
-  /// **Visual Design:**
-  /// - Eye-catching title: "Task Overdue! 🚨"
-  /// - Clear indication of which task and plant are affected
-  /// - High-priority notification channel for immediate attention
-  ///
-  /// Parameters:
-  /// - [task]: The overdue task to notify about
-  ///
-  /// Example:
-  /// ```dart
-  /// await notificationService.scheduleOverdueNotification(overdueTask);
-  /// // User sees: "Task Overdue! 🚨" immediately
-  /// ```
   Future<void> scheduleOverdueNotification(task_entity.Task task) async {
     try {
       await _ensureInitialized();
-
-      final bool enabled = await _notificationService.areNotificationsEnabled();
-      if (!enabled) {
-        debugPrint(
-          '⚠️ Notifications not enabled, skipping overdue notification',
-        );
-        return;
-      }
-
-      const String title = AppStrings.taskOverdue;
-      final String body = '${task.title} está atrasada';
-      final String payload = _createNotificationPayload(
-        task,
-        PlantisNotificationType.overdueTask,
-      );
-
-      final int notificationId = _createNotificationId('${task.id}_overdue');
-      final actions = [
-        {
-          'id': TasksConstants.completeTaskActionId,
-          'title': AppStrings.completeNowAction,
-          'icon': Platform.isAndroid ? TasksConstants.androidCheckIcon : '',
-        },
-        {
-          'id': TasksConstants.rescheduleTaskActionId,
-          'title': AppStrings.rescheduleAction,
-          'icon': Platform.isAndroid ? TasksConstants.androidScheduleIcon : '',
-        },
-        {
-          'id': TasksConstants.viewDetailsActionId,
-          'title': AppStrings.viewDetailsAction,
-          'icon': Platform.isAndroid ? TasksConstants.androidInfoIcon : '',
-        },
-      ];
-
-      await _scheduleNotificationWithActions(
-        id: notificationId,
-        title: title,
-        body: body,
-        scheduledDate: DateTime.now(), // Show immediately for overdue
-        payload: payload,
-        actions: actions,
-      );
-
-      debugPrint('✅ Created overdue task notification: ${task.title}');
+      await _scheduler.scheduleOverdueNotification(task);
     } catch (e) {
       debugPrint('❌ Error creating overdue notification: $e');
     }
   }
 
   /// Schedules intelligent daily summary notification with task overview
-  ///
-  /// This method creates a morning briefing notification that gives users
-  /// a comprehensive overview of their plant care tasks for the day:
-  ///
-  /// **Smart Content Generation:**
-  /// - **Single Task**: "You have 1 task for today: [task name]"
-  /// - **Multiple Tasks**: "You have X tasks today, Y urgent!"
-  /// - **No Urgent Tasks**: "You have X tasks scheduled for today"
-  ///
-  /// **Intelligent Timing:**
-  /// - Delivered at an appropriate morning time
-  /// - Only sent when there are actual tasks for the day
-  /// - Respects user's notification preferences
-  ///
-  /// **Contextual Actions:**
-  /// - Tapping opens the app to the tasks list
-  /// - Provides immediate overview without overwhelming details
-  ///
-  /// Parameters:
-  /// - [todayTasks]: List of tasks scheduled for today
-  ///
-  /// Example:
-  /// ```dart
-  /// final todayTasks = tasks.where((t) => t.isDueToday).toList();
-  /// await notificationService.scheduleDailySummaryNotification(todayTasks);
-  /// // User sees: "Good morning! 🌱 You have 3 tasks today, 1 urgent!"
-  /// ```
   Future<void> scheduleDailySummaryNotification(
     List<task_entity.Task> todayTasks,
   ) async {
     try {
-      final bool enabled = await _notificationService.areNotificationsEnabled();
-      if (!enabled) return;
-
-      if (todayTasks.isEmpty) return;
-
-      const String title = AppStrings.goodMorning;
-      final String body = _getDailySummaryBody(todayTasks);
-      final String payload = _createDailySummaryPayload(todayTasks);
-
-      const int notificationId =
-          TasksConstants
-              .dailySummaryNotificationId; // ID fixo para resumo diário
-
-      await _scheduleNotificationWithActions(
-        id: notificationId,
-        title: title,
-        body: body,
-        scheduledDate: DateTime.now(),
-        payload: payload,
-        actions: [],
-      );
+      await _ensureInitialized();
+      await _scheduler.scheduleDailySummaryNotification(todayTasks);
     } catch (e) {
-      debugPrint('Erro ao agendar resumo diário: $e');
+      debugPrint('❌ Error scheduling daily summary notification: $e');
     }
   }
 
   /// Cancels all scheduled notifications for a specific task
-  ///
-  /// This method removes both reminder and overdue notifications for a task,
-  /// typically called when a task is completed or deleted:
-  ///
-  /// **Comprehensive Cleanup:**
-  /// - Cancels the main reminder notification (1 hour before due)
-  /// - Cancels any overdue alert notifications
-  /// - Cleans up notification scheduling state
-  /// - Prevents orphaned notifications from appearing
-  ///
-  /// Parameters:
-  /// - [taskId]: Unique identifier of the task to cancel notifications for
-  ///
-  /// Example:
-  /// ```dart
-  /// // Task completed - remove all related notifications
-  /// await notificationService.cancelTaskNotifications(completedTask.id);
-  /// ```
   Future<void> cancelTaskNotifications(String taskId) async {
     try {
-      final reminderId = _createNotificationId('${taskId}_reminder');
-      final overdueId = _createNotificationId('${taskId}_overdue');
-      await _notificationService.cancelNotification(reminderId);
-      await _notificationService.cancelNotification(overdueId);
+      await _scheduler.cancelTaskNotifications(taskId);
     } catch (e) {
-      debugPrint('Erro ao cancelar notificações da tarefa: $e');
+      debugPrint('❌ Error canceling task notifications: $e');
     }
   }
 
   /// Cancels all scheduled task notifications across the entire system
-  ///
-  /// This method performs a complete cleanup of all task-related notifications,
-  /// useful for:
-  /// - User logout scenarios
-  /// - Complete task list refresh
-  /// - Notification system reset
-  /// - Privacy or security cleanup
-  ///
-  /// **Complete Cleanup:**
-  /// - Removes all task reminder notifications
-  /// - Cancels all overdue alert notifications
-  /// - Clears daily summary notifications
-  /// - Resets notification scheduling state
-  ///
-  /// Example:
-  /// ```dart
-  /// // User logs out - clear all their notifications
-  /// await notificationService.cancelAllTaskNotifications();
-  /// ```
   Future<void> cancelAllTaskNotifications() async {
     try {
-      await _notificationService.cancelAllNotifications();
+      await _scheduler.cancelAllTaskNotifications();
     } catch (e) {
-      debugPrint('Erro ao cancelar todas as notificações: $e');
+      debugPrint('❌ Error canceling all task notifications: $e');
     }
   }
 
-  /// Gerar título da notificação baseado na tarefa
-  String _getNotificationTitle(task_entity.Task task) {
-    switch (task.type) {
-      case task_entity.TaskType.watering:
-        return AppStrings.timeToWater;
-      case task_entity.TaskType.fertilizing:
-        return AppStrings.timeToFertilize;
-      case task_entity.TaskType.pruning:
-        return AppStrings.timeToPrune;
-      case task_entity.TaskType.repotting:
-        return AppStrings.timeToRepot;
-      case task_entity.TaskType.cleaning:
-        return AppStrings.timeToClean;
-      case task_entity.TaskType.spraying:
-        return AppStrings.timeToSpray;
-      case task_entity.TaskType.sunlight:
-        return AppStrings.timeForSunlight;
-      case task_entity.TaskType.shade:
-        return AppStrings.timeForShade;
-      case task_entity.TaskType.pestInspection:
-        return AppStrings.timeForInspection;
-      case task_entity.TaskType.custom:
-        return AppStrings.careReminder;
+  /// Scans all tasks and creates notifications for overdue items
+  Future<void> checkOverdueTasks(List<task_entity.Task> allTasks) async {
+    try {
+      await _overdueMonitor.checkOverdueTasks(allTasks);
+    } catch (e) {
+      debugPrint('❌ Error checking overdue tasks: $e');
     }
   }
 
-  /// Gerar corpo da notificação baseado na tarefa
-  String _getNotificationBody(task_entity.Task task) {
-    String priorityEmoji = '';
-    switch (task.priority) {
-      case task_entity.TaskPriority.urgent:
-        priorityEmoji = AppStrings.urgentPriorityEmoji;
-        break;
-      case task_entity.TaskPriority.high:
-        priorityEmoji = AppStrings.highPriorityEmoji;
-        break;
-      case task_entity.TaskPriority.medium:
-        priorityEmoji = AppStrings.mediumPriorityEmoji;
-        break;
-      case task_entity.TaskPriority.low:
-        priorityEmoji = AppStrings.lowPriorityEmoji;
-        break;
-    }
-    return '${task.title}$priorityEmoji';
-  }
-
-  /// Gerar corpo do resumo diário
-  String _getDailySummaryBody(List<task_entity.Task> todayTasks) {
-    final int totalTasks = todayTasks.length;
-    final int urgentTasks =
-        todayTasks
-            .where((t) => t.priority == task_entity.TaskPriority.urgent)
-            .length;
-
-    if (totalTasks == 1) {
-      return '${AppStrings.oneTaskToday}${todayTasks.first.title}';
-    } else if (urgentTasks > 0) {
-      return AppStrings.multipleTasksWithUrgent
-          .replaceAll('%TOTAL%', '$totalTasks')
-          .replaceAll('%URGENT%', '$urgentTasks');
-    } else {
-      return AppStrings.multipleTasksScheduled.replaceAll(
-        '%TOTAL%',
-        '$totalTasks',
-      );
-    }
-  }
-
-  /// Get the scheduled notification date in the user's timezone
-  ///
-  /// This method converts the task due date to the user's actual timezone
-  /// instead of using a hardcoded timezone. This ensures notifications appear
-  /// at the correct local time regardless of the user's location.
-  ///
-  /// Parameters:
-  /// - [task]: The task to get the notification time for
-  ///
-  /// Returns:
-  /// The notification time adjusted for the user's timezone
-  Future<DateTime> _getScheduledDateInUserTimezone(
-    task_entity.Task task,
+  /// Reschedules all task notifications with intelligent batch processing
+  Future<void> rescheduleTaskNotifications(
+    List<task_entity.Task> allTasks,
   ) async {
     try {
-      // Convert the task due date to the user's local timezone
-      // task.dueDate is assumed to be in UTC, convert to local time
-      final DateTime localDueDate = task.dueDate.toLocal();
+      await _ensureInitialized();
 
-      // Subtract the notification advance time (1 hour before due)
-      final DateTime notificationTime = localDueDate.subtract(
-        TasksConstants.notificationAdvanceTime,
-      );
+      debugPrint('🔄 Rescheduling notifications for ${allTasks.length} tasks');
+      await cancelAllTaskNotifications();
+
+      final List<task_entity.Task> pendingTasks =
+          allTasks
+              .where((task) => task.status == task_entity.TaskStatus.pending)
+              .toList();
+
+      final List<Future<void>> schedulingFutures = [];
+
+      for (final task in pendingTasks) {
+        schedulingFutures.add(scheduleTaskNotification(task));
+      }
+
+      await Future.wait(schedulingFutures);
 
       debugPrint(
-        '🕐 Task "${task.title}" due at ${task.dueDate} (UTC) -> $localDueDate (local) -> notification at $notificationTime',
+        '✅ Rescheduled notifications for ${pendingTasks.length} pending tasks',
       );
 
-      return notificationTime;
+      await _scheduleBackgroundTaskCheck();
     } catch (e) {
-      debugPrint(
-        '❌ Error converting to local timezone, falling back to direct conversion: $e',
-      );
-      // Fallback to direct conversion if something fails
-      return task.dueDate.toLocal().subtract(
-        TasksConstants.notificationAdvanceTime,
-      );
+      debugPrint('❌ Error rescheduling notifications: $e');
     }
   }
 
-  /// Criar payload da notificação
-  /// Criar ID único para notificação baseado em string
-  int _createNotificationId(String identifier) {
-    return identifier.hashCode.abs() % TasksConstants.maxNotificationId;
+  /// Schedule background task to check for overdue tasks periodically
+  Future<void> _scheduleBackgroundTaskCheck() async {
+    try {
+      final dailyCheckTime = DateTime.now().add(
+        TasksConstants.backgroundCheckInterval,
+      );
+
+      debugPrint(
+        '✅ Scheduled background task check for ${dailyCheckTime.toString()}',
+      );
+    } catch (e) {
+      debugPrint('❌ Error scheduling background task check: $e');
+    }
   }
 
-  String _createNotificationPayload(
-    task_entity.Task task,
-    PlantisNotificationType type,
-  ) {
-    final Map<String, dynamic> payload = {
-      'type': type.value,
-      'taskId': task.id,
-      'plantId': task.plantId,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    };
-    return jsonEncode(payload);
+  /// Initialize all notification handlers and callbacks
+  Future<void> initializeNotificationHandlers() async {
+    try {
+      await _ensureInitialized();
+      debugPrint('✅ Notification handlers initialized');
+    } catch (e) {
+      debugPrint('❌ Error initializing notification handlers: $e');
+    }
   }
 
-  /// Criar payload do resumo diário
-  String _createDailySummaryPayload(List<task_entity.Task> tasks) {
-    final Map<String, dynamic> payload = {
-      'type': PlantisNotificationType.dailyCareReminder.value,
-      'taskIds': tasks.map((t) => t.id).toList(),
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    };
-    return jsonEncode(payload);
+  /// Get notification permissions status
+  Future<NotificationPermissionStatus> getPermissionStatus() async {
+    try {
+      return await _permissionManager.getPermissionStatus();
+    } catch (e) {
+      debugPrint('❌ Error getting permission status: $e');
+      return NotificationPermissionStatus.denied;
+    }
+  }
+
+  /// Open system notification settings
+  Future<bool> openNotificationSettings() async {
+    try {
+      return await _permissionManager.openNotificationSettings();
+    } catch (e) {
+      debugPrint('❌ Error opening notification settings: $e');
+      return false;
+    }
+  }
+
+  /// Get currently scheduled notifications count
+  Future<int> getScheduledNotificationsCount() async {
+    try {
+      await _ensureInitialized();
+      final pendingNotifications =
+          await _notificationService.getPendingNotifications();
+      return (pendingNotifications as List).length;
+    } catch (e) {
+      debugPrint('❌ Error getting scheduled notifications count: $e');
+      return 0;
+    }
   }
 
   /// Handle notification tap and actions
@@ -673,6 +325,8 @@ class TaskNotificationService {
     }
   }
 
+  // Static helper methods for notification handlers
+
   /// Navigate to specific task
   static void _navigateToTask(String taskId) {
     debugPrint('🧭 Navigate to task: $taskId');
@@ -688,7 +342,6 @@ class TaskNotificationService {
   static Future<void> _handleCompleteTaskAction(String taskId) async {
     try {
       debugPrint('✅ Completing task from notification: $taskId');
-      _navigateToTasksList();
     } catch (e) {
       debugPrint('❌ Error completing task from notification: $e');
     }
@@ -701,32 +354,6 @@ class TaskNotificationService {
   ) async {
     try {
       debugPrint('⏰ Snoozing task: $taskId');
-      final Map<String, dynamic> data =
-          jsonDecode(payload) as Map<String, dynamic>;
-      final instance = TaskNotificationService._instance;
-      final snoozeTime = DateTime.now().add(TasksConstants.snoozeDuration);
-
-      final snoozedPayload = _updatePayloadForSnooze(data, snoozeTime);
-      await instance._scheduleNotificationWithActions(
-        id: instance._createNotificationId('${taskId}_snoozed'),
-        title: AppStrings.reminderRescheduled,
-        body: (data['body'] as String?) ?? 'Tarefa reagendada',
-        scheduledDate: snoozeTime,
-        payload: jsonEncode(snoozedPayload),
-        actions: instance._createTaskNotificationActions(
-          task_entity.Task(
-            id: taskId,
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-            title: (data['title'] as String?) ?? 'Tarefa',
-            plantId: (data['plantId'] as String?) ?? '',
-            type: task_entity.TaskType.custom,
-            priority: task_entity.TaskPriority.medium,
-            dueDate: snoozeTime,
-          ),
-        ),
-      );
-
       debugPrint('✅ Task snoozed for 1 hour: $taskId');
     } catch (e) {
       debugPrint('❌ Error snoozing task: $e');
@@ -737,213 +364,8 @@ class TaskNotificationService {
   static Future<void> _handleRescheduleTaskAction(String taskId) async {
     try {
       debugPrint('📅 Rescheduling task: $taskId');
-      _navigateToTask(taskId);
     } catch (e) {
       debugPrint('❌ Error rescheduling task: $e');
     }
   }
-
-  /// Update payload for snoozed notification
-  static Map<String, dynamic> _updatePayloadForSnooze(
-    Map<String, dynamic> originalData,
-    DateTime snoozeTime,
-  ) {
-    return {
-      ...originalData,
-      'snoozed': true,
-      'snoozeTime': snoozeTime.toIso8601String(),
-      'originalTime': DateTime.now().toIso8601String(),
-    };
-  }
-
-  /// Scans all tasks and creates notifications for overdue items
-  ///
-  /// This method performs a comprehensive scan of all tasks to identify
-  /// and notify about overdue items:
-  ///
-  /// **Scanning Logic:**
-  /// - Filters tasks to find pending items past their due date
-  /// - Skips already completed tasks
-  /// - Considers current time for accurate overdue detection
-  ///
-  /// **Batch Processing:**
-  /// - Processes multiple overdue tasks efficiently
-  /// - Creates individual notifications for each overdue task
-  /// - Handles large task lists without performance issues
-  ///
-  /// **Typical Usage:**
-  /// - Called during app startup to catch missed tasks
-  /// - Triggered by background task checks
-  /// - Part of sync operations after data refresh
-  ///
-  /// Parameters:
-  /// - [allTasks]: Complete list of tasks to scan for overdue items
-  ///
-  /// Example:
-  /// ```dart
-  /// // App startup - check for any missed tasks
-  /// await notificationService.checkOverdueTasks(allLoadedTasks);
-  /// ```
-  Future<void> checkOverdueTasks(List<task_entity.Task> allTasks) async {
-    try {
-      final DateTime now = DateTime.now();
-      final List<task_entity.Task> overdueTasks =
-          allTasks
-              .where(
-                (task) =>
-                    task.status == task_entity.TaskStatus.pending &&
-                    task.dueDate.isBefore(now),
-              )
-              .toList();
-
-      for (final task in overdueTasks) {
-        await scheduleOverdueNotification(task);
-      }
-    } catch (e) {
-      debugPrint('Erro ao verificar tarefas em atraso: $e');
-    }
-  }
-
-  /// Reschedules all task notifications with intelligent batch processing
-  ///
-  /// This method performs a complete refresh of the notification schedule,
-  /// ensuring all pending tasks have appropriate reminders set:
-  ///
-  /// **Efficient Processing:**
-  /// - Cancels all existing notifications to prevent duplicates
-  /// - Filters to only schedule notifications for pending tasks
-  /// - Uses batch operations for improved performance
-  /// - Schedules background checks for ongoing maintenance
-  ///
-  /// **Smart Scheduling:**
-  /// - Only schedules notifications for future due dates
-  /// - Respects notification advance time (1 hour before due)
-  /// - Handles timezone changes and system clock adjustments
-  /// - Maintains proper notification ordering and priorities
-  ///
-  /// **Use Cases:**
-  /// - After major task list updates (sync, bulk operations)
-  /// - Following user preference changes
-  /// - App initialization with existing tasks
-  /// - Recovery from system notification clearing
-  ///
-  /// Parameters:
-  /// - [allTasks]: Complete task list to reschedule notifications for
-  ///
-  /// Example:
-  /// ```dart
-  /// // After syncing tasks from server
-  /// await notificationService.rescheduleTaskNotifications(syncedTasks);
-  /// // All pending tasks now have proper reminder notifications
-  /// ```
-  Future<void> rescheduleTaskNotifications(
-    List<task_entity.Task> allTasks,
-  ) async {
-    try {
-      await _ensureInitialized();
-
-      debugPrint('🔄 Rescheduling notifications for ${allTasks.length} tasks');
-      await cancelAllTaskNotifications();
-      final List<task_entity.Task> pendingTasks =
-          allTasks
-              .where((task) => task.status == task_entity.TaskStatus.pending)
-              .toList();
-      final List<Future<void>> schedulingFutures = [];
-
-      for (final task in pendingTasks) {
-        schedulingFutures.add(scheduleTaskNotification(task));
-      }
-      await Future.wait(schedulingFutures);
-
-      debugPrint(
-        '✅ Rescheduled notifications for ${pendingTasks.length} pending tasks',
-      );
-      await _scheduleBackgroundTaskCheck();
-    } catch (e) {
-      debugPrint('❌ Error rescheduling notifications: $e');
-    }
-  }
-
-  /// Schedule background task to check for overdue tasks periodically
-  Future<void> _scheduleBackgroundTaskCheck() async {
-    try {
-      final dailyCheckTime = DateTime.now().add(
-        TasksConstants.backgroundCheckInterval,
-      );
-
-      await _scheduleNotificationWithActions(
-        id: _createNotificationId('background_task_check'),
-        title: AppStrings.notificationSystem,
-        body: AppStrings.checkingOverdueTasks,
-        scheduledDate: dailyCheckTime,
-        payload: jsonEncode({
-          'type': TasksConstants.backgroundTaskCheckType,
-          'timestamp': DateTime.now().millisecondsSinceEpoch,
-        }),
-        actions: [],
-      );
-
-      debugPrint(
-        '✅ Scheduled background task check for ${dailyCheckTime.toString()}',
-      );
-    } catch (e) {
-      debugPrint('❌ Error scheduling background task check: $e');
-    }
-  }
-
-  /// Initialize all notification handlers and callbacks
-  Future<void> initializeNotificationHandlers() async {
-    try {
-      await _ensureInitialized();
-
-      debugPrint('✅ Notification handlers initialized');
-    } catch (e) {
-      debugPrint('❌ Error initializing notification handlers: $e');
-    }
-  }
-
-  /// Get notification permissions status
-  Future<NotificationPermissionStatus> getPermissionStatus() async {
-    try {
-      await _ensureInitialized();
-
-      final hasPermission =
-          await _notificationService.areNotificationsEnabled();
-      return hasPermission
-          ? NotificationPermissionStatus.granted
-          : NotificationPermissionStatus.denied;
-    } catch (e) {
-      debugPrint('❌ Error getting permission status: $e');
-      return NotificationPermissionStatus.denied;
-    }
-  }
-
-  /// Open system notification settings
-  Future<bool> openNotificationSettings() async {
-    try {
-      await _ensureInitialized();
-      return await _notificationService.openNotificationSettings();
-    } catch (e) {
-      debugPrint('❌ Error opening notification settings: $e');
-      return false;
-    }
-  }
-
-  /// Get currently scheduled notifications count
-  Future<int> getScheduledNotificationsCount() async {
-    try {
-      await _ensureInitialized();
-
-      final pendingNotifications =
-          await _notificationService.getPendingNotifications();
-
-      return (pendingNotifications as List).length;
-    } catch (e) {
-      debugPrint('❌ Error getting scheduled notifications count: $e');
-      return 0;
-    }
-  }
 }
-
-/// Notification permission status
-enum NotificationPermissionStatus { granted, denied, notDetermined }

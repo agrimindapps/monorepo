@@ -327,7 +327,7 @@ class TaskRepositoryImpl implements TaskRepository {
         return const Left(local_failures.CacheFailure('Task not found'));
       }
 
-      // Soft delete: marcar como deleted (não remover do HiveBox)
+      // Soft delete: marcar como deleted (não remover do storage)
       final deletedTask = localTask.markAsDeleted();
 
       await _localDataSource.updateTask(deletedTask as TaskModel);

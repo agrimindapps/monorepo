@@ -25,7 +25,7 @@ class SubscriptionStatusNotifier extends _$SubscriptionStatusNotifier {
   }
 
   Future<void> refresh() async {
-    state = const AsyncLoading();
+    state = const AsyncLoading<local_sub.SubscriptionStatus>();
     state = await AsyncValue.guard(() async {
       return const local_sub.SubscriptionStatus(
         isActive: false,

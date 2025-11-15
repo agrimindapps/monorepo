@@ -1,4 +1,6 @@
+import 'package:drift/drift.dart';
 import 'package:core/core.dart';
+import 'package:injectable/injectable.dart';
 import 'tables/plantis_tables.dart';
 
 part 'plantis_database.g.dart';
@@ -45,22 +47,20 @@ part 'plantis_database.g.dart';
 class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
   PlantisDatabase(QueryExecutor e) : super(e);
 
-  /// Factory constructor para Injectable (DI)
-  ///
-  /// Este é o método que GetIt/Injectable usará para criar a instância
-  @factoryMethod
-  factory PlantisDatabase.injectable() {
-    print('🏭 Creating PlantisDatabase via injectable factory');
-    final db = PlantisDatabase.production();
-    print('✅ PlantisDatabase created successfully: ${db.hashCode}');
-    return db;
-  }
-
   /// Versão do schema do banco de dados
   ///
   /// Incrementar quando houver mudanças estruturais nas tabelas
   @override
   int get schemaVersion => 1;
+
+  /// Factory constructor para injeção de dependência (GetIt/Injectable)
+  ///
+  /// Este é o método padrão usado pelo @lazySingleton do Injectable.
+  /// Retorna a instância de produção.
+  @factoryMethod
+  factory PlantisDatabase.injectable() {
+    return PlantisDatabase.production();
+  }
 
   /// Factory constructor para ambiente de produção
   ///
@@ -138,7 +138,7 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
     return (select(plants)
           ..where((p) => p.isDeleted.equals(false))
           ..orderBy([
-            (p) => OrderingTerm(expression: p.name),
+            (p) => OrderingTerm.asc(p.name),
           ]))
         .get();
   }
@@ -148,7 +148,7 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
     return (select(plants)
           ..where((p) => p.spaceId.equals(spaceId) & p.isDeleted.equals(false))
           ..orderBy([
-            (p) => OrderingTerm(expression: p.name),
+            (p) => OrderingTerm.asc(p.name),
           ]))
         .get();
   }
@@ -166,7 +166,7 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
               t.status.equals('pending') &
               t.isDeleted.equals(false))
           ..orderBy([
-            (t) => OrderingTerm(expression: t.dueDate),
+            (t) => OrderingTerm.asc(t.dueDate),
           ]))
         .get();
   }
@@ -176,7 +176,7 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
     return (select(plantsSyncQueue)
           ..where((s) => s.isSynced.equals(false))
           ..orderBy([
-            (s) => OrderingTerm(expression: s.timestamp),
+            (s) => OrderingTerm.asc(s.timestamp),
           ]))
         .get();
   }

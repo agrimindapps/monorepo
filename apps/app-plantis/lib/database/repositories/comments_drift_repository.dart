@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:core/core.dart' hide Column;
 import 'package:injectable/injectable.dart';
 
@@ -44,10 +45,7 @@ class CommentsDriftRepository {
                     c.plantId.equals(localPlantId) & c.isDeleted.equals(false),
               )
               ..orderBy([
-                (c) => OrderingTerm(
-                  expression: c.createdAt,
-                  mode: OrderingMode.desc,
-                ),
+                (c) => OrderingTerm.desc(c.createdAt),
               ]))
             .get();
 
@@ -65,10 +63,7 @@ class CommentsDriftRepository {
               (c) => c.plantId.equals(localPlantId) & c.isDeleted.equals(false),
             )
             ..orderBy([
-              (c) => OrderingTerm(
-                expression: c.createdAt,
-                mode: OrderingMode.desc,
-              ),
+              (c) => OrderingTerm.desc(c.createdAt),
             ]))
           .watch()
           .map((comments) => comments.map(_commentDriftToModel).toList());

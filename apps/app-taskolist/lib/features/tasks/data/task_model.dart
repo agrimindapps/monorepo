@@ -4,7 +4,6 @@ import '../domain/task_entity.dart';
 
 part 'task_model.g.dart';
 
-@HiveType(typeId: 2)
 @JsonSerializable()
 class TaskModel extends TaskEntity {
   const TaskModel({
@@ -32,99 +31,6 @@ class TaskModel extends TaskEntity {
     super.parentTaskId,
     super.notes,
   });
-
-  @HiveField(0)
-  @override
-  String get id => super.id;
-
-  @HiveField(1)
-  @override
-  String get title => super.title;
-
-  @HiveField(2)
-  @override
-  String? get description => super.description;
-
-  @HiveField(3)
-  @override
-  String get listId => super.listId;
-
-  @HiveField(4)
-  @override
-  String get createdById => super.createdById;
-
-  @HiveField(5)
-  @override
-  String? get assignedToId => super.assignedToId;
-
-  @HiveField(6)
-  @override
-  DateTime get createdAt => super.createdAt;
-
-  @HiveField(7)
-  @override
-  DateTime get updatedAt => super.updatedAt;
-
-  @HiveField(8)
-  @override
-  DateTime? get dueDate => super.dueDate;
-
-  @HiveField(9)
-  @override
-  DateTime? get reminderDate => super.reminderDate;
-
-  @HiveField(10)
-  @override
-  TaskStatus get status => super.status;
-
-  @HiveField(11)
-  @override
-  TaskPriority get priority => super.priority;
-
-  @HiveField(12)
-  @override
-  bool get isStarred => super.isStarred;
-
-  @HiveField(13)
-  @override
-  int get position => super.position;
-
-  @HiveField(14)
-  @override
-  List<String> get tags => super.tags;
-
-  @HiveField(15)
-  @override
-  String? get parentTaskId => super.parentTaskId;
-
-  @HiveField(16)
-  @override
-  String? get notes => super.notes;
-
-  // Sync fields - New fields for BaseSyncEntity support
-  @HiveField(17)
-  @override
-  DateTime? get lastSyncAt => super.lastSyncAt;
-
-  @HiveField(18)
-  @override
-  bool get isDirty => super.isDirty;
-
-  @HiveField(19)
-  @override
-  bool get isDeleted => super.isDeleted;
-
-  @HiveField(20)
-  @override
-  int get version => super.version;
-
-  @HiveField(21)
-  @override
-  String? get userId => super.userId;
-
-  @HiveField(22)
-  @override
-  String? get moduleName => super.moduleName;
 
   factory TaskModel.fromJson(Map<String, dynamic> json) =>
       _$TaskModelFromJson(json);

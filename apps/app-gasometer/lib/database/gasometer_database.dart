@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:core/core.dart';
 import 'package:injectable/injectable.dart';
+import 'package:flutter/foundation.dart';
 import '../core/drift_exports.dart';
 import 'tables/gasometer_tables.dart';
 
@@ -42,13 +43,24 @@ part 'gasometer_database.g.dart';
     AuditTrail,
   ],
 )
-@lazySingleton
 class GasometerDatabase extends _$GasometerDatabase with BaseDriftDatabase {
   GasometerDatabase(QueryExecutor e) : super(e);
 
   /// Factory Injectable
+  /// 
+  /// Retorna null na web para evitar erros WASM do Drift.
+  /// Na web, Firestore deve ser usado como backend.
   @factoryMethod
   factory GasometerDatabase.injectable() {
+    if (kIsWeb) {
+      print('⚠️  [GasometerDatabase] Drift not supported on web - using Firestore');
+      throw UnsupportedError(
+        'GasometerDatabase is not supported on web. '
+        'Use Firestore as the backend instead. '
+        'This factory should not be called on web platform.',
+      );
+    }
+    
     print('🏭 Creating GasometerDatabase via injectable factory');
     final db = GasometerDatabase.production();
     print('✅ GasometerDatabase created successfully: ${db.hashCode}');

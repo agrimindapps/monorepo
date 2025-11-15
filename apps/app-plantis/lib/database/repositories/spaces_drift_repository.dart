@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:core/core.dart' hide Column;
 import 'package:injectable/injectable.dart';
 
@@ -39,9 +40,9 @@ class SpacesDriftRepository {
       firebaseId: Value(model.id), // String ID do Firebase
       name: model.nome,
       description: Value(model.descricao),
-      lightCondition: const Value(null),
-      humidity: const Value(null),
-      averageTemperature: const Value(null),
+      lightCondition: Value(null),
+      humidity: Value(null),
+      averageTemperature: Value(null),
       createdAt: Value(
         model.createdAtMs != null
             ? DateTime.fromMillisecondsSinceEpoch(model.createdAtMs!)
@@ -74,7 +75,7 @@ class SpacesDriftRepository {
     final spaces = await (_db.select(_db.spaces)
           ..where((s) => s.isDeleted.equals(false))
           ..orderBy([
-            (s) => OrderingTerm(expression: s.createdAt, mode: OrderingMode.desc),
+            (s) => OrderingTerm.desc(s.createdAt),
           ]))
         .get();
 
@@ -136,8 +137,8 @@ class SpacesDriftRepository {
           ..where((s) => s.firebaseId.equals(firebaseId)))
         .write(
       SpacesCompanion(
-        isDeleted: const Value(true),
-        isDirty: const Value(true),
+        isDeleted: Value(true),
+        isDirty: Value(true),
         updatedAt: Value(DateTime.now()),
       ),
     );
@@ -166,7 +167,7 @@ class SpacesDriftRepository {
     return (_db.select(_db.spaces)
           ..where((s) => s.isDeleted.equals(false))
           ..orderBy([
-            (s) => OrderingTerm(expression: s.createdAt, mode: OrderingMode.desc),
+            (s) => OrderingTerm.desc(s.createdAt),
           ]))
         .watch()
         .map((spaces) => spaces.map(_spaceDriftToModel).toList());
@@ -197,7 +198,7 @@ class SpacesDriftRepository {
           ..where((s) => s.firebaseId.equals(firebaseId)))
         .write(
       SpacesCompanion(
-        isDirty: const Value(false),
+        isDirty: Value(false),
         lastSyncAt: Value(DateTime.now()),
       ),
     );

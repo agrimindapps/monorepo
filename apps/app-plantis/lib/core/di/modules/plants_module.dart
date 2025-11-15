@@ -1,7 +1,5 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../features/plants/domain/services/plant_task_generator.dart';
-
 abstract class PlantsDIModule {
   static void init(GetIt sl) {
     // PlantsLocalDatasource - auto-registered by @LazySingleton in plants_local_datasource.dart

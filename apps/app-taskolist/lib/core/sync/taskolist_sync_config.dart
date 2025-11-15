@@ -11,7 +11,7 @@ import '../../features/tasks/domain/task_entity.dart';
 /// O sistema usará DataIntegrityService para prevenir duplicação quando:
 /// 1. Usuário cria task offline (ID local temporário)
 /// 2. Task é sincronizada com Firebase (pode receber ID remoto diferente)
-/// 3. DataIntegrityService reconcilia IDs (atualiza HiveBox e referências)
+/// 3. DataIntegrityService reconcilia IDs (atualiza referências de dados)
 ///
 /// **Quando executar ID Reconciliation:**
 /// - Após forceSync manual: `await dataIntegrityService.verifyTaskIntegrity()`

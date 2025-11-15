@@ -28,7 +28,8 @@ import '../../domain/entities/task.dart' as task_entity;
 /// The app bar automatically manages its state and communicates changes
 /// to the TasksProvider for data filtering and the parent widget through
 /// the onFilterChanged callback.
-class TasksAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget {
+class TasksAppBar extends ConsumerStatefulWidget
+    implements PreferredSizeWidget {
   final ValueChanged<TasksFilterType>? onFilterChanged;
 
   const TasksAppBar({super.key, this.onFilterChanged});
@@ -74,7 +75,9 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(TasksConstants.searchDebounceDelay, () {
       if (mounted) {
-        ref.read(tasksNotifierProvider.notifier).searchTasks(_searchController.text);
+        ref
+            .read(tasksNotifierProvider.notifier)
+            .searchTasks(_searchController.text);
       }
     });
   }
@@ -94,14 +97,13 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder:
-          (context) => _FilterBottomSheet(
-            activeFilters: _activeFilters,
-            activeTaskTypes: _activeTaskTypes,
-            activePriorities: _activePriorities,
-            selectedPlantFilter: _selectedPlantFilter,
-            onFiltersChanged: _onFiltersChanged,
-          ),
+      builder: (context) => _FilterBottomSheet(
+        activeFilters: _activeFilters,
+        activeTaskTypes: _activeTaskTypes,
+        activePriorities: _activePriorities,
+        selectedPlantFilter: _selectedPlantFilter,
+        onFiltersChanged: _onFiltersChanged,
+      ),
     );
   }
 
@@ -124,15 +126,17 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
   }
 
   void _applyAllFilters() {
-    final primaryFilter =
-        _activeFilters.isNotEmpty ? _activeFilters.first : TasksFilterType.all;
+    final primaryFilter = _activeFilters.isNotEmpty
+        ? _activeFilters.first
+        : TasksFilterType.all;
 
-    ref.read(tasksNotifierProvider.notifier).setAdvancedFilters(
-      filter: primaryFilter,
-      plantId: _selectedPlantFilter,
-      taskTypes: _activeTaskTypes,
-      priorities: _activePriorities,
-    );
+    ref
+        .read(tasksNotifierProvider.notifier)
+        .setAdvancedFilters(
+          taskTypes: _activeTaskTypes,
+          priorities: _activePriorities,
+          plantId: _selectedPlantFilter,
+        );
     widget.onFilterChanged?.call(primaryFilter);
   }
 
@@ -143,12 +147,13 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
       _activePriorities.clear();
       _selectedPlantFilter = null;
     });
-    ref.read(tasksNotifierProvider.notifier).setAdvancedFilters(
-      filter: TasksFilterType.all,
-      plantId: null,
-      taskTypes: const [],
-      priorities: const [],
-    );
+    ref
+        .read(tasksNotifierProvider.notifier)
+        .setAdvancedFilters(
+          taskTypes: const [],
+          priorities: const [],
+          plantId: null,
+        );
     widget.onFilterChanged?.call(TasksFilterType.all);
   }
 
@@ -165,8 +170,9 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
     final isDark = theme.brightness == Brightness.dark;
 
     return AppBar(
-      backgroundColor:
-          isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
+      backgroundColor: isDark
+          ? const Color(0xFF000000)
+          : theme.colorScheme.surface,
       elevation: 0,
       title: _showSearchBar ? _buildSearchBar(theme) : _buildTitleRow(theme),
       actions: [
@@ -238,10 +244,9 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
                                       isSelected:
                                           tasksState.currentFilter ==
                                           TasksFilterType.today,
-                                      onTap:
-                                          () => _handleFilterChange(
-                                            TasksFilterType.today,
-                                          ),
+                                      onTap: () => _handleFilterChange(
+                                        TasksFilterType.today,
+                                      ),
                                     ),
                                     const SizedBox(width: 16),
                                     _FilterButton(
@@ -253,10 +258,9 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
                                       isSelected:
                                           tasksState.currentFilter ==
                                           TasksFilterType.upcoming,
-                                      onTap:
-                                          () => _handleFilterChange(
-                                            TasksFilterType.upcoming,
-                                          ),
+                                      onTap: () => _handleFilterChange(
+                                        TasksFilterType.upcoming,
+                                      ),
                                     ),
                                   ],
                                 );
@@ -695,15 +699,14 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children:
-              options.map((option) {
-                final isSelected = selectedItems.contains(option);
-                return _buildFilterChipButton(
-                  getName(option),
-                  isSelected,
-                  () => onToggle(option),
-                );
-              }).toList(),
+          children: options.map((option) {
+            final isSelected = selectedItems.contains(option);
+            return _buildFilterChipButton(
+              getName(option),
+              isSelected,
+              () => onToggle(option),
+            );
+          }).toList(),
         ),
       ],
     );
@@ -733,18 +736,17 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
               horizontal: 16,
               vertical: 12,
             ),
-            suffixIcon:
-                _tempPlantFilter != null
-                    ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        setState(() {
-                          _tempPlantFilter = null;
-                          _plantFilterController.clear();
-                        });
-                      },
-                    )
-                    : null,
+            suffixIcon: _tempPlantFilter != null
+                ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      setState(() {
+                        _tempPlantFilter = null;
+                        _plantFilterController.clear();
+                      });
+                    },
+                  )
+                : null,
           ),
           onChanged: (value) {
             setState(() {
@@ -768,25 +770,22 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color:
-              isSelected
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.surfaceContainerHighest,
+          color: isSelected
+              ? theme.colorScheme.primary
+              : theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color:
-                isSelected
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.outline.withValues(alpha: 0.3),
+            color: isSelected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.outline.withValues(alpha: 0.3),
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color:
-                isSelected
-                    ? theme.colorScheme.onPrimary
-                    : theme.colorScheme.onSurface,
+            color: isSelected
+                ? theme.colorScheme.onPrimary
+                : theme.colorScheme.onSurface,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),

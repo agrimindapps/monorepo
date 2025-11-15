@@ -74,8 +74,8 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
   void _loadAvailableTags() {
     const tasksRequest = GetTasksRequest();
     ref
-        .read(getTasksFutureProvider(tasksRequest).future)
-        .then((tasks) {
+        .read<Future<List<TaskEntity>>>(getTasksFutureProvider(tasksRequest).future)
+        .then((List<TaskEntity> tasks) {
           final tagsSet = <String>{};
           for (final task in tasks) {
             tagsSet.addAll(task.tags);

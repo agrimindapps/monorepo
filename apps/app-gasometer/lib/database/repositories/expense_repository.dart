@@ -8,17 +8,26 @@ import '../tables/gasometer_tables.dart';
 /// Repositório de Despesas usando Drift
 ///
 /// Gerencia operações de CRUD e queries para despesas gerais de veículos
-@lazySingleton
 class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
   ExpenseRepository(this._db);
 
-  final GasometerDatabase _db;
+  final GasometerDatabase? _db;
 
   @override
-  TableInfo<Expenses, Expense> get table => _db.expenses;
+  TableInfo<Expenses, Expense> get table {
+    if (_db == null) {
+      throw UnsupportedError('Drift database is not available on web.');
+    }
+    return _db!.expenses;
+  }
 
   @override
-  GeneratedDatabase get database => _db;
+  GeneratedDatabase get database {
+    if (_db == null) {
+      throw UnsupportedError('Drift database is not available on web.');
+    }
+    return _db!;
+  }
 
   @override
   ExpenseData fromData(Expense data) {
@@ -74,7 +83,8 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
 
   /// Busca despesas de um veículo
   Future<List<ExpenseData>> findByVehicleId(int vehicleId) async {
-    final query = _db.select(_db.expenses)
+    if (_db == null) return [];
+    final query = _db!.select(_db!.expenses)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
       )
@@ -86,7 +96,8 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
 
   /// Stream de despesas de um veículo
   Stream<List<ExpenseData>> watchByVehicleId(int vehicleId) {
-    final query = _db.select(_db.expenses)
+    if (_db == null) return Stream.empty();
+    final query = _db!.select(_db!.expenses)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
       )
@@ -102,7 +113,8 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
     int vehicleId,
     String category,
   ) async {
-    final query = _db.select(_db.expenses)
+    if (_db == null) return [];
+    final query = _db!.select(_db!.expenses)
       ..where(
         (tbl) =>
             tbl.vehicleId.equals(vehicleId) &
@@ -117,7 +129,8 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
 
   /// Stream de despesas por categoria
   Stream<List<ExpenseData>> watchByCategory(int vehicleId, String category) {
-    final query = _db.select(_db.expenses)
+    if (_db == null) return Stream.empty();
+    final query = _db!.select(_db!.expenses)
       ..where(
         (tbl) =>
             tbl.vehicleId.equals(vehicleId) &
@@ -137,10 +150,11 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
     required DateTime startDate,
     required DateTime endDate,
   }) async {
+    if (_db == null) return [];
     final startMs = startDate.millisecondsSinceEpoch;
     final endMs = endDate.millisecondsSinceEpoch;
 
-    final query = _db.select(_db.expenses)
+    final query = _db!.select(_db!.expenses)
       ..where(
         (tbl) =>
             tbl.vehicleId.equals(vehicleId) &
@@ -160,17 +174,18 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
     DateTime? startDate,
     DateTime? endDate,
   }) async {
-    var query = _db.selectOnly(_db.expenses)
-      ..addColumns([_db.expenses.amount.sum()])
+    if (_db == null) return 0.0;
+    var query = _db!.selectOnly(_db!.expenses)
+      ..addColumns([_db!.expenses.amount.sum()])
       ..where(
-        _db.expenses.vehicleId.equals(vehicleId) &
-            _db.expenses.isDeleted.equals(false),
+        _db!.expenses.vehicleId.equals(vehicleId) &
+            _db!.expenses.isDeleted.equals(false),
       );
 
     if (startDate != null) {
       query = query
         ..where(
-          _db.expenses.date.isBiggerOrEqualValue(
+          _db!.expenses.date.isBiggerOrEqualValue(
             startDate.millisecondsSinceEpoch,
           ),
         );
@@ -178,14 +193,14 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
     if (endDate != null) {
       query = query
         ..where(
-          _db.expenses.date.isSmallerOrEqualValue(
+          _db!.expenses.date.isSmallerOrEqualValue(
             endDate.millisecondsSinceEpoch,
           ),
         );
     }
 
     final result = await query.getSingle();
-    return result.read(_db.expenses.amount.sum()) ?? 0.0;
+    return result.read(_db!.expenses.amount.sum()) ?? 0.0;
   }
 
   /// Calcula total de despesas por categoria
@@ -193,34 +208,36 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
     int vehicleId,
     String category,
   ) async {
-    final query = _db.selectOnly(_db.expenses)
-      ..addColumns([_db.expenses.amount.sum()])
+    if (_db == null) return 0.0;
+    final query = _db!.selectOnly(_db!.expenses)
+      ..addColumns([_db!.expenses.amount.sum()])
       ..where(
-        _db.expenses.vehicleId.equals(vehicleId) &
-            _db.expenses.category.equals(category) &
-            _db.expenses.isDeleted.equals(false),
+        _db!.expenses.vehicleId.equals(vehicleId) &
+            _db!.expenses.category.equals(category) &
+            _db!.expenses.isDeleted.equals(false),
       );
 
     final result = await query.getSingle();
-    return result.read(_db.expenses.amount.sum()) ?? 0.0;
+    return result.read(_db!.expenses.amount.sum()) ?? 0.0;
   }
 
   /// Busca estatísticas de despesas por categoria
   Future<Map<String, double>> getExpensesByCategory(int vehicleId) async {
-    final query = _db.selectOnly(_db.expenses)
-      ..addColumns([_db.expenses.category, _db.expenses.amount.sum()])
+    if (_db == null) return {};
+    final query = _db!.selectOnly(_db!.expenses)
+      ..addColumns([_db!.expenses.category, _db!.expenses.amount.sum()])
       ..where(
-        _db.expenses.vehicleId.equals(vehicleId) &
-            _db.expenses.isDeleted.equals(false),
+        _db!.expenses.vehicleId.equals(vehicleId) &
+            _db!.expenses.isDeleted.equals(false),
       )
-      ..groupBy([_db.expenses.category]);
+      ..groupBy([_db!.expenses.category]);
 
     final results = await query.get();
     final map = <String, double>{};
 
     for (final row in results) {
-      final category = row.read(_db.expenses.category);
-      final total = row.read(_db.expenses.amount.sum()) ?? 0.0;
+      final category = row.read(_db!.expenses.category);
+      final total = row.read(_db!.expenses.amount.sum()) ?? 0.0;
       if (category != null && category.isNotEmpty) {
         map[category] = total;
       }
@@ -231,30 +248,32 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
 
   /// Conta total de despesas de um veículo
   Future<int> countByVehicleId(int vehicleId) async {
-    final query = _db.selectOnly(_db.expenses)
-      ..addColumns([_db.expenses.id.count()])
+    if (_db == null) return 0;
+    final query = _db!.selectOnly(_db!.expenses)
+      ..addColumns([_db!.expenses.id.count()])
       ..where(
-        _db.expenses.vehicleId.equals(vehicleId) &
-            _db.expenses.isDeleted.equals(false),
+        _db!.expenses.vehicleId.equals(vehicleId) &
+            _db!.expenses.isDeleted.equals(false),
       );
 
     final result = await query.getSingle();
-    return result.read(_db.expenses.id.count()) ?? 0;
+    return result.read(_db!.expenses.id.count()) ?? 0;
   }
 
   /// Busca categorias distintas de um veículo
   Future<List<String>> findDistinctCategories(int vehicleId) async {
-    final query = _db.selectOnly(_db.expenses, distinct: true)
-      ..addColumns([_db.expenses.category])
+    if (_db == null) return [];
+    final query = _db!.selectOnly(_db!.expenses, distinct: true)
+      ..addColumns([_db!.expenses.category])
       ..where(
-        _db.expenses.vehicleId.equals(vehicleId) &
-            _db.expenses.isDeleted.equals(false),
+        _db!.expenses.vehicleId.equals(vehicleId) &
+            _db!.expenses.isDeleted.equals(false),
       )
-      ..orderBy([OrderingTerm.asc(_db.expenses.category)]);
+      ..orderBy([OrderingTerm.asc(_db!.expenses.category)]);
 
     final results = await query.get();
     return results
-        .map((row) => row.read(_db.expenses.category))
+        .map((row) => row.read(_db!.expenses.category))
         .where((cat) => cat != null && cat.isNotEmpty)
         .cast<String>()
         .toList();
@@ -262,7 +281,8 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
 
   /// Busca despesas mais recentes
   Future<List<ExpenseData>> findRecent(int vehicleId, {int limit = 10}) async {
-    final query = _db.select(_db.expenses)
+    if (_db == null) return [];
+    final query = _db!.select(_db!.expenses)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
       )
@@ -275,7 +295,8 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
 
   /// Busca despesas que precisam ser sincronizadas
   Future<List<ExpenseData>> findDirtyRecords() async {
-    final query = _db.select(_db.expenses)
+    if (_db == null) return [];
+    final query = _db!.select(_db!.expenses)
       ..where((tbl) => tbl.isDirty.equals(true));
 
     final results = await query.get();
@@ -284,10 +305,11 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
 
   /// Marca registros como sincronizados
   Future<void> markAsSynced(List<int> expenseIds) async {
-    await _db.executeTransaction(() async {
+    if (_db == null) return;
+    await _db!.executeTransaction(() async {
       for (final id in expenseIds) {
-        await (_db.update(
-          _db.expenses,
+        await (_db!.update(
+          _db!.expenses,
         )..where((tbl) => tbl.id.equals(id))).write(
           ExpensesCompanion(
             isDirty: const Value(false),
@@ -300,9 +322,10 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
 
   /// Soft delete de uma despesa
   Future<bool> softDelete(int expenseId) async {
+    if (_db == null) return false;
     final rowsAffected =
-        await (_db.update(
-          _db.expenses,
+        await (_db!.update(
+          _db!.expenses,
         )..where((tbl) => tbl.id.equals(expenseId))).write(
           ExpensesCompanion(
             isDeleted: const Value(true),

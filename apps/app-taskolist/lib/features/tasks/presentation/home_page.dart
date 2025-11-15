@@ -81,17 +81,17 @@ class _HomePageState extends ConsumerState<HomePage>
   Future<void> _loadSampleDataIfEmpty() async {
     try {
       const tasksRequest = GetTasksRequest();
-      final tasks = await ref.read(getTasksFutureProvider(tasksRequest).future);
+      final tasks = await ref.read<Future<List<TaskEntity>>>(getTasksFutureProvider(tasksRequest).future);
       if (tasks.isEmpty) {
         final sampleTasks = SampleData.getSampleTasks();
         for (final task in sampleTasks) {
-          await ref.read(taskNotifierProvider.notifier).createTask(task);
+          await ref.read<TaskNotifier>(taskNotifierProvider.notifier).createTask(task);
         }
       }
     } catch (e) {
       final sampleTasks = SampleData.getSampleTasks();
       for (final task in sampleTasks) {
-        await ref.read(taskNotifierProvider.notifier).createTask(task);
+        await ref.read<TaskNotifier>(taskNotifierProvider.notifier).createTask(task);
       }
     }
   }

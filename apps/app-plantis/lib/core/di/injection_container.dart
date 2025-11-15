@@ -2,8 +2,6 @@ import 'package:core/core.dart' hide Column, OfflineData;
 import 'package:core/src/domain/repositories/i_local_storage_repository.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../database/plantis_database.dart';
-
 import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../../features/data_export/data/datasources/local/export_file_generator.dart';
 import '../../features/data_export/data/datasources/local/plants_export_datasource.dart';
@@ -33,11 +31,17 @@ import '../providers/analytics_provider.dart';
 import '../services/data_cleaner_service.dart';
 import '../services/interfaces/i_notification_permission_manager.dart';
 import '../services/interfaces/i_notification_schedule_manager.dart';
+import '../services/interfaces/i_overdue_task_monitor.dart';
+import '../services/interfaces/i_permission_manager.dart';
 import '../services/interfaces/i_plant_notification_manager.dart';
 import '../services/interfaces/i_task_notification_manager.dart';
+import '../services/interfaces/i_task_notification_scheduler.dart';
 import '../services/notification_manager.dart';
+import '../services/notification_permission_manager.dart';
+import '../services/overdue_task_monitor.dart';
 import '../services/plantis_notification_service.dart';
 import '../services/secure_storage_service.dart';
+import '../services/task_notification_scheduler.dart';
 import '../services/task_notification_service.dart';
 import '../services/url_launcher_service.dart';
 import 'injection.dart' as injectable;
@@ -125,14 +129,10 @@ void _initCoreServices({bool firebaseEnabled = false}) {
   sl.registerLazySingleton<IPerformanceRepository>(
     () => _StubPerformanceRepository(),
   );
-  // ⚠️ REMOVED: Hive services no longer exist
-  // sl.registerLazySingleton<IBoxRegistryService>(() => BoxRegistryService());
-  // sl.registerLazySingleton<ILocalStorageRepository>(
-  //   () => HiveStorageService(sl<IBoxRegistryService>()),
-  // );
 
-  // ✅ REGISTER: PlantisDatabase manually (Injectable can't process Drift classes)
-  sl.registerLazySingleton<PlantisDatabase>(() => PlantisDatabase.injectable());
+  // ✅ REGISTER: PlantisDatabase is already registered via @lazySingleton @factoryMethod
+  // in plantis_database.dart and processed by injectable in injection.config.dart
+  // No manual registration needed here!
 
   // ✅ ADDED: Drift-based local storage service
   // TODO: Fix PlantisDatabase type recognition issue
@@ -173,7 +173,24 @@ void _initCoreServices({bool firebaseEnabled = false}) {
   );
   // RateLimiterService is registered via @injectable in injection.config.dart
   sl.registerLazySingleton(() => PlantisNotificationService());
+  
+  // Register specialized notification services with proper dependencies
+  sl.registerLazySingleton<ITaskNotificationScheduler>(
+    () => TaskNotificationScheduler(sl<PlantisNotificationService>()),
+  );
+  sl.registerLazySingleton<IOverdueTaskMonitor>(
+    () => OverdueTaskMonitor(sl<ITaskNotificationScheduler>()),
+  );
+  
+  // Register new SRP-compliant permission manager interface
+  sl.registerLazySingleton<IPermissionManager>(
+    () => NotificationPermissionManager(sl<PlantisNotificationService>()),
+  );
+  
+  // Register orchestrator - it uses the specialized services
   sl.registerLazySingleton(() => TaskNotificationService());
+  
+  // Register NotificationManager for compatibility
   sl.registerLazySingleton(() => NotificationManager());
   sl.registerLazySingleton<ITaskNotificationManager>(
     () => sl<NotificationManager>(),

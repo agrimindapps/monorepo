@@ -1,16 +1,11 @@
 import 'package:core/core.dart' hide Column;
 
 import '../../../features/tasks/data/datasources/remote/task_history_remote_datasource.dart';
-import '../../../features/tasks/data/datasources/remote/tasks_remote_datasource.dart';
-import '../../../features/tasks/data/repositories/tasks_repository_impl.dart';
-import '../../../features/tasks/domain/repositories/tasks_repository.dart';
 import '../../../features/tasks/domain/usecases/add_task_usecase.dart';
 import '../../../features/tasks/domain/usecases/complete_task_usecase.dart';
 import '../../../features/tasks/domain/usecases/complete_task_with_regeneration_usecase.dart';
-import '../../../features/tasks/domain/usecases/generate_initial_tasks_usecase.dart';
 import '../../../features/tasks/domain/usecases/get_tasks_usecase.dart';
 import '../../../features/tasks/domain/usecases/update_task_usecase.dart';
-import '../../services/task_generation_service.dart';
 
 class TasksModule {
   static void init(GetIt sl) {

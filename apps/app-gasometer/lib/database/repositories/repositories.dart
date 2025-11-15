@@ -9,3 +9,4 @@ export 'fuel_supply_repository.dart';
 export 'maintenance_repository.dart';
 export 'expense_repository.dart';
 export 'odometer_reading_repository.dart';
+export 'audit_trail_repository.dart';

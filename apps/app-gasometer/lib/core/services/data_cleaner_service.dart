@@ -5,7 +5,6 @@ import '../../database/gasometer_database.dart';
 
 /// Serviço para limpeza de dados do GasOMeter
 /// Permite limpar tabelas Drift e SharedPreferences de forma segura
-@lazySingleton
 class DataCleanerService {
   DataCleanerService(this._database);
 

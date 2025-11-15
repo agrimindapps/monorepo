@@ -1,4 +1,6 @@
 import '../../domain/entities/comentario.dart';
+import '../../../../database/termostecnicos_database.dart' as db;
+import 'package:drift/drift.dart';
 
 /// Data model for Comentario
 /// Handles conversion between Domain Entity and Drift persistence
@@ -15,6 +17,54 @@ class ComentarioModel extends Comentario {
     required super.pkIdentificador,
   });
 
+  // Default userId for single-user app
+  static const _defaultUserId = 'local_user';
+
+  /// Creates model from Drift entity
+  factory ComentarioModel.fromDrift(db.Comentario driftEntity) {
+    return ComentarioModel(
+      id: driftEntity.id.toString(),
+      createdAt: driftEntity.createdAt,
+      updatedAt: driftEntity.updatedAt ?? driftEntity.createdAt,
+      status: driftEntity.status,
+      idReg: driftEntity.idReg,
+      titulo: driftEntity.titulo,
+      conteudo: driftEntity.conteudo,
+      ferramenta: driftEntity.ferramenta,
+      pkIdentificador: driftEntity.pkIdentificador,
+    );
+  }
+
+  /// Converts to Drift companion for inserts
+  db.ComentariosCompanion toDriftCompanion() {
+    return db.ComentariosCompanion.insert(
+      userId: _defaultUserId,
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      status: Value(status),
+      idReg: idReg,
+      titulo: titulo,
+      conteudo: conteudo,
+      ferramenta: ferramenta,
+      pkIdentificador: pkIdentificador,
+    );
+  }
+
+  /// Converts model to domain entity
+  Comentario toEntity() {
+    return Comentario(
+      id: id,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      status: status,
+      idReg: idReg,
+      titulo: titulo,
+      conteudo: conteudo,
+      ferramenta: ferramenta,
+      pkIdentificador: pkIdentificador,
+    );
+  }
+
   /// Creates model from domain entity
   factory ComentarioModel.fromEntity(Comentario entity) {
     return ComentarioModel(
@@ -27,21 +77,6 @@ class ComentarioModel extends Comentario {
       conteudo: entity.conteudo,
       ferramenta: entity.ferramenta,
       pkIdentificador: entity.pkIdentificador,
-    );
-  }
-
-  /// Converts to domain entity
-  Comentario toEntity() {
-    return Comentario(
-      id: id,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-      status: status,
-      idReg: idReg,
-      titulo: titulo,
-      conteudo: conteudo,
-      ferramenta: ferramenta,
-      pkIdentificador: pkIdentificador,
     );
   }
 

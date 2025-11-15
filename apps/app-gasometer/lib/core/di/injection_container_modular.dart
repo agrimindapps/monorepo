@@ -1,5 +1,6 @@
 import 'package:core/core.dart' show GetIt, InjectionContainer;
 
+import 'database_module.dart';
 import 'di_module.dart';
 import 'injection.dart';
 import 'modules/account_deletion_module.dart';
@@ -33,6 +34,10 @@ class ModularInjectionContainer {
       // This registers all @injectable dependencies from build_runner
       print('📦 Configuring injectable dependencies...');
       await configureDependencies();
+
+      // Register database module conditionally (mobile/desktop only)
+      print('📦 Registering database module...');
+      registerDatabaseModule();
 
       print('📦 Registering core modules...');
       final modules = _createModules(firebaseEnabled: firebaseEnabled);

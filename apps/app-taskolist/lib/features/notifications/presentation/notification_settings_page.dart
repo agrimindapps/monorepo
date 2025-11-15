@@ -29,13 +29,11 @@ class _NotificationSettingsPageState
         foregroundColor: Colors.black87,
       ),
       body: permissionAsync.when(
-        data:
-            (permission) =>
-                _buildContent(context, permission, settings, statsAsync),
+        data: (permission) =>
+            _buildContent(context, permission, settings, statsAsync),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error:
-            (error, stack) =>
-                Center(child: Text('Erro ao carregar permissões: $error')),
+        error: (error, stack) =>
+            Center(child: Text('Erro ao carregar permissões: $error')),
       ),
     );
   }
@@ -161,26 +159,25 @@ class _NotificationSettingsPageState
             const SizedBox(height: 16),
 
             statsAsync.when(
-              data:
-                  (stats) => Column(
-                    children: [
-                      _buildStatRow(
-                        'Notificações pendentes',
-                        stats.totalPending.toString(),
-                      ),
-                      _buildStatRow(
-                        'Lembretes de tarefas',
-                        stats.taskReminders.toString(),
-                      ),
-                      _buildStatRow(
-                        'Alertas de prazo',
-                        stats.taskDeadlines.toString(),
-                      ),
-                    ],
+              data: (stats) => Column(
+                children: [
+                  _buildStatRow(
+                    'Notificações pendentes',
+                    stats.totalPending.toString(),
                   ),
+                  _buildStatRow(
+                    'Lembretes de tarefas',
+                    stats.taskReminders.toString(),
+                  ),
+                  _buildStatRow(
+                    'Alertas de prazo',
+                    stats.taskDeadlines.toString(),
+                  ),
+                ],
+              ),
               loading: () => const Text('Carregando estatísticas...'),
-              error:
-                  (error, stack) => const Text('Erro ao carregar estatísticas'),
+              error: (error, stack) =>
+                  const Text('Erro ao carregar estatísticas'),
             ),
 
             if (!permission.canScheduleExactAlarms) ...[
@@ -269,10 +266,8 @@ class _NotificationSettingsPageState
                   title: const Text('Avisar com antecedência'),
                   subtitle: Text(_formatDuration(settings.deadlineAlertBefore)),
                   trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap:
-                      () => _showDeadlineAlertDialog(
-                        settings.deadlineAlertBefore,
-                      ),
+                  onTap: () =>
+                      _showDeadlineAlertDialog(settings.deadlineAlertBefore),
                 ),
               ],
 
@@ -389,11 +384,9 @@ class _NotificationSettingsPageState
               'Abrir configurações de notificação do sistema',
             ),
             trailing: const Icon(Icons.arrow_forward_ios),
-            onTap:
-                () =>
-                    ref
-                        .read(notificationActionsProvider)
-                        .openNotificationSettings(),
+            onTap: () => ref
+                .read(notificationActionsProvider)
+                .openNotificationSettings(),
           ),
         ],
       ),
@@ -403,168 +396,161 @@ class _NotificationSettingsPageState
   void _showDeadlineAlertDialog(Duration currentDuration) {
     showDialog<dynamic>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Aviso de Prazo'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Avisar com quantas horas de antecedência?'),
-                const SizedBox(height: 16),
-                ...DurationValues.values.map(
-                  (duration) => RadioListTile<Duration>(
-                    title: Text(_formatDuration(duration)),
-                    value: duration,
-                    groupValue: currentDuration,
-                    onChanged: (value) {
-                      if (value != null) {
-                        ref
-                            .read(notificationSettingsProvider.notifier)
-                            .updateDeadlineAlertTime(value);
-                        Navigator.pop(context);
-                      }
-                    },
-                  ),
+      builder: (context) => AlertDialog(
+        title: const Text('Aviso de Prazo'),
+        content: RadioGroup<Duration>(
+          onChanged: (value) {
+            if (value != null) {
+              ref
+                  .read(notificationSettingsProvider.notifier)
+                  .updateDeadlineAlertTime(value);
+              Navigator.pop(context);
+            }
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Avisar com quantas horas de antecedência?'),
+              const SizedBox(height: 16),
+              ...DurationValues.values.map(
+                (duration) => ListTile(
+                  title: Text(_formatDuration(duration)),
+                  leading: Radio<Duration>(value: duration),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+        ),
+      ),
     );
   }
 
   void _showWeeklyReviewTimeDialog(NotificationSettings settings) {
     showDialog<dynamic>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Horário da Revisão Semanal'),
-            content: const Text('Dialog para escolher dia da semana e horário'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Salvar'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Horário da Revisão Semanal'),
+        content: const Text('Dialog para escolher dia da semana e horário'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
           ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
     );
   }
 
   void _showDailyProductivityTimeDialog(NotificationSettings settings) {
     showDialog<dynamic>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Horário do Lembrete'),
-            content: const Text('Dialog para escolher horário'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Salvar'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Horário do Lembrete'),
+        content: const Text('Dialog para escolher horário'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
           ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
     );
   }
 
   void _showPendingNotificationsDialog() {
     showDialog<dynamic>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Notificações Pendentes'),
-            content: SizedBox(
-              width: double.maxFinite,
-              height: 300,
-              child: Consumer(
-                builder: (context, WidgetRef ref, child) {
-                  final pendingAsync = ref.watch(pendingNotificationsProvider);
+      builder: (context) => AlertDialog(
+        title: const Text('Notificações Pendentes'),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 300,
+          child: Consumer(
+            builder: (context, WidgetRef ref, child) {
+              final pendingAsync = ref.watch(pendingNotificationsProvider);
 
-                  return pendingAsync.when(
-                    data: (List<core.PendingNotificationEntity> notifications) {
-                      if (notifications.isEmpty) {
-                        return const Center(
-                          child: Text('Nenhuma notificação pendente'),
-                        );
-                      }
+              return pendingAsync.when(
+                data: (List<core.PendingNotificationEntity> notifications) {
+                  if (notifications.isEmpty) {
+                    return const Center(
+                      child: Text('Nenhuma notificação pendente'),
+                    );
+                  }
 
-                      return ListView.builder(
-                        itemCount: notifications.length,
-                        itemBuilder: (context, index) {
-                          final notification = notifications[index];
-                          return ListTile(
-                            title: Text(notification.title),
-                            subtitle: Text(notification.body),
-                            trailing: Text('ID: ${notification.id}'),
-                          );
-                        },
+                  return ListView.builder(
+                    itemCount: notifications.length,
+                    itemBuilder: (context, index) {
+                      final notification = notifications[index];
+                      return ListTile(
+                        title: Text(notification.title),
+                        subtitle: Text(notification.body),
+                        trailing: Text('ID: ${notification.id}'),
                       );
                     },
-                    loading:
-                        () => const Center(child: CircularProgressIndicator()),
-                    error:
-                        (error, stack) => Center(child: Text('Erro: $error')),
                   );
                 },
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Fechar'),
-              ),
-            ],
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(child: Text('Erro: $error')),
+              );
+            },
           ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Fechar'),
+          ),
+        ],
+      ),
     );
   }
 
   void _showCancelAllDialog() {
     showDialog<dynamic>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Cancelar Todas'),
-            content: const Text(
-              'Tem certeza que deseja cancelar todas as notificações pendentes?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  final navigator = Navigator.of(context);
-                  final scaffoldMessenger = ScaffoldMessenger.of(context);
-                  navigator.pop();
-                  final bool success =
-                      await ref
-                          .read(notificationActionsProvider)
-                          .cancelAllNotifications();
-                  if (mounted) {
-                    scaffoldMessenger.showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          success
-                              ? 'Todas as notificações foram canceladas'
-                              : 'Erro ao cancelar notificações',
-                        ),
-                        backgroundColor: success ? Colors.green : Colors.red,
-                      ),
-                    );
-                  }
-                },
-                child: const Text('Confirmar'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Cancelar Todas'),
+        content: const Text(
+          'Tem certeza que deseja cancelar todas as notificações pendentes?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
           ),
+          TextButton(
+            onPressed: () async {
+              final navigator = Navigator.of(context);
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              navigator.pop();
+              final bool success = await ref
+                  .read(notificationActionsProvider)
+                  .cancelAllNotifications();
+              if (mounted) {
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success
+                          ? 'Todas as notificações foram canceladas'
+                          : 'Erro ao cancelar notificações',
+                    ),
+                    backgroundColor: success ? Colors.green : Colors.red,
+                  ),
+                );
+              }
+            },
+            child: const Text('Confirmar'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -592,6 +578,7 @@ class _NotificationSettingsPageState
     return days[dayOfWeek];
   }
 }
+
 class DurationValues {
   static const values = [
     Duration(minutes: 30),

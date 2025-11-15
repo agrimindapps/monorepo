@@ -71,8 +71,8 @@ class DataGeneratorService {
   /// Obtém estatísticas dos dados gerados
   Future<Map<String, dynamic>> getGeneratedDataStats() async {
     return {
-      'totalHiveBoxes': 7,
-      'totalHiveRecords': _random.nextInt(1000),
+      'totalDriftTables': 7,
+      'totalDriftRecords': _random.nextInt(1000),
       'totalModules': 6,
       'generatedAt': DateTime.now().toIso8601String(),
     };

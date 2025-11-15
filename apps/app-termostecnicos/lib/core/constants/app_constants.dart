@@ -8,8 +8,6 @@ class AppConstants {
   static const String themeKey = 'theme_mode';
   static const String ttsSettingsKey = 'tts_settings';
 
-  // Hive Box Names
-  static const String comentariosBox = 'comentarios_box';
 
   // App Info
   static const String appName = 'Termos Técnicos';

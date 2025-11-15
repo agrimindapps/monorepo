@@ -67,7 +67,7 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
         updatedAt: DateTime.now(),
       );
 
-      await ref.read(taskNotifierProvider.notifier).updateTask(updatedTask);
+      await ref.read<TaskNotifier>(taskNotifierProvider.notifier).updateTask(updatedTask);
 
       if (mounted) {
         setState(() => _isEditing = false);
@@ -119,7 +119,7 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
 
       try {
         await ref
-            .read(taskNotifierProvider.notifier)
+            .read<TaskNotifier>(taskNotifierProvider.notifier)
             .deleteTask(widget.task.id);
 
         if (mounted) {
@@ -235,7 +235,7 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<TaskStatus>(
-                      value: _selectedStatus,
+                      initialValue: _selectedStatus,
                       onChanged:
                           _isEditing
                               ? (status) {
@@ -288,7 +288,7 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<TaskPriority>(
-                      value: _selectedPriority,
+                      initialValue: _selectedPriority,
                       onChanged:
                           _isEditing
                               ? (priority) {

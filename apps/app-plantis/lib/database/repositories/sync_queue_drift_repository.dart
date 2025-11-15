@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:core/core.dart' hide Column;
 import 'package:injectable/injectable.dart';
 
@@ -24,9 +25,9 @@ class SyncQueueDriftRepository {
       data: data ?? '',
       timestamp: now,
       createdAt: now.millisecondsSinceEpoch,
-      attempts: const Value(0),
-      lastAttemptAt: const Value(null),
-      error: const Value(null),
+      attempts: Value(0),
+      lastAttemptAt: Value(null),
+      error: Value(null),
     );
 
     return await _db.into(_db.plantsSyncQueue).insert(companion);
@@ -35,7 +36,7 @@ class SyncQueueDriftRepository {
   Future<List<db.PlantsSyncQueueData>> getPendingItems({int limit = 50}) async {
     return (_db.select(_db.plantsSyncQueue)
           ..where((s) => s.isSynced.equals(false))
-          ..orderBy([(s) => OrderingTerm(expression: s.timestamp)])
+          ..orderBy([(s) => OrderingTerm.asc(s.timestamp)])
           ..limit(limit))
         .get();
   }
@@ -43,7 +44,7 @@ class SyncQueueDriftRepository {
   Future<bool> markAsSynced(int id) async {
     final updated =
         await (_db.update(_db.plantsSyncQueue)..where((s) => s.id.equals(id)))
-            .write(db.PlantsSyncQueueCompanion(isSynced: const Value(true)));
+            .write(db.PlantsSyncQueueCompanion(isSynced: Value(true)));
 
     return updated > 0;
   }
@@ -121,10 +122,7 @@ class SyncQueueDriftRepository {
                 s.isSynced.equals(false),
           )
           ..orderBy([
-            (s) => OrderingTerm(
-              expression: s.lastAttemptAt,
-              mode: OrderingMode.desc,
-            ),
+            (s) => OrderingTerm.desc(s.lastAttemptAt),
           ])
           ..limit(limit))
         .get();
@@ -134,7 +132,7 @@ class SyncQueueDriftRepository {
   Stream<List<db.PlantsSyncQueueData>> watchPendingItems({int limit = 50}) {
     return (_db.select(_db.plantsSyncQueue)
           ..where((s) => s.isSynced.equals(false))
-          ..orderBy([(s) => OrderingTerm(expression: s.timestamp)])
+          ..orderBy([(s) => OrderingTerm.asc(s.timestamp)])
           ..limit(limit))
         .watch();
   }

@@ -37,7 +37,7 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
 
       try {
         await ref
-            .read(taskNotifierProvider.notifier)
+            .read<TaskNotifier>(taskNotifierProvider.notifier)
             .createTask(
               TaskEntity(
                 id: FirebaseFirestore.instance.collection('_').doc().id,

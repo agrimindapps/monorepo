@@ -665,19 +665,65 @@ class TasksRepositoryImpl implements TasksRepository {
       );
     }
   }
+
+  /// ISP: Search tasks by query
+  @override
+  Future<Either<Failure, List<Task>>> searchTasks(String query) async {
+    final result = await getTasks();
+    return result.fold(
+      (failure) => Left(failure),
+      (tasks) => Right(tasks
+          .where((t) =>
+              t.title.toLowerCase().contains(query.toLowerCase()) ||
+              (t.description?.toLowerCase().contains(query.toLowerCase()) ?? false))
+          .toList()),
+    );
+  }
+
+  /// ISP: Filter tasks by plant ID
+  @override
+  Future<Either<Failure, List<Task>>> filterByPlantId(String plantId) =>
+      getTasksByPlantId(plantId);
+
+  /// ISP: Filter tasks by status
+  @override
+  Future<Either<Failure, List<Task>>> filterByStatus(TaskStatus status) =>
+      getTasksByStatus(status);
+
+  /// ISP: Get statistics
+  @override
+  Future<Either<Failure, Map<String, dynamic>>> getStatistics() async {
+    final result = await getTasks();
+    return result.fold(
+      (failure) => Left(failure),
+      (tasks) {
+        final totalCount = tasks.length;
+        final completedCount =
+            tasks.where((t) => t.status == TaskStatus.completed).length;
+        final pendingCount =
+            tasks.where((t) => t.status == TaskStatus.pending).length;
+        final overdueCount = tasks
+            .where((t) =>
+                t.dueDate.isBefore(DateTime.now()) &&
+                t.status != TaskStatus.completed)
+            .length;
+
+        return Right({
+          'total': totalCount,
+          'completed': completedCount,
+          'pending': pendingCount,
+          'overdue': overdueCount,
+          'completionRate': totalCount > 0 ? completedCount / totalCount * 100 : 0,
+        });
+      },
+    );
+  }
 }
 
 /// ENHANCED FEATURE: Sync strategies based on connection type and quality
 enum SyncStrategy {
-  /// Full sync with all optimizations - for WiFi/Ethernet connections
   aggressive,
-
-  /// Reduced frequency sync - for mobile data connections
   conservative,
-
-  /// Only critical updates - for slow connections
   minimal,
-
-  /// Skip sync - for offline or unstable connections
   disabled,
 }

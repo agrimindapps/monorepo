@@ -1,11 +1,9 @@
-import 'package:hive/hive.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../domain/user_entity.dart';
 
 part 'user_model.g.dart';
 
-@HiveType(typeId: 5)
 @JsonSerializable()
 class UserModel extends UserEntity {
   const UserModel({
@@ -18,38 +16,6 @@ class UserModel extends UserEntity {
     super.isActive,
     super.emailVerified = false,
   });
-
-  @HiveField(0)
-  @override
-  String get id => super.id;
-
-  @HiveField(1)
-  @override
-  String get name => super.name;
-
-  @HiveField(2)
-  @override
-  String get email => super.email;
-
-  @HiveField(3)
-  @override
-  String? get avatarUrl => super.avatarUrl;
-
-  @HiveField(4)
-  @override
-  DateTime get createdAt => super.createdAt;
-
-  @HiveField(5)
-  @override
-  DateTime get updatedAt => super.updatedAt;
-
-  @HiveField(6)
-  @override
-  bool get isActive => super.isActive;
-
-  @HiveField(7)
-  @override
-  bool get emailVerified => super.emailVerified;
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
       _$UserModelFromJson(json);

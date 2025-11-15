@@ -1,29 +1,26 @@
-import 'package:core/core.dart' show Box, Hive;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/theme/theme_mode_enum.dart';
 import 'preferences_local_datasource.dart';
 
 class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
-  static const String _boxName = 'preferences';
   static const String _themeKey = 'theme_mode';
   static const String _firstLaunchKey = 'first_launch';
 
-  Box<dynamic>? _box;
+  SharedPreferences? _prefs;
 
-  Future<Box<dynamic>> get _preferencesBox async {
-    _box ??= await Hive.openBox<dynamic>(_boxName);
-    return _box!;
+  Future<SharedPreferences> get _preferences async {
+    _prefs ??= await SharedPreferences.getInstance();
+    return _prefs!;
   }
 
   @override
   Future<AppThemeMode> getThemeMode() async {
     try {
-      final box = await _preferencesBox;
-      final themeValue =
-          box.get(_themeKey, defaultValue: AppThemeMode.system.persistenceValue)
-              as String? ??
-          AppThemeMode.system.persistenceValue;
+      final prefs = await _preferences;
+      final themeValue = prefs.getString(_themeKey) ?? AppThemeMode.system.persistenceValue;
       return AppThemeMode.fromPersistenceValue(themeValue);
     } catch (e) {
       if (kDebugMode) {
@@ -36,8 +33,8 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
   @override
   Future<void> setThemeMode(AppThemeMode themeMode) async {
     try {
-      final box = await _preferencesBox;
-      await box.put(_themeKey, themeMode.persistenceValue);
+      final prefs = await _preferences;
+      await prefs.setString(_themeKey, themeMode.persistenceValue);
     } catch (e) {
       if (kDebugMode) {
         debugPrint('Erro ao salvar tema: $e');
@@ -48,8 +45,8 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
   @override
   Future<bool> getFirstLaunch() async {
     try {
-      final box = await _preferencesBox;
-      return box.get(_firstLaunchKey, defaultValue: true) as bool? ?? true;
+      final prefs = await _preferences;
+      return prefs.getBool(_firstLaunchKey) ?? true;
     } catch (e) {
       if (kDebugMode) {
         debugPrint('Erro ao verificar primeiro launch: $e');
@@ -61,32 +58,28 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
   @override
   Future<void> setFirstLaunch(bool isFirstLaunch) async {
     try {
-      final box = await _preferencesBox;
-      await box.put(_firstLaunchKey, isFirstLaunch);
+      final prefs = await _preferences;
+      await prefs.setBool(_firstLaunchKey, isFirstLaunch);
     } catch (e) {
       if (kDebugMode) {
         debugPrint('Erro ao salvar primeiro launch: $e');
       }
     }
   }
+  
   Future<void> clearAllPreferences() async {
     try {
-      final box = await _preferencesBox;
-      await box.clear();
+      final prefs = await _preferences;
+      await prefs.clear();
     } catch (e) {
       if (kDebugMode) {
         debugPrint('Erro ao limpar preferências: $e');
       }
     }
   }
+  
   Future<void> close() async {
-    try {
-      await _box?.close();
-      _box = null;
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Erro ao fechar box de preferências: $e');
-      }
-    }
+    // SharedPreferences doesn't need to be closed
+    _prefs = null;
   }
 }

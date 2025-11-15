@@ -23,7 +23,6 @@ enum AuditEventType {
 }
 
 /// Financial Audit Trail Service - Migrated to Drift
-@lazySingleton
 class FinancialAuditTrailService {
   FinancialAuditTrailService(this._repository);
 

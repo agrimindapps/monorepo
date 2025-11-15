@@ -2,7 +2,7 @@
 import 'package:injectable/injectable.dart';
 
 import '../../../../../core/error/exceptions.dart';
-// import '../../../../../database/termostecnicos_database.dart';
+import '../../../../../database/termostecnicos_database.dart' as db;
 import '../../models/comentario_model.dart';
 
 /// Local data source interface for Comentarios
@@ -21,17 +21,19 @@ abstract class ComentariosLocalDataSource {
 /// Implementation of local data source using Drift/SQLite
 @LazySingleton(as: ComentariosLocalDataSource)
 class ComentariosLocalDataSourceImpl implements ComentariosLocalDataSource {
-  // final dynamic _database;
+  final db.TermosTecnicosDatabase _database;
 
   // Default userId for single-user app
   static const _defaultUserId = 'local_user';
 
-  ComentariosLocalDataSourceImpl();
+  ComentariosLocalDataSourceImpl(this._database);
 
   @override
   Future<List<ComentarioModel>> getComentarios() async {
-    // Database not available on web
-    return [];
+    final comentarios = await _database.comentarioDao.getAllComentarios(
+      _defaultUserId,
+    );
+    return comentarios.map((c) => ComentarioModel.fromDrift(c)).toList();
   }
 
   @override

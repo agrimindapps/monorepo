@@ -64,9 +64,10 @@ Future<void> main() async {
       }
     }
 
-    // Sync config only if Firebase is available
+    // Sync config only if Firebase is available AND not on web
     // UNIFIED ENVIRONMENT: Single configuration for all environments
-    if (firebaseInitialized) {
+    // Web platform uses Firestore directly without local sync
+    if (firebaseInitialized && !kIsWeb) {
       print('🔥 [MAIN] ANTES de inicializar GasometerSyncConfig');
       SecureLogger.info(
         'Initializing GasometerSyncConfig (unified environment)',
@@ -76,9 +77,15 @@ Future<void> main() async {
       SecureLogger.info('GasometerSyncConfig initialized successfully');
       await SyncDIModule.initializeSyncService(di.sl);
     } else {
-      SecureLogger.warning(
-        'Sync services not initialized - running in local-only mode',
-      );
+      if (kIsWeb) {
+        SecureLogger.info(
+          'Sync services not initialized - web uses Firestore directly',
+        );
+      } else {
+        SecureLogger.warning(
+          'Sync services not initialized - running in local-only mode',
+        );
+      }
     }
 
     if (firebaseInitialized) {

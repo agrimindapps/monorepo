@@ -48,7 +48,7 @@ class DataIntegrityService {
   /// 1. Usuário cria task offline → ID local (ex: 'local_abc123')
   /// 2. Sync envia ao Firebase → Firebase retorna ID remoto (ex: 'firebase_xyz789')
   /// 3. Este método:
-  ///    - Remove entrada com ID local do HiveBox
+  ///    - Remove entrada com ID local do storage local
   ///    - Mantém apenas entrada com ID remoto
   ///    - Atualiza referências em subtasks (parentTaskId)
   ///
@@ -56,7 +56,7 @@ class DataIntegrityService {
   /// ```dart
   /// // Após sync bem-sucedido
   /// await reconcileTaskId('local_abc123', 'firebase_xyz789');
-  /// // HiveBox agora contém apenas 'firebase_xyz789'
+  /// // Storage agora contém apenas 'firebase_xyz789'
   /// ```
   Future<Either<Failure, void>> reconcileTaskId(String localId, String remoteId) async {
     try {
@@ -150,7 +150,7 @@ class DataIntegrityService {
   // INTEGRITY VERIFICATION
   // ========================================================================
 
-  /// Verifica integridade completa de todas as tasks no HiveBox
+  /// Verifica integridade completa de todas as tasks no storage local
   ///
   /// **Verificações:**
   /// 1. **Orphaned Subtasks**: Subtasks cujo parentTaskId não existe

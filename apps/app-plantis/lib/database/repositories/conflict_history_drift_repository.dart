@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'dart:convert';
 
 import 'package:core/core.dart' hide Column;
@@ -55,7 +56,7 @@ class ConflictHistoryDriftRepository {
     }
 
     query.orderBy([
-      (c) => OrderingTerm(expression: c.occurredAt, mode: OrderingMode.desc),
+      (c) => OrderingTerm.desc(c.occurredAt),
     ]);
 
     final conflicts = await query.get();
@@ -101,10 +102,7 @@ class ConflictHistoryDriftRepository {
         await (_db.select(_db.conflictHistory)
               ..where((c) => c.resolvedAt.isNull())
               ..orderBy([
-                (c) => OrderingTerm(
-                  expression: c.occurredAt,
-                  mode: OrderingMode.desc,
-                ),
+                (c) => OrderingTerm.desc(c.occurredAt),
               ]))
             .get();
 

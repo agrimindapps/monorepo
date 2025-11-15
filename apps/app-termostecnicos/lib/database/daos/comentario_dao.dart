@@ -49,8 +49,9 @@ class ComentarioDao extends DatabaseAccessor<TermosTecnicosDatabase>
 
   /// Update existing comentario
   Future<void> updateComentario(int id, ComentariosCompanion comentario) {
-    return (update(comentarios)..where((tbl) => tbl.id.equals(id)))
-        .write(comentario);
+    return (update(
+      comentarios,
+    )..where((tbl) => tbl.id.equals(id))).write(comentario);
   }
 
   /// Soft delete comentario
@@ -65,8 +66,9 @@ class ComentarioDao extends DatabaseAccessor<TermosTecnicosDatabase>
 
   /// Delete all comentarios for a user (soft delete)
   Future<void> deleteAllComentarios(String userId) {
-    return (update(comentarios)..where((tbl) => tbl.userId.equals(userId)))
-        .write(
+    return (update(
+      comentarios,
+    )..where((tbl) => tbl.userId.equals(userId))).write(
       const ComentariosCompanion(
         isDeleted: Value(true),
         updatedAt: Value.absentIfNull(null),

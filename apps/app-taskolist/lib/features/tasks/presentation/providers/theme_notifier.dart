@@ -47,7 +47,7 @@ class ThemeNotifier extends _$ThemeNotifier {
 
   /// Define novo tema
   Future<void> setThemeMode(AppThemeMode themeMode) async {
-    state = const AsyncValue.loading();
+    state = const AsyncValue<ThemeState>.loading();
 
     state = await AsyncValue.guard(() async {
       await _dataSource.setThemeMode(themeMode);

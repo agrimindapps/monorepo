@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../database/daos/task_dao.dart';
+import '../../../database/taskolist_database.dart';
 import '../domain/task_entity.dart';
 import 'task_local_datasource.dart';
 import 'task_model.dart';
@@ -10,12 +12,12 @@ import 'task_model.dart';
 /// TaskLocalDataSource with in-memory cache for ultra-fast reads
 ///
 /// **Performance:**
-/// - Without cache: ~5ms (Hive read)
-/// - With cache: <1ms (95% reduction)
+/// - Without cache: ~5ms (Drift read)
+/// - With cache: less than 1ms (95% reduction)
 ///
 /// **Cache Strategy:**
-/// 1. Individual tasks: Map<String, TaskModel> (O(1) lookup)
-/// 2. All tasks list: List<TaskModel> (cached query result)
+/// 1. Individual tasks: Map&lt;String, TaskModel&gt; (O(1) lookup)
+/// 2. All tasks list: List&lt;TaskModel&gt; (cached query result)
 /// 3. Invalidation: On any write operation (put, update, delete)
 /// 4. Warmup: On first getTasks() call
 ///
@@ -24,10 +26,12 @@ import 'task_model.dart';
 /// - Auto-cleared on dispose()
 @LazySingleton(as: TaskLocalDataSource)
 class TaskLocalDataSourceImpl implements TaskLocalDataSource {
-  static const String _boxName = 'tasks';
-  Box<TaskModel>? _box;
-  final StreamController<List<TaskModel>> _taskStreamController =
-      StreamController<List<TaskModel>>.broadcast();
+  final TaskolistDatabase _database;
+  late final TaskDao _taskDao;
+
+  TaskLocalDataSourceImpl(this._database) {
+    _taskDao = _database.taskDao;
+  }
 
   // ========================================================================
   // IN-MEMORY CACHE
@@ -47,15 +51,6 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
   int _cacheMisses = 0;
 
   // ========================================================================
-  // HIVE BOX
-  // ========================================================================
-
-  Future<Box<TaskModel>> get _taskBox async {
-    _box ??= await Hive.openBox<TaskModel>(_boxName);
-    return _box!;
-  }
-
-  // ========================================================================
   // CACHE WARMING
   // ========================================================================
 
@@ -63,8 +58,7 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
   Future<void> _warmCache() async {
     if (_cacheWarmed) return;
 
-    final box = await _taskBox;
-    _allTasksCache = box.values.toList();
+    _allTasksCache = await _taskDao.getTasks();
 
     // Populate individual task cache
     for (final task in _allTasksCache!) {
@@ -97,58 +91,42 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
 
   @override
   Future<void> cacheTask(TaskModel task) async {
-    final box = await _taskBox;
-    await box.put(task.id, task);
+    await _taskDao.upsertTask(task);
 
     // Invalidate cache
     _invalidateCache();
-
-    _notifyListeners();
   }
 
   @override
   Future<void> cacheTasks(List<TaskModel> tasks) async {
-    final box = await _taskBox;
-    final taskMap = {for (TaskModel task in tasks) task.id: task};
-    await box.putAll(taskMap);
+    await _taskDao.upsertTasks(tasks);
 
     // Invalidate cache
     _invalidateCache();
-
-    _notifyListeners();
   }
 
   @override
   Future<void> updateTask(TaskModel task) async {
-    final box = await _taskBox;
-    await box.put(task.id, task);
+    await _taskDao.updateTask(task);
 
     // Invalidate cache
     _invalidateCache();
-
-    _notifyListeners();
   }
 
   @override
   Future<void> deleteTask(String id) async {
-    final box = await _taskBox;
-    await box.delete(id);
+    await _taskDao.deleteTask(id);
 
     // Invalidate cache
     _invalidateCache();
-
-    _notifyListeners();
   }
 
   @override
   Future<void> clearCache() async {
-    final box = await _taskBox;
-    await box.clear();
+    await _taskDao.clearAllTasks();
 
     // Invalidate cache
     _invalidateCache();
-
-    _notifyListeners();
   }
 
   // ========================================================================
@@ -166,14 +144,13 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
       return _taskCache[id];
     }
 
-    // Cache miss - read from Hive
+    // Cache miss - read from Drift
     _cacheMisses++;
     if (kDebugMode) {
       debugPrint('[TaskCache] MISS: getTask($id)');
     }
 
-    final box = await _taskBox;
-    final task = box.get(id);
+    final task = await _taskDao.getTaskByFirebaseId(id);
 
     // Update cache if found
     if (task != null) {
@@ -246,35 +223,13 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
     TaskPriority? priority,
     bool? isStarred,
   }) {
-    getTasks(
+    return _taskDao.watchTasks(
       listId: listId,
       userId: userId,
       status: status,
       priority: priority,
       isStarred: isStarred,
-    ).then((tasks) {
-      if (!_taskStreamController.isClosed) {
-        _taskStreamController.add(tasks);
-      }
-    });
-
-    return _taskStreamController.stream.asyncMap((_) async {
-      return await getTasks(
-        listId: listId,
-        userId: userId,
-        status: status,
-        priority: priority,
-        isStarred: isStarred,
-      );
-    });
-  }
-
-  void _notifyListeners() {
-    if (!_taskStreamController.isClosed) {
-      getTasks().then((tasks) {
-        _taskStreamController.add(tasks);
-      });
-    }
+    );
   }
 
   // ========================================================================
@@ -282,40 +237,22 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
   // ========================================================================
 
   Future<int> getTaskCount({String? listId, String? userId}) async {
-    final tasks = await getTasks(listId: listId, userId: userId);
-    return tasks.length;
+    return await _taskDao.getTaskCount(listId: listId, userId: userId);
   }
 
   Future<int> getCompletedTaskCount({String? listId, String? userId}) async {
-    final tasks = await getTasks(
-      listId: listId,
-      userId: userId,
-      status: TaskStatus.completed,
-    );
-    return tasks.length;
+    return await _taskDao.getCompletedTaskCount(listId: listId, userId: userId);
   }
 
   Future<List<TaskModel>> getOverdueTasks({
     String? listId,
     String? userId,
   }) async {
-    final tasks = await getTasks(listId: listId, userId: userId);
-    final now = DateTime.now();
-
-    return tasks
-        .where(
-          (task) =>
-              task.dueDate != null &&
-              task.dueDate!.isBefore(now) &&
-              task.status != TaskStatus.completed &&
-              task.status != TaskStatus.cancelled,
-        )
-        .toList();
+    return await _taskDao.getOverdueTasks(listId: listId, userId: userId);
   }
 
   Future<List<TaskModel>> getTasksByTag(String tag, {String? listId}) async {
-    final tasks = await getTasks(listId: listId);
-    return tasks.where((task) => task.tags.contains(tag)).toList();
+    return await _taskDao.getTasksByTag(tag, listId: listId);
   }
 
   // ========================================================================
@@ -323,9 +260,6 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
   // ========================================================================
 
   Future<void> dispose() async {
-    await _taskStreamController.close();
-    await _box?.close();
-
     // Clear cache
     _taskCache.clear();
     _allTasksCache = null;

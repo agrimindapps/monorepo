@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:core/core.dart' hide Column;
 import 'package:injectable/injectable.dart';
 
@@ -39,7 +40,7 @@ class PlantTasksDriftRepository {
     final tasks =
         await (_db.select(_db.plantTasks)
               ..where((t) => t.isDeleted.equals(false))
-              ..orderBy([(t) => OrderingTerm(expression: t.scheduledDate)]))
+              ..orderBy([(t) => OrderingTerm.asc(t.scheduledDate)]))
             .get();
 
     return tasks.map(_taskDriftToModel).toList();
@@ -51,7 +52,7 @@ class PlantTasksDriftRepository {
               ..where(
                 (t) => t.isDeleted.equals(false) & t.completedDate.isNull(),
               )
-              ..orderBy([(t) => OrderingTerm(expression: t.scheduledDate)]))
+              ..orderBy([(t) => OrderingTerm.asc(t.scheduledDate)]))
             .get();
 
     return tasks.map(_taskDriftToModel).toList();
@@ -64,8 +65,8 @@ class PlantTasksDriftRepository {
         )..where((t) => t.firebaseId.equals(firebaseId))).write(
           db.PlantTasksCompanion(
             completedDate: Value(DateTime.now()),
-            status: const Value('completed'),
-            isDirty: const Value(true),
+            status: Value('completed'),
+            isDirty: Value(true),
             updatedAt: Value(DateTime.now()),
           ),
         );
@@ -95,7 +96,7 @@ class PlantTasksDriftRepository {
                 (t) =>
                     t.plantId.equals(localPlantId) & t.isDeleted.equals(false),
               )
-              ..orderBy([(t) => OrderingTerm(expression: t.scheduledDate)]))
+              ..orderBy([(t) => OrderingTerm.asc(t.scheduledDate)]))
             .get();
 
     return tasks.map(_taskDriftToModel).toList();
@@ -135,8 +136,8 @@ class PlantTasksDriftRepository {
           _db.plantTasks,
         )..where((t) => t.firebaseId.equals(firebaseId))).write(
           db.PlantTasksCompanion(
-            isDeleted: const Value(true),
-            isDirty: const Value(true),
+            isDeleted: Value(true),
+            isDirty: Value(true),
             updatedAt: Value(DateTime.now()),
           ),
         );
@@ -153,8 +154,8 @@ class PlantTasksDriftRepository {
       _db.plantTasks,
     )..where((t) => t.plantId.equals(localPlantId))).write(
       db.PlantTasksCompanion(
-        isDeleted: const Value(true),
-        isDirty: const Value(true),
+        isDeleted: Value(true),
+        isDirty: Value(true),
         updatedAt: Value(DateTime.now()),
       ),
     );
@@ -168,7 +169,7 @@ class PlantTasksDriftRepository {
   Stream<List<PlantTaskModel>> watchPendingPlantTasks() {
     return (_db.select(_db.plantTasks)
           ..where((t) => t.isDeleted.equals(false) & t.completedDate.isNull())
-          ..orderBy([(t) => OrderingTerm(expression: t.scheduledDate)]))
+          ..orderBy([(t) => OrderingTerm.asc(t.scheduledDate)]))
         .watch()
         .map((tasks) => tasks.map(_taskDriftToModel).toList());
   }

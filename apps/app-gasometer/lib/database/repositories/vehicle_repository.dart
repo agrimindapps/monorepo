@@ -8,18 +8,26 @@ import '../tables/gasometer_tables.dart';
 /// Repositório de Veículos usando Drift
 ///
 /// Gerencia todas as operações de CRUD e queries relacionadas a veículos
-/// usando o banco de dados Drift ao invés do Hive.
-@lazySingleton
 class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
   VehicleRepository(this._db);
 
-  final GasometerDatabase _db;
+  final GasometerDatabase? _db;
 
   @override
-  TableInfo<Vehicles, Vehicle> get table => _db.vehicles;
+  TableInfo<Vehicles, Vehicle> get table {
+    if (_db == null) {
+      throw UnsupportedError('Drift database is not available on web.');
+    }
+    return _db!.vehicles;
+  }
 
   @override
-  GeneratedDatabase get database => _db;
+  GeneratedDatabase get database {
+    if (_db == null) {
+      throw UnsupportedError('Drift database is not available on web.');
+    }
+    return _db!;
+  }
 
   @override
   VehicleData fromData(Vehicle data) {
@@ -85,7 +93,8 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Busca veículos do usuário que não foram deletados
   Future<List<VehicleData>> findByUserId(String userId) async {
-    final query = _db.select(_db.vehicles)
+    if (_db == null) return [];
+    final query = _db!.select(_db!.vehicles)
       ..where((tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false))
       ..orderBy([(tbl) => OrderingTerm.asc(tbl.modelo)]);
 
@@ -95,7 +104,8 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Stream de veículos do usuário
   Stream<List<VehicleData>> watchByUserId(String userId) {
-    final query = _db.select(_db.vehicles)
+    if (_db == null) return Stream.empty();
+    final query = _db!.select(_db!.vehicles)
       ..where((tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false))
       ..orderBy([(tbl) => OrderingTerm.asc(tbl.modelo)]);
 
@@ -106,7 +116,8 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Busca veículo pela placa
   Future<VehicleData?> findByPlate(String userId, String placa) async {
-    final query = _db.select(_db.vehicles)
+    if (_db == null) return null;
+    final query = _db!.select(_db!.vehicles)
       ..where(
         (tbl) =>
             tbl.userId.equals(userId) &
@@ -121,7 +132,8 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Busca veículos vendidos
   Future<List<VehicleData>> findSoldVehicles(String userId) async {
-    final query = _db.select(_db.vehicles)
+    if (_db == null) return [];
+    final query = _db!.select(_db!.vehicles)
       ..where(
         (tbl) =>
             tbl.userId.equals(userId) &
@@ -136,7 +148,8 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Busca veículos ativos (não vendidos)
   Future<List<VehicleData>> findActiveVehicles(String userId) async {
-    final query = _db.select(_db.vehicles)
+    if (_db == null) return [];
+    final query = _db!.select(_db!.vehicles)
       ..where(
         (tbl) =>
             tbl.userId.equals(userId) &
@@ -151,7 +164,8 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Stream de veículos ativos
   Stream<List<VehicleData>> watchActiveVehicles(String userId) {
-    final query = _db.select(_db.vehicles)
+    if (_db == null) return Stream.empty();
+    final query = _db!.select(_db!.vehicles)
       ..where(
         (tbl) =>
             tbl.userId.equals(userId) &
@@ -167,23 +181,25 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Conta veículos ativos do usuário
   Future<int> countActiveVehicles(String userId) async {
-    final query = _db.selectOnly(_db.vehicles)
-      ..addColumns([_db.vehicles.id.count()])
+    if (_db == null) return 0;
+    final query = _db!.selectOnly(_db!.vehicles)
+      ..addColumns([_db!.vehicles.id.count()])
       ..where(
-        _db.vehicles.userId.equals(userId) &
-            _db.vehicles.vendido.equals(false) &
-            _db.vehicles.isDeleted.equals(false),
+        _db!.vehicles.userId.equals(userId) &
+            _db!.vehicles.vendido.equals(false) &
+            _db!.vehicles.isDeleted.equals(false),
       );
 
     final result = await query.getSingle();
-    return result.read(_db.vehicles.id.count()) ?? 0;
+    return result.read(_db!.vehicles.id.count()) ?? 0;
   }
 
   /// Atualiza o odômetro atual de um veículo
   Future<bool> updateOdometer(int vehicleId, double newOdometer) async {
+    if (_db == null) return false;
     final rowsAffected =
-        await (_db.update(
-          _db.vehicles,
+        await (_db!.update(
+          _db!.vehicles,
         )..where((tbl) => tbl.id.equals(vehicleId))).write(
           VehiclesCompanion(
             odometroAtual: Value(newOdometer),
@@ -196,9 +212,10 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Marca um veículo como vendido
   Future<bool> markAsSold(int vehicleId, double saleValue) async {
+    if (_db == null) return false;
     final rowsAffected =
-        await (_db.update(
-          _db.vehicles,
+        await (_db!.update(
+          _db!.vehicles,
         )..where((tbl) => tbl.id.equals(vehicleId))).write(
           VehiclesCompanion(
             vendido: const Value(true),
@@ -212,9 +229,10 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Soft delete de um veículo
   Future<bool> softDelete(int vehicleId) async {
+    if (_db == null) return false;
     final rowsAffected =
-        await (_db.update(
-          _db.vehicles,
+        await (_db!.update(
+          _db!.vehicles,
         )..where((tbl) => tbl.id.equals(vehicleId))).write(
           VehiclesCompanion(
             isDeleted: const Value(true),
@@ -227,7 +245,8 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Busca veículos que precisam ser sincronizados
   Future<List<VehicleData>> findDirtyRecords() async {
-    final query = _db.select(_db.vehicles)
+    if (_db == null) return [];
+    final query = _db!.select(_db!.vehicles)
       ..where((tbl) => tbl.isDirty.equals(true));
 
     final results = await query.get();
@@ -236,10 +255,11 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Marca registros como sincronizados
   Future<void> markAsSynced(List<int> vehicleIds) async {
-    await _db.executeTransaction(() async {
+    if (_db == null) return;
+    await _db!.executeTransaction(() async {
       for (final id in vehicleIds) {
-        await (_db.update(
-          _db.vehicles,
+        await (_db!.update(
+          _db!.vehicles,
         )..where((tbl) => tbl.id.equals(id))).write(
           VehiclesCompanion(
             isDirty: const Value(false),
@@ -252,7 +272,8 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Busca veículos por ano
   Future<List<VehicleData>> findByYear(String userId, int year) async {
-    final query = _db.select(_db.vehicles)
+    if (_db == null) return [];
+    final query = _db!.select(_db!.vehicles)
       ..where(
         (tbl) =>
             tbl.userId.equals(userId) &
@@ -267,7 +288,8 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Busca veículos por marca
   Future<List<VehicleData>> findByBrand(String userId, String marca) async {
-    final query = _db.select(_db.vehicles)
+    if (_db == null) return [];
+    final query = _db!.select(_db!.vehicles)
       ..where(
         (tbl) =>
             tbl.userId.equals(userId) &
@@ -282,17 +304,18 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Busca todas as marcas distintas do usuário
   Future<List<String>> findDistinctBrands(String userId) async {
-    final query = _db.selectOnly(_db.vehicles, distinct: true)
-      ..addColumns([_db.vehicles.marca])
+    if (_db == null) return [];
+    final query = _db!.selectOnly(_db!.vehicles, distinct: true)
+      ..addColumns([_db!.vehicles.marca])
       ..where(
-        _db.vehicles.userId.equals(userId) &
-            _db.vehicles.isDeleted.equals(false),
+        _db!.vehicles.userId.equals(userId) &
+            _db!.vehicles.isDeleted.equals(false),
       )
-      ..orderBy([OrderingTerm.asc(_db.vehicles.marca)]);
+      ..orderBy([OrderingTerm.asc(_db!.vehicles.marca)]);
 
     final results = await query.get();
     return results
-        .map((row) => row.read(_db.vehicles.marca))
+        .map((row) => row.read(_db!.vehicles.marca))
         .where((marca) => marca != null && marca.isNotEmpty)
         .cast<String>()
         .toList();
@@ -301,8 +324,7 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
 /// Classe auxiliar para transferência de dados de veículos
 ///
-/// Esta classe serve como intermediária entre o Drift e a camada de domínio,
-/// permitindo uma transição gradual do Hive para o Drift
+/// Esta classe serve como intermediária entre o Drift e a camada de domínio
 class VehicleData {
   const VehicleData({
     required this.id,

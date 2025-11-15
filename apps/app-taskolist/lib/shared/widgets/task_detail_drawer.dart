@@ -81,7 +81,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
         updatedAt: DateTime.now(),
       );
 
-      await ref.read(taskNotifierProvider.notifier).updateTask(updatedTask);
+      await ref.read<TaskNotifier>(taskNotifierProvider.notifier).updateTask(updatedTask);
 
       if (mounted) {
         setState(() => _isEditing = false);
@@ -133,7 +133,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
 
       try {
         await ref
-            .read(taskNotifierProvider.notifier)
+            .read<TaskNotifier>(taskNotifierProvider.notifier)
             .deleteTask(widget.task.id);
 
         if (mounted) {
@@ -185,7 +185,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
         updatedAt: DateTime.now(),
       );
 
-      await ref.read(taskNotifierProvider.notifier).updateTask(updatedTask);
+      await ref.read<TaskNotifier>(taskNotifierProvider.notifier).updateTask(updatedTask);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

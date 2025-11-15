@@ -181,7 +181,7 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
           cleanupType: CleanupType.localOnly,
           message: 'Dados locais anônimos removidos',
           clearedCounts: {
-            'hive_boxes': result['totalClearedBoxes'] as int? ?? 0,
+            'local_storage': result['totalClearedBoxes'] as int? ?? 0,
             'shared_preferences':
                 result['totalClearedPreferences'] as int? ?? 0,
           },

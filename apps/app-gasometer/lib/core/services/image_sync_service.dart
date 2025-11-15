@@ -105,7 +105,7 @@ class ImageSyncService {
   ImageSyncService(this._storageService, this._connectivityService)
     : _firestore = FirebaseFirestore.instance;
 
-  /// Inicializa o serviço (migrado de Hive para memória)
+  /// Inicializa o serviço
   Future<void> initialize() async {
     if (_initialized) return;
 

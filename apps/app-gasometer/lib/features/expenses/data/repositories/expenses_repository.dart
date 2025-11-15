@@ -8,8 +8,7 @@ import '../../domain/entities/expense_entity.dart';
 /// ExpensesRepository migrado para usar UnifiedSyncManager
 ///
 /// ✅ Migração completa:
-/// - ANTES: ~692 linhas com Hive manual, logging, cache customizado
-/// - DEPOIS: ~200 linhas usando UnifiedSyncManager
+/// - Otimizada com UnifiedSyncManager (~200 linhas)
 /// - Redução: ~70% menos código
 ///
 /// Características especiais (dados financeiros):

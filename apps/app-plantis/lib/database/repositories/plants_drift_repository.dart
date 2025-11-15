@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:core/core.dart' hide Column;
 import 'package:injectable/injectable.dart';
 
@@ -75,10 +76,7 @@ class PlantsDriftRepository {
         await (_db.select(_db.plants)
               ..where((p) => p.isDeleted.equals(false))
               ..orderBy([
-                (p) => OrderingTerm(
-                  expression: p.createdAt,
-                  mode: OrderingMode.desc,
-                ),
+                (p) => OrderingTerm.desc(p.createdAt),
               ]))
             .get();
 
@@ -105,7 +103,7 @@ class PlantsDriftRepository {
                 (p) =>
                     p.spaceId.equals(localSpaceId) & p.isDeleted.equals(false),
               )
-              ..orderBy([(p) => OrderingTerm(expression: p.name)]))
+              ..orderBy([(p) => OrderingTerm.asc(p.name)]))
             .get();
 
     return plants.map(_plantDriftToModel).toList();
@@ -124,7 +122,7 @@ class PlantsDriftRepository {
                         p.species.lower().like(searchTerm) |
                         p.notes.lower().like(searchTerm)),
               )
-              ..orderBy([(p) => OrderingTerm(expression: p.name)]))
+              ..orderBy([(p) => OrderingTerm.asc(p.name)]))
             .get();
 
     return plants.map(_plantDriftToModel).toList();
@@ -178,8 +176,8 @@ class PlantsDriftRepository {
           _db.plants,
         )..where((p) => p.firebaseId.equals(firebaseId))).write(
           db.PlantsCompanion(
-            isDeleted: const Value(true),
-            isDirty: const Value(true),
+            isDeleted: Value(true),
+            isDirty: Value(true),
             updatedAt: Value(DateTime.now()),
           ),
         );
@@ -208,8 +206,7 @@ class PlantsDriftRepository {
     return (_db.select(_db.plants)
           ..where((p) => p.isDeleted.equals(false))
           ..orderBy([
-            (p) =>
-                OrderingTerm(expression: p.createdAt, mode: OrderingMode.desc),
+            (p) => OrderingTerm.desc(p.createdAt),
           ]))
         .watch()
         .map((plants) => plants.map(_plantDriftToModel).toList());
@@ -236,7 +233,7 @@ class PlantsDriftRepository {
             ..where(
               (p) => p.spaceId.equals(localSpaceId) & p.isDeleted.equals(false),
             )
-            ..orderBy([(p) => OrderingTerm(expression: p.name)]))
+            ..orderBy([(p) => OrderingTerm.asc(p.name)]))
           .watch()
           .map((plants) => plants.map(_plantDriftToModel).toList());
     });
@@ -259,7 +256,7 @@ class PlantsDriftRepository {
       _db.plants,
     )..where((p) => p.firebaseId.equals(firebaseId))).write(
       db.PlantsCompanion(
-        isDirty: const Value(false),
+        isDirty: Value(false),
         lastSyncAt: Value(DateTime.now()),
       ),
     );

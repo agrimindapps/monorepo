@@ -1,36 +1,107 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 import '../../../features/expenses/data/sync/expense_drift_sync_adapter.dart';
 import '../../../features/fuel/data/sync/fuel_supply_drift_sync_adapter.dart';
 import '../../../features/maintenance/data/sync/maintenance_drift_sync_adapter.dart';
+import '../../../features/odometer/data/sync/odometer_drift_sync_adapter.dart';
 import '../../../features/vehicles/data/sync/vehicle_drift_sync_adapter.dart';
 import '../../services/gasometer_sync_service.dart';
+import '../../services/gasometer_sync_orchestrator.dart';
+import '../../services/sync_push_service.dart';
+import '../../services/sync_pull_service.dart';
+import '../../services/contracts/i_auth_provider.dart';
+import '../../services/contracts/i_analytics_provider.dart';
+import '../../services/providers/firebase_auth_provider.dart';
+import '../../services/providers/firebase_analytics_provider.dart';
+import '../../sync/adapters/sync_adapter_registry.dart';
+import '../../sync/adapters/i_sync_adapter.dart';
 
 /// Módulo de Dependency Injection para sincronização do Gasometer
-/// Registra o GasometerSyncService e seus adapters via Injectable/GetIt
+/// Registra serviços de sync refatorados seguindo SRP:
+/// - SyncPushService: Coordena push dos 5 adapters
+/// - SyncPullService: Coordena pull dos 5 adapters
+/// - GasometerSyncOrchestrator: Orquestra push + pull completa
+/// - GasometerSyncService: Legado (mantido para compatibilidade)
 abstract class SyncDIModule {
   static void init(GetIt sl) {
     if (kDebugMode) {
-      print('📦 Registering GasometerSyncService...');
+      print('📦 Registering Gasometer Sync Services...');
     }
 
     try {
       // Adapters são registrados automaticamente via @lazySingleton (Injectable)
-      // GasometerSyncService também é registrado via @lazySingleton
-      // Apenas validar que estão disponíveis
+      // Validar que estão disponíveis
       sl<VehicleDriftSyncAdapter>();
       sl<FuelSupplyDriftSyncAdapter>();
       sl<MaintenanceDriftSyncAdapter>();
       sl<ExpenseDriftSyncAdapter>();
-      sl<GasometerSyncService>();
+      sl<OdometerDriftSyncAdapter>();
+
+      // Register SyncAdapterRegistry with all adapters
+      sl.registerLazySingleton<SyncAdapterRegistry>(
+        () => SyncAdapterRegistry(
+          adapters: [
+            sl<VehicleDriftSyncAdapter>() as ISyncAdapter,
+            sl<FuelSupplyDriftSyncAdapter>() as ISyncAdapter,
+            sl<MaintenanceDriftSyncAdapter>() as ISyncAdapter,
+            sl<ExpenseDriftSyncAdapter>() as ISyncAdapter,
+            sl<OdometerDriftSyncAdapter>() as ISyncAdapter,
+          ],
+        ),
+      );
+
+      // Register specialized push/pull services (SRP) with registry
+      sl.registerLazySingleton<SyncPushService>(
+        () => SyncPushService(
+          adapterRegistry: sl<SyncAdapterRegistry>(),
+        ),
+      );
+
+      sl.registerLazySingleton<SyncPullService>(
+        () => SyncPullService(
+          adapterRegistry: sl<SyncAdapterRegistry>(),
+        ),
+      );
+
+      // Register orchestrator (coordinates push + pull)
+      sl.registerLazySingleton<GasometerSyncOrchestrator>(
+        () => GasometerSyncOrchestrator(
+          pushService: sl<SyncPushService>(),
+          pullService: sl<SyncPullService>(),
+        ),
+      );
+
+      // Register main GasometerSyncService (delegates to push + pull)
+      sl.registerLazySingleton<GasometerSyncService>(
+        () => GasometerSyncService(
+          pushService: sl<SyncPushService>(),
+          pullService: sl<SyncPullService>(),
+        ),
+      );
+
+      // Register Firebase Auth Provider
+      sl.registerLazySingleton<IAuthProvider>(
+        () => FirebaseAuthProvider(
+          firebaseAuth: FirebaseAuth.instance,
+        ) as IAuthProvider,
+      );
+
+      // Register Firebase Analytics Provider
+      sl.registerLazySingleton<IAnalyticsProvider>(
+        () => FirebaseAnalyticsProvider(
+          firebaseAnalytics: FirebaseAnalytics.instance,
+        ) as IAnalyticsProvider,
+      );
 
       if (kDebugMode) {
-        print('✅ GasometerSyncService and adapters registered successfully');
+        print('✅ Gasometer Sync Services registered successfully');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('⚠️ Failed to register GasometerSyncService: $e');
+        print('⚠️ Failed to register Gasometer Sync Services: $e');
       }
     }
   }

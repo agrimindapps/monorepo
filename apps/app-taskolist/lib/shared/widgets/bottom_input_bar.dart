@@ -63,7 +63,7 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
         status: TaskStatus.pending,
       );
 
-      await ref.read(taskNotifierProvider.notifier).createTask(newTask);
+      await ref.read<TaskNotifier>(taskNotifierProvider.notifier).createTask(newTask);
 
       _controller.clear();
       _focusNode.unfocus();

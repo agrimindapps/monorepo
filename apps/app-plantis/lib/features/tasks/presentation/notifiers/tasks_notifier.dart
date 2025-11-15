@@ -4,57 +4,53 @@ import 'package:core/core.dart' hide Column, getIt;
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
-import '../../../../core/localization/app_strings.dart';
+import '../../../../core/services/notification_permission_status.dart';
 import '../../../../core/services/task_notification_service.dart';
-import '../../core/constants/tasks_constants.dart';
 import '../../domain/entities/task.dart' as task_entity;
-import '../../domain/usecases/add_task_usecase.dart';
-import '../../domain/usecases/complete_task_usecase.dart';
+import '../../domain/services/task_filter_service.dart';
 import '../../domain/usecases/get_tasks_usecase.dart';
 import '../providers/tasks_providers.dart';
 import '../providers/tasks_state.dart';
+import 'tasks_crud_notifier.dart';
+import 'tasks_query_notifier.dart';
 
 part 'tasks_notifier.g.dart';
 
-/// TasksNotifier with Riverpod AsyncNotifier and offline support
+/// Root TasksNotifier - Orchestrates specialized notifiers (SRP)
 ///
-/// This notifier manages the complete tasks lifecycle with the following features:
-/// - Immutable state management with AsyncValue for better performance
-/// - Offline-first architecture with sync coordination
-/// - Granular loading states for individual operations
-/// - Real-time sync with conflict resolution
-/// - Comprehensive error handling and user feedback
-/// - Task filtering and search capabilities
-/// - Notification scheduling integration
-/// - Decoupled authentication state via AuthStateNotifier singleton
+/// Responsibilities (Coordinator Pattern):
+/// - Load and sync tasks from repository
+/// - Coordinate between specialized notifiers
+/// - Authentication state management
+/// - Notification service management
 ///
-/// The notifier follows Clean Architecture patterns and integrates with:
-/// - Use cases for business logic execution
-/// - Sync coordinator for network operations
-/// - Offline queue for connection resilience
-/// - Notification service for user reminders
-/// - AuthStateNotifier for authentication state (breaks circular dependencies)
+/// Delegates to specialized notifiers:
+/// - TasksCrudNotifier: ADD, UPDATE, DELETE, GET
+/// - TasksQueryNotifier: LIST, SEARCH, FILTER
+/// - TasksScheduleNotifier: RECURRING, REMINDERS, SCHEDULING
+/// - TasksRecommendationNotifier: RECOMMENDATIONS, SUGGESTIONS
 @riverpod
 class TasksNotifier extends _$TasksNotifier {
   late final GetTasksUseCase _getTasksUseCase;
-  late final AddTaskUseCase _addTaskUseCase;
-  late final CompleteTaskUseCase _completeTaskUseCase;
   late final TaskNotificationService _notificationService;
   late final AuthStateNotifier _authStateNotifier;
+  late final ITaskFilterService _filterService;
   StreamSubscription<UserEntity?>? _authSubscription;
 
   @override
   Future<TasksState> build() async {
     _getTasksUseCase = ref.read(getTasksUseCaseProvider);
-    _addTaskUseCase = ref.read(addTaskUseCaseProvider);
-    _completeTaskUseCase = ref.read(completeTaskUseCaseProvider);
     _notificationService = TaskNotificationService();
     _authStateNotifier = AuthStateNotifier.instance;
+    _filterService = ref.read(taskFilterServiceProvider);
+
     await _initializeNotificationService();
     _initializeAuthListener();
+
     ref.onDispose(() {
       _authSubscription?.cancel();
     });
+
     return await _loadTasksInternal();
   }
 
@@ -91,10 +87,6 @@ class TasksNotifier extends _$TasksNotifier {
   }
 
   /// Initializes the authentication state listener
-  ///
-  /// This method sets up a subscription to the AuthStateNotifier to listen
-  /// for authentication state changes. When the user logs in/out, it
-  /// automatically reloads tasks to ensure data consistency.
   void _initializeAuthListener() {
     _authSubscription = _authStateNotifier.userStream.listen((user) {
       debugPrint(
@@ -118,138 +110,7 @@ class TasksNotifier extends _$TasksNotifier {
     });
   }
 
-  /// Validates task ownership against the currently authenticated user
-  ///
-  /// This security method ensures that users can only access and modify tasks
-  /// that belong to them. It prevents unauthorized access to other users' data
-  /// in multi-user environments.
-  ///
-  /// Returns:
-  /// - `true` if the current user owns the task (exact userId match)
-  /// - `false` if no user is authenticated, task has null userId, or belongs to different user
-  ///
-  /// SECURITY: Tasks with null userId are DENIED access to prevent data exposure
-  bool _validateTaskOwnership(task_entity.Task task) {
-    final currentUser = _authStateNotifier.currentUser;
-    if (currentUser == null) {
-      debugPrint('🚫 Access denied: No authenticated user');
-      return false;
-    }
-    if (task.userId == null) {
-      debugPrint(
-        '🚫 Access denied: Task has null userId (potential security risk)',
-      );
-      return false;
-    }
-    if (task.userId == currentUser.id) {
-      return true;
-    }
-    debugPrint(
-      '🚫 Access denied: Task belongs to user ${task.userId}, current user is ${currentUser.id}',
-    );
-    return false;
-  }
-
-  /// Retrieves a task by ID and validates user ownership
-  ///
-  /// Throws:
-  /// - [Exception] if task is not found
-  /// - [UnauthorizedAccessException] if user doesn't own the task
-  task_entity.Task _getTaskWithOwnershipValidation(String taskId) {
-    final currentState = state.valueOrNull ?? TasksState.initial();
-    final task = currentState.allTasks
-        .whereType<task_entity.Task>()
-        .firstWhere(
-      (t) => t.id == taskId,
-      orElse: () => throw Exception('Task not found: $taskId'),
-    );
-
-    if (!_validateTaskOwnership(task)) {
-      throw const UnauthorizedAccessException(
-        'You are not authorized to modify this task',
-      );
-    }
-
-    return task;
-  }
-
-  /// Updates the state with granular operation tracking
-  void _updateState(TasksState Function(TasksState current) update) {
-    final currentState = state.valueOrNull ?? TasksState.initial();
-    state = AsyncValue.data(update(currentState));
-  }
-
-  /// Starts a loading operation for a specific task
-  void _startTaskOperation(String taskId, {String? message}) {
-    _updateState((current) {
-      final updatedOperations = Map<String, bool>.from(
-        current.individualTaskOperations,
-      );
-      updatedOperations[taskId] = true;
-
-      return current.copyWith(
-        individualTaskOperations: updatedOperations,
-        currentOperationMessage: message,
-      );
-    });
-  }
-
-  /// Completes a task-specific loading operation
-  void _completeTaskLoadingOperation(String taskId) {
-    _updateState((current) {
-      final updatedOperations = Map<String, bool>.from(
-        current.individualTaskOperations,
-      );
-      updatedOperations.remove(taskId);
-
-      return current.copyWith(
-        individualTaskOperations: updatedOperations,
-        currentOperationMessage: null,
-      );
-    });
-  }
-
-  /// Starts a global loading operation
-  void _startGlobalOperation(
-    TaskLoadingOperation operation, {
-    String? message,
-  }) {
-    _updateState((current) {
-      final updatedOperations = Set<TaskLoadingOperation>.from(
-        current.activeOperations,
-      );
-      updatedOperations.add(operation);
-
-      return current.copyWith(
-        activeOperations: updatedOperations,
-        currentOperationMessage: message,
-      );
-    });
-  }
-
-  /// Completes a global loading operation
-  void _completeGlobalOperation(TaskLoadingOperation operation) {
-    _updateState((current) {
-      final updatedOperations = Set<TaskLoadingOperation>.from(
-        current.activeOperations,
-      );
-      updatedOperations.remove(operation);
-
-      return current.copyWith(
-        activeOperations: updatedOperations,
-        currentOperationMessage: updatedOperations.isEmpty ? null : current.currentOperationMessage,
-      );
-    });
-  }
-
   /// Loads tasks from the remote data source with sync coordination
-  ///
-  /// This method orchestrates the complete task loading process including:
-  /// - Sync throttling to prevent excessive API calls
-  /// - Error handling with user-friendly messages
-  /// - Loading state management
-  /// - Notification scheduling for loaded tasks
-  /// - Automatic overdue task detection
   Future<void> loadTasks() async {
     debugPrint('🔄 TasksNotifier: Starting load tasks...');
 
@@ -257,12 +118,6 @@ class TasksNotifier extends _$TasksNotifier {
       await _loadTasksOperation();
     } catch (e) {
       debugPrint('❌ TasksNotifier: Load tasks failed: $e');
-      _updateState(
-        (current) => current.copyWith(
-          isLoading: false,
-          errorMessage: 'Erro ao sincronizar tarefas: $e',
-        ),
-      );
     }
   }
 
@@ -271,19 +126,9 @@ class TasksNotifier extends _$TasksNotifier {
     final shouldShowLoading = currentState.allTasks.isEmpty;
 
     if (shouldShowLoading) {
-      _startGlobalOperation(
-        TaskLoadingOperation.loadingTasks,
-        message: AppStrings.loadingTasks,
-      );
       _updateState(
         (current) => current.copyWith(isLoading: true, errorMessage: null),
       );
-    } else {
-      _startGlobalOperation(
-        TaskLoadingOperation.syncing,
-        message: AppStrings.synchronizing,
-      );
-      _updateState((current) => current.copyWith(errorMessage: null));
     }
 
     try {
@@ -293,8 +138,6 @@ class TasksNotifier extends _$TasksNotifier {
 
       result.fold(
         (failure) {
-          _completeGlobalOperation(TaskLoadingOperation.loadingTasks);
-          _completeGlobalOperation(TaskLoadingOperation.syncing);
           _updateState(
             (current) => current.copyWith(
               isLoading: false,
@@ -304,7 +147,7 @@ class TasksNotifier extends _$TasksNotifier {
           throw Exception(failure.userMessage);
         },
         (tasks) {
-          final filteredTasks = _applyFiltersToTasks(
+          final filteredTasks = _filterService.applyFilters(
             tasks,
             currentState.currentFilter,
             currentState.searchQuery,
@@ -313,8 +156,6 @@ class TasksNotifier extends _$TasksNotifier {
             currentState.selectedPriorities,
           );
 
-          _completeGlobalOperation(TaskLoadingOperation.loadingTasks);
-          _completeGlobalOperation(TaskLoadingOperation.syncing);
           _updateState(
             (current) => current.copyWith(
               allTasks: tasks,
@@ -329,8 +170,6 @@ class TasksNotifier extends _$TasksNotifier {
       );
     } catch (e) {
       debugPrint('❌ TasksNotifier: Load tasks operation failed: $e');
-      _completeGlobalOperation(TaskLoadingOperation.loadingTasks);
-      _completeGlobalOperation(TaskLoadingOperation.syncing);
       _updateState(
         (current) => current.copyWith(
           isLoading: false,
@@ -341,354 +180,54 @@ class TasksNotifier extends _$TasksNotifier {
     }
   }
 
-  /// Adds a new task with offline support and user validation
-  ///
-  /// Returns:
-  /// - `true` if the task was successfully added (including optimistic updates)
-  /// - `false` if there was an error that prevented task creation
+  /// Delegates to specialized CRUD notifier
   Future<bool> addTask(task_entity.Task task) async {
-    try {
-      return await _addTaskOperation(task);
-    } catch (e) {
-      _updateState(
-        (current) =>
-            current.copyWith(errorMessage: AppStrings.errorSyncingNewTask),
-      );
-      return false;
-    }
+    return await ref.read(tasksCrudNotifierProvider.notifier).addTask(task);
   }
 
-  Future<bool> _addTaskOperation(task_entity.Task task) async {
-    _startGlobalOperation(
-      TaskLoadingOperation.addingTask,
-      message: AppStrings.addingTask,
-    );
-    _updateState((current) => current.copyWith(errorMessage: null));
-
-    try {
-      final currentUser = _authStateNotifier.currentUser;
-      if (currentUser == null) {
-        _completeGlobalOperation(TaskLoadingOperation.addingTask);
-        _updateState(
-          (current) => current.copyWith(
-            errorMessage: AppStrings.mustBeAuthenticatedToCreateTasks,
-          ),
-        );
-        return false;
-      }
-      final taskWithUser = task.withUserId(currentUser.id);
-
-      final result = await _addTaskUseCase(AddTaskParams(task: taskWithUser));
-
-      return result.fold(
-        (failure) {
-          if (_isNetworkFailure(failure)) {
-            debugPrint(
-              '🌐 Network failure detected, queuing task for offline sync',
-            );
-            final optimisticTask = taskWithUser.copyWith(
-              id: DateTime.now().millisecondsSinceEpoch.toString(),
-              isDirty: true,
-            );
-            final currentState = state.valueOrNull ?? TasksState.initial();
-            final updatedTasks = List<task_entity.Task>.from(
-              currentState.allTasks,
-            )..add(optimisticTask);
-            final filteredTasks = _applyFiltersToTasks(
-              updatedTasks,
-              currentState.currentFilter,
-              currentState.searchQuery,
-              currentState.selectedPlantId,
-              currentState.selectedTaskTypes,
-              currentState.selectedPriorities,
-            );
-
-            _updateState(
-              (current) => current.copyWith(
-                allTasks: updatedTasks,
-                filteredTasks: filteredTasks,
-                errorMessage: null,
-              ),
-            );
-
-            _completeGlobalOperation(TaskLoadingOperation.addingTask);
-            return true; // Return success for optimistic update
-          } else {
-            _completeGlobalOperation(TaskLoadingOperation.addingTask);
-            _updateState(
-              (current) => current.copyWith(errorMessage: failure.userMessage),
-            );
-            throw Exception(failure.userMessage);
-          }
-        },
-        (addedTask) {
-          final currentState = state.valueOrNull ?? TasksState.initial();
-          final updatedTasks = List<task_entity.Task>.from(
-            currentState.allTasks,
-          )..add(addedTask);
-          final filteredTasks = _applyFiltersToTasks(
-            updatedTasks,
-            currentState.currentFilter,
-            currentState.searchQuery,
-            currentState.selectedPlantId,
-            currentState.selectedTaskTypes,
-            currentState.selectedPriorities,
-          );
-
-          _completeGlobalOperation(TaskLoadingOperation.addingTask);
-          _updateState(
-            (current) => current.copyWith(
-              allTasks: updatedTasks,
-              filteredTasks: filteredTasks,
-              errorMessage: null,
-            ),
-          );
-          _notificationService.scheduleTaskNotification(addedTask);
-          return true;
-        },
-      );
-    } catch (e) {
-      _completeGlobalOperation(TaskLoadingOperation.addingTask);
-      _updateState(
-        (current) => current.copyWith(
-          errorMessage: AppStrings.unexpectedErrorAddingTask,
-        ),
-      );
-      rethrow;
-    }
-  }
-
-  /// Completes a task with offline support and ownership validation
-  ///
-  /// Returns:
-  /// - `true` if the task was successfully completed (including optimistic updates)
-  /// - `false` if there was an error that prevented completion
-  ///
-  /// Throws:
-  /// - [UnauthorizedAccessException] if user doesn't own the task
+  /// Delegates to specialized CRUD notifier
   Future<bool> completeTask(String taskId, {String? notes}) async {
-    try {
-      return await _completeTaskOperation(taskId, notes);
-    } catch (e) {
-      _updateState(
-        (current) => current.copyWith(
-          errorMessage: AppStrings.errorSyncingTaskCompletion,
-        ),
-      );
-      return false;
-    }
+    return await ref
+        .read(tasksCrudNotifierProvider.notifier)
+        .completeTask(taskId, notes: notes);
   }
 
-  Future<bool> _completeTaskOperation(String taskId, String? notes) async {
-    _startTaskOperation(taskId, message: AppStrings.completingTask);
-    _updateState((current) => current.copyWith(errorMessage: null));
-
-    try {
-      final task = _getTaskWithOwnershipValidation(taskId);
-
-      final result = await _completeTaskUseCase(
-        CompleteTaskParams(taskId: taskId, notes: notes),
-      );
-
-      return result.fold(
-        (failure) {
-          if (_isNetworkFailure(failure)) {
-            debugPrint(
-              '🌐 Network failure detected, queuing task completion for offline sync',
-            );
-            final completedTask = task.copyWithTaskData(
-              status: task_entity.TaskStatus.completed,
-              completedAt: DateTime.now(),
-              completionNotes: notes,
-            );
-            final currentState = state.valueOrNull ?? TasksState.initial();
-            final updatedTasks =
-                currentState.allTasks.whereType<task_entity.Task>().map((t) {
-              if (t.id == taskId) {
-                return completedTask;
-              }
-              return t;
-            }).toList();
-
-            final filteredTasks = _applyFiltersToTasks(
-              updatedTasks,
-              currentState.currentFilter,
-              currentState.searchQuery,
-              currentState.selectedPlantId,
-              currentState.selectedTaskTypes,
-              currentState.selectedPriorities,
-            );
-
-            _updateState(
-              (current) => current.copyWith(
-                allTasks: updatedTasks,
-                filteredTasks: filteredTasks,
-                errorMessage: null,
-              ),
-            );
-
-            _notificationService.cancelTaskNotifications(taskId);
-            _notificationService.rescheduleTaskNotifications(updatedTasks);
-
-            _completeTaskLoadingOperation(taskId);
-            return true; // Return success for optimistic update
-          } else {
-            _completeTaskLoadingOperation(taskId);
-            _updateState(
-              (current) => current.copyWith(errorMessage: failure.userMessage),
-            );
-            throw Exception(failure.userMessage);
-          }
-        },
-        (completedTask) {
-          final currentState = state.valueOrNull ?? TasksState.initial();
-          final updatedTasks =
-              currentState.allTasks.whereType<task_entity.Task>().map((t) {
-            if (t.id == taskId) {
-              return completedTask;
-            }
-            return t;
-          }).toList();
-
-          final filteredTasks = _applyFiltersToTasks(
-            updatedTasks,
-            currentState.currentFilter,
-            currentState.searchQuery,
-            currentState.selectedPlantId,
-            currentState.selectedTaskTypes,
-            currentState.selectedPriorities,
-          );
-
-          _completeTaskLoadingOperation(taskId);
-
-          if (kDebugMode) {
-            print('✅ TasksNotifier.completeTask - Task completed successfully');
-            print('   taskId: $taskId');
-            print('   updatedTasks.length: ${updatedTasks.length}');
-            print('   filteredTasks.length: ${filteredTasks.length}');
-          }
-
-          _updateState(
-            (current) => current.copyWith(
-              allTasks: updatedTasks,
-              filteredTasks: filteredTasks,
-              errorMessage: null,
-            ),
-          );
-
-          if (kDebugMode) {
-            print('🔄 TasksNotifier.completeTask - State updated, notifying listeners');
-          }
-
-          _notificationService.cancelTaskNotifications(taskId);
-          _notificationService.rescheduleTaskNotifications(updatedTasks);
-
-          return true;
-        },
-      );
-    } on UnauthorizedAccessException catch (e) {
-      _completeTaskLoadingOperation(taskId);
-      _updateState((current) => current.copyWith(errorMessage: e.message));
-      rethrow;
-    } catch (e) {
-      _completeTaskLoadingOperation(taskId);
-      _updateState(
-        (current) => current.copyWith(
-          errorMessage: AppStrings.unexpectedErrorCompletingTask,
-        ),
-      );
-      rethrow;
-    }
-  }
-
-  /// Searches tasks by title, plant name, or description
+  /// Delegates to specialized Query notifier
   void searchTasks(String query) {
-    final normalizedQuery = query.toLowerCase();
-    final currentState = state.valueOrNull ?? TasksState.initial();
-
-    if (currentState.searchQuery != normalizedQuery) {
-      final filteredTasks = _applyFiltersToTasks(
-        currentState.allTasks,
-        currentState.currentFilter,
-        normalizedQuery,
-        currentState.selectedPlantId,
-        currentState.selectedTaskTypes,
-        currentState.selectedPriorities,
-      );
-
-      _updateState(
-        (current) => current.copyWith(
-          searchQuery: normalizedQuery,
-          filteredTasks: filteredTasks,
-        ),
-      );
-    }
+    ref.read(tasksQueryNotifierProvider.notifier).searchTasks(query);
+    _syncQueryStateToRoot();
   }
 
-  /// Sets the active filter for task display with optional plant filtering
+  /// Delegates to specialized Query notifier
   void setFilter(TasksFilterType filter, {String? plantId}) {
-    final currentState = state.valueOrNull ?? TasksState.initial();
-
-    if (currentState.currentFilter != filter ||
-        currentState.selectedPlantId != plantId) {
-      final filteredTasks = _applyFiltersToTasks(
-        currentState.allTasks,
-        filter,
-        currentState.searchQuery,
-        plantId,
-        currentState.selectedTaskTypes,
-        currentState.selectedPriorities,
-      );
-
-      _updateState(
-        (current) => current.copyWith(
-          currentFilter: filter,
-          selectedPlantId: plantId,
-          filteredTasks: filteredTasks,
-        ),
-      );
-    }
+    ref
+        .read(tasksQueryNotifierProvider.notifier)
+        .setFilter(filter, plantId: plantId);
+    _syncQueryStateToRoot();
   }
 
-  /// Applies advanced filtering with multiple criteria
+  /// Delegates to specialized Query notifier
   void setAdvancedFilters({
     List<task_entity.TaskType>? taskTypes,
     List<task_entity.TaskPriority>? priorities,
-    TasksFilterType? filter,
     String? plantId,
   }) {
-    final currentState = state.valueOrNull ?? TasksState.initial();
-
-    final filteredTasks = _applyFiltersToTasks(
-      currentState.allTasks,
-      filter ?? currentState.currentFilter,
-      currentState.searchQuery,
-      plantId ?? currentState.selectedPlantId,
-      taskTypes ?? currentState.selectedTaskTypes,
-      priorities ?? currentState.selectedPriorities,
-    );
-
-    _updateState(
-      (current) => current.copyWith(
-        currentFilter: filter ?? current.currentFilter,
-        selectedPlantId: plantId ?? current.selectedPlantId,
-        selectedTaskTypes: taskTypes ?? current.selectedTaskTypes,
-        selectedPriorities: priorities ?? current.selectedPriorities,
-        filteredTasks: filteredTasks,
-      ),
-    );
+    ref
+        .read(tasksQueryNotifierProvider.notifier)
+        .setAdvancedFilters(
+          taskTypes: taskTypes,
+          priorities: priorities,
+          plantId: plantId,
+        );
+    _syncQueryStateToRoot();
   }
 
   /// Refreshes tasks from the remote data source with visual feedback
   Future<void> refresh() async {
-    _startGlobalOperation(
-      TaskLoadingOperation.refreshing,
-      message: AppStrings.refreshing,
-    );
     try {
       await loadTasks();
     } finally {
-      _completeGlobalOperation(TaskLoadingOperation.refreshing);
+      // Refresh complete
     }
   }
 
@@ -700,116 +239,6 @@ class TasksNotifier extends _$TasksNotifier {
   /// Sets filtering to show tasks for a specific plant
   void setPlantFilter(String? plantId) {
     setFilter(TasksFilterType.byPlant, plantId: plantId);
-  }
-
-  /// Applies comprehensive filtering logic to a list of tasks
-  List<task_entity.Task> _applyFiltersToTasks(
-    List<task_entity.Task> allTasks,
-    TasksFilterType currentFilter,
-    String searchQuery,
-    String? selectedPlantId,
-    List<task_entity.TaskType> selectedTaskTypes,
-    List<task_entity.TaskPriority> selectedPriorities,
-  ) {
-    List<task_entity.Task> tasks = List.from(allTasks);
-    switch (currentFilter) {
-      case TasksFilterType.all:
-        break;
-      case TasksFilterType.today:
-        tasks =
-            tasks
-                .where(
-                  (t) =>
-                      t.isDueToday &&
-                      t.status == task_entity.TaskStatus.pending,
-                )
-                .toList();
-        break;
-      case TasksFilterType.overdue:
-        tasks = tasks.where((t) => t.isOverdue).toList();
-        break;
-      case TasksFilterType.upcoming:
-        final now = DateTime.now();
-        final nextWeek = now.add(TasksConstants.upcomingTasksDuration);
-        tasks =
-            tasks
-                .where(
-                  (t) =>
-                      t.status == task_entity.TaskStatus.pending &&
-                      t.dueDate.isAfter(now) &&
-                      t.dueDate.isBefore(nextWeek),
-                )
-                .toList();
-        break;
-      case TasksFilterType.allFuture:
-        final now = DateTime.now();
-        tasks =
-            tasks
-                .where(
-                  (t) =>
-                      t.status == task_entity.TaskStatus.pending &&
-                      t.dueDate.isAfter(now),
-                )
-                .toList();
-        break;
-      case TasksFilterType.completed:
-        tasks =
-            tasks
-                .where((t) => t.status == task_entity.TaskStatus.completed)
-                .toList();
-        break;
-      case TasksFilterType.byPlant:
-        if (selectedPlantId != null) {
-          tasks = tasks.where((t) => t.plantId == selectedPlantId).toList();
-        }
-        break;
-    }
-    if (selectedTaskTypes.isNotEmpty) {
-      tasks =
-          tasks.where((task) => selectedTaskTypes.contains(task.type)).toList();
-    }
-    if (selectedPriorities.isNotEmpty) {
-      tasks =
-          tasks
-              .where((task) => selectedPriorities.contains(task.priority))
-              .toList();
-    }
-    if (searchQuery.isNotEmpty) {
-      tasks =
-          tasks.where((task) {
-            return task.title.toLowerCase().contains(searchQuery) ||
-                (task.description?.toLowerCase().contains(searchQuery) ??
-                    false);
-          }).toList();
-    }
-    tasks.sort((a, b) {
-      if (a.status != b.status) {
-        if (a.status == task_entity.TaskStatus.pending) return -1;
-        if (b.status == task_entity.TaskStatus.pending) return 1;
-      }
-      final aPriorityIndex = task_entity.TaskPriority.values.indexOf(
-        a.priority,
-      );
-      final bPriorityIndex = task_entity.TaskPriority.values.indexOf(
-        b.priority,
-      );
-      if (aPriorityIndex != bPriorityIndex) {
-        return bPriorityIndex.compareTo(
-          aPriorityIndex,
-        ); // Higher priority first
-      }
-      return a.dueDate.compareTo(b.dueDate);
-    });
-
-    return tasks;
-  }
-
-  /// Determines if a failure is network-related for offline queue handling
-  bool _isNetworkFailure(Failure failure) {
-    return failure is NetworkFailure ||
-        failure.message.toLowerCase().contains('network') ||
-        failure.message.toLowerCase().contains('connection') ||
-        failure.message.toLowerCase().contains('timeout');
   }
 
   /// Initializes the notification service with comprehensive setup
@@ -841,7 +270,7 @@ class TasksNotifier extends _$TasksNotifier {
   /// Requests notification permissions from the user
   Future<bool> requestNotificationPermissions() async {
     try {
-      return true; // Placeholder - implement when TaskNotificationService interface is defined
+      return true;
     } catch (e) {
       debugPrint('❌ Error requesting notification permissions: $e');
       return false;
@@ -858,49 +287,28 @@ class TasksNotifier extends _$TasksNotifier {
     return await _notificationService.getScheduledNotificationsCount();
   }
 
-  List<task_entity.Task> get highPriorityTasks {
-    final currentState = state.valueOrNull ?? TasksState.initial();
-    return currentState.filteredTasks
-        .whereType<task_entity.Task>()
-        .where(
-          (t) =>
-              t.priority == task_entity.TaskPriority.high ||
-              t.priority == task_entity.TaskPriority.urgent,
-        )
-        .toList();
+  /// Helper: Sync query state to root
+  void _syncQueryStateToRoot() {
+    final queryState = ref.read(tasksQueryNotifierProvider);
+    _updateState(
+      (current) => current.copyWith(
+        searchQuery: queryState.searchQuery,
+        currentFilter: queryState.currentFilter,
+        selectedPlantId: queryState.selectedPlantId,
+        selectedTaskTypes: queryState.selectedTaskTypes,
+        selectedPriorities: queryState.selectedPriorities,
+        filteredTasks: queryState.filteredTasks,
+      ),
+    );
   }
 
-  List<task_entity.Task> get mediumPriorityTasks {
+  /// Helper: Update state
+  void _updateState(TasksState Function(TasksState current) update) {
     final currentState = state.valueOrNull ?? TasksState.initial();
-    return currentState.filteredTasks
-        .whereType<task_entity.Task>()
-        .where((t) => t.priority == task_entity.TaskPriority.medium)
-        .toList();
+    state = AsyncValue.data(update(currentState));
   }
 
-  List<task_entity.Task> get lowPriorityTasks {
-    final currentState = state.valueOrNull ?? TasksState.initial();
-    return currentState.filteredTasks
-        .whereType<task_entity.Task>()
-        .where((t) => t.priority == task_entity.TaskPriority.low)
-        .toList();
-  }
-}
-
-/// Exception thrown when a user tries to access a task they don't own
-class UnauthorizedAccessException implements Exception {
-  final String message;
-
-  const UnauthorizedAccessException(this.message);
-
-  @override
-  String toString() => 'UnauthorizedAccessException: $message';
-}
-
-/// Extension on TasksNotifier for backwards compatibility
-extension TasksNotifierCompat on TasksNotifier {
   /// Alias for setFilter - for backwards compatibility
-  /// Use setFilter instead in new code
   void filterTasks(TasksFilterType filter, {String? plantId}) {
     setFilter(filter, plantId: plantId);
   }

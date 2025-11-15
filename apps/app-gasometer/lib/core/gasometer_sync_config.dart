@@ -40,7 +40,6 @@ abstract final class GasometerSyncConfig {
   /// Configura o sistema de sincronização para o Gasometer
   /// Configuração unificada com sync frequente para dados financeiros críticos
   /// Firebase Firestore collections: vehicles, fuel, expenses, maintenance, users, subscriptions
-  /// Hive boxes: vehicles, fuel_supplies, expenses, maintenance (sem prefixos)
   static Future<void> initialize() async {
     // FORCE RECOMPILE - version 1.0.1
     print(
@@ -51,8 +50,6 @@ abstract final class GasometerSyncConfig {
     // IMPORTANTE: As boxes precisam estar registradas ANTES do UnifiedSyncManager
     print('🔧 [GasometerSync] Obtendo BoxRegistryService...');
 
-    // Hive boxes removed - all data now in Drift
-    // BoxRegistry no longer needed for gasometer
     print('🔧 [GasometerSync] Drift database handles all local storage');
 
     print('🔧 [GasometerSync] Iniciando UnifiedSyncManager...');

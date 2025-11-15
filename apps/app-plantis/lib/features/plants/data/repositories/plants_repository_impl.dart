@@ -1,14 +1,13 @@
-import 'dart:async';
-
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/data/adapters/network_info_adapter.dart';
 import '../../../../core/interfaces/network_info.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/repositories/plant_comments_repository.dart';
 import '../../domain/repositories/plant_tasks_repository.dart';
 import '../../domain/repositories/plants_repository.dart';
+import '../../domain/services/plant_sync_service.dart';
+import '../../domain/services/plants_connectivity_service.dart';
 import '../datasources/local/plants_local_datasource.dart';
 import '../datasources/remote/plants_remote_datasource.dart';
 import '../models/plant_model.dart';
@@ -22,9 +21,9 @@ class PlantsRepositoryImpl implements PlantsRepository {
     required this.authService,
     required this.taskRepository,
     required this.commentsRepository,
-  }) {
-    _initializeConnectivityMonitoring();
-  }
+    required this.connectivityService,
+    required this.syncService,
+  });
 
   final PlantsLocalDatasource localDatasource;
   final PlantsRemoteDatasource remoteDatasource;
@@ -32,8 +31,8 @@ class PlantsRepositoryImpl implements PlantsRepository {
   final IAuthRepository authService;
   final PlantTasksRepository taskRepository;
   final PlantCommentsRepository commentsRepository;
-  StreamSubscription<bool>? _connectivitySubscription;
-  bool _isMonitoringConnectivity = false;
+  final PlantsConnectivityService connectivityService;
+  final PlantSyncService syncService;
 
   Future<String?> get _currentUserId async {
     return await _getCurrentUserIdWithRetry();
@@ -57,7 +56,9 @@ class PlantsRepositoryImpl implements PlantsRepository {
 
         return null;
       } catch (e) {
-        print('Auth attempt $attempt/$maxRetries failed: $e');
+        if (kDebugMode) {
+          print('Auth attempt $attempt/$maxRetries failed: $e');
+        }
         if (attempt >= maxRetries) {
           return null;
         }
@@ -68,74 +69,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
     return null;
   }
 
-  /// ENHANCED FEATURE: Initialize real-time connectivity monitoring
-  void _initializeConnectivityMonitoring() {
-    try {
-      final enhanced = networkInfo.asEnhanced;
-      if (enhanced == null) {
-        if (kDebugMode) {
-          print(
-            'ℹ️ PlantsRepository: Basic NetworkInfo - real-time monitoring unavailable',
-          );
-        }
-        return;
-      }
-      _connectivitySubscription = enhanced.connectivityStream.listen(
-        _onConnectivityChanged,
-        onError: (Object error) {
-          if (kDebugMode) {
-            print('⚠️ PlantsRepository: Connectivity monitoring error: $error');
-          }
-        },
-      );
-
-      _isMonitoringConnectivity = true;
-
-      if (kDebugMode) {
-        print('✅ PlantsRepository: Real-time connectivity monitoring started');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print(
-          '❌ PlantsRepository: Failed to start connectivity monitoring: $e',
-        );
-      }
-    }
-  }
-
-  /// ENHANCED FEATURE: Handle real-time connectivity changes
-  void _onConnectivityChanged(bool isConnected) async {
-    try {
-      if (kDebugMode) {
-        print(
-          '🔄 PlantsRepository: Connectivity changed - ${isConnected ? 'Online' : 'Offline'}',
-        );
-      }
-
-      if (isConnected) {
-        final userId = await _currentUserId;
-        if (userId != null) {
-          if (kDebugMode) {
-            print(
-              '🚀 PlantsRepository: Connection restored - starting auto-sync',
-            );
-          }
-          _syncPlantsInBackground(userId, connectionRestored: true);
-        }
-      } else {
-        if (kDebugMode) {
-          print(
-            '📱 PlantsRepository: Connection lost - switching to offline mode',
-          );
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ PlantsRepository: Error handling connectivity change: $e');
-      }
-    }
-  }
-
   @override
   Future<Either<Failure, List<Plant>>> getPlants() async {
     try {
@@ -144,8 +77,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
         return const Right([]);
       }
 
-      // Use local datasource for both web and native
-      // UnifiedSyncManager is not being populated correctly in web mode
       final localPlants = await localDatasource.getPlants();
 
       if (kDebugMode) {
@@ -153,7 +84,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
       }
 
       if (await networkInfo.isConnected) {
-        _syncPlantsInBackground(userId);
+        await syncService.syncPlantsInBackground(userId);
       }
 
       return Right(localPlants);
@@ -170,44 +101,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
         UnknownFailure('Erro inesperado ao buscar plantas: ${e.toString()}'),
       );
     }
-  }
-  void _syncPlantsInBackground(
-    String userId, {
-    bool connectionRestored = false,
-  }) {
-    remoteDatasource
-        .getPlants(userId)
-        .then((remotePlants) {
-          final syncType =
-              connectionRestored
-                  ? 'Connection restored sync'
-                  : 'Background sync';
-          if (kDebugMode) {
-            print(
-              '✅ PlantsRepository: $syncType completed - ${remotePlants.length} plants',
-            );
-          }
-          for (final plant in remotePlants) {
-            localDatasource.updatePlant(plant);
-          }
-          if (_isMonitoringConnectivity && connectionRestored) {
-            _logSyncMetrics(remotePlants.length, syncType);
-          }
-        })
-        .catchError((Object e) {
-          if (kDebugMode) {
-            print('⚠️ PlantsRepository: Background sync failed: $e');
-          }
-        });
-  }
-  void _syncSinglePlantInBackground(String plantId, String userId) {
-    remoteDatasource
-        .getPlantById(plantId, userId)
-        .then((remotePlant) {
-          localDatasource.updatePlant(remotePlant);
-        })
-        .catchError((e) {
-        });
   }
 
   @override
@@ -238,7 +131,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
       }
 
       if (await networkInfo.isConnected) {
-        _syncSinglePlantInBackground(id, userId);
+        await syncService.syncSinglePlantInBackground(id, userId);
       }
 
       if (localPlant != null) {
@@ -642,80 +535,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
       return Left(
         UnknownFailure('Erro inesperado ao sincronizar: ${e.toString()}'),
       );
-    }
-  }
-
-  /// ENHANCED FEATURE: Log sync metrics for monitoring and debugging
-  void _logSyncMetrics(int plantsCount, String syncType) {
-    try {
-      final enhanced = networkInfo.asEnhanced;
-      if (enhanced != null) {
-        enhanced.detailedStatus.then((status) {
-          if (status != null && kDebugMode) {
-            print('📊 PlantsRepository Sync Metrics:');
-            print('   Type: $syncType');
-            print('   Plants synced: $plantsCount');
-            print('   Connection: ${status['connectivity_type']}');
-            print('   Timestamp: ${status['timestamp']}');
-          }
-        });
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ PlantsRepository: Error logging sync metrics: $e');
-      }
-    }
-  }
-
-  /// ENHANCED FEATURE: Get current connectivity status for debugging
-  Future<Map<String, dynamic>> getConnectivityStatus() async {
-    try {
-      final enhanced = networkInfo.asEnhanced;
-      if (enhanced != null) {
-        final status = await enhanced.detailedStatus;
-        return {
-          ...?status,
-          'monitoring_active': _isMonitoringConnectivity,
-          'repository': 'PlantsRepository',
-        };
-      } else {
-        final isConnected = await networkInfo.isConnected;
-        return {
-          'is_online': isConnected,
-          'monitoring_active': false,
-          'repository': 'PlantsRepository',
-          'adapter_type': 'basic',
-          'timestamp': DateTime.now().toIso8601String(),
-        };
-      }
-    } catch (e) {
-      return {
-        'error': e.toString(),
-        'monitoring_active': _isMonitoringConnectivity,
-        'repository': 'PlantsRepository',
-        'timestamp': DateTime.now().toIso8601String(),
-      };
-    }
-  }
-
-  /// ENHANCED FEATURE: Cleanup connectivity monitoring resources
-  Future<void> dispose() async {
-    try {
-      if (_connectivitySubscription != null) {
-        await _connectivitySubscription!.cancel();
-        _connectivitySubscription = null;
-        _isMonitoringConnectivity = false;
-
-        if (kDebugMode) {
-          print('✅ PlantsRepository: Connectivity monitoring disposed');
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print(
-          '❌ PlantsRepository: Error disposing connectivity monitoring: $e',
-        );
-      }
     }
   }
 }

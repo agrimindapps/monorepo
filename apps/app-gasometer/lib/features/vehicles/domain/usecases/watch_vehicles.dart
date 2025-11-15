@@ -7,7 +7,7 @@ import '../repositories/vehicle_repository.dart';
 ///
 /// Responsável por:
 /// - Retornar um stream com atualizações automáticas dos veículos
-/// - Integrar com Firebase/Hive para sincronização em tempo real
+/// - Integrar com Firebase para sincronização em tempo real
 /// - Manter a lista de veículos sempre atualizada
 @injectable
 class WatchVehicles {

@@ -1,17 +1,19 @@
 import 'package:core/core.dart';
 
+import '../../database/taskolist_database.dart';
+
 /// Implementação de IAppDataCleaner para app-taskolist
-/// Gerencia limpeza de tasks, categories, settings e cache local
+/// Gerencia limpeza de tasks e dados locais
 @LazySingleton(as: IAppDataCleaner)
 class TaskolistDataCleaner implements IAppDataCleaner {
-  final HiveInterface _hive;
+  final TaskolistDatabase _database;
   final SharedPreferences _prefs;
 
   TaskolistDataCleaner({
-    required HiveInterface hive,
+    required TaskolistDatabase database,
     required SharedPreferences prefs,
-  }) : _hive = hive,
-       _prefs = prefs;
+  })  : _database = database,
+        _prefs = prefs;
 
   @override
   String get appName => 'Taskolist';
@@ -21,13 +23,13 @@ class TaskolistDataCleaner implements IAppDataCleaner {
 
   @override
   String get description =>
-      'Limpeza de tarefas, categorias, configurações e dados locais do Taskolist';
+      'Limpeza de tarefas e dados locais do Taskolist';
 
   @override
   Future<Map<String, dynamic>> clearAllAppData() async {
     final result = <String, dynamic>{
       'success': true,
-      'clearedBoxes': <String>[],
+      'clearedTables': <String>[],
       'clearedPreferences': <String>[],
       'totalRecordsCleared': 0,
       'errors': <String>[],
@@ -35,37 +37,32 @@ class TaskolistDataCleaner implements IAppDataCleaner {
 
     try {
       final statsBefore = await getDataStatsBeforeCleaning();
-      final boxNames = [
-        'tasks',
-        'task_box',
-        'categories',
-        'category_box',
-        'settings',
-        'user_preferences',
-        'task_cache',
-      ];
 
-      for (final boxName in boxNames) {
-        try {
-          if (await _hive.boxExists(boxName)) {
-            await _hive.deleteBoxFromDisk(boxName);
-            (result['clearedBoxes'] as List).add(boxName);
-          }
-        } catch (e) {
-          (result['errors'] as List).add('Failed to clear $boxName: $e');
-          result['success'] = false;
-        }
+      // Clear Drift database tables
+      try {
+        await _database.taskDao.clearAllTasks();
+        (result['clearedTables'] as List).add('tasks');
+      } catch (e) {
+        (result['errors'] as List).add('Failed to clear tasks: $e');
+        result['success'] = false;
       }
+
+      try {
+        await _database.userDao.clearCache();
+        (result['clearedTables'] as List).add('users');
+      } catch (e) {
+        (result['errors'] as List).add('Failed to clear users: $e');
+        result['success'] = false;
+      }
+
+      // Clear SharedPreferences
       final prefsKeys = _prefs.getKeys();
       final appSpecificKeys = prefsKeys.where(
         (key) =>
             key.startsWith('taskolist_') ||
             key.startsWith('task_') ||
-            key.startsWith('category_') ||
             key.startsWith('theme_') ||
-            key.startsWith('notification_') ||
-            key.startsWith('onboarding_') ||
-            key.startsWith('last_sync_'),
+            key.startsWith('notification_'),
       );
 
       for (final key in appSpecificKeys) {
@@ -78,8 +75,8 @@ class TaskolistDataCleaner implements IAppDataCleaner {
       }
 
       result['totalRecordsCleared'] =
-          (result['clearedBoxes'] as List).length +
-          (result['clearedPreferences'] as List).length;
+          (result['clearedTables'] as List).length +
+              (result['clearedPreferences'] as List).length;
 
       result['statsBefore'] = statsBefore;
     } catch (e) {
@@ -94,53 +91,26 @@ class TaskolistDataCleaner implements IAppDataCleaner {
   Future<Map<String, dynamic>> getDataStatsBeforeCleaning() async {
     final stats = <String, dynamic>{
       'totalTasks': 0,
-      'totalCategories': 0,
+      'totalUsers': 0,
       'totalPreferences': 0,
       'totalRecords': 0,
     };
 
     try {
-      if (await _hive.boxExists('tasks') || await _hive.boxExists('task_box')) {
-        try {
-          final tasksBox = await _hive.openBox<dynamic>('tasks');
-          stats['totalTasks'] = tasksBox.length;
-          await tasksBox.close();
-        } catch (e) {
-          try {
-            final tasksBox = await _hive.openBox<dynamic>('task_box');
-            stats['totalTasks'] = tasksBox.length;
-            await tasksBox.close();
-          } catch (_) {
-          }
-        }
-      }
-      if (await _hive.boxExists('categories') ||
-          await _hive.boxExists('category_box')) {
-        try {
-          final categoriesBox = await _hive.openBox<dynamic>('categories');
-          stats['totalCategories'] = categoriesBox.length;
-          await categoriesBox.close();
-        } catch (e) {
-          try {
-            final categoriesBox = await _hive.openBox<dynamic>('category_box');
-            stats['totalCategories'] = categoriesBox.length;
-            await categoriesBox.close();
-          } catch (_) {
-          }
-        }
-      }
-      final prefsKeys = _prefs.getKeys();
-      stats['totalPreferences'] =
-          prefsKeys
-              .where(
-                (key) =>
-                    key.startsWith('taskolist_') || key.startsWith('task_'),
-              )
-              .length;
+      stats['totalTasks'] = await _database.taskDao.getTaskCount();
+      
+      final user = await _database.userDao.getCachedUser();
+      stats['totalUsers'] = user != null ? 1 : 0;
 
-      stats['totalRecords'] =
-          (stats['totalTasks'] as int) +
-          (stats['totalCategories'] as int) +
+      final prefsKeys = _prefs.getKeys();
+      stats['totalPreferences'] = prefsKeys
+          .where(
+            (key) => key.startsWith('taskolist_') || key.startsWith('task_'),
+          )
+          .length;
+
+      stats['totalRecords'] = (stats['totalTasks'] as int) +
+          (stats['totalUsers'] as int) +
           (stats['totalPreferences'] as int);
     } catch (e) {
       stats['error'] = e.toString();
@@ -152,12 +122,12 @@ class TaskolistDataCleaner implements IAppDataCleaner {
   @override
   Future<bool> verifyDataCleanup() async {
     try {
-      final boxNames = ['tasks', 'task_box', 'categories', 'category_box'];
-      for (final boxName in boxNames) {
-        if (await _hive.boxExists(boxName)) {
-          return false;
-        }
-      }
+      final taskCount = await _database.taskDao.getTaskCount();
+      if (taskCount > 0) return false;
+
+      final user = await _database.userDao.getCachedUser();
+      if (user != null) return false;
+
       final prefsKeys = _prefs.getKeys();
       final remainingAppKeys = prefsKeys.where(
         (key) => key.startsWith('taskolist_') || key.startsWith('task_'),
@@ -172,12 +142,12 @@ class TaskolistDataCleaner implements IAppDataCleaner {
   @override
   Future<bool> hasDataToClear() async {
     try {
-      final boxNames = ['tasks', 'task_box', 'categories', 'category_box'];
-      for (final boxName in boxNames) {
-        if (await _hive.boxExists(boxName)) {
-          return true;
-        }
-      }
+      final taskCount = await _database.taskDao.getTaskCount();
+      if (taskCount > 0) return true;
+
+      final user = await _database.userDao.getCachedUser();
+      if (user != null) return true;
+
       final prefsKeys = _prefs.getKeys();
       final hasPrefs = prefsKeys.any(
         (key) => key.startsWith('taskolist_') || key.startsWith('task_'),
@@ -191,7 +161,7 @@ class TaskolistDataCleaner implements IAppDataCleaner {
 
   @override
   List<String> getAvailableCategories() {
-    return ['Tasks', 'Categories', 'Settings', 'Cache', 'Preferences'];
+    return ['Tasks', 'Users', 'Preferences'];
   }
 
   @override
@@ -206,16 +176,12 @@ class TaskolistDataCleaner implements IAppDataCleaner {
     try {
       switch (category.toLowerCase()) {
         case 'tasks':
-          await _clearBoxes(['tasks', 'task_box'], result);
+          await _database.taskDao.clearAllTasks();
+          (result['clearedItems'] as List).add('tasks');
           break;
-        case 'categories':
-          await _clearBoxes(['categories', 'category_box'], result);
-          break;
-        case 'settings':
-          await _clearBoxes(['settings', 'user_preferences'], result);
-          break;
-        case 'cache':
-          await _clearBoxes(['task_cache'], result);
+        case 'users':
+          await _database.userDao.clearCache();
+          (result['clearedItems'] as List).add('users');
           break;
         case 'preferences':
           await _clearTaskPreferences(result);
@@ -230,23 +196,6 @@ class TaskolistDataCleaner implements IAppDataCleaner {
     }
 
     return result;
-  }
-
-  Future<void> _clearBoxes(
-    List<String> boxNames,
-    Map<String, dynamic> result,
-  ) async {
-    for (final boxName in boxNames) {
-      try {
-        if (await _hive.boxExists(boxName)) {
-          await _hive.deleteBoxFromDisk(boxName);
-          (result['clearedItems'] as List).add(boxName);
-        }
-      } catch (e) {
-        (result['errors'] as List).add('Failed to clear $boxName: $e');
-        result['success'] = false;
-      }
-    }
   }
 
   Future<void> _clearTaskPreferences(Map<String, dynamic> result) async {

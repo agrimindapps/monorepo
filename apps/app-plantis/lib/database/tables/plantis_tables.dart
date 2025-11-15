@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:drift/drift.dart';
 
 /// ============================================================================
 /// PLANTIS DATABASE TABLES - Drift Schema

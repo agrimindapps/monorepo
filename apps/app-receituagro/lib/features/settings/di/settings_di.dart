@@ -7,13 +7,19 @@ import 'package:core/core.dart' hide Column;
 
 /// Dependency Injection setup for Settings module following Clean Architecture.
 ///
-/// ⚠️ IMPORTANTE: IUserSettingsRepository e use cases agora via @LazySingleton/@injectable
-/// Registra apenas ProfileImageService (não tem @injectable)
+/// ⚠️ IMPORTANTE: 
+/// - IUserSettingsRepository e use cases via @LazySingleton/@injectable
+/// - ISettingsCompositeRepository via @LazySingleton (Composite Pattern)
+/// - Registra apenas ProfileImageService (não tem @injectable)
 abstract class SettingsDI {
   static void register(GetIt getIt) {
     // ❌ REMOVIDO: IUserSettingsRepository (via @LazySingleton)
     // ❌ REMOVIDO: GetUserSettingsUseCase (via @injectable)
     // ❌ REMOVIDO: UpdateUserSettingsUseCase (via @injectable)
+
+    // ✅ ISettingsCompositeRepository (via @LazySingleton)
+    // Composite Pattern - unified access to all settings repositories
+    // Already registered via @LazySingleton in settings_composite_repository_impl.dart
 
     // ✅ ProfileImageService ainda precisa de registro manual (sem @injectable)
     getIt.registerLazySingleton<ProfileImageService>(

@@ -13,7 +13,7 @@ class DiagnosticoMapper {
   static DiagnosticoEntity fromDrift(Diagnostico drift) {
     return DiagnosticoEntity(
       id: drift.firebaseId ?? drift.id.toString(),
-      idDefensivo: drift.defenisivoId.toString(),
+      idDefensivo: drift.defensivoId.toString(),
       idCultura: drift.culturaId.toString(),
       idPraga: drift.pragaId.toString(),
       nomeDefensivo: '', // Resolved via extension
@@ -60,7 +60,7 @@ class DiagnosticoMapper {
     return DiagnosticosCompanion(
       firebaseId: Value(entity.id),
       idReg: Value(entity.id),
-      defenisivoId: Value(int.tryParse(entity.idDefensivo) ?? 0),
+      defensivoId: Value(int.tryParse(entity.idDefensivo) ?? 0),
       culturaId: Value(int.tryParse(entity.idCultura) ?? 0),
       pragaId: Value(int.tryParse(entity.idPraga) ?? 0),
       dsMin: Value(entity.dosagem.dosagemMinima?.toString()),
@@ -81,7 +81,7 @@ class DiagnosticoMapper {
   static DiagnosticoEntity fromHive(Diagnostico hive) {
     return DiagnosticoEntity(
       id: hive.firebaseId ?? hive.id.toString(),
-      idDefensivo: hive.defenisivoId.toString(),
+      idDefensivo: hive.defensivoId.toString(),
       idCultura: hive.culturaId.toString(),
       idPraga: hive.pragaId.toString(),
       nomeDefensivo: '', // Resolved via extension

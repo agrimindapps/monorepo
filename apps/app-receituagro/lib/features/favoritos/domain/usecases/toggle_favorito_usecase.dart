@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 
 import '../entities/favorito_entity.dart';
 import '../repositories/i_favoritos_repository.dart';
@@ -51,50 +51,44 @@ class ToggleFavoritoUseCase {
     required String id,
     FavoritoEntity? favorito,
   }) async {
-    try {
-      // Validação de parâmetros
-      if (tipo.isEmpty || id.isEmpty) {
-        return Left(ValidationFailure('Tipo e ID são obrigatórios'));
-      }
-
-      // Verifica estado atual
-      final isFavorite = await _repository.isFavorito(tipo, id);
-
-      if (isFavorite) {
-        // Já está nos favoritos: Remove
-        final removeResult = await _repository.removeFavorito(tipo, id);
-
-        if (!removeResult) {
-          return Left(CacheFailure('Falha ao remover dos favoritos'));
-        }
-
-        // Retorna false (não está mais nos favoritos)
-        return const Right(false);
-      } else {
-        // Não está nos favoritos: Adiciona
-
-        // Se temos a entidade, usamos ela
-        if (favorito != null) {
-          final addResult = await _repository.addFavorito(favorito);
-
-          if (!addResult) {
-            return Left(CacheFailure('Falha ao adicionar aos favoritos'));
-          }
-
-          // Retorna true (está nos favoritos agora)
-          return const Right(true);
-        } else {
-          // Sem entidade completa, apenas marcamos como favorito
-          // (comportamento simplificado para compatibilidade)
-          return Left(
-            ValidationFailure(
-              'Entidade do favorito é obrigatória para adicionar',
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      return Left(CacheFailure('Erro ao alternar favorito: ${e.toString()}'));
+    // Validação de parâmetros
+    if (tipo.isEmpty || id.isEmpty) {
+      return Left<Failure, bool>(
+        ValidationFailure('Tipo e ID são obrigatórios'),
+      );
     }
+
+    // Verifica estado atual
+    final isFavoriteResult = await _repository.isFavorito(tipo, id);
+
+    return isFavoriteResult.fold(
+      (failure) => Left<Failure, bool>(failure),
+      (isFavorite) async {
+        if (isFavorite) {
+          // Já está nos favoritos: Remove
+          final removeResult = await _repository.removeFavorito(tipo, id);
+          return removeResult.fold(
+            (failure) => Left<Failure, bool>(failure),
+            (_) => Right<Failure, bool>(false),
+          );
+        } else {
+          // Não está nos favoritos: Adiciona
+          if (favorito != null) {
+            return _repository.addFavorito(favorito).then(
+              (result) => result.fold(
+                (failure) => Left<Failure, bool>(failure),
+                (_) => Right<Failure, bool>(true),
+              ),
+            );
+          } else {
+            return Left<Failure, bool>(
+              ValidationFailure(
+                'Entidade do favorito é obrigatória para adicionar',
+              ),
+            );
+          }
+        }
+      },
+    ) as Future<Either<Failure, bool>>;
   }
 }

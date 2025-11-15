@@ -1,4 +1,6 @@
 import 'package:core/core.dart';
+import 'package:drift/drift.dart';
+
 import '../receituagro_database.dart';
 
 /// Repositório de Informações de Plantas/Culturas usando Drift
@@ -78,10 +80,11 @@ class PlantasInfRepository {
 
   /// Conta o total de informações de plantas
   Future<int> count() async {
-    final count = _db.plantasInf.id.count();
-    final query = _db.selectOnly(_db.plantasInf)..addColumns([count]);
+    final countColumn = _db.plantasInf.id.count();
+    final query = _db.selectOnly(_db.plantasInf)
+      ..addColumns([countColumn]);
     final result = await query.getSingle();
-    return result.read(count)!;
+    return result.read(countColumn)!;
   }
 
   /// Observa mudanças em todas as informações de plantas

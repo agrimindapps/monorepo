@@ -1,4 +1,6 @@
 import 'package:core/core.dart';
+import 'package:drift/drift.dart';
+
 import '../receituagro_database.dart';
 
 /// Repositório de Fitossanitários usando Drift
@@ -34,7 +36,7 @@ class FitossanitariosRepository {
   /// Busca fitossanitários por nome (busca parcial)
   Future<List<Fitossanitario>> findByNome(String nome) async {
     final query = _db.select(_db.fitossanitarios)
-      ..where((tbl) => tbl.nome.contains(nome));
+      ..where((tbl) => tbl.nome.like('%$nome%'));
     return await query.get();
   }
 
@@ -61,10 +63,11 @@ class FitossanitariosRepository {
 
   /// Conta o total de fitossanitários
   Future<int> count() async {
-    final count = _db.fitossanitarios.id.count();
-    final query = _db.selectOnly(_db.fitossanitarios)..addColumns([count]);
+    final countColumn = _db.fitossanitarios.id.count();
+    final query = _db.selectOnly(_db.fitossanitarios)
+      ..addColumns([countColumn]);
     final result = await query.getSingle();
-    return result.read(count)!;
+    return result.read(countColumn)!;
   }
 
   /// Carrega fitossanitários a partir de dados JSON

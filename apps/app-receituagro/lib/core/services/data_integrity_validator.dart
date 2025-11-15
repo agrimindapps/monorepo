@@ -1,4 +1,4 @@
-// TEMPORARILY DISABLED: Hive to Drift migration in progress
+// TEMPORARILY DISABLED: Migration in progress
 // ignore_for_file: undefined_class, non_type_as_type_argument
 
 import '../../database/repositories/culturas_repository.dart';

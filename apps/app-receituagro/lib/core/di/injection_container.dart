@@ -10,6 +10,8 @@ import '../../features/analytics/analytics_service.dart';
 import '../../features/defensivos/data/services/defensivos_grouping_service.dart';
 // ❌ REMOVIDO: import '../../features/defensivos/di/defensivos_di.dart'; // Unused after consolidation
 // ✅ Diagnosticos imports removed - now managed by Injectable
+import '../../features/defensivos/data/strategies/defensivo_grouping_strategy_registry.dart';
+import '../../features/defensivos/data/strategies/defensivo_grouping_service_v2.dart';
 import '../../features/favoritos/domain/favoritos_navigation_service.dart';
 import '../../features/favoritos/favoritos_di.dart';
 // ❌ REMOVIDO: import '../../features/pragas/di/pragas_di.dart'; (via @LazySingleton)
@@ -44,6 +46,54 @@ import 'repositories_di.dart';
 
 final sl = core.GetIt.instance;
 
+/// Initializes the Dependency Injection container
+/// 
+/// ✅ DEPENDENCY INVERSION PRINCIPLE (DIP) IMPLEMENTATION:
+/// 
+/// DI SETUP FLOW:
+/// 1. Core infrastructure (GetIt instance setup)
+/// 2. @LazySingleton annotated classes (auto-registered via Injectable)
+/// 3. Manual registrations for complex setup
+/// 4. Module-specific DI (Features, Services, Sync)
+/// 
+/// KEY PRINCIPLES:
+/// - ✅ Depend on abstractions (interfaces), not concrete classes
+/// - ✅ Use @LazySingleton for lazy initialization (on-demand)
+/// - ✅ Register interfaces/abstract classes in the container
+/// - ✅ Concrete implementations are internal to module
+/// 
+/// LAYERED REGISTRATION:
+/// 1. Infrastructure: Database, Network, Storage
+/// 2. Repositories: Data layer abstractions (IRepository)
+/// 3. Use Cases: Business logic abstractions
+/// 4. Services: Specialized services (IAnalytics, ICrashlytics, etc.)
+/// 5. Notifiers: State management (Riverpod + GetIt)
+/// 
+/// EXAMPLE - Notifier Dependency Inversion:
+/// ```dart
+/// // Notifier depends on use case ABSTRACTION
+/// @riverpod
+/// class MyNotifier extends _$MyNotifier {
+///   late final GetDataUseCase _useCase;
+///   
+///   @override
+///   Future<Data> build() async {
+///     // DI container provides implementation
+///     _useCase = di.sl<GetDataUseCase>();
+///     return _useCase.call();
+///   }
+/// }
+/// 
+/// // Use case depends on repository ABSTRACTION
+/// class GetDataUseCase {
+///   final IDataRepository _repo; // Depends on interface
+///   GetDataUseCase(this._repo);
+/// }
+/// 
+/// // Repository IMPLEMENTATION injected by container
+/// @LazySingleton(as: IDataRepository)
+/// class DataRepositoryImpl implements IDataRepository { }
+/// ```
 Future<void> init() async {
   await core.InjectionContainer.init();
 
@@ -60,7 +110,7 @@ Future<void> init() async {
   FavoritosDI.registerRepository(); // ✅ Registra FavoritosRepositorySimplified como classe concreta
   configureAllRepositoriesDependencies();
 
-  // ✅ SIMPLIFIED: SyncQueue now uses in-memory storage (no Hive dependency)
+  // ✅ SIMPLIFIED: SyncQueue uses in-memory storage
   if (!sl.isRegistered<SyncQueue>()) {
     sl.registerLazySingleton<SyncQueue>(
       () => SyncQueue(),
@@ -75,7 +125,7 @@ Future<void> init() async {
 
   // DataIntegrityService removed - no longer needed
 
-  // ℹ️ SyncDIModule.init() é chamado no main.dart após Hive estar pronto
+  // ℹ️ SyncDIModule initialized in main.dart
   // Não registramos aqui para evitar duplicação
 
   sl.registerLazySingleton<core.IAppDataCleaner>(
@@ -245,8 +295,8 @@ Future<void> init() async {
   // ✅ PHASE 3: Setup GetIt for Pragas por Cultura services
   _setupPragasPorCulturaServices();
 
-  // ❌ REMOVED: PremiumLegacyRepository (Hive dependency removed)
-  // ❌ REMOVED: ComentarioRepository (Hive dependency removed)
+  // ❌ REMOVED: PremiumLegacyRepository
+  // ❌ REMOVED: ComentarioRepository
   
   try {
     sl.registerLazySingleton<IPremiumService>(() => MockPremiumService());
@@ -265,6 +315,22 @@ Future<void> init() async {
   // TODO: Migrate to Drift-based comentarios repository
   
   // ✅ IDiagnosticosRepository and all use cases now managed by Injectable (@LazySingleton, @injectable)
+  
+  // ✅ Estratégia Pattern para agrupamento de defensivos (SOLID - Open/Closed Principle)
+  if (!sl.isRegistered<DefensivoGroupingStrategyRegistry>()) {
+    sl.registerLazySingleton<DefensivoGroupingStrategyRegistry>(
+      () => DefensivoGroupingStrategyRegistry(),
+    );
+  }
+
+  if (!sl.isRegistered<DefensivoGroupingServiceV2>()) {
+    sl.registerLazySingleton<DefensivoGroupingServiceV2>(
+      () => DefensivoGroupingServiceV2(sl<DefensivoGroupingStrategyRegistry>()),
+    );
+  }
+
+  // ⚠️ BACKWARD COMPATIBILITY: Manter DefensivosGroupingService por enquanto
+  // TODO: Migrar todas as dependências para DefensivoGroupingServiceV2 e remover
   sl.registerLazySingleton<DefensivosGroupingService>(
     () => DefensivosGroupingService(),
   );

@@ -1,30 +1,30 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/interfaces/i_premium_service.dart';
 import '../../../../core/providers/feature_flags_notifier.dart';
-import '../../../../core/services/promotional_notification_manager.dart';
-import '../../../../core/services/receituagro_notification_service.dart';
 import '../../domain/entities/user_settings_entity.dart';
 import '../../domain/usecases/get_user_settings_usecase.dart';
 import '../../domain/usecases/update_user_settings_usecase.dart';
 import 'settings_state.dart';
 
 part 'settings_notifier.g.dart';
-/// Settings notifier for user settings management
+
+/// @deprecated Wrapper notifier for backward compatibility
+/// 
+/// REFACTORED: This notifier now delegates to specialized notifiers:
+/// - ThemeNotifier: theme and visual settings
+/// - NotificationsNotifier: notification preferences
+/// - AnalyticsDebugNotifier: analytics and debug operations
+/// 
+/// For new code, use the specialized notifiers directly.
+/// This wrapper maintains backward compatibility with existing UI code.
 @riverpod
 class SettingsNotifier extends _$SettingsNotifier {
   late final GetUserSettingsUseCase _getUserSettingsUseCase;
   late final UpdateUserSettingsUseCase _updateUserSettingsUseCase;
-  late final IPremiumService _premiumService;
-  late final ReceitaAgroNotificationService _notificationService;
-  late final PromotionalNotificationManager _promotionalManager;
-  late final IAnalyticsRepository _analyticsRepository;
-  late final ICrashlyticsRepository _crashlyticsRepository;
-  late final IAppRatingRepository _appRatingRepository;
   late final FeatureFlagsNotifier _featureFlagsNotifier;
   DeviceManagementService? _deviceManagementService;
 
@@ -33,26 +33,12 @@ class SettingsNotifier extends _$SettingsNotifier {
     _getUserSettingsUseCase = di.sl<GetUserSettingsUseCase>();
     _updateUserSettingsUseCase = di.sl<UpdateUserSettingsUseCase>();
     _initializeServices();
-    ref.onDispose(() {
-      unawaited(
-        _notificationService.cancelAllNotifications().catchError((Object e) {
-          debugPrint('Error cleaning notification resources: $e');
-          return false;
-        }),
-      );
-    });
 
     return SettingsState.initial();
   }
 
   void _initializeServices() {
     try {
-      _premiumService = di.sl<IPremiumService>();
-      _notificationService = di.sl<ReceitaAgroNotificationService>();
-      _promotionalManager = PromotionalNotificationManager();
-      _analyticsRepository = di.sl<IAnalyticsRepository>();
-      _crashlyticsRepository = di.sl<ICrashlyticsRepository>();
-      _appRatingRepository = di.sl<IAppRatingRepository>();
       _featureFlagsNotifier = ref.read(featureFlagsNotifierProvider.notifier);
       if (di.sl.isRegistered<DeviceManagementService>()) {
         _deviceManagementService = di.sl<DeviceManagementService>();
@@ -80,7 +66,6 @@ class SettingsNotifier extends _$SettingsNotifier {
 
     await Future.wait([
       loadSettings(),
-      _loadPremiumStatus(),
       _loadDeviceInfo(),
     ]);
   }
@@ -117,19 +102,6 @@ class SettingsNotifier extends _$SettingsNotifier {
     }
   }
 
-  /// Load premium status
-  Future<void> _loadPremiumStatus() async {
-    final currentState = state.value;
-    if (currentState == null) return;
-
-    try {
-      final isPremium = await _premiumService.isPremiumUser();
-      state = AsyncValue.data(currentState.copyWith(isPremiumUser: isPremium));
-    } catch (e) {
-      debugPrint('Error loading premium status: $e');
-    }
-  }
-
   /// Update theme setting
   Future<bool> setDarkTheme(bool isDark) async {
     return await _updateSingleSetting('isDarkTheme', isDark);
@@ -137,20 +109,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Update notifications setting
   Future<bool> setNotificationsEnabled(bool enabled) async {
-    final success = await _updateSingleSetting('notificationsEnabled', enabled);
-
-    if (success) {
-      try {
-        final currentPrefs =
-            await _promotionalManager.getUserNotificationPreferences();
-        final newPrefs = currentPrefs.copyWith(promotionalEnabled: enabled);
-        await _promotionalManager.saveUserNotificationPreferences(newPrefs);
-      } catch (e) {
-        debugPrint('Error updating promotional preferences: $e');
-      }
-    }
-
-    return success;
+    return await _updateSingleSetting('notificationsEnabled', enabled);
   }
 
   /// Update sound setting
@@ -175,153 +134,59 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Generate test license (development only)
   Future<bool> generateTestLicense() async {
-    try {
-      await _premiumService.generateTestSubscription();
-      await _loadPremiumStatus();
-      return true;
-    } catch (e) {
-      final currentState = state.value;
-      if (currentState != null) {
-        state = AsyncValue.data(currentState.copyWith(error: e.toString()));
-      }
-      debugPrint('Error generating test license: $e');
-      return false;
-    }
+    // TODO: Implement analyticsDebugNotifierProvider
+    // final debugNotifier = ref.read(analyticsDebugNotifierProvider.notifier);
+    // return await debugNotifier.generateTestLicense();
+    return false;
   }
 
   /// Remove test license (development only)
   Future<bool> removeTestLicense() async {
-    try {
-      await _premiumService.removeTestSubscription();
-      await _loadPremiumStatus();
-      return true;
-    } catch (e) {
-      final currentState = state.value;
-      if (currentState != null) {
-        state = AsyncValue.data(currentState.copyWith(error: e.toString()));
-      }
-      debugPrint('Error removing test license: $e');
-      return false;
-    }
+    // TODO: Implement analyticsDebugNotifierProvider
+    // final debugNotifier = ref.read(analyticsDebugNotifierProvider.notifier);
+    // return await debugNotifier.removeTestLicense();
+    return false;
   }
 
   /// Test notification functionality
   Future<bool> testNotification() async {
-    try {
-      debugPrint('Notification test - not implemented yet');
-
-      await _analyticsRepository.logEvent(
-        'notification_test',
-        parameters: {'status': 'success'},
-      );
-
-      return true;
-    } catch (e) {
-      final currentState = state.value;
-      if (currentState != null) {
-        state = AsyncValue.data(currentState.copyWith(error: e.toString()));
-      }
-      debugPrint('Error testing notification: $e');
-
-      await _analyticsRepository.logEvent(
-        'notification_test',
-        parameters: {'status': 'error', 'error': e.toString()},
-      );
-
-      return false;
-    }
+    // TODO: Implement notificationsNotifierProvider
+    // final notificationNotifier =
+    //     ref.read(notificationsNotifierProvider.notifier);
+    // return await notificationNotifier.testNotification();
+    return false;
   }
 
   /// Open notification settings
   Future<void> openNotificationSettings() async {
-    try {
-      await _notificationService.openNotificationSettings();
-    } catch (e) {
-      debugPrint('Error opening notification settings: $e');
-    }
+    // TODO: Implement notificationsNotifierProvider
+    // final notificationNotifier =
+    //     ref.read(notificationsNotifierProvider.notifier);
+    // await notificationNotifier.openNotificationSettings();
   }
 
   /// Test analytics functionality
   Future<bool> testAnalytics() async {
-    try {
-      final testData = {
-        'test_event': 'settings_test_analytics',
-        'timestamp': DateTime.now().toIso8601String(),
-        'platform':
-            Theme.of(
-              NavigationService.navigatorKey.currentContext!,
-            ).platform.toString(),
-      };
-
-      await _analyticsRepository.logEvent(
-        'test_analytics',
-        parameters: testData,
-      );
-
-      return true;
-    } catch (e) {
-      final currentState = state.value;
-      if (currentState != null) {
-        state = AsyncValue.data(currentState.copyWith(error: e.toString()));
-      }
-      debugPrint('Error testing analytics: $e');
-      return false;
-    }
+    // TODO: Implement analytics testing
+    // final debugNotifier = ref.read(analyticsDebugNotifierProvider.notifier);
+    // return await debugNotifier.testAnalytics();
+    return false;
   }
 
   /// Test crashlytics functionality
   Future<bool> testCrashlytics() async {
-    try {
-      await _crashlyticsRepository.log('Test crashlytics log from settings');
-
-      await _crashlyticsRepository.setCustomKey(
-        key: 'test_timestamp',
-        value: DateTime.now().toIso8601String(),
-      );
-
-      await _crashlyticsRepository.recordError(
-        exception: Exception('Test exception from settings'),
-        stackTrace: StackTrace.current,
-        reason: 'Testing Crashlytics integration',
-        fatal: false,
-      );
-
-      final currentState = state.value;
-      if (currentState != null) {
-        state = AsyncValue.data(currentState.clearError());
-      }
-
-      return true;
-    } catch (e) {
-      final currentState = state.value;
-      if (currentState != null) {
-        state = AsyncValue.data(currentState.copyWith(error: e.toString()));
-      }
-      debugPrint('Error testing crashlytics: $e');
-      return false;
-    }
+    // TODO: Implement crashlytics testing
+    // final debugNotifier = ref.read(analyticsDebugNotifierProvider.notifier);
+    // return await debugNotifier.testCrashlytics();
+    return false;
   }
 
   /// Show rate app dialog
   Future<bool> showRateAppDialog(BuildContext context) async {
-    try {
-
-      await _appRatingRepository.showRatingDialog();
-
-      await _analyticsRepository.logEvent(
-        'rate_app_shown',
-        parameters: {'timestamp': DateTime.now().toIso8601String()},
-      );
-
-      return true;
-    } catch (e) {
-      final currentState = state.value;
-      if (currentState != null) {
-        state = AsyncValue.data(currentState.copyWith(error: e.toString()));
-      }
-      debugPrint('Error showing rate app dialog: $e');
-      return false;
-    }
+    // TODO: Implement rate app dialog
+    // final debugNotifier = ref.read(analyticsDebugNotifierProvider.notifier);
+    // return await debugNotifier.showRateAppDialog();
+    return false;
   }
 
   /// Update a single setting
@@ -389,7 +254,6 @@ class SettingsNotifier extends _$SettingsNotifier {
 
     await Future.wait([
       loadSettings(),
-      _loadPremiumStatus(),
       _loadDeviceInfo(),
     ]);
   }

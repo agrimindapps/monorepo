@@ -160,9 +160,15 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     final itemId = currentState.defensivoData?.idDefensivo ?? defensivoName;
 
     try {
-      final isFavorited = await _favoritosRepository.isFavorito(
+      final result = await _favoritosRepository.isFavorito(
         'defensivo',
         itemId,
+      );
+
+      // Unwrap Either<Failure, bool> and update state
+      final isFavorited = result.fold(
+        (failure) => false, // On failure, assume not favorited
+        (value) => value,
       );
 
       // Sempre atualiza o estado, mesmo se estiver no mesmo valor
@@ -278,31 +284,15 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     );
 
     try {
-      final success = await _favoritosRepository.toggleFavorito(
+      final result = await _favoritosRepository.toggleFavorito(
         'defensivo',
         itemId,
       );
 
-      if (!success) {
-        state = AsyncValue.data(
-          currentState.copyWith(
-            isFavorited: wasAlreadyFavorited,
-            errorMessage:
-                'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito',
-          ),
-        );
-        return false;
-      }
-
-      return true;
-    } catch (e) {
-      try {
-        final success = await _favoritosRepository.toggleFavorito(
-          'defensivo',
-          itemId,
-        );
-
-        if (!success) {
+      // Unwrap Either<Failure, bool>
+      return result.fold(
+        (failure) {
+          // On failure, revert state
           state = AsyncValue.data(
             currentState.copyWith(
               isFavorited: wasAlreadyFavorited,
@@ -311,19 +301,31 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
             ),
           );
           return false;
-        }
-
-        return true;
-      } catch (fallbackError) {
-        state = AsyncValue.data(
-          currentState.copyWith(
-            isFavorited: wasAlreadyFavorited,
-            errorMessage:
-                'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito: ${fallbackError.toString()}',
-          ),
-        );
-        return false;
-      }
+        },
+        (success) {
+          // On success, keep the toggled state
+          if (!success) {
+            state = AsyncValue.data(
+              currentState.copyWith(
+                isFavorited: wasAlreadyFavorited,
+                errorMessage:
+                    'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito',
+              ),
+            );
+          }
+          return success;
+        },
+      );
+    } catch (e) {
+      // On exception, revert state
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isFavorited: wasAlreadyFavorited,
+          errorMessage:
+              'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito: ${e.toString()}',
+        ),
+      );
+      return false;
     }
   }
 

@@ -359,7 +359,7 @@ class DiagnosticoGroupingService {
     int score = 0;
 
     // Drift Diagnostico has IDs, not name fields
-    if (diagnostico.defenisivoId > 0) score += 2;
+    if (diagnostico.defensivoId > 0) score += 2;
     if (diagnostico.culturaId > 0) score += 2;
     if (diagnostico.pragaId > 0) score += 2;
     if (diagnostico.dsMax.isNotEmpty) score += 1;

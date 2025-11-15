@@ -1,24 +1,26 @@
+import 'package:core/core.dart';
+
 import '../entities/favorito_entity.dart';
 
 /// Interface principal do repositório de favoritos (Domain Layer)
 /// Princípios: Dependency Inversion + Interface Segregation
 abstract class IFavoritosRepository {
   /// Operações de consulta
-  Future<List<FavoritoEntity>> getAll();
-  Future<List<FavoritoEntity>> getByTipo(String tipo);
-  Future<FavoritosStats> getStats();
+  Future<Either<Failure, List<FavoritoEntity>>> getAll();
+  Future<Either<Failure, List<FavoritoEntity>>> getByTipo(String tipo);
+  Future<Either<Failure, FavoritosStats>> getStats();
 
   /// Verificação de status
-  Future<bool> isFavorito(String tipo, String id);
+  Future<Either<Failure, bool>> isFavorito(String tipo, String id);
 
   /// Operações CRUD genéricas (novos métodos para consolidação)
   /// Substitui os específicos (addDefensivo, addPraga, etc)
-  Future<bool> addFavorito(FavoritoEntity favorito);
-  Future<bool> removeFavorito(String tipo, String id);
-  Future<bool> toggleFavorito(String tipo, String id);
+  Future<Either<Failure, bool>> addFavorito(FavoritoEntity favorito);
+  Future<Either<Failure, bool>> removeFavorito(String tipo, String id);
+  Future<Either<Failure, bool>> toggleFavorito(String tipo, String id);
 
   /// Busca
-  Future<List<FavoritoEntity>> search(String query);
+  Future<Either<Failure, List<FavoritoEntity>>> search(String query);
 }
 
 /// Interface específica para operações de favoritos de defensivos
@@ -174,3 +176,4 @@ class FavoritosException implements Exception {
     return msg;
   }
 }
+

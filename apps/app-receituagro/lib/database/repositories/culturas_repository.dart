@@ -1,4 +1,6 @@
 import 'package:core/core.dart';
+import 'package:drift/drift.dart';
+
 import '../receituagro_database.dart';
 
 /// Repositório de Culturas usando Drift
@@ -33,7 +35,7 @@ class CulturasRepository {
   /// Busca culturas por nome (busca parcial)
   Future<List<Cultura>> findByNome(String nome) async {
     final query = _db.select(_db.culturas)
-      ..where((tbl) => tbl.nome.contains(nome));
+      ..where((tbl) => tbl.nome.like('%$nome%'));
     return await query.get();
   }
 
@@ -46,10 +48,10 @@ class CulturasRepository {
 
   /// Conta o total de culturas
   Future<int> count() async {
-    final count = _db.culturas.id.count();
-    final query = _db.selectOnly(_db.culturas)..addColumns([count]);
+    final query = _db.selectOnly(_db.culturas)
+      ..addColumns([_db.culturas.id.count()]);
     final result = await query.getSingle();
-    return result.read(count)!;
+    return result.read(_db.culturas.id.count())!;
   }
 
   /// Carrega dados do JSON e salva no banco Drift

@@ -32,7 +32,7 @@ class DiagnosticoIntegrationService {
       final diagnostico = await _diagnosticoRepo.findByIdReg(idReg);
       if (diagnostico == null) return null;
 
-      final defensivo = await _getDefensivoById(diagnostico.defenisivoId);
+      final defensivo = await _getDefensivoById(diagnostico.defensivoId);
       final cultura = await _getCulturaById(diagnostico.culturaId);
       final praga = await _getPragaById(diagnostico.pragaId);
 
@@ -157,7 +157,7 @@ class DiagnosticoIntegrationService {
         final defensivoIdInt = int.tryParse(defensivoId);
         if (defensivoIdInt != null) {
           filtered = filtered
-              .where((d) => d.defenisivoId == defensivoIdInt)
+              .where((d) => d.defensivoId == defensivoIdInt)
               .toList();
         }
       }

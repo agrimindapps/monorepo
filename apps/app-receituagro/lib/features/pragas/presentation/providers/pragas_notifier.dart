@@ -5,7 +5,7 @@ import '../../../../database/repositories/pragas_repository.dart';
 import '../../../../core/services/access_history_service.dart';
 import '../../data/mappers/praga_mapper.dart';
 import '../../domain/entities/praga_entity.dart';
-import '../services/pragas_error_message_service.dart';
+import '../../domain/services/i_pragas_error_message_service.dart';
 import 'pragas_state.dart';
 
 part 'pragas_notifier.g.dart';
@@ -15,13 +15,13 @@ part 'pragas_notifier.g.dart';
 @Riverpod(keepAlive: true)
 class PragasNotifier extends _$PragasNotifier {
   late final AccessHistoryService _historyService;
-  late final PragasErrorMessageService _errorService;
+  late final IPragasErrorMessageService _errorService;
   late final PragasRepository _pragasRepository;
 
   @override
   Future<PragasState> build() async {
     _historyService = AccessHistoryService();
-    _errorService = di.getIt<PragasErrorMessageService>();
+    _errorService = di.getIt<IPragasErrorMessageService>();
     _pragasRepository = GetIt.instance<PragasRepository>();
     return await _loadInitialData();
   }

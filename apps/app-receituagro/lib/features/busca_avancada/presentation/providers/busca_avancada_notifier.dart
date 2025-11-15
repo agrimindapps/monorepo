@@ -2,8 +2,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/diagnostico_integration_service.dart';
-import '../../services/busca_data_loading_service.dart';
-import '../../services/busca_validation_service.dart';
+import '../../domain/entities/busca_entity.dart';
+import '../../domain/services/i_busca_metadata_service.dart';
+import '../../domain/services/i_busca_validation_service.dart';
 
 part 'busca_avancada_notifier.g.dart';
 
@@ -97,14 +98,14 @@ class BuscaAvancadaState {
 @riverpod
 class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
   late final DiagnosticoIntegrationService _integrationService;
-  late final BuscaDataLoadingService _dataLoadingService;
-  late final BuscaValidationService _validationService;
+  late final IBuscaMetadataService _metadataService;
+  late final IBuscaValidationService _validationService;
 
   @override
   Future<BuscaAvancadaState> build() async {
     _integrationService = di.sl<DiagnosticoIntegrationService>();
-    _dataLoadingService = di.sl<BuscaDataLoadingService>();
-    _validationService = di.sl<BuscaValidationService>();
+    _metadataService = di.sl<IBuscaMetadataService>();
+    _validationService = di.sl<IBuscaValidationService>();
 
     return BuscaAvancadaState.initial();
   }
@@ -117,15 +118,35 @@ class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
     if (currentState.dadosCarregados) return;
 
     try {
-      final dropdownData = await _dataLoadingService.loadAllDropdownData();
+      final result = await _metadataService.loadAllDropdownData();
 
-      state = AsyncValue.data(
-        currentState.copyWith(
-          culturas: dropdownData['culturas'],
-          pragas: dropdownData['pragas'],
-          defensivos: dropdownData['defensivos'],
-          dadosCarregados: true,
-        ),
+      result.fold(
+        (failure) {
+          // Silently fail - dropdowns will be empty
+        },
+        (dropdownData) {
+          final culturas = dropdownData['culturas']
+                  ?.map((item) => {'id': item.id, 'nome': item.nome})
+                  .toList() ??
+              [];
+          final pragas = dropdownData['pragas']
+                  ?.map((item) => {'id': item.id, 'nome': item.nome})
+                  .toList() ??
+              [];
+          final defensivos = dropdownData['defensivos']
+                  ?.map((item) => {'id': item.id, 'nome': item.nome})
+                  .toList() ??
+              [];
+
+          state = AsyncValue.data(
+            currentState.copyWith(
+              culturas: culturas,
+              pragas: pragas,
+              defensivos: defensivos,
+              dadosCarregados: true,
+            ),
+          );
+        },
       );
     } catch (e) {
       // Silently fail - dropdowns will be empty
@@ -169,15 +190,18 @@ class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
     final currentState = state.value;
     if (currentState == null) return 'Estado não inicializado';
 
-    // Validate search parameters
-    final validationError = _validationService.validateSearchParams(
+    // Create filter entity
+    final filters = BuscaFiltersEntity(
       culturaId: currentState.culturaIdSelecionada,
       pragaId: currentState.pragaIdSelecionada,
       defensivoId: currentState.defensivoIdSelecionado,
     );
 
+    // Validate search parameters
+    final validationError = _validationService.validateSearchParams(filters);
+
     if (validationError != null) {
-      return validationError;
+      return validationError.message;
     }
 
     state = AsyncValue.data(
@@ -254,11 +278,13 @@ class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
     final currentState = state.value;
     if (currentState == null) return false;
 
-    return _validationService.hasActiveFilters(
+    final filters = BuscaFiltersEntity(
       culturaId: currentState.culturaIdSelecionada,
       pragaId: currentState.pragaIdSelecionada,
       defensivoId: currentState.defensivoIdSelecionado,
     );
+
+    return _validationService.hasActiveFilters(filters);
   }
 
   /// Builds a text description of active filters
@@ -266,11 +292,13 @@ class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
     final currentState = state.value;
     if (currentState == null) return '';
 
-    return _validationService.buildFiltrosAtivosTexto(
+    final filters = BuscaFiltersEntity(
       culturaId: currentState.culturaIdSelecionada,
       pragaId: currentState.pragaIdSelecionada,
       defensivoId: currentState.defensivoIdSelecionado,
     );
+
+    return _validationService.buildFilterDescription(filters);
   }
 
   /// Builds a map of active filters with their display names
@@ -278,13 +306,34 @@ class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
     final currentState = state.value;
     if (currentState == null) return {};
 
-    return _dataLoadingService.buildFiltrosDetalhados(
-      culturaId: currentState.culturaIdSelecionada,
-      pragaId: currentState.pragaIdSelecionada,
-      defensivoId: currentState.defensivoIdSelecionado,
-      culturas: currentState.culturas,
-      pragas: currentState.pragas,
-      defensivos: currentState.defensivos,
-    );
+    // TODO: Implement filtrosDetalhados using metadata service
+    // _dataLoadingService was removed - need to rebuild this using _metadataService
+    final filtros = <String, String>{};
+
+    if (currentState.culturaIdSelecionada != null) {
+      final cultura = currentState.culturas.firstWhere(
+        (c) => c['id'] == currentState.culturaIdSelecionada,
+        orElse: () => {'nome': 'Desconhecido'},
+      );
+      filtros['Cultura'] = cultura['nome'] ?? 'Desconhecido';
+    }
+
+    if (currentState.pragaIdSelecionada != null) {
+      final praga = currentState.pragas.firstWhere(
+        (p) => p['id'] == currentState.pragaIdSelecionada,
+        orElse: () => {'nome': 'Desconhecido'},
+      );
+      filtros['Praga'] = praga['nome'] ?? 'Desconhecido';
+    }
+
+    if (currentState.defensivoIdSelecionado != null) {
+      final defensivo = currentState.defensivos.firstWhere(
+        (d) => d['id'] == currentState.defensivoIdSelecionado,
+        orElse: () => {'nome': 'Desconhecido'},
+      );
+      filtros['Defensivo'] = defensivo['nome'] ?? 'Desconhecido';
+    }
+
+    return filtros;
   }
 }

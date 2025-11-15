@@ -5,20 +5,65 @@ import 'package:core/core.dart' hide Column;
 import '../../../../database/repositories/diagnostico_repository.dart';
 import '../../../../database/repositories/diagnosticos_repository.dart';
 import '../../domain/entities/diagnostico_entity.dart';
+import '../../domain/repositories/i_diagnosticos_metadata_repository.dart';
+import '../../domain/repositories/i_diagnosticos_query_repository.dart';
+import '../../domain/repositories/i_diagnosticos_read_repository.dart';
+import '../../domain/repositories/i_diagnosticos_recommendation_repository.dart';
 import '../../domain/repositories/i_diagnosticos_repository.dart';
+import '../../domain/repositories/i_diagnosticos_search_repository.dart';
+import '../../domain/repositories/i_diagnosticos_stats_repository.dart';
+import '../../domain/repositories/i_diagnosticos_validation_repository.dart';
 import '../mappers/diagnostico_mapper.dart';
 
 /// Implementation of diagnosticos repository (Data Layer)
 ///
-/// REFACTORED: Simplified to CRUD + Basic Queries only (Phase 4 - God Object Refactoring)
-/// - Removed 16 specialized methods now handled by services
-/// - Kept only 7 essential methods (2 CRUD + 5 basic queries)
-/// - Follows Single Responsibility Principle (SOLID)
+/// REFACTORED: Interface Segregation Principle (ISP) applied
+/// - Originally had 30+ methods in single fat interface
+/// - Now split into 7 specialized interfaces:
+///   1. IDiagnosticosReadRepository (2 methods: CRUD)
+///   2. IDiagnosticosQueryRepository (5 methods: basic queries)
+///   3. IDiagnosticosSearchRepository (3 methods: advanced search)
+///   4. IDiagnosticosStatsRepository (3 methods: statistics)
+///   5. IDiagnosticosMetadataRepository (4 methods: lookup data)
+///   6. IDiagnosticosValidationRepository (2 methods: validation)
+///   7. IDiagnosticosRecommendationRepository (1 method: recommendations)
 ///
-/// This repository is now focused solely on data access,
-/// leaving business logic to specialized services.
-@LazySingleton(as: IDiagnosticosRepository)
-class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
+/// Implementation class provides all 7 interfaces.
+/// Services inject only the interfaces they need, reducing coupling.
+@LazySingleton(
+  as: IDiagnosticosRepository,
+)
+@LazySingleton(
+  as: IDiagnosticosReadRepository,
+)
+@LazySingleton(
+  as: IDiagnosticosQueryRepository,
+)
+@LazySingleton(
+  as: IDiagnosticosSearchRepository,
+)
+@LazySingleton(
+  as: IDiagnosticosStatsRepository,
+)
+@LazySingleton(
+  as: IDiagnosticosMetadataRepository,
+)
+@LazySingleton(
+  as: IDiagnosticosValidationRepository,
+)
+@LazySingleton(
+  as: IDiagnosticosRecommendationRepository,
+)
+class DiagnosticosRepositoryImpl
+    implements
+        IDiagnosticosRepository,
+        IDiagnosticosReadRepository,
+        IDiagnosticosQueryRepository,
+        IDiagnosticosSearchRepository,
+        IDiagnosticosStatsRepository,
+        IDiagnosticosMetadataRepository,
+        IDiagnosticosValidationRepository,
+        IDiagnosticosRecommendationRepository {
   final DiagnosticosRepository _repository;
 
   const DiagnosticosRepositoryImpl(this._repository);
@@ -175,7 +220,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
       final matchingDiagnosticos = allDiagnosticos
           .where(
             (d) =>
-                d.defenisivoId.toString().contains(pattern) ||
+                d.defensivoId.toString().contains(pattern) ||
                 d.culturaId.toString().contains(pattern) ||
                 d.pragaId.toString().contains(pattern),
           )
@@ -198,7 +243,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
       final defensivosMap = <String, Map<String, dynamic>>{};
 
       for (final d in diagnosticos) {
-        final idStr = d.defenisivoId.toString();
+        final idStr = d.defensivoId.toString();
         if (!defensivosMap.containsKey(idStr)) {
           defensivosMap[idStr] = {
             'id': idStr,
@@ -383,7 +428,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
       final stats = {
         'total': diagnosticos.length,
         'totalDefensivos': diagnosticos
-            .map((e) => e.defenisivoId)
+            .map((e) => e.defensivoId)
             .toSet()
             .length,
         'totalCulturas': diagnosticos.map((e) => e.culturaId).toSet().length,

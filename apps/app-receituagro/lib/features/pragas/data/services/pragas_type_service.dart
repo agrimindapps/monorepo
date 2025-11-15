@@ -2,11 +2,13 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../domain/services/i_pragas_type_service.dart';
+
 /// Service responsible for praga type-related mappings and configurations
 /// Centralizes type-based logic (colors, icons, labels, emojis)
 /// Follows SRP and OCP - uses Map registry instead of switch statements
-@lazySingleton
-class PragasTypeService {
+@LazySingleton(as: IPragasTypeService)
+class PragasTypeService implements IPragasTypeService {
   PragasTypeService();
 
   /// Type color registry
@@ -54,6 +56,7 @@ class PragasTypeService {
   /// ```dart
   /// final color = service.getTypeColor('1'); // Red for insects
   /// ```
+  @override
   Color getTypeColor(String tipoPraga) {
     return _typeColors[tipoPraga] ?? _defaultColor;
   }
@@ -65,6 +68,7 @@ class PragasTypeService {
   /// ```dart
   /// final icon = service.getTypeIcon('2'); // Virus icon for diseases
   /// ```
+  @override
   IconData getTypeIcon(String tipoPraga) {
     return _typeIcons[tipoPraga] ?? _defaultIcon;
   }
@@ -76,6 +80,7 @@ class PragasTypeService {
   /// ```dart
   /// final label = service.getTypeLabel('1'); // 'Inseto'
   /// ```
+  @override
   String getTypeLabel(String tipoPraga) {
     return _typeLabels[tipoPraga] ?? _defaultLabel;
   }
@@ -87,24 +92,28 @@ class PragasTypeService {
   /// ```dart
   /// final emoji = service.getTypeEmoji('3'); // '🌿'
   /// ```
+  @override
   String getTypeEmoji(String tipoPraga) {
     return _typeEmojis[tipoPraga] ?? _defaultEmoji;
   }
 
   /// Check if a type has custom color
   /// Useful for conditional UI rendering
+  @override
   bool hasCustomColor(String tipoPraga) {
     return _typeColors.containsKey(tipoPraga);
   }
 
   /// Check if a type has custom icon
   /// Useful for conditional UI rendering
+  @override
   bool hasCustomIcon(String tipoPraga) {
     return _typeIcons.containsKey(tipoPraga);
   }
 
   /// Get all registered type IDs
   /// Useful for validation or testing
+  @override
   List<String> getRegisteredTypeIds() {
     return _typeLabels.keys.toList();
   }
@@ -121,6 +130,7 @@ class PragasTypeService {
   ///   'emoji': String,
   /// }
   /// ```
+  @override
   Map<String, dynamic> getTypeInfo(String tipoPraga) {
     return {
       'color': getTypeColor(tipoPraga),
@@ -132,6 +142,7 @@ class PragasTypeService {
 
   /// Build a type badge widget with icon and label
   /// Centralizes type badge UI component
+  @override
   Widget buildTypeBadge(
     String tipoPraga, {
     bool showIcon = true,
@@ -171,6 +182,7 @@ class PragasTypeService {
 
   /// Create icon widget for a praga type with styling
   /// Centralizes icon rendering
+  @override
   Widget buildTypeIcon(String tipoPraga, {double size = 24, Color? color}) {
     return Icon(
       getTypeIcon(tipoPraga),

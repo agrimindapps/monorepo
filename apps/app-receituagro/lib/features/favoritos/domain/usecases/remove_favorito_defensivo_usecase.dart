@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 
 import '../repositories/i_favoritos_repository.dart';
 
@@ -31,34 +31,25 @@ class RemoveFavoritoDefensivoUseCase {
   /// Executa o caso de uso para remover defensivo dos favoritos
   /// Retorna `Either<Failure, bool>`
   Future<Either<Failure, bool>> call(String defensivoId) async {
+    if (!_validator.isValidId(defensivoId)) {
+      return Left<Failure, bool>(
+        ValidationFailure('ID do defensivo é inválido: $defensivoId'),
+      );
+    }
+
+    final isFavorite = await _repository.isDefensivoFavorito(defensivoId);
+    if (!isFavorite) {
+      return Left<Failure, bool>(
+        NotFoundFailure('Defensivo não está nos favoritos: $defensivoId'),
+      );
+    }
+
     try {
-      if (!_validator.isValidId(defensivoId)) {
-        return Left(
-          ValidationFailure('ID do defensivo é inválido: $defensivoId'),
-        );
-      }
-      final isFavorite = await _repository.isDefensivoFavorito(defensivoId);
-      if (!isFavorite) {
-        return Left(
-          NotFoundFailure('Defensivo não está nos favoritos: $defensivoId'),
-        );
-      }
       final result = await _repository.removeDefensivo(defensivoId);
-
-      if (!result) {
-        return Left(
-          CacheFailure(
-            'Falha ao remover defensivo dos favoritos: $defensivoId',
-          ),
-        );
-      }
-
-      return Right(result);
+      return Right<Failure, bool>(result);
     } catch (e) {
-      return Left(
-        CacheFailure(
-          'Erro ao remover defensivo dos favoritos: ${e.toString()}',
-        ),
+      return Left<Failure, bool>(
+        CacheFailure('Erro ao remover defensivo dos favoritos: ${e.toString()}'),
       );
     }
   }

@@ -3,7 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/praga_entity.dart';
-import '../services/pragas_type_service.dart';
+import '../../domain/services/i_pragas_type_service.dart';
 import 'pragas_notifier.dart';
 
 part 'home_pragas_notifier.g.dart';
@@ -95,14 +95,14 @@ class HomePragasState {
   }
 
   /// Helper method to get suggestions list formatted for carousel
-  /// Refactored to use PragasTypeService (SOLID compliance)
+  /// Refactored to use IPragasTypeService (SOLID compliance)
   List<Map<String, dynamic>> getSuggestionsList() {
     if (isLoading || suggestedPragas.isEmpty) {
       return [];
     }
 
     // Get service via DI
-    final typeService = di.sl<PragasTypeService>();
+    final typeService = di.sl<IPragasTypeService>();
 
     return suggestedPragas.map((praga) {
       final emoji = typeService.getTypeEmoji(praga.tipoPraga);

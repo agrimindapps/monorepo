@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
@@ -14,29 +14,35 @@ class FavoritosRepositorySimplified implements IFavoritosRepository {
     : _service = service;
 
   @override
-  Future<List<FavoritoEntity>> getAll() async {
+  Future<Either<Failure, List<FavoritoEntity>>> getAll() async {
     try {
       final futures = await Future.wait([
-        getByTipo(TipoFavorito.defensivo),
-        getByTipo(TipoFavorito.praga),
-        getByTipo(TipoFavorito.diagnostico),
-        getByTipo(TipoFavorito.cultura),
+        _getByTipoWithEither(TipoFavorito.defensivo),
+        _getByTipoWithEither(TipoFavorito.praga),
+        _getByTipoWithEither(TipoFavorito.diagnostico),
+        _getByTipoWithEither(TipoFavorito.cultura),
       ]);
 
       final List<FavoritoEntity> allFavoritos = [];
-      for (final typeList in futures) {
-        allFavoritos.addAll(typeList);
+      for (final typeResult in futures) {
+        typeResult.fold(
+          (failure) => null,
+          (typeList) => allFavoritos.addAll(typeList),
+        );
       }
       allFavoritos.sort((a, b) => a.nomeDisplay.compareTo(b.nomeDisplay));
 
-      return allFavoritos;
+      return Right(allFavoritos);
     } catch (e) {
-      throw FavoritosException('Erro ao buscar todos os favoritos: $e');
+      return Left(
+        CacheFailure('Erro ao buscar todos os favoritos: ${e.toString()}'),
+      );
     }
   }
 
-  @override
-  Future<List<FavoritoEntity>> getByTipo(String tipo) async {
+  Future<Either<Failure, List<FavoritoEntity>>> _getByTipoWithEither(
+    String tipo,
+  ) async {
     try {
       final ids = await _service.getFavoriteIds(tipo);
       final favoritos = <FavoritoEntity>[];
@@ -48,33 +54,59 @@ class FavoritosRepositorySimplified implements IFavoritosRepository {
         }
       }
 
-      return favoritos;
+      return Right(favoritos);
     } catch (e) {
-      throw FavoritosException(
-        'Erro ao buscar favoritos por tipo: $e',
-        tipo: tipo,
+      return Left(
+        CacheFailure(
+          'Erro ao buscar favoritos por tipo: ${e.toString()}',
+        ),
       );
     }
   }
 
   @override
-  Future<FavoritosStats> getStats() async {
+  Future<Either<Failure, List<FavoritoEntity>>> getByTipo(String tipo) async {
     try {
-      return await _service.getStats();
+      final ids = await _service.getFavoriteIds(tipo);
+      final favoritos = <FavoritoEntity>[];
+
+      for (final id in ids) {
+        final entity = await _getEntityById(tipo, id);
+        if (entity != null) {
+          favoritos.add(entity);
+        }
+      }
+
+      return Right(favoritos);
     } catch (e) {
-      throw FavoritosException('Erro ao buscar estatísticas de favoritos: $e');
+      return Left(
+        CacheFailure(
+          'Erro ao buscar favoritos por tipo: ${e.toString()}',
+        ),
+      );
     }
   }
 
   @override
-  Future<bool> isFavorito(String tipo, String id) async {
+  Future<Either<Failure, FavoritosStats>> getStats() async {
     try {
-      return await _service.isFavoriteId(tipo, id);
+      final stats = await _service.getStats();
+      return Right(stats);
     } catch (e) {
-      throw FavoritosException(
-        'Erro ao verificar favorito: $e',
-        tipo: tipo,
-        id: id,
+      return Left(
+        CacheFailure('Erro ao buscar estatísticas de favoritos: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> isFavorito(String tipo, String id) async {
+    try {
+      final result = await _service.isFavoriteId(tipo, id);
+      return Right(result);
+    } catch (e) {
+      return Left(
+        CacheFailure('Erro ao verificar favorito: ${e.toString()}'),
       );
     }
   }
@@ -82,14 +114,13 @@ class FavoritosRepositorySimplified implements IFavoritosRepository {
   /// Implementação genérica: adiciona qualquer tipo de FavoritoEntity
   /// Novo padrão: substitui addDefensivo, addPraga, addDiagnostico, addCultura
   @override
-  Future<bool> addFavorito(FavoritoEntity favorito) async {
+  Future<Either<Failure, bool>> addFavorito(FavoritoEntity favorito) async {
     try {
-      return await _service.addFavoriteId(favorito.tipo, favorito.id);
+      final result = await _service.addFavoriteId(favorito.tipo, favorito.id);
+      return Right(result);
     } catch (e) {
-      throw FavoritosException(
-        'Erro ao adicionar favorito: $e',
-        tipo: favorito.tipo,
-        id: favorito.id,
+      return Left(
+        CacheFailure('Erro ao adicionar favorito: ${e.toString()}'),
       );
     }
   }
@@ -97,87 +128,107 @@ class FavoritosRepositorySimplified implements IFavoritosRepository {
   /// Implementação: remove favorito genérico
   /// Novo padrão: substitui removeDefensivo, removePraga, removeDiagnostico, removeCultura
   @override
-  Future<bool> removeFavorito(String tipo, String id) async {
+  Future<Either<Failure, bool>> removeFavorito(String tipo, String id) async {
     try {
-      return await _service.removeFavoriteId(tipo, id);
+      final result = await _service.removeFavoriteId(tipo, id);
+      return Right(result);
     } catch (e) {
-      throw FavoritosException(
-        'Erro ao remover favorito: $e',
-        tipo: tipo,
-        id: id,
+      return Left(
+        CacheFailure('Erro ao remover favorito: ${e.toString()}'),
       );
     }
   }
 
   /// Implementação: alterna favorito genérico
   @override
-  Future<bool> toggleFavorito(String tipo, String id) async {
+  Future<Either<Failure, bool>> toggleFavorito(String tipo, String id) async {
     try {
-      final isFav = await isFavorito(tipo, id);
+      final isFavResult = await isFavorito(tipo, id);
+
+      final isFav = isFavResult.fold(
+        (failure) => throw Exception(failure.message),
+        (result) => result,
+      );
 
       if (isFav) {
-        return await removeFavorito(tipo, id);
+        return removeFavorito(tipo, id);
       } else {
-        // Usa o método antigo por enquanto (compatibilidade)
-        return await _addFavoritoSimples(tipo, id);
+        return _addFavoritoSimples(tipo, id);
       }
     } catch (e) {
-      throw FavoritosException(
-        'Erro ao alternar favorito: $e',
-        tipo: tipo,
-        id: id,
+      return Left(
+        CacheFailure('Erro ao alternar favorito: ${e.toString()}'),
       );
     }
   }
 
   /// Helper privado: adiciona favorito (padrão antigo, mantido para compatibilidade)
-  Future<bool> _addFavoritoSimples(String tipo, String id) async {
+  Future<Either<Failure, bool>> _addFavoritoSimples(
+    String tipo,
+    String id,
+  ) async {
     try {
-      return await _service.addFavoriteId(tipo, id);
+      final result = await _service.addFavoriteId(tipo, id);
+      return Right(result);
     } catch (e) {
-      throw FavoritosException(
-        'Erro ao adicionar favorito: $e',
-        tipo: tipo,
-        id: id,
+      return Left(
+        CacheFailure('Erro ao adicionar favorito: ${e.toString()}'),
       );
     }
   }
 
   @override
-  Future<List<FavoritoEntity>> search(String query) async {
+  Future<Either<Failure, List<FavoritoEntity>>> search(String query) async {
     try {
-      final allFavoritos = await getAll();
-      final queryLower = query.toLowerCase();
+      final allResult = await getAll();
 
-      return allFavoritos.where((favorito) {
-        return favorito.nomeDisplay.toLowerCase().contains(queryLower);
-      }).toList();
+      return allResult.fold(
+        (failure) => Left(failure),
+        (allFavoritos) {
+          final queryLower = query.toLowerCase();
+
+          return Right(allFavoritos.where((favorito) {
+            return favorito.nomeDisplay.toLowerCase().contains(queryLower);
+          }).toList());
+        },
+      );
     } catch (e) {
-      throw FavoritosException('Erro ao buscar favoritos: $e');
+      return Left(
+        CacheFailure('Erro ao buscar favoritos: ${e.toString()}'),
+      );
     }
   }
 
-  Future<void> clearFavorites(String tipo) async {
+  Future<Either<Failure, void>> clearFavorites(String tipo) async {
     try {
       await _service.clearFavorites(tipo);
+      return const Right(null);
     } catch (e) {
-      throw FavoritosException('Erro ao limpar favoritos: $e', tipo: tipo);
+      return Left(
+        CacheFailure('Erro ao limpar favoritos: ${e.toString()}'),
+      );
     }
   }
 
-  Future<void> clearAllFavorites() async {
+  Future<Either<Failure, void>> clearAllFavorites() async {
     try {
       await _service.clearAllFavorites();
+      return const Right(null);
     } catch (e) {
-      throw FavoritosException('Erro ao limpar todos os favoritos: $e');
+      return Left(
+        CacheFailure('Erro ao limpar todos os favoritos: ${e.toString()}'),
+      );
     }
   }
 
-  Future<void> syncFavorites() async {
+  Future<Either<Failure, void>> syncFavorites() async {
     try {
       await _service.syncFavorites();
+      return const Right(null);
     } catch (e) {
-      throw FavoritosException('Erro ao sincronizar favoritos: $e');
+      return Left(
+        CacheFailure('Erro ao sincronizar favoritos: ${e.toString()}'),
+      );
     }
   }
 
@@ -190,99 +241,131 @@ class FavoritosRepositorySimplified implements IFavoritosRepository {
       }
       return null;
     } catch (e) {
-      throw FavoritosException(
-        'Erro ao buscar entidade por ID: $e',
-        tipo: tipo,
-        id: id,
-      );
+      return null;
     }
   }
 
   /// Obtém defensivos favoritos
-  Future<List<FavoritoDefensivoEntity>> getDefensivos() async {
-    final favoritos = await getByTipo(TipoFavorito.defensivo);
-    return favoritos.whereType<FavoritoDefensivoEntity>().toList();
+  Future<Either<Failure, List<FavoritoDefensivoEntity>>> getDefensivos() async {
+    try {
+      final result = await getByTipo(TipoFavorito.defensivo);
+      return result.fold(
+        (failure) => Left(failure),
+        (favoritos) => Right(favoritos.whereType<FavoritoDefensivoEntity>().toList()),
+      );
+    } catch (e) {
+      return Left(
+        CacheFailure('Erro ao obter defensivos favoritos: ${e.toString()}'),
+      );
+    }
   }
 
   /// Obtém pragas favoritas
-  Future<List<FavoritoPragaEntity>> getPragas() async {
-    final favoritos = await getByTipo(TipoFavorito.praga);
-    return favoritos.whereType<FavoritoPragaEntity>().toList();
+  Future<Either<Failure, List<FavoritoPragaEntity>>> getPragas() async {
+    try {
+      final result = await getByTipo(TipoFavorito.praga);
+      return result.fold(
+        (failure) => Left(failure),
+        (favoritos) => Right(favoritos.whereType<FavoritoPragaEntity>().toList()),
+      );
+    } catch (e) {
+      return Left(
+        CacheFailure('Erro ao obter pragas favoritas: ${e.toString()}'),
+      );
+    }
   }
 
   /// Obtém diagnósticos favoritos
-  Future<List<FavoritoDiagnosticoEntity>> getDiagnosticos() async {
-    final favoritos = await getByTipo(TipoFavorito.diagnostico);
-    return favoritos.whereType<FavoritoDiagnosticoEntity>().toList();
+  Future<Either<Failure, List<FavoritoDiagnosticoEntity>>> getDiagnosticos() async {
+    try {
+      final result = await getByTipo(TipoFavorito.diagnostico);
+      return result.fold(
+        (failure) => Left(failure),
+        (favoritos) => Right(favoritos.whereType<FavoritoDiagnosticoEntity>().toList()),
+      );
+    } catch (e) {
+      return Left(
+        CacheFailure('Erro ao obter diagnósticos favoritos: ${e.toString()}'),
+      );
+    }
   }
 
   /// Obtém culturas favoritas
-  Future<List<FavoritoCulturaEntity>> getCulturas() async {
-    final favoritos = await getByTipo(TipoFavorito.cultura);
-    return favoritos.whereType<FavoritoCulturaEntity>().toList();
+  Future<Either<Failure, List<FavoritoCulturaEntity>>> getCulturas() async {
+    try {
+      final result = await getByTipo(TipoFavorito.cultura);
+      return result.fold(
+        (failure) => Left(failure),
+        (favoritos) => Right(favoritos.whereType<FavoritoCulturaEntity>().toList()),
+      );
+    } catch (e) {
+      return Left(
+        CacheFailure('Erro ao obter culturas favoritas: ${e.toString()}'),
+      );
+    }
   }
 
   /// Verifica se defensivo é favorito
-  Future<bool> isDefensivoFavorito(String id) async {
-    return await isFavorito(TipoFavorito.defensivo, id);
+  Future<Either<Failure, bool>> isDefensivoFavorito(String id) async {
+    return isFavorito(TipoFavorito.defensivo, id);
   }
 
   /// Verifica se praga é favorita
-  Future<bool> isPragaFavorito(String id) async {
-    return await isFavorito(TipoFavorito.praga, id);
+  Future<Either<Failure, bool>> isPragaFavorito(String id) async {
+    return isFavorito(TipoFavorito.praga, id);
   }
 
   /// Verifica se diagnóstico é favorito
-  Future<bool> isDiagnosticoFavorito(String id) async {
-    return await isFavorito(TipoFavorito.diagnostico, id);
+  Future<Either<Failure, bool>> isDiagnosticoFavorito(String id) async {
+    return isFavorito(TipoFavorito.diagnostico, id);
   }
 
   /// Verifica se cultura é favorita
-  Future<bool> isCulturaFavorito(String id) async {
-    return await isFavorito(TipoFavorito.cultura, id);
+  Future<Either<Failure, bool>> isCulturaFavorito(String id) async {
+    return isFavorito(TipoFavorito.cultura, id);
   }
 
   /// Adiciona defensivo aos favoritos
   /// @Deprecated Use `addFavorito(FavoritoEntity)` em vez disso
-  Future<bool> addDefensivo(String id) async {
-    return await _addFavoritoSimples(TipoFavorito.defensivo, id);
+  Future<Either<Failure, bool>> addDefensivo(String id) async {
+    return _addFavoritoSimples(TipoFavorito.defensivo, id);
   }
 
   /// Adiciona praga aos favoritos
   /// @Deprecated Use `addFavorito(FavoritoEntity)` em vez disso
-  Future<bool> addPraga(String id) async {
-    return await _addFavoritoSimples(TipoFavorito.praga, id);
+  Future<Either<Failure, bool>> addPraga(String id) async {
+    return _addFavoritoSimples(TipoFavorito.praga, id);
   }
 
   /// Adiciona diagnóstico aos favoritos
   /// @Deprecated Use `addFavorito(FavoritoEntity)` em vez disso
-  Future<bool> addDiagnostico(String id) async {
-    return await _addFavoritoSimples(TipoFavorito.diagnostico, id);
+  Future<Either<Failure, bool>> addDiagnostico(String id) async {
+    return _addFavoritoSimples(TipoFavorito.diagnostico, id);
   }
 
   /// Adiciona cultura aos favoritos
   /// @Deprecated Use `addFavorito(FavoritoEntity)` em vez disso
-  Future<bool> addCultura(String id) async {
-    return await _addFavoritoSimples(TipoFavorito.cultura, id);
+  Future<Either<Failure, bool>> addCultura(String id) async {
+    return _addFavoritoSimples(TipoFavorito.cultura, id);
   }
 
   /// Remove defensivo dos favoritos
-  Future<bool> removeDefensivo(String id) async {
-    return await removeFavorito(TipoFavorito.defensivo, id);
+  Future<Either<Failure, bool>> removeDefensivo(String id) async {
+    return removeFavorito(TipoFavorito.defensivo, id);
   }
 
   /// Remove praga dos favoritos
-  Future<bool> removePraga(String id) async {
-    return await removeFavorito(TipoFavorito.praga, id);
+  Future<Either<Failure, bool>> removePraga(String id) async {
+    return removeFavorito(TipoFavorito.praga, id);
   }
 
   /// Remove diagnóstico dos favoritos
-  Future<bool> removeDiagnostico(String id) async {
-    return await removeFavorito(TipoFavorito.diagnostico, id);
+  Future<Either<Failure, bool>> removeDiagnostico(String id) async {
+    return removeFavorito(TipoFavorito.diagnostico, id);
   }
 
   /// Remove cultura dos favoritos
-  Future<bool> removeCultura(String id) async {
-    return await removeFavorito(TipoFavorito.cultura, id);
+  Future<Either<Failure, bool>> removeCultura(String id) async {
+    return removeFavorito(TipoFavorito.cultura, id);
   }
 }

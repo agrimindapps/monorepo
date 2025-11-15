@@ -640,7 +640,7 @@ class ReceitaAgroAuthNotifier extends _$ReceitaAgroAuthNotifier {
 
   Future<void> _syncUserProfile(UserEntity user, DeviceInfo deviceInfo) async {
     // TODO: Implementar sincronização de perfil quando a box "users" for configurada
-    // A box Hive "users" precisa ser registrada antes de habilitar esta funcionalidade
+    // Storage configuration needed de habilitar esta funcionalidade
     // Por enquanto, apenas logamos que o perfil foi carregado
     if (kDebugMode) {
       print('ℹ️ Auth Notifier: Sincronização de perfil desabilitada temporariamente');
@@ -648,7 +648,7 @@ class ReceitaAgroAuthNotifier extends _$ReceitaAgroAuthNotifier {
       print('   Device: ${deviceInfo.platform} - ${deviceInfo.uuid}');
     }
 
-    // Comentado temporariamente até configurar a box Hive users
+    // Commented temporarily
     /*
     try {
       if (user.id.isEmpty) {

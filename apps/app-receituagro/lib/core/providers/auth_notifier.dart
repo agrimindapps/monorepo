@@ -583,7 +583,7 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
   /// que usarem o mesmo dispositivo após logout.
   ///
   /// Dados limpos:
-  /// - Status premium local (Hive)
+  /// - Status premium local
   /// - Favoritos salvos
   /// - Comentários privados
   /// - SharedPreferences relacionadas a premium

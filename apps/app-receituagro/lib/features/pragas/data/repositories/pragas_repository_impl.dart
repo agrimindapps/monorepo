@@ -3,11 +3,11 @@ import 'package:core/core.dart' hide Column;
 import '../../../../database/repositories/pragas_repository.dart';
 import '../../domain/entities/praga_entity.dart';
 import '../../domain/repositories/i_pragas_repository.dart';
-import '../../presentation/services/pragas_error_message_service.dart';
+import '../../domain/services/i_pragas_error_message_service.dart';
+import '../../domain/services/i_pragas_query_service.dart';
+import '../../domain/services/i_pragas_search_service.dart';
+import '../../domain/services/i_pragas_stats_service.dart';
 import '../mappers/praga_mapper.dart';
-import '../services/pragas_query_service.dart';
-import '../services/pragas_search_service.dart';
-import '../services/pragas_stats_service.dart';
 
 /// Implementação do repositório de pragas usando Drift (Data Layer)
 ///
@@ -28,7 +28,7 @@ class PragasRepositoryImpl implements IPragasRepository {
   final IPragasQueryService _queryService;
   final IPragasSearchService _searchService;
   final IPragasStatsService _statsService;
-  final PragasErrorMessageService _errorService;
+  final IPragasErrorMessageService _errorService;
 
   PragasRepositoryImpl(
     this._repository,
@@ -240,7 +240,7 @@ class PragasRepositoryImpl implements IPragasRepository {
 @LazySingleton(as: IPragasHistoryRepository)
 class PragasHistoryRepositoryImpl implements IPragasHistoryRepository {
   final PragasRepository _repository;
-  final PragasErrorMessageService _errorService;
+  final IPragasErrorMessageService _errorService;
 
   static const int _maxRecentItems = 7;
   static const int _maxSuggestedItems = 5;

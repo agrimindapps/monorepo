@@ -54,7 +54,7 @@ class DiagnosticoRepository {
   /// Busca diagnósticos por defensivo
   Future<List<Diagnostico>> findByDefensivo(int defensivoId) async {
     return await (_db.select(_db.diagnosticos)
-          ..where((tbl) => tbl.defenisivoId.equals(defensivoId)))
+          ..where((tbl) => tbl.defensivoId.equals(defensivoId)))
         .get();
   }
 
@@ -77,7 +77,7 @@ class DiagnosticoRepository {
     final query = _db.select(_db.diagnosticos).join([
       leftOuterJoin(
         _db.fitossanitarios,
-        _db.fitossanitarios.id.equalsExp(_db.diagnosticos.defenisivoId),
+        _db.fitossanitarios.id.equalsExp(_db.diagnosticos.defensivoId),
       ),
       leftOuterJoin(
         _db.culturas,
@@ -106,7 +106,7 @@ class DiagnosticoRepository {
     final query = _db.select(_db.diagnosticos).join([
       leftOuterJoin(
         _db.fitossanitarios,
-        _db.fitossanitarios.id.equalsExp(_db.diagnosticos.defenisivoId),
+        _db.fitossanitarios.id.equalsExp(_db.diagnosticos.defensivoId),
       ),
       leftOuterJoin(
         _db.culturas,
@@ -137,7 +137,7 @@ class DiagnosticoRepository {
     final query = _db.select(_db.diagnosticos).join([
       leftOuterJoin(
         _db.fitossanitarios,
-        _db.fitossanitarios.id.equalsExp(_db.diagnosticos.defenisivoId),
+        _db.fitossanitarios.id.equalsExp(_db.diagnosticos.defensivoId),
       ),
       leftOuterJoin(
         _db.culturas,
@@ -148,7 +148,7 @@ class DiagnosticoRepository {
         _db.pragas.id.equalsExp(_db.diagnosticos.pragaId),
       ),
     ])
-      ..where(_db.diagnosticos.defenisivoId.equals(defensivoId));
+      ..where(_db.diagnosticos.defensivoId.equals(defensivoId));
 
     final results = await query.get();
 

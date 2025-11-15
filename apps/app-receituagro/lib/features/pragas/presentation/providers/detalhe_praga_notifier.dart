@@ -273,17 +273,21 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     final itemId = pragaData?.idReg ?? currentState.pragaName;
 
     try {
-      final isFavorited = await _favoritosRepository.isFavorito(
+      final result = await _favoritosRepository.isFavorito(
         'praga',
         itemId,
       );
+
+      // Unwrap Either<Failure, bool>
+      final isFavorited = result.fold(
+        (failure) => false,
+        (value) => value,
+      );
+
       state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
     } catch (e) {
-      final isFavorited = await _favoritosRepository.isFavorito(
-        'praga',
-        itemId,
-      );
-      state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
+      // On error, assume not favorited
+      state = AsyncValue.data(currentState.copyWith(isFavorited: false));
     }
   }
 
@@ -310,17 +314,21 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     final itemId = pragaData?.idReg ?? currentState.pragaName;
 
     try {
-      final isFavorited = await _favoritosRepository.isFavorito(
+      final result = await _favoritosRepository.isFavorito(
         'praga',
         itemId,
       );
+
+      // Unwrap Either<Failure, bool>
+      final isFavorited = result.fold(
+        (failure) => false,
+        (value) => value,
+      );
+
       state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
     } catch (e) {
-      final isFavorited = await _favoritosRepository.isFavorito(
-        'praga',
-        itemId,
-      );
-      state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
+      // On error, assume not favorited
+      state = AsyncValue.data(currentState.copyWith(isFavorited: false));
     }
   }
 
@@ -503,34 +511,15 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     );
 
     try {
-      final success = await _favoritosRepository.toggleFavorito(
+      final result = await _favoritosRepository.toggleFavorito(
         'praga',
         itemId,
       );
 
-      if (!success) {
-        state = AsyncValue.data(
-          currentState.copyWith(
-            isFavorited: wasAlreadyFavorited,
-            errorMessage:
-                'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito',
-          ),
-        );
-        return false;
-      }
-
-      state = AsyncValue.data(
-        currentState.copyWith(isFavorited: !wasAlreadyFavorited).clearError(),
-      );
-      return true;
-    } catch (e) {
-      try {
-        final success = await _favoritosRepository.toggleFavorito(
-          'praga',
-          itemId,
-        );
-
-        if (!success) {
+      // Unwrap Either<Failure, bool>
+      return result.fold(
+        (failure) {
+          // On failure, revert state
           state = AsyncValue.data(
             currentState.copyWith(
               isFavorited: wasAlreadyFavorited,
@@ -539,22 +528,35 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
             ),
           );
           return false;
-        }
+        },
+        (success) {
+          if (!success) {
+            state = AsyncValue.data(
+              currentState.copyWith(
+                isFavorited: wasAlreadyFavorited,
+                errorMessage:
+                    'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito',
+              ),
+            );
+            return false;
+          }
 
-        state = AsyncValue.data(
-          currentState.copyWith(isFavorited: !wasAlreadyFavorited).clearError(),
-        );
-        return true;
-      } catch (fallbackError) {
-        state = AsyncValue.data(
-          currentState.copyWith(
-            isFavorited: wasAlreadyFavorited,
-            errorMessage:
-                'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito',
-          ),
-        );
-        return false;
-      }
+          state = AsyncValue.data(
+            currentState.copyWith(isFavorited: !wasAlreadyFavorited).clearError(),
+          );
+          return true;
+        },
+      );
+    } catch (e) {
+      // On exception, revert state
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isFavorited: wasAlreadyFavorited,
+          errorMessage:
+              'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito: ${e.toString()}',
+        ),
+      );
+      return false;
     }
   }
 

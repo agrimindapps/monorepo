@@ -152,8 +152,18 @@ class FavoritosNotifier extends _$FavoritosNotifier {
   /// Novo padrão: Carrega uma única lista genérica em vez de 5 separadas
   Future<void> loadAllFavoritos() async {
     await _executeOperation(() async {
-      final favoritos = await _repository.getAll();
-      state = state.copyWith(favoritos: favoritos);
+      final result = await _repository.getAll();
+
+      // Unwrap Either<Failure, List<FavoritoEntity>>
+      result.fold(
+        (failure) {
+          // On failure, keep current favoritos or empty list
+          state = state.copyWith(favoritos: []);
+        },
+        (favoritos) {
+          state = state.copyWith(favoritos: favoritos);
+        },
+      );
     });
   }
 
@@ -194,7 +204,13 @@ class FavoritosNotifier extends _$FavoritosNotifier {
   /// Verifica se um item é favorito
   Future<bool> isFavorito(String tipo, String id) async {
     try {
-      return await _repository.isFavorito(tipo, id);
+      final result = await _repository.isFavorito(tipo, id);
+
+      // Unwrap Either<Failure, bool>
+      return result.fold(
+        (failure) => false,
+        (value) => value,
+      );
     } catch (e) {
       return false;
     }
@@ -205,7 +221,13 @@ class FavoritosNotifier extends _$FavoritosNotifier {
     try {
       _setLoading(true);
 
-      final result = await _repository.toggleFavorito(tipo, id);
+      final eitherResult = await _repository.toggleFavorito(tipo, id);
+
+      // Unwrap Either<Failure, bool>
+      final result = eitherResult.fold(
+        (failure) => false,
+        (value) => value,
+      );
 
       if (result) {
         await loadAllFavoritos(); // Recarrega após toggle
@@ -227,19 +249,24 @@ class FavoritosNotifier extends _$FavoritosNotifier {
       _setLoading(true);
 
       // Usa os métodos específicos ainda disponíveis
+      // These methods return Either<Failure, bool>, so we need to unwrap them
       bool result;
       switch (tipo) {
         case TipoFavorito.defensivo:
-          result = await _repository.addDefensivo(id);
+          final r = await _repository.addDefensivo(id);
+          result = r.fold((failure) => false, (success) => success);
           break;
         case TipoFavorito.praga:
-          result = await _repository.addPraga(id);
+          final r = await _repository.addPraga(id);
+          result = r.fold((failure) => false, (success) => success);
           break;
         case TipoFavorito.diagnostico:
-          result = await _repository.addDiagnostico(id);
+          final r = await _repository.addDiagnostico(id);
+          result = r.fold((failure) => false, (success) => success);
           break;
         case TipoFavorito.cultura:
-          result = await _repository.addCultura(id);
+          final r = await _repository.addCultura(id);
+          result = r.fold((failure) => false, (success) => success);
           break;
         default:
           result = false;
@@ -263,7 +290,13 @@ class FavoritosNotifier extends _$FavoritosNotifier {
     try {
       _setLoading(true);
 
-      final result = await _repository.removeFavorito(tipo, id);
+      final eitherResult = await _repository.removeFavorito(tipo, id);
+
+      // Unwrap Either<Failure, bool>
+      final result = eitherResult.fold(
+        (failure) => false,
+        (success) => success,
+      );
 
       if (result) {
         await loadAllFavoritos(); // Recarrega após remover
@@ -284,8 +317,17 @@ class FavoritosNotifier extends _$FavoritosNotifier {
       if (query.trim().isEmpty) {
         await loadAllFavoritos();
       } else {
-        final favoritos = await _repository.search(query);
-        state = state.copyWith(favoritos: favoritos);
+        final result = await _repository.search(query);
+
+        // Unwrap Either<Failure, List<FavoritoEntity>>
+        result.fold(
+          (failure) {
+            state = state.copyWith(favoritos: []);
+          },
+          (favoritos) {
+            state = state.copyWith(favoritos: favoritos);
+          },
+        );
       }
     });
   }
@@ -293,8 +335,18 @@ class FavoritosNotifier extends _$FavoritosNotifier {
   /// Carrega estatísticas
   Future<void> loadStats() async {
     await _executeOperation(() async {
-      final stats = await _repository.getStats();
-      state = state.copyWith(stats: stats);
+      final result = await _repository.getStats();
+
+      // Unwrap Either<Failure, FavoritosStats>
+      result.fold(
+        (failure) {
+          // On failure, use empty stats or keep current
+          state = state.copyWith(stats: FavoritosStats.empty());
+        },
+        (stats) {
+          state = state.copyWith(stats: stats);
+        },
+      );
     });
   }
 

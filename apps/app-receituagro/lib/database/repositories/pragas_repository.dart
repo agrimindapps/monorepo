@@ -1,4 +1,6 @@
 import 'package:core/core.dart';
+import 'package:drift/drift.dart';
+
 import '../receituagro_database.dart';
 
 /// Repositório de Pragas usando Drift
@@ -33,7 +35,7 @@ class PragasRepository {
   /// Busca pragas por nome (busca parcial)
   Future<List<Praga>> findByNome(String nome) async {
     final query = _db.select(_db.pragas)
-      ..where((tbl) => tbl.nome.contains(nome));
+      ..where((tbl) => tbl.nome.like('%$nome%'));
     return await query.get();
   }
 
@@ -45,10 +47,11 @@ class PragasRepository {
 
   /// Conta o total de pragas
   Future<int> count() async {
-    final count = _db.pragas.id.count();
-    final query = _db.selectOnly(_db.pragas)..addColumns([count]);
+    final countColumn = _db.pragas.id.count();
+    final query = _db.selectOnly(_db.pragas)
+      ..addColumns([countColumn]);
     final result = await query.getSingle();
-    return result.read(count)!;
+    return result.read(countColumn)!;
   }
 
   /// Carrega dados do JSON e salva no banco Drift

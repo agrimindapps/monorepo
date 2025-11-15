@@ -1,7 +1,7 @@
 import 'package:app_receituagro/core/di/injection.dart' as di;
 import 'package:flutter/material.dart';
+import '../domain/services/i_pragas_type_service.dart';
 import '../data/praga_view_mode.dart';
-import '../presentation/services/pragas_type_service.dart';
 
 class PragaSearchFieldWidget extends StatefulWidget {
   final TextEditingController controller;
@@ -36,14 +36,14 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
   late Animation<double> _scaleAnimation;
   late Animation<double> _elevationAnimation;
   final FocusNode _focusNode = FocusNode();
-  late PragasTypeService _typeService;
+  late IPragasTypeService _typeService;
   bool _isFocused = false;
 
   @override
   void initState() {
     super.initState();
 
-    _typeService = di.getIt<PragasTypeService>();
+    _typeService = di.getIt<IPragasTypeService>();
 
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 500),
@@ -96,7 +96,7 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
     super.dispose();
   }
 
-  /// Refactored to use PragasTypeService (SOLID compliance)
+  /// Refactored to use IPragasTypeService (SOLID compliance)
   String get _hintText {
     final typeName = _typeService.getTypeLabel(widget.pragaType);
     return 'Localizar ${typeName.toLowerCase()}...';

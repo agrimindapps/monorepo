@@ -83,7 +83,7 @@ class DiagnosticoResolverStrategy implements IFavoritosDataResolverStrategy {
       // Fetch related data using FKs
       final praga = await _pragasRepository.findById(item.pragaId);
       final defensivo =
-          await _fitossanitariosRepository.findById(item.defenisivoId);
+          await _fitossanitariosRepository.findById(item.defensivoId);
       final cultura = await _culturasRepository.findById(item.culturaId);
 
       return {

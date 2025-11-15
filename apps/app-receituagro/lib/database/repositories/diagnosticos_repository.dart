@@ -57,7 +57,7 @@ class DiagnosticosRepository {
     // Faz busca manual com filtros
     final all = await _baseRepo.findAll();
     return all.where((d) {
-      if (defensivoId != null && d.defenisivoId != defensivoId) {
+      if (defensivoId != null && d.defensivoId != defensivoId) {
         return false;
       }
       if (culturaId != null && d.culturaId != culturaId) {

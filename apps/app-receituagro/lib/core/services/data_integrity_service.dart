@@ -72,21 +72,21 @@ class IntegrityReport {
 
 /// Serviço de validação de integridade referencial dos dados
 ///
-/// DEPRECATED: This service depends on Hive which has been removed.
+/// DEPRECATED: Service removed
 /// TODO: Reimplement using Drift database queries and foreign key constraints.
 /// 
 /// MIGRATION NOTES:
 /// - Drift has built-in foreign key support
 /// - Use database queries instead of BoxManager
 /// - Leverage Drift's referential integrity features
-@Deprecated('Hive removed. Reimplement with Drift.')
+@Deprecated('Service removed. Use Drift instead.')
 class DataIntegrityService {
   
-  DataIntegrityService(dynamic _hiveManager);
+  DataIntegrityService(dynamic _deprecated);
 
   /// Valida a integridade referencial de todos os diagnósticos
   /// DEPRECATED: Returns empty report. Reimplement with Drift.
-  @Deprecated('Hive removed. Reimplement with Drift.')
+  @Deprecated('Service removed. Use Drift instead.')
   Future<Either<Failure, IntegrityReport>> validateIntegrity() async {
     developer.log(
       'DataIntegrityService is deprecated - returning empty report',
@@ -98,14 +98,14 @@ class DataIntegrityService {
 
   /// Valida integridade de um diagnóstico específico
   /// DEPRECATED: Returns empty list. Reimplement with Drift.
-  @Deprecated('Hive removed. Reimplement with Drift.')
+  @Deprecated('Service removed. Use Drift instead.')
   Future<Either<Failure, List<String>>> validateDiagnostico(dynamic diagnostico) async {
     return const Right([]);
   }
 
   /// Tenta corrigir diagnósticos com referências inválidas
   /// DEPRECATED: Returns empty list. Reimplement with Drift.
-  @Deprecated('Hive removed. Reimplement with Drift.')
+  @Deprecated('Service removed. Use Drift instead.')
   Future<Either<Failure, List<dynamic>>> fixMissingReferences() async {
     return const Right([]);
   }

@@ -117,7 +117,7 @@ class ErrorHandlerService {
         suggestions: ['Verifique sua conexão', 'Tente novamente'],
       );
     }
-    if (error.toString().contains('HiveError') || 
+    || 
         error.toString().contains('DatabaseException')) {
       return ErrorInfo(
         type: ErrorType.storage,

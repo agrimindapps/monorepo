@@ -2,7 +2,9 @@ import 'package:core/core.dart' hide Column;
 
 import '../../../../database/repositories/comentarios_repository.dart';
 import '../../domain/entities/comentario_entity.dart';
+import '../../domain/repositories/i_comentarios_read_repository.dart';
 import '../../domain/repositories/i_comentarios_repository.dart';
+import '../../domain/repositories/i_comentarios_write_repository.dart';
 import '../services/comentarios_mapper.dart';
 
 /// Implementation of IComentariosRepository using Drift local storage.
@@ -14,10 +16,22 @@ import '../services/comentarios_mapper.dart';
 /// - Separated search logic to ComentariosSearchService (SRP)
 /// - Repository now focuses only on CRUD operations
 /// - All dependencies injected to improve testability (DIP)
+/// - **NEW**: Implements segregated read/write interfaces (ISP)
 ///
 /// This follows the pattern established in diagnosticos feature.
+///
+/// Injectable as:
+/// - IComentariosRepository (deprecated, backward compatibility)
+/// - IComentariosReadRepository (for read-only clients)
+/// - IComentariosWriteRepository (for write-only clients)
 @LazySingleton(as: IComentariosRepository)
-class ComentariosRepositoryImpl implements IComentariosRepository {
+@LazySingleton(as: IComentariosReadRepository)
+@LazySingleton(as: IComentariosWriteRepository)
+class ComentariosRepositoryImpl
+    implements
+        IComentariosRepository,
+        IComentariosReadRepository,
+        IComentariosWriteRepository {
   final ComentariosRepository _repository;
   final IComentariosMapper _mapper;
 

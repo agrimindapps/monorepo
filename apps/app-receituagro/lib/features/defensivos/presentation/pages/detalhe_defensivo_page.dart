@@ -192,7 +192,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
           for (int i = 0; i < sample.length; i++) {
             final diag = sample[i];
             debugPrint(
-              '[$i] SAMPLE: defenisivoId="${diag.defenisivoId}"',
+              '[$i] SAMPLE: defensivoId="${diag.defensivoId}"',
             );
           }
         } else {
@@ -208,7 +208,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
         for (int i = 0; i < sample.length; i++) {
           final diag = sample[i];
           debugPrint(
-          '[$i] SAMPLE: defenisivoId="${diag.defenisivoId}", idReg="${diag.idReg}"',
+          '[$i] SAMPLE: defensivoId="${diag.defensivoId}", idReg="${diag.idReg}"',
           );
         }
         debugPrint(

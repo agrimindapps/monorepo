@@ -2,12 +2,17 @@ import 'package:core/core.dart' hide Column;
 
 import '../../../database/repositories/pragas_repository.dart';
 import '../data/repositories/pragas_repository_impl.dart';
+import '../data/services/pragas_error_message_service.dart';
 import '../data/services/pragas_query_service.dart';
 import '../data/services/pragas_search_service.dart';
 import '../data/services/pragas_stats_service.dart';
+import '../data/services/pragas_type_service.dart';
 import '../domain/repositories/i_pragas_repository.dart';
-import '../presentation/services/pragas_error_message_service.dart';
-import '../presentation/services/pragas_type_service.dart';
+import '../domain/services/i_pragas_error_message_service.dart';
+import '../domain/services/i_pragas_query_service.dart';
+import '../domain/services/i_pragas_search_service.dart';
+import '../domain/services/i_pragas_stats_service.dart';
+import '../domain/services/i_pragas_type_service.dart';
 
 /// Configuração de Dependency Injection para o módulo de Pragas
 ///
@@ -35,15 +40,15 @@ class PragasDI {
       sl.registerSingleton<IPragasStatsService>(PragasStatsService());
     }
 
-    // Register presentation services
-    if (!sl.isRegistered<PragasErrorMessageService>()) {
-      sl.registerSingleton<PragasErrorMessageService>(
+    // Register domain services (now with interface)
+    if (!sl.isRegistered<IPragasErrorMessageService>()) {
+      sl.registerSingleton<IPragasErrorMessageService>(
         PragasErrorMessageService(),
       );
     }
 
-    if (!sl.isRegistered<PragasTypeService>()) {
-      sl.registerSingleton<PragasTypeService>(PragasTypeService());
+    if (!sl.isRegistered<IPragasTypeService>()) {
+      sl.registerSingleton<IPragasTypeService>(PragasTypeService());
     }
 
     // Register repository with service dependencies
@@ -53,14 +58,14 @@ class PragasDI {
         sl<IPragasQueryService>(),
         sl<IPragasSearchService>(),
         sl<IPragasStatsService>(),
-        sl<PragasErrorMessageService>(),
+        sl<IPragasErrorMessageService>(),
       ),
     );
 
     sl.registerLazySingleton<IPragasHistoryRepository>(
       () => PragasHistoryRepositoryImpl(
         sl<PragasRepository>(),
-        sl<PragasErrorMessageService>(),
+        sl<IPragasErrorMessageService>(),
       ),
     );
 

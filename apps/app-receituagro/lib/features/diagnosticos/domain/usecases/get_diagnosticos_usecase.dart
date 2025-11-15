@@ -97,7 +97,7 @@ class GetDiagnosticosUseCase {
         );
       }
 
-      return await _repository.getByDefensivo(params.idDefensivo);
+      return await _repository.queryByDefensivo(params.idDefensivo);
     } catch (e) {
       return Left(
         CacheFailure('Erro ao buscar por defensivo: ${e.toString()}'),
@@ -115,7 +115,7 @@ class GetDiagnosticosUseCase {
         );
       }
 
-      return await _repository.getByCultura(params.idCultura);
+      return await _repository.queryByCultura(params.idCultura);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar por cultura: ${e.toString()}'));
     }
@@ -129,7 +129,7 @@ class GetDiagnosticosUseCase {
         return const Left(ValidationFailure('ID da praga não pode ser vazio'));
       }
 
-      return await _repository.getByPraga(params.idPraga);
+      return await _repository.queryByPraga(params.idPraga);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar por praga: ${e.toString()}'));
     }
@@ -360,7 +360,7 @@ class GetDiagnosticosByDefensivoUseCase {
         );
       }
 
-      return await _repository.getByDefensivo(idDefensivo);
+      return await _repository.queryByDefensivo(idDefensivo);
     } catch (e) {
       return Left(
         CacheFailure('Erro ao buscar por defensivo: ${e.toString()}'),
@@ -386,7 +386,7 @@ class GetDiagnosticosByCulturaUseCase {
         );
       }
 
-      return await _repository.getByCultura(idCultura);
+      return await _repository.queryByCultura(idCultura);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar por cultura: ${e.toString()}'));
     }
@@ -406,7 +406,7 @@ class GetDiagnosticosByPragaUseCase {
         return const Left(ValidationFailure('ID da praga não pode ser vazio'));
       }
 
-      return await _repository.getByPraga(idPraga);
+      return await _repository.queryByPraga(idPraga);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar por praga: ${e.toString()}'));
     }

@@ -42,8 +42,7 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await ThemePreferenceMigration.migratePreferences();
 
-  // ✅ REMOVED: Hive no longer needed - using in-memory storage
-  // await Hive.initFlutter();
+
 
   await di.init();
   await _initializeFirebaseServices();

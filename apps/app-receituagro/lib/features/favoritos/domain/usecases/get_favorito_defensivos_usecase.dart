@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 
 import '../entities/favorito_entity.dart';
 import '../repositories/i_favoritos_repository.dart';
@@ -35,11 +35,10 @@ class GetFavoritoDefensivosUseCase {
   /// Retorna `Either<Failure, List<FavoritoDefensivoEntity>>`
   Future<Either<Failure, List<FavoritoDefensivoEntity>>> call() async {
     try {
-      final defensivosFavoritos = await _repository.getDefensivos();
-
-      return Right(defensivosFavoritos);
+      final defensivos = await _repository.getDefensivos();
+      return Right<Failure, List<FavoritoDefensivoEntity>>(defensivos);
     } catch (e) {
-      return Left(
+      return Left<Failure, List<FavoritoDefensivoEntity>>(
         CacheFailure('Erro ao obter defensivos favoritos: ${e.toString()}'),
       );
     }

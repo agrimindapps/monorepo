@@ -3,7 +3,7 @@ import 'package:core/src/domain/repositories/i_local_storage_repository.dart'
     as storage;
 
 /// Minimal web-compatible implementation of ILocalStorageRepository
-/// Used when Hive is not available (e.g., on web platform)
+/// Web storage implementation
 /// All operations succeed but don't actually store data
 class WebLocalStorageRepository implements ILocalStorageRepository {
   @override

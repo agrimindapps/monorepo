@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 
 import '../repositories/i_favoritos_repository.dart';
 
@@ -40,28 +40,28 @@ class RemoveFavoritoUseCase {
     required String tipo,
     required String id,
   }) async {
-    try {
-      // Validação de parâmetros
-      if (tipo.isEmpty || id.isEmpty) {
-        return Left(ValidationFailure('Tipo e ID são obrigatórios'));
-      }
-
-      // Verifica se existe nos favoritos
-      final isFavorite = await _repository.isFavorito(tipo, id);
-      if (!isFavorite) {
-        return Left(NotFoundFailure('Favorito não encontrado: $tipo/$id'));
-      }
-
-      // Tenta remover dos favoritos
-      final result = await _repository.removeFavorito(tipo, id);
-
-      if (!result) {
-        return Left(CacheFailure('Falha ao remover $tipo dos favoritos'));
-      }
-
-      return Right(result);
-    } catch (e) {
-      return Left(CacheFailure('Erro ao remover favorito: ${e.toString()}'));
+    // Validação de parâmetros
+    if (tipo.isEmpty || id.isEmpty) {
+      return Left<Failure, bool>(
+        ValidationFailure('Tipo e ID são obrigatórios'),
+      );
     }
+
+    // Verifica se existe nos favoritos
+    final isFavoriteResult = await _repository.isFavorito(tipo, id);
+
+    final isFavorite = isFavoriteResult.fold(
+      (failure) => throw Exception(failure.message),
+      (result) => result,
+    );
+
+    if (!isFavorite) {
+      return Left<Failure, bool>(
+        NotFoundFailure('Favorito não encontrado: $tipo/$id'),
+      );
+    }
+
+    // Tenta remover dos favoritos
+    return _repository.removeFavorito(tipo, id);
   }
 }

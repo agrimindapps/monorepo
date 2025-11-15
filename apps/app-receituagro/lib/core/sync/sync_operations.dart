@@ -1,4 +1,4 @@
-// TEMPORARILY DISABLED: Hive to Drift migration in progress
+// TEMPORARILY DISABLED: Migration in progress
 // Minimal stub implementation - full implementation in sync_operations_backup.dart
 // ignore_for_file: unused_field, cancel_subscriptions
 import 'dart:async';

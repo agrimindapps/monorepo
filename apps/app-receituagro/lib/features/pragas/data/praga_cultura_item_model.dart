@@ -1,5 +1,5 @@
 import 'package:app_receituagro/core/di/injection.dart' as di;
-import '../presentation/services/pragas_type_service.dart';
+import '../domain/services/i_pragas_type_service.dart';
 
 class PragaCulturaItemModel {
   final String idReg;
@@ -29,9 +29,9 @@ class PragaCulturaItemModel {
   String get displayName => nomeComum;
   String get displaySecondaryName => nomeSecundario ?? nomeCientifico ?? '';
 
-  /// Refactored to use PragasTypeService (SOLID compliance)
+  /// Refactored to use IPragasTypeService (SOLID compliance)
   String get displayType {
-    final typeService = di.getIt<PragasTypeService>();
+    final typeService = di.getIt<IPragasTypeService>();
     return typeService.getTypeLabel(tipoPraga ?? '');
   }
 

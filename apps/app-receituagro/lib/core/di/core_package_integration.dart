@@ -63,8 +63,8 @@ class CorePackageIntegration {
 
   /// Register Core Package repositories (primary integration layer)
   static Future<void> _registerCoreRepositories() async {
-    // ✅ REMOVED: Hive dependency - using in-memory storage only
-    // IHiveManager registration removed - no longer needed
+    // ✅ Storage implementation simplified
+    // Legacy storage removed
     
     // ⚠️ REMOVED: EnhancedStorageService no longer exists
     // try {
@@ -244,7 +244,7 @@ class CorePackageIntegration {
     try {
       if (kDebugMode) {
         developer.log(
-          'SelectiveSyncService registration disabled - constructor requires hiveStorage parameter',
+          'SelectiveSyncService registration disabled',
           name: 'CorePackageIntegration',
           level: 500,
         );
@@ -401,8 +401,8 @@ class CorePackageIntegration {
 
   /// Register only auth services from Core Package
   static Future<void> _registerAuthServices() async {
-    // ✅ REMOVED: Hive dependency - using in-memory storage only
-    // IHiveManager registration removed - no longer needed
+    // ✅ Storage implementation simplified
+    // Legacy storage removed
     
     // IAuthRepository is already registered by core.InjectionContainer.init()
     // Skip registration to avoid duplicate registration error

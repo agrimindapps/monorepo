@@ -5,7 +5,7 @@ extension DiagnosticoDetalhadoExtension on DiagnosticoDetalhado {
   /// Verifica se o diagnóstico tem todas as informações necessárias
   bool get isValid =>
       diagnostico.idReg.isNotEmpty &&
-      diagnostico.defenisivoId > 0 &&
+      diagnostico.defensivoId > 0 &&
       diagnostico.culturaId > 0 &&
       diagnostico.pragaId > 0;
 

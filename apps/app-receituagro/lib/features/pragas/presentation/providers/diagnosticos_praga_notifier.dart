@@ -172,7 +172,8 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
     );
 
     try {
-      final result = await _diagnosticosRepository.getByPraga(pragaId);
+      // Use queryByPraga instead of deprecated getByPraga
+      final result = await _diagnosticosRepository.queryByPraga(pragaId);
 
       await result.fold(
         (failure) async {

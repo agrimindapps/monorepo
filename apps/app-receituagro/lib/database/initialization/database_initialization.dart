@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
+import 'package:drift/drift.dart';
 import '../receituagro_database.dart';
 
 /// Helper para inicializar o banco de dados Drift
@@ -45,11 +46,12 @@ class DatabaseInitialization {
   /// Verifica se o banco está acessível e retorna count de culturas
   static Future<int> _checkDatabase(ReceituagroDatabase db) async {
     try {
+      final countColumn = db.culturas.id.count();
       final query = db.selectOnly(db.culturas)
-        ..addColumns([db.culturas.id.count()]);
+        ..addColumns([countColumn]);
 
       final result = await query.getSingle();
-      return result.read(db.culturas.id.count()) ?? 0;
+      return result.read(countColumn) ?? 0;
     } catch (e) {
       developer.log(
         '⚠️ Erro ao verificar banco de dados: $e',

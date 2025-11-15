@@ -8,7 +8,7 @@ import '../utils/diagnostico_logger.dart';
 
 /// Extensão para Diagnostico (Drift) com métodos display e formatação
 extension DiagnosticoDriftExtension on Diagnostico {
-  /// Retorna o nome do defensivo SEMPRE resolvendo dinamicamente usando defenisivoId
+  /// Retorna o nome do defensivo SEMPRE resolvendo dinamicamente usando defensivoId
   /// NUNCA usa dados armazenados (sempre busca do banco)
   Future<String> getDisplayNomeDefensivo() async {
     final result = await getDisplayNomeDefensivoWithWarnings();
@@ -19,7 +19,7 @@ extension DiagnosticoDriftExtension on Diagnostico {
   Future<DataWithWarnings<String>> getDisplayNomeDefensivoWithWarnings() async {
     try {
       final repository = di.sl<FitossanitariosRepository>();
-      final defensivo = await repository.findById(defenisivoId);
+      final defensivo = await repository.findById(defensivoId);
       if (defensivo != null && defensivo.nomeComum?.isNotEmpty == true) {
         return DataWithWarnings(data: defensivo.nomeComum!);
       } else if (defensivo != null && defensivo.nome.isNotEmpty) {
@@ -28,7 +28,7 @@ extension DiagnosticoDriftExtension on Diagnostico {
     } catch (e, stackTrace) {
       DiagnosticoLogger.dataResolutionFailure(
         'defensivo',
-        defenisivoId.toString(),
+        defensivoId.toString(),
         e,
       );
       DiagnosticoLogger.error(
@@ -44,13 +44,13 @@ extension DiagnosticoDriftExtension on Diagnostico {
 
     DiagnosticoLogger.dataResolutionFailure(
       'defensivo',
-      defenisivoId.toString(),
+      defensivoId.toString(),
       'Defensivo não encontrado',
     );
     return DataWithWarnings(
       data: 'Defensivo não identificado',
       warnings: [
-        'Defensivo com ID $defenisivoId não encontrado na base de dados',
+        'Defensivo com ID $defensivoId não encontrado na base de dados',
       ],
     );
   }
@@ -196,7 +196,7 @@ extension DiagnosticoDriftExtension on Diagnostico {
     // Resolver dados do defensivo
     try {
       final fitossanitarioRepo = di.sl<FitossanitariosRepository>();
-      final defensivo = await fitossanitarioRepo.findById(defenisivoId);
+      final defensivo = await fitossanitarioRepo.findById(defensivoId);
       if (defensivo != null) {
         if (defensivo.ingredienteAtivo?.isNotEmpty == true) {
           ingredienteAtivo = defensivo.ingredienteAtivo!;

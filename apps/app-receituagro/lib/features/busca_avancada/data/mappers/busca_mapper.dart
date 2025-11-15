@@ -19,7 +19,7 @@ class BuscaMapper {
     try {
       final defensivoRepo = sl<FitossanitariosRepository>();
       final defensivo = await defensivoRepo.findByIdDefensivo(
-        diagnostico.defenisivoId.toString(),
+        diagnostico.defensivoId.toString(),
       );
       if (defensivo != null && defensivo.nome.isNotEmpty) {
         defensivoNome = defensivo.nome;
@@ -48,7 +48,7 @@ class BuscaMapper {
       metadata: {
         'idCultura': diagnostico.culturaId.toString(),
         'idPraga': diagnostico.pragaId.toString(),
-        'idDefensivo': diagnostico.defenisivoId.toString(),
+        'idDefensivo': diagnostico.defensivoId.toString(),
         'cultura': culturaNome,
         'praga': pragaNome,
         'defensivo': defensivoNome,

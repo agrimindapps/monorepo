@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/failure_message_service.dart';
+import '../../../../core/services/i_recommendation_service.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/services/filtering/i_diagnosticos_filter_service.dart';
 import '../../domain/services/metadata/i_diagnosticos_metadata_service.dart';
@@ -14,17 +15,30 @@ import 'diagnosticos_state.dart';
 
 part 'diagnosticos_notifier.g.dart';
 
+/// @deprecated
 /// Notifier para gerenciar estado dos diagnósticos (Presentation Layer)
 /// Especializado em recomendações defensivo-cultura-praga
 ///
 /// IMPORTANTE: keepAlive mantém o state mesmo quando não há listeners
 /// Isso previne perda de dados ao navegar entre tabs ou fazer rebuilds temporários
 ///
-/// REFACTORING: Migrated to use Specialized Services (SOLID principles)
+/// REFACTORING: Este notifier foi DEPRECATED em favor de 5 notifiers especializados:
+/// - DiagnosticosListNotifier: gerenciamento de lista
+/// - DiagnosticosFilterNotifier: operações de filtro
+/// - DiagnosticosSearchNotifier: operações de busca
+/// - DiagnosticosRecommendationsNotifier: gerenciamento de recomendações
+/// - DiagnosticosStatsNotifier: estatísticas e análise
+///
+/// MIGRAÇÃO: Use os providers especializados ao invés deste notifier gigante.
+/// Esta classe será removida em uma futura versão após todos os usages
+/// serem migrados para os novos providers.
+///
+/// Migrated to use Specialized Services (SOLID principles):
 /// - DiagnosticosFilterService: filtering operations
 /// - DiagnosticosSearchService: search operations
 /// - DiagnosticosMetadataService: metadata extraction
-/// - DiagnosticosStatsService: analytics and statistics
+/// - DiagnosticosStatsService: analytics and statistics (domain-specific)
+/// - RecommendationService: recommendation logic (now extracted - SRP)
 /// - FailureMessageService: error message handling
 @Riverpod(keepAlive: true)
 class DiagnosticosNotifier extends _$DiagnosticosNotifier {
@@ -33,13 +47,12 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   late final IDiagnosticosSearchService _searchService;
   late final IDiagnosticosMetadataService _metadataService;
   late final IDiagnosticosStatsService _statsService;
+  late final IRecommendationService _recommendationService;
   late final FailureMessageService _failureMessageService;
 
   // ========== Use Cases (Kept for backward compatibility) ==========
   late final GetDiagnosticosUseCase _getDiagnosticosUseCase;
   late final GetDiagnosticoByIdUseCase _getDiagnosticoByIdUseCase;
-  late final GetRecomendacoesUseCase _getRecomendacoesUseCase;
-  late final ValidateCompatibilidadeUseCase _validateCompatibilidadeUseCase;
 
   @override
   Future<DiagnosticosState> build() async {
@@ -48,13 +61,12 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     _searchService = di.sl<IDiagnosticosSearchService>();
     _metadataService = di.sl<IDiagnosticosMetadataService>();
     _statsService = di.sl<IDiagnosticosStatsService>();
+    _recommendationService = di.sl<IRecommendationService>();
     _failureMessageService = di.sl<FailureMessageService>();
 
     // ========== Inject Use Cases (Kept for backward compatibility) ==========
     _getDiagnosticosUseCase = di.sl<GetDiagnosticosUseCase>();
     _getDiagnosticoByIdUseCase = di.sl<GetDiagnosticoByIdUseCase>();
-    _getRecomendacoesUseCase = di.sl<GetRecomendacoesUseCase>();
-    _validateCompatibilidadeUseCase = di.sl<ValidateCompatibilidadeUseCase>();
 
     return DiagnosticosState.initial();
   }
@@ -116,7 +128,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
             ];
           }
 
-          // CORREÇÃO: loadAllDiagnosticos atualiza tanto allDiagnosticos quanto filteredDiagnosticos
           state = AsyncValue.data(
             currentState
                 .copyWith(
@@ -141,6 +152,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Busca recomendações por cultura e praga
+  /// REFACTORED: Now uses injected RecommendationService
   Future<void> getRecomendacoesPara({
     required String idCultura,
     required String idPraga,
@@ -162,7 +174,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     );
 
     try {
-      final result = await _getRecomendacoesUseCase(
+      final result = await _recommendationService.getRecommendations(
         idCultura: idCultura,
         idPraga: idPraga,
         limit: limit,
@@ -182,7 +194,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
                 .copyWith(
                   isLoading: false,
                   filteredDiagnosticos: diagnosticos,
-                  // CORREÇÃO: Sempre atualiza allDiagnosticos quando há contexto
                   allDiagnosticos: diagnosticos,
                 )
                 .clearError(),
@@ -197,12 +208,10 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Busca diagnósticos por defensivo
-  /// REFACTORED: Now uses DiagnosticosFilterService
   Future<void> getDiagnosticosByDefensivo(
     String idDefensivo, {
     String? nomeDefensivo,
   }) async {
-    // CORREÇÃO: Aguarda a inicialização do provider
     await future;
 
     final currentState = state.requireValue;
@@ -217,7 +226,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     );
 
     try {
-      // REFACTORED: Use DiagnosticosFilterService instead of use case
       final result = await _filterService.filterByDefensivo(idDefensivo);
 
       result.fold(
@@ -233,17 +241,12 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
         (diagnosticos) {
           final updatedState = state.requireValue;
 
-          // CORREÇÃO: Atualiza filteredDiagnosticos com os resultados filtrados por defensivo
-          // IMPORTANTE: SEMPRE atualiza allDiagnosticos para garantir que o getter funcione
-          // CRÍTICO: MANTÉM o contextoDefensivo que foi definido no início do método
           state = AsyncValue.data(
             updatedState
                 .copyWith(
                   isLoading: false,
                   filteredDiagnosticos: diagnosticos,
-                  // CORREÇÃO: Sempre atualiza allDiagnosticos (não passa null)
                   allDiagnosticos: diagnosticos,
-                  // CRÍTICO: Reforça o contextoDefensivo para garantir que não seja perdido
                   contextoDefensivo: nomeDefensivo ?? idDefensivo,
                 )
                 .clearError(),
@@ -264,12 +267,10 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Busca diagnósticos por cultura
-  /// REFACTORED: Now uses DiagnosticosFilterService
   Future<void> getDiagnosticosByCultura(
     String idCultura, {
     String? nomeCultura,
   }) async {
-    // CORREÇÃO: Aguarda a inicialização do provider
     await future;
 
     final currentState = state.requireValue;
@@ -281,7 +282,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     );
 
     try {
-      // REFACTORED: Use DiagnosticosFilterService instead of use case
       final result = await _filterService.filterByCultura(idCultura);
       result.fold(
         (failure) {
@@ -298,7 +298,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
                 .copyWith(
                   isLoading: false,
                   filteredDiagnosticos: diagnosticos,
-                  // CORREÇÃO: Sempre atualiza allDiagnosticos quando há contexto
                   allDiagnosticos: diagnosticos,
                 )
                 .clearError(),
@@ -313,12 +312,10 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Busca diagnósticos por praga
-  /// REFACTORED: Now uses DiagnosticosFilterService
   Future<void> getDiagnosticosByPraga(
     String idPraga, {
     String? nomePraga,
   }) async {
-    // CORREÇÃO: Aguarda a inicialização do provider
     await future;
 
     final currentState = state.requireValue;
@@ -330,7 +327,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     );
 
     try {
-      // REFACTORED: Use DiagnosticosFilterService instead of use case
       final result = await _filterService.filterByPraga(idPraga);
       result.fold(
         (failure) {
@@ -347,7 +343,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
                 .copyWith(
                   isLoading: false,
                   filteredDiagnosticos: diagnosticos,
-                  // CORREÇÃO: Sempre atualiza allDiagnosticos quando há contexto
                   allDiagnosticos: diagnosticos,
                 )
                 .clearError(),
@@ -362,7 +357,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Busca com filtros
-  /// REFACTORED: Now uses DiagnosticosSearchService
   Future<void> searchWithFilters(DiagnosticoSearchFilters filters) async {
     final currentState = state.value;
     if (currentState == null) return;
@@ -375,7 +369,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     );
 
     try {
-      // REFACTORED: Use DiagnosticosSearchService instead of use case
       final result = await _searchService.searchWithFilters(filters);
       result.fold(
         (failure) {
@@ -392,7 +385,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
                 .copyWith(
                   isLoading: false,
                   filteredDiagnosticos: diagnosticos,
-                  // CORREÇÃO: Sempre atualiza allDiagnosticos quando há contexto
                   allDiagnosticos: diagnosticos,
                 )
                 .clearError(),
@@ -412,7 +404,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     if (currentState == null) return;
 
     if (culturaNome == null || culturaNome == 'Todas') {
-      // Restaurar todos os diagnósticos do contexto atual
       state = AsyncValue.data(
         currentState.copyWith(
           contextoCultura: null,
@@ -422,7 +413,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
       return;
     }
 
-    // Filtrar localmente por cultura
     final filtered = currentState.allDiagnosticos.where((diag) {
       final nomeCulturaLower = diag.nomeCultura?.toLowerCase() ?? '';
       final culturaNomeLower = culturaNome.toLowerCase();
@@ -438,37 +428,30 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Busca por padrão geral
-  /// REFACTORED: Now uses DiagnosticosSearchService (client-side optimization)
   Future<void> searchByPattern(String pattern) async {
     final currentState = state.value;
     if (currentState == null) return;
 
-    // Se a busca está vazia, limpa os resultados e volta para filteredDiagnosticos
     if (pattern.trim().isEmpty) {
       state = AsyncValue.data(
         currentState.copyWith(
           searchQuery: '',
           searchResults: [],
-          // NÃO limpa contexto - preserva filtro de defensivo/cultura/praga
         ),
       );
       return;
     }
 
-    // NÃO usa clearContext() - preserva contexto de defensivo/cultura/praga
     state = AsyncValue.data(
       currentState.copyWith(searchQuery: pattern, isLoading: true).clearError(),
     );
 
     try {
-      // CORREÇÃO: Busca localmente em filteredDiagnosticos (que contém o contexto)
-      // ao invés de allDiagnosticos
       final diagnosticosParaBusca = currentState.filteredDiagnosticos.isNotEmpty
           ? currentState.filteredDiagnosticos
           : currentState.allDiagnosticos;
 
       if (diagnosticosParaBusca.isNotEmpty) {
-        // REFACTORED: Use client-side search from DiagnosticosSearchService
         final localResults = _searchService.searchInList(
           diagnosticosParaBusca,
           pattern,
@@ -486,8 +469,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
         return;
       }
 
-      // Fallback: busca remota se não há dados locais
-      // REFACTORED: Use DiagnosticosSearchService instead of use case
       final result = await _searchService.searchByPattern(pattern);
       result.fold(
         (failure) {
@@ -549,13 +530,14 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Valida compatibilidade entre defensivo, cultura e praga
+  /// REFACTORED: Now uses injected RecommendationService
   Future<bool> validateCompatibilidade({
     required String idDefensivo,
     required String idCultura,
     required String idPraga,
   }) async {
     try {
-      final result = await _validateCompatibilidadeUseCase(
+      final result = await _recommendationService.validateCompatibility(
         idDefensivo: idDefensivo,
         idCultura: idCultura,
         idPraga: idPraga,
@@ -583,12 +565,10 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Filtra diagnósticos carregados por tipo de aplicação
-  /// REFACTORED: Now uses DiagnosticosFilterService (client-side)
   void filterByTipoAplicacao(TipoAplicacao tipo) {
     final currentState = state.value;
     if (currentState == null) return;
 
-    // REFACTORED: Use client-side filter from DiagnosticosFilterService
     final filtered = _filterService.filterListByTipoAplicacao(
       currentState.filteredDiagnosticos,
       tipo,
@@ -600,12 +580,10 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Filtra diagnósticos carregados por completude
-  /// REFACTORED: Now uses DiagnosticosFilterService (client-side)
   void filterByCompletude(DiagnosticoCompletude completude) {
     final currentState = state.value;
     if (currentState == null) return;
 
-    // REFACTORED: Use client-side filter from DiagnosticosFilterService
     final filtered = _filterService.filterListByCompletude(
       currentState.filteredDiagnosticos,
       completude,
@@ -662,13 +640,11 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Carrega estatísticas
-  /// REFACTORED: Now uses DiagnosticosStatsService
   Future<void> _loadStats() async {
     final currentState = state.value;
     if (currentState == null) return;
 
     try {
-      // REFACTORED: Use DiagnosticosStatsService instead of use case
       final result = await _statsService.getStatistics();
       result.fold(
         (failure) {
@@ -690,13 +666,11 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Carrega dados para filtros
-  /// REFACTORED: Now uses DiagnosticosMetadataService
   Future<void> _loadFiltersData() async {
     final currentState = state.value;
     if (currentState == null) return;
 
     try {
-      // REFACTORED: Use DiagnosticosMetadataService instead of use case
       final result = await _metadataService.getFiltersData();
       result.fold(
         (failure) {
@@ -724,16 +698,11 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    // CORREÇÃO CRÍTICA: Não limpar contextos de navegação (defensivo/cultura/praga)
-    // Apenas limpar filtros de busca
-    // Isso previne perda de contexto quando o usuário interage com filtros na UI
     state = AsyncValue.data(
       currentState.copyWith(
         currentFilters: const DiagnosticoSearchFilters(),
         searchQuery: '',
         searchResults: [],
-        // NÃO chamar clearContext() - preserva contextoDefensivo/contextoCultura/contextoPraga
-        // filteredDiagnosticos permanece com os dados do contexto atual
       ),
     );
   }

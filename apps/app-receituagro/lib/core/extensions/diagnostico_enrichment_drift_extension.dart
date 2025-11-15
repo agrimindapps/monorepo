@@ -26,11 +26,11 @@ extension DiagnosticoEnrichmentDriftExtension on Diagnostico {
 
       // Busca defensivo
       Fitossanitario? defensivo;
-      if (defenisivoId > 0) {
+      if (defensivoId > 0) {
         // TODO: Implementar busca usando FitossanitariosRepository
-        // defensivo = await fitossanitariosRepo.findById(defenisivoId!);
+        // defensivo = await fitossanitariosRepo.findById(defensivoId!);
         warnings.add(
-          'Busca de defensivo ainda não implementada (ID: $defenisivoId)',
+          'Busca de defensivo ainda não implementada (ID: $defensivoId)',
         );
         developer.log(
           'Defensivo lookup not implemented for diagnostico: $id',
@@ -92,12 +92,12 @@ extension DiagnosticoEnrichmentDriftExtension on Diagnostico {
   Future<Either<Failure, DataWithWarnings<Fitossanitario?>>>
   enrichWithDefensivo() async {
     try {
-      if (defenisivoId <= 0) {
+      if (defensivoId <= 0) {
         return Right(DataWithWarnings(data: null));
       }
 
       // TODO: Implementar busca usando FitossanitariosRepository
-      // final defensivo = await fitossanitariosRepo.findById(defenisivoId!);
+      // final defensivo = await fitossanitariosRepo.findById(defensivoId!);
       final warnings = ['Busca de defensivo ainda não implementada'];
 
       return Right(

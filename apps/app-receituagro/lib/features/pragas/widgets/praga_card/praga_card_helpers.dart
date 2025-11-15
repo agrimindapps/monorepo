@@ -1,21 +1,21 @@
 import 'package:app_receituagro/core/di/injection.dart' as di;
 import 'package:flutter/material.dart';
 
-import '../../presentation/services/pragas_type_service.dart';
+import '../../domain/services/i_pragas_type_service.dart';
 
 /// Classe utilitária com helpers para PragaCard
 ///
-/// Refactored to use PragasTypeService for type-related logic (SOLID compliance)
+/// Refactored to use IPragasTypeService for type-related logic (SOLID compliance)
 ///
 /// Responsabilidades:
 /// - Cores de card e temas (UI theming)
-/// - Delegação para PragasTypeService para lógica de tipos
+/// - Delegação para IPragasTypeService para lógica de tipos
 class PragaCardHelpers {
   // Lazy-initialized service instance
-  static PragasTypeService? _typeService;
+  static IPragasTypeService? _typeService;
 
-  static PragasTypeService get _service {
-    _typeService ??= di.getIt<PragasTypeService>();
+  static IPragasTypeService get _service {
+    _typeService ??= di.getIt<IPragasTypeService>();
     return _typeService!;
   }
 

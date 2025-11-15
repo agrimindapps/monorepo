@@ -1,4 +1,5 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Column;
+import 'package:drift/drift.dart';
 
 /// ========== STATIC DATA TABLES ==========
 
@@ -19,7 +20,7 @@ class Diagnosticos extends Table {
 
   // ========== FOREIGN KEYS (NORMALIZED) ==========
   /// ID do defensivo (FK → Fitossanitarios)
-  IntColumn get defenisivoId => integer().references(
+  IntColumn get defensivoId => integer().references(
     Fitossanitarios,
     #id,
     onDelete: KeyAction.restrict,

@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide Column;
+import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
@@ -6,7 +7,7 @@ import '../../database/receituagro_database.dart';
 
 /// Implementação específica do ReceitaAgro para limpeza de dados usando Drift
 /// Implementa IAppDataCleaner do core package
-/// Refatorado completamente para usar Drift ao invés de Hive
+/// Refatorado para usar Drift
 class ReceitaAgroDataCleaner implements IAppDataCleaner {
   final ReceituagroDatabase _db = GetIt.instance<ReceituagroDatabase>();
 
@@ -434,7 +435,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       // Soft delete
       await (_db.update(_db.favoritos)
         ..where((tbl) => tbl.isDeleted.equals(false))
-      ).write(const FavoritosCompanion(isDeleted: Value(true), isDirty: Value(true)));
+      ).write(FavoritosCompanion(isDeleted: Value(true), isDirty: Value(true)));
       
       results['clearedTables'].add('favoritos');
       totalRecords += favoritosCount;
@@ -458,7 +459,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       // Soft delete
       await (_db.update(_db.comentarios)
         ..where((tbl) => tbl.isDeleted.equals(false))
-      ).write(const ComentariosCompanion(isDeleted: Value(true), isDirty: Value(true)));
+      ).write(ComentariosCompanion(isDeleted: Value(true), isDirty: Value(true)));
       
       results['clearedTables'].add('comentarios');
       totalRecords += comentariosCount;
@@ -622,7 +623,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       // Soft delete: marcar todos como deletados
       await (_db.update(_db.favoritos)
         ..where((tbl) => tbl.isDeleted.equals(false))
-      ).write(const FavoritosCompanion(isDeleted: Value(true), isDirty: Value(true)));
+      ).write(FavoritosCompanion(isDeleted: Value(true), isDirty: Value(true)));
 
       if (kDebugMode) {
         debugPrint('   ✅ $favoriteCount favoritos marcados como deletados');
@@ -687,7 +688,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       // Soft delete: marcar todos como deletados
       await (_db.update(_db.comentarios)
         ..where((tbl) => tbl.isDeleted.equals(false))
-      ).write(const ComentariosCompanion(isDeleted: Value(true), isDirty: Value(true)));
+      ).write(ComentariosCompanion(isDeleted: Value(true), isDirty: Value(true)));
 
       if (kDebugMode) {
         debugPrint('   ✅ $markedCount comentários marcados como deletados');

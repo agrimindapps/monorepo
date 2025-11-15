@@ -223,7 +223,7 @@ class ReceitaAgroSyncService implements ISyncService {
   }
 
   /// Método específico para sync de dados do usuário (comentários e favoritos)
-  /// Sincroniza dados do Firestore para local (Hive) após login
+  /// Sincroniza dados do Firestore após login
   Future<Either<Failure, ServiceSyncResult>> syncUserData() async {
     if (!canSync) {
       return Left(const ServerFailure('Service not ready for user data sync'));
@@ -358,12 +358,16 @@ class ReceitaAgroSyncService implements ISyncService {
         await favoritosRepo.syncFavorites();
 
         // Obtém estatísticas para contar
-        final stats = await favoritosRepo.getStats();
-        final totalFavoritos =
-            stats.totalDefensivos +
-            stats.totalPragas +
-            stats.totalDiagnosticos +
-            stats.totalCulturas;
+        final statsResult = await favoritosRepo.getStats();
+
+        // Unwrap Either<Failure, FavoritosStats>
+        final totalFavoritos = statsResult.fold(
+          (failure) => 0, // On error, return 0
+          (stats) => stats.totalDefensivos +
+              stats.totalPragas +
+              stats.totalDiagnosticos +
+              stats.totalCulturas,
+        );
 
         if (kDebugMode) {
           print('✅ Favoritos sincronizados - Total: $totalFavoritos');

@@ -1,4 +1,7 @@
+import 'package:drift/drift.dart';
 import 'package:core/core.dart';
+import 'package:injectable/injectable.dart';
+
 import 'tables/receituagro_tables.dart';
 
 part 'receituagro_database.g.dart';

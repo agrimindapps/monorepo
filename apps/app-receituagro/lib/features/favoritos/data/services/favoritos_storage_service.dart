@@ -301,7 +301,7 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
         return {
           // TODO: Implement JOINs to get names from related tables
           'nomePraga': 'ID: ${diagnostico.pragaId}',
-          'nomeDefensivo': 'ID: ${diagnostico.defenisivoId}',
+          'nomeDefensivo': 'ID: ${diagnostico.defensivoId}',
           'cultura': 'ID: ${diagnostico.culturaId}',
           'dosagem':
               '${diagnostico.dsMin ?? ''} - ${diagnostico.dsMax} ${diagnostico.um}',

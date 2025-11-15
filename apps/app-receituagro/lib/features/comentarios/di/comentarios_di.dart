@@ -6,7 +6,9 @@ import '../data/repositories/comentarios_repository_impl.dart';
 import '../data/services/comentarios_id_service.dart';
 import '../data/services/comentarios_mapper.dart';
 import '../data/services/comentarios_search_service.dart';
+import '../domain/repositories/i_comentarios_read_repository.dart';
 import '../domain/repositories/i_comentarios_repository.dart';
+import '../domain/repositories/i_comentarios_write_repository.dart';
 import '../domain/usecases/add_comentario_usecase.dart';
 import '../domain/usecases/delete_comentario_usecase.dart';
 import '../domain/usecases/get_comentarios_usecase.dart';
@@ -17,6 +19,7 @@ import '../domain/usecases/get_comentarios_usecase.dart';
 /// - Separates specialized services (Mapper, IdService, SearchService)
 /// - Follows the pattern established in diagnosticos feature
 /// - Improves testability through dependency injection
+/// - **NEW**: Registers segregated read/write interfaces (ISP)
 ///
 /// Registers all dependencies required for the comentarios feature.
 class ComentariosDI {
@@ -40,17 +43,20 @@ class ComentariosDI {
       );
     }
 
-    // Register repository with mapper dependency
-    getIt.registerFactory<IComentariosRepository>(
-      () => ComentariosRepositoryImpl(
-        getIt<ComentariosRepository>(),
-        getIt<IComentariosMapper>(),
-      ),
-    );
+    // Register repository with all interface variants
+    // This allows clients to depend on specific interfaces (ISP)
+    final repoFactory = () => ComentariosRepositoryImpl(
+          getIt<ComentariosRepository>(),
+          getIt<IComentariosMapper>(),
+        );
 
-    // Register use cases
+    getIt.registerFactory<IComentariosReadRepository>(repoFactory);
+    getIt.registerFactory<IComentariosWriteRepository>(repoFactory);
+    getIt.registerFactory<IComentariosRepository>(repoFactory);
+
+    // Register use cases with appropriate interfaces
     getIt.registerFactory<GetComentariosUseCase>(
-      () => GetComentariosUseCase(getIt<IComentariosRepository>()),
+      () => GetComentariosUseCase(getIt<IComentariosReadRepository>()),
     );
 
     getIt.registerFactory<AddComentarioUseCase>(
@@ -78,6 +84,14 @@ class ComentariosDI {
 
     if (getIt.isRegistered<IComentariosRepository>()) {
       getIt.unregister<IComentariosRepository>();
+    }
+
+    if (getIt.isRegistered<IComentariosReadRepository>()) {
+      getIt.unregister<IComentariosReadRepository>();
+    }
+
+    if (getIt.isRegistered<IComentariosWriteRepository>()) {
+      getIt.unregister<IComentariosWriteRepository>();
     }
   }
 }

@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
@@ -18,31 +18,46 @@ class FavoritosDefensivosRepositoryAdapter
 
   @override
   Future<List<FavoritoDefensivoEntity>> getDefensivos() async {
-    final favoritos = await _repository.getByTipo(TipoFavorito.defensivo);
-    return favoritos.whereType<FavoritoDefensivoEntity>().toList();
+    final favoritosResult = await _repository.getByTipo(TipoFavorito.defensivo);
+    return favoritosResult.fold(
+      (failure) => throw Exception(failure.message),
+      (favoritos) => favoritos.whereType<FavoritoDefensivoEntity>().toList(),
+    );
   }
 
   @override
   Future<bool> addDefensivo(String defensivoId) async {
-    return await _repository.addFavorito(
+    final result = await _repository.addFavorito(
       FavoritoDefensivoEntity(
         id: defensivoId,
         nomeComum: '',
         ingredienteAtivo: '',
       ),
     );
+    return result.fold(
+      (failure) => throw Exception(failure.message),
+      (success) => success,
+    );
   }
 
   @override
   Future<bool> removeDefensivo(String defensivoId) async {
-    return await _repository.removeFavorito(
+    final result = await _repository.removeFavorito(
       TipoFavorito.defensivo,
       defensivoId,
+    );
+    return result.fold(
+      (failure) => throw Exception(failure.message),
+      (success) => success,
     );
   }
 
   @override
   Future<bool> isDefensivoFavorito(String defensivoId) async {
-    return await _repository.isFavorito(TipoFavorito.defensivo, defensivoId);
+    final result = await _repository.isFavorito(TipoFavorito.defensivo, defensivoId);
+    return result.fold(
+      (failure) => throw Exception(failure.message),
+      (isFavorite) => isFavorite,
+    );
   }
 }

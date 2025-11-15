@@ -10,7 +10,7 @@ import '../di/injection_container.dart' as di;
 class CulturasDataLoader {
   static bool _isLoaded = false;
 
-  /// Carrega dados de culturas do JSON dos assets usando repositório Hive
+  /// Carrega dados de culturas do JSON dos assets
   static Future<void> loadCulturasData() async {
     if (_isLoaded) {
       developer.log(

@@ -253,17 +253,36 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     if (currentState == null) return;
 
     try {
-      final isFavorited = await _favoritosRepository.isFavorito(
+      final result = await _favoritosRepository.isFavorito(
         'diagnostico',
         diagnosticoId,
       );
+
+      // Unwrap Either<Failure, bool>
+      final isFavorited = result.fold(
+        (failure) => false, // On failure, assume not favorited
+        (value) => value,
+      );
+
       state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
     } catch (e) {
-      final isFavorited = await _favoritosRepository.isFavorito(
-        'diagnosticos',
-        diagnosticoId,
-      );
-      state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
+      // Fallback: try with 'diagnosticos' (plural)
+      try {
+        final result = await _favoritosRepository.isFavorito(
+          'diagnosticos',
+          diagnosticoId,
+        );
+
+        final isFavorited = result.fold(
+          (failure) => false,
+          (value) => value,
+        );
+
+        state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
+      } catch (fallbackError) {
+        // On error, assume not favorited
+        state = AsyncValue.data(currentState.copyWith(isFavorited: false));
+      }
     }
   }
 
@@ -281,40 +300,36 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     );
 
     try {
-      final success = await _favoritosRepository.toggleFavorito(
+      final result = await _favoritosRepository.toggleFavorito(
         'diagnostico',
         diagnosticoId,
       );
 
-      if (!success) {
-        state = AsyncValue.data(
-          currentState.copyWith(isFavorited: wasAlreadyFavorited),
-        );
-        return false;
-      }
-
-      return true;
-    } catch (e) {
-      try {
-        final success = await _favoritosRepository.toggleFavorito(
-          'diagnostico',
-          diagnosticoId,
-        );
-
-        if (!success) {
+      // Unwrap Either<Failure, bool>
+      return result.fold(
+        (failure) {
+          // On failure, revert state
           state = AsyncValue.data(
             currentState.copyWith(isFavorited: wasAlreadyFavorited),
           );
           return false;
-        }
-
-        return true;
-      } catch (fallbackError) {
-        state = AsyncValue.data(
-          currentState.copyWith(isFavorited: wasAlreadyFavorited),
-        );
-        return false;
-      }
+        },
+        (success) {
+          // On success, keep toggled state
+          if (!success) {
+            state = AsyncValue.data(
+              currentState.copyWith(isFavorited: wasAlreadyFavorited),
+            );
+          }
+          return success;
+        },
+      );
+    } catch (e) {
+      // On exception, revert state
+      state = AsyncValue.data(
+        currentState.copyWith(isFavorited: wasAlreadyFavorited),
+      );
+      return false;
     }
   }
 

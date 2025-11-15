@@ -1,41 +1,23 @@
-import '../entities/comentario_entity.dart';
+import 'i_comentarios_read_repository.dart';
+import 'i_comentarios_write_repository.dart';
 
-/// Repository interface for comentarios following the Repository pattern.
-/// This defines the contract that data layer implementations must follow.
-abstract class IComentariosRepository {
-  /// Gets all comments for the current user
-  Future<List<ComentarioEntity>> getAllComentarios();
-
-  /// Gets comments by specific context identifier
-  Future<List<ComentarioEntity>> getComentariosByContext(String pkIdentificador);
-
-  /// Gets comments by tool/feature
-  Future<List<ComentarioEntity>> getComentariosByTool(String ferramenta);
-
-  /// Gets a specific comment by ID
-  Future<ComentarioEntity?> getComentarioById(String id);
-
-  /// Adds a new comment
-  Future<void> addComentario(ComentarioEntity comentario);
-
-  /// Updates an existing comment
-  Future<void> updateComentario(ComentarioEntity comentario);
-
-  /// Deletes a comment (soft delete)
-  Future<void> deleteComentario(String id);
-
-  /// Hard deletes old inactive comments for cleanup
-  Future<void> cleanupOldComments();
-
-  /// Gets user comment statistics
-  Future<Map<String, int>> getUserCommentStats();
-
-  /// Searches comments by content
-  Future<List<ComentarioEntity>> searchComentarios(String query);
-
-  /// Gets comments by context identifier (alias for getComentariosByContext)
-  Future<List<ComentarioEntity>> getByContext(String pkIdentificador);
-
-  /// Gets comments created within a date range
-  Future<List<ComentarioEntity>> getCommentsByDateRange(DateTime start, DateTime end);
+/// Combined repository interface for comentarios.
+/// 
+/// **DEPRECATED**: This interface combines read and write operations for backward compatibility.
+/// New code should use:
+/// - [IComentariosReadRepository] for read-only operations
+/// - [IComentariosWriteRepository] for write operations
+/// 
+/// This follows Interface Segregation Principle (ISP) - clients should not be forced
+/// to depend on interfaces they don't use.
+/// 
+/// Benefits of segregation:
+/// - Clearer separation of concerns
+/// - Easier to mock in tests
+/// - Better security control (read-only vs write access)
+/// - More flexible dependency injection
+@Deprecated('Use IComentariosReadRepository or IComentariosWriteRepository instead')
+abstract class IComentariosRepository
+    implements IComentariosReadRepository, IComentariosWriteRepository {
+  // Empty - just combines the two interfaces for backward compatibility
 }

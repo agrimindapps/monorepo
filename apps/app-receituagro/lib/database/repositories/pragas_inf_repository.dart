@@ -1,4 +1,6 @@
 import 'package:core/core.dart';
+import 'package:drift/drift.dart';
+
 import '../receituagro_database.dart';
 
 /// Repositório de Informações de Pragas usando Drift
@@ -55,30 +57,31 @@ class PragasInfRepository {
   /// Busca informações por sintomas (busca parcial)
   Future<List<PragasInfData>> findBySintomas(String sintomas) async {
     final query = _db.select(_db.pragasInf)
-      ..where((tbl) => tbl.sintomas.contains(sintomas));
+      ..where((tbl) => tbl.sintomas.like('%$sintomas%'));
     return await query.get();
   }
 
   /// Busca informações por controle (busca parcial)
   Future<List<PragasInfData>> findByControle(String controle) async {
     final query = _db.select(_db.pragasInf)
-      ..where((tbl) => tbl.controle.contains(controle));
+      ..where((tbl) => tbl.controle.like('%$controle%'));
     return await query.get();
   }
 
   /// Busca informações por danos (busca parcial)
   Future<List<PragasInfData>> findByDanos(String danos) async {
     final query = _db.select(_db.pragasInf)
-      ..where((tbl) => tbl.danos.contains(danos));
+      ..where((tbl) => tbl.danos.like('%$danos%'));
     return await query.get();
   }
 
   /// Conta o total de informações de pragas
   Future<int> count() async {
-    final count = _db.pragasInf.id.count();
-    final query = _db.selectOnly(_db.pragasInf)..addColumns([count]);
+    final countColumn = _db.pragasInf.id.count();
+    final query = _db.selectOnly(_db.pragasInf)
+      ..addColumns([countColumn]);
     final result = await query.getSingle();
-    return result.read(count)!;
+    return result.read(countColumn)!;
   }
 
   /// Observa mudanças em todas as informações de pragas

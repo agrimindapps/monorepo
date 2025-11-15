@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 
 import '../entities/favorito_entity.dart';
 import '../repositories/i_favoritos_repository.dart';
@@ -38,33 +38,32 @@ class AddFavoritoUseCase {
   /// - `FavoritoDiagnosticoEntity` (tipo: TipoFavorito.diagnostico)
   /// - `FavoritoCulturaEntity` (tipo: TipoFavorito.cultura)
   Future<Either<Failure, bool>> call(FavoritoEntity favorito) async {
-    try {
-      // Validação de ID
-      if (favorito.id.isEmpty) {
-        return Left(ValidationFailure('ID do favorito é obrigatório'));
-      }
-
-      // Verifica se já existe nos favoritos
-      final isAlreadyFavorite = await _repository.isFavorito(
-        favorito.tipo,
-        favorito.id,
+    // Validação de ID
+    if (favorito.id.isEmpty) {
+      return Left<Failure, bool>(
+        ValidationFailure('ID do favorito é obrigatório'),
       );
-      if (isAlreadyFavorite) {
-        return Left(ValidationFailure('Já está nos favoritos: ${favorito.id}'));
-      }
-
-      // Tenta adicionar aos favoritos
-      final result = await _repository.addFavorito(favorito);
-
-      if (!result) {
-        return Left(
-          CacheFailure('Falha ao adicionar ${favorito.tipo} aos favoritos'),
-        );
-      }
-
-      return Right(result);
-    } catch (e) {
-      return Left(CacheFailure('Erro ao adicionar favorito: ${e.toString()}'));
     }
+
+    // Verifica se já existe nos favoritos
+    final isAlreadyFavoriteResult = await _repository.isFavorito(
+      favorito.tipo,
+      favorito.id,
+    );
+
+    // Processa o resultado do isFavorito
+    final isAlreadyFavorite = isAlreadyFavoriteResult.fold(
+      (failure) => throw Exception(failure.message),
+      (result) => result,
+    );
+
+    if (isAlreadyFavorite) {
+      return Left<Failure, bool>(
+        ValidationFailure('Já está nos favoritos: ${favorito.id}'),
+      );
+    }
+
+    // Tenta adicionar aos favoritos
+    return _repository.addFavorito(favorito);
   }
 }

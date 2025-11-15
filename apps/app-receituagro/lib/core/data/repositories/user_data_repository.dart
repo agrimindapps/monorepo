@@ -43,19 +43,19 @@ class UserDataRepository {
   bool get hasCurrentUser => currentUserId != null;
 
   /// Obtém configurações do app para o usuário atual
-  /// DEPRECATED: Hive removed - Use Firebase or Drift for persistence
+  /// DEPRECATED: Use Firebase or Drift for persistence
   @Deprecated('Use Firebase or Drift repositories instead')
   Future<Either<Exception, AppSettingsModel?>> getAppSettings() async {
-    return Left(Exception('Method deprecated: Hive support removed. Use Firebase or Drift instead.'));
+    return Left(Exception('Method deprecated. Use Firebase or Drift instead.'));
   }
 
   /// Salva configurações do app para o usuário atual
-  /// DEPRECATED: Hive removed - Use Firebase or Drift for persistence
+  /// DEPRECATED: Use Firebase or Drift for persistence
   @Deprecated('Use Firebase or Drift repositories instead')
   Future<Either<Exception, void>> saveAppSettings(
     AppSettingsModel settings,
   ) async {
-    return Left(Exception('Method deprecated: Hive support removed. Use Firebase or Drift instead.'));
+    return Left(Exception('Method deprecated. Use Firebase or Drift instead.'));
   }
 
   /// Cria configurações padrão para o usuário atual
@@ -83,19 +83,19 @@ class UserDataRepository {
   }
 
   /// Obtém dados de subscription para o usuário atual
-  /// DEPRECATED: Hive removed - Use Firebase or Drift for persistence
+  /// DEPRECATED: Use Firebase or Drift for persistence
   @Deprecated('Use Firebase or Drift repositories instead')
   Future<Either<Exception, SubscriptionEntity?>> getSubscriptionData() async {
-    return Left(Exception('Method deprecated: Hive support removed. Use Firebase or Drift instead.'));
+    return Left(Exception('Method deprecated. Use Firebase or Drift instead.'));
   }
 
   /// Salva dados de subscription para o usuário atual
-  /// DEPRECATED: Hive removed - Use Firebase or Drift for persistence
+  /// DEPRECATED: Use Firebase or Drift for persistence
   @Deprecated('Use Firebase or Drift repositories instead')
   Future<Either<Exception, void>> saveSubscriptionData(
     SubscriptionEntity subscription,
   ) async {
-    return Left(Exception('Method deprecated: Hive support removed. Use Firebase or Drift instead.'));
+    return Left(Exception('Method deprecated. Use Firebase or Drift instead.'));
   }
 
   // ========================================================================
@@ -114,30 +114,34 @@ class UserDataRepository {
       }
 
       // Delega para FavoritosRepository
-      final favoritos = await _favoritosRepository.getByTipo(
+      final result = await _favoritosRepository.getByTipo(
         TipoFavorito.defensivo,
       );
 
-      // Converte entities para models
-      final models = favoritos
-          .whereType<FavoritoDefensivoEntity>()
-          .map(
-            (entity) => FavoritoDefensivoModel(
-              id: int.tryParse(entity.id) ?? 0,
-              idReg: entity.id,
-              line1: entity.line1,
-              line2: entity.line2,
-              nomeComum: entity.nomeComum,
-              ingredienteAtivo: entity.ingredienteAtivo,
-              fabricante: entity.fabricante,
-              dataCriacao: entity.adicionadoEm ?? DateTime.now(),
-              userId: userId,
-              synchronized: false,
-            ),
-          )
-          .toList();
-
-      return Right(models);
+      // Unwrap Either and convert entities to models
+      return result.fold(
+        (failure) => Left(Exception('Failed to get favoritos: $failure')),
+        (favoritos) {
+          final models = favoritos
+              .whereType<FavoritoDefensivoEntity>()
+              .map(
+                (entity) => FavoritoDefensivoModel(
+                  id: int.tryParse(entity.id) ?? 0,
+                  idReg: entity.id,
+                  line1: entity.line1,
+                  line2: entity.line2,
+                  nomeComum: entity.nomeComum,
+                  ingredienteAtivo: entity.ingredienteAtivo,
+                  fabricante: entity.fabricante,
+                  dataCriacao: entity.adicionadoEm ?? DateTime.now(),
+                  userId: userId,
+                  synchronized: false,
+                ),
+              )
+              .toList();
+          return Right(models);
+        },
+      );
     } catch (e) {
       return Left(Exception('Error getting favoritos: $e'));
     }
@@ -404,16 +408,16 @@ class UserDataRepository {
   }
 
   /// Limpa todos os dados do usuário atual (para logout)
-  /// DEPRECATED: Hive removed - Use Firebase or Drift for persistence
+  /// DEPRECATED: Use Firebase or Drift for persistence
   @Deprecated('Use Firebase or Drift repositories instead')
   Future<Either<Exception, void>> clearUserData() async {
-    return Left(Exception('Method deprecated: Hive support removed. Use Firebase or Drift instead.'));
+    return Left(Exception('Method deprecated. Use Firebase or Drift instead.'));
   }
 
   /// Obtém estatísticas de dados do usuário
-  /// DEPRECATED: Hive removed - Use Firebase or Drift for persistence
+  /// DEPRECATED: Use Firebase or Drift for persistence
   @Deprecated('Use Firebase or Drift repositories instead')
   Future<Either<Exception, Map<String, int>>> getUserDataStats() async {
-    return Left(Exception('Method deprecated: Hive support removed. Use Firebase or Drift instead.'));
+    return Left(Exception('Method deprecated. Use Firebase or Drift instead.'));
   }
 }

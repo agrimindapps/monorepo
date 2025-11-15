@@ -1,4 +1,6 @@
 import 'package:core/core.dart';
+import 'package:drift/drift.dart';
+
 import '../receituagro_database.dart';
 
 /// Repositório de Informações de Fitossanitários usando Drift
@@ -59,7 +61,7 @@ class FitossanitariosInfoRepository {
   /// Busca informações por modo de ação (busca parcial)
   Future<List<FitossanitariosInfoData>> findByModoAcao(String modoAcao) async {
     final query = _db.select(_db.fitossanitariosInfo)
-      ..where((tbl) => tbl.modoAcao.contains(modoAcao));
+      ..where((tbl) => tbl.modoAcao.like('%$modoAcao%'));
     return await query.get();
   }
 
@@ -68,7 +70,7 @@ class FitossanitariosInfoRepository {
     String formulacao,
   ) async {
     final query = _db.select(_db.fitossanitariosInfo)
-      ..where((tbl) => tbl.formulacao.contains(formulacao));
+      ..where((tbl) => tbl.formulacao.like('%$formulacao%'));
     return await query.get();
   }
 
@@ -90,10 +92,11 @@ class FitossanitariosInfoRepository {
 
   /// Conta o total de informações de fitossanitários
   Future<int> count() async {
-    final count = _db.fitossanitariosInfo.id.count();
-    final query = _db.selectOnly(_db.fitossanitariosInfo)..addColumns([count]);
+    final countColumn = _db.fitossanitariosInfo.id.count();
+    final query = _db.selectOnly(_db.fitossanitariosInfo)
+      ..addColumns([countColumn]);
     final result = await query.getSingle();
-    return result.read(count)!;
+    return result.read(countColumn)!;
   }
 
   /// Observa mudanças em todas as informações de fitossanitários

@@ -1,12 +1,16 @@
 import 'package:core/core.dart' hide Column;
 
 import '../entities/comentario_entity.dart';
-import '../repositories/i_comentarios_repository.dart';
+import '../repositories/i_comentarios_read_repository.dart';
 
 /// **USE CASE: Retrieve Comments**
 ///
 /// Handles retrieval, sorting, filtering, and searching of comments with business logic applied.
 /// Implements agricultural domain-specific rules for comment organization and relevance.
+///
+/// **SOLID: Interface Segregation Principle**
+/// This use case only performs READ operations, so it depends on IComentariosReadRepository
+/// instead of the full repository interface. This makes the dependency explicit and testable.
 ///
 /// ## Business Rules Implemented:
 ///
@@ -42,7 +46,7 @@ import '../repositories/i_comentarios_repository.dart';
 /// - Consistent sorting prevents UI flickering and confusion
 @injectable
 class GetComentariosUseCase {
-  final IComentariosRepository _repository;
+  final IComentariosReadRepository _repository;
 
   GetComentariosUseCase(this._repository);
 

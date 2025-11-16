@@ -1,10 +1,9 @@
+// Package imports:
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/providers/core_providers.dart';
-import '../../data/datasources/emergency_reserve_local_datasource.dart';
-import '../../data/repositories/emergency_reserve_repository_impl.dart';
+// Project imports:
+import 'package:app_calculei/core/di/injection.dart';
 import '../../domain/entities/emergency_reserve_calculation.dart';
-import '../../domain/repositories/emergency_reserve_repository.dart';
 import '../../domain/usecases/calculate_emergency_reserve_usecase.dart';
 import '../../domain/usecases/get_emergency_reserve_calculation_history_usecase.dart';
 import '../../domain/usecases/save_emergency_reserve_calculation_usecase.dart';
@@ -127,26 +126,6 @@ class EmergencyReserveCalculatorNotifier
   }
 }
 
-// ========== DATA LAYER PROVIDERS ==========
-
-/// Provider for EmergencyReserveLocalDataSource
-@riverpod
-EmergencyReserveLocalDataSource emergencyReserveLocalDataSource(
-  EmergencyReserveLocalDataSourceRef ref,
-) {
-  final sharedPrefs = ref.watch(sharedPreferencesProvider).requireValue;
-  return EmergencyReserveLocalDataSourceImpl(sharedPrefs);
-}
-
-/// Provider for EmergencyReserveRepository
-@riverpod
-EmergencyReserveRepository emergencyReserveRepository(
-  EmergencyReserveRepositoryRef ref,
-) {
-  final localDataSource = ref.watch(emergencyReserveLocalDataSourceProvider);
-  return EmergencyReserveRepositoryImpl(localDataSource);
-}
-
 // ========== USE CASE PROVIDERS ==========
 
 /// Provider for CalculateEmergencyReserveUseCase
@@ -154,7 +133,7 @@ EmergencyReserveRepository emergencyReserveRepository(
 CalculateEmergencyReserveUseCase calculateEmergencyReserveUseCase(
   CalculateEmergencyReserveUseCaseRef ref,
 ) {
-  return CalculateEmergencyReserveUseCase();
+  return getIt<CalculateEmergencyReserveUseCase>();
 }
 
 /// Provider for SaveEmergencyReserveCalculationUseCase
@@ -162,8 +141,7 @@ CalculateEmergencyReserveUseCase calculateEmergencyReserveUseCase(
 SaveEmergencyReserveCalculationUseCase saveEmergencyReserveCalculationUseCase(
   SaveEmergencyReserveCalculationUseCaseRef ref,
 ) {
-  final repository = ref.watch(emergencyReserveRepositoryProvider);
-  return SaveEmergencyReserveCalculationUseCase(repository);
+  return getIt<SaveEmergencyReserveCalculationUseCase>();
 }
 
 /// Provider for GetEmergencyReserveCalculationHistoryUseCase
@@ -172,6 +150,5 @@ GetEmergencyReserveCalculationHistoryUseCase
     getEmergencyReserveCalculationHistoryUseCase(
   GetEmergencyReserveCalculationHistoryUseCaseRef ref,
 ) {
-  final repository = ref.watch(emergencyReserveRepositoryProvider);
-  return GetEmergencyReserveCalculationHistoryUseCase(repository);
+  return getIt<GetEmergencyReserveCalculationHistoryUseCase>();
 }

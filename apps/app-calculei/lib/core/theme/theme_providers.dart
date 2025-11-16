@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-// Light theme provider
-final lightThemeProvider = Provider<ThemeData>((ref) {
+part 'theme_providers.g.dart';
+
+/// Light theme provider
+@riverpod
+ThemeData lightTheme(LightThemeRef ref) {
   return ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
@@ -21,10 +24,11 @@ final lightThemeProvider = Provider<ThemeData>((ref) {
       ),
     ),
   );
-});
+}
 
-// Dark theme provider
-final darkThemeProvider = Provider<ThemeData>((ref) {
+/// Dark theme provider
+@riverpod
+ThemeData darkTheme(DarkThemeRef ref) {
   return ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
@@ -43,11 +47,15 @@ final darkThemeProvider = Provider<ThemeData>((ref) {
       ),
     ),
   );
-});
+}
 
-// Theme mode notifier
-class ThemeNotifier extends StateNotifier<bool> {
-  ThemeNotifier() : super(false); // false = light, true = dark
+/// Theme mode notifier (dark mode boolean state)
+@riverpod
+class ThemeModeNotifier extends _$ThemeModeNotifier {
+  @override
+  bool build() {
+    return false; // false = light, true = dark
+  }
 
   void toggleTheme() {
     state = !state;
@@ -58,12 +66,9 @@ class ThemeNotifier extends StateNotifier<bool> {
   }
 }
 
-final themeNotifierProvider =
-    StateNotifierProvider<ThemeNotifier, bool>((ref) {
-  return ThemeNotifier();
-});
-
-final currentThemeModeProvider = Provider<ThemeMode>((ref) {
-  final isDark = ref.watch(themeNotifierProvider);
+/// Current theme mode provider
+@riverpod
+ThemeMode currentThemeMode(CurrentThemeModeRef ref) {
+  final isDark = ref.watch(themeModeNotifierProvider);
   return isDark ? ThemeMode.dark : ThemeMode.light;
-});
+}

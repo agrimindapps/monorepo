@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../providers/animals_provider.dart';
+import '../providers/animals_providers.dart';
 import 'animals_page_coordinator.dart';
 
 /// Error handler component for Animals page

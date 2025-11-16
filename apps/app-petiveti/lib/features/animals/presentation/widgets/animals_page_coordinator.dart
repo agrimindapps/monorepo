@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 
-import '../providers/animals_provider.dart';
+import '../providers/animals_providers.dart';
 
 /// Coordinator for managing Animals page business logic
 /// 

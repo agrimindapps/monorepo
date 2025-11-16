@@ -1,25 +1,45 @@
-import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/providers/core_providers.dart';
+import '../../data/datasources/vacation_local_datasource.dart';
+import '../../data/repositories/vacation_repository_impl.dart';
 import '../../domain/entities/vacation_calculation.dart';
+import '../../domain/repositories/vacation_repository.dart';
 import '../../domain/usecases/calculate_vacation_usecase.dart';
 import '../../domain/usecases/save_calculation_usecase.dart';
 import '../../domain/usecases/get_calculation_history_usecase.dart';
 
 part 'vacation_calculator_provider.g.dart';
 
+/// Provider for VacationLocalDataSource
+@riverpod
+VacationLocalDataSource vacationLocalDataSource(
+  VacationLocalDataSourceRef ref,
+) {
+  final sharedPrefs = ref.watch(sharedPreferencesProvider).requireValue;
+  return VacationLocalDataSourceImpl(sharedPrefs);
+}
+
+/// Provider for VacationRepository
+@riverpod
+VacationRepository vacationRepository(VacationRepositoryRef ref) {
+  final localDataSource = ref.watch(vacationLocalDataSourceProvider);
+  return VacationRepositoryImpl(localDataSource);
+}
+
 /// Provider for CalculateVacationUseCase
 @riverpod
 CalculateVacationUseCase calculateVacationUseCase(
   CalculateVacationUseCaseRef ref,
 ) {
-  return getIt<CalculateVacationUseCase>();
+  return const CalculateVacationUseCase();
 }
 
 /// Provider for SaveCalculationUseCase
 @riverpod
 SaveCalculationUseCase saveCalculationUseCase(SaveCalculationUseCaseRef ref) {
-  return getIt<SaveCalculationUseCase>();
+  final repository = ref.watch(vacationRepositoryProvider);
+  return SaveCalculationUseCase(repository);
 }
 
 /// Provider for GetCalculationHistoryUseCase
@@ -27,7 +47,8 @@ SaveCalculationUseCase saveCalculationUseCase(SaveCalculationUseCaseRef ref) {
 GetCalculationHistoryUseCase getCalculationHistoryUseCase(
   GetCalculationHistoryUseCaseRef ref,
 ) {
-  return getIt<GetCalculationHistoryUseCase>();
+  final repository = ref.watch(vacationRepositoryProvider);
+  return GetCalculationHistoryUseCase(repository);
 }
 
 /// State notifier for vacation calculator

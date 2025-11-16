@@ -1,9 +1,10 @@
-// Package imports:
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-// Project imports:
-import 'package:app_calculei/core/di/injection.dart';
+import '../../../../core/providers/core_providers.dart';
+import '../../data/datasources/cash_vs_installment_local_datasource.dart';
+import '../../data/repositories/cash_vs_installment_repository_impl.dart';
 import '../../domain/entities/cash_vs_installment_calculation.dart';
+import '../../domain/repositories/cash_vs_installment_repository.dart';
 import '../../domain/usecases/calculate_cash_vs_installment_usecase.dart';
 import '../../domain/usecases/get_cash_vs_installment_calculation_history_usecase.dart';
 import '../../domain/usecases/save_cash_vs_installment_calculation_usecase.dart';
@@ -127,6 +128,26 @@ class CashVsInstallmentCalculatorNotifier
   }
 }
 
+// ========== DATA LAYER PROVIDERS ==========
+
+/// Provider for CashVsInstallmentLocalDataSource
+@riverpod
+CashVsInstallmentLocalDataSource cashVsInstallmentLocalDataSource(
+  CashVsInstallmentLocalDataSourceRef ref,
+) {
+  final sharedPrefs = ref.watch(sharedPreferencesProvider).requireValue;
+  return CashVsInstallmentLocalDataSourceImpl(sharedPrefs);
+}
+
+/// Provider for CashVsInstallmentRepository
+@riverpod
+CashVsInstallmentRepository cashVsInstallmentRepository(
+  CashVsInstallmentRepositoryRef ref,
+) {
+  final localDataSource = ref.watch(cashVsInstallmentLocalDataSourceProvider);
+  return CashVsInstallmentRepositoryImpl(localDataSource);
+}
+
 // ========== USE CASE PROVIDERS ==========
 
 /// Provider for CalculateCashVsInstallmentUseCase
@@ -134,7 +155,7 @@ class CashVsInstallmentCalculatorNotifier
 CalculateCashVsInstallmentUseCase calculateCashVsInstallmentUseCase(
   CalculateCashVsInstallmentUseCaseRef ref,
 ) {
-  return getIt<CalculateCashVsInstallmentUseCase>();
+  return CalculateCashVsInstallmentUseCase();
 }
 
 /// Provider for SaveCashVsInstallmentCalculationUseCase
@@ -143,7 +164,8 @@ SaveCashVsInstallmentCalculationUseCase
     saveCashVsInstallmentCalculationUseCase(
   SaveCashVsInstallmentCalculationUseCaseRef ref,
 ) {
-  return getIt<SaveCashVsInstallmentCalculationUseCase>();
+  final repository = ref.watch(cashVsInstallmentRepositoryProvider);
+  return SaveCashVsInstallmentCalculationUseCase(repository);
 }
 
 /// Provider for GetCashVsInstallmentCalculationHistoryUseCase
@@ -152,5 +174,6 @@ GetCashVsInstallmentCalculationHistoryUseCase
     getCashVsInstallmentCalculationHistoryUseCase(
   GetCashVsInstallmentCalculationHistoryUseCaseRef ref,
 ) {
-  return getIt<GetCashVsInstallmentCalculationHistoryUseCase>();
+  final repository = ref.watch(cashVsInstallmentRepositoryProvider);
+  return GetCashVsInstallmentCalculationHistoryUseCase(repository);
 }

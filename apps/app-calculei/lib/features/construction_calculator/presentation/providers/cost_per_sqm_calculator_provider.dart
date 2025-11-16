@@ -1,90 +1,46 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:core/core.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/usecases/index.dart';
 import '../../domain/entities/index.dart';
-import '../../domain/usecases/calculate_cost_per_sqm_usecase.dart';
 import 'construction_calculator_providers.dart';
 
-/// State for cost per square meter calculator
-class CostPerSqmCalculatorState extends Equatable {
-  const CostPerSqmCalculatorState({
-    this.calculation,
-    this.isLoading = false,
-    this.errorMessage,
-  });
+part 'cost_per_sqm_calculator_provider.g.dart';
 
-  final CostPerSquareMeterCalculation? calculation;
-  final bool isLoading;
-  final String? errorMessage;
-
-  CostPerSqmCalculatorState copyWith({
-    CostPerSquareMeterCalculation? calculation,
-    bool? isLoading,
-    String? errorMessage,
-  }) {
-    return CostPerSqmCalculatorState(
-      calculation: calculation ?? this.calculation,
-      isLoading: isLoading ?? this.isLoading,
-      errorMessage: errorMessage ?? this.errorMessage,
-    );
-  }
-
-  @override
-  List<Object?> get props => [calculation, isLoading, errorMessage];
+/// Provider for calculate cost per sqm use case
+@riverpod
+CalculateCostPerSqmUseCase calculateCostPerSqmUseCase(
+  CalculateCostPerSqmUseCaseRef ref,
+) {
+  final repository = ref.watch(constructionCalculatorRepositoryProvider);
+  return CalculateCostPerSqmUseCase(repository: repository);
 }
 
-/// Notifier for cost per square meter calculator
-class CostPerSqmCalculatorNotifier
-    extends StateNotifier<CostPerSqmCalculatorState> {
-  final CalculateCostPerSqmUseCase _calculateCostPerSqmUseCase;
+/// State notifier for cost per square meter calculator
+@riverpod
+class CostPerSqmCalculator extends _$CostPerSqmCalculator {
+  @override
+  CostPerSquareMeterCalculation? build() {
+    return null; // Initial empty state
+  }
 
-  CostPerSqmCalculatorNotifier({
-    required CalculateCostPerSqmUseCase calculateCostPerSqmUseCase,
-  })  : _calculateCostPerSqmUseCase = calculateCostPerSqmUseCase,
-        super(const CostPerSqmCalculatorState());
-
+  /// Calculate cost per square meter
   Future<void> calculate(CalculateCostPerSqmParams params) async {
-    state = state.copyWith(isLoading: true, errorMessage: null);
+    state = null;
 
-    final result = await _calculateCostPerSqmUseCase(params);
+    final useCase = ref.read(calculateCostPerSqmUseCaseProvider);
+    final result = await useCase(params);
 
     result.fold(
       (failure) {
-        state = state.copyWith(
-          isLoading: false,
-          errorMessage: failure.message,
-        );
+        throw failure;
       },
       (calculation) {
-        state = state.copyWith(
-          isLoading: false,
-          calculation: calculation,
-        );
+        state = calculation;
       },
     );
   }
 
+  /// Clear calculation
   void clearCalculation() {
-    state = const CostPerSqmCalculatorState();
+    state = null;
   }
 }
-
-/// Provider for cost per square meter calculator
-final costPerSqmCalculatorNotifierProvider = StateNotifierProvider<
-    CostPerSqmCalculatorNotifier, CostPerSqmCalculatorState>(
-  (ref) {
-    final calculateCostPerSqmUseCase =
-        ref.watch(calculateCostPerSqmUseCaseProvider);
-    return CostPerSqmCalculatorNotifier(
-      calculateCostPerSqmUseCase: calculateCostPerSqmUseCase,
-    );
-  },
-);
-
-/// Provider for calculate cost per sqm use case
-final calculateCostPerSqmUseCaseProvider = Provider<CalculateCostPerSqmUseCase>(
-  (ref) {
-    final repository = ref.watch(constructionCalculatorRepositoryProvider);
-    return CalculateCostPerSqmUseCase(repository: repository);
-  },
-);

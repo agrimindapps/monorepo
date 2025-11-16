@@ -6,7 +6,7 @@ import '../../../../core/utils/uuid_generator.dart';
 import '../../../../shared/widgets/form_components/form_components.dart';
 import '../../../animals/domain/entities/animal.dart';
 import '../../../animals/domain/entities/animal_enums.dart';
-import '../../../animals/presentation/providers/animals_provider.dart';
+import '../../../animals/presentation/providers/animals_providers.dart';
 import '../../domain/entities/weight.dart';
 import '../providers/weights_provider.dart';
 

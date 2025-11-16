@@ -10,6 +10,9 @@ import '../../domain/repositories/subscription_repository.dart';
 import '../../domain/services/subscription_validation_service.dart';
 import '../../domain/usecases/subscription_usecases.dart';
 
+// Export state classes for use in other modules
+export '../notifiers/subscription_notifier.dart' show SubscriptionState;
+
 part 'subscription_providers.g.dart';
 
 // ============================================================================

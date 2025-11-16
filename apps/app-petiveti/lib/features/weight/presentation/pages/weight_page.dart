@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../animals/presentation/providers/animals_provider.dart';
+import '../../../animals/presentation/providers/animals_providers.dart';
 import '../../domain/entities/weight.dart';
 import '../providers/weights_provider.dart';
 import '../widgets/add_weight_form.dart';

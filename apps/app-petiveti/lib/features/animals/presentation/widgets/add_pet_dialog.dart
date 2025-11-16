@@ -8,7 +8,7 @@ import '../../../../shared/widgets/form_components/form_components.dart';
 import '../../../../shared/widgets/sections/form_section_widget.dart';
 import '../../domain/entities/animal.dart';
 import '../../domain/entities/animal_enums.dart';
-import '../providers/animals_provider.dart';
+import '../providers/animals_providers.dart';
 
 class AddPetDialog extends ConsumerStatefulWidget {
   final Animal? animal;

@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 
-import '../../../animals/presentation/providers/animals_provider.dart';
+import '../../../animals/presentation/providers/animals_providers.dart';
 import '../providers/weights_provider.dart';
 
 /// Advanced weight goal management with veterinary guidelines

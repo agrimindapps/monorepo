@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../providers/home_provider.dart';
+import '../providers/home_providers.dart';
 
 /// **Home Feature Grid**
 ///

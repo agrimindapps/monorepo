@@ -1,10 +1,9 @@
+// Package imports:
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/providers/core_providers.dart';
-import '../../data/datasources/thirteenth_salary_local_datasource.dart';
-import '../../data/repositories/thirteenth_salary_repository_impl.dart';
+// Project imports:
+import 'package:app_calculei/core/di/injection.dart';
 import '../../domain/entities/thirteenth_salary_calculation.dart';
-import '../../domain/repositories/thirteenth_salary_repository.dart';
 import '../../domain/usecases/calculate_thirteenth_salary_usecase.dart';
 import '../../domain/usecases/get_thirteenth_salary_calculation_history_usecase.dart';
 import '../../domain/usecases/save_thirteenth_salary_calculation_usecase.dart';
@@ -125,26 +124,6 @@ class ThirteenthSalaryCalculatorNotifier
   }
 }
 
-// ========== DATA LAYER PROVIDERS ==========
-
-/// Provider for ThirteenthSalaryLocalDataSource
-@riverpod
-ThirteenthSalaryLocalDataSource thirteenthSalaryLocalDataSource(
-  ThirteenthSalaryLocalDataSourceRef ref,
-) {
-  final sharedPrefs = ref.watch(sharedPreferencesProvider).requireValue;
-  return ThirteenthSalaryLocalDataSourceImpl(sharedPrefs);
-}
-
-/// Provider for ThirteenthSalaryRepository
-@riverpod
-ThirteenthSalaryRepository thirteenthSalaryRepository(
-  ThirteenthSalaryRepositoryRef ref,
-) {
-  final localDataSource = ref.watch(thirteenthSalaryLocalDataSourceProvider);
-  return ThirteenthSalaryRepositoryImpl(localDataSource);
-}
-
 // ========== USE CASE PROVIDERS ==========
 
 /// Provider for CalculateThirteenthSalaryUseCase
@@ -152,7 +131,7 @@ ThirteenthSalaryRepository thirteenthSalaryRepository(
 CalculateThirteenthSalaryUseCase calculateThirteenthSalaryUseCase(
   CalculateThirteenthSalaryUseCaseRef ref,
 ) {
-  return CalculateThirteenthSalaryUseCase();
+  return getIt<CalculateThirteenthSalaryUseCase>();
 }
 
 /// Provider for SaveThirteenthSalaryCalculationUseCase
@@ -160,8 +139,7 @@ CalculateThirteenthSalaryUseCase calculateThirteenthSalaryUseCase(
 SaveThirteenthSalaryCalculationUseCase saveThirteenthSalaryCalculationUseCase(
   SaveThirteenthSalaryCalculationUseCaseRef ref,
 ) {
-  final repository = ref.watch(thirteenthSalaryRepositoryProvider);
-  return SaveThirteenthSalaryCalculationUseCase(repository);
+  return getIt<SaveThirteenthSalaryCalculationUseCase>();
 }
 
 /// Provider for GetThirteenthSalaryCalculationHistoryUseCase
@@ -170,6 +148,5 @@ GetThirteenthSalaryCalculationHistoryUseCase
     getThirteenthSalaryCalculationHistoryUseCase(
   GetThirteenthSalaryCalculationHistoryUseCaseRef ref,
 ) {
-  final repository = ref.watch(thirteenthSalaryRepositoryProvider);
-  return GetThirteenthSalaryCalculationHistoryUseCase(repository);
+  return getIt<GetThirteenthSalaryCalculationHistoryUseCase>();
 }

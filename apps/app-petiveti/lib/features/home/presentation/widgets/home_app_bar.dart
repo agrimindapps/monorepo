@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../providers/home_provider.dart';
+import '../providers/home_providers.dart';
 
 /// **Home App Bar Component**
 /// 

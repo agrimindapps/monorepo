@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../providers/home_provider.dart';
+import '../providers/home_providers.dart';
 
 /// **Home Quick Info Section**
 /// 

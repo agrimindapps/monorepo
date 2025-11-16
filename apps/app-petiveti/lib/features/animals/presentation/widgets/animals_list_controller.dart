@@ -2,7 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/animal.dart';
-import '../providers/animals_provider.dart';
+import '../providers/animals_providers.dart';
 import 'add_pet_dialog.dart';
 
 class AnimalsListController {

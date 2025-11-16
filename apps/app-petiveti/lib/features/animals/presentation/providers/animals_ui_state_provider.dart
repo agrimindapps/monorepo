@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 
 import '../../domain/entities/animal.dart';
-import 'animals_provider.dart';
+import 'animals_providers.dart';
 
 /// Local UI state for the Animals page
 /// 

@@ -26,10 +26,6 @@ dependencies:
   flutter_riverpod: ^2.6.1
   riverpod_annotation: ^2.6.1
 
-  # Dependency Injection
-  get_it: ^8.0.2
-  injectable: ^2.5.1
-
   # Functional Programming
   dartz: ^0.10.1
   equatable: ^2.0.7
@@ -57,7 +53,6 @@ dependencies:
   path_provider: any
   path: any
   shared_preferences: any
-  provider: any  # Coexist with Riverpod during migration
 
 dev_dependencies:
   flutter_test:
@@ -67,14 +62,13 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 
   # Code Generation
-  build_runner: ^2.4.12
+  build_runner: ^2.4.13
   riverpod_generator: ^2.6.1
-  injectable_generator: ^2.6.2
-  drift_dev: any  # Use version from core package
+  # drift_dev: any  # Desabilitado temporariamente por incompatibilidade analyzer
 
-  # Custom Linting (temporarily commented due to dependency conflicts)
+  # Custom Linting (desabilitados temporariamente por incompatibilidade)
   # custom_lint: ^0.7.0
-  # riverpod_lint: ^2.6.0
+  # riverpod_lint: ^2.6.2
 
   # Testing
   mocktail: ^1.0.0

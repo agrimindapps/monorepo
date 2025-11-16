@@ -11,7 +11,6 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'app_page.dart';
 import 'core/config/firebase_options.dart';
-import 'core/di/injection.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,8 +44,7 @@ void main() async {
     // App continues without Firebase - local storage works independently
   }
 
-  // Initialize DI with Firebase status
-  await configureDependencies(firebaseEnabled: firebaseInitialized);
+  // No DI configuration needed - using Riverpod providers
 
   // Run app with error handling for mobile platforms
   if (!kIsWeb &&

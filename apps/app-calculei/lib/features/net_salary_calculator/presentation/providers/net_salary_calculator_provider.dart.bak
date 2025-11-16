@@ -1,10 +1,9 @@
+// Package imports:
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/providers/core_providers.dart';
-import '../../data/datasources/net_salary_local_datasource.dart';
-import '../../data/repositories/net_salary_repository_impl.dart';
+// Project imports:
+import 'package:app_calculei/core/di/injection.dart';
 import '../../domain/entities/net_salary_calculation.dart';
-import '../../domain/repositories/net_salary_repository.dart';
 import '../../domain/usecases/calculate_net_salary_usecase.dart';
 import '../../domain/usecases/get_net_salary_calculation_history_usecase.dart';
 import '../../domain/usecases/save_net_salary_calculation_usecase.dart';
@@ -124,24 +123,6 @@ class NetSalaryCalculatorNotifier extends _$NetSalaryCalculatorNotifier {
   }
 }
 
-// ========== DATA LAYER PROVIDERS ==========
-
-/// Provider for NetSalaryLocalDataSource
-@riverpod
-NetSalaryLocalDataSource netSalaryLocalDataSource(
-  NetSalaryLocalDataSourceRef ref,
-) {
-  final sharedPrefs = ref.watch(sharedPreferencesProvider).requireValue;
-  return NetSalaryLocalDataSourceImpl(sharedPrefs);
-}
-
-/// Provider for NetSalaryRepository
-@riverpod
-NetSalaryRepository netSalaryRepository(NetSalaryRepositoryRef ref) {
-  final localDataSource = ref.watch(netSalaryLocalDataSourceProvider);
-  return NetSalaryRepositoryImpl(localDataSource);
-}
-
 // ========== USE CASE PROVIDERS ==========
 
 /// Provider for CalculateNetSalaryUseCase
@@ -149,7 +130,7 @@ NetSalaryRepository netSalaryRepository(NetSalaryRepositoryRef ref) {
 CalculateNetSalaryUseCase calculateNetSalaryUseCase(
   CalculateNetSalaryUseCaseRef ref,
 ) {
-  return CalculateNetSalaryUseCase();
+  return getIt<CalculateNetSalaryUseCase>();
 }
 
 /// Provider for SaveNetSalaryCalculationUseCase
@@ -157,8 +138,7 @@ CalculateNetSalaryUseCase calculateNetSalaryUseCase(
 SaveNetSalaryCalculationUseCase saveNetSalaryCalculationUseCase(
   SaveNetSalaryCalculationUseCaseRef ref,
 ) {
-  final repository = ref.watch(netSalaryRepositoryProvider);
-  return SaveNetSalaryCalculationUseCase(repository);
+  return getIt<SaveNetSalaryCalculationUseCase>();
 }
 
 /// Provider for GetNetSalaryCalculationHistoryUseCase
@@ -166,6 +146,5 @@ SaveNetSalaryCalculationUseCase saveNetSalaryCalculationUseCase(
 GetNetSalaryCalculationHistoryUseCase getNetSalaryCalculationHistoryUseCase(
   GetNetSalaryCalculationHistoryUseCaseRef ref,
 ) {
-  final repository = ref.watch(netSalaryRepositoryProvider);
-  return GetNetSalaryCalculationHistoryUseCase(repository);
+  return getIt<GetNetSalaryCalculationHistoryUseCase>();
 }

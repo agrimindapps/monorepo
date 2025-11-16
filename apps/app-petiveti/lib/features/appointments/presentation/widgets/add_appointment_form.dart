@@ -2,9 +2,9 @@ import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/uuid_generator.dart';
-import '../../../animals/presentation/providers/animals_provider.dart';
+import '../../../animals/presentation/providers/animals_providers.dart';
 import '../../domain/entities/appointment.dart';
-import '../providers/appointments_provider.dart';
+import '../providers/appointments_providers.dart';
 
 class AddAppointmentForm extends ConsumerStatefulWidget {
   final Appointment? initialAppointment;

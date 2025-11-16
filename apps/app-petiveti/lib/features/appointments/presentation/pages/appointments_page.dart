@@ -2,7 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/appointment.dart';
-import '../providers/appointments_provider.dart';
+import '../providers/appointments_providers.dart';
 import '../widgets/appointment_card.dart';
 import '../widgets/appointments_auto_reload_manager.dart';
 import '../widgets/empty_appointments_state.dart';

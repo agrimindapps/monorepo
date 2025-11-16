@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../providers/appointments_provider.dart';
+import '../providers/appointments_providers.dart';
 
 /// **Appointments Auto-Reload Manager**
 /// 

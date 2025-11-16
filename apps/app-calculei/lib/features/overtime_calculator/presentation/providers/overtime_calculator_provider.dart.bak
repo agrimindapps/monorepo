@@ -1,10 +1,9 @@
+// Package imports:
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/providers/core_providers.dart';
-import '../../data/datasources/overtime_local_datasource.dart';
-import '../../data/repositories/overtime_repository_impl.dart';
+// Project imports:
+import 'package:app_calculei/core/di/injection.dart';
 import '../../domain/entities/overtime_calculation.dart';
-import '../../domain/repositories/overtime_repository.dart';
 import '../../domain/usecases/calculate_overtime_usecase.dart';
 import '../../domain/usecases/get_overtime_calculation_history_usecase.dart';
 import '../../domain/usecases/save_overtime_calculation_usecase.dart';
@@ -124,22 +123,6 @@ class OvertimeCalculatorNotifier extends _$OvertimeCalculatorNotifier {
   }
 }
 
-// ========== DATA LAYER PROVIDERS ==========
-
-/// Provider for OvertimeLocalDataSource
-@riverpod
-OvertimeLocalDataSource overtimeLocalDataSource(OvertimeLocalDataSourceRef ref) {
-  final sharedPrefs = ref.watch(sharedPreferencesProvider).requireValue;
-  return OvertimeLocalDataSourceImpl(sharedPrefs);
-}
-
-/// Provider for OvertimeRepository
-@riverpod
-OvertimeRepository overtimeRepository(OvertimeRepositoryRef ref) {
-  final localDataSource = ref.watch(overtimeLocalDataSourceProvider);
-  return OvertimeRepositoryImpl(localDataSource);
-}
-
 // ========== USE CASE PROVIDERS ==========
 
 /// Provider for CalculateOvertimeUseCase
@@ -147,7 +130,7 @@ OvertimeRepository overtimeRepository(OvertimeRepositoryRef ref) {
 CalculateOvertimeUseCase calculateOvertimeUseCase(
   CalculateOvertimeUseCaseRef ref,
 ) {
-  return CalculateOvertimeUseCase();
+  return getIt<CalculateOvertimeUseCase>();
 }
 
 /// Provider for SaveOvertimeCalculationUseCase
@@ -155,8 +138,7 @@ CalculateOvertimeUseCase calculateOvertimeUseCase(
 SaveOvertimeCalculationUseCase saveOvertimeCalculationUseCase(
   SaveOvertimeCalculationUseCaseRef ref,
 ) {
-  final repository = ref.watch(overtimeRepositoryProvider);
-  return SaveOvertimeCalculationUseCase(repository);
+  return getIt<SaveOvertimeCalculationUseCase>();
 }
 
 /// Provider for GetOvertimeCalculationHistoryUseCase
@@ -164,6 +146,5 @@ SaveOvertimeCalculationUseCase saveOvertimeCalculationUseCase(
 GetOvertimeCalculationHistoryUseCase getOvertimeCalculationHistoryUseCase(
   GetOvertimeCalculationHistoryUseCaseRef ref,
 ) {
-  final repository = ref.watch(overtimeRepositoryProvider);
-  return GetOvertimeCalculationHistoryUseCase(repository);
+  return getIt<GetOvertimeCalculationHistoryUseCase>();
 }

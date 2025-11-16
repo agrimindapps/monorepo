@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 
-import '../providers/home_provider.dart';
+import '../providers/home_providers.dart';
 
 /// Service responsible for handling home page actions and business logic
 ///

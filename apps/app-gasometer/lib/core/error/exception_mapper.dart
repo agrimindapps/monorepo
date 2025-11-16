@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_storage/firebase_storage.dart' as storage;
+import 'package:core/core.dart';
 import 'failures.dart';
 
 /// Mapeia exceptions para failures específicos

@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
+import '../../../../core/interfaces/usecase.dart';
 import '../entities/praga_entity.dart';
 import '../repositories/pragas_repository.dart';
 

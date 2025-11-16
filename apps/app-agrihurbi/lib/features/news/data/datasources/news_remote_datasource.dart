@@ -197,13 +197,17 @@ class NewsRemoteDataSource {
   /// Get market summary
   Future<CommodityMarketSummaryModel> fetchMarketSummary() async {
     try {
-      final response = await _client.get<Map<String, dynamic>>('/api/v1/markets/summary');
+      final response = await _client.get<Map<String, dynamic>>(
+        '/api/v1/markets/summary',
+      );
       if (response.data is! Map<String, dynamic>) {
         throw const ServerException(
           'Invalid response format: expected Map<String, dynamic>',
         );
       }
-      return CommodityMarketSummaryModel.fromJson(response.data as Map<String, dynamic>);
+      return CommodityMarketSummaryModel.fromJson(
+        response.data as Map<String, dynamic>,
+      );
     } catch (e) {
       throw ServerException('Failed to fetch market summary: $e');
     }

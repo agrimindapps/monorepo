@@ -27,7 +27,7 @@ class FitossanitariosLocalDataSourceImpl
           .map((e) => FitossanitarioModel.fromJson(e as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      throw CacheException(message: e.toString());
+      throw CacheException( e.toString());
     }
   }
 
@@ -40,7 +40,7 @@ class FitossanitariosLocalDataSourceImpl
       );
       await _preferences.setString(_cachingKey, jsonString);
     } catch (e) {
-      throw CacheException(message: e.toString());
+      throw CacheException( e.toString());
     }
   }
 
@@ -49,7 +49,7 @@ class FitossanitariosLocalDataSourceImpl
     try {
       await _preferences.remove(_cachingKey);
     } catch (e) {
-      throw CacheException(message: e.toString());
+      throw CacheException( e.toString());
     }
   }
 }

@@ -37,10 +37,10 @@ class PragasRepositoryImpl implements IPragasRepository {
         return Right(cachedList.map((e) => e.toEntity()).toList());
       } on CacheException {
         // No cache available, return server failure
-        return Left(ServerFailure(message: e.message));
+        return Left(ServerFailure( e.message));
       }
     } on CacheException catch (e) {
-      return Left(CacheFailure(message: e.message));
+      return Left(CacheFailure( e.message));
     }
   }
 
@@ -50,7 +50,7 @@ class PragasRepositoryImpl implements IPragasRepository {
       final remoteItem = await _remoteDataSource.getPragaById(id);
       return Right(remoteItem.toEntity());
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+      return Left(ServerFailure( e.message));
     }
   }
 }

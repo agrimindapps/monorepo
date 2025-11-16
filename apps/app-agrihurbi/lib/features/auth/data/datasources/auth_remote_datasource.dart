@@ -85,7 +85,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         debugPrint('AuthRemoteDataSourceImpl: Login bem-sucedido');
         return UserModel.fromJson(userData as Map<String, dynamic>);
       } else {
-        final message = response.data!['message'] as String? ?? 'Falha no login';
+        final message =
+            response.data!['message'] as String? ?? 'Falha no login';
         debugPrint('AuthRemoteDataSourceImpl: Login falhou - $message');
         throw _mapStatusCodeToFailure(response.statusCode, message);
       }
@@ -178,7 +179,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       debugPrint('AuthRemoteDataSourceImpl: Renovando token');
 
-      final response = await _dioClient.post<Map<String, dynamic>>('/auth/refresh');
+      final response = await _dioClient.post<Map<String, dynamic>>(
+        '/auth/refresh',
+      );
 
       if (response.statusCode == 200) {
         final token = response.data!['access_token'] ?? response.data!['token'];
@@ -217,7 +220,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         return null;
       }
 
-      final response = await _dioClient.put<Map<String, dynamic>>('/users/$userId', data: data);
+      final response = await _dioClient.put<Map<String, dynamic>>(
+        '/users/$userId',
+        data: data,
+      );
 
       if (response.statusCode == 200) {
         final userData = response.data!['user'] ?? response.data;

@@ -1,15 +1,11 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
-import 'core/di/injection_container.dart' as di;
-import 'core/di/modules/account_deletion_module.dart';
-import 'core/di/modules/auth_module.dart';
-import 'core/di/modules/sync_module.dart';
+import 'core/providers/core_services_providers.dart';
 import 'firebase_options.dart';
-
-late ICrashlyticsRepository _crashlyticsRepository;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,11 +14,15 @@ Future<void> main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    await di.init();
-    _crashlyticsRepository = di.getIt<ICrashlyticsRepository>();
+
+    // Create ProviderContainer for initialization
+    final container = ProviderContainer();
+
+    final crashlyticsRepository = container.read(crashlyticsRepositoryProvider);
+
     if (!kIsWeb) {
       FlutterError.onError = (errorDetails) {
-        _crashlyticsRepository.recordError(
+        crashlyticsRepository.recordError(
           exception: errorDetails.exception,
           stackTrace: errorDetails.stack ?? StackTrace.empty,
           reason: errorDetails.summary.toString(),
@@ -31,7 +31,7 @@ Future<void> main() async {
       };
 
       PlatformDispatcher.instance.onError = (error, stack) {
-        _crashlyticsRepository.recordError(
+        crashlyticsRepository.recordError(
           exception: error,
           stackTrace: stack,
           fatal: true,
@@ -39,32 +39,15 @@ Future<void> main() async {
         return true;
       };
     }
-    try {
-      print('🔐 MAIN: Initializing account deletion module...');
-      AccountDeletionModule.init(di.getIt);
-      print('✅ MAIN: Account deletion module initialized successfully');
-    } catch (e) {
-      print('❌ MAIN: Account deletion initialization failed: $e');
-    }
-    try {
-      print('🔄 MAIN: Initializing Petiveti sync module...');
-      PetivetiSyncDIModule.init();
-      // NOTE: initializeSyncService() is commented out in sync_module.dart
-      // await PetivetiSyncDIModule.initializeSyncService();
-      print('✅ MAIN: Petiveti sync module initialized');
-    } catch (e) {
-      print('❌ MAIN: Sync module initialization failed: $e');
-    }
-    try {
-      print('🔐 MAIN: Initializing auth module...');
-      await AuthModule().register(di.getIt);
-      print('✅ MAIN: Auth module initialized successfully');
-    } catch (e) {
-      print('❌ MAIN: Auth module initialization failed: $e');
-    }
-    await _initializeFirebaseServices();
 
-    runApp(const ProviderScope(child: PetiVetiApp()));
+    await _initializeFirebaseServices(container);
+
+    runApp(
+      UncontrolledProviderScope(
+        container: container,
+        child: const PetiVetiApp(),
+      ),
+    );
   } catch (error) {
     runApp(
       MaterialApp(
@@ -95,16 +78,19 @@ Future<void> main() async {
 }
 
 /// Initialize Firebase services (Analytics, Crashlytics, Performance)
-Future<void> _initializeFirebaseServices() async {
+Future<void> _initializeFirebaseServices(ProviderContainer container) async {
   try {
     debugPrint('🚀 Initializing Firebase services...');
-    final analyticsRepository = di.getIt<IAnalyticsRepository>();
-    final performanceRepository = di.getIt<IPerformanceRepository>();
-    await _crashlyticsRepository.setCustomKey(
+
+    final analyticsRepository = container.read(analyticsRepositoryProvider);
+    final performanceRepository = container.read(performanceRepositoryProvider);
+    final crashlyticsRepository = container.read(crashlyticsRepositoryProvider);
+
+    await crashlyticsRepository.setCustomKey(
       key: 'app_name',
       value: 'PetiVeti',
     );
-    await _crashlyticsRepository.setCustomKey(
+    await crashlyticsRepository.setCustomKey(
       key: 'environment',
       value: kDebugMode ? 'debug' : 'production',
     );
@@ -119,13 +105,14 @@ Future<void> _initializeFirebaseServices() async {
       },
     );
 
-    await _crashlyticsRepository.log('PetiVeti app initialized successfully');
+    await crashlyticsRepository.log('PetiVeti app initialized successfully');
 
     debugPrint('✅ Firebase services initialized successfully');
   } catch (e, stackTrace) {
     debugPrint('❌ Error initializing Firebase services: $e');
     try {
-      await _crashlyticsRepository.recordError(
+      final crashlyticsRepository = container.read(crashlyticsRepositoryProvider);
+      await crashlyticsRepository.recordError(
         exception: e,
         stackTrace: stackTrace,
         reason: 'Firebase services initialization failed',

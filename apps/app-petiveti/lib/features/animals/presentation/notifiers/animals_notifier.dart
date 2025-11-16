@@ -1,16 +1,11 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/interfaces/usecase.dart' as local;
 import '../../../../core/interfaces/logging_service.dart';
-import '../../../../core/providers/logging_providers.dart';
+import '../../../../core/providers/core_services_providers.dart';
 import '../../domain/entities/animal.dart';
 import '../../domain/repositories/animal_repository.dart';
-import '../../domain/usecases/add_animal.dart';
-import '../../domain/usecases/delete_animal.dart';
-import '../../domain/usecases/get_animal_by_id.dart';
-import '../../domain/usecases/get_animals.dart';
-import '../../domain/usecases/update_animal.dart';
+import '../providers/animals_providers.dart';
 
 part 'animals_notifier.g.dart';
 
@@ -51,28 +46,15 @@ class AnimalsState {
 /// - Padrão consistente com Clean Architecture
 @riverpod
 class AnimalsNotifier extends _$AnimalsNotifier {
-  late final GetAnimals _getAnimals;
-  late final GetAnimalById _getAnimalById;
-  late final AddAnimal _addAnimal;
-  late final UpdateAnimal _updateAnimal;
-  late final DeleteAnimal _deleteAnimal;
-  late final ILoggingService _logger;
-
   @override
   AnimalsState build() {
-    _getAnimals = di.getIt<GetAnimals>();
-    _getAnimalById = di.getIt<GetAnimalById>();
-    _addAnimal = di.getIt<AddAnimal>();
-    _updateAnimal = di.getIt<UpdateAnimal>();
-    _deleteAnimal = di.getIt<DeleteAnimal>();
-    _logger = ref.watch(loggingServiceProvider);
-
     return const AnimalsState();
   }
 
   /// Carregar todos os animais
   Future<void> loadAnimals() async {
-    await _logger.trackUserAction(
+    final logger = ref.read(loggingServiceProvider);
+    await logger.trackUserAction(
       category: 'animals',
       operation: 'read',
       action: 'load_animals_initiated',
@@ -81,11 +63,12 @@ class AnimalsNotifier extends _$AnimalsNotifier {
 
     state = state.copyWith(isLoading: true, error: null);
 
-    final result = await _getAnimals(const local.NoParams());
+    final getAnimals = ref.read(getAnimalsProvider);
+    final result = await getAnimals(const local.NoParams());
 
     result.fold(
       (failure) {
-        _logger.logError(
+        logger.logError(
           category: 'animals',
           operation: 'read',
           message: 'Failed to load animals in notifier',
@@ -99,7 +82,7 @@ class AnimalsNotifier extends _$AnimalsNotifier {
         );
       },
       (animals) {
-        _logger.logInfo(
+        logger.logInfo(
           category: 'animals',
           operation: 'read',
           message: 'Successfully loaded animals in notifier',
@@ -119,7 +102,8 @@ class AnimalsNotifier extends _$AnimalsNotifier {
 
   /// Adicionar novo animal
   Future<void> addAnimal(Animal animal) async {
-    final result = await _addAnimal(animal);
+    final addAnimal = ref.read(addAnimalProvider);
+    final result = await addAnimal(animal);
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
@@ -135,7 +119,8 @@ class AnimalsNotifier extends _$AnimalsNotifier {
 
   /// Atualizar animal existente
   Future<void> updateAnimal(Animal animal) async {
-    final result = await _updateAnimal(animal);
+    final updateAnimal = ref.read(updateAnimalProvider);
+    final result = await updateAnimal(animal);
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
@@ -154,7 +139,8 @@ class AnimalsNotifier extends _$AnimalsNotifier {
 
   /// Deletar animal
   Future<void> deleteAnimal(String id) async {
-    final result = await _deleteAnimal(id);
+    final deleteAnimal = ref.read(deleteAnimalProvider);
+    final result = await deleteAnimal(id);
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
@@ -170,7 +156,8 @@ class AnimalsNotifier extends _$AnimalsNotifier {
 
   /// Buscar animal por ID
   Future<Animal?> getAnimalById(String id) async {
-    final result = await _getAnimalById(id);
+    final getAnimalById = ref.read(getAnimalByIdProvider);
+    final result = await getAnimalById(id);
 
     return result.fold(
       (failure) {
@@ -196,6 +183,6 @@ Future<Animal?> animalById(AnimalByIdRef ref, String id) async {
 
 @riverpod
 Stream<List<Animal>> animalsStream(AnimalsStreamRef ref) {
-  final repository = di.getIt.get<AnimalRepository>();
+  final repository = ref.watch(animalRepositoryProvider);
   return repository.watchAnimals();
 }

@@ -26,19 +26,17 @@ class PragasLocalDataSourceImpl implements PragasLocalDataSource {
           .map((e) => PragaModel.fromJson(e as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      throw CacheException(message: e.toString());
+      throw CacheException(e.toString());
     }
   }
 
   @override
   Future<void> cachePragas(List<PragaModel> pragas) async {
     try {
-      final jsonString = jsonEncode(
-        pragas.map((e) => e.toJson()).toList(),
-      );
+      final jsonString = jsonEncode(pragas.map((e) => e.toJson()).toList());
       await _preferences.setString(_cachingKey, jsonString);
     } catch (e) {
-      throw CacheException(message: e.toString());
+      throw CacheException(e.toString());
     }
   }
 
@@ -47,7 +45,7 @@ class PragasLocalDataSourceImpl implements PragasLocalDataSource {
     try {
       await _preferences.remove(_cachingKey);
     } catch (e) {
-      throw CacheException(message: e.toString());
+      throw CacheException(e.toString());
     }
   }
 }

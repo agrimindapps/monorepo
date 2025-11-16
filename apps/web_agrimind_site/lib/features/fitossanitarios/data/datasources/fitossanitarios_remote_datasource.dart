@@ -22,7 +22,7 @@ class FitossanitariosRemoteDataSourceImpl
           .map((e) => FitossanitarioModel.fromJson(e as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      throw ServerException(message: e.toString());
+      throw ServerException(e.toString());
     }
   }
 
@@ -35,9 +35,9 @@ class FitossanitariosRemoteDataSourceImpl
           .eq('id', id)
           .single();
 
-      return FitossanitarioModel.fromJson(response as Map<String, dynamic>);
+      return FitossanitarioModel.fromJson(response);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      throw ServerException(e.toString());
     }
   }
 }

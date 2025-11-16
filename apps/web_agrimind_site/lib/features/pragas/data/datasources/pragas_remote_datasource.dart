@@ -21,19 +21,22 @@ class PragasRemoteDataSourceImpl implements PragasRemoteDataSource {
           .map((e) => PragaModel.fromJson(e as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      throw ServerException(message: e.toString());
+      throw ServerException(e.toString());
     }
   }
 
   @override
   Future<PragaModel> getPragaById(String id) async {
     try {
-      final response =
-          await _supabaseClient.from('pragas').select().eq('id', id).single();
+      final response = await _supabaseClient
+          .from('pragas')
+          .select()
+          .eq('id', id)
+          .single();
 
-      return PragaModel.fromJson(response as Map<String, dynamic>);
+      return PragaModel.fromJson(response);
     } catch (e) {
-      throw ServerException(message: e.toString());
+      throw ServerException(e.toString());
     }
   }
 }

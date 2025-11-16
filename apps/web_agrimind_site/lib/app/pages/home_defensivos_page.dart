@@ -8,7 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/firebase_analytics_service.dart';
 import '../../widgets/appbar_widget.dart';
-import '../repository/defensivos_repository.dart';
+import '../../app-site/repository/defensivos_repository.dart';
 
 class DefenivosListarPage extends StatefulWidget {
   const DefenivosListarPage({super.key});
@@ -63,10 +63,7 @@ class _DefenivosListarPageState extends State<DefenivosListarPage> {
       appBar: AppBar(
         toolbarHeight: 70,
         backgroundColor: Colors.white.withOpacity(0.7), // Cor com transparência
-        title: SizedBox(
-          width: 1120,
-          child: rowOpcoesMenuSuperior(),
-        ),
+        title: SizedBox(width: 1120, child: rowOpcoesMenuSuperior()),
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -83,11 +80,7 @@ class _DefenivosListarPageState extends State<DefenivosListarPage> {
                 _rowPesquisar(),
                 const SizedBox(height: 30),
                 _todosOsDefensivos(),
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: Colors.grey.shade400,
-                ),
+                Divider(height: 1, thickness: 1, color: Colors.grey.shade400),
                 const SizedBox(height: 15),
                 _gridDefensivos(),
                 const SizedBox(height: 30),
@@ -189,10 +182,7 @@ class _DefenivosListarPageState extends State<DefenivosListarPage> {
                           ),
                           Row(
                             children: [
-                              const Icon(
-                                Icons.business,
-                                size: 16,
-                              ),
+                              const Icon(Icons.business, size: 16),
                               const SizedBox(
                                 width: 4, // Espaço entre o ícone e o texto
                               ),
@@ -237,9 +227,7 @@ class _DefenivosListarPageState extends State<DefenivosListarPage> {
                                 Navigator.pushNamed(
                                   context,
                                   '/defensivo',
-                                  arguments: {
-                                    'id': item['id'],
-                                  },
+                                  arguments: {'id': item['id']},
                                 );
                               },
                               style: TextButton.styleFrom(
@@ -248,7 +236,7 @@ class _DefenivosListarPageState extends State<DefenivosListarPage> {
                               ),
                               child: const Text('Mais Detalhes ->'),
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ),
@@ -297,8 +285,8 @@ class _DefenivosListarPageState extends State<DefenivosListarPage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
                         page == DefensivosRepository().currentPage.value
-                            ? Colors.green
-                            : Colors.grey,
+                        ? Colors.green
+                        : Colors.grey,
                   ),
                   onPressed: () {
                     DefensivosRepository().currentPage.value = page;
@@ -428,20 +416,14 @@ class _DefenivosListarPageState extends State<DefenivosListarPage> {
           // Layout para telas menores (smartphones)
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildSearchField(constraints),
-              _buildSearchButton(),
-            ],
+            children: [_buildSearchField(constraints), _buildSearchButton()],
           );
         } else {
           // Layout para telas maiores (tablets, desktops)
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildSearchField(constraints),
-              _buildSearchButton(),
-            ],
+            children: [_buildSearchField(constraints), _buildSearchButton()],
           );
         }
       },
@@ -598,10 +580,7 @@ class _DefenivosListarPageState extends State<DefenivosListarPage> {
       children: [
         _buildLogo(),
         const SizedBox(height: 20),
-        const Text(
-          'ReceituAgro: Seu app Agro',
-          style: TextStyle(fontSize: 24),
-        ),
+        const Text('ReceituAgro: Seu app Agro', style: TextStyle(fontSize: 24)),
         Text(
           'Agricultura do seu dia a dia',
           style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
@@ -668,14 +647,13 @@ class _DefenivosListarPageState extends State<DefenivosListarPage> {
             ),
             onTap: () async {
               Uri url = Uri.parse(
-                  'https://play.google.com/store/apps/details?id=br.com.agrimind.pragassoja');
+                'https://play.google.com/store/apps/details?id=br.com.agrimind.pragassoja',
+              );
               if (await canLaunchUrl(url)) {
                 await launchUrl(url);
                 await GAnalyticsService.logCustomEvent(
                   'button_click',
-                  parameters: {
-                    'button_name': 'download_play_store',
-                  },
+                  parameters: {'button_name': 'download_play_store'},
                 );
               } else {
                 throw 'Could not launch $url';
@@ -687,20 +665,16 @@ class _DefenivosListarPageState extends State<DefenivosListarPage> {
         MouseRegion(
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
-            child: Image.asset(
-              'lib/assets/download_app_store.png',
-              width: 140,
-            ),
+            child: Image.asset('lib/assets/download_app_store.png', width: 140),
             onTap: () async {
               Uri url = Uri.parse(
-                  'https://apps.apple.com/br/app/receituagro-seu-app-agro/id967785485?platform=iphone');
+                'https://apps.apple.com/br/app/receituagro-seu-app-agro/id967785485?platform=iphone',
+              );
               if (await canLaunchUrl(url)) {
                 await launchUrl(url);
                 await GAnalyticsService.logCustomEvent(
                   'button_click',
-                  parameters: {
-                    'button_name': 'download_app_store',
-                  },
+                  parameters: {'button_name': 'download_app_store'},
                 );
               } else {
                 throw 'Could not launch $url';

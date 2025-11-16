@@ -1,7 +1,13 @@
-import 'package:core/core.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../animals/domain/entities/animal_enums.dart';
-import '../../../animals/presentation/providers/animals_provider.dart';
+import '../../../animals/presentation/notifiers/animals_notifier.dart';
+
+part 'home_notifiers.g.dart';
+
+// ============================================================================
+// STATE CLASSES
+// ============================================================================
+
 class HomeNotificationsState {
   final int unreadCount;
   final List<String> recentNotifications;
@@ -25,6 +31,7 @@ class HomeNotificationsState {
     );
   }
 }
+
 class HomeStatsState {
   final int totalAnimals;
   final int upcomingAppointments;
@@ -85,8 +92,10 @@ class HomeStatsState {
   }
 
   bool get hasUrgentTasks => overdueItems > 0 || todayTasks > 0;
-  String get healthStatus => overdueItems > 5 ? 'Atenção' : overdueItems > 0 ? 'Cuidado' : 'Em dia';
+  String get healthStatus =>
+      overdueItems > 5 ? 'Atenção' : overdueItems > 0 ? 'Cuidado' : 'Em dia';
 }
+
 class HomeStatusState {
   final bool isLoading;
   final bool isOnline;
@@ -115,12 +124,21 @@ class HomeStatusState {
     );
   }
 }
-class HomeNotificationsNotifier extends StateNotifier<HomeNotificationsState> {
-  HomeNotificationsNotifier() : super(const HomeNotificationsState());
+
+// ============================================================================
+// NOTIFIERS
+// ============================================================================
+
+@riverpod
+class HomeNotificationsNotifier extends _$HomeNotificationsNotifier {
+  @override
+  HomeNotificationsState build() {
+    return const HomeNotificationsState();
+  }
 
   Future<void> loadNotifications() async {
     await Future<void>.delayed(const Duration(milliseconds: 500));
-    
+
     state = state.copyWith(
       unreadCount: 3,
       recentNotifications: [
@@ -139,46 +157,52 @@ class HomeNotificationsNotifier extends StateNotifier<HomeNotificationsState> {
     );
   }
 }
-class HomeStatsNotifier extends StateNotifier<HomeStatsState> {
-  final Ref ref;
-  
-  HomeStatsNotifier(this.ref) : super(const HomeStatsState());
+
+@riverpod
+class HomeStatsNotifier extends _$HomeStatsNotifier {
+  @override
+  HomeStatsState build() {
+    return const HomeStatsState();
+  }
 
   Future<void> loadStats() async {
     state = state.copyWith(isLoading: true);
-    
+
     try {
       await Future<void>.delayed(const Duration(milliseconds: 800));
-      final animalsState = ref.read(animalsProvider);
+      final animalsState = ref.read(animalsNotifierProvider);
       final animals = animalsState.animals;
       final Map<String, int> speciesBreakdown = {};
       double totalAge = 0;
       int animalsWithAge = 0;
-      
+
       for (final animal in animals) {
         final speciesName = animal.species.displayName;
         speciesBreakdown[speciesName] = (speciesBreakdown[speciesName] ?? 0) + 1;
-        
+
         if (animal.birthDate != null) {
           totalAge += animal.ageInMonths;
           animalsWithAge++;
         }
       }
-      
+
       final averageAge = animalsWithAge > 0 ? totalAge / animalsWithAge : 0.0;
-      final overdueItems = (animals.length * 0.1).round(); // 10% have overdue items
-      final todayTasks = (animals.length * 0.2).round(); // 20% have tasks today
-      
+      final overdueItems = (animals.length * 0.1).round();
+      final todayTasks = (animals.length * 0.2).round();
+
       state = state.copyWith(
         totalAnimals: animals.length,
         upcomingAppointments: 1,
         pendingVaccinations: (animals.length * 0.3).round(),
         activeMedications: (animals.length * 0.4).round(),
-        totalReminders: (animals.length * 2), // 2 reminders per animal
+        totalReminders: animals.length * 2,
         overdueItems: overdueItems,
         todayTasks: todayTasks,
-        nextAppointment: animals.isNotEmpty ? 'Consulta do ${animals.first.name}' : null,
-        nextVaccination: animals.isNotEmpty ? 'Vacina antirrábica - ${animals.first.name}' : null,
+        nextAppointment:
+            animals.isNotEmpty ? 'Consulta do ${animals.first.name}' : null,
+        nextVaccination: animals.isNotEmpty
+            ? 'Vacina antirrábica - ${animals.first.name}'
+            : null,
         speciesBreakdown: speciesBreakdown,
         averageAge: averageAge,
         isLoading: false,
@@ -203,15 +227,20 @@ class HomeStatsNotifier extends StateNotifier<HomeStatsState> {
     loadStats();
   }
 }
-class HomeStatusNotifier extends StateNotifier<HomeStatusState> {
-  HomeStatusNotifier() : super(HomeStatusState(lastUpdated: DateTime.now()));
+
+@riverpod
+class HomeStatusNotifier extends _$HomeStatusNotifier {
+  @override
+  HomeStatusState build() {
+    return HomeStatusState(lastUpdated: DateTime.now());
+  }
 
   Future<void> checkStatus() async {
     state = state.copyWith(isLoading: true, clearError: true);
-    
+
     try {
       await Future<void>.delayed(const Duration(milliseconds: 300));
-      
+
       state = state.copyWith(
         isLoading: false,
         isOnline: true,
@@ -237,29 +266,27 @@ class HomeStatusNotifier extends StateNotifier<HomeStatusState> {
     state = state.copyWith(clearError: true);
   }
 }
-final homeNotificationsProvider = StateNotifierProvider<HomeNotificationsNotifier, HomeNotificationsState>((ref) {
-  return HomeNotificationsNotifier();
-});
 
-final homeStatsProvider = StateNotifierProvider<HomeStatsNotifier, HomeStatsState>((ref) {
-  return HomeStatsNotifier(ref);
-});
+// ============================================================================
+// DERIVED PROVIDERS
+// ============================================================================
 
-final homeStatusProvider = StateNotifierProvider<HomeStatusNotifier, HomeStatusState>((ref) {
-  return HomeStatusNotifier();
-});
-final hasUnreadNotificationsProvider = Provider<bool>((ref) {
-  return ref.watch(homeNotificationsProvider).unreadCount > 0;
-});
+@riverpod
+bool hasUnreadNotifications(HasUnreadNotificationsRef ref) {
+  return ref.watch(homeNotificationsNotifierProvider).unreadCount > 0;
+}
 
-final hasUrgentAlertsProvider = Provider<bool>((ref) {
-  return ref.watch(homeNotificationsProvider).hasUrgentAlerts;
-});
+@riverpod
+bool hasUrgentAlerts(HasUrgentAlertsRef ref) {
+  return ref.watch(homeNotificationsNotifierProvider).hasUrgentAlerts;
+}
 
-final isHomeLoadingProvider = Provider<bool>((ref) {
-  return ref.watch(homeStatusProvider).isLoading;
-});
+@riverpod
+bool isHomeLoading(IsHomeLoadingRef ref) {
+  return ref.watch(homeStatusNotifierProvider).isLoading;
+}
 
-final homeErrorProvider = Provider<String?>((ref) {
-  return ref.watch(homeStatusProvider).errorMessage;
-});
+@riverpod
+String? homeError(HomeErrorRef ref) {
+  return ref.watch(homeStatusNotifierProvider).errorMessage;
+}

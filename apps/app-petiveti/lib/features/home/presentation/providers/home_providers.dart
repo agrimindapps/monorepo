@@ -7,8 +7,21 @@ import '../../domain/repositories/home_aggregation_repository.dart';
 import '../../domain/repositories/notification_repository.dart';
 import '../../domain/repositories/dashboard_repository.dart';
 
-// Export state classes for use in other modules
-export '../providers/home_notifiers.dart' show HomeStatusState, HomeNotificationsState, HomeStatsState;
+// Export state classes and notifiers for use in other modules
+export '../providers/home_notifiers.dart' show 
+  HomeStatusState, 
+  HomeNotificationsState, 
+  HomeStatsState,
+  HomeNotificationsNotifier,
+  HomeStatsNotifier,
+  HomeStatusNotifier,
+  homeNotificationsNotifierProvider,
+  homeStatsNotifierProvider,
+  homeStatusNotifierProvider,
+  hasUnreadNotificationsProvider,
+  hasUrgentAlertsProvider,
+  isHomeLoadingProvider,
+  homeErrorProvider;
 
 part 'home_providers.g.dart';
 

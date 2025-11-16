@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:core/core.dart' as core;
 import 'package:core/core.dart' hide AuthState, Column;
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/analytics/analytics_service.dart';
 import '../data/models/user_session_data.dart';
@@ -11,27 +12,23 @@ import '../services/device_identity_service.dart';
 import '../services/receituagro_data_cleaner.dart';
 import 'auth_state.dart' as local;
 
-/// AuthNotifier Riverpod version - replaces ChangeNotifier
-/// Manages authentication state using StateNotifier pattern
-class AuthNotifier extends StateNotifier<local.AuthState> {
-  final IAuthRepository _authRepository;
-  final DeviceIdentityService _deviceService;
-  final ReceitaAgroAnalyticsService _analytics;
-  final EnhancedAccountDeletionService _enhancedDeletionService;
+part 'auth_notifier.g.dart';
+
+/// AuthNotifier Riverpod code generation version
+/// Manages authentication state using AsyncNotifier pattern
+@riverpod
+class AuthNotifier extends _$AuthNotifier {
+  IAuthRepository get _authRepository => throw UnimplementedError('Inject via DI');
+  DeviceIdentityService get _deviceService => throw UnimplementedError('Inject via DI');
+  ReceitaAgroAnalyticsService get _analytics => throw UnimplementedError('Inject via DI');
+  EnhancedAccountDeletionService get _enhancedDeletionService => throw UnimplementedError('Inject via DI');
 
   StreamSubscription<UserEntity?>? _userSubscription;
 
-  AuthNotifier({
-    required IAuthRepository authRepository,
-    required DeviceIdentityService deviceService,
-    required ReceitaAgroAnalyticsService analytics,
-    required EnhancedAccountDeletionService enhancedAccountDeletionService,
-  })  : _authRepository = authRepository,
-        _deviceService = deviceService,
-        _analytics = analytics,
-        _enhancedDeletionService = enhancedAccountDeletionService,
-        super(const local.AuthState.initial()) {
+  @override
+  local.AuthState build() {
     _initializeAuthNotifier();
+    return const local.AuthState.initial();
   }
 
   Future<void> _initializeAuthNotifier() async {
@@ -628,10 +625,8 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
     }
   }
 
-  @override
   void dispose() {
     _userSubscription?.cancel();
-    super.dispose();
   }
 }
 

@@ -44,9 +44,6 @@ class GasometerEnvironmentConfig extends AppEnvironmentConfig {
   }
 }
 
-  static const String backups = 'gasometer_backups';
-}
-
 /// Gasometer-specific image service configuration
 class GasometerImageConfig {
   static const config = ImageServiceConfig(

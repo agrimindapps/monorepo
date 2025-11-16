@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../animals/domain/entities/animal_enums.dart';
 import '../../../animals/presentation/notifiers/animals_notifier.dart';
 
 part 'home_notifiers.g.dart';

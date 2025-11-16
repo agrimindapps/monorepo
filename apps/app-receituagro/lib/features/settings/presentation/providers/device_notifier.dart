@@ -1,8 +1,10 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/device_settings_entity.dart';
+
+part 'device_notifier.g.dart';
 
 /// State class for device settings
 class DeviceState {
@@ -58,14 +60,14 @@ class DeviceState {
 /// - settings: Current DeviceSettingsEntity
 /// - isLoading: Whether operations are in progress
 /// - error: Error message if any
-class DeviceNotifier extends StateNotifier<DeviceState> {
-  // Initialize with a default device ID (in real app, get from service)
-  DeviceNotifier({String? initialDeviceId})
-    : super(
-        DeviceState.initial(
-          initialDeviceId ?? 'device-${DateTime.now().millisecondsSinceEpoch}',
-        ),
-      );
+@riverpod
+class DeviceNotifier extends _$DeviceNotifier {
+  @override
+  DeviceState build({String? initialDeviceId}) {
+    return DeviceState.initial(
+      initialDeviceId ?? 'device-${DateTime.now().millisecondsSinceEpoch}',
+    );
+  }
 
   /// Toggles sync on/off
   ///
@@ -273,10 +275,3 @@ class DeviceNotifier extends StateNotifier<DeviceState> {
   /// Get error message if any
   String? get errorMessage => state.error;
 }
-
-/// Provider for device settings
-/// Use: ref.watch(deviceNotifierProvider)
-final deviceNotifierProvider =
-    StateNotifierProvider.autoDispose<DeviceNotifier, DeviceState>(
-      (ref) => DeviceNotifier(),
-    );

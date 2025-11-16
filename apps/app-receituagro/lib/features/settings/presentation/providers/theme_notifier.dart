@@ -1,8 +1,10 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/theme_settings_entity.dart';
+
+part 'theme_notifier.g.dart';
 
 /// State class for theme settings
 class ThemeState {
@@ -55,8 +57,10 @@ class ThemeState {
 /// - settings: Current ThemeSettingsEntity
 /// - isLoading: Whether operations are in progress
 /// - error: Error message if any
-class ThemeNotifier extends StateNotifier<ThemeState> {
-  ThemeNotifier() : super(ThemeState.initial());
+@riverpod
+class ThemeSettingsNotifier extends _$ThemeSettingsNotifier {
+  @override
+  ThemeState build() => ThemeState.initial();
 
   /// Toggles dark mode on/off
   ///
@@ -197,10 +201,3 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
   /// Get error message if any
   String? get errorMessage => state.error;
 }
-
-/// Provider for theme settings
-/// Use: ref.watch(themeNotifierProvider)
-final themeNotifierProvider =
-    StateNotifierProvider.autoDispose<ThemeNotifier, ThemeState>(
-      (ref) => ThemeNotifier(),
-    );

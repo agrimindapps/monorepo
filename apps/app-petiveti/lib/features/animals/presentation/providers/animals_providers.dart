@@ -14,8 +14,8 @@ import '../../domain/usecases/get_animals.dart';
 import '../../domain/usecases/update_animal.dart';
 import '../../../sync/providers/sync_providers.dart';
 
-// Export state classes for use in other modules
-export '../notifiers/animals_notifier.dart' show AnimalsState, AnimalsFilter;
+// Export state classes and providers for use in other modules
+export '../notifiers/animals_notifier.dart' show AnimalsState, AnimalsNotifier, animalsNotifierProvider;
 
 part 'animals_providers.g.dart';
 

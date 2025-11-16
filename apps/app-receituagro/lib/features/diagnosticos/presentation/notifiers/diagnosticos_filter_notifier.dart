@@ -1,23 +1,26 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/failure_message_service.dart';
 import '../../domain/services/filtering/i_diagnosticos_filter_service.dart';
 import '../state/diagnosticos_filter_state.dart';
 
+part 'diagnosticos_filter_notifier.g.dart';
+
 /// Notifier para gerenciamento de filtros de diagnósticos
 /// Responsabilidade: Handle filtering by defensivo, cultura, praga
 /// Métodos: filterByDefensivo(), filterByCultura(), filterByPraga(), clearFilters()
-class DiagnosticosFilterNotifier
-    extends StateNotifier<DiagnosticosFilterState> {
-  DiagnosticosFilterNotifier()
-      : super(DiagnosticosFilterState.initial()) {
-    _filterService = di.sl<IDiagnosticosFilterService>();
-    _failureMessageService = di.sl<FailureMessageService>();
-  }
-
+@riverpod
+class DiagnosticosFilter extends _$DiagnosticosFilter {
   late final IDiagnosticosFilterService _filterService;
   late final FailureMessageService _failureMessageService;
+
+  @override
+  DiagnosticosFilterState build() {
+    _filterService = di.sl<IDiagnosticosFilterService>();
+    _failureMessageService = di.sl<FailureMessageService>();
+    return DiagnosticosFilterState.initial();
+  }
 
   /// Filtra diagnósticos por defensivo
   Future<void> filterByDefensivo(
@@ -130,14 +133,13 @@ class DiagnosticosFilterNotifier
     }
   }
 
-  /// Limpa filtros e contextos
+  /// Limpa todos os filtros
   void clearFilters() {
-    state = state.clearContexts();
+    state = DiagnosticosFilterState.initial();
+  }
+
+  /// Limpa erro
+  void clearError() {
+    state = state.copyWith(errorMessage: null);
   }
 }
-
-/// Provider para DiagnosticosFilterNotifier
-final diagnosticosFilterNotifierProvider =
-    StateNotifierProvider<DiagnosticosFilterNotifier, DiagnosticosFilterState>(
-  (ref) => DiagnosticosFilterNotifier(),
-);

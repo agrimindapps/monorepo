@@ -1,9 +1,6 @@
 import 'package:core/core.dart' hide getIt, Column;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../database/taskolist_database.dart';
-import '../../features/tasks/data/task_local_datasource.dart';
 import '../../features/tasks/providers/task_providers.dart';
 import '../../infrastructure/services/analytics_service.dart';
 import '../../infrastructure/services/auth_service.dart';
@@ -187,10 +184,11 @@ AccountDeletionRateLimiter accountDeletionRateLimiter(Ref ref) {
 }
 
 @riverpod
-EnhancedAccountDeletionService enhancedAccountDeletionService(Ref ref) {
+Future<EnhancedAccountDeletionService> enhancedAccountDeletionService(Ref ref) async {
+  final appDataCleaner = await ref.watch(taskolistDataCleanerProvider.future);
   return EnhancedAccountDeletionService(
     authRepository: ref.watch(authRepositoryProvider),
-    appDataCleaner: ref.watch(taskolistDataCleanerProvider),
+    appDataCleaner: appDataCleaner,
     firestoreDeletion: ref.watch(firestoreDeletionServiceProvider),
     revenueCatCancellation: ref.watch(revenueCatCancellationServiceProvider),
     rateLimiter: ref.watch(accountDeletionRateLimiterProvider),

@@ -1,5 +1,7 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/index.dart';
+
+part 'trial_notifier.g.dart';
 
 /// Estado das informações de período experimental
 class TrialState {
@@ -79,8 +81,10 @@ class TrialState {
 /// - Iniciar novo período experimental
 /// - Cancelar período experimental
 /// - Rastrear progresso do período
-class TrialNotifier extends StateNotifier<TrialState> {
-  TrialNotifier() : super(TrialState.initial());
+@riverpod
+class TrialNotifier extends _$TrialNotifier {
+  @override
+  TrialState build() => TrialState.initial();
 
   /// Carrega informações do período experimental ativo
   ///

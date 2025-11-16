@@ -1,8 +1,10 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/notification_settings_entity.dart';
+
+part 'notification_notifier.g.dart';
 
 /// State class for notification settings
 class NotificationState {
@@ -56,8 +58,10 @@ class NotificationState {
 /// - settings: Current NotificationSettingsEntity
 /// - isLoading: Whether operations are in progress
 /// - error: Error message if any
-class NotificationNotifier extends StateNotifier<NotificationState> {
-  NotificationNotifier() : super(NotificationState.initial());
+@riverpod
+class NotificationSettingsNotifier extends _$NotificationSettingsNotifier {
+  @override
+  NotificationState build() => NotificationState.initial();
 
   /// Toggles all notifications on/off
   ///
@@ -221,10 +225,3 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
   /// Get error message if any
   String? get errorMessage => state.error;
 }
-
-/// Provider for notification settings
-/// Use: ref.watch(notificationNotifierProvider)
-final notificationNotifierProvider =
-    StateNotifierProvider.autoDispose<NotificationNotifier, NotificationState>(
-      (ref) => NotificationNotifier(),
-    );

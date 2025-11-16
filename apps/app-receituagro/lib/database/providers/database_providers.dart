@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get_it/get_it.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../receituagro_database.dart';
@@ -13,9 +12,11 @@ part 'database_providers.g.dart';
 ///
 /// Cria uma única instância do banco de dados e a mantém viva durante
 /// toda a vida do app. Quando o ref for disposed, fecha o banco.
-@riverpod
+///
+/// MIGRATED: Removida dependência de GetIt - cria instância diretamente
+@Riverpod(keepAlive: true)
 ReceituagroDatabase database(Ref ref) {
-  final db = GetIt.instance<ReceituagroDatabase>();
+  final db = ReceituagroDatabase();
   ref.onDispose(() => db.close());
   return db;
 }

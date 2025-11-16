@@ -13,8 +13,16 @@ import '../../domain/usecases/get_appointments.dart';
 import '../../domain/usecases/get_upcoming_appointments.dart';
 import '../../domain/usecases/update_appointment.dart';
 
-// Export state classes for use in other modules
-export '../notifiers/appointments_notifier.dart' show AppointmentState;
+// Export state classes and notifiers for use in other modules
+export '../notifiers/appointments_notifier.dart' show 
+  AppointmentState,
+  AppointmentsNotifier,
+  appointmentsNotifierProvider,
+  appointmentsListProvider,
+  upcomingAppointmentsListProvider,
+  appointmentsLoadingProvider,
+  appointmentsErrorProvider,
+  selectedAppointmentProvider;
 
 part 'appointments_providers.g.dart';
 

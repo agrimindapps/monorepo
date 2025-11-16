@@ -1,8 +1,10 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/premium_settings_entity.dart';
+
+part 'premium_notifier.g.dart';
 
 /// State class for premium settings
 class PremiumState {
@@ -58,8 +60,10 @@ class PremiumState {
 /// - settings: Current PremiumSettingsEntity
 /// - isLoading: Whether operations are in progress
 /// - error: Error message if any
-class PremiumNotifier extends StateNotifier<PremiumState> {
-  PremiumNotifier() : super(PremiumState.initial());
+@riverpod
+class PremiumNotifier extends _$PremiumNotifier {
+  @override
+  PremiumState build() => PremiumState.initial();
 
   /// Enables or disables development mode
   ///
@@ -257,10 +261,3 @@ class PremiumNotifier extends StateNotifier<PremiumState> {
   /// Get error message if any
   String? get errorMessage => state.error;
 }
-
-/// Provider for premium settings
-/// Use: ref.watch(premiumNotifierProvider)
-final premiumNotifierProvider =
-    StateNotifierProvider.autoDispose<PremiumNotifier, PremiumState>(
-      (ref) => PremiumNotifier(),
-    );

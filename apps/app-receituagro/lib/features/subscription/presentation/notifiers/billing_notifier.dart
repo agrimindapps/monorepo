@@ -1,6 +1,8 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/index.dart';
 import '../services/subscription_error_message_service.dart';
+
+part 'billing_notifier.g.dart';
 
 /// Estado dos problemas de cobrança
 class BillingState {
@@ -98,10 +100,14 @@ class BillingState {
 /// - Gerenciar retry de cobranças falhadas
 /// - Rastrear métodos de pagamento
 /// - Resolução de problemas
-class BillingNotifier extends StateNotifier<BillingState> {
-  BillingNotifier(this._errorService) : super(BillingState.initial());
+@riverpod
+class BillingNotifier extends _$BillingNotifier {
+  @override
+  BillingState build(SubscriptionErrorMessageService errorService) {
+    return BillingState.initial();
+  }
 
-  final SubscriptionErrorMessageService _errorService;
+  SubscriptionErrorMessageService get _errorService => errorService;
 
   /// Carrega a lista de problemas de cobrança
   ///

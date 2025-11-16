@@ -28,7 +28,7 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    final animalsState = ref.watch(animalsProvider);
+    final animalsState = ref.watch(animalsNotifierProvider);
     final hasActiveFilters = animalsState.filter.hasActiveFilters;
 
     return AppBar(
@@ -81,7 +81,7 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
                     _isSearching = false;
                   });
                   _searchController.clear();
-                  ref.read(animalsProvider.notifier).updateSearchQuery('');
+                  ref.read(animalsNotifierProvider.notifier).updateSearchQuery('');
                 },
               ),
             )
@@ -137,7 +137,7 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
                 icon: const Icon(Icons.clear),
                 onPressed: () {
                   _searchController.clear();
-                  ref.read(animalsProvider.notifier).updateSearchQuery('');
+                  ref.read(animalsNotifierProvider.notifier).updateSearchQuery('');
                 },
               ),
             ),
@@ -229,7 +229,7 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
           border: InputBorder.none,
         ),
         onChanged: (query) {
-          ref.read(animalsProvider.notifier).updateSearchQuery(query);
+          ref.read(animalsNotifierProvider.notifier).updateSearchQuery(query);
         },
       ),
     );
@@ -244,7 +244,7 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
   }
 
   void _clearAllFilters() {
-    ref.read(animalsProvider.notifier).clearFilters();
+    ref.read(animalsNotifierProvider.notifier).clearFilters();
     _searchController.clear();
     if (_isSearching) {
       setState(() {
@@ -270,7 +270,7 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
         duration: Duration(seconds: AnimalsConstants.syncDurationSeconds),
       ),
     );
-    await ref.read(animalsProvider.notifier).loadAnimals();
+    await ref.read(animalsNotifierProvider.notifier).loadAnimals();
   }
 }
 
@@ -289,7 +289,7 @@ class _AnimalsFilterBottomSheetState
   @override
   void initState() {
     super.initState();
-    _tempFilter = ref.read(animalsProvider).filter;
+    _tempFilter = ref.read(animalsNotifierProvider).filter;
   }
 
   @override
@@ -458,7 +458,7 @@ class _AnimalsFilterBottomSheetState
   }
 
   void _applyFilters() {
-    final notifier = ref.read(animalsProvider.notifier);
+    final notifier = ref.read(animalsNotifierProvider.notifier);
     notifier.updateSpeciesFilter(_tempFilter.speciesFilter);
     notifier.updateGenderFilter(_tempFilter.genderFilter);
     notifier.updateSizeFilter(_tempFilter.sizeFilter);

@@ -419,11 +419,11 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
       bool success;
       if (widget.isEditing) {
         success = await ref
-            .read(appointmentsProvider.notifier)
+            .read(appointmentsNotifierProvider.notifier)
             .updateAppointment(appointment);
       } else {
         success = await ref
-            .read(appointmentsProvider.notifier)
+            .read(appointmentsNotifierProvider.notifier)
             .addAppointment(appointment);
       }
 
@@ -441,7 +441,7 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
           ),
         );
       } else if (mounted) {
-        final errorMessage = ref.read(appointmentsProvider).errorMessage;
+        final errorMessage = ref.read(appointmentsNotifierProvider).errorMessage;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage ?? 'Erro ao salvar consulta'),

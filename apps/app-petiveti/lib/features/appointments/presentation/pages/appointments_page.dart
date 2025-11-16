@@ -43,7 +43,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
     final selectedAnimalId = ref.read(selectedAnimalIdProvider);
     if (selectedAnimalId != null) {
       ref
-          .read(appointmentsProvider.notifier)
+          .read(appointmentsNotifierProvider.notifier)
           .loadAppointments(selectedAnimalId);
     }
   }
@@ -70,7 +70,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
 
   @override
   Widget build(BuildContext context) {
-    final appointmentState = ref.watch(appointmentsProvider);
+    final appointmentState = ref.watch(appointmentsNotifierProvider);
     final selectedAnimalId = ref.watch(selectedAnimalIdProvider);
     final appointments = ref.watch(appointmentsListProvider);
 
@@ -456,7 +456,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
                         this.setState(() => _itemBeingDeleted = appointment.id);
 
                         final success = await ref
-                            .read(appointmentsProvider.notifier)
+                            .read(appointmentsNotifierProvider.notifier)
                             .deleteAppointment(appointment.id);
 
                         if (context.mounted) {

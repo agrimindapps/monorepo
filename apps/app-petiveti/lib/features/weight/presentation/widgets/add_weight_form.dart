@@ -45,7 +45,7 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
       _bodyConditionScore = weight.bodyConditionScore;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(animalsProvider.notifier).loadAnimals();
+      ref.read(animalsNotifierProvider.notifier).loadAnimals();
     });
   }
 
@@ -59,7 +59,7 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final animalsState = ref.watch(animalsProvider);
+    final animalsState = ref.watch(animalsNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(

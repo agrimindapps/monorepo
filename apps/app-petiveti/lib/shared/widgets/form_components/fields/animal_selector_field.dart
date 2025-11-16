@@ -72,14 +72,14 @@ class _AnimalSelectorFieldState extends ConsumerState<AnimalSelectorField> {
     super.initState();
     if (widget.autoLoad) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(animalsProvider.notifier).loadAnimals();
+        ref.read(animalsNotifierProvider.notifier).loadAnimals();
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final animalsState = ref.watch(animalsProvider);
+    final animalsState = ref.watch(animalsNotifierProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,7 +145,7 @@ class _AnimalSelectorFieldState extends ConsumerState<AnimalSelectorField> {
         trailing: IconButton(
           icon: const Icon(Icons.refresh),
           onPressed: () =>
-              ref.read(animalsProvider.notifier).loadAnimals(),
+              ref.read(animalsNotifierProvider.notifier).loadAnimals(),
           tooltip: 'Tentar novamente',
         ),
       ),

@@ -86,7 +86,7 @@ class AnimalsListController {
             ),
             onPressed: () async {
               Navigator.pop(context);
-              await ref.read(animalsProvider.notifier).deleteAnimal(animal.id);
+              await ref.read(animalsNotifierProvider.notifier).deleteAnimal(animal.id);
 
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(

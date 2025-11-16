@@ -51,7 +51,7 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
 
   void _onScroll() {
     if (_isBottom) {
-      final animalsState = ref.read(animalsProvider);
+      final animalsState = ref.read(animalsNotifierProvider);
       final uiState = ref.read(animalsUIStateProvider);
       
       if (!uiState.isLoadingMore && !uiState.hasReachedMax) {
@@ -70,7 +70,7 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
 
   @override
   Widget build(BuildContext context) {
-    final animalsState = ref.watch(animalsProvider);
+    final animalsState = ref.watch(animalsNotifierProvider);
     final uiState = ref.watch(animalsUIStateProvider);
     final filteredAnimals = ref.watch(filteredAnimalsProvider);
     
@@ -87,7 +87,7 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
     if (animalsState.filter.hasActiveFilters && filteredAnimals.isEmpty) {
       return UIComponents.searchEmptyState(
         onClearFilters: () {
-          ref.read(animalsProvider.notifier).clearFilters();
+          ref.read(animalsNotifierProvider.notifier).clearFilters();
         },
       );
     }
@@ -98,7 +98,7 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
       child: RefreshIndicator(
         onRefresh: () async {
           ref.read(animalsUIStateProvider.notifier).resetPagination();
-          await ref.read(animalsProvider.notifier).loadAnimals();
+          await ref.read(animalsNotifierProvider.notifier).loadAnimals();
         },
         child: ListView.builder(
         controller: _scrollController,

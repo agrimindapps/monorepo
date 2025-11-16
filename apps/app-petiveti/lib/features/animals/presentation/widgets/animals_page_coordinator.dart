@@ -26,7 +26,7 @@ class AnimalsPageCoordinator {
   /// Load animals data
   Future<void> loadAnimals() async {
     try {
-      await ref.read(animalsProvider.notifier).loadAnimals();
+      await ref.read(animalsNotifierProvider.notifier).loadAnimals();
     } catch (e) {
       rethrow;
     }

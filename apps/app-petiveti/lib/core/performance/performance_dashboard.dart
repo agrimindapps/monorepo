@@ -3,7 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
-import 'database_optimizer.dart';
+// import 'database_optimizer.dart'; // REMOVED: DatabaseOptimizer migrated to Drift
 import 'image_optimizer.dart';
 import 'memory_manager.dart';
 import 'navigation_optimizer.dart';
@@ -22,10 +22,10 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
     with TickerProviderStateMixin {
   late TabController _tabController;
   Timer? _refreshTimer;
-  
+
   final PerformanceService _performanceService = PerformanceService();
   final MemoryManager _memoryManager = MemoryManager();
-  final DatabaseOptimizer _dbOptimizer = DatabaseOptimizer();
+  // final DatabaseOptimizer _dbOptimizer = DatabaseOptimizer(); // REMOVED
   final NavigationOptimizer _navOptimizer = NavigationOptimizer();
   final ImageOptimizer _imageOptimizer = ImageOptimizer();
   final WidgetOptimizer _widgetOptimizer = WidgetOptimizer();

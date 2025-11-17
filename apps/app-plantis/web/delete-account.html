@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exclusão de Conta - App Plantis</title>
+    <meta name="description" content="Política e processo de exclusão de contas do aplicativo Plantis. Conforme requisitos das lojas de aplicativos e legislações de privacidade.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #2C3E50;
+            background-color: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0D945A 0%, #4DB377 100%);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .alert {
+            background: #FEF5E7;
+            border: 1px solid #F39C12;
+            color: #E67E22;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .alert-icon {
+            font-size: 1.5rem;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .section h2 {
+            color: #0D945A;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #E8F5E8;
+            padding-bottom: 0.5rem;
+        }
+        
+        .section h3 {
+            color: #2C3E50;
+            margin: 1.5rem 0 0.5rem;
+        }
+        
+        .deletion-form {
+            background: #F8F9FA;
+            border: 1px solid #DEE2E6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2C3E50;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #CED4DA;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #0D945A;
+            box-shadow: 0 0 0 3px rgba(13, 148, 90, 0.1);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #0D945A;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0A7548;
+        }
+        
+        .btn-danger {
+            background: #E74C3C;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #C0392B;
+        }
+        
+        .list {
+            padding-left: 1.5rem;
+        }
+        
+        .list li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .process-steps {
+            background: #E8F5E8;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .process-steps ol {
+            padding-left: 1.5rem;
+        }
+        
+        .process-steps li {
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .contact-info {
+            background: #E3F2E8;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .footer {
+            background: #2C3E50;
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-top: 3rem;
+        }
+        
+        .footer p {
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌱 Política de Exclusão de Contas</h1>
+        <p>App Plantis - Seu jardim digital</p>
+    </div>
+    
+    <div class="container">
+        <div class="alert">
+            <span class="alert-icon">⚠️</span>
+            <div>
+                <strong>Atenção:</strong> A exclusão de conta é irreversível. Certifique-se de fazer backup dos seus dados importantes antes de prosseguir.
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Como Excluir Sua Conta</h2>
+            
+            <h3>📱 Exclusão via Aplicativo (Recomendado)</h3>
+            <div class="process-steps">
+                <ol>
+                    <li>Abra o aplicativo Plantis</li>
+                    <li>Vá em <strong>Configurações → Minha Conta → Privacidade</strong></li>
+                    <li>Toque em <strong>"Excluir Conta"</strong></li>
+                    <li>Digite sua senha atual para confirmar identidade</li>
+                    <li>Confirme a exclusão seguindo as instruções</li>
+                </ol>
+                <p><strong>Processamento:</strong> Imediato</p>
+            </div>
+            
+            <h3>🌐 Exclusão via Web</h3>
+            <div class="deletion-form">
+                <form id="deletion-form" onsubmit="handleFormSubmit(event)">
+                    <div class="form-group">
+                        <label for="email">Email da conta:</label>
+                        <input type="email" id="email" name="email" required 
+                               placeholder="seu.email@exemplo.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reason">Motivo da exclusão:</label>
+                        <select id="reason" name="reason" required>
+                            <option value="">Selecione um motivo</option>
+                            <option value="privacy">Preocupações com privacidade</option>
+                            <option value="unused">Não uso mais o app</option>
+                            <option value="functionality">Problemas com funcionalidades</option>
+                            <option value="other">Outro motivo</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="details">Detalhes adicionais (opcional):</label>
+                        <textarea id="details" name="details" rows="4" 
+                                  placeholder="Descreva brevemente o motivo ou deixe sugestões..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="checkbox" id="confirm" name="confirm" required>
+                        <label for="confirm" style="display: inline; margin-left: 0.5rem;">
+                            Confirmo que li e compreendi as consequências da exclusão da conta
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-danger">
+                        Solicitar Exclusão da Conta
+                    </button>
+                </form>
+            </div>
+            <p><strong>Processamento:</strong> Até 7 dias úteis</p>
+        </div>
+        
+        <div class="section">
+            <h2>Dados Que Serão Excluídos</h2>
+            
+            <h3>🔐 Dados Pessoais</h3>
+            <ul class="list">
+                <li>Informações de perfil (nome, email, foto)</li>
+                <li>Preferências e configurações do app</li>
+                <li>Dados de uso e analytics pessoais</li>
+            </ul>
+            
+            <h3>📱 Conteúdo do Usuário</h3>
+            <ul class="list">
+                <li>Todas as plantas cadastradas</li>
+                <li>Fotos e imagens enviadas</li>
+                <li>Tarefas e lembretes criados</li>
+                <li>Histórico de cuidados e anotações</li>
+                <li>Configurações de notificações</li>
+            </ul>
+            
+            <h3>🔑 Dados de Conta</h3>
+            <ul class="list">
+                <li>Credenciais de login</li>
+                <li>Tokens de autenticação</li>
+                <li>Vinculações com redes sociais</li>
+                <li>Dados de sincronização</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2>Dados Retidos por Motivos Legais</h2>
+            
+            <h3>📊 Obrigações Fiscais (5 anos)</h3>
+            <ul class="list">
+                <li>Registros de transações para declaração de renda</li>
+                <li>Comprovantes de compra para auditoria fiscal</li>
+                <li>Dados necessários para emissão de notas fiscais</li>
+            </ul>
+            
+            <h3>🛡️ Segurança e Fraude (2 anos)</h3>
+            <ul class="list">
+                <li>Logs de segurança e tentativas de acesso</li>
+                <li>Registros de atividades suspeitas</li>
+                <li>Endereços IP para investigação de fraudes</li>
+                <li>Dados para prevenção de múltiplas contas</li>
+            </ul>
+            
+            <h3>📈 Dados Agregados (Indefinido)</h3>
+            <ul class="list">
+                <li>Estatísticas anônimas de uso do app</li>
+                <li>Dados de performance técnica (sem identificação)</li>
+                <li>Métricas de mercado e tendências</li>
+                <li>Dados para pesquisa e desenvolvimento</li>
+            </ul>
+            
+            <p><strong>Base Legal:</strong> LGPD (Brasil), GDPR (União Europeia), Código Civil Brasileiro, Legislação de defesa do consumidor</p>
+        </div>
+        
+        <div class="section">
+            <h2>Consequências da Exclusão</h2>
+            
+            <div class="alert">
+                <span class="alert-icon">🚨</span>
+                <div>
+                    <strong>Irreversibilidade:</strong> A exclusão é PERMANENTE e IRREVERSÍVEL. Não é possível recuperar dados após confirmação.
+                </div>
+            </div>
+            
+            <h3>🔄 O que acontece após a exclusão</h3>
+            <ul class="list">
+                <li>Novo cadastro criará conta totalmente nova</li>
+                <li>Histórico e progresso serão perdidos</li>
+                <li>Assinaturas ativas serão canceladas imediatamente</li>
+                <li>Perda imediata de acesso ao app</li>
+                <li>Sincronização de dados interrompida</li>
+                <li>Notificações e lembretes desativados</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2>Alternativas à Exclusão</h2>
+            
+            <h3>⏸️ Desativação Temporária</h3>
+            <ul class="list">
+                <li>Pause sua conta sem perder dados</li>
+                <li>Mantenha plantas e histórico salvos</li>
+                <li>Reative quando quiser voltar</li>
+                <li>Notificações desligadas temporariamente</li>
+            </ul>
+            
+            <h3>🔒 Configurações de Privacidade</h3>
+            <ul class="list">
+                <li>Limite coleta de dados analytics</li>
+                <li>Desative sincronização com nuvem</li>
+                <li>Configure privacidade das informações</li>
+                <li>Controle permissões individuais</li>
+            </ul>
+            
+            <h3>💳 Cancelamento de Assinatura</h3>
+            <ul class="list">
+                <li>Mantenha conta com funcionalidades básicas</li>
+                <li>Continue usando recursos gratuitos</li>
+                <li>Histórico de plantas preservado</li>
+                <li>Sem cobrança de mensalidades</li>
+            </ul>
+        </div>
+        
+        <div class="contact-info">
+            <h2>🆘 Suporte e Contato</h2>
+            
+            <h3>📞 Central de Ajuda</h3>
+            <ul class="list">
+                <li><strong>Email:</strong> privacy@plantis.app</li>
+                <li><strong>WhatsApp:</strong> +55 11 99999-9999</li>
+                <li><strong>Horário:</strong> Segunda a Sexta, 9h às 18h</li>
+            </ul>
+            
+            <h3>🌐 Formulário Web</h3>
+            <ul class="list">
+                <li><strong>Acesse:</strong> <a href="mailto:privacy@plantis.app">privacy@plantis.app</a></li>
+                <li><strong>Categoria:</strong> "Exclusão de Conta"</li>
+                <li><strong>Resposta:</strong> Até 24 horas úteis</li>
+            </ul>
+            
+            <h3>⚖️ Direitos do Usuário</h3>
+            <p>Em caso de problemas com o processo de exclusão, você pode:</p>
+            <ul class="list">
+                <li>Contactar nossa equipe de privacidade</li>
+                <li>Registrar reclamação na ANPD (Autoridade Nacional)</li>
+                <li>Buscar orientação no Procon de sua região</li>
+                <li>Consultar advogado especializado em dados</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>&copy; 2024 App Plantis. Todos os direitos reservados.</p>
+        <p>Esta página está em conformidade com as diretrizes do Google Play Store, Apple App Store, LGPD e GDPR.</p>
+    </div>
+    
+    <script>
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const email = formData.get('email');
+            const reason = formData.get('reason');
+            const details = formData.get('details');
+            
+            // Simular envio do formulário
+            alert(`Solicitação enviada!\n\nRecebemos sua solicitação de exclusão para: ${email}\n\nVocê receberá um email de confirmação em até 24 horas.\n\nObrigado por usar o Plantis! 🌱`);
+            
+            // Limpar formulário
+            event.target.reset();
+            
+            // Em um ambiente real, aqui você faria:
+            // - Envio para API de processamento
+            // - Validação no servidor
+            // - Envio de email de confirmação
+            // - Logging da solicitação
+        }
+        
+        // Adicionar validação em tempo real
+        document.getElementById('email').addEventListener('input', function() {
+            if (this.validity.valid) {
+                this.style.borderColor = '#0D945A';
+            } else {
+                this.style.borderColor = '#E74C3C';
+            }
+        });
+        
+        // Adicionar contador de caracteres para textarea
+        const textarea = document.getElementById('details');
+        const maxLength = 500;
+        
+        textarea.addEventListener('input', function() {
+            const remaining = maxLength - this.value.length;
+            
+            if (!document.getElementById('char-counter')) {
+                const counter = document.createElement('div');
+                counter.id = 'char-counter';
+                counter.style.fontSize = '0.8rem';
+                counter.style.color = '#7F8C8D';
+                counter.style.textAlign = 'right';
+                counter.style.marginTop = '0.25rem';
+                this.parentNode.appendChild(counter);
+            }
+            
+            document.getElementById('char-counter').textContent = `${remaining} caracteres restantes`;
+            
+            if (remaining < 0) {
+                this.style.borderColor = '#E74C3C';
+                document.getElementById('char-counter').style.color = '#E74C3C';
+            } else {
+                this.style.borderColor = '#CED4DA';
+                document.getElementById('char-counter').style.color = '#7F8C8D';
+            }
+        });
+    </script>
+</body>
+</html>

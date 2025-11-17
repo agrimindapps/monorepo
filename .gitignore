@@ -95,8 +95,28 @@ app.*.map.json
 # Windows
 **/windows/flutter/ephemeral/
 
-# Web related
-**/web/
+# Web related - Ignore build outputs but keep source files
+**/web/main.dart.js
+**/web/main.dart.js.map
+**/web/flutter_service_worker.js
+**/web/version.json
+**/web/flutter.js
+**/web/flutter_bootstrap.js
+**/web/canvaskit/
+
+# Web - Allow important source and config files
+!**/web/index.html
+!**/web/manifest.json
+!**/web/favicon.png
+!**/web/icons/
+!**/web/*.html
+
+# Drift Web WASM - Allow critical files for Drift database on web
+!**/web/sqlite3.wasm
+!**/web/drift_worker.dart
+!**/web/drift_worker.dart.js
+!**/web/drift_worker.dart.js.deps
+!**/web/drift_worker.dart.js.map
 
 # Coverage
 coverage/

@@ -77,7 +77,9 @@ class VaccineRepositoryImpl implements VaccineRepository {
   @override
   Future<Either<Failure, Vaccine?>> getVaccineById(String id) async {
     try {
-      final vaccineModel = await localDataSource.getVaccineById(int.tryParse(id) ?? 0);
+      final vaccineModel = await localDataSource.getVaccineById(
+        int.tryParse(id) ?? 0,
+      );
       if (vaccineModel == null) {
         return const Right(null);
       }
@@ -139,7 +141,7 @@ class VaccineRepositoryImpl implements VaccineRepository {
       if (intId == null) {
         return const Left(CacheFailure(message: 'Invalid vaccine ID format'));
       }
-      
+
       await localDataSource.deleteVaccine(intId);
       await _syncToRemote(() => remoteDataSource.deleteVaccine(id));
 
@@ -158,7 +160,9 @@ class VaccineRepositoryImpl implements VaccineRepository {
   @override
   Future<Either<Failure, void>> deleteVaccinesByAnimal(String animalId) async {
     try {
-      final vaccines = await localDataSource.getVaccinesByAnimalId(int.tryParse(animalId) ?? 0);
+      final vaccines = await localDataSource.getVaccinesByAnimalId(
+        int.tryParse(animalId) ?? 0,
+      );
       for (final vaccine in vaccines) {
         if (vaccine.id != null) {
           await localDataSource.deleteVaccine(vaccine.id!);
@@ -184,10 +188,14 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final allVaccines = animalId != null 
-        ? await localDataSource.getVaccinesByAnimalId(int.tryParse(animalId) ?? 0)
-        : await localDataSource.getVaccines('');
-      final vaccineModels = allVaccines.where((v) => v.toEntity().isPending).toList();
+      final allVaccines = animalId != null
+          ? await localDataSource.getVaccinesByAnimalId(
+              int.tryParse(animalId) ?? 0,
+            )
+          : await localDataSource.getVaccines('');
+      final vaccineModels = allVaccines
+          .where((v) => v.toEntity().isPending)
+          .toList();
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -201,10 +209,14 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final allVaccines = animalId != null 
-        ? await localDataSource.getVaccinesByAnimalId(int.tryParse(animalId) ?? 0)
-        : await localDataSource.getVaccines('');
-      final vaccineModels = allVaccines.where((v) => v.toEntity().isOverdue).toList();
+      final allVaccines = animalId != null
+          ? await localDataSource.getVaccinesByAnimalId(
+              int.tryParse(animalId) ?? 0,
+            )
+          : await localDataSource.getVaccines('');
+      final vaccineModels = allVaccines
+          .where((v) => v.toEntity().isOverdue)
+          .toList();
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -218,9 +230,11 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final allVaccines = animalId != null 
-        ? await localDataSource.getVaccinesByAnimalId(int.tryParse(animalId) ?? 0)
-        : await localDataSource.getVaccines('');
+      final allVaccines = animalId != null
+          ? await localDataSource.getVaccinesByAnimalId(
+              int.tryParse(animalId) ?? 0,
+            )
+          : await localDataSource.getVaccines('');
       final vaccineModels = allVaccines.where((v) => v.isCompleted).toList();
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
@@ -235,9 +249,11 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final allVaccines = animalId != null 
-        ? await localDataSource.getVaccinesByAnimalId(int.tryParse(animalId) ?? 0)
-        : await localDataSource.getVaccines('');
+      final allVaccines = animalId != null
+          ? await localDataSource.getVaccinesByAnimalId(
+              int.tryParse(animalId) ?? 0,
+            )
+          : await localDataSource.getVaccines('');
       final vaccineModels = allVaccines.where((v) => v.isRequired).toList();
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
@@ -252,9 +268,11 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final vaccineModels = animalId != null 
-        ? await localDataSource.getUpcomingVaccines(int.tryParse(animalId) ?? 0)
-        : <VaccineModel>[];
+      final vaccineModels = animalId != null
+          ? await localDataSource.getUpcomingVaccines(
+              int.tryParse(animalId) ?? 0,
+            )
+          : <VaccineModel>[];
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -268,10 +286,14 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final allVaccines = animalId != null 
-        ? await localDataSource.getVaccinesByAnimalId(int.tryParse(animalId) ?? 0)
-        : await localDataSource.getVaccines('');
-      final vaccineModels = allVaccines.where((v) => v.toEntity().isDueToday).toList();
+      final allVaccines = animalId != null
+          ? await localDataSource.getVaccinesByAnimalId(
+              int.tryParse(animalId) ?? 0,
+            )
+          : await localDataSource.getVaccines('');
+      final vaccineModels = allVaccines
+          .where((v) => v.toEntity().isDueToday)
+          .toList();
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -285,10 +307,14 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final allVaccines = animalId != null 
-        ? await localDataSource.getVaccinesByAnimalId(int.tryParse(animalId) ?? 0)
-        : await localDataSource.getVaccines('');
-      final vaccineModels = allVaccines.where((v) => v.toEntity().isDueSoon).toList();
+      final allVaccines = animalId != null
+          ? await localDataSource.getVaccinesByAnimalId(
+              int.tryParse(animalId) ?? 0,
+            )
+          : await localDataSource.getVaccines('');
+      final vaccineModels = allVaccines
+          .where((v) => v.toEntity().isDueSoon)
+          .toList();
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -304,13 +330,17 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final allVaccines = animalId != null 
-        ? await localDataSource.getVaccinesByAnimalId(int.tryParse(animalId) ?? 0)
-        : await localDataSource.getVaccines('');
+      final allVaccines = animalId != null
+          ? await localDataSource.getVaccinesByAnimalId(
+              int.tryParse(animalId) ?? 0,
+            )
+          : await localDataSource.getVaccines('');
       final vaccineModels = allVaccines.where((v) {
         final vaccine = v.toEntity();
-        return vaccine.date.isAfter(startDate.subtract(const Duration(days: 1))) && 
-               vaccine.date.isBefore(endDate.add(const Duration(days: 1)));
+        return vaccine.date.isAfter(
+              startDate.subtract(const Duration(days: 1)),
+            ) &&
+            vaccine.date.isBefore(endDate.add(const Duration(days: 1)));
       }).toList();
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
@@ -327,9 +357,11 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final allVaccines = animalId != null 
-        ? await localDataSource.getVaccinesByAnimalId(int.tryParse(animalId) ?? 0)
-        : await localDataSource.getVaccines('');
+      final allVaccines = animalId != null
+          ? await localDataSource.getVaccinesByAnimalId(
+              int.tryParse(animalId) ?? 0,
+            )
+          : await localDataSource.getVaccines('');
       final vaccineModels = allVaccines.where((v) {
         final vaccine = v.toEntity();
         return vaccine.date.year == year && vaccine.date.month == month;
@@ -349,15 +381,21 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final allVaccines = animalId != null 
-        ? await localDataSource.getVaccinesByAnimalId(int.tryParse(animalId) ?? 0)
-        : await localDataSource.getVaccines('');
+      final allVaccines = animalId != null
+          ? await localDataSource.getVaccinesByAnimalId(
+              int.tryParse(animalId) ?? 0,
+            )
+          : await localDataSource.getVaccines('');
       final vaccineModels = allVaccines.where((v) {
         final vaccine = v.toEntity();
-        return vaccine.date.isAfter(startDate.subtract(const Duration(days: 1))) && 
-               vaccine.date.isBefore(endDate.add(const Duration(days: 1)));
+        return vaccine.date.isAfter(
+              startDate.subtract(const Duration(days: 1)),
+            ) &&
+            vaccine.date.isBefore(endDate.add(const Duration(days: 1)));
       }).toList();
-      final vaccines = vaccineModels.map((VaccineModel model) => model.toEntity()).toList();
+      final vaccines = vaccineModels
+          .map((VaccineModel model) => model.toEntity())
+          .toList();
       final Map<DateTime, List<Vaccine>> calendar = {};
       for (final vaccine in vaccines) {
         final date = DateTime(
@@ -384,9 +422,9 @@ class VaccineRepositoryImpl implements VaccineRepository {
       final now = DateTime.now();
       final vaccineModels = allVaccines.where((v) {
         final vaccine = v.toEntity();
-        return vaccine.reminderDate != null && 
-               vaccine.reminderDate!.isBefore(now) && 
-               !vaccine.isCompleted;
+        return vaccine.reminderDate != null &&
+            vaccine.reminderDate!.isBefore(now) &&
+            !vaccine.isCompleted;
       }).toList();
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
@@ -401,7 +439,9 @@ class VaccineRepositoryImpl implements VaccineRepository {
   getVaccinesWithActiveReminders() async {
     try {
       final allVaccines = await localDataSource.getVaccines('');
-      final vaccineModels = allVaccines.where((v) => v.toEntity().reminderDate != null).toList();
+      final vaccineModels = allVaccines
+          .where((v) => v.toEntity().reminderDate != null)
+          .toList();
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -416,7 +456,9 @@ class VaccineRepositoryImpl implements VaccineRepository {
     DateTime reminderDate,
   ) async {
     try {
-      final vaccineModel = await localDataSource.getVaccineById(int.tryParse(vaccineId) ?? 0);
+      final vaccineModel = await localDataSource.getVaccineById(
+        int.tryParse(vaccineId) ?? 0,
+      );
       if (vaccineModel == null) {
         return const Left(ValidationFailure(message: 'Vacina não encontrada'));
       }
@@ -440,7 +482,9 @@ class VaccineRepositoryImpl implements VaccineRepository {
   @override
   Future<Either<Failure, void>> removeVaccineReminder(String vaccineId) async {
     try {
-      final vaccineModel = await localDataSource.getVaccineById(int.tryParse(vaccineId) ?? 0);
+      final vaccineModel = await localDataSource.getVaccineById(
+        int.tryParse(vaccineId) ?? 0,
+      );
       if (vaccineModel == null) {
         return const Left(ValidationFailure(message: 'Vacina não encontrada'));
       }
@@ -467,15 +511,17 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final allVaccines = animalId != null 
-        ? await localDataSource.getVaccinesByAnimalId(int.tryParse(animalId) ?? 0)
-        : await localDataSource.getVaccines('');
+      final allVaccines = animalId != null
+          ? await localDataSource.getVaccinesByAnimalId(
+              int.tryParse(animalId) ?? 0,
+            )
+          : await localDataSource.getVaccines('');
       final queryLower = query.toLowerCase();
       final vaccineModels = allVaccines.where((v) {
         final vaccine = v.toEntity();
         return vaccine.name.toLowerCase().contains(queryLower) ||
-               vaccine.veterinarian.toLowerCase().contains(queryLower) ||
-               (vaccine.notes?.toLowerCase().contains(queryLower) ?? false);
+            vaccine.veterinarian.toLowerCase().contains(queryLower) ||
+            (vaccine.notes?.toLowerCase().contains(queryLower) ?? false);
       }).toList();
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
@@ -491,10 +537,14 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final allVaccines = animalId != null 
-        ? await localDataSource.getVaccinesByAnimalId(int.tryParse(animalId) ?? 0)
-        : await localDataSource.getVaccines('');
-      final vaccineModels = allVaccines.where((v) => v.veterinarian == veterinarian).toList();
+      final allVaccines = animalId != null
+          ? await localDataSource.getVaccinesByAnimalId(
+              int.tryParse(animalId) ?? 0,
+            )
+          : await localDataSource.getVaccines('');
+      final vaccineModels = allVaccines
+          .where((v) => v.veterinarian == veterinarian)
+          .toList();
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -509,10 +559,14 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final allVaccines = animalId != null 
-        ? await localDataSource.getVaccinesByAnimalId(int.tryParse(animalId) ?? 0)
-        : await localDataSource.getVaccines('');
-      final vaccineModels = allVaccines.where((v) => v.name == vaccineName).toList();
+      final allVaccines = animalId != null
+          ? await localDataSource.getVaccinesByAnimalId(
+              int.tryParse(animalId) ?? 0,
+            )
+          : await localDataSource.getVaccines('');
+      final vaccineModels = allVaccines
+          .where((v) => v.name == vaccineName)
+          .toList();
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -527,10 +581,14 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final allVaccines = animalId != null 
-        ? await localDataSource.getVaccinesByAnimalId(int.tryParse(animalId) ?? 0)
-        : await localDataSource.getVaccines('');
-      final vaccineModels = allVaccines.where((v) => v.manufacturer == manufacturer).toList();
+      final allVaccines = animalId != null
+          ? await localDataSource.getVaccinesByAnimalId(
+              int.tryParse(animalId) ?? 0,
+            )
+          : await localDataSource.getVaccines('');
+      final vaccineModels = allVaccines
+          .where((v) => v.manufacturer == manufacturer)
+          .toList();
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -544,10 +602,11 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final allVaccines =
-          animalId != null
-              ? await localDataSource.getVaccinesByAnimalId(int.tryParse(animalId) ?? 0)
-              : await localDataSource.getVaccines('');
+      final allVaccines = animalId != null
+          ? await localDataSource.getVaccinesByAnimalId(
+              int.tryParse(animalId) ?? 0,
+            )
+          : await localDataSource.getVaccines('');
 
       final stats = <String, int>{
         'total': allVaccines.length,
@@ -591,10 +650,11 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final vaccineModels =
-          animalId != null
-              ? await localDataSource.getVaccinesByAnimalId(int.tryParse(animalId) ?? 0)
-              : await localDataSource.getVaccines('');
+      final vaccineModels = animalId != null
+          ? await localDataSource.getVaccinesByAnimalId(
+              int.tryParse(animalId) ?? 0,
+            )
+          : await localDataSource.getVaccines('');
 
       final vaccines = vaccineModels.map((model) => model.toEntity()).toList();
       final Map<String, List<Vaccine>> statusMap = {
@@ -642,8 +702,8 @@ class VaccineRepositoryImpl implements VaccineRepository {
   Future<Either<Failure, List<String>>> getVeterinarians() async {
     try {
       final vaccines = await localDataSource.getVaccines('');
-      final veterinarians =
-          vaccines.map((v) => v.veterinarian).toSet().toList()..sort();
+      final veterinarians = vaccines.map((v) => v.veterinarian).toSet().toList()
+        ..sort();
       return Right(veterinarians);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -676,8 +736,9 @@ class VaccineRepositoryImpl implements VaccineRepository {
     List<Vaccine> vaccines,
   ) async {
     try {
-      final vaccineModels =
-          vaccines.map((v) => VaccineModel.fromEntity(v)).toList();
+      final vaccineModels = vaccines
+          .map((v) => VaccineModel.fromEntity(v))
+          .toList();
       for (final model in vaccineModels) {
         await localDataSource.addVaccine(model);
       }
@@ -699,7 +760,9 @@ class VaccineRepositoryImpl implements VaccineRepository {
   ) async {
     try {
       for (final id in vaccineIds) {
-        final vaccine = await localDataSource.getVaccineById(int.tryParse(id) ?? 0);
+        final vaccine = await localDataSource.getVaccineById(
+          int.tryParse(id) ?? 0,
+        );
         if (vaccine != null) {
           final updated = vaccine.toEntity().copyWith(isCompleted: true);
           await localDataSource.updateVaccine(VaccineModel.fromEntity(updated));
@@ -724,7 +787,9 @@ class VaccineRepositoryImpl implements VaccineRepository {
   ) async {
     try {
       for (final id in vaccineIds) {
-        final vaccine = await localDataSource.getVaccineById(int.tryParse(id) ?? 0);
+        final vaccine = await localDataSource.getVaccineById(
+          int.tryParse(id) ?? 0,
+        );
         if (vaccine != null) {
           final updatedVaccine = vaccine.toEntity().copyWith(status: status);
           await localDataSource.updateVaccine(
@@ -793,10 +858,11 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final vaccineModels =
-          animalId != null
-              ? await localDataSource.getVaccinesByAnimalId(int.tryParse(animalId) ?? 0)
-              : await localDataSource.getVaccines('');
+      final vaccineModels = animalId != null
+          ? await localDataSource.getVaccinesByAnimalId(
+              int.tryParse(animalId) ?? 0,
+            )
+          : await localDataSource.getVaccines('');
 
       final data = {
         'vaccines': vaccineModels.map((v) => v.toMap()).toList(),
@@ -821,10 +887,9 @@ class VaccineRepositoryImpl implements VaccineRepository {
   ) async {
     try {
       final vaccinesData = data['vaccines'] as List<dynamic>;
-      final vaccineModels =
-          vaccinesData
-              .map((v) => VaccineModel.fromMap(v as Map<String, dynamic>))
-              .toList();
+      final vaccineModels = vaccinesData
+          .map((v) => VaccineModel.fromMap(v as Map<String, dynamic>))
+          .toList();
 
       for (final model in vaccineModels) {
         await localDataSource.addVaccine(model);

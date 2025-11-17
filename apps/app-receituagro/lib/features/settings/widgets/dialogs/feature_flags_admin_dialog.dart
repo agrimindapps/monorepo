@@ -20,7 +20,7 @@ class FeatureFlagsAdminDialog extends ConsumerStatefulWidget {
 }
 
 class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialog>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   Map<String, dynamic> _debugInfo = {};
 

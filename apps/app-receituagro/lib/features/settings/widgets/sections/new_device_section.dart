@@ -12,7 +12,7 @@ class NewDeviceSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final deviceState = ref.watch(deviceNotifierProvider);
+    final deviceState = ref.watch(deviceNotifierProvider(initialDeviceId: null));
 
     return Column(
       children: [
@@ -72,7 +72,7 @@ class NewDeviceSection extends ConsumerWidget {
           Switch(
             value: deviceState.settings.syncEnabled,
             onChanged: (value) {
-              ref.read(deviceNotifierProvider.notifier).toggleSync();
+              ref.read(deviceNotifierProvider(initialDeviceId: null).notifier).toggleSync();
             },
           ),
         ],
@@ -115,7 +115,7 @@ class NewDeviceSection extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              ref.read(deviceNotifierProvider.notifier).syncNow();
+              ref.read(deviceNotifierProvider(initialDeviceId: null).notifier).syncNow();
             },
             child: const Text('Sincronizar Agora'),
           ),
@@ -223,7 +223,7 @@ class NewDeviceSection extends ConsumerWidget {
                       child: const Text('Remover'),
                       onTap: () {
                         ref
-                            .read(deviceNotifierProvider.notifier)
+                            .read(deviceNotifierProvider(initialDeviceId: null).notifier)
                             .removeDevice(device);
                       },
                     ),

@@ -1,4 +1,7 @@
+import 'package:core/core.dart' hide SubscriptionState;
 import 'package:flutter/material.dart';
+
+import '../providers/subscription_notifier.dart';
 import '../providers/subscription_providers.dart';
 
 /// Widget responsible for displaying loading overlay during subscription operations
@@ -12,7 +15,9 @@ class SubscriptionLoadingOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!_shouldShowOverlay) {
+    // TODO: Add proper loading state properties to SubscriptionState
+    const shouldShowOverlay = false; // _shouldShowOverlay
+    if (!shouldShowOverlay) {
       return const SizedBox.shrink();
     }
 
@@ -29,11 +34,11 @@ class SubscriptionLoadingOverlay extends StatelessWidget {
                   const CircularProgressIndicator(),
                   const SizedBox(height: 16),
                   Text(
-                    state.loadingMessage,
+                    'Carregando...', // TODO: state.loadingMessage
                     style: Theme.of(context).textTheme.titleMedium,
                     textAlign: TextAlign.center,
                   ),
-                  if (state.isProcessingPurchase) ...[
+                  if (false) ...[  // TODO: state.isProcessingPurchase
                     const SizedBox(height: 8),
                     Text(
                       'Este processo pode levar alguns segundos...',

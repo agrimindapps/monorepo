@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../features/fuel/domain/services/fuel_formatter_service.dart';
+import '../../features/fuel/domain/services/fuel_formatter_service.dart';
 import 'validated_form_field.dart';
 
 /// Campo unificado para entrada de quilometragem/odômetro

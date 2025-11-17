@@ -6,8 +6,9 @@ import 'package:core/core.dart';
 import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 
-import '../data/models/pending_image_upload.dart';
-import 'firebase_storage_service.dart' as gasometer_storage;
+import '../../../../core/data/models/pending_image_upload.dart';
+import '../../../../core/services/storage/firebase_storage_service.dart'
+    as app_storage;
 
 /// Resultado da sincronização de imagens
 class SyncResult {
@@ -82,7 +83,7 @@ class SyncProgress {
 /// - Persistir fila em memória (Drift pode ser usado futuramente)
 @lazySingleton
 class ImageSyncService {
-  final gasometer_storage.FirebaseStorageService _storageService;
+  final app_storage.FirebaseStorageService _storageService;
   final ConnectivityService _connectivityService;
   final FirebaseFirestore _firestore;
 

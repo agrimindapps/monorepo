@@ -7,7 +7,7 @@ import '../../../../core/data/adapters/network_info_adapter.dart';
 import '../../../../core/interfaces/network_info.dart';
 import '../../domain/services/plants_connectivity_service.dart';
 
-@lazySingleton
+@LazySingleton(as: PlantsConnectivityService)
 class PlantsConnectivityServiceImpl implements PlantsConnectivityService {
   PlantsConnectivityServiceImpl({required this.networkInfo}) {
     // Initialize monitoring in constructor

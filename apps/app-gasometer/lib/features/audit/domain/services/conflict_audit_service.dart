@@ -1,5 +1,5 @@
-import '../sync/conflict_resolution_strategy.dart';
-import '../data/models/base_sync_model.dart';
+import '../../../../core/sync/conflict_resolution_strategy.dart';
+import '../../../../core/data/models/base_sync_model.dart';
 
 /// Interface para logging (compatível com LoggingService do core se existir)
 abstract class LoggingService {

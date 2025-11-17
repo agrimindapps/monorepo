@@ -2,8 +2,10 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:core/core.dart' as core;
 import 'package:injectable/injectable.dart';
-import 'firebase_storage_service.dart';
-import 'image_sync_service.dart';
+import 'package:core/core.dart';
+import '../../../image/domain/services/image_sync_service.dart';
+import '../../../../core/services/storage/firebase_storage_service.dart'
+    as app_storage;
 
 /// Result of image processing operation
 class ImageProcessingResult {
@@ -30,7 +32,7 @@ class ReceiptImageService {
     this._imageSyncService,
   );
   final core.ImageCompressionService _compressionService;
-  final FirebaseStorageService _storageService;
+  final app_storage.FirebaseStorageService _storageService;
   final core.ConnectivityService _connectivityService;
   final ImageSyncService _imageSyncService;
 

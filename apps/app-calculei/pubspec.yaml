@@ -64,7 +64,7 @@ dev_dependencies:
   # Code Generation
   build_runner: ^2.4.13
   riverpod_generator: ^2.6.1
-  # drift_dev: any  # Desabilitado temporariamente por incompatibilidade analyzer
+  drift_dev: any  # Desabilitado temporariamente por incompatibilidade analyzer
 
   # Custom Linting (desabilitados temporariamente por incompatibilidade)
   # custom_lint: ^0.7.0

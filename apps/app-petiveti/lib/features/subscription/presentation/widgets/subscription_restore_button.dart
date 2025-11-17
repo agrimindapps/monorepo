@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide SubscriptionState;
 import 'package:flutter/material.dart';
 
+import '../providers/subscription_notifier.dart';
 import '../providers/subscription_providers.dart';
 import 'subscription_page_coordinator.dart';
 
@@ -18,19 +19,17 @@ class SubscriptionRestoreButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return OutlinedButton.icon(
-      onPressed: state.isRestoringPurchases 
+      onPressed: state.hasAnyLoading 
           ? null 
           : () => SubscriptionPageCoordinator.restorePurchases(ref, context, userId),
-      icon: state.isRestoringPurchases
+      icon: state.hasAnyLoading
           ? const SizedBox(
               width: 16,
               height: 16,
               child: CircularProgressIndicator(strokeWidth: 2),
             )
           : const Icon(Icons.restore),
-      label: Text(
-        state.isRestoringPurchases ? 'Restaurando...' : 'Restaurar Compras',
-      ),
+      label: const Text('Restaurar Compras'),
     );
   }
 }

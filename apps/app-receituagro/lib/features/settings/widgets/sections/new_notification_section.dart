@@ -12,7 +12,7 @@ class NewNotificationSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notificationState = ref.watch(notificationNotifierProvider);
+    final notificationState = ref.watch(notificationSettingsNotifierProvider);
 
     return Column(
       children: [
@@ -74,7 +74,7 @@ class NewNotificationSection extends ConsumerWidget {
             value: notificationState.settings.notificationsEnabled,
             onChanged: (value) {
               ref
-                  .read(notificationNotifierProvider.notifier)
+                  .read(notificationSettingsNotifierProvider.notifier)
                   .toggleNotifications();
             },
           ),
@@ -114,7 +114,7 @@ class NewNotificationSection extends ConsumerWidget {
           Switch(
             value: notificationState.settings.soundEnabled,
             onChanged: (value) {
-              ref.read(notificationNotifierProvider.notifier).toggleSound();
+              ref.read(notificationSettingsNotifierProvider.notifier).toggleSound();
             },
           ),
         ],
@@ -154,7 +154,7 @@ class NewNotificationSection extends ConsumerWidget {
             value: notificationState.settings.promotionalNotificationsEnabled,
             onChanged: (value) {
               ref
-                  .read(notificationNotifierProvider.notifier)
+                  .read(notificationSettingsNotifierProvider.notifier)
                   .togglePromotional();
             },
           ),

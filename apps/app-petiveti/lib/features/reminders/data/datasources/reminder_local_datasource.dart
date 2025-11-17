@@ -7,7 +7,7 @@ import '../models/reminder_model.dart';
 
 abstract class ReminderLocalDataSource {
   Future<List<ReminderModel>> getReminders(String userId);
-  Future<List<ReminderModel>> getRemindersByAnimalId(int animalId);
+  Future<List<ReminderModel>> getRemindersByAnimalId(String animalId);
   Future<List<ReminderModel>> getActiveReminders(String userId);
   Future<List<ReminderModel>> getUpcomingReminders(String userId);
   Future<ReminderModel?> getReminderById(int id);
@@ -16,6 +16,8 @@ abstract class ReminderLocalDataSource {
   Future<bool> deleteReminder(int id);
   Future<bool> markAsCompleted(int id);
   Stream<List<ReminderModel>> watchRemindersByAnimalId(int animalId);
+  Future<List<ReminderModel>> getTodayReminders(String userId);
+  Future<List<ReminderModel>> getOverdueReminders(String userId);
 }
 
 @LazySingleton(as: ReminderLocalDataSource)
@@ -31,9 +33,10 @@ class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
   }
 
   @override
-  Future<List<ReminderModel>> getRemindersByAnimalId(int animalId) async {
+  Future<List<ReminderModel>> getRemindersByAnimalId(String animalId) async {
+    final intId = int.tryParse(animalId) ?? 0;
     final reminders = await _database.reminderDao.getRemindersByAnimal(
-      animalId,
+      intId,
     );
     return reminders.map(_toModel).toList();
   }
@@ -135,5 +138,17 @@ class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
       userId: model.userId,
       createdAt: Value(model.createdAt),
     );
+  }
+
+  @override
+  Future<List<ReminderModel>> getTodayReminders(String userId) {
+    // TODO: implement getTodayReminders
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<ReminderModel>> getOverdueReminders(String userId) {
+    // TODO: implement getOverdueReminders
+    throw UnimplementedError();
   }
 }

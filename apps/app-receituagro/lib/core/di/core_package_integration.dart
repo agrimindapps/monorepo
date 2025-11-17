@@ -489,17 +489,7 @@ class CorePackageIntegration {
       }
       rethrow;
     }
-    if (!_sl.isRegistered<AuthNotifier>()) {
-      _sl.registerLazySingleton<AuthNotifier>(
-        () => AuthNotifier(
-          authRepository: _sl<core.IAuthRepository>(),
-          deviceService: _sl<DeviceIdentityService>(),
-          analytics: _sl<ReceitaAgroAnalyticsService>(),
-          enhancedAccountDeletionService:
-              _sl<core.EnhancedAccountDeletionService>(),
-        ),
-      );
-    }
+    // AuthNotifier is now managed by Riverpod, no need for DI registration
 
     if (kDebugMode) {
       developer.log(

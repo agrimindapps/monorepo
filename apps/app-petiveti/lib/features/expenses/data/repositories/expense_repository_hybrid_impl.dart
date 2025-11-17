@@ -131,7 +131,7 @@ class ExpenseRepositoryHybridImpl extends BaseRepository
   @override
   Future<Either<Failure, List<Expense>>> getExpensesByCategory(String userId, ExpenseCategory category) async {
     try {
-      final localExpenses = await localDataSource.getExpensesByCategory(userId, category);
+      final localExpenses = await localDataSource.getExpensesByCategory(userId, category.toString().split('.').last);
       final isConnected = await checkConnectivity();
 
       if (isConnected) {
@@ -148,7 +148,7 @@ class ExpenseRepositoryHybridImpl extends BaseRepository
             }
           }
           
-          final updatedExpenses = await localDataSource.getExpensesByCategory(userId, category);
+          final updatedExpenses = await localDataSource.getExpensesByCategory(userId, category.toString().split('.').last);
           return Right(updatedExpenses);
           
         } catch (e) {
@@ -226,7 +226,8 @@ class ExpenseRepositoryHybridImpl extends BaseRepository
   @override
   Future<Either<Failure, void>> deleteExpense(String expenseId) async {
     try {
-      await localDataSource.deleteExpense(expenseId);
+      final intId = int.tryParse(expenseId) ?? 0;
+      await localDataSource.deleteExpense(intId);
       final isConnected = await checkConnectivity();
 
       if (isConnected) {

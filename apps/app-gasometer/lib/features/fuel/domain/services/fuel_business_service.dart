@@ -1,4 +1,4 @@
-import '../../../features/fuel/data/models/fuel_supply_model.dart';
+import '../../data/models/fuel_supply_model.dart';
 
 /// Service responsible for fuel supply business logic operations
 /// Extracted from FuelSupplyModel to follow Single Responsibility Principle

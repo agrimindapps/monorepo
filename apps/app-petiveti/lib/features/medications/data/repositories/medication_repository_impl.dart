@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/error/failures.dart' as local_failures;
@@ -139,7 +138,8 @@ class MedicationRepositoryImpl implements MedicationRepository {
       getActiveMedications() async {
     return _errorHandlingService.executeOperation(
       operation: () async {
-        final localMedications = await _localDataSource.getActiveMedications();
+        final localMedications =
+            await _localDataSource.getActiveMedications(_userId);
         final medications =
             localMedications.map((model) => model.toEntity()).toList();
         return medications;
@@ -156,7 +156,7 @@ class MedicationRepositoryImpl implements MedicationRepository {
       operation: () async {
         final intId = int.tryParse(animalId) ?? 0;
         final localMedications =
-            await _localDataSource.getActiveMedications(intId);
+            await _localDataSource.getActiveMedications(intId.toString());
         final medications =
             localMedications.map((model) => model.toEntity()).toList();
         return medications;
@@ -177,11 +177,12 @@ class MedicationRepositoryImpl implements MedicationRepository {
         final now = DateTime.now();
         final soon = now.add(const Duration(days: 30));
         final medications = localMedications
-            .where((m) => m.endDate != null && m.endDate!.isBefore(soon) && m.endDate!.isAfter(now))
+            .where((m) =>
+                m.endDate != null &&
+                m.endDate!.isBefore(soon) &&
+                m.endDate!.isAfter(now))
             .map((model) => model.toEntity())
             .toList();
-        return medications;
-            localMedications.map((model) => model.toEntity()).toList();
         return medications;
       },
       errorMessage: 'Failed to get expiring medications',
@@ -195,7 +196,8 @@ class MedicationRepositoryImpl implements MedicationRepository {
   ) async {
     return _errorHandlingService.executeNullableOperation(
       operation: () async {
-        final localMedication = await _localDataSource.getMedicationById(id);
+        final intId = int.tryParse(id) ?? 0;
+        final localMedication = await _localDataSource.getMedicationById(intId);
 
         if (localMedication != null && localMedication.isDeleted) {
           throw Exception('Medication was deleted');
@@ -261,8 +263,9 @@ class MedicationRepositoryImpl implements MedicationRepository {
     return _errorHandlingService.executeWithValidation(
       operation: () async {
         // 1. Buscar medication atual para preservar sync fields
+        final intId = int.tryParse(medication.id) ?? 0;
         final currentMedication =
-            await _localDataSource.getMedicationById(medication.id);
+            await _localDataSource.getMedicationById(intId);
         if (currentMedication == null) {
           throw Exception('Medication not found');
         }
@@ -307,7 +310,7 @@ class MedicationRepositoryImpl implements MedicationRepository {
         if (intId == null) {
           throw Exception('Invalid medication ID format');
         }
-        
+
         // Soft delete (datasource já implementa)
         await _localDataSource.deleteMedication(intId);
 
@@ -382,7 +385,8 @@ class MedicationRepositoryImpl implements MedicationRepository {
 
   @override
   Stream<List<Medication>> watchMedicationsByAnimalId(String animalId) {
-    return _localDataSource.watchMedicationsByAnimalId(animalId).map((models) =>
+    final intId = int.tryParse(animalId) ?? 0;
+    return _localDataSource.watchMedicationsByAnimalId(intId).map((models) =>
         models
             .where((model) => !model.isDeleted)
             .map((model) => model.toEntity())
@@ -445,7 +449,7 @@ class MedicationRepositoryImpl implements MedicationRepository {
       exportMedicationsData() async {
     return _errorHandlingService.executeOperation(
       operation: () async {
-        final medicationModels = await _localDataSource.getMedications();
+        final medicationModels = await _localDataSource.getMedications(_userId);
         final data = medicationModels.map((model) => model.toJson()).toList();
         return data;
       },

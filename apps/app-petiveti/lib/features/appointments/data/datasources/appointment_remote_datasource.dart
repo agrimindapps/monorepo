@@ -32,26 +32,29 @@ class AppointmentRemoteDataSourceImpl implements AppointmentRemoteDataSource {
           .get();
 
       return querySnapshot.docs
-          .map((doc) => AppointmentModel.fromMap({
-                'id': doc.id,
-                ...doc.data(),
-              }))
+          .map((doc) => AppointmentModel.fromMap({'id': doc.id, ...doc.data()}))
           .toList();
     } catch (e) {
-      throw ServerException(message: 'Failed to get appointments from server: $e');
+      throw ServerException(
+        message: 'Failed to get appointments from server: $e',
+      );
     }
   }
 
   @override
-  Future<AppointmentModel> createAppointment(AppointmentModel appointment) async {
+  Future<AppointmentModel> createAppointment(
+    AppointmentModel appointment,
+  ) async {
     try {
       final docRef = await firestore
           .collection(collectionName)
           .add(appointment.toMap());
 
-      final createdAppointment = appointment.copyWith(id: docRef.id);
+      final createdAppointment = appointment.copyWith(
+        id: int.tryParse(docRef.id),
+      );
       await docRef.update({'id': docRef.id});
-      
+
       return createdAppointment;
     } catch (e) {
       throw ServerException(message: 'Failed to create appointment: $e');
@@ -59,11 +62,13 @@ class AppointmentRemoteDataSourceImpl implements AppointmentRemoteDataSource {
   }
 
   @override
-  Future<AppointmentModel> updateAppointment(AppointmentModel appointment) async {
+  Future<AppointmentModel> updateAppointment(
+    AppointmentModel appointment,
+  ) async {
     try {
       await firestore
           .collection(collectionName)
-          .doc(appointment.id)
+          .doc(appointment.id?.toString() ?? '')
           .update(appointment.toMap());
 
       return appointment;
@@ -75,13 +80,10 @@ class AppointmentRemoteDataSourceImpl implements AppointmentRemoteDataSource {
   @override
   Future<void> deleteAppointment(String id) async {
     try {
-      await firestore
-          .collection(collectionName)
-          .doc(id)
-          .update({
-            'isDeleted': true,
-            'updatedAt': DateTime.now().millisecondsSinceEpoch,
-          });
+      await firestore.collection(collectionName).doc(id).update({
+        'isDeleted': true,
+        'updatedAt': DateTime.now().millisecondsSinceEpoch,
+      });
     } catch (e) {
       throw ServerException(message: 'Failed to delete appointment: $e');
     }
@@ -98,19 +100,24 @@ class AppointmentRemoteDataSourceImpl implements AppointmentRemoteDataSource {
           .collection(collectionName)
           .where('animalId', isEqualTo: animalId)
           .where('isDeleted', isEqualTo: false)
-          .where('dateTimestamp', isGreaterThanOrEqualTo: startDate.millisecondsSinceEpoch)
-          .where('dateTimestamp', isLessThanOrEqualTo: endDate.millisecondsSinceEpoch)
+          .where(
+            'dateTimestamp',
+            isGreaterThanOrEqualTo: startDate.millisecondsSinceEpoch,
+          )
+          .where(
+            'dateTimestamp',
+            isLessThanOrEqualTo: endDate.millisecondsSinceEpoch,
+          )
           .orderBy('dateTimestamp', descending: true)
           .get();
 
       return querySnapshot.docs
-          .map((doc) => AppointmentModel.fromMap({
-                'id': doc.id,
-                ...doc.data(),
-              }))
+          .map((doc) => AppointmentModel.fromMap({'id': doc.id, ...doc.data()}))
           .toList();
     } catch (e) {
-      throw ServerException(message: 'Failed to get appointments by date range: $e');
+      throw ServerException(
+        message: 'Failed to get appointments by date range: $e',
+      );
     }
   }
 }

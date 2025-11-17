@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/providers/database_providers.dart';
 import '../../data/datasources/animal_local_datasource.dart';
 import '../../data/repositories/animal_repository_impl.dart';
+import '../../data/repositories/noop_sync_manager.dart';
 import '../../data/services/animal_error_handling_service.dart';
 import '../../domain/repositories/animal_repository.dart';
 import '../../domain/repositories/isync_manager.dart';
@@ -54,7 +55,7 @@ AnimalLocalDataSource animalLocalDataSource(AnimalLocalDataSourceRef ref) {
 AnimalRepository animalRepository(AnimalRepositoryRef ref) {
   return AnimalRepositoryImpl(
     ref.watch(animalLocalDataSourceProvider),
-    ref.watch(syncManagerProvider),
+    const NoOpSyncManager(), // TODO: Implement proper sync manager
     ref.watch(animalErrorHandlingServiceProvider),
   );
 }

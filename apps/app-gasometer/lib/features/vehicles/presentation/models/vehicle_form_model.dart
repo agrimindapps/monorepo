@@ -1,6 +1,6 @@
 import 'package:core/core.dart' show Equatable;
 
-import '../../../../core/services/input_sanitizer.dart';
+import '../../../../core/validation/input_sanitizer.dart';
 import '../../domain/entities/vehicle_entity.dart';
 
 /// Reactive model for vehicle form

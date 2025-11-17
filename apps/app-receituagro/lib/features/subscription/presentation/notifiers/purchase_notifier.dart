@@ -1,7 +1,5 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/index.dart';
-
-part 'purchase_notifier.g.dart';
 
 /// Estado do histórico de compras
 class PurchaseState {
@@ -119,10 +117,8 @@ class PurchaseState {
 /// - Restaurar compras anteriores
 /// - Gerenciar compras falhadas
 /// - Sincronizar com backend
-@riverpod
-class PurchaseNotifier extends _$PurchaseNotifier {
-  @override
-  PurchaseState build() => PurchaseState.initial();
+class PurchaseNotifier extends StateNotifier<PurchaseState> {
+  PurchaseNotifier() : super(PurchaseState.initial());
 
   /// Carrega o histórico de compras do usuário
   ///

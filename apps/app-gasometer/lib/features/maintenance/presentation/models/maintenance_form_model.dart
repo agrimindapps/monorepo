@@ -1,6 +1,6 @@
 import 'package:core/core.dart' show Equatable;
 
-import '../../../../core/services/input_sanitizer.dart';
+import '../../../../core/validation/input_sanitizer.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../domain/entities/maintenance_entity.dart';
 

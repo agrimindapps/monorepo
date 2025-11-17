@@ -15,24 +15,19 @@ abstract class AnimalRemoteDataSource {
 class AnimalRemoteDataSourceImpl implements AnimalRemoteDataSource {
   final FirebaseService _firebaseService;
 
-  AnimalRemoteDataSourceImpl({
-    FirebaseService? firebaseService,
-  }) : _firebaseService = firebaseService ?? FirebaseService.instance;
+  AnimalRemoteDataSourceImpl({FirebaseService? firebaseService})
+    : _firebaseService = firebaseService ?? FirebaseService.instance;
 
   @override
   Future<List<AnimalModel>> getAnimals(String userId) async {
     try {
       final animals = await _firebaseService.getCollection<AnimalModel>(
         FirebaseCollections.animals,
-        where: [
-          WhereCondition('userId', isEqualTo: userId),
-        ],
-        orderBy: [
-          const OrderByCondition('name'),
-        ],
+        where: [WhereCondition('userId', isEqualTo: userId)],
+        orderBy: [const OrderByCondition('name')],
         fromMap: AnimalModel.fromMap,
       );
-      
+
       return animals;
     } catch (e) {
       throw ServerException(
@@ -49,7 +44,7 @@ class AnimalRemoteDataSourceImpl implements AnimalRemoteDataSource {
         id,
         AnimalModel.fromMap,
       );
-      
+
       return animal;
     } catch (e) {
       throw ServerException(
@@ -66,13 +61,13 @@ class AnimalRemoteDataSourceImpl implements AnimalRemoteDataSource {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
-      
+
       final id = await _firebaseService.addDocument<AnimalModel>(
         FirebaseCollections.animals,
         animalData,
         (animal) => animal.toMap(),
       );
-      
+
       return id;
     } catch (e) {
       throw ServerException(
@@ -84,13 +79,11 @@ class AnimalRemoteDataSourceImpl implements AnimalRemoteDataSource {
   @override
   Future<void> updateAnimal(AnimalModel animal) async {
     try {
-      final updatedAnimal = animal.copyWith(
-        updatedAt: DateTime.now(),
-      );
-      
+      final updatedAnimal = animal.copyWith(updatedAt: DateTime.now());
+
       await _firebaseService.setDocument<AnimalModel>(
         FirebaseCollections.animals,
-        animal.id,
+        animal.id?.toString() ?? '',
         updatedAnimal,
         (animal) => animal.toMap(),
         merge: true,
@@ -105,10 +98,7 @@ class AnimalRemoteDataSourceImpl implements AnimalRemoteDataSource {
   @override
   Future<void> deleteAnimal(String id) async {
     try {
-      await _firebaseService.deleteDocument(
-        FirebaseCollections.animals,
-        id,
-      );
+      await _firebaseService.deleteDocument(FirebaseCollections.animals, id);
     } catch (e) {
       throw ServerException(
         message: 'Erro ao deletar animal do servidor: ${e.toString()}',
@@ -121,12 +111,8 @@ class AnimalRemoteDataSourceImpl implements AnimalRemoteDataSource {
     try {
       return _firebaseService.streamCollection<AnimalModel>(
         FirebaseCollections.animals,
-        where: [
-          WhereCondition('userId', isEqualTo: userId),
-        ],
-        orderBy: [
-          const OrderByCondition('name'),
-        ],
+        where: [WhereCondition('userId', isEqualTo: userId)],
+        orderBy: [const OrderByCondition('name')],
         fromMap: AnimalModel.fromMap,
       );
     } catch (e) {

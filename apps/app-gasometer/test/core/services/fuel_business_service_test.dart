@@ -1,7 +1,7 @@
-import 'package:core/core.dart' hide test;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gasometer_drift/core/services/fuel_business_service.dart';
+
 import 'package:gasometer_drift/features/fuel/data/models/fuel_supply_model.dart';
+import 'package:gasometer_drift/features/fuel/domain/services/fuel_business_service.dart';
 
 void main() {
   group('FuelBusinessService - Financial Calculations', () {
@@ -48,7 +48,10 @@ void main() {
         final supply = testFuelSupply.copyWith(liters: 0.0);
 
         // Act
-        final result = FuelBusinessService.calculateConsumption(supply, 10000.0);
+        final result = FuelBusinessService.calculateConsumption(
+          supply,
+          10000.0,
+        );
 
         // Assert
         expect(result, 0.0);
@@ -59,7 +62,10 @@ void main() {
         final supply = testFuelSupply.copyWith(liters: -10.0);
 
         // Act
-        final result = FuelBusinessService.calculateConsumption(supply, 10000.0);
+        final result = FuelBusinessService.calculateConsumption(
+          supply,
+          10000.0,
+        );
 
         // Assert
         expect(result, 0.0);
@@ -89,16 +95,16 @@ void main() {
 
       test('should handle decimal values correctly', () {
         // Arrange
-        final supply = testFuelSupply.copyWith(
-          odometer: 10543.7,
-          liters: 38.5,
-        );
+        final supply = testFuelSupply.copyWith(odometer: 10543.7, liters: 38.5);
         const previousOdometer = 10000.0;
         // Distance: 543.7 km, Liters: 38.5L
         // Expected: 543.7 / 38.5 = 14.122...
 
         // Act
-        final result = FuelBusinessService.calculateConsumption(supply, previousOdometer);
+        final result = FuelBusinessService.calculateConsumption(
+          supply,
+          previousOdometer,
+        );
 
         // Assert
         expect(result, closeTo(14.122, 0.001));
@@ -141,7 +147,9 @@ void main() {
         // Arrange - 220.0 / 40.0 = 5.50
 
         // Act
-        final result = FuelBusinessService.calculatePricePerLiter(testFuelSupply);
+        final result = FuelBusinessService.calculatePricePerLiter(
+          testFuelSupply,
+        );
 
         // Assert
         expect(result, 5.50);
@@ -249,9 +257,15 @@ void main() {
       test('should ignore invalid consumptions (zero or negative)', () {
         // Arrange
         final supplies = [
-          testFuelSupply.copyWith(odometer: 10500.0, liters: 40.0), // Valid: 12.5
+          testFuelSupply.copyWith(
+            odometer: 10500.0,
+            liters: 40.0,
+          ), // Valid: 12.5
           testFuelSupply.copyWith(odometer: 10500.0, liters: 0.0), // Invalid: 0
-          testFuelSupply.copyWith(odometer: 11100.0, liters: 50.0), // Valid: 12.0
+          testFuelSupply.copyWith(
+            odometer: 11100.0,
+            liters: 50.0,
+          ), // Valid: 12.0
         ];
         final previousOdometers = [10000.0, 10500.0, 10500.0];
         // Average: (12.5 + 12.0) / 2 = 12.25 km/L
@@ -312,7 +326,9 @@ void main() {
 
       test('should handle single supply', () {
         // Act
-        final result = FuelBusinessService.calculateTotalFuelCost([testFuelSupply]);
+        final result = FuelBusinessService.calculateTotalFuelCost([
+          testFuelSupply,
+        ]);
 
         // Assert
         expect(result, 220.0);
@@ -357,7 +373,9 @@ void main() {
         // Average: 709.5 / 129.0 = 5.50
 
         // Act
-        final result = FuelBusinessService.calculateAveragePricePerLiter(supplies);
+        final result = FuelBusinessService.calculateAveragePricePerLiter(
+          supplies,
+        );
 
         // Assert
         expect(result, closeTo(5.50, 0.001));
@@ -378,7 +396,9 @@ void main() {
         ];
 
         // Act
-        final result = FuelBusinessService.calculateAveragePricePerLiter(supplies);
+        final result = FuelBusinessService.calculateAveragePricePerLiter(
+          supplies,
+        );
 
         // Assert
         expect(result, 0.0);
@@ -395,7 +415,9 @@ void main() {
         // Average: 715.0 / 120.0 = 5.958...
 
         // Act
-        final result = FuelBusinessService.calculateAveragePricePerLiter(supplies);
+        final result = FuelBusinessService.calculateAveragePricePerLiter(
+          supplies,
+        );
 
         // Assert
         expect(result, closeTo(5.958, 0.001));
@@ -413,7 +435,10 @@ void main() {
         ];
 
         // Act
-        final result = FuelBusinessService.filterByVehicle(supplies, 'vehicle-001');
+        final result = FuelBusinessService.filterByVehicle(
+          supplies,
+          'vehicle-001',
+        );
 
         // Assert
         expect(result.length, 2);
@@ -422,12 +447,13 @@ void main() {
 
       test('should return empty list when no matches', () {
         // Arrange
-        final supplies = [
-          testFuelSupply.copyWith(vehicleId: 'vehicle-001'),
-        ];
+        final supplies = [testFuelSupply.copyWith(vehicleId: 'vehicle-001')];
 
         // Act
-        final result = FuelBusinessService.filterByVehicle(supplies, 'vehicle-999');
+        final result = FuelBusinessService.filterByVehicle(
+          supplies,
+          'vehicle-999',
+        );
 
         // Assert
         expect(result.isEmpty, true);
@@ -446,10 +472,18 @@ void main() {
       test('should filter supplies within date range', () {
         // Arrange
         final supplies = [
-          testFuelSupply.copyWith(date: DateTime(2024, 1, 10).millisecondsSinceEpoch),
-          testFuelSupply.copyWith(date: DateTime(2024, 1, 15).millisecondsSinceEpoch),
-          testFuelSupply.copyWith(date: DateTime(2024, 1, 20).millisecondsSinceEpoch),
-          testFuelSupply.copyWith(date: DateTime(2024, 1, 25).millisecondsSinceEpoch),
+          testFuelSupply.copyWith(
+            date: DateTime(2024, 1, 10).millisecondsSinceEpoch,
+          ),
+          testFuelSupply.copyWith(
+            date: DateTime(2024, 1, 15).millisecondsSinceEpoch,
+          ),
+          testFuelSupply.copyWith(
+            date: DateTime(2024, 1, 20).millisecondsSinceEpoch,
+          ),
+          testFuelSupply.copyWith(
+            date: DateTime(2024, 1, 25).millisecondsSinceEpoch,
+          ),
         ];
 
         // Act
@@ -461,7 +495,9 @@ void main() {
 
         // Assert
         expect(result.length, 2);
-        final dates = result.map((s) => DateTime.fromMillisecondsSinceEpoch(s.date)).toList();
+        final dates = result
+            .map((s) => DateTime.fromMillisecondsSinceEpoch(s.date))
+            .toList();
         expect(dates.any((d) => d.day == 15), true);
         expect(dates.any((d) => d.day == 20), true);
       });
@@ -469,7 +505,9 @@ void main() {
       test('should return empty list when no supplies in range', () {
         // Arrange
         final supplies = [
-          testFuelSupply.copyWith(date: DateTime(2024, 1, 10).millisecondsSinceEpoch),
+          testFuelSupply.copyWith(
+            date: DateTime(2024, 1, 10).millisecondsSinceEpoch,
+          ),
         ];
 
         // Act
@@ -486,7 +524,9 @@ void main() {
       test('should include boundary dates', () {
         // Arrange
         final supplies = [
-          testFuelSupply.copyWith(date: DateTime(2024, 1, 15).millisecondsSinceEpoch),
+          testFuelSupply.copyWith(
+            date: DateTime(2024, 1, 15).millisecondsSinceEpoch,
+          ),
         ];
 
         // Act

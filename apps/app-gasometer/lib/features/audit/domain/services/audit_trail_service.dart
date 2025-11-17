@@ -4,10 +4,10 @@ library;
 
 import 'package:injectable/injectable.dart';
 
-import '../../core/data/models/audit_trail_model.dart';
-import '../../database/repositories/audit_trail_repository.dart';
-import '../../features/expenses/data/models/expense_model.dart';
-import '../../features/fuel/data/models/fuel_supply_model.dart';
+import '../../../../core/data/models/audit_trail_model.dart';
+import '../../../../database/repositories/audit_trail_repository.dart';
+import '../../../expenses/data/models/expense_model.dart';
+import '../../../fuel/data/models/fuel_supply_model.dart';
 
 /// Audit event types
 enum AuditEventType {

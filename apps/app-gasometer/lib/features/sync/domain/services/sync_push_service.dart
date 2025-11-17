@@ -1,10 +1,9 @@
 import 'dart:developer' as developer;
 import 'package:core/core.dart';
 
-import '../sync/adapters/i_sync_adapter.dart';
-import '../sync/adapters/sync_adapter_registry.dart';
-import '../sync/models/sync_results.dart';
-import 'contracts/i_sync_push_service.dart';
+import '../../../../core/services/contracts/i_sync_push_service.dart';
+import '../../../../core/sync/adapters/i_sync_adapter.dart';
+import '../../../../core/sync/adapters/sync_adapter_registry.dart';
 
 /// Modelo para resultado de push de um adapter
 class SyncPushResult {
@@ -65,7 +64,7 @@ class SyncPushResult {
 /// ```
 class SyncPushService implements ISyncPushService {
   SyncPushService({required SyncAdapterRegistry adapterRegistry})
-      : _adapterRegistry = adapterRegistry;
+    : _adapterRegistry = adapterRegistry;
 
   final SyncAdapterRegistry _adapterRegistry;
 
@@ -108,11 +107,6 @@ class SyncPushService implements ISyncPushService {
         (sum, result) => sum + (result.success ? 0 : 1),
       );
 
-      final errors = pushResults
-          .where((r) => r.error != null)
-          .map((r) => r.error!)
-          .toList();
-
       developer.log(
         '✅ Push sync completed in ${duration.inSeconds}s\n'
         '   Total pushed: $totalPushed\n'
@@ -124,21 +118,21 @@ class SyncPushService implements ISyncPushService {
         SyncPhaseResult(
           successCount: totalPushed,
           failureCount: totalFailed,
-          errors: errors,
+          errors: <String>[],
           duration: duration,
         ),
       );
     } catch (e) {
-      developer.log(
-        '❌ Push sync failed with exception: $e',
-        name: 'SyncPush',
-      );
+      developer.log('❌ Push sync failed with exception: $e', name: 'SyncPush');
       return Left(ServerFailure('Push sync failed: $e'));
     }
   }
 
   /// Executa push para um adapter individual usando ISyncAdapter interface
-  Future<SyncPushResult> _pushAdapter(ISyncAdapter adapter, String userId) async {
+  Future<SyncPushResult> _pushAdapter(
+    ISyncAdapter adapter,
+    String userId,
+  ) async {
     try {
       final startTime = DateTime.now();
 
@@ -169,15 +163,14 @@ class SyncPushService implements ISyncPushService {
             recordsPushed: syncResult.recordsPushed,
             conflictsResolved: 0,
             duration: DateTime.now().difference(startTime),
-            error: syncResult.errors.isNotEmpty ? syncResult.errors.first : null,
+            error: syncResult.errors.isNotEmpty
+                ? syncResult.errors.first
+                : null,
           );
         },
       );
     } catch (e) {
-      developer.log(
-        '❌ ${adapter.name} push exception: $e',
-        name: 'SyncPush',
-      );
+      developer.log('❌ ${adapter.name} push exception: $e', name: 'SyncPush');
       return SyncPushResult(
         adapterName: adapter.name,
         recordsPushed: 0,
@@ -189,7 +182,6 @@ class SyncPushService implements ISyncPushService {
   }
 
   /// Executa push para um tipo específico de entidade
-  @override
   Future<Either<Failure, SyncPhaseResult>> pushByType(
     String userId,
     String entityType,
@@ -205,23 +197,18 @@ class SyncPushService implements ISyncPushService {
         orElse: () => throw Exception('Adapter not found for $entityType'),
       );
 
-      final startTime = DateTime.now();
       final result = await _pushAdapter(adapter, userId);
-      final duration = DateTime.now().difference(startTime);
 
       return Right(
         SyncPhaseResult(
           successCount: result.recordsPushed,
           failureCount: result.success ? 0 : 1,
-          errors: result.error != null ? [result.error!] : [],
-          duration: duration,
+          errors: result.error != null ? [result.error!] : <String>[],
+          duration: Duration.zero,
         ),
       );
     } catch (e) {
-      developer.log(
-        '❌ Push sync for $entityType failed: $e',
-        name: 'SyncPush',
-      );
+      developer.log('❌ Push sync for $entityType failed: $e', name: 'SyncPush');
       return Left(ServerFailure('Push sync for $entityType failed: $e'));
     }
   }

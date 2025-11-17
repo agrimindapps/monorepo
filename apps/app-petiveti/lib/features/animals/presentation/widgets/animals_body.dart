@@ -84,10 +84,13 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
     if (animalsState.animals.isEmpty) {
       return const EmptyAnimalsState();
     }
-    if (animalsState.filter.hasActiveFilters && filteredAnimals.isEmpty) {
+    // TODO: Re-implement filter detection with new filter strategy
+    // if (animalsState.filter.hasActiveFilters && filteredAnimals.isEmpty) {
+    if (false && filteredAnimals.isEmpty) {
       return UIComponents.searchEmptyState(
         onClearFilters: () {
-          ref.read(animalsNotifierProvider.notifier).clearFilters();
+          // TODO: Re-implement clear filters with new filter strategy
+          // ref.read(animalsNotifierProvider.notifier).clearFilters();
         },
       );
     }

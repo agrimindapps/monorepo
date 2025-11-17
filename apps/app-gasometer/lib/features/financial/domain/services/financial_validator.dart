@@ -3,8 +3,8 @@
 library;
 import 'package:core/core.dart';
 
-import '../../features/expenses/data/models/expense_model.dart';
-import '../../features/fuel/data/models/fuel_supply_model.dart';
+import '../../../expenses/data/models/expense_model.dart';
+import '../../../fuel/data/models/fuel_supply_model.dart';
 
 /// Result class for financial validation
 class FinancialValidationResult {

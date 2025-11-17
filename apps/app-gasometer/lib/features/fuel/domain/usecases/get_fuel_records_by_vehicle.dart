@@ -10,6 +10,9 @@ class GetFuelRecordsByVehicle implements UseCase<List<FuelRecordEntity>, GetFuel
 
   @override
   Future<Either<Failure, List<FuelRecordEntity>>> call(GetFuelRecordsByVehicleParams params) async {
+    if (params.vehicleId.trim().isEmpty) {
+      return Left(ValidationFailure('ID do veículo não pode ser vazio'));
+    }
     return repository.getFuelRecordsByVehicle(params.vehicleId);
   }
 }

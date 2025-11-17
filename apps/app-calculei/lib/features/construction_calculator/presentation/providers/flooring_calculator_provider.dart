@@ -5,6 +5,31 @@ import 'construction_calculator_providers.dart';
 
 part 'flooring_calculator_provider.g.dart';
 
+/// State for flooring calculator
+class FlooringCalculatorState {
+  final FlooringCalculation? calculation;
+  final bool isLoading;
+  final String? errorMessage;
+
+  const FlooringCalculatorState({
+    this.calculation,
+    this.isLoading = false,
+    this.errorMessage,
+  });
+
+  FlooringCalculatorState copyWith({
+    FlooringCalculation? calculation,
+    bool? isLoading,
+    String? errorMessage,
+  }) {
+    return FlooringCalculatorState(
+      calculation: calculation ?? this.calculation,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: errorMessage ?? this.errorMessage,
+    );
+  }
+}
+
 /// Provider for calculate flooring use case
 @riverpod
 CalculateFlooringUseCase calculateFlooringUseCase(
@@ -18,29 +43,33 @@ CalculateFlooringUseCase calculateFlooringUseCase(
 @riverpod
 class FlooringCalculator extends _$FlooringCalculator {
   @override
-  FlooringCalculation? build() {
-    return null; // Initial empty state
+  FlooringCalculatorState build() {
+    return const FlooringCalculatorState(); // Initial empty state
   }
 
   /// Calculate flooring
   Future<void> calculate(CalculateFlooringParams params) async {
-    state = null;
+    state = state.copyWith(isLoading: true, errorMessage: null);
 
     final useCase = ref.read(calculateFlooringUseCaseProvider);
     final result = await useCase(params);
 
     result.fold(
       (failure) {
-        throw failure;
+        state = state.copyWith(isLoading: false, errorMessage: failure.message);
       },
       (calculation) {
-        state = calculation;
+        state = state.copyWith(
+          isLoading: false,
+          calculation: calculation,
+          errorMessage: null,
+        );
       },
     );
   }
 
   /// Clear calculation
   void clearCalculation() {
-    state = null;
+    state = const FlooringCalculatorState();
   }
 }

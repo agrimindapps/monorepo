@@ -111,7 +111,7 @@ final animalsUIStateProvider =
 final filteredAnimalsProvider = Provider<List<Animal>>((ref) {
   final animalsState = ref.watch(animalsNotifierProvider);
   final uiState = ref.watch(animalsUIStateProvider);
-  List<Animal> filteredAnimals = animalsState.displayedAnimals;
+  List<Animal> filteredAnimals = animalsState.animals;
   final maxItems = uiState.displayItemCount;
   final paginatedAnimals = filteredAnimals.take(maxItems).toList();
 

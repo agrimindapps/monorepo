@@ -1,8 +1,6 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/index.dart';
 import '../services/subscription_error_message_service.dart';
-
-part 'subscription_status_notifier.g.dart';
 
 /// Estado da assinatura do usuário com indicadores de progresso
 class SubscriptionStatusState {
@@ -83,14 +81,12 @@ class SubscriptionStatusState {
 /// - Atualizar automaticamente
 /// - Gerenciar operações de upgrade/downgrade
 /// - Rastrear histórico de mudanças
-@riverpod
-class SubscriptionStatusNotifier extends _$SubscriptionStatusNotifier {
-  @override
-  SubscriptionStatusState build(SubscriptionErrorMessageService errorService) {
-    return SubscriptionStatusState.initial();
-  }
+class SubscriptionStatusNotifier
+    extends StateNotifier<SubscriptionStatusState> {
+  final SubscriptionErrorMessageService _errorService;
 
-  SubscriptionErrorMessageService get _errorService => errorService;
+  SubscriptionStatusNotifier(this._errorService)
+    : super(SubscriptionStatusState.initial());
 
   /// Carrega o status da assinatura do usuário
   ///

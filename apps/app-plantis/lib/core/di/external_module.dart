@@ -40,4 +40,8 @@ abstract class ExternalModule {
   /// FirebaseFirestore instance for Firebase providers
   @lazySingleton
   FirebaseFirestore get firebaseFirestore => FirebaseFirestore.instance;
+
+  /// FirebaseAuth instance for authentication
+  @lazySingleton
+  FirebaseAuth get firebaseAuth => FirebaseAuth.instance;
 }

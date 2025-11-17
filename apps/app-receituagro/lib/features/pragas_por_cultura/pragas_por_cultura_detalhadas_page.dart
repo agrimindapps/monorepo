@@ -30,7 +30,7 @@ class PragasPorCulturaDetalhadasPage extends ConsumerStatefulWidget {
 
 class _PragasPorCulturaDetalhadasPageState
     extends ConsumerState<PragasPorCulturaDetalhadasPage>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override

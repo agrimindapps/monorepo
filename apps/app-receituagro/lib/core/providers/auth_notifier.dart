@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:core/core.dart' as core;
 import 'package:core/core.dart' hide AuthState, Column;
 import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/analytics/analytics_service.dart';
 import '../data/models/user_session_data.dart';
@@ -11,32 +10,38 @@ import '../extensions/user_entity_receituagro_extension.dart';
 import '../services/device_identity_service.dart';
 import '../services/receituagro_data_cleaner.dart';
 import 'auth_state.dart' as local;
+import 'core_providers.dart' as core_providers;
 
-part 'auth_notifier.g.dart';
-
-/// AuthNotifier Riverpod code generation version
-/// Manages authentication state using AsyncNotifier pattern
-@riverpod
-class AuthNotifier extends _$AuthNotifier {
-  IAuthRepository get _authRepository => throw UnimplementedError('Inject via DI');
-  DeviceIdentityService get _deviceService => throw UnimplementedError('Inject via DI');
-  ReceitaAgroAnalyticsService get _analytics => throw UnimplementedError('Inject via DI');
-  EnhancedAccountDeletionService get _enhancedDeletionService => throw UnimplementedError('Inject via DI');
+/// AuthNotifier using StateNotifier pattern
+/// Manages authentication state
+class AuthNotifier extends StateNotifier<local.AuthState> {
+  final Ref ref;
+  late final IAuthRepository _authRepository;
+  late final DeviceIdentityService _deviceService;
+  late final ReceitaAgroAnalyticsService _analytics;
+  late final EnhancedAccountDeletionService _enhancedDeletionService;
 
   StreamSubscription<UserEntity?>? _userSubscription;
 
-  @override
-  local.AuthState build() {
+  AuthNotifier(this.ref) : super(const local.AuthState.initial()) {
     _initializeAuthNotifier();
-    return const local.AuthState.initial();
   }
 
   Future<void> _initializeAuthNotifier() async {
+    // Initialize dependencies from Riverpod providers
+    _authRepository = ref.read(core_providers.authRepositoryProvider);
+    _deviceService = ref.read(core_providers.deviceIdentityServiceProvider);
+    _analytics = ref.read(core_providers.analyticsServiceProvider);
+    _enhancedDeletionService = ref.read(
+      core_providers.enhancedAccountDeletionServiceProvider,
+    );
+
     try {
       _userSubscription = _authRepository.currentUser.listen(
         _handleUserStateChange,
         onError: (Object error) {
-          if (kDebugMode) print('❌ Auth Notifier: Error in user stream - $error');
+          if (kDebugMode)
+            print('❌ Auth Notifier: Error in user stream - $error');
           state = state.copyWith(errorMessage: 'Erro na autenticação: $error');
         },
       );
@@ -96,13 +101,17 @@ class AuthNotifier extends _$AuthNotifier {
         clearError: true,
       );
 
-      if (kDebugMode) print('✅ Auth Notifier: User session initialized for ${user.displayName}');
+      if (kDebugMode)
+        print(
+          '✅ Auth Notifier: User session initialized for ${user.displayName}',
+        );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         errorMessage: 'Erro na inicialização da sessão: $e',
       );
-      if (kDebugMode) print('❌ Auth Notifier: Session initialization error - $e');
+      if (kDebugMode)
+        print('❌ Auth Notifier: Session initialization error - $e');
     }
   }
 
@@ -116,7 +125,8 @@ class AuthNotifier extends _$AuthNotifier {
 
   Future<void> _handleDeviceLogin(UserEntity user) async {
     try {
-      if (kDebugMode) print('🔄 Auth Notifier: Handling device login for user ${user.id}');
+      if (kDebugMode)
+        print('🔄 Auth Notifier: Handling device login for user ${user.id}');
       final deviceInfo = await _deviceService.getDeviceInfo();
       _analytics.trackDeviceAdded(deviceInfo.platform);
 
@@ -126,87 +136,134 @@ class AuthNotifier extends _$AuthNotifier {
       }
       await _syncUserProfile(user, deviceInfo);
     } catch (e) {
-      if (kDebugMode) print('❌ Auth Notifier: Device login handling error - $e');
+      if (kDebugMode)
+        print('❌ Auth Notifier: Device login handling error - $e');
       _analytics.trackError('device_login_error', e.toString());
     }
   }
 
-  Future<void> _triggerPostAuthSync(UserEntity user, UserEntity? previousUser) async {
+  Future<void> _triggerPostAuthSync(
+    UserEntity user,
+    UserEntity? previousUser,
+  ) async {
     try {
-      _analytics.trackEvent('post_auth_sync_triggered', parameters: {
-        'user_id': user.id,
-        'was_anonymous': (previousUser?.isAnonymous ?? false).toString(),
-        'new_login': (previousUser?.id != user.id).toString(),
-      });
+      _analytics.trackEvent(
+        'post_auth_sync_triggered',
+        parameters: {
+          'user_id': user.id,
+          'was_anonymous': (previousUser?.isAnonymous ?? false).toString(),
+          'new_login': (previousUser?.id != user.id).toString(),
+        },
+      );
 
-      if (kDebugMode) print('🔄 Auth Notifier: Triggering post-authentication sync for user ${user.displayName}');
-
-      unawaited(UnifiedSyncManager.instance.forceSyncApp('receituagro').then((result) {
-        result.fold(
-          (failure) {
-            _analytics.trackEvent('post_auth_sync_failed', parameters: {
-              'error': failure.message,
-            });
-            if (kDebugMode) print('❌ Auth Notifier: Post-auth sync failed: ${failure.message}');
-          },
-          (_) {
-            _analytics.trackEvent('post_auth_sync_success', parameters: {
-              'sync_completed': 'true',
-            });
-
-            if (kDebugMode) print('✅ Auth Notifier: Post-auth sync completed successfully');
-
-            if (previousUser?.isAnonymous == true && !user.isAnonymous) {
-              _analytics.trackEvent('anonymous_to_authenticated_migration', parameters: {
-                'previous_user_id': previousUser?.id ?? 'unknown',
-                'new_user_id': user.id,
-                'migration_result': 'success',
-              });
-
-              if (kDebugMode) print('✅ Auth Notifier: Anonymous to authenticated migration completed');
-            }
-          },
+      if (kDebugMode)
+        print(
+          '🔄 Auth Notifier: Triggering post-authentication sync for user ${user.displayName}',
         );
-      }).catchError((Object error) {
-        _analytics.trackError('post_auth_sync_exception', error.toString());
-        if (kDebugMode) print('❌ Auth Notifier: Post-auth sync exception: $error');
-      }));
+
+      unawaited(
+        UnifiedSyncManager.instance
+            .forceSyncApp('receituagro')
+            .then((result) {
+              result.fold(
+                (failure) {
+                  _analytics.trackEvent(
+                    'post_auth_sync_failed',
+                    parameters: {'error': failure.message},
+                  );
+                  if (kDebugMode)
+                    print(
+                      '❌ Auth Notifier: Post-auth sync failed: ${failure.message}',
+                    );
+                },
+                (_) {
+                  _analytics.trackEvent(
+                    'post_auth_sync_success',
+                    parameters: {'sync_completed': 'true'},
+                  );
+
+                  if (kDebugMode)
+                    print(
+                      '✅ Auth Notifier: Post-auth sync completed successfully',
+                    );
+
+                  if (previousUser?.isAnonymous == true && !user.isAnonymous) {
+                    _analytics.trackEvent(
+                      'anonymous_to_authenticated_migration',
+                      parameters: {
+                        'previous_user_id': previousUser?.id ?? 'unknown',
+                        'new_user_id': user.id,
+                        'migration_result': 'success',
+                      },
+                    );
+
+                    if (kDebugMode)
+                      print(
+                        '✅ Auth Notifier: Anonymous to authenticated migration completed',
+                      );
+                  }
+                },
+              );
+            })
+            .catchError((Object error) {
+              _analytics.trackError(
+                'post_auth_sync_exception',
+                error.toString(),
+              );
+              if (kDebugMode)
+                print('❌ Auth Notifier: Post-auth sync exception: $error');
+            }),
+      );
     } catch (e) {
       _analytics.trackError('post_auth_sync_trigger_error', e.toString());
-      if (kDebugMode) print('❌ Auth Notifier: Error triggering post-auth sync: $e');
+      if (kDebugMode)
+        print('❌ Auth Notifier: Error triggering post-auth sync: $e');
     }
   }
 
   Future<bool> forceSyncUserData() async {
     if (state.currentUser == null || state.currentUser!.isAnonymous) {
-      if (kDebugMode) print('⚠️ Auth Notifier: Cannot sync - user not authenticated');
+      if (kDebugMode)
+        print('⚠️ Auth Notifier: Cannot sync - user not authenticated');
       return false;
     }
 
     try {
-      _analytics.trackEvent('manual_sync_triggered', parameters: {
-        'user_id': state.currentUser!.id,
-        'trigger_source': 'manual_button',
-      });
+      _analytics.trackEvent(
+        'manual_sync_triggered',
+        parameters: {
+          'user_id': state.currentUser!.id,
+          'trigger_source': 'manual_button',
+        },
+      );
 
-      if (kDebugMode) print('🔄 Auth Notifier: Starting manual sync for user ${state.currentUser!.displayName}');
+      if (kDebugMode)
+        print(
+          '🔄 Auth Notifier: Starting manual sync for user ${state.currentUser!.displayName}',
+        );
 
-      final result = await UnifiedSyncManager.instance.forceSyncApp('receituagro');
+      final result = await UnifiedSyncManager.instance.forceSyncApp(
+        'receituagro',
+      );
 
       return result.fold(
         (failure) {
-          _analytics.trackEvent('manual_sync_failure', parameters: {
-            'error': failure.message,
-          });
-          if (kDebugMode) print('❌ Auth Notifier: Manual sync failed: ${failure.message}');
+          _analytics.trackEvent(
+            'manual_sync_failure',
+            parameters: {'error': failure.message},
+          );
+          if (kDebugMode)
+            print('❌ Auth Notifier: Manual sync failed: ${failure.message}');
           return false;
         },
         (_) {
-          _analytics.trackEvent('manual_sync_success', parameters: {
-            'sync_completed': 'true',
-          });
+          _analytics.trackEvent(
+            'manual_sync_success',
+            parameters: {'sync_completed': 'true'},
+          );
 
-          if (kDebugMode) print('✅ Auth Notifier: Manual sync completed successfully');
+          if (kDebugMode)
+            print('✅ Auth Notifier: Manual sync completed successfully');
           return true;
         },
       );
@@ -233,7 +290,10 @@ class AuthNotifier extends _$AuthNotifier {
 
       return result.fold(
         (failure) {
-          state = state.copyWith(isLoading: false, errorMessage: failure.message);
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: failure.message,
+          );
           _analytics.trackError('auth_login', failure.message);
           return AuthResult.failure(failure.message);
         },
@@ -244,7 +304,10 @@ class AuthNotifier extends _$AuthNotifier {
         },
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: 'Erro inesperado: $e');
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Erro inesperado: $e',
+      );
       _analytics.trackError('auth_login', e.toString());
       return AuthResult.failure(e.toString());
     }
@@ -268,7 +331,10 @@ class AuthNotifier extends _$AuthNotifier {
 
       return result.fold(
         (failure) {
-          state = state.copyWith(isLoading: false, errorMessage: failure.message);
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: failure.message,
+          );
           _analytics.trackError('auth_signup', failure.message);
           return AuthResult.failure(failure.message);
         },
@@ -280,7 +346,10 @@ class AuthNotifier extends _$AuthNotifier {
         },
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: 'Erro inesperado: $e');
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Erro inesperado: $e',
+      );
       _analytics.trackError('auth_signup', e.toString());
       return AuthResult.failure(e.toString());
     }
@@ -294,7 +363,10 @@ class AuthNotifier extends _$AuthNotifier {
 
       return result.fold(
         (failure) {
-          state = state.copyWith(isLoading: false, errorMessage: failure.message);
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: failure.message,
+          );
           return AuthResult.failure(failure.message);
         },
         (user) {
@@ -304,7 +376,10 @@ class AuthNotifier extends _$AuthNotifier {
         },
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: 'Erro inesperado: $e');
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Erro inesperado: $e',
+      );
       return AuthResult.failure(e.toString());
     }
   }
@@ -331,7 +406,10 @@ class AuthNotifier extends _$AuthNotifier {
 
       return result.fold(
         (failure) {
-          state = state.copyWith(isLoading: false, errorMessage: failure.message);
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: failure.message,
+          );
           _analytics.trackError('auth_upgrade', failure.message);
           return AuthResult.failure(failure.message);
         },
@@ -342,7 +420,10 @@ class AuthNotifier extends _$AuthNotifier {
         },
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: 'Erro inesperado: $e');
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Erro inesperado: $e',
+      );
       _analytics.trackError('auth_upgrade', e.toString());
       return AuthResult.failure(e.toString());
     }
@@ -355,7 +436,10 @@ class AuthNotifier extends _$AuthNotifier {
       final result = await _authRepository.signOut();
 
       result.fold(
-        (failure) => state = state.copyWith(isLoading: false, errorMessage: failure.message),
+        (failure) => state = state.copyWith(
+          isLoading: false,
+          errorMessage: failure.message,
+        ),
         (_) async {
           // 🔐 SEGURANÇA: Limpar dados premium e sensíveis antes de criar novo usuário anônimo
           await _clearPremiumDataOnLogout();
@@ -366,7 +450,10 @@ class AuthNotifier extends _$AuthNotifier {
         },
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: 'Erro ao fazer logout: $e');
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Erro ao fazer logout: $e',
+      );
     }
   }
 
@@ -377,14 +464,20 @@ class AuthNotifier extends _$AuthNotifier {
       final result = await _authRepository.sendPasswordResetEmail(email: email);
 
       result.fold(
-        (failure) => state = state.copyWith(isLoading: false, errorMessage: failure.message),
+        (failure) => state = state.copyWith(
+          isLoading: false,
+          errorMessage: failure.message,
+        ),
         (_) {
           state = state.copyWith(isLoading: false, clearError: true);
           _analytics.trackEvent('password_reset_sent');
         },
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: 'Erro ao enviar email: $e');
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Erro ao enviar email: $e',
+      );
     }
   }
 
@@ -401,10 +494,13 @@ class AuthNotifier extends _$AuthNotifier {
         debugPrint('🗑️ AuthNotifier: Iniciando exclusão de conta');
       }
 
-      _analytics.trackEvent('account_deletion_attempt', parameters: {
-        'user_id': state.currentUser!.id,
-        'user_type': state.userType.toString(),
-      });
+      _analytics.trackEvent(
+        'account_deletion_attempt',
+        parameters: {
+          'user_id': state.currentUser!.id,
+          'user_type': state.userType.toString(),
+        },
+      );
 
       final result = await _enhancedDeletionService.deleteAccount(
         password: password ?? '',
@@ -415,48 +511,67 @@ class AuthNotifier extends _$AuthNotifier {
       return result.fold(
         (error) {
           state = state.copyWith(isLoading: false, errorMessage: error.message);
-          _analytics.trackEvent('account_deletion_failed', parameters: {
-            'error': error.message,
-            'user_id': state.currentUser!.id,
-          });
+          _analytics.trackEvent(
+            'account_deletion_failed',
+            parameters: {
+              'error': error.message,
+              'user_id': state.currentUser!.id,
+            },
+          );
 
           if (kDebugMode) {
-            debugPrint('❌ AuthNotifier: Exclusão de conta falhou - ${error.message}');
+            debugPrint(
+              '❌ AuthNotifier: Exclusão de conta falhou - ${error.message}',
+            );
           }
 
           return AuthResult.failure(error.message);
         },
         (deletionResult) {
           if (deletionResult.isSuccess) {
-            _analytics.trackEvent('account_deletion_success', parameters: {
-              'user_id': state.currentUser!.id,
-            });
+            _analytics.trackEvent(
+              'account_deletion_success',
+              parameters: {'user_id': state.currentUser!.id},
+            );
 
             if (kDebugMode) {
-              debugPrint('✅ AuthNotifier: Exclusão de conta concluída com sucesso');
+              debugPrint(
+                '✅ AuthNotifier: Exclusão de conta concluída com sucesso',
+              );
             }
 
             _performPostDeletionCleanup();
 
-            return AuthResult.success(const UserEntity(
-              id: 'deleted',
-              email: 'deleted@account.com',
-              displayName: 'Conta excluída',
-              provider: core.AuthProvider.anonymous,
-            ));
+            return AuthResult.success(
+              const UserEntity(
+                id: 'deleted',
+                email: 'deleted@account.com',
+                displayName: 'Conta excluída',
+                provider: core.AuthProvider.anonymous,
+              ),
+            );
           } else {
-            state = state.copyWith(isLoading: false, errorMessage: deletionResult.userMessage);
-            _analytics.trackEvent('account_deletion_failed', parameters: {
-              'error': deletionResult.userMessage,
-              'user_id': state.currentUser!.id,
-            });
+            state = state.copyWith(
+              isLoading: false,
+              errorMessage: deletionResult.userMessage,
+            );
+            _analytics.trackEvent(
+              'account_deletion_failed',
+              parameters: {
+                'error': deletionResult.userMessage,
+                'user_id': state.currentUser!.id,
+              },
+            );
 
             return AuthResult.failure(deletionResult.userMessage);
           }
         },
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: 'Erro inesperado durante exclusão: $e');
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Erro inesperado durante exclusão: $e',
+      );
       _analytics.trackError('account_deletion_exception', e.toString());
 
       if (kDebugMode) {
@@ -489,7 +604,9 @@ class AuthNotifier extends _$AuthNotifier {
         (failure) {
           state = state.copyWith(errorMessage: failure.message);
           if (kDebugMode) {
-            debugPrint('❌ AuthNotifier: Erro ao obter preview - ${failure.message}');
+            debugPrint(
+              '❌ AuthNotifier: Erro ao obter preview - ${failure.message}',
+            );
           }
           return null;
         },
@@ -498,7 +615,9 @@ class AuthNotifier extends _$AuthNotifier {
             debugPrint('✅ AuthNotifier: Preview obtido com sucesso');
             debugPrint('   App: ${preview['appName']}');
             debugPrint('   Dados para limpar: ${preview['hasDataToClear']}');
-            debugPrint('   Registros totais: ${preview['dataStats']?['totalRecords'] ?? 0}');
+            debugPrint(
+              '   Registros totais: ${preview['dataStats']?['totalRecords'] ?? 0}',
+            );
           }
           return preview;
         },
@@ -535,41 +654,62 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> _syncUserProfile(UserEntity user, DeviceInfo deviceInfo) async {
     try {
       if (user.id.isEmpty) {
-        if (kDebugMode) print('🔄 Auth Notifier: User ID inválido - pulando sincronização de perfil');
+        if (kDebugMode)
+          print(
+            '🔄 Auth Notifier: User ID inválido - pulando sincronização de perfil',
+          );
         return;
       }
 
-      final profileEntity = user.withReceitaAgroData(
-        deviceId: deviceInfo.uuid,
-        platform: deviceInfo.platform,
-        appVersion: deviceInfo.appVersion,
-      ).copyWith(
-        updatedAt: DateTime.now(),
-        userId: user.id,
-      );
+      final profileEntity = user
+          .withReceitaAgroData(
+            deviceId: deviceInfo.uuid,
+            platform: deviceInfo.platform,
+            appVersion: deviceInfo.appVersion,
+          )
+          .copyWith(updatedAt: DateTime.now(), userId: user.id);
 
-      final updateResult = await UnifiedSyncManager.instance.update<UserEntity>('receituagro', profileEntity.id, profileEntity);
+      final updateResult = await UnifiedSyncManager.instance.update<UserEntity>(
+        'receituagro',
+        profileEntity.id,
+        profileEntity,
+      );
 
       await updateResult.fold(
         (core.Failure failure) async {
-          if (kDebugMode) print('Auth Notifier: Update falhou, tentando criar: ${failure.message}');
-          final createResult = await UnifiedSyncManager.instance.create<UserEntity>('receituagro', profileEntity);
+          if (kDebugMode)
+            print(
+              'Auth Notifier: Update falhou, tentando criar: ${failure.message}',
+            );
+          final createResult = await UnifiedSyncManager.instance
+              .create<UserEntity>('receituagro', profileEntity);
           createResult.fold(
             (core.Failure createFailure) {
-              if (kDebugMode) print('❌ Auth Notifier: Erro na sincronização de perfil (create): ${createFailure.message}');
-              _analytics.trackError('user_profile_sync_error', createFailure.message);
+              if (kDebugMode)
+                print(
+                  '❌ Auth Notifier: Erro na sincronização de perfil (create): ${createFailure.message}',
+                );
+              _analytics.trackError(
+                'user_profile_sync_error',
+                createFailure.message,
+              );
             },
             (String entityId) {
-              if (kDebugMode) print('✅ Auth Notifier: Perfil do usuário criado com sucesso: $entityId');
+              if (kDebugMode)
+                print(
+                  '✅ Auth Notifier: Perfil do usuário criado com sucesso: $entityId',
+                );
             },
           );
         },
         (_) {
-          if (kDebugMode) print('✅ Auth Notifier: Perfil do usuário atualizado com sucesso');
+          if (kDebugMode)
+            print('✅ Auth Notifier: Perfil do usuário atualizado com sucesso');
         },
       );
     } catch (e) {
-      if (kDebugMode) print('❌ Auth Notifier: Erro ao sincronizar perfil do usuário: $e');
+      if (kDebugMode)
+        print('❌ Auth Notifier: Erro ao sincronizar perfil do usuário: $e');
       _analytics.trackError('user_profile_sync_error', e.toString());
     }
   }
@@ -601,9 +741,13 @@ class AuthNotifier extends _$AuthNotifier {
 
           if (kDebugMode) {
             if (result['success'] == true) {
-              debugPrint('   ✅ Categoria "$category" limpa: ${result['totalRecordsCleared']} registros');
+              debugPrint(
+                '   ✅ Categoria "$category" limpa: ${result['totalRecordsCleared']} registros',
+              );
             } else {
-              debugPrint('   ⚠️ Falha ao limpar categoria "$category": ${result['errors']}');
+              debugPrint(
+                '   ⚠️ Falha ao limpar categoria "$category": ${result['errors']}',
+              );
             }
           }
         } catch (e) {
@@ -625,8 +769,10 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
 
+  @override
   void dispose() {
     _userSubscription?.cancel();
+    super.dispose();
   }
 }
 
@@ -635,11 +781,7 @@ class AuthResult {
   final UserEntity? user;
   final String? errorMessage;
 
-  const AuthResult._({
-    required this.isSuccess,
-    this.user,
-    this.errorMessage,
-  });
+  const AuthResult._({required this.isSuccess, this.user, this.errorMessage});
 
   factory AuthResult.success(UserEntity user) {
     return AuthResult._(isSuccess: true, user: user);
@@ -649,6 +791,7 @@ class AuthResult {
     return AuthResult._(isSuccess: false, errorMessage: message);
   }
 }
+
 extension UserEntityExtensions on UserEntity {
   bool get isAnonymous => provider.toString() == 'anonymous';
 }

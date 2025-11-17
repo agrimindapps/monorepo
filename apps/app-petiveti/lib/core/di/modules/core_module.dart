@@ -1,7 +1,9 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart' as core;
-import 'package:core/core.dart' show GetIt;
+import 'package:core/core.dart' show GetIt, FirebaseAuth, FirebaseFirestore;
 import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../cache/cache_service.dart';
 import '../../logging/datasources/log_local_datasource.dart';
@@ -32,6 +34,15 @@ class CoreModule implements DIModule {
 
   Future<void> _registerExternalServices(GetIt getIt) async {
     try {
+      // Register SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      getIt.registerSingleton<SharedPreferences>(prefs);
+
+      // Register Firebase instances
+      getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
+      getIt.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
+      getIt.registerLazySingleton<GoogleSignIn>(() => GoogleSignIn());
+
       getIt.registerLazySingleton<core.IAuthRepository>(
         () => core.FirebaseAuthService(),
       );

@@ -3,9 +3,9 @@
 library;
 import 'package:core/core.dart';
 
-import '../../features/expenses/data/models/expense_model.dart';
-import '../../features/fuel/data/models/fuel_supply_model.dart';
-import 'audit_trail_service.dart';
+import '../../../expenses/data/models/expense_model.dart';
+import '../../../fuel/data/models/fuel_supply_model.dart';
+import '../../../audit/domain/services/audit_trail_service.dart';
 import 'financial_validator.dart';
 
 /// Conflict resolution strategy options

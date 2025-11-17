@@ -6,7 +6,7 @@
 /// 
 /// Usage:
 /// ```dart
-/// import '../../../../core/validation/forms.dart';
+/// import 'forms.dart';
 /// ```
 library;
 

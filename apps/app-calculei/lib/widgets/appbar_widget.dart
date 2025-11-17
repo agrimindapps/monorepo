@@ -33,7 +33,7 @@ class PageHeaderWidget extends ConsumerWidget {
 
     // Use zero padding to eliminate any extra space contributing to overflow
     final padding = outerPadding ?? EdgeInsets.zero;
-    final isDark = ref.watch(themeNotifierProvider);
+    final isDark = ref.watch(themeModeNotifierProvider);
 
     return Padding(
       padding: padding,
@@ -65,12 +65,12 @@ class PageHeaderWidget extends ConsumerWidget {
               if (showBackButton) ...[
                 IconButton(
                   icon: const Icon(Icons.arrow_back),
-                  onPressed:
-                      onBackPressed ?? () => Navigator.of(context).pop(),
+                  onPressed: onBackPressed ?? () => Navigator.of(context).pop(),
                   tooltip: 'Voltar',
                   style: IconButton.styleFrom(
-                    backgroundColor:
-                        isDark ? Colors.grey.shade800 : Colors.white,
+                    backgroundColor: isDark
+                        ? Colors.grey.shade800
+                        : Colors.white,
                   ),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(
@@ -90,18 +90,17 @@ class PageHeaderWidget extends ConsumerWidget {
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: isDark
-                        ? Colors.amber.shade800
-                            .withAlpha(77) // 0.3 * 255 ≈ 77
-                        : Colors.blue.shade200
-                            .withAlpha(128), // 0.5 * 255 = 128
+                        ? Colors.amber.shade800.withAlpha(77) // 0.3 * 255 ≈ 77
+                        : Colors.blue.shade200.withAlpha(
+                            128,
+                          ), // 0.5 * 255 = 128
                     width: 2,
                   ),
                 ),
                 child: Icon(
                   icon,
                   size: isMobile ? 16 : 18,
-                  color:
-                      isDark ? Colors.amber.shade400 : Colors.blue.shade700,
+                  color: isDark ? Colors.amber.shade400 : Colors.blue.shade700,
                 ),
               ),
               SizedBox(width: isMobile ? 6 : 8),
@@ -202,7 +201,7 @@ class ContentCardWidget extends ConsumerWidget {
   });
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = ref.watch(themeNotifierProvider);
+    final isDark = ref.watch(themeModeNotifierProvider);
 
     return Container(
       width: double.infinity,

@@ -22,7 +22,7 @@ class _CostPerSqmCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(costPerSqmCalculatorNotifierProvider);
+    final state = ref.watch(costPerSqmCalculatorProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -91,14 +91,16 @@ class _CostPerSqmCalculatorPageState
                                 icon: const Icon(Icons.clear),
                                 label: const Text('Limpar'),
                                 style: TextButton.styleFrom(
-                                  foregroundColor:
-                                      Theme.of(context).colorScheme.primary,
+                                  foregroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.primary,
                                 ),
                               ),
                               const SizedBox(width: 16),
                               ElevatedButton.icon(
-                                onPressed:
-                                    state.isLoading ? null : _handleSubmit,
+                                onPressed: state.isLoading
+                                    ? null
+                                    : _handleSubmit,
                                 icon: state.isLoading
                                     ? const SizedBox(
                                         width: 16,
@@ -115,10 +117,12 @@ class _CostPerSqmCalculatorPageState
                                       : 'Calcular',
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Theme.of(context).colorScheme.primary,
-                                  foregroundColor:
-                                      Theme.of(context).colorScheme.onPrimary,
+                                  backgroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.primary,
+                                  foregroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
                                 ),
                               ),
                             ],
@@ -139,18 +143,18 @@ class _CostPerSqmCalculatorPageState
                           children: [
                             Icon(
                               Icons.error,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onErrorContainer,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onErrorContainer,
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
                                 state.errorMessage!,
                                 style: TextStyle(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onErrorContainer,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onErrorContainer,
                                 ),
                               ),
                             ),
@@ -190,12 +194,12 @@ class _CostPerSqmCalculatorPageState
 
   void _handleCalculate(CalculateCostPerSqmParams params) {
     // Execute the calculation through the notifier
-    ref.read(costPerSqmCalculatorNotifierProvider.notifier).calculate(params);
+    ref.read(costPerSqmCalculatorProvider.notifier).calculate(params);
   }
 
   void _handleClear() {
     _formKey.currentState?.reset();
-    ref.read(costPerSqmCalculatorNotifierProvider.notifier).clearCalculation();
+    ref.read(costPerSqmCalculatorProvider.notifier).clearCalculation();
   }
 
   void _showInfo(BuildContext context) {

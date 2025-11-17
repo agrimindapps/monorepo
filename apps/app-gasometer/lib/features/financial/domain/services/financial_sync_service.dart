@@ -7,7 +7,7 @@ import 'dart:math';
 
 import 'package:core/core.dart';
 
-import 'audit_trail_service.dart';
+import '../../../audit/domain/services/audit_trail_service.dart';
 import 'financial_conflict_resolver.dart';
 import 'financial_validator.dart';
 

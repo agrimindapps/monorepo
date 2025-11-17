@@ -1,8 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../core/di/injection.dart' as gasometer_di;
-import 'audit_trail_service.dart';
+import '../../../../core/di/injection.dart' as gasometer_di;
+import '../../../audit/domain/services/audit_trail_service.dart';
 import 'financial_conflict_resolver.dart';
 import 'financial_sync_service.dart';
 import 'financial_validator.dart';

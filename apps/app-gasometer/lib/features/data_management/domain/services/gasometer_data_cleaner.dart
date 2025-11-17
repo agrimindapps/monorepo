@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../database/gasometer_database.dart';
+import '../../../../database/gasometer_database.dart';
 
 /// Implementação de IAppDataCleaner para o app Gasometer
 /// Responsável por limpar todos os dados locais do app usando Drift

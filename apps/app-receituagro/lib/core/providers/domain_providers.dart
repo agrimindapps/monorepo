@@ -1,48 +1,17 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../database/providers/database_providers.dart';
-import '../../features/busca_avancada/data/datasources/busca_local_datasource.dart';
-import '../../features/busca_avancada/data/repositories/busca_repository_impl.dart';
-import '../../features/busca_avancada/data/services/busca_metadata_service.dart';
-import '../../features/busca_avancada/data/services/busca_validation_service.dart';
-import '../../features/busca_avancada/domain/repositories/i_busca_repository.dart';
-import '../../features/busca_avancada/domain/services/i_busca_metadata_service.dart';
-import '../../features/busca_avancada/domain/services/i_busca_validation_service.dart';
-import '../../features/busca_avancada/domain/usecases/busca_usecase.dart';
-import '../../features/comentarios/data/datasources/comentarios_local_datasource.dart';
-import '../../features/comentarios/data/repositories/comentarios_repository_impl.dart';
-import '../../features/comentarios/domain/repositories/i_comentarios_read_repository.dart';
-import '../../features/comentarios/domain/repositories/i_comentarios_repository.dart';
-import '../../features/comentarios/domain/repositories/i_comentarios_write_repository.dart';
-import '../../features/comentarios/domain/usecases/add_comentario_usecase.dart';
-import '../../features/comentarios/domain/usecases/delete_comentario_usecase.dart';
-import '../../features/comentarios/domain/usecases/get_comentarios_usecase.dart';
-import '../../features/diagnosticos/data/datasources/diagnostico_local_datasource.dart';
-import '../../features/diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
-import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
-import '../../features/diagnosticos/domain/services/filtering/diagnosticos_filter_service.dart';
-import '../../features/diagnosticos/domain/services/filtering/i_diagnosticos_filter_service.dart';
-import '../../features/diagnosticos/domain/services/metadata/diagnosticos_metadata_service.dart';
-import '../../features/diagnosticos/domain/services/metadata/i_diagnosticos_metadata_service.dart';
-import '../../features/diagnosticos/domain/services/search/diagnosticos_search_service.dart';
-import '../../features/diagnosticos/domain/services/search/i_diagnosticos_search_service.dart';
-import '../../features/diagnosticos/domain/services/stats/diagnosticos_stats_service.dart';
-import '../../features/diagnosticos/domain/services/stats/i_diagnosticos_stats_service.dart';
-import '../../features/diagnosticos/domain/usecases/get_diagnosticos_usecase.dart';
-import '../../features/pragas/data/services/pragas_query_service.dart';
-import '../../features/pragas/data/services/pragas_search_service.dart';
-import '../../features/pragas/data/services/pragas_stats_service.dart';
 import '../services/failure_message_service.dart';
 import '../services/filter_service.dart';
-import '../services/i_recommendation_service.dart';
-import '../services/recommendation_service.dart';
 import '../services/stats_service.dart';
 import 'core_providers.dart';
 
 part 'domain_providers.g.dart';
 
 // ========== BUSCA AVANCADA ==========
-
+// Commented out due to missing implementations
+/*
 /// Provider do datasource local de busca
 @riverpod
 BuscaLocalDatasource buscaLocalDatasource(Ref ref) {
@@ -76,9 +45,11 @@ BuscaUseCase buscaUseCase(Ref ref) {
   final repository = ref.watch(buscaRepositoryProvider);
   return BuscaUseCase(repository);
 }
+*/
 
 // ========== COMENTARIOS ==========
-
+// Commented out due to constructor issues
+/*
 /// Provider do datasource local de comentários
 @riverpod
 ComentariosLocalDatasource comentariosLocalDatasource(Ref ref) {
@@ -127,9 +98,11 @@ DeleteComentarioUseCase deleteComentarioUseCase(Ref ref) {
   final writeRepo = ref.watch(comentariosWriteRepositoryProvider);
   return DeleteComentarioUseCase(writeRepo);
 }
+*/
 
 // ========== DIAGNOSTICOS ==========
-
+// Commented out due to missing implementations
+/*
 /// Provider do datasource local de diagnósticos
 @riverpod
 DiagnosticoLocalDatasource diagnosticoLocalDatasource(Ref ref) {
@@ -185,9 +158,11 @@ GetDiagnosticoByIdUseCase getDiagnosticoByIdUseCase(Ref ref) {
   final repository = ref.watch(diagnosticosRepositoryProvider);
   return GetDiagnosticoByIdUseCase(repository);
 }
+*/
 
 // ========== PRAGAS ==========
-
+// Commented out due to constructor issues
+/*
 /// Provider do serviço de query de pragas
 @riverpod
 PragasQueryService pragasQueryService(Ref ref) {
@@ -208,6 +183,7 @@ PragasStatsService pragasStatsService(Ref ref) {
   final pragasRepo = ref.watch(pragasRepositoryProvider);
   return PragasStatsService(pragasRepo);
 }
+*/
 
 // ========== SHARED SERVICES ==========
 
@@ -218,11 +194,12 @@ FailureMessageService failureMessageService(Ref ref) {
 }
 
 /// Provider do serviço de recomendações
-@riverpod
+// Commented out due to missing diagnosticosRepositoryProvider
+/*@riverpod
 IRecommendationService recommendationService(Ref ref) {
   final diagnosticosRepo = ref.watch(diagnosticosRepositoryProvider);
   return RecommendationService(diagnosticosRepo);
-}
+}*/
 
 /// Provider do serviço de filtros genérico
 @riverpod

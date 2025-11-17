@@ -12,7 +12,7 @@ class VaccineDao extends DatabaseAccessor<PetivetiDatabase> with _$VaccineDaoMix
   Future<List<Vaccine>> getAllVaccines(String userId) {
     return (select(vaccines)
       ..where((tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false))
-      ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+      ..orderBy([(t) => OrderingTerm.desc(t.dateTimestamp)]))
       .get();
   }
 
@@ -20,7 +20,7 @@ class VaccineDao extends DatabaseAccessor<PetivetiDatabase> with _$VaccineDaoMix
   Future<List<Vaccine>> getVaccinesByAnimal(int animalId) {
     return (select(vaccines)
       ..where((tbl) => tbl.animalId.equals(animalId) & tbl.isDeleted.equals(false))
-      ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+      ..orderBy([(t) => OrderingTerm.desc(t.dateTimestamp)]))
       .get();
   }
 
@@ -28,7 +28,7 @@ class VaccineDao extends DatabaseAccessor<PetivetiDatabase> with _$VaccineDaoMix
   Stream<List<Vaccine>> watchVaccinesByAnimal(int animalId) {
     return (select(vaccines)
       ..where((tbl) => tbl.animalId.equals(animalId) & tbl.isDeleted.equals(false))
-      ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+      ..orderBy([(t) => OrderingTerm.desc(t.dateTimestamp)]))
       .watch();
   }
 
@@ -47,7 +47,7 @@ class VaccineDao extends DatabaseAccessor<PetivetiDatabase> with _$VaccineDaoMix
   /// Update vaccine
   Future<bool> updateVaccine(int id, VaccinesCompanion vaccine) async {
     final count = await (update(vaccines)..where((tbl) => tbl.id.equals(id)))
-      .write(vaccine.copyWith(updatedAt: Value(DateTime.now())));
+      .write(vaccine.copyWith(updatedAtTimestamp: Value(DateTime.now().millisecondsSinceEpoch)));
     return count > 0;
   }
 
@@ -56,21 +56,21 @@ class VaccineDao extends DatabaseAccessor<PetivetiDatabase> with _$VaccineDaoMix
     final count = await (update(vaccines)..where((tbl) => tbl.id.equals(id)))
       .write(VaccinesCompanion(
         isDeleted: const Value(true),
-        updatedAt: Value(DateTime.now()),
+        updatedAtTimestamp: Value(DateTime.now().millisecondsSinceEpoch),
       ));
     return count > 0;
   }
 
   /// Get upcoming vaccines (next due date in the future)
   Future<List<Vaccine>> getUpcomingVaccines(int animalId) {
-    final now = DateTime.now();
+    final now = DateTime.now().millisecondsSinceEpoch;
     return (select(vaccines)
       ..where((tbl) => 
         tbl.animalId.equals(animalId) & 
         tbl.isDeleted.equals(false) &
-        tbl.nextDueDate.isNotNull() &
-        tbl.nextDueDate.isBiggerOrEqualValue(now))
-      ..orderBy([(t) => OrderingTerm.asc(t.nextDueDate)]))
+        tbl.nextDueDateTimestamp.isNotNull() &
+        tbl.nextDueDateTimestamp.isBiggerOrEqualValue(now))
+      ..orderBy([(t) => OrderingTerm.asc(t.nextDueDateTimestamp)]))
       .get();
   }
 }

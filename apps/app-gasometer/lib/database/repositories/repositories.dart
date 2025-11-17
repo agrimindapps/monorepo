@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import '../../../core/drift_exports.dart';
+import '../../core/drift_exports.dart';
 // Drift Repositories
 //
 // Exporta todos os repositórios de dados usando Drift

@@ -36,6 +36,9 @@ export 'services/drift_disabled/base_drift_database.dart';
 export 'services/drift_disabled/drift_database_config.dart';
 export 'services/drift_disabled/base_drift_repository.dart';
 
+// Export Drift storage service for local storage compatibility
+export 'src/infrastructure/storage/drift_disabled/services/drift_storage_service.dart';
+
 export 'package:package_info_plus/package_info_plus.dart';
 export 'package:purchases_flutter/purchases_flutter.dart' hide LogLevel, Store;
 export 'package:riverpod/riverpod.dart'

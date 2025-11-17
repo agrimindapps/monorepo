@@ -60,7 +60,7 @@ class ReminderRepositoryHybridImpl extends BaseRepository implements ReminderRep
   @override
   Future<Either<Failure, List<Reminder>>> getRemindersByAnimal(String animalId) async {
     try {
-      final reminders = await localDataSource.getRemindersByAnimal(animalId);
+      final reminders = await localDataSource.getRemindersByAnimalId(animalId);
       return Right(reminders);
     } catch (e) {
       return Left(CacheFailure(message: 'Erro ao buscar lembretes do animal: ${e.toString()}'));
@@ -140,7 +140,7 @@ class ReminderRepositoryHybridImpl extends BaseRepository implements ReminderRep
   @override
   Future<Either<Failure, List<Reminder>>> getUpcomingReminders(String userId, int days) async {
     try {
-      final reminders = await localDataSource.getUpcomingReminders(userId, days);
+      final reminders = await localDataSource.getUpcomingReminders(userId);
       return Right(reminders);
     } catch (e) {
       return Left(CacheFailure(message: 'Erro ao buscar próximos lembretes: ${e.toString()}'));
@@ -198,7 +198,8 @@ class ReminderRepositoryHybridImpl extends BaseRepository implements ReminderRep
   @override
   Future<Either<Failure, void>> deleteReminder(String reminderId) async {
     try {
-      await localDataSource.deleteReminder(reminderId);
+      final intId = int.tryParse(reminderId) ?? 0;
+      await localDataSource.deleteReminder(intId);
       
       final isConnected = await checkConnectivity();
 

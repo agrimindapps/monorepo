@@ -1,10 +1,10 @@
 import 'dart:developer' as developer;
 import 'package:core/core.dart';
 
-import 'contracts/i_data_integrity_facade.dart';
-import '../../features/vehicles/domain/services/vehicle_id_reconciliation_service.dart';
-import '../../features/fuel/domain/services/fuel_supply_id_reconciliation_service.dart';
-import '../../features/maintenance/domain/services/maintenance_id_reconciliation_service.dart';
+import '../../../../core/services/contracts/i_data_integrity_facade.dart';
+import '../../../vehicles/domain/services/vehicle_id_reconciliation_service.dart';
+import '../../../fuel/domain/services/fuel_supply_id_reconciliation_service.dart';
+import '../../../maintenance/domain/services/maintenance_id_reconciliation_service.dart';
 
 /// Facade para orquestrar todos os serviços de integridade de dados
 ///

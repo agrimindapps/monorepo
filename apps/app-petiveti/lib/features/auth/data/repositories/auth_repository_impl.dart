@@ -33,15 +33,15 @@ class AuthRepositoryImpl
   Future<Either<Failure, User>> signInWithEmail(
       String email, String password) async {
     return await logTimedOperation<Either<Failure, User>>(
-      category: LogCategory.auth,
-      operation: LogOperation.login,
+      context: LogCategory.auth.name,
+      operation: LogOperation.login.name,
       message: 'sign in with email',
       metadata: {'email': email, 'method': 'email'},
       operationFunction: () async {
         try {
           await logOperationStart(
-            category: LogCategory.auth,
-            operation: LogOperation.login,
+            context: LogCategory.auth.name,
+            operation: LogOperation.login.name,
             message: 'authenticating user with email',
             metadata: {'email': email},
           );
@@ -49,8 +49,8 @@ class AuthRepositoryImpl
           final user = await remoteDataSource.signInWithEmail(email, password);
 
           await logLocalStorageOperation(
-            category: LogCategory.auth,
-            operation: LogOperation.create,
+            context: LogCategory.auth.name,
+            operation: LogOperation.create.name,
             message: 'caching user session',
             metadata: {'user_id': user.id, 'email': user.email},
           );
@@ -58,8 +58,8 @@ class AuthRepositoryImpl
           await localDataSource.cacheUser(user);
 
           await logOperationSuccess(
-            category: LogCategory.auth,
-            operation: LogOperation.login,
+            context: LogCategory.auth.name,
+            operation: LogOperation.login.name,
             message: 'sign in with email',
             metadata: {'user_id': user.id, 'email': user.email},
           );
@@ -67,8 +67,8 @@ class AuthRepositoryImpl
           return Right(user);
         } on ServerException catch (e, stackTrace) {
           await logOperationError(
-            category: LogCategory.auth,
-            operation: LogOperation.login,
+            context: LogCategory.auth.name,
+            operation: LogOperation.login.name,
             message: 'sign in with email - server error',
             error: e,
             stackTrace: stackTrace,
@@ -77,8 +77,8 @@ class AuthRepositoryImpl
           return Left(AuthFailure(message: e.message));
         } on CacheException catch (e, stackTrace) {
           await logOperationError(
-            category: LogCategory.auth,
-            operation: LogOperation.create,
+            context: LogCategory.auth.name,
+            operation: LogOperation.create.name,
             message: 'failed to cache user session',
             error: e,
             stackTrace: stackTrace,
@@ -88,8 +88,8 @@ class AuthRepositoryImpl
             final user = await remoteDataSource.getCurrentUser();
             if (user != null) {
               await logOperationSuccess(
-                category: LogCategory.auth,
-                operation: LogOperation.login,
+                context: LogCategory.auth.name,
+                operation: LogOperation.login.name,
                 message: 'sign in with email (cache failed but auth succeeded)',
                 metadata: {'user_id': user.id, 'cache_failed': true},
               );
@@ -102,8 +102,8 @@ class AuthRepositoryImpl
           }
         } catch (e, stackTrace) {
           await logOperationError(
-            category: LogCategory.auth,
-            operation: LogOperation.login,
+            context: LogCategory.auth.name,
+            operation: LogOperation.login.name,
             message: 'sign in with email - unexpected error',
             error: e,
             stackTrace: stackTrace,
@@ -151,23 +151,23 @@ class AuthRepositoryImpl
   @override
   Future<Either<Failure, User>> signInAnonymously() async {
     return await logTimedOperation<Either<Failure, User>>(
-      category: LogCategory.auth,
-      operation: LogOperation.login,
+      context: LogCategory.auth.name,
+      operation: LogOperation.login.name,
       message: 'sign in anonymously',
       metadata: {'method': 'anonymous'},
       operationFunction: () async {
         try {
           await logOperationStart(
-            category: LogCategory.auth,
-            operation: LogOperation.login,
+            context: LogCategory.auth.name,
+            operation: LogOperation.login.name,
             message: 'authenticating user anonymously',
           );
 
           final user = await remoteDataSource.signInAnonymously();
 
           await logLocalStorageOperation(
-            category: LogCategory.auth,
-            operation: LogOperation.create,
+            context: LogCategory.auth.name,
+            operation: LogOperation.create.name,
             message: 'caching anonymous user session',
             metadata: {'user_id': user.id, 'is_anonymous': true},
           );
@@ -175,8 +175,8 @@ class AuthRepositoryImpl
           await localDataSource.cacheUser(user);
 
           await logOperationSuccess(
-            category: LogCategory.auth,
-            operation: LogOperation.login,
+            context: LogCategory.auth.name,
+            operation: LogOperation.login.name,
             message: 'sign in anonymously',
             metadata: {'user_id': user.id},
           );
@@ -184,8 +184,8 @@ class AuthRepositoryImpl
           return Right(user);
         } on ServerException catch (e, stackTrace) {
           await logOperationError(
-            category: LogCategory.auth,
-            operation: LogOperation.login,
+            context: LogCategory.auth.name,
+            operation: LogOperation.login.name,
             message: 'sign in anonymously - server error',
             error: e,
             stackTrace: stackTrace,
@@ -193,8 +193,8 @@ class AuthRepositoryImpl
           return Left(AuthFailure(message: e.message));
         } on CacheException catch (e, stackTrace) {
           await logOperationError(
-            category: LogCategory.auth,
-            operation: LogOperation.create,
+            context: LogCategory.auth.name,
+            operation: LogOperation.create.name,
             message: 'failed to cache anonymous user session',
             error: e,
             stackTrace: stackTrace,
@@ -203,8 +203,8 @@ class AuthRepositoryImpl
             final user = await remoteDataSource.getCurrentUser();
             if (user != null) {
               await logOperationSuccess(
-                category: LogCategory.auth,
-                operation: LogOperation.login,
+                context: LogCategory.auth.name,
+                operation: LogOperation.login.name,
                 message:
                     'sign in anonymously (cache failed but auth succeeded)',
                 metadata: {'user_id': user.id, 'cache_failed': true},
@@ -218,8 +218,8 @@ class AuthRepositoryImpl
           }
         } catch (e, stackTrace) {
           await logOperationError(
-            category: LogCategory.auth,
-            operation: LogOperation.login,
+            context: LogCategory.auth.name,
+            operation: LogOperation.login.name,
             message: 'sign in anonymously - unexpected error',
             error: e,
             stackTrace: stackTrace,

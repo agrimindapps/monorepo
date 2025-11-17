@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:core/core.dart';
 
-import '../../../../core/services/i_id_reconciliation_service.dart';
+import '../../../../core/interfaces/i_id_reconciliation_service.dart';
 
 /// Serviço especializado em reconciliação de IDs de abastecimentos (FuelRecords)
 ///

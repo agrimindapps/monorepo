@@ -1,8 +1,10 @@
 import 'package:core/core.dart' as core;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../database/receituagro_database.dart';
 import '../../features/analytics/analytics_service.dart';
+import '../di/injection_container.dart' as di;
 import '../navigation/agricultural_navigation_extension.dart';
 import '../services/app_data_manager.dart';
 import '../services/cloud_functions_service.dart';
@@ -24,9 +26,7 @@ part 'core_providers.g.dart';
 /// Provider do banco de dados Drift (Singleton)
 @Riverpod(keepAlive: true)
 ReceituagroDatabase receituagroDatabase(Ref ref) {
-  final db = ReceituagroDatabase();
-  ref.onDispose(() => db.close());
-  return db;
+  return ReceituagroDatabase.injectable();
 }
 
 // ========== CORE SERVICES ==========
@@ -34,7 +34,7 @@ ReceituagroDatabase receituagroDatabase(Ref ref) {
 /// Provider do serviço de analytics
 @Riverpod(keepAlive: true)
 ReceitaAgroAnalyticsService analyticsService(Ref ref) {
-  return ReceitaAgroAnalyticsService.instance;
+  return di.sl<ReceitaAgroAnalyticsService>();
 }
 
 /// Provider do serviço de device identity
@@ -93,7 +93,7 @@ core.EnhancedNavigationService coreNavigationService(Ref ref) {
 /// Provider do serviço de integração de diagnósticos
 @Riverpod(keepAlive: true)
 DiagnosticoIntegrationService diagnosticoIntegrationService(Ref ref) {
-  return DiagnosticoIntegrationService.instance;
+  return di.sl<DiagnosticoIntegrationService>();
 }
 
 /// Provider do data cleaner
@@ -147,7 +147,7 @@ core.FirebaseDeviceService firebaseDeviceService(Ref ref) {
 /// Provider do serviço de analytics do Firebase
 @Riverpod(keepAlive: true)
 core.FirebaseAnalyticsService firebaseAnalyticsService(Ref ref) {
-  return core.FirebaseAnalyticsService.instance;
+  return di.sl<core.FirebaseAnalyticsService>();
 }
 
 // ========== AUTH SERVICES (from core) ==========
@@ -155,7 +155,7 @@ core.FirebaseAnalyticsService firebaseAnalyticsService(Ref ref) {
 /// Provider do repositório de autenticação
 @Riverpod(keepAlive: true)
 core.IAuthRepository authRepository(Ref ref) {
-  return core.InjectionContainer.get<core.IAuthRepository>();
+  return di.sl<core.IAuthRepository>();
 }
 
 /// Provider do serviço de account deletion
@@ -172,9 +172,11 @@ core.AccountDeletionService accountDeletionService(Ref ref) {
 /// Provider do serviço enhanced de account deletion
 @Riverpod(keepAlive: true)
 core.EnhancedAccountDeletionService enhancedAccountDeletionService(Ref ref) {
-  final accountDeletionService = ref.watch(accountDeletionServiceProvider);
+  final authRepo = ref.watch(authRepositoryProvider);
+  final dataCleaner = ref.watch(dataCleanerServiceProvider);
   return core.EnhancedAccountDeletionService(
-    accountDeletionService: accountDeletionService,
+    authRepository: authRepo,
+    appDataCleaner: dataCleaner,
   );
 }
 

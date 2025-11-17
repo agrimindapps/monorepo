@@ -38,8 +38,8 @@ class FavoritosPage extends ConsumerStatefulWidget {
 
 class _FavoritosPageState extends ConsumerState<FavoritosPage>
     with
+        AutomaticKeepAliveClientMixin<FavoritosPage>,
         TickerProviderStateMixin,
-        AutomaticKeepAliveClientMixin,
         WidgetsBindingObserver {
   late TabController _tabController;
   bool _hasInitialized = false;

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
+import 'core/di/injection_container_modular.dart' as di;
 import 'core/providers/core_services_providers.dart';
 import 'firebase_options.dart';
 
@@ -14,6 +15,9 @@ Future<void> main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    // Initialize GetIt dependency injection
+    await di.init();
 
     // Create ProviderContainer for initialization
     final container = ProviderContainer();

@@ -32,7 +32,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
   Future<Either<Failure, List<Reminder>>> getRemindersByAnimal(
       String animalId) async {
     return _errorHandlingService.executeOperation(
-      operation: () => localDataSource.getRemindersByAnimal(animalId),
+      operation: () => localDataSource.getRemindersByAnimalId(animalId),
       operationName: 'buscar lembretes do animal',
     );
   }
@@ -59,7 +59,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
   Future<Either<Failure, List<Reminder>>> getUpcomingReminders(
       String userId, int days) async {
     return _errorHandlingService.executeOperation(
-      operation: () => localDataSource.getUpcomingReminders(userId, days),
+      operation: () => localDataSource.getUpcomingReminders(userId),
       operationName: 'buscar próximos lembretes',
     );
   }

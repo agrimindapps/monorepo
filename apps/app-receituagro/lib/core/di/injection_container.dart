@@ -230,32 +230,30 @@ Future<void> init() async {
   //     }
   //   }
   // }
-  // ⚠️ REMOVED: ILocalStorageRepository no longer needed
-  // if (!kIsWeb && !sl.isRegistered<core.ILocalStorageRepository>()) {
-  //   try {
-  //     sl.registerLazySingleton<core.ILocalStorageRepository>(
-  //       () => sl<core.HiveStorageService>(),
-  //     );
-  //     if (kDebugMode) {
-  //       developer.log(
-  //         'ILocalStorageRepository registered successfully',
-  //         name: 'InjectionContainer',
-  //         level: 500,
-  //       );
-  //     }
-  //   } catch (e) {
-  //     if (kDebugMode) {
-  //       developer.log(
-  //         'ILocalStorageRepository registration failed',
-  //         name: 'InjectionContainer',
-  //         error: e,
-  //         level: 900,
-  //       );
-  //     }
-  //   }
-  // } else if (kIsWeb) {
-  //   // Web storage handled differently - no specific repository needed
-  // }
+  // Register DriftStorageService as ILocalStorageRepository
+  if (!sl.isRegistered<core.ILocalStorageRepository>()) {
+    try {
+      sl.registerLazySingleton<core.ILocalStorageRepository>(
+        () => core.DriftStorageService(sl<ReceituagroDatabase>()),
+      );
+      if (kDebugMode) {
+        developer.log(
+          'ILocalStorageRepository (DriftStorageService) registered successfully',
+          name: 'InjectionContainer',
+          level: 500,
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        developer.log(
+          'ILocalStorageRepository registration failed',
+          name: 'InjectionContainer',
+          error: e,
+          level: 900,
+        );
+      }
+    }
+  }
   // Register Drift repositories for services that still use GetIt
   if (!sl.isRegistered<FitossanitariosRepository>()) {
     sl.registerLazySingleton<FitossanitariosRepository>(

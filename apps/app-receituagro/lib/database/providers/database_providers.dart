@@ -16,7 +16,7 @@ part 'database_providers.g.dart';
 /// MIGRATED: Removida dependência de GetIt - cria instância diretamente
 @Riverpod(keepAlive: true)
 ReceituagroDatabase database(Ref ref) {
-  final db = ReceituagroDatabase();
+  final db = ReceituagroDatabase.production();
   ref.onDispose(() => db.close());
   return db;
 }
@@ -69,9 +69,7 @@ PragasRepository pragasRepository(Ref ref) {
 
 /// Stream de diagnósticos com dados relacionados (JOIN)
 @riverpod
-Stream<List<DiagnosticoEnriched>> diagnosticosEnrichedStream(
-  Ref ref,
-) {
+Stream<List<DiagnosticoEnriched>> diagnosticosEnrichedStream(Ref ref) {
   final repo = ref.watch(diagnosticoRepositoryProvider);
   return repo.watchAllWithRelations();
 }

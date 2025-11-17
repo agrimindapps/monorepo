@@ -116,7 +116,9 @@ TaskManagerAuthService taskManagerAuthService(Ref ref) {
   final crashlyticsService = ref.watch(taskManagerCrashlyticsServiceProvider);
   final subscriptionService = ref.watch(taskManagerSubscriptionServiceProvider);
   final syncService = ref.watch(taskManagerSyncServiceProvider);
-  final enhancedDeletionService = ref.watch(enhancedAccountDeletionServiceProvider);
+  final enhancedDeletionService = ref.watch(
+    enhancedAccountDeletionServiceProvider,
+  );
   return TaskManagerAuthService(
     authRepository,
     analyticsService,
@@ -148,20 +150,14 @@ DataIntegrityService dataIntegrityService(Ref ref) {
 Future<TaskolistDataCleaner> taskolistDataCleaner(Ref ref) async {
   final database = ref.watch(taskolistDatabaseProvider);
   final prefs = await SharedPreferences.getInstance();
-  return TaskolistDataCleaner(
-    database: database,
-    prefs: prefs,
-  );
+  return TaskolistDataCleaner(database: database, prefs: prefs);
 }
 
 @riverpod
 AutoSyncService autoSyncService(Ref ref) {
   final connectivityService = ref.watch(connectivityServiceProvider);
   final dataIntegrityService = ref.watch(dataIntegrityServiceProvider);
-  return AutoSyncService(
-    connectivityService,
-    dataIntegrityService,
-  );
+  return AutoSyncService(connectivityService, dataIntegrityService);
 }
 
 // ============================================================================
@@ -184,7 +180,9 @@ AccountDeletionRateLimiter accountDeletionRateLimiter(Ref ref) {
 }
 
 @riverpod
-Future<EnhancedAccountDeletionService> enhancedAccountDeletionService(Ref ref) async {
+Future<EnhancedAccountDeletionService> enhancedAccountDeletionService(
+  Ref ref,
+) async {
   final appDataCleaner = await ref.watch(taskolistDataCleanerProvider.future);
   return EnhancedAccountDeletionService(
     authRepository: ref.watch(authRepositoryProvider),

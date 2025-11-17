@@ -33,7 +33,7 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _startAutoRefresh();
   }
 
@@ -80,7 +80,6 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
         children: [
           _buildOverviewTab(),
           _buildMemoryTab(),
-          _buildDatabaseTab(),
           _buildNavigationTab(),
           _buildImageTab(),
           _buildWidgetsTab(),
@@ -126,7 +125,7 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
         }
 
         final report = snapshot.data!;
-        
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -144,33 +143,6 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
     );
   }
 
-  Widget _buildDatabaseTab() {
-    return FutureBuilder<DatabasePerformanceReport>(
-      future: Future.value(_dbOptimizer.analyzePerformance()),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        final report = snapshot.data!;
-        
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildDatabaseStatsCard(report),
-              const SizedBox(height: 16),
-              _buildSlowQueriesCard(report),
-              const SizedBox(height: 16),
-              _buildDatabaseRecommendationsCard(report),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildNavigationTab() {
     return FutureBuilder<NavigationReport>(
       future: Future.value(_navOptimizer.getNavigationReport()),
@@ -180,7 +152,7 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
         }
 
         final report = snapshot.data!;
-        
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -207,7 +179,7 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
         }
 
         final stats = snapshot.data!;
-        
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -232,7 +204,7 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
         }
 
         final report = snapshot.data!;
-        
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -251,10 +223,7 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-      ),
+      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
     );
   }
 
@@ -308,7 +277,12 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
     );
   }
 
-  Widget _buildMetricCard(String title, String value, IconData icon, Color color) {
+  Widget _buildMetricCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -355,7 +329,12 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
     );
   }
 
-  Widget _buildAlertCard(String title, String description, IconData icon, Color color) {
+  Widget _buildAlertCard(
+    String title,
+    String description,
+    IconData icon,
+    Color color,
+  ) {
     return Card(
       child: ListTile(
         leading: Icon(icon, color: color),
@@ -363,8 +342,7 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
         subtitle: Text(description),
         trailing: IconButton(
           icon: const Icon(Icons.more_vert),
-          onPressed: () {
-          },
+          onPressed: () {},
         ),
       ),
     );
@@ -376,14 +354,17 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
       runSpacing: 8,
       children: [
         _buildActionButton('Clear Cache', Icons.clear_all, _clearAllCaches),
-        _buildActionButton('Compact DB', Icons.compress, _compactDatabase),
         _buildActionButton('GC', Icons.cleaning_services, _forceGC),
         _buildActionButton('Export', Icons.download, _exportMetrics),
       ],
     );
   }
 
-  Widget _buildActionButton(String label, IconData icon, VoidCallback onPressed) {
+  Widget _buildActionButton(
+    String label,
+    IconData icon,
+    VoidCallback onPressed,
+  ) {
     return ElevatedButton.icon(
       onPressed: onPressed,
       icon: Icon(icon, size: 16),
@@ -401,7 +382,10 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Memory Usage', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Memory Usage',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             Text('Current Usage: ${_formatBytes(report.currentUsage)}'),
             Text('Tracked Objects: ${report.trackedObjects}'),
@@ -419,7 +403,10 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Memory Trends', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Memory Trends',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             Container(
               height: 200,
@@ -441,76 +428,12 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Memory Leaks', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(
+              'Memory Leaks',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             SizedBox(height: 16),
             Text('No memory leaks detected'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDatabaseStatsCard(DatabasePerformanceReport report) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Database Stats', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            Text('Total Queries: ${report.totalQueries}'),
-            Text('Cache Hit Rate: ${(report.cacheHitRate * 100).toStringAsFixed(1)}%'),
-            Text('Cache Size: ${report.cacheSize} entries'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSlowQueriesCard(DatabasePerformanceReport report) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Slow Queries', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            if (report.slowQueries.isEmpty)
-              const Text('No slow queries detected')
-            else
-              ...report.slowQueries.take(5).map((query) => 
-                ListTile(
-                  dense: true,
-                  title: Text(query.queryKey),
-                  trailing: Text('${query.executionTime}ms'),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDatabaseRecommendationsCard(DatabasePerformanceReport report) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Recommendations', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            if (report.recommendations.isEmpty)
-              const Text('No recommendations at this time')
-            else
-              ...report.recommendations.map((rec) => 
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text('• $rec'),
-                ),
-              ),
           ],
         ),
       ),
@@ -524,7 +447,10 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Navigation Stats', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Navigation Stats',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             Text('Preloaded Routes: ${report.preloadedRoutes}'),
             Text('Total Routes: ${report.routeMetrics.length}'),
@@ -542,15 +468,20 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Most Used Routes', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            ...report.mostUsedRoutes.take(5).map((route) => 
-              ListTile(
-                dense: true,
-                title: Text(route.routeName),
-                trailing: Text('${route.navigations}x'),
-              ),
+            const Text(
+              'Most Used Routes',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
+            const SizedBox(height: 16),
+            ...report.mostUsedRoutes
+                .take(5)
+                .map(
+                  (route) => ListTile(
+                    dense: true,
+                    title: Text(route.routeName),
+                    trailing: Text('${route.navigations}x'),
+                  ),
+                ),
           ],
         ),
       ),
@@ -564,18 +495,25 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Route Predictions', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Route Predictions',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             if (report.predictions.isEmpty)
               const Text('Not enough data for predictions')
             else
-              ...report.predictions.take(3).map((pred) => 
-                ListTile(
-                  dense: true,
-                  title: Text(pred.routeName),
-                  trailing: Text('${(pred.confidence * 100).toStringAsFixed(0)}%'),
-                ),
-              ),
+              ...report.predictions
+                  .take(3)
+                  .map(
+                    (pred) => ListTile(
+                      dense: true,
+                      title: Text(pred.routeName),
+                      trailing: Text(
+                        '${(pred.confidence * 100).toStringAsFixed(0)}%',
+                      ),
+                    ),
+                  ),
           ],
         ),
       ),
@@ -589,7 +527,10 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Image Cache', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Image Cache',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             Text('Memory Items: ${stats.memoryItems}'),
             Text('Memory Size: ${stats.memorySizeMB.toStringAsFixed(1)} MB'),
@@ -609,7 +550,10 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Image Optimizations', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Image Optimizations',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => _imageOptimizer.cleanupCache(),
@@ -628,7 +572,10 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Widget Stats', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Widget Stats',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             Text('Tracked Widgets: ${report.totalTrackedWidgets}'),
             Text('Problematic: ${report.problematicWidgets.length}'),
@@ -646,19 +593,24 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Problematic Widgets', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Problematic Widgets',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             if (report.problematicWidgets.isEmpty)
               const Text('No problematic widgets detected')
             else
-              ...report.problematicWidgets.take(5).map((widget) => 
-                ListTile(
-                  dense: true,
-                  title: Text(widget.widgetKey),
-                  subtitle: Text(widget.widgetType),
-                  trailing: Text('${widget.rebuildCount} rebuilds'),
-                ),
-              ),
+              ...report.problematicWidgets
+                  .take(5)
+                  .map(
+                    (widget) => ListTile(
+                      dense: true,
+                      title: Text(widget.widgetKey),
+                      subtitle: Text(widget.widgetType),
+                      trailing: Text('${widget.rebuildCount} rebuilds'),
+                    ),
+                  ),
           ],
         ),
       ),
@@ -687,21 +639,20 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
     );
 
     try {
-      await _dbOptimizer.runAutoOptimizations();
       _imageOptimizer.cleanupCache();
       _memoryManager.cleanup(aggressive: true);
       _navOptimizer.clearNavigationCache();
-      
+
       log('Performance optimizations completed', name: 'PerformanceDashboard');
     } finally {
       if (mounted) {
         Navigator.of(context).pop();
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Optimizations completed!')),
         );
       }
-      
+
       setState(() {});
     }
   }
@@ -709,40 +660,29 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
   void _clearAllCaches() {
     _imageOptimizer.cleanupCache(aggressive: true);
     _navOptimizer.clearNavigationCache();
-    _dbOptimizer.cleanupCache(aggressive: true);
-    
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('All caches cleared!')),
-      );
-    }
-    
-    setState(() {});
-  }
 
-  void _compactDatabase() async {
-    await _dbOptimizer.runAutoOptimizations();
-    
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Database compacted!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('All caches cleared!')));
     }
+
+    setState(() {});
   }
 
   void _forceGC() {
     _memoryManager.cleanup(aggressive: true);
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Garbage collection forced!')),
-    );
-    
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Garbage collection forced!')));
+
     setState(() {});
   }
 
   void _exportMetrics() async {
     final metrics = _performanceService.exportMetrics();
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('${metrics.keys.length} metrics exported!')),
     );

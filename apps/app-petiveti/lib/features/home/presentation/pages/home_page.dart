@@ -41,15 +41,15 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   void _loadHomeData() {
-    ref.read(homeNotificationsProvider.notifier).loadNotifications();
-    ref.read(homeStatsProvider.notifier).loadStats();
-    ref.read(homeStatusProvider.notifier).checkStatus();
+    ref.read(homeNotificationsNotifierProvider.notifier).loadNotifications();
+    ref.read(homeStatsNotifierProvider.notifier).loadStats();
+    ref.read(homeStatusNotifierProvider.notifier).checkStatus();
   }
 
   @override
   Widget build(BuildContext context) {
-    final statsState = ref.watch(homeStatsProvider);
-    final statusState = ref.watch(homeStatusProvider);
+    final statsState = ref.watch(homeStatsNotifierProvider);
+    final statusState = ref.watch(homeStatusNotifierProvider);
 
     return Scaffold(
       appBar: HomeAppBar(
@@ -90,13 +90,13 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   void _showNotifications() {
-    final notifications = ref.read(homeNotificationsProvider);
+    final notifications = ref.read(homeNotificationsNotifierProvider);
 
     _actionsService.showNotifications(
       context,
       notifications,
       onMarkAllAsRead: () {
-        ref.read(homeNotificationsProvider.notifier).markAllAsRead();
+        ref.read(homeNotificationsNotifierProvider.notifier).markAllAsRead();
       },
     );
   }

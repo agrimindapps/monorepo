@@ -5,6 +5,31 @@ import 'construction_calculator_providers.dart';
 
 part 'paint_consumption_calculator_provider.g.dart';
 
+/// State for paint consumption calculator
+class PaintConsumptionCalculatorState {
+  final PaintConsumptionCalculation? calculation;
+  final bool isLoading;
+  final String? errorMessage;
+
+  const PaintConsumptionCalculatorState({
+    this.calculation,
+    this.isLoading = false,
+    this.errorMessage,
+  });
+
+  PaintConsumptionCalculatorState copyWith({
+    PaintConsumptionCalculation? calculation,
+    bool? isLoading,
+    String? errorMessage,
+  }) {
+    return PaintConsumptionCalculatorState(
+      calculation: calculation ?? this.calculation,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: errorMessage ?? this.errorMessage,
+    );
+  }
+}
+
 /// Provider for calculate paint consumption use case
 @riverpod
 CalculatePaintConsumptionUseCase calculatePaintConsumptionUseCase(
@@ -18,29 +43,33 @@ CalculatePaintConsumptionUseCase calculatePaintConsumptionUseCase(
 @riverpod
 class PaintConsumptionCalculator extends _$PaintConsumptionCalculator {
   @override
-  PaintConsumptionCalculation? build() {
-    return null; // Initial empty state
+  PaintConsumptionCalculatorState build() {
+    return const PaintConsumptionCalculatorState(); // Initial empty state
   }
 
   /// Calculate paint consumption
   Future<void> calculate(CalculatePaintConsumptionParams params) async {
-    state = null;
+    state = state.copyWith(isLoading: true, errorMessage: null);
 
     final useCase = ref.read(calculatePaintConsumptionUseCaseProvider);
     final result = await useCase(params);
 
     result.fold(
       (failure) {
-        throw failure;
+        state = state.copyWith(isLoading: false, errorMessage: failure.message);
       },
       (calculation) {
-        state = calculation;
+        state = state.copyWith(
+          isLoading: false,
+          calculation: calculation,
+          errorMessage: null,
+        );
       },
     );
   }
 
   /// Clear calculation
   void clearCalculation() {
-    state = null;
+    state = const PaintConsumptionCalculatorState();
   }
 }

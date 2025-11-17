@@ -7,8 +7,8 @@ import '../../data/services/weight_error_handling_service.dart';
 import '../../domain/repositories/weight_repository.dart';
 import '../../domain/services/weight_validation_service.dart';
 import '../../domain/usecases/add_weight.dart';
-import '../../domain/usecases/delete_weight.dart';
-import '../../domain/usecases/get_weight_by_id.dart';
+import '../../domain/usecases/delete_weight.dart' as del;
+import '../../domain/usecases/get_weight_by_id.dart' as getWeight;
 import '../../domain/usecases/get_weight_statistics.dart';
 import '../../domain/usecases/get_weights.dart';
 import '../../domain/usecases/get_weights_by_animal_id.dart';
@@ -49,10 +49,7 @@ WeightLocalDataSource weightLocalDataSource(WeightLocalDataSourceRef ref) {
 
 @riverpod
 WeightRepository weightRepository(WeightRepositoryRef ref) {
-  return WeightRepositoryImpl(
-    ref.watch(weightLocalDataSourceProvider),
-    ref.watch(weightErrorHandlingServiceProvider),
-  );
+  return WeightRepositoryImpl(ref.watch(weightLocalDataSourceProvider));
 }
 
 // ============================================================================
@@ -75,33 +72,21 @@ GetWeightStatistics getWeightStatistics(GetWeightStatisticsRef ref) {
 }
 
 @riverpod
-GetWeightById getWeightById(GetWeightByIdRef ref) {
-  return GetWeightById(
-    ref.watch(weightRepositoryProvider),
-    ref.watch(weightValidationServiceProvider),
-  );
+getWeight.GetWeightById getWeightById(GetWeightByIdRef ref) {
+  return getWeight.GetWeightById(ref.watch(weightRepositoryProvider));
 }
 
 @riverpod
 AddWeight addWeight(AddWeightRef ref) {
-  return AddWeight(
-    ref.watch(weightRepositoryProvider),
-    ref.watch(weightValidationServiceProvider),
-  );
+  return AddWeight(ref.watch(weightRepositoryProvider));
 }
 
 @riverpod
 UpdateWeight updateWeight(UpdateWeightRef ref) {
-  return UpdateWeight(
-    ref.watch(weightRepositoryProvider),
-    ref.watch(weightValidationServiceProvider),
-  );
+  return UpdateWeight(ref.watch(weightRepositoryProvider));
 }
 
 @riverpod
-DeleteWeight deleteWeight(DeleteWeightRef ref) {
-  return DeleteWeight(
-    ref.watch(weightRepositoryProvider),
-    ref.watch(weightValidationServiceProvider),
-  );
+del.DeleteWeight deleteWeight(DeleteWeightRef ref) {
+  return del.DeleteWeight(ref.watch(weightRepositoryProvider));
 }

@@ -1,6 +1,6 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
-import '../errors/failures.dart';
+import 'package:core/core.dart';
 
 /// Níveis de severidade para logging
 enum LogLevel {

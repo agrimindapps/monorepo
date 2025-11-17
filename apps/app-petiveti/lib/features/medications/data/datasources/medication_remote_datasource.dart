@@ -4,9 +4,11 @@ import '../models/medication_model.dart';
 
 abstract class MedicationRemoteDataSource {
   Future<List<MedicationModel>> getMedications(String userId);
-  Future<List<MedicationModel>> getMedicationsByAnimalId(String userId, String animalId);
+  Future<List<MedicationModel>> getMedicationsByAnimalId(
+      String userId, String animalId);
   Future<List<MedicationModel>> getActiveMedications(String userId);
-  Future<List<MedicationModel>> getActiveMedicationsByAnimalId(String userId, String animalId);
+  Future<List<MedicationModel>> getActiveMedicationsByAnimalId(
+      String userId, String animalId);
   Future<List<MedicationModel>> getExpiringSoonMedications(String userId);
   Future<MedicationModel?> getMedicationById(String id);
   Future<String> addMedication(MedicationModel medication, String userId);
@@ -20,12 +22,15 @@ abstract class MedicationRemoteDataSource {
     DateTime startDate,
     DateTime endDate,
   );
-  Future<List<MedicationModel>> checkMedicationConflicts(String userId, MedicationModel medication);
+  Future<List<MedicationModel>> checkMedicationConflicts(
+      String userId, MedicationModel medication);
   Future<int> getActiveMedicationsCount(String userId, String animalId);
   Future<List<Map<String, dynamic>>> exportMedicationsData(String userId);
-  Future<void> importMedicationsData(String userId, List<Map<String, dynamic>> data);
+  Future<void> importMedicationsData(
+      String userId, List<Map<String, dynamic>> data);
   Stream<List<MedicationModel>> streamMedications(String userId);
-  Stream<List<MedicationModel>> streamMedicationsByAnimalId(String userId, String animalId);
+  Stream<List<MedicationModel>> streamMedicationsByAnimalId(
+      String userId, String animalId);
 }
 
 class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
@@ -49,9 +54,11 @@ class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
         return [];
       }
 
-      final animalIds = animals.map((animal) => animal['id'] as String).toList();
+      final animalIds =
+          animals.map((animal) => animal['id'] as String).toList();
 
-      final medications = await _firebaseService.getCollection<MedicationModel>(
+      final medications =
+          await _firebaseService.getCollection<MedicationModel>(
         FirebaseCollections.medications,
         where: [
           WhereCondition('animalId', whereIn: animalIds),
@@ -70,9 +77,11 @@ class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
   }
 
   @override
-  Future<List<MedicationModel>> getMedicationsByAnimalId(String userId, String animalId) async {
+  Future<List<MedicationModel>> getMedicationsByAnimalId(
+      String userId, String animalId) async {
     try {
-      final medications = await _firebaseService.getCollection<MedicationModel>(
+      final medications =
+          await _firebaseService.getCollection<MedicationModel>(
         FirebaseCollections.medications,
         where: [
           WhereCondition('animalId', isEqualTo: animalId),
@@ -85,7 +94,8 @@ class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
       return medications;
     } catch (e) {
       throw ServerException(
-        message: 'Erro ao buscar medicamentos do animal do servidor: ${e.toString()}',
+        message:
+            'Erro ao buscar medicamentos do animal do servidor: ${e.toString()}',
       );
     }
   }
@@ -98,52 +108,54 @@ class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
 
       return allMedications.where((medication) {
         return medication.startDate.isBefore(now) &&
-            medication.endDate.isAfter(now) &&
-            !medication.isDeleted &&
-            medication.discontinuedAt == null;
+            (medication.endDate?.isAfter(now) ?? false) &&
+            !medication.isDeleted;
       }).toList();
     } catch (e) {
       throw ServerException(
-        message: 'Erro ao buscar medicamentos ativos do servidor: ${e.toString()}',
+        message:
+            'Erro ao buscar medicamentos ativos do servidor: ${e.toString()}',
       );
     }
   }
 
   @override
-  Future<List<MedicationModel>> getActiveMedicationsByAnimalId(String userId, String animalId) async {
+  Future<List<MedicationModel>> getActiveMedicationsByAnimalId(
+      String userId, String animalId) async {
     try {
       final medications = await getMedicationsByAnimalId(userId, animalId);
       final now = DateTime.now();
 
       return medications.where((medication) {
         return medication.startDate.isBefore(now) &&
-            medication.endDate.isAfter(now) &&
-            !medication.isDeleted &&
-            medication.discontinuedAt == null;
+            (medication.endDate?.isAfter(now) ?? false) &&
+            !medication.isDeleted;
       }).toList();
     } catch (e) {
       throw ServerException(
-        message: 'Erro ao buscar medicamentos ativos do animal do servidor: ${e.toString()}',
+        message:
+            'Erro ao buscar medicamentos ativos do animal do servidor: ${e.toString()}',
       );
     }
   }
 
   @override
-  Future<List<MedicationModel>> getExpiringSoonMedications(String userId) async {
+  Future<List<MedicationModel>> getExpiringSoonMedications(
+      String userId) async {
     try {
       final allMedications = await getMedications(userId);
       final now = DateTime.now();
       final sevenDaysFromNow = now.add(const Duration(days: 7));
 
       return allMedications.where((medication) {
-        return medication.endDate.isAfter(now) &&
-            medication.endDate.isBefore(sevenDaysFromNow) &&
-            !medication.isDeleted &&
-            medication.discontinuedAt == null;
+        return (medication.endDate?.isAfter(now) ?? false) &&
+            (medication.endDate?.isBefore(sevenDaysFromNow) ?? false) &&
+            !medication.isDeleted;
       }).toList();
     } catch (e) {
       throw ServerException(
-        message: 'Erro ao buscar medicamentos próximos ao vencimento do servidor: ${e.toString()}',
+        message:
+            'Erro ao buscar medicamentos próximos ao vencimento do servidor: ${e.toString()}',
       );
     }
   }
@@ -166,7 +178,8 @@ class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
   }
 
   @override
-  Future<String> addMedication(MedicationModel medication, String userId) async {
+  Future<String> addMedication(
+      MedicationModel medication, String userId) async {
     try {
       final medicationData = medication.copyWith(
         createdAt: DateTime.now(),
@@ -196,7 +209,7 @@ class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
 
       await _firebaseService.setDocument<MedicationModel>(
         FirebaseCollections.medications,
-        medication.id,
+        medication.id.toString(),
         updatedMedication,
         (medication) => medication.toMap(),
         merge: true,
@@ -240,8 +253,6 @@ class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
       final medication = await getMedicationById(id);
       if (medication != null) {
         final discontinuedMedication = medication.copyWith(
-          discontinuedReason: reason,
-          discontinuedAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
 
@@ -261,7 +272,8 @@ class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
   }
 
   @override
-  Future<List<MedicationModel>> searchMedications(String userId, String query) async {
+  Future<List<MedicationModel>> searchMedications(
+      String userId, String query) async {
     try {
       final allMedications = await getMedications(userId);
       final lowerQuery = query.toLowerCase();
@@ -269,7 +281,8 @@ class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
       return allMedications.where((medication) {
         return medication.name.toLowerCase().contains(lowerQuery) ||
             medication.type.toLowerCase().contains(lowerQuery) ||
-            (medication.prescribedBy?.toLowerCase().contains(lowerQuery) ?? false);
+            (medication.veterinarian?.toLowerCase().contains(lowerQuery) ??
+                false);
       }).toList();
     } catch (e) {
       throw ServerException(
@@ -289,33 +302,39 @@ class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
       final medications = await getMedicationsByAnimalId(userId, animalId);
 
       return medications.where((medication) {
-        return (medication.startDate.isAfter(startDate) || medication.startDate.isAtSameMomentAs(startDate)) &&
-            (medication.endDate.isBefore(endDate) || medication.endDate.isAtSameMomentAs(endDate));
+        return (medication.startDate.isAfter(startDate) ||
+                medication.startDate.isAtSameMomentAs(startDate)) &&
+            ((medication.endDate?.isBefore(endDate) ?? false) ||
+                (medication.endDate?.isAtSameMomentAs(endDate) ?? false));
       }).toList();
     } catch (e) {
       throw ServerException(
-        message: 'Erro ao buscar histórico de medicamentos do servidor: ${e.toString()}',
+        message:
+            'Erro ao buscar histórico de medicamentos do servidor: ${e.toString()}',
       );
     }
   }
 
   @override
-  Future<List<MedicationModel>> checkMedicationConflicts(String userId, MedicationModel medication) async {
+  Future<List<MedicationModel>> checkMedicationConflicts(
+      String userId, MedicationModel medication) async {
     try {
-      final activeMedications = await getActiveMedicationsByAnimalId(userId, medication.animalId);
+      final activeMedications = await getActiveMedicationsByAnimalId(
+          userId, medication.animalId.toString());
 
       // Check for time conflicts (same time period)
       return activeMedications.where((existing) {
         if (existing.id == medication.id) return false;
 
-        return (medication.startDate.isBefore(existing.endDate) &&
-                medication.endDate.isAfter(existing.startDate)) ||
-            (existing.startDate.isBefore(medication.endDate) &&
-                existing.endDate.isAfter(medication.startDate));
+        return (medication.startDate.isBefore(existing.endDate!) &&
+                (medication.endDate?.isAfter(existing.startDate) ?? false)) ||
+            (existing.startDate.isBefore(medication.endDate!) &&
+                (existing.endDate?.isAfter(medication.startDate) ?? false));
       }).toList();
     } catch (e) {
       throw ServerException(
-        message: 'Erro ao verificar conflitos de medicamentos no servidor: ${e.toString()}',
+        message:
+            'Erro ao verificar conflitos de medicamentos no servidor: ${e.toString()}',
       );
     }
   }
@@ -323,7 +342,8 @@ class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
   @override
   Future<int> getActiveMedicationsCount(String userId, String animalId) async {
     try {
-      final activeMedications = await getActiveMedicationsByAnimalId(userId, animalId);
+      final activeMedications =
+          await getActiveMedicationsByAnimalId(userId, animalId);
       return activeMedications.length;
     } catch (e) {
       throw ServerException(
@@ -333,32 +353,36 @@ class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> exportMedicationsData(String userId) async {
+  Future<List<Map<String, dynamic>>> exportMedicationsData(
+      String userId) async {
     try {
       final medications = await getMedications(userId);
       return medications.map((medication) => medication.toMap()).toList();
     } catch (e) {
       throw ServerException(
-        message: 'Erro ao exportar dados de medicamentos do servidor: ${e.toString()}',
+        message:
+            'Erro ao exportar dados de medicamentos do servidor: ${e.toString()}',
       );
     }
   }
 
   @override
-  Future<void> importMedicationsData(String userId, List<Map<String, dynamic>> data) async {
+  Future<void> importMedicationsData(
+      String userId, List<Map<String, dynamic>> data) async {
     try {
       for (final medicationData in data) {
         final medication = MedicationModel.fromMap(medicationData);
         await _firebaseService.setDocument<MedicationModel>(
           FirebaseCollections.medications,
-          medication.id,
+          medication.id.toString(),
           medication,
           (medication) => medication.toMap(),
         );
       }
     } catch (e) {
       throw ServerException(
-        message: 'Erro ao importar dados de medicamentos no servidor: ${e.toString()}',
+        message:
+            'Erro ao importar dados de medicamentos no servidor: ${e.toString()}',
       );
     }
   }
@@ -382,7 +406,8 @@ class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
   }
 
   @override
-  Stream<List<MedicationModel>> streamMedicationsByAnimalId(String userId, String animalId) {
+  Stream<List<MedicationModel>> streamMedicationsByAnimalId(
+      String userId, String animalId) {
     try {
       return _firebaseService.streamCollection<MedicationModel>(
         FirebaseCollections.medications,
@@ -395,7 +420,8 @@ class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
       );
     } catch (e) {
       throw ServerException(
-        message: 'Erro ao escutar medicamentos do animal do servidor: ${e.toString()}',
+        message:
+            'Erro ao escutar medicamentos do animal do servidor: ${e.toString()}',
       );
     }
   }

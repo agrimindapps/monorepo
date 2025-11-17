@@ -65,7 +65,8 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
 
   @override
   Stream<List<VaccineModel>> watchVaccinesByAnimalId(int animalId) {
-    return _database.vaccineDao.watchVaccinesByAnimal(animalId)
+    return _database.vaccineDao
+        .watchVaccinesByAnimal(animalId)
         .map((vaccines) => vaccines.map(_toModel).toList());
   }
 
@@ -74,15 +75,19 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
       id: vaccine.id,
       animalId: vaccine.animalId,
       name: vaccine.name,
-      date: vaccine.date,
-      nextDueDate: vaccine.nextDueDate,
       veterinarian: vaccine.veterinarian,
-      location: vaccine.location,
-      batchNumber: vaccine.batchNumber,
+      dateTimestamp: vaccine.dateTimestamp,
+      nextDueDateTimestamp: vaccine.nextDueDateTimestamp,
+      batch: vaccine.batch,
+      manufacturer: vaccine.manufacturer,
+      dosage: vaccine.dosage,
       notes: vaccine.notes,
-      userId: vaccine.userId,
-      createdAt: vaccine.createdAt,
-      updatedAt: vaccine.updatedAt,
+      isRequired: vaccine.isRequired,
+      isCompleted: vaccine.isCompleted,
+      reminderDateTimestamp: vaccine.reminderDateTimestamp,
+      status: vaccine.status,
+      createdAtTimestamp: vaccine.createdAtTimestamp,
+      updatedAtTimestamp: vaccine.updatedAtTimestamp,
       isDeleted: vaccine.isDeleted,
     );
   }
@@ -93,28 +98,38 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
         id: model.id != null ? Value(model.id!) : const Value.absent(),
         animalId: Value(model.animalId),
         name: Value(model.name),
-        date: Value(model.date),
-        nextDueDate: Value.ofNullable(model.nextDueDate),
-        veterinarian: Value.ofNullable(model.veterinarian),
-        location: Value.ofNullable(model.location),
-        batchNumber: Value.ofNullable(model.batchNumber),
-        notes: Value.ofNullable(model.notes),
-        userId: Value(model.userId),
-        updatedAt: Value(DateTime.now()),
+        veterinarian: Value(model.veterinarian),
+        dateTimestamp: Value(model.dateTimestamp),
+        nextDueDateTimestamp: Value.absentIfNull(model.nextDueDateTimestamp),
+        batch: Value.absentIfNull(model.batch),
+        manufacturer: Value.absentIfNull(model.manufacturer),
+        dosage: Value.absentIfNull(model.dosage),
+        notes: Value.absentIfNull(model.notes),
+        isRequired: Value(model.isRequired),
+        isCompleted: Value(model.isCompleted),
+        reminderDateTimestamp: Value.absentIfNull(model.reminderDateTimestamp),
+        status: Value(model.status),
+        userId: const Value.absent(),
+        updatedAtTimestamp: Value(DateTime.now().millisecondsSinceEpoch),
       );
     }
 
     return VaccinesCompanion.insert(
       animalId: model.animalId,
       name: model.name,
-      date: model.date,
-      nextDueDate: Value.ofNullable(model.nextDueDate),
-      veterinarian: Value.ofNullable(model.veterinarian),
-      location: Value.ofNullable(model.location),
-      batchNumber: Value.ofNullable(model.batchNumber),
-      notes: Value.ofNullable(model.notes),
-      userId: model.userId,
-      createdAt: Value(model.createdAt),
+      veterinarian: model.veterinarian,
+      dateTimestamp: model.dateTimestamp,
+      userId: '',
+      createdAtTimestamp: model.createdAtTimestamp,
+      nextDueDateTimestamp: Value.absentIfNull(model.nextDueDateTimestamp),
+      batch: Value.absentIfNull(model.batch),
+      manufacturer: Value.absentIfNull(model.manufacturer),
+      dosage: Value.absentIfNull(model.dosage),
+      notes: Value.absentIfNull(model.notes),
+      isRequired: Value(model.isRequired),
+      isCompleted: Value(model.isCompleted),
+      reminderDateTimestamp: Value.absentIfNull(model.reminderDateTimestamp),
+      status: Value(model.status),
     );
   }
 }

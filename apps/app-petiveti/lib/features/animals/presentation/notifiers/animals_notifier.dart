@@ -53,13 +53,14 @@ class AnimalsNotifier extends _$AnimalsNotifier {
 
   /// Carregar todos os animais
   Future<void> loadAnimals() async {
-    final logger = ref.read(loggingServiceProvider);
-    await logger.trackUserAction(
-      category: 'animals',
-      operation: 'read',
-      action: 'load_animals_initiated',
-      metadata: {'from': 'animals_notifier'},
-    );
+    // TODO: Fix logging service call parameters
+    // final logger = ref.read(loggingServiceProvider);
+    // await logger.trackUserAction(
+    //   category: 'animals',
+    //   operation: 'read',
+    //   action: 'load_animals_initiated',
+    //   metadata: {'from': 'animals_notifier'},
+    // );
 
     state = state.copyWith(isLoading: true, error: null);
 
@@ -68,13 +69,13 @@ class AnimalsNotifier extends _$AnimalsNotifier {
 
     result.fold(
       (failure) {
-        logger.logError(
-          category: 'animals',
-          operation: 'read',
-          message: 'Failed to load animals in notifier',
-          error: failure.message,
-          metadata: {'notifier': 'animals_notifier'},
-        );
+        // logger.logError(
+        //   category: 'animals',
+        //   operation: 'read',
+        //   message: 'Failed to load animals in notifier',
+        //   error: failure.message,
+        //   metadata: {'notifier': 'animals_notifier'},
+        // );
 
         state = state.copyWith(
           isLoading: false,
@@ -82,15 +83,15 @@ class AnimalsNotifier extends _$AnimalsNotifier {
         );
       },
       (animals) {
-        logger.logInfo(
-          category: 'animals',
-          operation: 'read',
-          message: 'Successfully loaded animals in notifier',
-          metadata: {
-            'notifier': 'animals_notifier',
-            'count': animals.length,
-          },
-        );
+        // logger.logInfo(
+        //   category: 'animals',
+        //   operation: 'read',
+        //   message: 'Successfully loaded animals in notifier',
+        //   metadata: {
+        //     'notifier': 'animals_notifier',
+        //     'count': animals.length,
+        //   },
+        // );
         state = state.copyWith(
           animals: animals,
           isLoading: false,

@@ -29,7 +29,7 @@ class DetalhePragaPage extends ConsumerStatefulWidget {
 }
 
 class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override

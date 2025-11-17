@@ -22,7 +22,7 @@ class _FlooringCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(flooringCalculatorNotifierProvider);
+    final state = ref.watch(flooringCalculatorProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -91,14 +91,16 @@ class _FlooringCalculatorPageState
                                 icon: const Icon(Icons.clear),
                                 label: const Text('Limpar'),
                                 style: TextButton.styleFrom(
-                                  foregroundColor:
-                                      Theme.of(context).colorScheme.primary,
+                                  foregroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.primary,
                                 ),
                               ),
                               const SizedBox(width: 16),
                               ElevatedButton.icon(
-                                onPressed:
-                                    state.isLoading ? null : _handleSubmit,
+                                onPressed: state.isLoading
+                                    ? null
+                                    : _handleSubmit,
                                 icon: state.isLoading
                                     ? const SizedBox(
                                         width: 16,
@@ -115,10 +117,12 @@ class _FlooringCalculatorPageState
                                       : 'Calcular',
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Theme.of(context).colorScheme.primary,
-                                  foregroundColor:
-                                      Theme.of(context).colorScheme.onPrimary,
+                                  backgroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.primary,
+                                  foregroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
                                 ),
                               ),
                             ],
@@ -139,18 +143,18 @@ class _FlooringCalculatorPageState
                           children: [
                             Icon(
                               Icons.error,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onErrorContainer,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onErrorContainer,
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
                                 state.errorMessage!,
                                 style: TextStyle(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onErrorContainer,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onErrorContainer,
                                 ),
                               ),
                             ),
@@ -190,12 +194,12 @@ class _FlooringCalculatorPageState
 
   void _handleCalculate(CalculateFlooringParams params) {
     // Execute the calculation through the notifier
-    ref.read(flooringCalculatorNotifierProvider.notifier).calculate(params);
+    ref.read(flooringCalculatorProvider.notifier).calculate(params);
   }
 
   void _handleClear() {
     _formKey.currentState?.reset();
-    ref.read(flooringCalculatorNotifierProvider.notifier).clearCalculation();
+    ref.read(flooringCalculatorProvider.notifier).clearCalculation();
   }
 
   void _showInfo(BuildContext context) {

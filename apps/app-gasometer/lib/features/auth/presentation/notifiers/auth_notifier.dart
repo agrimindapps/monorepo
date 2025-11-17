@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container_modular.dart';
-import '../../../../core/services/auth_rate_limiter.dart';
+import '../../../../features/auth/domain/services/auth_rate_limiter.dart';
 import '../../../../core/services/analytics/gasometer_analytics_service.dart';
-import '../../../../core/services/platform_service.dart';
+import '../../../../core/services/platform/platform_service.dart';
 import '../../../../core/widgets/logout_loading_dialog.dart';
 import '../../domain/entities/user_entity.dart' as gasometer_auth;
 import '../../domain/usecases/get_current_user.dart';

@@ -5,7 +5,7 @@ import '../../domain/services/plant_sync_service.dart';
 import '../datasources/local/plants_local_datasource.dart';
 import '../datasources/remote/plants_remote_datasource.dart';
 
-@lazySingleton
+@LazySingleton(as: PlantSyncService)
 class PlantSyncServiceImpl implements PlantSyncService {
   PlantSyncServiceImpl({
     required this.localDatasource,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/services/auth_rate_limiter.dart';
+import '../../../../features/auth/domain/services/auth_rate_limiter.dart';
 
 /// Widget para mostrar informações de rate limiting de login
 class RateLimitInfoWidget extends StatelessWidget { // Para desenvolvimento/admin apenas

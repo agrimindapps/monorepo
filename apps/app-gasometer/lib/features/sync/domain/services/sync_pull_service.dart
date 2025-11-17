@@ -1,10 +1,10 @@
 import 'dart:developer' as developer;
 import 'package:core/core.dart';
 
-import '../sync/adapters/i_sync_adapter.dart';
-import 'contracts/i_sync_pull_service.dart';
-import 'contracts/i_sync_push_service.dart';
-import '../sync/adapters/sync_adapter_registry.dart';
+import '../../../../core/services/contracts/i_sync_pull_service.dart';
+import '../../../../core/services/contracts/i_sync_push_service.dart';
+import '../../../../core/sync/adapters/i_sync_adapter.dart';
+import '../../../../core/sync/adapters/sync_adapter_registry.dart';
 
 /// Modelo para resultado de pull de um adapter
 class SyncPullResult {
@@ -65,7 +65,7 @@ class SyncPullResult {
 /// ```
 class SyncPullService implements ISyncPullService {
   SyncPullService({required SyncAdapterRegistry adapterRegistry})
-      : _adapterRegistry = adapterRegistry;
+    : _adapterRegistry = adapterRegistry;
 
   final SyncAdapterRegistry _adapterRegistry;
 
@@ -80,10 +80,7 @@ class SyncPullService implements ISyncPullService {
   /// - Right(SyncPhaseResult): Resultado agregado com estatísticas
   /// - Left(failure): Erro crítico (ex: userId inválido)
   @override
-  Future<Either<Failure, SyncPhaseResult>> pullAll(
-    String userId, {
-    DateTime? since,
-  }) async {
+  Future<Either<Failure, SyncPhaseResult>> pullAll(String userId) async {
     try {
       developer.log(
         '📥 Starting pull sync for ${_adapterRegistry.count} adapters (userId: $userId)...',
@@ -94,7 +91,7 @@ class SyncPullService implements ISyncPullService {
 
       // Executa todos os pulls em paralelo usando registry
       final pullFutures = _adapterRegistry.adapters
-          .map((adapter) => _pullAdapter(adapter, userId, since))
+          .map((adapter) => _pullAdapter(adapter, userId, null))
           .toList();
 
       final pullResults = await Future.wait(pullFutures);
@@ -111,8 +108,6 @@ class SyncPullService implements ISyncPullService {
         (sum, result) => sum + result.conflictsResolved,
       );
 
-      final errors = <String>[];
-
       developer.log(
         '✅ Pull sync completed in ${duration.inSeconds}s\n'
         '   Total pulled: $totalPulled\n'
@@ -124,15 +119,12 @@ class SyncPullService implements ISyncPullService {
         SyncPhaseResult(
           successCount: totalPulled,
           failureCount: 0,
-          errors: errors,
+          errors: <String>[],
           duration: duration,
         ),
       );
     } catch (e) {
-      developer.log(
-        '❌ Pull sync failed with exception: $e',
-        name: 'SyncPull',
-      );
+      developer.log('❌ Pull sync failed with exception: $e', name: 'SyncPull');
       return Left(ServerFailure('Pull sync failed: $e'));
     }
   }
@@ -147,10 +139,7 @@ class SyncPullService implements ISyncPullService {
       final startTime = DateTime.now();
 
       // Usar a interface ISyncAdapter.pullRemoteChanges() que retorna SyncPullResult
-      final result = await adapter.pullRemoteChanges(
-        userId,
-        since: since,
-      );
+      final result = await adapter.pullRemoteChanges(userId, since: since);
 
       return result.fold(
         (failure) {
@@ -179,10 +168,7 @@ class SyncPullService implements ISyncPullService {
         },
       );
     } catch (e) {
-      developer.log(
-        '❌ ${adapter.name} pull exception: $e',
-        name: 'SyncPull',
-      );
+      developer.log('❌ ${adapter.name} pull exception: $e', name: 'SyncPull');
       return SyncPullResult(
         adapterName: adapter.name,
         recordsPulled: 0,
@@ -193,7 +179,6 @@ class SyncPullService implements ISyncPullService {
   }
 
   /// Executa pull para um tipo específico de entidade
-  @override
   Future<Either<Failure, SyncPhaseResult>> pullByType(
     String userId,
     String entityType,
@@ -222,10 +207,7 @@ class SyncPullService implements ISyncPullService {
         ),
       );
     } catch (e) {
-      developer.log(
-        '❌ Pull sync for $entityType failed: $e',
-        name: 'SyncPull',
-      );
+      developer.log('❌ Pull sync for $entityType failed: $e', name: 'SyncPull');
       return Left(ServerFailure('Pull sync for $entityType failed: $e'));
     }
   }

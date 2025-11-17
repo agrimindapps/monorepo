@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/interfaces/usecase.dart' as local;
 import '../../domain/entities/weight.dart';
+import '../../domain/repositories/weight_repository.dart';
 import 'weight_providers.dart';
 
 part 'weights_notifiers.g.dart';
@@ -112,28 +113,27 @@ class WeightsNotifier extends _$WeightsNotifier {
     final addWeight = ref.read(addWeightProvider);
     final result = await addWeight(weight);
 
-    result.fold(
-      (failure) => state = state.copyWith(error: failure.message),
-      (_) {
-        final updatedWeights = [weight, ...state.weights];
-        final updatedWeightsByAnimal = Map<String, List<Weight>>.from(
-          state.weightsByAnimal,
+    result.fold((failure) => state = state.copyWith(error: failure.message), (
+      _,
+    ) {
+      final updatedWeights = [weight, ...state.weights];
+      final updatedWeightsByAnimal = Map<String, List<Weight>>.from(
+        state.weightsByAnimal,
+      );
+      if (updatedWeightsByAnimal.containsKey(weight.animalId)) {
+        final animalWeights = List<Weight>.from(
+          updatedWeightsByAnimal[weight.animalId]!,
         );
-        if (updatedWeightsByAnimal.containsKey(weight.animalId)) {
-          final animalWeights = List<Weight>.from(
-            updatedWeightsByAnimal[weight.animalId]!,
-          );
-          animalWeights.insert(0, weight);
-          updatedWeightsByAnimal[weight.animalId] = animalWeights;
-        }
+        animalWeights.insert(0, weight);
+        updatedWeightsByAnimal[weight.animalId] = animalWeights;
+      }
 
-        state = state.copyWith(
-          weights: updatedWeights,
-          weightsByAnimal: updatedWeightsByAnimal,
-          error: null,
-        );
-      },
-    );
+      state = state.copyWith(
+        weights: updatedWeights,
+        weightsByAnimal: updatedWeightsByAnimal,
+        error: null,
+      );
+    });
   }
 
   /// Atualizar peso
@@ -141,30 +141,29 @@ class WeightsNotifier extends _$WeightsNotifier {
     final updateWeight = ref.read(updateWeightProvider);
     final result = await updateWeight(weight);
 
-    result.fold(
-      (failure) => state = state.copyWith(error: failure.message),
-      (_) {
-        final updatedWeights = state.weights.map((w) {
+    result.fold((failure) => state = state.copyWith(error: failure.message), (
+      _,
+    ) {
+      final updatedWeights = state.weights.map((w) {
+        return w.id == weight.id ? weight : w;
+      }).toList();
+
+      final updatedWeightsByAnimal = Map<String, List<Weight>>.from(
+        state.weightsByAnimal,
+      );
+      if (updatedWeightsByAnimal.containsKey(weight.animalId)) {
+        final animalWeights = updatedWeightsByAnimal[weight.animalId]!.map((w) {
           return w.id == weight.id ? weight : w;
         }).toList();
+        updatedWeightsByAnimal[weight.animalId] = animalWeights;
+      }
 
-        final updatedWeightsByAnimal = Map<String, List<Weight>>.from(
-          state.weightsByAnimal,
-        );
-        if (updatedWeightsByAnimal.containsKey(weight.animalId)) {
-          final animalWeights = updatedWeightsByAnimal[weight.animalId]!.map((w) {
-            return w.id == weight.id ? weight : w;
-          }).toList();
-          updatedWeightsByAnimal[weight.animalId] = animalWeights;
-        }
-
-        state = state.copyWith(
-          weights: updatedWeights,
-          weightsByAnimal: updatedWeightsByAnimal,
-          error: null,
-        );
-      },
-    );
+      state = state.copyWith(
+        weights: updatedWeights,
+        weightsByAnimal: updatedWeightsByAnimal,
+        error: null,
+      );
+    });
   }
 
   /// Deletar peso
@@ -172,29 +171,28 @@ class WeightsNotifier extends _$WeightsNotifier {
     final deleteWeight = ref.read(deleteWeightProvider);
     final result = await deleteWeight(id);
 
-    result.fold(
-      (failure) => state = state.copyWith(error: failure.message),
-      (_) {
-        final weightToDelete = state.currentWeights.firstWhere((w) => w.id == id);
-        final updatedWeights = state.weights.where((w) => w.id != id).toList();
+    result.fold((failure) => state = state.copyWith(error: failure.message), (
+      _,
+    ) {
+      final weightToDelete = state.currentWeights.firstWhere((w) => w.id == id);
+      final updatedWeights = state.weights.where((w) => w.id != id).toList();
 
-        final updatedWeightsByAnimal = Map<String, List<Weight>>.from(
-          state.weightsByAnimal,
-        );
-        if (updatedWeightsByAnimal.containsKey(weightToDelete.animalId)) {
-          final animalWeights = updatedWeightsByAnimal[weightToDelete.animalId]!
-              .where((w) => w.id != id)
-              .toList();
-          updatedWeightsByAnimal[weightToDelete.animalId] = animalWeights;
-        }
+      final updatedWeightsByAnimal = Map<String, List<Weight>>.from(
+        state.weightsByAnimal,
+      );
+      if (updatedWeightsByAnimal.containsKey(weightToDelete.animalId)) {
+        final animalWeights = updatedWeightsByAnimal[weightToDelete.animalId]!
+            .where((w) => w.id != id)
+            .toList();
+        updatedWeightsByAnimal[weightToDelete.animalId] = animalWeights;
+      }
 
-        state = state.copyWith(
-          weights: updatedWeights,
-          weightsByAnimal: updatedWeightsByAnimal,
-          error: null,
-        );
-      },
-    );
+      state = state.copyWith(
+        weights: updatedWeights,
+        weightsByAnimal: updatedWeightsByAnimal,
+        error: null,
+      );
+    });
   }
 
   void setSelectedAnimal(String? animalId) {

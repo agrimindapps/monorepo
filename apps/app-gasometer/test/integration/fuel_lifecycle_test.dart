@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gasometer_drift/features/fuel/data/models/fuel_supply_model.dart';
 import 'package:gasometer_drift/features/fuel/domain/entities/fuel_record_entity.dart';
 import 'package:gasometer_drift/features/fuel/domain/repositories/fuel_repository.dart';
+import 'package:gasometer_drift/features/vehicles/domain/entities/vehicle_entity.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockFuelRepository extends Mock implements FuelRepository {}
@@ -86,13 +87,14 @@ void main() {
       getResult.fold(
         (_) => fail('Get should succeed'),
         (record) {
-          expect(record.liters, 42.0);
+          expect(record, isNotNull);
+          expect(record!.liters, 42.0);
         },
       );
 
       // Phase 4: DELETE FUEL RECORD
       when(() => mockRepository.deleteFuelRecord('fuel-lifecycle-001'))
-          .thenAnswer((_) async => const Right(null));
+          .thenAnswer((_) async => const Right(unit));
 
       final deleteResult =
           await mockRepository.deleteFuelRecord('fuel-lifecycle-001');
@@ -179,7 +181,8 @@ void main() {
       verifyResult.fold(
         (_) => fail('Verify should succeed'),
         (record) {
-          expect(record.isDirty, false);
+          expect(record, isNotNull);
+          expect(record!.isDirty, false);
           expect(record.id, remoteId);
         },
       );

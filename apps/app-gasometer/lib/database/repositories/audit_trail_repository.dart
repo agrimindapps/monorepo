@@ -1,10 +1,10 @@
 import 'dart:convert';
-import '../../../core/drift_exports.dart';
+import '../../core/drift_exports.dart';
 
 import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../core/data/models/audit_trail_model.dart';
+import '../../core/data/models/audit_trail_model.dart';
 import '../gasometer_database.dart';
 
 /// Repositório de Auditoria usando Drift

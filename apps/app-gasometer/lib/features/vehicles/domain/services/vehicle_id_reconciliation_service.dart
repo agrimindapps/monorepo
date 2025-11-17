@@ -1,8 +1,8 @@
 import 'dart:developer' as developer;
 import 'package:core/core.dart';
 
-import '../../entities/vehicle_entity.dart';
-import '../../../../core/services/i_id_reconciliation_service.dart';
+import '../../../../core/interfaces/i_id_reconciliation_service.dart';
+import '../../domain/entities/vehicle_entity.dart';
 
 /// Serviço especializado em reconciliação de IDs de veículos
 ///
@@ -74,16 +74,13 @@ class VehicleIdReconciliationService implements IIdReconciliationService {
         box: 'vehicles',
       );
 
-      final vehicleMap = localResult.fold(
-        (failure) {
-          developer.log(
-            '⚠️ Vehicle not found with local ID: $localId',
-            name: 'VehicleReconciliation',
-          );
-          return null;
-        },
-        (data) => data,
-      );
+      final vehicleMap = localResult.fold((failure) {
+        developer.log(
+          '⚠️ Vehicle not found with local ID: $localId',
+          name: 'VehicleReconciliation',
+        );
+        return null;
+      }, (data) => data);
 
       if (vehicleMap == null) {
         return const Right(null);
@@ -152,50 +149,45 @@ class VehicleIdReconciliationService implements IIdReconciliationService {
   }
 
   /// Atualiza referências de veículo em outras entidades
-  Future<void> _updateReferences(String oldVehicleId, String newVehicleId) async {
+  Future<void> _updateReferences(
+    String oldVehicleId,
+    String newVehicleId,
+  ) async {
     try {
       // Update fuel records
       final fuelResult = await _localStorage.getValues<Map<String, dynamic>>(
         box: 'fuel_records',
       );
 
-      fuelResult.fold(
-        (_) {},
-        (records) {
-          for (final record in records) {
-            if (record['vehicle_id'] == oldVehicleId) {
-              record['vehicle_id'] = newVehicleId;
-              _localStorage.save<Map<String, dynamic>>(
-                key: record['id'] as String,
-                data: record,
-                box: 'fuel_records',
-              );
-            }
+      fuelResult.fold((_) {}, (records) {
+        for (final record in records) {
+          if (record['vehicle_id'] == oldVehicleId) {
+            record['vehicle_id'] = newVehicleId;
+            _localStorage.save<Map<String, dynamic>>(
+              key: record['id'] as String,
+              data: record,
+              box: 'fuel_records',
+            );
           }
-        },
-      );
+        }
+      });
 
       // Update maintenance records
-      final maintenanceResult =
-          await _localStorage.getValues<Map<String, dynamic>>(
-        box: 'maintenance_records',
-      );
+      final maintenanceResult = await _localStorage
+          .getValues<Map<String, dynamic>>(box: 'maintenance_records');
 
-      maintenanceResult.fold(
-        (_) {},
-        (records) {
-          for (final record in records) {
-            if (record['vehicle_id'] == oldVehicleId) {
-              record['vehicle_id'] = newVehicleId;
-              _localStorage.save<Map<String, dynamic>>(
-                key: record['id'] as String,
-                data: record,
-                box: 'maintenance_records',
-              );
-            }
+      maintenanceResult.fold((_) {}, (records) {
+        for (final record in records) {
+          if (record['vehicle_id'] == oldVehicleId) {
+            record['vehicle_id'] = newVehicleId;
+            _localStorage.save<Map<String, dynamic>>(
+              key: record['id'] as String,
+              data: record,
+              box: 'maintenance_records',
+            );
           }
-        },
-      );
+        }
+      });
 
       developer.log(
         '✅ Updated dependent references for vehicle ID change',

@@ -50,7 +50,8 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   Future<Either<Failure, List<Expense>>> getExpensesByCategory(
       String userId, ExpenseCategory category) async {
     return errorHandlingService.executeListOperation(
-      operation: () => localDataSource.getExpensesByCategory(userId, category),
+      operation: () => localDataSource.getExpensesByCategory(
+          userId, category.toString().split('.').last),
       operationName: 'buscar despesas por categoria',
     );
   }

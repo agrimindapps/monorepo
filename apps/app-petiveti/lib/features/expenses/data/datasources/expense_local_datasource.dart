@@ -3,18 +3,27 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../database/petiveti_database.dart';
 import '../models/expense_model.dart';
-import '../../domain/entities/expense.dart';
+import '../../domain/entities/expense.dart' as domain;
 
 abstract class ExpenseLocalDataSource {
   Future<List<ExpenseModel>> getExpenses(String userId);
   Future<List<ExpenseModel>> getExpensesByAnimalId(int animalId);
-  Future<List<ExpenseModel>> getExpensesByCategory(String userId, String category);
+  Future<List<ExpenseModel>> getExpensesByCategory(
+    String userId,
+    String category,
+  );
   Future<double> getTotalExpenses(int animalId);
   Future<ExpenseModel?> getExpenseById(int id);
   Future<int> addExpense(ExpenseModel expense);
   Future<bool> updateExpense(ExpenseModel expense);
   Future<bool> deleteExpense(int id);
   Stream<List<ExpenseModel>> watchExpensesByAnimalId(int animalId);
+  Future<List<ExpenseModel>> getExpensesByDateRange(
+    String userId,
+    DateTime startDate,
+    DateTime endDate,
+  );
+  Future<List<ExpenseModel>> getExpensesByAnimal(String animalId);
 }
 
 @LazySingleton(as: ExpenseLocalDataSource)
@@ -36,8 +45,14 @@ class ExpenseLocalDataSourceImpl implements ExpenseLocalDataSource {
   }
 
   @override
-  Future<List<ExpenseModel>> getExpensesByCategory(String userId, String category) async {
-    final expenses = await _database.expenseDao.getExpensesByCategory(userId, category);
+  Future<List<ExpenseModel>> getExpensesByCategory(
+    String userId,
+    String category,
+  ) async {
+    final expenses = await _database.expenseDao.getExpensesByCategory(
+      userId,
+      category,
+    );
     return expenses.map(_toModel).toList();
   }
 
@@ -71,30 +86,31 @@ class ExpenseLocalDataSourceImpl implements ExpenseLocalDataSource {
 
   @override
   Stream<List<ExpenseModel>> watchExpensesByAnimalId(int animalId) {
-    return _database.expenseDao.watchExpensesByAnimal(animalId)
+    return _database.expenseDao
+        .watchExpensesByAnimal(animalId)
         .map((expenses) => expenses.map(_toModel).toList());
   }
 
   ExpenseModel _toModel(Expense expense) {
     // Parse enum from string
-    final category = ExpenseCategory.values.firstWhere(
+    final category = domain.ExpenseCategory.values.firstWhere(
       (e) => e.toString() == 'ExpenseCategory.${expense.category}',
-      orElse: () => ExpenseCategory.other,
+      orElse: () => domain.ExpenseCategory.other,
     );
-    
-    final paymentMethod = PaymentMethod.values.firstWhere(
+
+    final paymentMethod = domain.PaymentMethod.values.firstWhere(
       (e) => e.toString() == 'PaymentMethod.${expense.paymentMethod}',
-      orElse: () => PaymentMethod.cash,
+      orElse: () => domain.PaymentMethod.cash,
     );
-    
-    RecurrenceType? recurrenceType;
+
+    domain.RecurrenceType? recurrenceType;
     if (expense.recurrenceType != null) {
-      recurrenceType = RecurrenceType.values.firstWhere(
+      recurrenceType = domain.RecurrenceType.values.firstWhere(
         (e) => e.toString() == 'RecurrenceType.${expense.recurrenceType}',
-        orElse: () => RecurrenceType.monthly,
+        orElse: () => domain.RecurrenceType.monthly,
       );
     }
-    
+
     return ExpenseModel(
       id: expense.id.toString(),
       animalId: expense.animalId.toString(),
@@ -126,7 +142,7 @@ class ExpenseLocalDataSourceImpl implements ExpenseLocalDataSource {
     final categoryStr = model.category.toString().split('.').last;
     final paymentMethodStr = model.paymentMethod.toString().split('.').last;
     final recurrenceTypeStr = model.recurrenceType?.toString().split('.').last;
-    
+
     if (forUpdate) {
       return ExpensesCompanion(
         id: Value(model.intId),
@@ -137,15 +153,15 @@ class ExpenseLocalDataSourceImpl implements ExpenseLocalDataSource {
         category: Value(categoryStr),
         paymentMethod: Value(paymentMethodStr),
         expenseDate: Value(model.expenseDate),
-        veterinaryClinic: Value.ofNullable(model.veterinaryClinic),
-        veterinarianName: Value.ofNullable(model.veterinarianName),
-        invoiceNumber: Value.ofNullable(model.invoiceNumber),
-        notes: Value.ofNullable(model.notes),
-        veterinarian: Value.ofNullable(model.veterinarian),
-        receiptNumber: Value.ofNullable(model.receiptNumber),
+        veterinaryClinic: Value.absentIfNull(model.veterinaryClinic),
+        veterinarianName: Value.absentIfNull(model.veterinarianName),
+        invoiceNumber: Value.absentIfNull(model.invoiceNumber),
+        notes: Value.absentIfNull(model.notes),
+        veterinarian: Value.absentIfNull(model.veterinarian),
+        receiptNumber: Value.absentIfNull(model.receiptNumber),
         isPaid: Value(model.isPaid),
         isRecurring: Value(model.isRecurring),
-        recurrenceType: Value.ofNullable(recurrenceTypeStr),
+        recurrenceType: Value.absentIfNull(recurrenceTypeStr),
         userId: Value(model.userId),
         updatedAt: Value(DateTime.now()),
       );
@@ -159,17 +175,33 @@ class ExpenseLocalDataSourceImpl implements ExpenseLocalDataSource {
       category: categoryStr,
       paymentMethod: paymentMethodStr,
       expenseDate: model.expenseDate,
-      veterinaryClinic: Value.ofNullable(model.veterinaryClinic),
-      veterinarianName: Value.ofNullable(model.veterinarianName),
-      invoiceNumber: Value.ofNullable(model.invoiceNumber),
-      notes: Value.ofNullable(model.notes),
-      veterinarian: Value.ofNullable(model.veterinarian),
-      receiptNumber: Value.ofNullable(model.receiptNumber),
+      veterinaryClinic: Value.absentIfNull(model.veterinaryClinic),
+      veterinarianName: Value.absentIfNull(model.veterinarianName),
+      invoiceNumber: Value.absentIfNull(model.invoiceNumber),
+      notes: Value.absentIfNull(model.notes),
+      veterinarian: Value.absentIfNull(model.veterinarian),
+      receiptNumber: Value.absentIfNull(model.receiptNumber),
       isPaid: Value(model.isPaid),
       isRecurring: Value(model.isRecurring),
-      recurrenceType: Value.ofNullable(recurrenceTypeStr),
+      recurrenceType: Value.absentIfNull(recurrenceTypeStr),
       userId: model.userId,
       createdAt: Value(model.createdAt),
     );
+  }
+
+  @override
+  Future<List<ExpenseModel>> getExpensesByDateRange(
+    String userId,
+    DateTime startDate,
+    DateTime endDate,
+  ) {
+    // TODO: implement getExpensesByDateRange
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<ExpenseModel>> getExpensesByAnimal(String animalId) {
+    // TODO: implement getExpensesByAnimal
+    throw UnimplementedError();
   }
 }

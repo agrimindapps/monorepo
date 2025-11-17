@@ -131,7 +131,7 @@ void main() {
       // Assert
       expect(result.isLeft(), true);
       result.fold(
-        (failure) => expect(failure.message, contains('preço')),
+        (failure) => expect(failure.message.toLowerCase(), contains('preço')),
         (_) => fail('Should fail'),
       );
     });

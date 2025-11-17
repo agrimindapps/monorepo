@@ -42,9 +42,11 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
   Future<void> saveCalculationHistory(CalculationHistoryModel history) async {
     final inputsJson = jsonEncode(history.inputs);
     final resultJson = jsonEncode(history.resultData);
-    
+
     if (history.id != null) {
-      final existingEntry = await _database.calculatorDao.getHistoryById(history.id!);
+      final existingEntry = await _database.calculatorDao.getHistoryById(
+        history.id!,
+      );
       if (existingEntry != null) {
         await _database.calculatorDao.updateHistoryEntry(
           history.id!,
@@ -55,7 +57,7 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
         return;
       }
     }
-    
+
     await _database.calculatorDao.createHistoryEntry(
       calculatorType: history.calculatorId,
       inputData: inputsJson,
@@ -74,27 +76,29 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
     DateTime? toDate,
   }) async {
     final allHistory = await _database.calculatorDao.getAllHistory('');
-    
+
     var filtered = allHistory.where((h) => !h.isDeleted).toList();
-    
+
     if (calculatorId != null) {
-      filtered = filtered.where((h) => h.calculatorType == calculatorId).toList();
+      filtered = filtered
+          .where((h) => h.calculatorType == calculatorId)
+          .toList();
     }
-    
+
     if (fromDate != null) {
       filtered = filtered.where((h) => h.date.isAfter(fromDate)).toList();
     }
-    
+
     if (toDate != null) {
       filtered = filtered.where((h) => h.date.isBefore(toDate)).toList();
     }
-    
+
     filtered.sort((a, b) => b.date.compareTo(a.date));
-    
+
     if (limit != null && limit > 0) {
       filtered = filtered.take(limit).toList();
     }
-    
+
     return filtered.map(_toModel).toList();
   }
 
@@ -149,15 +153,15 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
   Future<void> incrementCalculatorUsage(String calculatorId) async {
     final statsKey = '$_statsPrefix$calculatorId';
     final statsJson = _prefs.getString(statsKey);
-    
+
     Map<String, dynamic> stats = {};
     if (statsJson != null) {
       stats = jsonDecode(statsJson) as Map<String, dynamic>;
     }
-    
+
     stats['lastUsed'] = DateTime.now().millisecondsSinceEpoch;
     stats['usageCount'] = (stats['usageCount'] ?? 0) + 1;
-    
+
     await _prefs.setString(statsKey, jsonEncode(stats));
   }
 
@@ -165,24 +169,24 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
   Future<Map<String, int>> getCalculatorUsageStats() async {
     final allKeys = _prefs.getKeys();
     final statsKeys = allKeys.where((k) => k.startsWith(_statsPrefix));
-    
+
     final stats = <String, int>{};
     for (final key in statsKeys) {
       final calculatorId = key.replaceFirst(_statsPrefix, '');
       final statsJson = _prefs.getString(key);
       if (statsJson != null) {
         final data = jsonDecode(statsJson) as Map<String, dynamic>;
-        stats[calculatorId] = data['usageCount'] ?? 0;
+        stats[calculatorId] = (data['usageCount'] as int?) ?? 0;
       }
     }
-    
+
     return stats;
   }
 
   CalculationHistoryModel _toModel(CalculationHistoryEntry entry) {
     final inputs = jsonDecode(entry.inputData) as Map<String, dynamic>;
     final resultData = jsonDecode(entry.result) as Map<String, dynamic>;
-    
+
     return CalculationHistoryModel(
       id: entry.id,
       calculatorId: entry.calculatorType,

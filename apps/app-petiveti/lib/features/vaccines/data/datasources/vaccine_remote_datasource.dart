@@ -120,7 +120,7 @@ class VaccineRemoteDataSourceImpl implements VaccineRemoteDataSource {
   @override
   Future<VaccineModel> addVaccine(VaccineModel vaccine) async {
     try {
-      final doc = _vaccinesCollection.doc(vaccine.id);
+      final doc = _vaccinesCollection.doc(vaccine.id?.toString());
       await doc.set(vaccine.toMap());
       return vaccine;
     } catch (e) {
@@ -131,7 +131,7 @@ class VaccineRemoteDataSourceImpl implements VaccineRemoteDataSource {
   @override
   Future<VaccineModel> updateVaccine(VaccineModel vaccine) async {
     try {
-      await _vaccinesCollection.doc(vaccine.id).update(vaccine.toMap());
+      await _vaccinesCollection.doc(vaccine.id?.toString()).update(vaccine.toMap());
       return vaccine;
     } catch (e) {
       throw ServerException(message: 'Erro ao atualizar vacina: $e');
@@ -385,7 +385,7 @@ class VaccineRemoteDataSourceImpl implements VaccineRemoteDataSource {
       final batch = _firestore.batch();
       
       for (final vaccine in vaccines) {
-        final doc = _vaccinesCollection.doc(vaccine.id);
+        final doc = _vaccinesCollection.doc(vaccine.id?.toString());
         batch.set(doc, vaccine.toMap());
       }
       

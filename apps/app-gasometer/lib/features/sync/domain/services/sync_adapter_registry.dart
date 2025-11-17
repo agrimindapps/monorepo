@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
-import '../sync/adapters/i_sync_adapter.dart';
+import '../../../../core/sync/adapters/i_sync_adapter.dart';
 
 /// Registro central de adapters de sincronização
 /// 

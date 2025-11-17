@@ -4,19 +4,19 @@ library;
 
 import 'package:core/core.dart';
 
-import '../../core/data/models/audit_trail_model.dart';
-import '../../core/di/injection.dart' as gasometer_di;
-import 'audit_trail_service.dart';
+import '../../../../core/data/models/audit_trail_model.dart';
+import '../../../../core/di/injection.dart' as gasometer_di;
+import '../../../audit/domain/services/audit_trail_service.dart';
 import 'financial_conflict_resolver.dart';
 import 'financial_sync_service.dart';
 import 'financial_validator.dart';
 
-export '../../features/expenses/data/models/expense_model.dart';
-export '../../features/fuel/data/models/fuel_supply_model.dart';
-export '../../shared/widgets/financial_conflict_dialog.dart';
-export '../../shared/widgets/financial_sync_indicator.dart';
-export '../../shared/widgets/financial_warning_banner.dart';
-export 'audit_trail_service.dart';
+export '../../../expenses/data/models/expense_model.dart';
+export '../../../fuel/data/models/fuel_supply_model.dart';
+export '../../../../shared/widgets/financial_conflict_dialog.dart';
+export '../../../../shared/widgets/financial_sync_indicator.dart';
+export '../../../../shared/widgets/financial_warning_banner.dart';
+export '../../../audit/domain/services/audit_trail_service.dart';
 export 'financial_conflict_resolver.dart';
 export 'financial_sync_service.dart';
 export 'financial_validator.dart';

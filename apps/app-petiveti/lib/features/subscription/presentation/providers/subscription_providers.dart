@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_services_providers.dart';
+import '../../data/datasources/noop_subscription_repository.dart';
 import '../../data/datasources/subscription_local_datasource.dart';
 import '../../data/datasources/subscription_remote_datasource.dart';
 import '../../data/repositories/subscription_repository_impl.dart';
@@ -8,6 +9,7 @@ import '../../data/services/subscription_error_handling_service.dart';
 import '../../domain/repositories/subscription_repository.dart';
 import '../../domain/services/subscription_validation_service.dart';
 import '../../domain/usecases/subscription_usecases.dart';
+import 'subscription_notifier.dart';
 
 part 'subscription_providers.g.dart';
 
@@ -46,7 +48,8 @@ SubscriptionRemoteDataSource subscriptionRemoteDataSource(
 ) {
   return SubscriptionRemoteDataSourceImpl(
     firestore: ref.watch(firebaseFirestoreProvider),
-    subscriptionRepository: ref.watch(subscriptionRepositoryProvider),
+    // TODO: Remove circular dependency or use proper core ISubscriptionRepository
+    subscriptionRepository: const NoOpSubscriptionRepository(),
   );
 }
 

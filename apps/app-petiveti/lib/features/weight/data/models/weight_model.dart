@@ -15,6 +15,12 @@ class WeightModel {
   @JsonKey(name: 'weight')
   final double weight;
 
+  @JsonKey(name: 'unit')
+  final String unit;
+
+  @JsonKey(name: 'user_id')
+  final String userId;
+
   @JsonKey(name: 'date')
   final DateTime date;
 
@@ -37,6 +43,8 @@ class WeightModel {
     this.id,
     required this.animalId,
     required this.weight,
+    this.unit = 'kg',
+    this.userId = '',
     required this.date,
     this.notes,
     this.bodyConditionScore,

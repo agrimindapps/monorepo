@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/di/injection_container_modular.dart' as local_di;
-import '../../../../core/services/input_sanitizer.dart';
-import '../../../../core/services/receipt_image_service.dart';
+import '../../../../core/validation/input_sanitizer.dart';
+import '../../../../features/receipt/domain/services/receipt_image_service.dart';
 import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';

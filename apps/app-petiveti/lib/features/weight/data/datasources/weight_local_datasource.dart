@@ -13,6 +13,25 @@ abstract class WeightLocalDataSource {
   Future<bool> updateWeightRecord(WeightModel record);
   Future<bool> deleteWeightRecord(int id);
   Stream<List<WeightModel>> watchWeightRecordsByAnimalId(int animalId);
+
+  // Additional methods used by repository
+  Future<List<WeightModel>> getWeights();
+  Future<List<WeightModel>> getWeightsByAnimalId(String animalId);
+  Future<WeightModel?> getWeightById(String id);
+  Future<WeightModel?> getLatestWeightByAnimalId(String animalId);
+  Future<List<WeightModel>> getWeightHistory(
+    String animalId,
+    DateTime startDate,
+    DateTime endDate,
+  );
+  Future<void> cacheWeight(WeightModel weight);
+  Future<void> updateWeight(WeightModel weight);
+  Future<void> deleteWeight(int id);
+  Future<void> hardDeleteWeight(String id);
+  Future<void> cacheWeights(List<WeightModel> weights);
+  Future<int> getWeightsCount(String animalId);
+  Stream<List<WeightModel>> watchWeights();
+  Stream<List<WeightModel>> watchWeightsByAnimalId(String animalId);
 }
 
 @LazySingleton(as: WeightLocalDataSource)
@@ -29,7 +48,9 @@ class WeightLocalDataSourceImpl implements WeightLocalDataSource {
 
   @override
   Future<List<WeightModel>> getWeightRecordsByAnimalId(int animalId) async {
-    final records = await _database.weightDao.getWeightRecordsByAnimal(animalId);
+    final records = await _database.weightDao.getWeightRecordsByAnimal(
+      animalId,
+    );
     return records.map(_toModel).toList();
   }
 
@@ -65,8 +86,101 @@ class WeightLocalDataSourceImpl implements WeightLocalDataSource {
 
   @override
   Stream<List<WeightModel>> watchWeightRecordsByAnimalId(int animalId) {
-    return _database.weightDao.watchWeightRecordsByAnimal(animalId)
+    return _database.weightDao
+        .watchWeightRecordsByAnimal(animalId)
         .map((records) => records.map(_toModel).toList());
+  }
+
+  // Additional methods for repository compatibility
+  @override
+  Future<List<WeightModel>> getWeights() async {
+    final records = await _database.weightDao.getAllWeightRecords('');
+    return records.map(_toModel).toList();
+  }
+
+  @override
+  Future<List<WeightModel>> getWeightsByAnimalId(String animalId) async {
+    final intId = int.tryParse(animalId) ?? 0;
+    return getWeightRecordsByAnimalId(intId);
+  }
+
+  @override
+  Future<WeightModel?> getWeightById(String id) async {
+    final intId = int.tryParse(id) ?? 0;
+    return getWeightRecordById(intId);
+  }
+
+  @override
+  Future<WeightModel?> getLatestWeightByAnimalId(String animalId) async {
+    final intId = int.tryParse(animalId) ?? 0;
+    return getLatestWeight(intId);
+  }
+
+  @override
+  Future<List<WeightModel>> getWeightHistory(
+    String animalId,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    final intId = int.tryParse(animalId) ?? 0;
+    final records = await _database.weightDao.getWeightRecordsByAnimal(intId);
+    return records
+        .where(
+          (r) =>
+              r.date.isAfter(startDate.subtract(const Duration(days: 1))) &&
+              r.date.isBefore(endDate.add(const Duration(days: 1))),
+        )
+        .map(_toModel)
+        .toList();
+  }
+
+  @override
+  Future<void> cacheWeight(WeightModel weight) async {
+    await addWeightRecord(weight);
+  }
+
+  @override
+  Future<void> updateWeight(WeightModel weight) async {
+    await updateWeightRecord(weight);
+  }
+
+  @override
+  Future<void> deleteWeight(int id) async {
+    await deleteWeightRecord(id);
+  }
+
+  @override
+  Future<void> hardDeleteWeight(String id) async {
+    final intId = int.tryParse(id) ?? 0;
+    await _database.weightDao.deleteWeightRecord(intId);
+  }
+
+  @override
+  Future<void> cacheWeights(List<WeightModel> weights) async {
+    for (final weight in weights) {
+      await cacheWeight(weight);
+    }
+  }
+
+  @override
+  Future<int> getWeightsCount(String animalId) async {
+    final weights = await getWeightsByAnimalId(animalId);
+    return weights.length;
+  }
+
+  @override
+  Stream<List<WeightModel>> watchWeights() {
+    // Retorna todos os registros de peso (sem filtro por animal)
+    return Stream.value(<void>[]).asyncMap((_) async {
+      final records = await _database.weightDao.getAllWeightRecords('');
+      return records.map(_toModel).toList();
+    });
+  }
+
+  @override
+  Stream<List<WeightModel>> watchWeightsByAnimalId(String animalId) {
+    final intId = int.tryParse(animalId) ?? 0;
+    return watchWeightRecordsByAnimalId(intId);
   }
 
   WeightModel _toModel(WeightRecord record) {
@@ -75,15 +189,18 @@ class WeightLocalDataSourceImpl implements WeightLocalDataSource {
       animalId: record.animalId,
       weight: record.weight,
       unit: record.unit,
+      userId: record.userId,
       date: record.date,
       notes: record.notes,
-      userId: record.userId,
       createdAt: record.createdAt,
       isDeleted: record.isDeleted,
     );
   }
 
-  WeightRecordsCompanion _toCompanion(WeightModel model, {bool forUpdate = false}) {
+  WeightRecordsCompanion _toCompanion(
+    WeightModel model, {
+    bool forUpdate = false,
+  }) {
     if (forUpdate) {
       return WeightRecordsCompanion(
         id: model.id != null ? Value(model.id!) : const Value.absent(),
@@ -91,7 +208,7 @@ class WeightLocalDataSourceImpl implements WeightLocalDataSource {
         weight: Value(model.weight),
         unit: Value(model.unit),
         date: Value(model.date),
-        notes: Value.ofNullable(model.notes),
+        notes: Value.absentIfNull(model.notes),
         userId: Value(model.userId),
       );
     }
@@ -101,7 +218,7 @@ class WeightLocalDataSourceImpl implements WeightLocalDataSource {
       weight: model.weight,
       unit: Value(model.unit),
       date: model.date,
-      notes: Value.ofNullable(model.notes),
+      notes: Value.absentIfNull(model.notes),
       userId: model.userId,
       createdAt: Value(model.createdAt),
     );

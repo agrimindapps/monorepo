@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide SubscriptionState, Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/user_subscription.dart';
+import '../providers/subscription_notifier.dart';
 import '../providers/subscription_providers.dart';
 import 'subscription_page_coordinator.dart';
 
@@ -154,20 +155,20 @@ class CurrentSubscriptionCard extends ConsumerWidget {
         if (subscription.isActive && !subscription.isCancelled) ...[
           Expanded(
             child: OutlinedButton.icon(
-              onPressed: state.isCancelling
+              onPressed: false // TODO: Add isCancelling to SubscriptionState
                   ? null
                   : () => _showCancelDialog(context, ref),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Theme.of(context).colorScheme.error,
               ),
-              icon: state.isCancelling
+              icon: false // TODO: Add isCancelling to SubscriptionState
                   ? const SizedBox(
                       width: 16,
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.cancel, size: 18),
-              label: Text(state.isCancelling ? 'Cancelando...' : 'Cancelar'),
+              label: const Text('Cancelar'), // TODO: Add isCancelling to SubscriptionState
             ),
           ),
           const SizedBox(width: 8),
@@ -175,14 +176,14 @@ class CurrentSubscriptionCard extends ConsumerWidget {
         if (subscription.isPaused) ...[
           Expanded(
             child: ElevatedButton.icon(
-              onPressed: state.isResuming
+              onPressed: false // TODO: Add isResuming to SubscriptionState
                   ? null
                   : () => SubscriptionPageCoordinator.resumeSubscription(
                       ref,
                       context,
                       userId,
                     ),
-              icon: state.isResuming
+              icon: false // TODO: Add isResuming to SubscriptionState
                   ? const SizedBox(
                       width: 16,
                       height: 16,
@@ -192,7 +193,7 @@ class CurrentSubscriptionCard extends ConsumerWidget {
                       ),
                     )
                   : const Icon(Icons.play_arrow, size: 18),
-              label: Text(state.isResuming ? 'Retomando...' : 'Retomar'),
+              label: const Text('Retomar'), // TODO: Add isResuming to SubscriptionState
             ),
           ),
         ],

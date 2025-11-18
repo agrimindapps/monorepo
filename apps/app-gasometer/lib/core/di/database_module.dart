@@ -2,27 +2,35 @@ import 'package:get_it/get_it.dart';
 import '../../database/gasometer_database.dart';
 import '../../database/repositories/repositories.dart';
 
-/// Módulo para registrar o banco de dados e repositórios
+/// ⚠️ DEPRECATED MODULE - DO NOT USE
 /// 
-/// Funciona em todas as plataformas:
-/// - Mobile/Desktop: SQLite nativo via drift
-/// - Web: WASM + IndexedDB via drift
+/// Este módulo está DEPRECATED e NÃO deve ser usado.
+/// O GasometerDatabase agora é registrado automaticamente via @lazySingleton
+/// pelo injectable/build_runner em injection.config.dart.
+///
+/// O Riverpod provider (gasometerDatabaseProvider) acessa a instância via GetIt.I<>().
+///
+/// Se você precisar da instância do banco:
+/// - Via GetIt: `GetIt.I<GasometerDatabase>()`
+/// - Via Riverpod: `ref.watch(gasometerDatabaseProvider)`
+///
+/// Ambos retornam a MESMA instância singleton para evitar race conditions.
+
 final getIt = GetIt.instance;
 
-/// Registra o GasometerDatabase e repositórios
-/// 
-/// Deve ser chamado APÓS outras dependências terem sido registradas
+@Deprecated('Use @lazySingleton no GasometerDatabase + injectable')
 void registerDatabaseModule() {
   print('📦 [DatabaseModule] Registering Drift database for all platforms');
   print('    - Mobile/Desktop: SQLite nativo');
   print('    - Web: WASM + IndexedDB');
+  print('    ⚠️  SINGLE INSTANCE - Shared between GetIt and Riverpod');
   
   // Registra o banco de dados em todas as plataformas
   if (!getIt.isRegistered<GasometerDatabase>()) {
     getIt.registerSingleton<GasometerDatabase>(
       GasometerDatabase.production(),
     );
-    print('✅ [DatabaseModule] GasometerDatabase registered');
+    print('✅ [DatabaseModule] GasometerDatabase registered as SINGLETON');
   }
 
   // Registra todos os repositórios

@@ -19,8 +19,10 @@ class _PremiumProductsListState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final notifier = ref.read(premiumNotifierProvider.notifier);
-      notifier.loadAvailableProducts();
+      if (mounted) {
+        final notifier = ref.read(premiumNotifierProvider.notifier);
+        notifier.loadAvailableProducts();
+      }
     });
   }
 

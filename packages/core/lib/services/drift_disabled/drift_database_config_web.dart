@@ -32,7 +32,16 @@ class DriftDatabaseConfig {
 
         if (result.missingFeatures.isNotEmpty) {
           // ignore: avoid_print
-          print('⚠️ Missing features for drift web: ${result.missingFeatures}');
+          print(
+            '💡 Drift Web em modo compatibilidade (features ausentes: ${result.missingFeatures})\n'
+            '   Isso é normal e não afeta a funcionalidade. '
+            'Para melhor performance, use Chrome/Edge com headers:\n'
+            '   - Cross-Origin-Embedder-Policy: require-corp\n'
+            '   - Cross-Origin-Opener-Policy: same-origin',
+          );
+        } else {
+          // ignore: avoid_print
+          print('⚡ Drift Web com todas as features otimizadas habilitadas!');
         }
 
         // ignore: avoid_print

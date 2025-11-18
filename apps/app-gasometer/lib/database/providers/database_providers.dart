@@ -1,9 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get_it/get_it.dart';
 import '../gasometer_database.dart';
 import '../repositories/repositories.dart';
-import '../adapters/database_strategy_selector.dart';
 
 /// Provider do banco de dados principal
+///
+/// **IMPORTANTE:** Este provider retorna a MESMA instância registrada no GetIt
+/// para evitar múltiplas instâncias do banco de dados.
 ///
 /// **Funcionamento em todas as plataformas:**
 /// - **Mobile/Desktop**: SQLite nativo via Drift
@@ -11,13 +14,12 @@ import '../adapters/database_strategy_selector.dart';
 ///
 /// Usa DriftDatabaseConfig que automaticamente escolhe o executor correto.
 final gasometerDatabaseProvider = Provider<GasometerDatabase>((ref) {
-  // Drift funciona em todas as plataformas via DriftDatabaseConfig
-  final db = GasometerDatabase.production();
-
-  // Garante que o banco seja fechado quando o provider for descartado
-  ref.onDispose(() {
-    db.close();
-  });
+  // 🔒 CRITICAL: Retorna a instância única do GetIt
+  // Isso previne múltiplas instâncias que causam race conditions
+  final db = GetIt.I<GasometerDatabase>();
+  
+  // NÃO fecha o banco aqui, pois a instância é gerenciada pelo GetIt
+  // ref.onDispose não deve ser usado para instâncias compartilhadas
 
   // Mantém o provider vivo permanentemente
   ref.keepAlive();

@@ -20,7 +20,9 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadInitialData();
+      if (mounted) {
+        _loadInitialData();
+      }
     });
   }
 

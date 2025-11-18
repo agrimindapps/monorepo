@@ -6,7 +6,7 @@ import '../receituagro_database.dart';
 /// Repositório de Fitossanitários usando Drift
 ///
 /// Gerencia todas as operações de leitura dos dados estáticos de fitossanitários
-/// 
+///
 @lazySingleton
 class FitossanitariosRepository {
   FitossanitariosRepository(this._db);

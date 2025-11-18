@@ -74,7 +74,9 @@ abstract class BaseFormFieldState<T extends BaseFormField> extends State<T> {
     focusNode.addListener(_onFocusChanged);
     if (widget.autovalidate) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _validateField();
+        if (mounted) {
+          _validateField();
+        }
       });
     }
   }

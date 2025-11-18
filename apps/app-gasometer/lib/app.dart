@@ -56,18 +56,25 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
 
+    // 🔒 Verificação de segurança: apenas processa se o widget ainda está montado
+    if (!mounted) return;
+
     try {
       switch (state) {
         case AppLifecycleState.paused:
         case AppLifecycleState.inactive:
           // App going to background - pause auto-sync
-          main.autoSyncService.pause();
+          if (mounted) {
+            main.autoSyncService.pause();
+          }
           break;
         case AppLifecycleState.resumed:
           // App returning to foreground - resume auto-sync
-          main.autoSyncService.resume();
-          // ✅ NOVO: Sincronizar imagens pendentes ao voltar ao app
-          _syncPendingImages();
+          if (mounted) {
+            main.autoSyncService.resume();
+            // ✅ NOVO: Sincronizar imagens pendentes ao voltar ao app
+            _syncPendingImages();
+          }
           break;
         case AppLifecycleState.detached:
         case AppLifecycleState.hidden:
@@ -83,9 +90,14 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
 
   /// Sincroniza imagens pendentes de upload (offline → online)
   Future<void> _syncPendingImages() async {
+    // 🔒 Verificação de segurança: apenas executa se o widget ainda está montado
+    if (!mounted) return;
+
     try {
       final imageSyncService = ref.read(imageSyncServiceProvider);
       final result = await imageSyncService.syncPendingImages();
+
+      if (!mounted) return; // Verifica novamente após operação async
 
       if (result.hasSuccess && kDebugMode) {
         SecureLogger.info('📤 Synced ${result.successful} pending images');
@@ -95,7 +107,7 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
         SecureLogger.warning('⚠️ Failed to sync ${result.failed} images');
       }
     } catch (e) {
-      if (kDebugMode) {
+      if (kDebugMode && mounted) {
         SecureLogger.warning('Failed to sync pending images', error: e);
       }
     }
@@ -133,6 +145,9 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
   /// 🧪 AUTO-LOGIN PARA TESTES
   /// Remove this method in production!
   void _performTestAutoLogin() async {
+    // 🔒 Verificação de segurança: apenas executa se o widget ainda está montado
+    if (!mounted) return;
+
     try {
       SecureLogger.info('🧪 [TEST] Attempting auto-login...');
       
@@ -147,25 +162,33 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
         email: testEmail,
         password: testPassword,
       );
+
+      if (!mounted) return; // Verifica novamente após operação async
       
       result.fold(
         (failure) {
-          SecureLogger.error(
-            '🧪 [TEST] Auto-login failed: ${failure.message}',
-          );
+          if (mounted) {
+            SecureLogger.error(
+              '🧪 [TEST] Auto-login failed: ${failure.message}',
+            );
+          }
         },
         (user) {
-          SecureLogger.info(
-            '🧪 [TEST] Auto-login successful! User: ${user.email}',
-          );
+          if (mounted) {
+            SecureLogger.info(
+              '🧪 [TEST] Auto-login successful! User: ${user.email}',
+            );
+          }
         },
       );
     } catch (e, stackTrace) {
-      SecureLogger.error(
-        '🧪 [TEST] Auto-login error',
-        error: e,
-        stackTrace: stackTrace,
-      );
+      if (mounted) {
+        SecureLogger.error(
+          '🧪 [TEST] Auto-login error',
+          error: e,
+          stackTrace: stackTrace,
+        );
+      }
     }
   }
 }

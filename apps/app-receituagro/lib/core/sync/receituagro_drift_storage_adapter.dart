@@ -12,7 +12,7 @@ import '../../database/receituagro_database.dart';
 ///
 /// Este adapter implementa ILocalStorageRepository mas foca apenas nos métodos
 /// essenciais para sync (save, get, remove, clear, getValues).
-/// 
+///
 /// Traduz entre:
 /// - Estrutura específica do Drift (Favoritos, Comentarios, AppSettings)
 /// - Sistema de sync genérico esperado pelo UnifiedSyncManager
@@ -62,10 +62,7 @@ class ReceituagroDriftStorageAdapter implements ILocalStorageRepository {
   }
 
   @override
-  Future<Either<Failure, T?>> get<T>({
-    required String key,
-    String? box,
-  }) async {
+  Future<Either<Failure, T?>> get<T>({required String key, String? box}) async {
     try {
       await _ensureInitialized();
 
@@ -163,9 +160,12 @@ class ReceituagroDriftStorageAdapter implements ILocalStorageRepository {
   }
 
   // ========== IMPLEMENTAÇÕES STUB (não usadas pelo sync) ==========
-  
+
   @override
-  Future<Either<Failure, bool>> contains({required String key, String? box}) async {
+  Future<Either<Failure, bool>> contains({
+    required String key,
+    String? box,
+  }) async {
     return const Left(CacheFailure('Método contains não implementado'));
   }
 
@@ -255,7 +255,9 @@ class ReceituagroDriftStorageAdapter implements ILocalStorageRepository {
 
   @override
   Future<Either<Failure, Map<String, dynamic>>> getAllUserSettings() async {
-    return const Left(CacheFailure('Método getAllUserSettings não implementado'));
+    return const Left(
+      CacheFailure('Método getAllUserSettings não implementado'),
+    );
   }
 
   @override
@@ -340,9 +342,9 @@ class ReceituagroDriftStorageAdapter implements ILocalStorageRepository {
 
   Future<Either<Failure, void>> _deleteFavorito(String key) async {
     try {
-      await (_db.delete(_db.favoritos)
-            ..where((tbl) => tbl.firebaseId.equals(key)))
-          .go();
+      await (_db.delete(
+        _db.favoritos,
+      )..where((tbl) => tbl.firebaseId.equals(key))).go();
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure('Erro ao deletar favorito: $e'));
@@ -369,7 +371,10 @@ class ReceituagroDriftStorageAdapter implements ILocalStorageRepository {
 
   // ========== MÉTODOS PRIVADOS - COMENTARIOS ==========
 
-  Future<Either<Failure, void>> _saveComentario(String key, dynamic data) async {
+  Future<Either<Failure, void>> _saveComentario(
+    String key,
+    dynamic data,
+  ) async {
     try {
       final Map<String, dynamic> map = data is Map<String, dynamic>
           ? data
@@ -422,9 +427,9 @@ class ReceituagroDriftStorageAdapter implements ILocalStorageRepository {
 
   Future<Either<Failure, void>> _deleteComentario(String key) async {
     try {
-      await (_db.delete(_db.comentarios)
-            ..where((tbl) => tbl.firebaseId.equals(key)))
-          .go();
+      await (_db.delete(
+        _db.comentarios,
+      )..where((tbl) => tbl.firebaseId.equals(key))).go();
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure('Erro ao deletar comentário: $e'));
@@ -450,7 +455,10 @@ class ReceituagroDriftStorageAdapter implements ILocalStorageRepository {
 
   // ========== MÉTODOS PRIVADOS - APP SETTINGS ==========
 
-  Future<Either<Failure, void>> _saveAppSettings(String key, dynamic data) async {
+  Future<Either<Failure, void>> _saveAppSettings(
+    String key,
+    dynamic data,
+  ) async {
     try {
       final Map<String, dynamic> map = data is Map<String, dynamic>
           ? data
@@ -506,9 +514,9 @@ class ReceituagroDriftStorageAdapter implements ILocalStorageRepository {
 
   Future<Either<Failure, void>> _deleteAppSettings(String key) async {
     try {
-      await (_db.delete(_db.appSettings)
-            ..where((tbl) => tbl.firebaseId.equals(key)))
-          .go();
+      await (_db.delete(
+        _db.appSettings,
+      )..where((tbl) => tbl.firebaseId.equals(key))).go();
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure('Erro ao deletar settings: $e'));
@@ -541,7 +549,8 @@ class ReceituagroDriftStorageAdapter implements ILocalStorageRepository {
     if (!_isInitialized) {
       final result = await initialize();
       result.fold(
-        (failure) => throw Exception('Falha ao inicializar: ${failure.message}'),
+        (failure) =>
+            throw Exception('Falha ao inicializar: ${failure.message}'),
         (_) => null,
       );
     }

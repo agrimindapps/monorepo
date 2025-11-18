@@ -53,35 +53,35 @@ import 'repositories_di.dart';
 final sl = core.GetIt.instance;
 
 /// Initializes the Dependency Injection container
-/// 
+///
 /// ✅ DEPENDENCY INVERSION PRINCIPLE (DIP) IMPLEMENTATION:
-/// 
+///
 /// DI SETUP FLOW:
 /// 1. Core infrastructure (GetIt instance setup)
 /// 2. @LazySingleton annotated classes (auto-registered via Injectable)
 /// 3. Manual registrations for complex setup
 /// 4. Module-specific DI (Features, Services, Sync)
-/// 
+///
 /// KEY PRINCIPLES:
 /// - ✅ Depend on abstractions (interfaces), not concrete classes
 /// - ✅ Use @LazySingleton for lazy initialization (on-demand)
 /// - ✅ Register interfaces/abstract classes in the container
 /// - ✅ Concrete implementations are internal to module
-/// 
+///
 /// LAYERED REGISTRATION:
 /// 1. Infrastructure: Database, Network, Storage
 /// 2. Repositories: Data layer abstractions (IRepository)
 /// 3. Use Cases: Business logic abstractions
 /// 4. Services: Specialized services (IAnalytics, ICrashlytics, etc.)
 /// 5. Notifiers: State management (Riverpod + GetIt)
-/// 
+///
 /// EXAMPLE - Notifier Dependency Inversion:
 /// ```dart
 /// // Notifier depends on use case ABSTRACTION
 /// @riverpod
 /// class MyNotifier extends _$MyNotifier {
 ///   late final GetDataUseCase _useCase;
-///   
+///
 ///   @override
 ///   Future<Data> build() async {
 ///     // DI container provides implementation
@@ -89,13 +89,13 @@ final sl = core.GetIt.instance;
 ///     return _useCase.call();
 ///   }
 /// }
-/// 
+///
 /// // Use case depends on repository ABSTRACTION
 /// class GetDataUseCase {
 ///   final IDataRepository _repo; // Depends on interface
 ///   GetDataUseCase(this._repo);
 /// }
-/// 
+///
 /// // Repository IMPLEMENTATION injected by container
 /// @LazySingleton(as: IDataRepository)
 /// class DataRepositoryImpl implements IDataRepository { }
@@ -118,9 +118,7 @@ Future<void> init() async {
 
   // ✅ SIMPLIFIED: SyncQueue uses in-memory storage
   if (!sl.isRegistered<SyncQueue>()) {
-    sl.registerLazySingleton<SyncQueue>(
-      () => SyncQueue(),
-    );
+    sl.registerLazySingleton<SyncQueue>(() => SyncQueue());
   }
 
   if (!sl.isRegistered<SyncOperations>()) {
@@ -303,7 +301,7 @@ Future<void> init() async {
 
   // ❌ REMOVED: PremiumLegacyRepository
   // ❌ REMOVED: ComentarioRepository
-  
+
   try {
     sl.registerLazySingleton<IPremiumService>(() => MockPremiumService());
   } catch (e) {
@@ -319,9 +317,9 @@ Future<void> init() async {
 
   // ❌ REMOVED: ComentariosService (depends on ComentarioRepository)
   // TODO: Migrate to Drift-based comentarios repository
-  
+
   // ✅ IDiagnosticosRepository and all use cases now managed by Injectable (@LazySingleton, @injectable)
-  
+
   // ✅ Estratégia Pattern para agrupamento de defensivos (SOLID - Open/Closed Principle)
   if (!sl.isRegistered<DefensivoGroupingStrategyRegistry>()) {
     sl.registerLazySingleton<DefensivoGroupingStrategyRegistry>(
@@ -432,9 +430,8 @@ void _setupPragasPorCulturaServices() {
   // Register Data Service for loading pragas data
   if (!sl.isRegistered<IPragasCulturaDataService>()) {
     sl.registerLazySingleton<IPragasCulturaDataService>(
-      () => PragasCulturaDataService(
-        repository: sl<IPragasCulturaRepository>(),
-      ),
+      () =>
+          PragasCulturaDataService(repository: sl<IPragasCulturaRepository>()),
     );
   }
 

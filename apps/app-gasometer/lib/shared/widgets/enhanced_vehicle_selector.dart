@@ -186,7 +186,9 @@ class _EnhancedVehicleSelectorState
           final vehicleToSelect = _selectBestVehicle(vehicles);
           if (vehicleToSelect != null) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              _onVehicleSelected(vehicleToSelect.id);
+              if (mounted) {
+                _onVehicleSelected(vehicleToSelect.id);
+              }
             });
           }
         }
@@ -427,7 +429,7 @@ class _EnhancedVehicleSelectorState
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.medium,
-                          vertical: AppSpacing.xxlarge,
+                          vertical: AppSpacing.medium, // Reduzido de xxlarge
                         ),
                         border: InputBorder.none,
                         hintText: widget.hintText,
@@ -467,83 +469,81 @@ class _EnhancedVehicleSelectorState
                             child: Row(
                               children: [
                                 Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
+                                  child: Row(
                                     children: [
-                                      Text(
-                                        '${vehicle.brand} ${vehicle.model}',
-                                        style: TextStyle(
-                                          fontWeight: AppFontWeights.semiBold,
-                                          fontSize: AppFontSizes.large,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onSurface,
-                                          letterSpacing: 0.2,
+                                      // Marca/Modelo
+                                      Flexible(
+                                        child: Text(
+                                          '${vehicle.brand} ${vehicle.model}',
+                                          style: TextStyle(
+                                            fontWeight: AppFontWeights.semiBold,
+                                            fontSize: AppFontSizes.body,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onSurface,
+                                            height: 1.0,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
                                         ),
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
                                       ),
-                                      const SizedBox(height: 4),
-                                      Row(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 2,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary
-                                                  .withValues(alpha: 0.1),
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                    AppRadius.small,
-                                                  ),
-                                            ),
-                                            child: Text(
-                                              vehicle.licensePlate,
-                                              style: TextStyle(
-                                                fontSize: AppFontSizes.small,
-                                                fontWeight:
-                                                    AppFontWeights.medium,
-                                                color: Theme.of(
-                                                  context,
-                                                ).colorScheme.primary,
+                                      const SizedBox(width: 8),
+                                      // Placa
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 4,
+                                          vertical: 0,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                              .withValues(alpha: 0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(
+                                                AppRadius.small,
                                               ),
+                                        ),
+                                        child: Text(
+                                          vehicle.licensePlate,
+                                          style: TextStyle(
+                                            fontSize: AppFontSizes.xs,
+                                            fontWeight:
+                                                AppFontWeights.medium,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                            height: 1.0,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      // Ícone odômetro
+                                      Icon(
+                                        Icons.speed,
+                                        size: 12,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withValues(
+                                              alpha: AppOpacity.medium,
                                             ),
-                                          ),
-                                          const SizedBox(
-                                            width: AppSpacing.small,
-                                          ),
-                                          Icon(
-                                            Icons.speed,
-                                            size: AppSizes.iconXS,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurface
-                                                .withValues(
-                                                  alpha: AppOpacity.medium,
-                                                ),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            '${vehicle.currentOdometer.toStringAsFixed(0)} km',
-                                            style: TextStyle(
-                                              fontSize: AppFontSizes.small,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurface
-                                                  .withValues(
-                                                    alpha: AppOpacity.medium,
-                                                  ),
-                                              fontWeight: AppFontWeights.medium,
-                                            ),
-                                          ),
-                                        ],
+                                      ),
+                                      const SizedBox(width: 2),
+                                      // Odômetro
+                                      Text(
+                                        '${vehicle.currentOdometer.toStringAsFixed(0)} km',
+                                        style: TextStyle(
+                                          fontSize: AppFontSizes.xs,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withValues(
+                                                alpha: AppOpacity.medium,
+                                              ),
+                                          fontWeight: AppFontWeights.medium,
+                                          height: 1.0,
+                                        ),
                                       ),
                                     ],
                                   ),

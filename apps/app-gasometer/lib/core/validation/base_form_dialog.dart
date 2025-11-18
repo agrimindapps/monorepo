@@ -87,21 +87,29 @@ abstract class BaseFormDialogState<T extends ChangeNotifier> extends State<BaseF
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeProviders();
+      if (mounted) {
+        _initializeProviders();
+      }
     });
   }
   
   Future<void> _initializeProviders() async {
+    if (!mounted) return;
+    
     try {
       _formProvider = createFormProvider();
       
       await initializeFormProvider(_formProvider);
       
-      setState(() {
-        _isInitialized = true;
-      });
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
     } catch (e) {
-      showErrorDialog('Erro ao inicializar formulário: $e');
+      if (mounted) {
+        showErrorDialog('Erro ao inicializar formulário: $e');
+      }
     }
   }
   
@@ -160,7 +168,9 @@ return ProviderScope(
     
     if (error != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        showErrorSnackbar(error!);
+        if (mounted) {
+          showErrorSnackbar(error!);
+        }
       });
     }
     

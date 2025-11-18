@@ -5,6 +5,7 @@ import '../../features/favoritos/domain/entities/favorito_sync_entity.dart';
 import '../../features/settings/domain/entities/user_history_sync_entity.dart';
 import '../../features/settings/domain/entities/user_settings_sync_entity.dart';
 import '../extensions/user_entity_receituagro_extension.dart';
+
 FavoritoSyncEntity _favoritoFromFirebaseMap(Map<String, dynamic> map) {
   return FavoritoSyncEntity.fromMap(map);
 }
@@ -177,7 +178,8 @@ abstract final class ReceitaAgroSyncConfig {
           collectionName: 'user_settings',
           fromMap: _userSettingsFromFirebaseMap,
           toMap: (UserSettingsSyncEntity settings) => settings.toMap(),
-          conflictStrategy: ConflictStrategy.remoteWins, // Remote vence para settings
+          conflictStrategy:
+              ConflictStrategy.remoteWins, // Remote vence para settings
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 24),
           batchSize: 10,
@@ -188,7 +190,8 @@ abstract final class ReceitaAgroSyncConfig {
           collectionName: 'user_history',
           fromMap: _userHistoryFromFirebaseMap,
           toMap: (UserHistorySyncEntity history) => history.toMap(),
-          conflictStrategy: ConflictStrategy.localWins, // Local vence para histórico
+          conflictStrategy:
+              ConflictStrategy.localWins, // Local vence para histórico
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 24),
           batchSize: 100, // Maior batch para histórico
@@ -199,7 +202,8 @@ abstract final class ReceitaAgroSyncConfig {
           collectionName: 'users',
           fromMap: _userEntityFromFirebaseMap,
           toMap: (UserEntity user) => user.toReceitaAgroFirebaseMap(),
-          conflictStrategy: ConflictStrategy.remoteWins, // Remote vence para usuários
+          conflictStrategy:
+              ConflictStrategy.remoteWins, // Remote vence para usuários
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 24),
           batchSize: 10,
@@ -209,8 +213,10 @@ abstract final class ReceitaAgroSyncConfig {
           entityType: SubscriptionEntity,
           collectionName: 'subscriptions',
           fromMap: SubscriptionEntity.fromFirebaseMap,
-          toMap: (SubscriptionEntity subscription) => subscription.toFirebaseMap(),
-          conflictStrategy: ConflictStrategy.remoteWins, // Remote sempre vence para assinaturas
+          toMap: (SubscriptionEntity subscription) =>
+              subscription.toFirebaseMap(),
+          conflictStrategy: ConflictStrategy
+              .remoteWins, // Remote sempre vence para assinaturas
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 24),
           batchSize: 5,

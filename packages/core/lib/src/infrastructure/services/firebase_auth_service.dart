@@ -23,7 +23,7 @@ import '../../shared/utils/failure.dart';
 /// Também suporta vinculação de contas e gerenciamento de perfil.
 class FirebaseAuthService implements IAuthRepository {
   final FirebaseAuth _firebaseAuth;
-  final GoogleSignIn _googleSignIn;
+  final GoogleSignIn? _googleSignIn;
   final FacebookAuth _facebookAuth;
 
   /// Cria uma nova instância do serviço de autenticação Firebase
@@ -34,7 +34,8 @@ class FirebaseAuthService implements IAuthRepository {
     GoogleSignIn? googleSignIn,
     FacebookAuth? facebookAuth,
   }) : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-       _googleSignIn = googleSignIn ?? GoogleSignIn(scopes: ['email']),
+       // Não inicializa GoogleSignIn na web sem configuração explícita
+       _googleSignIn = googleSignIn ?? (kIsWeb ? null : GoogleSignIn(scopes: ['email'])),
        _facebookAuth = facebookAuth ?? FacebookAuth.instance;
 
   @override
@@ -108,6 +109,14 @@ class FirebaseAuthService implements IAuthRepository {
     try {
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Attempting Google Sign In...');
+      }
+
+      // 🔥 FIX: Verifica se Google Sign-In está disponível
+      if (_googleSignIn == null) {
+        if (kDebugMode) {
+          debugPrint('⚠️ Firebase: Google Sign-In not configured');
+        }
+        return Left(AuthFailure('Google Sign-In não está configurado para esta plataforma'));
       }
 
       // 🔥 FIX: Previne "Future already completed" na Web
@@ -454,7 +463,7 @@ class FirebaseAuthService implements IAuthRepository {
       }
       await _firebaseAuth.signOut();
       try {
-        await _googleSignIn.signOut();
+        await _googleSignIn?.signOut();
       } catch (e) {
         if (kDebugMode) {
           debugPrint(
@@ -703,6 +712,14 @@ class FirebaseAuthService implements IAuthRepository {
         }
         return const Left(AuthFailure('Conta já vinculada com Google'));
       }
+      // 🔥 FIX: Verifica se Google Sign-In está disponível
+      if (_googleSignIn == null) {
+        if (kDebugMode) {
+          debugPrint('⚠️ Firebase: Google Sign-In not configured');
+        }
+        return Left(AuthFailure('Google Sign-In não está configurado para esta plataforma'));
+      }
+
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {

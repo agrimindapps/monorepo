@@ -30,7 +30,9 @@ class _PromoPageState extends ConsumerState<PromoPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAuthenticationAndRedirect();
+      if (mounted) {
+        _checkAuthenticationAndRedirect();
+      }
     });
   }
 

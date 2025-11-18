@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 
 /// Serviço de cache inteligente para otimização de performance
 class CacheService {
@@ -90,11 +91,10 @@ class CacheService {
 
   /// Limpa entradas expiradas
   Future<void> clearExpired() async {
-    final expiredKeys =
-        _memoryCache.entries
-            .where((entry) => entry.value.isExpired)
-            .map((entry) => entry.key)
-            .toList();
+    final expiredKeys = _memoryCache.entries
+        .where((entry) => entry.value.isExpired)
+        .map((entry) => entry.key)
+        .toList();
 
     for (final key in expiredKeys) {
       _memoryCache.remove(key);
@@ -116,8 +116,9 @@ class CacheService {
   /// Obter estatísticas do cache
   CacheStatistics getStatistics() {
     final memoryEntries = _memoryCache.length;
-    final expiredEntries =
-        _memoryCache.values.where((entry) => entry.isExpired).length;
+    final expiredEntries = _memoryCache.values
+        .where((entry) => entry.isExpired)
+        .length;
     final validEntries = memoryEntries - expiredEntries;
 
     return CacheStatistics(
@@ -193,9 +194,8 @@ class CacheService {
   }
 
   void _cleanOldestEntries() {
-    final sortedEntries =
-        _memoryCache.entries.toList()
-          ..sort((a, b) => a.value.timestamp.compareTo(b.value.timestamp));
+    final sortedEntries = _memoryCache.entries.toList()
+      ..sort((a, b) => a.value.timestamp.compareTo(b.value.timestamp));
 
     final toRemove = sortedEntries.take(
       _memoryCache.length - maxMemoryEntries + 10,
@@ -218,7 +218,9 @@ class CacheService {
       };
 
       await _prefs!.setString(diskKey, jsonEncode(serializedEntry));
-    } catch (e) {}
+    } catch (e) {
+      debugPrint('[CacheService] Failed to save to disk: $e');
+    }
   }
 
   Future<CacheEntry<T>?> _loadFromDisk<T>(String key) async {
@@ -278,7 +280,9 @@ class CacheService {
       try {
         final freshData = await fetchFunction();
         await put(key, freshData, duration: duration, persistToDisk: true);
-      } catch (e) {}
+      } catch (e) {
+        debugPrint('[CacheService] Background refresh failed for key $key: $e');
+      }
     });
   }
 }

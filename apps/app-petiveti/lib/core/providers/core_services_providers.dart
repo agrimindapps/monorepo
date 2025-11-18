@@ -15,7 +15,6 @@ import '../performance/performance_service.dart' as local_perf;
 import '../services/auto_sync_service.dart';
 import '../services/logging_service_impl.dart';
 import '../services/mock_analytics_service.dart';
-import 'database_providers.dart';
 
 part 'core_services_providers.g.dart';
 

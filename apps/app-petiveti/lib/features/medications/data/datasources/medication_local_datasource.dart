@@ -15,9 +15,13 @@ abstract class MedicationLocalDataSource {
   Stream<List<MedicationModel>> watchMedicationsByAnimalId(int animalId);
   Future<List<MedicationModel>> searchMedications(String query);
   Future<List<MedicationModel>> getMedicationHistory(
-      String animalId, DateTime startDate, DateTime endDate);
+    String animalId,
+    DateTime startDate,
+    DateTime endDate,
+  );
   Future<List<MedicationModel>> checkMedicationConflicts(
-      MedicationModel medication);
+    MedicationModel medication,
+  );
   Future<int> getActiveMedicationsCount(String animalId);
   Future<void> hardDeleteMedication(String id);
   Future<void> discontinueMedication(String id, String reason);
@@ -40,8 +44,9 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
 
   @override
   Future<List<MedicationModel>> getMedicationsByAnimalId(int animalId) async {
-    final medications =
-        await _database.medicationDao.getMedicationsByAnimal(animalId);
+    final medications = await _database.medicationDao.getMedicationsByAnimal(
+      animalId,
+    );
     return medications.map(_toModel).toList();
   }
 
@@ -67,8 +72,10 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
   Future<bool> updateMedication(MedicationModel medication) async {
     if (medication.id == null) return false;
     final companion = _toCompanion(medication, forUpdate: true);
-    return await _database.medicationDao
-        .updateMedication(medication.id!, companion);
+    return await _database.medicationDao.updateMedication(
+      medication.id!,
+      companion,
+    );
   }
 
   @override
@@ -102,8 +109,10 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
     );
   }
 
-  MedicationsCompanion _toCompanion(MedicationModel model,
-      {bool forUpdate = false}) {
+  MedicationsCompanion _toCompanion(
+    MedicationModel model, {
+    bool forUpdate = false,
+  }) {
     if (forUpdate) {
       return MedicationsCompanion(
         id: model.id != null ? Value(model.id!) : const Value.absent(),
@@ -112,9 +121,9 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
         dosage: Value(model.dosage),
         frequency: Value(model.frequency),
         startDate: Value(model.startDate),
-        endDate: Value.ofNullable(model.endDate),
-        notes: Value.ofNullable(model.notes),
-        veterinarian: Value.ofNullable(model.veterinarian),
+        endDate: Value.absentIfNull(model.endDate),
+        notes: Value.absentIfNull(model.notes),
+        veterinarian: Value.absentIfNull(model.veterinarian),
         userId: Value(model.userId),
         updatedAt: Value(DateTime.now()),
       );
@@ -126,9 +135,9 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
       dosage: model.dosage,
       frequency: model.frequency,
       startDate: model.startDate,
-      endDate: Value.ofNullable(model.endDate),
-      notes: Value.ofNullable(model.notes),
-      veterinarian: Value.ofNullable(model.veterinarian),
+      endDate: Value.absentIfNull(model.endDate),
+      notes: Value.absentIfNull(model.notes),
+      veterinarian: Value.absentIfNull(model.veterinarian),
       userId: model.userId,
       createdAt: Value(model.createdAt),
     );
@@ -142,7 +151,8 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
 
   @override
   Future<List<MedicationModel>> checkMedicationConflicts(
-      MedicationModel medication) {
+    MedicationModel medication,
+  ) {
     // TODO: implement checkMedicationConflicts
     throw UnimplementedError();
   }
@@ -161,7 +171,10 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
 
   @override
   Future<List<MedicationModel>> getMedicationHistory(
-      String animalId, DateTime startDate, DateTime endDate) {
+    String animalId,
+    DateTime startDate,
+    DateTime endDate,
+  ) {
     // TODO: implement getMedicationHistory
     throw UnimplementedError();
   }

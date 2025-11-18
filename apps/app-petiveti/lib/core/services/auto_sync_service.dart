@@ -1,4 +1,3 @@
-import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../sync/petiveti_sync_config.dart';
@@ -60,7 +59,8 @@ class AutoSyncService {
 
     try {
       // 1. Usar configuração padrão se não fornecida
-      _currentConfig = syncConfig ??
+      _currentConfig =
+          syncConfig ??
           (kDebugMode
               ? PetivetiSyncConfig.development()
               : PetivetiSyncConfig.simple());
@@ -287,11 +287,7 @@ class AutoSyncService {
   /// Retorna status de sync
   Future<Map<String, dynamic>> getSyncStatus() async {
     if (!_isInitialized) {
-      return {
-        'initialized': false,
-        'paused': false,
-        'entities': 0,
-      };
+      return {'initialized': false, 'paused': false, 'entities': 0};
     }
 
     try {

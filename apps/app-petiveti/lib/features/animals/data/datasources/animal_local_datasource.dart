@@ -2,7 +2,6 @@ import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../database/petiveti_database.dart';
-import '../../../../database/tables/animals_table.dart';
 import '../../domain/entities/animal_enums.dart';
 import '../models/animal_model.dart';
 
@@ -18,12 +17,12 @@ abstract class AnimalLocalDataSource {
 }
 
 /// Drift-based implementation of AnimalLocalDataSource
-/// 
+///
 /// Responsibilities (SRP):
 /// 1. Communication with Drift database
 /// 2. CRUD operations
 /// 3. Data transformation (Drift entities ↔ Domain models)
-/// 
+///
 /// Not responsible for:
 /// - Business logic (delegated to Repository/Use Cases)
 /// - Complex transformations (Repository responsibility)
@@ -87,7 +86,7 @@ class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
     // Parse species and gender from stored strings
     final species = AnimalSpeciesExtension.fromString(animal.species);
     final gender = AnimalGenderExtension.fromString(animal.gender);
-    
+
     return AnimalModel(
       id: animal.id,
       name: animal.name,
@@ -115,14 +114,14 @@ class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
         id: model.id != null ? Value(model.id!) : const Value.absent(),
         name: Value(model.name),
         species: Value(model.species.name),
-        breed: Value.ofNullable(model.breed),
-        birthDate: Value.ofNullable(model.birthDate),
+        breed: Value.absentIfNull(model.breed),
+        birthDate: Value.absentIfNull(model.birthDate),
         gender: Value(model.gender.name),
-        weight: Value.ofNullable(model.weight),
-        photo: Value.ofNullable(model.photoUrl),
-        color: Value.ofNullable(model.color),
-        microchipNumber: Value.ofNullable(model.microchipNumber),
-        notes: Value.ofNullable(model.notes),
+        weight: Value.absentIfNull(model.weight),
+        photo: Value.absentIfNull(model.photoUrl),
+        color: Value.absentIfNull(model.color),
+        microchipNumber: Value.absentIfNull(model.microchipNumber),
+        notes: Value.absentIfNull(model.notes),
         userId: Value(model.userId),
         isActive: Value(model.isActive),
         updatedAt: Value(DateTime.now()),
@@ -132,14 +131,14 @@ class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
     return AnimalsCompanion.insert(
       name: model.name,
       species: model.species.name,
-      breed: Value.ofNullable(model.breed),
-      birthDate: Value.ofNullable(model.birthDate),
+      breed: Value.absentIfNull(model.breed),
+      birthDate: Value.absentIfNull(model.birthDate),
       gender: model.gender.name,
-      weight: Value.ofNullable(model.weight),
-      photo: Value.ofNullable(model.photoUrl),
-      color: Value.ofNullable(model.color),
-      microchipNumber: Value.ofNullable(model.microchipNumber),
-      notes: Value.ofNullable(model.notes),
+      weight: Value.absentIfNull(model.weight),
+      photo: Value.absentIfNull(model.photoUrl),
+      color: Value.absentIfNull(model.color),
+      microchipNumber: Value.absentIfNull(model.microchipNumber),
+      notes: Value.absentIfNull(model.notes),
       userId: model.userId,
       isActive: Value(model.isActive),
       createdAt: Value(model.createdAt),

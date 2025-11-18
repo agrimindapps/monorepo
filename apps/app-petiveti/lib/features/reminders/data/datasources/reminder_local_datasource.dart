@@ -35,9 +35,7 @@ class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
   @override
   Future<List<ReminderModel>> getRemindersByAnimalId(String animalId) async {
     final intId = int.tryParse(animalId) ?? 0;
-    final reminders = await _database.reminderDao.getRemindersByAnimal(
-      intId,
-    );
+    final reminders = await _database.reminderDao.getRemindersByAnimal(intId);
     return reminders.map(_toModel).toList();
   }
 
@@ -118,7 +116,7 @@ class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
         id: Value(int.tryParse(model.id) ?? 0),
         animalId: Value(int.tryParse(model.animalId) ?? 0),
         title: Value(model.title),
-        description: Value.ofNullable(model.description),
+        description: Value.absentIfNull(model.description),
         reminderDateTime: Value(model.scheduledDate),
         frequency: Value('once'),
         isCompleted: Value(model.status == ReminderStatus.completed),
@@ -130,7 +128,7 @@ class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
     return db.RemindersCompanion.insert(
       animalId: Value(int.tryParse(model.animalId) ?? 0),
       title: model.title,
-      description: Value.ofNullable(model.description),
+      description: Value.absentIfNull(model.description),
       reminderDateTime: model.scheduledDate,
       frequency: Value('once'),
       isCompleted: Value(model.status == ReminderStatus.completed),

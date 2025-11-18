@@ -42,8 +42,6 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await ThemePreferenceMigration.migratePreferences();
 
-
-
   await di.init();
   await _initializeFirebaseServices();
   final auth = FirebaseAuth.instance;
@@ -152,7 +150,7 @@ void main() async {
       }
     },
     (_) {
-      DiagnosticoLogger.serviceInit('AppDataManager', 'Hive pronto');
+      DiagnosticoLogger.serviceInit('AppDataManager', 'Dados prontos');
     },
   );
 
@@ -314,11 +312,28 @@ Future<void> _initializeFirebaseServices() async {
   }
 }
 
-class ReceitaAgroApp extends ConsumerWidget {
+class ReceitaAgroApp extends ConsumerStatefulWidget {
   const ReceitaAgroApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ReceitaAgroApp> createState() => _ReceitaAgroAppState();
+}
+
+class _ReceitaAgroAppState extends ConsumerState<ReceitaAgroApp> {
+  @override
+  void initState() {
+    super.initState();
+    
+    // 🧪 AUTO-LOGIN PARA TESTES (remover em produção)
+    if (kDebugMode) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _performTestAutoLogin();
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final themeMode = ref.watch(themeNotifierProvider);
 
     return MaterialApp(
@@ -334,5 +349,43 @@ class ReceitaAgroApp extends ConsumerWidget {
       navigatorKey: NavigationService.navigatorKey,
       debugShowCheckedModeBanner: false,
     );
+  }
+
+  /// 🧪 AUTO-LOGIN PARA TESTES
+  /// Remove this method in production!
+  void _performTestAutoLogin() async {
+    try {
+      DiagnosticoLogger.debug('🧪 [RECEITUAGRO-TEST] Attempting auto-login...');
+      
+      final auth = FirebaseAuth.instance;
+      
+      // Se já está logado e não é anônimo, não faz nada
+      if (auth.currentUser != null && !auth.currentUser!.isAnonymous) {
+        DiagnosticoLogger.debug(
+          '🧪 [RECEITUAGRO-TEST] Already logged in as: ${auth.currentUser!.email}',
+        );
+        return;
+      }
+      
+      const testEmail = 'lucineiy@hotmail.com';
+      const testPassword = 'QWEqwe@123';
+      
+      final result = await auth.signInWithEmailAndPassword(
+        email: testEmail,
+        password: testPassword,
+      );
+      
+      if (result.user != null) {
+        DiagnosticoLogger.debug(
+          '🧪 [RECEITUAGRO-TEST] Auto-login successful! User: ${result.user!.email}',
+        );
+      }
+    } catch (e, stackTrace) {
+      DiagnosticoLogger.warning(
+        '🧪 [RECEITUAGRO-TEST] Auto-login error',
+        e,
+      );
+      debugPrint('Stack trace: $stackTrace');
+    }
   }
 }

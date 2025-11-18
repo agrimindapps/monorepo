@@ -9,16 +9,19 @@ import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_local_data_source.dart';
 import '../datasources/auth_remote_data_source.dart';
 
-@LazySingleton(as: AuthRepository)
+/// AuthRepository implementation
+/// 
+/// Note: Registered manually in database_module.dart (not via @LazySingleton)
+/// because DataCleanerService dependency is platform-specific (not available on web)
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
-    required this.dataCleanerService,
+    this.dataCleanerService,
   });
   final AuthRemoteDataSource remoteDataSource;
   final AuthLocalDataSource localDataSource;
-  final DataCleanerService dataCleanerService;
+  final DataCleanerService? dataCleanerService;
 
   @override
   Future<Either<Failure, UserEntity?>> getCurrentUser() async {
@@ -394,8 +397,16 @@ class AuthRepositoryImpl implements AuthRepository {
 
   /// Clears all local gasometer-specific data after account deletion
   Future<void> _clearGasometerLocalData() async {
+    // Skip on web (no Drift database)
+    if (dataCleanerService == null) {
+      if (kDebugMode) {
+        debugPrint('⚠️ DataCleanerService not available (web platform)');
+      }
+      return;
+    }
+    
     try {
-      final clearResult = await dataCleanerService.clearAllData();
+      final clearResult = await dataCleanerService!.clearAllData();
 
       if (clearResult['success'] == true) {
         final clearedBoxes = clearResult['totalClearedBoxes'] ?? 0;

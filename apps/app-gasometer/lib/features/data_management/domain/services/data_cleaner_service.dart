@@ -2,15 +2,20 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../database/gasometer_database.dart';
+import 'i_data_cleaner_service.dart';
 
 /// Serviço para limpeza de dados do GasOMeter
 /// Permite limpar tabelas Drift e SharedPreferences de forma segura
-class DataCleanerService {
+/// 
+/// Note: Registered manually in database_module.dart (not via @injectable)
+/// because it depends on GasometerDatabase which is platform-specific
+class DataCleanerService implements IDataCleanerService {
   DataCleanerService(this._database);
 
   final GasometerDatabase _database;
 
   /// Limpa todos os dados da aplicação (Drift Tables + SharedPreferences)
+  @override
   Future<Map<String, dynamic>> clearAllData() async {
     if (kDebugMode) {
       debugPrint('🧹 Iniciando limpeza completa de dados...');
@@ -252,6 +257,7 @@ class DataCleanerService {
   }
 
   /// Limpa SharedPreferences específicas do aplicativo
+  @override
   Future<Map<String, dynamic>> clearAppSharedPreferences() async {
     final results = <String, dynamic>{
       'clearedKeys': <String>[],
@@ -427,6 +433,7 @@ class DataCleanerService {
   }
 
   /// Verifica se há dados para limpar
+  @override
   Future<bool> hasDataToClear() async {
     try {
       final stats = await getDataStatsBeforeCleaning();

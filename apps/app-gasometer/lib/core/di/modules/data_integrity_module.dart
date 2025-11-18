@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../features/data_management/domain/services/data_integrity_service.dart';
 import '../../../features/data_management/domain/services/data_integrity_facade.dart';
@@ -16,6 +17,18 @@ import '../../../features/maintenance/domain/services/maintenance_id_reconciliat
 /// - DataIntegrityService: Legado (mantido para compatibilidade)
 class DataIntegrityModule {
   static void init(GetIt getIt) {
+    if (kDebugMode) {
+      print('📦 Initializing data integrity module...');
+    }
+
+    // Skip data integrity services on web - ILocalStorageRepository não está disponível
+    if (kIsWeb) {
+      if (kDebugMode) {
+        print('⚠️  [DataIntegrityModule] Skipping on web');
+      }
+      return;
+    }
+
     final localStorage = getIt<ILocalStorageRepository>();
 
     // Register specialized reconciliation services (SRP)

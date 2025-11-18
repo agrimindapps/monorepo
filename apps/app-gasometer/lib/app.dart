@@ -3,9 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'core/di/injection_container.dart' as di;
 import 'core/providers/dependency_providers.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/gasometer_theme.dart';
+import 'features/auth/domain/repositories/auth_repository.dart';
 import 'features/settings/presentation/providers/settings_notifier.dart';
 import 'main.dart' as main;
 import 'shared/widgets/connectivity_banner.dart';
@@ -35,6 +37,13 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
 
     // ✅ NOVO: Sincronizar imagens pendentes ao abrir o app
     _syncPendingImages();
+    
+    // 🧪 AUTO-LOGIN PARA TESTES (remover em produção)
+    if (kDebugMode) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _performTestAutoLogin();
+      });
+    }
   }
 
   @override
@@ -119,5 +128,44 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
         );
       },
     );
+  }
+  
+  /// 🧪 AUTO-LOGIN PARA TESTES
+  /// Remove this method in production!
+  void _performTestAutoLogin() async {
+    try {
+      SecureLogger.info('🧪 [TEST] Attempting auto-login...');
+      
+      // Use GetIt directly
+      final authRepository = di.sl<AuthRepository>();
+      
+      // Test credentials
+      const testEmail = 'lucineiy@hotmail.com';
+      const testPassword = 'QWEqwe@123';
+      
+      final result = await authRepository.signInWithEmail(
+        email: testEmail,
+        password: testPassword,
+      );
+      
+      result.fold(
+        (failure) {
+          SecureLogger.error(
+            '🧪 [TEST] Auto-login failed: ${failure.message}',
+          );
+        },
+        (user) {
+          SecureLogger.info(
+            '🧪 [TEST] Auto-login successful! User: ${user.email}',
+          );
+        },
+      );
+    } catch (e, stackTrace) {
+      SecureLogger.error(
+        '🧪 [TEST] Auto-login error',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
   }
 }

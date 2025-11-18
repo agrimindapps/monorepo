@@ -245,3 +245,4 @@ Future<void> _initializeAutoSync() async {
 
 /// Get auto-sync service instance for lifecycle management
 AutoSyncService get autoSyncService => _autoSyncService;
+

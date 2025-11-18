@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../gasometer_database.dart';
 import '../repositories/repositories.dart';
@@ -6,28 +5,13 @@ import '../adapters/database_strategy_selector.dart';
 
 /// Provider do banco de dados principal
 ///
-/// **Lógica por Plataforma:**
-/// - **Web (kIsWeb)**: Retorna `null` para usar Firestore (veja `isUsingFirestoreProvider`)
-/// - **Mobile/Desktop**: Retorna instância de GasometerDatabase (Drift)
+/// **Funcionamento em todas as plataformas:**
+/// - **Mobile/Desktop**: SQLite nativo via Drift
+/// - **Web**: WASM + IndexedDB via Drift
 ///
-/// **Fluxo de dados:**
-/// 1. App consulta `isDatabaseAvailableProvider`
-/// 2. Se false (web), usa Firestore diretamente via Cloud Firestore package
-/// 3. Se true (mobile), usa Drift normalmente
-///
-/// IMPORTANTE: Este provider NÃO é usado quando `kIsWeb == true`
-/// para evitar erros WASM do Drift na web.
-final gasometerDatabaseProvider = Provider<GasometerDatabase?>((ref) {
-  // Em web, Drift não é suportado - Firestore é usado como backend
-  if (kIsWeb) {
-    print(
-      '⚠️  Drift database unavailable on web. '
-      'Firestore will be used as backend.',
-    );
-    return null;
-  }
-
-  // Em mobile/desktop, usa Drift normalmente
+/// Usa DriftDatabaseConfig que automaticamente escolhe o executor correto.
+final gasometerDatabaseProvider = Provider<GasometerDatabase>((ref) {
+  // Drift funciona em todas as plataformas via DriftDatabaseConfig
   final db = GasometerDatabase.production();
 
   // Garante que o banco seja fechado quando o provider for descartado
@@ -45,13 +29,9 @@ final gasometerDatabaseProvider = Provider<GasometerDatabase?>((ref) {
 
 /// Provider que indica se o banco Drift está disponível
 ///
-/// Usado para decidir se deve usar Drift ou Firestore como backend primário
+/// Agora sempre retorna true pois Drift funciona em todas as plataformas
 final isDatabaseAvailableProvider = Provider<bool>((ref) {
-  final isAvailable = !kIsWeb;
-  if (!isAvailable) {
-    DatabaseStrategySelector.logStrategyInfo();
-  }
-  return isAvailable;
+  return true; // Drift com WASM funciona na web
 });
 
 // ========== REPOSITORY PROVIDERS ==========

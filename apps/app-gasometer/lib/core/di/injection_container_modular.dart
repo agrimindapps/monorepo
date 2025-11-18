@@ -1,6 +1,5 @@
 import 'package:core/core.dart' show GetIt, InjectionContainer;
 
-import 'database_module.dart';
 import 'di_module.dart';
 import 'injection.dart';
 import 'modules/account_deletion_module.dart';
@@ -35,10 +34,10 @@ class ModularInjectionContainer {
       print('📦 Configuring injectable dependencies...');
       await configureDependencies();
 
-      // Register database module conditionally (mobile/desktop only)
-      print('📦 Registering database module...');
-      registerDatabaseModule();
-
+      // NOTE: database_module.dart is deprecated
+      // All repositories now use @lazySingleton and are registered via injectable
+      // Database and repositories are automatically registered by configureDependencies()
+      
       print('📦 Registering core modules...');
       final modules = _createModules(firebaseEnabled: firebaseEnabled);
       for (final module in modules) {

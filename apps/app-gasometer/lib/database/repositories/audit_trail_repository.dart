@@ -11,10 +11,11 @@ import '../gasometer_database.dart';
 ///
 /// Gerencia todas as operações de CRUD e queries relacionadas ao audit trail
 /// usando o banco de dados Drift.
+@lazySingleton
 class AuditTrailRepository {
   AuditTrailRepository(this._db);
 
-  final GasometerDatabase? _db;
+  final GasometerDatabase _db;
 
   /// Converte dados do Drift para domínio
   AuditTrailEntry fromData(AuditTrailData data) {
@@ -56,7 +57,7 @@ class AuditTrailRepository {
   /// Busca entradas de auditoria por entidade
   Future<List<AuditTrailEntry>> getByEntity(String entityId) async {
     if (_db == null) return [];
-    final query = _db!.select(_db!.auditTrail)
+    final query = _db.select(_db.auditTrail)
       ..where((t) => t.entityId.equals(entityId));
     final results = await query.get();
     return results.map(fromData).toList();
@@ -65,7 +66,7 @@ class AuditTrailRepository {
   /// Busca entradas de auditoria por tipo de entidade
   Future<List<AuditTrailEntry>> getByEntityType(String entityType) async {
     if (_db == null) return [];
-    final query = _db!.select(_db!.auditTrail)
+    final query = _db.select(_db.auditTrail)
       ..where((t) => t.entityType.equals(entityType));
     final results = await query.get();
     return results.map(fromData).toList();
@@ -74,7 +75,7 @@ class AuditTrailRepository {
   /// Busca entradas de auditoria por tipo de evento
   Future<List<AuditTrailEntry>> getByEventType(String eventType) async {
     if (_db == null) return [];
-    final query = _db!.select(_db!.auditTrail)
+    final query = _db.select(_db.auditTrail)
       ..where((t) => t.eventType.equals(eventType));
     final results = await query.get();
     return results.map(fromData).toList();
@@ -86,7 +87,7 @@ class AuditTrailRepository {
     DateTime end,
   ) async {
     if (_db == null) return [];
-    final query = _db!.select(_db!.auditTrail)
+    final query = _db.select(_db.auditTrail)
       ..where((t) => t.timestamp.isBetweenValues(start, end));
     final results = await query.get();
     return results.map(fromData).toList();
@@ -99,7 +100,7 @@ class AuditTrailRepository {
   }) async {
     if (_db == null) return [];
     final startDate = DateTime.now().subtract(Duration(days: days));
-    final query = _db!.select(_db!.auditTrail)
+    final query = _db.select(_db.auditTrail)
       ..where(
         (t) =>
             t.timestamp.isBiggerThanValue(startDate) &
@@ -113,18 +114,18 @@ class AuditTrailRepository {
   /// Conta total de entradas de auditoria
   Future<int> countEntries() async {
     if (_db == null) return 0;
-    final query = _db!.selectOnly(_db!.auditTrail)
-      ..addColumns([_db!.auditTrail.id.count()]);
+    final query = _db.selectOnly(_db.auditTrail)
+      ..addColumns([_db.auditTrail.id.count()]);
     final result = await query.getSingle();
-    return result.read(_db!.auditTrail.id.count()) ?? 0;
+    return result.read(_db.auditTrail.id.count()) ?? 0;
   }
 
   /// Limpa entradas antigas (mais de X dias)
   Future<int> cleanOldEntries(int daysToKeep) async {
     if (_db == null) return 0;
     final cutoffDate = DateTime.now().subtract(Duration(days: daysToKeep));
-    return await (_db!.delete(
-      _db!.auditTrail,
+    return await (_db.delete(
+      _db.auditTrail,
     )..where((t) => t.timestamp.isSmallerThanValue(cutoffDate))).go();
   }
 
@@ -154,6 +155,6 @@ class AuditTrailRepository {
   /// Insere uma nova entrada de auditoria
   Future<int> insert(AuditTrailEntry entry) async {
     if (_db == null) return 0;
-    return await _db!.into(_db!.auditTrail).insert(toCompanion(entry));
+    return await _db.into(_db.auditTrail).insert(toCompanion(entry));
   }
 }

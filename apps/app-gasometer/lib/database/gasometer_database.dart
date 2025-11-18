@@ -43,6 +43,7 @@ part 'gasometer_database.g.dart';
     AuditTrail,
   ],
 )
+@lazySingleton
 class GasometerDatabase extends _$GasometerDatabase with BaseDriftDatabase {
   GasometerDatabase(QueryExecutor e) : super(e);
 

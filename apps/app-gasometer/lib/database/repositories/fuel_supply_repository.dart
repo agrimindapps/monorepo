@@ -8,26 +8,21 @@ import '../tables/gasometer_tables.dart';
 /// Repositório de Abastecimentos usando Drift
 ///
 /// Gerencia operações de CRUD e queries para abastecimentos de combustível
+@lazySingleton
 class FuelSupplyRepository
     extends BaseDriftRepositoryImpl<FuelSupplyData, FuelSupply> {
   FuelSupplyRepository(this._db);
 
-  final GasometerDatabase? _db;
+  final GasometerDatabase _db;
 
   @override
   TableInfo<FuelSupplies, FuelSupply> get table {
-    if (_db == null) {
-      throw UnsupportedError('Drift database is not available on web.');
-    }
-    return _db!.fuelSupplies;
+    return _db.fuelSupplies;
   }
 
   @override
   GeneratedDatabase get database {
-    if (_db == null) {
-      throw UnsupportedError('Drift database is not available on web.');
-    }
-    return _db!;
+    return _db;
   }
 
   @override
@@ -96,7 +91,7 @@ class FuelSupplyRepository
     int? limit,
   }) async {
     if (_db == null) return [];
-    final query = _db!.select(_db!.fuelSupplies)
+    final query = _db.select(_db.fuelSupplies)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
       )
@@ -113,7 +108,7 @@ class FuelSupplyRepository
   /// Stream de abastecimentos de um veículo
   Stream<List<FuelSupplyData>> watchByVehicleId(int vehicleId) {
     if (_db == null) return Stream.empty();
-    final query = _db!.select(_db!.fuelSupplies)
+    final query = _db.select(_db.fuelSupplies)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
       )
@@ -127,7 +122,7 @@ class FuelSupplyRepository
   /// Busca último abastecimento de um veículo
   Future<FuelSupplyData?> findLastByVehicleId(int vehicleId) async {
     if (_db == null) return null;
-    final query = _db!.select(_db!.fuelSupplies)
+    final query = _db.select(_db.fuelSupplies)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
       )
@@ -148,7 +143,7 @@ class FuelSupplyRepository
     final startMs = startDate.millisecondsSinceEpoch;
     final endMs = endDate.millisecondsSinceEpoch;
 
-    final query = _db!.select(_db!.fuelSupplies)
+    final query = _db.select(_db.fuelSupplies)
       ..where(
         (tbl) =>
             tbl.vehicleId.equals(vehicleId) &
@@ -165,7 +160,7 @@ class FuelSupplyRepository
   /// Busca abastecimentos com tanque cheio (para cálculo de consumo)
   Future<List<FuelSupplyData>> findFullTankByVehicleId(int vehicleId) async {
     if (_db == null) return [];
-    final query = _db!.select(_db!.fuelSupplies)
+    final query = _db.select(_db.fuelSupplies)
       ..where(
         (tbl) =>
             tbl.vehicleId.equals(vehicleId) &
@@ -185,17 +180,17 @@ class FuelSupplyRepository
     DateTime? endDate,
   }) async {
     if (_db == null) return 0.0;
-    var query = _db!.selectOnly(_db!.fuelSupplies)
-      ..addColumns([_db!.fuelSupplies.totalPrice.sum()])
+    var query = _db.selectOnly(_db.fuelSupplies)
+      ..addColumns([_db.fuelSupplies.totalPrice.sum()])
       ..where(
-        _db!.fuelSupplies.vehicleId.equals(vehicleId) &
-            _db!.fuelSupplies.isDeleted.equals(false),
+        _db.fuelSupplies.vehicleId.equals(vehicleId) &
+            _db.fuelSupplies.isDeleted.equals(false),
       );
 
     if (startDate != null) {
       query = query
         ..where(
-          _db!.fuelSupplies.date.isBiggerOrEqualValue(
+          _db.fuelSupplies.date.isBiggerOrEqualValue(
             startDate.millisecondsSinceEpoch,
           ),
         );
@@ -203,14 +198,14 @@ class FuelSupplyRepository
     if (endDate != null) {
       query = query
         ..where(
-          _db!.fuelSupplies.date.isSmallerOrEqualValue(
+          _db.fuelSupplies.date.isSmallerOrEqualValue(
             endDate.millisecondsSinceEpoch,
           ),
         );
     }
 
     final result = await query.getSingle();
-    return result.read(_db!.fuelSupplies.totalPrice.sum()) ?? 0.0;
+    return result.read(_db.fuelSupplies.totalPrice.sum()) ?? 0.0;
   }
 
   /// Calcula total de litros abastecidos
@@ -220,17 +215,17 @@ class FuelSupplyRepository
     DateTime? endDate,
   }) async {
     if (_db == null) return 0.0;
-    var query = _db!.selectOnly(_db!.fuelSupplies)
-      ..addColumns([_db!.fuelSupplies.liters.sum()])
+    var query = _db.selectOnly(_db.fuelSupplies)
+      ..addColumns([_db.fuelSupplies.liters.sum()])
       ..where(
-        _db!.fuelSupplies.vehicleId.equals(vehicleId) &
-            _db!.fuelSupplies.isDeleted.equals(false),
+        _db.fuelSupplies.vehicleId.equals(vehicleId) &
+            _db.fuelSupplies.isDeleted.equals(false),
       );
 
     if (startDate != null) {
       query = query
         ..where(
-          _db!.fuelSupplies.date.isBiggerOrEqualValue(
+          _db.fuelSupplies.date.isBiggerOrEqualValue(
             startDate.millisecondsSinceEpoch,
           ),
         );
@@ -238,48 +233,48 @@ class FuelSupplyRepository
     if (endDate != null) {
       query = query
         ..where(
-          _db!.fuelSupplies.date.isSmallerOrEqualValue(
+          _db.fuelSupplies.date.isSmallerOrEqualValue(
             endDate.millisecondsSinceEpoch,
           ),
         );
     }
 
     final result = await query.getSingle();
-    return result.read(_db!.fuelSupplies.liters.sum()) ?? 0.0;
+    return result.read(_db.fuelSupplies.liters.sum()) ?? 0.0;
   }
 
   /// Calcula preço médio por litro
   Future<double> calculateAveragePricePerLiter(int vehicleId) async {
     if (_db == null) return 0.0;
-    final query = _db!.selectOnly(_db!.fuelSupplies)
-      ..addColumns([_db!.fuelSupplies.pricePerLiter.avg()])
+    final query = _db.selectOnly(_db.fuelSupplies)
+      ..addColumns([_db.fuelSupplies.pricePerLiter.avg()])
       ..where(
-        _db!.fuelSupplies.vehicleId.equals(vehicleId) &
-            _db!.fuelSupplies.isDeleted.equals(false),
+        _db.fuelSupplies.vehicleId.equals(vehicleId) &
+            _db.fuelSupplies.isDeleted.equals(false),
       );
 
     final result = await query.getSingle();
-    return result.read(_db!.fuelSupplies.pricePerLiter.avg()) ?? 0.0;
+    return result.read(_db.fuelSupplies.pricePerLiter.avg()) ?? 0.0;
   }
 
   /// Conta total de abastecimentos de um veículo
   Future<int> countByVehicleId(int vehicleId) async {
     if (_db == null) return 0;
-    final query = _db!.selectOnly(_db!.fuelSupplies)
-      ..addColumns([_db!.fuelSupplies.id.count()])
+    final query = _db.selectOnly(_db.fuelSupplies)
+      ..addColumns([_db.fuelSupplies.id.count()])
       ..where(
-        _db!.fuelSupplies.vehicleId.equals(vehicleId) &
-            _db!.fuelSupplies.isDeleted.equals(false),
+        _db.fuelSupplies.vehicleId.equals(vehicleId) &
+            _db.fuelSupplies.isDeleted.equals(false),
       );
 
     final result = await query.getSingle();
-    return result.read(_db!.fuelSupplies.id.count()) ?? 0;
+    return result.read(_db.fuelSupplies.id.count()) ?? 0;
   }
 
   /// Busca abastecimentos que precisam ser sincronizados
   Future<List<FuelSupplyData>> findDirtyRecords() async {
     if (_db == null) return [];
-    final query = _db!.select(_db!.fuelSupplies)
+    final query = _db.select(_db.fuelSupplies)
       ..where((tbl) => tbl.isDirty.equals(true));
 
     final results = await query.get();
@@ -289,10 +284,10 @@ class FuelSupplyRepository
   /// Marca registros como sincronizados
   Future<void> markAsSynced(List<int> supplyIds) async {
     if (_db == null) return;
-    await _db!.executeTransaction(() async {
+    await _db.executeTransaction(() async {
       for (final id in supplyIds) {
-        await (_db!.update(
-          _db!.fuelSupplies,
+        await (_db.update(
+          _db.fuelSupplies,
         )..where((tbl) => tbl.id.equals(id))).write(
           FuelSuppliesCompanion(
             isDirty: const Value(false),
@@ -307,8 +302,8 @@ class FuelSupplyRepository
   Future<bool> softDelete(int supplyId) async {
     if (_db == null) return false;
     final rowsAffected =
-        await (_db!.update(
-          _db!.fuelSupplies,
+        await (_db.update(
+          _db.fuelSupplies,
         )..where((tbl) => tbl.id.equals(supplyId))).write(
           FuelSuppliesCompanion(
             isDeleted: const Value(true),

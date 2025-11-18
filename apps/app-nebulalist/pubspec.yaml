@@ -44,15 +44,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # TODO: Add your assets here
-  # assets:
-  #   - assets/images/
-  #   - assets/icons/
-
-  # TODO: Add custom fonts if needed
-  # fonts:
-  #   - family: YourFont
-  #     fonts:
-  #       - asset: assets/fonts/YourFont-Regular.ttf
-  #       - asset: assets/fonts/YourFont-Bold.ttf
-  #         weight: 700
+  # Assets
+  assets:
+    - web/sqlite3.wasm  # Drift WASM (necessário para web)

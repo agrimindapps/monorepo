@@ -1,10 +1,13 @@
 import 'package:injectable/injectable.dart';
-import '../../../database/petiveti_database.dart';
 
 /// Database module for Drift integration
+///
+/// **NOTA:** PetivetiDatabase agora usa @lazySingleton diretamente,
+/// então este módulo não é mais necessário. Mantido para compatibilidade.
+///
+/// O Injectable irá registrar automaticamente PetivetiDatabase.injectable()
+/// como singleton através do @lazySingleton + @factoryMethod.
 @module
 abstract class DatabaseModule {
-  /// Provides singleton instance of PetivetiDatabase
-  @singleton
-  PetivetiDatabase get database => PetivetiDatabase();
+  // Módulo vazio - PetivetiDatabase gerencia seu próprio registro
 }

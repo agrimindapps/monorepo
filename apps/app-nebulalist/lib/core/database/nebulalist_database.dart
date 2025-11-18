@@ -1,22 +1,19 @@
-import 'package:drift/drift.dart';
 import 'package:core/core.dart';
+import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 
-// Tables
-import 'tables/tasks_table.dart';
-import 'tables/users_table.dart';
+import 'daos/item_dao.dart';
+import 'daos/list_dao.dart';
+import 'tables/items_table.dart';
+import 'tables/lists_table.dart';
 
-// DAOs
-import 'daos/task_dao.dart';
-import 'daos/user_dao.dart';
-
-part 'taskolist_database.g.dart';
+part 'nebulalist_database.g.dart';
 
 /// ============================================================================
-/// TASKOLIST DATABASE - Drift Implementation
+/// NEBULALIST DATABASE - Drift Implementation
 /// ============================================================================
 ///
-/// Database principal do app-taskolist usando Drift ORM.
+/// Database principal do app-nebulalist usando Drift ORM.
 ///
 /// **PADRÃO ESTABELECIDO (gasometer-drift):**
 /// - Usa DriftDatabaseConfig do core para configuração unificada
@@ -26,25 +23,19 @@ part 'taskolist_database.g.dart';
 /// - Extends BaseDriftDatabase do core (funcionalidades compartilhadas)
 ///
 /// **TABELAS (2 total):**
-/// 1. Tasks - Tarefas e gerenciamento
-/// 2. Users - Usuários e preferências
+/// 1. Lists - Listas de tarefas/itens do usuário
+/// 2. Items - Itens individuais dentro das listas
 ///
 /// **SCHEMA VERSION:** 1 (inicial)
 /// ============================================================================
 
 @DriftDatabase(
-  tables: [
-    Tasks,
-    Users,
-  ],
-  daos: [
-    TaskDao,
-    UserDao,
-  ],
+  tables: [Lists, Items],
+  daos: [ListDao, ItemDao],
 )
 @lazySingleton
-class TaskolistDatabase extends _$TaskolistDatabase with BaseDriftDatabase {
-  TaskolistDatabase(QueryExecutor e) : super(e);
+class NebulalistDatabase extends _$NebulalistDatabase with BaseDriftDatabase {
+  NebulalistDatabase(QueryExecutor e) : super(e);
 
   /// Versão do schema do banco de dados
   @override
@@ -52,42 +43,42 @@ class TaskolistDatabase extends _$TaskolistDatabase with BaseDriftDatabase {
 
   /// Factory constructor para injeção de dependência (GetIt/Injectable)
   @factoryMethod
-  factory TaskolistDatabase.injectable() {
-    return TaskolistDatabase.production();
+  factory NebulalistDatabase.injectable() {
+    return NebulalistDatabase.production();
   }
 
   /// Factory constructor para ambiente de produção
-  factory TaskolistDatabase.production() {
-    return TaskolistDatabase(
+  factory NebulalistDatabase.production() {
+    return NebulalistDatabase(
       DriftDatabaseConfig.createExecutor(
-        databaseName: 'taskolist_drift.db',
+        databaseName: 'nebulalist_drift.db',
         logStatements: false,
       ),
     );
   }
 
   /// Factory constructor para ambiente de desenvolvimento
-  factory TaskolistDatabase.development() {
-    return TaskolistDatabase(
+  factory NebulalistDatabase.development() {
+    return NebulalistDatabase(
       DriftDatabaseConfig.createExecutor(
-        databaseName: 'taskolist_drift_dev.db',
+        databaseName: 'nebulalist_drift_dev.db',
         logStatements: true,
       ),
     );
   }
 
   /// Factory constructor para testes
-  factory TaskolistDatabase.test() {
-    return TaskolistDatabase(
+  factory NebulalistDatabase.test() {
+    return NebulalistDatabase(
       DriftDatabaseConfig.createInMemoryExecutor(logStatements: true),
     );
   }
 
   /// Factory constructor com path customizado
-  factory TaskolistDatabase.withPath(String path) {
-    return TaskolistDatabase(
+  factory NebulalistDatabase.withPath(String path) {
+    return NebulalistDatabase(
       DriftDatabaseConfig.createCustomExecutor(
-        databaseName: 'taskolist_drift.db',
+        databaseName: 'nebulalist_drift.db',
         customPath: path,
         logStatements: false,
       ),

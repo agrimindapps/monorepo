@@ -1,4 +1,6 @@
 import 'package:core/core.dart' hide getIt, Column;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get_it/get_it.dart';
 
 import '../../database/taskolist_database.dart';
 import '../../features/tasks/providers/task_providers.dart';
@@ -19,9 +21,21 @@ part 'core_providers.g.dart';
 // DATABASE
 // ============================================================================
 
+/// Provider do banco de dados principal
+///
+/// **IMPORTANTE:** Retorna a instância única do GetIt para evitar múltiplas instâncias.
+/// Funciona em Web (WASM) e Mobile (Native) via DriftDatabaseConfig.
+final taskolistDatabaseProvider = Provider<TaskolistDatabase>((ref) {
+  final db = GetIt.I<TaskolistDatabase>();
+  ref.keepAlive();
+  return db;
+});
+
+/// Provider legado (mantido para compatibilidade)
+@Deprecated('Use taskolistDatabaseProvider')
 @riverpod
 TaskolistDatabase taskolistDatabase(Ref ref) {
-  return TaskolistDatabase();
+  return ref.watch(taskolistDatabaseProvider);
 }
 
 // ============================================================================
@@ -110,7 +124,7 @@ TaskManagerSubscriptionService taskManagerSubscriptionService(Ref ref) {
 }
 
 @riverpod
-Future<TaskManagerAuthService> taskManagerAuthService(Ref ref) async {
+TaskManagerAuthService taskManagerAuthService(Ref ref) {
   final authRepository = ref.watch(authRepositoryProvider);
   final analyticsService = ref.watch(taskManagerAnalyticsServiceProvider);
   final crashlyticsService = ref.watch(taskManagerCrashlyticsServiceProvider);
@@ -125,7 +139,7 @@ Future<TaskManagerAuthService> taskManagerAuthService(Ref ref) async {
     crashlyticsService,
     subscriptionService,
     syncService,
-    await enhancedDeletionService,
+    enhancedDeletionService.value!,
   );
 }
 

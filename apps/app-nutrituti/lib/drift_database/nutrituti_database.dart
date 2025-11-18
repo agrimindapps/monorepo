@@ -1,10 +1,6 @@
 import 'package:core/core.dart';
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
 import 'package:injectable/injectable.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 
 // Tables
 import 'tables/perfis_table.dart';
@@ -25,6 +21,31 @@ import 'daos/comentario_dao.dart';
 
 part 'nutrituti_database.g.dart';
 
+/// ============================================================================
+/// NUTRITUTI DATABASE - Drift Implementation
+/// ============================================================================
+///
+/// Database principal do app-nutrituti usando Drift ORM.
+///
+/// **PADRÃO ESTABELECIDO (gasometer-drift):**
+/// - Usa DriftDatabaseConfig do core para configuração unificada
+/// - Injectable com @lazySingleton para DI
+/// - Factory methods: production(), development(), test()
+/// - MigrationStrategy com onCreate e beforeOpen
+/// - Extends BaseDriftDatabase do core (funcionalidades compartilhadas)
+///
+/// **TABELAS (7 total):**
+/// 1. Perfis - Perfis de usuários
+/// 2. Pesos - Registro de peso
+/// 3. AguaRegistros - Registros de consumo de água (legacy)
+/// 4. WaterRecords - Registros de água
+/// 5. WaterAchievements - Conquistas de hidratação
+/// 6. Exercicios - Exercícios físicos
+/// 7. Comentarios - Comentários e notas
+///
+/// **SCHEMA VERSION:** 1 (inicial)
+/// ============================================================================
+
 @DriftDatabase(
   tables: [
     Perfis,
@@ -38,48 +59,68 @@ part 'nutrituti_database.g.dart';
   daos: [PerfilDao, PesoDao, AguaDao, WaterDao, ExercicioDao, ComentarioDao],
 )
 @lazySingleton
-class NutritutiDatabase extends _$NutritutiDatabase {
-  NutritutiDatabase(super.e);
-
-  /// Factory constructor para Injectable (DI)
-  @factoryMethod
-  factory NutritutiDatabase.injectable() {
-    final db = NutritutiDatabase.production();
-    return db;
-  }
+class NutritutiDatabase extends _$NutritutiDatabase with BaseDriftDatabase {
+  NutritutiDatabase(QueryExecutor e) : super(e);
 
   /// Versão do schema do banco de dados
   @override
   int get schemaVersion => 1;
 
+  /// Factory constructor para injeção de dependência (GetIt/Injectable)
+  @factoryMethod
+  factory NutritutiDatabase.injectable() {
+    return NutritutiDatabase.production();
+  }
+
   /// Factory constructor para ambiente de produção
   factory NutritutiDatabase.production() {
     return NutritutiDatabase(
-      LazyDatabase(() async {
-        final dbFolder = await getApplicationDocumentsDirectory();
-        final file = File(p.join(dbFolder.path, 'nutrituti_drift.db'));
-        return NativeDatabase(file);
-      }),
+      DriftDatabaseConfig.createExecutor(
+        databaseName: 'nutrituti_drift.db',
+        logStatements: false,
+      ),
     );
   }
 
   /// Factory constructor para ambiente de desenvolvimento
   factory NutritutiDatabase.development() {
     return NutritutiDatabase(
-      LazyDatabase(() async {
-        final dbFolder = await getApplicationDocumentsDirectory();
-        final file = File(p.join(dbFolder.path, 'nutrituti_drift_dev.db'));
-        return NativeDatabase(file, logStatements: true);
-      }),
+      DriftDatabaseConfig.createExecutor(
+        databaseName: 'nutrituti_drift_dev.db',
+        logStatements: true,
+      ),
     );
   }
 
   /// Factory constructor para testes
   factory NutritutiDatabase.test() {
     return NutritutiDatabase(
-      LazyDatabase(() async {
-        return NativeDatabase.memory();
-      }),
+      DriftDatabaseConfig.createInMemoryExecutor(logStatements: true),
     );
   }
+
+  /// Factory constructor com path customizado
+  factory NutritutiDatabase.withPath(String path) {
+    return NutritutiDatabase(
+      DriftDatabaseConfig.createCustomExecutor(
+        databaseName: 'nutrituti_drift.db',
+        customPath: path,
+        logStatements: false,
+      ),
+    );
+  }
+
+  /// Estratégia de migração do banco de dados
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (Migrator m) async {
+          await m.createAll();
+        },
+        beforeOpen: (details) async {
+          await customStatement('PRAGMA foreign_keys = ON');
+        },
+        onUpgrade: (Migrator m, int from, int to) async {
+          // Future schema migrations will go here
+        },
+      );
 }

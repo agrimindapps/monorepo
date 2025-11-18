@@ -74,6 +74,7 @@ dependencies:
   get_it: any
   equatable: any
   dartz: any
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -87,14 +88,14 @@ dev_dependencies:
   riverpod_generator: ^2.4.0
   injectable_generator: ^2.6.2
 
-  # Custom Linting
-  # riverpod_lint removed - conflicts with hive_generator
-
   # Testing
   mocktail: ^1.0.0
 
 flutter:
   uses-material-design: true
+  
+  # Assets
   assets:
     - assets/
     - assets/images/
+    - web/sqlite3.wasm  # Drift WASM (necessário para web)

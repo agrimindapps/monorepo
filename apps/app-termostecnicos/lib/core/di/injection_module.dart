@@ -1,8 +1,6 @@
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../database/termostecnicos_database.dart';
-
 /// Injectable module for third-party dependencies
 @module
 abstract class InjectableModule {
@@ -12,7 +10,6 @@ abstract class InjectableModule {
   Future<SharedPreferences> get sharedPreferences =>
       SharedPreferences.getInstance();
 
-  /// Register Drift database as singleton
-  @singleton
-  TermosTecnicosDatabase get database => TermosTecnicosDatabase();
+  // TermosTecnicosDatabase agora usa @lazySingleton + @factoryMethod
+  // e é automaticamente registrado via Injectable
 }

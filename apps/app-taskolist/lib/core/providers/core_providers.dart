@@ -116,8 +116,8 @@ Future<TaskManagerAuthService> taskManagerAuthService(Ref ref) async {
   final crashlyticsService = ref.watch(taskManagerCrashlyticsServiceProvider);
   final subscriptionService = ref.watch(taskManagerSubscriptionServiceProvider);
   final syncService = ref.watch(taskManagerSyncServiceProvider);
-  final enhancedDeletionService = await ref.watch(
-    enhancedAccountDeletionServiceProvider.future,
+  final enhancedDeletionService = ref.watch(
+    enhancedAccountDeletionServiceProvider,
   );
   return TaskManagerAuthService(
     authRepository,
@@ -125,7 +125,7 @@ Future<TaskManagerAuthService> taskManagerAuthService(Ref ref) async {
     crashlyticsService,
     subscriptionService,
     syncService,
-    enhancedDeletionService,
+    await enhancedDeletionService,
   );
 }
 

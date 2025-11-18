@@ -21,10 +21,10 @@ class DataIntegrityModule {
       print('📦 Initializing data integrity module...');
     }
 
-    // Skip data integrity services on web - ILocalStorageRepository não está disponível
+    // Skip on web - ILocalStorageRepository not available
     if (kIsWeb) {
       if (kDebugMode) {
-        print('⚠️  [DataIntegrityModule] Skipping on web');
+        print('⚠️  [DataIntegrityModule] Skipping on web (ILocalStorageRepository not available)');
       }
       return;
     }

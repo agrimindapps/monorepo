@@ -285,9 +285,10 @@ class DiagnosticoGroupingService {
     return groupByCultura<Diagnostico>(
       diagnosticos,
       (d) => d.culturaId.toString(),
-      (d) => null, // Drift Diagnostico doesn't have nomeCultura, resolver will fill it
+      (d) =>
+          null, // Drift Diagnostico doesn't have nomeCultura, resolver will fill it
       sortItemsInGroup: sortByRelevance,
-      itemComparator: sortByRelevance ? _compareHiveByRelevance : null,
+      itemComparator: sortByRelevance ? _compareByDiagnosticoRelevance : null,
     );
   }
 
@@ -343,9 +344,9 @@ class DiagnosticoGroupingService {
   }
 
   /// Comparador por relevância para Diagnostico
-  int _compareHiveByRelevance(Diagnostico a, Diagnostico b) {
-    final aScore = _calculateHiveRelevanceScore(a);
-    final bScore = _calculateHiveRelevanceScore(b);
+  int _compareByDiagnosticoRelevance(Diagnostico a, Diagnostico b) {
+    final aScore = _calculateDiagnosticoRelevanceScore(a);
+    final bScore = _calculateDiagnosticoRelevanceScore(b);
 
     if (aScore != bScore) {
       return bScore.compareTo(aScore); // Decrescente
@@ -355,7 +356,7 @@ class DiagnosticoGroupingService {
   }
 
   /// Calcula pontuação de relevância para Diagnostico
-  int _calculateHiveRelevanceScore(Diagnostico diagnostico) {
+  int _calculateDiagnosticoRelevanceScore(Diagnostico diagnostico) {
     int score = 0;
 
     // Drift Diagnostico has IDs, not name fields

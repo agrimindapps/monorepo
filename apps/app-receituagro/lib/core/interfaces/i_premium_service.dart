@@ -2,7 +2,7 @@ import 'dart:async';
 
 /// Interface unificada para o sistema de assinaturas Premium
 /// Integra todas as funcionalidades necessárias do app ReceitaAgro
-/// Implementada por PremiumServiceReal com integração RevenueCat + Hive
+/// Implementada por PremiumServiceReal com integração RevenueCat + Drift
 abstract class IPremiumService {
   /// Verificação rápida de acesso premium (cached)
   bool get isPremium;
@@ -100,5 +100,6 @@ class PremiumStatus {
   }
 
   @override
-  String toString() => 'PremiumStatus(isActive: $isActive, planType: $planType, expires: $expiryDate)';
+  String toString() =>
+      'PremiumStatus(isActive: $isActive, planType: $planType, expires: $expiryDate)';
 }

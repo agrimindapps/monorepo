@@ -15,6 +15,11 @@ import '../../features/defensivos/data/strategies/defensivo_grouping_service_v2.
 import '../../features/favoritos/domain/favoritos_navigation_service.dart';
 import '../../features/favoritos/favoritos_di.dart';
 // ❌ REMOVIDO: import '../../features/pragas/di/pragas_di.dart'; (via @LazySingleton)
+import '../../features/pragas_por_cultura/data/services/pragas_cultura_query_service.dart';
+import '../../features/pragas_por_cultura/data/services/pragas_cultura_sort_service.dart';
+import '../../features/pragas_por_cultura/data/services/pragas_cultura_statistics_service.dart';
+import '../../features/pragas_por_cultura/data/services/pragas_cultura_data_service.dart';
+import '../../features/pragas_por_cultura/domain/repositories/i_pragas_cultura_repository.dart';
 import '../../features/settings/di/device_management_di.dart';
 import '../../features/settings/di/settings_di.dart';
 import '../../features/settings/di/tts_module.dart';
@@ -23,6 +28,7 @@ import '../../database/repositories/pragas_repository.dart';
 import '../../database/repositories/culturas_repository.dart';
 import '../../database/receituagro_database.dart';
 import '../interfaces/i_premium_service.dart';
+import '../sync/receituagro_drift_storage_adapter.dart';
 import '../navigation/agricultural_navigation_extension.dart';
 import '../services/app_data_manager.dart';
 import '../services/cloud_functions_service.dart';
@@ -230,15 +236,17 @@ Future<void> init() async {
   //     }
   //   }
   // }
-  // Register DriftStorageService as ILocalStorageRepository
+  // Register ReceituagroDriftStorageAdapter as ILocalStorageRepository
+  // Este adapter customizado traduz entre as tabelas Drift específicas do ReceitaAgro
+  // (Favoritos, Comentarios, AppSettings) e o sistema de sync genérico do core
   if (!sl.isRegistered<core.ILocalStorageRepository>()) {
     try {
       sl.registerLazySingleton<core.ILocalStorageRepository>(
-        () => core.DriftStorageService(sl<ReceituagroDatabase>()),
+        () => ReceituagroDriftStorageAdapter(sl<ReceituagroDatabase>()),
       );
       if (kDebugMode) {
         developer.log(
-          'ILocalStorageRepository (DriftStorageService) registered successfully',
+          'ILocalStorageRepository (ReceituagroDriftStorageAdapter) registered successfully',
           name: 'InjectionContainer',
           level: 500,
         );
@@ -400,16 +408,39 @@ Future<void> init() async {
 /// ✅ PHASE 3: Setup GetIt for Pragas por Cultura refactoring
 /// Registers the 4 specialized services and ViewModel for the Pragas por Cultura feature
 void _setupPragasPorCulturaServices() {
-  // Import the services from the feature
-  // Services are registered as singletons to ensure consistent instance across the app
+  // Register Query Service for filtering pragas
+  if (!sl.isRegistered<IPragasCulturaQueryService>()) {
+    sl.registerLazySingleton<IPragasCulturaQueryService>(
+      () => PragasCulturaQueryService(),
+    );
+  }
 
-  // For now, this function is a placeholder
-  // The actual registration will be done when the services are created
-  // TODO: Add service imports and registration when Phase 3 page refactoring is complete
+  // Register Sort Service for ordering pragas
+  if (!sl.isRegistered<IPragasCulturaSortService>()) {
+    sl.registerLazySingleton<IPragasCulturaSortService>(
+      () => PragasCulturaSortService(),
+    );
+  }
+
+  // Register Statistics Service for calculating stats
+  if (!sl.isRegistered<IPragasCulturaStatisticsService>()) {
+    sl.registerLazySingleton<IPragasCulturaStatisticsService>(
+      () => PragasCulturaStatisticsService(),
+    );
+  }
+
+  // Register Data Service for loading pragas data
+  if (!sl.isRegistered<IPragasCulturaDataService>()) {
+    sl.registerLazySingleton<IPragasCulturaDataService>(
+      () => PragasCulturaDataService(
+        repository: sl<IPragasCulturaRepository>(),
+      ),
+    );
+  }
 
   if (kDebugMode) {
     developer.log(
-      'Pragas por Cultura services setup skipped (awaiting Page refactoring)',
+      'Pragas por Cultura services registered successfully (Query, Sort, Statistics, Data)',
       name: 'InjectionContainer - PragasPorCultura',
       level: 500,
     );

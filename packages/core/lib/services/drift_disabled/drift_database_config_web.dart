@@ -21,10 +21,13 @@ class DriftDatabaseConfig {
         // ignore: avoid_print
         print('🔧 Initializing Drift WASM database: $databaseName');
 
+        // Add cache busting timestamp to force reload of WASM files
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+
         final result = await WasmDatabase.open(
           databaseName: databaseName,
-          sqlite3Uri: Uri.parse('sqlite3.wasm'),
-          driftWorkerUri: Uri.parse('drift_worker.dart.js'),
+          sqlite3Uri: Uri.parse('sqlite3.wasm?v=$timestamp'),
+          driftWorkerUri: Uri.parse('drift_worker.dart.js?v=$timestamp'),
         );
 
         if (result.missingFeatures.isNotEmpty) {

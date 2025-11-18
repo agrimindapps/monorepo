@@ -47,10 +47,11 @@ class FitossanitariosRepository {
     return await query.get();
   }
 
-  /// Busca fitossanitários elegíveis (status = true e elegivel = true)
+  /// Busca fitossanitários elegíveis (apenas com status = true)
+  /// Nota: O campo elegivel foi removido do filtro pois todos os dados JSON têm elegivel=false
   Future<List<Fitossanitario>> findElegiveis() async {
     final query = _db.select(_db.fitossanitarios)
-      ..where((tbl) => tbl.status.equals(true) & tbl.elegivel.equals(true));
+      ..where((tbl) => tbl.status.equals(true));
     return await query.get();
   }
 

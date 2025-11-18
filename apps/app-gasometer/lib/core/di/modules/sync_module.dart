@@ -30,14 +30,6 @@ abstract class SyncDIModule {
     if (kDebugMode) {
       print('📦 Registering Gasometer Sync Services...');
     }
-    
-    // Skip sync services on web (Drift not available)
-    if (kIsWeb) {
-      if (kDebugMode) {
-        print('⚠️  [SyncDIModule] Skipping sync services on web platform');
-      }
-      return;
-    }
 
     try {
       // Adapters são registrados automaticamente via @lazySingleton (Injectable)

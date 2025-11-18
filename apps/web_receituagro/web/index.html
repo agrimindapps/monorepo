@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="AUTHOR" content="Agrimind" />
+
+  <meta name="description"
+    content="ReceituAgro Web - Consulte defensivos agrícolas e fitossanitários. Busque produtos por nome, ingrediente ativo, fabricante. Informações completas sobre registro, toxicidade, modo de ação e comercialização. Plataforma gratuita para o agronegócio.">
+  <meta name="keywords"
+    content="ReceituAgro, defensivos agrícolas, fitossanitários, agrotóxicos, pesticidas, ingrediente ativo, registro MAPA, toxicidade, agronegócio, agricultura, consulta defensivos, receituário agronômico">
+
+  <meta name="google-adsense-account" content="ca-pub-9652140799368794">
+
+  <meta name="robots" content="index, follow" />
+  <meta name="googlebot" content="index, follow" />
+  <meta http-equiv="CACHE-CONTROL" content="Public" />
+  <meta name="LANGUAGE" content="Portuguese" />
+  <meta http-equiv="content-language" content="pt-br" />
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="ReceituAgro Web">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://receituagro.com.br">
+  <meta property="og:title" content="ReceituAgro Web - Consulta de Defensivos Agrícolas">
+  <meta property="og:description" content="Consulte defensivos agrícolas e fitossanitários. Busque produtos por nome, ingrediente ativo, fabricante. Informações completas sobre registro, toxicidade e comercialização.">
+  <meta property="og:image" content="https://receituagro.com.br/icons/Icon-512.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://receituagro.com.br">
+  <meta property="twitter:title" content="ReceituAgro Web - Consulta de Defensivos Agrícolas">
+  <meta property="twitter:description" content="Consulte defensivos agrícolas e fitossanitários. Busque produtos por nome, ingrediente ativo, fabricante.">
+  <meta property="twitter:image" content="https://receituagro.com.br/icons/Icon-512.png">
+
+  <!-- Additional SEO meta tags -->
+  <meta name="theme-color" content="#0175C2">
+  <meta name="application-name" content="ReceituAgro Web">
+  <meta name="msapplication-TileColor" content="#0175C2">
+  <meta name="msapplication-TileImage" content="icons/Icon-192.png">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png" />
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://receituagro.com.br/">
+
+  <title>ReceituAgro Web - Consulta de Defensivos Agrícolas e Fitossanitários</title>
+  <link rel="manifest" href="manifest.json">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ReceituAgro Web",
+    "description": "Consulte defensivos agrícolas e fitossanitários. Busque produtos por nome, ingrediente ativo, fabricante. Informações completas sobre registro, toxicidade, modo de ação e comercialização.",
+    "url": "https://receituagro.com.br/",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web, iOS, Android",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "BRL"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "Agrimind Soluções",
+      "url": "https://agrimind.com.br"
+    },
+    "inLanguage": "pt-BR",
+    "audience": {
+      "@type": "Audience",
+      "audienceType": "Agricultores, Engenheiros Agrônomos, Técnicos Agrícolas"
+    },
+    "keywords": [
+      "defensivos agrícolas",
+      "fitossanitários",
+      "agrotóxicos",
+      "pesticidas",
+      "ingrediente ativo",
+      "registro MAPA",
+      "receituário agronômico",
+      "agricultura",
+      "agronegócio"
+    ],
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://receituagro.com.br/?search={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    },
+    "mainEntity": {
+      "@type": "Dataset",
+      "name": "Base de Defensivos Agrícolas",
+      "description": "Base de dados completa com informações sobre defensivos agrícolas registrados no Brasil",
+      "keywords": "defensivos, fitossanitários, MAPA, agricultura"
+    }
+  }
+  </script>
+</head>
+
+
+<body>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAKo5dxVHE2JJTGJYBcvBzA8u5NOf9XQQk",
+    authDomain: "receituagronew.firebaseapp.com",
+    databaseURL: "https://receituagronew-default-rtdb.firebaseio.com",
+    projectId: "receituagronew",
+    storageBucket: "receituagronew.appspot.com",
+    messagingSenderId: "317022121600",
+    appId: "1:317022121600:web:6756bcf856c110cdba4065",
+    measurementId: "G-80HVTELSK5"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+
+</html>

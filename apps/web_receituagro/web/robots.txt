@@ -1,0 +1,40 @@
+# robots.txt for ReceituAgro Web
+# https://receituagro.com.br
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://receituagro.com.br/sitemap.xml
+
+# Crawl delay (optional - helps reduce server load)
+Crawl-delay: 1
+
+# Allow all search engines to index the main content
+Allow: /defensivo
+Allow: /home
+Allow: /desenvolvimento
+
+# Block access to development and testing paths (if any)
+Disallow: /test/
+Disallow: /dev/
+Disallow: /.git/
+
+# Allow access to important assets
+Allow: /icons/
+Allow: /assets/
+Allow: /favicon.png
+Allow: /manifest.json
+
+# Specific rules for common search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Host directive (helps search engines understand the preferred domain)
+Host: https://receituagro.com.br

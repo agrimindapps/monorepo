@@ -48,19 +48,11 @@ class GasometerDatabase extends _$GasometerDatabase with BaseDriftDatabase {
 
   /// Factory Injectable
   /// 
-  /// Retorna null na web para evitar erros WASM do Drift.
-  /// Na web, Firestore deve ser usado como backend.
+  /// Funciona em todas as plataformas:
+  /// - Mobile/Desktop: SQLite nativo
+  /// - Web: WASM + IndexedDB
   @factoryMethod
   factory GasometerDatabase.injectable() {
-    if (kIsWeb) {
-      print('⚠️  [GasometerDatabase] Drift not supported on web - using Firestore');
-      throw UnsupportedError(
-        'GasometerDatabase is not supported on web. '
-        'Use Firestore as the backend instead. '
-        'This factory should not be called on web platform.',
-      );
-    }
-    
     print('🏭 Creating GasometerDatabase via injectable factory');
     final db = GasometerDatabase.production();
     print('✅ GasometerDatabase created successfully: ${db.hashCode}');

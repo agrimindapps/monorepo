@@ -2,11 +2,7 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart' hide Column;
 
-import '../../database/receituagro_database.dart';
-import '../../database/repositories/culturas_repository.dart';
-import '../../database/repositories/fitossanitarios_repository.dart';
-import '../../database/repositories/pragas_repository.dart';
-
+import '../di/receituagro_data_setup.dart';
 
 /// Interface para o gerenciador de dados da aplicação
 abstract class IAppDataManager {
@@ -20,10 +16,9 @@ abstract class IAppDataManager {
 }
 
 /// Implementação do gerenciador principal de dados da aplicação
-/// Responsável por inicializar o Hive, registrar adapters e coordenar o carregamento de dados
-/// Agora integrado com sistema de controle automático de versão
+/// Responsável por inicializar o Drift, coordenar o carregamento de dados
+/// e gerenciar o sistema de controle automático de versão
 class AppDataManager implements IAppDataManager {
-
   // ✅ Keep _isInitialized for interface compliance
   bool _isInitialized = false;
 
@@ -31,7 +26,7 @@ class AppDataManager implements IAppDataManager {
   AppDataManager();
 
   /// Inicializa completamente o sistema de dados com controle automático de versão
-  /// ✅ PADRÃO: Hive.initFlutter() já foi chamado no main.dart para sync queue do core package
+  /// Nota: Drift é inicializado automaticamente pelo database instance
   @override
   Future<Either<Exception, void>> initialize() async {
     if (_isInitialized) {
@@ -44,9 +39,8 @@ class AppDataManager implements IAppDataManager {
         name: 'AppDataManager',
       );
 
-      // ✅ Hive.initFlutter() já foi executado no main.dart
-      // Necessário apenas para sync queue do core package
-      // Dados do app usam Drift (não Hive)
+      // Drift é gerenciado automaticamente pelo database instance
+      // Dados do app usam Drift para armazenamento local
 
       await _createServices();
       developer.log(
@@ -54,6 +48,8 @@ class AppDataManager implements IAppDataManager {
         name: 'AppDataManager',
       );
 
+      // Carregar dados estáticos (culturas, pragas, fitossanitários, diagnósticos)
+      await ReceitaAgroDataSetup.initialize();
 
       _isInitialized = true;
 
@@ -79,16 +75,9 @@ class AppDataManager implements IAppDataManager {
         'Criando instâncias dos serviços...',
         name: 'AppDataManager',
       );
-      final assetLoader = AssetLoaderService();
 
-
-      // Create Drift database and repository
-      final database = ReceituagroDatabase.production();
-      final culturaRepo = CulturasRepository(database);
-      final pragasRepo = PragasRepository(database);
-      final fitossanitarioRepo = FitossanitariosRepository(database);
-
-
+      // Drift database será inicializado automaticamente quando necessário
+      // Repositories são criados via dependency injection quando requisitados
 
       developer.log(
         'Serviços criados com sucesso (incluindo controle de versão)',
@@ -136,7 +125,6 @@ class AppDataManager implements IAppDataManager {
       return {'error': 'Sistema não foi inicializado'};
     }
 
-
     return {
       'initialized': _isInitialized,
       'timestamp': DateTime.now().toIso8601String(),
@@ -150,8 +138,6 @@ class AppDataManager implements IAppDataManager {
     // ⚠️ SIMPLIFIED: Just return initialization status
     return _isInitialized;
   }
-
-
 
   /// Version control service removed - no longer available
   dynamic get versionControlService {
@@ -169,8 +155,6 @@ class AppDataManager implements IAppDataManager {
         'Fazendo dispose do AppDataManager...',
         name: 'AppDataManager',
       );
-
-
 
       _isInitialized = false;
 

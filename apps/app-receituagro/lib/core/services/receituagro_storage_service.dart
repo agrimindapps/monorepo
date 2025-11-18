@@ -9,22 +9,28 @@ class Failure {
 /// EMERGENCY FIX: Interface mínima para stub do storage
 abstract class _IStorageStub {
   Future<Either<String, void>> initialize();
-  Future<Either<String, void>> save(
-      {required String key, required dynamic data, String? box});
-  Future<Either<String, void>> saveWithTTL(
-      {required String key,
-      required dynamic data,
-      required Duration ttl,
-      String? box});
+  Future<Either<String, void>> save({
+    required String key,
+    required dynamic data,
+    String? box,
+  });
+  Future<Either<String, void>> saveWithTTL({
+    required String key,
+    required dynamic data,
+    required Duration ttl,
+    String? box,
+  });
   Future<Either<String, void>> remove({required String key, String? box});
   Future<Either<String, void>> clear({String? box});
-  Future<Either<String, void>> saveOfflineData(
-      {required String key, required List<Map<String, dynamic>> data});
+  Future<Either<String, void>> saveOfflineData({
+    required String key,
+    required List<Map<String, dynamic>> data,
+  });
   Future<void> dispose();
 }
 
-/// EMERGENCY FIX: Implementação stub mínima do HiveStorageService
-class _StubHiveStorageService implements _IStorageStub {
+/// EMERGENCY FIX: Implementação stub mínima do StorageService
+class _StubStorageService implements _IStorageStub {
   @override
   Future<Either<String, void>> initialize() async {
     return const Right(null);
@@ -71,8 +77,7 @@ class _StubHiveStorageService implements _IStorageStub {
   }
 
   @override
-  Future<void> dispose() async {
-  }
+  Future<void> dispose() async {}
 }
 
 /// Adapter para ReceitaAgroStorageService que usa HiveStorageService do core
@@ -90,7 +95,7 @@ class ReceitaAgroStorageService {
 
   /// EMERGENCY FIX: Constructor stub para uso sem Core Package
   /// Permite criar o service sem dependências externas durante correções
-  ReceitaAgroStorageService.stub() : _storage = _StubHiveStorageService();
+  ReceitaAgroStorageService.stub() : _storage = _StubStorageService();
 
   Future<void> initialize() async {
     if (_isInitialized) return;
@@ -102,9 +107,13 @@ class ReceitaAgroStorageService {
       (_) => _isInitialized = true,
     );
   }
+
   Future<void> savePreference(String key, dynamic value) async {
-    final result =
-        await _storage.save(key: key, data: value, box: _preferencesBox);
+    final result = await _storage.save(
+      key: key,
+      data: value,
+      box: _preferencesBox,
+    );
     result.fold(
       (String failure) =>
           throw Exception('Erro ao salvar preferência: $failure'),
@@ -137,20 +146,27 @@ class ReceitaAgroStorageService {
       (_) {},
     );
   }
-  Future<void> saveToCache(String key, dynamic value,
-      {Duration? expiry}) async {
+
+  Future<void> saveToCache(
+    String key,
+    dynamic value, {
+    Duration? expiry,
+  }) async {
     Either<String, void> result;
 
     if (expiry != null) {
-      result = (await _storage.saveWithTTL(
-        key: key,
-        data: value,
-        ttl: expiry,
-        box: _cacheBox,
-      )) as Either<String, void>;
+      result =
+          (await _storage.saveWithTTL(
+                key: key,
+                data: value,
+                ttl: expiry,
+                box: _cacheBox,
+              ))
+              as Either<String, void>;
     } else {
-      result = (await _storage.save(key: key, data: value, box: _cacheBox))
-          as Either<String, void>;
+      result =
+          (await _storage.save(key: key, data: value, box: _cacheBox))
+              as Either<String, void>;
     }
 
     result.fold(
@@ -174,8 +190,12 @@ class ReceitaAgroStorageService {
       (_) {},
     );
   }
+
   Future<void> addFavorite(
-      String type, String id, Map<String, dynamic> data) async {
+    String type,
+    String id,
+    Map<String, dynamic> data,
+  ) async {
     final key = '${type}_$id';
     final favoriteData = {
       'id': id,
@@ -227,12 +247,12 @@ class ReceitaAgroStorageService {
       return [];
     }
   }
+
   Future<void> saveOfflineData(
-      String collection, List<Map<String, dynamic>> data) async {
-    final result = await _storage.saveOfflineData(
-      key: collection,
-      data: data,
-    );
+    String collection,
+    List<Map<String, dynamic>> data,
+  ) async {
+    final result = await _storage.saveOfflineData(key: collection, data: data);
     result.fold(
       (String failure) =>
           throw Exception('Erro ao salvar dados offline: $failure'),
@@ -280,6 +300,7 @@ class ReceitaAgroStorageService {
       (_) {},
     );
   }
+
   Future<void> saveNotificationPreference(String type, bool enabled) async {
     final result = await _storage.save(
       key: 'notification_$type',
@@ -288,7 +309,8 @@ class ReceitaAgroStorageService {
     );
     result.fold(
       (String failure) => throw Exception(
-          'Erro ao salvar preferência de notificação: $failure'),
+        'Erro ao salvar preferência de notificação: $failure',
+      ),
       (_) {},
     );
   }
@@ -307,7 +329,7 @@ class ReceitaAgroStorageService {
       'pest_detected',
       'application_reminder',
       'new_recipes',
-      'weather_alerts'
+      'weather_alerts',
     ];
 
     for (final key in keys) {
@@ -316,6 +338,7 @@ class ReceitaAgroStorageService {
 
     return preferences;
   }
+
   Future<void> addSearchHistory(String query, String type) async {
     final history = getSearchHistory(type);
     history.remove(query);
@@ -356,6 +379,7 @@ class ReceitaAgroStorageService {
       (_) {},
     );
   }
+
   Future<void> incrementStatistic(String key) async {
     int current = 0; // Por enquanto começa com 0
 
@@ -386,6 +410,7 @@ class ReceitaAgroStorageService {
       return {};
     }
   }
+
   Future<void> dispose() async {
     await _storage.dispose();
   }

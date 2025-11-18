@@ -18,7 +18,9 @@ class UserActionService {
       await _authRepository.signOut();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SettingsDesignTokens.getSuccessSnackbar('Logout realizado com sucesso!'),
+          SettingsDesignTokens.getSuccessSnackbar(
+            'Logout realizado com sucesso!',
+          ),
         );
       }
     } catch (e) {
@@ -33,19 +35,19 @@ class UserActionService {
   /// Limpar dados locais
   Future<void> clearLocalData(BuildContext context) async {
     _showProgressDialog(
-      context, 
+      context,
       title: 'Limpando Dados',
       message: 'Removendo dados locais...',
     );
 
     try {
-      await _clearHiveData();
+      await _clearLocalData();
       await _clearAppCache();
       await _resetUserPreferences();
 
       if (context.mounted) {
         Navigator.of(context).pop(); // Fechar dialog de progresso
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SettingsDesignTokens.getSuccessSnackbar(
             'Dados locais limpos com sucesso! Você pode sincronizar novamente.',
@@ -55,7 +57,7 @@ class UserActionService {
     } catch (e) {
       if (context.mounted) {
         Navigator.of(context).pop(); // Fechar dialog de progresso
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SettingsDesignTokens.getErrorSnackbar('Erro ao limpar dados: $e'),
         );
@@ -68,7 +70,8 @@ class UserActionService {
     _showProgressDialog(
       context,
       title: 'Excluindo Conta',
-      message: 'Excluindo conta e dados...\nPor favor, aguarde. Esta operação pode levar alguns momentos.',
+      message:
+          'Excluindo conta e dados...\nPor favor, aguarde. Esta operação pode levar alguns momentos.',
     );
 
     try {
@@ -98,9 +101,7 @@ class UserActionService {
                   children: [
                     const Icon(Icons.error, color: Colors.white),
                     const SizedBox(width: 8),
-                    Expanded(
-                      child: Text('Erro na exclusão: ${error.message}'),
-                    ),
+                    Expanded(child: Text('Erro na exclusão: ${error.message}')),
                   ],
                 ),
                 backgroundColor: Colors.red,
@@ -133,7 +134,9 @@ class UserActionService {
                       Icon(Icons.check_circle, color: Colors.white),
                       SizedBox(width: 8),
                       Expanded(
-                        child: Text('Conta excluída com sucesso. Todos os dados foram removidos.'),
+                        child: Text(
+                          'Conta excluída com sucesso. Todos os dados foram removidos.',
+                        ),
                       ),
                     ],
                   ),
@@ -148,7 +151,9 @@ class UserActionService {
               );
 
               if (context.mounted) {
-                Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/', (route) => false);
               }
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -158,7 +163,9 @@ class UserActionService {
                       const Icon(Icons.error, color: Colors.white),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text('Erro na exclusão: ${deletionResult.userMessage}'),
+                        child: Text(
+                          'Erro na exclusão: ${deletionResult.userMessage}',
+                        ),
                       ),
                     ],
                   ),
@@ -192,9 +199,7 @@ class UserActionService {
               children: [
                 const Icon(Icons.error, color: Colors.white),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: Text('Erro inesperado: $e'),
-                ),
+                Expanded(child: Text('Erro inesperado: $e')),
               ],
             ),
             backgroundColor: Colors.red,
@@ -227,10 +232,7 @@ class UserActionService {
             const SizedBox(height: 16),
             Text(
               title,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 8),
             Text(
@@ -244,8 +246,8 @@ class UserActionService {
     );
   }
 
-  /// Limpar dados do Hive
-  Future<void> _clearHiveData() async {
+  /// Limpar dados locais do Drift
+  Future<void> _clearLocalData() async {
     await Future<void>.delayed(const Duration(milliseconds: 500));
   }
 

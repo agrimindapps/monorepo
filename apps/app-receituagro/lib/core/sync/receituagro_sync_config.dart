@@ -53,15 +53,16 @@ Map<String, dynamic> _subscriptionToFirebaseMap(BaseSyncEntity entity) {
 /// Diagnóstico agrícola com favoritos, comentários e dados do usuário
 abstract final class ReceitaAgroSyncConfig {
   /// Configura o sistema de sincronização para o ReceitaAgro
-  /// 🔄 REALTIME SYNC HABILITADO para favoritos e comentários
+  /// ✅ SYNC ATIVADO com ReceituagroDriftStorageAdapter
+  /// Sincroniza: Favoritos, Comentários e AppSettings
   static Future<void> configure() async {
     await UnifiedSyncManager.instance.initializeApp(
       appName: 'receituagro',
       config: AppSyncConfig.advanced(
         appName: 'receituagro',
-        syncInterval: const Duration(minutes: 2), // Sync mais frequente
+        syncInterval: const Duration(minutes: 2),
         conflictStrategy: ConflictStrategy.timestamp,
-        enableOrchestration: false, // Desabilitado para economizar recursos
+        enableOrchestration: false,
       ),
       entities: [
         EntitySyncRegistration<FavoritoSyncEntity>.simple(
@@ -81,24 +82,6 @@ abstract final class ReceitaAgroSyncConfig {
           collectionName: 'user_settings',
           fromMap: _userSettingsFromFirebaseMap,
           toMap: _userSettingsToFirebaseMap,
-        ),
-        EntitySyncRegistration<UserHistorySyncEntity>.simple(
-          entityType: UserHistorySyncEntity,
-          collectionName: 'user_history',
-          fromMap: _userHistoryFromFirebaseMap,
-          toMap: _userHistoryToFirebaseMap,
-        ),
-        EntitySyncRegistration<UserEntity>.simple(
-          entityType: UserEntity,
-          collectionName: 'users',
-          fromMap: _userEntityFromFirebaseMap,
-          toMap: _userEntityToFirebaseMap,
-        ),
-        EntitySyncRegistration<SubscriptionEntity>.simple(
-          entityType: SubscriptionEntity,
-          collectionName: 'subscriptions',
-          fromMap: SubscriptionEntity.fromFirebaseMap,
-          toMap: _subscriptionToFirebaseMap,
         ),
       ],
     );

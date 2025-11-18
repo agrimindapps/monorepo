@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Widget para botões de login social
 /// Segue o princípio da Responsabilidade Única
-/// 
+///
 /// ⚠️ TEMPORARIAMENTE DESABILITADO
 /// Login social requer configuração do Google Client ID no Firebase Console
 /// Para reabilitar, siga as instruções em GOOGLE_SIGNIN_WEB_SETUP.md

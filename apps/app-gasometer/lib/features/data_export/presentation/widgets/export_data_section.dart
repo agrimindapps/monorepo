@@ -162,31 +162,29 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius:
-            isFirst
-                ? const BorderRadius.only(
-                  topLeft: Radius.circular(15),
-                  topRight: Radius.circular(15),
-                )
-                : isLast
-                ? const BorderRadius.only(
-                  bottomLeft: Radius.circular(15),
-                  bottomRight: Radius.circular(15),
-                )
-                : BorderRadius.zero,
+        borderRadius: isFirst
+            ? const BorderRadius.only(
+                topLeft: Radius.circular(15),
+                topRight: Radius.circular(15),
+              )
+            : isLast
+            ? const BorderRadius.only(
+                bottomLeft: Radius.circular(15),
+                bottomRight: Radius.circular(15),
+              )
+            : BorderRadius.zero,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
             border: Border(
-              bottom:
-                  isLast
-                      ? BorderSide.none
-                      : BorderSide(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.outline.withValues(alpha: 0.2),
-                        width: 1,
-                      ),
+              bottom: isLast
+                  ? BorderSide.none
+                  : BorderSide(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withValues(alpha: 0.2),
+                      width: 1,
+                    ),
             ),
           ),
           child: Row(

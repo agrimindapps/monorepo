@@ -35,7 +35,8 @@ class FirebaseAuthService implements IAuthRepository {
     FacebookAuth? facebookAuth,
   }) : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
        // Não inicializa GoogleSignIn na web sem configuração explícita
-       _googleSignIn = googleSignIn ?? (kIsWeb ? null : GoogleSignIn(scopes: ['email'])),
+       _googleSignIn =
+           googleSignIn ?? (kIsWeb ? null : GoogleSignIn(scopes: ['email'])),
        _facebookAuth = facebookAuth ?? FacebookAuth.instance;
 
   @override
@@ -116,7 +117,11 @@ class FirebaseAuthService implements IAuthRepository {
         if (kDebugMode) {
           debugPrint('⚠️ Firebase: Google Sign-In not configured');
         }
-        return Left(AuthFailure('Google Sign-In não está configurado para esta plataforma'));
+        return Left(
+          AuthFailure(
+            'Google Sign-In não está configurado para esta plataforma',
+          ),
+        );
       }
 
       // 🔥 FIX: Previne "Future already completed" na Web
@@ -717,7 +722,11 @@ class FirebaseAuthService implements IAuthRepository {
         if (kDebugMode) {
           debugPrint('⚠️ Firebase: Google Sign-In not configured');
         }
-        return Left(AuthFailure('Google Sign-In não está configurado para esta plataforma'));
+        return Left(
+          AuthFailure(
+            'Google Sign-In não está configurado para esta plataforma',
+          ),
+        );
       }
 
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();

@@ -37,7 +37,7 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
 
     // ✅ NOVO: Sincronizar imagens pendentes ao abrir o app
     _syncPendingImages();
-    
+
     // 🧪 AUTO-LOGIN PARA TESTES (remover em produção)
     if (kDebugMode) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -141,7 +141,7 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
       },
     );
   }
-  
+
   /// 🧪 AUTO-LOGIN PARA TESTES
   /// Remove this method in production!
   void _performTestAutoLogin() async {
@@ -150,21 +150,21 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
 
     try {
       SecureLogger.info('🧪 [TEST] Attempting auto-login...');
-      
+
       // Use GetIt directly
       final authRepository = di.sl<AuthRepository>();
-      
+
       // Test credentials
       const testEmail = 'lucineiy@hotmail.com';
       const testPassword = 'QWEqwe@123';
-      
+
       final result = await authRepository.signInWithEmail(
         email: testEmail,
         password: testPassword,
       );
 
       if (!mounted) return; // Verifica novamente após operação async
-      
+
       result.fold(
         (failure) {
           if (mounted) {

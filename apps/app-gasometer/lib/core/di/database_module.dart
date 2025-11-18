@@ -3,7 +3,7 @@ import '../../database/gasometer_database.dart';
 import '../../database/repositories/repositories.dart';
 
 /// ⚠️ DEPRECATED MODULE - DO NOT USE
-/// 
+///
 /// Este módulo está DEPRECATED e NÃO deve ser usado.
 /// O GasometerDatabase agora é registrado automaticamente via @lazySingleton
 /// pelo injectable/build_runner em injection.config.dart.
@@ -24,12 +24,10 @@ void registerDatabaseModule() {
   print('    - Mobile/Desktop: SQLite nativo');
   print('    - Web: WASM + IndexedDB');
   print('    ⚠️  SINGLE INSTANCE - Shared between GetIt and Riverpod');
-  
+
   // Registra o banco de dados em todas as plataformas
   if (!getIt.isRegistered<GasometerDatabase>()) {
-    getIt.registerSingleton<GasometerDatabase>(
-      GasometerDatabase.production(),
-    );
+    getIt.registerSingleton<GasometerDatabase>(GasometerDatabase.production());
     print('✅ [DatabaseModule] GasometerDatabase registered as SINGLETON');
   }
 

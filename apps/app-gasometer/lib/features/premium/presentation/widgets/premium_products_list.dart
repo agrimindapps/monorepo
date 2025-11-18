@@ -124,23 +124,21 @@ class _PremiumProductsListState
         }
 
         return Column(
-          children:
-              state.availableProducts.map((product) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _buildProductCard(context, state, product),
-                );
-              }).toList(),
+          children: state.availableProducts.map((product) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _buildProductCard(context, state, product),
+            );
+          }).toList(),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error:
-          (error, stack) => Center(
-            child: Text(
-              'Erro: $error',
-              style: const TextStyle(color: AppColors.error),
-            ),
-          ),
+      error: (error, stack) => Center(
+        child: Text(
+          'Erro: $error',
+          style: const TextStyle(color: AppColors.error),
+        ),
+      ),
     );
   }
 
@@ -160,16 +158,15 @@ class _PremiumProductsListState
           color: isRecommended ? AppColors.primary : AppColors.grey200,
           width: isRecommended ? 2 : 1,
         ),
-        boxShadow:
-            isRecommended
-                ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-                : null,
+        boxShadow: isRecommended
+            ? [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
       ),
       child: Stack(
         children: [
@@ -265,35 +262,34 @@ class _PremiumProductsListState
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed:
-                        state.isProcessingPurchase
-                            ? null
-                            : () => _onPurchasePressed(context, product),
+                    onPressed: state.isProcessingPurchase
+                        ? null
+                        : () => _onPurchasePressed(context, product),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          isRecommended ? AppColors.primary : AppColors.grey700,
+                      backgroundColor: isRecommended
+                          ? AppColors.primary
+                          : AppColors.grey700,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child:
-                        state.isProcessingPurchase
-                            ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
-                                ),
+                    child: state.isProcessingPurchase
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
                               ),
-                            )
-                            : const Text(
-                              'Assinar Agora',
-                              style: AppTextStyles.buttonMedium,
                             ),
+                          )
+                        : const Text(
+                            'Assinar Agora',
+                            style: AppTextStyles.buttonMedium,
+                          ),
                   ),
                 ),
 
@@ -393,32 +389,31 @@ class _PremiumProductsListState
   ) async {
     return await showDialog<bool>(
           context: context,
-          builder:
-              (context) => AlertDialog(
-                title: const Text('Confirmar Compra'),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Produto: ${product.title}'),
-                    Text('Preço: ${product.priceString}'),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Ao confirmar, você será redirecionado para a loja para completar a compra.',
-                    ),
-                  ],
+          builder: (context) => AlertDialog(
+            title: const Text('Confirmar Compra'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Produto: ${product.title}'),
+                Text('Preço: ${product.priceString}'),
+                const SizedBox(height: 16),
+                const Text(
+                  'Ao confirmar, você será redirecionado para a loja para completar a compra.',
                 ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('Cancelar'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('Confirmar'),
-                  ),
-                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
               ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Confirmar'),
+              ),
+            ],
+          ),
         ) ??
         false;
   }

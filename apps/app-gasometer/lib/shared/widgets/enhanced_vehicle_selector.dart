@@ -1,4 +1,4 @@
-import 'package:core/core.dart' ;
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -499,17 +499,15 @@ class _EnhancedVehicleSelectorState
                                               .colorScheme
                                               .primary
                                               .withValues(alpha: 0.1),
-                                          borderRadius:
-                                              BorderRadius.circular(
-                                                AppRadius.small,
-                                              ),
+                                          borderRadius: BorderRadius.circular(
+                                            AppRadius.small,
+                                          ),
                                         ),
                                         child: Text(
                                           vehicle.licensePlate,
                                           style: TextStyle(
                                             fontSize: AppFontSizes.xs,
-                                            fontWeight:
-                                                AppFontWeights.medium,
+                                            fontWeight: AppFontWeights.medium,
                                             color: Theme.of(
                                               context,
                                             ).colorScheme.primary,

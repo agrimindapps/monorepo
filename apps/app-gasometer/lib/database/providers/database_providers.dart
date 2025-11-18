@@ -17,7 +17,7 @@ final gasometerDatabaseProvider = Provider<GasometerDatabase>((ref) {
   // 🔒 CRITICAL: Retorna a instância única do GetIt
   // Isso previne múltiplas instâncias que causam race conditions
   final db = GetIt.I<GasometerDatabase>();
-  
+
   // NÃO fecha o banco aqui, pois a instância é gerenciada pelo GetIt
   // ref.onDispose não deve ser usado para instâncias compartilhadas
 

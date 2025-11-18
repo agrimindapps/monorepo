@@ -7,7 +7,6 @@ import 'core/di/injection_container.dart' as di;
 import 'core/providers/sync_completion_listener.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/plantis_theme.dart';
-import 'features/auth/domain/repositories/auth_repository.dart';
 import 'shared/widgets/desktop_keyboard_shortcuts.dart';
 
 class PlantisApp extends ConsumerStatefulWidget {
@@ -66,28 +65,29 @@ class _PlantisAppState extends ConsumerState<PlantisApp> {
     try {
       SecureLogger.info('🧪 [PLANTIS-TEST] Attempting auto-login...');
       
-      final authRepository = di.sl<AuthRepository>();
+      final auth = FirebaseAuth.instance;
+      
+      // Se já está logado, não faz nada
+      if (auth.currentUser != null) {
+        SecureLogger.info(
+          '🧪 [PLANTIS-TEST] Already logged in as: ${auth.currentUser!.email}',
+        );
+        return;
+      }
       
       const testEmail = 'lucineiy@hotmail.com';
       const testPassword = 'QWEqwe@123';
       
-      final result = await authRepository.signInWithEmail(
+      final result = await auth.signInWithEmailAndPassword(
         email: testEmail,
         password: testPassword,
       );
       
-      result.fold(
-        (failure) {
-          SecureLogger.error(
-            '🧪 [PLANTIS-TEST] Auto-login failed: ${failure.message}',
-          );
-        },
-        (user) {
-          SecureLogger.info(
-            '🧪 [PLANTIS-TEST] Auto-login successful! User: ${user.email}',
-          );
-        },
-      );
+      if (result.user != null) {
+        SecureLogger.info(
+          '🧪 [PLANTIS-TEST] Auto-login successful! User: ${result.user!.email}',
+        );
+      }
     } catch (e, stackTrace) {
       SecureLogger.error(
         '🧪 [PLANTIS-TEST] Auto-login error',

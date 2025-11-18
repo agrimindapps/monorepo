@@ -83,14 +83,14 @@ class TermosTecnicosDatabase extends _$TermosTecnicosDatabase
   /// Estratégia de migração do banco de dados
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (Migrator m) async {
-          await m.createAll();
-        },
-        beforeOpen: (details) async {
-          await customStatement('PRAGMA foreign_keys = ON');
-        },
-        onUpgrade: (Migrator m, int from, int to) async {
-          // Future schema migrations will go here
-        },
-      );
+    onCreate: (Migrator m) async {
+      await m.createAll();
+    },
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+    onUpgrade: (Migrator m, int from, int to) async {
+      // Future schema migrations will go here
+    },
+  );
 }

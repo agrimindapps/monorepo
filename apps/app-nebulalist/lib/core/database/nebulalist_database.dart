@@ -29,10 +29,7 @@ part 'nebulalist_database.g.dart';
 /// **SCHEMA VERSION:** 1 (inicial)
 /// ============================================================================
 
-@DriftDatabase(
-  tables: [Lists, Items],
-  daos: [ListDao, ItemDao],
-)
+@DriftDatabase(tables: [Lists, Items], daos: [ListDao, ItemDao])
 @lazySingleton
 class NebulalistDatabase extends _$NebulalistDatabase with BaseDriftDatabase {
   NebulalistDatabase(QueryExecutor e) : super(e);
@@ -88,14 +85,14 @@ class NebulalistDatabase extends _$NebulalistDatabase with BaseDriftDatabase {
   /// Estratégia de migração do banco de dados
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (Migrator m) async {
-          await m.createAll();
-        },
-        beforeOpen: (details) async {
-          await customStatement('PRAGMA foreign_keys = ON');
-        },
-        onUpgrade: (Migrator m, int from, int to) async {
-          // Future schema migrations will go here
-        },
-      );
+    onCreate: (Migrator m) async {
+      await m.createAll();
+    },
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+    onUpgrade: (Migrator m, int from, int to) async {
+      // Future schema migrations will go here
+    },
+  );
 }

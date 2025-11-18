@@ -39,6 +39,6 @@ class Items extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {listId, position}
-      ];
+    {listId, position},
+  ];
 }

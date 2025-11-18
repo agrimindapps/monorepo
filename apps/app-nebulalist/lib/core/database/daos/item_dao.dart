@@ -18,14 +18,18 @@ class ItemDao extends DatabaseAccessor<NebulalistDatabase> with _$ItemDaoMixin {
       (select(items)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
 
   /// Buscar itens completados de uma lista
-  Future<List<ItemRecord>> getCompletedItems(String listId) => (select(items)
-        ..where((tbl) => tbl.listId.equals(listId) & tbl.isCompleted.equals(true)))
-      .get();
+  Future<List<ItemRecord>> getCompletedItems(String listId) =>
+      (select(items)..where(
+            (tbl) => tbl.listId.equals(listId) & tbl.isCompleted.equals(true),
+          ))
+          .get();
 
   /// Buscar itens pendentes de uma lista
-  Future<List<ItemRecord>> getPendingItems(String listId) => (select(items)
-        ..where((tbl) => tbl.listId.equals(listId) & tbl.isCompleted.equals(false)))
-      .get();
+  Future<List<ItemRecord>> getPendingItems(String listId) =>
+      (select(items)..where(
+            (tbl) => tbl.listId.equals(listId) & tbl.isCompleted.equals(false),
+          ))
+          .get();
 
   /// Inserir ou atualizar item
   Future<int> upsertItem(ItemsCompanion item) =>

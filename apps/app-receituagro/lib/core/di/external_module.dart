@@ -9,4 +9,10 @@ abstract class ExternalModule {
   @preResolve
   Future<SharedPreferences> get sharedPreferences =>
       SharedPreferences.getInstance();
+
+  @lazySingleton
+  FirebaseFirestore get firestore => FirebaseFirestore.instance;
+
+  @lazySingleton
+  FirebaseAuth get auth => FirebaseAuth.instance;
 }

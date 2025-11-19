@@ -394,7 +394,7 @@ class AdvancedSubscriptionSyncService implements ISubscriptionSyncService {
         : _configuration.logLevel.index >= SubscriptionSyncLogLevel.info.index;
 
     if (shouldLog) {
-      final prefix = '[AdvancedSubscriptionSyncService]';
+      const prefix = '[AdvancedSubscriptionSyncService]';
       if (isError) {
         debugPrint('$prefix ERROR: $message');
       } else {

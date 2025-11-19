@@ -62,7 +62,7 @@ class _AdBannerWidgetState extends ConsumerState<AdBannerWidget> {
                 adUnitId: widget.adUnitId,
                 size: widget.size,
                 request: const AdRequest(),
-                listener: BannerAdListener(),
+                listener: const BannerAdListener(),
               ),
           LoadAdError(0, 'domain', failure.message, null),
         );

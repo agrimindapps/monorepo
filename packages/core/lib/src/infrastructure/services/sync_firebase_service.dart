@@ -225,11 +225,12 @@ class SyncFirebaseService<T extends BaseSyncEntity>
         itemsToUpdate.add(updatedItem);
 
         final result = await _saveLocal(updatedItem);
-        if (result.isLeft())
+        if (result.isLeft()) {
           return result.fold(
             (failure) => Left(failure),
             (_) => const Right(null),
           );
+        }
       }
 
       if (_canSync()) {
@@ -249,11 +250,12 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       await _ensureInitialized();
 
       final existingResult = await _getLocal(id);
-      if (existingResult.isLeft())
+      if (existingResult.isLeft()) {
         return existingResult.fold(
           (failure) => Left(failure),
           (_) => const Right(null),
         );
+      }
 
       final existing = existingResult.getOrElse(() => null);
       if (existing == null) {
@@ -445,11 +447,12 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       }
 
       final unsyncedResult = await getUnsyncedItems();
-      if (unsyncedResult.isLeft())
+      if (unsyncedResult.isLeft()) {
         return unsyncedResult.fold(
           (failure) => Left(failure),
           (_) => const Right(null),
         );
+      }
 
       final unsyncedItems = unsyncedResult.getOrElse(() => []);
 

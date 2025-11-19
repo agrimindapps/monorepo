@@ -53,7 +53,9 @@ mixin DisposableServiceMixin implements IDisposableService {
   }
 
   /// Helper to dispose a StreamController safely
-  Future<void> disposeStreamController(StreamController? controller) async {
+  Future<void> disposeStreamController(
+    StreamController<dynamic>? controller,
+  ) async {
     try {
       await controller?.close();
     } catch (e) {
@@ -72,7 +74,9 @@ mixin DisposableServiceMixin implements IDisposableService {
   }
 
   /// Helper to cancel a StreamSubscription safely
-  Future<void> disposeSubscription(StreamSubscription? subscription) async {
+  Future<void> disposeSubscription(
+    StreamSubscription<dynamic>? subscription,
+  ) async {
     try {
       await subscription?.cancel();
     } catch (e) {
@@ -82,9 +86,9 @@ mixin DisposableServiceMixin implements IDisposableService {
 
   /// Helper to dispose multiple resources at once
   Future<void> disposeAll({
-    List<StreamController>? controllers,
+    List<StreamController<dynamic>>? controllers,
     List<Timer>? timers,
-    List<StreamSubscription>? subscriptions,
+    List<StreamSubscription<dynamic>>? subscriptions,
   }) async {
     // Dispose in parallel for efficiency
     await Future.wait([

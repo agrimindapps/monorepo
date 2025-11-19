@@ -16,22 +16,20 @@ abstract class AdsFailure extends Failure {
 class AdLoadFailure extends AdsFailure {
   const AdLoadFailure(
     String message, {
-    String? code,
-    dynamic details,
+    super.code,
+    super.details,
   }) : super(
     message: message,
-    code: code,
-    details: details,
   );
 
   /// Ad failed to load due to no inventory (no ads available)
-  factory AdLoadFailure.noInventory() => AdLoadFailure(
+  factory AdLoadFailure.noInventory() => const AdLoadFailure(
         'Nenhum anúncio disponível no momento',
         code: 'NO_INVENTORY',
       );
 
   /// Ad failed to load due to network error
-  factory AdLoadFailure.networkError() => AdLoadFailure(
+  factory AdLoadFailure.networkError() => const AdLoadFailure(
         'Erro de rede ao carregar anúncio',
         code: 'NETWORK_ERROR',
       );
@@ -51,7 +49,7 @@ class AdLoadFailure extends AdsFailure {
       );
 
   /// Ad failed to load - timeout
-  factory AdLoadFailure.timeout() => AdLoadFailure(
+  factory AdLoadFailure.timeout() => const AdLoadFailure(
         'Tempo esgotado ao carregar anúncio',
         code: 'TIMEOUT',
       );
@@ -61,22 +59,20 @@ class AdLoadFailure extends AdsFailure {
 class AdShowFailure extends AdsFailure {
   const AdShowFailure(
     String message, {
-    String? code,
-    dynamic details,
+    super.code,
+    super.details,
   }) : super(
     message: message,
-    code: code,
-    details: details,
   );
 
   /// Cannot show ad because it's not loaded/ready
-  factory AdShowFailure.notReady() => AdShowFailure(
+  factory AdShowFailure.notReady() => const AdShowFailure(
         'Anúncio não está pronto para exibição',
         code: 'AD_NOT_READY',
       );
 
   /// Cannot show ad because another ad is already showing
-  factory AdShowFailure.alreadyShowing() => AdShowFailure(
+  factory AdShowFailure.alreadyShowing() => const AdShowFailure(
         'Já existe um anúncio sendo exibido',
         code: 'AD_ALREADY_SHOWING',
       );
@@ -93,12 +89,10 @@ class AdShowFailure extends AdsFailure {
 class AdConfigFailure extends AdsFailure {
   const AdConfigFailure(
     String message, {
-    String? code,
-    dynamic details,
+    super.code,
+    super.details,
   }) : super(
           message: message,
-          code: code,
-          details: details,
         );
 
   /// Ad unit ID is invalid or missing
@@ -109,7 +103,7 @@ class AdConfigFailure extends AdsFailure {
       );
 
   /// Ad configuration is missing or incomplete
-  factory AdConfigFailure.missingConfiguration() => AdConfigFailure(
+  factory AdConfigFailure.missingConfiguration() => const AdConfigFailure(
         'Configuração de anúncios ausente',
         code: 'MISSING_CONFIG',
       );
@@ -126,12 +120,10 @@ class AdConfigFailure extends AdsFailure {
 class AdInitializationFailure extends AdsFailure {
   const AdInitializationFailure(
     String message, {
-    String? code,
-    dynamic details,
+    super.code,
+    super.details,
   }) : super(
           message: message,
-          code: code,
-          details: details,
         );
 
   /// Ads SDK failed to initialize
@@ -144,7 +136,7 @@ class AdInitializationFailure extends AdsFailure {
 
   /// Ads already initialized
   factory AdInitializationFailure.alreadyInitialized() =>
-      AdInitializationFailure(
+      const AdInitializationFailure(
         'SDK de anúncios já foi inicializado',
         code: 'ALREADY_INITIALIZED',
       );
@@ -155,37 +147,35 @@ class AdInitializationFailure extends AdsFailure {
 class AdFrequencyCapFailure extends AdsFailure {
   const AdFrequencyCapFailure(
     String message, {
-    String? code,
-    dynamic details,
+    super.code,
+    super.details,
   }) : super(
           message: message,
-          code: code,
-          details: details,
         );
 
   /// Daily limit reached
   factory AdFrequencyCapFailure.dailyLimitReached() =>
-      AdFrequencyCapFailure(
+      const AdFrequencyCapFailure(
         'Limite diário de anúncios atingido',
         code: 'DAILY_LIMIT_REACHED',
       );
 
   /// Session limit reached
   factory AdFrequencyCapFailure.sessionLimitReached() =>
-      AdFrequencyCapFailure(
+      const AdFrequencyCapFailure(
         'Limite de anúncios por sessão atingido',
         code: 'SESSION_LIMIT_REACHED',
       );
 
   /// Minimum interval not elapsed
-  factory AdFrequencyCapFailure.tooSoon() => AdFrequencyCapFailure(
+  factory AdFrequencyCapFailure.tooSoon() => const AdFrequencyCapFailure(
         'Intervalo mínimo entre anúncios não atingido',
         code: 'TOO_SOON',
       );
 
   /// Hourly limit reached
   factory AdFrequencyCapFailure.hourlyLimitReached() =>
-      AdFrequencyCapFailure(
+      const AdFrequencyCapFailure(
         'Limite de anúncios por hora atingido',
         code: 'HOURLY_LIMIT_REACHED',
       );

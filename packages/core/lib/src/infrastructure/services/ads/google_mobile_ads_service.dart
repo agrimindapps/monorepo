@@ -1,17 +1,16 @@
 import 'package:dartz/dartz.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-import '../../../domain/entities/ads/ad_unit_entity.dart';
 import '../../../domain/repositories/i_ads_repository.dart';
 import '../../../shared/utils/ads_failures.dart';
 import '../../../shared/utils/failure.dart';
 import 'specialized_services/ad_lifecycle_manager.dart';
+import 'specialized_services/ad_preloader_service.dart';
+import 'specialized_services/app_open_ad_service.dart';
 import 'specialized_services/banner_ad_service.dart';
 import 'specialized_services/interstitial_ad_service.dart';
 import 'specialized_services/rewarded_ad_service.dart';
 import 'specialized_services/rewarded_interstitial_ad_service.dart';
-import 'specialized_services/app_open_ad_service.dart';
-import 'specialized_services/ad_preloader_service.dart';
 
 /// Main Google Mobile Ads Service implementing the repository interface
 /// Follows Facade Pattern - coordinates all specialized services
@@ -39,13 +38,13 @@ class GoogleMobileAdsService implements IAdsRepository {
     required AppOpenAdService appOpenService,
     AdPreloaderService? preloaderService,
     this.premiumStatusChecker,
-  })  : _lifecycleManager = lifecycleManager,
-        _bannerService = bannerService,
-        _interstitialService = interstitialService,
-        _rewardedService = rewardedService,
-        _rewardedInterstitialService = rewardedInterstitialService,
-        _appOpenService = appOpenService,
-        _preloaderService = preloaderService;
+  }) : _lifecycleManager = lifecycleManager,
+       _bannerService = bannerService,
+       _interstitialService = interstitialService,
+       _rewardedService = rewardedService,
+       _rewardedInterstitialService = rewardedInterstitialService,
+       _appOpenService = appOpenService,
+       _preloaderService = preloaderService;
 
   // ===== Initialization =====
 
@@ -93,14 +92,12 @@ class GoogleMobileAdsService implements IAdsRepository {
     required AdSize size,
   }) async {
     if (!_isInitialized) {
-      return Left(
-        AdInitializationFailure('Ads not initialized'),
-      );
+      return const Left(AdInitializationFailure('Ads not initialized'));
     }
 
     // Check premium status
     if (await _shouldBlockForPremium()) {
-      return Left(AdPremiumBlockFailure());
+      return const Left(AdPremiumBlockFailure());
     }
 
     return _bannerService.loadBanner(
@@ -119,9 +116,7 @@ class GoogleMobileAdsService implements IAdsRepository {
     required String adUnitId,
   }) async {
     if (!_isInitialized) {
-      return Left(
-        AdInitializationFailure('Ads not initialized'),
-      );
+      return const Left(AdInitializationFailure('Ads not initialized'));
     }
 
     return _interstitialService.load(adUnitId: adUnitId);
@@ -130,14 +125,12 @@ class GoogleMobileAdsService implements IAdsRepository {
   @override
   Future<Either<Failure, void>> showInterstitialAd() async {
     if (!_isInitialized) {
-      return Left(
-        AdInitializationFailure('Ads not initialized'),
-      );
+      return const Left(AdInitializationFailure('Ads not initialized'));
     }
 
     // Check premium status
     if (await _shouldBlockForPremium()) {
-      return Left(AdPremiumBlockFailure());
+      return const Left(AdPremiumBlockFailure());
     }
 
     // Check frequency
@@ -179,9 +172,7 @@ class GoogleMobileAdsService implements IAdsRepository {
     required String adUnitId,
   }) async {
     if (!_isInitialized) {
-      return Left(
-        AdInitializationFailure('Ads not initialized'),
-      );
+      return const Left(AdInitializationFailure('Ads not initialized'));
     }
 
     return _rewardedService.load(adUnitId: adUnitId);
@@ -190,9 +181,7 @@ class GoogleMobileAdsService implements IAdsRepository {
   @override
   Future<Either<Failure, RewardedAd?>> showRewardedAd() async {
     if (!_isInitialized) {
-      return Left(
-        AdInitializationFailure('Ads not initialized'),
-      );
+      return const Left(AdInitializationFailure('Ads not initialized'));
     }
 
     // Rewarded ads can be shown to premium users (user-initiated)
@@ -241,24 +230,23 @@ class GoogleMobileAdsService implements IAdsRepository {
     required String adUnitId,
   }) async {
     if (!_isInitialized) {
-      return Left(
-        AdInitializationFailure('Ads not initialized'),
-      );
+      return const Left(AdInitializationFailure('Ads not initialized'));
     }
 
     return _rewardedInterstitialService.load(adUnitId: adUnitId);
   }
 
   @override
-  Future<Either<Failure, RewardedInterstitialAd?>> showRewardedInterstitialAd() async {
+  Future<Either<Failure, RewardedInterstitialAd?>>
+  showRewardedInterstitialAd() async {
     if (!_isInitialized) {
-      return Left(
-        AdInitializationFailure('Ads not initialized'),
-      );
+      return const Left(AdInitializationFailure('Ads not initialized'));
     }
 
     // Check frequency
-    final canShowResult = await shouldShowAd(placement: 'rewarded_interstitial');
+    final canShowResult = await shouldShowAd(
+      placement: 'rewarded_interstitial',
+    );
     if (canShowResult.isLeft()) {
       return canShowResult.fold(
         (failure) => Left(failure),
@@ -302,9 +290,7 @@ class GoogleMobileAdsService implements IAdsRepository {
     required String adUnitId,
   }) async {
     if (!_isInitialized) {
-      return Left(
-        AdInitializationFailure('Ads not initialized'),
-      );
+      return const Left(AdInitializationFailure('Ads not initialized'));
     }
 
     return _appOpenService.load(adUnitId: adUnitId);
@@ -313,14 +299,12 @@ class GoogleMobileAdsService implements IAdsRepository {
   @override
   Future<Either<Failure, void>> showAppOpenAd() async {
     if (!_isInitialized) {
-      return Left(
-        AdInitializationFailure('Ads not initialized'),
-      );
+      return const Left(AdInitializationFailure('Ads not initialized'));
     }
 
     // Check premium status
     if (await _shouldBlockForPremium()) {
-      return Left(AdPremiumBlockFailure());
+      return const Left(AdPremiumBlockFailure());
     }
 
     // Check frequency
@@ -362,9 +346,7 @@ class GoogleMobileAdsService implements IAdsRepository {
     required List<String> deviceIds,
   }) async {
     try {
-      final requestConfig = RequestConfiguration(
-        testDeviceIds: deviceIds,
-      );
+      final requestConfig = RequestConfiguration(testDeviceIds: deviceIds);
       await MobileAds.instance.updateRequestConfiguration(requestConfig);
       return const Right(null);
     } catch (e) {
@@ -384,7 +366,7 @@ class GoogleMobileAdsService implements IAdsRepository {
   }) async {
     // Check premium status
     if (await _shouldBlockForPremium()) {
-      return Left(AdPremiumBlockFailure());
+      return const Left(AdPremiumBlockFailure());
     }
 
     // TODO: Frequency checking disabled - _configService and _frequencyManager deleted
@@ -479,15 +461,6 @@ class GoogleMobileAdsService implements IAdsRepository {
       // If error checking premium status, allow ads
       return false;
     }
-  }
-
-  /// Get ad type from placement name
-  AdType _getAdTypeFromPlacement(String placement) {
-    if (placement.contains('interstitial')) return AdType.interstitial;
-    if (placement.contains('rewarded')) return AdType.rewarded;
-    if (placement.contains('banner')) return AdType.banner;
-    if (placement.contains('app_open')) return AdType.appOpen;
-    return AdType.interstitial; // Default
   }
 
   /// Get service statistics

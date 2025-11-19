@@ -153,7 +153,7 @@ class EnvironmentConfig {
 
     for (final key in required) {
       final value = get(key, fallback: null);
-      if (value == null || value.isEmpty) {
+      if (value.isEmpty) {
         missing.add(key);
       }
     }

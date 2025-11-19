@@ -11,7 +11,10 @@ import '../../tables/receituagro_tables.dart';
 @injectable
 class ComentariosDriftSyncAdapter
     extends DriftSyncAdapterBase<ComentarioSyncEntity, Comentario> {
-  ComentariosDriftSyncAdapter(super.db, super.firestore);
+  ComentariosDriftSyncAdapter(
+    ReceituagroDatabase db,
+    FirebaseFirestore firestore,
+  ) : super(db, firestore);
 
   ReceituagroDatabase get localDb => db as ReceituagroDatabase;
 
@@ -149,7 +152,6 @@ class ComentariosDriftSyncAdapter
     return entity.toFirebaseMap();
   }
 
-  @override
   Future<Either<Failure, ComentarioSyncEntity?>> getLocalByFirebaseId(
     String firebaseId,
   ) async {

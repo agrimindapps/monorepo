@@ -1,5 +1,6 @@
 /// Exceções específicas do Drift Storage
 /// Equivalentes às exceções Hive mas adaptadas para Drift
+library;
 
 /// Exceção base para erros relacionados ao Drift
 class DriftException implements Exception {

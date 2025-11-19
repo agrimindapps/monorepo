@@ -5,7 +5,6 @@ export 'package:carousel_slider/carousel_slider.dart';
 export 'package:cloud_firestore/cloud_firestore.dart' hide Order;
 export 'package:cloud_functions/cloud_functions.dart' hide Result;
 export 'package:connectivity_plus/connectivity_plus.dart';
-export 'package:flutter/material.dart' show Column;
 export 'package:dartz/dartz.dart' hide Order, State, id;
 export 'package:device_info_plus/device_info_plus.dart';
 export 'package:equatable/equatable.dart';
@@ -14,6 +13,7 @@ export 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 export 'package:firebase_core/firebase_core.dart';
 export 'package:firebase_crashlytics/firebase_crashlytics.dart';
 export 'package:firebase_storage/firebase_storage.dart' hide Task;
+export 'package:flutter/material.dart' show Column;
 export 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 export 'package:flutter_local_notifications/flutter_local_notifications.dart';
 export 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,25 +25,6 @@ export 'package:icons_plus/icons_plus.dart';
 export 'package:injectable/injectable.dart' hide Environment, order;
 export 'package:intl/intl.dart';
 export 'package:json_annotation/json_annotation.dart';
-
-// Drift - Sistema de persistência SQL
-// export 'package:drift/drift.dart'
-//     hide JsonKey, Index, VerificationResult, Query;
-// export 'services/drift/drift.dart';
-
-// Export Drift services used in app-plantis and other apps
-export 'services/drift/base_drift_database.dart';
-export 'services/drift/drift_database_config.dart';
-export 'services/drift/base_drift_repository.dart';
-
-// Export Drift storage service for local storage compatibility
-export 'src/infrastructure/storage/drift/services/drift_storage_service.dart';
-
-// Export Drift Sync Infrastructure
-export 'src/infrastructure/storage/drift/sync/adapters/drift_sync_adapter_base.dart';
-export 'src/infrastructure/storage/drift/sync/interfaces/i_drift_sync_adapter.dart';
-export 'src/infrastructure/storage/drift/sync/models/sync_results.dart';
-
 export 'package:package_info_plus/package_info_plus.dart';
 export 'package:purchases_flutter/purchases_flutter.dart' hide LogLevel, Store;
 export 'package:riverpod/riverpod.dart'
@@ -72,11 +53,22 @@ export 'package:supabase_flutter/supabase_flutter.dart'
     hide AuthException, AuthState, OAuthProvider, User;
 export 'package:timezone/timezone.dart';
 export 'package:url_launcher/url_launcher.dart';
+
 export 'models/license_info.dart';
 export 'repositories/license_repository.dart';
+// Drift - Sistema de persistência SQL
+// export 'package:drift/drift.dart'
+//     hide JsonKey, Index, VerificationResult, Query;
+// export 'services/drift/drift.dart';
+
+// Export Drift services used in app-plantis and other apps
+export 'services/drift/base_drift_database.dart';
+export 'services/drift/base_drift_repository.dart';
+export 'services/drift/drift_database_config.dart';
 export 'services/image_compression_service.dart';
 export 'services/license_service.dart';
 export 'services/shimmer_service.dart';
+export 'src/data/repositories/base_supabase_repository.dart';
 export 'src/domain/contracts/i_app_data_cleaner.dart';
 export 'src/domain/entities/auth_result.dart';
 export 'src/domain/entities/base_entity.dart';
@@ -115,7 +107,7 @@ export 'src/domain/repositories/i_security_repository.dart';
 export 'src/domain/repositories/i_storage_repository.dart';
 export 'src/domain/repositories/i_subscription_repository.dart';
 export 'src/domain/repositories/i_sync_repository.dart';
-export 'src/data/repositories/base_supabase_repository.dart';
+export 'src/domain/services/i_subscription_sync_service.dart';
 export 'src/domain/usecases/auth/delete_account_usecase.dart';
 export 'src/domain/usecases/auth/login_usecase.dart';
 export 'src/domain/usecases/auth/logout_usecase.dart';
@@ -132,6 +124,10 @@ export 'src/infrastructure/services/account_deletion_rate_limiter.dart';
 export 'src/infrastructure/services/account_deletion_service.dart';
 export 'src/infrastructure/services/anonymous_data_cleaner.dart';
 export 'src/infrastructure/services/app_rating_service.dart';
+export 'src/infrastructure/services/auth/auth_account_service.dart';
+export 'src/infrastructure/services/auth/auth_mapper_service.dart';
+export 'src/infrastructure/services/auth/auth_provider_linking_service.dart';
+export 'src/infrastructure/services/auth/auth_sign_in_service.dart';
 export 'src/infrastructure/services/connectivity_service.dart';
 export 'src/infrastructure/services/data_migration_service.dart';
 export 'src/infrastructure/services/device_management_service.dart';
@@ -144,18 +140,14 @@ export 'src/infrastructure/services/enhanced_logging_service.dart';
 export 'src/infrastructure/services/enhanced_notification_service.dart';
 export 'src/infrastructure/services/enhanced_secure_storage_service.dart';
 export 'src/infrastructure/services/enhanced_security_service.dart';
-export 'src/infrastructure/services/file_manager_service.dart';
-export 'src/infrastructure/services/file/file_operations_service.dart';
 export 'src/infrastructure/services/file/directory_manager_service.dart';
 export 'src/infrastructure/services/file/file_compression_service.dart';
 export 'src/infrastructure/services/file/file_metadata_service.dart';
+export 'src/infrastructure/services/file/file_operations_service.dart';
 export 'src/infrastructure/services/file/file_watcher_service.dart';
+export 'src/infrastructure/services/file_manager_service.dart';
 export 'src/infrastructure/services/firebase_analytics_service.dart';
 export 'src/infrastructure/services/firebase_auth_service.dart';
-export 'src/infrastructure/services/auth/auth_mapper_service.dart';
-export 'src/infrastructure/services/auth/auth_sign_in_service.dart';
-export 'src/infrastructure/services/auth/auth_account_service.dart';
-export 'src/infrastructure/services/auth/auth_provider_linking_service.dart';
 export 'src/infrastructure/services/firebase_crashlytics_service.dart';
 export 'src/infrastructure/services/firebase_device_service.dart';
 export 'src/infrastructure/services/firebase_storage_service.dart';
@@ -173,12 +165,12 @@ export 'src/infrastructure/services/security_service.dart';
 export 'src/infrastructure/services/sync_firebase_service.dart';
 export 'src/infrastructure/services/validation_service.dart';
 export 'src/infrastructure/services/web_notification_service.dart';
-
-// Storage - Drift (Novo)
-// export 'src/infrastructure/storage/drift/drift_storage.dart';
-
-export 'src/services/cache/cache_service.dart';
-export 'src/services/supabase/supabase_config_service.dart';
+// Export Drift storage service for local storage compatibility
+export 'src/infrastructure/storage/drift/services/drift_storage_service.dart';
+// Export Drift Sync Infrastructure
+export 'src/infrastructure/storage/drift/sync/adapters/drift_sync_adapter_base.dart';
+export 'src/infrastructure/storage/drift/sync/interfaces/i_drift_sync_adapter.dart';
+export 'src/infrastructure/storage/drift/sync/models/sync_results.dart';
 export 'src/presentation/theme/base/base_colors.dart';
 export 'src/presentation/theme/base/base_theme.dart';
 export 'src/presentation/theme/base/base_typography.dart';
@@ -198,26 +190,31 @@ export 'src/riverpod/domain/device/device_management_providers.dart';
 export 'src/riverpod/domain/premium/subscription_providers.dart';
 export 'src/riverpod/domain/sync/sync_providers.dart';
 export 'src/riverpod/riverpod_utils.dart';
-export 'src/domain/services/i_subscription_sync_service.dart';
+// Storage - Drift (Novo)
+// export 'src/infrastructure/storage/drift/drift_storage.dart';
+
+export 'src/services/cache/cache_service.dart';
 export 'src/services/simple_subscription_sync_service.dart';
 export 'src/services/subscription/advanced_subscription_services.dart'
     hide CacheStatistics, ConflictResolutionStrategy;
+export 'src/services/supabase/supabase_config_service.dart';
 export 'src/shared/config/environment_config.dart';
 export 'src/shared/contracts/i_asset_loader.dart';
 export 'src/shared/contracts/i_version_manager.dart';
 export 'src/shared/di/injection_container.dart';
 export 'src/shared/enums/log_level.dart';
 export 'src/shared/extensions/log_level_extensions.dart';
+export 'src/shared/extensions/supabase_query_extensions.dart';
 export 'src/shared/interfaces/i_navigation_extension.dart';
 export 'src/shared/models/navigation_state.dart';
 export 'src/shared/services/asset_loader_service.dart';
 export 'src/shared/services/cache_management_service.dart' hide CacheConfig;
 export 'src/shared/services/dio_service.dart';
 export 'src/shared/services/enhanced_navigation_service.dart';
+export 'src/shared/services/firebase_id_service.dart';
 export 'src/shared/services/navigation_analytics_service.dart';
 export 'src/shared/services/navigation_configuration_service.dart';
 export 'src/shared/services/navigation_service.dart';
-export 'src/shared/services/firebase_id_service.dart';
 export 'src/shared/services/optimized_image_service.dart';
 export 'src/shared/services/platform_capabilities_service.dart';
 export 'src/shared/utils/app_error.dart';
@@ -225,9 +222,8 @@ export 'src/shared/utils/error_adapter.dart' hide ErrorHandlingMixin;
 export 'src/shared/utils/failure.dart';
 export 'src/shared/utils/result.dart';
 export 'src/shared/utils/secure_logger.dart';
-export 'src/shared/utils/supabase_failure.dart';
 export 'src/shared/utils/subscription_failures.dart';
-export 'src/shared/extensions/supabase_query_extensions.dart';
+export 'src/shared/utils/supabase_failure.dart';
 export 'src/sync/app_sync_config.dart';
 export 'src/sync/config/sync_app_config.dart';
 export 'src/sync/conflict_resolution/conflict_resolver_factory.dart'
@@ -236,14 +232,14 @@ export 'src/sync/entity_sync_registration.dart'
     hide IConflictResolver, SyncPriority;
 export 'src/sync/interfaces/i_sync_service.dart';
 export 'src/sync/services/sync_logger.dart' hide LogLevel;
-export 'src/sync/sync.dart'
-    hide NetworkInfo, ConnectionQuality, MigrationResult, LogLevel;
-export 'src/sync/unified_sync_manager.dart';
 export 'src/sync/specialized/offline_sync_handler.dart';
 export 'src/sync/specialized/sync_coordinator.dart';
 export 'src/sync/specialized/sync_error_handler.dart';
 export 'src/sync/specialized/sync_state_machine.dart'
     hide AppSyncEvent, SyncAction;
+export 'src/sync/sync.dart'
+    hide NetworkInfo, ConnectionQuality, MigrationResult, LogLevel;
+export 'src/sync/unified_sync_manager.dart';
 export 'utils/core_icons.dart';
 export 'utils/random_selection_service.dart';
 export 'widgets/core_carousel_widget.dart';

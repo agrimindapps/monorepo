@@ -32,7 +32,7 @@ class StorageCompressionService {
       // Compress using GZip
       final compressed = const GZipEncoder().encode(bytes);
 
-      if (compressed == null || compressed.isEmpty) {
+      if (compressed.isEmpty) {
         return value;
       }
 

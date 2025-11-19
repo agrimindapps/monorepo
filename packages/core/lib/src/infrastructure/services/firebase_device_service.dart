@@ -442,9 +442,7 @@ class FirebaseDeviceService implements IDeviceRepository {
             // Find last active device
             if (lastActive == null) {
               lastActive = device;
-            } else if (device.lastActiveAt != null &&
-                lastActive.lastActiveAt != null &&
-                device.lastActiveAt.isAfter(lastActive.lastActiveAt)) {
+            } else if (device.lastActiveAt.isAfter(lastActive.lastActiveAt)) {
               lastActive = device;
             }
 

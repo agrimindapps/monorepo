@@ -4,6 +4,7 @@
 /// ```dart
 /// import 'package:core/src/infrastructure/services/storage/storage_services.dart';
 /// ```
+library;
 
 export 'storage_backup_service.dart';
 export 'storage_cache_manager.dart';

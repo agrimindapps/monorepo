@@ -1,3 +1,4 @@
+import 'package:core/src/shared/utils/logger.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/wasm.dart';
 
@@ -18,8 +19,7 @@ class DriftDatabaseConfig {
   }) {
     return LazyDatabase(() async {
       try {
-        // ignore: avoid_print
-        print('🔧 Initializing Drift WASM database: $databaseName');
+        Logger.info('🔧 Initializing Drift WASM database: $databaseName');
 
         // Add cache busting timestamp to force reload of WASM files
         final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -31,8 +31,7 @@ class DriftDatabaseConfig {
         );
 
         if (result.missingFeatures.isNotEmpty) {
-          // ignore: avoid_print
-          print(
+          Logger.warning(
             '💡 Drift Web em modo compatibilidade (features ausentes: ${result.missingFeatures})\n'
             '   Isso é normal e não afeta a funcionalidade. '
             'Para melhor performance, use Chrome/Edge com headers:\n'
@@ -40,19 +39,17 @@ class DriftDatabaseConfig {
             '   - Cross-Origin-Opener-Policy: same-origin',
           );
         } else {
-          // ignore: avoid_print
-          print('⚡ Drift Web com todas as features otimizadas habilitadas!');
+          Logger.info(
+            '⚡ Drift Web com todas as features otimizadas habilitadas!',
+          );
         }
 
-        // ignore: avoid_print
-        print('✅ Drift WASM database initialized successfully');
+        Logger.info('✅ Drift WASM database initialized successfully');
 
         return result.resolvedExecutor;
       } catch (e, stackTrace) {
-        // ignore: avoid_print
-        print('❌ Failed to initialize Drift WASM database: $e');
-        // ignore: avoid_print
-        print('Stack trace: $stackTrace');
+        Logger.error('❌ Failed to initialize Drift WASM database: $e');
+        Logger.error('Stack trace: $stackTrace');
         rethrow;
       }
     });

@@ -294,7 +294,7 @@ class LocalSubscriptionProvider implements ISubscriptionDataProvider {
   // ==================== Utilities ====================
 
   void _log(String message, {bool isError = false}) {
-    final prefix = '[LocalProvider]';
+    const prefix = '[LocalProvider]';
     if (isError) {
       debugPrint('$prefix ERROR: $message');
     } else {

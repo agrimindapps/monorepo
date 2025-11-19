@@ -1,20 +1,21 @@
 import 'dart:async';
 
+import 'package:core/src/shared/utils/logger.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 
 /// Adapter inteligente para seleção automática de executor de banco de dados
-/// 
+///
 /// Este adapter detecta a plataforma em tempo de execução e fornece:
 /// - WASM + IndexedDB na web
 /// - SQLite nativo em mobile/desktop
 /// - Fallback automático se WASM falhar
 abstract class DatabaseExecutorAdapter {
   /// Obtém o executor apropriado para a plataforma atual
-  /// 
+  ///
   /// [databaseName] - Nome do banco de dados
   /// [allowWebFallback] - Se true, tenta fallback quando Drift WASM falha na web
-  /// 
+  ///
   /// Uso:
   /// ```dart
   /// final executor = await DatabaseExecutorAdapter.getExecutor(
@@ -28,11 +29,9 @@ abstract class DatabaseExecutorAdapter {
   }) async {
     // Log da plataforma detectada
     if (kIsWeb) {
-      // ignore: avoid_print
-      print('📱 Detected: Web platform - using WASM + IndexedDB');
+      Logger.info('📱 Detected: Web platform - using WASM + IndexedDB');
     } else {
-      // ignore: avoid_print
-      print('📱 Detected: Native platform - using SQLite FFI');
+      Logger.info('📱 Detected: Native platform - using SQLite FFI');
     }
 
     // Importa a configuração correta por plataforma
@@ -54,12 +53,10 @@ abstract class DatabaseExecutorAdapter {
         final config = _WebDriftConfig();
         return config.createExecutor(databaseName: databaseName);
       } catch (e) {
-        // ignore: avoid_print
-        print('❌ WASM initialization failed: $e');
-        
+        Logger.error('❌ WASM initialization failed: $e');
+
         if (allowWebFallback) {
-          // ignore: avoid_print
-          print('⚠️ Attempting fallback to Firestore adapter...');
+          Logger.warning('⚠️ Attempting fallback to Firestore adapter...');
           // Implementação futura de fallback
           rethrow;
         }
@@ -78,15 +75,14 @@ abstract class DatabaseExecutorAdapter {
   /// Verifica se Drift WASM está disponível
   static Future<bool> isWasmAvailable() async {
     if (!kIsWeb) return false;
-    
+
     try {
       // Testa carregamento do WASM
       final config = _WebDriftConfig();
       await config.testWasmAvailability();
       return true;
     } catch (e) {
-      // ignore: avoid_print
-      print('⚠️ WASM not available: $e');
+      Logger.warning('⚠️ WASM not available: $e');
       return false;
     }
   }
@@ -96,27 +92,23 @@ abstract class DatabaseExecutorAdapter {
 class _WebDriftConfig {
   /// Cria executor usando WASM
   QueryExecutor createExecutor({required String databaseName}) {
-    // ignore: avoid_print
-    print('🔧 Creating WASM executor for: $databaseName');
-    
+    Logger.info('🔧 Creating WASM executor for: $databaseName');
+
     // Usa a configuração do core package (drift_database_config_web.dart)
     // que já está importada via export condicional
     return LazyDatabase(() async {
-      // ignore: avoid_print
-      print('🔧 Initializing Drift WASM database: $databaseName');
-      
+      Logger.info('🔧 Initializing Drift WASM database: $databaseName');
+
       try {
         // Importa dinamicamente para evitar erro em plataformas não-web
         final wasmModule = await _loadWasmModule();
-        
-        // ignore: avoid_print
-        print('✅ WASM module loaded successfully');
-        
+
+        Logger.info('✅ WASM module loaded successfully');
+
         // Retorna executor (a configuração real está em drift_database_config_web.dart)
         return wasmModule;
       } catch (e) {
-        // ignore: avoid_print
-        print('❌ Failed to load WASM: $e');
+        Logger.error('❌ Failed to load WASM: $e');
         rethrow;
       }
     });
@@ -126,11 +118,9 @@ class _WebDriftConfig {
   Future<void> testWasmAvailability() async {
     try {
       await _loadWasmModule();
-      // ignore: avoid_print
-      print('✅ WASM is available');
+      Logger.info('✅ WASM is available');
     } catch (e) {
-      // ignore: avoid_print
-      print('❌ WASM is not available: $e');
+      Logger.error('❌ WASM is not available: $e');
       rethrow;
     }
   }
@@ -147,9 +137,8 @@ class _WebDriftConfig {
 class _NativeDriftConfig {
   /// Cria executor usando SQLite nativo
   QueryExecutor createExecutor({required String databaseName}) {
-    // ignore: avoid_print
-    print('🔧 Creating native SQLite executor for: $databaseName');
-    
+    Logger.info('🔧 Creating native SQLite executor for: $databaseName');
+
     // Usa a configuração do core package (drift_database_config_mobile.dart)
     // que já está importada via export condicional
     throw UnsupportedError('Use DriftDatabaseConfig from core package');
@@ -165,15 +154,14 @@ extension DatabaseExecutorErrorHandling on Future<QueryExecutor> {
   }) async {
     try {
       final executor = await this;
-      // ignore: avoid_print
-      print('✅ Database executor initialized${operationName != null ? " for $operationName" : ""}');
+      Logger.info(
+        '✅ Database executor initialized${operationName != null ? " for $operationName" : ""}',
+      );
       return executor;
     } catch (e, stackTrace) {
-      // ignore: avoid_print
-      print('❌ Failed to initialize executor: $e');
-      // ignore: avoid_print
-      print('Stack trace: $stackTrace');
-      
+      Logger.error('❌ Failed to initialize executor: $e');
+      Logger.error('Stack trace: $stackTrace');
+
       onError?.call();
       rethrow;
     }

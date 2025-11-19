@@ -3,11 +3,11 @@ import 'package:riverpod/riverpod.dart';
 import '../../../domain/repositories/i_ads_repository.dart';
 import '../../../infrastructure/services/ads/google_mobile_ads_service.dart';
 import '../../../infrastructure/services/ads/specialized_services/ad_lifecycle_manager.dart';
+import '../../../infrastructure/services/ads/specialized_services/app_open_ad_service.dart';
 import '../../../infrastructure/services/ads/specialized_services/banner_ad_service.dart';
 import '../../../infrastructure/services/ads/specialized_services/interstitial_ad_service.dart';
 import '../../../infrastructure/services/ads/specialized_services/rewarded_ad_service.dart';
 import '../../../infrastructure/services/ads/specialized_services/rewarded_interstitial_ad_service.dart';
-import '../../../infrastructure/services/ads/specialized_services/app_open_ad_service.dart';
 
 // ===== Specialized Services Providers =====
 

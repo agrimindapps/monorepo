@@ -11,7 +11,8 @@ import '../../tables/receituagro_tables.dart';
 @injectable
 class FavoritosDriftSyncAdapter
     extends DriftSyncAdapterBase<FavoritoSyncEntity, Favorito> {
-  FavoritosDriftSyncAdapter(super.db, super.firestore);
+  FavoritosDriftSyncAdapter(ReceituagroDatabase db, FirebaseFirestore firestore)
+    : super(db, firestore);
 
   ReceituagroDatabase get localDb => db as ReceituagroDatabase;
 

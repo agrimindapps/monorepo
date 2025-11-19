@@ -8,6 +8,9 @@
 /// documentação pública foi temporariamente suprimida aqui para permitir
 /// iterações rápidas; substitua por documentação específica por membro ao
 /// evoluir o código.
+library;
+
+import 'package:core/src/shared/utils/logger.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -82,39 +85,31 @@ final eventTrackingProvider = Provider<EventTracking>((ref) {
   final userProperties = ref.watch(userAnalyticsPropertiesProvider);
 
   return EventTracking(
-    trackEvent:
-        (eventName, parameters) => analytics
-            .logEvent(eventName, parameters: {...userProperties, ...parameters})
-            .then((_) => {}), // Convert Either to Future<void>
-    trackScreenView:
-        (screenName, screenClass) => analytics
-            .setCurrentScreen(
-              screenName: screenName,
-              screenClassOverride: screenClass,
-            )
-            .then((_) => {}),
-    trackUserAction:
-        (action, category, label) => analytics
-            .logEvent(
-              'user_action',
-              parameters: {
-                'action': action,
-                'category': category ?? '',
-                'label': label ?? '',
-              },
-            )
-            .then((_) => {}),
-    trackFeatureUsage:
-        (feature, context) => analytics
-            .logEvent(
-              'feature_usage',
-              parameters: {'feature': feature, ...context},
-            )
-            .then((_) => {}),
-    trackError:
-        (error, context) => analytics
-            .logError(error: error.toString(), additionalInfo: context)
-            .then((_) => {}),
+    trackEvent: (eventName, parameters) => analytics
+        .logEvent(eventName, parameters: {...userProperties, ...parameters})
+        .then((_) => {}), // Convert Either to Future<void>
+    trackScreenView: (screenName, screenClass) => analytics
+        .setCurrentScreen(
+          screenName: screenName,
+          screenClassOverride: screenClass,
+        )
+        .then((_) => {}),
+    trackUserAction: (action, category, label) => analytics
+        .logEvent(
+          'user_action',
+          parameters: {
+            'action': action,
+            'category': category ?? '',
+            'label': label ?? '',
+          },
+        )
+        .then((_) => {}),
+    trackFeatureUsage: (feature, context) => analytics
+        .logEvent('feature_usage', parameters: {'feature': feature, ...context})
+        .then((_) => {}),
+    trackError: (error, context) => analytics
+        .logError(error: error.toString(), additionalInfo: context)
+        .then((_) => {}),
   );
 });
 
@@ -169,27 +164,24 @@ final crashReportingActionsProvider = Provider<CrashReportingActions>((ref) {
   final userProperties = ref.watch(userAnalyticsPropertiesProvider);
 
   return CrashReportingActions(
-    recordError:
-        (error, stackTrace, fatal) => crashService
-            .recordError(
-              exception: error,
-              stackTrace: stackTrace ?? StackTrace.empty,
-              fatal: fatal,
-              additionalInfo: userProperties,
-            )
-            .then((_) => {}),
-    recordFlutterError:
-        (flutterError) => crashService
-            .recordError(
-              exception: flutterError.exception,
-              stackTrace: flutterError.stack ?? StackTrace.empty,
-              additionalInfo: userProperties,
-            )
-            .then((_) => {}),
+    recordError: (error, stackTrace, fatal) => crashService
+        .recordError(
+          exception: error,
+          stackTrace: stackTrace ?? StackTrace.empty,
+          fatal: fatal,
+          additionalInfo: userProperties,
+        )
+        .then((_) => {}),
+    recordFlutterError: (flutterError) => crashService
+        .recordError(
+          exception: flutterError.exception,
+          stackTrace: flutterError.stack ?? StackTrace.empty,
+          additionalInfo: userProperties,
+        )
+        .then((_) => {}),
     log: (message) => crashService.log(message).then((_) => {}),
-    setCustomKey:
-        (key, value) =>
-            crashService.setCustomKey(key: key, value: value).then((_) => {}),
+    setCustomKey: (key, value) =>
+        crashService.setCustomKey(key: key, value: value).then((_) => {}),
     setUserId: (userId) => crashService.setUserId(userId).then((_) => {}),
   );
 });
@@ -213,20 +205,18 @@ final abTestActionsProvider = Provider<ABTestActions>((ref) {
   final analytics = ref.read(analyticsServiceProvider);
 
   return ABTestActions(
-    trackConversion:
-        (testName, variant) => analytics
-            .logEvent(
-              'ab_test_conversion',
-              parameters: {'test_name': testName, 'variant': variant},
-            )
-            .then((_) => {}),
-    trackExposure:
-        (testName, variant) => analytics
-            .logEvent(
-              'ab_test_exposure',
-              parameters: {'test_name': testName, 'variant': variant},
-            )
-            .then((_) => {}),
+    trackConversion: (testName, variant) => analytics
+        .logEvent(
+          'ab_test_conversion',
+          parameters: {'test_name': testName, 'variant': variant},
+        )
+        .then((_) => {}),
+    trackExposure: (testName, variant) => analytics
+        .logEvent(
+          'ab_test_exposure',
+          parameters: {'test_name': testName, 'variant': variant},
+        )
+        .then((_) => {}),
   );
 });
 
@@ -774,7 +764,9 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
     try {
       await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(false);
       state = const AnalyticsDisabled();
-    } catch (e) {}
+    } catch (e) {
+      Logger.error('Failed to disable analytics: $e');
+    }
   }
 }
 

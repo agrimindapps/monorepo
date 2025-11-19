@@ -23,14 +23,14 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
 
   /// Cache opcional (implementar se necessário)
   final Map<dynamic, T> _cache = {};
-  bool _cacheEnabled = false;
+  final bool _cacheEnabled;
 
   DriftRepositoryBase({
     required this.database,
     required this.table,
     bool enableCache = false,
-  })  : tableName = table.actualTableName,
-        _cacheEnabled = enableCache;
+  }) : tableName = table.actualTableName,
+       _cacheEnabled = enableCache;
 
   @override
   bool get isInitialized => true;
@@ -163,9 +163,9 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
   @override
   Future<Result<bool>> delete(dynamic id) async {
     try {
-      final deleted = await (database.delete(table)
-            ..where((tbl) => idColumn.equals(id as Object)))
-          .go();
+      final deleted = await (database.delete(
+        table,
+      )..where((tbl) => idColumn.equals(id as Object))).go();
 
       if (_cacheEnabled && deleted > 0) {
         _cache.remove(id);
@@ -192,9 +192,9 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
   @override
   Future<Result<int>> deleteAll(List<dynamic> ids) async {
     try {
-      final deleted = await (database.delete(table)
-            ..where((tbl) => idColumn.isIn(ids.cast<Object>())))
-          .go();
+      final deleted = await (database.delete(
+        table,
+      )..where((tbl) => idColumn.isIn(ids.cast<Object>()))).go();
 
       if (_cacheEnabled && deleted > 0) {
         for (final id in ids) {
@@ -255,9 +255,9 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
         return Result.success(_cache[id]);
       }
 
-      final item = await (database.select(table)
-            ..where((tbl) => idColumn.equals(id as Object)))
-          .getSingleOrNull();
+      final item = await (database.select(
+        table,
+      )..where((tbl) => idColumn.equals(id as Object))).getSingleOrNull();
 
       if (_cacheEnabled && item != null) {
         _cache[id] = item;
@@ -308,9 +308,9 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
   }) async {
     try {
       final offset = (page - 1) * pageSize;
-      final items = await (database.select(table)
-            ..limit(pageSize, offset: offset))
-          .get();
+      final items = await (database.select(
+        table,
+      )..limit(pageSize, offset: offset)).get();
 
       return Result.success(items);
     } catch (e, stackTrace) {
@@ -358,9 +358,9 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
   @override
   Future<Result<bool>> exists(dynamic id) async {
     try {
-      final item = await (database.select(table)
-            ..where((tbl) => idColumn.equals(id as Object)))
-          .getSingleOrNull();
+      final item = await (database.select(
+        table,
+      )..where((tbl) => idColumn.equals(id as Object))).getSingleOrNull();
 
       return Result.success(item != null);
     } catch (e, stackTrace) {
@@ -386,8 +386,9 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
 
   @override
   Stream<T?> watchById(dynamic id) {
-    return (database.select(table)..where((tbl) => idColumn.equals(id as Object)))
-        .watchSingleOrNull();
+    return (database.select(
+      table,
+    )..where((tbl) => idColumn.equals(id as Object))).watchSingleOrNull();
   }
 
   @override
@@ -509,7 +510,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
     try {
       final countResult = await count();
       if (countResult.isError) return Result.error(countResult.error!);
-      
+
       return Result.success(countResult.data! == 0);
     } catch (e, stackTrace) {
       debugPrint('$tableName: Failed to check isEmpty - $e');
@@ -530,12 +531,11 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
   @override
   Future<Result<List<dynamic>>> getAllIds() async {
     try {
-      final query = database.selectOnly(table)
-        ..addColumns([idColumn]);
-      
+      final query = database.selectOnly(table)..addColumns([idColumn]);
+
       final results = await query.get();
       final ids = results.map((row) => row.read(idColumn)).toList();
-      
+
       debugPrint('$tableName: Retrieved ${ids.length} IDs');
       return Result.success(ids);
     } catch (e, stackTrace) {
@@ -559,10 +559,10 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
     try {
       final countResult = await count();
       if (countResult.isError) return Result.error(countResult.error!);
-      
+
       final isEmptyResult = await isEmpty();
       if (isEmptyResult.isError) return Result.error(isEmptyResult.error!);
-      
+
       final stats = {
         'tableName': tableName,
         'totalItems': countResult.data!,
@@ -571,7 +571,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
         'cacheSize': _cache.length,
         'databaseInfo': database.toString(),
       };
-      
+
       return Result.success(stats);
     } catch (e, stackTrace) {
       debugPrint('$tableName: Failed to get statistics - $e');
@@ -609,11 +609,13 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
         return Result.success([]);
       }
 
-      final items = await (database.select(table)
-            ..where((tbl) => idColumn.isIn(ids.cast<Object>())))
-          .get();
+      final items = await (database.select(
+        table,
+      )..where((tbl) => idColumn.isIn(ids.cast<Object>()))).get();
 
-      debugPrint('$tableName: Retrieved ${items.length}/${ids.length} items by IDs');
+      debugPrint(
+        '$tableName: Retrieved ${items.length}/${ids.length} items by IDs',
+      );
       return Result.success(items);
     } catch (e, stackTrace) {
       debugPrint('$tableName: Failed to get items by IDs - $e');
@@ -668,9 +670,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       final items = findResult.data!;
       final firstItem = items.isNotEmpty ? items.first : null;
 
-      debugPrint(
-        '$tableName: Found first item: ${firstItem != null}',
-      );
+      debugPrint('$tableName: Found first item: ${firstItem != null}');
       return Result.success(firstItem);
     } catch (e, stackTrace) {
       debugPrint('$tableName: Failed to findFirst - $e');
@@ -723,11 +723,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
 
       await database.batch((batch) {
         for (final item in items) {
-          batch.insert(
-            table,
-            item,
-            mode: InsertMode.insertOrReplace,
-          );
+          batch.insert(table, item, mode: InsertMode.insertOrReplace);
         }
       });
 
@@ -787,8 +783,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
     Expression<bool> Function(TTable) where,
   ) async {
     try {
-      final query = database.select(table)
-        ..where((tbl) => where(tbl));
+      final query = database.select(table)..where((tbl) => where(tbl));
 
       final items = await query.get();
 
@@ -816,9 +811,9 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
     Insertable<T> update,
   ) async {
     try {
-      final updated = await (database.update(table)
-            ..where((tbl) => where(tbl)))
-          .write(update);
+      final updated = await (database.update(
+        table,
+      )..where((tbl) => where(tbl))).write(update);
 
       if (_cacheEnabled && updated > 0) {
         _cache.clear();

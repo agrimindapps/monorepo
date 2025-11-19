@@ -16,8 +16,7 @@ class SyncPushResult {
   bool get isSuccess => recordsFailed == 0;
 
   String get summary =>
-      'Push completed: $recordsPushed pushed, $recordsFailed failed in ${duration.inMilliseconds}ms' +
-      (errors.isNotEmpty ? '\nErrors: ${errors.join(", ")}' : '');
+      'Push completed: $recordsPushed pushed, $recordsFailed failed in ${duration.inMilliseconds}ms${errors.isNotEmpty ? '\nErrors: ${errors.join(", ")}' : ''}';
 }
 
 /// Resultado de uma operação de pull (Firebase → local)
@@ -38,8 +37,7 @@ class SyncPullResult {
   bool get isSuccess => recordsFailed == 0;
 
   String get summary =>
-      'Pull completed: $recordsPulled pulled, $recordsFailed failed in ${duration.inMilliseconds}ms' +
-      (errors.isNotEmpty ? '\nErrors: ${errors.join(", ")}' : '');
+      'Pull completed: $recordsPulled pulled, $recordsFailed failed in ${duration.inMilliseconds}ms${errors.isNotEmpty ? '\nErrors: ${errors.join(", ")}' : ''}';
 }
 
 /// Resultado completo de uma operação de sincronização bidirecional
@@ -61,7 +59,5 @@ class DriftSyncResult {
   int get totalRecordsFailed => push.recordsFailed + pull.recordsFailed;
 
   String get summary =>
-      'Sync completed in ${totalDuration.inMilliseconds}ms\n' +
-      'Push: ${push.recordsPushed} pushed, ${push.recordsFailed} failed\n' +
-      'Pull: ${pull.recordsPulled} pulled, ${pull.recordsFailed} failed';
+      'Sync completed in ${totalDuration.inMilliseconds}ms\n' 'Push: ${push.recordsPushed} pushed, ${push.recordsFailed} failed\n' 'Pull: ${pull.recordsPulled} pulled, ${pull.recordsFailed} failed';
 }

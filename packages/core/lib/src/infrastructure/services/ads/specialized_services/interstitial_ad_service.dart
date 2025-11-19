@@ -28,7 +28,7 @@ class InterstitialAdService {
     void Function(LoadAdError)? onAdFailedToLoad,
   }) async {
     if (_isLoading) {
-      return Left(
+      return const Left(
         AdLoadFailure('Interstitial ad already loading', code: 'ALREADY_LOADING'),
       );
     }

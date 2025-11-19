@@ -59,7 +59,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
           'Push aborted: No internet connection',
           name: 'DriftSync.$collectionName',
         );
-        return Left(NetworkFailure('Sem conexão com a internet'));
+        return const Left(NetworkFailure('Sem conexão com a internet'));
       }
 
       // 2. Buscar registros dirty do Drift
@@ -206,7 +206,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
       );
 
       if (!isOnline) {
-        return Left(NetworkFailure('Sem conexão com a internet'));
+        return const Left(NetworkFailure('Sem conexão com a internet'));
       }
 
       // 2. Query no Firestore
@@ -419,7 +419,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
   @override
   Either<Failure, void> validateForSync(TEntity entity) {
     if (entity.id.isEmpty) {
-      return Left(ValidationFailure('ID não pode ser vazio'));
+      return const Left(ValidationFailure('ID não pode ser vazio'));
     }
     return const Right(null);
   }

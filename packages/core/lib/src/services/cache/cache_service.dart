@@ -96,10 +96,9 @@ class CacheService {
 
         if (!isExpired) {
           _hitCount++;
-          final data =
-              deserializer != null
-                  ? deserializer(jsonDecode(cachedData))
-                  : jsonDecode(cachedData) as T;
+          final data = deserializer != null
+              ? deserializer(jsonDecode(cachedData))
+              : jsonDecode(cachedData) as T;
           if (useMemoryCache) {
             _memoryCache[cacheKey] = data;
             _memoryCacheTimestamp[cacheKey] = cacheTime;
@@ -159,7 +158,7 @@ class CacheService {
 
   /// Verifica se um item existe no cache e não está expirado
   static Future<bool> exists(String key, {Duration? ttl}) async {
-    final data = await get(key, ttl: ttl);
+    final data = await get<dynamic>(key, ttl: ttl);
     return data != null;
   }
 
@@ -174,7 +173,7 @@ class CacheService {
           .then((data) async {
             await set(key, data, ttl: ttl);
           })
-          .catchError((e) {
+          .catchError((Object e) {
             SecureLogger.error(
               'Erro ao atualizar cache em background',
               error: e,
@@ -222,8 +221,9 @@ class CacheService {
   /// Métricas de cache
   static Map<String, dynamic> getMetrics() {
     final total = _hitCount + _missCount;
-    final hitRate =
-        total > 0 ? (_hitCount / total * 100).toStringAsFixed(1) : '0.0';
+    final hitRate = total > 0
+        ? (_hitCount / total * 100).toStringAsFixed(1)
+        : '0.0';
 
     return {
       'hits': _hitCount,

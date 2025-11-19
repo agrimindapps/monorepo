@@ -151,7 +151,7 @@ class RevenueCatSubscriptionProvider implements ISubscriptionDataProvider {
   // ==================== Utilities ====================
 
   void _log(String message, {bool isError = false}) {
-    final prefix = '[RevenueCatProvider]';
+    const prefix = '[RevenueCatProvider]';
     if (isError) {
       debugPrint('$prefix ERROR: $message');
     } else {

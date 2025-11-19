@@ -45,16 +45,16 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
       features: _getFeaturesForProduct(productInfo.productId),
       isPopular: productInfo.productId.contains('yearly'),
       originalPrice: null, // Not provided by core
-      trialDays:
-          productInfo.freeTrialPeriod != null
-              ? _parseTrialDays(productInfo.freeTrialPeriod!)
-              : null,
+      trialDays: productInfo.freeTrialPeriod != null
+          ? _parseTrialDays(productInfo.freeTrialPeriod!)
+          : null,
       metadata: {
         'hasIntroPrice': productInfo.hasIntroPrice,
         'hasTrial': productInfo.hasFreeTrial,
       },
     );
   }
+
   UserSubscriptionModel _mapSubscriptionEntityToUserSubscription(
     core.SubscriptionEntity entity,
     String userId,
@@ -92,6 +92,7 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
       updatedAt: entity.updatedAt ?? DateTime.now(),
     );
   }
+
   PlanType _mapSubscriptionPeriodToPlanType(String? period) {
     if (period == null) return PlanType.free;
 
@@ -104,6 +105,7 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
 
     return PlanType.monthly;
   }
+
   int? _getDurationInDays(String? period) {
     if (period == null) return null;
 
@@ -116,16 +118,26 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
 
     return 30;
   }
+
   PlanType _mapTierToPlanType(core.SubscriptionTier tier) {
     switch (tier) {
       case core.SubscriptionTier.free:
+        return PlanType.free;
+      case core.SubscriptionTier.basic:
         return PlanType.free;
       case core.SubscriptionTier.premium:
         return PlanType.monthly;
       case core.SubscriptionTier.pro:
         return PlanType.yearly;
+      case core.SubscriptionTier.ultimate:
+        return PlanType.lifetime;
+      case core.SubscriptionTier.lifetime:
+        return PlanType.lifetime;
+      case core.SubscriptionTier.trial:
+        return PlanType.monthly;
     }
   }
+
   PlanStatus _mapSubscriptionStatusToPlanStatus(
     core.SubscriptionStatus status,
   ) {
@@ -136,6 +148,8 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
         return PlanStatus.expired;
       case core.SubscriptionStatus.cancelled:
         return PlanStatus.cancelled;
+      case core.SubscriptionStatus.paused:
+        return PlanStatus.paused;
       case core.SubscriptionStatus.pending:
         return PlanStatus.pending;
       case core.SubscriptionStatus.gracePeriod:
@@ -144,6 +158,7 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
         return PlanStatus.pending;
     }
   }
+
   int? _parseTrialDays(String period) {
     final match = RegExp(r'(\d+)').firstMatch(period);
     if (match != null) {
@@ -155,6 +170,7 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
     }
     return null;
   }
+
   List<String> _getFeaturesForProduct(String productId) {
     return [
       'Acesso ilimitado a todas as calculadoras',
@@ -263,7 +279,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   @override
   Future<void> cancelSubscription(String userId) async {
     try {
-
       await firestore
           .collection('users')
           .doc(userId)
@@ -288,7 +303,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   @override
   Future<void> pauseSubscription(String userId) async {
     try {
-
       await firestore
           .collection('users')
           .doc(userId)
@@ -398,8 +412,8 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
           final doc = snapshot.docs.first;
           final data = doc.data();
           try {
-            final result =
-                await subscriptionRepository.getCurrentSubscription();
+            final result = await subscriptionRepository
+                .getCurrentSubscription();
 
             return result.fold(
               (_) => null, // On failure, return null
@@ -434,24 +448,19 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
               startDate: DateTime.fromMillisecondsSinceEpoch(
                 data['startedAt'] as int,
               ),
-              expirationDate:
-                  data['expiresAt'] != null
-                      ? DateTime.fromMillisecondsSinceEpoch(
-                        data['expiresAt'] as int,
-                      )
-                      : null,
-              cancelledAt:
-                  data['cancelledAt'] != null
-                      ? DateTime.fromMillisecondsSinceEpoch(
-                        data['cancelledAt'] as int,
-                      )
-                      : null,
-              pausedAt:
-                  data['pausedAt'] != null
-                      ? DateTime.fromMillisecondsSinceEpoch(
-                        data['pausedAt'] as int,
-                      )
-                      : null,
+              expirationDate: data['expiresAt'] != null
+                  ? DateTime.fromMillisecondsSinceEpoch(
+                      data['expiresAt'] as int,
+                    )
+                  : null,
+              cancelledAt: data['cancelledAt'] != null
+                  ? DateTime.fromMillisecondsSinceEpoch(
+                      data['cancelledAt'] as int,
+                    )
+                  : null,
+              pausedAt: data['pausedAt'] != null
+                  ? DateTime.fromMillisecondsSinceEpoch(data['pausedAt'] as int)
+                  : null,
               autoRenew: (data['autoRenew'] as bool?) ?? false,
               trialEndDate: null,
               receiptData: (data['receiptData'] as String?) ?? '',

@@ -39,7 +39,7 @@ class AppOpenAdService {
     void Function(LoadAdError)? onAdFailedToLoad,
   }) async {
     if (_isLoading) {
-      return Left(
+      return const Left(
         AdLoadFailure('App open ad already loading', code: 'ALREADY_LOADING'),
       );
     }
@@ -95,7 +95,7 @@ class AppOpenAdService {
 
     if (_isExpired) {
       await dispose();
-      return Left(
+      return const Left(
         AdShowFailure('App open ad expired', code: 'AD_EXPIRED'),
       );
     }

@@ -373,7 +373,7 @@ class FirebaseSubscriptionProvider implements ISubscriptionDataProvider {
   // ==================== Utilities ====================
 
   void _log(String message, {bool isError = false}) {
-    final prefix = '[FirebaseProvider]';
+    const prefix = '[FirebaseProvider]';
     if (isError) {
       debugPrint('$prefix ERROR: $message');
     } else {

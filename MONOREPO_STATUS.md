@@ -20,7 +20,7 @@
 | `app-taskolist` | 0 | 87 | ✅ Ready |
 | `web_agrimind_site` | 0 | 24 | ✅ Ready |
 | `web_receituagro` | 0 | 135 | ✅ Ready |
-| `packages/core` | 0 | 2977 | ✅ Ready (Very High Lint Count) |
+| `packages/core` | 0 | 2849 | ✅ Ready (Very High Lint Count) |
 
 ## Next Steps
 - Address high warning counts in `app-receituagro`, `app-plantis`, and `app-minigames`.

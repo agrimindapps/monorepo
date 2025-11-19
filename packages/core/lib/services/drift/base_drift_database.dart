@@ -1,3 +1,4 @@
+import 'package:core/src/shared/utils/logger.dart';
 import 'package:drift/drift.dart';
 
 /// Classe base abstrata para todos os bancos de dados Drift
@@ -30,10 +31,10 @@ mixin BaseDriftDatabase on GeneratedDatabase {
       });
     } catch (e, stackTrace) {
       // Log do erro (pode ser integrado com Firebase Crashlytics)
-      print(
+      Logger.error(
         'Transaction error${operationName != null ? " in $operationName" : ""}: $e',
       );
-      print('Stack trace: $stackTrace');
+      Logger.error('Stack trace: $stackTrace');
       rethrow;
     }
   }
@@ -45,8 +46,8 @@ mixin BaseDriftDatabase on GeneratedDatabase {
     try {
       await batch(operations);
     } catch (e, stackTrace) {
-      print('Batch operation error: $e');
-      print('Stack trace: $stackTrace');
+      Logger.error('Batch operation error: $e');
+      Logger.error('Stack trace: $stackTrace');
       rethrow;
     }
   }
@@ -98,7 +99,7 @@ mixin BaseDriftDatabase on GeneratedDatabase {
     try {
       await customStatement('VACUUM');
     } catch (e) {
-      print('Vacuum error: $e');
+      Logger.error('Vacuum error: $e');
       rethrow;
     }
   }
@@ -115,7 +116,7 @@ mixin BaseDriftDatabase on GeneratedDatabase {
 
       return result.data['integrity_check'] == 'ok';
     } catch (e) {
-      print('Integrity check error: $e');
+      Logger.error('Integrity check error: $e');
       return false;
     }
   }

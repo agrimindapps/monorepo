@@ -151,8 +151,8 @@
 /// );
 /// ```
 
-library drift_service;
+library;
 
-export 'drift_database_config.dart';
 export 'base_drift_database.dart';
 export 'base_drift_repository.dart';
+export 'drift_database_config.dart';

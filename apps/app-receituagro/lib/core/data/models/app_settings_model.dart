@@ -135,7 +135,7 @@ class AppSettingsModel {
         'theme: $theme, '
         'language: $language, '
         'sync: $enableSync, '
-        'synchronized: $sync_synchronized'
+        'synchronized: $syncSynchronized'
         ')';
   }
 }

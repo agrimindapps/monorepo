@@ -28,7 +28,7 @@ class RewardedAdService {
     void Function(LoadAdError)? onAdFailedToLoad,
   }) async {
     if (_isLoading) {
-      return Left(
+      return const Left(
         AdLoadFailure('Rewarded ad already loading', code: 'ALREADY_LOADING'),
       );
     }

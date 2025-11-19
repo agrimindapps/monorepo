@@ -2,55 +2,63 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Extensions para facilitar queries no Supabase
 /// Nota: Use cast dinâmico para evitar problemas de tipo com PostgrestFilterBuilder
-extension SupabaseQueryExtensions on PostgrestFilterBuilder {
+extension SupabaseQueryExtensions on PostgrestFilterBuilder<dynamic> {
   /// Busca por campo com padrão case-insensitive (ILIKE)
-  PostgrestFilterBuilder searchByField(String field, String query) {
+  PostgrestFilterBuilder<dynamic> searchByField(String field, String query) {
     return ilike(field, '%$query%');
   }
 
   /// Filtra registros ativos (Status = 1 ou true)
-  PostgrestFilterBuilder whereActive() {
+  PostgrestFilterBuilder<dynamic> whereActive() {
     return or('Status.eq.1,Status.eq.true');
   }
 
   /// Filtra registros inativos (Status = 0 ou false)
-  PostgrestFilterBuilder whereInactive() {
+  PostgrestFilterBuilder<dynamic> whereInactive() {
     return or('Status.eq.0,Status.eq.false');
   }
 
   /// Ordena por data de criação
-  PostgrestFilterBuilder orderByCreatedAt({bool ascending = false}) {
-    return order('createdAt', ascending: ascending) as PostgrestFilterBuilder;
+  PostgrestFilterBuilder<dynamic> orderByCreatedAt({bool ascending = false}) {
+    return order('createdAt', ascending: ascending)
+        as PostgrestFilterBuilder<dynamic>;
   }
 
   /// Ordena por data de atualização
-  PostgrestFilterBuilder orderByUpdatedAt({bool ascending = false}) {
-    return order('updatedAt', ascending: ascending) as PostgrestFilterBuilder;
+  PostgrestFilterBuilder<dynamic> orderByUpdatedAt({bool ascending = false}) {
+    return order('updatedAt', ascending: ascending)
+        as PostgrestFilterBuilder<dynamic>;
   }
 
   /// Paginação simplificada
-  PostgrestFilterBuilder paginate({required int page, required int pageSize}) {
+  PostgrestFilterBuilder<dynamic> paginate({
+    required int page,
+    required int pageSize,
+  }) {
     final offset = (page - 1) * pageSize;
-    return range(offset, offset + pageSize - 1) as PostgrestFilterBuilder;
+    return range(offset, offset + pageSize - 1)
+        as PostgrestFilterBuilder<dynamic>;
   }
 
   /// Busca por múltiplos IDs
-  PostgrestFilterBuilder whereInIds(String field, List<String> ids) {
+  PostgrestFilterBuilder<dynamic> whereInIds(String field, List<String> ids) {
     return inFilter(field, ids);
   }
 
   /// Filtra por intervalo de datas
-  PostgrestFilterBuilder whereDateBetween({
+  PostgrestFilterBuilder<dynamic> whereDateBetween({
     required String field,
     required DateTime start,
     required DateTime end,
   }) {
-    return gte(field, start.toIso8601String())
-        .lte(field, end.toIso8601String());
+    return gte(
+      field,
+      start.toIso8601String(),
+    ).lte(field, end.toIso8601String());
   }
 
   /// Busca por texto em múltiplos campos
-  PostgrestFilterBuilder searchInFields(
+  PostgrestFilterBuilder<dynamic> searchInFields(
     List<String> fields,
     String query,
   ) {
@@ -59,8 +67,8 @@ extension SupabaseQueryExtensions on PostgrestFilterBuilder {
   }
 
   /// Limita quantidade de resultados
-  PostgrestFilterBuilder take(int count) {
-    return limit(count) as PostgrestFilterBuilder;
+  PostgrestFilterBuilder<dynamic> take(int count) {
+    return limit(count) as PostgrestFilterBuilder<dynamic>;
   }
 }
 

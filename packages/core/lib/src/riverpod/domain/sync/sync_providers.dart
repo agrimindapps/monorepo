@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import '../../../sync/config/sync_app_config.dart';
 
 /// Providers unificados para sincronização e conectividade
 /// Consolidam offline/online sync entre todos os apps do monorepo

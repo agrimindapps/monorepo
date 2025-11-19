@@ -117,7 +117,7 @@ class FirebaseAuthService implements IAuthRepository {
         if (kDebugMode) {
           debugPrint('⚠️ Firebase: Google Sign-In not configured');
         }
-        return Left(
+        return const Left(
           AuthFailure(
             'Google Sign-In não está configurado para esta plataforma',
           ),
@@ -722,7 +722,7 @@ class FirebaseAuthService implements IAuthRepository {
         if (kDebugMode) {
           debugPrint('⚠️ Firebase: Google Sign-In not configured');
         }
-        return Left(
+        return const Left(
           AuthFailure(
             'Google Sign-In não está configurado para esta plataforma',
           ),

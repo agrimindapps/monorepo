@@ -103,10 +103,10 @@ class SyncQueueItem {
     DateTime? sync_lastRetryAt,
   }) {
     // ✅ Handle status parameter
-    final bool isSynced = status != null 
+    final bool isSynced = status != null
         ? (status == 'synced' || status == 'completed')
         : (syncIsSynced ?? sync_isSynced ?? this.syncIsSynced);
-    
+
     return SyncQueueItem(
       syncId: syncId ?? sync_id ?? this.syncId,
       modelType: modelType ?? this.modelType,
@@ -115,8 +115,10 @@ class SyncQueueItem {
       syncTimestamp: syncTimestamp ?? sync_timestamp ?? this.syncTimestamp,
       syncRetryCount: syncRetryCount ?? sync_retryCount ?? this.syncRetryCount,
       syncIsSynced: isSynced,
-      syncErrorMessage: syncErrorMessage ?? sync_errorMessage ?? this.syncErrorMessage,
-      syncLastRetryAt: syncLastRetryAt ?? sync_lastRetryAt ?? this.syncLastRetryAt,
+      syncErrorMessage:
+          syncErrorMessage ?? sync_errorMessage ?? this.syncErrorMessage,
+      syncLastRetryAt:
+          syncLastRetryAt ?? sync_lastRetryAt ?? this.syncLastRetryAt,
     );
   }
 

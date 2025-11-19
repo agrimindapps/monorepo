@@ -188,12 +188,15 @@ class LogRepositoryService implements IDisposableService {
     buffer.writeln('# Total entries: ${logs.length}');
     buffer.writeln('# Filters applied:');
     if (filterLevel != null) buffer.writeln('#   Level: ${filterLevel.name}');
-    if (searchText?.isNotEmpty == true)
+    if (searchText?.isNotEmpty == true) {
       buffer.writeln('#   Search: $searchText');
-    if (startDate != null)
+    }
+    if (startDate != null) {
       buffer.writeln('#   Start: ${startDate.toIso8601String()}');
-    if (endDate != null)
+    }
+    if (endDate != null) {
       buffer.writeln('#   End: ${endDate.toIso8601String()}');
+    }
     buffer.writeln('# ==========================================');
     buffer.writeln();
 

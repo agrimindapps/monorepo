@@ -51,13 +51,15 @@ IComentariosRepository comentariosRepository(ComentariosRepositoryRef ref) {
 
 @riverpod
 IComentariosReadRepository comentariosReadRepository(
-    ComentariosReadRepositoryRef ref) {
+  ComentariosReadRepositoryRef ref,
+) {
   return di.sl<IComentariosReadRepository>();
 }
 
 @riverpod
 IComentariosWriteRepository comentariosWriteRepository(
-    ComentariosWriteRepositoryRef ref) {
+  ComentariosWriteRepositoryRef ref,
+) {
   return di.sl<IComentariosWriteRepository>();
 }
 
@@ -77,7 +79,8 @@ AddComentarioUseCase addComentariosUseCase(AddComentariosUseCaseRef ref) {
 
 @riverpod
 DeleteComentarioUseCase deleteComentariosUseCase(
-    DeleteComentariosUseCaseRef ref) {
+  DeleteComentariosUseCaseRef ref,
+) {
   return DeleteComentarioUseCase(
     ref.watch(comentariosReadRepositoryProvider),
     ref.watch(comentariosWriteRepositoryProvider),
@@ -112,10 +115,7 @@ class ComentariosState extends _$ComentariosState {
         hasLoaded: true,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: _formatError(e),
-      );
+      state = state.copyWith(isLoading: false, error: _formatError(e));
     }
   }
 
@@ -133,10 +133,7 @@ class ComentariosState extends _$ComentariosState {
         hasLoaded: true,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: _formatError(e),
-      );
+      state = state.copyWith(isLoading: false, error: _formatError(e));
     }
   }
 
@@ -154,10 +151,7 @@ class ComentariosState extends _$ComentariosState {
         hasLoaded: true,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: _formatError(e),
-      );
+      state = state.copyWith(isLoading: false, error: _formatError(e));
     }
   }
 
@@ -175,9 +169,11 @@ class ComentariosState extends _$ComentariosState {
       if (pkIdentificador != null && ferramenta != null) {
         final allComentarios = await useCase();
         comentarios = allComentarios
-            .where((c) =>
-                c.pkIdentificador == pkIdentificador &&
-                c.ferramenta == ferramenta)
+            .where(
+              (c) =>
+                  c.pkIdentificador == pkIdentificador &&
+                  c.ferramenta == ferramenta,
+            )
             .toList();
       } else if (pkIdentificador != null) {
         comentarios = await useCase.getByContext(pkIdentificador);
@@ -195,10 +191,7 @@ class ComentariosState extends _$ComentariosState {
         hasLoaded: true,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: _formatError(e),
-      );
+      state = state.copyWith(isLoading: false, error: _formatError(e));
     }
   }
 
@@ -212,16 +205,10 @@ class ComentariosState extends _$ComentariosState {
       final useCase = ref.read(addComentariosUseCaseProvider);
       await useCase(comentario);
       final updatedList = [...state.comentarios, comentario];
-      state = state.copyWith(
-        comentarios: updatedList,
-        isOperating: false,
-      );
+      state = state.copyWith(comentarios: updatedList, isOperating: false);
       await _refreshComentarios();
     } catch (e) {
-      state = state.copyWith(
-        isOperating: false,
-        error: _formatError(e),
-      );
+      state = state.copyWith(isOperating: false, error: _formatError(e));
     }
   }
 
@@ -234,19 +221,14 @@ class ComentariosState extends _$ComentariosState {
     try {
       final useCase = ref.read(deleteComentariosUseCaseProvider);
       await useCase(comentarioId);
-      final updatedList =
-          state.comentarios.where((c) => c.id != comentarioId).toList();
+      final updatedList = state.comentarios
+          .where((c) => c.id != comentarioId)
+          .toList();
 
-      state = state.copyWith(
-        comentarios: updatedList,
-        isOperating: false,
-      );
+      state = state.copyWith(comentarios: updatedList, isOperating: false);
       await _refreshComentarios();
     } catch (e) {
-      state = state.copyWith(
-        isOperating: false,
-        error: _formatError(e),
-      );
+      state = state.copyWith(isOperating: false, error: _formatError(e));
     }
   }
 
@@ -272,11 +254,7 @@ class ComentariosState extends _$ComentariosState {
 
   /// Clear all filters
   void clearFilters() {
-    state = state.copyWith(
-      searchText: '',
-      filterContext: '',
-      filterTool: '',
-    );
+    state = state.copyWith(searchText: '', filterContext: '', filterTool: '');
   }
 
   /// Refresh comentarios
@@ -296,10 +274,7 @@ class ComentariosState extends _$ComentariosState {
   }
 
   /// Initialize
-  Future<void> initialize({
-    String? pkIdentificador,
-    String? ferramenta,
-  }) async {
+  Future<void> initialize({String? pkIdentificador, String? ferramenta}) async {
     if (state.hasLoaded) return;
 
     await loadComentariosWithFilters(
@@ -342,8 +317,9 @@ List<ComentarioEntity> comentariosFiltered(ComentariosFilteredRef ref) {
   var filtered = comentarios;
 
   if (filterContext.isNotEmpty) {
-    filtered =
-        filtered.where((c) => c.pkIdentificador == filterContext).toList();
+    filtered = filtered
+        .where((c) => c.pkIdentificador == filterContext)
+        .toList();
   }
 
   if (filterTool.isNotEmpty) {
@@ -353,10 +329,12 @@ List<ComentarioEntity> comentariosFiltered(ComentariosFilteredRef ref) {
   if (searchText.isNotEmpty) {
     final query = searchText.toLowerCase();
     filtered = filtered
-        .where((c) =>
-            c.titulo.toLowerCase().contains(query) ||
-            c.conteudo.toLowerCase().contains(query) ||
-            c.ferramenta.toLowerCase().contains(query))
+        .where(
+          (c) =>
+              c.titulo.toLowerCase().contains(query) ||
+              c.conteudo.toLowerCase().contains(query) ||
+              c.ferramenta.toLowerCase().contains(query),
+        )
         .toList();
   }
 

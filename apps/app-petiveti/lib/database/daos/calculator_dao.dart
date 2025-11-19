@@ -5,33 +5,39 @@ import '../tables/calculation_history_table.dart';
 part 'calculator_dao.g.dart';
 
 @DriftAccessor(tables: [CalculationHistory])
-class CalculatorDao extends DatabaseAccessor<PetivetiDatabase> with _$CalculatorDaoMixin {
+class CalculatorDao extends DatabaseAccessor<PetivetiDatabase>
+    with _$CalculatorDaoMixin {
   CalculatorDao(PetivetiDatabase db) : super(db);
 
   /// Get all calculation history for a user
   Future<List<CalculationHistoryEntry>> getAllHistory(String userId) {
     return (select(calculationHistory)
-      ..where((tbl) => tbl.isDeleted.equals(false))
-      ..orderBy([(t) => OrderingTerm.desc(t.date)]))
-      .get();
+          ..where((tbl) => tbl.isDeleted.equals(false))
+          ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+        .get();
   }
 
   /// Get history by calculator type
-  Future<List<CalculationHistoryEntry>> getHistoryByType(String userId, String calculatorType) {
+  Future<List<CalculationHistoryEntry>> getHistoryByType(
+    String userId,
+    String calculatorType,
+  ) {
     return (select(calculationHistory)
-      ..where((tbl) => 
-        tbl.userId.equals(userId) & 
-        tbl.isDeleted.equals(false) &
-        tbl.calculatorType.equals(calculatorType))
-      ..orderBy([(t) => OrderingTerm.desc(t.date)]))
-      .get();
+          ..where(
+            (tbl) =>
+                tbl.userId.equals(userId) &
+                tbl.isDeleted.equals(false) &
+                tbl.calculatorType.equals(calculatorType),
+          )
+          ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+        .get();
   }
 
   /// Get history entry by ID
   Future<CalculationHistoryEntry?> getHistoryById(int id) {
     return (select(calculationHistory)
-      ..where((tbl) => tbl.id.equals(id) & tbl.isDeleted.equals(false)))
-      .getSingleOrNull();
+          ..where((tbl) => tbl.id.equals(id) & tbl.isDeleted.equals(false)))
+        .getSingleOrNull();
   }
 
   /// Create history entry
@@ -60,37 +66,41 @@ class CalculatorDao extends DatabaseAccessor<PetivetiDatabase> with _$Calculator
     String? inputData,
     String? result,
   }) async {
-    final updates = <String, Value>{};
-    if (calculatorType != null) updates['calculator_type'] = Value(calculatorType);
+    final updates = <String, Value<String>>{};
+    if (calculatorType != null)
+      updates['calculator_type'] = Value(calculatorType);
     if (inputData != null) updates['input_data'] = Value(inputData);
     if (result != null) updates['result'] = Value(result);
-    
+
     if (updates.isEmpty) return false;
-    
+
     final companion = CalculationHistoryCompanion(
-      calculatorType: calculatorType != null ? Value(calculatorType) : const Value.absent(),
+      calculatorType: calculatorType != null
+          ? Value(calculatorType)
+          : const Value.absent(),
       inputData: inputData != null ? Value(inputData) : const Value.absent(),
       result: result != null ? Value(result) : const Value.absent(),
     );
-    
-    final rowsAffected = await (update(calculationHistory)
-      ..where((tbl) => tbl.id.equals(id)))
-      .write(companion);
-    
+
+    final rowsAffected = await (update(
+      calculationHistory,
+    )..where((tbl) => tbl.id.equals(id))).write(companion);
+
     return rowsAffected > 0;
   }
 
   /// Delete history entry
   Future<bool> deleteHistoryEntry(int id) async {
-    final rowsAffected = await (update(calculationHistory)
-      ..where((tbl) => tbl.id.equals(id)))
-      .write(const CalculationHistoryCompanion(isDeleted: Value(true)));
+    final rowsAffected =
+        await (update(calculationHistory)..where((tbl) => tbl.id.equals(id)))
+            .write(const CalculationHistoryCompanion(isDeleted: Value(true)));
     return rowsAffected > 0;
   }
 
   /// Clear all history for a user
   Future<int> clearAllHistory(String userId) {
-    return (update(calculationHistory)..where((tbl) => tbl.userId.equals(userId)))
-      .write(const CalculationHistoryCompanion(isDeleted: Value(true)));
+    return (update(calculationHistory)
+          ..where((tbl) => tbl.userId.equals(userId)))
+        .write(const CalculationHistoryCompanion(isDeleted: Value(true)));
   }
 }

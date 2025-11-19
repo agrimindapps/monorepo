@@ -107,7 +107,7 @@ class DriftResultAdapter {
       if (result.isError) {
         return Result.error(result.error!);
       }
-      data.add(result.data!);
+      data.add(result.data as T);
     }
     
     return Result.success(data);

@@ -59,8 +59,9 @@ class AuthState {
     required T Function(String message) error,
   }) {
     if (this is _Loading) return loading();
-    if (this is _Authenticated)
+    if (this is _Authenticated) {
       return authenticated((this as _Authenticated).user);
+    }
     if (this is _Unauthenticated) return unauthenticated();
     if (this is _Error) return error((this as _Error).message);
     throw StateError('Unknown state: $this');
@@ -74,10 +75,12 @@ class AuthState {
     required T Function() orElse,
   }) {
     if (this is _Loading && loading != null) return loading();
-    if (this is _Authenticated && authenticated != null)
+    if (this is _Authenticated && authenticated != null) {
       return authenticated((this as _Authenticated).user);
-    if (this is _Unauthenticated && unauthenticated != null)
+    }
+    if (this is _Unauthenticated && unauthenticated != null) {
       return unauthenticated();
+    }
     if (this is _Error && error != null) return error((this as _Error).message);
     return orElse();
   }
@@ -370,8 +373,9 @@ class FormState<T> {
   }) {
     if (this is _FormInitial<T>) return initial();
     if (this is _FormEditing<T>) return editing((this as _FormEditing<T>).data);
-    if (this is _FormSubmitting<T>)
+    if (this is _FormSubmitting<T>) {
       return submitting((this as _FormSubmitting<T>).data);
+    }
     if (this is _FormCompleted<T>) return completed();
     if (this is _FormError<T>) return error((this as _FormError<T>).message);
     throw StateError('Unknown state: $this');

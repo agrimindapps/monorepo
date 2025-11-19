@@ -75,8 +75,8 @@ class UserDataRepository {
 
       final defaultSettings = AppSettingsModel(
         userId: userId,
-        sync_createdAt: DateTime.now(),
-        sync_synchronized: false,
+        syncCreatedAt: DateTime.now(),
+        syncSynchronized: false,
       );
 
       final saveResult = await saveAppSettings(defaultSettings);
@@ -326,7 +326,7 @@ class UserDataRepository {
       final unsynchronizedData = <String, List<dynamic>>{};
       final settingsResult = await getAppSettings();
       settingsResult.fold((error) => null, (settings) {
-        if (settings != null && !settings.sync_synchronized) {
+        if (settings != null && !settings.syncSynchronized) {
           unsynchronizedData['app_settings'] = [settings];
         }
       });

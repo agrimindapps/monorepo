@@ -139,7 +139,7 @@ abstract class BaseSupabaseRepository<TModel, TEntity> {
           .limit(1);
 
       if (response.isEmpty) {
-        return Left(SupabaseNotFoundFailure('Registro não encontrado'));
+        return const Left(SupabaseNotFoundFailure('Registro não encontrado'));
       }
 
       final data = response.first;

@@ -33,9 +33,7 @@ class CheckGameResultUseCase {
 
     // Check for draw (board full with no winner)
     if (currentState.isBoardFull) {
-      return Right(
-        currentState.copyWith(result: GameResult.draw),
-      );
+      return Right(currentState.copyWith(result: GameResult.draw));
     }
 
     // Game still in progress

@@ -25,9 +25,7 @@ class GeneratePuzzleUseCase {
       );
 
       if (puzzle == null) {
-        return const Left(
-          UnexpectedFailure('Failed to generate puzzle'),
-        );
+        return const Left(UnexpectedFailure('Failed to generate puzzle'));
       }
 
       return Right(puzzle);
@@ -36,4 +34,3 @@ class GeneratePuzzleUseCase {
     }
   }
 }
-

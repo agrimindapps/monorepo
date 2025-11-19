@@ -36,17 +36,13 @@ class ValidateMoveUseCase {
 
       // Validate value
       if (value < 1 || value > 9) {
-        return const Left(
-          ValidationFailure('Value must be between 1 and 9'),
-        );
+        return const Left(ValidationFailure('Value must be between 1 and 9'));
       }
 
       // Check if cell is editable
       final cell = grid.getCell(row, col);
       if (cell.isFixed) {
-        return const Left(
-          ValidationFailure('Cannot modify a fixed cell'),
-        );
+        return const Left(ValidationFailure('Cannot modify a fixed cell'));
       }
 
       // Check if placement is valid (no conflicts)

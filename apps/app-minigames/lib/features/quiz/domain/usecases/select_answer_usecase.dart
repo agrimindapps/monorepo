@@ -49,23 +49,27 @@ class SelectAnswerUseCase {
 
     if (validationResult.isCorrect) {
       // Correct: add score
-      return Right(currentState.copyWith(
-        score: currentState.score + validationResult.scoreEarned,
-        currentAnswerState: AnswerState.correct,
-      ));
+      return Right(
+        currentState.copyWith(
+          score: currentState.score + validationResult.scoreEarned,
+          currentAnswerState: AnswerState.correct,
+        ),
+      );
     } else {
       // Incorrect: deduct lives using service
       final lifeResult = _lifeManagementService.deductLivesForIncorrectAnswer(
         currentState.lives,
       );
 
-      return Right(currentState.copyWith(
-        lives: lifeResult.newLives,
-        currentAnswerState: AnswerState.incorrect,
-        gameStatus: lifeResult.isGameOver
-            ? QuizGameStatus.gameOver
-            : currentState.gameStatus,
-      ));
+      return Right(
+        currentState.copyWith(
+          lives: lifeResult.newLives,
+          currentAnswerState: AnswerState.incorrect,
+          gameStatus: lifeResult.isGameOver
+              ? QuizGameStatus.gameOver
+              : currentState.gameStatus,
+        ),
+      );
     }
   }
 }

@@ -32,13 +32,15 @@ class HandleTimeoutUseCase {
       currentState.lives,
     );
 
-    return Right(currentState.copyWith(
-      lives: lifeResult.newLives,
-      timeLeft: 0,
-      currentAnswerState: AnswerState.incorrect,
-      gameStatus: lifeResult.isGameOver
-          ? QuizGameStatus.gameOver
-          : currentState.gameStatus,
-    ));
+    return Right(
+      currentState.copyWith(
+        lives: lifeResult.newLives,
+        timeLeft: 0,
+        currentAnswerState: AnswerState.incorrect,
+        gameStatus: lifeResult.isGameOver
+            ? QuizGameStatus.gameOver
+            : currentState.gameStatus,
+      ),
+    );
   }
 }

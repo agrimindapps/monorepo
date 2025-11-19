@@ -24,9 +24,7 @@ class MakeAIMoveUseCase {
   Future<Either<Failure, GameState>> call(GameState currentState) async {
     // Validation: Game must be in progress
     if (!currentState.isInProgress) {
-      return const Left(
-        GameLogicFailure('Game is not in progress'),
-      );
+      return const Left(GameLogicFailure('Game is not in progress'));
     }
 
     // Validation: Must be in vsComputer mode
@@ -44,9 +42,7 @@ class MakeAIMoveUseCase {
     );
 
     if (moveResult == null) {
-      return const Left(
-        GameLogicFailure('No available moves'),
-      );
+      return const Left(GameLogicFailure('No available moves'));
     }
 
     // Execute move
@@ -65,7 +61,3 @@ class MakeAIMoveUseCase {
     );
   }
 }
-
-
-
-

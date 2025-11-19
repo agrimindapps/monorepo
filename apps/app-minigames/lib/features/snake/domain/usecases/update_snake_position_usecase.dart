@@ -50,9 +50,7 @@ class UpdateSnakePositionUseCase {
     );
 
     if (collisionResult.hasCollision) {
-      return Right(currentState.copyWith(
-        gameStatus: SnakeGameStatus.gameOver,
-      ));
+      return Right(currentState.copyWith(gameStatus: SnakeGameStatus.gameOver));
     }
 
     // 3. Check if ate food
@@ -75,7 +73,8 @@ class UpdateSnakePositionUseCase {
 
     if (ateFood) {
       // Remove eaten food position from free positions
-      newFreePositions = {...currentState.freePositions}..remove(currentState.foodPosition);
+      newFreePositions = {...currentState.freePositions}
+        ..remove(currentState.foodPosition);
 
       newFoodPosition = _foodGeneratorService.generateFood(
         snakeBody: newSnake,
@@ -90,11 +89,13 @@ class UpdateSnakePositionUseCase {
     // 6. Update score
     final newScore = ateFood ? currentState.score + 1 : currentState.score;
 
-    return Right(currentState.copyWith(
-      snake: newSnake,
-      foodPosition: newFoodPosition,
-      score: newScore,
-      freePositions: newFreePositions,
-    ));
+    return Right(
+      currentState.copyWith(
+        snake: newSnake,
+        foodPosition: newFoodPosition,
+        score: newScore,
+        freePositions: newFreePositions,
+      ),
+    );
   }
 }

@@ -53,21 +53,21 @@ class ForgotPasswordDialogManager {
   }
 
   Widget _buildHeader() {
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            const Icon(Icons.lock_reset_outlined, size: 24),
-            const SizedBox(width: 12),
-            const Text(
+            Icon(Icons.lock_reset_outlined, size: 24),
+            SizedBox(width: 12),
+            Text(
               'Redefinir Senha',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
           ],
         ),
-        const SizedBox(height: 8),
-        const Text(
+        SizedBox(height: 8),
+        Text(
           'Insira seu email para receber um link de redefinição de senha',
           style: TextStyle(fontSize: 14),
         ),

@@ -9,7 +9,6 @@ import '../../domain/usecases/get_settings.dart';
 import '../../domain/usecases/update_theme.dart';
 import '../../domain/usecases/update_tts_settings.dart';
 import '../../data/datasources/local/settings_local_datasource.dart';
-import '../../data/repositories/settings_repository_impl.dart';
 
 part 'settings_providers.g.dart';
 

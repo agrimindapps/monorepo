@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'plant_form_state_manager.dart';
+import 'plants_realtime_sync_manager.dart';
 import 'plants_search_manager.dart';
 import 'plants_sort_manager.dart';
 import 'plants_view_mode_manager.dart';
-import 'plants_realtime_sync_manager.dart';
 
 /// Provides managers for plants feature presentation layer
 /// Centralizes DIP for all managers

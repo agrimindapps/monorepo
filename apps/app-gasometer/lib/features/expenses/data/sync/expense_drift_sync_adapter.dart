@@ -3,7 +3,6 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
 
-import '../../../../core/sync/adapters/drift_sync_adapter_base.dart';
 import '../../../../database/gasometer_database.dart';
 import '../../../../database/tables/gasometer_tables.dart';
 import '../../domain/entities/expense_entity.dart';
@@ -48,19 +47,21 @@ class ExpenseDriftSyncAdapter
     extends DriftSyncAdapterBase<ExpenseEntity, Expense> {
   ExpenseDriftSyncAdapter(super.db, super.firestore);
 
+  GasometerDatabase get _db => db as GasometerDatabase;
+
   @override
   String get collectionName => 'expenses';
 
   @override
   TableInfo<Expenses, Expense> get table =>
-      db.expenses as TableInfo<Expenses, Expense>;
+      _db.expenses as TableInfo<Expenses, Expense>;
 
   // ==========================================================================
   // CONVERSÕES: DRIFT → DOMAIN ENTITY
   // ==========================================================================
 
   @override
-  ExpenseEntity toDomainEntity(Expense driftRow) {
+  ExpenseEntity driftToEntity(Expense driftRow) {
     // Converter timestamp (int) → DateTime
     final date = DateTime.fromMillisecondsSinceEpoch(driftRow.date);
 
@@ -116,7 +117,7 @@ class ExpenseDriftSyncAdapter
   // ==========================================================================
 
   @override
-  Insertable<Expense> toCompanion(ExpenseEntity entity) {
+  Insertable<Expense> entityToCompanion(ExpenseEntity entity) {
     // Parse vehicleId (pode ser firebaseId ou localId)
     int vehicleLocalId;
     try {
@@ -240,6 +241,15 @@ class ExpenseDriftSyncAdapter
   }
 
   // ==========================================================================
+  // CONVERSÕES: FIRESTORE → DOMAIN ENTITY
+  // ==========================================================================
+
+  @override
+  ExpenseEntity fromFirestoreDoc(Map<String, dynamic> doc) {
+    return ExpenseEntity.fromFirebaseMap(doc);
+  }
+
+  // ==========================================================================
   // VALIDAÇÃO
   // ==========================================================================
 
@@ -289,16 +299,22 @@ class ExpenseDriftSyncAdapter
   // ==========================================================================
 
   @override
-  ExpenseEntity resolveConflict(ExpenseEntity local, ExpenseEntity remote) {
+  Future<Either<Failure, ExpenseEntity>> resolveConflict(
+    ExpenseEntity local,
+    ExpenseEntity remote,
+  ) async {
     // Usar estratégia padrão (Last Write Wins - LWW)
-    final resolved = super.resolveConflict(local, remote);
+    final result = await super.resolveConflict(local, remote);
 
-    developer.log(
-      'Conflict resolved for expense: ${resolved.id} (${resolved.type.displayName})',
-      name: 'ExpenseDriftSyncAdapter',
-    );
+    if (result.isRight()) {
+      final resolved = result.getOrElse(() => local);
+      developer.log(
+        'Conflict resolved for expense: ${resolved.id} (${resolved.type.displayName})',
+        name: 'ExpenseDriftSyncAdapter',
+      );
+    }
 
-    return resolved;
+    return result;
   }
 
   // ==========================================================================
@@ -320,7 +336,7 @@ class ExpenseDriftSyncAdapter
         name: 'ExpenseDriftSyncAdapter',
       );
 
-      final query = db.select(db.expenses)
+      final query = _db.select(_db.expenses)
         ..where(
           (tbl) =>
               tbl.userId.equals(userId) &
@@ -328,7 +344,7 @@ class ExpenseDriftSyncAdapter
               tbl.isDeleted.equals(false),
         )
         ..orderBy([(tbl) => OrderingTerm.asc(tbl.updatedAt)])
-        ..limit(50); // Batch size
+        ..limit(50);
 
       developer.log(
         '🔍 Query created successfully',
@@ -356,7 +372,7 @@ class ExpenseDriftSyncAdapter
         final row = rows[i];
         try {
           developer.log(
-            '🔍 Row $i: id=${row.id}, firebaseId=${row.firebaseId}, vehicleId=${row.vehicleId}, amount=${row.amount}',
+            '🔍 Row $i: id=${row.id}, firebaseId=${row.firebaseId}, date=${row.date}, amount=${row.amount}, userId=${row.userId}',
             name: 'ExpenseDriftSyncAdapter',
           );
         } catch (e) {
@@ -371,7 +387,7 @@ class ExpenseDriftSyncAdapter
       final entities = <ExpenseEntity>[];
       for (final row in rows) {
         try {
-          var entity = toDomainEntity(row);
+          var entity = driftToEntity(row);
 
           final vehicleFirebaseId = await _resolveVehicleFirebaseId(
             row.vehicleId,
@@ -411,15 +427,13 @@ class ExpenseDriftSyncAdapter
         stackTrace: stackTrace,
       );
 
-      return Left(CacheFailure('Failed to get dirty expense records: $e'));
+      return Left(CacheFailure('Failed to get dirty expenses: $e'));
     }
   }
 
-  @override
   Future<Either<Failure, ExpenseEntity?>> getLocalEntity(String id) async {
     try {
-      // Buscar por firebaseId OU por id (local autoIncrement)
-      final query = db.select(db.expenses)
+      final query = _db.select(_db.expenses)
         ..where(
           (tbl) =>
               tbl.firebaseId.equals(id) | tbl.id.equals(int.tryParse(id) ?? -1),
@@ -433,7 +447,7 @@ class ExpenseDriftSyncAdapter
           'Found local expense: $id',
           name: 'ExpenseDriftSyncAdapter',
         );
-        return Right(toDomainEntity(row));
+        return Right(driftToEntity(row));
       }
 
       return const Right(null);
@@ -449,7 +463,6 @@ class ExpenseDriftSyncAdapter
     }
   }
 
-  @override
   Future<Either<Failure, void>> insertLocal(ExpenseEntity entity) async {
     try {
       final resolvedEntity = await _ensureLocalVehicleReference(entity);
@@ -459,11 +472,11 @@ class ExpenseDriftSyncAdapter
         );
       }
 
-      final companion = toCompanion(resolvedEntity);
-      await db.into(db.expenses).insert(companion);
+      final companion = entityToCompanion(resolvedEntity);
+      await _db.into(_db.expenses).insert(companion);
 
       developer.log(
-        'Inserted expense: ${entity.id} (${entity.type.displayName})',
+        'Inserted expense: ${entity.id}',
         name: 'ExpenseDriftSyncAdapter',
       );
 
@@ -480,7 +493,6 @@ class ExpenseDriftSyncAdapter
     }
   }
 
-  @override
   Future<Either<Failure, void>> updateLocal(ExpenseEntity entity) async {
     try {
       final resolvedEntity = await _ensureLocalVehicleReference(entity);
@@ -490,12 +502,12 @@ class ExpenseDriftSyncAdapter
         );
       }
 
-      final companion = toCompanion(resolvedEntity);
+      final companion = entityToCompanion(resolvedEntity);
 
-      // Atualizar por firebaseId OU por id local
-      final query = db.update(db.expenses)
+      // ExpenseEntity não tem firebaseId, apenas id
+      final query = _db.update(_db.expenses)
         ..where(
-          (tbl) => (entity.id.isNotEmpty && int.tryParse(entity.id) == null
+          (tbl) => (entity.id.isNotEmpty
               ? tbl.firebaseId.equals(entity.id)
               : tbl.id.equals(int.tryParse(entity.id) ?? -1)),
         );
@@ -511,7 +523,7 @@ class ExpenseDriftSyncAdapter
       }
 
       developer.log(
-        'Updated expense: ${entity.id} (${entity.type.displayName})',
+        'Updated expense: ${entity.id}',
         name: 'ExpenseDriftSyncAdapter',
       );
 
@@ -542,7 +554,7 @@ class ExpenseDriftSyncAdapter
             : const Value.absent(),
       );
 
-      final query = db.update(db.expenses)
+      final query = _db.update(_db.expenses)
         ..where(
           (tbl) =>
               tbl.firebaseId.equals(id) | tbl.id.equals(int.tryParse(id) ?? -1),
@@ -579,7 +591,7 @@ class ExpenseDriftSyncAdapter
   ) async {
     try {
       // Buscar veículo por firebaseId para obter localId
-      final vehicleQuery = db.select(db.vehicles)
+      final vehicleQuery = _db.select(_db.vehicles)
         ..where((tbl) => tbl.firebaseId.equals(vehicleFirebaseId))
         ..limit(1);
 
@@ -593,7 +605,7 @@ class ExpenseDriftSyncAdapter
       }
 
       // Buscar despesas por categoria
-      final query = db.select(db.expenses)
+      final query = _db.select(_db.expenses)
         ..where(
           (tbl) =>
               tbl.vehicleId.equals(vehicle.id) &
@@ -603,7 +615,7 @@ class ExpenseDriftSyncAdapter
         ..orderBy([(tbl) => OrderingTerm.desc(tbl.date)]);
 
       final rows = await query.get();
-      return rows.map((row) => toDomainEntity(row)).toList();
+      return rows.map((row) => driftToEntity(row)).toList();
     } catch (e) {
       developer.log(
         'Error getting expenses by category',
@@ -622,7 +634,7 @@ class ExpenseDriftSyncAdapter
   }) async {
     try {
       // Buscar veículo por firebaseId
-      final vehicleQuery = db.select(db.vehicles)
+      final vehicleQuery = _db.select(_db.vehicles)
         ..where((tbl) => tbl.firebaseId.equals(vehicleFirebaseId))
         ..limit(1);
 
@@ -632,7 +644,7 @@ class ExpenseDriftSyncAdapter
       }
 
       // Montar query com filtros de data
-      var query = db.select(db.expenses)
+      var query = _db.select(_db.expenses)
         ..where(
           (tbl) =>
               tbl.vehicleId.equals(vehicle.id) & tbl.isDeleted.equals(false),
@@ -653,7 +665,7 @@ class ExpenseDriftSyncAdapter
       }
 
       final rows = await query.get();
-      final entities = rows.map((row) => toDomainEntity(row)).toList();
+      final entities = rows.map((row) => driftToEntity(row)).toList();
 
       // Somar total
       final total = entities.fold<double>(
@@ -683,7 +695,7 @@ class ExpenseDriftSyncAdapter
   ) async {
     try {
       // Buscar veículo por firebaseId
-      final vehicleQuery = db.select(db.vehicles)
+      final vehicleQuery = _db.select(_db.vehicles)
         ..where((tbl) => tbl.firebaseId.equals(vehicleFirebaseId))
         ..limit(1);
 
@@ -693,7 +705,7 @@ class ExpenseDriftSyncAdapter
       }
 
       // Buscar todas as despesas
-      final query = db.select(db.expenses)
+      final query = _db.select(_db.expenses)
         ..where(
           (tbl) =>
               tbl.vehicleId.equals(vehicle.id) & tbl.isDeleted.equals(false),
@@ -701,7 +713,7 @@ class ExpenseDriftSyncAdapter
         ..orderBy([(tbl) => OrderingTerm.desc(tbl.date)]);
 
       final rows = await query.get();
-      return rows.map((row) => toDomainEntity(row)).toList();
+      return rows.map((row) => driftToEntity(row)).toList();
     } catch (e) {
       developer.log(
         'Error getting expenses by vehicle',
@@ -717,7 +729,7 @@ class ExpenseDriftSyncAdapter
     String vehicleFirebaseId,
   ) async* {
     // Primeiro, resolver vehicleId local
-    final vehicleQuery = db.select(db.vehicles)
+    final vehicleQuery = _db.select(_db.vehicles)
       ..where((tbl) => tbl.firebaseId.equals(vehicleFirebaseId))
       ..limit(1);
 
@@ -728,20 +740,20 @@ class ExpenseDriftSyncAdapter
     }
 
     // Assistir mudanças nas despesas
-    final query = db.select(db.expenses)
+    final query = _db.select(_db.expenses)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicle.id) & tbl.isDeleted.equals(false),
       )
       ..orderBy([(tbl) => OrderingTerm.desc(tbl.date)]);
 
     yield* query.watch().map(
-      (rows) => rows.map((row) => toDomainEntity(row)).toList(),
+      (rows) => rows.map((row) => driftToEntity(row)).toList(),
     );
   }
 
   Future<String?> _resolveVehicleFirebaseId(int localVehicleId) async {
-    final vehicleRow = await (db.select(
-      db.vehicles,
+    final vehicleRow = await (_db.select(
+      _db.vehicles,
     )..where((tbl) => tbl.id.equals(localVehicleId))).getSingleOrNull();
 
     final firebaseId = vehicleRow?.firebaseId;
@@ -765,7 +777,7 @@ class ExpenseDriftSyncAdapter
     }
 
     final vehicleRow =
-        await (db.select(db.vehicles)
+        await (_db.select(_db.vehicles)
               ..where((tbl) => tbl.firebaseId.equals(entity.vehicleId)))
             .getSingleOrNull();
 

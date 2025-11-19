@@ -1,9 +1,9 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../../database/receituagro_database.dart';
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/widgets/content_section_widget.dart';
+import '../../../../database/receituagro_database.dart';
 import '../providers/home_defensivos_notifier.dart';
 
 /// New items section component for Defensivos home page.

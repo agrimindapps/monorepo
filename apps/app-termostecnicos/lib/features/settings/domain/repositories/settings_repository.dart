@@ -1,4 +1,3 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart' hide Column;
 
 import '../entities/app_settings.dart';

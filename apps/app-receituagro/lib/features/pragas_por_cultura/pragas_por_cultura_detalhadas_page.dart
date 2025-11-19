@@ -1,10 +1,9 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../database/receituagro_database.dart';
 import '../../core/services/diagnostico_integration_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
+import '../../database/receituagro_database.dart';
 import '../pragas/widgets/praga_cultura_tab_bar_widget.dart';
 import 'presentation/providers/pragas_cultura_page_view_model.dart';
 import 'presentation/providers/pragas_cultura_providers.dart';

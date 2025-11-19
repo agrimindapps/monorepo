@@ -2,8 +2,8 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../presentation/providers/index.dart';
-import '../shared/settings_card.dart';
 import '../shared/section_header.dart';
+import '../shared/settings_card.dart';
 
 /// Premium Settings Section
 /// Allows users to view premium features and settings

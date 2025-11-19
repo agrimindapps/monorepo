@@ -2,7 +2,6 @@
 import 'package:drift/drift.dart';
 
 import '../../../../database/receituagro_database.dart';
-import '../../../../database/repositories/diagnostico_repository.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 
 class DiagnosticoMapper {

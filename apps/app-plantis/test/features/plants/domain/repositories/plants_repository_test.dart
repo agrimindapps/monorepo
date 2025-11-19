@@ -36,7 +36,7 @@ class _TestPlantsRepository implements PlantsRepository {
   Future<Either<Failure, Plant>> updatePlant(Plant plant) async {
     final index = _plants.indexWhere((p) => p.id == plant.id);
     if (index == -1) {
-      return Left(NotFoundFailure('Plant not found'));
+      return const Left(NotFoundFailure('Plant not found'));
     }
     _plants[index] = plant;
     return Right(plant);

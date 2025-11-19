@@ -278,7 +278,7 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
 
       return Right(stats);
     } catch (e) {
-      return Left(
+      return const Left(
         CacheFailure(
           'Erro ao buscar estatísticas dos defensivos: {{e.toString()}}',
         ),
@@ -403,7 +403,7 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
 
       return Right(defensivosFiltrados);
     } catch (e) {
-      return Left(
+      return const Left(
         CacheFailure('Erro ao buscar defensivos com filtros: {{e.toString()}}'),
       );
     }

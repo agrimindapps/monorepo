@@ -12,7 +12,7 @@ import '../../providers/index.dart';
 /// - Oferecer ações (upgrade, downgrade, cancel)
 /// - Indicadores visuais de urgência
 class SubscriptionStatusSection extends ConsumerWidget {
-  const SubscriptionStatusSection({Key? key}) : super(key: key);
+  const SubscriptionStatusSection({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

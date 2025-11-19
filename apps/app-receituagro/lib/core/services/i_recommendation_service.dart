@@ -1,7 +1,6 @@
 import 'package:core/core.dart';
 
 import '../../features/diagnosticos/domain/entities/diagnostico_entity.dart';
-import '../../features/diagnosticos/presentation/state/diagnosticos_search_state.dart';
 
 /// Specialized Service for generating recommendations
 /// 

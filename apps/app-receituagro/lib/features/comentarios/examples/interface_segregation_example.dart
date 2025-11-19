@@ -10,7 +10,7 @@
 /// 3. **Security**: Easy to restrict write access to specific services
 /// 4. **Flexibility**: Can inject different implementations for read/write
 
-library comentarios_isp_example;
+library;
 
 import '../domain/entities/comentario_entity.dart';
 import '../domain/repositories/i_comentarios_read_repository.dart';

@@ -45,7 +45,7 @@ class _DesktopLayout extends StatelessWidget {
           const ModernSidebar(),
           Expanded(
             child: DecoratedBox(
-              decoration: BoxDecoration(color: Color(0xFFE8ECEF)),
+              decoration: const BoxDecoration(color: Color(0xFFE8ECEF)),
               child: ClipRRect(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40.0),

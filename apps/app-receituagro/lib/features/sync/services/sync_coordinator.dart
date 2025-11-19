@@ -2,12 +2,9 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:injectable/injectable.dart';
 
-import '../../../database/sync/adapters/favoritos_drift_sync_adapter.dart';
 import '../../../database/sync/adapters/comentarios_drift_sync_adapter.dart';
-import '../../../database/sync/models/sync_results.dart';
+import '../../../database/sync/adapters/favoritos_drift_sync_adapter.dart';
 
 /// Coordenador de Sincronização (Sync Coordinator)
 ///

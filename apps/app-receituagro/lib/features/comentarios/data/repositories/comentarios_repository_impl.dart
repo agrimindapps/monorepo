@@ -1,5 +1,4 @@
 import 'package:core/core.dart' hide Column;
-import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../database/repositories/comentarios_repository.dart';
 import '../../domain/entities/comentario_entity.dart';

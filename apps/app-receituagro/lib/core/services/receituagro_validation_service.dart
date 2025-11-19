@@ -20,10 +20,11 @@ class ReceitaAgroValidationService {
     Map<String, dynamic> data,
   ) {
     if (!_isInitialized) {
-      if (kDebugMode)
+      if (kDebugMode) {
         print(
           'ReceitaAgroValidationService not initialized, using fallback mode',
         );
+      }
     }
 
     final errors = <String>[];

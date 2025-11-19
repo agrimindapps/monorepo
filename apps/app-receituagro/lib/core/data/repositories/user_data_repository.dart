@@ -6,7 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 import '../../../features/comentarios/data/comentario_model.dart';
 import '../../../features/comentarios/domain/entities/comentario_entity.dart';
-import '../../../features/comentarios/domain/repositories/i_comentarios_repository.dart';
+import '../../../features/comentarios/domain/repositories/i_comentarios_read_repository.dart';
+import '../../../features/comentarios/domain/repositories/i_comentarios_write_repository.dart';
 import '../../../features/favoritos/data/favorito_defensivo_model.dart';
 import '../../../features/favoritos/domain/entities/favorito_entity.dart';
 import '../../../features/favoritos/domain/repositories/i_favoritos_repository.dart';
@@ -20,15 +21,21 @@ import '../models/app_settings_model.dart';
 class UserDataRepository {
   // Specialized repositories for delegation (Dependency Injection)
   final IFavoritosRepository _favoritosRepository;
-  final IComentariosRepository _comentariosRepository;
+  final IComentariosReadRepository _comentariosReadRepository;
+  final IComentariosWriteRepository _comentariosWriteRepository;
 
   UserDataRepository({
     IFavoritosRepository? favoritosRepository,
-    IComentariosRepository? comentariosRepository,
+    IComentariosReadRepository? comentariosReadRepository,
+    IComentariosWriteRepository? comentariosWriteRepository,
   }) : _favoritosRepository =
            favoritosRepository ?? GetIt.instance<IFavoritosRepository>(),
-       _comentariosRepository =
-           comentariosRepository ?? GetIt.instance<IComentariosRepository>();
+       _comentariosReadRepository =
+           comentariosReadRepository ??
+           GetIt.instance<IComentariosReadRepository>(),
+       _comentariosWriteRepository =
+           comentariosWriteRepository ??
+           GetIt.instance<IComentariosWriteRepository>();
 
   /// Obtém o userId atual via Firebase Auth (synchronous access)
   String? get currentUserId {
@@ -223,7 +230,7 @@ class UserDataRepository {
       }
 
       // Delega para ComentariosRepository
-      final entities = await _comentariosRepository.getAllComentarios();
+      final entities = await _comentariosReadRepository.getAllComentarios();
 
       // Converte entities para models
       final models = entities
@@ -276,7 +283,7 @@ class UserDataRepository {
       );
 
       // Delega para ComentariosRepository
-      await _comentariosRepository.addComentario(entity);
+      await _comentariosWriteRepository.addComentario(entity);
 
       return const Right(null);
     } catch (e) {
@@ -295,7 +302,7 @@ class UserDataRepository {
       }
 
       // Delega para ComentariosRepository (soft delete)
-      await _comentariosRepository.deleteComentario(comentarioId);
+      await _comentariosWriteRepository.deleteComentario(comentarioId);
 
       return const Right(null);
     } catch (e) {

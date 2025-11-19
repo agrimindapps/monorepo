@@ -80,8 +80,9 @@ class FiltrosDefensivosWidget extends StatelessWidget {
 
   String _buildSubtitleText() {
     final filtros = <String>[];
-    if (filtroToxicidade != 'todos')
+    if (filtroToxicidade != 'todos') {
       filtros.add('Toxicidade: $filtroToxicidade');
+    }
     if (filtroTipo != 'todos') filtros.add('Tipo: $filtroTipo');
     if (apenasComercializados) filtros.add('Comercializados');
     if (apenasElegiveis) filtros.add('Elegíveis');

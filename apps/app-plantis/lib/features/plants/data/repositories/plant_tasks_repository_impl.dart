@@ -1,6 +1,5 @@
 import 'package:core/core.dart' hide Column, Task;
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/interfaces/network_info.dart';
 import '../../../tasks/domain/entities/task.dart';

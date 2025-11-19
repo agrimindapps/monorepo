@@ -1,0 +1,122 @@
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 85.0.0 (92.0.0 available)
+  analyzer 7.6.0 (9.0.0 available)
+  analyzer_plugin 0.12.0 (0.13.11 available)
+  app_links 6.4.1 (7.0.0 available)
+  build 2.5.4 (4.0.2 available)
+  build_config 1.1.2 (1.2.0 available)
+  build_daemon 4.1.0 (4.1.1 available)
+  build_resolvers 2.5.4 (3.0.4 available)
+  build_runner 2.5.4 (2.10.3 available)
+  build_runner_core 9.1.2 (9.3.2 available)
+  characters 1.4.0 (1.4.1 available)
+  connectivity_plus 6.1.5 (7.0.0 available)
+  cross_file 0.3.5 (0.3.5+1 available)
+  crypto 3.0.6 (3.0.7 available)
+  custom_lint_core 0.7.1 (0.8.1 available)
+  custom_lint_visitor 1.0.0+7.7.0 (1.0.0+8.4.0 available)
+  dart_style 3.1.1 (3.1.3 available)
+  device_info_plus 11.5.0 (12.2.0 available)
+  facebook_auth_desktop 1.0.3 (2.1.1 available)
+  file_selector_linux 0.9.3+2 (0.9.3+3 available)
+  file_selector_macos 0.9.4+5 (0.9.4+6 available)
+  file_selector_platform_interface 2.6.2 (2.7.0 available)
+  file_selector_windows 0.9.3+4 (0.9.3+5 available)
+  firebase_crashlytics 5.0.4 (5.0.5 available)
+  firebase_remote_config 6.1.1 (6.1.2 available)
+  firebase_remote_config_web 1.10.0 (1.10.1 available)
+  flutter_facebook_auth 6.2.0 (7.1.2 available)
+  flutter_facebook_auth_platform_interface 5.0.0 (6.1.2 available)
+  flutter_facebook_auth_web 5.0.0 (6.1.2 available)
+  flutter_lints 5.0.0 (6.0.0 available)
+  flutter_riverpod 2.6.1 (3.0.3 available)
+  flutter_secure_storage_linux 1.2.3 (2.0.1 available)
+  flutter_secure_storage_macos 3.1.3 (4.0.0 available)
+  flutter_secure_storage_platform_interface 1.1.2 (2.0.1 available)
+  flutter_secure_storage_web 1.2.1 (2.0.0 available)
+  flutter_secure_storage_windows 3.1.2 (4.0.0 available)
+  flutter_svg 2.2.1 (2.2.2 available)
+  freezed 2.5.8 (3.2.3 available)
+  freezed_annotation 2.4.4 (3.1.0 available)
+  get_it 8.3.0 (9.0.5 available)
+  go_router 16.3.0 (17.0.0 available)
+  google_mobile_ads 5.3.1 (6.0.0 available)
+  google_sign_in 6.3.0 (7.2.0 available)
+  google_sign_in_android 6.2.1 (7.2.5 available)
+  google_sign_in_ios 5.9.0 (6.2.4 available)
+  google_sign_in_platform_interface 2.5.0 (3.1.0 available)
+  google_sign_in_web 0.12.4+4 (1.1.0 available)
+  http 1.5.0 (1.6.0 available)
+  image_picker 1.2.0 (1.2.1 available)
+  image_picker_android 0.8.13+7 (0.8.13+8 available)
+  image_picker_for_web 3.1.0 (3.1.1 available)
+  image_picker_ios 0.8.13+1 (0.8.13+2 available)
+  injectable 2.5.2 (2.6.0 available)
+  js 0.6.7 (0.7.2 available)
+  json_serializable 6.9.5 (6.11.1 available)
+  lints 5.1.1 (6.0.0 available)
+  local_auth 2.3.0 (3.0.0 available)
+  local_auth_android 1.0.56 (2.0.2 available)
+  local_auth_darwin 1.6.1 (2.0.1 available)
+  local_auth_windows 1.0.11 (2.0.1 available)
+  material_color_utilities 0.11.1 (0.13.0 available)
+  meta 1.16.0 (1.17.0 available)
+  package_info_plus 8.3.1 (9.0.0 available)
+  path_provider_android 2.2.20 (2.2.21 available)
+  path_provider_foundation 2.4.3 (2.4.4 available)
+  pointycastle 3.9.1 (4.0.0 available)
+  purchases_flutter 9.9.2 (9.9.6 available)
+  rate_my_app 2.2.0 (2.3.2 available)
+  riverpod 2.6.1 (3.0.3 available)
+  riverpod_analyzer_utils 0.5.9 (0.5.10 available)
+  riverpod_annotation 2.6.1 (3.0.3 available)
+  riverpod_generator 2.6.4 (3.0.3 available)
+  shared_preferences_android 2.4.15 (2.4.16 available)
+  shared_preferences_foundation 2.5.5 (2.5.6 available)
+  sign_in_with_apple 6.1.4 (7.0.1 available)
+  sign_in_with_apple_platform_interface 1.1.0 (2.0.0 available)
+  sign_in_with_apple_web 2.1.1 (3.0.0 available)
+  source_gen 2.0.0 (4.1.0 available)
+  source_helper 1.3.7 (1.3.8 available)
+  sqlite3 2.9.4 (3.0.1 available)
+  sqlite3_web 0.4.1 (0.5.0 available)
+  test_api 0.7.6 (0.7.8 available)
+  universal_io 2.2.2 (2.3.1 available)
+  url_launcher_android 6.3.24 (6.3.25 available)
+  url_launcher_ios 6.3.5 (6.3.6 available)
+  url_launcher_linux 3.2.1 (3.2.2 available)
+  url_launcher_macos 3.2.4 (3.2.5 available)
+  url_launcher_windows 3.1.4 (3.1.5 available)
+  webview_flutter_android 4.10.5 (4.10.6 available)
+  webview_flutter_wkwebview 3.23.2 (3.23.3 available)
+Got dependencies!
+90 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing web_agrimind_site...                                  
+
+   info • Parameter 'key' could be a super parameter • lib/app-site/pages/culturas_dialog.dart:11:9 • use_super_parameters
+   info • Invalid use of a private type in a public API • lib/app-site/pages/culturas_dialog.dart:14:3 • library_private_types_in_public_api
+   info • Constructors for public widgets should have a named 'key' parameter • lib/app-site/pages/culturas_page.dart:7:7 • use_key_in_widget_constructors
+   info • Invalid use of a private type in a public API • lib/app-site/pages/culturas_page.dart:9:3 • library_private_types_in_public_api
+   info • Parameter 'key' could be a super parameter • lib/app-site/pages/defensivos_dialog.dart:11:9 • use_super_parameters
+   info • Invalid use of a private type in a public API • lib/app-site/pages/defensivos_dialog.dart:18:3 • library_private_types_in_public_api
+   info • Don't use 'BuildContext's across async gaps • lib/app-site/pages/defensivos_dialog.dart:68:28 • use_build_context_synchronously
+   info • Parameter 'key' could be a super parameter • lib/app-site/pages/fitossanitarios_page.dart:10:9 • use_super_parameters
+   info • Invalid use of a private type in a public API • lib/app-site/pages/fitossanitarios_page.dart:14:3 • library_private_types_in_public_api
+   info • Parameter 'key' could be a super parameter • lib/app-site/pages/pragas_dialog.dart:12:9 • use_super_parameters
+   info • Invalid use of a private type in a public API • lib/app-site/pages/pragas_dialog.dart:15:3 • library_private_types_in_public_api
+   info • Constructors for public widgets should have a named 'key' parameter • lib/app-site/pages/pragas_page.dart:7:7 • use_key_in_widget_constructors
+   info • Invalid use of a private type in a public API • lib/app-site/pages/pragas_page.dart:9:3 • library_private_types_in_public_api
+   info • The import of 'dart:ui' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/app/pages/home_defensivos_page.dart:1:8 • unnecessary_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/pages/home_defensivos_page.dart:65:39 • deprecated_member_use
+  error • Target of URI doesn't exist: 'injection.config.dart' • lib/core/di/injection.dart:6:8 • uri_does_not_exist
+  error • The method 'init' isn't defined for the type 'GetIt' • lib/core/di/injection.dart:20:9 • undefined_method
+   info • The variable name 'ConfigOptionSobre' isn't a lowerCamelCase identifier • lib/pages/sobre_page.dart:159:8 • non_constant_identifier_names
+   info • The variable name 'ConfigOptionFeedback' isn't a lowerCamelCase identifier • lib/services/comments_service.dart:396:8 • non_constant_identifier_names
+   info • 'dialogBackgroundColor' is deprecated and shouldn't be used. Use DialogThemeData.backgroundColor instead. This feature was deprecated after v3.27.0-0.1.pre • lib/themes/dark_theme.dart:157:3 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/themes/dark_theme.dart:175:27 • deprecated_member_use
+   info • 'dialogBackgroundColor' is deprecated and shouldn't be used. Use DialogThemeData.backgroundColor instead. This feature was deprecated after v3.27.0-0.1.pre • lib/themes/light_theme.dart:177:3 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/themes/light_theme.dart:198:27 • deprecated_member_use
+   info • The member 'formatEditUpdate' overrides an inherited member but isn't annotated with '@override' • lib/widgets/textfield_widget.dart:81:20 • annotate_overrides
+

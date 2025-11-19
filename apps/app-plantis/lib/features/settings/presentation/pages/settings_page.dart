@@ -9,8 +9,8 @@ import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/base_page_scaffold.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
-import '../managers/settings_sections_builder.dart';
 import '../managers/settings_dialog_manager.dart';
+import '../managers/settings_sections_builder.dart';
 import '../widgets/sections/device_management_section.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {

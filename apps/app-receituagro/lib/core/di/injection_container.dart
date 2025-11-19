@@ -4,31 +4,30 @@ import 'dart:developer' as developer;
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 
+import '../../database/receituagro_database.dart';
+import '../../database/repositories/culturas_repository.dart';
+import '../../database/repositories/fitossanitarios_repository.dart';
+import '../../database/repositories/pragas_repository.dart';
 // ❌ REMOVIDO: import '../../features/DetalheDefensivos/di/defensivo_details_di.dart';
 import '../../features/analytics/analytics_service.dart';
 // ❌ REMOVIDO: import '../../features/comentarios/di/comentarios_di.dart'; (via @LazySingleton)
 import '../../features/defensivos/data/services/defensivos_grouping_service.dart';
+import '../../features/defensivos/data/strategies/defensivo_grouping_service_v2.dart';
 // ❌ REMOVIDO: import '../../features/defensivos/di/defensivos_di.dart'; // Unused after consolidation
 // ✅ Diagnosticos imports removed - now managed by Injectable
 import '../../features/defensivos/data/strategies/defensivo_grouping_strategy_registry.dart';
-import '../../features/defensivos/data/strategies/defensivo_grouping_service_v2.dart';
 import '../../features/favoritos/domain/favoritos_navigation_service.dart';
 import '../../features/favoritos/favoritos_di.dart';
+import '../../features/pragas_por_cultura/data/services/pragas_cultura_data_service.dart';
 // ❌ REMOVIDO: import '../../features/pragas/di/pragas_di.dart'; (via @LazySingleton)
 import '../../features/pragas_por_cultura/data/services/pragas_cultura_query_service.dart';
 import '../../features/pragas_por_cultura/data/services/pragas_cultura_sort_service.dart';
 import '../../features/pragas_por_cultura/data/services/pragas_cultura_statistics_service.dart';
-import '../../features/pragas_por_cultura/data/services/pragas_cultura_data_service.dart';
 import '../../features/pragas_por_cultura/domain/repositories/i_pragas_cultura_repository.dart';
 import '../../features/settings/di/device_management_di.dart';
 import '../../features/settings/di/settings_di.dart';
 import '../../features/settings/di/tts_module.dart';
-import '../../database/repositories/fitossanitarios_repository.dart';
-import '../../database/repositories/pragas_repository.dart';
-import '../../database/repositories/culturas_repository.dart';
-import '../../database/receituagro_database.dart';
 import '../interfaces/i_premium_service.dart';
-import '../sync/receituagro_drift_storage_adapter.dart';
 import '../navigation/agricultural_navigation_extension.dart';
 import '../services/app_data_manager.dart';
 import '../services/cloud_functions_service.dart';
@@ -42,6 +41,7 @@ import '../services/receituagro_data_cleaner.dart';
 import '../services/receituagro_navigation_service.dart';
 import '../services/receituagro_notification_service.dart';
 import '../services/remote_config_service.dart';
+import '../sync/receituagro_drift_storage_adapter.dart';
 // ⚠️ REMOVED: import '../services/data_migration_service.dart';
 import '../sync/sync_operations.dart';
 import '../sync/sync_queue.dart';

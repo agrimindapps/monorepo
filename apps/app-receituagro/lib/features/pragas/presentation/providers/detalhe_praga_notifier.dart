@@ -1,16 +1,16 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/premium_notifier.dart';
 import '../../../../database/receituagro_database.dart';
-
-import '../../domain/entities/praga_entity.dart';
-import '../../domain/repositories/i_pragas_repository.dart';
 import '../../../comentarios/data/comentario_model.dart';
 import '../../../comentarios/domain/comentarios_service.dart';
 import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
 import '../../../favoritos/favoritos_di.dart';
+import '../../domain/entities/praga_entity.dart';
+import '../../domain/repositories/i_pragas_repository.dart';
 
 part 'detalhe_praga_notifier.g.dart';
 

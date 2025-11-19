@@ -1,11 +1,13 @@
 import 'dart:developer' as developer;
 
+import 'package:firebase_auth/firebase_auth.dart';
+
+import '../../../../core/di/injection_container.dart';
 import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../database/repositories/diagnostico_repository.dart';
 import '../../../../database/repositories/favorito_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../../database/repositories/pragas_repository.dart';
-import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
 
@@ -65,7 +67,14 @@ class FavoritosStorageService implements IFavoritosStorage {
         'adicionadoEm': DateTime.now().toIso8601String(),
       };
 
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        developer.log('Erro: Usuário não autenticado ao adicionar favorito');
+        return false;
+      }
+
       final result = await _repository.addFavorito(
+        userId,
         tipoKey,
         id,
         itemData.toString(),

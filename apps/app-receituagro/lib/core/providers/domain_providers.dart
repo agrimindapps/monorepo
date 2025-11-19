@@ -1,11 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../database/providers/database_providers.dart';
 import '../services/failure_message_service.dart';
 import '../services/filter_service.dart';
 import '../services/stats_service.dart';
-import 'core_providers.dart';
 
 part 'domain_providers.g.dart';
 

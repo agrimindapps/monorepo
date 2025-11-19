@@ -1,6 +1,6 @@
-import 'package:core/core.dart' hide Column;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+
+import 'package:core/core.dart' hide Column;
 
 /// Datasource local para gerenciamento de cache de dispositivos
 /// Usa SharedPreferences para persistência offline

@@ -1,10 +1,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../database/receituagro_database.dart';
-import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/services/fitossanitarios_data_loader.dart';
+import '../../../../database/receituagro_database.dart';
+import '../../../../database/repositories/fitossanitarios_repository.dart';
 
 part 'defensivos_statistics_notifier.g.dart';
 

@@ -35,15 +35,15 @@ class SubscriptionFinancialDetailsCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Título da seção
-            Row(
+            const Row(
               children: [
                 Icon(
                   Icons.account_balance_wallet,
                   size: 20,
                   color: ReceitaAgroColors.primary,
                 ),
-                const SizedBox(width: 8),
-                const Text(
+                SizedBox(width: 8),
+                Text(
                   'Detalhes do Plano',
                   style: TextStyle(
                     fontSize: 16,

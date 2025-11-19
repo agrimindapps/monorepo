@@ -332,7 +332,7 @@ class ImageManagementService {
     try {
       // TODO: Implementar abstração específica para Base64 upload
       // Por agora, retorna erro padrão
-      return Left(
+      return const Left(
         NetworkFailure(
           'Upload Base64 requer implementação na camada de dados',
         ),

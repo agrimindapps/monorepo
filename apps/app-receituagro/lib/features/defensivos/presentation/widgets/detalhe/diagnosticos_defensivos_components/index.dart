@@ -5,6 +5,7 @@
 ///
 /// Arquivo refatorado de diagnosticos_defensivos_components.dart (1501 linhas)
 /// em 5 módulos menores para melhor manutenibilidade.
+library;
 
 export 'culture_section_widget.dart';
 export 'dialog_widget.dart';

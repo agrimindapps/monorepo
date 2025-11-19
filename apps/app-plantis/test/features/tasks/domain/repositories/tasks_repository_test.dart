@@ -34,7 +34,7 @@ class _TestTasksRepository implements TasksRepository {
   Future<Either<Failure, Task>> updateTask(Task task) async {
     final index = _tasks.indexWhere((t) => t.id == task.id);
     if (index == -1) {
-      return Left(NotFoundFailure('Task not found'));
+      return const Left(NotFoundFailure('Task not found'));
     }
     _tasks[index] = task;
     return Right(task);
@@ -74,7 +74,7 @@ class _TestTasksRepository implements TasksRepository {
   Future<Either<Failure, Task>> completeTask(String id, {String? notes}) async {
     final index = _tasks.indexWhere((t) => t.id == id);
     if (index == -1) {
-      return Left(NotFoundFailure('Task not found'));
+      return const Left(NotFoundFailure('Task not found'));
     }
     final completedTask = _tasks[index].copyWithTaskData(
       status: TaskStatus.completed,
@@ -88,7 +88,7 @@ class _TestTasksRepository implements TasksRepository {
   Future<Either<Failure, void>> markTaskAsOverdue(String id) async {
     final index = _tasks.indexWhere((t) => t.id == id);
     if (index == -1) {
-      return Left(NotFoundFailure('Task not found'));
+      return const Left(NotFoundFailure('Task not found'));
     }
     _tasks[index] = _tasks[index].copyWithTaskData(
       status: TaskStatus.overdue,
@@ -99,7 +99,7 @@ class _TestTasksRepository implements TasksRepository {
   @override
   Future<Either<Failure, Task>> createRecurringTask(Task completedTask) async {
     if (!completedTask.isRecurring) {
-      return Left(ValidationFailure('Task is not recurring'));
+      return const Left(ValidationFailure('Task is not recurring'));
     }
     final intervalDays = completedTask.recurringIntervalDays ?? 7;
     final newTask = completedTask.copyWithTaskData(
@@ -381,8 +381,8 @@ void main() {
 
     test('should get overdue tasks', () async {
       // Arrange
-      final yesterdayDate = DateTime.now().subtract(Duration(days: 1));
-      final tomorrowDate = DateTime.now().add(Duration(days: 1));
+      final yesterdayDate = DateTime.now().subtract(const Duration(days: 1));
+      final tomorrowDate = DateTime.now().add(const Duration(days: 1));
 
       final overdueTask = TestFixtures.createTestTask(
         id: 'task-1',

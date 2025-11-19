@@ -3,8 +3,6 @@ import 'dart:developer' as developer;
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 import '../../features/analytics/analytics_service.dart';
-import '../providers/auth_notifier.dart';
-import '../services/device_identity_service.dart';
 import '../services/receituagro_validation_service.dart';
 import 'injection_container.dart' as di;
 

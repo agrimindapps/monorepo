@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 
 import '../../../home/domain/entities/landing_content.dart';
 import '../../../home/presentation/providers/landing_providers.dart';
-import '../builders/how_it_works_section_builder.dart';
 import '../builders/footer_section_builder.dart';
+import '../builders/how_it_works_section_builder.dart';
 import '../builders/promo_coming_soon_section_builder.dart';
 import '../builders/testimonials_section_builder.dart';
 import '../managers/promotional_page_animation_manager.dart';

@@ -1,6 +1,4 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' hide SubscriptionStatus, Column;
-import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../../../../core/di/di_providers.dart';
 import '../../domain/entities/subscription_status.dart';
@@ -9,7 +7,6 @@ import '../../domain/usecases/check_subscription_status.dart';
 import '../../domain/usecases/restore_purchases.dart';
 import '../../domain/usecases/get_available_packages.dart';
 import '../../data/datasources/local/premium_local_datasource.dart';
-import '../../data/repositories/premium_repository_impl.dart';
 
 part 'premium_providers.g.dart';
 

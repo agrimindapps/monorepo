@@ -49,7 +49,7 @@ class _DateRangeSelectorState extends State<DateRangeSelector> {
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
-            value: widget.initialValue,
+            initialValue: widget.initialValue,
             items: const [
               DropdownMenuItem(
                   value: 'ultimos7', child: Text('Últimos 7 dias')),
@@ -74,7 +74,7 @@ class _DateRangeSelectorState extends State<DateRangeSelector> {
                         builder: (context, child) {
                           return Theme(
                             data: Theme.of(context).copyWith(
-                              dialogBackgroundColor: Colors.white,
+                              dialogTheme: DialogThemeData(backgroundColor: Colors.white),
                             ),
                             child: Center(
                               child: SizedBox(

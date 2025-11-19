@@ -2,11 +2,10 @@ import 'dart:async';
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart' show debugPrint, kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/foundation.dart'
+    show debugPrint, kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart' as purchases;
 
 import 'package:core/core.dart' hide Column;
@@ -33,7 +32,6 @@ void main() async {
 
   // Initialize Firebase with error handling (BEFORE DI)
   bool firebaseInitialized = false;
-  FirebaseAnalyticsService? analyticsService;
   FirebaseCrashlyticsService? crashlyticsService;
 
   try {
@@ -43,7 +41,6 @@ void main() async {
     firebaseInitialized = true;
 
     // Initialize Firebase services from core package
-    analyticsService = FirebaseAnalyticsService();
     crashlyticsService = FirebaseCrashlyticsService();
     debugPrint('Firebase initialized successfully');
   } catch (e) {
@@ -57,9 +54,12 @@ void main() async {
   // Initialize DI (AFTER Firebase)
   await configureDependencies();
 
-  if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)) {
+  if (!kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS)) {
     // RevenueCat setup
-    if (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS) {
+    if (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS) {
       RevenuecatService(store: purchases.Store.appStore, apiKey: appleApiKey);
     } else if (defaultTargetPlatform == TargetPlatform.android) {
       RevenuecatService(store: purchases.Store.playStore, apiKey: googleApiKey);
@@ -72,14 +72,17 @@ void main() async {
   }
 
   Future.delayed(const Duration(milliseconds: 500), () async {
-    if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)) {
+    if (!kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS)) {
       await _configureSDK();
     }
   });
 
   if (!kIsWeb &&
       firebaseInitialized &&
-      (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)) {
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS)) {
     runZonedGuarded<Future<void>>(
       () async {
         runApp(const ProviderScope(child: App()));

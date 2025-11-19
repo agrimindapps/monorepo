@@ -19,108 +19,108 @@ abstract class Failure extends Equatable {
 
 class ServerFailure extends Failure {
   const ServerFailure({
-    String message = 'Erro no servidor. Tente novamente mais tarde.',
-    int? statusCode,
-  }) : super(message: message, statusCode: statusCode);
+    super.message = 'Erro no servidor. Tente novamente mais tarde.',
+    super.statusCode,
+  });
 }
 
 class CacheFailure extends Failure {
   const CacheFailure({
-    String message = 'Erro ao acessar dados locais.',
-    int? statusCode,
-  }) : super(message: message, statusCode: statusCode);
+    super.message = 'Erro ao acessar dados locais.',
+    super.statusCode,
+  });
 }
 
 class NetworkFailure extends Failure {
   const NetworkFailure({
-    String message = 'Sem conexão com a internet.',
-    int? statusCode,
-  }) : super(message: message, statusCode: statusCode);
+    super.message = 'Sem conexão com a internet.',
+    super.statusCode,
+  });
 }
 
 class UnknownFailure extends Failure {
   const UnknownFailure({
-    String message = 'Erro desconhecido. Tente novamente.',
-    int? statusCode,
-  }) : super(message: message, statusCode: statusCode);
+    super.message = 'Erro desconhecido. Tente novamente.',
+    super.statusCode,
+  });
 }
 
 class ValidationFailure extends Failure {
   const ValidationFailure({
-    String message = 'Dados inválidos.',
-    int? statusCode,
-  }) : super(message: message, statusCode: statusCode);
+    super.message = 'Dados inválidos.',
+    super.statusCode,
+  });
 }
 
 // ==================== Storage Failures ====================
 
 class StorageFailure extends Failure {
   const StorageFailure({
-    String message = 'Erro ao acessar armazenamento.',
-    int? statusCode,
-  }) : super(message: message, statusCode: statusCode);
+    super.message = 'Erro ao acessar armazenamento.',
+    super.statusCode,
+  });
 }
 
 class StorageReadFailure extends StorageFailure {
   const StorageReadFailure({
-    String message = 'Erro ao ler dados do armazenamento.',
-  }) : super(message: message);
+    super.message = 'Erro ao ler dados do armazenamento.',
+  });
 }
 
 class StorageWriteFailure extends StorageFailure {
   const StorageWriteFailure({
-    String message = 'Erro ao salvar dados no armazenamento.',
-  }) : super(message: message);
+    super.message = 'Erro ao salvar dados no armazenamento.',
+  });
 }
 
 class StorageDeleteFailure extends StorageFailure {
   const StorageDeleteFailure({
-    String message = 'Erro ao deletar dados do armazenamento.',
-  }) : super(message: message);
+    super.message = 'Erro ao deletar dados do armazenamento.',
+  });
 }
 
 // ==================== Data Failures ====================
 
 class DataNotFoundFailure extends Failure {
   const DataNotFoundFailure({
-    String message = 'Dados não encontrados.',
-    int? statusCode,
-  }) : super(message: message, statusCode: statusCode);
+    super.message = 'Dados não encontrados.',
+    super.statusCode,
+  });
 }
 
 class DataParseFailure extends Failure {
   const DataParseFailure({
-    String message = 'Erro ao processar dados.',
-    int? statusCode,
-  }) : super(message: message, statusCode: statusCode);
+    super.message = 'Erro ao processar dados.',
+    super.statusCode,
+  });
 }
 
 // ==================== Permission Failures ====================
 
 class PermissionFailure extends Failure {
   const PermissionFailure({
-    String message = 'Permissão negada.',
-    int? statusCode,
-  }) : super(message: message, statusCode: statusCode);
+    super.message = 'Permissão negada.',
+    super.statusCode,
+  });
 }
 
 // ==================== Premium Failures ====================
 
 class PremiumFailure extends Failure {
   const PremiumFailure({
-    String message = 'Erro ao verificar assinatura premium.',
-    int? statusCode,
-  }) : super(message: message, statusCode: statusCode);
+    super.message = 'Erro ao verificar assinatura premium.',
+    super.statusCode,
+  });
 }
 
 class SubscriptionNotFoundFailure extends PremiumFailure {
   const SubscriptionNotFoundFailure({
-    String message = 'Assinatura não encontrada.',
-  }) : super(message: message);
+    super.message = 'Assinatura não encontrada.',
+  });
 }
 
 class PurchaseFailure extends PremiumFailure {
   const PurchaseFailure({
-    String message = 'Erro ao processar compra.',
-  }) : super(message: message);
+    super.message = 'Erro ao processar compra.',
+  });
 }

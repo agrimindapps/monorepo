@@ -1,9 +1,9 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../database/receituagro_database.dart';
 import '../../core/services/receituagro_navigation_service.dart';
 import '../../core/theme/design_tokens.dart';
+import '../../database/receituagro_database.dart';
 import 'presentation/providers/home_defensivos_notifier.dart';
 import 'presentation/widgets/defensivos_error_state.dart';
 import 'presentation/widgets/defensivos_new_items_section.dart';

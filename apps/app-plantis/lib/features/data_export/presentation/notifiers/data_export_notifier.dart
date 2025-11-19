@@ -244,7 +244,7 @@ class DataExportNotifier extends _$DataExportNotifier {
       if (userId == null) {
         state = AsyncValue.data(
           currentState.copyWith(
-            currentProgress: ExportProgress.error('Usuário não autenticado'),
+            currentProgress: const ExportProgress.error('Usuário não autenticado'),
           ),
         );
         return;

@@ -1,5 +1,5 @@
-import 'package:drift/drift.dart';
 import 'package:core/core.dart' hide Column;
+import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../core/data/models/comentario_model.dart';

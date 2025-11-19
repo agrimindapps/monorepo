@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 /// This stub provides basic compatibility but does not function
 @Deprecated('Use ConsumerStatefulWidget with Riverpod premiumStatusNotifierProvider instead')
 mixin PremiumStatusListener<T extends StatefulWidget> on State<T> {
-  bool _isPremium = false;
+  final bool _isPremium = false;
 
   bool get isPremium => _isPremium;
 

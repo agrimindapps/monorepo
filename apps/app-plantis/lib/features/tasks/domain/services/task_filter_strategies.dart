@@ -1,6 +1,6 @@
 import '../../core/constants/tasks_constants.dart';
-import '../entities/task.dart' as task_entity;
 import '../../presentation/providers/tasks_state.dart';
+import '../entities/task.dart' as task_entity;
 
 /// Strategy interface for filtering tasks by status/type
 /// Implements Strategy Pattern to allow extensible filter types

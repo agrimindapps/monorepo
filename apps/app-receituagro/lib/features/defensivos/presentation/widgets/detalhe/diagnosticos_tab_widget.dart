@@ -317,14 +317,14 @@ class DiagnosticosTabWidget extends ConsumerWidget {
           return DiagnosticoDefensivoCultureSectionWidget(
             cultura: item.cultura!,
             diagnosticCount: item.count!,
-            diagnosticos: item.diagnosticos!,
+            diagnosticos: item.diagnosticos,
           );
         }
 
         return Builder(
           builder: (context) => DiagnosticoDefensivoListItemWidget(
-            diagnostico: item.diagnostic!,
-            onTap: () => _showDiagnosticoDialog(context, item.diagnostic!),
+            diagnostico: item.diagnostic,
+            onTap: () => _showDiagnosticoDialog(context, item.diagnostic),
             isDense: true,
             hasElevation: false,
           ),

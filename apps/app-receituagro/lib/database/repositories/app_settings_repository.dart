@@ -1,5 +1,5 @@
-import 'package:drift/drift.dart';
 import 'package:core/core.dart';
+import 'package:drift/drift.dart';
 
 import '../../core/models/app_settings.dart' as models;
 import '../receituagro_database.dart';

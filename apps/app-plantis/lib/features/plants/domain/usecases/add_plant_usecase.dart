@@ -1,6 +1,5 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/data/models/planta_config_model.dart';

@@ -2,7 +2,6 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart' hide Column;
 
-import '../../../../database/repositories/diagnostico_repository.dart';
 import '../../../../database/repositories/diagnosticos_repository.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/repositories/i_diagnosticos_metadata_repository.dart';
@@ -324,8 +323,8 @@ class DiagnosticosRepositoryImpl
     try {
       final diagnosticosDrift = await _repository.findByTriplaCombinacao(
         
-        culturaId: int.tryParse(culturaId ?? ""),
-        pragaId: int.tryParse(pragaId ?? ""),
+        culturaId: int.tryParse(culturaId ?? ''),
+        pragaId: int.tryParse(pragaId ?? ''),
       );
 
       final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);

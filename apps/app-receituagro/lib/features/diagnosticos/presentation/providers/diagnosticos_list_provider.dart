@@ -1,6 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../notifiers/diagnosticos_list_notifier.dart';
 import '../state/diagnosticos_list_state.dart';
 
 part 'diagnosticos_list_provider.g.dart';

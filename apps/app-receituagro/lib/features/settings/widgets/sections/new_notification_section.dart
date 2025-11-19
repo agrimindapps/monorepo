@@ -2,8 +2,8 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../presentation/providers/index.dart';
-import '../shared/settings_card.dart';
 import '../shared/section_header.dart';
+import '../shared/settings_card.dart';
 
 /// Notification Settings Section
 /// Allows users to control notification preferences
@@ -16,7 +16,7 @@ class NewNotificationSection extends ConsumerWidget {
 
     return Column(
       children: [
-        SectionHeader(title: 'Notificações'),
+        const SectionHeader(title: 'Notificações'),
         SettingsCard(
           child: Column(
             children: [

@@ -179,7 +179,7 @@ class WebImageUploadManager {
       }
 
       // Em mobile/desktop, não deve chegar aqui (usaria WebImageUploadManager)
-      return Left(
+      return const Left(
         NetworkFailure('Upload de Base64 não suportado em mobile/desktop'),
       );
     } catch (e) {

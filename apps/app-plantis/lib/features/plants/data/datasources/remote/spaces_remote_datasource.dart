@@ -1,5 +1,4 @@
 import 'package:core/core.dart' hide Column;
-import 'package:injectable/injectable.dart';
 
 import '../../../../../core/services/rate_limiter_service.dart';
 import '../../models/space_model.dart';

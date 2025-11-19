@@ -32,7 +32,7 @@ class LandingFeaturesSection extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
-            Wrap(
+            const Wrap(
               spacing: 24,
               runSpacing: 24,
               alignment: WrapAlignment.center,

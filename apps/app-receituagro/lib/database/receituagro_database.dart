@@ -1,6 +1,5 @@
-import 'package:drift/drift.dart';
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
+import 'package:drift/drift.dart';
 
 import 'tables/receituagro_tables.dart';
 
@@ -50,7 +49,7 @@ part 'receituagro_database.g.dart';
 )
 @lazySingleton
 class ReceituagroDatabase extends _$ReceituagroDatabase with BaseDriftDatabase {
-  ReceituagroDatabase(QueryExecutor e) : super(e);
+  ReceituagroDatabase(super.e);
 
   /// Factory Injectable
   @factoryMethod
@@ -156,7 +155,7 @@ class ReceituagroDatabase extends _$ReceituagroDatabase with BaseDriftDatabase {
     final count = culturasCount.read(culturas.id.count()) ?? 0;
 
     if (count > 0) {
-      print('ℹ️ Dados estáticos já populados (${count} culturas)');
+      print('ℹ️ Dados estáticos já populados ($count culturas)');
       return;
     }
 

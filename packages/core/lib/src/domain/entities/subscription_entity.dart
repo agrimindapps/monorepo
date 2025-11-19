@@ -99,11 +99,33 @@ class SubscriptionEntity extends BaseSyncEntity {
     return expirationDate!.difference(now).inDays;
   }
 
-  /// Check if subscription is expiring soon (within 7 days)
+  /// Tempo até expiração da assinatura
+  Duration? get timeUntilExpiry {
+    if (expirationDate == null) return null;
+    final now = DateTime.now();
+    if (now.isAfter(expirationDate!)) return Duration.zero;
+    return expirationDate!.difference(now);
+  }
+
+  /// Percentual de vida da assinatura (0-100)
+  /// 0 = Início, 100 = Expirado
+  double get percentageExpired {
+    if (expirationDate == null || purchaseDate == null) return 0.0;
+
+    final totalDuration = expirationDate!.difference(purchaseDate!).inSeconds;
+    if (totalDuration <= 0) return 100.0;
+
+    final elapsed = DateTime.now().difference(purchaseDate!).inSeconds;
+    if (elapsed < 0) return 0.0;
+    if (elapsed >= totalDuration) return 100.0;
+
+    return (elapsed / totalDuration) * 100.0;
+  }
+
+  /// Indica se subscription está expirando em breve (< 7 dias)
   bool get isExpiringSoon {
-    if (expirationDate == null) return false;
-    final remaining = expirationDate!.difference(DateTime.now());
-    return remaining.inDays <= 7 && remaining.inDays > 0;
+    final days = daysRemaining;
+    return days != null && days <= 7 && days >= 0;
   }
 
   /// Se a assinatura é para o app Plantis
@@ -297,11 +319,12 @@ enum SubscriptionStatus {
   cancelled,
   gracePeriod,
   pending,
+  paused,
   unknown,
 }
 
 /// Níveis de assinatura
-enum SubscriptionTier { free, premium, pro }
+enum SubscriptionTier { free, basic, premium, pro, ultimate, lifetime, trial }
 
 /// Lojas onde a compra pode ser feita
 enum Store { appStore, playStore, stripe, promotional, unknown }
@@ -319,6 +342,8 @@ extension SubscriptionStatusExtension on SubscriptionStatus {
         return 'Período de Graça';
       case SubscriptionStatus.pending:
         return 'Pendente';
+      case SubscriptionStatus.paused:
+        return 'Pausado';
       case SubscriptionStatus.unknown:
         return 'Desconhecido';
     }
@@ -332,14 +357,23 @@ extension SubscriptionTierExtension on SubscriptionTier {
     switch (this) {
       case SubscriptionTier.free:
         return 'Gratuito';
+      case SubscriptionTier.basic:
+        return 'Básico';
       case SubscriptionTier.premium:
         return 'Premium';
       case SubscriptionTier.pro:
         return 'Pro';
+      case SubscriptionTier.ultimate:
+        return 'Ultimate';
+      case SubscriptionTier.lifetime:
+        return 'Vitalício';
+      case SubscriptionTier.trial:
+        return 'Trial';
     }
   }
 
-  bool get isPaid => this != SubscriptionTier.free;
+  bool get isPaid =>
+      this != SubscriptionTier.free && this != SubscriptionTier.trial;
 }
 
 extension StoreExtension on Store {

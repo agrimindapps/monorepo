@@ -1,10 +1,10 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../database/repositories/fitossanitarios_repository.dart';
-import '../../../database/repositories/pragas_repository.dart';
 import '../../../core/services/diagnostico_integration_service.dart';
 import '../../../core/services/receituagro_navigation_service.dart';
+import '../../../database/repositories/fitossanitarios_repository.dart';
+import '../../../database/repositories/pragas_repository.dart';
 import '../../diagnosticos/presentation/pages/detalhe_diagnostico_page.dart';
 import '../data/favorito_defensivo_model.dart';
 import '../data/favorito_diagnostico_model.dart';

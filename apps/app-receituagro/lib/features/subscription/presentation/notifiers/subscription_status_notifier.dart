@@ -1,6 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:core/core.dart';
-import '../../domain/entities/index.dart';
+
 import '../../domain/usecases/get_current_subscription.dart';
 import '../services/subscription_error_message_service.dart';
 
@@ -102,7 +101,7 @@ class SubscriptionStatusNotifier
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final result = await _getCurrentSubscription(NoParams());
+      final result = await _getCurrentSubscription(const NoParams());
 
       result.fold(
         (failure) => state = state.copyWith(

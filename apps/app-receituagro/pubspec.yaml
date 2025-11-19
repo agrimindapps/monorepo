@@ -36,6 +36,16 @@ dependencies:
   firebase_messaging: ^16.0.3
   url_launcher: ^6.3.1
 
+  firebase_auth: any
+  flutter_local_notifications: any
+  firebase_remote_config: any
+  http: any
+  crypto: any
+  device_info_plus: any
+  flutter_secure_storage: any
+  package_info_plus: any
+  flutter_tts: any
+  share_plus: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -52,9 +62,9 @@ flutter:
 
   # Assets do aplicativo ReceitaAgro
   assets:
-    # Drift WASM removed - not using Drift, using in-memory storage
-    # - web/sqlite3.wasm
-    # - web/drift_worker.dart
+    # Drift WASM Assets
+    - web/sqlite3.wasm
+    - web/drift_worker.dart.js
     
     # Dados JSON do banco de dados
     - assets/database/json/tbculturas/

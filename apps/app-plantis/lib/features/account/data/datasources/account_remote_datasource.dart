@@ -1,6 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:core/core.dart' hide Column;
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 
 /// Interface para data source remoto de conta
 /// Abstração para acesso ao Firebase

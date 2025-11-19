@@ -1,6 +1,4 @@
-import 'package:core/core.dart' hide Column;
 
-import '../entities/diagnostico_entity.dart';
 import 'i_diagnosticos_metadata_repository.dart';
 import 'i_diagnosticos_query_repository.dart';
 import 'i_diagnosticos_read_repository.dart';

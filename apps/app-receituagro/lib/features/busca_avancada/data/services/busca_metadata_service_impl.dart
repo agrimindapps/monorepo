@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:core/core.dart';
 
 import '../../domain/entities/busca_entity.dart';
@@ -24,7 +23,7 @@ class BuscaMetadataService implements IBuscaMetadataService {
             culturas: dropdownData['culturas'] ?? [],
             pragas: dropdownData['pragas'] ?? [],
             defensivos: dropdownData['defensivos'] ?? [],
-            tipos: ['diagnostico', 'praga', 'defensivo', 'cultura'],
+            tipos: const ['diagnostico', 'praga', 'defensivo', 'cultura'],
           ));
         },
       );

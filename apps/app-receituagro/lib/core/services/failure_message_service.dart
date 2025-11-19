@@ -1,5 +1,4 @@
 import 'package:core/core.dart' hide Column;
-import 'package:injectable/injectable.dart';
 
 /// Service specialized in mapping Failure types to user-friendly messages
 /// Principle: Single Responsibility - Only handles Failure to message mapping

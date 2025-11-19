@@ -53,7 +53,7 @@ class ToggleFavoritoUseCase {
   }) async {
     // Validação de parâmetros
     if (tipo.isEmpty || id.isEmpty) {
-      return Left<Failure, bool>(
+      return const Left<Failure, bool>(
         ValidationFailure('Tipo e ID são obrigatórios'),
       );
     }
@@ -69,7 +69,7 @@ class ToggleFavoritoUseCase {
           final removeResult = await _repository.removeFavorito(tipo, id);
           return removeResult.fold(
             (failure) => Left<Failure, bool>(failure),
-            (_) => Right<Failure, bool>(false),
+            (_) => const Right<Failure, bool>(false),
           );
         } else {
           // Não está nos favoritos: Adiciona
@@ -77,11 +77,11 @@ class ToggleFavoritoUseCase {
             return _repository.addFavorito(favorito).then(
               (result) => result.fold(
                 (failure) => Left<Failure, bool>(failure),
-                (_) => Right<Failure, bool>(true),
+                (_) => const Right<Failure, bool>(true),
               ),
             );
           } else {
-            return Left<Failure, bool>(
+            return const Left<Failure, bool>(
               ValidationFailure(
                 'Entidade do favorito é obrigatória para adicionar',
               ),

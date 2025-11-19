@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'i_sync_adapter.dart';
 
 /// Registry pattern para gerenciar múltiplos sync adapters
 ///
@@ -33,21 +32,22 @@ class SyncAdapterRegistry {
   /// Cria um novo registry com adapters
   ///
   /// [adapters]: Lista de adapters a registrar
-  SyncAdapterRegistry({required List<ISyncAdapter> adapters})
-      : _adapters = List.unmodifiable(adapters);
+  SyncAdapterRegistry({
+    required List<IDriftSyncAdapter<dynamic, dynamic>> adapters,
+  }) : _adapters = List.unmodifiable(adapters);
 
-  final List<ISyncAdapter> _adapters;
+  final List<IDriftSyncAdapter<dynamic, dynamic>> _adapters;
 
   /// Retorna lista imutável de adapters registrados
-  List<ISyncAdapter> get adapters => _adapters;
+  List<IDriftSyncAdapter<dynamic, dynamic>> get adapters => _adapters;
 
   /// Retorna número de adapters registrados
   int get count => _adapters.length;
 
   /// Encontra adapter por nome
-  ISyncAdapter? findByName(String name) {
+  IDriftSyncAdapter<dynamic, dynamic>? findByName(String name) {
     try {
-      return _adapters.firstWhere((adapter) => adapter.name == name);
+      return _adapters.firstWhere((adapter) => adapter.collectionName == name);
     } catch (e) {
       return null;
     }
@@ -55,9 +55,10 @@ class SyncAdapterRegistry {
 
   /// Verifica se adapter está registrado
   bool has(String adapterName) {
-    return _adapters.any((adapter) => adapter.name == adapterName);
+    return _adapters.any((adapter) => adapter.collectionName == adapterName);
   }
 
   /// Retorna lista de nomes de adapters registrados
-  List<String> get adapterNames => _adapters.map((a) => a.name).toList();
+  List<String> get adapterNames =>
+      _adapters.map((a) => a.collectionName).toList();
 }

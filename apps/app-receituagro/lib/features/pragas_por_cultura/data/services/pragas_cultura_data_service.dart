@@ -38,7 +38,7 @@ class PragasCulturaDataService implements IPragasCulturaDataService {
       final pragasResult = await repository.getPragasPorCultura(culturaId);
       return pragasResult.fold(
         (failure) => [],
-        (pragas) => (pragas as List).cast<Map<String, dynamic>>(),
+        (pragas) => (pragas).cast<Map<String, dynamic>>(),
       );
     } catch (e) {
       return [];
@@ -51,7 +51,7 @@ class PragasCulturaDataService implements IPragasCulturaDataService {
       final culturasResult = await repository.getCulturas();
       return culturasResult.fold(
         (failure) => [],
-        (culturas) => (culturas as List).cast<Map<String, dynamic>>(),
+        (culturas) => (culturas).cast<Map<String, dynamic>>(),
       );
     } catch (e) {
       return [];
@@ -66,7 +66,7 @@ class PragasCulturaDataService implements IPragasCulturaDataService {
       final defensivosResult = await repository.getDefensivos(pragaId);
       return defensivosResult.fold(
         (failure) => [],
-        (defensivos) => (defensivos as List).cast<Map<String, dynamic>>(),
+        (defensivos) => (defensivos).cast<Map<String, dynamic>>(),
       );
     } catch (e) {
       return [];

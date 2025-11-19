@@ -3,9 +3,6 @@ import 'dart:async';
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
-import 'services/analytics_cache_service.dart';
-import 'services/analytics_metrics_calculation_service.dart';
-
 /// ⚠️ MOCK DATA WARNING:
 /// This service returns mock/fake data for development purposes when
 /// DEBUG_ANALYTICS_MOCK_DATA is true. In production, this should be
@@ -20,6 +17,8 @@ import 'services/analytics_metrics_calculation_service.dart';
 /// - Or ensure ReceituagroEnvironmentConfig.DEBUG_ANALYTICS_MOCK_DATA is false in production
 
 import '../../core/constants/receituagro_environment_config.dart';
+import 'services/analytics_cache_service.dart';
+import 'services/analytics_metrics_calculation_service.dart';
 
 /// 🔄 DEPRECATED: Use ReceitaAgroAnalyticsEvent instead
 /// This enum is kept for backward compatibility only

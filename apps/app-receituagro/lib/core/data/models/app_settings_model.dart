@@ -13,13 +13,13 @@ class AppSettingsModel {
 
   final String? userId;
 
-  final bool sync_synchronized;
+  final bool syncSynchronized;
 
-  final DateTime? sync_syncedAt;
+  final DateTime? syncSyncedAt;
 
-  final DateTime sync_createdAt;
+  final DateTime syncCreatedAt;
 
-  final DateTime? sync_updatedAt;
+  final DateTime? syncUpdatedAt;
 
   AppSettingsModel({
     this.theme = 'system',
@@ -28,10 +28,10 @@ class AppSettingsModel {
     this.enableSync = true,
     this.featureFlags = const {},
     this.userId,
-    this.sync_synchronized = false,
-    this.sync_syncedAt,
-    required this.sync_createdAt,
-    this.sync_updatedAt,
+    this.syncSynchronized = false,
+    this.syncSyncedAt,
+    required this.syncCreatedAt,
+    this.syncUpdatedAt,
   });
 
   factory AppSettingsModel.fromMap(Map<String, dynamic> map) {
@@ -44,14 +44,14 @@ class AppSettingsModel {
           ? Map<String, bool>.from(map['featureFlags'] as Map)
           : const {},
       userId: map['userId']?.toString(),
-      sync_synchronized: map['sync_synchronized'] == true,
-      sync_syncedAt: map['sync_syncedAt'] != null
+      syncSynchronized: map['sync_synchronized'] == true,
+      syncSyncedAt: map['sync_syncedAt'] != null
           ? DateTime.tryParse(map['sync_syncedAt'].toString())
           : null,
-      sync_createdAt:
+      syncCreatedAt:
           DateTime.tryParse(map['sync_createdAt']?.toString() ?? '') ??
           DateTime.now(),
-      sync_updatedAt: map['sync_updatedAt'] != null
+      syncUpdatedAt: map['sync_updatedAt'] != null
           ? DateTime.tryParse(map['sync_updatedAt'].toString())
           : null,
     );
@@ -65,10 +65,10 @@ class AppSettingsModel {
       'enableSync': enableSync,
       'featureFlags': featureFlags,
       'userId': userId,
-      'sync_synchronized': sync_synchronized,
-      'sync_syncedAt': sync_syncedAt?.toIso8601String(),
-      'sync_createdAt': sync_createdAt.toIso8601String(),
-      'sync_updatedAt': sync_updatedAt?.toIso8601String(),
+      'sync_synchronized': syncSynchronized,
+      'sync_syncedAt': syncSyncedAt?.toIso8601String(),
+      'sync_createdAt': syncCreatedAt.toIso8601String(),
+      'sync_updatedAt': syncUpdatedAt?.toIso8601String(),
     };
   }
 
@@ -79,10 +79,10 @@ class AppSettingsModel {
     bool? enableSync,
     Map<String, bool>? featureFlags,
     String? userId,
-    bool? sync_synchronized,
-    DateTime? sync_syncedAt,
-    DateTime? sync_createdAt,
-    DateTime? sync_updatedAt,
+    bool? syncSynchronized,
+    DateTime? syncSyncedAt,
+    DateTime? syncCreatedAt,
+    DateTime? syncUpdatedAt,
   }) {
     return AppSettingsModel(
       theme: theme ?? this.theme,
@@ -91,19 +91,19 @@ class AppSettingsModel {
       enableSync: enableSync ?? this.enableSync,
       featureFlags: featureFlags ?? this.featureFlags,
       userId: userId ?? this.userId,
-      sync_synchronized: sync_synchronized ?? this.sync_synchronized,
-      sync_syncedAt: sync_syncedAt ?? this.sync_syncedAt,
-      sync_createdAt: sync_createdAt ?? this.sync_createdAt,
-      sync_updatedAt: sync_updatedAt ?? this.sync_updatedAt,
+      syncSynchronized: syncSynchronized ?? this.syncSynchronized,
+      syncSyncedAt: syncSyncedAt ?? this.syncSyncedAt,
+      syncCreatedAt: syncCreatedAt ?? this.syncCreatedAt,
+      syncUpdatedAt: syncUpdatedAt ?? this.syncUpdatedAt,
     );
   }
 
-  AppSettingsModel markAsUnsynchronized() {
-    return copyWith(sync_synchronized: false, sync_updatedAt: DateTime.now());
+  AppSettingsModel markAsDirty() {
+    return copyWith(syncSynchronized: false, syncUpdatedAt: DateTime.now());
   }
 
   AppSettingsModel markAsSynchronized() {
-    return copyWith(sync_synchronized: true, sync_syncedAt: DateTime.now());
+    return copyWith(syncSynchronized: true, syncSyncedAt: DateTime.now());
   }
 
   @override

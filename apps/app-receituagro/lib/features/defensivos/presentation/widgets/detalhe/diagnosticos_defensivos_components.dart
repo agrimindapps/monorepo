@@ -11,5 +11,6 @@
 /// ```dart
 /// import 'diagnosticos_defensivos_components/index.dart';
 /// ```
+library;
 
 export 'diagnosticos_defensivos_components/index.dart';

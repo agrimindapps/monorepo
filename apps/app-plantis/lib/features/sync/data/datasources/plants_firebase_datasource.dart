@@ -1,6 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../plants/data/models/plant_model.dart';
 import '../mappers/plant_firebase_mapper.dart';

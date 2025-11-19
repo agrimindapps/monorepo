@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
+
+import '../../domain/entities/index.dart';
+import '../../domain/usecases/get_current_subscription.dart';
 import '../models/user_subscription_model.dart';
 import '../notifiers/index.dart';
 import '../services/subscription_error_message_service.dart';
-import '../../domain/entities/index.dart';
-
-import '../../domain/usecases/get_current_subscription.dart';
 
 final sl = GetIt.instance;
 

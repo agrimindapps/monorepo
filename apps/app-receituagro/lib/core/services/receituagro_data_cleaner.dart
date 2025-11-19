@@ -1,7 +1,6 @@
 import 'package:core/core.dart' hide Column;
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
 
 import '../../database/receituagro_database.dart';
 
@@ -435,7 +434,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       // Soft delete
       await (_db.update(_db.favoritos)
         ..where((tbl) => tbl.isDeleted.equals(false))
-      ).write(FavoritosCompanion(isDeleted: Value(true), isDirty: Value(true)));
+      ).write(const FavoritosCompanion(isDeleted: Value(true), isDirty: Value(true)));
       
       results['clearedTables'].add('favoritos');
       totalRecords += favoritosCount;
@@ -459,7 +458,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       // Soft delete
       await (_db.update(_db.comentarios)
         ..where((tbl) => tbl.isDeleted.equals(false))
-      ).write(ComentariosCompanion(isDeleted: Value(true), isDirty: Value(true)));
+      ).write(const ComentariosCompanion(isDeleted: Value(true), isDirty: Value(true)));
       
       results['clearedTables'].add('comentarios');
       totalRecords += comentariosCount;
@@ -623,7 +622,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       // Soft delete: marcar todos como deletados
       await (_db.update(_db.favoritos)
         ..where((tbl) => tbl.isDeleted.equals(false))
-      ).write(FavoritosCompanion(isDeleted: Value(true), isDirty: Value(true)));
+      ).write(const FavoritosCompanion(isDeleted: Value(true), isDirty: Value(true)));
 
       if (kDebugMode) {
         debugPrint('   ✅ $favoriteCount favoritos marcados como deletados');
@@ -688,7 +687,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       // Soft delete: marcar todos como deletados
       await (_db.update(_db.comentarios)
         ..where((tbl) => tbl.isDeleted.equals(false))
-      ).write(ComentariosCompanion(isDeleted: Value(true), isDirty: Value(true)));
+      ).write(const ComentariosCompanion(isDeleted: Value(true), isDirty: Value(true)));
 
       if (kDebugMode) {
         debugPrint('   ✅ $markedCount comentários marcados como deletados');

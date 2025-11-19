@@ -143,7 +143,7 @@ class DataIntegrityValidator {
     // Validar diagnósticos
     final diagnosticosResult = await _diagnosticoRepo.getAll();
     if (diagnosticosResult.isSuccess) {
-      final diagnosticos = diagnosticosResult.data!;
+      final diagnosticos = diagnosticosResult.data;
       issues.addAll(await _validateDiagnosticos(diagnosticos));
     }
 

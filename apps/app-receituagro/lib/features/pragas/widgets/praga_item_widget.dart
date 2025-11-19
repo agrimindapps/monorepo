@@ -1,9 +1,9 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../database/receituagro_database.dart';
 import '../../../core/extensions/praga_drift_extension.dart';
 import '../../../core/widgets/optimized_praga_image_widget.dart';
+import '../../../database/receituagro_database.dart';
 import '../data/praga_view_mode.dart';
 
 class PragaItemWidget extends StatelessWidget {

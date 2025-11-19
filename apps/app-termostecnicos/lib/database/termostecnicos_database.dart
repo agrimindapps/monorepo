@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
 import 'daos/comentario_dao.dart';
 import 'tables/comentarios_table.dart';
@@ -30,7 +29,7 @@ part 'termostecnicos_database.g.dart';
 @lazySingleton
 class TermosTecnicosDatabase extends _$TermosTecnicosDatabase
     with BaseDriftDatabase {
-  TermosTecnicosDatabase(QueryExecutor e) : super(e);
+  TermosTecnicosDatabase(super.e);
 
   /// Versão do schema do banco de dados
   @override

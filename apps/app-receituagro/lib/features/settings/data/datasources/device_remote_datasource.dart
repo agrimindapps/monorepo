@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import 'package:core/core.dart' hide Column;
 
 /// Remote data source para operações de dispositivos via Firebase

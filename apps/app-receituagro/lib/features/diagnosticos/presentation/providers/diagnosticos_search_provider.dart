@@ -1,7 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/diagnostico_entity.dart';
-import '../notifiers/diagnosticos_search_notifier.dart';
 import '../state/diagnosticos_search_state.dart';
 
 part 'diagnosticos_search_provider.g.dart';

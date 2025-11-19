@@ -1,5 +1,4 @@
 import 'package:core/core.dart' hide Column;
-import 'package:injectable/injectable.dart';
 
 import '../../../../../core/data/models/espaco_model.dart';
 import '../../../../../database/repositories/spaces_drift_repository.dart';

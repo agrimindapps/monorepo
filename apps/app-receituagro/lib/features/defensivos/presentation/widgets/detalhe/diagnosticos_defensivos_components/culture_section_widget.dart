@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../../database/repositories/culturas_repository.dart';
 import '../../../../../../core/di/injection_container.dart';
 import '../../../../../../core/theme/spacing_tokens.dart';
+import '../../../../../../database/repositories/culturas_repository.dart';
 
 /// Widget para seção de cultura com contador de diagnósticos e dados detalhados
 class DiagnosticoDefensivoCultureSectionWidget extends StatefulWidget {

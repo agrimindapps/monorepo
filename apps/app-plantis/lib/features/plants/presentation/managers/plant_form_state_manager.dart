@@ -24,8 +24,9 @@ class PlantFormStateManager {
     if (plantingDate != null) return true;
     if (imageUrls.isNotEmpty) return true;
     if (enableWateringCare == true || wateringIntervalDays != null) return true;
-    if (enableFertilizerCare == true || fertilizingIntervalDays != null)
+    if (enableFertilizerCare == true || fertilizingIntervalDays != null) {
       return true;
+    }
     if (enableSunlightCare == true) return true;
     if (enablePestInspection == true) return true;
     if (enablePruning == true) return true;

@@ -1,0 +1,557 @@
+Analyzing app-minigames...                                      
+
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/app_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'icons_plus' isn't a dependency of the importing package • lib/constants/bottom_navigator_const.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'firebase_core' isn't a dependency of the importing package • lib/constants/firebase_const.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'firebase_core' isn't a dependency of the importing package • lib/core/config/firebase_options.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'cloud_firestore' isn't a dependency of the importing package • lib/core/di/injection.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'firebase_auth' isn't a dependency of the importing package • lib/core/di/injection.dart:4:8 • depend_on_referenced_packages
+   info • The imported package 'get_it' isn't a dependency of the importing package • lib/core/di/injection.dart:6:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/core/di/injection.dart:7:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/core/di/injection.dart:9:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/core/error/failures.dart:1:8 • depend_on_referenced_packages
+   info • Angle brackets will be interpreted as HTML • lib/core/error/failures.dart:4:21 • unintended_html_in_doc_comment
+   info • Parameter 'message' could be a super parameter • lib/core/error/failures.dart:19:9 • use_super_parameters
+   info • Parameter 'message' could be a super parameter • lib/core/error/failures.dart:24:9 • use_super_parameters
+   info • Parameter 'message' could be a super parameter • lib/core/error/failures.dart:29:9 • use_super_parameters
+   info • Parameter 'message' could be a super parameter • lib/core/error/failures.dart:34:9 • use_super_parameters
+   info • Parameter 'message' could be a super parameter • lib/core/error/failures.dart:39:9 • use_super_parameters
+   info • The imported package 'cloud_firestore' isn't a dependency of the importing package • lib/core/providers/core_providers.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'firebase_auth' isn't a dependency of the importing package • lib/core/providers/core_providers.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'riverpod_annotation' isn't a dependency of the importing package • lib/core/providers/core_providers.dart:4:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/core/providers/core_providers.dart:5:8 • depend_on_referenced_packages
+   info • 'SharedPreferencesRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/core_providers.dart:27:37 • deprecated_member_use_from_same_package
+   info • 'FirebaseFirestoreRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/core_providers.dart:38:37 • deprecated_member_use_from_same_package
+   info • 'FirebaseAuthRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/core_providers.dart:47:27 • deprecated_member_use_from_same_package
+   info • 'LoggerRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/core_providers.dart:56:15 • deprecated_member_use_from_same_package
+   info • 'printTime' is deprecated and shouldn't be used. Use `dateTimeFormat` with `DateTimeFormat.onlyTimeAndSinceStart` or `DateTimeFormat.none` instead • lib/core/providers/core_providers.dart:64:7 • deprecated_member_use
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/core/router/app_router.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/core/theme/theme_providers.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/caca_palavra/data/datasources/caca_palavra_local_data_source.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/caca_palavra/data/repositories/caca_palavra_repository_impl.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/caca_palavra/di/caca_palavra_injection.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/caca_palavra/di/caca_palavra_injection.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/caca_palavra/domain/entities/game_state.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/caca_palavra/domain/entities/high_score.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/caca_palavra/domain/entities/position.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/caca_palavra/domain/entities/word_entity.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/caca_palavra/domain/repositories/caca_palavra_repository.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/caca_palavra/domain/services/grid_generator_service.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/caca_palavra/domain/services/word_dictionary_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/caca_palavra/domain/services/word_selection_service.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/caca_palavra/domain/usecases/check_word_match_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/caca_palavra/domain/usecases/generate_grid_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/caca_palavra/domain/usecases/load_high_score_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/caca_palavra/domain/usecases/restart_game_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/caca_palavra/domain/usecases/save_high_score_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/caca_palavra/domain/usecases/save_high_score_usecase.dart:20:16 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/caca_palavra/domain/usecases/save_high_score_usecase.dart:20:21 • prefer_const_constructors
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/caca_palavra/domain/usecases/select_cell_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/caca_palavra/domain/usecases/select_cell_usecase.dart:16:16 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/caca_palavra/domain/usecases/select_cell_usecase.dart:16:21 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/caca_palavra/domain/usecases/select_cell_usecase.dart:22:16 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/caca_palavra/domain/usecases/select_cell_usecase.dart:22:21 • prefer_const_constructors
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/caca_palavra/domain/usecases/toggle_word_highlight_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/caca_palavra/domain/usecases/toggle_word_highlight_usecase.dart:14:16 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/caca_palavra/domain/usecases/toggle_word_highlight_usecase.dart:14:21 • prefer_const_constructors
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/caca_palavra/presentation/pages/caca_palavra_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'riverpod_annotation' isn't a dependency of the importing package • lib/features/caca_palavra/presentation/providers/caca_palavra_game_notifier.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/campo_minado/data/datasources/campo_minado_local_data_source.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/campo_minado/domain/entities/cell_data.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/campo_minado/domain/entities/game_state.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/campo_minado/domain/entities/game_stats.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/campo_minado/domain/services/flood_fill_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/campo_minado/domain/services/mine_generator_service.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/campo_minado/domain/services/neighbor_calculator_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/campo_minado/presentation/pages/campo_minado_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'riverpod_annotation' isn't a dependency of the importing package • lib/features/campo_minado/presentation/providers/campo_minado_game_notifier.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/campo_minado/presentation/providers/campo_minado_game_notifier.dart:3:8 • depend_on_referenced_packages
+   info • 'SharedPreferencesRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/campo_minado/presentation/providers/campo_minado_game_notifier.dart:23:45 • deprecated_member_use_from_same_package
+   info • 'CampoMinadoLocalDataSourceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/campo_minado/presentation/providers/campo_minado_game_notifier.dart:29:3 • deprecated_member_use_from_same_package
+   info • 'CampoMinadoRepositoryRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/campo_minado/presentation/providers/campo_minado_game_notifier.dart:37:3 • deprecated_member_use_from_same_package
+   info • 'RevealCellUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/campo_minado/presentation/providers/campo_minado_game_notifier.dart:46:37 • deprecated_member_use_from_same_package
+   info • 'ToggleFlagUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/campo_minado/presentation/providers/campo_minado_game_notifier.dart:51:37 • deprecated_member_use_from_same_package
+   info • 'ChordClickUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/campo_minado/presentation/providers/campo_minado_game_notifier.dart:56:37 • deprecated_member_use_from_same_package
+   info • 'StartNewGameUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/campo_minado/presentation/providers/campo_minado_game_notifier.dart:63:41 • deprecated_member_use_from_same_package
+   info • 'TogglePauseUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/campo_minado/presentation/providers/campo_minado_game_notifier.dart:68:39 • deprecated_member_use_from_same_package
+   info • 'UpdateTimerUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/campo_minado/presentation/providers/campo_minado_game_notifier.dart:73:39 • deprecated_member_use_from_same_package
+   info • 'LoadStatsUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/campo_minado/presentation/providers/campo_minado_game_notifier.dart:78:43 • deprecated_member_use_from_same_package
+   info • 'UpdateStatsUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/campo_minado/presentation/providers/campo_minado_game_notifier.dart:84:47 • deprecated_member_use_from_same_package
+   info • 'IsGameActiveRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/campo_minado/presentation/providers/campo_minado_game_notifier.dart:320:19 • deprecated_member_use_from_same_package
+   info • 'CanInteractRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/campo_minado/presentation/providers/campo_minado_game_notifier.dart:326:18 • deprecated_member_use_from_same_package
+   info • 'FormattedTimeRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/campo_minado/presentation/providers/campo_minado_game_notifier.dart:332:22 • deprecated_member_use_from_same_package
+   info • 'RemainingMinesRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/campo_minado/presentation/providers/campo_minado_game_notifier.dart:338:20 • deprecated_member_use_from_same_package
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/campo_minado/presentation/widgets/cell_widget.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/campo_minado/presentation/widgets/game_header_widget.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/campo_minado/presentation/widgets/game_over_dialog.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/campo_minado/presentation/widgets/minefield_widget.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/flappbird/data/datasources/flappbird_local_datasource.dart:2:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/flappbird/data/repositories/flappbird_repository_impl.dart:2:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/flappbird/data/repositories/flappbird_repository_impl.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/flappbird/di/flappbird_injection.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/flappbird/di/flappbird_injection.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/flappbird/domain/entities/bird_entity.dart:2:8 • depend_on_referenced_packages
+   info • 'isCollidingWithGround' is deprecated and shouldn't be used. Use CollisionService.checkGroundCollision instead • lib/features/flappbird/domain/entities/bird_entity.dart:83:12 • deprecated_member_use_from_same_package
+   info • 'isCollidingWithCeiling' is deprecated and shouldn't be used. Use CollisionService.checkCeilingCollision instead • lib/features/flappbird/domain/entities/bird_entity.dart:83:46 • deprecated_member_use_from_same_package
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/flappbird/domain/entities/game_state_entity.dart:2:8 • depend_on_referenced_packages
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/features/flappbird/domain/entities/game_state_entity.dart:47:14 • prefer_const_literals_to_create_immutables
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/flappbird/domain/entities/high_score_entity.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/flappbird/domain/entities/pipe_entity.dart:2:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/flappbird/domain/repositories/flappbird_repository.dart:2:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/flappbird/domain/repositories/flappbird_repository.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/flappbird/domain/services/collision_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/flappbird/domain/services/physics_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/flappbird/domain/services/pipe_generator_service.dart:2:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/flappbird/domain/usecases/check_collision_usecase.dart:2:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/flappbird/domain/usecases/check_collision_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/flappbird/domain/usecases/flap_bird_usecase.dart:2:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/flappbird/domain/usecases/flap_bird_usecase.dart:2:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/flappbird/domain/usecases/flap_bird_usecase.dart:21:16 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/flappbird/domain/usecases/flap_bird_usecase.dart:22:11 • prefer_const_constructors
+   info • 'flap' is deprecated and shouldn't be used. Use PhysicsService.applyJump instead • lib/features/flappbird/domain/usecases/flap_bird_usecase.dart:27:41 • deprecated_member_use_from_same_package
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/flappbird/domain/usecases/load_high_score_usecase.dart:2:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/flappbird/domain/usecases/load_high_score_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/flappbird/domain/usecases/save_high_score_usecase.dart:2:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/flappbird/domain/usecases/save_high_score_usecase.dart:2:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/flappbird/domain/usecases/save_high_score_usecase.dart:20:16 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/flappbird/domain/usecases/save_high_score_usecase.dart:20:21 • prefer_const_constructors
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/flappbird/domain/usecases/start_game_usecase.dart:2:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/flappbird/domain/usecases/start_game_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/flappbird/domain/usecases/update_physics_usecase.dart:2:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/flappbird/domain/usecases/update_physics_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/flappbird/domain/usecases/update_pipes_usecase.dart:2:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/flappbird/domain/usecases/update_pipes_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/flappbird/presentation/pages/flappbird_page.dart:5:8 • depend_on_referenced_packages
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/flappbird/presentation/pages/flappbird_page.dart:112:49 • deprecated_member_use
+   info • The imported package 'riverpod_annotation' isn't a dependency of the importing package • lib/features/flappbird/presentation/providers/flappbird_notifier.dart:5:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/flappbird/presentation/widgets/background_widget.dart:21:14 • prefer_const_constructors
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/features/flappbird/presentation/widgets/background_widget.dart:22:19 • prefer_const_literals_to_create_immutables
+   info • Use 'const' with the constructor to improve performance • lib/features/flappbird/presentation/widgets/background_widget.dart:24:11 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/flappbird/presentation/widgets/background_widget.dart:27:20 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/flappbird/presentation/widgets/background_widget.dart:29:11 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/flappbird/presentation/widgets/background_widget.dart:32:20 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/flappbird/presentation/widgets/background_widget.dart:34:11 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/flappbird/presentation/widgets/background_widget.dart:37:20 • prefer_const_constructors
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/flappbird/presentation/widgets/background_widget.dart:57:29 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/flappbird/presentation/widgets/bird_widget.dart:36:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/flappbird/presentation/widgets/game_over_dialog.dart:22:27 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/flappbird/presentation/widgets/game_over_dialog.dart:32:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/flappbird/presentation/widgets/pipe_widget.dart:81:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/flappbird/presentation/widgets/score_display_widget.dart:32:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/flappbird/presentation/widgets/score_display_widget.dart:47:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/flappbird/presentation/widgets/score_display_widget.dart:50:41 • deprecated_member_use
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/game_2048/data/datasources/game_2048_local_datasource.dart:3:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/game_2048/data/repositories/game_2048_repository_impl.dart:2:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/game_2048/data/repositories/game_2048_repository_impl.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'get_it' isn't a dependency of the importing package • lib/features/game_2048/di/game_2048_injection.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/game_2048/di/game_2048_injection.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/game_2048/domain/entities/game_state_entity.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/game_2048/domain/entities/grid_entity.dart:1:8 • depend_on_referenced_packages
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/features/game_2048/domain/entities/grid_entity.dart:18:30 • prefer_const_literals_to_create_immutables
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/game_2048/domain/entities/high_score_entity.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/game_2048/domain/entities/position_entity.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/game_2048/domain/entities/tile_entity.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'uuid' isn't a dependency of the importing package • lib/features/game_2048/domain/entities/tile_entity.dart:2:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/game_2048/domain/repositories/game_2048_repository.dart:2:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/game_2048/domain/repositories/game_2048_repository.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/game_2048/domain/services/game_over_checker_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/game_2048/domain/services/line_mover_service.dart:1:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/game_2048/domain/services/line_mover_service.dart:44:14 • prefer_const_constructors
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/game_2048/domain/services/tile_spawner_service.dart:3:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/game_2048/domain/usecases/check_game_over_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/game_2048/domain/usecases/check_game_over_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/game_2048/domain/usecases/load_high_score_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/game_2048/domain/usecases/load_high_score_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/game_2048/domain/usecases/move_tiles_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/game_2048/domain/usecases/move_tiles_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/game_2048/domain/usecases/move_tiles_usecase.dart:20:16 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/game_2048/domain/usecases/move_tiles_usecase.dart:21:11 • prefer_const_constructors
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/game_2048/domain/usecases/restart_game_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/game_2048/domain/usecases/restart_game_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/game_2048/domain/usecases/save_high_score_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/game_2048/domain/usecases/save_high_score_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/game_2048/domain/usecases/save_high_score_usecase.dart:21:16 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/game_2048/domain/usecases/save_high_score_usecase.dart:21:21 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/game_2048/domain/usecases/save_high_score_usecase.dart:25:16 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/game_2048/domain/usecases/save_high_score_usecase.dart:25:21 • prefer_const_constructors
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/game_2048/domain/usecases/spawn_tile_usecase.dart:3:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/game_2048/domain/usecases/spawn_tile_usecase.dart:3:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/game_2048/domain/usecases/spawn_tile_usecase.dart:22:16 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/game_2048/domain/usecases/spawn_tile_usecase.dart:22:21 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/game_2048/domain/usecases/spawn_tile_usecase.dart:51:16 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/game_2048/domain/usecases/spawn_tile_usecase.dart:51:21 • prefer_const_constructors
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/game_2048/presentation/pages/game_2048_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'get_it' isn't a dependency of the importing package • lib/features/game_2048/presentation/providers/game_2048_notifier.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'riverpod_annotation' isn't a dependency of the importing package • lib/features/game_2048/presentation/providers/game_2048_notifier.dart:2:8 • depend_on_referenced_packages
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/game_2048/presentation/widgets/game_controls_widget.dart:67:24 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/game_2048/presentation/widgets/game_controls_widget.dart:69:43 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/game_2048/presentation/widgets/game_over_dialog.dart:35:35 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/game_2048/presentation/widgets/tile_widget.dart:87:63 • deprecated_member_use
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/home/presentation/pages/home_page.dart:2:8 • depend_on_referenced_packages
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:141:23 • deprecated_member_use
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/memory/data/datasources/memory_local_datasource.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/memory/data/repositories/memory_repository_impl.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'get_it' isn't a dependency of the importing package • lib/features/memory/di/memory_injection.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/memory/di/memory_injection.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/memory/di/memory_injection.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/memory/domain/entities/card_entity.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/memory/domain/entities/game_state_entity.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/memory/domain/entities/high_score_entity.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/memory/domain/repositories/memory_repository.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/memory/domain/services/card_flip_service.dart:1:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/memory/domain/services/card_flip_service.dart:36:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/memory/domain/services/card_flip_service.dart:45:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/memory/domain/services/card_flip_service.dart:54:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/memory/domain/services/card_flip_service.dart:63:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/memory/domain/services/card_flip_service.dart:72:14 • prefer_const_constructors
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/memory/domain/services/card_generator_service.dart:4:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/memory/domain/services/card_matcher_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/memory/domain/usecases/check_match_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/memory/domain/usecases/flip_card_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/memory/domain/usecases/generate_cards_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/memory/domain/usecases/load_high_score_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/memory/domain/usecases/restart_game_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/memory/domain/usecases/save_high_score_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/memory/presentation/pages/memory_game_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'get_it' isn't a dependency of the importing package • lib/features/memory/presentation/providers/memory_game_notifier.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'riverpod_annotation' isn't a dependency of the importing package • lib/features/memory/presentation/providers/memory_game_notifier.dart:4:8 • depend_on_referenced_packages
+   info • 'GenerateCardsUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/memory/presentation/providers/memory_game_notifier.dart:179:43 • deprecated_member_use_from_same_package
+   info • 'FlipCardUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/memory/presentation/providers/memory_game_notifier.dart:184:33 • deprecated_member_use_from_same_package
+   info • 'CheckMatchUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/memory/presentation/providers/memory_game_notifier.dart:189:37 • deprecated_member_use_from_same_package
+   info • 'RestartGameUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/memory/presentation/providers/memory_game_notifier.dart:194:39 • deprecated_member_use_from_same_package
+   info • 'LoadHighScoreUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/memory/presentation/providers/memory_game_notifier.dart:200:43 • deprecated_member_use_from_same_package
+   info • 'SaveHighScoreUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/memory/presentation/providers/memory_game_notifier.dart:205:43 • deprecated_member_use_from_same_package
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/pingpong/data/datasources/pingpong_local_datasource.dart:2:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/pingpong/data/repositories/pingpong_repository_impl.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/pingpong/data/repositories/pingpong_repository_impl.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/pingpong/di/pingpong_injection.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/pingpong/di/pingpong_injection.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/pingpong/domain/entities/ball_entity.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/pingpong/domain/entities/game_state_entity.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/pingpong/domain/entities/high_score_entity.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/pingpong/domain/entities/paddle_entity.dart:1:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/pingpong/domain/repositories/pingpong_repository.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/pingpong/domain/repositories/pingpong_repository.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/pingpong/domain/services/ai_paddle_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/pingpong/domain/services/ball_physics_service.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/pingpong/domain/services/collision_detection_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/pingpong/domain/services/score_manager_service.dart:1:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/pingpong/domain/usecases/check_collision_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/pingpong/domain/usecases/check_collision_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/pingpong/domain/usecases/check_collision_usecase.dart:8:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/pingpong/domain/usecases/check_collision_usecase.dart:8:19 • prefer_const_constructors
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/pingpong/domain/usecases/check_score_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/pingpong/domain/usecases/check_score_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/pingpong/domain/usecases/check_score_usecase.dart:9:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/pingpong/domain/usecases/check_score_usecase.dart:9:19 • prefer_const_constructors
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/pingpong/domain/usecases/load_high_score_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/pingpong/domain/usecases/load_high_score_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/pingpong/domain/usecases/save_high_score_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/pingpong/domain/usecases/save_high_score_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/pingpong/domain/usecases/save_high_score_usecase.dart:14:16 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/pingpong/domain/usecases/save_high_score_usecase.dart:14:21 • prefer_const_constructors
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/pingpong/domain/usecases/start_game_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/pingpong/domain/usecases/start_game_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/pingpong/domain/usecases/update_ai_paddle_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/pingpong/domain/usecases/update_ai_paddle_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/pingpong/domain/usecases/update_ai_paddle_usecase.dart:8:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/pingpong/domain/usecases/update_ai_paddle_usecase.dart:8:19 • prefer_const_constructors
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/pingpong/domain/usecases/update_ball_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/pingpong/domain/usecases/update_ball_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/pingpong/domain/usecases/update_ball_usecase.dart:8:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/pingpong/domain/usecases/update_ball_usecase.dart:8:19 • prefer_const_constructors
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/pingpong/domain/usecases/update_player_paddle_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/pingpong/domain/usecases/update_player_paddle_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/pingpong/domain/usecases/update_player_paddle_usecase.dart:14:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/pingpong/domain/usecases/update_player_paddle_usecase.dart:14:19 • prefer_const_constructors
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/pingpong/presentation/pages/pingpong_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'riverpod_annotation' isn't a dependency of the importing package • lib/features/pingpong/presentation/providers/pingpong_notifier.dart:2:8 • depend_on_referenced_packages
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/pingpong/presentation/widgets/game_over_dialog.dart:65:45 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • lib/features/pingpong/presentation/widgets/game_over_dialog.dart:69:30 • prefer_const_constructors
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/features/pingpong/presentation/widgets/game_over_dialog.dart:70:35 • prefer_const_literals_to_create_immutables
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz/data/datasources/quiz_local_data_source.dart:5:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/quiz/data/datasources/quiz_local_data_source.dart:6:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz/data/repositories/quiz_repository_impl.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz/data/repositories/quiz_repository_impl.dart:3:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/data/repositories/quiz_repository_impl.dart:30:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/data/repositories/quiz_repository_impl.dart:30:19 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/data/repositories/quiz_repository_impl.dart:40:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/data/repositories/quiz_repository_impl.dart:40:19 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/data/repositories/quiz_repository_impl.dart:50:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/data/repositories/quiz_repository_impl.dart:50:19 • prefer_const_constructors
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/quiz/domain/entities/game_state.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/quiz/domain/entities/high_score.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/quiz/domain/entities/quiz_question.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz/domain/repositories/quiz_repository.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz/domain/services/answer_validation_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz/domain/services/life_management_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz/domain/services/question_manager_service.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz/domain/usecases/generate_game_questions_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz/domain/usecases/generate_game_questions_usecase.dart:3:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/domain/usecases/generate_game_questions_usecase.dart:30:18 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/domain/usecases/generate_game_questions_usecase.dart:30:23 • prefer_const_constructors
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz/domain/usecases/handle_timeout_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz/domain/usecases/handle_timeout_usecase.dart:3:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/domain/usecases/handle_timeout_usecase.dart:24:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/domain/usecases/handle_timeout_usecase.dart:24:19 • prefer_const_constructors
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz/domain/usecases/load_high_score_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz/domain/usecases/load_high_score_usecase.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz/domain/usecases/next_question_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz/domain/usecases/next_question_usecase.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz/domain/usecases/restart_game_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz/domain/usecases/restart_game_usecase.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz/domain/usecases/save_high_score_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz/domain/usecases/save_high_score_usecase.dart:3:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/domain/usecases/save_high_score_usecase.dart:22:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/domain/usecases/save_high_score_usecase.dart:22:19 • prefer_const_constructors
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz/domain/usecases/select_answer_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz/domain/usecases/select_answer_usecase.dart:3:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/domain/usecases/select_answer_usecase.dart:25:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/domain/usecases/select_answer_usecase.dart:25:19 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/domain/usecases/select_answer_usecase.dart:31:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/domain/usecases/select_answer_usecase.dart:31:19 • prefer_const_constructors
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz/domain/usecases/start_game_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz/domain/usecases/start_game_usecase.dart:3:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/domain/usecases/start_game_usecase.dart:26:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/domain/usecases/start_game_usecase.dart:26:19 • prefer_const_constructors
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz/domain/usecases/update_timer_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz/domain/usecases/update_timer_usecase.dart:3:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/domain/usecases/update_timer_usecase.dart:23:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz/domain/usecases/update_timer_usecase.dart:23:19 • prefer_const_constructors
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/quiz/presentation/pages/quiz_page.dart:5:8 • depend_on_referenced_packages
+   info • The imported package 'riverpod_annotation' isn't a dependency of the importing package • lib/features/quiz/presentation/providers/quiz_game_notifier.dart:5:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz_image/data/datasources/quiz_image_local_data_source.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/quiz_image/data/datasources/quiz_image_local_data_source.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz_image/data/repositories/quiz_image_repository_impl.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz_image/data/repositories/quiz_image_repository_impl.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/quiz_image/domain/entities/game_state.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/quiz_image/domain/entities/high_score.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/quiz_image/domain/entities/quiz_question.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz_image/domain/repositories/quiz_image_repository.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz_image/domain/services/answer_validation_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz_image/domain/services/game_state_manager_service.dart:1:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz_image/domain/services/game_state_manager_service.dart:29:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz_image/domain/services/game_state_manager_service.dart:37:12 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/quiz_image/domain/services/game_state_manager_service.dart:46:12 • prefer_const_constructors
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz_image/domain/services/question_manager_service.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz_image/domain/usecases/generate_game_questions_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz_image/domain/usecases/generate_game_questions_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz_image/domain/usecases/handle_timeout_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz_image/domain/usecases/handle_timeout_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz_image/domain/usecases/load_high_score_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz_image/domain/usecases/load_high_score_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz_image/domain/usecases/next_question_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz_image/domain/usecases/next_question_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz_image/domain/usecases/restart_game_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz_image/domain/usecases/restart_game_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz_image/domain/usecases/save_high_score_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz_image/domain/usecases/save_high_score_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz_image/domain/usecases/select_answer_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz_image/domain/usecases/select_answer_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz_image/domain/usecases/start_game_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz_image/domain/usecases/start_game_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/quiz_image/domain/usecases/update_timer_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/quiz_image/domain/usecases/update_timer_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/quiz_image/presentation/pages/quiz_image_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'riverpod_annotation' isn't a dependency of the importing package • lib/features/quiz_image/presentation/providers/quiz_image_notifier.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/snake/data/datasources/snake_local_data_source.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/snake/data/datasources/snake_local_data_source.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/snake/data/repositories/snake_repository_impl.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/snake/data/repositories/snake_repository_impl.dart:3:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/snake/data/repositories/snake_repository_impl.dart:29:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/snake/data/repositories/snake_repository_impl.dart:29:19 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/snake/data/repositories/snake_repository_impl.dart:39:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/snake/data/repositories/snake_repository_impl.dart:39:19 • prefer_const_constructors
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/snake/domain/entities/game_state.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/snake/domain/entities/high_score.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/snake/domain/entities/position.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/snake/domain/repositories/snake_repository.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/snake/domain/services/collision_detection_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/snake/domain/services/food_generator_service.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/snake/domain/services/game_state_manager_service.dart:1:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/snake/domain/services/game_state_manager_service.dart:36:12 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/snake/domain/services/game_state_manager_service.dart:56:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/snake/domain/services/game_state_manager_service.dart:62:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/snake/domain/services/game_state_manager_service.dart:78:12 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/snake/domain/services/game_state_manager_service.dart:117:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/snake/domain/services/game_state_manager_service.dart:139:12 • prefer_const_constructors
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/snake/domain/services/snake_movement_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/snake/domain/usecases/change_difficulty_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/snake/domain/usecases/change_difficulty_usecase.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/snake/domain/usecases/change_direction_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/snake/domain/usecases/change_direction_usecase.dart:3:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/snake/domain/usecases/change_direction_usecase.dart:25:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/snake/domain/usecases/change_direction_usecase.dart:25:19 • prefer_const_constructors
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/snake/domain/usecases/load_high_score_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/snake/domain/usecases/load_high_score_usecase.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/snake/domain/usecases/save_high_score_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/snake/domain/usecases/save_high_score_usecase.dart:3:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/snake/domain/usecases/save_high_score_usecase.dart:22:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/snake/domain/usecases/save_high_score_usecase.dart:22:19 • prefer_const_constructors
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/snake/domain/usecases/start_new_game_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/snake/domain/usecases/start_new_game_usecase.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/snake/domain/usecases/toggle_pause_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/snake/domain/usecases/toggle_pause_usecase.dart:3:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/snake/domain/usecases/toggle_pause_usecase.dart:28:12 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/snake/domain/usecases/toggle_pause_usecase.dart:28:17 • prefer_const_constructors
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/snake/domain/usecases/update_snake_position_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/snake/domain/usecases/update_snake_position_usecase.dart:3:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/snake/domain/usecases/update_snake_position_usecase.dart:28:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/snake/domain/usecases/update_snake_position_usecase.dart:28:19 • prefer_const_constructors
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/snake/presentation/pages/snake_page.dart:5:8 • depend_on_referenced_packages
+   info • The imported package 'riverpod_annotation' isn't a dependency of the importing package • lib/features/snake/presentation/providers/snake_game_notifier.dart:5:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/soletrando/data/datasources/soletrando_local_datasource.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/soletrando/data/repositories/soletrando_repository_impl.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'get_it' isn't a dependency of the importing package • lib/features/soletrando/di/soletrando_injection.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/soletrando/di/soletrando_injection.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/soletrando/domain/entities/game_state_entity.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/soletrando/domain/entities/high_score_entity.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/soletrando/domain/entities/letter_entity.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/soletrando/domain/entities/word_entity.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/soletrando/domain/repositories/soletrando_repository.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/soletrando/domain/services/game_state_manager_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/soletrando/domain/services/hint_manager_service.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/soletrando/domain/services/letter_validation_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/soletrando/domain/services/score_calculation_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/soletrando/domain/usecases/check_letter_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/soletrando/domain/usecases/generate_word_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/soletrando/domain/usecases/load_high_score_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/soletrando/domain/usecases/restart_game_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/soletrando/domain/usecases/reveal_hint_usecase.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/soletrando/domain/usecases/save_high_score_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/soletrando/domain/usecases/skip_word_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/soletrando/presentation/pages/soletrando_page.dart:2:8 • depend_on_referenced_packages
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/soletrando/presentation/pages/soletrando_page.dart:79:15 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/soletrando/presentation/pages/soletrando_page.dart:99:15 • deprecated_member_use
+   info • The imported package 'get_it' isn't a dependency of the importing package • lib/features/soletrando/presentation/providers/soletrando_game_notifier.dart:4:8 • depend_on_referenced_packages
+   info • The imported package 'riverpod_annotation' isn't a dependency of the importing package • lib/features/soletrando/presentation/providers/soletrando_game_notifier.dart:5:8 • depend_on_referenced_packages
+   info • 'GenerateWordUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/soletrando/presentation/providers/soletrando_game_notifier.dart:196:41 • deprecated_member_use_from_same_package
+   info • 'SkipWordUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/soletrando/presentation/providers/soletrando_game_notifier.dart:202:33 • deprecated_member_use_from_same_package
+   info • 'RestartGameUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/soletrando/presentation/providers/soletrando_game_notifier.dart:208:39 • deprecated_member_use_from_same_package
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/sudoku/data/datasources/sudoku_local_datasource.dart:2:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/sudoku/data/repositories/sudoku_repository_impl.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/sudoku/data/repositories/sudoku_repository_impl.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'get_it' isn't a dependency of the importing package • lib/features/sudoku/di/sudoku_injection.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/sudoku/di/sudoku_injection.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/sudoku/di/sudoku_injection.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/sudoku/domain/entities/game_state_entity.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/sudoku/domain/entities/high_score_entity.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/sudoku/domain/entities/position_entity.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/sudoku/domain/entities/sudoku_cell_entity.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/sudoku/domain/entities/sudoku_grid_entity.dart:1:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/sudoku/domain/repositories/sudoku_repository.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/sudoku/domain/repositories/sudoku_repository.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/sudoku/domain/services/conflict_manager_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/sudoku/domain/services/grid_validation_service.dart:1:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/sudoku/domain/services/grid_validation_service.dart:264:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/sudoku/domain/services/grid_validation_service.dart:273:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/sudoku/domain/services/grid_validation_service.dart:279:12 • prefer_const_constructors
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/sudoku/domain/services/hint_generator_service.dart:4:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/sudoku/domain/services/puzzle_generator_service.dart:4:8 • depend_on_referenced_packages
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/sudoku/domain/usecases/check_completion_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/sudoku/domain/usecases/check_completion_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Angle brackets will be interpreted as HTML • lib/features/sudoku/domain/usecases/check_completion_usecase.dart:12:21 • unintended_html_in_doc_comment
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/sudoku/domain/usecases/generate_puzzle_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/sudoku/domain/usecases/generate_puzzle_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Angle brackets will be interpreted as HTML • lib/features/sudoku/domain/usecases/generate_puzzle_usecase.dart:16:21 • unintended_html_in_doc_comment
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/sudoku/domain/usecases/get_hint_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/sudoku/domain/usecases/get_hint_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Angle brackets will be interpreted as HTML • lib/features/sudoku/domain/usecases/get_hint_usecase.dart:15:21 • unintended_html_in_doc_comment
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/sudoku/domain/usecases/load_high_score_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/sudoku/domain/usecases/load_high_score_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Angle brackets will be interpreted as HTML • lib/features/sudoku/domain/usecases/load_high_score_usecase.dart:14:21 • unintended_html_in_doc_comment
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/sudoku/domain/usecases/place_number_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/sudoku/domain/usecases/place_number_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Angle brackets will be interpreted as HTML • lib/features/sudoku/domain/usecases/place_number_usecase.dart:24:21 • unintended_html_in_doc_comment
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/sudoku/domain/usecases/save_high_score_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/sudoku/domain/usecases/save_high_score_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Angle brackets will be interpreted as HTML • lib/features/sudoku/domain/usecases/save_high_score_usecase.dart:13:21 • unintended_html_in_doc_comment
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/sudoku/domain/usecases/toggle_notes_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/sudoku/domain/usecases/toggle_notes_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Angle brackets will be interpreted as HTML • lib/features/sudoku/domain/usecases/toggle_notes_usecase.dart:12:21 • unintended_html_in_doc_comment
+   info • The import of 'package:dartz/dartz.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/sudoku/domain/usecases/validate_move_usecase.dart:1:8 • unnecessary_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/sudoku/domain/usecases/validate_move_usecase.dart:1:8 • depend_on_referenced_packages
+   info • Angle brackets will be interpreted as HTML • lib/features/sudoku/domain/usecases/validate_move_usecase.dart:13:21 • unintended_html_in_doc_comment
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/sudoku/presentation/pages/sudoku_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'riverpod_annotation' isn't a dependency of the importing package • lib/features/sudoku/presentation/providers/sudoku_notifier.dart:2:8 • depend_on_referenced_packages
+   info • 'UpdateConflictsUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/sudoku/presentation/providers/sudoku_notifier.dart:335:47 • deprecated_member_use_from_same_package
+   info • 'ValidateMoveUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/sudoku/presentation/providers/sudoku_notifier.dart:340:41 • deprecated_member_use_from_same_package
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/sudoku/presentation/widgets/number_pad_widget.dart:56:36 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/sudoku/presentation/widgets/sudoku_cell_widget.dart:53:35 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/sudoku/presentation/widgets/sudoku_cell_widget.dart:55:35 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/sudoku/presentation/widgets/sudoku_cell_widget.dart:57:35 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • lib/features/sudoku/presentation/widgets/victory_dialog.dart:27:14 • prefer_const_constructors
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/features/sudoku/presentation/widgets/victory_dialog.dart:28:19 • prefer_const_literals_to_create_immutables
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tictactoe/data/datasources/tictactoe_local_data_source.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/tictactoe/data/datasources/tictactoe_local_data_source.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tictactoe/data/repositories/tictactoe_repository_impl.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tictactoe/data/repositories/tictactoe_repository_impl.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/tictactoe/domain/entities/game_analytics.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/tictactoe/domain/entities/game_settings.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/tictactoe/domain/entities/game_state.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/tictactoe/domain/entities/game_stats.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tictactoe/domain/repositories/tictactoe_repository.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tictactoe/domain/services/ai_move_strategy_service.dart:4:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/tictactoe/domain/services/ai_move_strategy_service.dart:115:14 • prefer_const_constructors
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tictactoe/domain/services/game_result_validation_service.dart:1:8 • depend_on_referenced_packages
+   info • Use 'const' with the constructor to improve performance • lib/features/tictactoe/domain/services/game_result_validation_service.dart:54:12 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/tictactoe/domain/services/game_result_validation_service.dart:224:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/features/tictactoe/domain/services/game_result_validation_service.dart:235:12 • prefer_const_constructors
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tictactoe/domain/services/move_cache_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tictactoe/domain/usecases/check_game_result_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tictactoe/domain/usecases/check_game_result_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tictactoe/domain/usecases/load_settings_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tictactoe/domain/usecases/load_settings_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tictactoe/domain/usecases/load_stats_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tictactoe/domain/usecases/load_stats_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tictactoe/domain/usecases/make_ai_move_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tictactoe/domain/usecases/make_ai_move_usecase.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tictactoe/domain/usecases/make_move_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tictactoe/domain/usecases/make_move_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tictactoe/domain/usecases/reset_stats_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tictactoe/domain/usecases/reset_stats_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tictactoe/domain/usecases/save_settings_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tictactoe/domain/usecases/save_settings_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tictactoe/domain/usecases/save_stats_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tictactoe/domain/usecases/save_stats_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/tictactoe/presentation/pages/tictactoe_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'riverpod_annotation' isn't a dependency of the importing package • lib/features/tictactoe/presentation/providers/tictactoe_game_notifier.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/tictactoe/presentation/widgets/game_stats_widget.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tower/data/datasources/tower_local_data_source.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/features/tower/data/datasources/tower_local_data_source.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tower/data/repositories/tower_repository_impl.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tower/data/repositories/tower_repository_impl.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/tower/domain/entities/block_data.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/tower/domain/entities/game_state.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/tower/domain/entities/high_score.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tower/domain/repositories/tower_repository.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tower/domain/services/block_generation_service.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tower/domain/services/overlap_calculation_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tower/domain/services/physics_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tower/domain/services/scoring_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tower/domain/usecases/change_difficulty_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tower/domain/usecases/change_difficulty_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tower/domain/usecases/drop_block_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tower/domain/usecases/drop_block_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tower/domain/usecases/load_high_score_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tower/domain/usecases/load_high_score_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tower/domain/usecases/save_high_score_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tower/domain/usecases/save_high_score_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tower/domain/usecases/start_new_game_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tower/domain/usecases/start_new_game_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tower/domain/usecases/toggle_pause_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tower/domain/usecases/toggle_pause_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/tower/domain/usecases/update_moving_block_usecase.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/tower/domain/usecases/update_moving_block_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/tower/presentation/pages/tower_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'riverpod_annotation' isn't a dependency of the importing package • lib/features/tower/presentation/providers/tower_game_notifier.dart:3:8 • depend_on_referenced_packages
+   info • The import of 'package:firebase_core/firebase_core.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/main.dart:6:8 • unnecessary_import
+   info • The imported package 'firebase_core' isn't a dependency of the importing package • lib/main.dart:6:8 • depend_on_referenced_packages
+   info • The import of 'package:flutter_riverpod/flutter_riverpod.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/main.dart:9:8 • unnecessary_import
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/main.dart:9:8 • depend_on_referenced_packages
+   info • The import of 'package:shared_preferences/shared_preferences.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/main.dart:11:8 • unnecessary_import
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/main.dart:11:8 • depend_on_referenced_packages
+   info • The function 'safeCallback' should have a return type but doesn't • lib/services/timer_service.dart:53:5 • always_declare_return_types
+   info • The function 'safeCallback' should have a return type but doesn't • lib/services/timer_service.dart:97:5 • always_declare_return_types
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/widgets/appbar_widget.dart:5:8 • depend_on_referenced_packages
+

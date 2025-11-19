@@ -1,6 +1,4 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart' hide Column;
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/app_settings.dart';
 import '../../domain/repositories/settings_repository.dart';

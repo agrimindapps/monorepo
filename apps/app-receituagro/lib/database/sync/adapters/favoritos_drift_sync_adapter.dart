@@ -1,10 +1,9 @@
 import 'package:core/core.dart' hide Column;
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
+import '../../../features/favoritos/domain/entities/favorito_sync_entity.dart';
 import '../../receituagro_database.dart';
 import '../../tables/receituagro_tables.dart';
-import '../../../features/favoritos/domain/entities/favorito_sync_entity.dart';
 
 /// Adapter de sincronização para Favoritos
 ///
@@ -38,7 +37,7 @@ class FavoritosDriftSyncAdapter
           tipo: row.tipo,
           itemId: row.itemId,
           itemData:
-              {}, // TODO: Parse JSON from row.itemData if needed, or keep empty if not synced back
+              const {}, // TODO: Parse JSON from row.itemData if needed, or keep empty if not synced back
           adicionadoEm: row.createdAt,
           createdAt: row.createdAt,
           updatedAt: row.updatedAt ?? row.createdAt,
@@ -85,9 +84,6 @@ class FavoritosDriftSyncAdapter
           firebaseId: firebaseId != null
               ? Value(firebaseId)
               : const Value.absent(),
-          syncError: const Value(null),
-          retryCount: const Value(0),
-          syncStatus: const Value(0), // Synced
         ),
       );
 
@@ -100,12 +96,13 @@ class FavoritosDriftSyncAdapter
   }
 
   @override
+  @override
   FavoritoSyncEntity driftToEntity(Favorito row) {
     return FavoritoSyncEntity(
       id: row.firebaseId ?? 'temp_${row.id}',
       tipo: row.tipo,
       itemId: row.itemId,
-      itemData: {}, // TODO: Parse JSON
+      itemData: const {}, // TODO: Parse JSON
       adicionadoEm: row.createdAt,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt ?? row.createdAt,
@@ -156,7 +153,6 @@ class FavoritosDriftSyncAdapter
     return entity.toFirebaseMap();
   }
 
-  @override
   Future<Either<Failure, FavoritoSyncEntity?>> getLocalByFirebaseId(
     String firebaseId,
   ) async {

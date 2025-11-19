@@ -4,8 +4,8 @@ import 'package:core/core.dart' as core;
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/foundation.dart';
 
-import '../comentario_model.dart';
 import '../../domain/entities/comentario_sync_entity.dart';
+import '../comentario_model.dart';
 
 /// Service especializado para sincronização de comentários com Firebase
 /// Responsabilidade: Sincronizar operações de comentários com Firestore

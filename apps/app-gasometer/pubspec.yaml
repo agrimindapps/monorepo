@@ -57,6 +57,7 @@ flutter:
   # O drift_worker.dart será compilado automaticamente para JS pelo Flutter
   assets:
     - web/sqlite3.wasm
+    - web/drift_worker.dart.js
 
   # Diretórios criados mas vazios por enquanto
   # assets:

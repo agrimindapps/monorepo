@@ -1,6 +1,6 @@
-import 'package:drift/drift.dart';
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
+import 'package:drift/drift.dart';
+
 import 'tables/plantis_tables.dart';
 
 part 'plantis_database.g.dart';
@@ -45,7 +45,7 @@ part 'plantis_database.g.dart';
 )
 @lazySingleton
 class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
-  PlantisDatabase(QueryExecutor e) : super(e);
+  PlantisDatabase(super.e);
 
   /// Versão do schema do banco de dados
   ///

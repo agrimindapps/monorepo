@@ -1,8 +1,8 @@
 import 'package:core/core.dart';
 import 'package:drift/drift.dart';
+
 import '../receituagro_database.dart';
 import '../tables/receituagro_tables.dart';
-import '../../core/services/filter_service.dart';
 import 'i_favorito_crud_repository.dart';
 import 'i_favorito_query_repository.dart';
 
@@ -105,6 +105,7 @@ class FavoritoRepository extends BaseDriftRepositoryImpl<FavoritoData, Favorito>
   // ========== QUERIES CUSTOMIZADAS ==========
 
   /// Busca favoritos do usuário por tipo
+  @override
   Future<List<FavoritoData>> findByUserAndType(
     String userId,
     String tipo,
@@ -123,6 +124,7 @@ class FavoritoRepository extends BaseDriftRepositoryImpl<FavoritoData, Favorito>
   }
 
   /// Busca todos os favoritos do usuário
+  @override
   Future<List<FavoritoData>> findByUserId(String userId) async {
     final query = _db.select(_db.favoritos)
       ..where((tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false))
@@ -160,6 +162,7 @@ class FavoritoRepository extends BaseDriftRepositoryImpl<FavoritoData, Favorito>
   }
 
   /// Verifica se um item está favoritado
+  @override
   Future<bool> isFavorited(String userId, String tipo, String itemId) async {
     final query = _db.selectOnly(_db.favoritos)
       ..addColumns([_db.favoritos.id.count()])
@@ -175,6 +178,7 @@ class FavoritoRepository extends BaseDriftRepositoryImpl<FavoritoData, Favorito>
   }
 
   /// Busca um favorito específico
+  @override
   Future<FavoritoData?> findByUserTypeAndItem(
     String userId,
     String tipo,
@@ -195,6 +199,7 @@ class FavoritoRepository extends BaseDriftRepositoryImpl<FavoritoData, Favorito>
   }
 
   /// Conta favoritos do usuário por tipo
+  @override
   Future<Map<String, int>> countByType(String userId) async {
     final query = _db.selectOnly(_db.favoritos, distinct: true)
       ..addColumns([_db.favoritos.tipo, _db.favoritos.id.count()])
@@ -216,6 +221,7 @@ class FavoritoRepository extends BaseDriftRepositoryImpl<FavoritoData, Favorito>
   }
 
   /// Conta total de favoritos do usuário
+  @override
   Future<int> countByUserId(String userId) async {
     final query = _db.selectOnly(_db.favoritos)
       ..addColumns([_db.favoritos.id.count()])
@@ -229,6 +235,7 @@ class FavoritoRepository extends BaseDriftRepositoryImpl<FavoritoData, Favorito>
   }
 
   /// Remove favorito (soft delete)
+  @override
   Future<bool> removeFavorito(String userId, String tipo, String itemId) async {
     final favorito = await findByUserTypeAndItem(userId, tipo, itemId);
     if (favorito == null) return false;
@@ -282,6 +289,7 @@ class FavoritoRepository extends BaseDriftRepositoryImpl<FavoritoData, Favorito>
   }
 
   /// Busca favoritos recentes (últimos N)
+  @override
   Future<List<FavoritoData>> findRecent(String userId, {int limit = 10}) async {
     final query = _db.select(_db.favoritos)
       ..where((tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false))
@@ -307,6 +315,7 @@ class FavoritoRepository extends BaseDriftRepositoryImpl<FavoritoData, Favorito>
   }
 
   /// @deprecated Legacy method - adiciona favorito
+  @override
   Future<int> addFavorito(
     String userId,
     String tipo,

@@ -118,12 +118,12 @@ ThemeData darkTheme = ThemeData(
   // Button themes
   textButtonTheme: TextButtonThemeData(
     style: ButtonStyle(
-      padding: MaterialStateProperty.all(
+      padding: WidgetStateProperty.all(
         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
-      backgroundColor: MaterialStateProperty.all(_surfaceColor),
-      foregroundColor: MaterialStateProperty.all(_textColor),
-      shape: MaterialStateProperty.all(
+      backgroundColor: WidgetStateProperty.all(_surfaceColor),
+      foregroundColor: WidgetStateProperty.all(_textColor),
+      shape: WidgetStateProperty.all(
         RoundedRectangleBorder(
           borderRadius: _borderRadius,
           side: const BorderSide(color: _borderColor),
@@ -428,7 +428,7 @@ ThemeData darkTheme = ThemeData(
       letterSpacing: 1.25,
       color: _textColor,
     ),
-    bodySmall: const TextStyle(
+    bodySmall: TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w400,
       letterSpacing: 0.4,

@@ -10,7 +10,7 @@ class AccountDeletionDataSource {
   /// Get Account Deletion Policy document model
   LegalDocumentModel getAccountDeletionPolicy() {
     final sections = [
-      LegalSectionModel(
+      const LegalSectionModel(
         title: 'Como Excluir Sua Conta',
         content: '''**Exclusão via Aplicativo:**
 1. Abra o aplicativo Plantis

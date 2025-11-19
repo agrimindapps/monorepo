@@ -1,10 +1,9 @@
 import 'package:core/core.dart' hide Column;
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
+import '../../../features/comentarios/domain/entities/comentario_sync_entity.dart';
 import '../../receituagro_database.dart';
 import '../../tables/receituagro_tables.dart';
-import '../../../features/comentarios/domain/entities/comentario_sync_entity.dart';
 
 /// Adapter de sincronização para Comentários
 ///

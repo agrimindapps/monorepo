@@ -1,5 +1,5 @@
-import 'package:drift/drift.dart';
 import 'package:core/core.dart' hide Column;
+import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 
 import '../plantis_database.dart' as db;
@@ -25,9 +25,9 @@ class SyncQueueDriftRepository {
       data: data ?? '',
       timestamp: now,
       createdAt: now.millisecondsSinceEpoch,
-      attempts: Value(0),
-      lastAttemptAt: Value(null),
-      error: Value(null),
+      attempts: const Value(0),
+      lastAttemptAt: const Value(null),
+      error: const Value(null),
     );
 
     return await _db.into(_db.plantsSyncQueue).insert(companion);
@@ -44,7 +44,7 @@ class SyncQueueDriftRepository {
   Future<bool> markAsSynced(int id) async {
     final updated =
         await (_db.update(_db.plantsSyncQueue)..where((s) => s.id.equals(id)))
-            .write(db.PlantsSyncQueueCompanion(isSynced: Value(true)));
+            .write(const db.PlantsSyncQueueCompanion(isSynced: Value(true)));
 
     return updated > 0;
   }

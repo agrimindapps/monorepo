@@ -1,5 +1,5 @@
-import 'package:drift/drift.dart';
 import 'package:core/core.dart' hide Column;
+import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../core/data/models/espaco_model.dart';
@@ -40,9 +40,9 @@ class SpacesDriftRepository {
       firebaseId: Value(model.id), // String ID do Firebase
       name: model.nome,
       description: Value(model.descricao),
-      lightCondition: Value(null),
-      humidity: Value(null),
-      averageTemperature: Value(null),
+      lightCondition: const Value(null),
+      humidity: const Value(null),
+      averageTemperature: const Value(null),
       createdAt: Value(
         model.createdAtMs != null
             ? DateTime.fromMillisecondsSinceEpoch(model.createdAtMs!)
@@ -137,8 +137,8 @@ class SpacesDriftRepository {
           ..where((s) => s.firebaseId.equals(firebaseId)))
         .write(
       SpacesCompanion(
-        isDeleted: Value(true),
-        isDirty: Value(true),
+        isDeleted: const Value(true),
+        isDirty: const Value(true),
         updatedAt: Value(DateTime.now()),
       ),
     );
@@ -198,7 +198,7 @@ class SpacesDriftRepository {
           ..where((s) => s.firebaseId.equals(firebaseId)))
         .write(
       SpacesCompanion(
-        isDirty: Value(false),
+        isDirty: const Value(false),
         lastSyncAt: Value(DateTime.now()),
       ),
     );

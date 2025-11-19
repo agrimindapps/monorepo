@@ -11,7 +11,7 @@ class LandingContentDataSource {
   /// Currently configured for "Coming Soon" state
   LandingContentModel getLandingContent() {
     return LandingContentModel(
-      hero: HeroContentModel(
+      hero: const HeroContentModel(
         title: 'Bem-vindo ao Plantis',
         subtitle:
             'Gerencie suas plantas de forma inteligente com tecnologia e sustentabilidade',
@@ -21,38 +21,38 @@ class LandingContentDataSource {
         comingSoonLabel: 'Em Breve',
       ),
       features: [
-        FeatureItemModel(
+        const FeatureItemModel(
           title: 'Biblioteca de Plantas',
           description: 'Acesse informações sobre milhares de espécies',
           icon: '🌿',
         ),
-        FeatureItemModel(
+        const FeatureItemModel(
           title: 'Gestão de Cultivos',
           description: 'Acompanhe o desenvolvimento das suas plantas',
           icon: '📊',
         ),
-        FeatureItemModel(
+        const FeatureItemModel(
           title: 'Alertas Inteligentes',
           description: 'Receba notificações de rega e cuidados',
           icon: '🔔',
         ),
-        FeatureItemModel(
+        const FeatureItemModel(
           title: 'Comunidade',
           description: 'Compartilhe experiências com outros cultivadores',
           icon: '👥',
         ),
-        FeatureItemModel(
+        const FeatureItemModel(
           title: 'Agenda de Atividades',
           description: 'Organize todas as tarefas do seu cultivo',
           icon: '📅',
         ),
-        FeatureItemModel(
+        const FeatureItemModel(
           title: 'Análise de Solo',
           description: 'Registre e monitore a qualidade do solo',
           icon: '🌱',
         ),
       ],
-      cta: CTAContentModel(
+      cta: const CTAContentModel(
         title: 'Comece agora',
         description: 'Junte-se a milhares de cultivadores',
         buttonText: 'Criar conta grátis',

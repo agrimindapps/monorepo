@@ -18,10 +18,10 @@ class ExportProgressMonitor {
 
   /// Calculates time remaining based on progress
   String calculateTimeRemaining(int currentStep, int totalSteps) {
-    final secondsPerStep = 3;
+    const secondsPerStep = 3;
     final stepsRemaining = totalSteps - currentStep - 1;
     final secondsRemaining = stepsRemaining * secondsPerStep;
-    return '${secondsRemaining} segundos restantes';
+    return '$secondsRemaining segundos restantes';
   }
 
   /// Formats progress step message

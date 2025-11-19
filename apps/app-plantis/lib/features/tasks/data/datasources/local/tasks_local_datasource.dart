@@ -1,6 +1,5 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../../database/repositories/tasks_drift_repository.dart';
 import '../../../domain/entities/task.dart';

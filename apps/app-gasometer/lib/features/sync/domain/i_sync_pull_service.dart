@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import '../../../core/sync/models/sync_results.dart';
 
 /// Interface para orquestração de operações de pull de sincronização
 ///

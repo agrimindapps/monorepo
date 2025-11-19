@@ -83,15 +83,15 @@ class _SubscriptionBenefitsWidgetState
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
+                  const Row(
                     children: [
                       Icon(
                         Icons.workspace_premium,
                         color: ReceitaAgroColors.primary,
                         size: 20,
                       ),
-                      const SizedBox(width: 8),
-                      const Text(
+                      SizedBox(width: 8),
+                      Text(
                         'Recursos Premium',
                         style: TextStyle(
                           fontSize: 16,
@@ -172,7 +172,7 @@ class _SubscriptionBenefitsWidgetState
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.check_circle,
             color: ReceitaAgroColors.primary,
             size: 18,

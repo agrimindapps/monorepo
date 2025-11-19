@@ -79,6 +79,7 @@ class ConflictHistoryModel extends BaseSyncModel {
     );
   }
 
+  @override
   Map<String, dynamic> toMap() => {
     'id': id,
     'modelType': modelType,

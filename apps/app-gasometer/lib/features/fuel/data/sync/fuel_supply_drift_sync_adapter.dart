@@ -3,7 +3,6 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
 
-import '../../../../core/sync/adapters/drift_sync_adapter_base.dart';
 import '../../../../database/gasometer_database.dart';
 import '../../../../database/tables/gasometer_tables.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart'; // FuelType enum
@@ -55,19 +54,21 @@ class FuelSupplyDriftSyncAdapter
     extends DriftSyncAdapterBase<FuelRecordEntity, FuelSupply> {
   FuelSupplyDriftSyncAdapter(super.db, super.firestore);
 
+  GasometerDatabase get _db => db as GasometerDatabase;
+
   @override
   String get collectionName => 'fuel_supplies';
 
   @override
   TableInfo<FuelSupplies, FuelSupply> get table =>
-      db.fuelSupplies as TableInfo<FuelSupplies, FuelSupply>;
+      _db.fuelSupplies as TableInfo<FuelSupplies, FuelSupply>;
 
   // ==========================================================================
   // CONVERSÕES: DRIFT → DOMAIN ENTITY
   // ==========================================================================
 
   @override
-  FuelRecordEntity toDomainEntity(FuelSupply driftRow) {
+  FuelRecordEntity driftToEntity(FuelSupply driftRow) {
     // Converter timestamp (int) → DateTime
     final date = DateTime.fromMillisecondsSinceEpoch(driftRow.date);
 
@@ -151,7 +152,7 @@ class FuelSupplyDriftSyncAdapter
   // ==========================================================================
 
   @override
-  Insertable<FuelSupply> toCompanion(FuelRecordEntity entity) {
+  Insertable<FuelSupply> entityToCompanion(FuelRecordEntity entity) {
     // Parse vehicleId (pode ser firebaseId ou localId)
     int vehicleLocalId;
     try {
@@ -282,6 +283,15 @@ class FuelSupplyDriftSyncAdapter
   }
 
   // ==========================================================================
+  // CONVERSÕES: FIRESTORE → DOMAIN ENTITY
+  // ==========================================================================
+
+  @override
+  FuelRecordEntity fromFirestoreDoc(Map<String, dynamic> doc) {
+    return FuelRecordEntity.fromFirebaseMap(doc);
+  }
+
+  // ==========================================================================
   // VALIDAÇÃO
   // ==========================================================================
 
@@ -355,19 +365,22 @@ class FuelSupplyDriftSyncAdapter
   // ==========================================================================
 
   @override
-  FuelRecordEntity resolveConflict(
+  Future<Either<Failure, FuelRecordEntity>> resolveConflict(
     FuelRecordEntity local,
     FuelRecordEntity remote,
-  ) {
+  ) async {
     // Usar estratégia padrão (Last Write Wins - LWW)
-    final resolved = super.resolveConflict(local, remote);
+    final result = await super.resolveConflict(local, remote);
 
-    developer.log(
-      'Conflict resolved for fuel supply: ${resolved.id} (${resolved.date}, ${resolved.liters}L)',
-      name: 'FuelSupplyDriftSyncAdapter',
-    );
+    if (result.isRight()) {
+      final resolved = result.getOrElse(() => local);
+      developer.log(
+        'Conflict resolved for fuel supply: ${resolved.id} (${resolved.date}, ${resolved.liters}L)',
+        name: 'FuelSupplyDriftSyncAdapter',
+      );
+    }
 
-    return resolved;
+    return result;
   }
 
   // ==========================================================================
@@ -389,7 +402,7 @@ class FuelSupplyDriftSyncAdapter
         name: 'FuelSupplyDriftSyncAdapter',
       );
 
-      final query = db.select(db.fuelSupplies)
+      final query = _db.select(_db.fuelSupplies)
         ..where(
           (tbl) =>
               tbl.userId.equals(userId) &
@@ -397,7 +410,7 @@ class FuelSupplyDriftSyncAdapter
               tbl.isDeleted.equals(false),
         )
         ..orderBy([(tbl) => OrderingTerm.asc(tbl.updatedAt)])
-        ..limit(50); // Batch size
+        ..limit(50);
 
       developer.log(
         '🔍 Query created successfully',
@@ -425,7 +438,7 @@ class FuelSupplyDriftSyncAdapter
         final row = rows[i];
         try {
           developer.log(
-            '🔍 Row $i: id=${row.id}, firebaseId=${row.firebaseId}, vehicleId=${row.vehicleId}, liters=${row.liters}',
+            '🔍 Row $i: id=${row.id}, firebaseId=${row.firebaseId}, date=${row.date}, liters=${row.liters}, userId=${row.userId}',
             name: 'FuelSupplyDriftSyncAdapter',
           );
         } catch (e) {
@@ -440,7 +453,7 @@ class FuelSupplyDriftSyncAdapter
       final entities = <FuelRecordEntity>[];
       for (final row in rows) {
         try {
-          var entity = toDomainEntity(row);
+          var entity = driftToEntity(row);
 
           final vehicleFirebaseId = await _resolveVehicleFirebaseId(
             row.vehicleId,
@@ -448,7 +461,7 @@ class FuelSupplyDriftSyncAdapter
 
           if (vehicleFirebaseId == null) {
             developer.log(
-              '⏸️ Skipping fuel record ${entity.id}: vehicle ${row.vehicleId} not synced yet',
+              '⏸️ Skipping fuel supply ${entity.id}: vehicle ${row.vehicleId} not synced yet',
               name: 'FuelSupplyDriftSyncAdapter',
             );
             continue;
@@ -480,15 +493,13 @@ class FuelSupplyDriftSyncAdapter
         stackTrace: stackTrace,
       );
 
-      return Left(CacheFailure('Failed to get dirty fuel supply records: $e'));
+      return Left(CacheFailure('Failed to get dirty fuel supplies: $e'));
     }
   }
 
-  @override
   Future<Either<Failure, FuelRecordEntity?>> getLocalEntity(String id) async {
     try {
-      // Buscar por firebaseId OU por id (local autoIncrement)
-      final query = db.select(db.fuelSupplies)
+      final query = _db.select(_db.fuelSupplies)
         ..where(
           (tbl) =>
               tbl.firebaseId.equals(id) | tbl.id.equals(int.tryParse(id) ?? -1),
@@ -502,7 +513,7 @@ class FuelSupplyDriftSyncAdapter
           'Found local fuel supply: $id',
           name: 'FuelSupplyDriftSyncAdapter',
         );
-        return Right(toDomainEntity(row));
+        return Right(driftToEntity(row));
       }
 
       return const Right(null);
@@ -518,21 +529,20 @@ class FuelSupplyDriftSyncAdapter
     }
   }
 
-  @override
   Future<Either<Failure, void>> insertLocal(FuelRecordEntity entity) async {
     try {
       final resolvedEntity = await _ensureLocalVehicleReference(entity);
       if (resolvedEntity == null) {
         return const Left(
-          CacheFailure('Failed to resolve vehicle reference for fuel record'),
+          CacheFailure('Failed to resolve vehicle reference for fuel supply'),
         );
       }
 
-      final companion = toCompanion(resolvedEntity);
-      await db.into(db.fuelSupplies).insert(companion);
+      final companion = entityToCompanion(resolvedEntity);
+      await _db.into(_db.fuelSupplies).insert(companion);
 
       developer.log(
-        'Inserted fuel supply: ${entity.id} (${entity.liters}L @ ${entity.date})',
+        'Inserted fuel supply: ${entity.id}',
         name: 'FuelSupplyDriftSyncAdapter',
       );
 
@@ -549,22 +559,21 @@ class FuelSupplyDriftSyncAdapter
     }
   }
 
-  @override
   Future<Either<Failure, void>> updateLocal(FuelRecordEntity entity) async {
     try {
       final resolvedEntity = await _ensureLocalVehicleReference(entity);
       if (resolvedEntity == null) {
         return const Left(
-          CacheFailure('Failed to resolve vehicle reference for fuel record'),
+          CacheFailure('Failed to resolve vehicle reference for fuel supply'),
         );
       }
 
-      final companion = toCompanion(resolvedEntity);
+      final companion = entityToCompanion(resolvedEntity);
 
-      // Atualizar por firebaseId OU por id local
-      final query = db.update(db.fuelSupplies)
+      // FuelRecordEntity não tem firebaseId, apenas id
+      final query = _db.update(_db.fuelSupplies)
         ..where(
-          (tbl) => (entity.id.isNotEmpty && int.tryParse(entity.id) == null
+          (tbl) => (entity.id.isNotEmpty
               ? tbl.firebaseId.equals(entity.id)
               : tbl.id.equals(int.tryParse(entity.id) ?? -1)),
         );
@@ -580,7 +589,7 @@ class FuelSupplyDriftSyncAdapter
       }
 
       developer.log(
-        'Updated fuel supply: ${entity.id} (${entity.liters}L)',
+        'Updated fuel supply: ${entity.id}',
         name: 'FuelSupplyDriftSyncAdapter',
       );
 
@@ -611,7 +620,7 @@ class FuelSupplyDriftSyncAdapter
             : const Value.absent(),
       );
 
-      final query = db.update(db.fuelSupplies)
+      final query = _db.update(_db.fuelSupplies)
         ..where(
           (tbl) =>
               tbl.firebaseId.equals(id) | tbl.id.equals(int.tryParse(id) ?? -1),
@@ -649,7 +658,7 @@ class FuelSupplyDriftSyncAdapter
   ) async {
     try {
       // Buscar veículo por firebaseId para obter localId
-      final vehicleQuery = db.select(db.vehicles)
+      final vehicleQuery = _db.select(_db.vehicles)
         ..where((tbl) => tbl.firebaseId.equals(vehicleFirebaseId))
         ..limit(1);
 
@@ -663,7 +672,7 @@ class FuelSupplyDriftSyncAdapter
       }
 
       // Buscar abastecimentos pelo vehicleId local
-      final query = db.select(db.fuelSupplies)
+      final query = _db.select(_db.fuelSupplies)
         ..where(
           (tbl) =>
               tbl.vehicleId.equals(vehicle.id) & tbl.isDeleted.equals(false),
@@ -671,7 +680,7 @@ class FuelSupplyDriftSyncAdapter
         ..orderBy([(tbl) => OrderingTerm.desc(tbl.date)]);
 
       final rows = await query.get();
-      return rows.map((row) => toDomainEntity(row)).toList();
+      return rows.map((row) => driftToEntity(row)).toList();
     } catch (e) {
       developer.log(
         'Error getting supplies by vehicle',
@@ -686,7 +695,7 @@ class FuelSupplyDriftSyncAdapter
   Future<FuelRecordEntity?> getLatestSupply(String vehicleFirebaseId) async {
     try {
       // Buscar veículo por firebaseId
-      final vehicleQuery = db.select(db.vehicles)
+      final vehicleQuery = _db.select(_db.vehicles)
         ..where((tbl) => tbl.firebaseId.equals(vehicleFirebaseId))
         ..limit(1);
 
@@ -696,7 +705,7 @@ class FuelSupplyDriftSyncAdapter
       }
 
       // Buscar último abastecimento
-      final query = db.select(db.fuelSupplies)
+      final query = _db.select(_db.fuelSupplies)
         ..where(
           (tbl) =>
               tbl.vehicleId.equals(vehicle.id) & tbl.isDeleted.equals(false),
@@ -705,7 +714,7 @@ class FuelSupplyDriftSyncAdapter
         ..limit(1);
 
       final row = await query.getSingleOrNull();
-      return row != null ? toDomainEntity(row) : null;
+      return row != null ? driftToEntity(row) : null;
     } catch (e) {
       developer.log(
         'Error getting latest supply',
@@ -721,7 +730,7 @@ class FuelSupplyDriftSyncAdapter
     String vehicleFirebaseId,
   ) async* {
     // Primeiro, resolver vehicleId local
-    final vehicleQuery = db.select(db.vehicles)
+    final vehicleQuery = _db.select(_db.vehicles)
       ..where((tbl) => tbl.firebaseId.equals(vehicleFirebaseId))
       ..limit(1);
 
@@ -732,20 +741,20 @@ class FuelSupplyDriftSyncAdapter
     }
 
     // Assistir mudanças nos abastecimentos
-    final query = db.select(db.fuelSupplies)
+    final query = _db.select(_db.fuelSupplies)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicle.id) & tbl.isDeleted.equals(false),
       )
       ..orderBy([(tbl) => OrderingTerm.desc(tbl.date)]);
 
     yield* query.watch().map(
-      (rows) => rows.map((row) => toDomainEntity(row)).toList(),
+      (rows) => rows.map((row) => driftToEntity(row)).toList(),
     );
   }
 
   Future<String?> _resolveVehicleFirebaseId(int localVehicleId) async {
-    final vehicleRow = await (db.select(
-      db.vehicles,
+    final vehicleRow = await (_db.select(
+      _db.vehicles,
     )..where((tbl) => tbl.id.equals(localVehicleId))).getSingleOrNull();
 
     final firebaseId = vehicleRow?.firebaseId;
@@ -769,7 +778,7 @@ class FuelSupplyDriftSyncAdapter
     }
 
     final vehicleRow =
-        await (db.select(db.vehicles)
+        await (_db.select(_db.vehicles)
               ..where((tbl) => tbl.firebaseId.equals(entity.vehicleId)))
             .getSingleOrNull();
 

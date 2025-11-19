@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:core/core.dart';
 
 import '../../domain/entities/busca_entity.dart';
@@ -46,7 +45,7 @@ class BuscaValidationService implements IBuscaValidationService {
     }
 
     if (query.trim().length < _minQueryLength) {
-      return ValidationFailure(
+      return const ValidationFailure(
         'O termo de busca deve ter pelo menos $_minQueryLength caracteres',
       );
     }

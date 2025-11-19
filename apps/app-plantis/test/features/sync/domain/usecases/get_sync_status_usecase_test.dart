@@ -31,7 +31,7 @@ void main() {
           .thenAnswer((_) async => Right(syncStatus));
 
       // Act
-      final result = await useCase(NoParams());
+      final result = await useCase(const NoParams());
 
       // Assert
       expect(result.isRight(), true);
@@ -61,7 +61,7 @@ void main() {
           .thenAnswer((_) async => Right(syncStatus));
 
       // Act
-      final result = await useCase(NoParams());
+      final result = await useCase(const NoParams());
 
       // Assert
       expect(result.isRight(), true);
@@ -87,7 +87,7 @@ void main() {
           .thenAnswer((_) async => Right(syncStatus));
 
       // Act
-      final result = await useCase(NoParams());
+      final result = await useCase(const NoParams());
 
       // Assert
       expect(result.isRight(), true);
@@ -107,7 +107,7 @@ void main() {
           .thenAnswer((_) async => const Left(failure));
 
       // Act
-      final result = await useCase(NoParams());
+      final result = await useCase(const NoParams());
 
       // Assert
       expect(result.isLeft(), true);

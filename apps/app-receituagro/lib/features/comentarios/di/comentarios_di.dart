@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../database/repositories/comentarios_repository.dart';
 import '../../../core/services/error_handler_service.dart';
+import '../../../database/repositories/comentarios_repository.dart';
 import '../data/repositories/comentarios_repository_impl.dart';
 import '../data/services/comentarios_id_service.dart';
 import '../data/services/comentarios_mapper.dart';
@@ -45,10 +45,10 @@ class ComentariosDI {
 
     // Register repository with all interface variants
     // This allows clients to depend on specific interfaces (ISP)
-    final repoFactory = () => ComentariosRepositoryImpl(
-          getIt<ComentariosRepository>(),
-          getIt<IComentariosMapper>(),
-        );
+    ComentariosRepositoryImpl repoFactory() => ComentariosRepositoryImpl(
+      getIt<ComentariosRepository>(),
+      getIt<IComentariosMapper>(),
+    );
 
     getIt.registerFactory<IComentariosReadRepository>(repoFactory);
     getIt.registerFactory<IComentariosWriteRepository>(repoFactory);
@@ -60,11 +60,17 @@ class ComentariosDI {
     );
 
     getIt.registerFactory<AddComentarioUseCase>(
-      () => AddComentarioUseCase(getIt<IComentariosRepository>()),
+      () => AddComentarioUseCase(
+        getIt<IComentariosReadRepository>(),
+        getIt<IComentariosWriteRepository>(),
+      ),
     );
 
     getIt.registerFactory<DeleteComentarioUseCase>(
-      () => DeleteComentarioUseCase(getIt<IComentariosRepository>()),
+      () => DeleteComentarioUseCase(
+        getIt<IComentariosReadRepository>(),
+        getIt<IComentariosWriteRepository>(),
+      ),
     );
   }
 

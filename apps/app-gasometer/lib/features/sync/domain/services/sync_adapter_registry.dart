@@ -1,31 +1,29 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
-import '../../../../core/sync/adapters/i_sync_adapter.dart';
 
 /// Registro central de adapters de sincronização
-/// 
+///
 /// Implementa o padrão Registry para evitar hard-coding de adapters específicos
 /// Permite adicionar novos adapters sem modificar código existente
 class SyncAdapterRegistry {
-  final Map<String, ISyncAdapter> _adapters = {};
+  final Map<String, IDriftSyncAdapter<dynamic, dynamic>> _adapters = {};
 
   /// Registra um novo adapter
-  void register(ISyncAdapter adapter) {
-    _adapters[adapter.name] = adapter;
+  void register(IDriftSyncAdapter<dynamic, dynamic> adapter) {
+    _adapters[adapter.collectionName] = adapter;
   }
 
   /// Obtém um adapter específico
-  ISyncAdapter? getAdapter(String entityType) {
+  IDriftSyncAdapter<dynamic, dynamic>? getAdapter(String entityType) {
     return _adapters[entityType];
   }
 
   /// Obtém todos os adapters registrados
-  List<ISyncAdapter> getAll() {
+  List<IDriftSyncAdapter<dynamic, dynamic>> getAll() {
     return _adapters.values.toList();
   }
 
   /// Obtém todos os adapters registrados (alias para getAll)
-  List<ISyncAdapter> get adapters => getAll();
+  List<IDriftSyncAdapter<dynamic, dynamic>> get adapters => getAll();
 
   /// Quantidade de adapters registrados
   int get count => _adapters.length;

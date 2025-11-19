@@ -1,5 +1,5 @@
-import 'package:drift/drift.dart';
 import 'package:core/core.dart' hide Column;
+import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../features/plants/data/models/plant_model.dart';
@@ -176,8 +176,8 @@ class PlantsDriftRepository {
           _db.plants,
         )..where((p) => p.firebaseId.equals(firebaseId))).write(
           db.PlantsCompanion(
-            isDeleted: Value(true),
-            isDirty: Value(true),
+            isDeleted: const Value(true),
+            isDirty: const Value(true),
             updatedAt: Value(DateTime.now()),
           ),
         );
@@ -256,7 +256,7 @@ class PlantsDriftRepository {
       _db.plants,
     )..where((p) => p.firebaseId.equals(firebaseId))).write(
       db.PlantsCompanion(
-        isDirty: Value(false),
+        isDirty: const Value(false),
         lastSyncAt: Value(DateTime.now()),
       ),
     );

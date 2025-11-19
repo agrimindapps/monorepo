@@ -42,7 +42,7 @@ class RemoveFavoritoUseCase {
   }) async {
     // Validação de parâmetros
     if (tipo.isEmpty || id.isEmpty) {
-      return Left<Failure, bool>(
+      return const Left<Failure, bool>(
         ValidationFailure('Tipo e ID são obrigatórios'),
       );
     }

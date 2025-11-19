@@ -1,0 +1,264 @@
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 85.0.0 (92.0.0 available)
+  _flutterfire_internals 1.3.63 (1.3.64 available)
+  analyzer 7.6.0 (9.0.0 available)
+! analyzer_plugin 0.13.4 (overridden in ./pubspec_overrides.yaml) (0.13.11 available)
+  app_links 6.4.1 (7.0.0 available)
+  build 2.5.4 (4.0.2 available)
+  build_config 1.1.2 (1.2.0 available)
+  build_daemon 4.1.0 (4.1.1 available)
+  build_resolvers 2.5.4 (3.0.4 available)
+  build_runner 2.5.4 (2.10.3 available)
+  build_runner_core 9.1.2 (9.3.2 available)
+  characters 1.4.0 (1.4.1 available)
+  cloud_firestore 6.0.3 (6.1.0 available)
+  cloud_firestore_platform_interface 7.0.3 (7.0.4 available)
+  cloud_firestore_web 5.0.3 (5.1.0 available)
+  cloud_functions 6.0.3 (6.0.4 available)
+  cloud_functions_platform_interface 5.8.6 (5.8.7 available)
+  cloud_functions_web 5.0.3 (5.1.0 available)
+  connectivity_plus 6.1.5 (7.0.0 available)
+  cross_file 0.3.4+2 (0.3.5+1 available)
+  crypto 3.0.6 (3.0.7 available)
+  custom_lint 0.7.3 (0.8.1 available)
+  custom_lint_builder 0.7.3 (0.8.1 available)
+  custom_lint_core 0.7.1 (0.8.1 available)
+  custom_lint_visitor 1.0.0+7.7.0 (1.0.0+8.4.0 available)
+  dart_style 3.1.1 (3.1.3 available)
+  device_info_plus 11.5.0 (12.2.0 available)
+  facebook_auth_desktop 1.0.3 (2.1.1 available)
+  file_selector_linux 0.9.3+2 (0.9.3+3 available)
+  file_selector_macos 0.9.4+5 (0.9.4+6 available)
+  file_selector_platform_interface 2.6.2 (2.7.0 available)
+  file_selector_windows 0.9.3+4 (0.9.3+5 available)
+  firebase_analytics 12.0.3 (12.0.4 available)
+  firebase_analytics_platform_interface 5.0.3 (5.0.4 available)
+  firebase_analytics_web 0.6.0+3 (0.6.1 available)
+  firebase_auth 6.1.1 (6.1.2 available)
+  firebase_auth_platform_interface 8.1.3 (8.1.4 available)
+  firebase_auth_web 6.0.4 (6.1.0 available)
+  firebase_core 4.2.0 (4.2.1 available)
+  firebase_core_web 3.2.0 (3.3.0 available)
+  firebase_crashlytics 5.0.3 (5.0.5 available)
+  firebase_crashlytics_platform_interface 3.8.14 (3.8.15 available)
+  firebase_messaging 16.0.3 (16.0.4 available)
+  firebase_messaging_platform_interface 4.7.3 (4.7.4 available)
+  firebase_messaging_web 4.0.3 (4.1.0 available)
+  firebase_performance 0.11.1+1 (0.11.1+2 available)
+  firebase_performance_platform_interface 0.1.6+1 (0.1.6+2 available)
+  firebase_performance_web 0.1.7+20 (0.1.8 available)
+  firebase_remote_config 6.1.0 (6.1.2 available)
+  firebase_remote_config_platform_interface 2.0.4 (2.0.5 available)
+  firebase_remote_config_web 1.9.0 (1.10.1 available)
+  firebase_storage 13.0.3 (13.0.4 available)
+  firebase_storage_platform_interface 5.2.14 (5.2.15 available)
+  firebase_storage_web 3.10.21 (3.11.0 available)
+  flutter_facebook_auth 6.2.0 (7.1.2 available)
+  flutter_facebook_auth_platform_interface 5.0.0 (6.1.2 available)
+  flutter_facebook_auth_web 5.0.0 (6.1.2 available)
+  flutter_lints 5.0.0 (6.0.0 available)
+  flutter_riverpod 2.6.1 (3.0.3 available)
+  flutter_secure_storage_linux 1.2.3 (2.0.1 available)
+  flutter_secure_storage_macos 3.1.3 (4.0.0 available)
+  flutter_secure_storage_platform_interface 1.1.2 (2.0.1 available)
+  flutter_secure_storage_web 1.2.1 (2.0.0 available)
+  flutter_secure_storage_windows 3.1.2 (4.0.0 available)
+  flutter_svg 2.2.1 (2.2.2 available)
+  freezed 2.5.8 (3.2.3 available)
+  freezed_annotation 2.4.4 (3.1.0 available)
+  get_it 8.2.0 (9.0.5 available)
+  go_router 16.3.0 (17.0.0 available)
+  google_mobile_ads 5.3.1 (6.0.0 available)
+  google_sign_in 6.3.0 (7.2.0 available)
+  google_sign_in_android 6.2.1 (7.2.5 available)
+  google_sign_in_ios 5.9.0 (6.2.4 available)
+  google_sign_in_platform_interface 2.5.0 (3.1.0 available)
+  google_sign_in_web 0.12.4+4 (1.1.0 available)
+  http 1.5.0 (1.6.0 available)
+  image_picker 1.2.0 (1.2.1 available)
+  image_picker_android 0.8.13+5 (0.8.13+8 available)
+  image_picker_for_web 3.1.0 (3.1.1 available)
+  image_picker_ios 0.8.13+1 (0.8.13+2 available)
+  injectable 2.5.2 (2.6.0 available)
+  injectable_generator 2.7.0 (2.9.1 available)
+  js 0.6.7 (0.7.2 available)
+  json_serializable 6.9.5 (6.11.1 available)
+  lints 5.1.1 (6.0.0 available)
+  local_auth 2.3.0 (3.0.0 available)
+  local_auth_android 1.0.56 (2.0.2 available)
+  local_auth_darwin 1.6.1 (2.0.1 available)
+  local_auth_windows 1.0.11 (2.0.1 available)
+  material_color_utilities 0.11.1 (0.13.0 available)
+  meta 1.16.0 (1.17.0 available)
+  package_info_plus 8.3.1 (9.0.0 available)
+  path_provider_android 2.2.20 (2.2.21 available)
+  path_provider_foundation 2.4.3 (2.4.4 available)
+  pointycastle 3.9.1 (4.0.0 available)
+  purchases_flutter 9.9.0 (9.9.6 available)
+  rate_my_app 2.2.0 (2.3.2 available)
+  riverpod 2.6.1 (3.0.3 available)
+  riverpod_analyzer_utils 0.5.9 (0.5.10 available)
+  riverpod_annotation 2.6.1 (3.0.3 available)
+  riverpod_generator 2.6.4 (3.0.3 available)
+  riverpod_lint 2.6.4 (3.0.3 available)
+  shared_preferences_android 2.4.15 (2.4.16 available)
+  shared_preferences_foundation 2.5.5 (2.5.6 available)
+  sign_in_with_apple 6.1.4 (7.0.1 available)
+  sign_in_with_apple_platform_interface 1.1.0 (2.0.0 available)
+  sign_in_with_apple_web 2.1.1 (3.0.0 available)
+  source_gen 2.0.0 (4.1.0 available)
+  source_helper 1.3.7 (1.3.8 available)
+  sqlite3 2.9.4 (3.0.1 available)
+  sqlite3_web 0.4.1 (0.5.0 available)
+  test_api 0.7.6 (0.7.8 available)
+  universal_io 2.2.2 (2.3.1 available)
+  url_launcher_android 6.3.24 (6.3.25 available)
+  url_launcher_ios 6.3.5 (6.3.6 available)
+  url_launcher_linux 3.2.1 (3.2.2 available)
+  url_launcher_macos 3.2.4 (3.2.5 available)
+  url_launcher_windows 3.1.4 (3.1.5 available)
+  uuid 4.5.1 (4.5.2 available)
+  webview_flutter_android 4.10.5 (4.10.6 available)
+  webview_flutter_wkwebview 3.23.1 (3.23.3 available)
+Got dependencies!
+121 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing web_receituagro...                                    
+
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:12:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:32:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:33:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:35:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:40:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:58:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:59:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:60:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:65:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:77:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:78:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:83:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:103:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:104:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:105:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:106:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:111:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:151:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:154:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:157:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:162:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:163:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:164:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:172:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:173:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:174:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:175:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:176:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:177:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:185:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:187:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:188:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:189:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:190:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:191:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:192:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:193:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:194:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:195:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:196:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:197:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:198:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:199:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:200:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:201:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:202:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:203:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:204:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:205:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:206:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:207:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:208:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:209:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/app-site/examples/adapter_usage_example.dart:210:5 • avoid_print
+   info • Invalid use of a private type in a public API • lib/app-site/pages/culturas_dialog.dart:14:3 • library_private_types_in_public_api
+   info • Invalid use of a private type in a public API • lib/app-site/pages/culturas_page.dart:11:3 • library_private_types_in_public_api
+   info • Invalid use of a private type in a public API • lib/app-site/pages/defensivos_dialog.dart:17:3 • library_private_types_in_public_api
+   info • Don't use 'BuildContext's across async gaps • lib/app-site/pages/defensivos_dialog.dart:67:28 • use_build_context_synchronously
+   info • Invalid use of a private type in a public API • lib/app-site/pages/fitossanitarios_page.dart:12:3 • library_private_types_in_public_api
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app-site/pages/home_defensivos_page.dart:65:39 • deprecated_member_use
+   info • Invalid use of a private type in a public API • lib/app-site/pages/pragas_dialog.dart:15:3 • library_private_types_in_public_api
+   info • Invalid use of a private type in a public API • lib/app-site/pages/pragas_page.dart:11:3 • library_private_types_in_public_api
+   info • The type parameter name 'Type' matches a visible type name • lib/core/interfaces/usecase.dart:9:24 • avoid_types_as_parameter_names
+warning • Unused import: '../../features/auth/domain/entities/user_role.dart' • lib/core/router/app_router.dart:5:8 • unused_import
+warning • The declaration '_EditPlaceholder' isn't referenced • lib/core/router/app_router.dart:257:7 • unused_element
+warning • The declaration '_CreateCulturaPlaceholder' isn't referenced • lib/core/router/app_router.dart:307:7 • unused_element
+warning • The declaration '_EditCulturaPlaceholder' isn't referenced • lib/core/router/app_router.dart:330:7 • unused_element
+warning • A value for optional parameter 'id' isn't ever given • lib/core/router/app_router.dart:333:39 • unused_element_parameter
+warning • The declaration '_CreatePragaPlaceholder' isn't referenced • lib/core/router/app_router.dart:382:7 • unused_element
+warning • The declaration '_EditPragaPlaceholder' isn't referenced • lib/core/router/app_router.dart:405:7 • unused_element
+warning • A value for optional parameter 'id' isn't ever given • lib/core/router/app_router.dart:408:37 • unused_element_parameter
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/core/widgets/app_drawer.dart:240:42 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/core/widgets/app_drawer.dart:240:72 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/core/widgets/app_drawer.dart:263:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/core/widgets/web_internal_layout.dart:64:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/core/widgets/web_internal_layout.dart:355:41 • deprecated_member_use
+warning • Unused import: '../providers/auth_providers.dart' • lib/features/auth/presentation/pages/login_page.dart:4:8 • unused_import
+   info • 'LoginUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_providers.dart:15:27 • deprecated_member_use_from_same_package
+   info • 'LogoutUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_providers.dart:20:29 • deprecated_member_use_from_same_package
+   info • 'GetCurrentUserUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_providers.dart:25:45 • deprecated_member_use_from_same_package
+   info • 'IsAuthenticatedRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_providers.dart:97:22 • deprecated_member_use_from_same_package
+   info • 'CurrentUserRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_providers.dart:104:19 • deprecated_member_use_from_same_package
+   info • 'CanWriteRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_providers.dart:111:15 • deprecated_member_use_from_same_package
+   info • 'CanDeleteRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_providers.dart:118:16 • deprecated_member_use_from_same_package
+   info • 'IsAdminRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_providers.dart:125:14 • deprecated_member_use_from_same_package
+warning • Unnecessary cast • lib/features/culturas/data/datasources/culturas_supabase_datasource.dart:49:36 • unnecessary_cast
+warning • Unnecessary cast • lib/features/culturas/data/datasources/culturas_supabase_datasource.dart:86:36 • unnecessary_cast
+warning • Unnecessary cast • lib/features/culturas/data/datasources/culturas_supabase_datasource.dart:105:36 • unnecessary_cast
+   info • 'GetAllCulturasUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/culturas/presentation/providers/culturas_providers.dart:12:45 • deprecated_member_use_from_same_package
+   info • 'CulturasListRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/culturas/presentation/providers/culturas_providers.dart:43:36 • deprecated_member_use_from_same_package
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/dashboard/presentation/pages/dashboard_page.dart:127:33 • deprecated_member_use
+   info • 'MaterialStateProperty' is deprecated and shouldn't be used. Use WidgetStateProperty instead. Moved to the Widgets layer to make code available outside of Material. This feature was deprecated after v3.19.0-0.3.pre • lib/features/defensivos/presentation/pages/defensivos_list_page.dart:563:30 • deprecated_member_use
+   info • 'GetAllDefensivosUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/defensivos/presentation/providers/defensivos_providers.dart:18:3 • deprecated_member_use_from_same_package
+   info • 'SearchDefensivosUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/defensivos/presentation/providers/defensivos_providers.dart:25:3 • deprecated_member_use_from_same_package
+   info • 'DeleteDefensivoUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/defensivos/presentation/providers/defensivos_providers.dart:31:47 • deprecated_member_use_from_same_package
+   info • 'DefensivosFilterServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/defensivos/presentation/providers/defensivos_providers.dart:39:3 • deprecated_member_use_from_same_package
+   info • 'DefensivosPaginationServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/defensivos/presentation/providers/defensivos_providers.dart:46:3 • deprecated_member_use_from_same_package
+warning • The member 'state' can only be used within 'package:riverpod/src/notifier.dart' or a test • lib/features/defensivos/presentation/providers/defensivos_providers.dart:91:44 • invalid_use_of_visible_for_testing_member
+warning • The member 'state' can only be used within instance members of subclasses of 'NotifierBase' • lib/features/defensivos/presentation/providers/defensivos_providers.dart:91:44 • invalid_use_of_protected_member
+warning • The member 'state' can only be used within 'package:riverpod/src/notifier.dart' or a test • lib/features/defensivos/presentation/providers/defensivos_providers.dart:104:44 • invalid_use_of_visible_for_testing_member
+warning • The member 'state' can only be used within instance members of subclasses of 'NotifierBase' • lib/features/defensivos/presentation/providers/defensivos_providers.dart:104:44 • invalid_use_of_protected_member
+   info • 'PaginatedDefensivosRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/defensivos/presentation/providers/defensivos_providers.dart:163:37 • deprecated_member_use_from_same_package
+   info • 'TotalPagesRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/defensivos/presentation/providers/defensivos_providers.dart:179:16 • deprecated_member_use_from_same_package
+   info • 'PageNumbersRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/defensivos/presentation/providers/defensivos_providers.dart:194:23 • deprecated_member_use_from_same_package
+   info • 'GetAllDefensivosUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/defensivos/presentation/providers/defensivos_usecases_providers.dart:22:3 • deprecated_member_use_from_same_package
+   info • 'SearchDefensivosUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/defensivos/presentation/providers/defensivos_usecases_providers.dart:29:3 • deprecated_member_use_from_same_package
+   info • 'CreateDefensivoUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/defensivos/presentation/providers/defensivos_usecases_providers.dart:36:3 • deprecated_member_use_from_same_package
+   info • 'UpdateDefensivoUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/defensivos/presentation/providers/defensivos_usecases_providers.dart:43:3 • deprecated_member_use_from_same_package
+   info • 'DeleteDefensivoUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/defensivos/presentation/providers/defensivos_usecases_providers.dart:50:3 • deprecated_member_use_from_same_package
+   info • 'GetDiagnosticosByDefensivoIdUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/defensivos/presentation/providers/defensivos_usecases_providers.dart:61:3 • deprecated_member_use_from_same_package
+   info • 'CreateDiagnosticoUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/defensivos/presentation/providers/defensivos_usecases_providers.dart:68:3 • deprecated_member_use_from_same_package
+   info • 'GetDefensivoInfoByDefensivoIdUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/defensivos/presentation/providers/defensivos_usecases_providers.dart:79:3 • deprecated_member_use_from_same_package
+   info • 'SaveDefensivoInfoUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/defensivos/presentation/providers/defensivos_usecases_providers.dart:86:3 • deprecated_member_use_from_same_package
+   info • The imported package 'collection' isn't a dependency of the importing package • lib/features/defensivos/presentation/widgets/defensivo_cadastro_tab2_diagnostico.dart:3:8 • depend_on_referenced_packages
+   info • 'MaterialStateColor' is deprecated and shouldn't be used. Use WidgetStateColor instead. Moved to the Widgets layer to make code available outside of Material. This feature was deprecated after v3.19.0-0.3.pre • lib/features/defensivos/presentation/widgets/defensivo_cadastro_tab2_diagnostico.dart:285:34 • deprecated_member_use
+warning • Unused import: '../../../culturas/domain/entities/cultura.dart' • lib/features/defensivos/presentation/widgets/diagnostico_add_dialog.dart:5:8 • unused_import
+warning • Unused import: '../../../pragas/domain/entities/praga.dart' • lib/features/defensivos/presentation/widgets/diagnostico_add_dialog.dart:7:8 • unused_import
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/defensivos/presentation/widgets/diagnostico_add_dialog.dart:129:27 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/defensivos/presentation/widgets/diagnostico_add_dialog.dart:164:27 • deprecated_member_use
+warning • Unnecessary cast • lib/features/pragas/data/datasources/pragas_supabase_datasource.dart:49:34 • unnecessary_cast
+warning • Unnecessary cast • lib/features/pragas/data/datasources/pragas_supabase_datasource.dart:86:34 • unnecessary_cast
+warning • Unnecessary cast • lib/features/pragas/data/datasources/pragas_supabase_datasource.dart:105:34 • unnecessary_cast
+   info • 'GetAllPragasUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/pragas/presentation/providers/pragas_providers.dart:12:41 • deprecated_member_use_from_same_package
+   info • 'PragasListRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/pragas/presentation/providers/pragas_providers.dart:43:32 • deprecated_member_use_from_same_package
+warning • Unused import: 'dart:ui' • lib/main.dart:1:8 • unused_import
+   info • The imported package 'flutter_web_plugins' isn't a dependency of the importing package • lib/main.dart:6:8 • depend_on_referenced_packages
+warning • Unused import: 'themes/manager.dart' • lib/main.dart:13:8 • unused_import
+   info • The variable name 'ConfigOptionSobre' isn't a lowerCamelCase identifier • lib/pages/sobre_page.dart:158:8 • non_constant_identifier_names
+   info • The variable name 'ConfigOptionFeedback' isn't a lowerCamelCase identifier • lib/services/comments_service.dart:388:8 • non_constant_identifier_names
+   info • Don't invoke 'print' in production code • lib/services/localstorage_service.dart:9:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/localstorage_service.dart:28:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/localstorage_service.dart:39:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/localstorage_service.dart:67:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/localstorage_service.dart:80:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/localstorage_service.dart:98:7 • avoid_print
+

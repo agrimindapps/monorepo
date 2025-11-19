@@ -1,6 +1,5 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/services/i_pragas_type_service.dart';
 

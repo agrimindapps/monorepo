@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
+import '../../../../database/repositories/culturas_repository.dart';
 import '../../domain/entities/praga_entity.dart';
 import '../../domain/services/i_pragas_type_service.dart';
 import 'pragas_notifier.dart';

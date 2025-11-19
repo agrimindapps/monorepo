@@ -3,10 +3,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/di/injection.dart';
 import '../../domain/services/schedule_service.dart';
 import '../../domain/services/task_recommendation_service.dart';
-import '../notifiers/tasks_crud_notifier.dart';
-import '../notifiers/tasks_query_notifier.dart';
-import '../notifiers/tasks_schedule_notifier.dart';
-import '../notifiers/tasks_recommendation_notifier.dart';
 
 part 'specialized_tasks_providers.g.dart';
 

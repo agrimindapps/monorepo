@@ -2,8 +2,8 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../presentation/providers/index.dart';
-import '../shared/settings_card.dart';
 import '../shared/section_header.dart';
+import '../shared/settings_card.dart';
 
 /// Theme Settings Section
 /// Allows users to toggle dark mode and select language preferences
@@ -16,7 +16,7 @@ class NewThemeSection extends ConsumerWidget {
 
     return Column(
       children: [
-        SectionHeader(title: 'Aparência'),
+        const SectionHeader(title: 'Aparência'),
         SettingsCard(
           child: Column(
             children: [
@@ -86,7 +86,7 @@ class NewThemeSection extends ConsumerWidget {
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 12),
-          Container(
+          DecoratedBox(
             decoration: BoxDecoration(
               border: Border.all(
                 color: Theme.of(context).colorScheme.outlineVariant,

@@ -1,8 +1,8 @@
+import '../../../../core/di/injection_container.dart';
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../../database/repositories/pragas_repository.dart';
-import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/busca_entity.dart';
 
 /// Mapper para conversão entre diferentes modelos e BuscaResultEntity
@@ -26,13 +26,11 @@ class BuscaMapper {
       }
       final culturaRepo = sl<CulturasRepository>();
       final culturaIdInt = diagnostico.culturaId;
-      if (culturaIdInt != null) {
-        final cultura = await culturaRepo.findById(culturaIdInt);
-        if (cultura != null && cultura.nome.isNotEmpty) {
-          culturaNome = cultura.nome;
-        }
+      final cultura = await culturaRepo.findById(culturaIdInt);
+      if (cultura != null && cultura.nome.isNotEmpty) {
+        culturaNome = cultura.nome;
       }
-      final pragaRepo = sl<PragasRepository>();
+          final pragaRepo = sl<PragasRepository>();
       final praga = await pragaRepo.findByIdPraga(diagnostico.pragaId.toString());
       if (praga != null && praga.nome.isNotEmpty) {
         pragaNome = praga.nome;

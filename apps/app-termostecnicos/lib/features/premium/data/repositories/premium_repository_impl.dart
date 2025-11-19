@@ -1,6 +1,4 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart' hide SubscriptionStatus, Column;
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/subscription_status.dart';
 import '../../domain/repositories/premium_repository.dart';

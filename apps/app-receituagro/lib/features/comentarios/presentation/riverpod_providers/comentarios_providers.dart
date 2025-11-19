@@ -3,7 +3,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/comentario_entity.dart';
+import '../../domain/repositories/i_comentarios_read_repository.dart';
 import '../../domain/repositories/i_comentarios_repository.dart';
+import '../../domain/repositories/i_comentarios_write_repository.dart';
 import '../../domain/usecases/add_comentario_usecase.dart';
 import '../../domain/usecases/delete_comentario_usecase.dart';
 import '../../domain/usecases/get_comentarios_usecase.dart';
@@ -47,21 +49,39 @@ IComentariosRepository comentariosRepository(ComentariosRepositoryRef ref) {
   return di.sl<IComentariosRepository>();
 }
 
+@riverpod
+IComentariosReadRepository comentariosReadRepository(
+    ComentariosReadRepositoryRef ref) {
+  return di.sl<IComentariosReadRepository>();
+}
+
+@riverpod
+IComentariosWriteRepository comentariosWriteRepository(
+    ComentariosWriteRepositoryRef ref) {
+  return di.sl<IComentariosWriteRepository>();
+}
+
 /// Use Cases dependency injection providers
 @riverpod
 GetComentariosUseCase getComentariosUseCase(GetComentariosUseCaseRef ref) {
-  return GetComentariosUseCase(ref.watch(comentariosRepositoryProvider));
+  return GetComentariosUseCase(ref.watch(comentariosReadRepositoryProvider));
 }
 
 @riverpod
 AddComentarioUseCase addComentariosUseCase(AddComentariosUseCaseRef ref) {
-  return AddComentarioUseCase(ref.watch(comentariosRepositoryProvider));
+  return AddComentarioUseCase(
+    ref.watch(comentariosReadRepositoryProvider),
+    ref.watch(comentariosWriteRepositoryProvider),
+  );
 }
 
 @riverpod
 DeleteComentarioUseCase deleteComentariosUseCase(
     DeleteComentariosUseCaseRef ref) {
-  return DeleteComentarioUseCase(ref.watch(comentariosRepositoryProvider));
+  return DeleteComentarioUseCase(
+    ref.watch(comentariosReadRepositoryProvider),
+    ref.watch(comentariosWriteRepositoryProvider),
+  );
 }
 
 // ============================================================================

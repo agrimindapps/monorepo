@@ -66,7 +66,7 @@ class ReceitaAgroSyncService implements ISyncService {
   @override
   Future<Either<Failure, ServiceSyncResult>> sync() async {
     if (!canSync) {
-      return Left(const ServerFailure('Service not ready for sync'));
+      return const Left(ServerFailure('Service not ready for sync'));
     }
 
     final startTime = DateTime.now();
@@ -226,7 +226,7 @@ class ReceitaAgroSyncService implements ISyncService {
   /// Sincroniza dados do Firestore após login
   Future<Either<Failure, ServiceSyncResult>> syncUserData() async {
     if (!canSync) {
-      return Left(const ServerFailure('Service not ready for user data sync'));
+      return const Left(ServerFailure('Service not ready for user data sync'));
     }
 
     final startTime = DateTime.now();
@@ -268,8 +268,9 @@ class ReceitaAgroSyncService implements ISyncService {
       favoritosResult.fold(
         (failure) {
           totalFailed++;
-          if (kDebugMode)
+          if (kDebugMode) {
             print('⚠️ Falha ao sincronizar favoritos: ${failure.message}');
+          }
         },
         (count) {
           totalSynced += count;

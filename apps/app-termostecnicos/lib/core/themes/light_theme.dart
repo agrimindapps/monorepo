@@ -111,17 +111,17 @@ ThemeData lightTheme = ThemeData(
   // Text Button Theme
   textButtonTheme: TextButtonThemeData(
     style: ButtonStyle(
-      padding: MaterialStateProperty.all(
+      padding: WidgetStateProperty.all(
         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
-      shape: MaterialStateProperty.all(
+      shape: WidgetStateProperty.all(
         RoundedRectangleBorder(
           borderRadius: _borderRadius,
           side: const BorderSide(color: _borderColor),
         ),
       ),
-      foregroundColor: MaterialStateProperty.all(_textColor),
-      backgroundColor: MaterialStateProperty.all(_backgroundColor),
+      foregroundColor: WidgetStateProperty.all(_textColor),
+      backgroundColor: WidgetStateProperty.all(_backgroundColor),
     ),
   ),
 
@@ -299,12 +299,12 @@ ThemeData lightTheme = ThemeData(
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ButtonStyle(
-      foregroundColor: MaterialStateProperty.all(_backgroundColor),
-      backgroundColor: MaterialStateProperty.all(_primaryColor),
-      padding: MaterialStateProperty.all(
+      foregroundColor: WidgetStateProperty.all(_backgroundColor),
+      backgroundColor: WidgetStateProperty.all(_primaryColor),
+      padding: WidgetStateProperty.all(
         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
-      shape: MaterialStateProperty.all(
+      shape: WidgetStateProperty.all(
         RoundedRectangleBorder(borderRadius: _borderRadius),
       ),
     ),

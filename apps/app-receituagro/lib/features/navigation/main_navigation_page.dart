@@ -61,8 +61,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   }
 
   void _onBottomNavTap(int index) {
-    if (_currentBottomNavIndex == index)
+    if (_currentBottomNavIndex == index) {
       return; // Evita rebuilds desnecessários
+    }
 
     setState(() {
       _currentBottomNavIndex = index;

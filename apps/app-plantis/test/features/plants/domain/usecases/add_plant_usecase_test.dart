@@ -16,7 +16,7 @@ void main() {
 
   setUpAll(() {
     // Register fallback values for mocktail
-    registerFallbackValue(AddPlantParams(name: 'Test'));
+    registerFallbackValue(const AddPlantParams(name: 'Test'));
     registerFallbackValue(TestFixtures.createTestPlant());
 
     // Setup authenticated user for tests
@@ -53,7 +53,7 @@ void main() {
       'should return Left with ValidationFailure when plant name is empty',
       () async {
         // Arrange
-        final params = AddPlantParams(name: '');
+        const params = AddPlantParams(name: '');
 
         // Act
         final result = await addPlantUseCase(params);
@@ -71,7 +71,7 @@ void main() {
       'should return Left with ValidationFailure when plant name is less than 2 characters',
       () async {
         // Arrange
-        final params = AddPlantParams(name: 'A');
+        const params = AddPlantParams(name: 'A');
 
         // Act
         final result = await addPlantUseCase(params);
@@ -165,7 +165,7 @@ void main() {
           () => mockPlantTaskGenerator.generateTasksForPlant(any()),
         ).thenReturn([]);
 
-        final params = AddPlantParams(
+        const params = AddPlantParams(
           name: 'Monstera',
           species: 'Monstera Deliciosa',
         );
@@ -190,7 +190,7 @@ void main() {
         () => mockPlantsRepository.addPlant(any()),
       ).thenAnswer((_) async => const Left(ServerFailure('Database error')));
 
-      final params = AddPlantParams(name: 'Test Plant');
+      const params = AddPlantParams(name: 'Test Plant');
 
       // Act
       final result = await addPlantUseCase(params);
@@ -217,7 +217,7 @@ void main() {
         () => mockPlantTaskGenerator.generateTasksForPlant(any()),
       ).thenReturn([]);
 
-      final params = AddPlantParams(name: '  Test Plant  ');
+      const params = AddPlantParams(name: '  Test Plant  ');
 
       // Act
       final result = await addPlantUseCase(params);

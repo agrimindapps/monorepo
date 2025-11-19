@@ -56,6 +56,7 @@ dependencies:
 
   # Dependencies from core but used directly in app code
   # (Required for direct imports per analyzer)
+  share_plus: any
   shared_preferences: any
   firebase_core: any
   icons_plus: any

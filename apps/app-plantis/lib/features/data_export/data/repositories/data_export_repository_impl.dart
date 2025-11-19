@@ -1,7 +1,6 @@
 import 'dart:convert' as convert;
 
 import 'package:core/core.dart' hide Column;
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/entities/export_request.dart';
 import '../../domain/repositories/data_export_repository.dart';
@@ -487,7 +486,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
       final exportData = <DataType, dynamic>{};
 
       // Helper to handle data fetch results
-      Future<bool> _fetchData(
+      Future<bool> fetchData(
         Future<Either<Failure, dynamic>> Function() fetcher,
         DataType dataType,
       ) async {
@@ -508,28 +507,28 @@ class DataExportRepositoryImpl implements DataExportRepository {
       for (final dataType in request.dataTypes) {
         switch (dataType) {
           case DataType.plants:
-            await _fetchData(() => getUserPlantsData(request.userId), dataType);
+            await fetchData(() => getUserPlantsData(request.userId), dataType);
             break;
           case DataType.plantTasks:
-            await _fetchData(() => getUserTasksData(request.userId), dataType);
+            await fetchData(() => getUserTasksData(request.userId), dataType);
             break;
           case DataType.spaces:
-            await _fetchData(() => getUserSpacesData(request.userId), dataType);
+            await fetchData(() => getUserSpacesData(request.userId), dataType);
             break;
           case DataType.plantPhotos:
-            await _fetchData(
+            await fetchData(
               () => getUserPlantPhotosData(request.userId),
               dataType,
             );
             break;
           case DataType.plantComments:
-            await _fetchData(
+            await fetchData(
               () => getUserPlantCommentsData(request.userId),
               dataType,
             );
             break;
           case DataType.settings:
-            await _fetchData(
+            await fetchData(
               () => getUserSettingsData(request.userId),
               dataType,
             );
@@ -542,27 +541,27 @@ class DataExportRepositoryImpl implements DataExportRepository {
             break;
           case DataType.all:
             // Fetch all data types
-            await _fetchData(
+            await fetchData(
               () => getUserPlantsData(request.userId),
               DataType.plants,
             );
-            await _fetchData(
+            await fetchData(
               () => getUserTasksData(request.userId),
               DataType.plantTasks,
             );
-            await _fetchData(
+            await fetchData(
               () => getUserSpacesData(request.userId),
               DataType.spaces,
             );
-            await _fetchData(
+            await fetchData(
               () => getUserPlantPhotosData(request.userId),
               DataType.plantPhotos,
             );
-            await _fetchData(
+            await fetchData(
               () => getUserPlantCommentsData(request.userId),
               DataType.plantComments,
             );
-            await _fetchData(
+            await fetchData(
               () => getUserSettingsData(request.userId),
               DataType.settings,
             );

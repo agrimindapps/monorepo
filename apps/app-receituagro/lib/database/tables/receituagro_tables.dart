@@ -1,4 +1,3 @@
-import 'package:core/core.dart' hide Column;
 import 'package:drift/drift.dart';
 
 /// ========== STATIC DATA TABLES ==========

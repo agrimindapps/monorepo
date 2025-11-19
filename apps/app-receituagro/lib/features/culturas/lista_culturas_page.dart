@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../database/repositories/culturas_repository.dart';
-import '../../database/receituagro_database.dart';
 import '../../core/di/injection_container.dart';
 import '../../core/services/receituagro_navigation_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
+import '../../database/receituagro_database.dart';
+import '../../database/repositories/culturas_repository.dart';
 import '../pragas_por_cultura/pragas_por_cultura_detalhadas_page.dart';
 import 'data/cultura_view_mode.dart';
 import 'widgets/cultura_item_widget.dart';

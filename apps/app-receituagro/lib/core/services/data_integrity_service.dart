@@ -1,6 +1,5 @@
 import 'dart:developer' as developer;
 
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart' hide Column;
 
 /// Relatório de integridade referencial dos dados
@@ -82,7 +81,7 @@ class IntegrityReport {
 @Deprecated('Service removed. Use Drift instead.')
 class DataIntegrityService {
   
-  DataIntegrityService(dynamic _deprecated);
+  DataIntegrityService(dynamic deprecated);
 
   /// Valida a integridade referencial de todos os diagnósticos
   /// DEPRECATED: Returns empty report. Reimplement with Drift.

@@ -13,12 +13,12 @@ import '../../features/data_export/domain/usecases/delete_export_usecase.dart';
 import '../../features/data_export/domain/usecases/download_export_usecase.dart';
 import '../../features/data_export/domain/usecases/get_export_history_usecase.dart';
 import '../../features/data_export/domain/usecases/request_export_usecase.dart';
-import '../../features/settings/di/device_management_di.dart';
 import '../../features/plants/domain/repositories/plant_comments_repository.dart';
 import '../../features/plants/domain/repositories/plants_repository.dart';
 import '../../features/plants/domain/repositories/spaces_repository.dart';
 import '../../features/settings/data/datasources/settings_local_datasource.dart';
 import '../../features/settings/data/repositories/settings_repository.dart';
+import '../../features/settings/di/device_management_di.dart';
 import '../../features/settings/domain/repositories/i_settings_repository.dart';
 // Settings providers moved to Riverpod notifiers
 // See: settings_notifier.dart and notifications_settings_notifier.dart

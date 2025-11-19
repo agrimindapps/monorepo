@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/failure_message_service.dart';
-import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/services/metadata/i_diagnosticos_metadata_service.dart';
 import '../../domain/services/stats/i_diagnosticos_stats_service.dart';
 import '../state/diagnosticos_stats_state.dart';

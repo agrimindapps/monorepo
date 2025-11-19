@@ -28,7 +28,7 @@ class _ProductionReleaseDashboardState extends State<ProductionReleaseDashboard>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.warning_amber_rounded,
               size: 64,
               color: Colors.orange,

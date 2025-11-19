@@ -147,7 +147,7 @@ class LocalImageCacheService {
       );
 
       if (!success) {
-        return Left(
+        return const Left(
           CacheFailure('Erro ao salvar imagem em cache'),
         );
       }
@@ -168,7 +168,7 @@ class LocalImageCacheService {
       }
 
       if (config.onlyOnWeb && !kIsWeb) {
-        return Left(CacheFailure('Cache não disponível em mobile'));
+        return const Left(CacheFailure('Cache não disponível em mobile'));
       }
 
       final key = '${config.keyPrefix}$id';
@@ -311,7 +311,7 @@ class LocalImageCacheService {
           );
 
           if (!success) {
-            return Left(CacheFailure('Erro ao atualizar cache'));
+            return const Left(CacheFailure('Erro ao atualizar cache'));
           }
 
           return const Right(null);

@@ -131,8 +131,7 @@ class PragasErrorMessageService implements IPragasErrorMessageService {
   /// Get error message for loading recent pragas
   @override
   String getLoadRecentError([String? details]) {
-    return 'Erro ao carregar pragas recentes' +
-        (details != null ? ': $details' : '');
+    return 'Erro ao carregar pragas recentes${details != null ? ': $details' : ''}';
   }
 
   /// Get generic error message with optional details

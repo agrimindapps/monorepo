@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../database/receituagro_database.dart';
-import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
+import '../../../../database/receituagro_database.dart';
+import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../data/view_mode.dart';
 
 part 'lista_defensivos_notifier.g.dart';

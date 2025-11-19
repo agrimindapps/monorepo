@@ -1,7 +1,5 @@
 import 'package:app_plantis/features/settings/presentation/providers/notifiers/theme_notifier.dart';
-import 'package:app_plantis/features/settings/presentation/providers/settings_notifier.dart';
 import 'package:core/core.dart' hide test;
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 

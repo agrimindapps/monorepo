@@ -3,7 +3,6 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
 
-import '../../../../core/sync/adapters/drift_sync_adapter_base.dart';
 import '../../../../database/gasometer_database.dart';
 import '../../../../database/tables/gasometer_tables.dart';
 import '../../domain/entities/odometer_entity.dart';
@@ -36,26 +35,29 @@ import '../../domain/entities/odometer_entity.dart';
 @lazySingleton
 class OdometerDriftSyncAdapter
     extends DriftSyncAdapterBase<OdometerEntity, OdometerReading> {
-  OdometerDriftSyncAdapter(super.db, super.firestore) {
+  OdometerDriftSyncAdapter(GeneratedDatabase db, FirebaseFirestore firestore)
+    : super(db, firestore) {
     developer.log(
       '🏗️ OdometerDriftSyncAdapter initialized with db: ${db.hashCode}, firestore: ${firestore.hashCode}',
       name: 'OdometerDriftSyncAdapter',
     );
   }
 
+  GasometerDatabase get _db => db as GasometerDatabase;
+
   @override
   String get collectionName => 'odometer_readings';
 
   @override
   TableInfo<OdometerReadings, OdometerReading> get table =>
-      db.odometerReadings as TableInfo<OdometerReadings, OdometerReading>;
+      _db.odometerReadings as TableInfo<OdometerReadings, OdometerReading>;
 
   // ==========================================================================
   // CONVERSÕES: DRIFT → DOMAIN ENTITY
   // ==========================================================================
 
   @override
-  OdometerEntity toDomainEntity(OdometerReading driftRow) {
+  OdometerEntity driftToEntity(OdometerReading driftRow) {
     // Converter timestamp (int) → DateTime
     final date = DateTime.fromMillisecondsSinceEpoch(driftRow.date);
 
@@ -88,7 +90,7 @@ class OdometerDriftSyncAdapter
   // ==========================================================================
 
   @override
-  Insertable<OdometerReading> toCompanion(OdometerEntity entity) {
+  Insertable<OdometerReading> entityToCompanion(OdometerEntity entity) {
     // Resolver vehicleId (String do Firestore) → vehicleId (int do Drift)
     final vehicleIdInt = int.tryParse(entity.vehicleId) ?? 0;
 
@@ -149,65 +151,28 @@ class OdometerDriftSyncAdapter
   // ==========================================================================
 
   @override
-  Either<Failure, OdometerEntity> fromFirestoreMap(Map<String, dynamic> doc) {
+  OdometerEntity fromFirestoreDoc(Map<String, dynamic> doc) {
     try {
-      // Parse tipo
-      OdometerType type = OdometerType.other;
-      if (doc['type'] != null) {
-        try {
-          type = OdometerType.values.firstWhere(
-            (e) => e.name == doc['type'],
-            orElse: () => OdometerType.other,
-          );
-        } catch (_) {
-          type = OdometerType.other;
-        }
-      }
+      // Usar método existente da entidade
+      final entity = OdometerEntity.fromFirebaseMap(doc);
 
-      final entity = OdometerEntity(
-        id: doc['id'] as String? ?? '',
-        vehicleId: doc['vehicle_id'] as String? ?? '',
-        value: (doc['reading'] as num?)?.toDouble() ?? 0.0,
-        registrationDate: DateTime.fromMillisecondsSinceEpoch(
-          doc['date'] as int? ?? DateTime.now().millisecondsSinceEpoch,
-        ),
-        description: doc['notes'] as String? ?? '',
-        type: type,
-        createdAt: doc['created_at'] != null
-            ? DateTime.fromMillisecondsSinceEpoch(doc['created_at'] as int)
-            : null,
-        updatedAt: doc['updated_at'] != null
-            ? DateTime.fromMillisecondsSinceEpoch(doc['updated_at'] as int)
-            : null,
-        lastSyncAt: doc['last_sync_at'] != null
-            ? DateTime.fromMillisecondsSinceEpoch(doc['last_sync_at'] as int)
-            : null,
-        isDirty: doc['is_dirty'] as bool? ?? false,
-        isDeleted: doc['is_deleted'] as bool? ?? false,
-        version: doc['version'] as int? ?? 1,
-        userId: doc['user_id'] as String?,
-        moduleName: doc['module_name'] as String? ?? 'gasometer',
-      );
-
-      if (entity.id.isEmpty) {
-        return const Left(
-          ValidationFailure(
-            'Odometer reading ID missing from Firestore document',
-          ),
-        );
-      }
-
+      // Validar campos obrigatórios
       if (entity.vehicleId.isEmpty) {
-        return const Left(
-          ValidationFailure('Vehicle ID missing from Firestore document'),
+        throw const ValidationFailure(
+          'Vehicle ID missing from Firestore document',
         );
       }
 
-      return Right(entity);
-    } catch (e) {
-      return Left(
-        ParseFailure('Failed to parse odometer reading from Firestore: $e'),
+      return entity;
+    } catch (e, stackTrace) {
+      developer.log(
+        'Failed to parse Firestore document to OdometerEntity',
+        name: 'OdometerDriftSyncAdapter',
+        error: e,
+        stackTrace: stackTrace,
       );
+
+      throw ParseFailure('Failed to parse odometer from Firestore: $e');
     }
   }
 
@@ -266,7 +231,7 @@ class OdometerDriftSyncAdapter
         name: 'OdometerDriftSyncAdapter',
       );
 
-      final query = db.select(db.odometerReadings)
+      final query = _db.select(_db.odometerReadings)
         ..where(
           (tbl) =>
               tbl.userId.equals(userId) &
@@ -317,7 +282,7 @@ class OdometerDriftSyncAdapter
       final entities = <OdometerEntity>[];
       for (final row in rows) {
         try {
-          var entity = toDomainEntity(row);
+          var entity = driftToEntity(row);
 
           final vehicleFirebaseId = await _resolveVehicleFirebaseId(
             row.vehicleId,
@@ -361,10 +326,10 @@ class OdometerDriftSyncAdapter
     }
   }
 
-  @override
+  // @override removed as it is not in the interface
   Future<Either<Failure, OdometerEntity?>> getLocalEntity(String id) async {
     try {
-      final query = db.select(db.odometerReadings)
+      final query = _db.select(_db.odometerReadings)
         ..where(
           (tbl) =>
               tbl.firebaseId.equals(id) | tbl.id.equals(int.tryParse(id) ?? -1),
@@ -378,7 +343,7 @@ class OdometerDriftSyncAdapter
           'Found local odometer reading: $id',
           name: 'OdometerDriftSyncAdapter',
         );
-        return Right(toDomainEntity(row));
+        return Right(driftToEntity(row));
       }
 
       return const Right(null);
@@ -394,7 +359,7 @@ class OdometerDriftSyncAdapter
     }
   }
 
-  @override
+  // @override removed as it is not in the interface
   Future<Either<Failure, void>> insertLocal(OdometerEntity entity) async {
     try {
       final resolvedEntity = await _ensureLocalVehicleReference(entity);
@@ -404,8 +369,8 @@ class OdometerDriftSyncAdapter
         );
       }
 
-      final companion = toCompanion(resolvedEntity);
-      await db.into(db.odometerReadings).insert(companion);
+      final companion = entityToCompanion(resolvedEntity);
+      await _db.into(_db.odometerReadings).insert(companion);
 
       developer.log(
         'Inserted odometer reading: ${entity.id}',
@@ -425,7 +390,7 @@ class OdometerDriftSyncAdapter
     }
   }
 
-  @override
+  // @override removed as it is not in the interface
   Future<Either<Failure, void>> updateLocal(OdometerEntity entity) async {
     try {
       final resolvedEntity = await _ensureLocalVehicleReference(entity);
@@ -435,10 +400,10 @@ class OdometerDriftSyncAdapter
         );
       }
 
-      final companion = toCompanion(resolvedEntity);
+      final companion = entityToCompanion(resolvedEntity);
 
       // OdometerEntity não tem firebaseId, apenas id
-      final query = db.update(db.odometerReadings)
+      final query = _db.update(_db.odometerReadings)
         ..where(
           (tbl) =>
               tbl.firebaseId.equals(entity.id) |
@@ -487,7 +452,7 @@ class OdometerDriftSyncAdapter
             : const Value.absent(),
       );
 
-      final query = db.update(db.odometerReadings)
+      final query = _db.update(_db.odometerReadings)
         ..where(
           (tbl) =>
               tbl.firebaseId.equals(id) | tbl.id.equals(int.tryParse(id) ?? -1),
@@ -526,7 +491,7 @@ class OdometerDriftSyncAdapter
     try {
       // Buscar vehicleId (int) do Drift pelo firebaseId usando query gerada
       final vehicle =
-          await (db.select(db.vehicles)
+          await (_db.select(_db.vehicles)
                 ..where((tbl) => tbl.firebaseId.equals(vehicleFirebaseId))
                 ..where((tbl) => tbl.isDeleted.equals(false)))
               .getSingleOrNull();
@@ -542,13 +507,13 @@ class OdometerDriftSyncAdapter
       final vehicleIdInt = vehicle.id;
 
       // Buscar todas as leituras do veículo
-      final query = db.select(db.odometerReadings)
+      final query = _db.select(_db.odometerReadings)
         ..where((tbl) => tbl.vehicleId.equals(vehicleIdInt))
         ..where((tbl) => tbl.isDeleted.equals(false))
         ..orderBy([(tbl) => OrderingTerm.desc(tbl.date)]);
 
       final readings = await query.get();
-      return readings.map<OdometerEntity>(toDomainEntity).toList();
+      return readings.map<OdometerEntity>(driftToEntity).toList();
     } catch (e) {
       developer.log(
         '❌ Error getting readings by vehicle: $e',
@@ -558,12 +523,12 @@ class OdometerDriftSyncAdapter
     }
   }
 
-  /// Obtém a leitura mais recente de um veículo
+  /// Obtém a última leitura de odômetro de um veículo
   Future<OdometerEntity?> getLatestReading(String vehicleFirebaseId) async {
     try {
       // Buscar vehicleId (int) do Drift pelo firebaseId usando query gerada
       final vehicle =
-          await (db.select(db.vehicles)
+          await (_db.select(_db.vehicles)
                 ..where((tbl) => tbl.firebaseId.equals(vehicleFirebaseId))
                 ..where((tbl) => tbl.isDeleted.equals(false)))
               .getSingleOrNull();
@@ -575,14 +540,14 @@ class OdometerDriftSyncAdapter
       final vehicleIdInt = vehicle.id;
 
       // Buscar a leitura mais recente
-      final query = db.select(db.odometerReadings)
+      final query = _db.select(_db.odometerReadings)
         ..where((tbl) => tbl.vehicleId.equals(vehicleIdInt))
         ..where((tbl) => tbl.isDeleted.equals(false))
         ..orderBy([(tbl) => OrderingTerm.desc(tbl.date)])
         ..limit(1);
 
       final reading = await query.getSingleOrNull();
-      return reading != null ? toDomainEntity(reading) : null;
+      return reading != null ? driftToEntity(reading) : null;
     } catch (e) {
       developer.log('❌ Error getting latest reading: $e', name: 'OdometerSync');
       return null;
@@ -590,8 +555,8 @@ class OdometerDriftSyncAdapter
   }
 
   Future<String?> _resolveVehicleFirebaseId(int localVehicleId) async {
-    final vehicleRow = await (db.select(
-      db.vehicles,
+    final vehicleRow = await (_db.select(
+      _db.vehicles,
     )..where((tbl) => tbl.id.equals(localVehicleId))).getSingleOrNull();
 
     final firebaseId = vehicleRow?.firebaseId;
@@ -615,7 +580,7 @@ class OdometerDriftSyncAdapter
     }
 
     final vehicleRow =
-        await (db.select(db.vehicles)
+        await (_db.select(_db.vehicles)
               ..where((tbl) => tbl.firebaseId.equals(entity.vehicleId)))
             .getSingleOrNull();
 

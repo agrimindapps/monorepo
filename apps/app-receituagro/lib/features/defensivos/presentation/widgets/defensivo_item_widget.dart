@@ -1,9 +1,9 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../../database/receituagro_database.dart';
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/theme/receituagro_colors.dart';
+import '../../../../database/receituagro_database.dart';
 
 class DefensivoItemWidget extends StatelessWidget {
   final Fitossanitario defensivo;

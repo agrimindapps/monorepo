@@ -1,6 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart' hide Column;
-import 'package:core/src/domain/services/i_subscription_sync_service.dart';
 import 'package:core/src/services/subscription/subscription_sync_models.dart'
     as subscription_models;
 

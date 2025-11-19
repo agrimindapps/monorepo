@@ -16,16 +16,11 @@ class CompartilharTermo {
       buffer.writeln();
       buffer.writeln('App Termos Técnicos - Agrimind Soluções');
 
-      await Share.share(
-        buffer.toString(),
-        subject: termo.termo,
-      );
+      await Share.share(buffer.toString(), subject: termo.termo);
 
       return const Right(unit);
     } catch (e) {
-      return const Left(
-        UnknownFailure(message: 'Erro ao compartilhar termo'),
-      );
+      return const Left(UnknownFailure(message: 'Erro ao compartilhar termo'));
     }
   }
 }

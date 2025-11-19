@@ -33,10 +33,10 @@
 library;
 
 // Interfaces
-export 'adapters/i_drift_sync_adapter.dart';
+export 'package:core/src/infrastructure/storage/drift/sync/interfaces/i_drift_sync_adapter.dart';
 
 // Base classes
-export 'adapters/drift_sync_adapter_base.dart';
+export 'package:core/src/infrastructure/storage/drift/sync/adapters/drift_sync_adapter_base.dart';
 
 // Models
-export 'models/sync_results.dart';
+export 'package:core/src/infrastructure/storage/drift/sync/models/sync_results.dart';

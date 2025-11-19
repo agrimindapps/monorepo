@@ -1,25 +1,27 @@
 import 'package:core/core.dart' hide Column;
 
 import '../entities/comentario_entity.dart';
-import '../repositories/i_comentarios_repository.dart';
+import '../repositories/i_comentarios_read_repository.dart';
+import '../repositories/i_comentarios_write_repository.dart';
 
 /// Use case for deleting comentarios with business logic.
 /// Handles soft delete and business rules around comment deletion.
 @injectable
 class DeleteComentarioUseCase {
-  final IComentariosRepository _repository;
+  final IComentariosReadRepository _readRepository;
+  final IComentariosWriteRepository _writeRepository;
 
-  DeleteComentarioUseCase(this._repository);
+  DeleteComentarioUseCase(this._readRepository, this._writeRepository);
 
   /// Soft deletes a comentario after comprehensive validation
   Future<void> call(String comentarioId) async {
-    final comentario = await _repository.getComentarioById(comentarioId);
-    
+    final comentario = await _readRepository.getComentarioById(comentarioId);
+
     if (comentario == null) {
       throw ComentarioNotFoundException('Comentário não encontrado');
     }
     await _validateDeletion(comentario);
-    await _repository.deleteComentario(comentarioId);
+    await _writeRepository.deleteComentario(comentarioId);
   }
 
   /// Hard deletes a comentario (admin/cleanup function)
@@ -29,12 +31,12 @@ class DeleteComentarioUseCase {
 
   /// Cleanup old deleted comments (maintenance operation)
   Future<int> cleanupOldDeletedComments() async {
-    final statsBefore = await _repository.getUserCommentStats();
+    final statsBefore = await _readRepository.getUserCommentStats();
     final deletedBefore = statsBefore['deleted'] ?? 0;
-    
-    await _repository.cleanupOldComments();
-    
-    final statsAfter = await _repository.getUserCommentStats();
+
+    await _writeRepository.cleanupOldComments();
+
+    final statsAfter = await _readRepository.getUserCommentStats();
     final deletedAfter = statsAfter['deleted'] ?? 0;
     return deletedBefore - deletedAfter;
   }
@@ -44,10 +46,12 @@ class DeleteComentarioUseCase {
     if (!comentario.status) {
       throw AlreadyDeletedException('Comentário já foi deletado');
     }
-    final daysSinceCreation = DateTime.now().difference(comentario.createdAt).inDays;
+    final daysSinceCreation = DateTime.now()
+        .difference(comentario.createdAt)
+        .inDays;
     if (daysSinceCreation > 365) {
       throw DeletionNotAllowedException(
-        'Comentários com mais de 1 ano não podem ser deletados para fins de auditoria'
+        'Comentários com mais de 1 ano não podem ser deletados para fins de auditoria',
       );
     }
     await _checkDeletionRateLimit();
@@ -59,12 +63,14 @@ class DeleteComentarioUseCase {
   Future<void> _checkDeletionRateLimit() async {
     try {
       final now = DateTime.now();
-      final recentDeletions = await _getRecentDeletions(now.subtract(const Duration(minutes: 10)));
-      
+      final recentDeletions = await _getRecentDeletions(
+        now.subtract(const Duration(minutes: 10)),
+      );
+
       const maxDeletionsIn10Minutes = 5;
       if (recentDeletions.length >= maxDeletionsIn10Minutes) {
         throw DeletionNotAllowedException(
-          'Muitas exclusões recentes. Aguarde alguns minutos antes de excluir novamente.'
+          'Muitas exclusões recentes. Aguarde alguns minutos antes de excluir novamente.',
         );
       }
     } catch (e) {
@@ -82,12 +88,11 @@ class DeleteComentarioUseCase {
   /// Validate contextual deletion rules
   Future<void> _validateContextualDeletion(ComentarioEntity comentario) async {
     try {
-      if (_isCriticalContext(comentario.pkIdentificador)) {
-      }
+      if (_isCriticalContext(comentario.pkIdentificador)) {}
       final hasReferences = await _checkCommentReferences(comentario.id);
       if (hasReferences) {
         throw DeletionNotAllowedException(
-          'Este comentário não pode ser excluído pois possui referências ativas'
+          'Este comentário não pode ser excluído pois possui referências ativas',
         );
       }
     } catch (e) {
@@ -109,30 +114,28 @@ class DeleteComentarioUseCase {
 
   /// Validate system comment deletion rules
   void _validateSystemCommentDeletion(ComentarioEntity comentario) {
-    
     if (_isSystemGeneratedComment(comentario)) {
       throw DeletionNotAllowedException(
-        'Comentários gerados pelo sistema não podem ser excluídos'
+        'Comentários gerados pelo sistema não podem ser excluídos',
       );
     }
-    if (_isHighValueComment(comentario)) {
-    }
+    if (_isHighValueComment(comentario)) {}
   }
 
   /// Check if comment is system-generated
   bool _isSystemGeneratedComment(ComentarioEntity comentario) {
     return comentario.titulo.startsWith('[SISTEMA]') ||
-           comentario.ferramenta == 'system' ||
-           comentario.conteudo.contains('[AUTO-GENERATED]');
+        comentario.ferramenta == 'system' ||
+        comentario.conteudo.contains('[AUTO-GENERATED]');
   }
 
   /// Check if comment is considered high-value
   bool _isHighValueComment(ComentarioEntity comentario) {
-    
     final isDetailed = comentario.conteudo.length > 500;
-    final hasStructuredContent = comentario.conteudo.contains('\n') && 
-                                comentario.conteudo.split('\n').length > 3;
-    
+    final hasStructuredContent =
+        comentario.conteudo.contains('\n') &&
+        comentario.conteudo.split('\n').length > 3;
+
     return isDetailed || hasStructuredContent;
   }
 
@@ -143,11 +146,13 @@ class DeleteComentarioUseCase {
     }
 
     if (comentarioIds.length > 50) {
-      throw InvalidOperationException('Máximo de 50 comentários por operação em lote');
+      throw InvalidOperationException(
+        'Máximo de 50 comentários por operação em lote',
+      );
     }
 
     final results = BatchDeleteResult();
-    
+
     for (final id in comentarioIds) {
       try {
         await call(id);
@@ -156,7 +161,7 @@ class DeleteComentarioUseCase {
         results.failed[id] = e.toString();
       }
     }
-    
+
     return results;
   }
 }

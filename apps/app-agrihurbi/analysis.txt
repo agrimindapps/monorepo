@@ -1,0 +1,218 @@
+Analyzing app-agrihurbi...                                      
+
+   info • The imported package 'dio' isn't a dependency of the importing package • lib/core/di/injection.dart:2:8 • depend_on_referenced_packages
+   info • Classes should define instance members • lib/core/di/modules/account_deletion_module.dart:3:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/core/di/modules/sync_module.dart:3:1 • avoid_classes_with_only_static_members
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/core/interfaces/usecase.dart:1:8 • depend_on_referenced_packages
+   info • The type parameter name 'Type' matches a visible type name • lib/core/interfaces/usecase.dart:5:24 • avoid_types_as_parameter_names
+   info • The imported package 'dio' isn't a dependency of the importing package • lib/core/network/auth_interceptor.dart:1:8 • depend_on_referenced_packages
+   info • Sort directive sections alphabetically • lib/core/network/auth_interceptor.dart:2:1 • directives_ordering
+warning • Unused import: 'package:core/core.dart' • lib/core/network/auth_interceptor.dart:2:8 • unused_import
+   info • The imported package 'dio' isn't a dependency of the importing package • lib/core/network/dio_client.dart:1:8 • depend_on_referenced_packages
+   info • Classes should define instance members • lib/core/network/dio_client.dart:3:1 • avoid_classes_with_only_static_members
+   info • The imported package 'connectivity_plus' isn't a dependency of the importing package • lib/core/network/network_info.dart:3:8 • depend_on_referenced_packages
+   info • Missing an 'await' for the 'Future' computed by this expression • lib/core/performance/lazy_loading_manager.dart:93:27 • unawaited_futures
+   info • Missing an 'await' for the 'Future' computed by this expression • lib/core/performance/lazy_loading_manager.dart:106:27 • unawaited_futures
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/core/utils/typedef.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_secure_storage' isn't a dependency of the importing package • lib/features/auth/data/datasources/auth_local_datasource.dart:5:8 • depend_on_referenced_packages
+   info • Sort directive sections alphabetically • lib/features/auth/data/datasources/auth_remote_datasource.dart:5:1 • directives_ordering
+   info • The imported package 'dio' isn't a dependency of the importing package • lib/features/auth/data/datasources/auth_remote_datasource.dart:5:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/auth/presentation/notifiers/auth_notifier.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'freezed_annotation' isn't a dependency of the importing package • lib/features/auth/presentation/notifiers/auth_state.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/auth/presentation/pages/login_page.dart:10:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/auth/presentation/pages/register_page.dart:10:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/auth/presentation/providers/auth_provider.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/auth/presentation/providers/auth_provider.dart:5:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/calculators/data/datasources/calculator_local_datasource.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/calculators/data/repositories/calculator_data_repository_impl.dart:1:8 • depend_on_referenced_packages
+   info • Empty catch block • lib/features/calculators/domain/calculators/livestock/breeding_cycle_calculator.dart:439:19 • empty_catches
+   info • Empty catch block • lib/features/calculators/domain/calculators/livestock/breeding_cycle_calculator.dart:453:19 • empty_catches
+   info • Empty catch block • lib/features/calculators/domain/registry/calculator_registry.dart:183:21 • empty_catches
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/calculators/domain/registry/calculator_strategy_registry.dart:1:8 • depend_on_referenced_packages
+   info • Empty catch block • lib/features/calculators/domain/services/calculator_favorites_service.dart:160:17 • empty_catches
+   info • Empty catch block • lib/features/calculators/domain/services/calculator_template_service.dart:263:17 • empty_catches
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/calculators/domain/services/calculator_ui_service.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/calculators/domain/usecases/manage_favorites.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'freezed_annotation' isn't a dependency of the importing package • lib/features/calculators/presentation/notifiers/calculator_state.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/calculators/presentation/pages/calculator_detail_page.dart:3:8 • depend_on_referenced_packages
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/features/calculators/presentation/pages/calculators_favorites_page.dart:557:28 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/features/calculators/presentation/pages/calculators_favorites_page.dart:570:28 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/features/calculators/presentation/pages/calculators_favorites_page.dart:597:28 • use_build_context_synchronously
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/calculators/presentation/pages/calculators_list_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/calculators/presentation/providers/calculator_coordinator_provider.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/calculators/presentation/providers/calculator_execution_provider.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/calculators/presentation/providers/calculator_favorites_provider.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/calculators/presentation/providers/calculator_history_provider.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/calculators/presentation/providers/calculator_management_provider.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/calculators/presentation/providers/calculator_provider.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/calculators/presentation/providers/calculator_provider_simple.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/calculators/presentation/providers/calculator_provider_simple.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/calculators/presentation/providers/calculator_search_provider.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/calculators/presentation/widgets/calculator_list_widget.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/calculators/presentation/widgets/calculator_list_widget.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/calculators/presentation/widgets/calculator_search_results_widget.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/calculators/presentation/widgets/calculator_search_results_widget.dart:4:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/home/presentation/pages/home_page.dart:6:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/home/presentation/pages/home_page.dart:7:8 • depend_on_referenced_packages
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/livestock/data/datasources/livestock_remote_datasource.dart:31:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/livestock/data/datasources/livestock_remote_datasource.dart:40:13 • only_throw_errors
+warning • Unused import: 'package:core/core.dart' • lib/features/livestock/domain/entities/bovine_entity.dart:1:8 • unused_import
+warning • Unused import: 'package:core/core.dart' • lib/features/livestock/domain/entities/equine_entity.dart:1:8 • unused_import
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/livestock/domain/services/bovine_form_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/livestock/domain/services/livestock_validation_service.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'freezed_annotation' isn't a dependency of the importing package • lib/features/livestock/presentation/notifiers/bovines_filter_state.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'freezed_annotation' isn't a dependency of the importing package • lib/features/livestock/presentation/notifiers/bovines_management_state.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'freezed_annotation' isn't a dependency of the importing package • lib/features/livestock/presentation/notifiers/equines_management_state.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'freezed_annotation' isn't a dependency of the importing package • lib/features/livestock/presentation/notifiers/livestock_coordinator_state.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'freezed_annotation' isn't a dependency of the importing package • lib/features/livestock/presentation/notifiers/livestock_search_state.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'freezed_annotation' isn't a dependency of the importing package • lib/features/livestock/presentation/notifiers/livestock_statistics_state.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'freezed_annotation' isn't a dependency of the importing package • lib/features/livestock/presentation/notifiers/livestock_sync_state.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/livestock/presentation/pages/bovine_detail_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/livestock/presentation/pages/bovine_detail_page.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'intl' isn't a dependency of the importing package • lib/features/livestock/presentation/pages/bovine_detail_page.dart:4:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/livestock/presentation/pages/bovine_form_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/livestock/presentation/pages/bovine_form_page.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/livestock/presentation/pages/bovine_form_page_original.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/livestock/presentation/pages/bovine_form_page_original.dart:4:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/livestock/presentation/pages/bovines_list_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/livestock/presentation/pages/bovines_list_page.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/livestock/presentation/pages/equine_detail_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/livestock/presentation/pages/equine_detail_page.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'intl' isn't a dependency of the importing package • lib/features/livestock/presentation/pages/equine_detail_page.dart:4:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/livestock/presentation/pages/equine_form_page.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/livestock/presentation/pages/equine_form_page.dart:4:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/livestock/presentation/pages/livestock_dashboard_example.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/livestock/presentation/pages/livestock_search_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/livestock/presentation/pages/livestock_search_page.dart:3:8 • depend_on_referenced_packages
+   info • Statements in an if should be enclosed in a block • lib/features/livestock/presentation/pages/livestock_search_page.dart:99:9 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/features/livestock/presentation/pages/livestock_search_page.dart:101:9 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/features/livestock/presentation/pages/livestock_search_page.dart:105:9 • curly_braces_in_flow_control_structures
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/livestock/presentation/providers/bovines_filter_provider.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/livestock/presentation/providers/bovines_management_provider.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/livestock/presentation/providers/bovines_provider.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/livestock/presentation/providers/equines_management_provider.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/livestock/presentation/providers/livestock_coordinator_provider.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/livestock/presentation/providers/livestock_provider.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/livestock/presentation/providers/livestock_search_provider.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/livestock/presentation/providers/livestock_statistics_provider.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/livestock/presentation/providers/livestock_sync_provider.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/livestock/presentation/widgets/bovine_form_action_buttons.dart:2:8 • depend_on_referenced_packages
+   info • The import of 'package:core/core.dart' is unnecessary because all of the used elements are also provided by the import of 'package:injectable/injectable.dart' • lib/features/markets/data/datasources/market_remote_datasource.dart:4:8 • unnecessary_import
+   info • The imported package 'dio' isn't a dependency of the importing package • lib/features/markets/data/datasources/market_remote_datasource.dart:5:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/markets/data/datasources/market_remote_datasource.dart:6:8 • depend_on_referenced_packages
+warning • Unused import: 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart' • lib/features/markets/data/models/market_enums_adapter.dart:1:8 • unused_import
+warning • Unused import: 'package:core/core.dart' • lib/features/markets/data/models/market_enums_adapter.dart:2:8 • unused_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/markets/data/repositories/market_repository_impl.dart:10:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/markets/data/repositories/market_repository_impl.dart:11:8 • depend_on_referenced_packages
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/markets/domain/usecases/manage_market_favorites.dart:5:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/markets/presentation/pages/market_detail_page.dart:9:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/markets/presentation/pages/markets_list_page.dart:10:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/markets/presentation/pages/markets_list_page.dart:11:8 • depend_on_referenced_packages
+   info • Empty catch block • lib/features/markets/presentation/providers/market_provider.dart:428:17 • empty_catches
+warning • Unused import: 'package:app_agrihurbi/core/error/exceptions.dart' • lib/features/news/data/datasources/news_local_datasource.dart:1:8 • unused_import
+   info • The imported package 'dio' isn't a dependency of the importing package • lib/features/news/data/datasources/news_remote_datasource.dart:6:8 • depend_on_referenced_packages
+warning • Unused import: 'package:core/core.dart' • lib/features/news/data/models/commodity_price_model.dart:3:8 • unused_import
+   info • Field overrides a field inherited from 'CommodityPriceEntity' • lib/features/news/data/models/commodity_price_model.dart:12:16 • overridden_fields
+   info • Field overrides a field inherited from 'CommodityPriceEntity' • lib/features/news/data/models/commodity_price_model.dart:15:16 • overridden_fields
+   info • Field overrides a field inherited from 'CommodityPriceEntity' • lib/features/news/data/models/commodity_price_model.dart:20:16 • overridden_fields
+   info • Field overrides a field inherited from 'CommodityPriceEntity' • lib/features/news/data/models/commodity_price_model.dart:23:16 • overridden_fields
+   info • Field overrides a field inherited from 'CommodityPriceEntity' • lib/features/news/data/models/commodity_price_model.dart:26:16 • overridden_fields
+   info • Field overrides a field inherited from 'CommodityPriceEntity' • lib/features/news/data/models/commodity_price_model.dart:29:16 • overridden_fields
+   info • Field overrides a field inherited from 'CommodityPriceEntity' • lib/features/news/data/models/commodity_price_model.dart:32:16 • overridden_fields
+   info • Field overrides a field inherited from 'CommodityPriceEntity' • lib/features/news/data/models/commodity_price_model.dart:35:16 • overridden_fields
+   info • Field overrides a field inherited from 'CommodityPriceEntity' • lib/features/news/data/models/commodity_price_model.dart:38:18 • overridden_fields
+   info • Field overrides a field inherited from 'CommodityPriceEntity' • lib/features/news/data/models/commodity_price_model.dart:41:36 • overridden_fields
+   info • Field overrides a field inherited from 'HistoricalPrice' • lib/features/news/data/models/commodity_price_model.dart:317:18 • overridden_fields
+   info • Field overrides a field inherited from 'HistoricalPrice' • lib/features/news/data/models/commodity_price_model.dart:320:16 • overridden_fields
+   info • Field overrides a field inherited from 'HistoricalPrice' • lib/features/news/data/models/commodity_price_model.dart:323:16 • overridden_fields
+   info • Field overrides a field inherited from 'MarketSummaryEntity' • lib/features/news/data/models/commodity_price_model.dart:366:16 • overridden_fields
+   info • Field overrides a field inherited from 'MarketSummaryEntity' • lib/features/news/data/models/commodity_price_model.dart:369:18 • overridden_fields
+   info • Field overrides a field inherited from 'MarketSummaryEntity' • lib/features/news/data/models/commodity_price_model.dart:372:35 • overridden_fields
+   info • Field overrides a field inherited from 'MarketSummaryEntity' • lib/features/news/data/models/commodity_price_model.dart:375:35 • overridden_fields
+   info • Field overrides a field inherited from 'MarketSummaryEntity' • lib/features/news/data/models/commodity_price_model.dart:378:16 • overridden_fields
+   info • Field overrides a field inherited from 'MarketSummaryEntity' • lib/features/news/data/models/commodity_price_model.dart:381:16 • overridden_fields
+warning • Unused import: 'package:core/core.dart' • lib/features/news/data/models/news_article_model.dart:3:8 • unused_import
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/news/data/repositories/news_repository_impl.dart:11:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/news/data/repositories/news_repository_impl.dart:12:8 • depend_on_referenced_packages
+   info • Empty catch block • lib/features/news/data/repositories/news_repository_impl.dart:104:21 • empty_catches
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/news/domain/repositories/news_repository.dart:4:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/news/presentation/pages/news_list_page.dart:8:8 • depend_on_referenced_packages
+   info • Empty catch block • lib/features/news/presentation/providers/news_provider.dart:302:17 • empty_catches
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/promo/presentation/pages/promo_page.dart:2:8 • depend_on_referenced_packages
+   info • Field overrides a field inherited from 'SettingsEntity' • lib/features/settings/data/models/settings_model.dart:6:16 • overridden_fields
+   info • Field overrides a field inherited from 'SettingsEntity' • lib/features/settings/data/models/settings_model.dart:9:18 • overridden_fields
+   info • Field overrides a field inherited from 'SettingsEntity' • lib/features/settings/data/models/settings_model.dart:12:16 • overridden_fields
+   info • Field overrides a field inherited from 'SettingsEntity' • lib/features/settings/data/models/settings_model.dart:15:35 • overridden_fields
+   info • Field overrides a field inherited from 'SettingsEntity' • lib/features/settings/data/models/settings_model.dart:18:27 • overridden_fields
+   info • Field overrides a field inherited from 'SettingsEntity' • lib/features/settings/data/models/settings_model.dart:21:30 • overridden_fields
+   info • Field overrides a field inherited from 'SettingsEntity' • lib/features/settings/data/models/settings_model.dart:24:30 • overridden_fields
+   info • Field overrides a field inherited from 'SettingsEntity' • lib/features/settings/data/models/settings_model.dart:27:31 • overridden_fields
+   info • Field overrides a field inherited from 'SettingsEntity' • lib/features/settings/data/models/settings_model.dart:30:29 • overridden_fields
+   info • Field overrides a field inherited from 'SettingsEntity' • lib/features/settings/data/models/settings_model.dart:33:18 • overridden_fields
+   info • Field overrides a field inherited from 'NotificationSettings' • lib/features/settings/data/models/settings_model.dart:134:14 • overridden_fields
+   info • Field overrides a field inherited from 'NotificationSettings' • lib/features/settings/data/models/settings_model.dart:137:14 • overridden_fields
+   info • Field overrides a field inherited from 'NotificationSettings' • lib/features/settings/data/models/settings_model.dart:140:14 • overridden_fields
+   info • Field overrides a field inherited from 'NotificationSettings' • lib/features/settings/data/models/settings_model.dart:143:14 • overridden_fields
+   info • Field overrides a field inherited from 'NotificationSettings' • lib/features/settings/data/models/settings_model.dart:146:14 • overridden_fields
+   info • Field overrides a field inherited from 'NotificationSettings' • lib/features/settings/data/models/settings_model.dart:149:14 • overridden_fields
+   info • Field overrides a field inherited from 'NotificationSettings' • lib/features/settings/data/models/settings_model.dart:152:16 • overridden_fields
+   info • Field overrides a field inherited from 'NotificationSettings' • lib/features/settings/data/models/settings_model.dart:155:16 • overridden_fields
+   info • Field overrides a field inherited from 'DataSettings' • lib/features/settings/data/models/settings_model.dart:219:14 • overridden_fields
+   info • Field overrides a field inherited from 'DataSettings' • lib/features/settings/data/models/settings_model.dart:222:14 • overridden_fields
+   info • Field overrides a field inherited from 'DataSettings' • lib/features/settings/data/models/settings_model.dart:225:14 • overridden_fields
+   info • Field overrides a field inherited from 'DataSettings' • lib/features/settings/data/models/settings_model.dart:228:13 • overridden_fields
+   info • Field overrides a field inherited from 'DataSettings' • lib/features/settings/data/models/settings_model.dart:231:14 • overridden_fields
+   info • Field overrides a field inherited from 'DataSettings' • lib/features/settings/data/models/settings_model.dart:234:26 • overridden_fields
+   info • Field overrides a field inherited from 'PrivacySettings' • lib/features/settings/data/models/settings_model.dart:291:14 • overridden_fields
+   info • Field overrides a field inherited from 'PrivacySettings' • lib/features/settings/data/models/settings_model.dart:294:14 • overridden_fields
+   info • Field overrides a field inherited from 'PrivacySettings' • lib/features/settings/data/models/settings_model.dart:297:14 • overridden_fields
+   info • Field overrides a field inherited from 'PrivacySettings' • lib/features/settings/data/models/settings_model.dart:300:14 • overridden_fields
+   info • Field overrides a field inherited from 'PrivacySettings' • lib/features/settings/data/models/settings_model.dart:303:14 • overridden_fields
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/features/settings/presentation/pages/settings_page.dart:709:28 • use_build_context_synchronously
+   info • The imported package 'cloud_firestore' isn't a dependency of the importing package • lib/features/subscription/data/datasources/subscription_remote_datasource.dart:3:8 • depend_on_referenced_packages
+  error • The type 'SubscriptionTier' isn't exhaustively matched by the switch cases since it doesn't match the pattern 'SubscriptionTier.basic' • lib/features/subscription/data/datasources/subscription_remote_datasource.dart:120:5 • non_exhaustive_switch_statement
+  error • The type 'SubscriptionStatus' isn't exhaustively matched by the switch cases since it doesn't match the pattern 'SubscriptionStatus.paused' • lib/features/subscription/data/datasources/subscription_remote_datasource.dart:132:5 • non_exhaustive_switch_statement
+warning • Unused import: 'package:core/core.dart' • lib/features/weather/data/datasources/weather_local_datasource.dart:2:8 • unused_import
+warning • Unused import: 'package:core/core.dart' • lib/features/weather/data/datasources/weather_remote_datasource.dart:1:8 • unused_import
+warning • Unused import: 'package:core/core.dart' • lib/features/weather/data/datasources/weather_remote_datasource.dart:2:8 • unused_import
+warning • Unused import: '../../domain/failures/weather_failures.dart' • lib/features/weather/data/datasources/weather_remote_datasource.dart:4:8 • unused_import
+   info • The imported package 'dio' isn't a dependency of the importing package • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'injectable' isn't a dependency of the importing package • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:2:8 • depend_on_referenced_packages
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:51:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:71:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:130:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:153:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:169:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:194:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:215:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:234:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:256:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:278:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:298:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:319:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:335:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:356:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:381:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:422:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:440:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:479:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:503:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:518:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:546:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:574:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:608:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:639:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:663:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:678:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/weather/data/datasources/weather_remote_datasource_impl.dart:692:13 • only_throw_errors
+   info • The imported package 'dartz' isn't a dependency of the importing package • lib/features/weather/data/repositories/weather_repository_impl.dart:1:8 • depend_on_referenced_packages
+warning • Unused import: '../models/weather_statistics_model.dart' • lib/features/weather/data/repositories/weather_repository_impl.dart:11:8 • unused_import
+   info • Statements in an if should be enclosed in a block • lib/features/weather/data/repositories/weather_repository_impl.dart:727:9 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/features/weather/data/repositories/weather_repository_impl.dart:729:9 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/features/weather/data/repositories/weather_repository_impl.dart:731:9 • curly_braces_in_flow_control_structures
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/weather/presentation/pages/weather_dashboard_page.dart:2:8 • depend_on_referenced_packages
+   info • The import of 'package:core/core.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/weather/presentation/providers/weather_provider.dart:1:8 • unnecessary_import
+   info • Sort directive sections alphabetically • lib/features/weather/presentation/providers/weather_provider.dart:4:1 • directives_ordering
+   info • The imported package 'firebase_core' isn't a dependency of the importing package • lib/firebase_options.dart:1:8 • depend_on_referenced_packages
+   info • Classes should define instance members • lib/firebase_options.dart:5:1 • avoid_classes_with_only_static_members
+

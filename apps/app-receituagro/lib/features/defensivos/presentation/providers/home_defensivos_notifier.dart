@@ -1,12 +1,12 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../../database/receituagro_database.dart';
-import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/services/access_history_service.dart';
 import '../../../../core/services/fitossanitarios_data_loader.dart';
 import '../../../../core/services/receituagro_random_extensions.dart';
+import '../../../../database/receituagro_database.dart';
+import '../../../../database/repositories/fitossanitarios_repository.dart';
 
 part 'home_defensivos_notifier.g.dart';
 

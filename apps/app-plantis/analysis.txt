@@ -1,0 +1,599 @@
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 85.0.0 (92.0.0 available)
+  _flutterfire_internals 1.3.63 (1.3.64 available)
+  analyzer 7.6.0 (9.0.0 available)
+  analyzer_plugin 0.13.4 (0.13.11 available)
+  app_links 6.4.1 (7.0.0 available)
+  build 2.5.4 (4.0.2 available)
+  build_config 1.1.2 (1.2.0 available)
+  build_daemon 4.1.0 (4.1.1 available)
+  build_resolvers 2.5.4 (3.0.4 available)
+  build_runner 2.5.4 (2.10.3 available)
+  build_runner_core 9.1.2 (9.3.2 available)
+  characters 1.4.0 (1.4.1 available)
+  cloud_firestore 6.0.3 (6.1.0 available)
+  cloud_firestore_platform_interface 7.0.3 (7.0.4 available)
+  cloud_firestore_web 5.0.3 (5.1.0 available)
+  cloud_functions 6.0.3 (6.0.4 available)
+  cloud_functions_platform_interface 5.8.6 (5.8.7 available)
+  cloud_functions_web 5.0.3 (5.1.0 available)
+  connectivity_plus 6.1.5 (7.0.0 available)
+! core 1.0.0 from path ../../packages/core (overridden in ./pubspec_overrides.yaml)
+  cross_file 0.3.4+2 (0.3.5+1 available)
+  crypto 3.0.6 (3.0.7 available)
+  custom_lint_core 0.7.5 (0.8.1 available)
+  custom_lint_visitor 1.0.0+7.7.0 (1.0.0+8.4.0 available)
+  dart_style 3.1.1 (3.1.3 available)
+  device_info_plus 11.5.0 (12.2.0 available)
+  drift 2.28.2 (2.29.0 available)
+  drift_dev 2.28.0 (2.29.0 available)
+  facebook_auth_desktop 1.0.3 (2.1.1 available)
+  file_selector_linux 0.9.3+2 (0.9.3+3 available)
+  file_selector_macos 0.9.4+4 (0.9.4+6 available)
+  file_selector_platform_interface 2.6.2 (2.7.0 available)
+  file_selector_windows 0.9.3+4 (0.9.3+5 available)
+  firebase_analytics 12.0.3 (12.0.4 available)
+  firebase_analytics_platform_interface 5.0.3 (5.0.4 available)
+  firebase_analytics_web 0.6.0+3 (0.6.1 available)
+  firebase_auth 6.1.1 (6.1.2 available)
+  firebase_auth_platform_interface 8.1.3 (8.1.4 available)
+  firebase_auth_web 6.0.4 (6.1.0 available)
+  firebase_core 4.2.0 (4.2.1 available)
+  firebase_core_web 3.2.0 (3.3.0 available)
+  firebase_crashlytics 5.0.3 (5.0.5 available)
+  firebase_crashlytics_platform_interface 3.8.14 (3.8.15 available)
+  firebase_messaging 16.0.3 (16.0.4 available)
+  firebase_messaging_platform_interface 4.7.3 (4.7.4 available)
+  firebase_messaging_web 4.0.3 (4.1.0 available)
+  firebase_performance 0.11.1+1 (0.11.1+2 available)
+  firebase_performance_platform_interface 0.1.6+1 (0.1.6+2 available)
+  firebase_performance_web 0.1.7+20 (0.1.8 available)
+  firebase_remote_config 6.1.0 (6.1.2 available)
+  firebase_remote_config_platform_interface 2.0.4 (2.0.5 available)
+  firebase_remote_config_web 1.9.0 (1.10.1 available)
+  firebase_storage 13.0.3 (13.0.4 available)
+  firebase_storage_platform_interface 5.2.14 (5.2.15 available)
+  firebase_storage_web 3.10.21 (3.11.0 available)
+  flutter_facebook_auth 6.2.0 (7.1.2 available)
+  flutter_facebook_auth_platform_interface 5.0.0 (6.1.2 available)
+  flutter_facebook_auth_web 5.0.0 (6.1.2 available)
+  flutter_lints 5.0.0 (6.0.0 available)
+  flutter_plugin_android_lifecycle 2.0.31 (2.0.32 available)
+  flutter_riverpod 2.6.1 (3.0.3 available)
+  flutter_secure_storage_linux 1.2.3 (2.0.1 available)
+  flutter_secure_storage_macos 3.1.3 (4.0.0 available)
+  flutter_secure_storage_platform_interface 1.1.2 (2.0.1 available)
+  flutter_secure_storage_web 1.2.1 (2.0.0 available)
+  flutter_secure_storage_windows 3.1.2 (4.0.0 available)
+  flutter_svg 2.2.1 (2.2.2 available)
+  font_awesome_flutter 10.9.1 (10.12.0 available)
+  freezed 2.5.8 (3.2.3 available)
+  freezed_annotation 2.4.4 (3.1.0 available)
+  get_it 8.2.0 (9.0.5 available)
+  go_router 16.3.0 (17.0.0 available)
+  google_mobile_ads 5.3.1 (6.0.0 available)
+  google_sign_in 6.3.0 (7.2.0 available)
+  google_sign_in_android 6.2.1 (7.2.5 available)
+  google_sign_in_ios 5.9.0 (6.2.4 available)
+  google_sign_in_platform_interface 2.5.0 (3.1.0 available)
+  google_sign_in_web 0.12.4+4 (1.1.0 available)
+  http 1.5.0 (1.6.0 available)
+  image_picker 1.2.0 (1.2.1 available)
+  image_picker_android 0.8.13+1 (0.8.13+8 available)
+  image_picker_for_web 3.1.0 (3.1.1 available)
+  image_picker_ios 0.8.13 (0.8.13+2 available)
+  image_picker_macos 0.2.2 (0.2.2+1 available)
+  injectable 2.5.2 (2.6.0 available)
+  injectable_generator 2.7.0 (2.9.1 available)
+  js 0.6.7 (0.7.2 available)
+  json_serializable 6.9.5 (6.11.1 available)
+  lints 5.1.1 (6.0.0 available)
+  local_auth 2.3.0 (3.0.0 available)
+  local_auth_android 1.0.52 (2.0.2 available)
+  local_auth_darwin 1.6.0 (2.0.1 available)
+  local_auth_windows 1.0.11 (2.0.1 available)
+  material_color_utilities 0.11.1 (0.13.0 available)
+  meta 1.16.0 (1.17.0 available)
+  package_info_plus 8.3.1 (9.0.0 available)
+  path_provider_android 2.2.19 (2.2.21 available)
+  path_provider_foundation 2.4.2 (2.4.4 available)
+  pointycastle 3.9.1 (4.0.0 available)
+  purchases_flutter 9.9.0 (9.9.6 available)
+  rate_my_app 2.2.0 (2.3.2 available)
+  riverpod 2.6.1 (3.0.3 available)
+  riverpod_analyzer_utils 0.5.9 (0.5.10 available)
+  riverpod_annotation 2.6.1 (3.0.3 available)
+  riverpod_generator 2.6.4 (3.0.3 available)
+  shared_preferences_android 2.4.13 (2.4.16 available)
+  shared_preferences_foundation 2.5.4 (2.5.6 available)
+  shelf_web_socket 2.0.1 (3.0.0 available)
+  sign_in_with_apple 6.1.4 (7.0.1 available)
+  sign_in_with_apple_platform_interface 1.1.0 (2.0.0 available)
+  sign_in_with_apple_web 2.1.1 (3.0.0 available)
+  source_gen 2.0.0 (4.1.0 available)
+  source_helper 1.3.5 (1.3.8 available)
+  sqflite_android 2.4.1 (2.4.2+2 available)
+  sqlite3 2.9.4 (3.0.1 available)
+  sqlite3_web 0.4.1 (0.5.0 available)
+  sqlparser 0.41.2 (0.42.0 available)
+  test_api 0.7.6 (0.7.8 available)
+  url_launcher_android 6.3.20 (6.3.25 available)
+  url_launcher_ios 6.3.4 (6.3.6 available)
+  url_launcher_linux 3.2.1 (3.2.2 available)
+  url_launcher_macos 3.2.3 (3.2.5 available)
+  url_launcher_windows 3.1.4 (3.1.5 available)
+  uuid 4.5.1 (4.5.2 available)
+  vm_service 15.0.0 (15.0.2 available)
+  webview_flutter_android 4.10.1 (4.10.6 available)
+  webview_flutter_wkwebview 3.23.0 (3.23.3 available)
+Got dependencies!
+126 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing app-plantis...                                        
+
+   info • Classes should define instance members • lib/core/config/security_config.dart:3:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/core/data/adapters/plantis_image_service_adapter.dart:327:1 • avoid_classes_with_only_static_members
+   info • Field overrides a field inherited from 'BaseEntity' • lib/core/data/models/comentario_model.dart:7:16 • overridden_fields
+   info • Field overrides a field inherited from 'BaseSyncEntity' • lib/core/data/models/comentario_model.dart:12:14 • overridden_fields
+   info • Field overrides a field inherited from 'BaseSyncEntity' • lib/core/data/models/comentario_model.dart:14:14 • overridden_fields
+   info • Field overrides a field inherited from 'BaseSyncEntity' • lib/core/data/models/comentario_model.dart:16:13 • overridden_fields
+   info • Field overrides a field inherited from 'BaseSyncEntity' • lib/core/data/models/comentario_model.dart:18:17 • overridden_fields
+   info • Field overrides a field inherited from 'BaseSyncEntity' • lib/core/data/models/comentario_model.dart:20:17 • overridden_fields
+   info • Field overrides a field inherited from 'BaseEntity' • lib/core/data/models/conflict_history_model.dart:7:16 • overridden_fields
+   info • Field overrides a field inherited from 'BaseEntity' • lib/core/data/models/espaco_model.dart:8:16 • overridden_fields
+   info • Field overrides a field inherited from 'BaseSyncEntity' • lib/core/data/models/espaco_model.dart:13:14 • overridden_fields
+   info • Field overrides a field inherited from 'BaseSyncEntity' • lib/core/data/models/espaco_model.dart:15:14 • overridden_fields
+   info • Field overrides a field inherited from 'BaseSyncEntity' • lib/core/data/models/espaco_model.dart:17:13 • overridden_fields
+   info • Field overrides a field inherited from 'BaseSyncEntity' • lib/core/data/models/espaco_model.dart:19:17 • overridden_fields
+   info • Field overrides a field inherited from 'BaseSyncEntity' • lib/core/data/models/espaco_model.dart:21:17 • overridden_fields
+   info • Field overrides a field inherited from 'BaseEntity' • lib/core/data/models/planta_config_model.dart:8:16 • overridden_fields
+   info • Field overrides a field inherited from 'BaseSyncEntity' • lib/core/data/models/planta_config_model.dart:13:14 • overridden_fields
+   info • Field overrides a field inherited from 'BaseSyncEntity' • lib/core/data/models/planta_config_model.dart:15:14 • overridden_fields
+   info • Field overrides a field inherited from 'BaseSyncEntity' • lib/core/data/models/planta_config_model.dart:17:13 • overridden_fields
+   info • Field overrides a field inherited from 'BaseSyncEntity' • lib/core/data/models/planta_config_model.dart:19:17 • overridden_fields
+   info • Field overrides a field inherited from 'BaseSyncEntity' • lib/core/data/models/planta_config_model.dart:21:17 • overridden_fields
+   info • Import of a library in the 'lib/src' directory of another package • lib/core/di/advanced_subscription_module.dart:2:8 • implementation_imports
+   info • Import of a library in the 'lib/src' directory of another package • lib/core/di/injection_container.dart:2:8 • implementation_imports
+   info • Classes should define instance members • lib/core/di/modules/account_deletion_module.dart:3:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/core/di/modules/domain_module.dart:2:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/core/di/modules/domain_module.dart:6:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/core/di/modules/domain_module.dart:10:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/core/di/modules/domain_module.dart:14:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/core/di/modules/domain_module.dart:18:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/core/di/modules/domain_module.dart:22:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/core/di/modules/plants_module.dart:3:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/core/di/modules/spaces_module.dart:3:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/core/di/modules/sync_module.dart:10:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/core/di/modules/tasks_module.dart:10:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/core/di/solid_di_factory.dart:261:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/core/error/error_adapter.dart:4:1 • avoid_classes_with_only_static_members
+   info • Angle brackets will be interpreted as HTML • lib/core/error/error_adapter.dart:5:42 • unintended_html_in_doc_comment
+   info • Use 'TypeName _' instead of a type literal • lib/core/error/error_adapter.dart:10:12 • type_literal_in_constant_pattern
+   info • Use 'TypeName _' instead of a type literal • lib/core/error/error_adapter.dart:17:12 • type_literal_in_constant_pattern
+   info • Use 'TypeName _' instead of a type literal • lib/core/error/error_adapter.dart:25:12 • type_literal_in_constant_pattern
+   info • Use 'TypeName _' instead of a type literal • lib/core/error/error_adapter.dart:32:12 • type_literal_in_constant_pattern
+   info • Use 'TypeName _' instead of a type literal • lib/core/error/error_adapter.dart:40:12 • type_literal_in_constant_pattern
+   info • Use 'TypeName _' instead of a type literal • lib/core/error/error_adapter.dart:47:12 • type_literal_in_constant_pattern
+   info • Use 'TypeName _' instead of a type literal • lib/core/error/error_adapter.dart:54:12 • type_literal_in_constant_pattern
+   info • 'AnalyticsRepositoryRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/analytics_notifier.dart:12:42 • deprecated_member_use_from_same_package
+   info • 'CrashlyticsRepositoryRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/analytics_notifier.dart:18:46 • deprecated_member_use_from_same_package
+   info • 'AnalyticsInitializedRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/analytics_notifier.dart:443:27 • deprecated_member_use_from_same_package
+   info • 'AnalyticsEnabledRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/analytics_notifier.dart:449:23 • deprecated_member_use_from_same_package
+   info • 'AnalyticsErrorRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/analytics_notifier.dart:455:24 • deprecated_member_use_from_same_package
+   info • 'IsDebugModeRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/analytics_notifier.dart:461:18 • deprecated_member_use_from_same_package
+   info • 'AnalyticsServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/analytics_notifier.dart:467:28 • deprecated_member_use_from_same_package
+   info • 'ShouldShowAnalyticsSettingsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/analytics_notifier.dart:473:34 • deprecated_member_use_from_same_package
+   info • 'AnalyticsStatusTextRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/analytics_notifier.dart:481:28 • deprecated_member_use_from_same_package
+   info • 'AnalyticsStatusIconRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/analytics_notifier.dart:498:30 • deprecated_member_use_from_same_package
+   info • Missing an 'await' for the 'Future' computed by this expression • lib/core/providers/auth_providers.dart:688:19 • unawaited_futures
+   info • Missing an 'await' for the 'Future' computed by this expression • lib/core/providers/auth_providers.dart:730:19 • unawaited_futures
+   info • 'CurrentUserRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/auth_providers.dart:740:25 • deprecated_member_use_from_same_package
+   info • 'IsAuthenticatedRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/auth_providers.dart:749:22 • deprecated_member_use_from_same_package
+   info • 'IsLoadingRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/auth_providers.dart:758:16 • deprecated_member_use_from_same_package
+   info • 'IsPremiumRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/auth_providers.dart:767:16 • deprecated_member_use_from_same_package
+   info • 'IsInitializedRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/auth_providers.dart:776:20 • deprecated_member_use_from_same_package
+   info • 'BackgroundSyncServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/background_sync_provider.dart:13:45 • deprecated_member_use_from_same_package
+   info • 'ShouldStartInitialSyncRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/background_sync_provider.dart:172:29 • deprecated_member_use_from_same_package
+   info • 'SyncProgressRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/background_sync_provider.dart:183:21 • deprecated_member_use_from_same_package
+   info • 'SyncStatusMessageRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/background_sync_provider.dart:195:26 • deprecated_member_use_from_same_package
+   info • 'ShouldShowSyncIndicatorRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/background_sync_provider.dart:214:30 • deprecated_member_use_from_same_package
+   info • 'SyncIndicatorColorRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/background_sync_provider.dart:222:27 • deprecated_member_use_from_same_package
+   info • 'SyncStatusStreamRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/background_sync_provider.dart:245:47 • deprecated_member_use_from_same_package
+   info • 'SyncMessageStreamRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/background_sync_provider.dart:252:34 • deprecated_member_use_from_same_package
+   info • 'SyncProgressStreamRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/background_sync_provider.dart:259:33 • deprecated_member_use_from_same_package
+   info • 'PlantCommentsRepositoryRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/comments_providers.dart:11:49 • deprecated_member_use_from_same_package
+   info • 'PlantCommentsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/comments_providers.dart:312:3 • deprecated_member_use_from_same_package
+   info • 'GetPlantsUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/plants_providers.dart:370:35 • deprecated_member_use_from_same_package
+   info • 'GetPlantByIdUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/plants_providers.dart:375:41 • deprecated_member_use_from_same_package
+   info • 'SearchPlantsUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/plants_providers.dart:380:41 • deprecated_member_use_from_same_package
+   info • 'AddPlantUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/plants_providers.dart:385:33 • deprecated_member_use_from_same_package
+   info • 'UpdatePlantUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/plants_providers.dart:390:39 • deprecated_member_use_from_same_package
+   info • 'DeletePlantUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/plants_providers.dart:395:39 • deprecated_member_use_from_same_package
+   info • 'AuthStateProviderRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/plants_providers.dart:404:38 • deprecated_member_use_from_same_package
+   info • 'PlantsDataServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/plants_providers.dart:409:37 • deprecated_member_use_from_same_package
+   info • 'PlantsFilterServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/plants_providers.dart:416:41 • deprecated_member_use_from_same_package
+   info • 'PlantsCareCalculatorRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/plants_providers.dart:421:43 • deprecated_member_use_from_same_package
+   info • 'AllPlantsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/plants_providers.dart:1174:23 • deprecated_member_use_from_same_package
+   info • 'FilteredPlantsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/plants_providers.dart:1183:28 • deprecated_member_use_from_same_package
+   info • 'PlantsIsLoadingRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/plants_providers.dart:1192:22 • deprecated_member_use_from_same_package
+   info • 'PlantsErrorRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/plants_providers.dart:1202:21 • deprecated_member_use_from_same_package
+   info • 'PlantisRealtimeServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/realtime_sync_notifier.dart:13:47 • deprecated_member_use_from_same_package
+   info • 'ConnectivityServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/realtime_sync_notifier.dart:19:41 • deprecated_member_use_from_same_package
+   info • 'UnifiedSyncManagerRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/realtime_sync_notifier.dart:25:39 • deprecated_member_use_from_same_package
+   info • 'IsRealtimeActiveRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/realtime_sync_notifier.dart:592:23 • deprecated_member_use_from_same_package
+   info • 'IsSyncOnlineRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/realtime_sync_notifier.dart:603:19 • deprecated_member_use_from_same_package
+   info • 'CurrentSyncStatusRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/realtime_sync_notifier.dart:614:30 • deprecated_member_use_from_same_package
+   info • 'SyncStatusMessageRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/realtime_sync_notifier.dart:625:26 • deprecated_member_use_from_same_package
+   info • 'SyncStatusColorRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/realtime_sync_notifier.dart:636:36 • deprecated_member_use_from_same_package
+   info • 'PendingChangesCountRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/realtime_sync_notifier.dart:647:25 • deprecated_member_use_from_same_package
+   info • 'RecentSyncEventsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/realtime_sync_notifier.dart:658:31 • deprecated_member_use_from_same_package
+   info • 'PlantisRealtimeServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/realtime_sync_provider.dart:91:47 • deprecated_member_use_from_same_package
+   info • 'ConnectivityServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/realtime_sync_provider.dart:97:41 • deprecated_member_use_from_same_package
+   info • 'SettingsRepositoryRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:14:40 • deprecated_member_use_from_same_package
+   info • 'PlantisNotificationServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:21:3 • deprecated_member_use_from_same_package
+   info • Missing an 'await' for the 'Future' computed by this expression • lib/core/providers/settings_notifier.dart:305:14 • unawaited_futures
+   info • Missing an 'await' for the 'Future' computed by this expression • lib/core/providers/settings_notifier.dart:312:11 • unawaited_futures
+   info • 'CurrentSettingsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:345:32 • deprecated_member_use_from_same_package
+   info • 'SettingsLoadingRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:351:22 • deprecated_member_use_from_same_package
+   info • 'SettingsInitializedRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:357:26 • deprecated_member_use_from_same_package
+   info • 'SettingsErrorRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:363:23 • deprecated_member_use_from_same_package
+   info • 'SettingsSuccessRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:369:25 • deprecated_member_use_from_same_package
+   info • 'NotificationSettingsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:375:49 • deprecated_member_use_from_same_package
+   info • 'BackupSettingsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:381:37 • deprecated_member_use_from_same_package
+   info • 'ThemeSettingsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:387:35 • deprecated_member_use_from_same_package
+   info • 'AccountSettingsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:393:39 • deprecated_member_use_from_same_package
+   info • 'AppSettingsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:399:31 • deprecated_member_use_from_same_package
+   info • 'HasNotificationPermissionsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:405:33 • deprecated_member_use_from_same_package
+   info • 'IsDarkModeRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:411:17 • deprecated_member_use_from_same_package
+   info • 'NotificationsEnabledRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:417:27 • deprecated_member_use_from_same_package
+   info • 'IsWebPlatformRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:423:20 • deprecated_member_use_from_same_package
+   info • 'NotificationStatusTextRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:429:31 • deprecated_member_use_from_same_package
+   info • 'NotificationStatusColorRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:444:31 • deprecated_member_use_from_same_package
+   info • 'NotificationStatusIconRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:456:33 • deprecated_member_use_from_same_package
+   info • 'ThemeSubtitleRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/settings_notifier.dart:468:22 • deprecated_member_use_from_same_package
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/core/providers/spaces_providers.dart:108:26 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/core/providers/spaces_providers.dart:159:28 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/core/providers/spaces_providers.dart:183:28 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/core/providers/spaces_providers.dart:213:28 • only_throw_errors
+   info • Use 'TypeName _' instead of a type literal • lib/core/providers/spaces_providers.dart:248:12 • type_literal_in_constant_pattern
+   info • Use 'TypeName _' instead of a type literal • lib/core/providers/spaces_providers.dart:250:12 • type_literal_in_constant_pattern
+   info • Use 'TypeName _' instead of a type literal • lib/core/providers/spaces_providers.dart:252:12 • type_literal_in_constant_pattern
+   info • Use 'TypeName _' instead of a type literal • lib/core/providers/spaces_providers.dart:254:12 • type_literal_in_constant_pattern
+   info • Use 'TypeName _' instead of a type literal • lib/core/providers/spaces_providers.dart:261:12 • type_literal_in_constant_pattern
+   info • 'GetSpacesUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/spaces_providers.dart:270:35 • deprecated_member_use_from_same_package
+   info • 'GetSpaceByIdUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/spaces_providers.dart:275:41 • deprecated_member_use_from_same_package
+   info • 'AddSpaceUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/spaces_providers.dart:280:33 • deprecated_member_use_from_same_package
+   info • 'UpdateSpaceUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/spaces_providers.dart:285:39 • deprecated_member_use_from_same_package
+   info • 'DeleteSpaceUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/spaces_providers.dart:290:39 • deprecated_member_use_from_same_package
+   info • 'SyncCompletionListenerInitializerRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/sync_completion_listener.dart:76:40 • deprecated_member_use_from_same_package
+   info • 'SyncConnectivityServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/sync_status_provider.dart:54:45 • deprecated_member_use_from_same_package
+   info • 'SyncQueueRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/sync_status_provider.dart:60:21 • deprecated_member_use_from_same_package
+   info • 'ThemeSettingsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/theme_providers.dart:176:35 • deprecated_member_use_from_same_package
+   info • 'ThemeModeRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/theme_providers.dart:182:21 • deprecated_member_use_from_same_package
+   info • 'ThemeLoadingRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/theme_providers.dart:188:19 • deprecated_member_use_from_same_package
+   info • 'ThemeErrorRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/theme_providers.dart:194:20 • deprecated_member_use_from_same_package
+   info • 'PlantisIsDarkModeRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/theme_providers.dart:200:24 • deprecated_member_use_from_same_package
+   info • 'PlantisIsLightModeRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/theme_providers.dart:206:25 • deprecated_member_use_from_same_package
+   info • 'PlantisFollowSystemThemeRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/theme_providers.dart:212:31 • deprecated_member_use_from_same_package
+   info • 'ContextAwareDarkModeRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/theme_providers.dart:218:27 • deprecated_member_use_from_same_package
+   info • 'ThemeStatusTextRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/theme_providers.dart:230:24 • deprecated_member_use_from_same_package
+   info • 'ThemeIconRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/theme_providers.dart:244:20 • deprecated_member_use_from_same_package
+   info • Classes should define instance members • lib/core/router/app_router.dart:27:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/core/services/data_sanitization_service.dart:4:1 • avoid_classes_with_only_static_members
+   info • Empty catch block • lib/core/services/memory_monitoring_service.dart:71:19 • empty_catches
+   info • Classes should define instance members • lib/core/services/plantis_notification_config.dart:5:1 • avoid_classes_with_only_static_members
+   info • Empty catch block • lib/core/services/plantis_notification_service.dart:337:23 • empty_catches
+   info • The parameter name 'count' matches a visible type name • lib/core/services/plantis_sync_service.dart:103:10 • avoid_types_as_parameter_names
+   info • The parameter name 'count' matches a visible type name • lib/core/services/plantis_sync_service.dart:120:10 • avoid_types_as_parameter_names
+   info • The parameter name 'count' matches a visible type name • lib/core/services/plantis_sync_service.dart:137:10 • avoid_types_as_parameter_names
+   info • The parameter name 'count' matches a visible type name • lib/core/services/plantis_sync_service.dart:154:10 • avoid_types_as_parameter_names
+   info • Classes should define instance members • lib/core/services/plantis_sync_service.dart:286:1 • avoid_classes_with_only_static_members
+   info • Missing an 'await' for the 'Future' computed by this expression • lib/core/services/web_image_upload_manager.dart:128:26 • unawaited_futures
+   info • Classes should define instance members • lib/core/storage/storage_usage_example.dart:5:1 • avoid_classes_with_only_static_members
+   info • Missing an 'await' for the 'Future' computed by this expression • lib/core/sync/sync_operations.dart:57:18 • unawaited_futures
+   info • Classes should define instance members • lib/core/theme/plantis_colors.dart:3:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/core/theme/plantis_theme.dart:5:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/core/widgets/enhanced_error_states.dart:3:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/core/widgets/enhanced_loading_states.dart:3:1 • avoid_classes_with_only_static_members
+   info • 'PlantisDatabaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/database/providers/database_providers.dart:36:33 • deprecated_member_use_from_same_package
+   info • 'ActivePlantsCountRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/database/providers/database_providers.dart:57:31 • deprecated_member_use_from_same_package
+   info • 'PendingTasksCountRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/database/providers/database_providers.dart:64:31 • deprecated_member_use_from_same_package
+   info • 'DirtyRecordsCountRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/database/providers/database_providers.dart:71:31 • deprecated_member_use_from_same_package
+   info • 'ActivePlantsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/database/providers/database_providers.dart:88:34 • deprecated_member_use_from_same_package
+   info • 'PendingTasksRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/database/providers/database_providers.dart:95:33 • deprecated_member_use_from_same_package
+   info • 'PendingSyncItemsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/database/providers/database_providers.dart:102:52 • deprecated_member_use_from_same_package
+   info • 'PlantsBySpaceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/database/providers/database_providers.dart:119:3 • deprecated_member_use_from_same_package
+   info • 'PlantConfigRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/database/providers/database_providers.dart:134:3 • deprecated_member_use_from_same_package
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/database/repositories/plant_configs_drift_repository.dart:17:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/account/data/datasources/account_local_datasource.dart:56:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/account/data/datasources/account_local_datasource.dart:100:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/account/data/datasources/account_local_datasource.dart:110:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/account/data/datasources/account_remote_datasource.dart:54:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/account/data/datasources/account_remote_datasource.dart:79:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/account/data/datasources/account_remote_datasource.dart:112:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/account/data/datasources/account_remote_datasource.dart:131:13 • only_throw_errors
+   info • 'AccountRemoteDataSourceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/account/presentation/providers/account_providers.dart:28:3 • deprecated_member_use_from_same_package
+   info • 'AccountLocalDataSourceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/account/presentation/providers/account_providers.dart:39:47 • deprecated_member_use_from_same_package
+   info • 'AccountRepositoryRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/account/presentation/providers/account_providers.dart:75:37 • deprecated_member_use_from_same_package
+   info • 'GetAccountInfoUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/account/presentation/providers/account_providers.dart:96:45 • deprecated_member_use_from_same_package
+   info • 'LogoutUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/account/presentation/providers/account_providers.dart:102:44 • deprecated_member_use_from_same_package
+   info • 'ClearDataUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/account/presentation/providers/account_providers.dart:108:35 • deprecated_member_use_from_same_package
+   info • 'DeleteAccountUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/account/presentation/providers/account_providers.dart:114:43 • deprecated_member_use_from_same_package
+   info • 'AccountInfoRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/account/presentation/providers/account_providers.dart:125:33 • deprecated_member_use_from_same_package
+   info • 'AccountInfoStreamRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/account/presentation/providers/account_providers.dart:137:40 • deprecated_member_use_from_same_package
+   info • 'ClearDataDialogManagerRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/account/presentation/providers/dialog_managers_providers.dart:22:47 • deprecated_member_use_from_same_package
+   info • 'LogoutDialogManagerRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/account/presentation/providers/dialog_managers_providers.dart:28:41 • deprecated_member_use_from_same_package
+   info • 'AuthDialogManagerRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_dialog_managers_providers.dart:15:37 • deprecated_member_use_from_same_package
+   info • 'CredentialsPersistenceManagerRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_dialog_managers_providers.dart:23:3 • deprecated_member_use_from_same_package
+   info • 'AuthSubmissionManagerRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_dialog_managers_providers.dart:31:45 • deprecated_member_use_from_same_package
+   info • 'ForgotPasswordDialogManagerRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_dialog_managers_providers.dart:38:3 • deprecated_member_use_from_same_package
+   info • 'EmailCheckerManagerRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_dialog_managers_providers.dart:52:41 • deprecated_member_use_from_same_package
+   info • 'checkEmailExists' is deprecated and shouldn't be used. Use EmailCheckerManager.checkExists() instead • lib/features/auth/presentation/providers/register_notifier.dart:228:31 • deprecated_member_use_from_same_package
+   info • Classes should define instance members • lib/features/auth/utils/auth_validators.dart:1:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/features/auth/utils/validation_helpers.dart:3:1 • avoid_classes_with_only_static_members
+   info • Missing an 'await' for the 'Future' computed by this expression • lib/features/data_export/data/repositories/data_export_repository_impl.dart:263:7 • unawaited_futures
+   info • Use an initializing formal to assign a parameter to a field • lib/features/data_export/domain/entities/export_request.dart:122:8 • prefer_initializing_formals
+   info • Use an initializing formal to assign a parameter to a field • lib/features/data_export/domain/entities/export_request.dart:124:8 • prefer_initializing_formals
+   info • Use an initializing formal to assign a parameter to a field • lib/features/data_export/domain/entities/export_request.dart:131:8 • prefer_initializing_formals
+   info • Use an initializing formal to assign a parameter to a field • lib/features/data_export/domain/entities/export_request.dart:133:8 • prefer_initializing_formals
+   info • 'ExportDialogManagerRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/data_export/presentation/providers/export_managers_providers.dart:15:41 • deprecated_member_use_from_same_package
+   info • 'ExportStatusMapperRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/data_export/presentation/providers/export_managers_providers.dart:21:39 • deprecated_member_use_from_same_package
+   info • 'ExportActionHandlerRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/data_export/presentation/providers/export_managers_providers.dart:27:41 • deprecated_member_use_from_same_package
+   info • 'ExportProgressMonitorRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/data_export/presentation/providers/export_managers_providers.dart:33:45 • deprecated_member_use_from_same_package
+   info • 'ExportRateLimiterRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/data_export/presentation/providers/export_managers_providers.dart:39:37 • deprecated_member_use_from_same_package
+   info • 'ExportStatisticsCalculatorRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/data_export/presentation/providers/export_managers_providers.dart:46:3 • deprecated_member_use_from_same_package
+   info • 'ExportActionServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/data_export/presentation/providers/export_managers_providers.dart:53:41 • deprecated_member_use_from_same_package
+   info • The parameter name 'count' matches a visible type name • lib/features/device_management/data/datasources/device_remote_datasource.dart:221:53 • avoid_types_as_parameter_names
+   info • The parameter name 'count' matches a visible type name • lib/features/device_management/data/datasources/device_remote_datasource.dart:241:53 • avoid_types_as_parameter_names
+   info • Classes should define instance members • lib/features/device_management/presentation/managers/device_feedback_builder.dart:6:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/features/device_management/presentation/managers/device_status_builder.dart:6:1 • avoid_classes_with_only_static_members
+   info • 'GetUserDevicesUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/device_management/presentation/providers/device_management_notifier.dart:106:45 • deprecated_member_use_from_same_package
+   info • 'ValidateDeviceUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/device_management/presentation/providers/device_management_notifier.dart:111:45 • deprecated_member_use_from_same_package
+   info • 'RevokeDeviceUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/device_management/presentation/providers/device_management_notifier.dart:116:41 • deprecated_member_use_from_same_package
+   info • 'RevokeAllOtherDevicesUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/device_management/presentation/providers/device_management_notifier.dart:121:59 • deprecated_member_use_from_same_package
+   info • 'GetDeviceStatisticsUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/device_management/presentation/providers/device_management_notifier.dart:126:55 • deprecated_member_use_from_same_package
+   info • 'AuthStateNotifierRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/device_management/presentation/providers/device_management_notifier.dart:131:37 • deprecated_member_use_from_same_package
+   info • 'GetUserDevicesUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/device_management/presentation/providers/device_management_provider.dart:522:45 • deprecated_member_use_from_same_package
+   info • 'ValidateDeviceUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/device_management/presentation/providers/device_management_provider.dart:527:45 • deprecated_member_use_from_same_package
+   info • 'RevokeDeviceUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/device_management/presentation/providers/device_management_provider.dart:532:41 • deprecated_member_use_from_same_package
+   info • 'RevokeAllOtherDevicesUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/device_management/presentation/providers/device_management_provider.dart:538:3 • deprecated_member_use_from_same_package
+   info • 'GetDeviceStatisticsUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/device_management/presentation/providers/device_management_provider.dart:545:3 • deprecated_member_use_from_same_package
+   info • 'AuthStateNotifierRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/device_management/presentation/providers/device_management_provider.dart:551:37 • deprecated_member_use_from_same_package
+   info • Classes should define instance members • lib/features/device_management/presentation/services/device_status_manager.dart:3:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/features/home/presentation/managers/landing_auth_redirect_manager.dart:4:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/features/home/presentation/managers/landing_footer_builder.dart:5:1 • avoid_classes_with_only_static_members
+   info • 'LandingContentDataSourceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/home/presentation/providers/landing_providers.dart:22:3 • deprecated_member_use_from_same_package
+   info • 'LandingAuthRepositoryRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/home/presentation/providers/landing_providers.dart:36:45 • deprecated_member_use_from_same_package
+   info • 'LandingContentRepositoryRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/home/presentation/providers/landing_providers.dart:46:3 • deprecated_member_use_from_same_package
+   info • 'CheckAuthStatusUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/home/presentation/providers/landing_providers.dart:58:47 • deprecated_member_use_from_same_package
+   info • 'GetLandingContentUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/home/presentation/providers/landing_providers.dart:66:3 • deprecated_member_use_from_same_package
+   info • 'LandingAuthStatusRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/home/presentation/providers/landing_providers.dart:80:45 • deprecated_member_use_from_same_package
+   info • 'LandingAuthStatusStreamRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/home/presentation/providers/landing_providers.dart:95:3 • deprecated_member_use_from_same_package
+   info • 'LandingContentRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/home/presentation/providers/landing_providers.dart:105:39 • deprecated_member_use_from_same_package
+   info • Classes should define instance members • lib/features/legal/data/legal_content_service.dart:6:1 • avoid_classes_with_only_static_members
+   info • Angle brackets will be interpreted as HTML • lib/features/legal/domain/repositories/legal_repository.dart:7:54 • unintended_html_in_doc_comment
+   info • Classes should define instance members • lib/features/legal/presentation/builders/footer_section_builder.dart:5:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/features/legal/presentation/builders/how_it_works_section_builder.dart:3:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/features/legal/presentation/builders/promo_coming_soon_section_builder.dart:3:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/features/legal/presentation/builders/testimonials_section_builder.dart:3:1 • avoid_classes_with_only_static_members
+   info • 'PrivacyPolicyDataSourceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/legal/presentation/providers/legal_providers.dart:22:3 • deprecated_member_use_from_same_package
+   info • 'TermsOfServiceDataSourceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/legal/presentation/providers/legal_providers.dart:29:3 • deprecated_member_use_from_same_package
+   info • 'AccountDeletionDataSourceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/legal/presentation/providers/legal_providers.dart:36:3 • deprecated_member_use_from_same_package
+   info • 'LegalRepositoryRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/legal/presentation/providers/legal_providers.dart:46:33 • deprecated_member_use_from_same_package
+   info • 'GetLegalDocumentUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/legal/presentation/providers/legal_providers.dart:60:3 • deprecated_member_use_from_same_package
+   info • 'GetAllLegalDocumentsUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/legal/presentation/providers/legal_providers.dart:67:3 • deprecated_member_use_from_same_package
+   info • 'LegalDocumentRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/legal/presentation/providers/legal_providers.dart:79:3 • deprecated_member_use_from_same_package
+   info • 'AllLegalDocumentsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/legal/presentation/providers/legal_providers.dart:93:47 • deprecated_member_use_from_same_package
+   info • Classes should define instance members • lib/features/license/presentation/builders/license_status_card_builder.dart:5:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/features/license/presentation/builders/upgrade_prompt_builder.dart:5:1 • avoid_classes_with_only_static_members
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plant_tasks_local_datasource.dart:87:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plant_tasks_local_datasource.dart:112:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plant_tasks_local_datasource.dart:127:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plant_tasks_local_datasource.dart:160:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plant_tasks_local_datasource.dart:201:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plant_tasks_local_datasource.dart:223:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plant_tasks_local_datasource.dart:242:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plant_tasks_local_datasource.dart:271:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plant_tasks_local_datasource.dart:285:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plant_tasks_local_datasource.dart:299:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plant_tasks_local_datasource.dart:311:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plant_tasks_local_datasource.dart:323:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plant_tasks_local_datasource.dart:342:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plants_local_datasource.dart:68:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plants_local_datasource.dart:77:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plants_local_datasource.dart:102:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plants_local_datasource.dart:113:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plants_local_datasource.dart:123:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plants_local_datasource.dart:146:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plants_local_datasource.dart:164:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plants_local_datasource.dart:174:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/plants_local_datasource.dart:185:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/spaces_local_datasource.dart:45:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/spaces_local_datasource.dart:58:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/spaces_local_datasource.dart:70:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/spaces_local_datasource.dart:83:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/spaces_local_datasource.dart:86:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/spaces_local_datasource.dart:98:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/spaces_local_datasource.dart:101:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/local/spaces_local_datasource.dart:112:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:61:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:63:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:75:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:82:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:87:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:90:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:105:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:107:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:125:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:127:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:160:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:162:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:179:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:181:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:202:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:237:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:239:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:266:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/plants_remote_datasource.dart:268:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/spaces_remote_datasource.dart:51:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/spaces_remote_datasource.dart:53:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/spaces_remote_datasource.dart:65:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/spaces_remote_datasource.dart:72:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/spaces_remote_datasource.dart:77:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/spaces_remote_datasource.dart:80:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/spaces_remote_datasource.dart:95:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/spaces_remote_datasource.dart:97:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/spaces_remote_datasource.dart:115:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/spaces_remote_datasource.dart:117:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/spaces_remote_datasource.dart:134:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/spaces_remote_datasource.dart:136:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/spaces_remote_datasource.dart:161:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/datasources/remote/spaces_remote_datasource.dart:163:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/plants/data/repositories/plants_repository_impl.dart:260:21 • only_throw_errors
+   info • Empty catch block • lib/features/plants/data/repositories/spaces_repository_impl.dart:199:21 • empty_catches
+   info • Empty catch block • lib/features/plants/domain/entities/plant.dart:75:19 • empty_catches
+   info • Empty catch block • lib/features/plants/domain/entities/plant.dart:83:19 • empty_catches
+   info • Empty catch block • lib/features/plants/domain/entities/plant.dart:93:19 • empty_catches
+   info • Empty catch block • lib/features/plants/domain/entities/plant.dart:103:19 • empty_catches
+   info • Empty catch block • lib/features/plants/domain/entities/plant.dart:118:19 • empty_catches
+   info • Empty catch block • lib/features/plants/domain/entities/plant.dart:125:19 • empty_catches
+   info • Empty catch block • lib/features/plants/domain/entities/plant.dart:135:19 • empty_catches
+   info • Empty catch block • lib/features/plants/domain/entities/plant.dart:142:19 • empty_catches
+   info • Empty catch block • lib/features/plants/domain/entities/plant.dart:149:19 • empty_catches
+   info • Empty catch block • lib/features/plants/domain/entities/plant.dart:156:19 • empty_catches
+   info • Empty catch block • lib/features/plants/domain/entities/plant.dart:163:19 • empty_catches
+   info • Empty catch block • lib/features/plants/domain/entities/plant.dart:170:19 • empty_catches
+   info • Empty catch block • lib/features/plants/domain/entities/plant.dart:177:19 • empty_catches
+   info • Empty catch block • lib/features/plants/domain/entities/plant.dart:184:19 • empty_catches
+   info • Empty catch block • lib/features/plants/domain/entities/plant.dart:192:19 • empty_catches
+   info • Empty catch block • lib/features/plants/domain/entities/plant.dart:202:19 • empty_catches
+   info • Classes should define instance members • lib/features/plants/domain/services/plant_task_task_adapter.dart:7:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/features/plants/domain/services/plant_task_validation_service.dart:6:1 • avoid_classes_with_only_static_members
+warning • The declaration '_generateId' isn't referenced • lib/features/plants/domain/usecases/add_plant_usecase.dart:231:10 • unused_element
+   info • Classes should define instance members • lib/features/plants/presentation/builders/plant_form_dialog_builder.dart:3:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/features/plants/presentation/builders/plants_sort_builder.dart:3:1 • avoid_classes_with_only_static_members
+   info • Missing an 'await' for the 'Future' computed by this expression • lib/features/plants/presentation/notifiers/plant_task_notifier.dart:197:9 • unawaited_futures
+   info • 'PlantCommentsRepositoryRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/plants/presentation/providers/plant_comments_provider.dart:278:3 • deprecated_member_use_from_same_package
+   info • 'PlantCommentsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/plants/presentation/providers/plant_comments_provider.dart:284:37 • deprecated_member_use_from_same_package
+   info • 'PlantCommentsIsLoadingRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/plants/presentation/providers/plant_comments_provider.dart:294:29 • deprecated_member_use_from_same_package
+   info • 'PlantCommentsErrorRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/plants/presentation/providers/plant_comments_provider.dart:304:28 • deprecated_member_use_from_same_package
+   info • 'GetPlantByIdUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/plants/presentation/providers/plant_details_provider.dart:201:41 • deprecated_member_use_from_same_package
+   info • 'DeletePlantUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/plants/presentation/providers/plant_details_provider.dart:206:39 • deprecated_member_use_from_same_package
+   info • 'UpdatePlantUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/plants/presentation/providers/plant_details_provider.dart:211:39 • deprecated_member_use_from_same_package
+   info • 'PlantTaskGeneratorRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/plants/presentation/providers/plant_task_provider.dart:486:39 • deprecated_member_use_from_same_package
+   info • 'PlantTasksRepositoryRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/plants/presentation/providers/plant_task_provider.dart:491:44 • deprecated_member_use_from_same_package
+   info • 'GetSpacesUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/plants/presentation/providers/spaces_provider.dart:328:35 • deprecated_member_use_from_same_package
+   info • 'GetSpaceByIdUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/plants/presentation/providers/spaces_provider.dart:333:41 • deprecated_member_use_from_same_package
+   info • 'AddSpaceUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/plants/presentation/providers/spaces_provider.dart:338:33 • deprecated_member_use_from_same_package
+   info • 'UpdateSpaceUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/plants/presentation/providers/spaces_provider.dart:343:39 • deprecated_member_use_from_same_package
+   info • 'DeleteSpaceUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/plants/presentation/providers/spaces_provider.dart:348:39 • deprecated_member_use_from_same_package
+   info • 'SpacesRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/plants/presentation/providers/spaces_provider.dart:353:20 • deprecated_member_use_from_same_package
+   info • 'SpacesIsLoadingRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/plants/presentation/providers/spaces_provider.dart:363:22 • deprecated_member_use_from_same_package
+   info • 'SpacesErrorRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/plants/presentation/providers/spaces_provider.dart:373:21 • deprecated_member_use_from_same_package
+   info • Classes should define instance members • lib/features/plants/presentation/utils/failure_message_mapper.dart:4:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/features/plants/presentation/widgets/plant_details/plant_details_error_widgets.dart:326:1 • avoid_classes_with_only_static_members
+   info • Missing an 'await' for the 'Future' computed by this expression • lib/features/plants/presentation/widgets/plant_details/plant_info_section.dart:330:67 • unawaited_futures
+   info • Missing an 'await' for the 'Future' computed by this expression • lib/features/plants/presentation/widgets/plant_form_dialog.dart:385:55 • unawaited_futures
+   info • Classes should define instance members • lib/features/plants/presentation/widgets/plant_tasks_helper.dart:7:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/features/premium/presentation/builders/premium_actions_builder.dart:3:1 • avoid_classes_with_only_static_members
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/settings/data/datasources/device_local_datasource.dart:38:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/settings/data/datasources/device_local_datasource.dart:68:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/settings/data/datasources/device_local_datasource.dart:103:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/settings/data/datasources/device_local_datasource.dart:120:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/settings/data/datasources/device_remote_datasource.dart:28:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/settings/data/datasources/device_remote_datasource.dart:49:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/settings/data/datasources/device_remote_datasource.dart:67:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/settings/data/datasources/device_remote_datasource.dart:153:13 • only_throw_errors
+   info • Classes should define instance members • lib/features/settings/di/device_management_di.dart:8:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/features/settings/presentation/managers/notification_settings_builder.dart:7:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/features/settings/presentation/managers/settings_sections_builder.dart:6:1 • avoid_classes_with_only_static_members
+   info • 'NotificationServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/settings/presentation/providers/notifications_settings_notifier.dart:121:48 • deprecated_member_use_from_same_package
+   info • 'SharedPreferencesRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/settings/presentation/providers/notifications_settings_notifier.dart:126:45 • deprecated_member_use_from_same_package
+   info • 'SettingsRepositoryRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/settings/presentation/providers/settings_notifier.dart:116:40 • deprecated_member_use_from_same_package
+   info • 'PlantisNotificationServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/settings/presentation/providers/settings_notifier.dart:122:3 • deprecated_member_use_from_same_package
+   info • 'SettingsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/settings/presentation/providers/settings_notifier.dart:599:25 • deprecated_member_use_from_same_package
+   info • 'NotificationSettingsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/settings/presentation/providers/settings_notifier.dart:610:49 • deprecated_member_use_from_same_package
+   info • 'BackupSettingsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/settings/presentation/providers/settings_notifier.dart:621:37 • deprecated_member_use_from_same_package
+   info • 'ThemeSettingsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/settings/presentation/providers/settings_notifier.dart:632:35 • deprecated_member_use_from_same_package
+   info • 'AccountSettingsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/settings/presentation/providers/settings_notifier.dart:643:39 • deprecated_member_use_from_same_package
+   info • 'NotificationsEnabledRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/settings/presentation/providers/settings_notifier.dart:654:27 • deprecated_member_use_from_same_package
+   info • 'IsDarkModeRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/settings/presentation/providers/settings_notifier.dart:665:17 • deprecated_member_use_from_same_package
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/features/settings/presentation/widgets/dialogs/device_management_dialog.dart:300:30 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/features/settings/presentation/widgets/dialogs/device_management_dialog.dart:350:30 • use_build_context_synchronously
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:46:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:58:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:60:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:62:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:66:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:81:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:84:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:92:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:101:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:107:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:109:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:111:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:115:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:130:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:133:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:145:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:147:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:149:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:151:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:155:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:174:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:177:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:194:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:196:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:198:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:202:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:220:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:241:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:243:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:245:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:249:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:264:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:277:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:279:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:281:15 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/sync/data/datasources/plants_firebase_datasource.dart:285:13 • only_throw_errors
+   info • Classes should define instance members • lib/features/sync/data/mappers/plant_firebase_mapper.dart:5:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/features/sync/data/mappers/task_firebase_mapper.dart:6:1 • avoid_classes_with_only_static_members
+   info • Use an initializing formal to assign a parameter to a field • lib/features/sync/domain/entities/sync_status.dart:74:9 • prefer_initializing_formals
+   info • Use an initializing formal to assign a parameter to a field • lib/features/sync/domain/entities/sync_status.dart:78:9 • prefer_initializing_formals
+   info • Use an initializing formal to assign a parameter to a field • lib/features/sync/domain/entities/sync_status.dart:95:9 • prefer_initializing_formals
+   info • Use an initializing formal to assign a parameter to a field • lib/features/sync/domain/entities/sync_status.dart:96:9 • prefer_initializing_formals
+   info • Angle brackets will be interpreted as HTML • lib/features/sync/domain/repositories/i_sync_orchestration_repository.dart:19:30 • unintended_html_in_doc_comment
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/tasks/data/datasources/local/tasks_local_datasource.dart:45:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/tasks/data/datasources/local/tasks_local_datasource.dart:54:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/tasks/data/datasources/local/tasks_local_datasource.dart:69:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/tasks/data/datasources/local/tasks_local_datasource.dart:83:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/tasks/data/datasources/local/tasks_local_datasource.dart:102:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/tasks/data/datasources/local/tasks_local_datasource.dart:121:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/tasks/data/datasources/local/tasks_local_datasource.dart:154:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/tasks/data/datasources/local/tasks_local_datasource.dart:166:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/tasks/data/datasources/local/tasks_local_datasource.dart:175:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/tasks/data/datasources/local/tasks_local_datasource.dart:184:13 • only_throw_errors
+   info • Don't throw instances of classes that don't extend either 'Exception' or 'Error' • lib/features/tasks/data/datasources/local/tasks_local_datasource.dart:193:13 • only_throw_errors
+   info • 'ScheduleServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/tasks/presentation/providers/specialized_tasks_providers.dart:11:34 • deprecated_member_use_from_same_package
+   info • 'TaskRecommendationServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/tasks/presentation/providers/specialized_tasks_providers.dart:18:3 • deprecated_member_use_from_same_package
+   info • 'TasksRepositoryRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/tasks/presentation/providers/tasks_providers.dart:16:33 • deprecated_member_use_from_same_package
+   info • 'GetTasksUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/tasks/presentation/providers/tasks_providers.dart:22:33 • deprecated_member_use_from_same_package
+   info • 'AddTaskUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/tasks/presentation/providers/tasks_providers.dart:28:31 • deprecated_member_use_from_same_package
+   info • 'CompleteTaskUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/tasks/presentation/providers/tasks_providers.dart:34:41 • deprecated_member_use_from_same_package
+   info • 'TaskFilterServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/tasks/presentation/providers/tasks_providers.dart:40:38 • deprecated_member_use_from_same_package
+   info • 'TaskOwnershipValidatorRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/tasks/presentation/providers/tasks_providers.dart:46:48 • deprecated_member_use_from_same_package
+   info • Missing an 'await' for the 'Future' computed by this expression • lib/main.dart:119:5 • unawaited_futures
+   info • Classes should define instance members • lib/shared/widgets/feedback/animated_feedback.dart:7:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/shared/widgets/feedback/confirmation_system.dart:967:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/shared/widgets/feedback/progress_tracker.dart:10:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/shared/widgets/feedback/progress_tracker.dart:658:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/shared/widgets/feedback/toast_service.dart:487:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/shared/widgets/feedback/unified_feedback_system.dart:11:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/shared/widgets/loading/contextual_loading_manager.dart:3:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/shared/widgets/loading/loading_components.dart:29:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/shared/widgets/loading/loading_components.dart:112:1 • avoid_classes_with_only_static_members
+   info • Classes should define instance members • lib/shared/widgets/loading/skeleton_loader.dart:152:1 • avoid_classes_with_only_static_members
+   info • The parameter name 'count' matches a visible type name • test/features/plants/domain/repositories/plants_repository_test.dart:295:10 • avoid_types_as_parameter_names
+   info • Classes should define instance members • test/helpers/test_fixtures.dart:5:1 • avoid_classes_with_only_static_members
+

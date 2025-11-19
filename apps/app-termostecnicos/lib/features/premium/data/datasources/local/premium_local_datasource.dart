@@ -37,9 +37,7 @@ class PremiumLocalDataSourceImpl implements PremiumLocalDataSource {
         expirationDate = activeEntitlement.expirationDate != null
             ? DateTime.parse(activeEntitlement.expirationDate!)
             : null;
-        startDate = activeEntitlement.latestPurchaseDate != null
-            ? DateTime.parse(activeEntitlement.latestPurchaseDate!)
-            : null;
+        startDate = DateTime.parse(activeEntitlement.latestPurchaseDate);
         isActive = true;
       }
 
@@ -73,9 +71,7 @@ class PremiumLocalDataSourceImpl implements PremiumLocalDataSource {
         expirationDate = activeEntitlement.expirationDate != null
             ? DateTime.parse(activeEntitlement.expirationDate!)
             : null;
-        startDate = activeEntitlement.latestPurchaseDate != null
-            ? DateTime.parse(activeEntitlement.latestPurchaseDate!)
-            : null;
+        startDate = DateTime.parse(activeEntitlement.latestPurchaseDate);
         isActive = true;
       }
 

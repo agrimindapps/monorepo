@@ -1,10 +1,10 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
-import '../../features/diagnosticos/domain/entities/diagnostico_entity.dart';
-import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../database/receituagro_database.dart';
 import '../../database/tables/receituagro_tables.dart';
+import '../../features/diagnosticos/domain/entities/diagnostico_entity.dart';
+import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../di/injection_container.dart';
 
 /// Serviço avançado para validação de compatibilidade entre entidades (versão Drift)

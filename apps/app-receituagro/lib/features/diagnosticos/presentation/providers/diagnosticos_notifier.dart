@@ -106,7 +106,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     }
 
     try {
-      final result = await _getDiagnosticosUseCase(GetAllDiagnosticosParams());
+      final result = await _getDiagnosticosUseCase(const GetAllDiagnosticosParams());
       result.fold(
         (failure) {
           state = AsyncValue.data(

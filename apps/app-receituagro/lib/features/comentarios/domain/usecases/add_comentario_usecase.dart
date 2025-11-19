@@ -2,7 +2,8 @@ import 'package:core/core.dart' hide Column;
 
 import '../../constants/comentarios_design_tokens.dart';
 import '../entities/comentario_entity.dart';
-import '../repositories/i_comentarios_repository.dart';
+import '../repositories/i_comentarios_read_repository.dart';
+import '../repositories/i_comentarios_write_repository.dart';
 
 /// **USE CASE: Add New Comment**
 ///
@@ -88,9 +89,10 @@ import '../repositories/i_comentarios_repository.dart';
 /// ```
 @injectable
 class AddComentarioUseCase {
-  final IComentariosRepository _repository;
+  final IComentariosReadRepository _readRepository;
+  final IComentariosWriteRepository _writeRepository;
 
-  AddComentarioUseCase(this._repository);
+  AddComentarioUseCase(this._readRepository, this._writeRepository);
 
   /// Adds a new comentario after comprehensive validation
   Future<void> call(ComentarioEntity comentario) async {
@@ -107,7 +109,7 @@ class AddComentarioUseCase {
       status: true, // Always active when created
     );
 
-    await _repository.addComentario(comentarioToSave);
+    await _writeRepository.addComentario(comentarioToSave);
   }
 
   /// Comprehensive business validation for comentario content
@@ -205,7 +207,7 @@ class AddComentarioUseCase {
 
   /// Check if user has reached comment limits with comprehensive rules
   Future<void> _checkUserLimits() async {
-    final stats = await _repository.getUserCommentStats();
+    final stats = await _readRepository.getUserCommentStats();
     final activeComments = stats['active'] ?? 0;
     final totalComments = stats['total'] ?? 0;
     const maxTotalComments = 500;
@@ -232,7 +234,7 @@ class AddComentarioUseCase {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
 
-      final todayComments = await _repository.getCommentsByDateRange(
+      final todayComments = await _readRepository.getCommentsByDateRange(
         today,
         today.add(const Duration(days: 1)),
       );
@@ -276,7 +278,7 @@ class AddComentarioUseCase {
   /// Check for duplicate content in same context with proper implementation
   Future<bool> _isDuplicateContent(ComentarioEntity comentario) async {
     try {
-      final existingComments = await _repository.getByContext(
+      final existingComments = await _readRepository.getByContext(
         comentario.pkIdentificador,
       );
       final exactTitleMatch = existingComments.any(

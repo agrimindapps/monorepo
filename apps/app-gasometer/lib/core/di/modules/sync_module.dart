@@ -19,7 +19,6 @@ import '../../services/contracts/i_analytics_provider.dart';
 import '../../services/providers/firebase_auth_provider.dart';
 import '../../services/providers/firebase_analytics_provider.dart';
 import '../../sync/adapters/sync_adapter_registry.dart';
-import '../../sync/adapters/i_sync_adapter.dart';
 
 /// Módulo de Dependency Injection para sincronização do Gasometer
 /// Registra serviços de sync refatorados seguindo SRP:
@@ -54,24 +53,29 @@ abstract class SyncDIModule {
       sl.registerLazySingleton<SyncAdapterRegistry>(
         () => SyncAdapterRegistry(
           adapters: [
-            sl<VehicleDriftSyncAdapter>() as ISyncAdapter,
-            sl<FuelSupplyDriftSyncAdapter>() as ISyncAdapter,
-            sl<MaintenanceDriftSyncAdapter>() as ISyncAdapter,
-            sl<ExpenseDriftSyncAdapter>() as ISyncAdapter,
-            sl<OdometerDriftSyncAdapter>() as ISyncAdapter,
+            sl<VehicleDriftSyncAdapter>()
+                as IDriftSyncAdapter<dynamic, dynamic>,
+            sl<FuelSupplyDriftSyncAdapter>()
+                as IDriftSyncAdapter<dynamic, dynamic>,
+            sl<MaintenanceDriftSyncAdapter>()
+                as IDriftSyncAdapter<dynamic, dynamic>,
+            sl<ExpenseDriftSyncAdapter>()
+                as IDriftSyncAdapter<dynamic, dynamic>,
+            sl<OdometerDriftSyncAdapter>()
+                as IDriftSyncAdapter<dynamic, dynamic>,
           ],
         ),
       );
 
       // Register specialized push/pull services (SRP) with registry
       sl.registerLazySingleton<SyncPushService>(
-        () => SyncPushService(adapterRegistry: sl<SyncAdapterRegistry>()),
+        () => SyncPushService(sl<SyncAdapterRegistry>()),
       );
 
       sl.registerLazySingleton<SyncPullService>(
         () => SyncPullService(
-          adapterRegistry: sl<SyncAdapterRegistry>(),
-          checkpointStore: sl<SyncCheckpointStore>(),
+          sl<SyncAdapterRegistry>(),
+          sl<SyncCheckpointStore>(),
         ),
       );
 

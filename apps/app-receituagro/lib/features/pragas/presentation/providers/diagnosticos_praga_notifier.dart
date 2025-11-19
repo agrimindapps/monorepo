@@ -1,9 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/di/injection_container.dart' as di;
 import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../../database/repositories/pragas_repository.dart';
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 
 part 'diagnosticos_praga_notifier.g.dart';

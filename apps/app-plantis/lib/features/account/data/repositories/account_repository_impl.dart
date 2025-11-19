@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:core/core.dart' hide Column;
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 
 import '../../domain/entities/account_info.dart';
 import '../../domain/repositories/account_repository.dart';

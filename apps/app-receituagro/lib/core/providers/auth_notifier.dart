@@ -40,8 +40,9 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
       _userSubscription = _authRepository.currentUser.listen(
         _handleUserStateChange,
         onError: (Object error) {
-          if (kDebugMode)
+          if (kDebugMode) {
             print('❌ Auth Notifier: Error in user stream - $error');
+          }
           state = state.copyWith(errorMessage: 'Erro na autenticação: $error');
         },
       );
@@ -101,17 +102,19 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
         clearError: true,
       );
 
-      if (kDebugMode)
+      if (kDebugMode) {
         print(
           '✅ Auth Notifier: User session initialized for ${user.displayName}',
         );
+      }
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         errorMessage: 'Erro na inicialização da sessão: $e',
       );
-      if (kDebugMode)
+      if (kDebugMode) {
         print('❌ Auth Notifier: Session initialization error - $e');
+      }
     }
   }
 
@@ -125,8 +128,9 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
 
   Future<void> _handleDeviceLogin(UserEntity user) async {
     try {
-      if (kDebugMode)
+      if (kDebugMode) {
         print('🔄 Auth Notifier: Handling device login for user ${user.id}');
+      }
       final deviceInfo = await _deviceService.getDeviceInfo();
       _analytics.trackDeviceAdded(deviceInfo.platform);
 
@@ -136,8 +140,9 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
       }
       await _syncUserProfile(user, deviceInfo);
     } catch (e) {
-      if (kDebugMode)
+      if (kDebugMode) {
         print('❌ Auth Notifier: Device login handling error - $e');
+      }
       _analytics.trackError('device_login_error', e.toString());
     }
   }
@@ -156,10 +161,11 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
         },
       );
 
-      if (kDebugMode)
+      if (kDebugMode) {
         print(
           '🔄 Auth Notifier: Triggering post-authentication sync for user ${user.displayName}',
         );
+      }
 
       unawaited(
         UnifiedSyncManager.instance
@@ -171,10 +177,11 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
                     'post_auth_sync_failed',
                     parameters: {'error': failure.message},
                   );
-                  if (kDebugMode)
+                  if (kDebugMode) {
                     print(
                       '❌ Auth Notifier: Post-auth sync failed: ${failure.message}',
                     );
+                  }
                 },
                 (_) {
                   _analytics.trackEvent(
@@ -182,10 +189,11 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
                     parameters: {'sync_completed': 'true'},
                   );
 
-                  if (kDebugMode)
+                  if (kDebugMode) {
                     print(
                       '✅ Auth Notifier: Post-auth sync completed successfully',
                     );
+                  }
 
                   if (previousUser?.isAnonymous == true && !user.isAnonymous) {
                     _analytics.trackEvent(
@@ -197,10 +205,11 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
                       },
                     );
 
-                    if (kDebugMode)
+                    if (kDebugMode) {
                       print(
                         '✅ Auth Notifier: Anonymous to authenticated migration completed',
                       );
+                    }
                   }
                 },
               );
@@ -210,21 +219,24 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
                 'post_auth_sync_exception',
                 error.toString(),
               );
-              if (kDebugMode)
+              if (kDebugMode) {
                 print('❌ Auth Notifier: Post-auth sync exception: $error');
+              }
             }),
       );
     } catch (e) {
       _analytics.trackError('post_auth_sync_trigger_error', e.toString());
-      if (kDebugMode)
+      if (kDebugMode) {
         print('❌ Auth Notifier: Error triggering post-auth sync: $e');
+      }
     }
   }
 
   Future<bool> forceSyncUserData() async {
     if (state.currentUser == null || state.currentUser!.isAnonymous) {
-      if (kDebugMode)
+      if (kDebugMode) {
         print('⚠️ Auth Notifier: Cannot sync - user not authenticated');
+      }
       return false;
     }
 
@@ -237,10 +249,11 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
         },
       );
 
-      if (kDebugMode)
+      if (kDebugMode) {
         print(
           '🔄 Auth Notifier: Starting manual sync for user ${state.currentUser!.displayName}',
         );
+      }
 
       final result = await UnifiedSyncManager.instance.forceSyncApp(
         'receituagro',
@@ -252,8 +265,9 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
             'manual_sync_failure',
             parameters: {'error': failure.message},
           );
-          if (kDebugMode)
+          if (kDebugMode) {
             print('❌ Auth Notifier: Manual sync failed: ${failure.message}');
+          }
           return false;
         },
         (_) {
@@ -262,8 +276,9 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
             parameters: {'sync_completed': 'true'},
           );
 
-          if (kDebugMode)
+          if (kDebugMode) {
             print('✅ Auth Notifier: Manual sync completed successfully');
+          }
           return true;
         },
       );
@@ -654,10 +669,11 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
   Future<void> _syncUserProfile(UserEntity user, DeviceInfo deviceInfo) async {
     try {
       if (user.id.isEmpty) {
-        if (kDebugMode)
+        if (kDebugMode) {
           print(
             '🔄 Auth Notifier: User ID inválido - pulando sincronização de perfil',
           );
+        }
         return;
       }
 
@@ -677,39 +693,44 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
 
       await updateResult.fold(
         (core.Failure failure) async {
-          if (kDebugMode)
+          if (kDebugMode) {
             print(
               'Auth Notifier: Update falhou, tentando criar: ${failure.message}',
             );
+          }
           final createResult = await UnifiedSyncManager.instance
               .create<UserEntity>('receituagro', profileEntity);
           createResult.fold(
             (core.Failure createFailure) {
-              if (kDebugMode)
+              if (kDebugMode) {
                 print(
                   '❌ Auth Notifier: Erro na sincronização de perfil (create): ${createFailure.message}',
                 );
+              }
               _analytics.trackError(
                 'user_profile_sync_error',
                 createFailure.message,
               );
             },
             (String entityId) {
-              if (kDebugMode)
+              if (kDebugMode) {
                 print(
                   '✅ Auth Notifier: Perfil do usuário criado com sucesso: $entityId',
                 );
+              }
             },
           );
         },
         (_) {
-          if (kDebugMode)
+          if (kDebugMode) {
             print('✅ Auth Notifier: Perfil do usuário atualizado com sucesso');
+          }
         },
       );
     } catch (e) {
-      if (kDebugMode)
+      if (kDebugMode) {
         print('❌ Auth Notifier: Erro ao sincronizar perfil do usuário: $e');
+      }
       _analytics.trackError('user_profile_sync_error', e.toString());
     }
   }

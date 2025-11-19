@@ -44,7 +44,7 @@ void main() {
     test('should filter tasks due today', () {
       // Arrange
       final today = DateTime.now();
-      final tomorrow = today.add(Duration(days: 1));
+      final tomorrow = today.add(const Duration(days: 1));
 
       final taskToday = TestFixtures.createTestTask(
         id: 'task-1',
@@ -70,8 +70,8 @@ void main() {
 
     test('should filter overdue tasks', () {
       // Arrange
-      final yesterday = DateTime.now().subtract(Duration(days: 1));
-      final tomorrow = DateTime.now().add(Duration(days: 1));
+      final yesterday = DateTime.now().subtract(const Duration(days: 1));
+      final tomorrow = DateTime.now().add(const Duration(days: 1));
 
       final overdueTask = TestFixtures.createTestTask(
         id: 'task-1',

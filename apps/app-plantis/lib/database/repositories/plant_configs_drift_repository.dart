@@ -1,6 +1,5 @@
-import 'package:drift/drift.dart';
 import 'package:core/core.dart' hide Column;
-import 'package:injectable/injectable.dart';
+import 'package:drift/drift.dart';
 
 import '../../core/data/models/planta_config_model.dart';
 import '../plantis_database.dart' as db;

@@ -1,12 +1,7 @@
 import 'package:core/core.dart' hide Column;
 
-import 'data/factories/favorito_entity_factory_registry.dart';
 import 'data/repositories/favoritos_repository_simplified.dart';
-import 'data/services/favoritos_cache_service_inline.dart';
-import 'data/services/favoritos_data_resolver_service.dart';
 import 'data/services/favoritos_service.dart';
-import 'data/services/favoritos_sync_service.dart';
-import 'data/services/favoritos_validator_service.dart';
 import 'domain/repositories/i_favoritos_repository.dart';
 // import 'presentation/providers/favoritos_provider_simplified.dart'; // DEPRECATED: Migrando para Riverpod
 

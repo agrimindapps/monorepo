@@ -32,7 +32,7 @@ void main() {
       ).thenAnswer((_) async => Right(syncResult));
 
       // Act
-      final result = await useCase(NoParams());
+      final result = await useCase(const NoParams());
 
       // Assert
       expect(result.isRight(), true);
@@ -54,7 +54,7 @@ void main() {
       ).thenAnswer((_) async => const Left(failure));
 
       // Act
-      final result = await useCase(NoParams());
+      final result = await useCase(const NoParams());
 
       // Assert
       expect(result.isLeft(), true);
@@ -69,7 +69,7 @@ void main() {
       final syncResult = PlantisSyncResult(
         timestamp: DateTime.now(),
         itemsProcessed: 4,
-        itemsWithConflicts: ['item-1'],
+        itemsWithConflicts: const ['item-1'],
         errorCount: 0,
       );
 
@@ -78,7 +78,7 @@ void main() {
       ).thenAnswer((_) async => Right(syncResult));
 
       // Act
-      final result = await useCase(NoParams());
+      final result = await useCase(const NoParams());
 
       // Assert
       expect(result.isRight(), true);
@@ -102,7 +102,7 @@ void main() {
       ).thenAnswer((_) async => Right(syncResult));
 
       // Act
-      await useCase(NoParams());
+      await useCase(const NoParams());
 
       // Assert
       verify(() => mockRepository.sync()).called(1);

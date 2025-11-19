@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart' hide Column;
+import 'package:dartz/dartz.dart';
 
 import '../../database/receituagro_database.dart';
 import '../data/models/diagnostico_with_warnings_drift.dart';
@@ -93,7 +93,7 @@ extension DiagnosticoEnrichmentDriftExtension on Diagnostico {
   enrichWithDefensivo() async {
     try {
       if (defensivoId <= 0) {
-        return Right(DataWithWarnings(data: null));
+        return const Right(DataWithWarnings(data: null));
       }
 
       // TODO: Implementar busca usando FitossanitariosRepository
@@ -115,7 +115,7 @@ extension DiagnosticoEnrichmentDriftExtension on Diagnostico {
   Future<Either<Failure, DataWithWarnings<Praga?>>> enrichWithPraga() async {
     try {
       if (pragaId <= 0) {
-        return Right(DataWithWarnings(data: null));
+        return const Right(DataWithWarnings(data: null));
       }
 
       // TODO: Implementar busca usando PragasRepository
@@ -138,7 +138,7 @@ extension DiagnosticoEnrichmentDriftExtension on Diagnostico {
   enrichWithCultura() async {
     try {
       if (culturaId <= 0) {
-        return Right(DataWithWarnings(data: null));
+        return const Right(DataWithWarnings(data: null));
       }
 
       // TODO: Implementar busca usando CulturasRepository

@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../domain/entities/space.dart';
+
 import '../../domain/entities/plant.dart';
+import '../../domain/entities/space.dart';
 
 part 'spaces_state.freezed.dart';
 

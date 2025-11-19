@@ -33,7 +33,7 @@ class VTextField extends StatelessWidget {
   final bool showClearButton;
 
   VTextField({
-    Key? key,
+    super.key,
     this.labelText,
     this.hintText,
     FocusNode? focusNode,
@@ -62,8 +62,7 @@ class VTextField extends StatelessWidget {
     this.errorBorder,
     this.focusedErrorBorder,
     this.showClearButton = false,
-  })  : focusNode = focusNode ?? FocusNode(),
-        super(key: key);
+  })  : focusNode = focusNode ?? FocusNode();
 
   @override
   Widget build(BuildContext context) {

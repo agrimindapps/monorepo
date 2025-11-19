@@ -8,7 +8,6 @@ import 'package:app_plantis/features/tasks/presentation/notifiers/tasks_crud_not
 import 'package:app_plantis/features/tasks/presentation/providers/tasks_providers.dart';
 import 'package:app_plantis/features/tasks/presentation/providers/tasks_state.dart';
 import 'package:core/core.dart' hide test;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

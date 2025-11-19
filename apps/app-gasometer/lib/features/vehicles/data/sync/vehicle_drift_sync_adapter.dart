@@ -3,7 +3,6 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
 
-import '../../../../core/sync/adapters/drift_sync_adapter_base.dart';
 import '../../../../database/gasometer_database.dart';
 import '../../../../database/tables/gasometer_tables.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
@@ -48,21 +47,24 @@ import '../../../vehicles/domain/entities/vehicle_entity.dart';
 @lazySingleton
 class VehicleDriftSyncAdapter
     extends DriftSyncAdapterBase<VehicleEntity, Vehicle> {
-  VehicleDriftSyncAdapter(super.db, super.firestore);
+  VehicleDriftSyncAdapter(GeneratedDatabase db, FirebaseFirestore firestore)
+    : super(db, firestore);
+
+  GasometerDatabase get _db => db as GasometerDatabase;
 
   @override
   String get collectionName => 'vehicles';
 
   @override
   TableInfo<Vehicles, Vehicle> get table =>
-      db.vehicles as TableInfo<Vehicles, Vehicle>;
+      _db.vehicles as TableInfo<Vehicles, Vehicle>;
 
   // ==========================================================================
   // CONVERSÕES: DRIFT → DOMAIN ENTITY
   // ==========================================================================
 
   @override
-  VehicleEntity toDomainEntity(Vehicle driftRow) {
+  VehicleEntity driftToEntity(Vehicle driftRow) {
     // Mapear combustivel (int) → FuelType list
     final fuelType = _parseFuelTypeFromIndex(driftRow.combustivel);
     final supportedFuels = [fuelType];
@@ -152,7 +154,7 @@ class VehicleDriftSyncAdapter
   // ==========================================================================
 
   @override
-  Insertable<Vehicle> toCompanion(VehicleEntity entity) {
+  Insertable<Vehicle> entityToCompanion(VehicleEntity entity) {
     // Parse firebaseId para localId (se necessário)
     int? localId;
     if (entity.firebaseId != null) {
@@ -267,25 +269,25 @@ class VehicleDriftSyncAdapter
   // ==========================================================================
 
   @override
-  Either<Failure, VehicleEntity> fromFirestoreMap(Map<String, dynamic> map) {
+  VehicleEntity fromFirestoreDoc(Map<String, dynamic> doc) {
     try {
       // Usar método existente da entidade
-      final entity = VehicleEntity.fromFirebaseMap(map);
+      final entity = VehicleEntity.fromFirebaseMap(doc);
 
       // Validar campos obrigatórios
       if (entity.id.isEmpty) {
-        return const Left(
-          ValidationFailure('Vehicle ID missing from Firestore document'),
+        throw const ValidationFailure(
+          'Vehicle ID missing from Firestore document',
         );
       }
 
       if (entity.brand.isEmpty || entity.model.isEmpty) {
-        return const Left(
-          ValidationFailure('Brand or model missing from Firestore document'),
+        throw const ValidationFailure(
+          'Brand or model missing from Firestore document',
         );
       }
 
-      return Right(entity);
+      return entity;
     } catch (e, stackTrace) {
       developer.log(
         'Failed to parse Firestore document to VehicleEntity',
@@ -294,7 +296,7 @@ class VehicleDriftSyncAdapter
         stackTrace: stackTrace,
       );
 
-      return Left(ParseFailure('Failed to parse vehicle from Firestore: $e'));
+      throw ParseFailure('Failed to parse vehicle from Firestore: $e');
     }
   }
 
@@ -357,16 +359,22 @@ class VehicleDriftSyncAdapter
   // ==========================================================================
 
   @override
-  VehicleEntity resolveConflict(VehicleEntity local, VehicleEntity remote) {
+  Future<Either<Failure, VehicleEntity>> resolveConflict(
+    VehicleEntity local,
+    VehicleEntity remote,
+  ) async {
     // Usar estratégia padrão (Last Write Wins - LWW)
-    final resolved = super.resolveConflict(local, remote);
+    final resolvedResult = await super.resolveConflict(local, remote);
 
-    developer.log(
-      'Conflict resolved for vehicle: ${resolved.id} (${resolved.brand} ${resolved.model})',
-      name: 'VehicleDriftSyncAdapter',
+    resolvedResult.fold(
+      (failure) => null,
+      (resolved) => developer.log(
+        'Conflict resolved for vehicle: ${resolved.id} (${resolved.brand} ${resolved.model})',
+        name: 'VehicleDriftSyncAdapter',
+      ),
     );
 
-    return resolved;
+    return resolvedResult;
   }
 
   // ==========================================================================
@@ -391,7 +399,7 @@ class VehicleDriftSyncAdapter
         name: 'VehicleDriftSyncAdapter',
       );
 
-      final query = db.select(db.vehicles)
+      final query = _db.select(_db.vehicles)
         ..where(
           (tbl) =>
               tbl.userId.equals(userId) &
@@ -442,7 +450,7 @@ class VehicleDriftSyncAdapter
       final entities = <VehicleEntity>[];
       for (final row in rows) {
         try {
-          final entity = toDomainEntity(row);
+          final entity = driftToEntity(row);
           entities.add(entity);
         } catch (e) {
           developer.log(
@@ -472,11 +480,11 @@ class VehicleDriftSyncAdapter
     }
   }
 
-  @override
+  // @override removed as it is not in the interface
   Future<Either<Failure, VehicleEntity?>> getLocalEntity(String id) async {
     try {
       // Buscar por firebaseId OU por id (local autoIncrement)
-      final query = db.select(db.vehicles)
+      final query = _db.select(_db.vehicles)
         ..where(
           (tbl) =>
               tbl.firebaseId.equals(id) | tbl.id.equals(int.tryParse(id) ?? -1),
@@ -490,7 +498,7 @@ class VehicleDriftSyncAdapter
           'Found local vehicle: $id',
           name: 'VehicleDriftSyncAdapter',
         );
-        return Right(toDomainEntity(row));
+        return Right(driftToEntity(row));
       }
 
       return const Right(null);
@@ -506,11 +514,11 @@ class VehicleDriftSyncAdapter
     }
   }
 
-  @override
+  // @override removed as it is not in the interface
   Future<Either<Failure, void>> insertLocal(VehicleEntity entity) async {
     try {
-      final companion = toCompanion(entity);
-      await db.into(db.vehicles).insert(companion);
+      final companion = entityToCompanion(entity);
+      await _db.into(_db.vehicles).insert(companion);
 
       developer.log(
         'Inserted vehicle: ${entity.id} (${entity.brand} ${entity.model})',
@@ -530,13 +538,13 @@ class VehicleDriftSyncAdapter
     }
   }
 
-  @override
+  // @override removed as it is not in the interface
   Future<Either<Failure, void>> updateLocal(VehicleEntity entity) async {
     try {
-      final companion = toCompanion(entity);
+      final companion = entityToCompanion(entity);
 
       // Atualizar por firebaseId OU por id local
-      final query = db.update(db.vehicles)
+      final query = _db.update(_db.vehicles)
         ..where(
           (tbl) => (entity.firebaseId != null
               ? tbl.firebaseId.equals(entity.firebaseId!)
@@ -586,7 +594,7 @@ class VehicleDriftSyncAdapter
             : const Value.absent(),
       );
 
-      final query = db.update(db.vehicles)
+      final query = _db.update(_db.vehicles)
         ..where(
           (tbl) =>
               tbl.firebaseId.equals(id) | tbl.id.equals(int.tryParse(id) ?? -1),
@@ -623,7 +631,7 @@ class VehicleDriftSyncAdapter
     String? excludeVehicleId,
   }) async {
     try {
-      final query = db.select(db.vehicles)
+      final query = _db.select(_db.vehicles)
         ..where(
           (tbl) =>
               tbl.userId.equals(userId) &
@@ -657,7 +665,7 @@ class VehicleDriftSyncAdapter
   /// Busca veículos ativos do usuário (helper para UI)
   Future<List<VehicleEntity>> getActiveVehicles(String userId) async {
     try {
-      final query = db.select(db.vehicles)
+      final query = _db.select(_db.vehicles)
         ..where(
           (tbl) =>
               tbl.userId.equals(userId) &
@@ -667,7 +675,7 @@ class VehicleDriftSyncAdapter
         ..orderBy([(tbl) => OrderingTerm.asc(tbl.modelo)]);
 
       final rows = await query.get();
-      return rows.map((row) => toDomainEntity(row)).toList();
+      return rows.map((row) => driftToEntity(row)).toList();
     } catch (e) {
       developer.log(
         'Error getting active vehicles',
@@ -680,7 +688,7 @@ class VehicleDriftSyncAdapter
 
   /// Stream de veículos ativos (reactive UI)
   Stream<List<VehicleEntity>> watchActiveVehicles(String userId) {
-    final query = db.select(db.vehicles)
+    final query = _db.select(_db.vehicles)
       ..where(
         (tbl) =>
             tbl.userId.equals(userId) &
@@ -690,7 +698,7 @@ class VehicleDriftSyncAdapter
       ..orderBy([(tbl) => OrderingTerm.asc(tbl.modelo)]);
 
     return query.watch().map(
-      (rows) => rows.map((row) => toDomainEntity(row)).toList(),
+      (rows) => rows.map((row) => driftToEntity(row)).toList(),
     );
   }
 }

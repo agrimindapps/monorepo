@@ -58,7 +58,7 @@ class _FeedbackDialogState extends ConsumerState<FeedbackDialog> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(color: PlantisColors.primary),
+                    const CircularProgressIndicator(color: PlantisColors.primary),
                     const SizedBox(height: 16),
                     Text(
                       'Enviando feedback...',
@@ -164,7 +164,7 @@ class _FeedbackDialogState extends ConsumerState<FeedbackDialog> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: PlantisColors.primary,
                             width: 2,
                           ),

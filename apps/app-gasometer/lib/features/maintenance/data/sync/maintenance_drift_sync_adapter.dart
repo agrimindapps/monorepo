@@ -1,9 +1,7 @@
+import 'package:core/core.dart';
 import 'package:drift/drift.dart';
 import 'dart:developer' as developer;
 
-import 'package:core/core.dart';
-
-import '../../../../core/sync/adapters/drift_sync_adapter_base.dart';
 import '../../../../database/gasometer_database.dart';
 import '../../../../database/tables/gasometer_tables.dart';
 import '../../domain/entities/maintenance_entity.dart';
@@ -57,19 +55,21 @@ class MaintenanceDriftSyncAdapter
     extends DriftSyncAdapterBase<MaintenanceEntity, Maintenance> {
   MaintenanceDriftSyncAdapter(super.db, super.firestore);
 
+  GasometerDatabase get _db => db as GasometerDatabase;
+
   @override
   String get collectionName => 'maintenances';
 
   @override
   TableInfo<Maintenances, Maintenance> get table =>
-      db.maintenances as TableInfo<Maintenances, Maintenance>;
+      _db.maintenances as TableInfo<Maintenances, Maintenance>;
 
   // ==========================================================================
   // CONVERSÕES: DRIFT → DOMAIN ENTITY
   // ==========================================================================
 
   @override
-  MaintenanceEntity toDomainEntity(Maintenance driftRow) {
+  MaintenanceEntity driftToEntity(Maintenance driftRow) {
     // Converter timestamp (int) → DateTime
     final serviceDate = DateTime.fromMillisecondsSinceEpoch(driftRow.data);
 
@@ -159,7 +159,7 @@ class MaintenanceDriftSyncAdapter
   // ==========================================================================
 
   @override
-  Insertable<Maintenance> toCompanion(MaintenanceEntity entity) {
+  Insertable<Maintenance> entityToCompanion(MaintenanceEntity entity) {
     // Parse vehicleId (pode ser firebaseId ou localId)
     int vehicleLocalId;
     try {
@@ -265,27 +265,25 @@ class MaintenanceDriftSyncAdapter
   // ==========================================================================
 
   @override
-  Either<Failure, MaintenanceEntity> fromFirestoreMap(
-    Map<String, dynamic> map,
-  ) {
+  MaintenanceEntity fromFirestoreDoc(Map<String, dynamic> doc) {
     try {
       // Usar método existente da entidade
-      final entity = MaintenanceEntity.fromFirebaseMap(map);
+      final entity = MaintenanceEntity.fromFirebaseMap(doc);
 
       // Validar campos obrigatórios
       if (entity.id.isEmpty) {
-        return const Left(
-          ValidationFailure('Maintenance ID missing from Firestore document'),
+        throw const ValidationFailure(
+          'Maintenance ID missing from Firestore document',
         );
       }
 
       if (entity.vehicleId.isEmpty) {
-        return const Left(
-          ValidationFailure('Vehicle ID missing from Firestore document'),
+        throw const ValidationFailure(
+          'Vehicle ID missing from Firestore document',
         );
       }
 
-      return Right(entity);
+      return entity;
     } catch (e, stackTrace) {
       developer.log(
         'Failed to parse Firestore document to MaintenanceEntity',
@@ -294,9 +292,7 @@ class MaintenanceDriftSyncAdapter
         stackTrace: stackTrace,
       );
 
-      return Left(
-        ParseFailure('Failed to parse maintenance from Firestore: $e'),
-      );
+      throw ParseFailure('Failed to parse maintenance from Firestore: $e');
     }
   }
 
@@ -373,19 +369,22 @@ class MaintenanceDriftSyncAdapter
   // ==========================================================================
 
   @override
-  MaintenanceEntity resolveConflict(
+  Future<Either<Failure, MaintenanceEntity>> resolveConflict(
     MaintenanceEntity local,
     MaintenanceEntity remote,
-  ) {
+  ) async {
     // Usar estratégia padrão (Last Write Wins - LWW)
-    final resolved = super.resolveConflict(local, remote);
+    final result = await super.resolveConflict(local, remote);
 
-    developer.log(
-      'Conflict resolved for maintenance: ${resolved.id} (${resolved.title})',
-      name: 'MaintenanceDriftSyncAdapter',
-    );
+    if (result.isRight()) {
+      final resolved = result.getOrElse(() => local);
+      developer.log(
+        'Conflict resolved for maintenance: ${resolved.id} (${resolved.title})',
+        name: 'MaintenanceDriftSyncAdapter',
+      );
+    }
 
-    return resolved;
+    return result;
   }
 
   // ==========================================================================
@@ -398,16 +397,11 @@ class MaintenanceDriftSyncAdapter
   ) async {
     try {
       developer.log(
-        '🔍 Starting getDirtyRecords for user: $userId',
+        'Getting dirty maintenance records for user: $userId',
         name: 'MaintenanceDriftSyncAdapter',
       );
 
-      developer.log(
-        '🔍 Database instance: ${db.hashCode}, type: ${db.runtimeType}',
-        name: 'MaintenanceDriftSyncAdapter',
-      );
-
-      final query = db.select(db.maintenances)
+      final query = _db.select(_db.maintenances)
         ..where(
           (tbl) =>
               tbl.userId.equals(userId) &
@@ -415,84 +409,40 @@ class MaintenanceDriftSyncAdapter
               tbl.isDeleted.equals(false),
         )
         ..orderBy([(tbl) => OrderingTerm.asc(tbl.updatedAt)])
-        ..limit(50); // Batch size
-
-      developer.log(
-        '🔍 Query created successfully',
-        name: 'MaintenanceDriftSyncAdapter',
-      );
+        ..limit(50); // Processar em lotes
 
       final rows = await query.get();
 
-      developer.log(
-        '🔍 Query executed successfully, got ${rows.length} rows',
-        name: 'MaintenanceDriftSyncAdapter',
-      );
-
-      // Verificar se temos rows válidas
-      if (rows.isEmpty) {
-        developer.log(
-          'ℹ️ No dirty maintenances found for user $userId',
-          name: 'MaintenanceDriftSyncAdapter',
-        );
-        return const Right([]);
-      }
-
-      // Log details of each row com verificações de segurança
-      for (int i = 0; i < rows.length; i++) {
-        final row = rows[i];
-        try {
-          developer.log(
-            '🔍 Row $i: id=${row.id}, firebaseId=${row.firebaseId}, vehicleId=${row.vehicleId}, tipo=${row.tipo}',
-            name: 'MaintenanceDriftSyncAdapter',
-          );
-        } catch (e) {
-          developer.log(
-            '⚠️ Error logging row $i: $e',
-            name: 'MaintenanceDriftSyncAdapter',
-          );
-        }
-      }
-
-      // Converter entities com tratamento de erro individual
-      final entities = <MaintenanceEntity>[];
+      // Resolver vehicleId para firebaseId se necessário
+      final List<MaintenanceEntity> entities = [];
       for (final row in rows) {
         try {
-          var entity = toDomainEntity(row);
+          var entity = driftToEntity(row);
 
-          final vehicleFirebaseId = await _resolveVehicleFirebaseId(
-            row.vehicleId,
-          );
-
-          if (vehicleFirebaseId == null) {
-            developer.log(
-              '⏸️ Skipping maintenance ${entity.id}: vehicle ${row.vehicleId} not synced yet',
-              name: 'MaintenanceDriftSyncAdapter',
+          // Se vehicleId for numérico (local), tentar resolver para firebaseId
+          if (int.tryParse(entity.vehicleId) != null) {
+            final vehicleFirebaseId = await _resolveVehicleFirebaseId(
+              row.vehicleId,
             );
-            continue;
+            if (vehicleFirebaseId != null) {
+              entity = entity.copyWith(vehicleId: vehicleFirebaseId);
+            }
           }
 
-          entity = entity.copyWith(vehicleId: vehicleFirebaseId);
           entities.add(entity);
         } catch (e) {
           developer.log(
-            '❌ Error converting row to entity: $e',
-            name: 'MaintenanceDriftSyncAdapter',
+            'Error converting maintenance row to entity: ${row.id}',
             error: e,
+            name: 'MaintenanceDriftSyncAdapter',
           );
-          // Continuar com outras rows em vez de falhar completamente
         }
       }
-
-      developer.log(
-        'Found ${entities.length} dirty maintenances for user $userId',
-        name: 'MaintenanceDriftSyncAdapter',
-      );
 
       return Right(entities);
     } catch (e, stackTrace) {
       developer.log(
-        'Failed to get dirty records',
+        'Failed to get dirty maintenance records',
         name: 'MaintenanceDriftSyncAdapter',
         error: e,
         stackTrace: stackTrace,
@@ -502,11 +452,10 @@ class MaintenanceDriftSyncAdapter
     }
   }
 
-  @override
   Future<Either<Failure, MaintenanceEntity?>> getLocalEntity(String id) async {
     try {
       // Buscar por firebaseId OU por id (local autoIncrement)
-      final query = db.select(db.maintenances)
+      final query = _db.select(_db.maintenances)
         ..where(
           (tbl) =>
               tbl.firebaseId.equals(id) | tbl.id.equals(int.tryParse(id) ?? -1),
@@ -520,7 +469,7 @@ class MaintenanceDriftSyncAdapter
           'Found local maintenance: $id',
           name: 'MaintenanceDriftSyncAdapter',
         );
-        return Right(toDomainEntity(row));
+        return Right(driftToEntity(row));
       }
 
       return const Right(null);
@@ -536,7 +485,6 @@ class MaintenanceDriftSyncAdapter
     }
   }
 
-  @override
   Future<Either<Failure, void>> insertLocal(MaintenanceEntity entity) async {
     try {
       final resolvedEntity = await _ensureLocalVehicleReference(entity);
@@ -546,8 +494,8 @@ class MaintenanceDriftSyncAdapter
         );
       }
 
-      final companion = toCompanion(resolvedEntity);
-      await db.into(db.maintenances).insert(companion);
+      final companion = entityToCompanion(resolvedEntity);
+      await _db.into(_db.maintenances).insert(companion);
 
       developer.log(
         'Inserted maintenance: ${entity.id} (${entity.title})',
@@ -567,7 +515,6 @@ class MaintenanceDriftSyncAdapter
     }
   }
 
-  @override
   Future<Either<Failure, void>> updateLocal(MaintenanceEntity entity) async {
     try {
       final resolvedEntity = await _ensureLocalVehicleReference(entity);
@@ -577,10 +524,10 @@ class MaintenanceDriftSyncAdapter
         );
       }
 
-      final companion = toCompanion(resolvedEntity);
+      final companion = entityToCompanion(resolvedEntity);
 
       // Atualizar por firebaseId OU por id local
-      final query = db.update(db.maintenances)
+      final query = _db.update(_db.maintenances)
         ..where(
           (tbl) => (entity.id.isNotEmpty && int.tryParse(entity.id) == null
               ? tbl.firebaseId.equals(entity.id)
@@ -629,7 +576,7 @@ class MaintenanceDriftSyncAdapter
             : const Value.absent(),
       );
 
-      final query = db.update(db.maintenances)
+      final query = _db.update(_db.maintenances)
         ..where(
           (tbl) =>
               tbl.firebaseId.equals(id) | tbl.id.equals(int.tryParse(id) ?? -1),
@@ -665,7 +612,7 @@ class MaintenanceDriftSyncAdapter
   ) async {
     try {
       // Buscar veículo por firebaseId para obter localId
-      final vehicleQuery = db.select(db.vehicles)
+      final vehicleQuery = _db.select(_db.vehicles)
         ..where((tbl) => tbl.firebaseId.equals(vehicleFirebaseId))
         ..limit(1);
 
@@ -679,7 +626,7 @@ class MaintenanceDriftSyncAdapter
       }
 
       // Buscar manutenções pendentes (concluida = false)
-      final query = db.select(db.maintenances)
+      final query = _db.select(_db.maintenances)
         ..where(
           (tbl) =>
               tbl.vehicleId.equals(vehicle.id) &
@@ -689,7 +636,7 @@ class MaintenanceDriftSyncAdapter
         ..orderBy([(tbl) => OrderingTerm.asc(tbl.data)]);
 
       final rows = await query.get();
-      return rows.map((row) => toDomainEntity(row)).toList();
+      return rows.map((row) => driftToEntity(row)).toList();
     } catch (e) {
       developer.log(
         'Error getting pending maintenances',
@@ -707,7 +654,7 @@ class MaintenanceDriftSyncAdapter
   ) async {
     try {
       // Buscar veículo por firebaseId
-      final vehicleQuery = db.select(db.vehicles)
+      final vehicleQuery = _db.select(_db.vehicles)
         ..where((tbl) => tbl.firebaseId.equals(vehicleFirebaseId))
         ..limit(1);
 
@@ -717,7 +664,7 @@ class MaintenanceDriftSyncAdapter
       }
 
       // Buscar manutenções por tipo
-      final query = db.select(db.maintenances)
+      final query = _db.select(_db.maintenances)
         ..where(
           (tbl) =>
               tbl.vehicleId.equals(vehicle.id) &
@@ -727,7 +674,7 @@ class MaintenanceDriftSyncAdapter
         ..orderBy([(tbl) => OrderingTerm.desc(tbl.data)]);
 
       final rows = await query.get();
-      return rows.map((row) => toDomainEntity(row)).toList();
+      return rows.map((row) => driftToEntity(row)).toList();
     } catch (e) {
       developer.log(
         'Error getting maintenances by type',
@@ -744,7 +691,7 @@ class MaintenanceDriftSyncAdapter
   ) async {
     try {
       // Buscar veículo por firebaseId
-      final vehicleQuery = db.select(db.vehicles)
+      final vehicleQuery = _db.select(_db.vehicles)
         ..where((tbl) => tbl.firebaseId.equals(vehicleFirebaseId))
         ..limit(1);
 
@@ -754,7 +701,7 @@ class MaintenanceDriftSyncAdapter
       }
 
       // Buscar todas as manutenções
-      final query = db.select(db.maintenances)
+      final query = _db.select(_db.maintenances)
         ..where(
           (tbl) =>
               tbl.vehicleId.equals(vehicle.id) & tbl.isDeleted.equals(false),
@@ -762,7 +709,7 @@ class MaintenanceDriftSyncAdapter
         ..orderBy([(tbl) => OrderingTerm.desc(tbl.data)]);
 
       final rows = await query.get();
-      return rows.map((row) => toDomainEntity(row)).toList();
+      return rows.map((row) => driftToEntity(row)).toList();
     } catch (e) {
       developer.log(
         'Error getting maintenances by vehicle',
@@ -778,7 +725,7 @@ class MaintenanceDriftSyncAdapter
     String vehicleFirebaseId,
   ) async* {
     // Primeiro, resolver vehicleId local
-    final vehicleQuery = db.select(db.vehicles)
+    final vehicleQuery = _db.select(_db.vehicles)
       ..where((tbl) => tbl.firebaseId.equals(vehicleFirebaseId))
       ..limit(1);
 
@@ -789,20 +736,20 @@ class MaintenanceDriftSyncAdapter
     }
 
     // Assistir mudanças nas manutenções
-    final query = db.select(db.maintenances)
+    final query = _db.select(_db.maintenances)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicle.id) & tbl.isDeleted.equals(false),
       )
       ..orderBy([(tbl) => OrderingTerm.desc(tbl.data)]);
 
     yield* query.watch().map(
-      (rows) => rows.map((row) => toDomainEntity(row)).toList(),
+      (rows) => rows.map((row) => driftToEntity(row)).toList(),
     );
   }
 
   Future<String?> _resolveVehicleFirebaseId(int localVehicleId) async {
-    final vehicleRow = await (db.select(
-      db.vehicles,
+    final vehicleRow = await (_db.select(
+      _db.vehicles,
     )..where((tbl) => tbl.id.equals(localVehicleId))).getSingleOrNull();
 
     final firebaseId = vehicleRow?.firebaseId;
@@ -826,7 +773,7 @@ class MaintenanceDriftSyncAdapter
     }
 
     final vehicleRow =
-        await (db.select(db.vehicles)
+        await (_db.select(_db.vehicles)
               ..where((tbl) => tbl.firebaseId.equals(entity.vehicleId)))
             .getSingleOrNull();
 

@@ -1,5 +1,5 @@
-import 'package:drift/drift.dart';
 import 'package:core/core.dart' hide Column;
+import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../features/plants/data/models/plant_task_model.dart';
@@ -69,8 +69,8 @@ class PlantTasksDriftRepository {
         )..where((t) => t.firebaseId.equals(firebaseId))).write(
           db.PlantTasksCompanion(
             completedDate: Value(DateTime.now()),
-            status: Value('completed'),
-            isDirty: Value(true),
+            status: const Value('completed'),
+            isDirty: const Value(true),
             updatedAt: Value(DateTime.now()),
           ),
         );
@@ -140,8 +140,8 @@ class PlantTasksDriftRepository {
           _db.plantTasks,
         )..where((t) => t.firebaseId.equals(firebaseId))).write(
           db.PlantTasksCompanion(
-            isDeleted: Value(true),
-            isDirty: Value(true),
+            isDeleted: const Value(true),
+            isDirty: const Value(true),
             updatedAt: Value(DateTime.now()),
           ),
         );
@@ -158,8 +158,8 @@ class PlantTasksDriftRepository {
       _db.plantTasks,
     )..where((t) => t.plantId.equals(localPlantId))).write(
       db.PlantTasksCompanion(
-        isDeleted: Value(true),
-        isDirty: Value(true),
+        isDeleted: const Value(true),
+        isDirty: const Value(true),
         updatedAt: Value(DateTime.now()),
       ),
     );

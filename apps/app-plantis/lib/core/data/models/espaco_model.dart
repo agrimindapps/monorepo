@@ -189,6 +189,7 @@ class EspacoModel extends BaseSyncModel {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() => toMap();
   factory EspacoModel.fromJson(Map<String, dynamic> json) =>
       EspacoModel.fromMap(json);

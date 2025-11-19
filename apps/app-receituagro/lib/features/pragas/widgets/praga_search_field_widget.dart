@@ -1,7 +1,8 @@
 import 'package:app_receituagro/core/di/injection.dart' as di;
 import 'package:flutter/material.dart';
-import '../domain/services/i_pragas_type_service.dart';
+
 import '../data/praga_view_mode.dart';
+import '../domain/services/i_pragas_type_service.dart';
 
 class PragaSearchFieldWidget extends StatefulWidget {
   final TextEditingController controller;

@@ -5,6 +5,7 @@
 /// 
 /// ⚠️ Este é um arquivo de exemplo/referência. Não é código de produção.
 /// Remova este arquivo após migração completa.
+library;
 
 import 'package:app_receituagro/features/defensivos/data/strategies/defensivo_grouping_service_v2.dart';
 import 'package:app_receituagro/features/defensivos/data/strategies/defensivo_grouping_strategy_registry.dart';

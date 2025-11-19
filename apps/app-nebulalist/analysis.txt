@@ -1,0 +1,290 @@
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 85.0.0 (92.0.0 available)
+  _flutterfire_internals 1.3.63 (1.3.64 available)
+  analyzer 7.6.0 (9.0.0 available)
+  analyzer_plugin 0.13.4 (0.13.11 available)
+  app_links 6.4.1 (7.0.0 available)
+  build 2.5.4 (4.0.2 available)
+  build_config 1.1.2 (1.2.0 available)
+  build_daemon 4.1.0 (4.1.1 available)
+  build_resolvers 2.5.4 (3.0.4 available)
+  build_runner 2.5.4 (2.10.3 available)
+  build_runner_core 9.1.2 (9.3.2 available)
+  characters 1.4.0 (1.4.1 available)
+  cloud_firestore 6.0.3 (6.1.0 available)
+  cloud_firestore_platform_interface 7.0.3 (7.0.4 available)
+  cloud_firestore_web 5.0.3 (5.1.0 available)
+  cloud_functions 6.0.3 (6.0.4 available)
+  cloud_functions_platform_interface 5.8.6 (5.8.7 available)
+  cloud_functions_web 5.0.3 (5.1.0 available)
+  connectivity_plus 6.1.5 (7.0.0 available)
+! core 1.0.0 from path ../../packages/core (overridden in ./pubspec_overrides.yaml)
+  cross_file 0.3.4+2 (0.3.5+1 available)
+  crypto 3.0.6 (3.0.7 available)
+  custom_lint_core 0.7.5 (0.8.1 available)
+  custom_lint_visitor 1.0.0+7.7.0 (1.0.0+8.4.0 available)
+  dart_style 3.1.1 (3.1.3 available)
+  device_info_plus 11.5.0 (12.2.0 available)
+  drift 2.28.2 (2.29.0 available)
+  drift_dev 2.28.0 (2.29.0 available)
+  facebook_auth_desktop 1.0.3 (2.1.1 available)
+  file_selector_linux 0.9.3+2 (0.9.3+3 available)
+  file_selector_macos 0.9.4+4 (0.9.4+6 available)
+  file_selector_platform_interface 2.6.2 (2.7.0 available)
+  file_selector_windows 0.9.3+4 (0.9.3+5 available)
+  firebase_analytics 12.0.3 (12.0.4 available)
+  firebase_analytics_platform_interface 5.0.3 (5.0.4 available)
+  firebase_analytics_web 0.6.0+3 (0.6.1 available)
+  firebase_auth 6.1.1 (6.1.2 available)
+  firebase_auth_platform_interface 8.1.3 (8.1.4 available)
+  firebase_auth_web 6.0.4 (6.1.0 available)
+  firebase_core 4.2.0 (4.2.1 available)
+  firebase_core_web 3.2.0 (3.3.0 available)
+  firebase_crashlytics 5.0.3 (5.0.5 available)
+  firebase_crashlytics_platform_interface 3.8.14 (3.8.15 available)
+  firebase_messaging 16.0.3 (16.0.4 available)
+  firebase_messaging_platform_interface 4.7.3 (4.7.4 available)
+  firebase_messaging_web 4.0.3 (4.1.0 available)
+  firebase_performance 0.11.1+1 (0.11.1+2 available)
+  firebase_performance_platform_interface 0.1.6+1 (0.1.6+2 available)
+  firebase_performance_web 0.1.7+20 (0.1.8 available)
+  firebase_remote_config 6.1.0 (6.1.2 available)
+  firebase_remote_config_platform_interface 2.0.4 (2.0.5 available)
+  firebase_remote_config_web 1.9.0 (1.10.1 available)
+  firebase_storage 13.0.3 (13.0.4 available)
+  firebase_storage_platform_interface 5.2.14 (5.2.15 available)
+  firebase_storage_web 3.10.21 (3.11.0 available)
+  flutter_facebook_auth 6.2.0 (7.1.2 available)
+  flutter_facebook_auth_platform_interface 5.0.0 (6.1.2 available)
+  flutter_facebook_auth_web 5.0.0 (6.1.2 available)
+  flutter_lints 5.0.0 (6.0.0 available)
+  flutter_plugin_android_lifecycle 2.0.31 (2.0.32 available)
+  flutter_riverpod 2.6.1 (3.0.3 available)
+  flutter_secure_storage_linux 1.2.3 (2.0.1 available)
+  flutter_secure_storage_macos 3.1.3 (4.0.0 available)
+  flutter_secure_storage_platform_interface 1.1.2 (2.0.1 available)
+  flutter_secure_storage_web 1.2.1 (2.0.0 available)
+  flutter_secure_storage_windows 3.1.2 (4.0.0 available)
+  flutter_svg 2.2.1 (2.2.2 available)
+  font_awesome_flutter 10.9.1 (10.12.0 available)
+  freezed 2.5.8 (3.2.3 available)
+  freezed_annotation 2.4.4 (3.1.0 available)
+  get_it 8.2.0 (9.0.5 available)
+  go_router 16.3.0 (17.0.0 available)
+  google_mobile_ads 5.3.1 (6.0.0 available)
+  google_sign_in 6.3.0 (7.2.0 available)
+  google_sign_in_android 6.2.1 (7.2.5 available)
+  google_sign_in_ios 5.9.0 (6.2.4 available)
+  google_sign_in_platform_interface 2.5.0 (3.1.0 available)
+  google_sign_in_web 0.12.4+4 (1.1.0 available)
+  http 1.5.0 (1.6.0 available)
+  image_picker 1.2.0 (1.2.1 available)
+  image_picker_android 0.8.13+1 (0.8.13+8 available)
+  image_picker_for_web 3.1.0 (3.1.1 available)
+  image_picker_ios 0.8.13 (0.8.13+2 available)
+  image_picker_macos 0.2.2 (0.2.2+1 available)
+  injectable 2.5.2 (2.6.0 available)
+  injectable_generator 2.7.0 (2.9.1 available)
+  js 0.6.7 (0.7.2 available)
+  json_serializable 6.9.5 (6.11.1 available)
+  lints 5.1.1 (6.0.0 available)
+  local_auth 2.3.0 (3.0.0 available)
+  local_auth_android 1.0.52 (2.0.2 available)
+  local_auth_darwin 1.6.0 (2.0.1 available)
+  local_auth_windows 1.0.11 (2.0.1 available)
+  material_color_utilities 0.11.1 (0.13.0 available)
+  meta 1.16.0 (1.17.0 available)
+  package_info_plus 8.3.1 (9.0.0 available)
+  path_provider_android 2.2.19 (2.2.21 available)
+  path_provider_foundation 2.4.2 (2.4.4 available)
+  pointycastle 3.9.1 (4.0.0 available)
+  purchases_flutter 9.9.0 (9.9.6 available)
+  rate_my_app 2.2.0 (2.3.2 available)
+  riverpod 2.6.1 (3.0.3 available)
+  riverpod_analyzer_utils 0.5.9 (0.5.10 available)
+  riverpod_annotation 2.6.1 (3.0.3 available)
+  riverpod_generator 2.6.4 (3.0.3 available)
+  shared_preferences_android 2.4.13 (2.4.16 available)
+  shared_preferences_foundation 2.5.4 (2.5.6 available)
+  shelf_web_socket 2.0.1 (3.0.0 available)
+  sign_in_with_apple 6.1.4 (7.0.1 available)
+  sign_in_with_apple_platform_interface 1.1.0 (2.0.0 available)
+  sign_in_with_apple_web 2.1.1 (3.0.0 available)
+  source_gen 2.0.0 (4.1.0 available)
+  source_helper 1.3.5 (1.3.8 available)
+  sqflite_android 2.4.1 (2.4.2+2 available)
+  sqlite3 2.9.4 (3.0.1 available)
+  sqlite3_web 0.4.1 (0.5.0 available)
+  sqlparser 0.41.2 (0.42.0 available)
+  test_api 0.7.6 (0.7.8 available)
+  url_launcher_android 6.3.20 (6.3.25 available)
+  url_launcher_ios 6.3.4 (6.3.6 available)
+  url_launcher_linux 3.2.1 (3.2.2 available)
+  url_launcher_macos 3.2.3 (3.2.5 available)
+  url_launcher_windows 3.1.4 (3.1.5 available)
+  uuid 4.5.1 (4.5.2 available)
+  vm_service 15.0.0 (15.0.2 available)
+  webview_flutter_android 4.10.1 (4.10.6 available)
+  webview_flutter_wkwebview 3.23.0 (3.23.3 available)
+Got dependencies!
+126 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing app-nebulalist...                                     
+
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/app.dart:2:8 • depend_on_referenced_packages
+   info • Parameter 'db' could be a super parameter • lib/core/database/daos/item_dao.dart:10:3 • use_super_parameters
+   info • Parameter 'db' could be a super parameter • lib/core/database/daos/list_dao.dart:10:3 • use_super_parameters
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/core/database/nebulalist_database.dart:3:8 • unnecessary_import
+   info • Parameter 'e' could be a super parameter • lib/core/database/nebulalist_database.dart:35:3 • use_super_parameters
+   info • The imported package 'get_it' isn't a dependency of the importing package • lib/core/di/injection.dart:1:8 • depend_on_referenced_packages
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/core/di/injection_container.dart:1:8 • unnecessary_import
+   info • Import of a library in the 'lib/src' directory of another package • lib/core/di/injection_container.dart:3:8 • implementation_imports
+   info • The import of 'package:cloud_firestore/cloud_firestore.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/core/di/injection_container.dart:4:8 • unnecessary_import
+   info • The imported package 'cloud_firestore' isn't a dependency of the importing package • lib/core/di/injection_container.dart:4:8 • depend_on_referenced_packages
+   info • The import of 'package:firebase_auth/firebase_auth.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/core/di/injection_container.dart:5:8 • unnecessary_import
+   info • The imported package 'firebase_auth' isn't a dependency of the importing package • lib/core/di/injection_container.dart:5:8 • depend_on_referenced_packages
+   info • The import of 'package:shared_preferences/shared_preferences.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/core/di/injection_container.dart:6:8 • unnecessary_import
+   info • The imported package 'shared_preferences' isn't a dependency of the importing package • lib/core/di/injection_container.dart:6:8 • depend_on_referenced_packages
+   info • 'AppAnalyticsServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/services_providers.dart:13:38 • deprecated_member_use_from_same_package
+   info • 'ShareServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/services_providers.dart:20:27 • deprecated_member_use_from_same_package
+   info • 'AppNotificationServiceRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/core/providers/services_providers.dart:27:44 • deprecated_member_use_from_same_package
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/core/router/app_router.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/core/router/app_router.dart:3:8 • depend_on_referenced_packages
+   info • Import of a library in the 'lib/src' directory of another package • lib/core/services/analytics_service.dart:2:8 • implementation_imports
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/core/services/notification_service.dart:3:8 • unnecessary_import
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/core/services/share_service.dart:2:8 • unnecessary_import
+   info • 'Share' is deprecated and shouldn't be used. Use SharePlus instead • lib/core/services/share_service.dart:30:11 • deprecated_member_use
+   info • 'share' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead • lib/core/services/share_service.dart:30:17 • deprecated_member_use
+   info • 'Share' is deprecated and shouldn't be used. Use SharePlus instead • lib/core/services/share_service.dart:58:11 • deprecated_member_use
+   info • 'share' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead • lib/core/services/share_service.dart:58:17 • deprecated_member_use
+   info • 'Share' is deprecated and shouldn't be used. Use SharePlus instead • lib/core/services/share_service.dart:79:11 • deprecated_member_use
+   info • 'share' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead • lib/core/services/share_service.dart:79:17 • deprecated_member_use
+   info • The import of 'package:equatable/equatable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/auth/domain/usecases/reset_password_usecase.dart:2:8 • unnecessary_import
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/auth/domain/usecases/reset_password_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The import of 'package:equatable/equatable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/auth/domain/usecases/signup_usecase.dart:2:8 • unnecessary_import
+   info • The imported package 'equatable' isn't a dependency of the importing package • lib/features/auth/domain/usecases/signup_usecase.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/auth/presentation/pages/forgot_password_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/auth/presentation/pages/forgot_password_page.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/auth/presentation/pages/login_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/auth/presentation/pages/login_page.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/auth/presentation/pages/signup_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/auth/presentation/pages/signup_page.dart:3:8 • depend_on_referenced_packages
+   info • The import of 'package:riverpod_annotation/riverpod_annotation.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/auth/presentation/providers/auth_provider.dart:4:8 • unnecessary_import
+   info • 'AuthRepositoryRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_provider.dart:37:32 • deprecated_member_use_from_same_package
+   info • 'AnalyticsRepositoryRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_provider.dart:43:42 • deprecated_member_use_from_same_package
+   info • 'LoginUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_provider.dart:49:27 • deprecated_member_use_from_same_package
+   info • 'LogoutUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_provider.dart:57:29 • deprecated_member_use_from_same_package
+   info • 'SignUpUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_provider.dart:65:29 • deprecated_member_use_from_same_package
+   info • 'ResetPasswordUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/auth/presentation/providers/auth_provider.dart:73:43 • deprecated_member_use_from_same_package
+   info • The imported package 'cloud_firestore' isn't a dependency of the importing package • lib/features/items/data/datasources/item_master_remote_datasource.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'cloud_firestore' isn't a dependency of the importing package • lib/features/items/data/datasources/list_item_remote_datasource.dart:1:8 • depend_on_referenced_packages
+   info • The imported package 'cloud_firestore' isn't a dependency of the importing package • lib/features/items/data/models/item_master_model.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'cloud_firestore' isn't a dependency of the importing package • lib/features/items/data/models/list_item_model.dart:2:8 • depend_on_referenced_packages
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/items/data/repositories/item_master_repository.dart:2:8 • unnecessary_import
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/items/data/repositories/list_item_repository.dart:2:8 • unnecessary_import
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/items/domain/usecases/add_item_to_list_usecase.dart:2:8 • unnecessary_import
+   info • Angle brackets will be interpreted as HTML • lib/features/items/domain/usecases/add_item_to_list_usecase.dart:20:21 • unintended_html_in_doc_comment
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/items/domain/usecases/check_item_limit_usecase.dart:2:8 • unnecessary_import
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/items/domain/usecases/create_item_master_usecase.dart:2:8 • unnecessary_import
+   info • Angle brackets will be interpreted as HTML • lib/features/items/domain/usecases/create_item_master_usecase.dart:15:21 • unintended_html_in_doc_comment
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/items/domain/usecases/delete_item_master_usecase.dart:2:8 • unnecessary_import
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/items/domain/usecases/get_item_masters_usecase.dart:2:8 • unnecessary_import
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/items/domain/usecases/get_list_items_usecase.dart:2:8 • unnecessary_import
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/items/domain/usecases/remove_item_from_list_usecase.dart:2:8 • unnecessary_import
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/items/domain/usecases/toggle_item_completion_usecase.dart:2:8 • unnecessary_import
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/items/domain/usecases/update_item_master_usecase.dart:2:8 • unnecessary_import
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/items/domain/usecases/update_list_item_usecase.dart:2:8 • unnecessary_import
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/items/presentation/pages/items_bank_page.dart:2:8 • depend_on_referenced_packages
+   info • 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre • lib/features/items/presentation/pages/items_bank_page.dart:74:46 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/pages/items_bank_page.dart:74:61 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/pages/items_bank_page.dart:146:64 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/pages/items_bank_page.dart:160:65 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/pages/items_bank_page.dart:223:62 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/pages/items_bank_page.dart:372:65 • deprecated_member_use
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/items/presentation/pages/list_detail_page.dart:2:8 • depend_on_referenced_packages
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/pages/list_detail_page.dart:77:61 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/pages/list_detail_page.dart:80:56 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/pages/list_detail_page.dart:92:62 • deprecated_member_use
+   info • 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre • lib/features/items/presentation/pages/list_detail_page.dart:150:60 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/pages/list_detail_page.dart:242:62 • deprecated_member_use
+   info • Uses 'await' on an instance of 'AsyncValue<Future<Null>>', which is not a subtype of 'Future' • lib/features/items/presentation/pages/list_detail_page.dart:296:11 • await_only_futures
+   info • Uses 'await' on an instance of 'AsyncValue<Null>', which is not a subtype of 'Future' • lib/features/items/presentation/pages/list_detail_page.dart:297:13 • await_only_futures
+   info • The import of 'package:core/core.dart' is unnecessary because all of the used elements are also provided by the import of 'package:riverpod_annotation/riverpod_annotation.dart' • lib/features/items/presentation/providers/item_masters_provider.dart:1:8 • unnecessary_import
+   info • 'GetItemMastersUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/items/presentation/providers/item_masters_provider.dart:16:45 • deprecated_member_use_from_same_package
+   info • 'CreateItemMasterUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/items/presentation/providers/item_masters_provider.dart:22:3 • deprecated_member_use_from_same_package
+   info • 'UpdateItemMasterUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/items/presentation/providers/item_masters_provider.dart:29:3 • deprecated_member_use_from_same_package
+   info • 'DeleteItemMasterUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/items/presentation/providers/item_masters_provider.dart:36:3 • deprecated_member_use_from_same_package
+   info • 'CheckItemLimitUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/items/presentation/providers/item_masters_provider.dart:42:45 • deprecated_member_use_from_same_package
+   info • 'ItemMastersCountRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/items/presentation/providers/item_masters_provider.dart:169:22 • deprecated_member_use_from_same_package
+   info • 'CanCreateItemMasterRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/items/presentation/providers/item_masters_provider.dart:181:34 • deprecated_member_use_from_same_package
+   info • 'ItemMastersByCategoryRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/items/presentation/providers/item_masters_provider.dart:193:3 • deprecated_member_use_from_same_package
+   info • The import of 'package:core/core.dart' is unnecessary because all of the used elements are also provided by the import of 'package:riverpod_annotation/riverpod_annotation.dart' • lib/features/items/presentation/providers/list_items_provider.dart:1:8 • unnecessary_import
+   info • 'GetListItemsUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/items/presentation/providers/list_items_provider.dart:15:41 • deprecated_member_use_from_same_package
+   info • 'AddItemToListUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/items/presentation/providers/list_items_provider.dart:20:43 • deprecated_member_use_from_same_package
+   info • 'UpdateListItemUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/items/presentation/providers/list_items_provider.dart:25:45 • deprecated_member_use_from_same_package
+   info • 'RemoveItemFromListUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/items/presentation/providers/list_items_provider.dart:31:3 • deprecated_member_use_from_same_package
+   info • 'ToggleItemCompletionUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/items/presentation/providers/list_items_provider.dart:38:3 • deprecated_member_use_from_same_package
+   info • 'PendingItemsCountRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/items/presentation/providers/list_items_provider.dart:168:23 • deprecated_member_use_from_same_package
+   info • 'CompletedItemsCountRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/items/presentation/providers/list_items_provider.dart:180:25 • deprecated_member_use_from_same_package
+   info • 'HighPriorityItemsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/items/presentation/providers/list_items_provider.dart:193:3 • deprecated_member_use_from_same_package
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/items/presentation/widgets/add_item_to_list_dialog.dart:2:8 • depend_on_referenced_packages
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/widgets/add_item_to_list_dialog.dart:127:62 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/widgets/add_item_to_list_dialog.dart:145:63 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/widgets/add_item_to_list_dialog.dart:245:57 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/items/presentation/widgets/add_item_to_list_dialog.dart:306:15 • deprecated_member_use
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/items/presentation/widgets/create_item_master_dialog.dart:3:8 • depend_on_referenced_packages
+   info • Use 'isEmpty' instead of 'length' to test whether the collection is empty • lib/features/items/presentation/widgets/create_item_master_dialog.dart:112:23 • prefer_is_empty
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/features/items/presentation/widgets/create_item_master_dialog.dart:126:17 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/widgets/create_item_master_dialog.dart:247:54 • deprecated_member_use
+   info • 'ButtonBar' is deprecated and shouldn't be used. Use OverflowBar instead. This feature was deprecated after v3.21.0-10.0.pre • lib/features/items/presentation/widgets/item_master_card.dart:161:15 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/widgets/item_master_empty_state.dart:20:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/widgets/item_master_empty_state.dart:34:52 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/widgets/item_master_empty_state.dart:41:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/widgets/list_item_tile.dart:106:54 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/widgets/list_item_tile.dart:144:50 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/widgets/list_item_tile.dart:189:24 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/widgets/list_items_empty_state.dart:25:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/widgets/list_items_empty_state.dart:39:52 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/items/presentation/widgets/list_items_empty_state.dart:53:50 • deprecated_member_use
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/lists/data/datasources/list_remote_datasource.dart:2:8 • unnecessary_import
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/lists/data/repositories/list_repository.dart:3:8 • unnecessary_import
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/lists/domain/usecases/check_list_limit_usecase.dart:2:8 • unnecessary_import
+   info • Angle brackets will be interpreted as HTML • lib/features/lists/domain/usecases/check_list_limit_usecase.dart:17:21 • unintended_html_in_doc_comment
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/lists/domain/usecases/create_list_usecase.dart:2:8 • unnecessary_import
+   info • Angle brackets will be interpreted as HTML • lib/features/lists/domain/usecases/create_list_usecase.dart:15:21 • unintended_html_in_doc_comment
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/lists/domain/usecases/delete_list_usecase.dart:2:8 • unnecessary_import
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/lists/domain/usecases/get_lists_usecase.dart:2:8 • unnecessary_import
+   info • The import of 'package:injectable/injectable.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/lists/domain/usecases/update_list_usecase.dart:2:8 • unnecessary_import
+   info • Angle brackets will be interpreted as HTML • lib/features/lists/domain/usecases/update_list_usecase.dart:15:21 • unintended_html_in_doc_comment
+   info • The import of 'package:go_router/go_router.dart' is unnecessary because all of the used elements are also provided by the import of 'package:core/core.dart' • lib/features/lists/presentation/pages/lists_page.dart:3:8 • unnecessary_import
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/lists/presentation/pages/lists_page.dart:3:8 • depend_on_referenced_packages
+   info • 'GetListsUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/lists/presentation/providers/lists_provider.dart:16:33 • deprecated_member_use_from_same_package
+   info • 'CreateListUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/lists/presentation/providers/lists_provider.dart:21:37 • deprecated_member_use_from_same_package
+   info • 'UpdateListUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/lists/presentation/providers/lists_provider.dart:26:37 • deprecated_member_use_from_same_package
+   info • 'DeleteListUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/lists/presentation/providers/lists_provider.dart:31:37 • deprecated_member_use_from_same_package
+   info • 'CheckListLimitUseCaseRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/lists/presentation/providers/lists_provider.dart:36:45 • deprecated_member_use_from_same_package
+   info • 'FavoriteListsRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/lists/presentation/providers/lists_provider.dart:180:32 • deprecated_member_use_from_same_package
+   info • 'ListsCountRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/lists/presentation/providers/lists_provider.dart:192:16 • deprecated_member_use_from_same_package
+   info • 'CanCreateListRef' is deprecated and shouldn't be used. Will be removed in 3.0. Use Ref instead • lib/features/lists/presentation/providers/lists_provider.dart:204:28 • deprecated_member_use_from_same_package
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/lists/presentation/widgets/create_list_dialog.dart:106:54 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/lists/presentation/widgets/list_card.dart:40:51 • deprecated_member_use
+   info • 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre • lib/features/lists/presentation/widgets/list_card.dart:110:54 • deprecated_member_use
+   info • 'ButtonBar' is deprecated and shouldn't be used. Use OverflowBar instead. This feature was deprecated after v3.21.0-10.0.pre • lib/features/lists/presentation/widgets/list_card.dart:119:13 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/lists/presentation/widgets/list_empty_state.dart:20:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/lists/presentation/widgets/list_empty_state.dart:34:52 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/lists/presentation/widgets/list_empty_state.dart:41:48 • deprecated_member_use
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/promo/presentation/pages/promo_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/promo/presentation/pages/promo_page.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/promo/presentation/widgets/call_to_action.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/promo/presentation/widgets/navigation_bar.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/settings/presentation/pages/profile_page.dart:2:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/settings/presentation/pages/profile_page.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/features/settings/presentation/pages/settings_page.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'go_router' isn't a dependency of the importing package • lib/features/settings/presentation/pages/settings_page.dart:4:8 • depend_on_referenced_packages
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/settings/presentation/pages/settings_page.dart:324:62 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/settings/presentation/pages/settings_page.dart:341:70 • deprecated_member_use
+   info • The imported package 'flutter_riverpod' isn't a dependency of the importing package • lib/main.dart:3:8 • depend_on_referenced_packages
+   info • The imported package 'firebase_core' isn't a dependency of the importing package • lib/main.dart:4:8 • depend_on_referenced_packages
+   info • 'WillPopScope' is deprecated and shouldn't be used. Use PopScope instead. The Android predictive back feature will not work with WillPopScope. This feature was deprecated after v3.12.0-1.0.pre • lib/shared/widgets/feedback/app_dialog.dart:137:29 • deprecated_member_use
+

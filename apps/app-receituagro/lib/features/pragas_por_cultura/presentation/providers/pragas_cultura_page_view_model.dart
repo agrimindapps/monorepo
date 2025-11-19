@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/entities/pragas_cultura_filter.dart';
-import '../../domain/entities/pragas_cultura_statistics.dart';
 import '../../data/services/pragas_cultura_data_service.dart';
 import '../../data/services/pragas_cultura_query_service.dart';
 import '../../data/services/pragas_cultura_sort_service.dart';
 import '../../data/services/pragas_cultura_statistics_service.dart';
+import '../../domain/entities/pragas_cultura_filter.dart';
+import '../../domain/entities/pragas_cultura_statistics.dart';
 import '../services/pragas_cultura_error_message_service.dart';
 
 /// State class para o ViewModel

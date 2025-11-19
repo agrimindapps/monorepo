@@ -1,4 +1,3 @@
-import 'package:core/core.dart';
 
 import 'favorito_repository.dart';
 

@@ -2,8 +2,8 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../presentation/providers/index.dart';
-import '../shared/settings_card.dart';
 import '../shared/section_header.dart';
+import '../shared/settings_card.dart';
 
 /// Device Settings Section
 /// Allows users to manage connected devices and sync preferences
@@ -16,7 +16,7 @@ class NewDeviceSection extends ConsumerWidget {
 
     return Column(
       children: [
-        SectionHeader(title: 'Sincronização e Dispositivos'),
+        const SectionHeader(title: 'Sincronização e Dispositivos'),
         SettingsCard(
           child: Column(
             children: [

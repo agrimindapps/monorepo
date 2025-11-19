@@ -2,12 +2,11 @@ import 'dart:developer' as developer;
 import 'package:core/core.dart';
 
 import '../../../../core/services/contracts/i_sync_push_service.dart';
-import '../../../../core/sync/adapters/i_sync_adapter.dart';
 import '../../../../core/sync/adapters/sync_adapter_registry.dart';
 
 /// Modelo para resultado de push de um adapter
-class SyncPushResult {
-  const SyncPushResult({
+class ServicePushResult {
+  const ServicePushResult({
     required this.adapterName,
     required this.recordsPushed,
     required this.conflictsResolved,
@@ -20,133 +19,100 @@ class SyncPushResult {
   final int conflictsResolved;
   final Duration duration;
   final String? error;
-
-  bool get success => error == null;
-
-  String get summary =>
-      '${recordsPushed} pushed${conflictsResolved > 0 ? ', ${conflictsResolved} conflicts' : ''}';
 }
 
-/// Serviço especializado em coordenar push (envio local → Firebase) dos adapters
-///
-/// **Implementação de:** ISyncPushService
-///
-/// **Responsabilidades:**
-/// - Coordenar push de todos os adapters registrados
-/// - Executar pushes em paralelo para performance
-/// - Agregar resultados e estatísticas
-/// - Error handling: um adapter falhando não interrompe os outros
-/// - Apenas push operations, sem pull
-///
-/// **Princípio SOLID:**
-/// - Single Responsibility: Apenas coordenar pushes
-/// - Open/Closed: Fácil adicionar novos adapters sem modificar este serviço
-/// - Dependency Injection via constructor (registry pattern)
-/// - Error handling via Either<Failure, T>
-/// - Interface Segregation: Implementa ISyncPushService
-/// - Dependency Inversion: Depende de ISyncAdapter, não de implementações
-///
-/// **Fluxo:**
-/// 1. pushAll() itera sobre adapters do registry
-/// 2. Executa todos em paralelo via Future.wait
-/// 3. Agrega resultados
-/// 4. Retorna com estatísticas
-///
-/// **Exemplo:**
-/// ```dart
-/// final registry = SyncAdapterRegistry(adapters: [...]);
-/// final service = SyncPushService(registry);
-/// final result = await service.pushAll(userId);
-/// result.fold(
-///   (failure) => print('Push failed: ${failure.message}'),
-///   (phaseResult) => print('Pushed ${phaseResult.successCount} records'),
-/// );
-/// ```
+@lazySingleton
 class SyncPushService implements ISyncPushService {
-  SyncPushService({required SyncAdapterRegistry adapterRegistry})
-    : _adapterRegistry = adapterRegistry;
+  SyncPushService(this.registry);
 
-  final SyncAdapterRegistry _adapterRegistry;
+  final SyncAdapterRegistry registry;
 
-  /// Executa push de todos os adapters registrados em paralelo
-  ///
-  /// **Comportamento:**
-  /// - Adapters rodam em paralelo via Future.wait (não sequencial)
-  /// - Um adapter falhando não interrompe os outros
-  /// - Erros são agregados no resultado final
-  ///
-  /// **Retorna:**
-  /// - Right(SyncPhaseResult): Resultado agregado com estatísticas
-  /// - Left(failure): Erro crítico (ex: userId inválido)
   @override
   Future<Either<Failure, SyncPhaseResult>> pushAll(String userId) async {
-    try {
-      developer.log(
-        '📤 Starting push sync for ${_adapterRegistry.count} adapters (userId: $userId)...',
-        name: 'SyncPush',
-      );
+    developer.log('🚀 Starting Push All for user: $userId', name: 'SyncPush');
+    final stopwatch = Stopwatch()..start();
 
-      final startTime = DateTime.now();
+    final results = <ServicePushResult>[];
+    final errors = <String>[];
+    int successCount = 0;
+    int failureCount = 0;
 
-      // Executa todos os pushes em paralelo usando registry
-      final pushFutures = _adapterRegistry.adapters
-          .map((adapter) => _pushAdapter(adapter, userId))
-          .toList();
+    for (final adapter in registry.adapters) {
+      final result = await _pushAdapter(adapter, userId);
+      results.add(result);
 
-      final pushResults = await Future.wait(pushFutures);
-
-      final duration = DateTime.now().difference(startTime);
-
-      final totalPushed = pushResults.fold<int>(
-        0,
-        (sum, result) => sum + result.recordsPushed,
-      );
-
-      final totalFailed = pushResults.fold<int>(
-        0,
-        (sum, result) => sum + (result.success ? 0 : 1),
-      );
-
-      developer.log(
-        '✅ Push sync completed in ${duration.inSeconds}s\n'
-        '   Total pushed: $totalPushed\n'
-        '   Total failed: $totalFailed',
-        name: 'SyncPush',
-      );
-
-      return Right(
-        SyncPhaseResult(
-          successCount: totalPushed,
-          failureCount: totalFailed,
-          errors: <String>[],
-          duration: duration,
-        ),
-      );
-    } catch (e) {
-      developer.log('❌ Push sync failed with exception: $e', name: 'SyncPush');
-      return Left(ServerFailure('Push sync failed: $e'));
+      if (result.error != null) {
+        errors.add('${adapter.collectionName}: ${result.error}');
+        failureCount++;
+      } else {
+        successCount++;
+      }
     }
+
+    stopwatch.stop();
+    _logSummary(results, stopwatch.elapsed);
+
+    return Right(
+      SyncPhaseResult(
+        successCount: successCount,
+        failureCount: failureCount,
+        errors: errors,
+        duration: stopwatch.elapsed,
+      ),
+    );
   }
 
-  /// Executa push para um adapter individual usando ISyncAdapter interface
-  Future<SyncPushResult> _pushAdapter(
-    ISyncAdapter adapter,
+  @override
+  Future<Either<Failure, SyncPhaseResult>> pushByType(
+    String userId,
+    String entityType,
+  ) async {
+    final adapter = registry.findByName(entityType);
+    if (adapter == null) {
+      return Left(ValidationFailure('Adapter not found for type: $entityType'));
+    }
+
+    final stopwatch = Stopwatch()..start();
+    final result = await _pushAdapter(adapter, userId);
+    stopwatch.stop();
+
+    final errors = <String>[];
+    if (result.error != null) {
+      errors.add('${adapter.collectionName}: ${result.error}');
+    }
+
+    return Right(
+      SyncPhaseResult(
+        successCount: result.error == null ? 1 : 0,
+        failureCount: result.error != null ? 1 : 0,
+        errors: errors,
+        duration: stopwatch.elapsed,
+      ),
+    );
+  }
+
+  Future<ServicePushResult> _pushAdapter(
+    IDriftSyncAdapter<dynamic, dynamic> adapter,
     String userId,
   ) async {
     try {
-      final startTime = DateTime.now();
+      developer.log(
+        '📤 Pushing ${adapter.collectionName}...',
+        name: 'SyncPush',
+      );
 
-      // Usar a interface ISyncAdapter.pushDirtyRecords() que retorna SyncPushResult from sync_results
+      final startTime = DateTime.now();
       final result = await adapter.pushDirtyRecords(userId);
 
       return result.fold(
         (failure) {
           developer.log(
-            '❌ ${adapter.name} push failed: ${failure.message}',
+            '❌ ${adapter.collectionName} push failed: ${failure.message}',
             name: 'SyncPush',
+            error: failure,
           );
-          return SyncPushResult(
-            adapterName: adapter.name,
+          return ServicePushResult(
+            adapterName: adapter.collectionName,
             recordsPushed: 0,
             conflictsResolved: 0,
             duration: DateTime.now().difference(startTime),
@@ -155,11 +121,11 @@ class SyncPushService implements ISyncPushService {
         },
         (syncResult) {
           developer.log(
-            '✅ ${adapter.name} push: ${syncResult.recordsPushed} records',
+            '✅ ${adapter.collectionName} push: ${syncResult.recordsPushed} records',
             name: 'SyncPush',
           );
-          return SyncPushResult(
-            adapterName: adapter.name,
+          return ServicePushResult(
+            adapterName: adapter.collectionName,
             recordsPushed: syncResult.recordsPushed,
             conflictsResolved: 0,
             duration: DateTime.now().difference(startTime),
@@ -169,10 +135,15 @@ class SyncPushService implements ISyncPushService {
           );
         },
       );
-    } catch (e) {
-      developer.log('❌ ${adapter.name} push exception: $e', name: 'SyncPush');
-      return SyncPushResult(
-        adapterName: adapter.name,
+    } catch (e, stack) {
+      developer.log(
+        '❌ Unexpected error pushing ${adapter.collectionName}',
+        name: 'SyncPush',
+        error: e,
+        stackTrace: stack,
+      );
+      return ServicePushResult(
+        adapterName: adapter.collectionName,
         recordsPushed: 0,
         conflictsResolved: 0,
         duration: Duration.zero,
@@ -181,35 +152,27 @@ class SyncPushService implements ISyncPushService {
     }
   }
 
-  /// Executa push para um tipo específico de entidade
-  Future<Either<Failure, SyncPhaseResult>> pushByType(
-    String userId,
-    String entityType,
-  ) async {
-    try {
+  void _logSummary(List<ServicePushResult> results, Duration totalDuration) {
+    final totalPushed = results.fold<int>(
+      0,
+      (sum, result) => sum + result.recordsPushed,
+    );
+
+    developer.log(
+      '🏁 Push Summary (Total: ${totalDuration.inMilliseconds}ms)',
+      name: 'SyncPush',
+    );
+    developer.log('   Total Records Pushed: $totalPushed', name: 'SyncPush');
+
+    for (final result in results) {
+      final status = result.error == null ? '✅' : '❌';
       developer.log(
-        '📤 Starting push sync for $entityType (userId: $userId)...',
+        '   $status ${result.adapterName}: ${result.recordsPushed} records (${result.duration.inMilliseconds}ms)',
         name: 'SyncPush',
       );
-
-      final adapter = _adapterRegistry.adapters.firstWhere(
-        (a) => a.name == entityType,
-        orElse: () => throw Exception('Adapter not found for $entityType'),
-      );
-
-      final result = await _pushAdapter(adapter, userId);
-
-      return Right(
-        SyncPhaseResult(
-          successCount: result.recordsPushed,
-          failureCount: result.success ? 0 : 1,
-          errors: result.error != null ? [result.error!] : <String>[],
-          duration: Duration.zero,
-        ),
-      );
-    } catch (e) {
-      developer.log('❌ Push sync for $entityType failed: $e', name: 'SyncPush');
-      return Left(ServerFailure('Push sync for $entityType failed: $e'));
+      if (result.error != null) {
+        developer.log('      Error: ${result.error}', name: 'SyncPush');
+      }
     }
   }
 }

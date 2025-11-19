@@ -1,7 +1,5 @@
 import 'package:app_receituagro/core/interfaces/i_premium_service.dart';
-import 'package:app_receituagro/features/settings/presentation/providers/notifiers/analytics_debug_notifier.dart';
 import 'package:core/core.dart' hide test;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -33,13 +31,13 @@ void main() {
 
     // Mock successful responses
     when(() => mockAnalyticsRepository.logEvent(any(), parameters: any(named: 'parameters')))
-        .thenAnswer((_) async => Right(null));
+        .thenAnswer((_) async => const Right(null));
 
     when(() => mockCrashlyticsRepository.log(any()))
-        .thenAnswer((_) async => Right(null));
+        .thenAnswer((_) async => const Right(null));
 
     when(() => mockCrashlyticsRepository.setCustomKey(key: any(named: 'key'), value: any(named: 'value')))
-        .thenAnswer((_) async => Right(null));
+        .thenAnswer((_) async => const Right(null));
 
     when(() => mockCrashlyticsRepository.recordError(
           exception: any(named: 'exception'),
@@ -47,16 +45,16 @@ void main() {
           reason: any(named: 'reason'),
           fatal: any(named: 'fatal'),
         ))
-        .thenAnswer((_) async => Right(null));
+        .thenAnswer((_) async => const Right(null));
 
     when(() => mockAppRatingRepository.showRatingDialog())
         .thenAnswer((_) async => true);
 
     when(() => mockPremiumService.generateTestSubscription())
-        .thenAnswer((_) async => Right(null));
+        .thenAnswer((_) async => const Right(null));
 
     when(() => mockPremiumService.removeTestSubscription())
-        .thenAnswer((_) async => Right(null));
+        .thenAnswer((_) async => const Right(null));
   });
 
   // ===== GROUP 1: ANALYTICS TESTING =====
@@ -72,7 +70,7 @@ void main() {
       when(() => mockAnalyticsRepository.logEvent(
             'test_analytics',
             parameters: any(named: 'parameters'),
-          )).thenAnswer((_) async => Right(null));
+          )).thenAnswer((_) async => const Right(null));
 
       // Act
       await mockAnalyticsRepository.logEvent(
@@ -98,7 +96,7 @@ void main() {
       when(() => mockAnalyticsRepository.logEvent(
             'test_analytics',
             parameters: testData,
-          )).thenAnswer((_) async => Right(null));
+          )).thenAnswer((_) async => const Right(null));
 
       // Act
       await mockAnalyticsRepository.logEvent(
@@ -129,7 +127,7 @@ void main() {
     test('should log multiple analytics events sequentially', () async {
       // Arrange
       when(() => mockAnalyticsRepository.logEvent(any(), parameters: any(named: 'parameters')))
-          .thenAnswer((_) async => Right(null));
+          .thenAnswer((_) async => const Right(null));
 
       // Act
       await mockAnalyticsRepository.logEvent('event1', parameters: {});
@@ -163,7 +161,7 @@ void main() {
       const testLog = 'Test crashlytics log from settings';
 
       when(() => mockCrashlyticsRepository.log(testLog))
-          .thenAnswer((_) async => Right(null));
+          .thenAnswer((_) async => const Right(null));
 
       // Act
       await mockCrashlyticsRepository.log(testLog);
@@ -179,7 +177,7 @@ void main() {
       when(() => mockCrashlyticsRepository.setCustomKey(
             key: 'test_timestamp',
             value: timestamp,
-          )).thenAnswer((_) async => Right(null));
+          )).thenAnswer((_) async => const Right(null));
 
       // Act
       await mockCrashlyticsRepository.setCustomKey(
@@ -204,7 +202,7 @@ void main() {
             stackTrace: any(named: 'stackTrace'),
             reason: 'Testing Crashlytics integration',
             fatal: false,
-          )).thenAnswer((_) async => Right(null));
+          )).thenAnswer((_) async => const Right(null));
 
       // Act
       await mockCrashlyticsRepository.recordError(
@@ -237,7 +235,7 @@ void main() {
     test('should record multiple logs in sequence', () async {
       // Arrange
       when(() => mockCrashlyticsRepository.log(any()))
-          .thenAnswer((_) async => Right(null));
+          .thenAnswer((_) async => const Right(null));
 
       // Act
       await mockCrashlyticsRepository.log('Log 1');
@@ -257,7 +255,7 @@ void main() {
             stackTrace: any(named: 'stackTrace'),
             reason: any(named: 'reason'),
             fatal: false,
-          )).thenAnswer((_) async => Right(null));
+          )).thenAnswer((_) async => const Right(null));
 
       // Act
       await mockCrashlyticsRepository.recordError(
@@ -285,7 +283,7 @@ void main() {
             stackTrace: any(named: 'stackTrace'),
             reason: any(named: 'reason'),
             fatal: true,
-          )).thenAnswer((_) async => Right(null));
+          )).thenAnswer((_) async => const Right(null));
 
       // Act
       await mockCrashlyticsRepository.recordError(
@@ -316,7 +314,7 @@ void main() {
       when(() => mockAnalyticsRepository.logEvent(
             'rate_app_shown',
             parameters: any(named: 'parameters'),
-          )).thenAnswer((_) async => Right(null));
+          )).thenAnswer((_) async => const Right(null));
 
       // Act
       await mockAppRatingRepository.showRatingDialog();
@@ -352,7 +350,7 @@ void main() {
       when(() => mockAnalyticsRepository.logEvent(
             'rate_app_shown',
             parameters: params,
-          )).thenAnswer((_) async => Right(null));
+          )).thenAnswer((_) async => const Right(null));
 
       // Act
       await mockAnalyticsRepository.logEvent(
@@ -374,7 +372,7 @@ void main() {
     test('should generate test license successfully', () async {
       // Arrange
       when(() => mockPremiumService.generateTestSubscription())
-          .thenAnswer((_) async => Right(null));
+          .thenAnswer((_) async => const Right(null));
 
       // Act
       await mockPremiumService.generateTestSubscription();
@@ -386,7 +384,7 @@ void main() {
     test('should remove test license successfully', () async {
       // Arrange
       when(() => mockPremiumService.removeTestSubscription())
-          .thenAnswer((_) async => Right(null));
+          .thenAnswer((_) async => const Right(null));
 
       // Act
       await mockPremiumService.removeTestSubscription();
@@ -420,9 +418,9 @@ void main() {
     test('should generate and remove test license in sequence', () async {
       // Arrange
       when(() => mockPremiumService.generateTestSubscription())
-          .thenAnswer((_) async => Right(null));
+          .thenAnswer((_) async => const Right(null));
       when(() => mockPremiumService.removeTestSubscription())
-          .thenAnswer((_) async => Right(null));
+          .thenAnswer((_) async => const Right(null));
 
       // Act
       await mockPremiumService.generateTestSubscription();
@@ -440,9 +438,9 @@ void main() {
     test('should execute full debug workflow', () async {
       // Arrange - Setup all mocks
       when(() => mockAnalyticsRepository.logEvent(any(), parameters: any(named: 'parameters')))
-          .thenAnswer((_) async => Right(null));
+          .thenAnswer((_) async => const Right(null));
       when(() => mockCrashlyticsRepository.log(any()))
-          .thenAnswer((_) async => Right(null));
+          .thenAnswer((_) async => const Right(null));
       when(() => mockAppRatingRepository.showRatingDialog())
           .thenAnswer((_) async => true);
 
@@ -461,11 +459,11 @@ void main() {
     test('should handle multiple debug operations concurrently', () async {
       // Arrange
       when(() => mockAnalyticsRepository.logEvent(any(), parameters: any(named: 'parameters')))
-          .thenAnswer((_) async => Right(null));
+          .thenAnswer((_) async => const Right(null));
       when(() => mockCrashlyticsRepository.log(any()))
-          .thenAnswer((_) async => Right(null));
+          .thenAnswer((_) async => const Right(null));
       when(() => mockPremiumService.generateTestSubscription())
-          .thenAnswer((_) async => Right(null));
+          .thenAnswer((_) async => const Right(null));
 
       // Act - Execute concurrent operations
       final future1 =
@@ -485,9 +483,9 @@ void main() {
     test('should maintain debug state across operations', () async {
       // Arrange
       when(() => mockAnalyticsRepository.logEvent(any(), parameters: any(named: 'parameters')))
-          .thenAnswer((_) async => Right(null));
+          .thenAnswer((_) async => const Right(null));
       when(() => mockCrashlyticsRepository.log(any()))
-          .thenAnswer((_) async => Right(null));
+          .thenAnswer((_) async => const Right(null));
 
       // Act - Execute operations and verify state
       await mockAnalyticsRepository.logEvent('operation1', parameters: {});
@@ -516,7 +514,7 @@ void main() {
     test('should handle empty crash log message', () async {
       // Arrange
       when(() => mockCrashlyticsRepository.log(''))
-          .thenAnswer((_) async => Right(null));
+          .thenAnswer((_) async => const Right(null));
 
       // Act
       await mockCrashlyticsRepository.log('');
@@ -535,7 +533,7 @@ void main() {
       when(() => mockAnalyticsRepository.logEvent(
             any(),
             parameters: longParams,
-          )).thenAnswer((_) async => Right(null));
+          )).thenAnswer((_) async => const Right(null));
 
       // Act
       await mockAnalyticsRepository.logEvent('test', parameters: longParams);
@@ -552,7 +550,7 @@ void main() {
       const specialMessage = r'Test with special chars: @#$%^&*()';
 
       when(() => mockCrashlyticsRepository.log(specialMessage))
-          .thenAnswer((_) async => Right(null));
+          .thenAnswer((_) async => const Right(null));
 
       // Act
       await mockCrashlyticsRepository.log(specialMessage);

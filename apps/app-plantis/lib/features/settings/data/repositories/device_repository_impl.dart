@@ -1,5 +1,4 @@
 import 'package:core/core.dart' hide Column;
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../datasources/device_local_datasource.dart';

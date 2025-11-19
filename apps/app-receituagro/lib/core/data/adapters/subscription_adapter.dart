@@ -3,7 +3,6 @@ import 'package:core/core.dart' hide Column;
 /// Adaptador para converter e manter compatibilidade com SubscriptionEntity
 /// Fornece métodos utilitários para lógica de negócio específica do ReceitaAgro
 abstract class SubscriptionAdapter {
-
   /// Mapeia status string para SubscriptionStatus enum
   static SubscriptionStatus mapStatus(String status) {
     switch (status.toLowerCase()) {
@@ -27,6 +26,8 @@ abstract class SubscriptionAdapter {
     switch (tier) {
       case SubscriptionTier.free:
         return [];
+      case SubscriptionTier.basic:
+        return ['sync_data'];
       case SubscriptionTier.premium:
         return [
           'unlimited_favorites',
@@ -35,6 +36,28 @@ abstract class SubscriptionAdapter {
           'priority_support',
         ];
       case SubscriptionTier.pro:
+        return [
+          'unlimited_favorites',
+          'sync_data',
+          'premium_content',
+          'priority_support',
+          'advanced_search',
+          'export_data',
+          'offline_mode',
+        ];
+      case SubscriptionTier.ultimate:
+      case SubscriptionTier.lifetime:
+        return [
+          'unlimited_favorites',
+          'sync_data',
+          'premium_content',
+          'priority_support',
+          'advanced_search',
+          'export_data',
+          'offline_mode',
+          'exclusive_content',
+        ];
+      case SubscriptionTier.trial:
         return [
           'unlimited_favorites',
           'sync_data',
@@ -60,7 +83,7 @@ abstract class SubscriptionAdapter {
       'unlimited_favorites',
       'sync_data',
       'premium_content',
-      'priority_support'
+      'priority_support',
     ];
     if (features.any((f) => premiumFeatures.contains(f))) {
       return SubscriptionTier.premium;
@@ -93,7 +116,7 @@ abstract class SubscriptionAdapter {
   /// Equivalente ao hasFeature() do SubscriptionDataModel
   static bool hasFeature(SubscriptionEntity entity, String feature) {
     if (!entity.isActive) return false;
-    
+
     final features = mapTierToFeatures(entity.tier);
     return features.contains(feature);
   }
@@ -115,14 +138,14 @@ abstract class SubscriptionAdapter {
 
   /// Equivalente ao isTrial do SubscriptionDataModel
   static bool isTrial(SubscriptionEntity entity) {
-    return entity.isInTrial && 
-           (entity.trialEndDate?.isAfter(DateTime.now()) ?? false);
+    return entity.isInTrial &&
+        (entity.trialEndDate?.isAfter(DateTime.now()) ?? false);
   }
 
   /// Equivalente ao isExpired do SubscriptionDataModel
   static bool isExpired(SubscriptionEntity entity) {
     return entity.status == SubscriptionStatus.expired ||
-           (entity.expirationDate != null && 
+        (entity.expirationDate != null &&
             entity.expirationDate!.isBefore(DateTime.now()));
   }
 }

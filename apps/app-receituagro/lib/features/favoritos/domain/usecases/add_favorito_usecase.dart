@@ -40,7 +40,7 @@ class AddFavoritoUseCase {
   Future<Either<Failure, bool>> call(FavoritoEntity favorito) async {
     // Validação de ID
     if (favorito.id.isEmpty) {
-      return Left<Failure, bool>(
+      return const Left<Failure, bool>(
         ValidationFailure('ID do favorito é obrigatório'),
       );
     }

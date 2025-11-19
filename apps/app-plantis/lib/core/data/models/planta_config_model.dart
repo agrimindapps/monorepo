@@ -281,6 +281,7 @@ class PlantaConfigModel extends BaseSyncModel {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() => toMap();
   factory PlantaConfigModel.fromJson(Map<String, dynamic> json) =>
       PlantaConfigModel.fromMap(json);

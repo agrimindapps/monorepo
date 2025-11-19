@@ -353,7 +353,8 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
             (failure) async {
               // Erro ao buscar localmente
               errors.add(
-                  'Error fetching local for ${doc.id}: ${failure.toString()}');
+                'Error fetching local for ${doc.id}: ${failure.toString()}',
+              );
               totalFailed++;
             },
             (localEntity) async {

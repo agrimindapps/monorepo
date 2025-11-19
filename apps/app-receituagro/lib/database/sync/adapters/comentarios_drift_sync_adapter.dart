@@ -166,7 +166,8 @@ class ComentariosDriftSyncAdapter
       return Right(driftToEntity(result));
     } catch (e) {
       return Left(
-          CacheFailure('Erro ao buscar comentário local por firebaseId: $e'));
+        CacheFailure('Erro ao buscar comentário local por firebaseId: $e'),
+      );
     }
   }
 }

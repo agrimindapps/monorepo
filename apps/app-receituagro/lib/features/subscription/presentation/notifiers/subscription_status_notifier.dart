@@ -88,10 +88,8 @@ class SubscriptionStatusNotifier
   final SubscriptionErrorMessageService _errorService;
   final GetCurrentSubscriptionUseCase _getCurrentSubscription;
 
-  SubscriptionStatusNotifier(
-    this._errorService,
-    this._getCurrentSubscription,
-  ) : super(SubscriptionStatusState.initial());
+  SubscriptionStatusNotifier(this._errorService, this._getCurrentSubscription)
+    : super(SubscriptionStatusState.initial());
 
   /// Carrega o status da assinatura do usuário
   ///

@@ -167,20 +167,20 @@ class SubscriptionEntity extends BaseSyncEntity {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        productId,
-        status,
-        tier,
-        expirationDate,
-        purchaseDate,
-        originalPurchaseDate,
-        renewalDate,
-        trialEndDate,
-        cancellationReason,
-        store,
-        isInTrial,
-        isSandbox,
-      ];
+    ...super.props,
+    productId,
+    status,
+    tier,
+    expirationDate,
+    purchaseDate,
+    originalPurchaseDate,
+    renewalDate,
+    trialEndDate,
+    cancellationReason,
+    store,
+    isInTrial,
+    isSandbox,
+  ];
 
   /// Implementação dos métodos abstratos do BaseSyncEntity
   @override
@@ -301,20 +301,10 @@ enum SubscriptionStatus {
 }
 
 /// Níveis de assinatura
-enum SubscriptionTier {
-  free,
-  premium,
-  pro,
-}
+enum SubscriptionTier { free, premium, pro }
 
 /// Lojas onde a compra pode ser feita
-enum Store {
-  appStore,
-  playStore,
-  stripe,
-  promotional,
-  unknown,
-}
+enum Store { appStore, playStore, stripe, promotional, unknown }
 
 extension SubscriptionStatusExtension on SubscriptionStatus {
   String get displayName {

@@ -31,9 +31,7 @@ class CheckCollisionUseCase {
         birdX: currentState.birdX,
       )) {
         // Collision detected - game over
-        return Right(
-          currentState.copyWith(status: FlappyGameStatus.gameOver),
-        );
+        return Right(currentState.copyWith(status: FlappyGameStatus.gameOver));
       }
 
       // No collision

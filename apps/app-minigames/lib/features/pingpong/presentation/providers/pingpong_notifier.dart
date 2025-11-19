@@ -58,25 +58,19 @@ class PingpongGame extends _$PingpongGame {
 
   Future<void> _loadHighScore(GameDifficulty difficulty) async {
     final result = await _loadHighScoreUseCase(difficulty);
-    result.fold(
-      (_) {},
-      (highScore) {
-        if (highScore != null) {
-          state = state.copyWith(highScore: highScore);
-        }
-      },
-    );
+    result.fold((_) {}, (highScore) {
+      if (highScore != null) {
+        state = state.copyWith(highScore: highScore);
+      }
+    });
   }
 
   Future<void> startGame(GameDifficulty difficulty) async {
     final result = await _startGameUseCase(state, difficulty);
-    result.fold(
-      (_) {},
-      (newState) {
-        state = newState;
-        _startGameLoop();
-      },
-    );
+    result.fold((_) {}, (newState) {
+      state = newState;
+      _startGameLoop();
+    });
   }
 
   void _startGameLoop() {
@@ -113,17 +107,14 @@ class PingpongGame extends _$PingpongGame {
 
     result = await _checkScoreUseCase(state);
     if (!_isMounted) return;
-    result.fold(
-      (_) {},
-      (s) {
-        if (!_isMounted) return;
-        state = s;
-        if (s.isGameOver) {
-          _gameLoop?.cancel();
-          _handleGameOver();
-        }
-      },
-    );
+    result.fold((_) {}, (s) {
+      if (!_isMounted) return;
+      state = s;
+      if (s.isGameOver) {
+        _gameLoop?.cancel();
+        _handleGameOver();
+      }
+    });
   }
 
   Future<void> _handleGameOver() async {
@@ -138,7 +129,8 @@ class PingpongGame extends _$PingpongGame {
       totalHits: state.totalHits,
     );
 
-    if (state.highScore == null || newHighScore.isBetterThan(state.highScore!)) {
+    if (state.highScore == null ||
+        newHighScore.isBetterThan(state.highScore!)) {
       await _saveHighScoreUseCase(newHighScore);
       state = state.copyWith(highScore: newHighScore);
     }

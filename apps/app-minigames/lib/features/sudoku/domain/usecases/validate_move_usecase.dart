@@ -1,6 +1,8 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 import 'package:core/core.dart';
 import '../entities/sudoku_grid_entity.dart';
+import '../services/grid_validation_service.dart';
 
 /// Use case for validating if a move is legal
 ///
@@ -8,7 +10,12 @@ import '../entities/sudoku_grid_entity.dart';
 /// - Cell is editable (not a fixed clue)
 /// - Number is valid (1-9)
 /// - No conflicts in row/column/block
+@injectable
 class ValidateMoveUseCase {
+  final GridValidationService _validationService;
+
+  ValidateMoveUseCase(this._validationService);
+
   /// Validate a move
   /// Returns Either<Failure, bool>
   /// - Right(true) if move is valid
@@ -43,7 +50,12 @@ class ValidateMoveUseCase {
       }
 
       // Check if placement is valid (no conflicts)
-      final isValid = grid.isValidPlacement(row, col, value);
+      final isValid = _validationService.isValidPlacement(
+        grid: grid,
+        row: row,
+        col: col,
+        value: value,
+      );
 
       if (!isValid) {
         return const Left(

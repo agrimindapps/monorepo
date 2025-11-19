@@ -46,11 +46,7 @@ class PhysicsService {
     final newY = bird.y + (newVelocity * deltaTimeSeconds);
     final newRotation = _calculateRotation(newVelocity);
 
-    return bird.copyWith(
-      velocity: newVelocity,
-      y: newY,
-      rotation: newRotation,
-    );
+    return bird.copyWith(velocity: newVelocity, y: newY, rotation: newRotation);
   }
 
   /// Applies jump (flap) to bird with instant rotation update
@@ -66,10 +62,7 @@ class PhysicsService {
     final clampedVelocity = _clampVelocity(jumpStrength);
     final newRotation = _calculateRotation(clampedVelocity);
 
-    return bird.copyWith(
-      velocity: clampedVelocity,
-      rotation: newRotation,
-    );
+    return bird.copyWith(velocity: clampedVelocity, rotation: newRotation);
   }
 
   /// Clamps velocity to prevent extreme speeds
@@ -102,14 +95,16 @@ class PhysicsService {
       // Note: defaultJumpStrength is negative, so we divide by it to get positive ratio
       final ratio = (velocity / defaultJumpStrength).clamp(0.0, 1.0);
       return -0.785 * ratio; // -45 degrees in radians
-    } 
+    }
     // If moving down (positive velocity), rotate down to 90 degrees
     else {
       // Map velocity 0 to 500 to 0 to 90 degrees
       final ratio = (velocity / 500.0).clamp(0.0, 1.0);
       return 1.57 * ratio; // 90 degrees in radians
     }
-  }  /// Calculates falling distance in next frame
+  }
+
+  /// Calculates falling distance in next frame
   double predictFallDistance({
     required double currentVelocity,
     double gravity = defaultGravity,
@@ -229,8 +224,5 @@ class PhysicsValidation {
   final bool isValid;
   final String? errorMessage;
 
-  PhysicsValidation({
-    required this.isValid,
-    this.errorMessage,
-  });
+  PhysicsValidation({required this.isValid, this.errorMessage});
 }

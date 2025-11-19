@@ -27,8 +27,9 @@ class CheckScoreUseCase {
         return Right(state);
       }
 
-      final newMaxRally =
-          state.currentRally > state.maxRally ? state.currentRally : state.maxRally;
+      final newMaxRally = state.currentRally > state.maxRally
+          ? state.currentRally
+          : state.maxRally;
 
       final gameOverResult = _scoreService.checkGameOver(
         playerScore: scoreUpdate.newPlayerScore,

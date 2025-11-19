@@ -22,17 +22,14 @@ import '../data/repositories/flappbird_repository_impl.dart';
 @module
 abstract class FlappbirdModule {
   // Data sources
-  FlappbirdLocalDataSource flappbirdLocalDataSource(
-    SharedPreferences prefs,
-  ) =>
+  FlappbirdLocalDataSource flappbirdLocalDataSource(SharedPreferences prefs) =>
       FlappbirdLocalDataSource(prefs);
 
   // Repositories
   @Singleton(as: FlappbirdRepository)
   FlappbirdRepositoryImpl flappbirdRepository(
     FlappbirdLocalDataSource dataSource,
-  ) =>
-      FlappbirdRepositoryImpl(dataSource);
+  ) => FlappbirdRepositoryImpl(dataSource);
 
   // Services are already registered as @lazySingleton, no need to register here
 
@@ -40,31 +37,24 @@ abstract class FlappbirdModule {
   StartGameUseCase startGameUseCase(
     PhysicsService physicsService,
     PipeGeneratorService pipeGeneratorService,
-  ) =>
-      StartGameUseCase(physicsService, pipeGeneratorService);
+  ) => StartGameUseCase(physicsService, pipeGeneratorService);
 
   FlapBirdUseCase get flapBirdUseCase => FlapBirdUseCase();
 
   UpdatePhysicsUseCase updatePhysicsUseCase(
     PhysicsService physicsService,
     CollisionService collisionService,
-  ) =>
-      UpdatePhysicsUseCase(physicsService, collisionService);
+  ) => UpdatePhysicsUseCase(physicsService, collisionService);
 
   UpdatePipesUseCase get updatePipesUseCase => UpdatePipesUseCase();
 
   CheckCollisionUseCase checkCollisionUseCase(
     CollisionService collisionService,
-  ) =>
-      CheckCollisionUseCase(collisionService);
+  ) => CheckCollisionUseCase(collisionService);
 
-  LoadHighScoreUseCase loadHighScoreUseCase(
-    FlappbirdRepository repository,
-  ) =>
+  LoadHighScoreUseCase loadHighScoreUseCase(FlappbirdRepository repository) =>
       LoadHighScoreUseCase(repository);
 
-  SaveHighScoreUseCase saveHighScoreUseCase(
-    FlappbirdRepository repository,
-  ) =>
+  SaveHighScoreUseCase saveHighScoreUseCase(FlappbirdRepository repository) =>
       SaveHighScoreUseCase(repository);
 }

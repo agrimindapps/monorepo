@@ -10,13 +10,21 @@ import '../entities/game_state.dart';
 import '../entities/position.dart';
 import '../entities/enums.dart';
 import '../services/food_generator_service.dart';
+import '../services/snake_movement_service.dart';
+import '../services/collision_detection_service.dart';
 
 /// Use case to update snake position (game physics)
 @injectable
 class UpdateSnakePositionUseCase {
   final FoodGeneratorService _foodGeneratorService;
+  final SnakeMovementService _movementService;
+  final CollisionDetectionService _collisionService;
 
-  UpdateSnakePositionUseCase(this._foodGeneratorService);
+  UpdateSnakePositionUseCase(
+    this._foodGeneratorService,
+    this._movementService,
+    this._collisionService,
+  );
 
   /// Execute the use case
   /// Moves snake, checks collisions, checks food
@@ -29,49 +37,39 @@ class UpdateSnakePositionUseCase {
     }
 
     // 1. Calculate new head position based on direction
-    final currentHead = currentState.head;
-    Position newHead;
-
-    switch (currentState.direction) {
-      case Direction.up:
-        newHead = Position(currentHead.x, currentHead.y - 1);
-        break;
-      case Direction.down:
-        newHead = Position(currentHead.x, currentHead.y + 1);
-        break;
-      case Direction.left:
-        newHead = Position(currentHead.x - 1, currentHead.y);
-        break;
-      case Direction.right:
-        newHead = Position(currentHead.x + 1, currentHead.y);
-        break;
-    }
-
-    // 2. Wraparound (snake goes through walls)
-    newHead = Position(
-      (newHead.x + currentState.gridSize) % currentState.gridSize,
-      (newHead.y + currentState.gridSize) % currentState.gridSize,
+    final newHead = _movementService.moveHead(
+      currentHead: currentState.head,
+      direction: currentState.direction,
+      gridSize: currentState.gridSize,
     );
 
-    // 3. Check collision with own body
-    if (currentState.snake.contains(newHead)) {
+    // 2. Check collision with own body
+    final collisionResult = _collisionService.checkCollision(
+      headPosition: newHead,
+      snakeBody: currentState.snake,
+    );
+
+    if (collisionResult.hasCollision) {
       return Right(currentState.copyWith(
         gameStatus: SnakeGameStatus.gameOver,
       ));
     }
 
-    // 4. Check if ate food
-    final bool ateFood = newHead == currentState.foodPosition;
+    // 3. Check if ate food
+    final foodCollision = _collisionService.checkFood(
+      headPosition: newHead,
+      foodPosition: currentState.foodPosition,
+    );
+    final ateFood = foodCollision.ateFood;
 
-    // 5. Build new snake
-    List<Position> newSnake = [newHead, ...currentState.snake];
+    // 4. Build new snake
+    final newSnake = _movementService.updateSnakeBody(
+      currentSnake: currentState.snake,
+      newHead: newHead,
+      ateFood: ateFood,
+    );
 
-    if (!ateFood) {
-      // Remove tail if didn't eat
-      newSnake = newSnake.sublist(0, newSnake.length - 1);
-    }
-
-    // 6. Generate new food position if ate (using cached free positions)
+    // 5. Generate new food position if ate (using cached free positions)
     Position newFoodPosition = currentState.foodPosition;
     Set<Position> newFreePositions = currentState.freePositions;
 
@@ -89,7 +87,7 @@ class UpdateSnakePositionUseCase {
       newFreePositions.remove(newFoodPosition);
     }
 
-    // 7. Update score
+    // 6. Update score
     final newScore = ateFood ? currentState.score + 1 : currentState.score;
 
     return Right(currentState.copyWith(

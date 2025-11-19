@@ -8,11 +8,19 @@ import 'package:app_minigames/core/error/failures.dart';
 // Domain imports:
 import '../entities/game_state.dart';
 import '../entities/enums.dart';
+import '../services/answer_validation_service.dart';
+import '../services/life_management_service.dart';
 
 /// Use case to process answer selection
 @injectable
 class SelectAnswerUseCase {
-  SelectAnswerUseCase();
+  final AnswerValidationService _answerValidationService;
+  final LifeManagementService _lifeManagementService;
+
+  SelectAnswerUseCase(
+    this._answerValidationService,
+    this._lifeManagementService,
+  );
 
   /// Execute the use case
   /// Validates answer and updates score/lives
@@ -31,23 +39,32 @@ class SelectAnswerUseCase {
       return Left(GameLogicFailure('No current question'));
     }
 
-    // Check if answer is correct
-    final isCorrect = currentQuestion.isCorrectAnswer(selectedAnswer);
+    // Validate answer using service
+    final validationResult = _answerValidationService.validateAnswer(
+      question: currentQuestion,
+      selectedAnswer: selectedAnswer,
+      timeLeft: currentState.timeLeft,
+      difficulty: currentState.difficulty,
+    );
 
-    // Update state based on answer
-    if (isCorrect) {
-      // Correct: add timeLeft to score
+    if (validationResult.isCorrect) {
+      // Correct: add score
       return Right(currentState.copyWith(
-        score: currentState.score + currentState.timeLeft,
+        score: currentState.score + validationResult.scoreEarned,
         currentAnswerState: AnswerState.correct,
       ));
     } else {
-      // Incorrect: lose 1 life
-      final newLives = currentState.lives - 1;
+      // Incorrect: deduct lives using service
+      final lifeResult = _lifeManagementService.deductLivesForIncorrectAnswer(
+        currentState.lives,
+      );
+
       return Right(currentState.copyWith(
-        lives: newLives,
+        lives: lifeResult.newLives,
         currentAnswerState: AnswerState.incorrect,
-        gameStatus: newLives <= 0 ? QuizGameStatus.gameOver : currentState.gameStatus,
+        gameStatus: lifeResult.isGameOver
+            ? QuizGameStatus.gameOver
+            : currentState.gameStatus,
       ));
     }
   }

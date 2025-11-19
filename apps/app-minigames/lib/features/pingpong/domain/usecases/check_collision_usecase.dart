@@ -39,11 +39,13 @@ class CheckCollisionUseCase {
         totalHits++;
       }
 
-      return Right(state.copyWith(
-        ball: ball,
-        currentRally: currentRally,
-        totalHits: totalHits,
-      ));
+      return Right(
+        state.copyWith(
+          ball: ball,
+          currentRally: currentRally,
+          totalHits: totalHits,
+        ),
+      );
     } catch (e) {
       return Left(UnexpectedFailure('Failed to check collision: $e'));
     }

@@ -8,11 +8,14 @@ import 'package:app_minigames/core/error/failures.dart';
 // Domain imports:
 import '../entities/game_state.dart';
 import '../entities/enums.dart';
+import '../services/life_management_service.dart';
 
 /// Use case to handle question timeout
 @injectable
 class HandleTimeoutUseCase {
-  HandleTimeoutUseCase();
+  final LifeManagementService _lifeManagementService;
+
+  HandleTimeoutUseCase(this._lifeManagementService);
 
   /// Execute the use case
   /// Timeout = lose 1 life
@@ -24,14 +27,18 @@ class HandleTimeoutUseCase {
       return Left(GameLogicFailure('Game is not in progress'));
     }
 
-    // Timeout: lose 1 life
-    final newLives = currentState.lives - 1;
+    // Timeout: deduct lives using service
+    final lifeResult = _lifeManagementService.deductLivesForTimeout(
+      currentState.lives,
+    );
 
     return Right(currentState.copyWith(
-      lives: newLives,
+      lives: lifeResult.newLives,
       timeLeft: 0,
       currentAnswerState: AnswerState.incorrect,
-      gameStatus: newLives <= 0 ? QuizGameStatus.gameOver : currentState.gameStatus,
+      gameStatus: lifeResult.isGameOver
+          ? QuizGameStatus.gameOver
+          : currentState.gameStatus,
     ));
   }
 }

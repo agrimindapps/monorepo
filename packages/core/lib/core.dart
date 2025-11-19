@@ -32,12 +32,17 @@ export 'package:json_annotation/json_annotation.dart';
 // export 'services/drift/drift.dart';
 
 // Export Drift services used in app-plantis and other apps
-export 'services/drift_disabled/base_drift_database.dart';
-export 'services/drift_disabled/drift_database_config.dart';
-export 'services/drift_disabled/base_drift_repository.dart';
+export 'services/drift/base_drift_database.dart';
+export 'services/drift/drift_database_config.dart';
+export 'services/drift/base_drift_repository.dart';
 
 // Export Drift storage service for local storage compatibility
-export 'src/infrastructure/storage/drift_disabled/services/drift_storage_service.dart';
+export 'src/infrastructure/storage/drift/services/drift_storage_service.dart';
+
+// Export Drift Sync Infrastructure
+export 'src/infrastructure/storage/drift/sync/adapters/drift_sync_adapter_base.dart';
+export 'src/infrastructure/storage/drift/sync/interfaces/i_drift_sync_adapter.dart';
+export 'src/infrastructure/storage/drift/sync/models/sync_results.dart';
 
 export 'package:package_info_plus/package_info_plus.dart';
 export 'package:purchases_flutter/purchases_flutter.dart' hide LogLevel, Store;

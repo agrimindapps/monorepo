@@ -5,7 +5,6 @@ import 'package:injectable/injectable.dart';
 import '../../receituagro_database.dart';
 import '../../tables/receituagro_tables.dart';
 import '../../../features/comentarios/domain/entities/comentario_sync_entity.dart';
-import 'drift_sync_adapter_base.dart';
 
 /// Adapter de sincronização para Comentários
 ///
@@ -15,18 +14,20 @@ class ComentariosDriftSyncAdapter
     extends DriftSyncAdapterBase<ComentarioSyncEntity, Comentario> {
   ComentariosDriftSyncAdapter(super.db, super.firestore);
 
+  ReceituagroDatabase get localDb => db as ReceituagroDatabase;
+
   @override
   String get collectionName => 'comentarios';
 
   @override
-  TableInfo<Comentarios, Comentario> get table => db.comentarios;
+  TableInfo<Comentarios, Comentario> get table => localDb.comentarios;
 
   @override
   Future<Either<Failure, List<ComentarioSyncEntity>>> getDirtyRecords(
     String userId,
   ) async {
     try {
-      final query = db.select(db.comentarios)
+      final query = localDb.select(localDb.comentarios)
         ..where((tbl) => tbl.userId.equals(userId) & tbl.isDirty.equals(true));
 
       final results = await query.get();
@@ -56,8 +57,8 @@ class ComentariosDriftSyncAdapter
 
       if (id == 0) return Left(CacheFailure('ID local inválido: $localId'));
 
-      await (db.update(
-        db.comentarios,
+      await (localDb.update(
+        localDb.comentarios,
       )..where((tbl) => tbl.id.equals(id))).write(
         ComentariosCompanion(
           isDirty: const Value(false),
@@ -154,7 +155,7 @@ class ComentariosDriftSyncAdapter
     String firebaseId,
   ) async {
     try {
-      final query = db.select(db.comentarios)
+      final query = localDb.select(localDb.comentarios)
         ..where((tbl) => tbl.firebaseId.equals(firebaseId));
 
       final result = await query.getSingleOrNull();

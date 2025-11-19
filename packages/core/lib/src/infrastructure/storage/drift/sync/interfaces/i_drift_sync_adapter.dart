@@ -1,6 +1,7 @@
-import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
 import 'package:drift/drift.dart';
 
+import '../../../../../../core.dart';
 import '../models/sync_results.dart';
 
 /// Interface para adaptadores de sincronização Drift ↔ Firestore

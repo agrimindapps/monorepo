@@ -5,7 +5,6 @@ import 'package:injectable/injectable.dart';
 import '../../receituagro_database.dart';
 import '../../tables/receituagro_tables.dart';
 import '../../../features/favoritos/domain/entities/favorito_sync_entity.dart';
-import 'drift_sync_adapter_base.dart';
 
 /// Adapter de sincronização para Favoritos
 ///
@@ -15,18 +14,20 @@ class FavoritosDriftSyncAdapter
     extends DriftSyncAdapterBase<FavoritoSyncEntity, Favorito> {
   FavoritosDriftSyncAdapter(super.db, super.firestore);
 
+  ReceituagroDatabase get localDb => db as ReceituagroDatabase;
+
   @override
   String get collectionName => 'favoritos';
 
   @override
-  TableInfo<Favoritos, Favorito> get table => db.favoritos;
+  TableInfo<Favoritos, Favorito> get table => localDb.favoritos;
 
   @override
   Future<Either<Failure, List<FavoritoSyncEntity>>> getDirtyRecords(
     String userId,
   ) async {
     try {
-      final query = db.select(db.favoritos)
+      final query = localDb.select(localDb.favoritos)
         ..where((tbl) => tbl.userId.equals(userId) & tbl.isDirty.equals(true));
 
       final results = await query.get();
@@ -75,7 +76,9 @@ class FavoritosDriftSyncAdapter
 
       if (id == 0) return Left(CacheFailure('ID local inválido: $localId'));
 
-      await (db.update(db.favoritos)..where((tbl) => tbl.id.equals(id))).write(
+      await (localDb.update(
+        localDb.favoritos,
+      )..where((tbl) => tbl.id.equals(id))).write(
         FavoritosCompanion(
           isDirty: const Value(false),
           lastSyncAt: Value(DateTime.now()),
@@ -158,7 +161,7 @@ class FavoritosDriftSyncAdapter
     String firebaseId,
   ) async {
     try {
-      final query = db.select(db.favoritos)
+      final query = localDb.select(localDb.favoritos)
         ..where((tbl) => tbl.firebaseId.equals(firebaseId));
 
       final result = await query.getSingleOrNull();

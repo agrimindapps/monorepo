@@ -43,12 +43,12 @@ class SyncPullResult {
 }
 
 /// Resultado completo de uma operação de sincronização bidirecional
-class SyncResult {
+class DriftSyncResult {
   final SyncPushResult push;
   final SyncPullResult pull;
   final Duration totalDuration;
 
-  const SyncResult({
+  const DriftSyncResult({
     required this.push,
     required this.pull,
     required this.totalDuration,

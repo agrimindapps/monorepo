@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
 import '../../domain/entities/index.dart';
+import '../../domain/usecases/get_current_subscription.dart';
 import '../services/subscription_error_message_service.dart';
 
 /// Estado da assinatura do usuário com indicadores de progresso
@@ -84,9 +86,12 @@ class SubscriptionStatusState {
 class SubscriptionStatusNotifier
     extends StateNotifier<SubscriptionStatusState> {
   final SubscriptionErrorMessageService _errorService;
+  final GetCurrentSubscriptionUseCase _getCurrentSubscription;
 
-  SubscriptionStatusNotifier(this._errorService)
-    : super(SubscriptionStatusState.initial());
+  SubscriptionStatusNotifier(
+    this._errorService,
+    this._getCurrentSubscription,
+  ) : super(SubscriptionStatusState.initial());
 
   /// Carrega o status da assinatura do usuário
   ///
@@ -99,30 +104,18 @@ class SubscriptionStatusNotifier
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      // Simula latência de rede
-      await Future<void>.delayed(const Duration(milliseconds: 800));
+      final result = await _getCurrentSubscription(NoParams());
 
-      // TODO: Substituir por chamada real ao repositório
-      // final subscription = await _subscriptionRepository.getActiveSubscription();
-
-      // Dados de exemplo (remover em produção)
-      final exampleSubscription = SubscriptionEntity(
-        id: 'sub_123456',
-        productId: 'com.receituagro.premium.monthly',
-        status: SubscriptionStatus.active,
-        tier: SubscriptionTier.premium,
-        expirationDate: DateTime.now().add(const Duration(days: 25)),
-        renewalDate: DateTime.now().add(const Duration(days: 25)),
-        store: Store.playStore,
-        isAutoRenewing: true,
-        createdAt: DateTime.now().subtract(const Duration(days: 365)),
-        updatedAt: DateTime.now(),
-      );
-
-      state = state.copyWith(
-        subscription: exampleSubscription,
-        isLoading: false,
-        lastUpdated: DateTime.now(),
+      result.fold(
+        (failure) => state = state.copyWith(
+          isLoading: false,
+          error: _errorService.getLoadStatusError(failure.message),
+        ),
+        (subscription) => state = state.copyWith(
+          subscription: subscription,
+          isLoading: false,
+          lastUpdated: DateTime.now(),
+        ),
       );
     } catch (error) {
       state = state.copyWith(
@@ -135,26 +128,7 @@ class SubscriptionStatusNotifier
   /// Atualiza o status da assinatura manualmente
   /// Útil quando o usuário toma uma ação que afeta assinatura
   Future<void> refreshStatus() async {
-    if (state.subscription == null) {
-      await loadSubscriptionStatus();
-      return;
-    }
-
-    state = state.copyWith(isLoading: true, error: null);
-
-    try {
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-
-      // TODO: Fazer refresh real contra backend
-      // final updated = await _subscriptionRepository.refreshSubscriptionStatus();
-
-      state = state.copyWith(isLoading: false, lastUpdated: DateTime.now());
-    } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        error: _errorService.getUpdateStatusError(error.toString()),
-      );
-    }
+    await loadSubscriptionStatus();
   }
 
   /// Valida a validade da assinatura atual

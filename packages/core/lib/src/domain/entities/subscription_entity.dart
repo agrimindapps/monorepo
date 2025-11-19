@@ -17,6 +17,7 @@ class SubscriptionEntity extends BaseSyncEntity {
     this.store = Store.appStore,
     this.isInTrial = false,
     this.isSandbox = false,
+    this.isAutoRenewing = false,
     super.createdAt,
     super.updatedAt,
     super.lastSyncAt,
@@ -63,6 +64,9 @@ class SubscriptionEntity extends BaseSyncEntity {
   /// Se é ambiente de sandbox/teste
   final bool isSandbox;
 
+  /// Se a renovação automática está ativa
+  final bool isAutoRenewing;
+
   /// Retorna true se a assinatura está ativa
   bool get isActive {
     if (status != SubscriptionStatus.active) return false;
@@ -93,6 +97,13 @@ class SubscriptionEntity extends BaseSyncEntity {
     final now = DateTime.now();
     if (now.isAfter(expirationDate!)) return 0;
     return expirationDate!.difference(now).inDays;
+  }
+
+  /// Check if subscription is expiring soon (within 7 days)
+  bool get isExpiringSoon {
+    if (expirationDate == null) return false;
+    final remaining = expirationDate!.difference(DateTime.now());
+    return remaining.inDays <= 7 && remaining.inDays > 0;
   }
 
   /// Se a assinatura é para o app Plantis

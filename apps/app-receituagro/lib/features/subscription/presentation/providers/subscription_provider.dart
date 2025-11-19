@@ -5,6 +5,8 @@ import '../notifiers/index.dart';
 import '../services/subscription_error_message_service.dart';
 import '../../domain/entities/index.dart';
 
+import '../../domain/usecases/get_current_subscription.dart';
+
 final sl = GetIt.instance;
 
 // ═══════════════════════════════════════════════════════════════
@@ -15,8 +17,10 @@ final sl = GetIt.instance;
 /// Gerencia estado de subscription do usuário
 final subscriptionStatusNotifierProvider =
     StateNotifierProvider<SubscriptionStatusNotifier, SubscriptionStatusState>(
-      (ref) =>
-          SubscriptionStatusNotifier(sl<SubscriptionErrorMessageService>()),
+      (ref) => SubscriptionStatusNotifier(
+        sl<SubscriptionErrorMessageService>(),
+        sl<GetCurrentSubscriptionUseCase>(),
+      ),
       name: 'subscriptionStatusNotifier',
     );
 

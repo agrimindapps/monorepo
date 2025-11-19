@@ -1,6 +1,6 @@
 import 'enums/purchase_status.dart';
 import 'enums/purchase_type.dart';
-import 'enums/store.dart';
+import 'package:core/core.dart' hide PurchaseType;
 
 /// Purchase history entity
 /// Represents a purchase transaction in the user's history

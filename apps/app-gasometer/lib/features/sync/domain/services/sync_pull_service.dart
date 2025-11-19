@@ -5,15 +5,18 @@ import '../../../../core/services/contracts/i_sync_pull_service.dart';
 import '../../../../core/services/contracts/i_sync_push_service.dart';
 import '../../../../core/sync/adapters/i_sync_adapter.dart';
 import '../../../../core/sync/adapters/sync_adapter_registry.dart';
+import '../../../../core/sync/models/sync_results.dart' as sync_models;
+import 'sync_checkpoint_store.dart';
 
 /// Modelo para resultado de pull de um adapter
-class SyncPullResult {
-  const SyncPullResult({
+class AdapterPullSnapshot {
+  const AdapterPullSnapshot({
     required this.adapterName,
     required this.recordsPulled,
     required this.conflictsResolved,
     required this.duration,
     this.error,
+    this.lastRemoteUpdateAt,
   });
 
   final String adapterName;
@@ -21,6 +24,7 @@ class SyncPullResult {
   final int conflictsResolved;
   final Duration duration;
   final String? error;
+  final DateTime? lastRemoteUpdateAt;
 
   bool get success => error == null;
 
@@ -64,10 +68,15 @@ class SyncPullResult {
 /// );
 /// ```
 class SyncPullService implements ISyncPullService {
-  SyncPullService({required SyncAdapterRegistry adapterRegistry})
-    : _adapterRegistry = adapterRegistry;
+  SyncPullService({
+    required SyncAdapterRegistry adapterRegistry,
+    required SyncCheckpointStore checkpointStore,
+  }) : _adapterRegistry = adapterRegistry,
+       _checkpointStore = checkpointStore;
 
   final SyncAdapterRegistry _adapterRegistry;
+  final SyncCheckpointStore _checkpointStore;
+  static const _cursorSafetyGap = Duration(milliseconds: 250);
 
   /// Executa pull de todos os adapters registrados em paralelo
   ///
@@ -91,7 +100,7 @@ class SyncPullService implements ISyncPullService {
 
       // Executa todos os pulls em paralelo usando registry
       final pullFutures = _adapterRegistry.adapters
-          .map((adapter) => _pullAdapter(adapter, userId, null))
+          .map((adapter) => _pullAdapter(adapter, userId))
           .toList();
 
       final pullResults = await Future.wait(pullFutures);
@@ -108,6 +117,16 @@ class SyncPullService implements ISyncPullService {
         (sum, result) => sum + result.conflictsResolved,
       );
 
+      final failedPulls = pullResults
+          .where((result) => !result.success)
+          .toList();
+      final aggregatedErrors = failedPulls
+          .map(
+            (result) =>
+                '[${result.adapterName}] ${result.error ?? 'unknown error'}',
+          )
+          .toList();
+
       developer.log(
         '✅ Pull sync completed in ${duration.inSeconds}s\n'
         '   Total pulled: $totalPulled\n'
@@ -118,8 +137,8 @@ class SyncPullService implements ISyncPullService {
       return Right(
         SyncPhaseResult(
           successCount: totalPulled,
-          failureCount: 0,
-          errors: <String>[],
+          failureCount: failedPulls.length,
+          errors: aggregatedErrors,
           duration: duration,
         ),
       );
@@ -130,52 +149,82 @@ class SyncPullService implements ISyncPullService {
   }
 
   /// Executa pull para um adapter individual usando ISyncAdapter interface
-  Future<SyncPullResult> _pullAdapter(
+  Future<AdapterPullSnapshot> _pullAdapter(
     ISyncAdapter adapter,
     String userId,
-    DateTime? since,
   ) async {
     try {
+      final since = await _checkpointStore.getCursor(
+        userId: userId,
+        adapter: adapter.name,
+      );
       final startTime = DateTime.now();
 
       // Usar a interface ISyncAdapter.pullRemoteChanges() que retorna SyncPullResult
       final result = await adapter.pullRemoteChanges(userId, since: since);
 
-      return result.fold(
-        (failure) {
-          developer.log(
-            '❌ ${adapter.name} pull failed: ${failure.message}',
-            name: 'SyncPull',
-          );
-          return SyncPullResult(
-            adapterName: adapter.name,
-            recordsPulled: 0,
-            conflictsResolved: 0,
-            duration: DateTime.now().difference(startTime),
-          );
-        },
-        (syncResult) {
-          developer.log(
-            '✅ ${adapter.name} pull: ${syncResult.recordsPulled} records',
-            name: 'SyncPull',
-          );
-          return SyncPullResult(
-            adapterName: adapter.name,
-            recordsPulled: syncResult.recordsPulled,
-            conflictsResolved: syncResult.conflictsResolved,
-            duration: DateTime.now().difference(startTime),
-          );
-        },
+      if (result.isLeft()) {
+        final failure =
+            (result as Left<Failure, sync_models.SyncPullResult>).value;
+        developer.log(
+          '❌ ${adapter.name} pull failed: ${failure.message}',
+          name: 'SyncPull',
+        );
+        return AdapterPullSnapshot(
+          adapterName: adapter.name,
+          recordsPulled: 0,
+          conflictsResolved: 0,
+          duration: DateTime.now().difference(startTime),
+          error: failure.message,
+        );
+      }
+
+      final syncResult =
+          (result as Right<Failure, sync_models.SyncPullResult>).value;
+      final nextCursor = _resolveNextCursor(
+        since,
+        syncResult.latestRemoteUpdateAt,
+      );
+      await _checkpointStore.saveCursor(
+        userId: userId,
+        adapter: adapter.name,
+        timestamp: nextCursor,
+      );
+
+      developer.log(
+        '✅ ${adapter.name} pull: ${syncResult.recordsPulled + syncResult.recordsUpdated} records (cursor -> ${nextCursor.toIso8601String()})',
+        name: 'SyncPull',
+      );
+
+      return AdapterPullSnapshot(
+        adapterName: adapter.name,
+        recordsPulled: syncResult.recordsPulled + syncResult.recordsUpdated,
+        conflictsResolved: syncResult.conflictsResolved,
+        duration: DateTime.now().difference(startTime),
+        lastRemoteUpdateAt: syncResult.latestRemoteUpdateAt,
       );
     } catch (e) {
       developer.log('❌ ${adapter.name} pull exception: $e', name: 'SyncPull');
-      return SyncPullResult(
+      return AdapterPullSnapshot(
         adapterName: adapter.name,
         recordsPulled: 0,
         conflictsResolved: 0,
         duration: Duration.zero,
+        error: e.toString(),
       );
     }
+  }
+
+  DateTime _resolveNextCursor(DateTime? currentCursor, DateTime? latestRemote) {
+    if (latestRemote != null) {
+      final buffered = latestRemote.toUtc().subtract(_cursorSafetyGap);
+      if (currentCursor == null) return buffered;
+      return buffered.isAfter(currentCursor) ? buffered : currentCursor;
+    }
+
+    final now = DateTime.now().toUtc();
+    if (currentCursor == null) return now;
+    return now.isAfter(currentCursor) ? now : currentCursor;
   }
 
   /// Executa pull para um tipo específico de entidade
@@ -195,14 +244,18 @@ class SyncPullService implements ISyncPullService {
       );
 
       final startTime = DateTime.now();
-      final result = await _pullAdapter(adapter, userId, null);
+      final result = await _pullAdapter(adapter, userId);
       final duration = DateTime.now().difference(startTime);
+
+      final errors = result.error != null
+          ? ['[${adapter.name}] ${result.error}']
+          : const <String>[];
 
       return Right(
         SyncPhaseResult(
           successCount: result.recordsPulled,
-          failureCount: 0,
-          errors: [],
+          failureCount: result.success ? 0 : 1,
+          errors: errors,
           duration: duration,
         ),
       );

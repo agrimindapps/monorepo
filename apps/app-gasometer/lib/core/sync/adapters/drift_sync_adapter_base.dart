@@ -305,6 +305,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
     DateTime? since,
   }) async {
     final stopwatch = Stopwatch()..start();
+    DateTime? latestRemoteUpdateAt;
 
     try {
       // 1. Verificar conectividade
@@ -355,6 +356,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
             recordsUpdated: 0,
             conflictsResolved: 0,
             duration: stopwatch.elapsed,
+            latestRemoteUpdateAt: since,
           ),
         );
       }
@@ -383,6 +385,18 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
         }
 
         final remoteEntity = (parseResult as Right<Failure, TEntity>).value;
+
+        final remoteTimestamp =
+            remoteEntity.updatedAt ??
+            remoteEntity.createdAt ??
+            _extractRemoteTimestamp(remoteData, 'updated_at') ??
+            _extractRemoteTimestamp(remoteData, 'last_sync_at') ??
+            DateTime.now();
+
+        final lastSeen = latestRemoteUpdateAt;
+        if (lastSeen == null || remoteTimestamp.isAfter(lastSeen)) {
+          latestRemoteUpdateAt = remoteTimestamp;
+        }
 
         // Verificar se existe localmente
         final localEntityResult = await getLocalEntity(remoteEntity.id);
@@ -424,6 +438,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
         conflictsResolved: conflictsResolved,
         warnings: warnings,
         duration: stopwatch.elapsed,
+        latestRemoteUpdateAt: latestRemoteUpdateAt,
       );
 
       developer.log(result.summary, name: 'DriftSync.$collectionName');
@@ -633,4 +648,19 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
   /// }
   /// ```
   Future<Either<Failure, void>> markAsSynced(String id, {String? firebaseId});
+}
+
+DateTime? _extractRemoteTimestamp(Map<String, dynamic> data, String field) {
+  final value = data[field];
+  if (value == null) return null;
+  if (value is Timestamp) return value.toDate();
+  if (value is DateTime) return value;
+  if (value is String) {
+    return DateTime.tryParse(value);
+  }
+  if (value is int) {
+    // Assume epoch milliseconds
+    return DateTime.fromMillisecondsSinceEpoch(value);
+  }
+  return null;
 }

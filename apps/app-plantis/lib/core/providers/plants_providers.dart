@@ -65,21 +65,29 @@ class PlantsState {
     return allPlants.where((plant) => plant.spaceId == filterBySpace).toList();
   }
 
-  /// Computed property - search results
+  /// Computed property - search results (accent-insensitive)
   /// No stored state, computed on-demand from allPlants + searchQuery
   List<Plant> get searchResults {
     if (searchQuery.isEmpty) {
       return const [];
     }
 
-    final lower = searchQuery.toLowerCase();
+    String norm(String s) => s
+        .toLowerCase()
+        .replaceAll(RegExp('[áàâãä]'), 'a')
+        .replaceAll(RegExp('[éèêë]'), 'e')
+        .replaceAll(RegExp('[íìîï]'), 'i')
+        .replaceAll(RegExp('[óòôõö]'), 'o')
+        .replaceAll(RegExp('[úùûü]'), 'u')
+        .replaceAll(RegExp('[ç]'), 'c')
+        .trim();
+
+    final q = norm(searchQuery);
     return allPlants.where((plant) {
-      final name = plant.name.toLowerCase();
-      final species = (plant.species ?? '').toLowerCase();
-      final notes = (plant.notes ?? '').toLowerCase();
-      return name.contains(lower) ||
-             species.contains(lower) ||
-             notes.contains(lower);
+      final name = norm(plant.name);
+      final species = norm(plant.species ?? '');
+      final notes = norm(plant.notes ?? '');
+      return name.contains(q) || species.contains(q) || notes.contains(q);
     }).toList();
   }
 

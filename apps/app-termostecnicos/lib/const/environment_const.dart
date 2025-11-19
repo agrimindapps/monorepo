@@ -1,5 +1,5 @@
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:core/core.dart' hide Column;
 
 class GlobalEnvironment {
@@ -48,37 +48,37 @@ class Environment {
   // Use getter to avoid Platform check at initialization on web
   String get linkTermoUso => kIsWeb
       ? 'https://agrimindapps.blogspot.com/2022/08/termos-tecnicos-termos-e-condicoes.html'
-      : Platform.isAndroid
-          ? 'https://agrimindapps.blogspot.com/2022/08/termos-tecnicos-termos-e-condicoes.html'
-          : 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
+      : (defaultTargetPlatform == TargetPlatform.iOS)
+          ? 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/'
+          : 'https://agrimindapps.blogspot.com/2022/08/termos-tecnicos-termos-e-condicoes.html';
 
   void initialize() {
     if (!kIsWeb) {
       if (GlobalEnvironment.isProduction) {
-        admobBanner = Platform.isAndroid
+        admobBanner = (defaultTargetPlatform == TargetPlatform.android)
             ? prod['admobBanner-android']
             : prod['admobBanner-ios'];
-        onOpenApp = Platform.isAndroid
+        onOpenApp = (defaultTargetPlatform == TargetPlatform.android)
             ? prod['onOpenApp-android']
             : prod['onOpenApp-ios'];
-        admobPremiado = Platform.isAndroid
+        admobPremiado = (defaultTargetPlatform == TargetPlatform.android)
             ? prod['admobPremiado-android']
             : prod['admobPremiado-ios'];
-        altAdmobBanner = Platform.isAndroid
+        altAdmobBanner = (defaultTargetPlatform == TargetPlatform.android)
             ? prod['altAdmobBanner-android']
             : prod['altAdmobBanner-ios'];
       } else {
         // Homologação
-        admobBanner = Platform.isAndroid
+        admobBanner = (defaultTargetPlatform == TargetPlatform.android)
             ? hml['admobBanner-android']
             : hml['admobBanner-ios'];
-        onOpenApp = Platform.isAndroid
+        onOpenApp = (defaultTargetPlatform == TargetPlatform.android)
             ? hml['onOpenApp-android']
             : hml['onOpenApp-ios'];
-        admobPremiado = Platform.isAndroid
+        admobPremiado = (defaultTargetPlatform == TargetPlatform.android)
             ? hml['admobPremiado-android']
             : hml['admobPremiado-ios'];
-        altAdmobBanner = Platform.isAndroid
+        altAdmobBanner = (defaultTargetPlatform == TargetPlatform.android)
             ? hml['altAdmobBanner-android']
             : hml['altAdmobBanner-ios'];
       }

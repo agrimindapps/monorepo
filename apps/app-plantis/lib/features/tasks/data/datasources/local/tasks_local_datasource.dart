@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide Column;
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../../database/repositories/tasks_drift_repository.dart';
@@ -143,6 +144,14 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
         await _driftRepo.insertTask(task);
       }
     } catch (e) {
+      final msg = e.toString();
+      if (msg.contains('Plant not found locally')) {
+        // Skip caching task until its plant is available locally
+        if (kDebugMode) {
+          print('⚠️ TasksLocalDataSource: Skipping task ${task.id} - ${task.title} because plant is not cached yet');
+        }
+        return;
+      }
       throw CacheFailure('Erro ao cachear tarefa: $e');
     }
   }

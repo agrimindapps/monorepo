@@ -1,5 +1,5 @@
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -107,7 +107,7 @@ ThemeData darkTheme = ThemeData(
     systemOverlayStyle: SystemUiOverlayStyle(
       statusBarBrightness: kIsWeb
           ? Brightness.light
-          : Platform.isAndroid
+          : (defaultTargetPlatform == TargetPlatform.android)
               ? Brightness.light
               : Brightness.dark,
       systemNavigationBarColor: _backgroundColor,

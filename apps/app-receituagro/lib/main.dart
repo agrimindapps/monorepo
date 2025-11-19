@@ -22,6 +22,7 @@ import 'core/utils/diagnostico_logger.dart';
 // REMOVED: import 'core/utils/receita_agro_data_inspector_initializer.dart';
 import 'core/utils/theme_preference_migration.dart';
 import 'features/analytics/analytics_service.dart';
+import 'features/sync/services/sync_coordinator.dart' as app_sync;
 import 'firebase_options.dart';
 
 late ICrashlyticsRepository _crashlyticsRepository;
@@ -92,6 +93,15 @@ void main() async {
       );
     }
   }
+  try {
+    debugPrint('🔄 [MAIN] Initializing SyncCoordinator...');
+    final syncCoordinator = di.sl<app_sync.SyncCoordinator>();
+    syncCoordinator.initialize();
+    debugPrint('✅ [MAIN] SyncCoordinator initialized');
+  } catch (e) {
+    debugPrint('❌ [MAIN] SyncCoordinator initialization failed: $e');
+  }
+
   // ⚠️ REMOVED: Data Inspector no longer exists
   // if (kDebugMode) {
   //   ReceitaAgroDataInspectorInitializer.initialize();
@@ -323,7 +333,7 @@ class _ReceitaAgroAppState extends ConsumerState<ReceitaAgroApp> {
   @override
   void initState() {
     super.initState();
-    
+
     // 🧪 AUTO-LOGIN PARA TESTES (remover em produção)
     if (kDebugMode) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -356,9 +366,9 @@ class _ReceitaAgroAppState extends ConsumerState<ReceitaAgroApp> {
   void _performTestAutoLogin() async {
     try {
       DiagnosticoLogger.debug('🧪 [RECEITUAGRO-TEST] Attempting auto-login...');
-      
+
       final auth = FirebaseAuth.instance;
-      
+
       // Se já está logado e não é anônimo, não faz nada
       if (auth.currentUser != null && !auth.currentUser!.isAnonymous) {
         DiagnosticoLogger.debug(
@@ -366,25 +376,22 @@ class _ReceitaAgroAppState extends ConsumerState<ReceitaAgroApp> {
         );
         return;
       }
-      
+
       const testEmail = 'lucineiy@hotmail.com';
       const testPassword = 'QWEqwe@123';
-      
+
       final result = await auth.signInWithEmailAndPassword(
         email: testEmail,
         password: testPassword,
       );
-      
+
       if (result.user != null) {
         DiagnosticoLogger.debug(
           '🧪 [RECEITUAGRO-TEST] Auto-login successful! User: ${result.user!.email}',
         );
       }
     } catch (e, stackTrace) {
-      DiagnosticoLogger.warning(
-        '🧪 [RECEITUAGRO-TEST] Auto-login error',
-        e,
-      );
+      DiagnosticoLogger.warning('🧪 [RECEITUAGRO-TEST] Auto-login error', e);
       debugPrint('Stack trace: $stackTrace');
     }
   }

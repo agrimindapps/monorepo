@@ -127,6 +127,11 @@ coverage/
 # Melos
 .melos_tool/
 
+# Node modules
+node_modules/
+package-lock.json
+package.json
+
 # Firebase
 firebase_app_id_file.json
 

@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:io' show Platform;
+
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
+import 'package:flutter/foundation.dart' show debugPrint, kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -57,11 +57,11 @@ void main() async {
   // Initialize DI (AFTER Firebase)
   await configureDependencies();
 
-  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+  if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)) {
     // RevenueCat setup
-    if (Platform.isIOS || Platform.isMacOS) {
+    if (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS) {
       RevenuecatService(store: purchases.Store.appStore, apiKey: appleApiKey);
-    } else if (Platform.isAndroid) {
+    } else if (defaultTargetPlatform == TargetPlatform.android) {
       RevenuecatService(store: purchases.Store.playStore, apiKey: googleApiKey);
     }
 
@@ -72,14 +72,14 @@ void main() async {
   }
 
   Future.delayed(const Duration(milliseconds: 500), () async {
-    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)) {
       await _configureSDK();
     }
   });
 
   if (!kIsWeb &&
       firebaseInitialized &&
-      (Platform.isAndroid || Platform.isIOS)) {
+      (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)) {
     runZonedGuarded<Future<void>>(
       () async {
         runApp(const ProviderScope(child: App()));

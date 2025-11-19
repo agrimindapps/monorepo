@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
@@ -93,9 +94,27 @@ class FavoritosService {
         'tipo': tipo,
         'adicionadoEm': DateTime.now().toIso8601String(),
       };
-      final itemDataString = '{"id":"$id","tipo":"$tipo","adicionadoEm":"${DateTime.now().toIso8601String()}"}';
+      final itemDataString =
+          '{"id":"$id","tipo":"$tipo","adicionadoEm":"${DateTime.now().toIso8601String()}"}';
 
-      final insertedId = await repo.addFavorito(tipo, id, itemDataString);
+      final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+      if (userId.isEmpty) {
+        if (kDebugMode) {
+          developer.log(
+            'Usuário não autenticado ao adicionar favorito',
+            name: 'FavoritosService',
+          );
+        }
+        // Se não tiver usuário, não salva no banco local pois a tabela exige userId
+        return false;
+      }
+
+      final insertedId = await repo.addFavorito(
+        userId,
+        tipo,
+        id,
+        itemDataString,
+      );
       final result = insertedId > 0;
 
       if (result) {

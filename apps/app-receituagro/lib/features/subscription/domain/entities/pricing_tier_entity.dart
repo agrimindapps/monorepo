@@ -1,4 +1,4 @@
-import 'enums/subscription_tier.dart';
+import 'package:core/core.dart';
 
 /// Pricing tier entity
 /// Represents available subscription plans and their pricing

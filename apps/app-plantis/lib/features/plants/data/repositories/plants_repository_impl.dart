@@ -134,11 +134,20 @@ class PlantsRepositoryImpl implements PlantsRepository {
         await syncService.syncSinglePlantInBackground(id, userId);
       }
 
-      if (localPlant != null) {
-        if (kDebugMode) {
-          print('✅ PlantsRepositoryImpl.getPlantById - Returning plant: ${localPlant.name}');
+      Plant? resolved = localPlant;
+      if (resolved == null) {
+        for (var i = 0; i < 3; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+          resolved = await localDatasource.getPlantById(id);
+          if (resolved != null) break;
         }
-        return Right(localPlant);
+      }
+
+      if (resolved != null) {
+        if (kDebugMode) {
+          print('✅ PlantsRepositoryImpl.getPlantById - Returning plant: ${resolved.name}');
+        }
+        return Right(resolved);
       } else {
         if (kDebugMode) {
           print('❌ PlantsRepositoryImpl.getPlantById - Plant not found in local datasource');
@@ -227,10 +236,11 @@ class PlantsRepositoryImpl implements PlantsRepository {
             }
 
             try {
-              await localDatasource.updatePlant(remotePlant);
+              // Inserir a versão remota como novo registro (id remoto)
+              await localDatasource.addPlant(remotePlant);
 
               if (kDebugMode) {
-                print('✅ Versão remota salva localmente');
+                print('✅ Versão remota INSERIDA localmente');
               }
               try {
                 await localDatasource.hardDeletePlant(plantModel.id);
@@ -239,15 +249,13 @@ class PlantsRepositoryImpl implements PlantsRepository {
                 }
               } catch (deleteError) {
                 if (kDebugMode) {
-                  print(
-                    '⚠️ Falha ao deletar ID local ${plantModel.id}: $deleteError',
-                  );
+                  print('⚠️ Falha ao deletar ID local ${plantModel.id}: $deleteError');
                   print('   Mas versão remota foi salva com sucesso');
                 }
               }
             } catch (updateError) {
               if (kDebugMode) {
-                print('❌ Falha ao salvar versão remota: $updateError');
+                print('❌ Falha ao inserir versão remota: $updateError');
               }
               throw CacheFailure(
                 'Falha ao atualizar planta localmente: ${updateError.toString()}',

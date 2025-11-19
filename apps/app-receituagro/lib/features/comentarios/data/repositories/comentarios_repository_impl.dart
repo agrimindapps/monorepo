@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide Column;
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../database/repositories/comentarios_repository.dart';
 import '../../domain/entities/comentario_entity.dart';
@@ -93,8 +94,9 @@ class ComentariosRepositoryImpl
 
   @override
   Future<Map<String, int>> getUserCommentStats() async {
-    // TODO: Get current user ID from auth service
-    return await _repository.getUserStats('current-user-id');
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) return {};
+    return await _repository.getUserStats(userId);
   }
 
   @override

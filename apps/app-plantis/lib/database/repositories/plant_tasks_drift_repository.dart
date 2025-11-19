@@ -16,9 +16,13 @@ class PlantTasksDriftRepository {
   Future<int> insertPlantTask(PlantTaskModel model) async {
     final localPlantId = await _resolvePlantId(model.plantId);
 
+    if (localPlantId == null) {
+      throw StateError('Plant not found locally for id: ${model.plantId}');
+    }
+
     final companion = db.PlantTasksCompanion.insert(
       firebaseId: Value(model.id),
-      plantId: localPlantId ?? 0,
+      plantId: localPlantId,
       type: model.type.name,
       title: model.title,
       description: Value(model.description),
@@ -111,7 +115,7 @@ class PlantTasksDriftRepository {
           _db.plantTasks,
         )..where((t) => t.firebaseId.equals(model.id))).write(
           db.PlantTasksCompanion(
-            plantId: Value(localPlantId ?? 0),
+            plantId: localPlantId != null ? Value(localPlantId) : const Value.absent(),
             type: Value(model.type.name),
             title: Value(model.title),
             description: Value(model.description),

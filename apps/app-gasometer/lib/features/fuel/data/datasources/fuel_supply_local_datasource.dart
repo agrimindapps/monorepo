@@ -1,12 +1,20 @@
+import 'package:core/core.dart' show GetIt;
 import 'package:injectable/injectable.dart';
+
 import '../../../../database/repositories/fuel_supply_repository.dart';
+import '../../../sync/domain/services/sync_write_trigger.dart';
 
 /// DataSource local para abastecimentos usando Drift
 @lazySingleton
 class FuelSupplyLocalDataSource {
-  const FuelSupplyLocalDataSource(this._repository);
+  FuelSupplyLocalDataSource(this._repository);
 
   final FuelSupplyRepository _repository;
+  SyncWriteTrigger get _syncTrigger => GetIt.instance<SyncWriteTrigger>();
+
+  void _notifySync() {
+    _syncTrigger.scheduleSync();
+  }
 
   // ========== CRUD BÁSICO ==========
 
@@ -50,7 +58,9 @@ class FuelSupplyLocalDataSource {
       receiptImagePath: receiptImagePath,
     );
 
-    return await _repository.insert(data);
+    final newId = await _repository.insert(data);
+    _notifySync();
+    return newId;
   }
 
   Future<FuelSupplyData?> findById(int id) async {
@@ -140,11 +150,15 @@ class FuelSupplyLocalDataSource {
       receiptImagePath: receiptImagePath,
     );
 
-    return await _repository.update(data);
+    final success = await _repository.update(data);
+    if (success) _notifySync();
+    return success;
   }
 
   Future<bool> delete(int id) async {
-    return await _repository.softDelete(id);
+    final success = await _repository.softDelete(id);
+    if (success) _notifySync();
+    return success;
   }
 
   // ========== ESTATÍSTICAS ==========

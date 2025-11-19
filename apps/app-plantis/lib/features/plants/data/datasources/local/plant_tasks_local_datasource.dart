@@ -148,6 +148,13 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
         print('✅ PlantTasksLocalDatasource: Task ${task.id} salva com sucesso');
       }
     } catch (e) {
+      final msg = e.toString();
+      if (msg.contains('Plant not found locally')) {
+        if (kDebugMode) {
+          print('⚠️ PlantTasksLocalDatasource: Skipping task ${task.id} because plant is not cached yet');
+        }
+        return;
+      }
       if (kDebugMode) {
         print('❌ PlantTasksLocalDatasource: Erro ao salvar task: $e');
       }
@@ -167,8 +174,19 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       }
 
       for (final task in tasks) {
-        final taskModel = PlantTaskModel.fromEntity(task);
-        await _driftRepo.insertPlantTask(taskModel);
+        try {
+          final taskModel = PlantTaskModel.fromEntity(task);
+          await _driftRepo.insertPlantTask(taskModel);
+        } catch (e) {
+          final msg = e.toString();
+          if (msg.contains('Plant not found locally')) {
+            if (kDebugMode) {
+              print('⚠️ PlantTasksLocalDatasource: Skipping task ${task.id} in batch because plant is not cached yet');
+            }
+            continue;
+          }
+          rethrow;
+        }
       }
       _invalidateCache();
 

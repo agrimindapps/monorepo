@@ -1,191 +1,77 @@
 import 'dart:developer' as developer;
 
-import 'package:core/core.dart' as core;
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../domain/entities/favorito_sync_entity.dart';
 import 'favoritos_data_resolver_service.dart';
 
 /// Service especializado para sincronização de favoritos com Firebase
-/// Responsabilidade: Sincronizar operações de favoritos com Firestore
+///
+/// ⚠️ REFACTOR: Esta classe foi simplificada para NÃO realizar chamadas de API diretas.
+/// A responsabilidade de sincronização agora é do [SyncCoordinator] e [FavoritosDriftSyncAdapter].
+///
+/// Esta classe agora serve apenas como um utilitário para resolver dados antes de salvar no banco local,
+/// se necessário, ou pode ser depreciada futuramente.
 @injectable
 class FavoritosSyncService {
   final FavoritosDataResolverService _dataResolver;
 
-  FavoritosSyncService({
-    required FavoritosDataResolverService dataResolver,
-  }) : _dataResolver = dataResolver;
+  FavoritosSyncService({required FavoritosDataResolverService dataResolver})
+    : _dataResolver = dataResolver;
 
-  /// Sincroniza uma operação de favorito com Firestore
+  /// Prepara dados para salvamento local (Drift)
   ///
-  /// Consolidado: Reduz logs de 15+ para 3-4 por operação
-  ///
-  /// [operation] - 'create', 'update' ou 'delete'
-  /// [tipo] - Tipo do favorito (defensivo, praga, diagnostico, cultura)
-  /// [id] - ID do item favorito
-  /// [data] - Dados do item (opcional, será resolvido se null)
-  Future<void> syncOperation(
-    String operation,
+  /// Não realiza mais chamadas ao Firestore. O Drift se encarrega de marcar como dirty
+  /// e o SyncWorker fará o envio em background.
+  Future<Map<String, dynamic>?> prepareDataForLocalSave(
     String tipo,
     String id,
     Map<String, dynamic>? data,
   ) async {
     if (kDebugMode) {
       developer.log(
-        'Sincronizando $operation: tipo=$tipo, id=$id',
+        'Preparando dados para save local: tipo=$tipo, id=$id',
         name: 'FavoritosSync',
       );
     }
 
     try {
-      // Valida autenticação
-      final userId = firebase_auth.FirebaseAuth.instance.currentUser?.uid;
-      if (userId == null || userId.isEmpty) {
-        if (kDebugMode) {
-          developer.log(
-            'Usuário não autenticado - sync cancelado',
-            name: 'FavoritosSync',
-          );
-        }
-        return;
-      }
-
-      // Valida dados
-      if (id.isEmpty || tipo.isEmpty) {
-        if (kDebugMode) {
-          developer.log(
-            'Dados inválidos - sync cancelado',
-            name: 'FavoritosSync',
-          );
-        }
-        return;
-      }
-
       // Resolve dados se necessário
-      final resolvedData = data ?? await _dataResolver.resolveItemData(tipo, id);
+      final resolvedData =
+          data ?? await _dataResolver.resolveItemData(tipo, id);
       if (resolvedData == null) {
         if (kDebugMode) {
           developer.log(
-            'Não foi possível resolver dados - sync cancelado',
+            'Não foi possível resolver dados para cache local',
             name: 'FavoritosSync',
           );
         }
-        return;
+        return null;
       }
-
-      // Cria entidade de sincronização
-      final syncEntity = FavoritoSyncEntity(
-        id: 'favorite_${tipo}_$id',
-        tipo: tipo,
-        itemId: id,
-        itemData: resolvedData,
-        adicionadoEm: DateTime.now(),
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        userId: userId,
-      );
-
-      // Executa operação
-      await _executeSyncOperation(operation, syncEntity);
+      return resolvedData;
     } catch (e) {
       if (kDebugMode) {
         developer.log(
-          'Erro na sincronização: $e',
+          'Erro ao preparar dados: $e',
           name: 'FavoritosSync',
           error: e,
         );
       }
+      return null;
     }
   }
 
-  /// Executa a operação de sincronização com Firestore
-  Future<void> _executeSyncOperation(
+  /// @deprecated Use prepareDataForLocalSave e salve no repositório Drift
+  Future<void> syncOperation(
     String operation,
-    FavoritoSyncEntity syncEntity,
+    String tipo,
+    String id,
+    Map<String, dynamic>? data,
   ) async {
-    try {
-      if (operation == 'create') {
-        final result = await core.UnifiedSyncManager.instance
-            .create<FavoritoSyncEntity>('receituagro', syncEntity);
-
-        result.fold(
-          (core.Failure failure) {
-            if (kDebugMode) {
-              developer.log(
-                'Erro no create: ${failure.message}',
-                name: 'FavoritosSync',
-              );
-            }
-          },
-          (String entityId) {
-            if (kDebugMode) {
-              developer.log(
-                'Create bem-sucedido: $entityId',
-                name: 'FavoritosSync',
-              );
-            }
-          },
-        );
-      } else if (operation == 'delete') {
-        final result = await core.UnifiedSyncManager.instance
-            .delete<FavoritoSyncEntity>('receituagro', syncEntity.id);
-
-        result.fold(
-          (core.Failure failure) {
-            if (kDebugMode) {
-              developer.log(
-                'Erro no delete: ${failure.message}',
-                name: 'FavoritosSync',
-              );
-            }
-          },
-          (_) {
-            if (kDebugMode) {
-              developer.log(
-                'Delete bem-sucedido',
-                name: 'FavoritosSync',
-              );
-            }
-          },
-        );
-      } else {
-        // update
-        final result = await core.UnifiedSyncManager.instance
-            .update<FavoritoSyncEntity>(
-          'receituagro',
-          syncEntity.id,
-          syncEntity,
-        );
-
-        result.fold(
-          (core.Failure failure) {
-            if (kDebugMode) {
-              developer.log(
-                'Erro no update: ${failure.message}',
-                name: 'FavoritosSync',
-              );
-            }
-          },
-          (_) {
-            if (kDebugMode) {
-              developer.log(
-                'Update bem-sucedido',
-                name: 'FavoritosSync',
-              );
-            }
-          },
-        );
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        developer.log(
-          'Erro ao executar operação: $e',
-          name: 'FavoritosSync',
-          error: e,
-        );
-      }
-    }
+    developer.log(
+      'DEPRECATED: syncOperation chamado. O sistema agora usa Offline-First via Drift.',
+      name: 'FavoritosSync',
+    );
+    // No-op: A sincronização real acontece via DriftSyncAdapter
   }
 }

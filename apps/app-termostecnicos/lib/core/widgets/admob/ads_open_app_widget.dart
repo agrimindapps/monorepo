@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -78,7 +78,7 @@ class _OpenAppAdState extends ConsumerState<OpenAppAd> {
                       ),
                       Padding(
                         padding: EdgeInsets.only(
-                            top: (!kIsWeb && Platform.isAndroid)
+                            top: (!kIsWeb && defaultTargetPlatform == TargetPlatform.android)
                                 ? MediaQuery.of(context).size.height * 0.125
                                 : MediaQuery.of(context).size.height * 0.05),
                         child: Center(

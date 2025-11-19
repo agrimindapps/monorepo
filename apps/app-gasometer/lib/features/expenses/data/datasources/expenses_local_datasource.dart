@@ -1,12 +1,20 @@
+import 'package:core/core.dart' show GetIt;
 import 'package:injectable/injectable.dart';
+
 import '../../../../database/repositories/expense_repository.dart';
+import '../../../sync/domain/services/sync_write_trigger.dart';
 
 /// DataSource local para despesas usando Drift
 @lazySingleton
 class ExpensesLocalDataSource {
-  const ExpensesLocalDataSource(this._repository);
+  ExpensesLocalDataSource(this._repository);
 
   final ExpenseRepository _repository;
+  SyncWriteTrigger get _syncTrigger => GetIt.instance<SyncWriteTrigger>();
+
+  void _notifySync() {
+    _syncTrigger.scheduleSync();
+  }
 
   // ========== CRUD BÁSICO ==========
 
@@ -42,7 +50,9 @@ class ExpensesLocalDataSource {
       receiptImagePath: receiptImagePath,
     );
 
-    return await _repository.insert(expenseData);
+    final newId = await _repository.insert(expenseData);
+    _notifySync();
+    return newId;
   }
 
   Future<ExpenseData?> findById(int id) async {
@@ -134,11 +144,15 @@ class ExpensesLocalDataSource {
       receiptImagePath: receiptImagePath,
     );
 
-    return await _repository.update(expenseData);
+    final success = await _repository.update(expenseData);
+    if (success) _notifySync();
+    return success;
   }
 
   Future<bool> delete(int id) async {
-    return await _repository.softDelete(id);
+    final success = await _repository.softDelete(id);
+    if (success) _notifySync();
+    return success;
   }
 
   // ========== ESTATÍSTICAS ==========

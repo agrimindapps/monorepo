@@ -347,32 +347,40 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
           final remoteEntity = fromFirestoreDoc(doc.data());
 
           // Verificar se existe localmente
-          final localEntityResult = await _getLocalByFirebaseId(
-            remoteEntity.id,
-          );
+          final localEntityResult = await getLocalByFirebaseId(remoteEntity.id);
 
-          if (localEntityResult.isRight()) {
-            // Existe localmente - resolver conflito
-            final localEntity = (localEntityResult as Right).value as TEntity;
-            final resolvedEntity = await resolveConflict(
-              localEntity,
-              remoteEntity,
-            );
-
-            if (resolvedEntity.isRight()) {
-              final resolved =
-                  (resolvedEntity as Right<Failure, TEntity>).value;
-              await _updateLocal(resolved);
-              totalPulled++;
-            } else {
-              errors.add('Conflict resolution failed for ${doc.id}');
+          await localEntityResult.fold(
+            (failure) async {
+              // Erro ao buscar localmente
+              errors.add(
+                  'Error fetching local for ${doc.id}: ${failure.toString()}');
               totalFailed++;
-            }
-          } else {
-            // Não existe localmente - inserir
-            await _insertLocal(remoteEntity);
-            totalPulled++;
-          }
+            },
+            (localEntity) async {
+              if (localEntity != null) {
+                // Existe localmente - resolver conflito
+                final resolvedEntityResult = await resolveConflict(
+                  localEntity,
+                  remoteEntity,
+                );
+
+                await resolvedEntityResult.fold(
+                  (failure) async {
+                    errors.add('Conflict resolution failed for ${doc.id}');
+                    totalFailed++;
+                  },
+                  (resolved) async {
+                    await _updateLocal(resolved);
+                    totalPulled++;
+                  },
+                );
+              } else {
+                // Não existe localmente - inserir
+                await _insertLocal(remoteEntity);
+                totalPulled++;
+              }
+            },
+          );
         } catch (e) {
           developer.log(
             'Failed to process remote doc ${doc.id}: $e',
@@ -411,12 +419,12 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
 
   // Métodos auxiliares para operações locais (subclasses podem sobrescrever)
 
-  Future<Either<Failure, TEntity?>> _getLocalByFirebaseId(
+  Future<Either<Failure, TEntity?>> getLocalByFirebaseId(
     String firebaseId,
   ) async {
     try {
       // Subclasses devem implementar busca por firebaseId
-      throw UnimplementedError('Subclass must implement _getLocalByFirebaseId');
+      throw UnimplementedError('Subclass must implement getLocalByFirebaseId');
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar registro local: $e'));
     }

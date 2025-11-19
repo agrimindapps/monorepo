@@ -1,12 +1,20 @@
+import 'package:core/core.dart' show GetIt;
 import 'package:injectable/injectable.dart';
+
 import '../../../../database/repositories/maintenance_repository.dart';
+import '../../../sync/domain/services/sync_write_trigger.dart';
 
 /// DataSource local para manutenções usando Drift
 @lazySingleton
 class MaintenanceLocalDataSource {
-  const MaintenanceLocalDataSource(this._repository);
+  MaintenanceLocalDataSource(this._repository);
 
   final MaintenanceRepository _repository;
+  SyncWriteTrigger get _syncTrigger => GetIt.instance<SyncWriteTrigger>();
+
+  void _notifySync() {
+    _syncTrigger.scheduleSync();
+  }
 
   // ========== CRUD BÁSICO ==========
 
@@ -46,7 +54,9 @@ class MaintenanceLocalDataSource {
       receiptImagePath: receiptImagePath,
     );
 
-    return await _repository.insert(maintenanceData);
+    final newId = await _repository.insert(maintenanceData);
+    _notifySync();
+    return newId;
   }
 
   Future<MaintenanceData?> findById(int id) async {
@@ -137,15 +147,21 @@ class MaintenanceLocalDataSource {
       receiptImagePath: receiptImagePath,
     );
 
-    return await _repository.update(maintenanceData);
+    final success = await _repository.update(maintenanceData);
+    if (success) _notifySync();
+    return success;
   }
 
   Future<bool> delete(int id) async {
-    return await _repository.softDelete(id);
+    final success = await _repository.softDelete(id);
+    if (success) _notifySync();
+    return success;
   }
 
   Future<bool> markAsCompleted(int maintenanceId) async {
-    return await _repository.markAsCompleted(maintenanceId);
+    final success = await _repository.markAsCompleted(maintenanceId);
+    if (success) _notifySync();
+    return success;
   }
 
   // ========== ESTATÍSTICAS ==========

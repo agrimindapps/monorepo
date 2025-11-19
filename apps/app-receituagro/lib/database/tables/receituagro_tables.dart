@@ -7,7 +7,7 @@ import 'package:drift/drift.dart';
 ///
 /// Relaciona defensivos agrícolas com culturas e pragas, definindo
 /// dosagens e formas de aplicação recomendadas.
-/// 
+///
 /// ⚠️ TABELA ESTÁTICA - Não pertence ao usuário, não sincroniza com Firebase.
 /// Dados carregados do Firebase apenas para leitura (lookup table).
 class Diagnosticos extends Table {
@@ -100,6 +100,14 @@ class Favoritos extends Table {
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
   IntColumn get version => integer().withDefault(const Constant(1))();
 
+  // ========== SYNC DIAGNOSTICS ==========
+  TextColumn get syncError => text().nullable()();
+  IntColumn get retryCount => integer().withDefault(const Constant(0))();
+  DateTimeColumn get lastAttemptAt => dateTime().nullable()();
+
+  /// 0=Synced, 1=Pending, 2=Error, 3=Conflict
+  IntColumn get syncStatus => integer().withDefault(const Constant(0))();
+
   // ========== BUSINESS FIELDS ==========
   /// Tipo do favorito: 'defensivos', 'pragas', 'diagnosticos', 'culturas'
   TextColumn get tipo => text()();
@@ -139,6 +147,14 @@ class Comentarios extends Table {
   BoolColumn get isDirty => boolean().withDefault(const Constant(false))();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
   IntColumn get version => integer().withDefault(const Constant(1))();
+
+  // ========== SYNC DIAGNOSTICS ==========
+  TextColumn get syncError => text().nullable()();
+  IntColumn get retryCount => integer().withDefault(const Constant(0))();
+  DateTimeColumn get lastAttemptAt => dateTime().nullable()();
+
+  /// 0=Synced, 1=Pending, 2=Error, 3=Conflict
+  IntColumn get syncStatus => integer().withDefault(const Constant(0))();
 
   // ========== BUSINESS FIELDS ==========
   /// ID do item comentado

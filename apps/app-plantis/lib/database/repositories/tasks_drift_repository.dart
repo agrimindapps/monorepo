@@ -28,6 +28,10 @@ class TasksDriftRepository {
   Future<int> insertTask(TaskModel model) async {
     final localPlantId = await _resolvePlantId(model.plantId);
 
+    if (localPlantId == null) {
+      throw StateError('Plant not found locally for id: ${model.plantId}');
+    }
+
     final companion = db.TasksCompanion.insert(
       firebaseId: Value(model.id),
       title: model.title,
@@ -37,7 +41,7 @@ class TasksDriftRepository {
       priority: Value(model.priority.key),
       dueDate: model.dueDate,
       completedAt: Value(model.completedAt),
-      plantId: localPlantId ?? 0,
+      plantId: localPlantId,
       createdAt: Value(model.createdAt),
       updatedAt: Value(model.updatedAt),
       isDirty: Value(model.isDirty),
@@ -112,7 +116,7 @@ class TasksDriftRepository {
       priority: Value(model.priority.key),
       dueDate: Value(model.dueDate),
       completedAt: Value(model.completedAt),
-      plantId: Value(localPlantId ?? 0),
+      plantId: localPlantId != null ? Value(localPlantId) : const Value.absent(),
       updatedAt: Value(DateTime.now()),
       isDirty: Value(model.isDirty),
       isDeleted: Value(model.isDeleted),

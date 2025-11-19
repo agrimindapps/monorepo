@@ -1,8 +1,12 @@
+import 'dart:async';
+
+import 'package:core/core.dart' show GetIt;
 import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../database/repositories/vehicle_repository.dart';
 import '../../../../database/gasometer_database.dart';
+import '../../../sync/domain/services/sync_write_trigger.dart';
 
 /// Local data source for vehicles using Drift
 ///
@@ -16,6 +20,13 @@ class VehicleLocalDataSource {
   final VehicleRepository _repository;
 
   VehicleLocalDataSource(this._repository);
+
+  SyncWriteTrigger get _syncTrigger => GetIt.instance<SyncWriteTrigger>();
+
+  void _notifySync() {
+    // Debounced para consolidar múltiplas operações em sequência
+    _syncTrigger.scheduleSync();
+  }
 
   /// Get all vehicles for a specific user
   Future<List<VehicleData>> getVehiclesByUserId(String userId) {
@@ -74,7 +85,11 @@ class VehicleLocalDataSource {
       isDirty: const Value(true),
     );
     // Use the database insert method directly
-    return await _repository.database.into(_repository.table).insert(companion);
+    final newId = await _repository.database
+        .into(_repository.table)
+        .insert(companion);
+    _notifySync();
+    return newId;
   }
 
   /// Update an existing vehicle with partial updates
@@ -82,12 +97,17 @@ class VehicleLocalDataSource {
     final rowsAffected = await (_repository.database.update(
       _repository.table,
     )..where((tbl) => tbl.id.equals(id))).write(updates);
-    return rowsAffected > 0;
+    final success = rowsAffected > 0;
+    if (success) _notifySync();
+    return success;
   }
 
   /// Update current odometer reading
   Future<bool> updateCurrentOdometer(int id, double odometer) {
-    return _repository.updateOdometer(id, odometer);
+    return _repository.updateOdometer(id, odometer).then((success) {
+      if (success) _notifySync();
+      return success;
+    });
   }
 
   /// Alias for updateCurrentOdometer (for convenience)
@@ -97,17 +117,26 @@ class VehicleLocalDataSource {
 
   /// Mark vehicle as sold
   Future<bool> markAsSold(int id, double saleValue) {
-    return _repository.markAsSold(id, saleValue);
+    return _repository.markAsSold(id, saleValue).then((success) {
+      if (success) _notifySync();
+      return success;
+    });
   }
 
   /// Soft delete a vehicle (mark as deleted)
   Future<bool> deleteVehicle(int id) {
-    return _repository.softDelete(id);
+    return _repository.softDelete(id).then((success) {
+      if (success) _notifySync();
+      return success;
+    });
   }
 
   /// Permanently delete a vehicle (hard delete)
   Future<bool> deleteVehiclePermanently(int id) {
-    return _repository.delete(id);
+    return _repository.delete(id).then((success) {
+      if (success) _notifySync();
+      return success;
+    });
   }
 
   /// Get active (not sold) vehicles for a user

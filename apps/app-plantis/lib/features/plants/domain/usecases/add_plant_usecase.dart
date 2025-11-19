@@ -1,5 +1,6 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/data/models/planta_config_model.dart';
@@ -104,14 +105,18 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
       return Left(validationResult);
     }
     final now = DateTime.now();
-    final generatedId = params.id ?? _generateId();
-
-    if (kDebugMode) {
-      print('🌱 AddPlantUseCase.call() - Criando planta com id: $generatedId');
-    }
     final currentUser = AuthStateNotifier.instance.currentUser;
     if (currentUser == null) {
       return const Left(AuthFailure('Usuário não está autenticado'));
+    }
+    final generatedId = params.id ??
+        FirebaseFirestore.instance
+            .collection('users/${currentUser.id}/plants')
+            .doc()
+            .id;
+
+    if (kDebugMode) {
+      print('🌱 AddPlantUseCase.call() - Criando planta com id: $generatedId');
     }
 
     final plant = Plant(

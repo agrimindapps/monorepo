@@ -12,6 +12,8 @@ import '../../../features/sync/domain/services/gasometer_sync_service.dart';
 import '../../../features/sync/domain/services/gasometer_sync_orchestrator.dart';
 import '../../../features/sync/domain/services/sync_push_service.dart';
 import '../../../features/sync/domain/services/sync_pull_service.dart';
+import '../../../features/sync/domain/services/sync_write_trigger.dart';
+import '../../../features/sync/domain/services/sync_checkpoint_store.dart';
 import '../../services/contracts/i_auth_provider.dart';
 import '../../services/contracts/i_analytics_provider.dart';
 import '../../services/providers/firebase_auth_provider.dart';
@@ -40,6 +42,14 @@ abstract class SyncDIModule {
       sl<ExpenseDriftSyncAdapter>();
       sl<OdometerDriftSyncAdapter>();
 
+      if (!sl.isRegistered<SyncWriteTrigger>()) {
+        sl.registerLazySingleton<SyncWriteTrigger>(SyncWriteTrigger.new);
+      }
+
+      if (!sl.isRegistered<SyncCheckpointStore>()) {
+        sl.registerLazySingleton<SyncCheckpointStore>(SyncCheckpointStore.new);
+      }
+
       // Register SyncAdapterRegistry with all adapters
       sl.registerLazySingleton<SyncAdapterRegistry>(
         () => SyncAdapterRegistry(
@@ -55,14 +65,13 @@ abstract class SyncDIModule {
 
       // Register specialized push/pull services (SRP) with registry
       sl.registerLazySingleton<SyncPushService>(
-        () => SyncPushService(
-          adapterRegistry: sl<SyncAdapterRegistry>(),
-        ),
+        () => SyncPushService(adapterRegistry: sl<SyncAdapterRegistry>()),
       );
 
       sl.registerLazySingleton<SyncPullService>(
         () => SyncPullService(
           adapterRegistry: sl<SyncAdapterRegistry>(),
+          checkpointStore: sl<SyncCheckpointStore>(),
         ),
       );
 
@@ -84,16 +93,18 @@ abstract class SyncDIModule {
 
       // Register Firebase Auth Provider
       sl.registerLazySingleton<IAuthProvider>(
-        () => FirebaseAuthProvider(
-          firebaseAuth: FirebaseAuth.instance,
-        ) as IAuthProvider,
+        () =>
+            FirebaseAuthProvider(firebaseAuth: FirebaseAuth.instance)
+                as IAuthProvider,
       );
 
       // Register Firebase Analytics Provider
       sl.registerLazySingleton<IAnalyticsProvider>(
-        () => FirebaseAnalyticsProvider(
-          firebaseAnalytics: FirebaseAnalytics.instance,
-        ) as IAnalyticsProvider,
+        () =>
+            FirebaseAnalyticsProvider(
+                  firebaseAnalytics: FirebaseAnalytics.instance,
+                )
+                as IAnalyticsProvider,
       );
 
       if (kDebugMode) {
@@ -203,6 +214,14 @@ abstract class SyncDIModule {
     try {
       final syncService = sl<GasometerSyncService>();
       await syncService.clearLocalData();
+
+      final checkpointStore = sl<SyncCheckpointStore>();
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        await checkpointStore.clearUser(currentUser.uid);
+      } else {
+        await checkpointStore.clearAll();
+      }
 
       if (kDebugMode) {
         print('✅ Sync data cleared successfully');

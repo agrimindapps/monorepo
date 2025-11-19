@@ -134,10 +134,7 @@ class SyncPushResult extends Equatable {
       recordsPushed: results.fold(0, (sum, r) => sum + r.recordsPushed),
       recordsFailed: results.fold(0, (sum, r) => sum + r.recordsFailed),
       errors: results.expand((r) => r.errors).toList(),
-      duration: results.fold(
-        Duration.zero,
-        (sum, r) => sum + r.duration,
-      ),
+      duration: results.fold(Duration.zero, (sum, r) => sum + r.duration),
     );
   }
 }
@@ -159,6 +156,7 @@ class SyncPullResult extends Equatable {
     this.conflictsResolved = 0,
     this.warnings = const [],
     required this.duration,
+    this.latestRemoteUpdateAt,
   });
 
   /// Número de registros NOVOS baixados do Firestore
@@ -198,6 +196,10 @@ class SyncPullResult extends Equatable {
   /// Tempo total da operação de pull
   final Duration duration;
 
+  /// Maior timestamp remoto (updated_at) processado durante o pull.
+  /// Usado para suportar pulls incrementais (cursor baseado no servidor).
+  final DateTime? latestRemoteUpdateAt;
+
   /// Total de registros afetados (novos + atualizados + conflitos)
   int get totalRecords => recordsPulled + recordsUpdated + conflictsResolved;
 
@@ -226,12 +228,13 @@ class SyncPullResult extends Equatable {
 
   @override
   List<Object?> get props => [
-        recordsPulled,
-        recordsUpdated,
-        conflictsResolved,
-        warnings,
-        duration,
-      ];
+    recordsPulled,
+    recordsUpdated,
+    conflictsResolved,
+    warnings,
+    duration,
+    latestRemoteUpdateAt,
+  ];
 
   @override
   String toString() {
@@ -239,7 +242,8 @@ class SyncPullResult extends Equatable {
         'pulled: $recordsPulled, '
         'updated: $recordsUpdated, '
         'conflicts: $conflictsResolved, '
-        'duration: ${duration.inMilliseconds}ms)';
+        'duration: ${duration.inMilliseconds}ms, '
+        'latestRemote: ${latestRemoteUpdateAt?.toIso8601String()})';
   }
 
   /// Cria resultado vazio (nenhuma mudança detectada)
@@ -249,6 +253,7 @@ class SyncPullResult extends Equatable {
       recordsUpdated: 0,
       conflictsResolved: 0,
       duration: Duration.zero,
+      latestRemoteUpdateAt: null,
     );
   }
 
@@ -256,12 +261,14 @@ class SyncPullResult extends Equatable {
   factory SyncPullResult.newRecords({
     required int recordsPulled,
     required Duration duration,
+    DateTime? latestRemoteUpdateAt,
   }) {
     return SyncPullResult(
       recordsPulled: recordsPulled,
       recordsUpdated: 0,
       conflictsResolved: 0,
       duration: duration,
+      latestRemoteUpdateAt: latestRemoteUpdateAt,
     );
   }
 
@@ -269,12 +276,14 @@ class SyncPullResult extends Equatable {
   factory SyncPullResult.updatesOnly({
     required int recordsUpdated,
     required Duration duration,
+    DateTime? latestRemoteUpdateAt,
   }) {
     return SyncPullResult(
       recordsPulled: 0,
       recordsUpdated: recordsUpdated,
       conflictsResolved: 0,
       duration: duration,
+      latestRemoteUpdateAt: latestRemoteUpdateAt,
     );
   }
 
@@ -285,15 +294,16 @@ class SyncPullResult extends Equatable {
     return SyncPullResult(
       recordsPulled: results.fold(0, (sum, r) => sum + r.recordsPulled),
       recordsUpdated: results.fold(0, (sum, r) => sum + r.recordsUpdated),
-      conflictsResolved: results.fold(
-        0,
-        (sum, r) => sum + r.conflictsResolved,
-      ),
+      conflictsResolved: results.fold(0, (sum, r) => sum + r.conflictsResolved),
       warnings: results.expand((r) => r.warnings).toList(),
-      duration: results.fold(
-        Duration.zero,
-        (sum, r) => sum + r.duration,
-      ),
+      duration: results.fold(Duration.zero, (sum, r) => sum + r.duration),
+      latestRemoteUpdateAt: results.fold<DateTime?>(null, (latest, r) {
+        if (r.latestRemoteUpdateAt == null) return latest;
+        if (latest == null) return r.latestRemoteUpdateAt;
+        return r.latestRemoteUpdateAt!.isAfter(latest)
+            ? r.latestRemoteUpdateAt
+            : latest;
+      }),
     );
   }
 }

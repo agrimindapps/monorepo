@@ -9,48 +9,47 @@ import 'i_favorito_query_repository.dart';
 /// Repositório de Favoritos usando Drift
 ///
 /// Gerencia favoritos multi-tipo (defensivos, pragas, diagnosticos, culturas)
-/// 
+///
 /// ✅ INTERFACE SEGREGATION PATTERN (ISP):
 /// Implements two segregated interfaces instead of one monolithic interface:
-/// 
+///
 /// 1. IFavoritoCrudRepository - CREATE, READ, UPDATE, DELETE operations:
 ///    - add(entity): Create new favorite
 ///    - get(id): Read single favorite
 ///    - update(entity): Update existing favorite
 ///    - delete(id): Delete favorite (soft delete)
 ///    - getAll(): Get all favorites
-/// 
+///
 /// 2. IFavoritoQueryRepository - QUERY operations:
 ///    - search(term): Search by name/content
 ///    - count(): Count total favorites
 ///    - exists(id): Check if favorite exists
 ///    - queryBy*(filters): Specialized queries
-/// 
+///
 /// Benefits:
 /// - Clients depend only on interface methods they actually use
 /// - CRUD notifiers don't need query methods (reduces coupling)
 /// - Query services don't need CRUD methods
 /// - Easier to extend with new query types
-/// 
+///
 /// ✅ DATABASE-LEVEL FILTERING:
 /// Drift queries (.where(), .orderBy()) execute at SQLite level for performance.
 /// For in-memory filtering in notifiers/providers, use FilterService instead.
-/// 
+///
 /// Example:
 /// ```dart
 /// // In repository (efficient database query):
 /// final favorites = await repository.findByUserAndType(userId, 'defensivo');
-/// 
+///
 /// // In notifier (in-memory filtering):
 /// final filtered = FilterService.filterBySearchTerm(favoritesList, query, ...);
 /// ```
-/// 
+///
 /// ⚠️ NOTA: Este repository utiliza queries Drift para filtering de forma eficiente.
 /// Para operações de filtro em-memória em notifiers/providers, use FilterService
 /// que fornece operações genéricas de filtro sem persistência.
 @lazySingleton
-class FavoritoRepository
-    extends BaseDriftRepositoryImpl<FavoritoData, Favorito>
+class FavoritoRepository extends BaseDriftRepositoryImpl<FavoritoData, Favorito>
     implements IFavoritoCrudRepository, IFavoritoQueryRepository {
   FavoritoRepository(this._db);
 
@@ -308,12 +307,18 @@ class FavoritoRepository
   }
 
   /// @deprecated Legacy method - adiciona favorito
-  Future<int> addFavorito(String tipo, String itemId, String? itemData) async {
+  Future<int> addFavorito(
+    String userId,
+    String tipo,
+    String itemId,
+    String? itemData,
+  ) async {
     final companion = FavoritosCompanion.insert(
-      userId: '', // TODO: Obter userId do contexto
+      userId: userId,
       tipo: tipo,
       itemId: itemId,
       itemData: itemData ?? '',
+      isDirty: const Value(true),
     );
 
     return await _db.into(_db.favoritos).insert(companion);

@@ -94,14 +94,22 @@ class PhysicsService {
   }
 
   /// Calculates bird rotation based on velocity
-  /// Unified rotation calculation: -90° to +45° (radians: -π/2 to π/4)
-  /// Sensitivity: 0.05 radians per pixel/frame velocity
+  /// Unified rotation calculation: -45° to +90° (radians: -π/4 to π/2)
   double _calculateRotation(double velocity) {
-    final rotation = velocity * 0.05;
-    return rotation.clamp(-1.5708, 0.7854); // -90° to 45° in radians
-  }
-
-  /// Calculates falling distance in next frame
+    // If moving up (negative velocity), rotate up to -45 degrees
+    if (velocity < 0) {
+      // Map velocity 0 to -600 (jump strength) to 0 to -45 degrees
+      // Note: defaultJumpStrength is negative, so we divide by it to get positive ratio
+      final ratio = (velocity / defaultJumpStrength).clamp(0.0, 1.0);
+      return -0.785 * ratio; // -45 degrees in radians
+    } 
+    // If moving down (positive velocity), rotate down to 90 degrees
+    else {
+      // Map velocity 0 to 500 to 0 to 90 degrees
+      final ratio = (velocity / 500.0).clamp(0.0, 1.0);
+      return 1.57 * ratio; // 90 degrees in radians
+    }
+  }  /// Calculates falling distance in next frame
   double predictFallDistance({
     required double currentVelocity,
     double gravity = defaultGravity,

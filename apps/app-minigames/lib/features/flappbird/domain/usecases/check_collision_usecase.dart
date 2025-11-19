@@ -7,9 +7,14 @@ import 'package:core/core.dart';
 // Entity imports:
 import '../entities/game_state_entity.dart';
 import '../entities/enums.dart';
+import '../services/collision_service.dart';
 
 /// Use case to check collision between bird and pipes
 class CheckCollisionUseCase {
+  final CollisionService _collisionService;
+
+  CheckCollisionUseCase(this._collisionService);
+
   Future<Either<Failure, FlappyGameState>> call({
     required FlappyGameState currentState,
   }) async {
@@ -19,18 +24,16 @@ class CheckCollisionUseCase {
         return Right(currentState);
       }
 
-      final birdX = currentState.birdX;
-      final birdY = currentState.bird.y;
-      final birdSize = currentState.bird.size;
-
-      // Check collision with each pipe
-      for (final pipe in currentState.pipes) {
-        if (pipe.checkCollision(birdX, birdY, birdSize)) {
-          // Collision detected - game over
-          return Right(
-            currentState.copyWith(status: FlappyGameStatus.gameOver),
-          );
-        }
+      // Check collision with pipes using service
+      if (_collisionService.checkBirdPipesCollision(
+        bird: currentState.bird,
+        pipes: currentState.pipes,
+        birdX: currentState.birdX,
+      )) {
+        // Collision detected - game over
+        return Right(
+          currentState.copyWith(status: FlappyGameStatus.gameOver),
+        );
       }
 
       // No collision

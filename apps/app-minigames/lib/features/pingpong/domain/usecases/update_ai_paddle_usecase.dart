@@ -1,27 +1,26 @@
 import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
+import 'package:injectable/injectable.dart';
 import '../entities/game_state_entity.dart';
+import '../services/ai_paddle_service.dart';
 
+@lazySingleton
 class UpdateAiPaddleUseCase {
+  final AiPaddleService _aiPaddleService;
+
+  UpdateAiPaddleUseCase(this._aiPaddleService);
+
   Future<Either<Failure, GameStateEntity>> call(GameStateEntity state) async {
     if (!state.canPlay) {
       return Left(ValidationFailure('Game is not active'));
     }
 
     try {
-      var aiPaddle = state.aiPaddle;
-      final ball = state.ball;
-      final aiSpeed = state.difficulty.aiSpeed;
-      final reactionDelay = state.difficulty.aiReactionDelay;
-
-      final targetY = ball.y;
-      final currentY = aiPaddle.y;
-
-      if (targetY < currentY - reactionDelay) {
-        aiPaddle = aiPaddle.moveUp(aiSpeed);
-      } else if (targetY > currentY + reactionDelay) {
-        aiPaddle = aiPaddle.moveDown(aiSpeed);
-      }
+      final aiPaddle = _aiPaddleService.updatePaddle(
+        aiPaddle: state.aiPaddle,
+        ball: state.ball,
+        difficulty: state.difficulty,
+      );
 
       return Right(state.copyWith(aiPaddle: aiPaddle));
     } catch (e) {

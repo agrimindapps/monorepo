@@ -53,7 +53,10 @@ abstract class FlappbirdModule {
 
   UpdatePipesUseCase get updatePipesUseCase => UpdatePipesUseCase();
 
-  CheckCollisionUseCase get checkCollisionUseCase => CheckCollisionUseCase();
+  CheckCollisionUseCase checkCollisionUseCase(
+    CollisionService collisionService,
+  ) =>
+      CheckCollisionUseCase(collisionService);
 
   LoadHighScoreUseCase loadHighScoreUseCase(
     FlappbirdRepository repository,

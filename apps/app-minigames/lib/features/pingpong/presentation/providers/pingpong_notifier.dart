@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:get_it/get_it.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/game_state_entity.dart';
 import '../../domain/entities/high_score_entity.dart';
@@ -39,12 +40,12 @@ class PingpongGame extends _$PingpongGame {
   }
 
   void _initializeUseCases() {
-    _startGameUseCase = StartGameUseCase();
-    _updateBallUseCase = UpdateBallUseCase();
-    _updatePlayerPaddleUseCase = UpdatePlayerPaddleUseCase();
-    _updateAiPaddleUseCase = UpdateAiPaddleUseCase();
-    _checkCollisionUseCase = CheckCollisionUseCase();
-    _checkScoreUseCase = CheckScoreUseCase();
+    _startGameUseCase = GetIt.I<StartGameUseCase>();
+    _updateBallUseCase = GetIt.I<UpdateBallUseCase>();
+    _updatePlayerPaddleUseCase = GetIt.I<UpdatePlayerPaddleUseCase>();
+    _updateAiPaddleUseCase = GetIt.I<UpdateAiPaddleUseCase>();
+    _checkCollisionUseCase = GetIt.I<CheckCollisionUseCase>();
+    _checkScoreUseCase = GetIt.I<CheckScoreUseCase>();
   }
 
   void setUseCases({

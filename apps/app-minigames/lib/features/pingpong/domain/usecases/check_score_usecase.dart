@@ -1,50 +1,55 @@
 import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
+import 'package:injectable/injectable.dart';
 import '../entities/game_state_entity.dart';
 import '../entities/enums.dart';
+import '../services/score_manager_service.dart';
 
+@lazySingleton
 class CheckScoreUseCase {
+  final ScoreManagerService _scoreService;
+
+  CheckScoreUseCase(this._scoreService);
+
   Future<Either<Failure, GameStateEntity>> call(GameStateEntity state) async {
     if (!state.canPlay) {
       return Left(ValidationFailure('Game is not active'));
     }
 
     try {
-      final ball = state.ball;
+      final scoreUpdate = _scoreService.checkBoundaries(
+        ball: state.ball,
+        playerScore: state.playerScore,
+        aiScore: state.aiScore,
+      );
 
-      if (ball.x < 0.0) {
-        final newAiScore = state.aiScore + 1;
-        final newMaxRally =
-            state.currentRally > state.maxRally ? state.currentRally : state.maxRally;
-
-        return Right(state.copyWith(
-          ball: ball.reset(toLeft: false),
-          aiScore: newAiScore,
-          currentRally: 0,
-          maxRally: newMaxRally,
-          status: newAiScore >= GameStateEntity.winningScore
-              ? GameStatus.gameOver
-              : GameStatus.playing,
-        ));
+      if (!scoreUpdate.shouldUpdate) {
+        return Right(state);
       }
 
-      if (ball.x > 1.0) {
-        final newPlayerScore = state.playerScore + 1;
-        final newMaxRally =
-            state.currentRally > state.maxRally ? state.currentRally : state.maxRally;
+      final newMaxRally =
+          state.currentRally > state.maxRally ? state.currentRally : state.maxRally;
 
-        return Right(state.copyWith(
-          ball: ball.reset(toLeft: true),
-          playerScore: newPlayerScore,
-          currentRally: 0,
-          maxRally: newMaxRally,
-          status: newPlayerScore >= GameStateEntity.winningScore
-              ? GameStatus.gameOver
-              : GameStatus.playing,
-        ));
+      final gameOverResult = _scoreService.checkGameOver(
+        playerScore: scoreUpdate.newPlayerScore,
+        aiScore: scoreUpdate.newAiScore,
+      );
+
+      var newState = state.copyWith(
+        playerScore: scoreUpdate.newPlayerScore,
+        aiScore: scoreUpdate.newAiScore,
+        maxRally: newMaxRally,
+        currentRally: 0,
+      );
+
+      if (gameOverResult.isGameOver) {
+        newState = newState.copyWith(status: GameStatus.gameOver);
+      } else {
+        final newBall = state.ball.reset(toLeft: scoreUpdate.resetBallToLeft);
+        newState = newState.copyWith(ball: newBall);
       }
 
-      return Right(state);
+      return Right(newState);
     } catch (e) {
       return Left(UnexpectedFailure('Failed to check score: $e'));
     }

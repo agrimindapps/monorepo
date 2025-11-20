@@ -7,6 +7,7 @@ import '../../domain/services/task_filter_service.dart';
 import '../../domain/services/task_ownership_validator.dart';
 import '../../domain/usecases/add_task_usecase.dart';
 import '../../domain/usecases/complete_task_usecase.dart';
+import '../../domain/usecases/get_task_by_id_usecase.dart';
 import '../../domain/usecases/get_tasks_usecase.dart';
 
 part 'tasks_providers.g.dart';
@@ -21,6 +22,12 @@ TasksRepository tasksRepository(TasksRepositoryRef ref) {
 @riverpod
 GetTasksUseCase getTasksUseCase(GetTasksUseCaseRef ref) {
   return GetTasksUseCase(ref.watch(tasksRepositoryProvider));
+}
+
+/// Provider for GetTaskByIdUseCase
+@riverpod
+GetTaskByIdUseCase getTaskByIdUseCase(GetTaskByIdUseCaseRef ref) {
+  return GetTaskByIdUseCase(ref.watch(tasksRepositoryProvider));
 }
 
 /// Provider for AddTaskUseCase

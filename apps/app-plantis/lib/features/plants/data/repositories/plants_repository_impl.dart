@@ -77,7 +77,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
         return const Right([]);
       }
 
-      final localPlants = await localDatasource.getPlants();
+      var localPlants = await localDatasource.getPlants();
 
       if (kDebugMode) {
         print('📱 PlantsRepository.getPlants - Loaded ${localPlants.length} plants from local datasource');
@@ -85,6 +85,8 @@ class PlantsRepositoryImpl implements PlantsRepository {
 
       if (await networkInfo.isConnected) {
         await syncService.syncPlantsInBackground(userId);
+        // Re-fetch local data after sync to ensure we return the latest data
+        localPlants = await localDatasource.getPlants();
       }
 
       return Right(localPlants);

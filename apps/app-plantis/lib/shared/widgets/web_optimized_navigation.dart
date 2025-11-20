@@ -96,13 +96,13 @@ class _ModernSidebarState extends State<ModernSidebar>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _widthAnimation = Tween<double>(begin: _expandedWidth, end: _expandedWidth)
-        .animate(
-          CurvedAnimation(
-            parent: _widthAnimationController,
-            curve: Curves.easeInOut,
-          ),
-        );
+    _widthAnimation =
+        Tween<double>(begin: _expandedWidth, end: _expandedWidth).animate(
+      CurvedAnimation(
+        parent: _widthAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
 
     _fadeAnimationController.forward();
     _widthAnimationController.forward();
@@ -120,16 +120,15 @@ class _ModernSidebarState extends State<ModernSidebar>
       _isExpanded = !_isExpanded;
     });
 
-    _widthAnimation =
-        Tween<double>(
-          begin: _isExpanded ? _collapsedWidth : _expandedWidth,
-          end: _isExpanded ? _expandedWidth : _collapsedWidth,
-        ).animate(
-          CurvedAnimation(
-            parent: _widthAnimationController,
-            curve: Curves.easeInOut,
-          ),
-        );
+    _widthAnimation = Tween<double>(
+      begin: _isExpanded ? _collapsedWidth : _expandedWidth,
+      end: _isExpanded ? _expandedWidth : _collapsedWidth,
+    ).animate(
+      CurvedAnimation(
+        parent: _widthAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
 
     _widthAnimationController.reset();
     _widthAnimationController.forward();
@@ -216,7 +215,6 @@ class _SidebarHeader extends StatelessWidget {
             ),
             child: const Icon(Icons.eco, color: Colors.white, size: 22),
           ),
-
           if (isExpanded) ...[
             const SizedBox(width: 16),
             Expanded(
@@ -267,10 +265,10 @@ class _NavigationList extends StatelessWidget {
               child: Text(
                 'PRINCIPAIS',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
               ),
             ),
           ],
@@ -336,7 +334,6 @@ class _BottomNavigationSection extends StatelessWidget {
             shortcut: '3',
             isExpanded: isExpanded,
           ),
-
           const SizedBox(height: 8),
         ],
       ),
@@ -454,19 +451,22 @@ class _NavigationItemState extends State<_NavigationItem>
                     ),
                     decoration: BoxDecoration(
                       color: isActive
-                          ? PlantisColors.primary.withValues(alpha: 0.1)
+                          ? PlantisColors.primary
                           : _isHovering
-                          ? theme.colorScheme.surfaceContainerHighest
-                                .withValues(alpha: 0.5)
-                          : Colors.transparent,
+                              ? theme.colorScheme.surfaceContainerHighest
+                                  .withValues(alpha: 0.5)
+                              : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
-                      border: isActive
-                          ? Border.all(
-                              color: PlantisColors.primary.withValues(
-                                alpha: 0.3,
+                      boxShadow: isActive
+                          ? [
+                              BoxShadow(
+                                color: PlantisColors.primary.withValues(
+                                  alpha: 0.3,
+                                ),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
                               ),
-                              width: 1,
-                            )
+                            ]
                           : null,
                     ),
                     child: widget.isExpanded
@@ -489,20 +489,15 @@ class _NavigationItemState extends State<_NavigationItem>
         Icon(
           widget.icon,
           size: 20,
-          color: isActive
-              ? PlantisColors.primary
-              : theme.colorScheme.onSurfaceVariant,
+          color: isActive ? Colors.white : theme.colorScheme.onSurfaceVariant,
         ),
-
         const SizedBox(width: 16),
         Expanded(
           child: Text(
             widget.label,
             style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-              color: isActive
-                  ? PlantisColors.primary
-                  : theme.colorScheme.onSurface,
+              color: isActive ? Colors.white : theme.colorScheme.onSurface,
             ),
           ),
         ),
@@ -511,7 +506,9 @@ class _NavigationItemState extends State<_NavigationItem>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: PlantisColors.primary,
+              color: isActive
+                  ? Colors.white.withValues(alpha: 0.2)
+                  : PlantisColors.primary,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -554,9 +551,7 @@ class _NavigationItemState extends State<_NavigationItem>
           child: Icon(
             widget.icon,
             size: 22,
-            color: isActive
-                ? PlantisColors.primary
-                : theme.colorScheme.onSurfaceVariant,
+            color: isActive ? Colors.white : theme.colorScheme.onSurfaceVariant,
           ),
         ),
         if (widget.badge != null)
@@ -566,7 +561,7 @@ class _NavigationItemState extends State<_NavigationItem>
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: PlantisColors.primary,
+                color: isActive ? Colors.white : PlantisColors.primary,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: theme.colorScheme.surface,
@@ -576,7 +571,7 @@ class _NavigationItemState extends State<_NavigationItem>
               child: Text(
                 widget.badge! > 99 ? '99+' : widget.badge.toString(),
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.white,
+                  color: isActive ? PlantisColors.primary : Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 9,
                 ),
@@ -617,8 +612,7 @@ class _SidebarFooter extends StatelessWidget {
               final authState = ref.watch(authProvider);
 
               // Get user data from auth state
-              final displayName =
-                  authState.whenData((auth) {
+              final displayName = authState.whenData((auth) {
                     return DataSanitizationService.sanitizeDisplayName(
                       auth.currentUser,
                       auth.isAnonymous,
@@ -626,8 +620,7 @@ class _SidebarFooter extends StatelessWidget {
                   }).value ??
                   'Usuário Anônimo';
 
-              final statusText =
-                  authState.whenData((auth) {
+              final statusText = authState.whenData((auth) {
                     return auth.isAnonymous ? 'Modo Offline' : 'Online';
                   }).value ??
                   'Carregando...';
@@ -723,7 +716,6 @@ class _SidebarFooter extends StatelessWidget {
                         ),
                       ),
                     ),
-
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -747,7 +739,6 @@ class _SidebarFooter extends StatelessWidget {
                         ],
                       ),
                     ),
-
                     const SizedBox(width: 8),
                     Container(
                       width: 8,

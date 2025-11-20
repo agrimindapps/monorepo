@@ -1,9 +1,11 @@
 import 'package:core/core.dart';
+import 'package:injectable/injectable.dart';
 
 import '../entities/calculator_category.dart';
 import '../entities/calculator_entity.dart';
 import '../repositories/calculator_repository.dart';
 
+@lazySingleton
 class GetCalculators {
   final CalculatorRepository repository;
 
@@ -14,6 +16,7 @@ class GetCalculators {
   }
 }
 
+@lazySingleton
 class GetCalculatorsByCategory {
   final CalculatorRepository repository;
 
@@ -26,6 +29,7 @@ class GetCalculatorsByCategory {
   }
 }
 
+@lazySingleton
 class GetCalculatorById {
   final CalculatorRepository repository;
 
@@ -36,6 +40,7 @@ class GetCalculatorById {
   }
 }
 
+@lazySingleton
 class SearchCalculators {
   final CalculatorRepository repository;
 

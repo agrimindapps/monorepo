@@ -47,8 +47,8 @@ import '../../../vehicles/domain/entities/vehicle_entity.dart';
 @lazySingleton
 class VehicleDriftSyncAdapter
     extends DriftSyncAdapterBase<VehicleEntity, Vehicle> {
-  VehicleDriftSyncAdapter(GeneratedDatabase db, FirebaseFirestore firestore)
-    : super(db, firestore);
+  VehicleDriftSyncAdapter(GasometerDatabase db, FirebaseFirestore firestore)
+      : super(db, firestore);
 
   GasometerDatabase get _db => db as GasometerDatabase;
 
@@ -589,9 +589,8 @@ class VehicleDriftSyncAdapter
         isDirty: const Value(false),
         lastSyncAt: Value(DateTime.now()),
         // 🔥 FIX: Atualizar firebaseId se fornecido (UUID gerado durante push)
-        firebaseId: firebaseId != null
-            ? Value(firebaseId)
-            : const Value.absent(),
+        firebaseId:
+            firebaseId != null ? Value(firebaseId) : const Value.absent(),
       );
 
       final query = _db.update(_db.vehicles)
@@ -698,7 +697,7 @@ class VehicleDriftSyncAdapter
       ..orderBy([(tbl) => OrderingTerm.asc(tbl.modelo)]);
 
     return query.watch().map(
-      (rows) => rows.map((row) => driftToEntity(row)).toList(),
-    );
+          (rows) => rows.map((row) => driftToEntity(row)).toList(),
+        );
   }
 }

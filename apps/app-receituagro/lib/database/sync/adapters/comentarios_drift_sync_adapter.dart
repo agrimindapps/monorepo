@@ -12,9 +12,8 @@ import '../../tables/receituagro_tables.dart';
 class ComentariosDriftSyncAdapter
     extends DriftSyncAdapterBase<ComentarioSyncEntity, Comentario> {
   ComentariosDriftSyncAdapter(
-    ReceituagroDatabase db,
-    FirebaseFirestore firestore,
-  ) : super(db, firestore);
+      ReceituagroDatabase db, FirebaseFirestore firestore)
+      : super(db, firestore);
 
   ReceituagroDatabase get localDb => db as ReceituagroDatabase;
 
@@ -61,13 +60,13 @@ class ComentariosDriftSyncAdapter
 
       await (localDb.update(
         localDb.comentarios,
-      )..where((tbl) => tbl.id.equals(id))).write(
+      )..where((tbl) => tbl.id.equals(id)))
+          .write(
         ComentariosCompanion(
           isDirty: const Value(false),
           lastSyncAt: Value(DateTime.now()),
-          firebaseId: firebaseId != null
-              ? Value(firebaseId)
-              : const Value.absent(),
+          firebaseId:
+              firebaseId != null ? Value(firebaseId) : const Value.absent(),
           // syncError: const Value(null), // TODO: Uncomment after build_runner
           // retryCount: const Value(0),
           // syncStatus: const Value(0), // Synced
@@ -86,8 +85,8 @@ class ComentariosDriftSyncAdapter
   ComentarioSyncEntity driftToEntity(Comentario row) {
     return ComentarioSyncEntity(
       id: row.firebaseId ?? 'temp_${row.id}',
-      idReg: row.id
-          .toString(), // Usando ID local como idReg se não houver outro
+      idReg:
+          row.id.toString(), // Usando ID local como idReg se não houver outro
       titulo: '', // Tabela não tem título
       conteudo: row.texto,
       ferramenta: row.moduleName,

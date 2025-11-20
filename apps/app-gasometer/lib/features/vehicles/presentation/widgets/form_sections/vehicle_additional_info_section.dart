@@ -8,12 +8,14 @@ class VehicleAdditionalInfoSection extends StatelessWidget {
   const VehicleAdditionalInfoSection({
     required this.observationsController,
     required this.observationsFieldKey,
+    required this.observationsFocusNode,
     this.onObservationsChanged,
     super.key,
   });
 
   final TextEditingController observationsController;
   final GlobalKey observationsFieldKey;
+  final FocusNode observationsFocusNode;
   final ValueChanged<String>? onObservationsChanged;
 
   @override
@@ -25,6 +27,7 @@ class VehicleAdditionalInfoSection extends StatelessWidget {
         key: observationsFieldKey,
         child: ObservationsField(
           controller: observationsController,
+          focusNode: observationsFocusNode,
           label: 'Observações',
           hint: 'Adicione observações sobre o veículo...',
           required: false,

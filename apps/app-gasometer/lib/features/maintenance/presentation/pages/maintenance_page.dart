@@ -1,10 +1,16 @@
 import 'package:core/core.dart' ;
 import 'package:flutter/material.dart';
 
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/utils/date_utils.dart' as local_date_utils;
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
+import '../../../../core/widgets/standard_loading_view.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
+import '../../domain/entities/maintenance_entity.dart';
+import '../notifiers/maintenances_notifier.dart';
+import '../notifiers/maintenances_state.dart';
 import 'add_maintenance_page.dart';
 
 class MaintenancePage extends ConsumerStatefulWidget {
@@ -15,12 +21,12 @@ class MaintenancePage extends ConsumerStatefulWidget {
 }
 
 class _MaintenancePageState extends ConsumerState<MaintenancePage> {
-  int _currentMonthIndex = DateTime.now().month - 1;
   String? _selectedVehicleId;
 
   @override
   Widget build(BuildContext context) {
     final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+    final maintenanceState = ref.watch(maintenancesNotifierProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -30,17 +36,28 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
             _buildVehicleSelector(context),
             if (_selectedVehicleId != null &&
                 (vehiclesAsync.value?.isNotEmpty ?? false))
-              _buildMonthSelector(),
+              _buildMonthSelector(maintenanceState),
             Expanded(
               child: vehiclesAsync.when(
                 data: (vehicles) {
                   if (_selectedVehicleId == null) {
                     return _buildSelectVehicleState();
                   }
-                  return _buildContent(context);
+                  return _buildContent(context, maintenanceState);
                 },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, __) => _buildContent(context),
+                loading: () => const StandardLoadingView(
+                  message: 'Carregando veículos...',
+                  showProgress: true,
+                ),
+                error: (error, _) => EnhancedEmptyState(
+                  title: 'Erro ao carregar veículos',
+                  description: error.toString(),
+                  icon: Icons.error_outline,
+                  actionLabel: 'Tentar novamente',
+                  onAction: () {
+                    ref.read(vehiclesNotifierProvider.notifier).refresh();
+                  },
+                ),
               ),
             ),
           ],
@@ -126,15 +143,24 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
           setState(() {
             _selectedVehicleId = vehicleId;
           });
-          // TODO: Implementar filtro de manutenções por veículo quando o provider estiver pronto
+          if (vehicleId != null) {
+            ref
+                .read(maintenancesNotifierProvider.notifier)
+                .loadMaintenancesByVehicle(vehicleId);
+          }
         },
         hintText: 'Selecione um veículo',
       ),
     );
   }
 
-  Widget _buildMonthSelector() {
-    final months = _getMonths();
+  Widget _buildMonthSelector(MaintenancesState state) {
+    final vehicleRecords = state.maintenances
+        .where((r) => r.vehicleId == _selectedVehicleId)
+        .toList();
+
+    final months = _getMonths(vehicleRecords);
+    final selectedMonth = state.selectedMonth;
 
     return Container(
       height: 50,
@@ -144,13 +170,22 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: months.length,
         itemBuilder: (context, index) {
-          final isSelected = index == _currentMonthIndex;
+          final month = months[index];
+          final isSelected = selectedMonth != null &&
+              month.year == selectedMonth.year &&
+              month.month == selectedMonth.month;
+
+          final monthName = DateFormat('MMM yy', 'pt_BR').format(month);
+          final formattedMonth =
+              monthName[0].toUpperCase() + monthName.substring(1);
 
           return GestureDetector(
             onTap: () {
-              setState(() {
-                _currentMonthIndex = index;
-              });
+              if (isSelected) {
+                ref.read(maintenancesNotifierProvider.notifier).clearMonthFilter();
+              } else {
+                ref.read(maintenancesNotifierProvider.notifier).selectMonth(month);
+              }
             },
             child: Container(
               margin: const EdgeInsets.only(right: 12),
@@ -168,7 +203,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
               ),
               child: Center(
                 child: Text(
-                  months[index],
+                  formattedMonth,
                   style: TextStyle(
                     color: isSelected
                         ? Colors.white
@@ -186,12 +221,174 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
     );
   }
 
-  Widget _buildContent(BuildContext context) {
-    return const EnhancedEmptyState(
-      title: 'Nenhuma manutenção',
-      description:
-          'Adicione sua primeira manutenção para começar a acompanhar o histórico de manutenções.',
-      icon: Icons.build_outlined,
+  Widget _buildContent(BuildContext context, MaintenancesState state) {
+    if (state.isLoading && !state.hasData) {
+      return const StandardLoadingView(
+        message: 'Carregando manutenções...',
+        showProgress: true,
+      );
+    }
+
+    if (state.errorMessage != null && !state.hasData) {
+      return EnhancedEmptyState(
+        title: 'Erro ao carregar',
+        description: state.errorMessage!,
+        icon: Icons.error_outline,
+        actionLabel: 'Tentar novamente',
+        onAction: () {
+          if (_selectedVehicleId != null) {
+            ref
+                .read(maintenancesNotifierProvider.notifier)
+                .loadMaintenancesByVehicle(_selectedVehicleId!);
+          }
+        },
+      );
+    }
+
+    final records = state.filteredMaintenances;
+
+    if (records.isEmpty) {
+      return EnhancedEmptyState(
+        title: 'Nenhuma manutenção',
+        description: state.hasActiveFilters
+            ? 'Nenhum registro encontrado com os filtros aplicados.'
+            : 'Adicione sua primeira manutenção para começar a acompanhar o histórico de manutenções.',
+        icon: Icons.build_outlined,
+        actionLabel: state.hasActiveFilters ? 'Limpar filtros' : null,
+        onAction: state.hasActiveFilters
+            ? () =>
+                ref.read(maintenancesNotifierProvider.notifier).clearFilters()
+            : null,
+      );
+    }
+
+    return _buildMaintenanceList(records);
+  }
+
+  Widget _buildMaintenanceList(List<MaintenanceEntity> records) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        if (_selectedVehicleId != null) {
+          await ref
+              .read(maintenancesNotifierProvider.notifier)
+              .loadMaintenancesByVehicle(_selectedVehicleId!);
+        }
+      },
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: records.length,
+        itemBuilder: (context, index) {
+          final record = records[index];
+          return _buildMaintenanceCard(record);
+        },
+      ),
+    );
+  }
+
+  Widget _buildMaintenanceCard(MaintenanceEntity record) {
+    final date = record.serviceDate;
+    final formattedDate =
+        '${date.day.toString().padLeft(2, '0')}/'
+        '${date.month.toString().padLeft(2, '0')}/'
+        '${date.year}';
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    record.title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text(
+                  'R\$ ${record.cost.toStringAsFixed(2)}',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  Icons.calendar_today,
+                  size: 16,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  formattedDate,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(width: 16),
+                Icon(
+                  Icons.speed,
+                  size: 16,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${record.odometer.toStringAsFixed(0)} km',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Color(record.type.colorValue).withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    record.type.displayName,
+                    style: TextStyle(
+                      color: Color(record.type.colorValue),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color:
+                        Color(record.status.colorValue).withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    record.status.displayName,
+                    style: TextStyle(
+                      color: Color(record.status.colorValue),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -216,9 +413,10 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
           builder: (context) =>
               AddMaintenancePage(vehicleId: _selectedVehicleId),
         ).then((result) {
-          if (result == true) {
-            // Refresh maintenance list when ready
-            setState(() {});
+          if (result == true && _selectedVehicleId != null) {
+            ref
+                .read(maintenancesNotifierProvider.notifier)
+                .loadMaintenancesByVehicle(_selectedVehicleId!);
           }
         });
       },
@@ -236,28 +434,10 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
     );
   }
 
-  List<String> _getMonths() {
-    final now = DateTime.now();
-    final currentYear = now.year;
-    const monthNames = [
-      'Jan',
-      'Fev',
-      'Mar',
-      'Abr',
-      'Mai',
-      'Jun',
-      'Jul',
-      'Ago',
-      'Set',
-      'Out',
-      'Nov',
-      'Dez',
-    ];
-
-    return monthNames
-        .asMap()
-        .entries
-        .map((entry) => '${entry.value} ${currentYear.toString().substring(2)}')
-        .toList();
+  List<DateTime> _getMonths(List<MaintenanceEntity> records) {
+    final dates = records.map((e) => e.serviceDate).toList();
+    final dateUtils =
+        ModularInjectionContainer.instance<local_date_utils.DateUtils>();
+    return dateUtils.generateMonthRange(dates);
   }
 }

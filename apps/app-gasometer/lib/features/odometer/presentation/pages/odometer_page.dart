@@ -1,11 +1,16 @@
 import 'package:core/core.dart' ;
 import 'package:flutter/material.dart';
 
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/utils/date_utils.dart' as local_date_utils;
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
+import '../../../../core/widgets/standard_loading_view.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
+import '../../domain/entities/odometer_entity.dart';
 import '../providers/odometer_notifier.dart';
+import '../providers/odometer_state.dart';
 import 'add_odometer_page.dart';
 
 class OdometerPage extends ConsumerStatefulWidget {
@@ -16,12 +21,12 @@ class OdometerPage extends ConsumerStatefulWidget {
 }
 
 class _OdometerPageState extends ConsumerState<OdometerPage> {
-  int _currentMonthIndex = DateTime.now().month - 1;
   String? _selectedVehicleId;
 
   @override
   Widget build(BuildContext context) {
     final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+    final odometerState = ref.watch(odometerNotifierProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -31,17 +36,28 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
             _buildVehicleSelector(context),
             if (_selectedVehicleId != null &&
                 (vehiclesAsync.value?.isNotEmpty ?? false))
-              _buildMonthSelector(),
+              _buildMonthSelector(odometerState),
             Expanded(
               child: vehiclesAsync.when(
                 data: (vehicles) {
                   if (_selectedVehicleId == null) {
                     return _buildSelectVehicleState();
                   }
-                  return _buildContent(context);
+                  return _buildContent(context, odometerState);
                 },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, __) => _buildContent(context),
+                loading: () => const StandardLoadingView(
+                  message: 'Carregando veículos...',
+                  showProgress: true,
+                ),
+                error: (error, _) => EnhancedEmptyState(
+                  title: 'Erro ao carregar veículos',
+                  description: error.toString(),
+                  icon: Icons.error_outline,
+                  actionLabel: 'Tentar novamente',
+                  onAction: () {
+                    ref.read(vehiclesNotifierProvider.notifier).refresh();
+                  },
+                ),
               ),
             ),
           ],
@@ -129,7 +145,9 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
             _selectedVehicleId = vehicleId;
           });
           if (vehicleId != null) {
-            ref.read(odometerNotifierProvider.notifier).loadByVehicle(vehicleId);
+            ref
+                .read(odometerNotifierProvider.notifier)
+                .loadByVehicle(vehicleId);
           }
         },
         hintText: 'Selecione um veículo',
@@ -137,8 +155,11 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
     );
   }
 
-  Widget _buildMonthSelector() {
-    final months = _getMonths();
+  Widget _buildMonthSelector(OdometerState state) {
+    final vehicleRecords = state.readings;
+
+    final months = _getMonths(vehicleRecords);
+    final selectedMonth = state.selectedMonth;
 
     return Container(
       height: 50,
@@ -148,13 +169,22 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: months.length,
         itemBuilder: (context, index) {
-          final isSelected = index == _currentMonthIndex;
+          final month = months[index];
+          final isSelected = selectedMonth != null &&
+              month.year == selectedMonth.year &&
+              month.month == selectedMonth.month;
+
+          final monthName = DateFormat('MMM yy', 'pt_BR').format(month);
+          final formattedMonth =
+              monthName[0].toUpperCase() + monthName.substring(1);
 
           return GestureDetector(
             onTap: () {
-              setState(() {
-                _currentMonthIndex = index;
-              });
+              if (isSelected) {
+                ref.read(odometerNotifierProvider.notifier).clearMonthFilter();
+              } else {
+                ref.read(odometerNotifierProvider.notifier).selectMonth(month);
+              }
             },
             child: Container(
               margin: const EdgeInsets.only(right: 12),
@@ -172,7 +202,7 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
               ),
               child: Center(
                 child: Text(
-                  months[index],
+                  formattedMonth,
                   style: TextStyle(
                     color: isSelected
                         ? Colors.white
@@ -190,70 +220,101 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
     );
   }
 
-  Widget _buildContent(BuildContext context) {
-    final odometerState = ref.watch(odometerNotifierProvider);
+  Widget _buildContent(BuildContext context, OdometerState state) {
+    if (state.isLoading && !state.hasData) {
+      return const StandardLoadingView(
+        message: 'Carregando leituras...',
+        showProgress: true,
+      );
+    }
 
-    return odometerState.when(
-      data: (readings) {
-        if (readings.isEmpty) {
-          return const EnhancedEmptyState(
-            title: 'Nenhum registro',
-            description:
-                'Adicione sua primeira leitura de odômetro para começar a acompanhar a quilometragem.',
-            icon: Icons.speed_outlined,
-          );
+    if (state.errorMessage != null && !state.hasData) {
+      return EnhancedEmptyState(
+        title: 'Erro ao carregar',
+        description: state.errorMessage!,
+        icon: Icons.error_outline,
+        actionLabel: 'Tentar novamente',
+        onAction: () {
+          if (_selectedVehicleId != null) {
+            ref
+                .read(odometerNotifierProvider.notifier)
+                .loadByVehicle(_selectedVehicleId!);
+          }
+        },
+      );
+    }
+
+    final records = state.filteredReadings;
+
+    if (records.isEmpty) {
+      return EnhancedEmptyState(
+        title: 'Nenhum registro',
+        description: state.hasActiveFilters
+            ? 'Nenhum registro encontrado com os filtros aplicados.'
+            : 'Adicione sua primeira leitura de odômetro para começar a acompanhar a quilometragem.',
+        icon: Icons.speed_outlined,
+        actionLabel: state.hasActiveFilters ? 'Limpar filtros' : null,
+        onAction: state.hasActiveFilters
+            ? () => ref.read(odometerNotifierProvider.notifier).clearMonthFilter()
+            : null,
+      );
+    }
+
+    return _buildOdometerList(records);
+  }
+
+  Widget _buildOdometerList(List<OdometerEntity> records) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        if (_selectedVehicleId != null) {
+          await ref
+              .read(odometerNotifierProvider.notifier)
+              .loadByVehicle(_selectedVehicleId!);
         }
+      },
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: records.length,
+        itemBuilder: (context, index) {
+          final reading = records[index];
+          final formatter = NumberFormat('#,##0.0', 'pt_BR');
+          final dateFormatter = DateFormat('dd/MM/yyyy HH:mm');
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: readings.length,
-          itemBuilder: (context, index) {
-            final reading = readings[index];
-            final formatter = NumberFormat('#,##0.0', 'pt_BR');
-            final dateFormatter = DateFormat('dd/MM/yyyy HH:mm');
-
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  child: const Icon(Icons.speed, color: Colors.white),
-                ),
-                title: Text(
-                  '${formatter.format(reading.value)} km',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(dateFormatter.format(reading.registrationDate)),
-                    if (reading.description.isNotEmpty)
-                      Text(
-                        reading.description,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                  ],
-                ),
-                trailing: Text(
-                  reading.type.displayName,
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.w500,
-                  ),
+          return Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: Theme.of(context).primaryColor,
+                child: const Icon(Icons.speed, color: Colors.white),
+              ),
+              title: Text(
+                '${formatter.format(reading.value)} km',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
                 ),
               ),
-            );
-          },
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => const EnhancedEmptyState(
-        title: 'Erro ao carregar',
-        description: 'Não foi possível carregar as leituras de odômetro.',
-        icon: Icons.error_outline,
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(dateFormatter.format(reading.registrationDate)),
+                  if (reading.description.isNotEmpty)
+                    Text(
+                      reading.description,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                ],
+              ),
+              trailing: Text(
+                reading.type.displayName,
+                style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -280,7 +341,9 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
         ).then((result) {
           if (result == true && _selectedVehicleId != null) {
             // Reload odometer list after adding
-            ref.read(odometerNotifierProvider.notifier).loadByVehicle(_selectedVehicleId!);
+            ref
+                .read(odometerNotifierProvider.notifier)
+                .loadByVehicle(_selectedVehicleId!);
           }
         });
       },
@@ -299,28 +362,10 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
     );
   }
 
-  List<String> _getMonths() {
-    final now = DateTime.now();
-    final currentYear = now.year;
-    const monthNames = [
-      'Jan',
-      'Fev',
-      'Mar',
-      'Abr',
-      'Mai',
-      'Jun',
-      'Jul',
-      'Ago',
-      'Set',
-      'Out',
-      'Nov',
-      'Dez',
-    ];
-
-    return monthNames
-        .asMap()
-        .entries
-        .map((entry) => '${entry.value} ${currentYear.toString().substring(2)}')
-        .toList();
+  List<DateTime> _getMonths(List<OdometerEntity> records) {
+    final dates = records.map((e) => e.registrationDate).toList();
+    final dateUtils =
+        ModularInjectionContainer.instance<local_date_utils.DateUtils>();
+    return dateUtils.generateMonthRange(dates);
   }
 }

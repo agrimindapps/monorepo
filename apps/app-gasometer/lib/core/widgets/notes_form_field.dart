@@ -254,12 +254,14 @@ class DescriptionField extends StatelessWidget {
   const DescriptionField({
     super.key,
     required this.controller,
+    this.focusNode,
     this.label,
     this.hint,
     this.required = false,
     this.onChanged,
   });
   final TextEditingController controller;
+  final FocusNode? focusNode;
   final String? label;
   final String? hint;
   final bool required;
@@ -269,6 +271,7 @@ class DescriptionField extends StatelessWidget {
   Widget build(BuildContext context) {
     return NotesFormField(
       controller: controller,
+      focusNode: focusNode,
       type: NotesFieldType.description,
       customLabel: label,
       customHint: hint,
@@ -282,12 +285,14 @@ class LocationField extends StatelessWidget {
   const LocationField({
     super.key,
     required this.controller,
+    this.focusNode,
     this.label,
     this.hint,
     this.required = false,
     this.onChanged,
   });
   final TextEditingController controller;
+  final FocusNode? focusNode;
   final String? label;
   final String? hint;
   final bool required;
@@ -297,6 +302,7 @@ class LocationField extends StatelessWidget {
   Widget build(BuildContext context) {
     return NotesFormField(
       controller: controller,
+      focusNode: focusNode,
       type: NotesFieldType.location,
       customLabel: label,
       customHint: hint,
@@ -310,12 +316,14 @@ class CommentsField extends StatelessWidget {
   const CommentsField({
     super.key,
     required this.controller,
+    this.focusNode,
     this.label,
     this.hint,
     this.required = false,
     this.onChanged,
   });
   final TextEditingController controller;
+  final FocusNode? focusNode;
   final String? label;
   final String? hint;
   final bool required;
@@ -325,6 +333,7 @@ class CommentsField extends StatelessWidget {
   Widget build(BuildContext context) {
     return NotesFormField(
       controller: controller,
+      focusNode: focusNode,
       type: NotesFieldType.comments,
       customLabel: label,
       customHint: hint,

@@ -271,11 +271,13 @@ class AmountFormField extends StatelessWidget {
   const AmountFormField({
     super.key,
     required this.controller,
+    this.focusNode,
     this.label,
     this.required = true,
     this.onChanged,
   });
   final TextEditingController controller;
+  final FocusNode? focusNode;
   final String? label;
   final bool required;
   final void Function(String?)? onChanged;
@@ -284,6 +286,7 @@ class AmountFormField extends StatelessWidget {
   Widget build(BuildContext context) {
     return MoneyFormField(
       controller: controller,
+      focusNode: focusNode,
       type: MoneyFieldType.amount,
       customLabel: label,
       required: required,
@@ -325,11 +328,13 @@ class CostFormField extends StatelessWidget {
   const CostFormField({
     super.key,
     required this.controller,
+    this.focusNode,
     this.label,
     this.required = true,
     this.onChanged,
   });
   final TextEditingController controller;
+  final FocusNode? focusNode;
   final String? label;
   final bool required;
   final void Function(String?)? onChanged;
@@ -338,6 +343,7 @@ class CostFormField extends StatelessWidget {
   Widget build(BuildContext context) {
     return MoneyFormField(
       controller: controller,
+      focusNode: focusNode,
       type: MoneyFieldType.cost,
       customLabel: label,
       required: required,

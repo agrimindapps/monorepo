@@ -1,54 +1,25 @@
 import 'package:core/core.dart';
-import 'package:dio/dio.dart';
 
+import '../../database/agrihurbi_database.dart';
+import '../../features/livestock/data/datasources/livestock_local_datasource.dart';
 import 'injection.config.dart';
 
 final getIt = GetIt.instance;
-
-/// Module for registering external dependencies from core package
-@module
-abstract class RegisterModule {
-  @lazySingleton
-  Dio get dio => Dio();
-
-  // @lazySingleton
-  // IAnalyticsRepository get analyticsRepository => FirebaseAnalyticsService();
-
-  // @lazySingleton
-  // FirebaseAnalyticsService get firebaseAnalyticsService =>
-  //     FirebaseAnalyticsService();
-
-  // @lazySingleton
-  // ICrashlyticsRepository get crashlyticsRepository =>
-  //     FirebaseCrashlyticsService();
-
-  // @lazySingleton
-  // IPerformanceRepository get performanceRepository => PerformanceService();
-
-  // @lazySingleton
-  // ISubscriptionRepository get subscriptionRepository => RevenueCatService();
-
-  // @lazySingleton
-  // INotificationRepository get notificationRepository =>
-  //     LocalNotificationService();
-
-  // @lazySingleton
-  // IAuthRepository get authRepository => FirebaseAuthService();
-
-  // @lazySingleton
-  // IDriftManager get driftManager => DriftManager.instance;
-
-  // @preResolve
-  // Future<SharedPreferences> get sharedPreferences =>
-  //     SharedPreferences.getInstance();
-
-  // @lazySingleton
-  // FlutterSecureStorage get flutterSecureStorage => const FlutterSecureStorage();
-}
 
 @InjectableInit(
   initializerName: 'init',
   preferRelativeImports: true,
   asExtension: true,
 )
-Future<void> configureDependencies() async => getIt.init();
+Future<void> configureDependencies() async {
+  // Inicializar Injectable gerado
+  await getIt.init();
+
+  // Registrar Drift Database manualmente (não pode estar em @module)
+  getIt.registerSingleton<AgrihurbiDatabase>(AgrihurbiDatabase.production());
+
+  // Registrar Drift Local Data Source
+  getIt.registerSingleton<LivestockLocalDataSource>(
+    LivestockDriftLocalDataSource(getIt<AgrihurbiDatabase>()),
+  );
+}

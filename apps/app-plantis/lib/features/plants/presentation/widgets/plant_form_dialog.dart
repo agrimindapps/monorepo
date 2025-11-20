@@ -87,14 +87,13 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
       ),
       child: Container(
         constraints: BoxConstraints(
-          maxWidth: 800,
+          maxWidth: screenSize.width > 900 ? 1100 : 800,
           maxHeight: screenSize.height * 0.9,
         ),
         decoration: BoxDecoration(
-          color:
-              Theme.of(context).brightness == Brightness.dark
-                  ? const Color(0xFF2D2D2D)
-                  : const Color(0xFFFFFFFF), // Branco puro para modo claro
+          color: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF2D2D2D)
+              : const Color(0xFFFFFFFF), // Branco puro para modo claro
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
@@ -172,9 +171,9 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
                 Text(
                   isEditing ? 'Editar Planta' : 'Nova Planta',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
+                      ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -182,8 +181,8 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
                       ? 'Atualize as informações da sua planta'
                       : 'Adicione uma nova planta ao seu jardim',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                 ),
               ],
             ),
@@ -248,8 +247,8 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
             Text(
               errorMessage ?? 'Erro desconhecido',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+                    color: colorScheme.onSurfaceVariant,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -265,29 +264,91 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
   }
 
   Widget _buildFormContent(PlantFormState formState) {
-    return Scrollbar(
-      controller: _scrollController,
-      child: SingleChildScrollView(
-        controller: _scrollController,
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-        child: Column(
+    final isDesktop = MediaQuery.of(context).size.width > 900;
+
+    if (isDesktop) {
+      return Container(
+        padding: const EdgeInsets.fromLTRB(32, 24, 32, 24),
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle('Informações Básicas', Icons.info_outline),
-            const SizedBox(height: 16),
-            const PlantFormBasicInfo(),
-
-            const SizedBox(height: 24),
-            _buildSectionTitle(
-              'Configurações de Cuidado',
-              Icons.settings_outlined,
+            // Coluna da Esquerda - Informações Básicas
+            Expanded(
+              flex: 5,
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionTitle(
+                      'Informações Básicas',
+                      Icons.info_outline,
+                    ),
+                    const SizedBox(height: 24),
+                    const PlantFormBasicInfo(),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
-            const PlantFormCareConfig(),
 
-            const SizedBox(height: 16),
+            // Divisor Vertical
+            Container(
+              width: 1,
+              margin: const EdgeInsets.symmetric(horizontal: 32),
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+            ),
+
+            // Coluna da Direita - Configurações de Cuidado
+            Expanded(
+              flex: 4,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionTitle(
+                      'Configurações de Cuidado',
+                      Icons.settings_outlined,
+                    ),
+                    const SizedBox(height: 24),
+                    const PlantFormCareConfig(),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
+      );
+    }
+
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          TabBar(
+            labelColor: Theme.of(context).colorScheme.primary,
+            unselectedLabelColor:
+                Theme.of(context).colorScheme.onSurfaceVariant,
+            indicatorColor: Theme.of(context).colorScheme.primary,
+            tabs: const [
+              Tab(text: 'Informações'),
+              Tab(text: 'Cuidados'),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
+                  child: const PlantFormBasicInfo(),
+                ),
+                SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
+                  child: const PlantFormCareConfig(),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -341,17 +402,16 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
               FilledButton(
                 onPressed:
                     (isFormValid && !isSaving) ? () => _handleSave() : null,
-                child:
-                    isSaving
-                        ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                        : Text(widget.plantId != null ? 'Atualizar' : 'Salvar'),
+                child: isSaving
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(widget.plantId != null ? 'Atualizar' : 'Salvar'),
               ),
             ],
           );
@@ -361,16 +421,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
   }
 
   Future<void> _handleClose() async {
-    final formState = ref.read(plantFormStateNotifierProvider);
-
-    if (formState.hasChanges) {
-      final shouldDiscard = await _showDiscardDialog();
-      if (shouldDiscard == true && mounted) {
-        Navigator.of(context).pop(false);
-      }
-    } else {
-      Navigator.of(context).pop(false);
-    }
+    Navigator.of(context).pop(false);
   }
 
   Future<void> _handleSave() async {
@@ -489,36 +540,5 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
         print('❌ PlantFormDialog._handleSave() - Erro: $e');
       }
     }
-  }
-
-  Future<bool?> _showDiscardDialog() {
-    return showDialog<bool>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            icon: Icon(
-              Icons.warning_amber_rounded,
-              color: Theme.of(context).colorScheme.error,
-              size: 32,
-            ),
-            title: const Text('Descartar alterações?'),
-            content: const Text(
-              'Você tem alterações não salvas que serão perdidas. Deseja realmente sair sem salvar?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Continuar Editando'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                style: FilledButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                ),
-                child: const Text('Descartar'),
-              ),
-            ],
-          ),
-    );
   }
 }

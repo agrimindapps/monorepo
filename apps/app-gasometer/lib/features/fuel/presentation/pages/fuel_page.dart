@@ -1,6 +1,8 @@
 import 'package:core/core.dart' ;
 import 'package:flutter/material.dart';
 
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/utils/date_utils.dart' as local_date_utils;
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../core/widgets/standard_loading_view.dart';
@@ -18,7 +20,6 @@ class FuelPage extends ConsumerStatefulWidget {
 }
 
 class _FuelPageState extends ConsumerState<FuelPage> {
-  int _currentMonthIndex = DateTime.now().month - 1;
   String? _selectedVehicleId;
 
   @override
@@ -47,7 +48,11 @@ class _FuelPageState extends ConsumerState<FuelPage> {
             _buildVehicleSelector(context),
             if (_selectedVehicleId != null &&
                 (vehiclesAsync.value?.isNotEmpty ?? false))
-              _buildMonthSelector(),
+              fuelStateAsync.when(
+                data: (state) => _buildMonthSelector(state),
+                loading: () => const SizedBox(height: 66),
+                error: (_, __) => const SizedBox.shrink(),
+              ),
             Expanded(
               child: vehiclesAsync.when(
                 data: (vehicles) {
@@ -245,8 +250,13 @@ class _FuelPageState extends ConsumerState<FuelPage> {
     );
   }
 
-  Widget _buildMonthSelector() {
-    final months = _getMonths();
+  Widget _buildMonthSelector(FuelState fuelState) {
+    final vehicleRecords = fuelState.fuelRecords
+        .where((r) => r.vehicleId == _selectedVehicleId)
+        .toList();
+
+    final months = _getMonths(vehicleRecords);
+    final selectedMonth = fuelState.selectedMonth;
 
     return Container(
       height: 50,
@@ -256,13 +266,22 @@ class _FuelPageState extends ConsumerState<FuelPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: months.length,
         itemBuilder: (context, index) {
-          final isSelected = index == _currentMonthIndex;
+          final month = months[index];
+          final isSelected = selectedMonth != null &&
+              month.year == selectedMonth.year &&
+              month.month == selectedMonth.month;
+
+          final monthName = DateFormat('MMM yy', 'pt_BR').format(month);
+          final formattedMonth =
+              monthName[0].toUpperCase() + monthName.substring(1);
 
           return GestureDetector(
             onTap: () {
-              setState(() {
-                _currentMonthIndex = index;
-              });
+              if (isSelected) {
+                ref.read(fuelRiverpodProvider.notifier).clearMonthFilter();
+              } else {
+                ref.read(fuelRiverpodProvider.notifier).selectMonth(month);
+              }
             },
             child: Container(
               margin: const EdgeInsets.only(right: 12),
@@ -280,7 +299,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
               ),
               child: Center(
                 child: Text(
-                  months[index],
+                  formattedMonth,
                   style: TextStyle(
                     color: isSelected
                         ? Colors.white
@@ -373,15 +392,15 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                 Text(
                   formattedDate,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 Text(
                   'R\$ ${record.totalPrice.toStringAsFixed(2)}',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.w600,
-                  ),
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ],
             ),
@@ -470,28 +489,10 @@ class _FuelPageState extends ConsumerState<FuelPage> {
     );
   }
 
-  List<String> _getMonths() {
-    final now = DateTime.now();
-    final currentYear = now.year;
-    const monthNames = [
-      'Jan',
-      'Fev',
-      'Mar',
-      'Abr',
-      'Mai',
-      'Jun',
-      'Jul',
-      'Ago',
-      'Set',
-      'Out',
-      'Nov',
-      'Dez',
-    ];
-
-    return monthNames
-        .asMap()
-        .entries
-        .map((entry) => '${entry.value} ${currentYear.toString().substring(2)}')
-        .toList();
+  List<DateTime> _getMonths(List<FuelRecordEntity> records) {
+    final dates = records.map((e) => e.date).toList();
+    final dateUtils =
+        ModularInjectionContainer.instance<local_date_utils.DateUtils>();
+    return dateUtils.generateMonthRange(dates);
   }
 }

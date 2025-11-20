@@ -71,9 +71,10 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
           ),
         );
       }
-      final localTasks = await localDatasource.getPlantTasks();
+      var localTasks = await localDatasource.getPlantTasks();
       if (await networkInfo.isConnected) {
-        _syncPlantTasksInBackground(userId);
+        await _syncPlantTasksInBackground(userId);
+        localTasks = await localDatasource.getPlantTasks();
       }
 
       if (kDebugMode) {
@@ -109,9 +110,10 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       if (userId == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-      final localTasks = await localDatasource.getPlantTasksByPlantId(plantId);
+      var localTasks = await localDatasource.getPlantTasksByPlantId(plantId);
       if (await networkInfo.isConnected) {
-        _syncPlantTasksByPlantIdInBackground(plantId, userId);
+        await _syncPlantTasksByPlantIdInBackground(plantId, userId);
+        localTasks = await localDatasource.getPlantTasksByPlantId(plantId);
       }
 
       if (kDebugMode) {
@@ -472,7 +474,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       if (!(await networkInfo.isConnected)) {
         return const Left(NetworkFailure('Sem conexão com a internet'));
       }
-      final localTasks = await localDatasource.getPlantTasks();
+      var localTasks = await localDatasource.getPlantTasks();
       final tasksToSync =
           localTasks
               .map((task) => PlantTaskModel.fromEntity(task))
@@ -519,46 +521,48 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       );
     }
   }
-  void _syncPlantTasksInBackground(String userId) {
-    remoteDatasource
-        .getPlantTasks(userId)
-        .then((remoteTasks) {
-          if (kDebugMode) {
-            print(
-              '✅ PlantTasksRepository: Background sync completed - ${remoteTasks.length} plant tasks',
-            );
-          }
-          for (final task in remoteTasks) {
-            localDatasource.updatePlantTask(task.toEntity());
-          }
-        })
-        .catchError((Object e) {
-          if (kDebugMode) {
-            print('⚠️ PlantTasksRepository: Background sync failed: $e');
-          }
-        });
+  Future<void> _syncPlantTasksInBackground(String userId) async {
+    try {
+      final remoteTasks = await remoteDatasource.getPlantTasks(userId);
+      if (kDebugMode) {
+        print(
+          '✅ PlantTasksRepository: Background sync completed - ${remoteTasks.length} plant tasks',
+        );
+      }
+      for (final task in remoteTasks) {
+        await localDatasource.updatePlantTask(task.toEntity());
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ PlantTasksRepository: Background sync failed: $e');
+      }
+    }
   }
 
-  void _syncPlantTasksByPlantIdInBackground(String plantId, String userId) {
-    remoteDatasource
-        .getPlantTasksByPlantId(plantId, userId)
-        .then((remoteTasks) {
-          if (kDebugMode) {
-            print(
-              '✅ PlantTasksRepository: Background sync for plant $plantId completed - ${remoteTasks.length} tasks',
-            );
-          }
-          for (final task in remoteTasks) {
-            localDatasource.updatePlantTask(task.toEntity());
-          }
-        })
-        .catchError((Object e) {
-          if (kDebugMode) {
-            print(
-              '⚠️ PlantTasksRepository: Background sync for plant $plantId failed: $e',
-            );
-          }
-        });
+  Future<void> _syncPlantTasksByPlantIdInBackground(
+    String plantId,
+    String userId,
+  ) async {
+    try {
+      final remoteTasks = await remoteDatasource.getPlantTasksByPlantId(
+        plantId,
+        userId,
+      );
+      if (kDebugMode) {
+        print(
+          '✅ PlantTasksRepository: Background sync for plant $plantId completed - ${remoteTasks.length} tasks',
+        );
+      }
+      for (final task in remoteTasks) {
+        await localDatasource.updatePlantTask(task.toEntity());
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(
+          '⚠️ PlantTasksRepository: Background sync for plant $plantId failed: $e',
+        );
+      }
+    }
   }
 
   @override

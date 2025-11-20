@@ -34,6 +34,37 @@ import '../features/sync/domain/services/gasometer_sync_service.dart';
 /// Configuração de sincronização específica do Gasometer
 /// Controle veicular com veículos e manutenções
 /// UNIFIED ENVIRONMENT: Uma única configuração para dev e prod
+///
+/// ## 🔥 Firestore Indices Required
+///
+/// This app uses Firestore composite indices for pull-based synchronization.
+/// The sync system fetches remote changes using timestamp-based queries:
+///
+/// ```dart
+/// // Query pattern used by DriftSyncAdapterBase.pullRemoteChanges()
+/// query.where('updatedAt', isGreaterThan: lastSyncTime).limit(500)
+/// ```
+///
+/// **Required Indices:**
+/// - vehicles: updatedAt ASC
+/// - fuel_supplies: updatedAt ASC
+/// - maintenances: updatedAt ASC
+/// - expenses: updatedAt ASC
+/// - odometer_readings: updatedAt ASC
+///
+/// **Deployment:**
+/// 1. CLI: `./deploy-firestore-indexes.sh my-project-id`
+/// 2. Manual: See FIRESTORE_INDICES.md
+/// 3. Console: https://console.firebase.google.com/project/{PROJECT}/firestore/indexes
+///
+/// **Without these indices:**
+/// ❌ Firestore will reject pull queries with: "The query requires an index"
+/// ❌ Sync will fail and app will crash on pull operations
+/// ❌ Users cannot sync offline changes
+///
+/// **Status:** CRITICAL for production. Must be deployed before app launch.
+///
+/// See: `FIRESTORE_INDICES.md` for complete documentation
 abstract final class GasometerSyncConfig {
   const GasometerSyncConfig._();
 

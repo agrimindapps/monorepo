@@ -53,4 +53,40 @@ class DateUtils {
       return DateTime(targetYear, targetMonth, 1, endDate.hour, endDate.minute, endDate.second);
     }
   }
+
+  /// Generates a list of months between the oldest and newest date in the list.
+  /// If the list is empty, returns a list containing only the current month.
+  List<DateTime> generateMonthRange(List<DateTime> dates) {
+    if (dates.isEmpty) {
+      final now = DateTime.now();
+      return [DateTime(now.year, now.month)];
+    }
+
+    DateTime minDate = dates.first;
+    DateTime maxDate = dates.first;
+
+    for (final date in dates) {
+      if (date.isBefore(minDate)) minDate = date;
+      if (date.isAfter(maxDate)) maxDate = date;
+    }
+
+    // Normalize to start of month
+    minDate = DateTime(minDate.year, minDate.month);
+    maxDate = DateTime(maxDate.year, maxDate.month);
+
+    final months = <DateTime>[];
+    var current = minDate;
+
+    while (current.isBefore(maxDate) || current.isAtSameMomentAs(maxDate)) {
+      months.add(current);
+      // Move to next month
+      if (current.month == 12) {
+        current = DateTime(current.year + 1, 1);
+      } else {
+        current = DateTime(current.year, current.month + 1);
+      }
+    }
+
+    return months;
+  }
 }

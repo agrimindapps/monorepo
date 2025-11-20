@@ -48,6 +48,7 @@ class FuelState {
     this.errorMessage,
     this.isInitialized = false,
     this.selectedVehicleId,
+    this.selectedMonth,
     this.searchQuery = '',
     this.statistics,
     this.analytics = const {},
@@ -61,6 +62,7 @@ class FuelState {
   final String? errorMessage;
   final bool isInitialized;
   final String? selectedVehicleId;
+  final DateTime? selectedMonth;
   final String searchQuery;
   final FuelStatistics? statistics;
   final Map<String, FuelAnalytics> analytics; // Cache por vehicleId
@@ -71,8 +73,9 @@ class FuelState {
   int get recordCount => fuelRecords.length;
   bool get hasError => errorMessage != null;
   bool get hasActiveVehicleFilter => selectedVehicleId != null;
+  bool get hasActiveMonthFilter => selectedMonth != null;
   bool get hasActiveSearch => searchQuery.isNotEmpty;
-  bool get hasActiveFilters => hasActiveVehicleFilter || hasActiveSearch;
+  bool get hasActiveFilters => hasActiveVehicleFilter || hasActiveSearch || hasActiveMonthFilter;
   bool get hasPendingRecords => pendingRecords.isNotEmpty;
   int get pendingRecordsCount => pendingRecords.length;
 
@@ -81,6 +84,11 @@ class FuelState {
     var records = fuelRecords;
     if (selectedVehicleId != null) {
       records = records.where((r) => r.vehicleId == selectedVehicleId).toList();
+    }
+    if (selectedMonth != null) {
+      records = records.where((r) =>
+          r.date.year == selectedMonth!.year &&
+          r.date.month == selectedMonth!.month).toList();
     }
     if (searchQuery.isNotEmpty) {
       final query = searchQuery.toLowerCase();
@@ -107,6 +115,7 @@ class FuelState {
     String? errorMessage,
     bool? isInitialized,
     String? selectedVehicleId,
+    DateTime? selectedMonth,
     String? searchQuery,
     FuelStatistics? statistics,
     Map<String, FuelAnalytics>? analytics,
@@ -115,6 +124,7 @@ class FuelState {
     bool? isSyncing,
     bool clearError = false,
     bool clearVehicleFilter = false,
+    bool clearMonthFilter = false,
     bool clearSearchQuery = false,
   }) {
     return FuelState(
@@ -125,6 +135,9 @@ class FuelState {
       selectedVehicleId: clearVehicleFilter
           ? null
           : (selectedVehicleId ?? this.selectedVehicleId),
+      selectedMonth: clearMonthFilter
+          ? null
+          : (selectedMonth ?? this.selectedMonth),
       searchQuery: clearSearchQuery ? '' : (searchQuery ?? this.searchQuery),
       statistics: statistics ?? this.statistics,
       analytics: analytics ?? this.analytics,
@@ -560,6 +573,22 @@ class FuelRiverpod extends _$FuelRiverpod {
     });
   }
 
+  void selectMonth(DateTime month) {
+    state.whenData((currentState) {
+      state = AsyncValue.data(
+        currentState.copyWith(selectedMonth: month),
+      );
+    });
+  }
+
+  void clearMonthFilter() {
+    state.whenData((currentState) {
+      state = AsyncValue.data(
+        currentState.copyWith(clearMonthFilter: true),
+      );
+    });
+  }
+
   void clearVehicleFilter() {
     state.whenData((currentState) {
       state = AsyncValue.data(
@@ -579,6 +608,7 @@ class FuelRiverpod extends _$FuelRiverpod {
           searchQuery: '',
           clearVehicleFilter: true,
           clearSearchQuery: true,
+          clearMonthFilter: true,
         ),
       );
     });

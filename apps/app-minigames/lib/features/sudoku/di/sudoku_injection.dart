@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/datasources/sudoku_local_datasource.dart';
 import '../data/repositories/sudoku_repository_impl.dart';
 import '../domain/repositories/sudoku_repository.dart';
+import '../domain/services/grid_validation_service.dart';
+import '../domain/services/puzzle_generator_service.dart';
 import '../domain/usecases/check_completion_usecase.dart';
 import '../domain/usecases/generate_puzzle_usecase.dart';
 import '../domain/usecases/get_hint_usecase.dart';
@@ -30,12 +32,6 @@ abstract class SudokuModule {
   }
 
   // Use Cases - Pure logic (no dependencies)
-  @injectable
-  GeneratePuzzleUseCase get generatePuzzleUseCase => GeneratePuzzleUseCase();
-
-  @injectable
-  ValidateMoveUseCase get validateMoveUseCase => ValidateMoveUseCase();
-
   @injectable
   UpdateConflictsUseCase get updateConflictsUseCase => UpdateConflictsUseCase();
 
@@ -86,9 +82,21 @@ Future<void> initSudokuDependencies(GetIt getIt) async {
     SudokuRepositoryImpl(getIt<SudokuLocalDataSource>()),
   );
 
+  // Services
+  getIt.registerLazySingleton<PuzzleGeneratorService>(
+    () => PuzzleGeneratorService(),
+  );
+  getIt.registerLazySingleton<GridValidationService>(
+    () => GridValidationService(),
+  );
+
   // Use Cases - Pure logic
-  getIt.registerFactory<GeneratePuzzleUseCase>(() => GeneratePuzzleUseCase());
-  getIt.registerFactory<ValidateMoveUseCase>(() => ValidateMoveUseCase());
+  getIt.registerFactory<GeneratePuzzleUseCase>(
+    () => GeneratePuzzleUseCase(getIt<PuzzleGeneratorService>()),
+  );
+  getIt.registerFactory<ValidateMoveUseCase>(
+    () => ValidateMoveUseCase(getIt<GridValidationService>()),
+  );
   getIt.registerFactory<UpdateConflictsUseCase>(() => UpdateConflictsUseCase());
   getIt.registerFactory<ToggleNotesUseCase>(() => ToggleNotesUseCase());
   getIt.registerFactory<GetHintUseCase>(() => GetHintUseCase());

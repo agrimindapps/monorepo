@@ -5,7 +5,6 @@ import 'package:core/core.dart';
 
 /// Settings Local Data Source
 abstract class SettingsLocalDataSource {
-
   /// Save settings
   Future<void> saveSettings(SettingsModel settings);
 
@@ -25,7 +24,7 @@ abstract class SettingsLocalDataSource {
   Future<void> clearSettings();
 }
 
-@injectable
+@LazySingleton(as: SettingsLocalDataSource)
 class SettingsLocalDataSourceImpl implements SettingsLocalDataSource {
   final SharedPreferences _prefs;
 

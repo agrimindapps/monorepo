@@ -16,6 +16,10 @@ class VehicleBasicInfoSection extends StatelessWidget {
     required this.modelFieldKey,
     required this.yearFieldKey,
     required this.colorFieldKey,
+    required this.brandFocusNode,
+    required this.modelFocusNode,
+    required this.yearFocusNode,
+    required this.colorFocusNode,
     required this.onYearChanged,
     super.key,
   });
@@ -28,6 +32,10 @@ class VehicleBasicInfoSection extends StatelessWidget {
   final GlobalKey modelFieldKey;
   final GlobalKey yearFieldKey;
   final GlobalKey colorFieldKey;
+  final FocusNode brandFocusNode;
+  final FocusNode modelFocusNode;
+  final FocusNode yearFocusNode;
+  final FocusNode colorFocusNode;
   final ValueChanged<int?> onYearChanged;
 
   @override
@@ -41,6 +49,7 @@ class VehicleBasicInfoSection extends StatelessWidget {
             key: brandFieldKey,
             child: ValidatedFormField(
               controller: brandController,
+              focusNode: brandFocusNode,
               label: 'Marca',
               hint: 'Ex: Ford, Volkswagen, etc.',
               required: true,
@@ -58,6 +67,7 @@ class VehicleBasicInfoSection extends StatelessWidget {
             key: modelFieldKey,
             child: ValidatedFormField(
               controller: modelController,
+              focusNode: modelFocusNode,
               label: 'Modelo',
               hint: 'Ex: Gol, Fiesta, etc.',
               required: true,
@@ -87,6 +97,7 @@ class VehicleBasicInfoSection extends StatelessWidget {
                   key: colorFieldKey,
                   child: ValidatedFormField(
                     controller: colorController,
+                    focusNode: colorFocusNode,
                     label: 'Cor',
                     hint: 'Ex: Branco, Preto, etc.',
                     required: true,
@@ -122,6 +133,7 @@ class VehicleBasicInfoSection extends StatelessWidget {
 
     return DropdownButtonFormField<int>(
       initialValue: currentValue,
+      focusNode: yearFocusNode,
       decoration: InputDecoration(
         labelText: 'Ano',
         border: OutlineInputBorder(

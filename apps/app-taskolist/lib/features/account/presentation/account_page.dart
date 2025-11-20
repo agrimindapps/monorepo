@@ -86,9 +86,8 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             CircleAvatar(
               radius: 40,
               backgroundColor: AppColors.primaryColor.withAlpha(26),
-              backgroundImage: user.photoUrl != null
-                  ? NetworkImage(user.photoUrl!)
-                  : null,
+              backgroundImage:
+                  user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
               child: user.photoUrl == null
                   ? const Icon(
                       Icons.person,
@@ -130,7 +129,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                           AppColors.warning,
                           Icons.warning,
                         ),
-
                       if (user.provider == AuthProvider.anonymous)
                         _buildStatusChip(
                           'Conta temporária',
@@ -200,7 +198,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
               ],
             ),
             const SizedBox(height: 12),
-
             subscriptionState.when(
               data: (status) => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,7 +248,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showEditProfileDialog(user),
           ),
-
           if (!user.isEmailVerified &&
               user.provider != AuthProvider.anonymous) ...[
             const Divider(height: 1),
@@ -263,7 +259,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
               onTap: () => _sendEmailVerification(),
             ),
           ],
-
           if (user.provider == AuthProvider.anonymous) ...[
             const Divider(height: 1),
             ListTile(
@@ -296,7 +291,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
               );
             },
           ),
-
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.palette),
@@ -305,7 +299,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showThemeDialog(),
           ),
-
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.language),
@@ -330,7 +323,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showBackupDialog(),
           ),
-
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.download),
@@ -354,7 +346,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showHelpDialog(),
           ),
-
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.privacy_tip, color: AppColors.info),
@@ -362,14 +353,12 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showPrivacyDialog(),
           ),
-
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.logout, color: AppColors.warning),
             title: const Text('Sair'),
             onTap: () => _showLogoutDialog(),
           ),
-
           if (user.provider != AuthProvider.anonymous) ...[
             const Divider(height: 1),
             ListTile(
@@ -493,7 +482,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   void _updateProfile() async {
-    final authService = ref.read(taskManagerAuthServiceProvider);
+    final authService = await ref.read(taskManagerAuthServiceProvider.future);
     final newName = _displayNameController.text.trim();
 
     if (newName.isEmpty) {
@@ -579,7 +568,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   void _deleteAccount() async {
-    final authService = ref.read(taskManagerAuthServiceProvider);
+    final authService = await ref.read(taskManagerAuthServiceProvider.future);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Row(

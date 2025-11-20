@@ -637,15 +637,14 @@ class PlantsNotifier extends _$PlantsNotifier {
       );
       return;
     }
-    await _loadLocalDataFirst();
-    _syncInBackground();
+    await _loadData();
   }
 
-  /// Loads local data immediately for instant UI response
-  Future<void> _loadLocalDataFirst() async {
+  /// Loads data (local + remote sync if connected)
+  Future<void> _loadData() async {
     try {
       if (kDebugMode) {
-        print('📦 PlantsProvider: Carregando dados locais primeiro...');
+        print('📦 PlantsProvider: Carregando dados...');
       }
 
       final currentState = state.valueOrNull ?? const PlantsState();
@@ -655,29 +654,28 @@ class PlantsNotifier extends _$PlantsNotifier {
           currentState.copyWith(isLoading: true, error: null),
         );
       }
-      final localResult = await _getPlantsUseCase.call(const NoParams());
+      final result = await _getPlantsUseCase.call(const NoParams());
 
-      localResult.fold(
+      result.fold(
         (failure) {
           if (kDebugMode) {
             print(
-              '⚠️ PlantsProvider: Dados locais não disponíveis: ${_getErrorMessage(failure)}',
+              '⚠️ PlantsProvider: Falha ao carregar dados: ${_getErrorMessage(failure)}',
             );
           }
-          // Se falhar ao carregar dados locais, desativa loading e mostra lista vazia
-          // O sync em background tentará buscar dados remotos
           final currentState = state.valueOrNull ?? const PlantsState();
           state = AsyncData(
             currentState.copyWith(
               isLoading: false,
               allPlants: [],
+              error: _getErrorMessage(failure),
             ),
           );
         },
         (plants) {
           if (kDebugMode) {
             print(
-              '✅ PlantsProvider: Dados locais carregados: ${plants.length} plantas',
+              '✅ PlantsProvider: Dados carregados: ${plants.length} plantas',
             );
           }
           _updatePlantsData(plants);
@@ -685,51 +683,17 @@ class PlantsNotifier extends _$PlantsNotifier {
       );
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantsProvider: Erro ao carregar dados locais: $e');
+        print('❌ PlantsProvider: Erro ao carregar dados: $e');
       }
-      // Em caso de exceção, desativa loading e mostra lista vazia
       final currentState = state.valueOrNull ?? const PlantsState();
       state = AsyncData(
         currentState.copyWith(
           isLoading: false,
           allPlants: [],
+          error: e.toString(),
         ),
       );
     }
-  }
-
-  /// Syncs with remote data in background without blocking UI
-  void _syncInBackground() {
-    if (kDebugMode) {
-      print('🔄 PlantsProvider: Iniciando sync em background...');
-    }
-    Future.delayed(const Duration(milliseconds: 100), () async {
-      final result = await _getPlantsUseCase.call(const NoParams());
-
-      result.fold(
-        (failure) {
-          if (kDebugMode) {
-            print(
-              '❌ PlantsProvider: Background sync falhou: ${_getErrorMessage(failure)}',
-            );
-          }
-          final currentState = state.valueOrNull ?? const PlantsState();
-          if (currentState.allPlants.isEmpty) {
-            state = AsyncData(
-              currentState.copyWith(error: _getErrorMessage(failure)),
-            );
-          }
-        },
-        (plants) {
-          if (kDebugMode) {
-            print(
-              '✅ PlantsProvider: Background sync bem-sucedido: ${plants.length} plantas',
-            );
-          }
-          _updatePlantsData(plants);
-        },
-      );
-    });
   }
 
   /// Updates plants data and notifies listeners

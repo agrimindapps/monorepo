@@ -43,6 +43,7 @@ class FormValidator {
     bool required = false,
     String? Function(String?)? customValidator,
     GlobalKey? scrollKey,
+    FocusNode? focusNode,
     int? minLength,
     int? maxLength,
     double? minValue,
@@ -63,6 +64,7 @@ class FormValidator {
       required: required,
       customValidator: customValidator,
       scrollKey: key,
+      focusNode: focusNode,
       minLength: minLength,
       maxLength: maxLength,
       minValue: minValue,
@@ -138,6 +140,9 @@ class FormValidator {
     for (final field in _fields) {
       final result = await _validateField(field);
       if (!result.isValid) {
+        if (field.focusNode != null) {
+          field.focusNode!.requestFocus();
+        }
         final context = field.scrollKey.currentContext;
         if (context != null && context.mounted) {
           await Scrollable.ensureVisible(
@@ -208,6 +213,7 @@ class FormFieldData {
     required this.required,
     this.customValidator,
     required this.scrollKey,
+    this.focusNode,
     this.minLength,
     this.maxLength,
     this.minValue,
@@ -224,6 +230,7 @@ class FormFieldData {
   final bool required;
   final String? Function(String?)? customValidator;
   final GlobalKey scrollKey;
+  final FocusNode? focusNode;
   final int? minLength;
   final int? maxLength;
   final double? minValue;
@@ -614,6 +621,7 @@ extension FormValidatorExtensions on FormValidator {
         required: config.required,
         customValidator: config.customValidator,
         scrollKey: config.scrollKey,
+        focusNode: config.focusNode,
         minLength: config.minLength,
         maxLength: config.maxLength,
         minValue: config.minValue,
@@ -652,6 +660,7 @@ class FormFieldConfig {
     this.required = false,
     this.customValidator,
     this.scrollKey,
+    this.focusNode,
     this.minLength,
     this.maxLength,
     this.minValue,
@@ -668,6 +677,7 @@ class FormFieldConfig {
   final bool required;
   final String? Function(String?)? customValidator;
   final GlobalKey? scrollKey;
+  final FocusNode? focusNode;
   final int? minLength;
   final int? maxLength;
   final double? minValue;

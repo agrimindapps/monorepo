@@ -41,7 +41,18 @@ class UpdateSnakePositionUseCase {
       currentHead: currentState.head,
       direction: currentState.direction,
       gridSize: currentState.gridSize,
+      hasWalls: currentState.hasWalls,
     );
+
+    // 1.1 Check wall collision (if enabled)
+    if (currentState.hasWalls) {
+      if (!_movementService.isWithinBounds(
+        position: newHead,
+        gridSize: currentState.gridSize,
+      )) {
+        return Right(currentState.copyWith(gameStatus: SnakeGameStatus.gameOver));
+      }
+    }
 
     // 2. Check collision with own body
     final collisionResult = _collisionService.checkCollision(

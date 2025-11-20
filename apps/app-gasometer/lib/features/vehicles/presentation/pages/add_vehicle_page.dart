@@ -30,6 +30,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
   final TextEditingController _observacoesController = TextEditingController();
   late final FormValidator _formValidator;
   final Map<String, GlobalKey> _fieldKeys = {};
+  final Map<String, FocusNode> _focusNodes = {};
   bool _isInitialized = false;
 
   void _initializeFormNotifier() {
@@ -49,16 +50,14 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
   void _initializeFormValidator() {
     _formValidator = FormValidator();
     final notifier = ref.read(vehicleFormNotifierProvider.notifier);
-    _fieldKeys['marca'] = GlobalKey();
-    _fieldKeys['modelo'] = GlobalKey();
-    _fieldKeys['ano'] = GlobalKey();
-    _fieldKeys['cor'] = GlobalKey();
-    _fieldKeys['odometro'] = GlobalKey();
-    _fieldKeys['placa'] = GlobalKey();
-    _fieldKeys['chassi'] = GlobalKey();
-    _fieldKeys['renavam'] = GlobalKey();
-    _fieldKeys['observacoes'] = GlobalKey();
-    _fieldKeys['combustivel'] = GlobalKey();
+    
+    // Initialize keys and focus nodes
+    final fields = ['marca', 'modelo', 'ano', 'cor', 'odometro', 'placa', 'chassi', 'renavam', 'observacoes', 'combustivel'];
+    for (final field in fields) {
+      _fieldKeys[field] = GlobalKey();
+      _focusNodes[field] = FocusNode();
+    }
+
     _formValidator.addFields([
       FormFieldConfig(
         fieldId: 'marca',
@@ -69,6 +68,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
         maxLength: 50,
         label: 'Marca',
         scrollKey: _fieldKeys['marca'],
+        focusNode: _focusNodes['marca'],
       ),
       FormFieldConfig(
         fieldId: 'modelo',
@@ -79,6 +79,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
         maxLength: 50,
         label: 'Modelo',
         scrollKey: _fieldKeys['modelo'],
+        focusNode: _focusNodes['modelo'],
       ),
       FormFieldConfig(
         fieldId: 'ano',
@@ -87,6 +88,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
         required: true,
         label: 'Ano',
         scrollKey: _fieldKeys['ano'],
+        focusNode: _focusNodes['ano'],
       ),
       FormFieldConfig(
         fieldId: 'cor',
@@ -97,6 +99,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
         maxLength: 30,
         label: 'Cor',
         scrollKey: _fieldKeys['cor'],
+        focusNode: _focusNodes['cor'],
       ),
       FormFieldConfig(
         fieldId: 'odometro',
@@ -107,6 +110,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
         maxValue: 999999.0,
         label: 'Odômetro Atual',
         scrollKey: _fieldKeys['odometro'],
+        focusNode: _focusNodes['odometro'],
       ),
       FormFieldConfig(
         fieldId: 'placa',
@@ -115,6 +119,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
         required: true,
         label: 'Placa',
         scrollKey: _fieldKeys['placa'],
+        focusNode: _focusNodes['placa'],
       ),
       FormFieldConfig(
         fieldId: 'chassi',
@@ -123,6 +128,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
         required: false,
         label: 'Chassi',
         scrollKey: _fieldKeys['chassi'],
+        focusNode: _focusNodes['chassi'],
       ),
       FormFieldConfig(
         fieldId: 'renavam',
@@ -131,6 +137,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
         required: false,
         label: 'Renavam',
         scrollKey: _fieldKeys['renavam'],
+        focusNode: _focusNodes['renavam'],
       ),
       FormFieldConfig(
         fieldId: 'observacoes',
@@ -141,6 +148,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
         maxLength: 1000,
         label: 'Observações',
         scrollKey: _fieldKeys['observacoes'],
+        focusNode: _focusNodes['observacoes'],
       ),
     ]);
   }
@@ -149,6 +157,9 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
   void dispose() {
     _observacoesController.dispose();
     _formValidator.clear();
+    for (final node in _focusNodes.values) {
+      node.dispose();
+    }
     super.dispose();
   }
 
@@ -204,6 +215,10 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
               modelFieldKey: _fieldKeys['modelo']!,
               yearFieldKey: _fieldKeys['ano']!,
               colorFieldKey: _fieldKeys['cor']!,
+              brandFocusNode: _focusNodes['marca']!,
+              modelFocusNode: _focusNodes['modelo']!,
+              yearFocusNode: _focusNodes['ano']!,
+              colorFocusNode: _focusNodes['cor']!,
               onYearChanged: (value) {
                 notifier.yearController.text = value?.toString() ?? '';
                 notifier.markAsChanged();
@@ -226,6 +241,10 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
               plateFieldKey: _fieldKeys['placa']!,
               chassisFieldKey: _fieldKeys['chassi']!,
               renavamFieldKey: _fieldKeys['renavam']!,
+              odometerFocusNode: _focusNodes['odometro']!,
+              plateFocusNode: _focusNodes['placa']!,
+              chassisFocusNode: _focusNodes['chassi']!,
+              renavamFocusNode: _focusNodes['renavam']!,
               onOdometerChanged: (_) => setState(() {}),
               onPlateChanged: (_) => setState(() {}),
               onChassisChanged: (_) => setState(() {}),
@@ -235,6 +254,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
             VehicleAdditionalInfoSection(
               observationsController: _observacoesController,
               observationsFieldKey: _fieldKeys['observacoes']!,
+              observationsFocusNode: _focusNodes['observacoes']!,
               onObservationsChanged: (_) => setState(() {}),
             ),
           ],

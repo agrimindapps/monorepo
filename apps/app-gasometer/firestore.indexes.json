@@ -5,66 +5,48 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "userId",
+          "fieldPath": "updatedAt",
           "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAt",
-          "order": "DESCENDING"
         }
       ]
     },
     {
-      "collectionGroup": "fuel_records",
+      "collectionGroup": "fuel_supplies",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "userId",
+          "fieldPath": "updatedAt",
           "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "vehicleId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "date",
-          "order": "DESCENDING"
         }
       ]
     },
     {
-      "collectionGroup": "maintenance_records",
+      "collectionGroup": "maintenances",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "userId",
+          "fieldPath": "updatedAt",
           "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "vehicleId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "date",
-          "order": "DESCENDING"
         }
       ]
     },
     {
-      "collectionGroup": "odometer_records",
+      "collectionGroup": "expenses",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "userId",
+          "fieldPath": "updatedAt",
           "order": "ASCENDING"
-        },
+        }
+      ]
+    },
+    {
+      "collectionGroup": "odometer_readings",
+      "queryScope": "COLLECTION",
+      "fields": [
         {
-          "fieldPath": "vehicleId",
+          "fieldPath": "updatedAt",
           "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "date",
-          "order": "DESCENDING"
         }
       ]
     }

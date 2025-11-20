@@ -1,6 +1,8 @@
 import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:core/core.dart' hide Failure, ValidationFailure;
 
+import 'package:injectable/injectable.dart';
+
 import '../entities/calculation_history.dart';
 import '../entities/calculation_result.dart';
 import '../repositories/calculator_repository.dart';
@@ -24,14 +26,15 @@ class ExecuteCalculationParams {
   });
 }
 
+@lazySingleton
 class ExecuteCalculation {
   final CalculatorRepository repository;
   final FirebaseAnalyticsService _analyticsService;
   final RevenueCatService _revenueCatService;
 
   ExecuteCalculation(this.repository)
-      : _analyticsService = FirebaseAnalyticsService(),
-        _revenueCatService = RevenueCatService();
+    : _analyticsService = FirebaseAnalyticsService(),
+      _revenueCatService = RevenueCatService();
 
   /// Executa cálculo simples sem parâmetros
   Future<Either<Failure, CalculationResult>> call(
@@ -39,12 +42,13 @@ class ExecuteCalculation {
     Map<String, dynamic> inputs,
   ) async {
     final startTime = DateTime.now();
-    
+
     try {
       final isPremiumCalculator = _isPremiumCalculator(calculatorId);
-      
+
       if (isPremiumCalculator) {
-        final hasAccessResult = await _revenueCatService.hasActiveSubscription();
+        final hasAccessResult = await _revenueCatService
+            .hasActiveSubscription();
         final hasAccess = hasAccessResult.fold((l) => false, (r) => r);
         if (!hasAccess) {
           await _analyticsService.logEvent(
@@ -54,7 +58,11 @@ class ExecuteCalculation {
               'input_count': inputs.length,
             },
           );
-          return const Left(ValidationFailure(message: 'Esta calculadora requer assinatura premium'));
+          return const Left(
+            ValidationFailure(
+              message: 'Esta calculadora requer assinatura premium',
+            ),
+          );
         }
       }
       await _analyticsService.logEvent(
@@ -65,10 +73,10 @@ class ExecuteCalculation {
           'is_premium': isPremiumCalculator,
         },
       );
-      
+
       final result = await repository.executeCalculation(calculatorId, inputs);
       final duration = DateTime.now().difference(startTime).inMilliseconds;
-      
+
       await result.fold(
         (failure) async {
           await _analyticsService.logEvent(
@@ -92,20 +100,17 @@ class ExecuteCalculation {
           );
         },
       );
-      
+
       return result;
     } catch (e) {
       await _analyticsService.logEvent(
         'calculation_unexpected_error',
-        parameters: {
-          'calculator_id': calculatorId,
-          'error': e.toString(),
-        },
+        parameters: {'calculator_id': calculatorId, 'error': e.toString()},
       );
       rethrow;
     }
   }
-  
+
   /// Verifica se a calculadora requer acesso premium
   bool _isPremiumCalculator(String calculatorId) {
     const premiumCalculators = {
@@ -136,8 +141,8 @@ class ExecuteCalculationWithHistory {
   final RevenueCatService _revenueCatService;
 
   ExecuteCalculationWithHistory(this.repository)
-      : _analyticsService = FirebaseAnalyticsService(),
-        _revenueCatService = RevenueCatService();
+    : _analyticsService = FirebaseAnalyticsService(),
+      _revenueCatService = RevenueCatService();
 
   Future<Either<Failure, CalculationResult>> call({
     required String calculatorId,
@@ -148,12 +153,13 @@ class ExecuteCalculationWithHistory {
     Map<String, String>? tags,
   }) async {
     final startTime = DateTime.now();
-    
+
     try {
       final isPremiumCalculator = _isPremiumCalculator(calculatorId);
-      
+
       if (isPremiumCalculator) {
-        final hasAccessResult = await _revenueCatService.hasActiveSubscription();
+        final hasAccessResult = await _revenueCatService
+            .hasActiveSubscription();
         final hasAccess = hasAccessResult.fold((l) => false, (r) => r);
         if (!hasAccess) {
           await _analyticsService.logEvent(
@@ -164,7 +170,11 @@ class ExecuteCalculationWithHistory {
               'user_id': userId,
             },
           );
-          return const Left(ValidationFailure(message: 'Esta calculadora requer assinatura premium'));
+          return const Left(
+            ValidationFailure(
+              message: 'Esta calculadora requer assinatura premium',
+            ),
+          );
         }
       }
       await _analyticsService.logEvent(
@@ -210,7 +220,9 @@ class ExecuteCalculationWithHistory {
               tags: tags,
             );
 
-            final saveResult = await repository.saveCalculationToHistory(history);
+            final saveResult = await repository.saveCalculationToHistory(
+              history,
+            );
             await saveResult.fold(
               (failure) async {
                 await _analyticsService.logEvent(
@@ -261,7 +273,7 @@ class ExecuteCalculationWithHistory {
       rethrow;
     }
   }
-  
+
   /// Verifica se a calculadora requer acesso premium
   bool _isPremiumCalculator(String calculatorId) {
     const premiumCalculators = {

@@ -15,4 +15,26 @@ abstract class ExternalModule {
 
   @lazySingleton
   FirebaseAuth get auth => FirebaseAuth.instance;
+
+  // Core Services bridging
+  // These services are registered manually in CorePackageIntegration
+  // but need to be exposed to Injectable for dependency resolution
+
+  @lazySingleton
+  ISubscriptionRepository get subscriptionRepository =>
+      GetIt.I<ISubscriptionRepository>();
+
+  @lazySingleton
+  IAuthRepository get authRepository => GetIt.I<IAuthRepository>();
+
+  @lazySingleton
+  ConnectivityService get connectivityService => GetIt.I<ConnectivityService>();
+
+  @lazySingleton
+  FirebaseDeviceService get firebaseDeviceService =>
+      GetIt.I<FirebaseDeviceService>();
+
+  @lazySingleton
+  ILocalStorageRepository get localStorageRepository =>
+      GetIt.I<ILocalStorageRepository>();
 }

@@ -3,6 +3,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/game_state_entity.dart';
 import '../../domain/entities/position_entity.dart';
+import '../../domain/services/grid_validation_service.dart';
+import '../../domain/services/puzzle_generator_service.dart';
 import '../../domain/usecases/check_completion_usecase.dart';
 import '../../domain/usecases/generate_puzzle_usecase.dart';
 import '../../domain/usecases/get_hint_usecase.dart';
@@ -38,7 +40,7 @@ class SudokuGame extends _$SudokuGame {
     });
 
     // Initialize use cases (will be replaced with DI)
-    _generatePuzzleUseCase = GeneratePuzzleUseCase();
+    _generatePuzzleUseCase = GeneratePuzzleUseCase(PuzzleGeneratorService());
     _placeNumberUseCase = PlaceNumberUseCase(
       ref.read(validateMoveUseCaseProvider),
       ref.read(updateConflictsUseCaseProvider),
@@ -338,5 +340,5 @@ UpdateConflictsUseCase updateConflictsUseCase(UpdateConflictsUseCaseRef ref) {
 
 @riverpod
 ValidateMoveUseCase validateMoveUseCase(ValidateMoveUseCaseRef ref) {
-  return ValidateMoveUseCase();
+  return ValidateMoveUseCase(GridValidationService());
 }

@@ -1,0 +1,6 @@
+targets:
+  $default:
+    builders:
+      drift_dev|drift:
+        options:
+          generate_adapters: true

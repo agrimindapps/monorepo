@@ -1,8 +1,7 @@
-import 'dart:math' as math;
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class FeaturesCarousel extends StatefulWidget {
-
   const FeaturesCarousel({super.key, required this.features});
   final List<Map<String, dynamic>> features;
 
@@ -10,32 +9,16 @@ class FeaturesCarousel extends StatefulWidget {
   State<FeaturesCarousel> createState() => _FeaturesCarouselState();
 }
 
-class _FeaturesCarouselState extends State<FeaturesCarousel>
-    with SingleTickerProviderStateMixin {
+class _FeaturesCarouselState extends State<FeaturesCarousel> {
   int _currentPage = 0;
   final PageController _pageController =
       PageController(initialPage: 0, viewportFraction: 0.85);
-  late final AnimationController _animationController;
-  final List<Color> _cardColors = [
-    Colors.blue.shade800,
-    Colors.green.shade700,
-    Colors.amber.shade700,
-    Colors.purple.shade700,
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 6),
-    )..repeat();
-  }
+  
+  // Hover state for desktop
+  int? _hoveredIndex;
 
   @override
   void dispose() {
-    _animationController.stop();
-    _animationController.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -43,64 +26,122 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final isMobile = screenSize.width < 800;
+    final isMobile = screenSize.width < 900;
 
     return Container(
       padding: EdgeInsets.symmetric(
-        vertical: 80,
+        vertical: 100,
         horizontal: isMobile ? 20 : screenSize.width * 0.08,
       ),
+      // Dark gradient background to match the theme
       decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(40),
-          topRight: Radius.circular(40),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFF0F172A), // Deep Navy (continuation from Header)
+            Color(0xFF1E293B), // Slate 800
+          ],
         ),
       ),
       child: Column(
         children: [
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: 'Funcionalidades ',
-                  style: TextStyle(
-                    fontSize: isMobile ? 28 : 36,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                    height: 1.2,
-                  ),
-                ),
-                TextSpan(
-                  text: 'Poderosas',
-                  style: TextStyle(
-                    fontSize: isMobile ? 28 : 36,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue[800],
-                    height: 1.2,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            constraints: const BoxConstraints(maxWidth: 700),
-            child: const Text(
-              'Descubra como o GasOMeter pode transformar o gerenciamento do seu veículo e otimizar seu controle',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black54,
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
+          _buildSectionHeader(isMobile),
           const SizedBox(height: 60),
           isMobile ? _buildMobileCarousel() : _buildDesktopFeatureGrid(),
         ],
       ),
+    );
+  }
+
+  Widget _buildSectionHeader(bool isMobile) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.blue.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+          ),
+          child: Text(
+            'FUNCIONALIDADES',
+            style: TextStyle(
+              color: Colors.blue[400],
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        RichText(
+          textAlign: TextAlign.center,
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: 'Tudo o que você precisa\n',
+                style: TextStyle(
+                  fontSize: isMobile ? 32 : 48,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  height: 1.2,
+                  fontFamily: 'Inter',
+                ),
+              ),
+              TextSpan(
+                text: 'em um só lugar',
+                style: TextStyle(
+                  fontSize: isMobile ? 32 : 48,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.transparent,
+                  height: 1.2,
+                  fontFamily: 'Inter',
+                  shadows: [
+                    Shadow(
+                      offset: const Offset(0, 4),
+                      blurRadius: 8,
+                      color: Colors.blue.withValues(alpha: 0.4),
+                    ),
+                  ],
+                  decoration: TextDecoration.none,
+                  decorationColor: Colors.blue,
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Gradient text workaround
+        ShaderMask(
+          shaderCallback: (bounds) => LinearGradient(
+            colors: [Colors.blue[400]!, Colors.cyan[400]!],
+          ).createShader(bounds),
+          child: Text(
+            'em um só lugar',
+            style: TextStyle(
+              fontSize: isMobile ? 32 : 48,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              height: 1.2,
+              fontFamily: 'Inter',
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        const SizedBox(height: 24),
+        Container(
+          constraints: const BoxConstraints(maxWidth: 700),
+          child: Text(
+            'O GasOMeter reúne todas as ferramentas essenciais para você gerenciar seu veículo com eficiência, economia e tranquilidade.',
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.blueGrey[200],
+              height: 1.6,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ],
     );
   }
 
@@ -120,11 +161,15 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
         crossAxisCount: crossAxisCount,
         mainAxisSpacing: 30,
         crossAxisSpacing: 30,
-        childAspectRatio: 0.8,
+        childAspectRatio: 0.85,
       ),
       itemCount: widget.features.length,
       itemBuilder: (context, index) {
-        return _buildFeatureCard(widget.features[index], index);
+        return MouseRegion(
+          onEnter: (_) => setState(() => _hoveredIndex = index),
+          onExit: (_) => setState(() => _hoveredIndex = null),
+          child: _buildFeatureCard(widget.features[index], index, isHovered: _hoveredIndex == index),
+        );
       },
     );
   }
@@ -133,7 +178,7 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
     return Column(
       children: [
         SizedBox(
-          height: 380,
+          height: 420,
           child: PageView.builder(
             controller: _pageController,
             itemCount: widget.features.length,
@@ -146,15 +191,15 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
               return AnimatedPadding(
                 duration: const Duration(milliseconds: 300),
                 padding: EdgeInsets.symmetric(
-                  horizontal: 8,
+                  horizontal: 10,
                   vertical: _currentPage == index ? 0 : 20,
                 ),
-                child: _buildFeatureCard(widget.features[index], index),
+                child: _buildFeatureCard(widget.features[index], index, isHovered: _currentPage == index),
               );
             },
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 30),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
@@ -170,13 +215,13 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 margin: const EdgeInsets.symmetric(horizontal: 4),
-                width: _currentPage == index ? 24 : 10,
-                height: 10,
+                width: _currentPage == index ? 32 : 8,
+                height: 8,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
+                  borderRadius: BorderRadius.circular(4),
                   color: _currentPage == index
-                      ? _cardColors[index % _cardColors.length]
-                      : Colors.grey[300],
+                      ? Colors.blue[400]
+                      : Colors.white.withValues(alpha: 0.2),
                 ),
               ),
             ),
@@ -186,134 +231,105 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
     );
   }
 
-  Widget _buildFeatureCard(Map<String, dynamic> feature, int index) {
-    final cardColor = _cardColors[index % _cardColors.length];
+  Widget _buildFeatureCard(Map<String, dynamic> feature, int index, {bool isHovered = false}) {
+    // Different accent colors for cards
+    final List<Color> accentColors = [
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+    ];
+    final accentColor = accentColors[index % accentColors.length];
 
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, child) {
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      transform: Matrix4.identity()..translate(0.0, isHovered ? -10.0 : 0.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: isHovered 
+                    ? accentColor.withValues(alpha: 0.5)
+                    : Colors.white.withValues(alpha: 0.1),
+                width: isHovered ? 2 : 1,
+              ),
+              boxShadow: [
+                if (isHovered)
                   BoxShadow(
-                    color: cardColor.withValues(alpha: 0.2),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
+                    color: accentColor.withValues(alpha: 0.2),
+                    blurRadius: 30,
+                    offset: const Offset(0, 10),
                   ),
-                ],
-                border: Border.all(
-                  color: Colors.grey.withValues(alpha: 0.1),
-                  width: 1,
-                ),
-              ),
-              padding: const EdgeInsets.all(30),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: cardColor.withValues(alpha: 0.1),
-                    ),
-                    child: Icon(
-                      feature['icon'] as IconData,
-                      size: 40,
-                      color: cardColor,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    feature['title'] as String,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: cardColor,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    feature['description'] as String,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
-                      height: 1.5,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 4,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+              ],
             ),
-            Positioned(
-              top: -10 +
-                  10 *
-                      math.sin(
-                          _animationController.value * math.pi * 2 + index),
-              right: -10,
-              child: Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: cardColor.withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: -15 +
-                  10 *
-                      math.sin(
-                          _animationController.value * math.pi * 2 + index + 2),
-              left: 20,
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: cardColor.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            if (index == 0)
-              Positioned(
-                top: 15,
-                left: 15,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
                   decoration: BoxDecoration(
-                    color: Colors.amber[400],
-                    borderRadius: BorderRadius.circular(20),
+                    color: accentColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
+                  child: Icon(
+                    feature['icon'] as IconData,
+                    size: 32,
+                    color: accentColor,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  feature['title'] as String,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  feature['description'] as String,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.blueGrey[200],
+                    height: 1.6,
+                  ),
+                ),
+                const Spacer(),
+                AnimatedOpacity(
+                  opacity: isHovered ? 1.0 : 0.5,
+                  duration: const Duration(milliseconds: 200),
+                  child: Row(
                     children: [
-                      Icon(Icons.star, color: Colors.white, size: 12),
-                      SizedBox(width: 4),
                       Text(
-                        'DESTAQUE',
+                        'Saiba mais',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: accentColor,
                           fontWeight: FontWeight.bold,
-                          fontSize: 10,
                         ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.arrow_forward,
+                        size: 16,
+                        color: accentColor,
                       ),
                     ],
                   ),
                 ),
-              ),
-          ],
-        );
-      },
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../core/theme/plantis_colors.dart';
+
 
 class PromoCallToAction extends StatelessWidget {
   const PromoCallToAction({super.key});
@@ -13,7 +14,7 @@ class PromoCallToAction extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(
-        vertical: 80,
+        vertical: 100,
         horizontal: isMobile ? 24 : 40,
       ),
       decoration: const BoxDecoration(
@@ -21,128 +22,115 @@ class PromoCallToAction extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            PlantisColors.primary,
-            PlantisColors.secondary,
+            Color(0xFFF59E0B), // Sunlight Gold
+            Color(0xFFD97706), // Amber 600
           ],
         ),
       ),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: Column(
-            children: [
-              const Icon(
-                Icons.eco,
-                size: 64,
-                color: Colors.white,
+      child: Stack(
+        children: [
+          // Decorative background elements
+          Positioned(
+            top: -50,
+            left: -50,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.1),
               ),
-              const SizedBox(height: 24),
-              Text(
-                'Pronto para transformar seu jardim?',
-                style: TextStyle(
-                  fontSize: isMobile ? 28 : 36,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-                textAlign: TextAlign.center,
+            ),
+          ),
+          Positioned(
+            bottom: -50,
+            right: -50,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.05),
               ),
-              const SizedBox(height: 16),
-              Text(
-                'Junte-se a milhares de jardineiros que já estão cuidando melhor de suas plantas com o Plantis',
-                style: TextStyle(
-                  fontSize: isMobile ? 16 : 18,
-                  color: Colors.white.withValues(alpha: 0.9),
-                  height: 1.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 40),
-              Text(
-                'Gratuito para sempre • Sem cartão de crédito',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white.withValues(alpha: 0.8),
-                ),
-              ),
-              const SizedBox(height: 32),
-              // Store download buttons (disabled)
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
+            ),
+          ),
+          
+          // Content
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: Column(
                 children: [
-                  _buildStoreButton(
-                    icon: Icons.android,
-                    label: 'Google Play',
-                    enabled: false,
-                    isMobile: isMobile,
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.eco,
+                      size: 48,
+                      color: Colors.white,
+                    ),
                   ),
-                  SizedBox(width: isMobile ? 12 : 16),
-                  _buildStoreButton(
-                    icon: Icons.apple,
-                    label: 'App Store',
-                    enabled: false,
-                    isMobile: isMobile,
+                  const SizedBox(height: 32),
+                  Text(
+                    'Pronto para transformar seu jardim?',
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: isMobile ? 32 : 48,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      height: 1.2,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Junte-se a milhares de jardineiros que já estão cuidando melhor de suas plantas com o Plantis.',
+                    style: GoogleFonts.inter(
+                      fontSize: isMobile ? 16 : 18,
+                      color: Colors.white.withValues(alpha: 0.9),
+                      height: 1.6,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 48),
+                  ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFFD97706),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 48,
+                        vertical: 24,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 8,
+                    ),
+                    child: const Text(
+                      'Começar Gratuitamente',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Text(
+                    'Gratuito para sempre • Sem cartão de crédito',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStoreButton({
-    required IconData icon,
-    required String label,
-    required bool enabled,
-    required bool isMobile,
-  }) {
-    return Opacity(
-      opacity: enabled ? 1.0 : 0.5,
-      child: Container(
-        height: isMobile ? 44 : 52,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: enabled ? 0.2 : 0.1),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: enabled ? 0.3 : 0.15),
-            width: 1,
-          ),
-        ),
-        padding: EdgeInsets.symmetric(
-          horizontal: isMobile ? 16 : 20,
-          vertical: 8,
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.white, size: isMobile ? 20 : 24),
-            SizedBox(width: isMobile ? 8 : 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'DISPONÍVEL NA',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: enabled ? 0.8 : 0.5),
-                    fontSize: isMobile ? 8 : 9,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: isMobile ? 12 : 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

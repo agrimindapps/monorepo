@@ -14,6 +14,7 @@ class SnakeGameState extends Equatable {
   final int gridSize;
   final SnakeGameStatus gameStatus;
   final SnakeDifficulty difficulty;
+  final bool hasWalls; // Whether walls kill the snake (true) or wrap around (false)
   final Set<Position> freePositions; // Cached free positions for performance
 
   const SnakeGameState({
@@ -24,6 +25,7 @@ class SnakeGameState extends Equatable {
     required this.gridSize,
     required this.gameStatus,
     required this.difficulty,
+    required this.hasWalls,
     required this.freePositions,
   });
 
@@ -31,6 +33,7 @@ class SnakeGameState extends Equatable {
   factory SnakeGameState.initial({
     int gridSize = 20,
     SnakeDifficulty difficulty = SnakeDifficulty.medium,
+    bool hasWalls = false,
   }) {
     final center = gridSize ~/ 2;
     final initialSnake = [Position(center, center)];
@@ -44,6 +47,7 @@ class SnakeGameState extends Equatable {
       gridSize: gridSize,
       gameStatus: SnakeGameStatus.notStarted,
       difficulty: difficulty,
+      hasWalls: hasWalls,
       freePositions: freePositions,
     );
   }
@@ -89,6 +93,7 @@ class SnakeGameState extends Equatable {
     int? gridSize,
     SnakeGameStatus? gameStatus,
     SnakeDifficulty? difficulty,
+    bool? hasWalls,
     Set<Position>? freePositions,
   }) {
     // Auto-calculate freePositions if snake changed but freePositions not provided
@@ -104,6 +109,7 @@ class SnakeGameState extends Equatable {
       gridSize: gridSize ?? this.gridSize,
       gameStatus: gameStatus ?? this.gameStatus,
       difficulty: difficulty ?? this.difficulty,
+      hasWalls: hasWalls ?? this.hasWalls,
       freePositions: newFreePositions,
     );
   }
@@ -117,6 +123,7 @@ class SnakeGameState extends Equatable {
         gridSize,
         gameStatus,
         difficulty,
+        hasWalls,
         freePositions,
       ];
 }

@@ -12,7 +12,7 @@ import '../../tables/receituagro_tables.dart';
 class FavoritosDriftSyncAdapter
     extends DriftSyncAdapterBase<FavoritoSyncEntity, Favorito> {
   FavoritosDriftSyncAdapter(ReceituagroDatabase db, FirebaseFirestore firestore)
-    : super(db, firestore);
+      : super(db, firestore);
 
   ReceituagroDatabase get localDb => db as ReceituagroDatabase;
 
@@ -37,8 +37,7 @@ class FavoritosDriftSyncAdapter
           id: row.firebaseId ?? 'temp_${row.id}',
           tipo: row.tipo,
           itemId: row.itemId,
-          itemData:
-              const {}, // TODO: Parse JSON from row.itemData if needed, or keep empty if not synced back
+          itemData: const {}, // TODO: Parse JSON from row.itemData if needed, or keep empty if not synced back
           adicionadoEm: row.createdAt,
           createdAt: row.createdAt,
           updatedAt: row.updatedAt ?? row.createdAt,
@@ -78,13 +77,13 @@ class FavoritosDriftSyncAdapter
 
       await (localDb.update(
         localDb.favoritos,
-      )..where((tbl) => tbl.id.equals(id))).write(
+      )..where((tbl) => tbl.id.equals(id)))
+          .write(
         FavoritosCompanion(
           isDirty: const Value(false),
           lastSyncAt: Value(DateTime.now()),
-          firebaseId: firebaseId != null
-              ? Value(firebaseId)
-              : const Value.absent(),
+          firebaseId:
+              firebaseId != null ? Value(firebaseId) : const Value.absent(),
         ),
       );
 

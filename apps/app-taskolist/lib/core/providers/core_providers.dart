@@ -124,14 +124,14 @@ TaskManagerSubscriptionService taskManagerSubscriptionService(Ref ref) {
 }
 
 @riverpod
-TaskManagerAuthService taskManagerAuthService(Ref ref) {
+Future<TaskManagerAuthService> taskManagerAuthService(Ref ref) async {
   final authRepository = ref.watch(authRepositoryProvider);
   final analyticsService = ref.watch(taskManagerAnalyticsServiceProvider);
   final crashlyticsService = ref.watch(taskManagerCrashlyticsServiceProvider);
   final subscriptionService = ref.watch(taskManagerSubscriptionServiceProvider);
   final syncService = ref.watch(taskManagerSyncServiceProvider);
-  final enhancedDeletionService = ref.watch(
-    enhancedAccountDeletionServiceProvider,
+  final enhancedDeletionService = await ref.watch(
+    enhancedAccountDeletionServiceProvider.future,
   );
   return TaskManagerAuthService(
     authRepository,
@@ -139,7 +139,7 @@ TaskManagerAuthService taskManagerAuthService(Ref ref) {
     crashlyticsService,
     subscriptionService,
     syncService,
-    enhancedDeletionService.value!,
+    enhancedDeletionService,
   );
 }
 

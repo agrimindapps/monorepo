@@ -2,6 +2,8 @@
 import 'dart:async';
 
 // Package imports:
+// Package imports:
+import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 // Core imports:
@@ -182,7 +184,13 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
             if (newState.gameStatus.isGameOver) {
               _gameTimer?.cancel();
               _saveHighScore();
+              HapticFeedback.heavyImpact();
             } else {
+              // Check if score increased (food eaten)
+              if (newState.score > currentState!.score) {
+                HapticFeedback.lightImpact();
+              }
+              
               // Recalculate game speed if score changed (dynamic difficulty)
               final newDynamicSpeed = _movementService.calculateDynamicGameSpeed(
                 baseDifficulty: newState.difficulty,
@@ -320,4 +328,28 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
     );
   }
 
+  /// Toggle wall mode
+  Future<void> toggleWalls() async {
+    if (!_isMounted) return;
+
+    final currentState = state.valueOrNull;
+    if (currentState == null) return;
+
+    // Toggle hasWalls
+    final newHasWalls = !currentState.hasWalls;
+
+    // Restart game with new setting
+    _gameTimer?.cancel();
+    
+    // We need to update the startNewGameUseCase to accept hasWalls or update state manually
+    // For now, let's update state manually and restart
+    
+    final newState = SnakeGameState.initial(
+      difficulty: currentState.difficulty,
+      hasWalls: newHasWalls,
+    );
+    
+    state = AsyncValue.data(newState);
+    // Don't auto-start, let user start
+  }
 }

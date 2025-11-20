@@ -30,6 +30,7 @@ class AddOdometerPage extends ConsumerStatefulWidget {
 class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
     with FormErrorHandlerMixin {
   final _formKey = GlobalKey<FormState>();
+  final Map<String, FocusNode> _focusNodes = {};
   bool _isInitialized = false;
   bool _isSubmitting = false;
   Timer? _debounceTimer;
@@ -40,6 +41,9 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
   @override
   void initState() {
     super.initState();
+    _focusNodes['odometer'] = FocusNode();
+    _focusNodes['registrationType'] = FocusNode();
+    _focusNodes['description'] = FocusNode();
   }
 
   @override
@@ -86,6 +90,9 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
   void dispose() {
     _debounceTimer?.cancel();
     _timeoutTimer?.cancel();
+    for (final node in _focusNodes.values) {
+      node.dispose();
+    }
 
     super.dispose();
   }
@@ -227,6 +234,7 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
 
     return OdometerField(
       controller: notifier.odometerController,
+      focusNode: _focusNodes['odometer'],
       label: OdometerConstants.fieldLabels['odometro'],
       hint: '45234',
       currentOdometer: formState.vehicle?.currentOdometer,
@@ -245,6 +253,7 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
 
     return DropdownButtonFormField<OdometerType>(
       initialValue: formState.registrationType,
+      focusNode: _focusNodes['registrationType'],
       decoration: InputDecoration(
         labelText: OdometerConstants.fieldLabels['tipoRegistro'],
         hintText: OdometerConstants.fieldHints['tipoRegistro'],
@@ -286,6 +295,7 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
 
     return ObservationsField(
       controller: notifier.descriptionController,
+      focusNode: _focusNodes['description'],
       label: OdometerConstants.fieldLabels['descricao'],
       hint: OdometerConstants.fieldHints['descricao'],
       required: false,
@@ -309,11 +319,36 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
 
   /// Internal submit method with enhanced protection and timeout handling
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      // Se a validação do Form falhar, o Flutter já foca no primeiro erro automaticamente se os FocusNodes estiverem configurados corretamente.
+      // Mas podemos forçar se necessário.
+      return;
+    }
 
     final formNotifier = ref.read(odometerFormNotifierProvider.notifier);
     if (!formNotifier.validateForm()) {
       debugPrint('Form validation FAILED');
+      final formState = ref.read(odometerFormNotifierProvider);
+      if (formState.fieldErrors.isNotEmpty) {
+        // Mapeamento de erros do estado para chaves de focus node
+        // OdometerFormNotifier usa chaves como 'odometerValue', 'registrationType', 'description'
+        // Precisamos mapear se diferirem.
+        // 'odometerValue' -> 'odometer'
+        String? focusKey;
+        final firstErrorKey = formState.fieldErrors.keys.first;
+        if (firstErrorKey == 'odometerValue') {
+          focusKey = 'odometer';
+        } else if (firstErrorKey == 'registrationType') {
+          focusKey = 'registrationType';
+        } else if (firstErrorKey == 'description') {
+          focusKey = 'description';
+        }
+        
+        if (focusKey != null) {
+          _focusNodes[focusKey]?.requestFocus();
+        }
+        setFormError(formState.fieldErrors.values.first);
+      }
       return;
     }
     if (_isSubmitting) {

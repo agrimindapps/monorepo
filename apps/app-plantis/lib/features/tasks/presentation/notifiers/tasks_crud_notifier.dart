@@ -9,6 +9,7 @@ import '../../domain/services/task_filter_service.dart';
 import '../../domain/services/task_ownership_validator.dart';
 import '../../domain/usecases/add_task_usecase.dart';
 import '../../domain/usecases/complete_task_usecase.dart';
+import '../../domain/usecases/get_task_by_id_usecase.dart';
 import '../providers/tasks_providers.dart';
 import '../providers/tasks_state.dart';
 
@@ -30,6 +31,7 @@ part 'tasks_crud_notifier.g.dart';
 class TasksCrudNotifier extends _$TasksCrudNotifier {
   late final AddTaskUseCase _addTaskUseCase;
   late final CompleteTaskUseCase _completeTaskUseCase;
+  late final GetTaskByIdUseCase _getTaskByIdUseCase;
   late final AuthStateNotifier _authStateNotifier;
   late final ITaskOwnershipValidator _ownershipValidator;
   late final ITaskFilterService _filterService;
@@ -38,6 +40,7 @@ class TasksCrudNotifier extends _$TasksCrudNotifier {
   TasksState build() {
     _addTaskUseCase = ref.read(addTaskUseCaseProvider);
     _completeTaskUseCase = ref.read(completeTaskUseCaseProvider);
+    _getTaskByIdUseCase = ref.read(getTaskByIdUseCaseProvider);
     _authStateNotifier = AuthStateNotifier.instance;
     _ownershipValidator = ref.read(taskOwnershipValidatorProvider);
     _filterService = ref.read(taskFilterServiceProvider);
@@ -87,7 +90,7 @@ class TasksCrudNotifier extends _$TasksCrudNotifier {
   /// Completes a task with ownership validation
   Future<bool> completeTask(String taskId, {String? notes}) async {
     try {
-      final task = _getTaskWithOwnershipValidation(taskId);
+      final task = await _getTaskWithOwnershipValidation(taskId);
       final result = await _completeTaskUseCase(
         CompleteTaskParams(taskId: taskId, notes: notes),
       );
@@ -119,17 +122,33 @@ class TasksCrudNotifier extends _$TasksCrudNotifier {
   }
 
   /// Helper: Get task with ownership validation
-  task_entity.Task _getTaskWithOwnershipValidation(String taskId) {
+  Future<task_entity.Task> _getTaskWithOwnershipValidation(String taskId) async {
     final currentState = state;
-    final task = currentState.allTasks
+    
+    // 1. Try to find in local state first (fastest)
+    final localTask = currentState.allTasks
         .whereType<task_entity.Task>()
+        .cast<task_entity.Task?>()
         .firstWhere(
-          (t) => t.id == taskId,
-          orElse: () => throw Exception('Task not found: $taskId'),
+          (t) => t?.id == taskId,
+          orElse: () => null,
         );
 
-    _ownershipValidator.validateOwnershipOrThrow(task);
-    return task;
+    if (localTask != null) {
+      _ownershipValidator.validateOwnershipOrThrow(localTask);
+      return localTask;
+    }
+
+    // 2. If not found locally, fetch from repository
+    final result = await _getTaskByIdUseCase(taskId);
+    
+    return result.fold(
+      (failure) => throw Exception('Task not found: $taskId'),
+      (task) {
+        _ownershipValidator.validateOwnershipOrThrow(task);
+        return task;
+      },
+    );
   }
 
   /// Helper: Add optimistic task for offline support

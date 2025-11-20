@@ -83,11 +83,22 @@ class PlantsDriftRepository {
     return plants.map(_plantDriftToModel).toList();
   }
 
-  /// Retorna planta pelo firebaseId
-  Future<Plant?> getPlantById(String firebaseId) async {
-    final plant = await (_db.select(
+  /// Retorna planta pelo firebaseId ou ID local
+  Future<Plant?> getPlantById(String id) async {
+    // 1. Tenta buscar pelo firebaseId (padrão)
+    var plant = await (_db.select(
       _db.plants,
-    )..where((p) => p.firebaseId.equals(firebaseId))).getSingleOrNull();
+    )..where((p) => p.firebaseId.equals(id))).getSingleOrNull();
+
+    // 2. Se não encontrou, tenta buscar pelo ID local (fallback para dados legados)
+    if (plant == null) {
+      final localId = int.tryParse(id);
+      if (localId != null) {
+        plant = await (_db.select(
+          _db.plants,
+        )..where((p) => p.id.equals(localId))).getSingleOrNull();
+      }
+    }
 
     return plant != null ? _plantDriftToModel(plant) : null;
   }
@@ -130,10 +141,26 @@ class PlantsDriftRepository {
 
   // ==================== UPDATE ====================
 
-  /// Atualiza planta existente
+  /// Atualiza planta existente ou insere se não existir (Upsert)
   Future<bool> updatePlant(PlantModel model) async {
-    final localId = await _getLocalIdByFirebaseId(model.id);
-    if (localId == null) return false;
+    var localId = await _getLocalIdByFirebaseId(model.id);
+    
+    // Se não existe, insere
+    if (localId == null) {
+      try {
+        final id = await insertPlant(model);
+        return id > 0;
+      } catch (e) {
+        // Se falhar por constraint (race condition), tenta recuperar o ID novamente
+        if (e.toString().contains('UNIQUE constraint failed') || 
+            e.toString().contains('constraint failed')) {
+           localId = await _getLocalIdByFirebaseId(model.id);
+           if (localId == null) rethrow; // Se ainda for null, é outro erro
+        } else {
+          rethrow;
+        }
+      }
+    }
 
     final localSpaceId = await _resolveSpaceId(model.spaceId);
 
@@ -162,7 +189,7 @@ class PlantsDriftRepository {
 
     final updated = await (_db.update(
       _db.plants,
-    )..where((p) => p.id.equals(localId))).write(companion);
+    )..where((p) => p.id.equals(localId!))).write(companion);
 
     return updated > 0;
   }

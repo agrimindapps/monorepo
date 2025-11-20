@@ -35,8 +35,8 @@ import '../../domain/entities/odometer_entity.dart';
 @lazySingleton
 class OdometerDriftSyncAdapter
     extends DriftSyncAdapterBase<OdometerEntity, OdometerReading> {
-  OdometerDriftSyncAdapter(GeneratedDatabase db, FirebaseFirestore firestore)
-    : super(db, firestore) {
+  OdometerDriftSyncAdapter(GasometerDatabase db, FirebaseFirestore firestore)
+      : super(db, firestore) {
     developer.log(
       '🏗️ OdometerDriftSyncAdapter initialized with db: ${db.hashCode}, firestore: ${firestore.hashCode}',
       name: 'OdometerDriftSyncAdapter',
@@ -447,9 +447,8 @@ class OdometerDriftSyncAdapter
       final companion = OdometerReadingsCompanion(
         isDirty: const Value(false),
         lastSyncAt: Value(DateTime.now()),
-        firebaseId: firebaseId != null
-            ? Value(firebaseId)
-            : const Value.absent(),
+        firebaseId:
+            firebaseId != null ? Value(firebaseId) : const Value.absent(),
       );
 
       final query = _db.update(_db.odometerReadings)
@@ -490,11 +489,10 @@ class OdometerDriftSyncAdapter
   ) async {
     try {
       // Buscar vehicleId (int) do Drift pelo firebaseId usando query gerada
-      final vehicle =
-          await (_db.select(_db.vehicles)
-                ..where((tbl) => tbl.firebaseId.equals(vehicleFirebaseId))
-                ..where((tbl) => tbl.isDeleted.equals(false)))
-              .getSingleOrNull();
+      final vehicle = await (_db.select(_db.vehicles)
+            ..where((tbl) => tbl.firebaseId.equals(vehicleFirebaseId))
+            ..where((tbl) => tbl.isDeleted.equals(false)))
+          .getSingleOrNull();
 
       if (vehicle == null) {
         developer.log(
@@ -527,11 +525,10 @@ class OdometerDriftSyncAdapter
   Future<OdometerEntity?> getLatestReading(String vehicleFirebaseId) async {
     try {
       // Buscar vehicleId (int) do Drift pelo firebaseId usando query gerada
-      final vehicle =
-          await (_db.select(_db.vehicles)
-                ..where((tbl) => tbl.firebaseId.equals(vehicleFirebaseId))
-                ..where((tbl) => tbl.isDeleted.equals(false)))
-              .getSingleOrNull();
+      final vehicle = await (_db.select(_db.vehicles)
+            ..where((tbl) => tbl.firebaseId.equals(vehicleFirebaseId))
+            ..where((tbl) => tbl.isDeleted.equals(false)))
+          .getSingleOrNull();
 
       if (vehicle == null) {
         return null;
@@ -557,7 +554,8 @@ class OdometerDriftSyncAdapter
   Future<String?> _resolveVehicleFirebaseId(int localVehicleId) async {
     final vehicleRow = await (_db.select(
       _db.vehicles,
-    )..where((tbl) => tbl.id.equals(localVehicleId))).getSingleOrNull();
+    )..where((tbl) => tbl.id.equals(localVehicleId)))
+        .getSingleOrNull();
 
     final firebaseId = vehicleRow?.firebaseId;
 
@@ -579,10 +577,9 @@ class OdometerDriftSyncAdapter
       return entity;
     }
 
-    final vehicleRow =
-        await (_db.select(_db.vehicles)
-              ..where((tbl) => tbl.firebaseId.equals(entity.vehicleId)))
-            .getSingleOrNull();
+    final vehicleRow = await (_db.select(_db.vehicles)
+          ..where((tbl) => tbl.firebaseId.equals(entity.vehicleId)))
+        .getSingleOrNull();
 
     if (vehicleRow == null) {
       developer.log(

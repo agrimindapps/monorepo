@@ -1,8 +1,10 @@
 import 'package:core/core.dart';
+import 'package:injectable/injectable.dart';
 
 import '../entities/calculation_history.dart';
 import '../repositories/calculator_repository.dart';
 
+@lazySingleton
 class GetCalculationHistory {
   final CalculatorRepository repository;
 
@@ -13,6 +15,7 @@ class GetCalculationHistory {
   }
 }
 
+@lazySingleton
 class DeleteCalculationHistory {
   final CalculatorRepository repository;
 
@@ -22,4 +25,5 @@ class DeleteCalculationHistory {
     return repository.removeFromHistory(historyId);
   }
 }
+
 // }

@@ -16,6 +16,10 @@ class VehicleDocumentationSection extends StatelessWidget {
     required this.plateFieldKey,
     required this.chassisFieldKey,
     required this.renavamFieldKey,
+    required this.odometerFocusNode,
+    required this.plateFocusNode,
+    required this.chassisFocusNode,
+    required this.renavamFocusNode,
     this.onOdometerChanged,
     this.onPlateChanged,
     this.onChassisChanged,
@@ -31,6 +35,10 @@ class VehicleDocumentationSection extends StatelessWidget {
   final GlobalKey plateFieldKey;
   final GlobalKey chassisFieldKey;
   final GlobalKey renavamFieldKey;
+  final FocusNode odometerFocusNode;
+  final FocusNode plateFocusNode;
+  final FocusNode chassisFocusNode;
+  final FocusNode renavamFocusNode;
   final ValueChanged<String>? onOdometerChanged;
   final ValueChanged<String>? onPlateChanged;
   final ValueChanged<String>? onChassisChanged;
@@ -49,6 +57,7 @@ class VehicleDocumentationSection extends StatelessWidget {
             key: odometerFieldKey,
             child: ValidatedFormField(
               controller: odometerController,
+              focusNode: odometerFocusNode,
               label: 'Odômetro Atual',
               hint: '0,00',
               required: true,
@@ -77,6 +86,7 @@ class VehicleDocumentationSection extends StatelessWidget {
             key: plateFieldKey,
             child: ValidatedFormField(
               controller: plateController,
+              focusNode: plateFocusNode,
               label: 'Placa',
               hint: 'Ex: ABC1234 ou ABC1D23',
               required: true,
@@ -96,6 +106,7 @@ class VehicleDocumentationSection extends StatelessWidget {
             key: chassisFieldKey,
             child: ValidatedFormField(
               controller: chassisController,
+              focusNode: chassisFocusNode,
               label: 'Chassi (opcional)',
               hint: 'Ex: 9BWZZZ377VT004251',
               required: false,
@@ -115,6 +126,7 @@ class VehicleDocumentationSection extends StatelessWidget {
             key: renavamFieldKey,
             child: ValidatedFormField(
               controller: renavamController,
+              focusNode: renavamFocusNode,
               label: 'Renavam (opcional)',
               hint: 'Ex: 12345678901',
               required: false,

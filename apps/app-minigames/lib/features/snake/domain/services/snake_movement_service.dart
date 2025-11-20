@@ -51,11 +51,16 @@ class SnakeMovementService {
     required Position currentHead,
     required Direction direction,
     required int gridSize,
+    bool hasWalls = false,
   }) {
     final newHead = calculateNewHeadPosition(
       currentHead: currentHead,
       direction: direction,
     );
+
+    if (hasWalls) {
+      return newHead;
+    }
 
     return applyWraparound(
       position: newHead,

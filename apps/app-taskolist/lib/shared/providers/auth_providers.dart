@@ -7,16 +7,17 @@ import 'package:core/core.dart' hide getIt, Column;
 import '../../core/providers/core_providers.dart';
 import '../../infrastructure/services/auth_service.dart';
 import '../../infrastructure/services/sync_service.dart';
-final authStateStreamProvider = StreamProvider<core.UserEntity?>((ref) {
-  final authService = ref.watch(taskManagerAuthServiceProvider);
-  return authService.currentUser;
+
+final authStateStreamProvider = StreamProvider<core.UserEntity?>((ref) async* {
+  final authService = await ref.watch(taskManagerAuthServiceProvider.future);
+  yield* authService.currentUser;
 });
 final isLoggedInProvider = FutureProvider<bool>((ref) async {
-  final authService = ref.watch(taskManagerAuthServiceProvider);
+  final authService = await ref.watch(taskManagerAuthServiceProvider.future);
   return await authService.isLoggedIn;
 });
 final currentUserProvider = FutureProvider<core.UserEntity?>((ref) async {
-  final authService = ref.watch(taskManagerAuthServiceProvider);
+  final authService = await ref.watch(taskManagerAuthServiceProvider.future);
   return authService.currentUser.first;
 });
 
@@ -43,7 +44,7 @@ final signInProvider = FutureProvider.family<core.UserEntity, SignInRequest>((
   ref,
   request,
 ) async {
-  final authService = ref.watch(taskManagerAuthServiceProvider);
+  final authService = await ref.watch(taskManagerAuthServiceProvider.future);
   final crashlyticsService = ref.watch(taskManagerCrashlyticsServiceProvider);
 
   try {
@@ -82,7 +83,7 @@ final signUpProvider = FutureProvider.family<core.UserEntity, SignUpRequest>((
   ref,
   request,
 ) async {
-  final authService = ref.watch(taskManagerAuthServiceProvider);
+  final authService = await ref.watch(taskManagerAuthServiceProvider.future);
   final crashlyticsService = ref.watch(taskManagerCrashlyticsServiceProvider);
 
   try {
@@ -119,7 +120,7 @@ final signUpProvider = FutureProvider.family<core.UserEntity, SignUpRequest>((
   }
 });
 final signOutProvider = FutureProvider<void>((ref) async {
-  final authService = ref.watch(taskManagerAuthServiceProvider);
+  final authService = await ref.watch(taskManagerAuthServiceProvider.future);
 
   final result = await authService.signOut();
   return result.fold(
@@ -130,7 +131,7 @@ final signOutProvider = FutureProvider<void>((ref) async {
 
 class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
   AuthNotifier(this._authService, this._syncService)
-    : super(const AsyncValue.loading()) {
+      : super(const AsyncValue.loading()) {
     _init();
   }
 
@@ -147,9 +148,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
   void _init() {
     _subscription = _authService.currentUser.listen(
       (user) => state = AsyncValue.data(user),
-      onError:
-          (Object error, StackTrace stackTrace) =>
-              state = AsyncValue.error(error, stackTrace),
+      onError: (Object error, StackTrace stackTrace) =>
+          state = AsyncValue.error(error, stackTrace),
     );
   }
 
@@ -306,10 +306,10 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
 
 final authNotifierProvider =
     StateNotifierProvider<AuthNotifier, AsyncValue<core.UserEntity?>>((ref) {
-      final authService = ref.watch(taskManagerAuthServiceProvider);
-      final syncService = ref.watch(taskManagerSyncServiceProvider);
-      return AuthNotifier(authService, syncService);
-    });
+  final authService = ref.watch(taskManagerAuthServiceProvider).requireValue;
+  final syncService = ref.watch(taskManagerSyncServiceProvider);
+  return AuthNotifier(authService, syncService);
+});
 final isAuthenticatedProvider = Provider<bool>((ref) {
   final authState = ref.watch(authNotifierProvider);
   return authState.when(

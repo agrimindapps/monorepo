@@ -20,6 +20,7 @@ class MaintenancesState extends Equatable {
     this.selectedVehicleId,
     this.selectedType,
     this.selectedStatus,
+    this.selectedMonth,
     this.startDate,
     this.endDate,
     this.searchQuery = '',
@@ -49,6 +50,9 @@ class MaintenancesState extends Equatable {
   /// Status selecionado para filtro
   final MaintenanceStatus? selectedStatus;
 
+  /// Mês selecionado para filtro
+  final DateTime? selectedMonth;
+
   /// Data inicial do período de filtro
   final DateTime? startDate;
 
@@ -75,6 +79,7 @@ class MaintenancesState extends Equatable {
       selectedVehicleId != null ||
       selectedType != null ||
       selectedStatus != null ||
+      selectedMonth != null ||
       startDate != null ||
       endDate != null ||
       searchQuery.isNotEmpty;
@@ -96,6 +101,7 @@ class MaintenancesState extends Equatable {
     String? Function()? selectedVehicleId,
     MaintenanceType? Function()? selectedType,
     MaintenanceStatus? Function()? selectedStatus,
+    DateTime? Function()? selectedMonth,
     DateTime? Function()? startDate,
     DateTime? Function()? endDate,
     String? searchQuery,
@@ -115,6 +121,8 @@ class MaintenancesState extends Equatable {
       selectedType: selectedType != null ? selectedType() : this.selectedType,
       selectedStatus:
           selectedStatus != null ? selectedStatus() : this.selectedStatus,
+      selectedMonth:
+          selectedMonth != null ? selectedMonth() : this.selectedMonth,
       startDate: startDate != null ? startDate() : this.startDate,
       endDate: endDate != null ? endDate() : this.endDate,
       searchQuery: searchQuery ?? this.searchQuery,
@@ -135,6 +143,7 @@ class MaintenancesState extends Equatable {
       selectedVehicleId: () => null,
       selectedType: () => null,
       selectedStatus: () => null,
+      selectedMonth: () => null,
       startDate: () => null,
       endDate: () => null,
       searchQuery: '',
@@ -150,6 +159,7 @@ class MaintenancesState extends Equatable {
     selectedVehicleId,
     selectedType,
     selectedStatus,
+    selectedMonth,
     startDate,
     endDate,
     searchQuery,

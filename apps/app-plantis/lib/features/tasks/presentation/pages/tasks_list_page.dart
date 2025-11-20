@@ -12,7 +12,6 @@ import '../widgets/empty_tasks_widget.dart';
 import '../widgets/task_completion_dialog.dart';
 import '../widgets/tasks_error_boundary.dart';
 
-
 class TasksListPage extends ConsumerStatefulWidget {
   const TasksListPage({super.key});
 
@@ -53,7 +52,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
       if (!mounted) return;
 
       ref.read(tasksNotifierProvider.notifier).loadTasks();
-      ref.read(tasksNotifierProvider.notifier).filterTasks(TasksFilterType.today);
+      ref
+          .read(tasksNotifierProvider.notifier)
+          .filterTasks(TasksFilterType.today);
     });
   }
 
@@ -105,7 +106,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
         margin: const EdgeInsets.only(right: 16),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha:0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(8),
         ),
         child: const Icon(Icons.task_alt, color: Colors.white, size: 24),
@@ -151,7 +152,8 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => ref.read(tasksNotifierProvider.notifier).loadTasks(),
+              onPressed: () =>
+                  ref.read(tasksNotifierProvider.notifier).loadTasks(),
               child: const Text('Tentar novamente'),
             ),
           ],
@@ -209,19 +211,18 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                       .read(tasksNotifierProvider.notifier)
                       .filterTasks(TasksFilterType.overdue);
                 },
-                selectedColor: Colors.red.withValues(alpha:0.2),
+                selectedColor: Colors.red.withValues(alpha: 0.2),
                 checkmarkColor: Colors.red,
-                backgroundColor: Colors.red.withValues(alpha:0.1),
+                backgroundColor: Colors.red.withValues(alpha: 0.1),
                 side: BorderSide.none,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 12,
                 ),
                 labelStyle: TextStyle(
-                  color:
-                      tasksState.currentFilter == TasksFilterType.overdue
-                          ? Colors.red[700]
-                          : Colors.grey[700],
+                  color: tasksState.currentFilter == TasksFilterType.overdue
+                      ? Colors.red[700]
+                      : Colors.grey[700],
                   fontSize: 16,
                   fontWeight:
                       tasksState.currentFilter == TasksFilterType.overdue
@@ -265,21 +266,19 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                     .read(tasksNotifierProvider.notifier)
                     .filterTasks(TasksFilterType.today);
               },
-              selectedColor: PlantisColors.primary.withValues(alpha:0.2),
+              selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
               checkmarkColor: PlantisColors.primary,
-              backgroundColor: PlantisColors.primary.withValues(alpha:0.1),
+              backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
               side: BorderSide.none,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               labelStyle: TextStyle(
-                color:
-                    tasksState.currentFilter == TasksFilterType.today
-                        ? PlantisColors.primary
-                        : Colors.grey[700],
+                color: tasksState.currentFilter == TasksFilterType.today
+                    ? PlantisColors.primary
+                    : Colors.grey[700],
                 fontSize: 16,
-                fontWeight:
-                    tasksState.currentFilter == TasksFilterType.today
-                        ? FontWeight.w600
-                        : FontWeight.w500,
+                fontWeight: tasksState.currentFilter == TasksFilterType.today
+                    ? FontWeight.w600
+                    : FontWeight.w500,
               ),
             ),
             const SizedBox(width: 12),
@@ -317,21 +316,19 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                     .read(tasksNotifierProvider.notifier)
                     .filterTasks(TasksFilterType.upcoming);
               },
-              selectedColor: PlantisColors.primary.withValues(alpha:0.2),
+              selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
               checkmarkColor: PlantisColors.primary,
-              backgroundColor: PlantisColors.primary.withValues(alpha:0.1),
+              backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
               side: BorderSide.none,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               labelStyle: TextStyle(
-                color:
-                    tasksState.currentFilter == TasksFilterType.upcoming
-                        ? PlantisColors.primary
-                        : Colors.grey[700],
+                color: tasksState.currentFilter == TasksFilterType.upcoming
+                    ? PlantisColors.primary
+                    : Colors.grey[700],
                 fontSize: 16,
-                fontWeight:
-                    tasksState.currentFilter == TasksFilterType.upcoming
-                        ? FontWeight.w600
-                        : FontWeight.w500,
+                fontWeight: tasksState.currentFilter == TasksFilterType.upcoming
+                    ? FontWeight.w600
+                    : FontWeight.w500,
               ),
             ),
             const SizedBox(width: 12),
@@ -369,16 +366,15 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                     .read(tasksNotifierProvider.notifier)
                     .filterTasks(TasksFilterType.allFuture);
               },
-              selectedColor: PlantisColors.primary.withValues(alpha:0.2),
+              selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
               checkmarkColor: PlantisColors.primary,
-              backgroundColor: PlantisColors.primary.withValues(alpha:0.1),
+              backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
               side: BorderSide.none,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               labelStyle: TextStyle(
-                color:
-                    tasksState.currentFilter == TasksFilterType.allFuture
-                        ? PlantisColors.primary
-                        : Colors.grey[700],
+                color: tasksState.currentFilter == TasksFilterType.allFuture
+                    ? PlantisColors.primary
+                    : Colors.grey[700],
                 fontSize: 16,
                 fontWeight:
                     tasksState.currentFilter == TasksFilterType.allFuture
@@ -455,7 +451,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
       children: [
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
           child: Row(
             children: [
               Container(
@@ -488,9 +484,8 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     final theme = Theme.of(context);
     final tasksAsync = ref.watch(tasksNotifierProvider);
     final isLoading = tasksAsync.maybeWhen(
-      data:
-          (TasksState state) =>
-              state.individualTaskOperations.containsKey(task.id),
+      data: (TasksState state) =>
+          state.individualTaskOperations.containsKey(task.id),
       orElse: () => false,
     );
     final plantsAsync = ref.watch(plantsNotifierProvider);
@@ -533,27 +528,24 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
   ) {
     return Semantics(
       label: 'Tarefa: ${task.title} para $plantName',
-      hint:
-          isLoading
-              ? 'Tarefa sendo processada'
-              : 'Toque duas vezes para marcar como concluída',
+      hint: isLoading
+          ? 'Tarefa sendo processada'
+          : 'Toque duas vezes para marcar como concluída',
       button: true,
       enabled: !isLoading,
-      onTap:
-          isLoading
-              ? null
-              : () => _showTaskCompletionDialog(context, task, plantName, ref),
+      onTap: isLoading
+          ? null
+          : () => _showTaskCompletionDialog(context, task, plantName, ref),
       child: PlantisCard(
         key: ValueKey(task.id),
-        margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         padding: const EdgeInsets.all(12),
-        onTap:
-            isLoading
-                ? null
-                : () {
-                  AccessibilityTokens.performHapticFeedback('light');
-                  _showTaskCompletionDialog(context, task, plantName, ref);
-                },
+        onTap: isLoading
+            ? null
+            : () {
+                AccessibilityTokens.performHapticFeedback('light');
+                _showTaskCompletionDialog(context, task, plantName, ref);
+              },
         child: Row(
           children: [
             Container(
@@ -561,35 +553,34 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               height: 48,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: PlantisColors.primary.withValues(alpha:0.1),
+                color: PlantisColors.primary.withValues(alpha: 0.1),
                 border: Border.all(
-                  color: PlantisColors.primary.withValues(alpha:0.3),
+                  color: PlantisColors.primary.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
               child: ClipOval(
-                child:
-                    plantImageUrl != null
-                        ? Image.network(
-                          plantImageUrl,
-                          width: 48,
-                          height: 48,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(
-                              Icons.local_florist,
-                              color: PlantisColors.primary.withValues(alpha:
-                                0.6,
-                              ),
-                              size: 24,
-                            );
-                          },
-                        )
-                        : Icon(
-                          Icons.local_florist,
-                          color: PlantisColors.primary.withValues(alpha:0.6),
-                          size: 24,
-                        ),
+                child: plantImageUrl != null
+                    ? Image.network(
+                        plantImageUrl,
+                        width: 48,
+                        height: 48,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.local_florist,
+                            color: PlantisColors.primary.withValues(
+                              alpha: 0.6,
+                            ),
+                            size: 24,
+                          );
+                        },
+                      )
+                    : Icon(
+                        Icons.local_florist,
+                        color: PlantisColors.primary.withValues(alpha: 0.6),
+                        size: 24,
+                      ),
               ),
             ),
             const SizedBox(width: 12),
@@ -600,8 +591,8 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                   Text(
                     task.title,
                     style: TextStyle(
-                      color: theme.colorScheme.onSurface.withValues(alpha:
-                        isLoading ? 0.6 : 1.0,
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: isLoading ? 0.6 : 1.0,
                       ),
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -611,7 +602,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                   Text(
                     plantName,
                     style: TextStyle(
-                      color: theme.colorScheme.onSurface.withValues(alpha:0.6),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       fontSize: 14,
                     ),
                   ),
@@ -631,10 +622,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               ),
             ),
             GestureDetector(
-              onTap:
-                  isLoading
-                      ? null
-                      : () => _showTaskCompletionDialog(
+              onTap: isLoading
+                  ? null
+                  : () => _showTaskCompletionDialog(
                         context,
                         task,
                         plantName,
@@ -647,18 +637,17 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                   shape: BoxShape.circle,
                   border: Border.all(color: PlantisColors.primary, width: 2),
                 ),
-                child:
-                    isLoading
-                        ? const Padding(
-                          padding: EdgeInsets.all(2),
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              PlantisColors.primary,
-                            ),
+                child: isLoading
+                    ? const Padding(
+                        padding: EdgeInsets.all(2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            PlantisColors.primary,
                           ),
-                        )
-                        : const SizedBox(), // Círculo vazio = tarefa pendente
+                        ),
+                      )
+                    : const SizedBox(), // Círculo vazio = tarefa pendente
               ),
             ),
           ],
@@ -739,9 +728,8 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     final theme = Theme.of(context);
     final tasksAsync = ref.watch(tasksNotifierProvider);
     final remainingTasks = tasksAsync.maybeWhen(
-      data:
-          (TasksState state) =>
-              state.allTasks.length - state.filteredTasks.length,
+      data: (TasksState state) =>
+          state.allTasks.length - state.filteredTasks.length,
       orElse: () => 0,
     );
     return _buildViewAllButtonContent(remainingTasks, theme, ref);
@@ -793,7 +781,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha:0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),

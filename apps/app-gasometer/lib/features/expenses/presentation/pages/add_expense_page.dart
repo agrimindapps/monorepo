@@ -21,6 +21,7 @@ class AddExpensePage extends ConsumerStatefulWidget {
 
 class _AddExpensePageState extends ConsumerState<AddExpensePage>
     with FormErrorHandlerMixin {
+  final Map<String, FocusNode> _focusNodes = {};
   bool _isInitialized = false;
   bool _isSubmitting = false;
   Timer? _debounceTimer;
@@ -33,6 +34,11 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage>
   @override
   void initState() {
     super.initState();
+    _focusNodes['description'] = FocusNode();
+    _focusNodes['amount'] = FocusNode();
+    _focusNodes['odometer'] = FocusNode();
+    _focusNodes['location'] = FocusNode();
+    _focusNodes['notes'] = FocusNode();
   }
 
   @override
@@ -75,6 +81,9 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage>
   void dispose() {
     _debounceTimer?.cancel();
     _timeoutTimer?.cancel();
+    for (final node in _focusNodes.values) {
+      node.dispose();
+    }
     super.dispose();
   }
 
@@ -105,7 +114,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage>
       errorMessage: formErrorMessage,
       content: !isInitialized
           ? const Center(child: CircularProgressIndicator())
-          : const ExpenseFormView(),
+          : ExpenseFormView(focusNodes: _focusNodes),
     );
   }
 
@@ -139,6 +148,8 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage>
       // Pega o primeiro erro para exibir
       final formState = ref.read(expenseFormNotifierProvider);
       if (formState.fieldErrors.isNotEmpty) {
+        final firstErrorField = formState.fieldErrors.keys.first;
+        _focusNodes[firstErrorField]?.requestFocus();
         setFormError(formState.fieldErrors.values.first);
       } else {
         setFormError('Por favor, corrija os campos destacados');

@@ -1,8 +1,9 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/router/app_router.dart';
-import '../../../../core/theme/plantis_colors.dart';
 
 class PromoNavigationBar extends StatelessWidget {
   const PromoNavigationBar({
@@ -27,18 +28,23 @@ class PromoNavigationBar extends StatelessWidget {
     final screenSize = MediaQuery.of(context).size;
     final isMobile = screenSize.width < 800;
 
-    return Container(
-      color: Colors.white.withValues(alpha: 0.95),
-      padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 16 : screenSize.width * 0.08,
-        vertical: 16,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _buildLogo(),
-          isMobile ? _buildMobileMenu(context) : _buildDesktopMenu(context),
-        ],
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          color: const Color(0xFF0F2F21).withValues(alpha: 0.8), // Deep Forest Green with opacity
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 16 : screenSize.width * 0.08,
+            vertical: 16,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildLogo(),
+              isMobile ? _buildMobileMenu(context) : _buildDesktopMenu(context),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -52,14 +58,14 @@ class PromoNavigationBar extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [PlantisColors.primary, PlantisColors.secondary],
+                colors: [Color(0xFF10B981), Color(0xFF059669)], // Emerald Gradient
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: PlantisColors.primary.withValues(alpha: 0.3),
+                  color: const Color(0xFF10B981).withValues(alpha: 0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -69,23 +75,23 @@ class PromoNavigationBar extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           RichText(
-            text: const TextSpan(
+            text: TextSpan(
               children: [
                 TextSpan(
                   text: 'Plan',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                    color: PlantisColors.primary,
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                     letterSpacing: -0.5,
                   ),
                 ),
                 TextSpan(
                   text: 'tis',
-                  style: TextStyle(
-                    fontSize: 20,
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 24,
                     fontWeight: FontWeight.w400,
-                    color: PlantisColors.primary,
+                    color: const Color(0xFF10B981), // Emerald
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -110,6 +116,7 @@ class PromoNavigationBar extends StatelessWidget {
   void _showMobileMenu(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
+      backgroundColor: const Color(0xFF0F2F21),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -123,7 +130,7 @@ class PromoNavigationBar extends StatelessWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -152,7 +159,7 @@ class PromoNavigationBar extends StatelessWidget {
                       _navigateToLogin(context);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: PlantisColors.primary,
+                      backgroundColor: const Color(0xFF10B981),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
@@ -182,13 +189,16 @@ class PromoNavigationBar extends StatelessWidget {
     return ListTile(
       title: Text(
         title,
-        style: TextStyle(color: Colors.grey[800], fontWeight: FontWeight.w500),
+        style: GoogleFonts.inter(
+          color: Colors.white,
+          fontWeight: FontWeight.w500,
+        ),
       ),
       onTap: () {
         Navigator.pop(context);
         onTap();
       },
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white54),
     );
   }
 
@@ -218,18 +228,19 @@ class PromoNavigationBar extends StatelessWidget {
           ],
         ),
         SizedBox(width: isSmallDesktop ? 12 : 24),
-        OutlinedButton(
+        ElevatedButton(
           onPressed: () => _navigateToLogin(context),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: PlantisColors.primary,
-            side: const BorderSide(color: PlantisColors.primary, width: 2),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF10B981), // Emerald
+            foregroundColor: Colors.white,
             padding: EdgeInsets.symmetric(
-              horizontal: isSmallDesktop ? 12 : 20,
-              vertical: isSmallDesktop ? 8 : 12,
+              horizontal: isSmallDesktop ? 16 : 24,
+              vertical: isSmallDesktop ? 12 : 16,
             ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
+            elevation: 0,
           ),
           child: Text(
             'Entrar',
@@ -249,7 +260,7 @@ class PromoNavigationBar extends StatelessWidget {
         TextButton(
           onPressed: () => _navigateToLogin(context),
           style: TextButton.styleFrom(
-            foregroundColor: PlantisColors.primary,
+            foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           ),
           child: const Text(
@@ -263,7 +274,7 @@ class PromoNavigationBar extends StatelessWidget {
             _showMobileMenu(context);
           },
           tooltip: 'Menu',
-          color: PlantisColors.primary,
+          color: Colors.white,
         ),
       ],
     );
@@ -288,15 +299,15 @@ class PromoNavigationBar extends StatelessWidget {
           decoration: BoxDecoration(
             color:
                 isActive
-                    ? PlantisColors.primary.withValues(alpha: 0.1)
+                    ? const Color(0xFF10B981).withValues(alpha: 0.1)
                     : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
             title,
-            style: TextStyle(
-              color: isActive ? PlantisColors.primary : Colors.grey[800],
-              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            style: GoogleFonts.inter(
+              color: isActive ? const Color(0xFF10B981) : Colors.grey[300],
+              fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
               fontSize: isSmallDesktop ? 13 : 15,
             ),
           ),

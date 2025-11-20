@@ -167,6 +167,7 @@ class OptionalOdometerField extends StatelessWidget {
   const OptionalOdometerField({
     super.key,
     required this.controller,
+    this.focusNode,
     this.label,
     this.hint,
     this.currentOdometer,
@@ -174,6 +175,7 @@ class OptionalOdometerField extends StatelessWidget {
     this.onChanged,
   });
   final TextEditingController controller;
+  final FocusNode? focusNode;
   final String? label;
   final String? hint;
   final double? currentOdometer;
@@ -184,6 +186,7 @@ class OptionalOdometerField extends StatelessWidget {
   Widget build(BuildContext context) {
     return OdometerField(
       controller: controller,
+      focusNode: focusNode,
       label: label ?? 'Quilometragem (Opcional)',
       hint: hint,
       required: false,
@@ -200,15 +203,18 @@ class SimpleOdometerField extends StatelessWidget {
   const SimpleOdometerField({
     super.key,
     required this.controller,
+    this.focusNode,
     this.onChanged,
   });
   final TextEditingController controller;
+  final FocusNode? focusNode;
   final void Function(String?)? onChanged;
 
   @override
   Widget build(BuildContext context) {
     return OdometerField(
       controller: controller,
+      focusNode: focusNode,
       label: 'Quilometragem',
       hint: 'Digite a quilometragem atual',
       onChanged: onChanged,

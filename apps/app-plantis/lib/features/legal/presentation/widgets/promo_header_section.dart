@@ -1,9 +1,11 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../core/theme/plantis_colors.dart';
+
 import 'promo_hero_countdown_badge.dart';
 
-class PromoHeaderSection extends StatelessWidget {
+class PromoHeaderSection extends StatefulWidget {
   final bool comingSoon;
   final DateTime? launchDate;
 
@@ -14,37 +16,62 @@ class PromoHeaderSection extends StatelessWidget {
   });
 
   @override
+  State<PromoHeaderSection> createState() => _PromoHeaderSectionState();
+}
+
+class _PromoHeaderSectionState extends State<PromoHeaderSection>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 20),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final isMobile = screenSize.width < 800;
+    final isMobile = screenSize.width < 900;
 
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            PlantisColors.primary,
-            PlantisColors.secondary,
-            PlantisColors.accent,
-          ],
-        ),
-      ),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1280),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: isMobile ? 24 : 40,
-              vertical: 80,
+    return Stack(
+      children: [
+        // Animated Background
+        Positioned.fill(
+          child: CustomPaint(
+            painter: _NatureBackgroundPainter(
+              animation: _controller,
+              color1: const Color(0xFF0F2F21), // Deep Forest Green
+              color2: const Color(0xFF064E3B), // Dark Emerald
             ),
-            child: isMobile
-                ? _buildMobileContent(context)
-                : _buildDesktopContent(context),
           ),
         ),
-      ),
+        
+        // Content
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1280),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 24 : 40,
+                vertical: isMobile ? 100 : 140,
+              ),
+              child: isMobile
+                  ? _buildMobileContent(context)
+                  : _buildDesktopContent(context),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -58,14 +85,18 @@ class PromoHeaderSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeaderText(),
-              const SizedBox(height: 32),
-              if (comingSoon && launchDate != null) ...[
-                PromoHeroCountdownBadge(launchDate: launchDate!),
-                const SizedBox(height: 32),
+              const SizedBox(height: 40),
+              _buildActionButtons(),
+              if (widget.comingSoon && widget.launchDate != null) ...[
+                const SizedBox(height: 40),
+                PromoHeroCountdownBadge(launchDate: widget.launchDate!),
               ],
+              const SizedBox(height: 60),
+              _buildStatsRow(),
             ],
           ),
         ),
+        const SizedBox(width: 60),
         Expanded(
           flex: 5,
           child: _buildAppShowcase(),
@@ -76,125 +107,326 @@ class PromoHeaderSection extends StatelessWidget {
 
   Widget _buildMobileContent(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        _buildHeaderText(),
-        const SizedBox(height: 24),
-        if (comingSoon && launchDate != null) ...[
-          PromoHeroCountdownBadge(launchDate: launchDate!),
-          const SizedBox(height: 24),
+        _buildHeaderText(textAlign: TextAlign.center),
+        const SizedBox(height: 32),
+        _buildActionButtons(isCentered: true),
+        if (widget.comingSoon && widget.launchDate != null) ...[
+          const SizedBox(height: 32),
+          PromoHeroCountdownBadge(launchDate: widget.launchDate!),
         ],
-        const SizedBox(height: 48),
+        const SizedBox(height: 60),
         _buildAppShowcase(),
+        const SizedBox(height: 60),
+        _buildStatsRow(isCentered: true),
       ],
     );
   }
 
-  Widget _buildHeaderText() {
-    return const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildHeaderText({TextAlign textAlign = TextAlign.start}) {
+    return Column(
+      crossAxisAlignment: textAlign == TextAlign.center
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.start,
       children: [
-        Text(
-          'Cuide das suas Plantas\ncom Amor e Tecnologia',
-          style: TextStyle(
-            fontSize: 48,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            height: 1.1,
-            letterSpacing: -0.5,
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.eco, color: Color(0xFF10B981), size: 16),
+              const SizedBox(width: 8),
+              Text(
+                'O Futuro do Cuidado com Plantas',
+                style: GoogleFonts.inter(
+                  color: const Color(0xFF10B981), // Emerald
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
           ),
         ),
-        SizedBox(height: 24),
+        const SizedBox(height: 24),
+        RichText(
+          textAlign: textAlign,
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: 'Cultive seu Jardim com ',
+                style: GoogleFonts.playfairDisplay(
+                  fontSize: 56,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  height: 1.1,
+                ),
+              ),
+              TextSpan(
+                text: 'Inteligência',
+                style: GoogleFonts.playfairDisplay(
+                  fontSize: 56,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFFF59E0B), // Sunlight Gold
+                  height: 1.1,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
         Text(
-          'O aplicativo mais completo para jardineiros apaixonados. Registre, acompanhe e receba lembretes inteligentes para manter suas plantas sempre saudáveis.',
-          style: TextStyle(
+          'Transforme sua paixão por plantas em uma ciência exata. O Plantis combina tecnologia e natureza para garantir que seu jardim prospere.',
+          style: GoogleFonts.inter(
             fontSize: 18,
-            color: Colors.white,
-            height: 1.5,
-            letterSpacing: 0.2,
+            color: Colors.grey[300],
+            height: 1.6,
+          ),
+          textAlign: textAlign,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons({bool isCentered = false}) {
+    return Row(
+      mainAxisAlignment:
+          isCentered ? MainAxisAlignment.center : MainAxisAlignment.start,
+      children: [
+        ElevatedButton(
+          onPressed: () {},
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF10B981), // Emerald
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 8,
+            shadowColor: const Color(0xFF10B981).withValues(alpha: 0.5),
+          ),
+          child: const Text(
+            'Começar Agora',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ),
+        const SizedBox(width: 16),
+        OutlinedButton(
+          onPressed: () {},
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.white,
+            side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          child: const Text(
+            'Saiba Mais',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
       ],
     );
   }
 
+  Widget _buildStatsRow({bool isCentered = false}) {
+    final stats = [
+      {'value': '10k+', 'label': 'Plantas'},
+      {'value': '4.8', 'label': 'Avaliação'},
+      {'value': '100%', 'label': 'Gratuito'},
+    ];
+
+    return Row(
+      mainAxisAlignment:
+          isCentered ? MainAxisAlignment.center : MainAxisAlignment.start,
+      children: stats.asMap().entries.map((entry) {
+        final index = entry.key;
+        final stat = entry.value;
+        return Row(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  stat['value']!,
+                  style: GoogleFonts.inter(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                Text(
+                  stat['label']!,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: Colors.grey[400],
+                  ),
+                ),
+              ],
+            ),
+            if (index < stats.length - 1)
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 24),
+                height: 40,
+                width: 1,
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+          ],
+        );
+      }).toList(),
+    );
+  }
 
   Widget _buildAppShowcase() {
     return Stack(
       alignment: Alignment.center,
       children: [
+        // Glow effect
         Container(
-          width: 350,
-          height: 350,
+          width: 400,
+          height: 400,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.white.withValues(alpha: 0.05),
-          ),
-        ),
-        Container(
-          width: 280,
-          height: 520,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(32),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
-                blurRadius: 30,
-                offset: const Offset(0, 10),
-              ),
-            ],
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.2),
-              width: 2,
+            gradient: RadialGradient(
+              colors: [
+                const Color(0xFF10B981).withValues(alpha: 0.2),
+                Colors.transparent,
+              ],
             ),
           ),
+        ),
+        // Phone Mockup
+        Container(
+          width: 300,
+          height: 600,
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F172A),
+            borderRadius: BorderRadius.circular(40),
+            border: Border.all(
+              color: Colors.grey.withValues(alpha: 0.2),
+              width: 8,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.5),
+                blurRadius: 40,
+                offset: const Offset(0, 20),
+              ),
+            ],
+          ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(32),
             child: Stack(
               children: [
-                Container(
-                  color: Colors.white,
-                  width: double.infinity,
-                  height: double.infinity,
-                ),
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                    margin: const EdgeInsets.only(top: 10),
-                    width: 120,
-                    height: 25,
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
+                ColoredBox(
+                  color: const Color(0xFFF8FAFC),
                   child: Column(
                     children: [
-                      const SizedBox(height: 50),
-                      const Icon(
-                        Icons.eco,
-                        size: 60,
-                        color: PlantisColors.primary,
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Plantis',
-                        style: TextStyle(
-                          color: PlantisColors.primary,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                      Container(
+                        height: 200,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF0F2F21),
+                          borderRadius: BorderRadius.vertical(
+                            bottom: Radius.circular(30),
+                          ),
+                        ),
+                        child: Stack(
+                          children: [
+                            Positioned(
+                              right: -20,
+                              top: -20,
+                              child: Icon(
+                                Icons.eco,
+                                size: 150,
+                                color: Colors.white.withValues(alpha: 0.05),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 40),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Olá, Jardineiro',
+                                            style: TextStyle(
+                                              color: Colors.white70,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Minhas Plantas',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white
+                                              .withValues(alpha: 0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: const Icon(
+                                          Icons.notifications_outlined,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 40),
-                      _buildPlantCardMockup('Samambaia', PlantisColors.leaf),
-                      const SizedBox(height: 12),
-                      _buildPlantCardMockup('Suculenta', PlantisColors.water),
-                      const SizedBox(height: 12),
-                      _buildPlantCardMockup('Orquídea', PlantisColors.flower),
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          children: [
+                            _buildMockupCard(
+                              'Monstera Deliciosa',
+                              'Regar hoje',
+                              Icons.water_drop,
+                              Colors.blue,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildMockupCard(
+                              'Espada de São Jorge',
+                              'Adubar em 2 dias',
+                              Icons.eco,
+                              Colors.green,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildMockupCard(
+                              'Orquídea Phalaenopsis',
+                              'Poda necessária',
+                              Icons.cut,
+                              Colors.orange,
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -202,100 +434,185 @@ class PromoHeaderSection extends StatelessWidget {
             ),
           ),
         ),
+        // Floating Cards
         Positioned(
-          top: 50,
-          right: 40,
-          child: _buildFloatingElement(Icons.water_drop, PlantisColors.water),
+          right: -20,
+          top: 100,
+          child: _buildFloatingCard(
+            icon: Icons.wb_sunny,
+            title: 'Luz Ideal',
+            subtitle: 'Luz Indireta',
+            color: Colors.amber,
+          ),
         ),
         Positioned(
-          bottom: 80,
-          left: 40,
-          child: _buildFloatingElement(Icons.wb_sunny, PlantisColors.sun),
-        ),
-        Positioned(
-          bottom: 180,
-          right: 30,
-          child: _buildFloatingElement(Icons.local_florist, PlantisColors.flower),
+          left: -20,
+          bottom: 150,
+          child: _buildFloatingCard(
+            icon: Icons.water_drop,
+            title: 'Umidade',
+            subtitle: '60% - 80%',
+            color: Colors.blue,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildPlantCardMockup(String plantName, Color color) {
+  Widget _buildMockupCard(
+    String title,
+    String subtitle,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Row(
         children: [
           Container(
-            width: 48,
-            height: 48,
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(8),
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(Icons.eco, color: color, size: 24),
+            child: Icon(icon, color: color, size: 20),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  plantName,
-                  style: const TextStyle(
-                    color: Colors.black87,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
                 ),
-                const SizedBox(height: 2),
-                const Row(
-                  children: [
-                    Icon(Icons.water_drop, size: 12, color: PlantisColors.water),
-                    SizedBox(width: 4),
-                    Text(
-                      'Regar amanhã',
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
+              ),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  color: Colors.grey[500],
+                  fontSize: 12,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFloatingElement(IconData icon, Color color) {
+  Widget _buildFloatingCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+  }) {
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Icon(icon, color: color, size: 24),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: Colors.black87,
+                ),
+              ),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
+}
+
+class _NatureBackgroundPainter extends CustomPainter {
+  final Animation<double> animation;
+  final Color color1;
+  final Color color2;
+
+  _NatureBackgroundPainter({
+    required this.animation,
+    required this.color1,
+    required this.color2,
+  }) : super(repaint: animation);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final paint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [color1, color2],
+      ).createShader(rect);
+
+    canvas.drawRect(rect, paint);
+
+    // Draw subtle organic shapes (leaves/particles)
+    final random = math.Random(42); // Fixed seed for consistent pattern
+    final particlePaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.03)
+      ..style = PaintingStyle.fill;
+
+    for (var i = 0; i < 20; i++) {
+      final x = random.nextDouble() * size.width;
+      final y = random.nextDouble() * size.height;
+      final radius = random.nextDouble() * 100 + 50;
+      final offset = animation.value * 50 * (i % 2 == 0 ? 1 : -1);
+
+      canvas.drawCircle(
+        Offset(x + offset, y + offset),
+        radius,
+        particlePaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

@@ -32,6 +32,7 @@ class AddMaintenancePage extends ConsumerStatefulWidget {
 class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
     with FormErrorHandlerMixin {
   final Map<String, ValidationResult> _validationResults = {};
+  final Map<String, FocusNode> _focusNodes = {};
   bool _isInitialized = false;
   bool _isSubmitting = false;
   Timer? _debounceTimer;
@@ -44,6 +45,14 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
   @override
   void initState() {
     super.initState();
+    _focusNodes['title'] = FocusNode();
+    _focusNodes['description'] = FocusNode();
+    _focusNodes['cost'] = FocusNode();
+    _focusNodes['odometer'] = FocusNode();
+    _focusNodes['workshopName'] = FocusNode();
+    _focusNodes['workshopPhone'] = FocusNode();
+    _focusNodes['workshopAddress'] = FocusNode();
+    _focusNodes['notes'] = FocusNode();
   }
 
   @override
@@ -79,6 +88,9 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
   void dispose() {
     _debounceTimer?.cancel();
     _timeoutTimer?.cancel();
+    for (final node in _focusNodes.values) {
+      node.dispose();
+    }
     super.dispose();
   }
 
@@ -149,6 +161,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
         children: [
           ValidatedFormField(
             controller: notifier.titleController,
+            focusNode: _focusNodes['title'],
             label: 'Tipo de Manutenção',
             hint: 'Ex: Troca de óleo, Revisão completa...',
             required: true,
@@ -224,6 +237,10 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
         children: [
           LocationField(
             controller: notifier.workshopNameController,
+            // LocationField doesn't expose focusNode directly in the wrapper, need to check
+            // Wait, LocationField is a wrapper around NotesFormField which has focusNode.
+            // But LocationField constructor doesn't accept focusNode?
+            // Let's check LocationField again.
             label: 'Oficina/Local',
             hint: 'Nome da oficina ou local da manutenção',
             required: true,
@@ -232,6 +249,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
           const SizedBox(height: GasometerDesignTokens.spacingMd),
           DescriptionField(
             controller: notifier.descriptionController,
+            focusNode: _focusNodes['description'],
             label: 'Descrição dos Serviços',
             hint: 'Descreva os serviços realizados, peças trocadas, etc.',
             required: true,
@@ -252,6 +270,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
         children: [
           CostFormField(
             controller: notifier.costController,
+            focusNode: _focusNodes['cost'],
             label: 'Custo Total',
             required: true,
             onChanged: (value) {},
@@ -259,6 +278,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
           const SizedBox(height: GasometerDesignTokens.spacingMd),
           OdometerField(
             controller: notifier.odometerController,
+            focusNode: _focusNodes['odometer'],
             label: 'Quilometragem Atual',
             hint: '0,0',
             currentOdometer: formState.vehicle?.currentOdometer,
@@ -375,6 +395,8 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
       // Pega o primeiro erro para exibir
       final formState = ref.read(maintenanceFormNotifierProvider);
       if (formState.fieldErrors.isNotEmpty) {
+        final firstErrorField = formState.fieldErrors.keys.first;
+        _focusNodes[firstErrorField]?.requestFocus();
         setFormError(formState.fieldErrors.values.first);
       } else {
         setFormError('Por favor, corrija os campos destacados');

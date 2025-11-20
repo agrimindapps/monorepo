@@ -297,6 +297,18 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
     _applyFiltersAndStats();
   }
 
+  /// Seleciona mês para filtro
+  void selectMonth(DateTime month) {
+    state = state.copyWith(selectedMonth: () => month);
+    _applyFiltersAndStats();
+  }
+
+  /// Limpa filtro de mês
+  void clearMonthFilter() {
+    state = state.copyWith(selectedMonth: () => null);
+    _applyFiltersAndStats();
+  }
+
   /// Aplica busca por texto
   void search(String query) {
     state = state.copyWith(searchQuery: query);
@@ -333,6 +345,12 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
       if (state.selectedStatus != null &&
           maintenance.status != state.selectedStatus) {
         return false;
+      }
+      if (state.selectedMonth != null) {
+        if (maintenance.serviceDate.year != state.selectedMonth!.year ||
+            maintenance.serviceDate.month != state.selectedMonth!.month) {
+          return false;
+        }
       }
       if (state.startDate != null) {
         final startOfDay = DateTime(

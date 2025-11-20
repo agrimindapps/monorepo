@@ -17,7 +17,8 @@ import 'expense_type_selector.dart';
 
 /// Widget principal do formulário de despesas
 class ExpenseFormView extends ConsumerWidget {
-  const ExpenseFormView({super.key});
+  const ExpenseFormView({super.key, required this.focusNodes});
+  final Map<String, FocusNode> focusNodes;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,6 +43,7 @@ class ExpenseFormView extends ConsumerWidget {
                 const SizedBox(height: GasometerDesignTokens.spacingMd),
                 DescriptionField(
                   controller: notifier.descriptionController,
+                  focusNode: focusNodes['description'],
                   label: 'Descrição da Despesa',
                   hint: ExpenseConstants.descriptionPlaceholder,
                   required: true,
@@ -68,12 +70,14 @@ class ExpenseFormView extends ConsumerWidget {
                   children: [
                     AmountFormField(
                       controller: notifier.amountController,
+                      focusNode: focusNodes['amount'],
                       label: 'Valor Total',
                       required: true,
                       onChanged: (value) {},
                     ),
                     OdometerField(
                       controller: notifier.odometerController,
+                      focusNode: focusNodes['odometer'],
                       label: 'Quilometragem Atual',
                       hint: ExpenseConstants.odometerPlaceholder,
                       currentOdometer: state.vehicle?.currentOdometer,
@@ -93,6 +97,7 @@ class ExpenseFormView extends ConsumerWidget {
               children: [
                 LocationField(
                   controller: notifier.locationController,
+                  focusNode: focusNodes['location'],
                   label: 'Local da Despesa',
                   hint: ExpenseConstants.locationPlaceholder,
                   required: false,
@@ -102,6 +107,7 @@ class ExpenseFormView extends ConsumerWidget {
                 const SizedBox(height: GasometerDesignTokens.spacingMd),
                 ObservationsField(
                   controller: notifier.notesController,
+                  focusNode: focusNodes['notes'],
                   label: 'Observações Adicionais',
                   hint: ExpenseConstants.notesPlaceholder,
                   required: false,

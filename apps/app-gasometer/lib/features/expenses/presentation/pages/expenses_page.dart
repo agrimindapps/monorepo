@@ -1,10 +1,16 @@
 import 'package:core/core.dart' ;
 import 'package:flutter/material.dart';
 
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/utils/date_utils.dart' as local_date_utils;
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
+import '../../../../core/widgets/standard_loading_view.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
+import '../../domain/entities/expense_entity.dart';
+import '../notifiers/expenses_notifier.dart';
+import '../state/expenses_state.dart';
 import 'add_expense_page.dart';
 
 class ExpensesPage extends ConsumerStatefulWidget {
@@ -15,12 +21,12 @@ class ExpensesPage extends ConsumerStatefulWidget {
 }
 
 class _ExpensesPageState extends ConsumerState<ExpensesPage> {
-  int _currentMonthIndex = DateTime.now().month - 1;
   String? _selectedVehicleId;
 
   @override
   Widget build(BuildContext context) {
     final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+    final expensesState = ref.watch(expensesNotifierProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -30,17 +36,28 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
             _buildVehicleSelector(context),
             if (_selectedVehicleId != null &&
                 (vehiclesAsync.value?.isNotEmpty ?? false))
-              _buildMonthSelector(),
+              _buildMonthSelector(expensesState),
             Expanded(
               child: vehiclesAsync.when(
                 data: (vehicles) {
                   if (_selectedVehicleId == null) {
                     return _buildSelectVehicleState();
                   }
-                  return _buildContent(context);
+                  return _buildContent(context, expensesState);
                 },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, __) => _buildContent(context),
+                loading: () => const StandardLoadingView(
+                  message: 'Carregando veículos...',
+                  showProgress: true,
+                ),
+                error: (error, _) => EnhancedEmptyState(
+                  title: 'Erro ao carregar veículos',
+                  description: error.toString(),
+                  icon: Icons.error_outline,
+                  actionLabel: 'Tentar novamente',
+                  onAction: () {
+                    ref.read(vehiclesNotifierProvider.notifier).refresh();
+                  },
+                ),
               ),
             ),
           ],
@@ -130,15 +147,24 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
           setState(() {
             _selectedVehicleId = vehicleId;
           });
-          // TODO: Implementar filtro de despesas por veículo quando o provider estiver pronto
+          if (vehicleId != null) {
+            ref
+                .read(expensesNotifierProvider.notifier)
+                .loadExpensesByVehicle(vehicleId);
+          }
         },
         hintText: 'Selecione um veículo',
       ),
     );
   }
 
-  Widget _buildMonthSelector() {
-    final months = _getMonths();
+  Widget _buildMonthSelector(ExpensesState state) {
+    final vehicleRecords = state.expenses
+        .where((r) => r.vehicleId == _selectedVehicleId)
+        .toList();
+
+    final months = _getMonths(vehicleRecords);
+    final selectedMonth = state.filtersConfig.selectedMonth;
 
     return Container(
       height: 50,
@@ -148,13 +174,22 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: months.length,
         itemBuilder: (context, index) {
-          final isSelected = index == _currentMonthIndex;
+          final month = months[index];
+          final isSelected = selectedMonth != null &&
+              month.year == selectedMonth.year &&
+              month.month == selectedMonth.month;
+
+          final monthName = DateFormat('MMM yy', 'pt_BR').format(month);
+          final formattedMonth =
+              monthName[0].toUpperCase() + monthName.substring(1);
 
           return GestureDetector(
             onTap: () {
-              setState(() {
-                _currentMonthIndex = index;
-              });
+              if (isSelected) {
+                ref.read(expensesNotifierProvider.notifier).clearMonthFilter();
+              } else {
+                ref.read(expensesNotifierProvider.notifier).selectMonth(month);
+              }
             },
             child: Container(
               margin: const EdgeInsets.only(right: 12),
@@ -172,7 +207,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
               ),
               child: Center(
                 child: Text(
-                  months[index],
+                  formattedMonth,
                   style: TextStyle(
                     color: isSelected
                         ? Colors.white
@@ -190,14 +225,166 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
     );
   }
 
-  Widget _buildContent(BuildContext context) {
-    return EnhancedEmptyState(
-      title: 'Nenhuma despesa',
-      description:
-          'Adicione sua primeira despesa para começar a acompanhar seus gastos.',
-      icon: Icons.attach_money_outlined,
-      actionLabel: 'Adicionar despesa',
-      onAction: () {},
+  Widget _buildContent(BuildContext context, ExpensesState state) {
+    if (state.isLoading && !state.hasActiveFilters) {
+      return const StandardLoadingView(
+        message: 'Carregando despesas...',
+        showProgress: true,
+      );
+    }
+
+    if (state.error != null && state.filteredExpenses.isEmpty) {
+      return EnhancedEmptyState(
+        title: 'Erro ao carregar',
+        description: state.error!,
+        icon: Icons.error_outline,
+        actionLabel: 'Tentar novamente',
+        onAction: () {
+          if (_selectedVehicleId != null) {
+            ref
+                .read(expensesNotifierProvider.notifier)
+                .loadExpensesByVehicle(_selectedVehicleId!);
+          }
+        },
+      );
+    }
+
+    final records = state.filteredExpenses;
+
+    if (records.isEmpty) {
+      return EnhancedEmptyState(
+        title: 'Nenhuma despesa',
+        description: state.hasActiveFilters
+            ? 'Nenhum registro encontrado com os filtros aplicados.'
+            : 'Adicione sua primeira despesa para começar a acompanhar seus gastos.',
+        icon: Icons.attach_money_outlined,
+        actionLabel: state.hasActiveFilters ? 'Limpar filtros' : null,
+        onAction: state.hasActiveFilters
+            ? () => ref.read(expensesNotifierProvider.notifier).clearFilters()
+            : null,
+      );
+    }
+
+    return _buildExpenseList(records);
+  }
+
+  Widget _buildExpenseList(List<ExpenseEntity> records) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        if (_selectedVehicleId != null) {
+          await ref
+              .read(expensesNotifierProvider.notifier)
+              .loadExpensesByVehicle(_selectedVehicleId!);
+        }
+      },
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: records.length,
+        itemBuilder: (context, index) {
+          final record = records[index];
+          return _buildExpenseCard(record);
+        },
+      ),
+    );
+  }
+
+  Widget _buildExpenseCard(ExpenseEntity record) {
+    final date = record.date;
+    final formattedDate =
+        '${date.day.toString().padLeft(2, '0')}/'
+        '${date.month.toString().padLeft(2, '0')}/'
+        '${date.year}';
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    record.title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text(
+                  'R\$ ${record.amount.toStringAsFixed(2)}',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  Icons.calendar_today,
+                  size: 16,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  formattedDate,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(width: 16),
+                Icon(
+                  Icons.speed,
+                  size: 16,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${record.odometer.toStringAsFixed(0)} km',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: record.type.color.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        record.type.icon,
+                        size: 12,
+                        color: record.type.color,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        record.type.displayName,
+                        style: TextStyle(
+                          color: record.type.color,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -221,9 +408,10 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
           context: context,
           builder: (context) => AddExpensePage(vehicleId: _selectedVehicleId),
         ).then((result) {
-          if (result == true) {
-            // Refresh expenses list when ready
-            setState(() {});
+          if (result == true && _selectedVehicleId != null) {
+            ref
+                .read(expensesNotifierProvider.notifier)
+                .loadExpensesByVehicle(_selectedVehicleId!);
           }
         });
       },
@@ -241,28 +429,10 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
     );
   }
 
-  List<String> _getMonths() {
-    final now = DateTime.now();
-    final currentYear = now.year;
-    const monthNames = [
-      'Jan',
-      'Fev',
-      'Mar',
-      'Abr',
-      'Mai',
-      'Jun',
-      'Jul',
-      'Ago',
-      'Set',
-      'Out',
-      'Nov',
-      'Dez',
-    ];
-
-    return monthNames
-        .asMap()
-        .entries
-        .map((entry) => '${entry.value} ${currentYear.toString().substring(2)}')
-        .toList();
+  List<DateTime> _getMonths(List<ExpenseEntity> records) {
+    final dates = records.map((e) => e.date).toList();
+    final dateUtils =
+        ModularInjectionContainer.instance<local_date_utils.DateUtils>();
+    return dateUtils.generateMonthRange(dates);
   }
 }

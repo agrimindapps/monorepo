@@ -52,7 +52,8 @@ import '../../domain/entities/fuel_record_entity.dart';
 @lazySingleton
 class FuelSupplyDriftSyncAdapter
     extends DriftSyncAdapterBase<FuelRecordEntity, FuelSupply> {
-  FuelSupplyDriftSyncAdapter(super.db, super.firestore);
+  FuelSupplyDriftSyncAdapter(GasometerDatabase db, FirebaseFirestore firestore)
+      : super(db, firestore);
 
   GasometerDatabase get _db => db as GasometerDatabase;
 
@@ -615,9 +616,8 @@ class FuelSupplyDriftSyncAdapter
       final companion = FuelSuppliesCompanion(
         isDirty: const Value(false),
         lastSyncAt: Value(DateTime.now()),
-        firebaseId: firebaseId != null
-            ? Value(firebaseId)
-            : const Value.absent(),
+        firebaseId:
+            firebaseId != null ? Value(firebaseId) : const Value.absent(),
       );
 
       final query = _db.update(_db.fuelSupplies)
@@ -748,14 +748,15 @@ class FuelSupplyDriftSyncAdapter
       ..orderBy([(tbl) => OrderingTerm.desc(tbl.date)]);
 
     yield* query.watch().map(
-      (rows) => rows.map((row) => driftToEntity(row)).toList(),
-    );
+          (rows) => rows.map((row) => driftToEntity(row)).toList(),
+        );
   }
 
   Future<String?> _resolveVehicleFirebaseId(int localVehicleId) async {
     final vehicleRow = await (_db.select(
       _db.vehicles,
-    )..where((tbl) => tbl.id.equals(localVehicleId))).getSingleOrNull();
+    )..where((tbl) => tbl.id.equals(localVehicleId)))
+        .getSingleOrNull();
 
     final firebaseId = vehicleRow?.firebaseId;
 
@@ -777,10 +778,9 @@ class FuelSupplyDriftSyncAdapter
       return entity;
     }
 
-    final vehicleRow =
-        await (_db.select(_db.vehicles)
-              ..where((tbl) => tbl.firebaseId.equals(entity.vehicleId)))
-            .getSingleOrNull();
+    final vehicleRow = await (_db.select(_db.vehicles)
+          ..where((tbl) => tbl.firebaseId.equals(entity.vehicleId)))
+        .getSingleOrNull();
 
     if (vehicleRow == null) {
       developer.log(

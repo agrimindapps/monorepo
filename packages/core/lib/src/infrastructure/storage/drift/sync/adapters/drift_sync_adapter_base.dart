@@ -210,12 +210,34 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
       }
 
       // 2. Query no Firestore
+      // ⚠️ IMPORTANT: This query requires Firestore composite indices!
+      //
+      // Query Pattern:
+      //   .where('updatedAt', isGreaterThan: timestamp).limit(500)
+      //
+      // Without indices, Firestore will reject this query with:
+      //   "The query requires an index. You can create it by following the link
+      //    in the console or locally via the Firebase CLI."
+      //
+      // Required Index Setup:
+      //   - vehicles: updatedAt ASC
+      //   - fuel_supplies: updatedAt ASC
+      //   - maintenances: updatedAt ASC
+      //   - expenses: updatedAt ASC
+      //   - odometer_readings: updatedAt ASC
+      //
+      // Deployment:
+      //   1. CLI: ./deploy-firestore-indexes.sh my-project-id
+      //   2. Manual: https://console.firebase.google.com/project/{PROJECT}/firestore/indexes
+      //   3. Docs: See FIRESTORE_INDICES.md for full instructions
+      //
       fs.Query query = firestore
           .collection('users')
           .doc(userId)
           .collection(collectionName);
 
       if (since != null) {
+        // This where() clause requires the index on updatedAt
         query = query.where('updatedAt', isGreaterThan: since);
       }
 

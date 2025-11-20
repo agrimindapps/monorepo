@@ -272,6 +272,18 @@ class ExpensesNotifier extends _$ExpensesNotifier {
     _applyFiltersAndRecalculate(newFiltersConfig);
   }
 
+  /// Seleciona mês para filtro
+  void selectMonth(DateTime month) {
+    final newFiltersConfig = state.filtersConfig.copyWith(selectedMonth: month);
+    _applyFiltersAndRecalculate(newFiltersConfig);
+  }
+
+  /// Limpa filtro de mês
+  void clearMonthFilter() {
+    final newFiltersConfig = state.filtersConfig.copyWith(clearMonth: true);
+    _applyFiltersAndRecalculate(newFiltersConfig);
+  }
+
   /// Aplica filtro por período
   void filterByPeriod(DateTime? start, DateTime? end) {
     final newFiltersConfig = state.filtersConfig.copyWith(

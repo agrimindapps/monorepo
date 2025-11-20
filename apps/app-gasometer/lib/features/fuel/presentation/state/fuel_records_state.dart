@@ -41,6 +41,9 @@ class FuelRecordsState with _$FuelRecordsState {
     /// Filtro por veículo
     String? selectedVehicleId,
 
+    /// Filtro por mês específico
+    DateTime? selectedMonth,
+
     /// Filtro por tipo de combustível
     FuelType? selectedFuelType,
 

@@ -1,5 +1,6 @@
 import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 import '../repositories/calculator_repository.dart';
 
@@ -16,21 +17,21 @@ class GetFavoritesParams extends FavoriteParams {
 /// Parâmetros para adicionar favorito
 class AddFavoriteParams extends FavoriteParams {
   final String calculatorId;
-  
+
   const AddFavoriteParams(this.calculatorId);
 }
 
-/// Parâmetros para remover favorito  
+/// Parâmetros para remover favorito
 class RemoveFavoriteParams extends FavoriteParams {
   final String calculatorId;
-  
+
   const RemoveFavoriteParams(this.calculatorId);
 }
 
-/// Use case unificado para gerenciar favoritos
-/// 
-/// Segue padrão Clean Architecture com Either para error handling
-/// Utiliza pattern matching para diferentes operações
+/// Use case para gerenciar favoritos
+///
+/// Centraliza lógica de adicionar, remover e listar favoritos
+@lazySingleton
 class ManageFavorites {
   final CalculatorRepository repository;
 
@@ -44,7 +45,9 @@ class ManageFavorites {
     } else if (params is RemoveFavoriteParams) {
       return await repository.removeFromFavorites(params.calculatorId);
     } else {
-      return const Left(ValidationFailure(message: 'Parâmetro de favorito inválido'));
+      return const Left(
+        ValidationFailure(message: 'Parâmetro de favorito inválido'),
+      );
     }
   }
 }

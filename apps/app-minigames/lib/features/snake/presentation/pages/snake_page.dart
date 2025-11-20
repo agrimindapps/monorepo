@@ -1,5 +1,9 @@
+// Dart imports:
+import 'dart:ui';
+
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +14,7 @@ import '../providers/snake_game_notifier.dart';
 // Domain imports:
 import '../../domain/entities/enums.dart';
 
-/// Snake game page
+/// Snake game page with Neon Arcade theme
 class SnakePage extends ConsumerWidget {
   const SnakePage({super.key});
 
@@ -20,152 +24,465 @@ class SnakePage extends ConsumerWidget {
     final notifier = ref.read(snakeGameNotifierProvider.notifier);
 
     return Scaffold(
+      backgroundColor: const Color(0xFF121212), // Dark background
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Snake'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        title: const Text(
+          'NEON SNAKE',
+          style: TextStyle(
+            fontFamily: 'Orbitron', // Assuming a techy font, or fallback
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2,
+            color: Colors.white,
+            shadows: [
+              Shadow(
+                color: Colors.greenAccent,
+                blurRadius: 10,
+              ),
+            ],
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => notifier.restartGame(),
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              notifier.restartGame();
+            },
+            tooltip: 'Reiniciar',
           ),
           IconButton(
-            icon: const Icon(Icons.pause),
-            onPressed: () => notifier.togglePause(),
+            icon: Icon(
+              gameState.valueOrNull?.gameStatus.isPaused == true
+                  ? Icons.play_arrow
+                  : Icons.pause,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              HapticFeedback.selectionClick();
+              notifier.togglePause();
+            },
+            tooltip: 'Pausar/Continuar',
           ),
         ],
       ),
-      body: gameState.when(
-        data: (state) {
-          return Column(
-            children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Score: ${state.score}'),
-                    Text('High Score: ${notifier.highScore}'),
-                    Text('Length: ${state.length}'),
-                  ],
-                ),
-              ),
-
-              // Game board
-              Expanded(
-                child: Center(
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Container(
-                      color: Colors.black,
-                      child: GridView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: state.gridSize,
-                        ),
-                        itemCount: state.gridSize * state.gridSize,
-                        itemBuilder: (context, index) {
-                          final x = index % state.gridSize;
-                          final y = index ~/ state.gridSize;
-
-                          Color cellColor = Colors.grey[900]!;
-
-                          if (state.isSnakeHead(x, y)) {
-                            cellColor = Colors.green[700]!;
-                          } else if (state.isSnake(x, y)) {
-                            cellColor = Colors.green;
-                          } else if (state.isFood(x, y)) {
-                            cellColor = Colors.red;
-                          }
-
-                          return Container(
-                            margin: const EdgeInsets.all(1),
-                            decoration: BoxDecoration(
-                              color: cellColor,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              // Instructions or game over
-              if (state.gameStatus.isNotStarted)
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: ElevatedButton(
-                    onPressed: () => notifier.startGame(),
-                    child: const Text('Iniciar Jogo'),
-                  ),
-                ),
-
-              if (state.gameStatus.isGameOver)
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment.center,
+            radius: 1.5,
+            colors: [
+              Color(0xFF1A1A2E),
+              Color(0xFF0F0F1A),
+            ],
+          ),
+        ),
+        child: KeyboardListener(
+          focusNode: FocusNode()..requestFocus(),
+          autofocus: true,
+          onKeyEvent: (event) {
+            if (event is KeyDownEvent) {
+              if (event.logicalKey == LogicalKeyboardKey.arrowUp ||
+                  event.logicalKey == LogicalKeyboardKey.keyW) {
+                notifier.changeDirection(Direction.up);
+              } else if (event.logicalKey == LogicalKeyboardKey.arrowDown ||
+                  event.logicalKey == LogicalKeyboardKey.keyS) {
+                notifier.changeDirection(Direction.down);
+              } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft ||
+                  event.logicalKey == LogicalKeyboardKey.keyA) {
+                notifier.changeDirection(Direction.left);
+              } else if (event.logicalKey == LogicalKeyboardKey.arrowRight ||
+                  event.logicalKey == LogicalKeyboardKey.keyD) {
+                notifier.changeDirection(Direction.right);
+              } else if (event.logicalKey == LogicalKeyboardKey.space) {
+                notifier.togglePause();
+              }
+            }
+          },
+          child: gameState.when(
+            data: (state) {
+              return Stack(
+                children: [
+                  Column(
                     children: [
-                      const Text(
-                        'Game Over!',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      SizedBox(height: MediaQuery.of(context).padding.top + 60),
+                      
+                      // HUD (Heads Up Display)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _buildGlassScoreCard('SCORE', state.score.toString(), Colors.greenAccent),
+                            _buildGlassScoreCard('BEST', notifier.highScore.toString(), Colors.amberAccent),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => notifier.restartGame(),
-                        child: const Text('Jogar Novamente'),
+                      
+                      const SizedBox(height: 20),
+
+                      // Wall Toggle
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'WALLS',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.7),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Switch(
+                            value: state.hasWalls,
+                            activeThumbColor: Colors.redAccent,
+                            activeTrackColor: Colors.redAccent.withValues(alpha: 0.3),
+                            inactiveThumbColor: Colors.grey,
+                            inactiveTrackColor: Colors.grey.withValues(alpha: 0.3),
+                            onChanged: (value) {
+                              HapticFeedback.selectionClick();
+                              notifier.toggleWalls();
+                            },
+                          ),
+                        ],
                       ),
+
+                      const SizedBox(height: 10),
+
+                      // Game Board
+                      Expanded(
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: AspectRatio(
+                              aspectRatio: 1,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: state.hasWalls 
+                                        ? Colors.redAccent.withValues(alpha: 0.5) 
+                                        : Colors.blueAccent.withValues(alpha: 0.3),
+                                    width: 2,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: state.hasWalls 
+                                          ? Colors.redAccent.withValues(alpha: 0.1) 
+                                          : Colors.blueAccent.withValues(alpha: 0.1),
+                                      blurRadius: 20,
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                  color: Colors.black.withValues(alpha: 0.5),
+                                ),
+                                child: GestureDetector(
+                                  onVerticalDragUpdate: (details) {
+                                    if (details.delta.dy < -10) {
+                                      notifier.changeDirection(Direction.up);
+                                    } else if (details.delta.dy > 10) {
+                                      notifier.changeDirection(Direction.down);
+                                    }
+                                  },
+                                  onHorizontalDragUpdate: (details) {
+                                    if (details.delta.dx < -10) {
+                                      notifier.changeDirection(Direction.left);
+                                    } else if (details.delta.dx > 10) {
+                                      notifier.changeDirection(Direction.right);
+                                    }
+                                  },
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: GridView.builder(
+                                      physics: const NeverScrollableScrollPhysics(),
+                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: state.gridSize,
+                                        crossAxisSpacing: 1,
+                                        mainAxisSpacing: 1,
+                                      ),
+                                      itemCount: state.gridSize * state.gridSize,
+                                      itemBuilder: (context, index) {
+                                        final x = index % state.gridSize;
+                                        final y = index ~/ state.gridSize;
+
+                                        return _buildGridCell(x, y, state);
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Mobile Controls
+                      if (MediaQuery.of(context).size.width < 800)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 32, top: 16),
+                          child: _buildMobileControls(notifier),
+                        ),
                     ],
                   ),
-                ),
 
-              if (state.gameStatus.isPaused)
-                const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text(
-                    'PAUSADO',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  // Overlays
+                  if (state.gameStatus.isNotStarted)
+                    _buildOverlay(
+                      context,
+                      title: 'NEON SNAKE',
+                      buttonText: 'START GAME',
+                      onPressed: () {
+                        HapticFeedback.mediumImpact();
+                        notifier.startGame();
+                      },
+                    ),
+
+                  if (state.gameStatus.isGameOver)
+                    _buildOverlay(
+                      context,
+                      title: 'GAME OVER',
+                      subtitle: 'SCORE: ${state.score}',
+                      buttonText: 'TRY AGAIN',
+                      onPressed: () {
+                        HapticFeedback.mediumImpact();
+                        notifier.restartGame();
+                      },
+                      color: Colors.black.withValues(alpha: 0.85),
+                      isError: true,
+                    ),
+
+                  if (state.gameStatus.isPaused)
+                    _buildOverlay(
+                      context,
+                      title: 'PAUSED',
+                      buttonText: 'RESUME',
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        notifier.togglePause();
+                      },
+                      color: Colors.black.withValues(alpha: 0.6),
+                    ),
+                ],
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator(color: Colors.greenAccent)),
+            error: (error, stack) => Center(child: Text('Error: $error', style: const TextStyle(color: Colors.red))),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGridCell(int x, int y, dynamic state) {
+    if (state.isSnakeHead(x, y)) {
+      return Container(
+        decoration: BoxDecoration(
+          color: state.difficulty.color,
+          borderRadius: BorderRadius.circular(4),
+          boxShadow: [
+            BoxShadow(
+              color: state.difficulty.color.withValues(alpha: 0.6),
+              blurRadius: 8,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+      );
+    } else if (state.isSnake(x, y)) {
+      return Container(
+        decoration: BoxDecoration(
+          color: state.difficulty.color.withValues(alpha: 0.7),
+          borderRadius: BorderRadius.circular(2),
+        ),
+      );
+    } else if (state.isFood(x, y)) {
+      return TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.8, end: 1.2),
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+        builder: (context, scale, child) {
+          return Transform.scale(
+            scale: scale,
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.redAccent,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.redAccent.withValues(alpha: 0.6),
+                    blurRadius: 10,
+                    spreadRadius: 2,
                   ),
-                ),
+                ],
+              ),
+            ),
+          );
+        },
+        onEnd: () {}, // Loop handled by parent logic or simple pulse here? 
+                      // Simple pulse needs state, keeping it simple for now with one-way or just static glow
+      );
+    } else {
+      // Empty cell with subtle grid
+      return Container(
+        color: Colors.white.withValues(alpha: 0.02),
+      );
+    }
+  }
 
-              // Controls
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    // Up
-                    IconButton(
-                      icon: const Icon(Icons.arrow_upward, size: 48),
-                      onPressed: () => notifier.changeDirection(Direction.up),
-                    ),
-                    // Left and Right
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back, size: 48),
-                          onPressed: () => notifier.changeDirection(Direction.left),
-                        ),
-                        const SizedBox(width: 100),
-                        IconButton(
-                          icon: const Icon(Icons.arrow_forward, size: 48),
-                          onPressed: () => notifier.changeDirection(Direction.right),
-                        ),
-                      ],
-                    ),
-                    // Down
-                    IconButton(
-                      icon: const Icon(Icons.arrow_downward, size: 48),
-                      onPressed: () => notifier.changeDirection(Direction.down),
-                    ),
-                  ],
+  Widget _buildGlassScoreCard(String label, String value, Color accentColor) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+          ),
+          child: Column(
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: accentColor,
+                  letterSpacing: 1.5,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontFamily: 'Monospace',
                 ),
               ),
             ],
-          );
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOverlay(
+    BuildContext context, {
+    required String title,
+    String? subtitle,
+    required String buttonText,
+    required VoidCallback onPressed,
+    Color? color,
+    bool isError = false,
+  }) {
+    return Container(
+      color: color ?? Colors.black.withValues(alpha: 0.7),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                  color: isError ? Colors.redAccent : Colors.greenAccent,
+                  shadows: [
+                    BoxShadow(
+                      color: (isError ? Colors.redAccent : Colors.greenAccent).withValues(alpha: 0.5),
+                      blurRadius: 20,
+                    ),
+                  ],
+                  letterSpacing: 4,
+                ),
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 16),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 40),
+              ElevatedButton(
+                onPressed: onPressed,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isError ? Colors.redAccent : Colors.greenAccent,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  elevation: 10,
+                  shadowColor: (isError ? Colors.redAccent : Colors.greenAccent).withValues(alpha: 0.5),
+                ),
+                child: Text(
+                  buttonText,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMobileControls(dynamic notifier) {
+    return Column(
+      children: [
+        _buildControlButton(Icons.keyboard_arrow_up, () => notifier.changeDirection(Direction.up)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildControlButton(Icons.keyboard_arrow_left, () => notifier.changeDirection(Direction.left)),
+            const SizedBox(width: 60),
+            _buildControlButton(Icons.keyboard_arrow_right, () => notifier.changeDirection(Direction.right)),
+          ],
+        ),
+        _buildControlButton(Icons.keyboard_arrow_down, () => notifier.changeDirection(Direction.down)),
+      ],
+    );
+  }
+
+  Widget _buildControlButton(IconData icon, VoidCallback onPressed) {
+    return Container(
+      margin: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.1),
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: IconButton(
+        icon: Icon(icon, color: Colors.white, size: 32),
+        onPressed: () {
+          HapticFeedback.lightImpact();
+          onPressed();
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Erro: $error')),
+        padding: const EdgeInsets.all(16),
       ),
     );
   }

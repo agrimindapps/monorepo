@@ -8,7 +8,6 @@ import 'package:core/core.dart';
 /// Handles local storage of news articles, favorites,
 /// and commodity prices
 abstract class NewsLocalDataSource {
-
   /// Cache news articles
   Future<void> cacheArticles(List<NewsArticleModel> articles);
 
@@ -91,9 +90,8 @@ abstract class NewsLocalDataSource {
   Future<Map<String, int>> getCacheStats();
 }
 
-@injectable
+@LazySingleton(as: NewsLocalDataSource)
 class NewsLocalDataSourceImpl implements NewsLocalDataSource {
-
   @override
   Future<void> cacheArticles(List<NewsArticleModel> articles) async {
     throw UnimplementedError('cacheArticles has not been implemented');
@@ -155,7 +153,9 @@ class NewsLocalDataSourceImpl implements NewsLocalDataSource {
   Future<List<CommodityPriceModel>> getCachedCommodityPrices({
     List<CommodityTypeModel>? types,
   }) async {
-    throw UnimplementedError('getCachedCommodityPrices has not been implemented');
+    throw UnimplementedError(
+      'getCachedCommodityPrices has not been implemented',
+    );
   }
 
   @override

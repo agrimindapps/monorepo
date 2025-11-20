@@ -6,6 +6,7 @@ class ExpenseFiltersConfig {
   const ExpenseFiltersConfig({
     this.vehicleId,
     this.type,
+    this.selectedMonth,
     this.startDate,
     this.endDate,
     this.searchQuery = '',
@@ -14,6 +15,7 @@ class ExpenseFiltersConfig {
   });
   final String? vehicleId;
   final ExpenseType? type;
+  final DateTime? selectedMonth;
   final DateTime? startDate;
   final DateTime? endDate;
   final String searchQuery;
@@ -24,6 +26,7 @@ class ExpenseFiltersConfig {
   ExpenseFiltersConfig copyWith({
     String? vehicleId,
     ExpenseType? type,
+    DateTime? selectedMonth,
     DateTime? startDate,
     DateTime? endDate,
     String? searchQuery,
@@ -31,11 +34,13 @@ class ExpenseFiltersConfig {
     bool? sortAscending,
     bool clearVehicleId = false,
     bool clearType = false,
+    bool clearMonth = false,
     bool clearDates = false,
   }) {
     return ExpenseFiltersConfig(
       vehicleId: clearVehicleId ? null : (vehicleId ?? this.vehicleId),
       type: clearType ? null : (type ?? this.type),
+      selectedMonth: clearMonth ? null : (selectedMonth ?? this.selectedMonth),
       startDate: clearDates ? null : (startDate ?? this.startDate),
       endDate: clearDates ? null : (endDate ?? this.endDate),
       searchQuery: searchQuery ?? this.searchQuery,
@@ -48,6 +53,7 @@ class ExpenseFiltersConfig {
   bool get hasActiveFilters {
     return vehicleId != null ||
         type != null ||
+        selectedMonth != null ||
         startDate != null ||
         endDate != null ||
         searchQuery.isNotEmpty;
@@ -64,6 +70,7 @@ class ExpenseFiltersConfig {
     return other is ExpenseFiltersConfig &&
         other.vehicleId == vehicleId &&
         other.type == type &&
+        other.selectedMonth == selectedMonth &&
         other.startDate == startDate &&
         other.endDate == endDate &&
         other.searchQuery == searchQuery &&
@@ -76,6 +83,7 @@ class ExpenseFiltersConfig {
     return Object.hash(
       vehicleId,
       type,
+      selectedMonth,
       startDate,
       endDate,
       searchQuery,
@@ -110,6 +118,12 @@ class ExpenseFiltersService {
       }
       if (config.type != null && expense.type != config.type) {
         return false;
+      }
+      if (config.selectedMonth != null) {
+        if (expense.date.year != config.selectedMonth!.year ||
+            expense.date.month != config.selectedMonth!.month) {
+          return false;
+        }
       }
       if (config.startDate != null) {
         final startOfDay = DateTime(

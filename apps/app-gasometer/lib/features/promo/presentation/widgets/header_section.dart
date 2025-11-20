@@ -1,39 +1,84 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'notification_form_dialog.dart';
 
-class HeaderSection extends StatelessWidget {
+class HeaderSection extends StatefulWidget {
   const HeaderSection({super.key});
+
+  @override
+  State<HeaderSection> createState() => _HeaderSectionState();
+}
+
+class _HeaderSectionState extends State<HeaderSection>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 20),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final isMobile = screenSize.width < 800;
+    final isMobile = screenSize.width < 900;
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Colors.blue[800]!, Colors.indigo[900]!],
-        ),
-      ),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1280),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: isMobile ? 24 : 40,
-              vertical: 80,
+    return Stack(
+      children: [
+        // Animated Background
+        Positioned.fill(
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF0F172A), // Deep Navy
+                  Color(0xFF1E293B), // Slate 800
+                  Color(0xFF0F172A), // Deep Navy
+                ],
+              ),
             ),
-            child:
-                isMobile
-                    ? _buildMobileContent(context)
-                    : _buildDesktopContent(context),
           ),
         ),
-      ),
+        Positioned.fill(
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return CustomPaint(
+                painter: _BackgroundPainter(_controller.value),
+              );
+            },
+          ),
+        ),
+
+        // Content
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1280),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 24 : 40,
+                vertical: isMobile ? 60 : 100,
+              ),
+              child: isMobile
+                  ? _buildMobileContent(context)
+                  : _buildDesktopContent(context),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -42,19 +87,24 @@ class HeaderSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
-          flex: 5,
+          flex: 6,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _buildBadge(),
+              const SizedBox(height: 24),
               _buildHeaderText(),
               const SizedBox(height: 32),
               _buildActionButtons(context),
-              const SizedBox(height: 24),
-              _buildDownloadBadges(context),
+              const SizedBox(height: 40),
+              _buildStatsRow(),
             ],
           ),
         ),
-        Expanded(flex: 5, child: _buildAppShowcase()),
+        Expanded(
+          flex: 6,
+          child: Center(child: _buildAppShowcase()),
+        ),
       ],
     );
   }
@@ -63,38 +113,102 @@ class HeaderSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildHeaderText(),
+        _buildBadge(),
         const SizedBox(height: 24),
+        _buildHeaderText(),
+        const SizedBox(height: 32),
         _buildActionButtons(context),
-        const SizedBox(height: 20),
-        _buildDownloadBadges(context),
-        const SizedBox(height: 48),
-        _buildAppShowcase(),
+        const SizedBox(height: 60),
+        Center(child: _buildAppShowcase()),
+        const SizedBox(height: 40),
+        _buildStatsRow(),
       ],
     );
   }
 
+  Widget _buildBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.amber.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.auto_awesome, color: Colors.amber[400], size: 16),
+          const SizedBox(width: 8),
+          Text(
+            'O Futuro do Controle Veicular',
+            style: TextStyle(
+              color: Colors.amber[400],
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHeaderText() {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Controle Total\npara seu Veículo',
-          style: TextStyle(
-            fontSize: 48,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            height: 1.1,
-            letterSpacing: -0.5,
+        RichText(
+          text: TextSpan(
+            style: const TextStyle(
+              fontSize: 56,
+              fontWeight: FontWeight.w800,
+              height: 1.1,
+              letterSpacing: -1.5,
+              color: Colors.white,
+              fontFamily: 'Inter', // Assuming Inter or system font
+            ),
+            children: [
+              const TextSpan(text: 'Controle Total\n'),
+              TextSpan(
+                text: 'do seu Veículo',
+                style: TextStyle(
+                  color: Colors.transparent,
+                  shadows: [
+                    Shadow(
+                      offset: const Offset(0, 4),
+                      blurRadius: 8,
+                      color: Colors.amber.withValues(alpha: 0.4),
+                    ),
+                  ],
+                  decoration: TextDecoration.none,
+                  decorationColor: Colors.amber,
+                ),
+              ),
+            ],
           ),
         ),
-        SizedBox(height: 24),
+        // Gradient text workaround for "do seu Veículo"
+        ShaderMask(
+          shaderCallback: (bounds) => LinearGradient(
+            colors: [Colors.amber[300]!, Colors.orange[500]!],
+          ).createShader(bounds),
+          child: const Text(
+            'do seu Veículo',
+            style: TextStyle(
+              fontSize: 56,
+              fontWeight: FontWeight.w800,
+              height: 1.1,
+              letterSpacing: -1.5,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
         Text(
-          'Gerencie abastecimentos, manutenções e despesas do seu veículo com o aplicativo mais completo do mercado.',
+          'Gerencie abastecimentos, manutenções e despesas com inteligência. Economize dinheiro e prolongue a vida útil do seu carro com o GasOMeter.',
           style: TextStyle(
             fontSize: 18,
-            color: Colors.white,
-            height: 1.5,
+            color: Colors.blueGrey[100],
+            height: 1.6,
             letterSpacing: 0.2,
           ),
         ),
@@ -115,121 +229,87 @@ class HeaderSection extends StatelessWidget {
             );
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.amber[400],
-            foregroundColor: Colors.black87,
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+            backgroundColor: Colors.amber[500],
+            foregroundColor: Colors.black,
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
             ),
-            elevation: 4,
-            shadowColor: Colors.black.withValues(alpha: 0.3),
+            elevation: 8,
+            shadowColor: Colors.amber.withValues(alpha: 0.4),
           ),
           child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Quero ser Notificado',
+                'Entrar na Lista de Espera',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              SizedBox(width: 8),
-              Icon(Icons.notifications, size: 16),
+              SizedBox(width: 12),
+              Icon(Icons.arrow_forward, size: 20),
             ],
+          ),
+        ),
+        OutlinedButton(
+          onPressed: () {
+            // Scroll to features or video
+          },
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.white,
+            side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          child: const Text(
+            'Saiba Mais',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildDownloadBadges(BuildContext context) {
+  Widget _buildStatsRow() {
     return Row(
       children: [
-        GestureDetector(
-          onTap: () {
-            showDialog<void>(
-              context: context,
-              builder: (context) => const NotificationFormDialog(),
-            );
-          },
-          child: Container(
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                const Icon(Icons.android, color: Colors.white, size: 24),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'EM BREVE NA',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        fontSize: 8,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Text(
-                      'Google Play',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+        _buildStatItem('50k+', 'Usuários'),
+        Container(
+          height: 40,
+          width: 1,
+          color: Colors.white.withValues(alpha: 0.1),
+          margin: const EdgeInsets.symmetric(horizontal: 24),
+        ),
+        _buildStatItem('4.9', 'Avaliação'),
+        Container(
+          height: 40,
+          width: 1,
+          color: Colors.white.withValues(alpha: 0.1),
+          margin: const EdgeInsets.symmetric(horizontal: 24),
+        ),
+        _buildStatItem('100%', 'Gratuito'),
+      ],
+    );
+  }
+
+  Widget _buildStatItem(String value, String label) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
-        const SizedBox(width: 12),
-        GestureDetector(
-          onTap: () {
-            showDialog<void>(
-              context: context,
-              builder: (context) => const NotificationFormDialog(),
-            );
-          },
-          child: Container(
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                const Icon(Icons.apple, color: Colors.white, size: 24),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'EM BREVE NA',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        fontSize: 8,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Text(
-                      'App Store',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.blueGrey[200],
           ),
         ),
       ],
@@ -239,178 +319,293 @@ class HeaderSection extends StatelessWidget {
   Widget _buildAppShowcase() {
     return Stack(
       alignment: Alignment.center,
+      clipBehavior: Clip.none,
       children: [
+        // Glow effect
         Container(
-          width: 350,
-          height: 350,
+          width: 300,
+          height: 500,
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white.withValues(alpha: 0.05),
-          ),
-        ),
-        Container(
-          width: 280,
-          height: 520,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(32),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
-                blurRadius: 30,
-                offset: const Offset(0, 10),
-              ),
-            ],
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.2),
-              width: 2,
+            gradient: RadialGradient(
+              colors: [
+                Colors.blue.withValues(alpha: 0.3),
+                Colors.transparent,
+              ],
+              radius: 0.7,
             ),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(28),
-            child: Stack(
-              children: [
-                Container(
-                  color: Colors.blue[900],
-                  width: double.infinity,
-                  height: double.infinity,
-                ),
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                    margin: const EdgeInsets.only(top: 10),
-                    width: 120,
-                    height: 25,
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(2),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 50),
-                      Icon(
-                        Icons.local_gas_station,
-                        size: 60,
-                        color: Colors.amber[400],
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'GasOMeter',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 40),
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        height: 120,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: List.generate(
-                              5,
-                              (index) => Container(
-                                width: 30,
-                                height: 70 + (index * 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.amber[400]!.withValues(
-                                    alpha: 0.7,
-                                  ),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.directions_car,
-                              color: Colors.amber[400],
-                            ),
-                            const SizedBox(width: 16),
-                            const Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Meu Veículo',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  'Honda Civic 2022',
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+        ),
+        // Phone Frame
+        Transform(
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.001)
+            ..rotateY(-0.1)
+            ..rotateZ(0.05),
+          alignment: Alignment.center,
+          child: Container(
+            width: 280,
+            height: 560,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0F172A),
+              borderRadius: BorderRadius.circular(40),
+              border: Border.all(color: Colors.grey[800]!, width: 8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  blurRadius: 40,
+                  offset: const Offset(20, 20),
                 ),
               ],
             ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(32),
+              child: Stack(
+                children: [
+                  // App UI Mockup
+                  Container(
+                    color: const Color(0xFFF8FAFC),
+                    child: Column(
+                      children: [
+                        // App Bar
+                        Container(
+                          height: 100,
+                          padding: const EdgeInsets.only(
+                              top: 40, left: 20, right: 20),
+                          color: Colors.white,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Olá, Motorista',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Honda Civic',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              CircleAvatar(
+                                backgroundColor: Colors.amber[100],
+                                child: Icon(Icons.person,
+                                    color: Colors.amber[800]),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Dashboard Content
+                        Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            children: [
+                              _buildMockCard(
+                                  Icons.local_gas_station,
+                                  'Último Abastecimento',
+                                  'R\$ 250,00',
+                                  Colors.blue),
+                              const SizedBox(height: 16),
+                              _buildMockCard(Icons.speed, 'Média de Consumo',
+                                  '12.5 km/L', Colors.green),
+                              const SizedBox(height: 16),
+                              _buildMockCard(Icons.build, 'Próxima Revisão',
+                                  'Em 15 dias', Colors.orange),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        // Floating Elements
+        Positioned(
+          right: -40,
+          top: 100,
+          child: _buildFloatingCard(
+            icon: Icons.notifications_active,
+            title: 'Alerta',
+            subtitle: 'Troca de Óleo',
+            color: Colors.red,
+            delay: 0,
           ),
         ),
         Positioned(
-          top: 50,
-          right: 40,
-          child: _buildFloatingElement(Icons.local_gas_station, Colors.amber),
-        ),
-        Positioned(
-          bottom: 80,
-          left: 40,
-          child: _buildFloatingElement(Icons.bar_chart, Colors.green),
-        ),
-        Positioned(
-          bottom: 180,
-          right: 30,
-          child: _buildFloatingElement(Icons.speed, Colors.red),
+          left: -40,
+          bottom: 150,
+          child: _buildFloatingCard(
+            icon: Icons.trending_up,
+            title: 'Economia',
+            subtitle: 'R\$ 150/mês',
+            color: Colors.green,
+            delay: 1,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildFloatingElement(IconData icon, MaterialColor color) {
+  Widget _buildMockCard(
+      IconData icon, String title, String value, MaterialColor color) {
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Icon(icon, color: color, size: 24),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color),
+          ),
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
+  }
+
+  Widget _buildFloatingCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required double delay,
+  }) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final yOffset = math.sin(_controller.value * 2 * math.pi + delay) * 10;
+        return Transform.translate(
+          offset: Offset(0, yOffset),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: color, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _BackgroundPainter extends CustomPainter {
+  final double animationValue;
+
+  _BackgroundPainter(this.animationValue);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.03)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+
+    final path = Path();
+    final width = size.width;
+    final height = size.height;
+
+    // Draw animated grid lines
+    for (var i = 0; i < width; i += 60) {
+      final offset = math.sin((i / width + animationValue) * math.pi) * 20;
+      path.moveTo(i.toDouble(), 0);
+      path.quadraticBezierTo(
+        i.toDouble() + offset,
+        height / 2,
+        i.toDouble(),
+        height,
+      );
+    }
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _BackgroundPainter oldDelegate) {
+    return oldDelegate.animationValue != animationValue;
   }
 }

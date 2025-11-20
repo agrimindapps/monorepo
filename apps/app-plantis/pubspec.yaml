@@ -5,8 +5,8 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.9.0 <4.0.0"
-  flutter: ">=3.35.0 <4.0.0"
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=3.24.0"
 
 dependencies:
   flutter:
@@ -39,6 +39,7 @@ dependencies:
   sqlite3_flutter_libs: any  # Versão do core: ^0.5.24
   equatable: any
   firebase_auth: any
+  google_fonts: ^6.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

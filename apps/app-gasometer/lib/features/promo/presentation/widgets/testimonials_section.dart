@@ -8,40 +8,6 @@ class TestimonialsSection extends StatefulWidget {
 }
 
 class _TestimonialsSectionState extends State<TestimonialsSection> {
-  int _selectedIndex = 0;
-  final _avatarColors = [
-    Colors.blue[100]!,
-    Colors.green[100]!,
-    Colors.amber[100]!,
-  ];
-
-  final _avatarIconColors = [
-    Colors.blue[800]!,
-    Colors.green[700]!,
-    Colors.amber[700]!,
-  ];
-
-  final List<Map<String, dynamic>> _testimonials = [
-    {
-      'name': 'Carlos Silva',
-      'role': 'Motorista de App',
-      'text': 'O GasOMeter me ajudou a reduzir meus gastos com combustível em 20%. Agora consigo acompanhar o consumo em tempo real.',
-      'rating': 5,
-    },
-    {
-      'name': 'Maria Santos',
-      'role': 'Empresária',
-      'text': 'Excelente para controlar a frota da empresa. Os relatórios são muito detalhados e me ajudam na tomada de decisões.',
-      'rating': 5,
-    },
-    {
-      'name': 'João Costa',
-      'role': 'Engenheiro',
-      'text': 'Interface simples e intuitiva. Consigo registrar tudo rapidamente e os lembretes de manutenção são muito úteis.',
-      'rating': 5,
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
@@ -80,7 +46,7 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
                   ),
                 ),
                 TextSpan(
-                  text: ' Vão Dizer',
+                  text: ' Dizem',
                   style: TextStyle(
                     fontSize: isMobile ? 28 : 36,
                     fontWeight: FontWeight.bold,
@@ -91,145 +57,144 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          Container(
-            constraints: const BoxConstraints(maxWidth: 700),
-            child: const Text(
-              'Veja como o GasOMeter tem ajudado motoristas a ter maior controle em todo o Brasil',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black54,
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
           const SizedBox(height: 60),
-          Container(
-            constraints: const BoxConstraints(maxWidth: 1000),
-            child: isMobile ? _buildMobileTestimonials() : _buildDesktopTestimonials(),
-          ),
+          isMobile ? _buildMobileLayout() : _buildDesktopLayout(),
         ],
       ),
     );
   }
 
-  Widget _buildDesktopTestimonials() {
+  Widget _buildDesktopLayout() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: _testimonials.asMap().entries.map((entry) {
-        final index = entry.key;
-        final testimonial = entry.value;
-        return Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: _buildTestimonialCard(testimonial, index),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildMobileTestimonials() {
-    return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(
-            _testimonials.length,
-            (index) => GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedIndex = index;
-                });
-              },
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                width: _selectedIndex == index ? 30 : 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  color: _selectedIndex == index
-                      ? Colors.blue[800]
-                      : Colors.grey[300],
-                ),
+        Expanded(
+          child: Column(
+            children: [
+              _buildTestimonialCard(
+                name: 'Ricardo Silva',
+                role: 'Motorista de App',
+                content:
+                    'O GasOMeter mudou completamente a forma como controlo meus gastos. A economia no final do mês é real!',
+                rating: 5,
+                imageColor: Colors.blue,
               ),
-            ),
+              const SizedBox(height: 30),
+              _buildTestimonialCard(
+                name: 'Ana Paula',
+                role: 'Representante Comercial',
+                content:
+                    'Interface super intuitiva e relatórios detalhados. Consigo saber exatamente quanto gasto por km rodado.',
+                rating: 5,
+                imageColor: Colors.purple,
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 30),
-        _buildTestimonialCard(_testimonials[_selectedIndex], _selectedIndex),
+        const SizedBox(width: 30),
+        Expanded(
+          child: Column(
+            children: [
+              const SizedBox(height: 40), // Offset for masonry effect
+              _buildTestimonialCard(
+                name: 'Carlos Mendes',
+                role: 'Entusiasta Automotivo',
+                content:
+                    'A funcionalidade de lembretes de manutenção é fantástica. Nunca mais esqueci de trocar o óleo na data certa.',
+                rating: 5,
+                imageColor: Colors.orange,
+              ),
+              const SizedBox(height: 30),
+              _buildTestimonialCard(
+                name: 'Fernanda Oliveira',
+                role: 'Gestora de Frota',
+                content:
+                    'Uso para gerenciar os 3 carros da família. É impressionante como ficou fácil organizar tudo em um só lugar.',
+                rating: 4,
+                imageColor: Colors.green,
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildTestimonialCard(Map<String, dynamic> testimonial, int index) {
+  Widget _buildMobileLayout() {
+    return Column(
+      children: [
+        _buildTestimonialCard(
+          name: 'Ricardo Silva',
+          role: 'Motorista de App',
+          content:
+              'O GasOMeter mudou completamente a forma como controlo meus gastos. A economia no final do mês é real!',
+          rating: 5,
+          imageColor: Colors.blue,
+        ),
+        const SizedBox(height: 20),
+        _buildTestimonialCard(
+          name: 'Ana Paula',
+          role: 'Representante Comercial',
+          content:
+              'Interface super intuitiva e relatórios detalhados. Consigo saber exatamente quanto gasto por km rodado.',
+          rating: 5,
+          imageColor: Colors.purple,
+        ),
+        const SizedBox(height: 20),
+        _buildTestimonialCard(
+          name: 'Carlos Mendes',
+          role: 'Entusiasta Automotivo',
+          content:
+              'A funcionalidade de lembretes de manutenção é fantástica. Nunca mais esqueci de trocar o óleo na data certa.',
+          rating: 5,
+          imageColor: Colors.orange,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTestimonialCard({
+    required String name,
+    required String role,
+    required String content,
+    required int rating,
+    required Color imageColor,
+  }) {
     return Container(
-      padding: const EdgeInsets.all(30),
+      padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: _avatarColors[index % _avatarColors.length],
-            ),
-            child: Icon(
-              Icons.person,
-              size: 40,
-              color: _avatarIconColors[index % _avatarIconColors.length],
-            ),
-          ),
-          const SizedBox(height: 20),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(
-              testimonial['rating'] as int,
+              5,
               (index) => Icon(
                 Icons.star,
-                color: Colors.amber[400],
                 size: 20,
+                color: index < rating ? Colors.amber[400] : Colors.grey[300],
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          Text(
-            '"${testimonial['text']}"',
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.black87,
-              height: 1.6,
-              fontStyle: FontStyle.italic,
-            ),
-            textAlign: TextAlign.center,
-          ),
           const SizedBox(height: 20),
           Text(
-            testimonial['name'] as String,
+            '"$content"',
             style: const TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            testimonial['role'] as String,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
+              height: 1.6,
+              color: Color(0xFF334155), // Slate 700
+              fontStyle: FontStyle.italic,
             ),
           ),
         ],

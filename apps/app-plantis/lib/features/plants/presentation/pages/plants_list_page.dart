@@ -159,9 +159,8 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
                   ...SortBy.values.map(
                     (sort) => ListTile(
                       title: Text(sortManager.getSortTitle(sort)),
-                      trailing: state.sortBy == sort
-                          ? const Icon(Icons.check)
-                          : null,
+                      trailing:
+                          state.sortBy == sort ? const Icon(Icons.check) : null,
                       onTap: () {
                         _onSortChanged(sort);
                         Navigator.of(context).pop();
@@ -238,34 +237,34 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
                 Consumer(
                   builder:
                       (BuildContext context, WidgetRef ref, Widget? child) {
-                        final plantsState = ref.watch(
-                          riverpod_plants.plantsNotifierProvider,
-                        );
-                        final appBarData = plantsState.when(
-                          data: (state) => AppBarData(
-                            plantsCount: state.allPlants.length,
-                            searchQuery: state.searchQuery,
-                            viewMode: state.viewMode,
-                          ),
-                          loading: () => const AppBarData(
-                            plantsCount: 0,
-                            searchQuery: '',
-                            viewMode: ViewMode.list,
-                          ),
-                          error: (_, __) => const AppBarData(
-                            plantsCount: 0,
-                            searchQuery: '',
-                            viewMode: ViewMode.list,
-                          ),
-                        );
-                        return PlantsAppBar(
-                          plantsCount: appBarData.plantsCount,
-                          searchQuery: appBarData.searchQuery,
-                          onSearchChanged: _onSearchChanged,
-                          viewMode: appBarData.viewMode,
-                          onViewModeChanged: _onViewModeChanged,
-                        );
-                      },
+                    final plantsState = ref.watch(
+                      riverpod_plants.plantsNotifierProvider,
+                    );
+                    final appBarData = plantsState.when(
+                      data: (state) => AppBarData(
+                        plantsCount: state.allPlants.length,
+                        searchQuery: state.searchQuery,
+                        viewMode: state.viewMode,
+                      ),
+                      loading: () => const AppBarData(
+                        plantsCount: 0,
+                        searchQuery: '',
+                        viewMode: ViewMode.list,
+                      ),
+                      error: (_, __) => const AppBarData(
+                        plantsCount: 0,
+                        searchQuery: '',
+                        viewMode: ViewMode.list,
+                      ),
+                    );
+                    return PlantsAppBar(
+                      plantsCount: appBarData.plantsCount,
+                      searchQuery: appBarData.searchQuery,
+                      onSearchChanged: _onSearchChanged,
+                      viewMode: appBarData.viewMode,
+                      onViewModeChanged: _onViewModeChanged,
+                    );
+                  },
                 ),
                 Expanded(child: _buildOptimizedPlantsContent()),
               ],
@@ -420,8 +419,8 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
               plants: plantsState.searchQuery.isNotEmpty
                   ? plantsState.searchResults
                   : (plantsState.filterBySpace != null
-                        ? plantsState.filteredPlants
-                        : plantsState.allPlants),
+                      ? plantsState.filteredPlants
+                      : plantsState.allPlants),
               isSearching: plantsState.searchQuery.isNotEmpty,
               searchQuery: plantsState.searchQuery,
             );
@@ -461,8 +460,8 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
             );
             return plantsAsync.when(
               data: (plantsState) {
-                final useGridLayout =
-                    viewMode == ViewMode.groupedBySpacesGrid ||
+                final useGridLayout = viewMode ==
+                        ViewMode.groupedBySpacesGrid ||
                     viewMode ==
                         ViewMode
                             .groupedBySpaces; // Default to grid for groupedBySpaces

@@ -53,7 +53,8 @@ import '../../domain/entities/maintenance_entity.dart';
 @lazySingleton
 class MaintenanceDriftSyncAdapter
     extends DriftSyncAdapterBase<MaintenanceEntity, Maintenance> {
-  MaintenanceDriftSyncAdapter(super.db, super.firestore);
+  MaintenanceDriftSyncAdapter(GasometerDatabase db, FirebaseFirestore firestore)
+      : super(db, firestore);
 
   GasometerDatabase get _db => db as GasometerDatabase;
 
@@ -186,9 +187,8 @@ class MaintenanceDriftSyncAdapter
     final concluida = entity.status == MaintenanceStatus.completed;
 
     // Pegar primeiro invoice path (Drift suporta apenas um)
-    final receiptImagePath = entity.invoicesPaths.isNotEmpty
-        ? entity.invoicesPaths.first
-        : null;
+    final receiptImagePath =
+        entity.invoicesPaths.isNotEmpty ? entity.invoicesPaths.first : null;
 
     return MaintenancesCompanion(
       // ID: usar Value() se existe, senão Value.absent() (autoIncrement)
@@ -571,9 +571,8 @@ class MaintenanceDriftSyncAdapter
       final companion = MaintenancesCompanion(
         isDirty: const Value(false),
         lastSyncAt: Value(DateTime.now()),
-        firebaseId: firebaseId != null
-            ? Value(firebaseId)
-            : const Value.absent(),
+        firebaseId:
+            firebaseId != null ? Value(firebaseId) : const Value.absent(),
       );
 
       final query = _db.update(_db.maintenances)
@@ -743,14 +742,15 @@ class MaintenanceDriftSyncAdapter
       ..orderBy([(tbl) => OrderingTerm.desc(tbl.data)]);
 
     yield* query.watch().map(
-      (rows) => rows.map((row) => driftToEntity(row)).toList(),
-    );
+          (rows) => rows.map((row) => driftToEntity(row)).toList(),
+        );
   }
 
   Future<String?> _resolveVehicleFirebaseId(int localVehicleId) async {
     final vehicleRow = await (_db.select(
       _db.vehicles,
-    )..where((tbl) => tbl.id.equals(localVehicleId))).getSingleOrNull();
+    )..where((tbl) => tbl.id.equals(localVehicleId)))
+        .getSingleOrNull();
 
     final firebaseId = vehicleRow?.firebaseId;
 
@@ -772,10 +772,9 @@ class MaintenanceDriftSyncAdapter
       return entity;
     }
 
-    final vehicleRow =
-        await (_db.select(_db.vehicles)
-              ..where((tbl) => tbl.firebaseId.equals(entity.vehicleId)))
-            .getSingleOrNull();
+    final vehicleRow = await (_db.select(_db.vehicles)
+          ..where((tbl) => tbl.firebaseId.equals(entity.vehicleId)))
+        .getSingleOrNull();
 
     if (vehicleRow == null) {
       developer.log(

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-
 import 'notification_form_dialog.dart';
 
 class CallToAction extends StatelessWidget {
@@ -17,139 +15,108 @@ class CallToAction extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Colors.blue[700]!, Colors.indigo[900]!],
+          colors: [
+            Colors.amber[600]!,
+            Colors.orange[700]!,
+          ],
         ),
       ),
       child: Stack(
-        clipBehavior: Clip.none,
         children: [
+          // Decorative background elements
           Positioned(
-            top: -80,
-            left: -80,
+            top: -100,
+            right: -100,
             child: Container(
-              width: 200,
-              height: 200,
+              width: 400,
+              height: 400,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.1),
               ),
             ),
           ),
           Positioned(
             bottom: -50,
-            right: screenSize.width * 0.2,
+            left: -50,
             child: Container(
-              width: 150,
-              height: 150,
+              width: 200,
+              height: 200,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.1),
               ),
             ),
           ),
-          Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: 80,
-              horizontal: isMobile ? 24 : screenSize.width * 0.08,
-            ),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 600),
+          
+          // Content
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1000),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 24 : 40,
+                  vertical: isMobile ? 80 : 120,
+                ),
                 child: Column(
                   children: [
                     Text(
-                      'Pronto para Começar?',
+                      'Pronto para transformar\nsua gestão veicular?',
                       style: TextStyle(
-                        fontSize: isMobile ? 32 : 40,
-                        fontWeight: FontWeight.bold,
+                        fontSize: isMobile ? 36 : 56,
+                        fontWeight: FontWeight.w900,
                         color: Colors.white,
-                        height: 1.2,
+                        height: 1.1,
+                        letterSpacing: -1.0,
+                        fontFamily: 'Inter',
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'Seja um dos primeiros a experimentar o GasOMeter e transforme a forma como você gerencia seu veículo.',
-                      style: TextStyle(
-                        fontSize: isMobile ? 16 : 18,
-                        color: Colors.white.withValues(alpha: 0.9),
-                        height: 1.6,
+                    const SizedBox(height: 24),
+                    Container(
+                      constraints: const BoxConstraints(maxWidth: 700),
+                      child: const Text(
+                        'Junte-se a milhares de motoristas que já estão economizando tempo e dinheiro com o GasOMeter. É gratuito e fácil de usar.',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                          height: 1.5,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 40),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    const SizedBox(height: 48),
+                    Wrap(
+                      spacing: 20,
+                      runSpacing: 20,
+                      alignment: WrapAlignment.center,
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            context.go('/login');
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.amber[400],
-                            foregroundColor: Colors.black87,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: isMobile ? 24 : 32,
-                              vertical: isMobile ? 16 : 20,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 6,
-                            shadowColor: Colors.black.withValues(alpha: 0.3),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.login, size: 20),
-                              const SizedBox(width: 12),
-                              Text(
-                                'Acessar App',
-                                style: TextStyle(
-                                  fontSize: isMobile ? 16 : 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(width: 16),
-                        OutlinedButton(
-                          onPressed: () {
                             showDialog<void>(
                               context: context,
-                              builder:
-                                  (context) => const NotificationFormDialog(),
+                              builder: (context) => const NotificationFormDialog(),
                             );
                           },
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            side: const BorderSide(
-                              color: Colors.white,
-                              width: 2,
-                            ),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: isMobile ? 24 : 32,
-                              vertical: isMobile ? 16 : 20,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.orange[700],
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 24,
                             ),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(16),
                             ),
+                            elevation: 0,
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.notifications, size: 20),
-                              const SizedBox(width: 12),
-                              Text(
-                                'Ser Notificado',
-                                style: TextStyle(
-                                  fontSize: isMobile ? 16 : 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                          child: const Text(
+                            'Começar Agora',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],

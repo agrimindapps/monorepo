@@ -111,7 +111,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               errorText:
                   fieldErrors['wateringInterval'], // Show validation error
             ),
-
             const SizedBox(height: 20),
             _buildCareSection(
               title: 'Adubo',
@@ -132,7 +131,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               errorText:
                   fieldErrors['fertilizingInterval'], // Show validation error
             ),
-
             const SizedBox(height: 20),
             _buildCareSection(
               title: 'Luz solar',
@@ -151,7 +149,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               onDateChanged: (date) =>
                   formNotifier.setSunlightConfig(lastDate: date),
             ),
-
             const SizedBox(height: 20),
             _buildCareSection(
               title: 'Verificação de pragas',
@@ -170,7 +167,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               onDateChanged: (date) =>
                   formNotifier.setPestInspectionConfig(lastDate: date),
             ),
-
             const SizedBox(height: 20),
             _buildCareSection(
               title: 'Poda',
@@ -191,7 +187,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               errorText:
                   fieldErrors['pruningInterval'], // Show validation error
             ),
-
             const SizedBox(height: 20),
             _buildCareSection(
               title: 'Replantio',
@@ -230,7 +225,9 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
   }) {
     final theme = Theme.of(context);
 
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.brightness == Brightness.dark
@@ -239,18 +236,20 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: errorText != null
-              ? theme
-                    .colorScheme
-                    .error // Show error border
+              ? theme.colorScheme.error // Show error border
               : (isEnabled
-                    ? iconColor.withValues(alpha: 0.3)
-                    : Colors.grey[300]!),
-          width: 1.5,
+                  ? iconColor.withValues(
+                      alpha: 0.5,
+                    ) // Stronger border when enabled
+                  : Colors.grey[300]!),
+          width: isEnabled ? 2.0 : 1.5, // Thicker border when enabled
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
+            color: isEnabled
+                ? iconColor.withValues(alpha: 0.1)
+                : Colors.black.withValues(alpha: 0.05),
+            blurRadius: isEnabled ? 12 : 8,
             offset: const Offset(0, 2),
           ),
         ],
@@ -277,41 +276,53 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
                   ),
                 ),
               ),
-              Switch(value: isEnabled, onChanged: onToggle),
+              Switch(
+                value: isEnabled,
+                onChanged: onToggle,
+                activeTrackColor: iconColor,
+              ),
             ],
           ),
-          if (isEnabled) ...[
-            const SizedBox(height: 16),
-            _buildExpandedContent(
-              interval: interval,
-              onIntervalChanged: onIntervalChanged,
-              lastDate: lastDate,
-              onDateChanged: onDateChanged,
-              iconColor: iconColor,
-            ),
-          ],
-          if (errorText != null) ...[
-            const SizedBox(height: 8),
-            Row(
+          AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            child: Column(
               children: [
-                Icon(
-                  Icons.error_outline,
-                  color: theme.colorScheme.error,
-                  size: 16,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    errorText,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.error,
-                      fontWeight: FontWeight.w500,
-                    ),
+                if (isEnabled) ...[
+                  const SizedBox(height: 16),
+                  _buildExpandedContent(
+                    interval: interval,
+                    onIntervalChanged: onIntervalChanged,
+                    lastDate: lastDate,
+                    onDateChanged: onDateChanged,
+                    iconColor: iconColor,
                   ),
-                ),
+                ],
+                if (errorText != null) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        color: theme.colorScheme.error,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          errorText,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.error,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
-          ],
+          ),
         ],
       ),
     );
@@ -332,7 +343,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
           onChanged: onIntervalChanged,
           iconColor: iconColor,
         ),
-
         const SizedBox(height: 12),
         _buildDateSelector(
           label: 'Última vez',
@@ -419,45 +429,74 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: iconColor.withValues(alpha: 0.2), width: 1),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.calendar_today, color: iconColor, size: 16),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: () => _showDatePicker(value, onChanged),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: iconColor.withValues(alpha: 0.3),
-                  width: 1,
+          Row(
+            children: [
+              Icon(Icons.calendar_today, color: iconColor, size: 16),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    value != null ? _formatDate(value) : 'Hoje',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: iconColor,
+              const Spacer(),
+              GestureDetector(
+                onTap: () => _showDatePicker(value, onChanged),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: iconColor.withValues(alpha: 0.3),
+                      width: 1,
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  Icon(Icons.calendar_today, color: iconColor, size: 14),
-                ],
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        value != null ? _formatDate(value) : 'Hoje',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: iconColor,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(Icons.edit_calendar, color: iconColor, size: 14),
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              _buildQuickDateChip(
+                label: 'Hoje',
+                date: DateTime.now(),
+                selectedDate: value,
+                onSelected: onChanged,
+                color: iconColor,
+              ),
+              const SizedBox(width: 8),
+              _buildQuickDateChip(
+                label: 'Ontem',
+                date: DateTime.now().subtract(const Duration(days: 1)),
+                selectedDate: value,
+                onSelected: onChanged,
+                color: iconColor,
+              ),
+            ],
           ),
         ],
       ),
@@ -522,6 +561,44 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
     if (date != null) {
       onChanged(date);
     }
+  }
+
+  bool _isSameDay(DateTime? date1, DateTime? date2) {
+    if (date1 == null || date2 == null) return false;
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
+  }
+
+  Widget _buildQuickDateChip({
+    required String label,
+    required DateTime date,
+    required DateTime? selectedDate,
+    required ValueChanged<DateTime?> onSelected,
+    required Color color,
+  }) {
+    final isSelected = _isSameDay(selectedDate, date);
+    return GestureDetector(
+      onTap: () => onSelected(date),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: isSelected ? color : Colors.transparent,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(
+            color: isSelected ? color : color.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            color: isSelected ? Colors.white : color,
+          ),
+        ),
+      ),
+    );
   }
 
   String _formatDate(DateTime date) {

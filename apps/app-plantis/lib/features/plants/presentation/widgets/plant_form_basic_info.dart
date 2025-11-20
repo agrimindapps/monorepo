@@ -80,7 +80,6 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildImageSection(context),
-
         const SizedBox(height: 20),
         _buildBasicInfoForm(context),
       ],
@@ -114,16 +113,14 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color:
-            theme.brightness == Brightness.dark
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFFFFFFF), // Branco puro para modo claro
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2C2C2E)
+            : const Color(0xFFFFFFFF), // Branco puro para modo claro
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color:
-              theme.brightness == Brightness.dark
-                  ? theme.colorScheme.outline.withValues(alpha: 0.3)
-                  : const Color(0xFFE0E0E0),
+          color: theme.brightness == Brightness.dark
+              ? theme.colorScheme.outline.withValues(alpha: 0.3)
+              : const Color(0xFFE0E0E0),
         ),
       ),
       child: Column(
@@ -174,16 +171,14 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color:
-            theme.brightness == Brightness.dark
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFFFFFFF), // Branco puro para modo claro
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2C2C2E)
+            : const Color(0xFFFFFFFF), // Branco puro para modo claro
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color:
-              theme.brightness == Brightness.dark
-                  ? theme.colorScheme.outline.withValues(alpha: 0.3)
-                  : const Color(0xFFE0E0E0),
+          color: theme.brightness == Brightness.dark
+              ? theme.colorScheme.outline.withValues(alpha: 0.3)
+              : const Color(0xFFE0E0E0),
         ),
       ),
       child: InkWell(
@@ -330,18 +325,16 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
         decoration: BoxDecoration(
-          color:
-              isDisabled
-                  ? theme.colorScheme.surfaceContainerHighest.withValues(
-                    alpha: 0.3,
-                  )
-                  : theme.colorScheme.primaryContainer.withValues(alpha: 0.1),
+          color: isDisabled
+              ? theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.3,
+                )
+              : theme.colorScheme.primaryContainer.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color:
-                isDisabled
-                    ? theme.colorScheme.outline.withValues(alpha: 0.3)
-                    : theme.colorScheme.primary.withValues(alpha: 0.3),
+            color: isDisabled
+                ? theme.colorScheme.outline.withValues(alpha: 0.3)
+                : theme.colorScheme.primary.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -357,24 +350,22 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
               Icon(
                 icon,
                 size: 32,
-                color:
-                    isDisabled
-                        ? theme.colorScheme.onSurfaceVariant.withValues(
-                          alpha: 0.5,
-                        )
-                        : theme.colorScheme.primary,
+                color: isDisabled
+                    ? theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.5,
+                      )
+                    : theme.colorScheme.primary,
               ),
             const SizedBox(height: 12),
             Text(
               formState.isUploadingImages ? 'Enviando...' : label,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color:
-                    isDisabled
-                        ? theme.colorScheme.onSurfaceVariant.withValues(
-                          alpha: 0.5,
-                        )
-                        : theme.colorScheme.primary,
+                color: isDisabled
+                    ? theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.5,
+                      )
+                    : theme.colorScheme.primary,
               ),
             ),
           ],
@@ -390,27 +381,26 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
   ) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Remover Imagem'),
-            content: const Text('Deseja remover esta imagem?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () {
-                  formNotifier.removeImage(index);
-                  Navigator.of(context).pop();
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: Theme.of(context).colorScheme.error,
-                ),
-                child: const Text('Remover'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Remover Imagem'),
+        content: const Text('Deseja remover esta imagem?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
           ),
+          TextButton(
+            onPressed: () {
+              formNotifier.removeImage(index);
+              Navigator.of(context).pop();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Remover'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -428,19 +418,19 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
           label: 'Nome da planta',
           hint: 'Ex: Minha Rosa Vermelha',
           isRequired: true,
+          autofocus: true,
           errorText: fieldErrors['name'],
           onChanged: (value) {
             formNotifier.setName(value);
           },
           validator: (value) => _validatePlantName(value),
           prefixIcon: Icon(
-            Icons.local_florist,
+            Icons.local_florist_outlined,
             color: theme.colorScheme.primary,
             size: 20,
           ),
         ),
-
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         _buildTextField(
           controller: _speciesController,
           label: 'Espécie',
@@ -450,34 +440,31 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
           },
           validator: (value) => _validateSpecies(value),
           prefixIcon: Icon(
-            Icons.science,
+            Icons.spa_outlined,
             color: theme.colorScheme.primary,
             size: 20,
           ),
         ),
-
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         SpaceSelectorWidget(
           selectedSpaceId: formState.spaceId,
-          onSpaceChanged:
-              (spaceId) => _handleSpaceSelection(formNotifier, spaceId),
+          onSpaceChanged: (spaceId) =>
+              _handleSpaceSelection(formNotifier, spaceId),
           errorText: fieldErrors['space'],
         ),
-
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         _buildDateField(
           context: context,
           label: 'Data de plantio',
           value: formState.plantingDate,
           onChanged: formNotifier.setPlantingDate,
           prefixIcon: Icon(
-            Icons.event,
+            Icons.calendar_today_outlined,
             color: theme.colorScheme.primary,
             size: 20,
           ),
         ),
-
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         _buildTextField(
           controller: _notesController,
           label: 'Observações',
@@ -487,10 +474,17 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
             formNotifier.setNotes(value);
           },
           validator: (value) => _validateNotes(value),
-          prefixIcon: Icon(
-            Icons.note,
-            color: theme.colorScheme.primary,
-            size: 20,
+          prefixIcon: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Icon(
+                Icons.notes_outlined,
+                color: theme.colorScheme.primary,
+                size: 20,
+              ),
+            ],
           ),
         ),
       ],
@@ -505,6 +499,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     Widget? prefixIcon,
     String? errorText,
     bool isRequired = false,
+    bool autofocus = false,
     int maxLines = 1,
     String? Function(String?)? validator,
   }) {
@@ -526,6 +521,8 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
           maxLines: maxLines,
           onChanged: onChanged,
           validator: validator,
+          autofocus: autofocus,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: theme.textTheme.bodyMedium?.copyWith(
@@ -639,10 +636,9 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
                         ? _formatDate(value)
                         : 'Selecionar data (opcional)',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color:
-                          value != null
-                              ? theme.colorScheme.onSurface
-                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: value != null
+                          ? theme.colorScheme.onSurface
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -803,16 +799,14 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color:
-            theme.brightness == Brightness.dark
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFFFFFFF),
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2C2C2E)
+            : const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color:
-              theme.brightness == Brightness.dark
-                  ? theme.colorScheme.outline.withValues(alpha: 0.3)
-                  : const Color(0xFFE0E0E0),
+          color: theme.brightness == Brightness.dark
+              ? theme.colorScheme.outline.withValues(alpha: 0.3)
+              : const Color(0xFFE0E0E0),
         ),
       ),
       child: Column(
@@ -894,11 +888,10 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
             child: Center(
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                value:
-                    loadingProgress.expectedTotalBytes != null
-                        ? loadingProgress.cumulativeBytesLoaded /
-                            loadingProgress.expectedTotalBytes!
-                        : null,
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
               ),
             ),
           );

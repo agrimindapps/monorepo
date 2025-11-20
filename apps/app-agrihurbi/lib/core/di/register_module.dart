@@ -1,8 +1,13 @@
 import 'package:core/core.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Module for registering external dependencies from core package
 @module
 abstract class RegisterModule {
+  @lazySingleton
+  Dio get dio => Dio();
+
   @lazySingleton
   IAnalyticsRepository get analyticsRepository => FirebaseAnalyticsService();
 
@@ -27,6 +32,22 @@ abstract class RegisterModule {
   @lazySingleton
   IAuthRepository get authRepository => FirebaseAuthService();
 
-  // @lazySingleton
-  // IDriftManager get driftManager => DriftManager.instance;
+  @preResolve
+  Future<SharedPreferences> get sharedPreferences =>
+      SharedPreferences.getInstance();
+
+  @lazySingleton
+  Connectivity get connectivity => Connectivity();
+
+  @lazySingleton
+  FlutterSecureStorage get secureStorage => const FlutterSecureStorage();
+
+  @lazySingleton
+  RevenueCatService get revenueCatService => RevenueCatService();
+
+  @lazySingleton
+  EnhancedAccountDeletionService get accountDeletionService =>
+      EnhancedAccountDeletionService(authRepository: FirebaseAuthService());
+
+  // Drift Database é registrado no DriftModule
 }

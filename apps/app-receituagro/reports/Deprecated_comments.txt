@@ -1,0 +1,36 @@
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/repositories.dart:20:// Compatibility layer para migração (DEPRECATED)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/mixins/premium_status_listener.dart:4:/// DEPRECATED: Use ConsumerStatefulWidget with Riverpod instead
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/mixins/premium_status_listener.dart:20:  /// DEPRECATED: Use ref.listen with Riverpod instead
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/data/repositories/user_data_repository.dart:5:// DEPRECATED: import '../../../core/utils/box_manager.dart';
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/data/repositories/user_data_repository.dart:53:  /// DEPRECATED: Use Firebase or Drift for persistence
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/data/repositories/user_data_repository.dart:60:  /// DEPRECATED: Use Firebase or Drift for persistence
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/data/repositories/user_data_repository.dart:93:  /// DEPRECATED: Use Firebase or Drift for persistence
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/data/repositories/user_data_repository.dart:100:  /// DEPRECATED: Use Firebase or Drift for persistence
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/data/repositories/user_data_repository.dart:418:  /// DEPRECATED: Use Firebase or Drift for persistence
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/data/repositories/user_data_repository.dart:425:  /// DEPRECATED: Use Firebase or Drift for persistence
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/data/models/app_settings_model.dart:1:// DEPRECATED: Legacy model - migrate to Drift AppSettings table
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/data_integrity_service.dart:74:/// DEPRECATED: Service removed
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/data_integrity_service.dart:87:  /// DEPRECATED: Returns empty report. Reimplement with Drift.
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/data_integrity_service.dart:99:  /// DEPRECATED: Returns empty list. Reimplement with Drift.
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/data_integrity_service.dart:106:  /// DEPRECATED: Returns empty list. Reimplement with Drift.
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/premium_service.dart:136:  /// DEPRECATED: Use constructor injection via DI container instead
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/premium_service.dart:152:  /// DEPRECATED: Use constructor injection instead
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/premium_status_notifier.dart:70:/// DEPRECATED: Use Riverpod provider directly instead
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/index.dart:12:// export 'presentation/providers/favoritos_provider_simplified.dart'; // DEPRECATED - usar Riverpod FavoritosNotifier
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/favoritos_di.dart:6:// import 'presentation/providers/favoritos_provider_simplified.dart'; // DEPRECATED: Migrando para Riverpod
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/favoritos_di.dart:70:    // Provider (DEPRECATED - usar FavoritosNotifier do Riverpod)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/favoritos_di.dart:81:      // _getIt.unregister<FavoritosProviderSimplified>(); // DEPRECATED
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/favoritos_di.dart:102:  // FavoritosProviderSimplified get favoritosProvider => get<FavoritosProviderSimplified>(); // DEPRECATED - usar Riverpod
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/data/services/favoritos_sync_service.dart:72:      'DEPRECATED: syncOperation chamado. O sistema agora usa Offline-First via Drift.',
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/domain/entities/diagnostico_entity.dart:45:  /// ⚠️ DEPRECATED: Usar DiagnosticoEntityResolver para obter nomes atualizados
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/presentation/providers/diagnosticos_notifier.dart:25:/// REFACTORING: Este notifier foi DEPRECATED em favor de 5 notifiers especializados:
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/presentation/providers/diagnosticos_notifier.g.dart:19:/// REFACTORING: Este notifier foi DEPRECATED em favor de 5 notifiers especializados:
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/release/production_release_dashboard.dart:3:/// DEPRECATED: ProductionReleaseDashboard foi removido
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/domain/usecases/get_culturas_usecase.dart:90:/// DEPRECATED - As classes abaixo foram consolidadas na classe GetCulturasUseCase
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/domain/usecases/get_culturas_usecase.dart:94:/// Use case para buscar todas as culturas [DEPRECATED]
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/domain/usecases/get_culturas_usecase.dart:110:/// Use case para buscar culturas por grupo [DEPRECATED]
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/domain/usecases/get_culturas_usecase.dart:127:/// Use case para pesquisar culturas [DEPRECATED]
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/domain/usecases/get_culturas_usecase.dart:146:/// Use case para buscar grupos de culturas [DEPRECATED]
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/comentarios/domain/repositories/i_comentarios_repository.dart:6:/// **DEPRECATED**: This interface combines read and write operations for backward compatibility.
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:72:// DEPRECATED: Usecases antigos mantidos para compatibilidade
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:23:/// 🔄 DEPRECATED: Use ReceitaAgroAnalyticsEvent instead

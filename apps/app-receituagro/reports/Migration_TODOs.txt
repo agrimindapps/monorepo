@@ -1,0 +1,3 @@
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/presentation/providers/detalhe_praga_notifier.dart:27:  // MIGRATION TODO: Replace legacy Hive types with Drift types
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/presentation/providers/detalhe_praga_notifier.dart:102:  // MIGRATION TODO: Praga Drift model uses 'idPraga' not 'idReg'
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/presentation/providers/detalhe_praga_notifier.dart:325:  /// MIGRATION TODO: Reimplement with Drift-based repository queries

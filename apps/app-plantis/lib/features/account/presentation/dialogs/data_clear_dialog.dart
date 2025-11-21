@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/services/data_cleaner_service.dart';
 import '../../../../core/services/data_sanitization_service.dart';
+import '../../../../core/services/services_providers.dart';
 import '../utils/text_formatters.dart';
 
 /// Dialog stateful para confirmação de limpeza de dados
-class DataClearDialog extends StatefulWidget {
+class DataClearDialog extends ConsumerStatefulWidget {
   const DataClearDialog({super.key});
 
   @override
-  State<DataClearDialog> createState() => _DataClearDialogState();
+  ConsumerState<DataClearDialog> createState() => _DataClearDialogState();
 }
 
-class _DataClearDialogState extends State<DataClearDialog> {
+class _DataClearDialogState extends ConsumerState<DataClearDialog> {
   final TextEditingController _confirmationController = TextEditingController();
   bool _isConfirmationValid = false;
   bool _isLoading = false;
@@ -171,7 +172,7 @@ class _DataClearDialogState extends State<DataClearDialog> {
 
                   try {
                     final dataCleanerService =
-                        GetIt.instance<DataCleanerService>();
+                        ref.read(dataCleanerServiceProvider);
                     final result = await dataCleanerService
                         .clearUserContentOnly();
 

@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide Column, getIt;
 
 import '../../domain/entities/plant.dart';
 import '../../domain/repositories/plants_repository.dart';
+import '../providers/plants_providers.dart';
 
 part 'plants_list_notifier.g.dart';
 
@@ -300,8 +301,4 @@ class PlantsListNotifier extends _$PlantsListNotifier {
     final currentState = state.valueOrNull ?? const PlantsListState();
     state = AsyncValue.data(currentState.copyWith(errorMessage: null));
   }
-}
-@riverpod
-PlantsRepository plantsRepository(Ref ref) {
-  return GetIt.instance<PlantsRepository>();
 }

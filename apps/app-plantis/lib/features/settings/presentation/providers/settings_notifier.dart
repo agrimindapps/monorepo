@@ -1,9 +1,12 @@
-import 'package:core/core.dart' hide Column, getIt;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../../../core/services/plantis_notification_service.dart';
+import '../../../../core/services/services_providers.dart';
+import '../../data/datasources/settings_local_datasource.dart';
+import '../../data/repositories/settings_repository.dart';
 import '../../domain/entities/settings_entity.dart';
 import '../../domain/repositories/i_settings_repository.dart';
 
@@ -113,15 +116,22 @@ class SettingsState {
 }
 
 @riverpod
-ISettingsRepository settingsRepository(SettingsRepositoryRef ref) {
-  return getIt<ISettingsRepository>();
+Future<SettingsLocalDataSource> settingsLocalDataSource(SettingsLocalDataSourceRef ref) async {
+  final prefs = await ref.watch(sharedPreferencesProvider.future);
+  return SettingsLocalDataSource(prefs: prefs);
+}
+
+@riverpod
+Future<ISettingsRepository> settingsRepository(SettingsRepositoryRef ref) async {
+  final localDataSource = await ref.watch(settingsLocalDataSourceProvider.future);
+  return SettingsRepository(localDataSource: localDataSource);
 }
 
 @riverpod
 PlantisNotificationService plantisNotificationService(
   PlantisNotificationServiceRef ref,
 ) {
-  return getIt<PlantisNotificationService>();
+  return PlantisNotificationService();
 }
 
 @riverpod
@@ -131,7 +141,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   @override
   Future<SettingsState> build() async {
-    _settingsRepository = ref.read(settingsRepositoryProvider);
+    _settingsRepository = await ref.watch(settingsRepositoryProvider.future);
     _notificationService = ref.read(plantisNotificationServiceProvider);
     return await _initialize();
   }

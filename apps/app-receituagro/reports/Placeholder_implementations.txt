@@ -1,0 +1,15 @@
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/error_handler_service.dart:171:  /// Report error to external service (placeholder for crash reporting)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/widgets/optimized_praga_image_widget.dart:21:  final Widget? placeholder;
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/widgets/optimized_praga_image_widget.dart:32:    this.placeholder,
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/widgets/optimized_praga_image_widget.dart:116:  /// Widget de placeholder otimizado
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/widgets/optimized_praga_image_widget.dart:118:    if (widget.placeholder != null) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/widgets/optimized_praga_image_widget.dart:119:      return widget.placeholder!;
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/widgets/praga_image_widget.dart:11:  final Widget? placeholder;
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/widgets/praga_image_widget.dart:21:    this.placeholder,
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/widgets/praga_image_widget.dart:59:  /// Widget de placeholder padrão
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/widgets/praga_image_widget.dart:127:                      : widget.placeholder ?? _buildDefaultPlaceholder(),
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/widgets/praga_image_widget.dart:157:              : widget.placeholder ?? _buildDefaultPlaceholder(),
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/widgets/sections/support_section.dart:66:      // ✅ FIXED: Usar AppRatingService do core package ao invés de placeholder
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/widgets/subscription_financial_details_card.dart:162:  /// Obter método de pagamento (placeholder)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/comentarios/constants/comentarios_strings.dart:213:  /// Search field placeholder
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/presentation/widgets/detalhe/diagnosticos_defensivos_components/dialog_widget.dart:364:                placeholder: ColoredBox(

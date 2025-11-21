@@ -129,7 +129,19 @@ O aplicativo utiliza Clean Architecture e Riverpod, mas a implementação da Inj
 - **Ações Realizadas**:
   - Atualizado `pragas_cultura_providers.dart` para usar `@riverpod` annotation e remover uso direto de `GetIt.instance`.
 
+### 16. UI/Widgets (✅ Concluído)
+- **Status**: Refatorado para usar `ConsumerWidget` e `ConsumerStatefulWidget`.
+- **Ações Realizadas**:
+  - Refatorado `ListaCulturasPage` para usar `ref.read` e `ConsumerStatefulWidget`.
+  - Refatorado `HomeDefensivosPage` para usar `ref.read` para navegação.
+  - Refatorado `DetalheDefensivoPage` para usar `ref.read` para repositórios e navegação.
+  - Refatorado `DetalhePragaPage` para usar `ref.read` para navegação.
+  - Refatorado `SettingsPage` para usar `ref.read` para serviços de dispositivo.
+  - Refatorado `ProfilePage` para usar `ref.read` para analytics, sync e data cleaner.
+  - Refatorado `ModernHeaderWidget` para usar `ConsumerWidget` e `ref.read` para navegação.
+  - Criados/Atualizados providers em `core_providers.dart`, `navigation_providers.dart`, `settings_providers.dart` e `analytics_providers.dart` para suportar a injeção via Riverpod.
+
 ## Conclusão Geral
 Todas as features do `app-receituagro` foram analisadas e refatoradas para remover o uso direto de `GetIt` (Service Locator) dentro dos Notifiers e Widgets, adotando o padrão de **Bridge Providers** com Riverpod. Isso melhora a testabilidade, desacopla o código e prepara o terreno para uma migração completa para Riverpod no futuro (onde os providers do Core também serão Riverpod).
 
-O projeto agora segue consistentemente o padrão de injeção de dependência via Riverpod na camada de apresentação.
+O projeto agora segue consistentemente o padrão de injeção de dependência via Riverpod na camada de apresentação e na camada de UI.

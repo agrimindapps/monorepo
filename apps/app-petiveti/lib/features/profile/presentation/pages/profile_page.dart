@@ -1,10 +1,9 @@
 import 'package:core/core.dart' hide User, AuthState, AuthStatus, Column;
 import 'package:flutter/material.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../shared/constants/profile_constants.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../services/profile_actions_service.dart';
+import '../providers/profile_providers.dart';
 import '../widgets/profile_state_handlers.dart';
 
 /// Profile page widget for displaying user information and settings
@@ -15,10 +14,6 @@ import '../widgets/profile_state_handlers.dart';
 /// - **Open/Closed**: Business logic extracted to service
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
-
-  // Lazy initialization of service
-  ProfileActionsService get _actionsService =>
-      di.getIt<ProfileActionsService>();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,6 +43,9 @@ class ProfilePage extends ConsumerWidget {
         onSignIn: () => context.push('/login'),
       );
     }
+    
+    final actionsService = ref.read(profileActionsServiceProvider);
+    
     return Semantics(
       label: 'Página de perfil do usuário',
       hint: 'Visualize e gerencie suas informações de perfil e configurações',
@@ -77,25 +75,25 @@ class ProfilePage extends ConsumerWidget {
                 context,
                 'Notificações',
                 Icons.notifications,
-                () => _actionsService.showNotificationsSettings(context),
+                () => actionsService.showNotificationsSettings(context),
               ),
               _buildMenuItem(
                 context,
                 'Tema',
                 Icons.palette,
-                () => _actionsService.showThemeSettings(context),
+                () => actionsService.showThemeSettings(context),
               ),
               _buildMenuItem(
                 context,
                 'Idioma',
                 Icons.language,
-                () => _actionsService.showLanguageSettings(context),
+                () => actionsService.showLanguageSettings(context),
               ),
               _buildMenuItem(
                 context,
                 'Backup e Sincronização',
                 Icons.cloud_sync,
-                () => _actionsService.showBackupSettings(context),
+                () => actionsService.showBackupSettings(context),
               ),
             ]),
             const SizedBox(height: 24),
@@ -104,19 +102,19 @@ class ProfilePage extends ConsumerWidget {
                 context,
                 'Central de Ajuda',
                 Icons.help,
-                () => _actionsService.showHelp(context),
+                () => actionsService.showHelp(context),
               ),
               _buildMenuItem(
                 context,
                 'Contatar Suporte',
                 Icons.support_agent,
-                () => _actionsService.contactSupport(context),
+                () => actionsService.contactSupport(context),
               ),
               _buildMenuItem(
                 context,
                 'Sobre o App',
                 Icons.info,
-                () => _actionsService.showAbout(context),
+                () => actionsService.showAbout(context),
               ),
             ]),
             const SizedBox(height: 32),
@@ -229,7 +227,7 @@ class ProfilePage extends ConsumerWidget {
   }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
-    _actionsService.showLogoutDialog(
+    ref.read(profileActionsServiceProvider).showLogoutDialog(
       context: context,
       onConfirm: () {
         ref.read(authProvider.notifier).signOut();

@@ -18,6 +18,8 @@ export '../../domain/services/plants_care_service.dart' show CareStatus;
 export '../../domain/services/plants_sort_service.dart' show SortBy, ViewMode;
 export 'plants_state.dart';
 
+import 'plants_providers.dart';
+
 part 'plants_notifier.g.dart';
 
 /// Plants Notifier refactored with specialized services
@@ -526,32 +528,3 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 }
 
-@riverpod
-GetPlantsUseCase getPlantsUseCase(Ref ref) {
-  return GetIt.instance<GetPlantsUseCase>();
-}
-
-@riverpod
-GetPlantByIdUseCase getPlantByIdUseCase(Ref ref) {
-  return GetIt.instance<GetPlantByIdUseCase>();
-}
-
-@riverpod
-SearchPlantsUseCase searchPlantsUseCase(Ref ref) {
-  return GetIt.instance<SearchPlantsUseCase>();
-}
-
-@riverpod
-AddPlantUseCase addPlantUseCase(Ref ref) {
-  return GetIt.instance<AddPlantUseCase>();
-}
-
-@riverpod
-UpdatePlantUseCase updatePlantUseCase(Ref ref) {
-  return GetIt.instance<UpdatePlantUseCase>();
-}
-
-@riverpod
-DeletePlantUseCase deletePlantUseCase(Ref ref) {
-  return GetIt.instance<DeletePlantUseCase>();
-}

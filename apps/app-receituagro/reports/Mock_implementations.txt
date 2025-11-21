@@ -1,0 +1,41 @@
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/di/injection_container.dart:37:import '../services/mock_premium_service.dart';
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/constants/receituagro_environment_config.dart:11:  /// Flag para usar mock data em analytics (apenas para desenvolvimento)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/premium_service.dart:193:          '✅ Premium Service initialized (web mock mode)',
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/mock_premium_service.dart:166:    // Mock navigation - no-op in mock
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/widgets/sync_status_indicator_widget.dart:92:  /// Initialize mock sync state for demonstration
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/domain/usecases/update_user_settings_usecase.dart:166:  /// Check subscription status (mock implementation)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/domain/usecases/update_user_settings_usecase.dart:171:  /// Notify theme change (mock implementation)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/domain/usecases/update_user_settings_usecase.dart:175:  /// Disable analytics (mock implementation)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/domain/usecases/update_user_settings_usecase.dart:179:  /// Disable notifications (mock implementation)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/domain/usecases/update_user_settings_usecase.dart:183:  /// Initialize speech recognition (mock implementation)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/notifiers/notifications_notifier.dart:32:/// - Easy to mock and test
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/notifiers/analytics_debug_notifier.dart:23:/// - Allows for easy mocking and testing
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/notifiers/analytics_debug_notifier.g.dart:24:/// - Allows for easy mocking and testing
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/notifiers/notifications_notifier.g.dart:29:/// - Easy to mock and test
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/widgets/sections/user_profile_section.dart:344:  /// Get user email (mock)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/data/factories/favorito_entity_factory_registry.dart:13:/// - Easy to test (can mock registry)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/comentarios/examples/interface_segregation_example.dart:111:// Read-only test - only mock read operations
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/comentarios/examples/interface_segregation_example.dart:116:  final mockReadRepo = MockComentariosReadRepository();
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/comentarios/examples/interface_segregation_example.dart:117:  final service = ComentariosListService(mockReadRepo);
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/comentarios/examples/interface_segregation_example.dart:119:  when(() => mockReadRepo.getAllComentarios())
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/comentarios/examples/interface_segregation_example.dart:125:  verify(() => mockReadRepo.getAllComentarios()).called(1);
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/comentarios/examples/interface_segregation_example.dart:126:  // No need to mock write operations!
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/comentarios/domain/repositories/i_comentarios_repository.dart:16:/// - Easier to mock in tests
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/presentation/providers/diagnosticos_praga_notifier.dart:331:  /// Obtém dados do defensivo por nome (mock implementation)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/presentation/widgets/detalhe/diagnosticos_defensivos_components/dialog_widget.dart:251:  /// Cabeçalho moderno baseado no mockup
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/presentation/widgets/defensivo_item_widget.dart:82:    const color = Color(0xFF4CAF50); // Verde padrão como no mockup
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:7:/// This service returns mock/fake data for development purposes when
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:15:/// To disable mock data:
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:173:  /// Helper method para verificar se deve usar mock data
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:194:      final mockStatus = _useMockData ? '(MOCK DATA)' : '(REAL DATA)';
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:195:      print('📊 Analytics Dashboard Service initialized $mockStatus');
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:207:  /// ⚠️ Returns mock data when DEBUG_ANALYTICS_MOCK_DATA is true
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:214:    // Alertar se usando mock data
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:365:      final mockSubscriptionData = <Map<String, dynamic>>[];
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:369:          mockSubscriptionData,
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:372:          mockSubscriptionData,
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:375:          mockSubscriptionData,
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:378:          mockSubscriptionData,
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:380:        churnRate: _calculationService.calculateChurnRate(mockSubscriptionData),
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:382:          mockSubscriptionData,
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:110:  /// Get mock funnel data for a specific step

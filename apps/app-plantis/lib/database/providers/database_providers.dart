@@ -1,5 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../plantis_database.dart';
+import '../repositories/tasks_drift_repository.dart';
+import '../repositories/plants_drift_repository.dart';
+import '../repositories/plant_tasks_drift_repository.dart';
+import '../repositories/spaces_drift_repository.dart';
 
 part 'database_providers.g.dart';
 
@@ -136,4 +140,32 @@ Future<PlantConfig?> plantConfig(
 }) async {
   final db = ref.watch(plantisDatabaseProvider);
   return db.getPlantConfig(plantId);
+}
+
+// ============================================================================
+// REPOSITORY PROVIDERS
+// ============================================================================
+
+@riverpod
+TasksDriftRepository tasksDriftRepository(TasksDriftRepositoryRef ref) {
+  final db = ref.watch(plantisDatabaseProvider);
+  return TasksDriftRepository(db);
+}
+
+@riverpod
+PlantsDriftRepository plantsDriftRepository(PlantsDriftRepositoryRef ref) {
+  final db = ref.watch(plantisDatabaseProvider);
+  return PlantsDriftRepository(db);
+}
+
+@riverpod
+PlantTasksDriftRepository plantTasksDriftRepository(PlantTasksDriftRepositoryRef ref) {
+  final db = ref.watch(plantisDatabaseProvider);
+  return PlantTasksDriftRepository(db);
+}
+
+@riverpod
+SpacesDriftRepository spacesDriftRepository(SpacesDriftRepositoryRef ref) {
+  final db = ref.watch(plantisDatabaseProvider);
+  return SpacesDriftRepository(db);
 }

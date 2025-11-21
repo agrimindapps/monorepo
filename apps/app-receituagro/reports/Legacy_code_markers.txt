@@ -1,0 +1,2 @@
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/fitossanitarios_repository.dart:133:  // MÉTODOS DE COMPATIBILIDADE LEGACY
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/pragas_repository.dart:85:  // MÉTODOS DE COMPATIBILIDADE LEGACY

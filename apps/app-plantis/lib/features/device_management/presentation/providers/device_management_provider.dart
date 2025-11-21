@@ -14,6 +14,7 @@ import 'package:core/core.dart'
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../data/models/device_model.dart';
@@ -21,6 +22,7 @@ import '../../domain/usecases/get_device_statistics_usecase.dart';
 import '../../domain/usecases/get_user_devices_usecase.dart';
 import '../../domain/usecases/revoke_device_usecase.dart';
 import '../../domain/usecases/validate_device_usecase.dart';
+import 'device_management_providers.dart';
 
 part 'device_management_provider.freezed.dart';
 part 'device_management_provider.g.dart';
@@ -100,16 +102,12 @@ class DeviceManagementState with _$DeviceManagementState {
 /// Provider para gerenciar estado de dispositivos no app-plantis
 @riverpod
 class DeviceManagementNotifier extends _$DeviceManagementNotifier {
-  GetUserDevicesUseCase get _getUserDevicesUseCase =>
-      ref.read(getUserDevicesUseCaseProvider);
-  ValidateDeviceUseCase get _validateDeviceUseCase =>
-      ref.read(validateDeviceUseCaseProvider);
-  RevokeDeviceUseCase get _revokeDeviceUseCase =>
-      ref.read(revokeDeviceUseCaseProvider);
-  RevokeAllOtherDevicesUseCase get _revokeAllOtherDevicesUseCase =>
-      ref.read(revokeAllOtherDevicesUseCaseProvider);
-  GetDeviceStatisticsUseCase get _getDeviceStatisticsUseCase =>
-      ref.read(getDeviceStatisticsUseCaseProvider);
+  late final GetUserDevicesUseCase _getUserDevicesUseCase;
+  late final ValidateDeviceUseCase _validateDeviceUseCase;
+  late final RevokeDeviceUseCase _revokeDeviceUseCase;
+  late final RevokeAllOtherDevicesUseCase _revokeAllOtherDevicesUseCase;
+  late final GetDeviceStatisticsUseCase _getDeviceStatisticsUseCase;
+  
   AuthStateNotifier get _authStateNotifier => ref.read(authStateNotifierProvider);
 
   StreamSubscription<UserEntity?>? _userSubscription;
@@ -129,15 +127,25 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
   }
 
   /// Inicializa o provider
-  void _initializeProvider() {
+  Future<void> _initializeProvider() async {
     if (kDebugMode) {
       debugPrint('🔐 DeviceProvider: Initializing');
     }
 
-    _userSubscription = _authStateNotifier.userStream.listen(_onUserChanged);
+    try {
+      _getUserDevicesUseCase = await ref.read(getUserDevicesUseCaseProvider.future);
+      _validateDeviceUseCase = await ref.read(validateDeviceUseCaseProvider.future);
+      _revokeDeviceUseCase = await ref.read(revokeDeviceUseCaseProvider.future);
+      _revokeAllOtherDevicesUseCase = await ref.read(revokeAllOtherDevicesUseCaseProvider.future);
+      _getDeviceStatisticsUseCase = await ref.read(getDeviceStatisticsUseCaseProvider.future);
 
-    if (_authStateNotifier.isAuthenticated) {
-      _initializeDeviceManagement();
+      _userSubscription = _authStateNotifier.userStream.listen(_onUserChanged);
+
+      if (_authStateNotifier.isAuthenticated) {
+        _initializeDeviceManagement();
+      }
+    } catch (e) {
+      state = state.copyWith(errorMessage: 'Erro ao carregar dependências: $e');
     }
   }
 
@@ -515,39 +523,4 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
   void _clearMessages() {
     state = state.copyWith(errorMessage: null, successMessage: null);
   }
-}
-
-// Dependency providers using GetIt
-@riverpod
-GetUserDevicesUseCase getUserDevicesUseCase(GetUserDevicesUseCaseRef ref) {
-  return GetIt.instance<GetUserDevicesUseCase>();
-}
-
-@riverpod
-ValidateDeviceUseCase validateDeviceUseCase(ValidateDeviceUseCaseRef ref) {
-  return GetIt.instance<ValidateDeviceUseCase>();
-}
-
-@riverpod
-RevokeDeviceUseCase revokeDeviceUseCase(RevokeDeviceUseCaseRef ref) {
-  return GetIt.instance<RevokeDeviceUseCase>();
-}
-
-@riverpod
-RevokeAllOtherDevicesUseCase revokeAllOtherDevicesUseCase(
-  RevokeAllOtherDevicesUseCaseRef ref,
-) {
-  return GetIt.instance<RevokeAllOtherDevicesUseCase>();
-}
-
-@riverpod
-GetDeviceStatisticsUseCase getDeviceStatisticsUseCase(
-  GetDeviceStatisticsUseCaseRef ref,
-) {
-  return GetIt.instance<GetDeviceStatisticsUseCase>();
-}
-
-@riverpod
-AuthStateNotifier authStateNotifier(AuthStateNotifierRef ref) {
-  return AuthStateNotifier.instance;
 }

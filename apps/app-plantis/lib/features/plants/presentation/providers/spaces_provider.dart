@@ -1,9 +1,91 @@
 import 'package:core/core.dart' hide Column;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/space.dart';
 import '../../domain/usecases/spaces_usecases.dart';
+import '../../data/datasources/local/spaces_local_datasource.dart';
+import '../../data/datasources/remote/spaces_remote_datasource.dart';
+import '../../data/repositories/spaces_repository_impl.dart';
+import '../../domain/repositories/spaces_repository.dart';
+
+import '../../../../core/auth/auth_providers.dart';
+import '../../../../core/services/services_providers.dart';
+import '../../../../database/providers/database_providers.dart';
 
 part 'spaces_provider.g.dart';
+
+// ============================================================================
+// Data Sources
+// ============================================================================
+
+@riverpod
+SpacesLocalDatasource spacesLocalDatasource(SpacesLocalDatasourceRef ref) {
+  final driftRepo = ref.watch(spacesDriftRepositoryProvider);
+  return SpacesLocalDatasourceImpl(driftRepo);
+}
+
+@riverpod
+SpacesRemoteDatasource spacesRemoteDatasource(SpacesRemoteDatasourceRef ref) {
+  final firestore = ref.watch(firebaseFirestoreProvider);
+  final rateLimiter = ref.watch(rateLimiterServiceProvider);
+  return SpacesRemoteDatasourceImpl(
+    firestore: firestore,
+    rateLimiter: rateLimiter,
+  );
+}
+
+// ============================================================================
+// Repository
+// ============================================================================
+
+@riverpod
+SpacesRepository spacesRepository(SpacesRepositoryRef ref) {
+  final localDatasource = ref.watch(spacesLocalDatasourceProvider);
+  final remoteDatasource = ref.watch(spacesRemoteDatasourceProvider);
+  final networkInfo = ref.watch(networkInfoProvider);
+  final authService = ref.watch(authRepositoryProvider);
+
+  return SpacesRepositoryImpl(
+    localDatasource: localDatasource,
+    remoteDatasource: remoteDatasource,
+    networkInfo: networkInfo,
+    authService: authService,
+  );
+}
+
+// ============================================================================
+// Use Cases
+// ============================================================================
+
+@riverpod
+GetSpacesUseCase getSpacesUseCase(GetSpacesUseCaseRef ref) {
+  final repository = ref.watch(spacesRepositoryProvider);
+  return GetSpacesUseCase(repository);
+}
+
+@riverpod
+GetSpaceByIdUseCase getSpaceByIdUseCase(GetSpaceByIdUseCaseRef ref) {
+  final repository = ref.watch(spacesRepositoryProvider);
+  return GetSpaceByIdUseCase(repository);
+}
+
+@riverpod
+AddSpaceUseCase addSpaceUseCase(AddSpaceUseCaseRef ref) {
+  final repository = ref.watch(spacesRepositoryProvider);
+  return AddSpaceUseCase(repository);
+}
+
+@riverpod
+UpdateSpaceUseCase updateSpaceUseCase(UpdateSpaceUseCaseRef ref) {
+  final repository = ref.watch(spacesRepositoryProvider);
+  return UpdateSpaceUseCase(repository);
+}
+
+@riverpod
+DeleteSpaceUseCase deleteSpaceUseCase(DeleteSpaceUseCaseRef ref) {
+  final repository = ref.watch(spacesRepositoryProvider);
+  return DeleteSpaceUseCase(repository);
+}
 
 /// Spaces State model for Riverpod
 class SpacesState {
@@ -322,31 +404,6 @@ class SpacesNotifier extends _$SpacesNotifier {
         return 'Erro inesperado';
     }
   }
-}
-
-@riverpod
-GetSpacesUseCase getSpacesUseCase(GetSpacesUseCaseRef ref) {
-  return GetIt.instance<GetSpacesUseCase>();
-}
-
-@riverpod
-GetSpaceByIdUseCase getSpaceByIdUseCase(GetSpaceByIdUseCaseRef ref) {
-  return GetIt.instance<GetSpaceByIdUseCase>();
-}
-
-@riverpod
-AddSpaceUseCase addSpaceUseCase(AddSpaceUseCaseRef ref) {
-  return GetIt.instance<AddSpaceUseCase>();
-}
-
-@riverpod
-UpdateSpaceUseCase updateSpaceUseCase(UpdateSpaceUseCaseRef ref) {
-  return GetIt.instance<UpdateSpaceUseCase>();
-}
-
-@riverpod
-DeleteSpaceUseCase deleteSpaceUseCase(DeleteSpaceUseCaseRef ref) {
-  return GetIt.instance<DeleteSpaceUseCase>();
 }
 
 @riverpod

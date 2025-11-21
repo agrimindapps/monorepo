@@ -1,0 +1,135 @@
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/sync/adapters/comentarios_drift_sync_adapter.dart:70:          // syncError: const Value(null), // TODO: Uncomment after build_runner
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/sync/adapters/favoritos_drift_sync_adapter.dart:40:          itemData: const {}, // TODO: Parse JSON from row.itemData if needed, or keep empty if not synced back
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/sync/adapters/favoritos_drift_sync_adapter.dart:105:      itemData: const {}, // TODO: Parse JSON
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/sync/adapters/favoritos_drift_sync_adapter.dart:120:      itemData: Value(entity.itemData.toString()), // TODO: Serialize JSON
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/receituagro_database.dart:164:    // TODO: Implementar carregamento dos JSON assets
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/di/injection_container.dart:319:  // TODO: Migrate to Drift-based comentarios repository
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/di/injection_container.dart:337:  // TODO: Migrar todas as dependências para DefensivoGroupingServiceV2 e remover
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/providers/receituagro_auth_notifier.dart:642:    // TODO: Implementar sincronização de perfil quando a box "users" for configurada
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/utils/diagnostico_logger.dart:41:    // TODO: Integrar com sistema de analytics/crash reporting
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/extensions/fitossanitario_drift_extension.dart:22:      // TODO: Implementar consulta à tabela FitossanitariosInfo quando necessário
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/extensions/fitossanitario_drift_extension.dart:42:      // TODO: Implementar consulta à tabela FitossanitariosInfo para obter toxicidade
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/extensions/diagnostico_enrichment_drift_extension.dart:30:        // TODO: Implementar busca usando FitossanitariosRepository
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/extensions/diagnostico_enrichment_drift_extension.dart:45:        // TODO: Implementar busca usando PragasRepository
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/extensions/diagnostico_enrichment_drift_extension.dart:58:        // TODO: Implementar busca usando CulturasRepository
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/extensions/diagnostico_enrichment_drift_extension.dart:99:      // TODO: Implementar busca usando FitossanitariosRepository
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/extensions/diagnostico_enrichment_drift_extension.dart:121:      // TODO: Implementar busca usando PragasRepository
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/extensions/diagnostico_enrichment_drift_extension.dart:144:      // TODO: Implementar busca usando CulturasRepository
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/extensions/praga_drift_extension.dart:35:      // TODO: Implementar consulta à tabela PragasInf quando necessário
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/extensions/praga_drift_extension.dart:46:      // TODO: Implementar consulta à tabela PragasInf quando necessário
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/data_integrity_service.dart:75:/// TODO: Reimplement using Drift database queries and foreign key constraints.
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/busca_avancada/data/datasources/busca_datasource_impl.dart:372:    // TODO: Implement search history persistence
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/busca_avancada/data/datasources/busca_datasource_impl.dart:382:    // TODO: Implement cache clearing if needed
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/busca_avancada/presentation/providers/busca_avancada_notifier.dart:309:    // TODO: Implement filtrosDetalhados using metadata service
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/premium_notifier.dart:83:      // TODO: Persist to storage
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/premium_notifier.dart:122:      // TODO: Persist to storage and notify analytics service
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/premium_notifier.dart:149:      // TODO: Persist to storage
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/premium_notifier.dart:174:      // TODO: Load from storage or check subscription status
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/premium_notifier.dart:216:      // TODO: Persist to storage
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/device_notifier.dart:89:      // TODO: Persist to storage
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/device_notifier.dart:113:      // TODO: Perform actual sync
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/device_notifier.dart:156:      // TODO: Persist to storage and notify backend
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/device_notifier.dart:188:      // TODO: Persist to storage and notify backend
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/device_notifier.dart:208:      // TODO: Load from storage
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/settings_notifier.dart:137:    // TODO: Implement analyticsDebugNotifierProvider
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/settings_notifier.dart:145:    // TODO: Implement analyticsDebugNotifierProvider
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/settings_notifier.dart:153:    // TODO: Implement notificationsNotifierProvider
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/settings_notifier.dart:162:    // TODO: Implement notificationsNotifierProvider
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/settings_notifier.dart:170:    // TODO: Implement analytics testing
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/settings_notifier.dart:178:    // TODO: Implement crashlytics testing
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/settings_notifier.dart:186:    // TODO: Implement rate app dialog
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/theme_notifier.dart:81:      // TODO: Persist to storage (Hive/SharedPreferences)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/theme_notifier.dart:117:      // TODO: Persist to storage
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/theme_notifier.dart:134:      // TODO: Persist to storage
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/theme_notifier.dart:153:      // TODO: Load from storage
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/notification_notifier.dart:79:      // TODO: Persist to storage and notify backend
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/notification_notifier.dart:104:      // TODO: Persist to storage
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/notification_notifier.dart:126:      // TODO: Persist to storage and notify backend
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/notification_notifier.dart:149:      // TODO: Persist to storage
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/notification_notifier.dart:168:      // TODO: Load from storage
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/data/services/favoritos_storage_service.dart:311:          // TODO: Implement JOINs to get names from related tables
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/domain/services/stats/diagnosticos_stats_service.dart:23:        completos: 0, // TODO: Calculate from data
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/domain/services/stats/diagnosticos_stats_service.dart:24:        parciais: 0, // TODO: Calculate from data
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/domain/services/stats/diagnosticos_stats_service.dart:25:        incompletos: 0, // TODO: Calculate from data
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/domain/services/stats/diagnosticos_stats_service.dart:26:        porDefensivo: {}, // TODO: Calculate from data
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/domain/services/stats/diagnosticos_stats_service.dart:27:        porCultura: {}, // TODO: Calculate from data
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/domain/services/stats/diagnosticos_stats_service.dart:28:        porPraga: {}, // TODO: Calculate from data
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/domain/services/stats/diagnosticos_stats_service.dart:29:        topDiagnosticos: [], // TODO: Calculate from data
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas_por_cultura/pragas_por_cultura_detalhadas_page.dart:478:  /// TODO: Replace with proper type conversion after Phase 3
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas_por_cultura/data/datasources/pragas_cultura_integration_datasource.dart:11:/// - Integrar dados de diagnóstico (DiagnosticoRepository) - TODO: Reintegrate
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/subscription_status_notifier.dart:156:      // TODO: Disparar notificação/alerta ao usuário
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/subscription_status_notifier.dart:162:      // TODO: Aplicar limitações parciais
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/subscription_status_notifier.dart:168:      // TODO: Remover acesso a features premium
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/subscription_status_notifier.dart:201:      // TODO: Chamar backend/API de upgrade
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/subscription_status_notifier.dart:218:      // TODO: Log event de upgrade
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/subscription_status_notifier.dart:260:      // TODO: Chamar backend/API de downgrade
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/subscription_status_notifier.dart:277:      // TODO: Log event de downgrade
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/subscription_status_notifier.dart:312:      // TODO: Chamar backend/API de cancelamento
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/subscription_status_notifier.dart:328:      // TODO: Log event de cancelamento
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/subscription_status_notifier.dart:363:      // TODO: Chamar backend/API de reativação
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/subscription_status_notifier.dart:377:      // TODO: Log event de reativação
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/trial_notifier.dart:98:      // TODO: Substituir por chamada real ao repositório
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/trial_notifier.dart:139:      // TODO: Fazer refresh real contra backend
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/trial_notifier.dart:171:      // TODO: Chamar backend/API para iniciar trial
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/trial_notifier.dart:195:      // TODO: Log event de novo trial
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/trial_notifier.dart:226:      // TODO: Chamar backend/API de cancelamento
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/trial_notifier.dart:241:      // TODO: Log event de cancelamento
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/trial_notifier.dart:268:      // TODO: Disparar notificação de expiração iminente
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/trial_notifier.dart:286:      // TODO: Chamar backend para finalizar trial
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/trial_notifier.dart:301:      // TODO: Disparar actions pós-expiração
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/trial_notifier.dart:306:      // TODO: Log event de expiração
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/purchase_notifier.dart:135:      // TODO: Substituir por chamada real ao repositório
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/purchase_notifier.dart:192:      // TODO: Chamar backend/API de compra
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/purchase_notifier.dart:227:      // TODO: Log event de compra
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/purchase_notifier.dart:252:      // TODO: Chamar backend/API de restauração
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/purchase_notifier.dart:262:      // TODO: Log event de restauração
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/purchase_notifier.dart:296:      // TODO: Chamar backend/API de retry
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/purchase_notifier.dart:316:      // TODO: Log event de retry
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/purchase_notifier.dart:339:      // TODO: Sincronizar com backend
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/purchase_notifier.dart:344:      // TODO: Log event de sincronização
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/billing_notifier.dart:118:      // TODO: Substituir por chamada real ao repositório
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/billing_notifier.dart:160:      // TODO: Fazer refresh real contra backend
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/billing_notifier.dart:195:      // TODO: Chamar backend/API de retry
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/billing_notifier.dart:215:      // TODO: Log event de retry
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/billing_notifier.dart:247:      // TODO: Chamar backend/API para resolver
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/billing_notifier.dart:268:      // TODO: Log event de resolução
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/billing_notifier.dart:291:      // TODO: Chamar backend/API para atualizar método
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/billing_notifier.dart:317:      // TODO: Log event de atualização
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/pages/sections/subscription_status_section.dart:163:              // TODO: Navegar para tela de upgrade
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/pages/sections/subscription_status_section.dart:233:              // TODO: Implementar seleção de plano
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/pages/sections/subscription_status_section.dart:263:              // TODO: Implementar downgrade
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/pages/sections/subscription_status_section.dart:290:              // TODO: Implementar cancelamento
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/pages/sections/trial_section.dart:97:                  // TODO: Navegar para tela de upgrade
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/pages/sections/trial_section.dart:115:                            // TODO: Implementar
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/widgets/subscription_financial_details_card.dart:164:    // TODO: Integrar com RevenueCat para obter método real
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/domain/entities/praga_entity.dart:28:  /// TODO: Verify field mapping with actual Drift schema
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/presentation/providers/detalhe_praga_notifier.dart:27:  // MIGRATION TODO: Replace legacy Hive types with Drift types
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/presentation/providers/detalhe_praga_notifier.dart:102:  // MIGRATION TODO: Praga Drift model uses 'idPraga' not 'idReg'
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/presentation/providers/detalhe_praga_notifier.dart:325:  /// MIGRATION TODO: Reimplement with Drift-based repository queries
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/presentation/widgets/detalhe/diagnosticos_defensivos_components/dialog_widget.dart:66:      // TODO: Fix after migration - diagnostico should contain pragaId
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/presentation/widgets/detalhe/comentarios_tab_widget.dart:293:      // TODO: Implementar método de edição no notifier
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/presentation/widgets/detalhe/comentarios_tab_widget.dart:314:        // TODO: Navigate to subscription page
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/presentation/widgets/detalhe/tecnologia_tab_widget.dart:94:        // TODO: Navigate to subscription page
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:12:/// TODO: Integrate with Firebase Analytics API to fetch real metrics
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:236:            : 0, // TODO: fetch from Firebase
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:239:            : 0, // TODO: fetch from Firebase
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/analytics_dashboard_service.dart:242:            : 0, // TODO: fetch from Firebase
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:15:  /// TODO: Replace with real Firebase Analytics data in production
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:23:  /// TODO: Replace with real Firebase Analytics data in production
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:31:  /// TODO: Replace with real Firebase Analytics data in production
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:39:  /// TODO: Replace with real Firebase Analytics data in production
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:47:  /// TODO: Replace with real Firebase Analytics data in production
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:55:  /// TODO: Replace with real Firebase Analytics data in production
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:112:  /// TODO: Replace with real Firebase Analytics data in production
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:136:  /// TODO: Replace with real Firebase Performance Monitoring data in production
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:144:  /// TODO: Replace with real Firebase Performance Monitoring data in production
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:152:  /// TODO: Replace with real Firebase Performance Monitoring data in production
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:164:  /// TODO: Replace with real Firebase Crashlytics data in production
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:172:  /// TODO: Replace with real error tracking data in production
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:180:  /// TODO: Replace with real performance monitoring data in production
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:191:  /// TODO: Replace with real RevenueCat/subscription data in production
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:199:  /// TODO: Replace with real RevenueCat/subscription data in production
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:207:  /// TODO: Replace with real RevenueCat/subscription data in production
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:215:  /// TODO: Replace with real RevenueCat/subscription data in production
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:225:  /// TODO: Replace with real RevenueCat/subscription data in production
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/analytics/services/analytics_metrics_calculation_service.dart:233:  /// TODO: Replace with real RevenueCat/subscription data in production

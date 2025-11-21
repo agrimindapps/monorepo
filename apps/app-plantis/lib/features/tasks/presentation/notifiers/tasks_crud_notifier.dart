@@ -122,9 +122,10 @@ class TasksCrudNotifier extends _$TasksCrudNotifier {
   }
 
   /// Helper: Get task with ownership validation
-  Future<task_entity.Task> _getTaskWithOwnershipValidation(String taskId) async {
+  Future<task_entity.Task> _getTaskWithOwnershipValidation(
+      String taskId) async {
     final currentState = state;
-    
+
     // 1. Try to find in local state first (fastest)
     final localTask = currentState.allTasks
         .whereType<task_entity.Task>()
@@ -141,7 +142,7 @@ class TasksCrudNotifier extends _$TasksCrudNotifier {
 
     // 2. If not found locally, fetch from repository
     final result = await _getTaskByIdUseCase(taskId);
-    
+
     return result.fold(
       (failure) => throw Exception('Task not found: $taskId'),
       (task) {

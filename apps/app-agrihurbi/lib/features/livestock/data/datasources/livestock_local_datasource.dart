@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'package:core/core.dart';
 import 'package:drift/drift.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../database/agrihurbi_database.dart';
-import '../../../../database/tables/livestock_tables.dart';
+import '../../domain/entities/bovine_entity.dart';
+import '../../domain/entities/equine_entity.dart';
 import '../models/bovine_model.dart';
 import '../models/equine_model.dart';
 
@@ -33,7 +36,7 @@ abstract class LivestockLocalDataSource {
 }
 
 /// Implementação do data source local com Drift
-@LazySingleton(as: LivestockLocalDataSource)
+@Injectable(as: LivestockLocalDataSource)
 class LivestockDriftLocalDataSource implements LivestockLocalDataSource {
   final AgrihurbiDatabase _db;
 
@@ -188,7 +191,8 @@ class LivestockDriftLocalDataSource implements LivestockLocalDataSource {
       }
 
       if (geneticInfluences != null && geneticInfluences.isNotEmpty) {
-        query.where((tbl) => tbl.geneticInfluences.like('%$geneticInfluences%'));
+        query
+            .where((tbl) => tbl.geneticInfluences.like('%$geneticInfluences%'));
       }
 
       query.orderBy([(tbl) => OrderingTerm.asc(tbl.commonName)]);
@@ -234,15 +238,15 @@ class LivestockDriftLocalDataSource implements LivestockLocalDataSource {
       registrationId: drift.registrationId,
       commonName: drift.commonName,
       originCountry: drift.originCountry,
-      imageUrls: drift.imageUrls,
+      imageUrls: (jsonDecode(drift.imageUrls) as List).cast<String>(),
       thumbnailUrl: drift.thumbnailUrl,
       animalType: drift.animalType,
       origin: drift.origin,
       characteristics: drift.characteristics,
       breed: drift.breed,
-      aptitude: drift.aptitude,
-      tags: drift.tags,
-      breedingSystem: drift.breedingSystem,
+      aptitude: BovineAptitude.values[drift.aptitude],
+      tags: (jsonDecode(drift.tags) as List).cast<String>(),
+      breedingSystem: BreedingSystem.values[drift.breedingSystem],
       purpose: drift.purpose,
       notes: drift.notes,
     );
@@ -250,24 +254,24 @@ class LivestockDriftLocalDataSource implements LivestockLocalDataSource {
 
   BovinesCompanion _bovineToCompanion(BovineModel model) {
     return BovinesCompanion.insert(
-      id: Value(model.id),
+      id: model.id,
       createdAt: Value(model.createdAt),
       updatedAt: Value(model.updatedAt ?? DateTime.now()),
       isActive: Value(model.isActive),
-      registrationId: Value(model.registrationId),
-      commonName: Value(model.commonName),
-      originCountry: Value(model.originCountry),
-      imageUrls: Value(model.imageUrls.join(',')),
-      thumbnailUrl: model.thumbnailUrl != null ? Value(model.thumbnailUrl!) : const Value(null),
-      animalType: Value(model.animalType),
-      origin: Value(model.origin),
-      characteristics: Value(model.characteristics),
-      breed: Value(model.breed),
-      aptitude: Value(model.aptitude.index),
-      tags: Value(model.tags.join(',')),
-      breedingSystem: Value(model.breedingSystem.index),
-      purpose: Value(model.purpose),
-      notes: model.notes != null ? Value(model.notes!) : const Value(null),
+      registrationId: model.registrationId,
+      commonName: model.commonName,
+      originCountry: model.originCountry,
+      imageUrls: Value(jsonEncode(model.imageUrls)),
+      thumbnailUrl: Value(model.thumbnailUrl),
+      animalType: model.animalType,
+      origin: model.origin,
+      characteristics: model.characteristics,
+      breed: model.breed,
+      aptitude: model.aptitude.index,
+      tags: Value(jsonEncode(model.tags)),
+      breedingSystem: model.breedingSystem.index,
+      purpose: model.purpose,
+      notes: Value(model.notes),
     );
   }
 
@@ -280,12 +284,12 @@ class LivestockDriftLocalDataSource implements LivestockLocalDataSource {
       registrationId: drift.registrationId,
       commonName: drift.commonName,
       originCountry: drift.originCountry,
-      imageUrls: drift.imageUrls,
+      imageUrls: (jsonDecode(drift.imageUrls) as List).cast<String>(),
       thumbnailUrl: drift.thumbnailUrl,
       history: drift.history,
-      temperament: drift.temperament,
-      coat: drift.coat,
-      primaryUse: drift.primaryUse,
+      temperament: EquineTemperament.values[drift.temperament],
+      coat: CoatColor.values[drift.coat],
+      primaryUse: EquinePrimaryUse.values[drift.primaryUse],
       geneticInfluences: drift.geneticInfluences,
       height: drift.height,
       weight: drift.weight,
@@ -294,22 +298,22 @@ class LivestockDriftLocalDataSource implements LivestockLocalDataSource {
 
   EquinesCompanion _equineToCompanion(EquineModel model) {
     return EquinesCompanion.insert(
-      id: Value(model.id),
+      id: model.id,
       createdAt: Value(model.createdAt),
       updatedAt: Value(model.updatedAt ?? DateTime.now()),
       isActive: Value(model.isActive),
-      registrationId: Value(model.registrationId),
-      commonName: Value(model.commonName),
-      originCountry: Value(model.originCountry),
-      imageUrls: Value(model.imageUrls.join(',')),
-      thumbnailUrl: model.thumbnailUrl != null ? Value(model.thumbnailUrl!) : const Value(null),
-      history: Value(model.history),
-      temperament: Value(model.temperament.index),
-      coat: Value(model.coat.index),
-      primaryUse: Value(model.primaryUse.index),
-      geneticInfluences: Value(model.geneticInfluences),
-      height: Value(model.height),
-      weight: Value(model.weight),
+      registrationId: model.registrationId,
+      commonName: model.commonName,
+      originCountry: model.originCountry,
+      imageUrls: Value(jsonEncode(model.imageUrls)),
+      thumbnailUrl: Value(model.thumbnailUrl),
+      history: model.history,
+      temperament: model.temperament.index,
+      coat: model.coat.index,
+      primaryUse: model.primaryUse.index,
+      geneticInfluences: model.geneticInfluences,
+      height: model.height,
+      weight: model.weight,
     );
   }
 
@@ -365,8 +369,7 @@ class LivestockDriftLocalDataSource implements LivestockLocalDataSource {
   dynamic _jsonDecode(String json) {
     // In production, use actual JSON decoder
     // For now, using a simple approach - ideally use jsonDecode from dart:convert
-    throw UnimplementedError('JSON decode not implemented - use dart:convert in production');
+    throw UnimplementedError(
+        'JSON decode not implemented - use dart:convert in production');
   }
 }
-
-

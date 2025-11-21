@@ -2,48 +2,48 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart' as core;
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:injectable/injectable.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/interfaces/i_premium_service.dart';
 import '../../../features/comentarios/data/comentario_model.dart';
 import '../constants/comentarios_design_tokens.dart';
+import '../data/services/comentarios_mapper.dart';
 import '../domain/entities/comentario_sync_entity.dart';
+import 'repositories/i_comentarios_repository.dart';
 
 part 'comentarios_service.g.dart';
 
-abstract class IComentariosRepository {
-  Future<List<ComentarioModel>> getAllComentarios();
-  Future<void> addComentario(ComentarioModel comentario);
-  Future<void> updateComentario(ComentarioModel comentario);
-  Future<void> deleteComentario(String id);
-}
-
 /// Comentarios Service - Business Logic Layer
 /// Does not manage state (no ChangeNotifier/Riverpod), just business operations
+@lazySingleton
 class ComentariosService {
   final IComentariosRepository? _repository;
   final IPremiumService? _premiumService;
+  final IComentariosMapper? _mapper;
 
   ComentariosService({
     IComentariosRepository? repository,
     IPremiumService? premiumService,
-  }) : _repository = repository,
-       _premiumService = premiumService;
+    IComentariosMapper? mapper,
+  })  : _repository = repository,
+        _premiumService = premiumService,
+        _mapper = mapper;
 
   Future<List<ComentarioModel>> getAllComentarios({
     String? pkIdentificador,
   }) async {
     try {
-      final comentarios =
-          await _repository?.getAllComentarios() ?? <ComentarioModel>[];
-      comentarios.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      if (pkIdentificador != null && pkIdentificador.isNotEmpty) {
-        return comentarios
-            .where((element) => element.pkIdentificador == pkIdentificador)
-            .toList();
-      }
+      if (_repository == null || _mapper == null) return [];
 
-      return comentarios;
+      final entities = pkIdentificador != null && pkIdentificador.isNotEmpty
+          ? await _repository!.getComentariosByContext(pkIdentificador)
+          : await _repository!.getAllComentarios();
+
+      // Sort by createdAt descending
+      entities.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return _mapper!.entitiesToModels(entities);
     } catch (e) {
       return [];
     }
@@ -56,30 +56,21 @@ class ComentariosService {
       level: 500,
     );
     try {
-      developer.log(
-        'Salvando no repositório local',
-        name: 'ComentarioService',
-        level: 500,
-      );
-      await _repository?.addComentario(comentario);
-      developer.log(
-        'Comentário salvo localmente com sucesso',
-        name: 'ComentarioService',
-        level: 500,
-      );
-      developer.log(
-        'Iniciando sincronização',
-        name: 'ComentarioService',
-        level: 500,
-      );
+      if (_repository == null || _mapper == null) return;
+
+      developer.log('Salvando no repositório local',
+          name: 'ComentarioService', level: 500);
+      final entity = _mapper!.modelToEntity(comentario);
+      await _repository!.addComentario(entity);
+
+      developer.log('Comentário salvo localmente com sucesso',
+          name: 'ComentarioService', level: 500);
+      developer.log('Iniciando sincronização',
+          name: 'ComentarioService', level: 500);
       await _queueSyncOperation('create', comentario);
     } catch (e) {
-      developer.log(
-        'Error adding comentario',
-        name: 'ComentarioService',
-        error: e,
-        level: 1000,
-      );
+      developer.log('Error adding comentario',
+          name: 'ComentarioService', error: e, level: 1000);
       rethrow;
     }
   }
@@ -91,57 +82,40 @@ class ComentariosService {
       level: 500,
     );
     try {
-      developer.log(
-        'Atualizando no repositório local',
-        name: 'ComentarioService',
-        level: 500,
-      );
-      await _repository?.updateComentario(comentario);
-      developer.log(
-        'Comentário atualizado localmente com sucesso',
-        name: 'ComentarioService',
-        level: 500,
-      );
-      developer.log(
-        'Iniciando sincronização',
-        name: 'ComentarioService',
-        level: 500,
-      );
+      if (_repository == null || _mapper == null) return;
+
+      developer.log('Atualizando no repositório local',
+          name: 'ComentarioService', level: 500);
+      final entity = _mapper!.modelToEntity(comentario);
+      await _repository!.updateComentario(entity);
+
+      developer.log('Comentário atualizado localmente com sucesso',
+          name: 'ComentarioService', level: 500);
+      developer.log('Iniciando sincronização',
+          name: 'ComentarioService', level: 500);
       await _queueSyncOperation('update', comentario);
     } catch (e) {
-      developer.log(
-        'Error updating comentario',
-        name: 'ComentarioService',
-        error: e,
-        level: 1000,
-      );
+      developer.log('Error updating comentario',
+          name: 'ComentarioService', error: e, level: 1000);
       rethrow;
     }
   }
 
   Future<void> deleteComentario(String id) async {
-    developer.log(
-      'Deletando comentário - id=$id',
-      name: 'ComentarioService',
-      level: 500,
-    );
+    developer.log('Deletando comentário - id=$id',
+        name: 'ComentarioService', level: 500);
     try {
-      developer.log(
-        'Removendo do repositório local',
-        name: 'ComentarioService',
-        level: 500,
-      );
-      await _repository?.deleteComentario(id);
-      developer.log(
-        'Comentário removido localmente com sucesso',
-        name: 'ComentarioService',
-        level: 500,
-      );
-      developer.log(
-        'Iniciando sincronização de deleção',
-        name: 'ComentarioService',
-        level: 500,
-      );
+      if (_repository == null) return;
+
+      developer.log('Removendo do repositório local',
+          name: 'ComentarioService', level: 500);
+      await _repository!.deleteComentario(id);
+
+      developer.log('Comentário removido localmente com sucesso',
+          name: 'ComentarioService', level: 500);
+      developer.log('Iniciando sincronização de deleção',
+          name: 'ComentarioService', level: 500);
+
       await _queueSyncOperation(
         'delete',
         ComentarioModel(
@@ -157,12 +131,8 @@ class ComentariosService {
         ),
       );
     } catch (e) {
-      developer.log(
-        'Error deleting comentario',
-        name: 'ComentarioService',
-        error: e,
-        level: 1000,
-      );
+      developer.log('Error deleting comentario',
+          name: 'ComentarioService', error: e, level: 1000);
       rethrow;
     }
   }
@@ -179,11 +149,11 @@ class ComentariosService {
       if (searchText.isNotEmpty) {
         final searchLower = _sanitizeSearchText(searchText);
         final contentMatch = comentario.conteudo.toLowerCase().contains(
-          searchLower,
-        );
+              searchLower,
+            );
         final toolMatch = comentario.ferramenta.toLowerCase().contains(
-          searchLower,
-        );
+              searchLower,
+            );
 
         if (!contentMatch && !toolMatch) return false;
       }
@@ -370,12 +340,12 @@ class ComentariosService {
           name: 'ComentarioService',
           level: 500,
         );
-        final result = await core.UnifiedSyncManager.instance
-            .update<ComentarioSyncEntity>(
-              'receituagro',
-              syncEntity.id,
-              syncEntity,
-            );
+        final result =
+            await core.UnifiedSyncManager.instance.update<ComentarioSyncEntity>(
+          'receituagro',
+          syncEntity.id,
+          syncEntity,
+        );
         result.fold(
           (core.Failure failure) {
             developer.log(
@@ -415,9 +385,6 @@ class ComentariosService {
 /// Note: Dependencies will be injected later when we migrate premium services
 @riverpod
 ComentariosService comentariosService(ComentariosServiceRef ref) {
-  // TODO: Inject repository and premium service once migrated
-  return ComentariosService(
-    repository: null, // Will be injected via DI
-    premiumService: null, // Will be injected after premium migration
-  );
+  // Use GetIt to retrieve the singleton instance
+  return core.GetIt.instance<ComentariosService>();
 }

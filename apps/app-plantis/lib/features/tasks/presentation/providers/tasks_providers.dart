@@ -53,4 +53,3 @@ ITaskFilterService taskFilterService(TaskFilterServiceRef ref) {
 ITaskOwnershipValidator taskOwnershipValidator(TaskOwnershipValidatorRef ref) {
   return TaskOwnershipValidator(AuthStateNotifier.instance);
 }
-

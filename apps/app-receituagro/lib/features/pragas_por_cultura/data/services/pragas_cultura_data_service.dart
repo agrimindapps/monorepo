@@ -1,4 +1,5 @@
 import '../../domain/repositories/i_pragas_cultura_repository.dart';
+import '../../../culturas/domain/entities/cultura_entity.dart';
 
 /// Service para operações de I/O com pragas por cultura
 ///
@@ -51,7 +52,21 @@ class PragasCulturaDataService implements IPragasCulturaDataService {
       final culturasResult = await repository.getCulturas();
       return culturasResult.fold(
         (failure) => [],
-        (culturas) => (culturas).cast<Map<String, dynamic>>(),
+        (culturas) => culturas
+            .map((c) {
+              if (c is CulturaEntity) {
+                return {
+                  'id': c.id,
+                  'nome': c.nome,
+                };
+              }
+              if (c is Map) {
+                return Map<String, dynamic>.from(c);
+              }
+              return <String, dynamic>{};
+            })
+            .where((element) => element.isNotEmpty)
+            .toList(),
       );
     } catch (e) {
       return [];

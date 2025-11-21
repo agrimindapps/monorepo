@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, getIt;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../../core/di/injection_container_modular.dart' as local_di;
 import '../../../../core/validation/input_sanitizer.dart';
+import '../../../../core/di/injection.dart';
 import '../../../../features/receipt/domain/services/receipt_image_service.dart';
 import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
@@ -15,9 +15,8 @@ import '../../core/constants/fuel_constants.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../../domain/services/fuel_formatter_service.dart';
 import '../../domain/services/fuel_validator_service.dart';
-import '../../domain/usecases/add_fuel_record.dart';
-import '../../domain/usecases/update_fuel_record.dart';
 import '../models/fuel_form_model.dart';
+import 'fuel_riverpod_notifier.dart';
 
 /// Form state for fuel record creation/editing
 class FuelFormState {
@@ -77,16 +76,13 @@ class FuelFormState {
       isLoading: isLoading ?? this.isLoading,
       lastError: clearError ? null : (lastError ?? this.lastError),
       lastOdometerReading: lastOdometerReading ?? this.lastOdometerReading,
-      receiptImagePath: clearImagePaths
-          ? null
-          : (receiptImagePath ?? this.receiptImagePath),
-      receiptImageUrl: clearImagePaths
-          ? null
-          : (receiptImageUrl ?? this.receiptImageUrl),
+      receiptImagePath:
+          clearImagePaths ? null : (receiptImagePath ?? this.receiptImagePath),
+      receiptImageUrl:
+          clearImagePaths ? null : (receiptImageUrl ?? this.receiptImageUrl),
       isUploadingImage: isUploadingImage ?? this.isUploadingImage,
-      imageUploadError: clearImageError
-          ? null
-          : (imageUploadError ?? this.imageUploadError),
+      imageUploadError:
+          clearImageError ? null : (imageUploadError ?? this.imageUploadError),
     );
   }
 }
@@ -98,16 +94,16 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     required String? userId,
     required ReceiptImageService receiptImageService,
     required Ref ref,
-  }) : _receiptImageService = receiptImageService,
-       _ref = ref,
-       super(
-         FuelFormState(
-           formModel: FuelFormModel.initial(
-             initialVehicleId ?? '',
-             userId ?? '',
-           ),
-         ),
-       ) {
+  })  : _receiptImageService = receiptImageService,
+        _ref = ref,
+        super(
+          FuelFormState(
+            formModel: FuelFormModel.initial(
+              initialVehicleId ?? '',
+              userId ?? '',
+            ),
+          ),
+        ) {
     _formatter = FuelFormatterService();
     _validator = FuelValidatorService();
     _imagePicker = ImagePicker();
@@ -141,13 +137,13 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
 
   /// Map of field names to their corresponding FocusNodes
   Map<String, FocusNode> get fieldFocusNodes => {
-    'liters': litersFocusNode,
-    'pricePerLiter': pricePerLiterFocusNode,
-    'odometer': odometerFocusNode,
-    'gasStationName': gasStationFocusNode,
-    'gasStationBrand': gasStationBrandFocusNode,
-    'notes': notesFocusNode,
-  };
+        'liters': litersFocusNode,
+        'pricePerLiter': pricePerLiterFocusNode,
+        'odometer': odometerFocusNode,
+        'gasStationName': gasStationFocusNode,
+        'gasStationBrand': gasStationBrandFocusNode,
+        'notes': notesFocusNode,
+      };
 
   Future<void> initialize({String? vehicleId, String? userId}) async {
     try {
@@ -536,23 +532,29 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
       final fuelEntity = state.formModel.toFuelRecord();
 
       // Decide se é criar ou atualizar
-      final Either<Failure, FuelRecordEntity> result;
+      bool success = false;
 
       if (state.formModel.id.isEmpty) {
-        // Criar novo
-        final addUseCase = local_di.getIt<AddFuelRecord>();
-        result = await addUseCase(AddFuelRecordParams(fuelRecord: fuelEntity));
+        // Criar novo via Riverpod Notifier para manter estado sincronizado
+        success = await _ref
+            .read(fuelRiverpodProvider.notifier)
+            .addFuelRecord(fuelEntity);
       } else {
-        // Atualizar existente
-        final updateUseCase = local_di.getIt<UpdateFuelRecord>();
-        result = await updateUseCase(
-          UpdateFuelRecordParams(fuelRecord: fuelEntity),
-        );
+        // Atualizar existente via Riverpod Notifier
+        success = await _ref
+            .read(fuelRiverpodProvider.notifier)
+            .updateFuelRecord(fuelEntity);
       }
 
       state = state.copyWith(isLoading: false);
 
-      return result.fold((failure) => Left(failure), (entity) => Right(entity));
+      if (success) {
+        return Right(fuelEntity);
+      } else {
+        final error = _ref.read(fuelRiverpodProvider).value?.errorMessage ??
+            'Erro desconhecido ao salvar';
+        return Left(UnexpectedFailure(error));
+      }
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -773,17 +775,17 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
 /// Fuel form notifier provider factory
 final fuelFormNotifierProvider =
     StateNotifierProvider.family<FuelFormNotifier, FuelFormState, String>((
-      ref,
-      vehicleId,
-    ) {
-      final userId = ref.watch(userIdProvider);
-      return FuelFormNotifier(
-        initialVehicleId: vehicleId,
-        userId: userId,
-        receiptImageService: local_di.getIt<ReceiptImageService>(),
-        ref: ref,
-      );
-    });
+  ref,
+  vehicleId,
+) {
+  final userId = ref.watch(userIdProvider);
+  return FuelFormNotifier(
+    initialVehicleId: vehicleId,
+    userId: userId,
+    receiptImageService: getIt<ReceiptImageService>(),
+    ref: ref,
+  );
+});
 
 /// Derived providers for form state
 final fuelFormCanSubmitProvider = Provider.family<bool, String>((

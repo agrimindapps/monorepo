@@ -31,6 +31,8 @@ class DiagnosticoInfoWidget extends StatelessWidget {
 
   Widget _buildImageSection(BuildContext context) {
     final theme = Theme.of(context);
+    // Tenta obter o nome científico do mapa de dados, senão usa o nome da praga (fallback)
+    final nomeCientifico = diagnosticoData['nomeCientifico'] ?? nomePraga;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,7 +68,7 @@ class DiagnosticoInfoWidget extends StatelessWidget {
                   final imageHeight = availableWidth * 0.56;
 
                   return PragaImageWidget(
-                    nomeCientifico: nomePraga,
+                    nomeCientifico: nomeCientifico,
                     width: double.infinity,
                     height: imageHeight,
                     fit: BoxFit.cover,
@@ -97,6 +99,18 @@ class DiagnosticoInfoWidget extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
+              if (diagnosticoData['nomeCientifico'] != null && diagnosticoData['nomeCientifico'] != 'N/A') ...[
+                const SizedBox(height: 4),
+                Text(
+                  diagnosticoData['nomeCientifico']!,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
               const SizedBox(height: 8),
               Text(
                 '$nomeDefensivo - $cultura',

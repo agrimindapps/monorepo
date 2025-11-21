@@ -21,14 +21,6 @@ class NewNotificationSection extends ConsumerWidget {
           child: Column(
             children: [
               _buildNotificationsToggle(context, ref, notificationState),
-              if (notificationState.settings.notificationsEnabled)
-                const Divider(height: 1),
-              if (notificationState.settings.notificationsEnabled)
-                _buildSoundToggle(context, ref, notificationState),
-              if (notificationState.settings.notificationsEnabled)
-                const Divider(height: 1),
-              if (notificationState.settings.notificationsEnabled)
-                _buildPromotionalToggle(context, ref, notificationState),
               if (notificationState.isLoading ||
                   notificationState.error != null)
                 const Divider(height: 1),
@@ -76,86 +68,6 @@ class NewNotificationSection extends ConsumerWidget {
               ref
                   .read(notificationSettingsNotifierProvider.notifier)
                   .toggleNotifications();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSoundToggle(
-    BuildContext context,
-    WidgetRef ref,
-    NotificationState notificationState,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Som e Vibração',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Toque ao receber notificações',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          Switch(
-            value: notificationState.settings.soundEnabled,
-            onChanged: (value) {
-              ref.read(notificationSettingsNotifierProvider.notifier).toggleSound();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPromotionalToggle(
-    BuildContext context,
-    WidgetRef ref,
-    NotificationState notificationState,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Notificações Promocionais',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Ofertas e novidades do app',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          Switch(
-            value: notificationState.settings.promotionalNotificationsEnabled,
-            onChanged: (value) {
-              ref
-                  .read(notificationSettingsNotifierProvider.notifier)
-                  .togglePromotional();
             },
           ),
         ],

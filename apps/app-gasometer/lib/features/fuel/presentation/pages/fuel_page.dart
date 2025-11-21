@@ -23,14 +23,6 @@ class _FuelPageState extends ConsumerState<FuelPage> {
   String? _selectedVehicleId;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(fuelRiverpodProvider.notifier).loadFuelRecords();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     final fuelStateAsync = ref.watch(fuelRiverpodProvider);
     final isOnline = ref.watch(fuelIsOnlineProvider);
@@ -231,7 +223,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
 
   Widget _buildVehicleSelector(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
       child: EnhancedVehicleSelector(
         selectedVehicleId: _selectedVehicleId,
         onVehicleChanged: (vehicleId) {

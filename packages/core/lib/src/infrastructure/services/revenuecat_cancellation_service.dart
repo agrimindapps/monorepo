@@ -16,6 +16,15 @@ class RevenueCatCancellationService {
   /// para o usuário cancelar manualmente nas lojas.
   Future<Result<SubscriptionCancellationResult>>
   handleSubscriptionCancellation() async {
+    if (kIsWeb) {
+      return Result.success(
+        SubscriptionCancellationResult(
+          hadActiveSubscription: false,
+          message: 'Cancelamento de assinatura não aplicável na web',
+        ),
+      );
+    }
+
     try {
       if (kDebugMode) {
         debugPrint(
@@ -154,6 +163,15 @@ da loja onde você realizou a compra (App Store ou Google Play Store).
   /// Obtém informações detalhadas sobre assinaturas ativas
   /// Útil para exibir antes da exclusão
   Future<Result<Map<String, dynamic>>> getSubscriptionDetails() async {
+    if (kIsWeb) {
+      return Result.success({
+        'hasActiveSubscription': false,
+        'activeSubscriptions': [],
+        'entitlements': {},
+        'latestExpirationDate': null,
+      });
+    }
+
     try {
       final customerInfo = await Purchases.getCustomerInfo();
 
@@ -200,6 +218,8 @@ da loja onde você realizou a compra (App Store ou Google Play Store).
 
   /// Verifica se o usuário tem assinatura ativa
   Future<bool> hasActiveSubscription() async {
+    if (kIsWeb) return false;
+
     try {
       final customerInfo = await Purchases.getCustomerInfo();
       return customerInfo.activeSubscriptions.isNotEmpty;

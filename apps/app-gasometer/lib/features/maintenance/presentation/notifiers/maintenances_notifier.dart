@@ -31,7 +31,7 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
     _repository = getIt<MaintenanceRepository>();
     _formatter = MaintenanceFormatterService();
     _getVehicleById = getIt<GetVehicleById>();
-    loadMaintenances();
+    Future.microtask(() => loadMaintenances());
 
     return const MaintenancesState();
   }

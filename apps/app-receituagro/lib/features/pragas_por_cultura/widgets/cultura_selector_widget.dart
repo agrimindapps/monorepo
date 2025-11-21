@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 /// Widget especializado para seleção de cultura
 /// Permite escolher uma cultura para explorar suas pragas
 class CulturaSelectorWidget extends StatelessWidget {
-  final List<Map<String, String>> culturas;
+  final List<Map<String, dynamic>> culturas;
   final String? culturaIdSelecionada;
   final ValueChanged<String> onCulturaChanged;
 
@@ -88,10 +88,11 @@ class CulturaSelectorWidget extends StatelessWidget {
       if (culturaIdSelecionada == 'todas') {
         culturaSelecionada = 'Todas as culturas';
       } else {
-        culturaSelecionada = culturas.firstWhere(
+        final cultura = culturas.firstWhere(
           (c) => c['id'] == culturaIdSelecionada,
-          orElse: () => {'nome': 'Cultura não encontrada'},
-        )['nome'];
+          orElse: () => <String, String>{'nome': 'Cultura não encontrada'},
+        );
+        culturaSelecionada = cultura['nome'] as String?;
       }
     }
 
@@ -172,7 +173,7 @@ class CulturaSelectorWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: DropdownButtonFormField<String>(
-              initialValue: culturaIdSelecionada,
+              initialValue: _getValidInitialValue(),
               decoration: InputDecoration(
                 hintText: 'Selecione uma cultura',
                 hintStyle: TextStyle(
@@ -224,7 +225,7 @@ class CulturaSelectorWidget extends StatelessWidget {
                 ),
                 ...culturas.map((cultura) {
                   return DropdownMenuItem<String>(
-                    value: cultura['id'],
+                    value: cultura['id'] as String?,
                     child: Row(
                       children: [
                         Container(
@@ -242,7 +243,7 @@ class CulturaSelectorWidget extends StatelessWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            cultura['nome']!,
+                            cultura['nome'] as String,
                             style: const TextStyle(fontSize: 12),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -347,5 +348,14 @@ class CulturaSelectorWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String? _getValidInitialValue() {
+    if (culturaIdSelecionada == null) return null;
+    if (culturaIdSelecionada == 'todas') return 'todas';
+    if (culturaIdSelecionada == '') return '';
+
+    final exists = culturas.any((c) => c['id'] == culturaIdSelecionada);
+    return exists ? culturaIdSelecionada : null;
   }
 }

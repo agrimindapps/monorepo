@@ -240,15 +240,24 @@ class _DetalheDiagnosticoPageState extends ConsumerState<DetalheDiagnosticoPage>
   }
 
   Widget _buildContent(DetalheDiagnosticoState state) {
+    // Prefer resolved names from data map if available, otherwise use widget params
+    final resolvedNomePraga = state.diagnosticoData['nomePraga'] ?? widget.nomePraga;
+    final resolvedNomeDefensivo = state.diagnosticoData['nomeDefensivo'] ?? widget.nomeDefensivo;
+    final resolvedCultura = state.diagnosticoData['nomeCultura'] ?? widget.cultura;
+    
+    // If scientific name is available, append it to praga name for display or use it for image lookup
+    // DiagnosticoInfoWidget uses nomePraga for both image lookup and display
+    // Ideally we should pass scientific name separately, but for now let's ensure we pass the best name available
+    
     return SingleChildScrollView(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           DiagnosticoInfoWidget(
-            nomePraga: widget.nomePraga,
-            nomeDefensivo: widget.nomeDefensivo,
-            cultura: widget.cultura,
+            nomePraga: resolvedNomePraga,
+            nomeDefensivo: resolvedNomeDefensivo,
+            cultura: resolvedCultura,
             diagnosticoData: state.diagnosticoData,
           ),
           const SizedBox(height: 24),

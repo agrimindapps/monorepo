@@ -72,13 +72,12 @@ class PlantsDriftRepository {
 
   /// Retorna todas as plantas ativas
   Future<List<Plant>> getAllPlants() async {
-    final plants =
-        await (_db.select(_db.plants)
-              ..where((p) => p.isDeleted.equals(false))
-              ..orderBy([
-                (p) => OrderingTerm.desc(p.createdAt),
-              ]))
-            .get();
+    final plants = await (_db.select(_db.plants)
+          ..where((p) => p.isDeleted.equals(false))
+          ..orderBy([
+            (p) => OrderingTerm.desc(p.createdAt),
+          ]))
+        .get();
 
     return plants.map(_plantDriftToModel).toList();
   }
@@ -88,7 +87,8 @@ class PlantsDriftRepository {
     // 1. Tenta buscar pelo firebaseId (padrão)
     var plant = await (_db.select(
       _db.plants,
-    )..where((p) => p.firebaseId.equals(id))).getSingleOrNull();
+    )..where((p) => p.firebaseId.equals(id)))
+        .getSingleOrNull();
 
     // 2. Se não encontrou, tenta buscar pelo ID local (fallback para dados legados)
     if (plant == null) {
@@ -96,7 +96,8 @@ class PlantsDriftRepository {
       if (localId != null) {
         plant = await (_db.select(
           _db.plants,
-        )..where((p) => p.id.equals(localId))).getSingleOrNull();
+        )..where((p) => p.id.equals(localId)))
+            .getSingleOrNull();
       }
     }
 
@@ -108,14 +109,12 @@ class PlantsDriftRepository {
     final localSpaceId = await _resolveSpaceId(spaceFirebaseId);
     if (localSpaceId == null) return [];
 
-    final plants =
-        await (_db.select(_db.plants)
-              ..where(
-                (p) =>
-                    p.spaceId.equals(localSpaceId) & p.isDeleted.equals(false),
-              )
-              ..orderBy([(p) => OrderingTerm.asc(p.name)]))
-            .get();
+    final plants = await (_db.select(_db.plants)
+          ..where(
+            (p) => p.spaceId.equals(localSpaceId) & p.isDeleted.equals(false),
+          )
+          ..orderBy([(p) => OrderingTerm.asc(p.name)]))
+        .get();
 
     return plants.map(_plantDriftToModel).toList();
   }
@@ -124,17 +123,16 @@ class PlantsDriftRepository {
   Future<List<Plant>> searchPlants(String query) async {
     final searchTerm = '%${query.toLowerCase()}%';
 
-    final plants =
-        await (_db.select(_db.plants)
-              ..where(
-                (p) =>
-                    p.isDeleted.equals(false) &
-                    (p.name.lower().like(searchTerm) |
-                        p.species.lower().like(searchTerm) |
-                        p.notes.lower().like(searchTerm)),
-              )
-              ..orderBy([(p) => OrderingTerm.asc(p.name)]))
-            .get();
+    final plants = await (_db.select(_db.plants)
+          ..where(
+            (p) =>
+                p.isDeleted.equals(false) &
+                (p.name.lower().like(searchTerm) |
+                    p.species.lower().like(searchTerm) |
+                    p.notes.lower().like(searchTerm)),
+          )
+          ..orderBy([(p) => OrderingTerm.asc(p.name)]))
+        .get();
 
     return plants.map(_plantDriftToModel).toList();
   }
@@ -144,7 +142,7 @@ class PlantsDriftRepository {
   /// Atualiza planta existente ou insere se não existir (Upsert)
   Future<bool> updatePlant(PlantModel model) async {
     var localId = await _getLocalIdByFirebaseId(model.id);
-    
+
     // Se não existe, insere
     if (localId == null) {
       try {
@@ -152,10 +150,10 @@ class PlantsDriftRepository {
         return id > 0;
       } catch (e) {
         // Se falhar por constraint (race condition), tenta recuperar o ID novamente
-        if (e.toString().contains('UNIQUE constraint failed') || 
+        if (e.toString().contains('UNIQUE constraint failed') ||
             e.toString().contains('constraint failed')) {
-           localId = await _getLocalIdByFirebaseId(model.id);
-           if (localId == null) rethrow; // Se ainda for null, é outro erro
+          localId = await _getLocalIdByFirebaseId(model.id);
+          if (localId == null) rethrow; // Se ainda for null, é outro erro
         } else {
           rethrow;
         }
@@ -189,7 +187,8 @@ class PlantsDriftRepository {
 
     final updated = await (_db.update(
       _db.plants,
-    )..where((p) => p.id.equals(localId!))).write(companion);
+    )..where((p) => p.id.equals(localId!)))
+        .write(companion);
 
     return updated > 0;
   }
@@ -198,16 +197,16 @@ class PlantsDriftRepository {
 
   /// Soft delete
   Future<bool> deletePlant(String firebaseId) async {
-    final updated =
-        await (_db.update(
-          _db.plants,
-        )..where((p) => p.firebaseId.equals(firebaseId))).write(
-          db.PlantsCompanion(
-            isDeleted: const Value(true),
-            isDirty: const Value(true),
-            updatedAt: Value(DateTime.now()),
-          ),
-        );
+    final updated = await (_db.update(
+      _db.plants,
+    )..where((p) => p.firebaseId.equals(firebaseId)))
+        .write(
+      db.PlantsCompanion(
+        isDeleted: const Value(true),
+        isDirty: const Value(true),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
 
     return updated > 0;
   }
@@ -216,7 +215,8 @@ class PlantsDriftRepository {
   Future<bool> hardDeletePlant(String firebaseId) async {
     final deleted = await (_db.delete(
       _db.plants,
-    )..where((p) => p.firebaseId.equals(firebaseId))).go();
+    )..where((p) => p.firebaseId.equals(firebaseId)))
+        .go();
 
     return deleted > 0;
   }
@@ -272,7 +272,8 @@ class PlantsDriftRepository {
   Future<List<Plant>> getDirtyPlants() async {
     final plants = await (_db.select(
       _db.plants,
-    )..where((p) => p.isDirty.equals(true))).get();
+    )..where((p) => p.isDirty.equals(true)))
+        .get();
 
     return plants.map(_plantDriftToModel).toList();
   }
@@ -281,7 +282,8 @@ class PlantsDriftRepository {
   Future<void> markAsSynced(String firebaseId) async {
     await (_db.update(
       _db.plants,
-    )..where((p) => p.firebaseId.equals(firebaseId))).write(
+    )..where((p) => p.firebaseId.equals(firebaseId)))
+        .write(
       db.PlantsCompanion(
         isDirty: const Value(false),
         lastSyncAt: Value(DateTime.now()),
@@ -338,7 +340,8 @@ class PlantsDriftRepository {
     // Busca no banco pelo firebaseId
     final space = await (_db.select(
       _db.spaces,
-    )..where((s) => s.firebaseId.equals(spaceFirebaseId))).getSingleOrNull();
+    )..where((s) => s.firebaseId.equals(spaceFirebaseId)))
+        .getSingleOrNull();
 
     return space?.id;
   }
@@ -347,7 +350,8 @@ class PlantsDriftRepository {
   Future<int?> _getLocalIdByFirebaseId(String firebaseId) async {
     final plant = await (_db.select(
       _db.plants,
-    )..where((p) => p.firebaseId.equals(firebaseId))).getSingleOrNull();
+    )..where((p) => p.firebaseId.equals(firebaseId)))
+        .getSingleOrNull();
 
     return plant?.id;
   }

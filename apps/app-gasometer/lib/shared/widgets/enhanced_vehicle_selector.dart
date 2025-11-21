@@ -384,46 +384,41 @@ class _EnhancedVehicleSelectorState
           ? 'Veículo selecionado: ${selectedVehicle.brand} ${selectedVehicle.model}, ${selectedVehicle.licensePlate}'
           : 'Selecionar veículo',
       button: true,
-      child: AnimatedBuilder(
-        animation: _scaleAnimation,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: selectedVehicle != null
-                        ? Theme.of(
-                            context,
-                          ).colorScheme.primary.withValues(alpha: 0.5)
-                        : Theme.of(
-                            context,
-                          ).colorScheme.outline.withValues(alpha: 0.3),
-                    width: selectedVehicle != null ? 2.0 : 1.5,
-                  ),
-                  borderRadius: BorderRadius.circular(AppRadius.large),
-                  color: Theme.of(context).colorScheme.surface,
-                  boxShadow: [
-                    BoxShadow(
-                      color: selectedVehicle != null
-                          ? Theme.of(
-                              context,
-                            ).colorScheme.primary.withValues(alpha: 0.1)
-                          : Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: 0.05),
-                      blurRadius: selectedVehicle != null ? 12 : 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: 64),
-                    child: DropdownButtonFormField<String>(
+      child: FadeTransition(
+        opacity: _fadeAnimation,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: selectedVehicle != null
+                  ? Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.5)
+                  : Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.3),
+              width: selectedVehicle != null ? 2.0 : 1.5,
+            ),
+            borderRadius: BorderRadius.circular(15),
+            color: Theme.of(context).colorScheme.surface,
+            boxShadow: [
+              BoxShadow(
+                color: selectedVehicle != null
+                    ? Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.1)
+                    : Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.05),
+                blurRadius: selectedVehicle != null ? 8 : 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 64),
+              child: DropdownButtonFormField<String>(
                       initialValue: _currentSelectedVehicleId,
                       isDense: true,
                       decoration: InputDecoration(
@@ -798,9 +793,6 @@ class _EnhancedVehicleSelectorState
                 ),
               ),
             ),
-          );
-        },
-      ),
     );
   }
 }

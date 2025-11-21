@@ -16,7 +16,7 @@ import 'package:core/core.dart';
 /// - Lifecycle-aware (can be paused/resumed)
 class AutoSyncService {
   AutoSyncService({required ConnectivityService connectivityService})
-    : _connectivityService = connectivityService;
+      : _connectivityService = connectivityService;
 
   final ConnectivityService _connectivityService;
 

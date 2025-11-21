@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../../core/di/injection_container.dart';
+import '../../../../../../core/extensions/diagnostico_drift_extension.dart';
 import '../../../../../../core/theme/spacing_tokens.dart';
 import '../../../../../../database/receituagro_database.dart';
 import '../../../../../../database/repositories/pragas_repository.dart';
@@ -93,19 +94,20 @@ class _DiagnosticoDefensivoListItemWidgetState
           nomePragaModel.isNotEmpty &&
           nomePragaModel != 'Não especificado') {
         nomeComumPraga = nomePragaModel;
-      } else if (_pragaData != null) {
-        final nomeComumCompleto = _pragaData!.nome;
-        if (nomeComumCompleto.contains(',')) {
-          nomeComumPraga = nomeComumCompleto.split(',').first.trim();
-        } else if (nomeComumCompleto.contains(';')) {
-          nomeComumPraga = nomeComumCompleto.split(';').first.trim();
-        } else {
-          nomeComumPraga = nomeComumCompleto;
-        }
       }
     }
-
+    
+    // Sobrescreve com dados da praga carregada se disponível
     if (_pragaData != null) {
+      final nomeComumCompleto = _pragaData!.nome;
+      if (nomeComumCompleto.contains(',')) {
+        nomeComumPraga = nomeComumCompleto.split(',').first.trim();
+      } else if (nomeComumCompleto.contains(';')) {
+        nomeComumPraga = nomeComumCompleto.split(';').first.trim();
+      } else {
+        nomeComumPraga = nomeComumCompleto;
+      }
+      
       nomeCientificoPraga = _pragaData!.nomeLatino ?? '';
     }
 
@@ -274,7 +276,28 @@ class _DiagnosticoDefensivoListItemWidgetState
   /// Helper para extrair propriedades com fallbacks
   String? _getProperty(String primaryKey, [String? fallbackKey]) {
     try {
-      if (widget.diagnostico is Map<String, dynamic>) {
+      if (widget.diagnostico is Diagnostico) {
+        final diag = widget.diagnostico as Diagnostico;
+        switch (primaryKey) {
+          case 'dosagem':
+            return diag.displayDosagem;
+          case 'fkIdPraga':
+          case 'idPraga':
+            return diag.pragaId.toString();
+          case 'fkIdCultura':
+          case 'idCultura':
+            return diag.culturaId.toString();
+          case 'idDefensivo':
+            return diag.defensivoId.toString();
+          case 'nomePraga':
+          case 'grupo':
+            // Retorna null para forçar o carregamento via pragaId no initState/build
+            return null; 
+          default:
+            // Tenta acessar propriedades diretas se existirem
+            return _getObjectProperty(diag, primaryKey)?.toString();
+        }
+      } else if (widget.diagnostico is Map<String, dynamic>) {
         final map = widget.diagnostico as Map<String, dynamic>;
         return map[primaryKey]?.toString() ??
             (fallbackKey != null ? map[fallbackKey]?.toString() : null);

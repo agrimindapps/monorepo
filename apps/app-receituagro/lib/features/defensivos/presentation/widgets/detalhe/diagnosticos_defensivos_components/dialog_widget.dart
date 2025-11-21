@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../../../../../core/di/injection_container.dart';
+import '../../../../../../core/extensions/diagnostico_drift_extension.dart';
 import '../../../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../../../core/widgets/praga_image_widget.dart';
 import '../../../../../../database/receituagro_database.dart';
@@ -88,7 +89,37 @@ class _DiagnosticoDefensivoDialogWidgetState
   /// Helper para extrair propriedades do diagnóstico
   String? _getProperty(String primaryKey, [String? secondaryKey]) {
     try {
-      if (widget.diagnostico is Map<String, dynamic>) {
+      if (widget.diagnostico is Diagnostico) {
+        final diag = widget.diagnostico as Diagnostico;
+        switch (primaryKey) {
+          case 'dosagem':
+            return diag.displayDosagem;
+          case 'aplicacaoTerrestre':
+            return diag.displayVazaoTerrestre;
+          case 'aplicacaoAerea':
+            return diag.displayVazaoAerea;
+          case 'intervaloDias':
+            return diag.displayIntervaloAplicacao;
+          case 'pragaId':
+          case 'fkIdPraga':
+          case 'idPraga':
+            return diag.pragaId.toString();
+          case 'id':
+          case 'idReg':
+          case 'objectId':
+            return diag.idReg;
+          case 'nomeDefensivo':
+          case 'nome':
+            // Será carregado assincronamente se necessário, ou retornado se já disponível
+            return null; 
+          case 'nomePraga':
+          case 'grupo':
+             // Será carregado via pragaId
+             return null;
+          default:
+             return null;
+        }
+      } else if (widget.diagnostico is Map<String, dynamic>) {
         final map = widget.diagnostico as Map<String, dynamic>;
         return map[primaryKey]?.toString() ??
             (secondaryKey != null ? map[secondaryKey]?.toString() : null);
@@ -221,7 +252,7 @@ class _DiagnosticoDefensivoDialogWidgetState
   Widget _buildModernHeader(BuildContext context) {
     final theme = Theme.of(context);
     final nomeDefensivo =
-        _getProperty('nomeDefensivo', 'nome') ?? 'Defensivo não identificado';
+        _getProperty('nomeDefensivo', 'nome') ?? widget.defensivoName;
     final ingredienteAtivo =
         _getProperty('ingredienteAtivo') ??
         'Ingrediente ativo não especificado';
@@ -276,8 +307,12 @@ class _DiagnosticoDefensivoDialogWidgetState
   /// Seção da imagem da praga
   Widget _buildPragaImageSection(BuildContext context) {
     final theme = Theme.of(context);
-    final nomePraga =
+    String nomePraga =
         _getProperty('nomePraga', 'grupo') ?? 'Praga não identificada';
+        
+    if (_pragaData != null) {
+      nomePraga = _pragaData!.nome;
+    }
 
     return Container(
       padding: const EdgeInsets.all(16),

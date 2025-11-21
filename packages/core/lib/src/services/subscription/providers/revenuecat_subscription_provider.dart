@@ -39,7 +39,11 @@ class RevenueCatSubscriptionProvider implements ISubscriptionDataProvider {
   RevenueCatSubscriptionProvider({
     required ISubscriptionRepository subscriptionRepository,
   }) : _subscriptionRepository = subscriptionRepository {
-    _initializeStream();
+    if (!kIsWeb) {
+      _initializeStream();
+    } else {
+      _log('Web platform detected: RevenueCat provider disabled');
+    }
   }
 
   final ISubscriptionRepository _subscriptionRepository;
@@ -62,10 +66,15 @@ class RevenueCatSubscriptionProvider implements ISubscriptionDataProvider {
   int get priority => 100; // Highest priority
 
   @override
-  bool get isEnabled => _isEnabled;
+  bool get isEnabled => _isEnabled && !kIsWeb;
 
   @override
   Future<Either<Failure, SubscriptionEntity?>> fetch() async {
+    if (kIsWeb) {
+      _log('Web platform: fetch skipped');
+      return const Right(null);
+    }
+
     try {
       _log('Fetching subscription from RevenueCat');
 
@@ -99,6 +108,11 @@ class RevenueCatSubscriptionProvider implements ISubscriptionDataProvider {
 
   @override
   Future<void> initialize() async {
+    if (kIsWeb) {
+      _log('Web platform: initialization skipped');
+      return;
+    }
+
     _log('Initializing provider');
     _initializeStream();
 

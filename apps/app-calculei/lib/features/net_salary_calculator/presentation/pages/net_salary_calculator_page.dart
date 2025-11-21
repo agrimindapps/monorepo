@@ -6,17 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:app_calculei/core/style/shadcn_style.dart';
+import 'package:app_calculei/core/presentation/widgets/calculator_layout.dart';
 import '../../domain/usecases/calculate_net_salary_usecase.dart';
 import '../providers/net_salary_calculator_provider.dart';
 import '../widgets/net_salary_input_form.dart';
 import '../widgets/net_salary_result_card.dart';
 
 /// Page for calculating net salary (Salário Líquido)
-///
-/// Follows Clean Architecture:
-/// - Presentation layer only
-/// - Uses Riverpod for state management
-/// - Delegates business logic to use cases
 class NetSalaryCalculatorPage extends ConsumerStatefulWidget {
   const NetSalaryCalculatorPage({super.key});
 
@@ -33,138 +29,148 @@ class _NetSalaryCalculatorPageState
   Widget build(BuildContext context) {
     final state = ref.watch(netSalaryCalculatorNotifierProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+    return CalculatorLayout(
+      title: 'Cálculo de Salário Líquido',
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.info_outline),
+          onPressed: () => _showInfo(context),
         ),
-        title: const Row(
-          children: [
-            Icon(Icons.monetization_on, color: Colors.orange),
-            SizedBox(width: 8),
-            Text('Cálculo de Salário Líquido'),
-          ],
+      ],
+      inputForm: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () => _showInfo(context),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Dados do Cálculo',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: ShadcnStyle.textColor,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Input Form
+              NetSalaryInputForm(
+                formKey: _formKey,
+                onCalculate: _handleCalculate,
+              ),
+
+              const SizedBox(height: 24),
+
+              // Action Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // Input Form Card
-                  Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Calcule seu salário líquido',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: ShadcnStyle.textColor,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Input Form
-                          NetSalaryInputForm(
-                            formKey: _formKey,
-                            onCalculate: _handleCalculate,
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          // Action Buttons
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              TextButton.icon(
-                                onPressed: _handleClear,
-                                icon: const Icon(Icons.clear),
-                                label: const Text('Limpar'),
-                                style: ShadcnStyle.textButtonStyle,
-                              ),
-                              const SizedBox(width: 16),
-                              ElevatedButton.icon(
-                                onPressed:
-                                    state.isLoading ? null : _handleSubmit,
-                                icon: state.isLoading
-                                    ? const SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : const Icon(Icons.calculate),
-                                label: Text(
-                                  state.isLoading ? 'Calculando...' : 'Calcular',
-                                ),
-                                style: ShadcnStyle.primaryButtonStyle,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                  TextButton.icon(
+                    onPressed: _handleClear,
+                    icon: const Icon(Icons.clear),
+                    label: const Text('Limpar'),
+                    style: ShadcnStyle.textButtonStyle,
                   ),
-
-                  // Error Message
-                  if (state.errorMessage != null) ...[
-                    const SizedBox(height: 16),
-                    Card(
-                      color: Colors.red.shade50,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.error, color: Colors.red),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                state.errorMessage!,
-                                style: const TextStyle(color: Colors.red),
-                              ),
+                  const SizedBox(width: 16),
+                  ElevatedButton.icon(
+                    onPressed: state.isLoading ? null : _handleSubmit,
+                    icon: state.isLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
                             ),
-                          ],
-                        ),
-                      ),
+                          )
+                        : const Icon(Icons.calculate),
+                    label: Text(
+                      state.isLoading ? 'Calculando...' : 'Calcular',
                     ),
-                  ],
-
-                  // Result Card
-                  if (state.calculation != null) ...[
-                    const SizedBox(height: 24),
-                    AnimatedOpacity(
-                      opacity: state.calculation != null ? 1.0 : 0.0,
-                      duration: const Duration(milliseconds: 500),
-                      child: NetSalaryResultCard(
-                        calculation: state.calculation!,
-                      ),
-                    ),
-                  ],
+                    style: ShadcnStyle.primaryButtonStyle,
+                  ),
                 ],
               ),
-            ),
+
+              // Error Message
+              if (state.errorMessage != null) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red.shade100),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.red),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          state.errorMessage!,
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
           ),
+        ),
+      ),
+      resultCard: state.calculation != null
+          ? NetSalaryResultCard(calculation: state.calculation!)
+          : _buildEmptyState(context),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Card(
+      elevation: 0,
+      color: Theme.of(context)
+          .colorScheme
+          .surfaceContainerHighest
+          .withOpacity(0.3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+        ),
+      ),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.calculate_outlined,
+              size: 64,
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'O resultado aparecerá aqui',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Preencha os dados ao lado e clique em calcular.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          ],
         ),
       ),
     );
@@ -177,16 +183,12 @@ class _NetSalaryCalculatorPageState
   }
 
   void _handleCalculate(CalculateNetSalaryParams params) {
-    ref
-        .read(netSalaryCalculatorNotifierProvider.notifier)
-        .calculate(params);
+    ref.read(netSalaryCalculatorNotifierProvider.notifier).calculate(params);
   }
 
   void _handleClear() {
     _formKey.currentState?.reset();
-    ref
-        .read(netSalaryCalculatorNotifierProvider.notifier)
-        .clearCalculation();
+    ref.read(netSalaryCalculatorNotifierProvider.notifier).clearCalculation();
   }
 
   void _showInfo(BuildContext context) {

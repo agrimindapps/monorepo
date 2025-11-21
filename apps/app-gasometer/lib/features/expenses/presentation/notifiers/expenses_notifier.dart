@@ -64,7 +64,7 @@ class ExpensesNotifier extends _$ExpensesNotifier {
     _addExpenseUseCase = ref.watch(addExpenseUseCaseProvider);
     _updateExpenseUseCase = ref.watch(updateExpenseUseCaseProvider);
     _deleteExpenseUseCase = ref.watch(deleteExpenseUseCaseProvider);
-    _loadInitialData();
+    Future.microtask(() => _loadInitialData());
 
     return ExpensesState.initial();
   }

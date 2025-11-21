@@ -5,16 +5,12 @@ import '../../core/di/injection_container.dart' as di;
 import '../../core/services/device_identity_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/responsive_content_wrapper.dart';
-import 'constants/settings_design_tokens.dart';
 import 'presentation/providers/settings_notifier.dart';
-import 'widgets/dialogs/theme_selection_dialog.dart';
 import 'widgets/sections/auth_section.dart';
 import 'widgets/sections/feature_flags_section.dart';
 import 'widgets/sections/legal_section.dart';
-import 'widgets/sections/new_device_section.dart';
 import 'widgets/sections/new_notification_section.dart';
 import 'widgets/sections/new_premium_section.dart';
-import 'widgets/sections/new_theme_section.dart';
 import 'widgets/sections/support_section.dart';
 import 'widgets/sections/tts_settings_section.dart';
 
@@ -111,11 +107,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         AuthSection(),
         SizedBox(height: 8),
         // New refactored sections using new notifiers
-        NewThemeSection(),
-        SizedBox(height: 8),
         NewNotificationSection(),
-        SizedBox(height: 8),
-        NewDeviceSection(),
         SizedBox(height: 8),
         NewPremiumSection(),
         SizedBox(height: 8),
@@ -139,33 +131,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       showBackButton: false,
       showActions: true,
       isDark: isDark,
-      additionalActions: [_buildThemeSettingsButton(context)],
-    );
-  }
-
-  Widget _buildThemeSettingsButton(BuildContext context) {
-    return Semantics(
-      label: 'Configurações de tema',
-      hint: 'Toque para abrir as opções de tema',
-      button: true,
-      child: GestureDetector(
-        onTap: () => _openThemeDialog(context),
-        child: Padding(
-          padding: const EdgeInsets.all(9),
-          child: Icon(
-            SettingsDesignTokens.paletteIcon,
-            color: Theme.of(context).colorScheme.onPrimary,
-            size: 17,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _openThemeDialog(BuildContext context) async {
-    await showDialog<void>(
-      context: context,
-      builder: (context) => const ThemeSelectionDialog(),
     );
   }
 

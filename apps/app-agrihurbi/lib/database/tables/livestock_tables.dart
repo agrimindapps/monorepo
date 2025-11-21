@@ -67,6 +67,7 @@ class Bovines extends Table {
   Set<Column> get primaryKey => {id};
 
   // Índices para otimizar buscas
+  /*
   @override
   List<Index> get indexes => [
     Index('bovines_breed', [breed]),
@@ -74,6 +75,7 @@ class Bovines extends Table {
     Index('bovines_breeding_system', [breedingSystem]),
     Index('bovines_is_active', [isActive]),
   ];
+  */
 }
 
 /// Tabela de Equinos (Cavalos)
@@ -137,6 +139,7 @@ class Equines extends Table {
   Set<Column> get primaryKey => {id};
 
   // Índices para otimizar buscas
+  /*
   @override
   List<Index> get indexes => [
     Index('equines_temperament', [temperament]),
@@ -144,4 +147,5 @@ class Equines extends Table {
     Index('equines_primary_use', [primaryUse]),
     Index('equines_is_active', [isActive]),
   ];
+  */
 }

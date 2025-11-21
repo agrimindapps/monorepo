@@ -35,15 +35,15 @@ enum ConstructionCalcType {
   String get route {
     switch (this) {
       case ConstructionCalcType.materialsQuantity:
-        return '/construction/materials-quantity';
+        return '/calculators/construction/materials-quantity';
       case ConstructionCalcType.costPerSquareMeter:
-        return '/construction/cost-per-sqm';
+        return '/calculators/construction/cost-per-sqm';
       case ConstructionCalcType.paintConsumption:
-        return '/construction/paint-consumption';
+        return '/calculators/construction/paint-consumption';
       case ConstructionCalcType.flooring:
-        return '/construction/flooring';
+        return '/calculators/construction/flooring';
       case ConstructionCalcType.concrete:
-        return '/construction/concrete';
+        return '/calculators/construction/concrete';
     }
   }
 }

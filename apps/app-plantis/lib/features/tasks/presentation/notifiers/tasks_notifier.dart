@@ -8,11 +8,13 @@ import '../../../../core/services/notification_permission_status.dart';
 import '../../../../core/services/task_notification_service.dart';
 import '../../domain/entities/task.dart' as task_entity;
 import '../../domain/services/task_filter_service.dart';
+import '../../domain/services/task_ownership_validator.dart';
+import '../../domain/usecases/add_task_usecase.dart';
+import '../../domain/usecases/complete_task_usecase.dart';
+import '../../domain/usecases/get_task_by_id_usecase.dart';
 import '../../domain/usecases/get_tasks_usecase.dart';
 import '../providers/tasks_providers.dart';
 import '../providers/tasks_state.dart';
-import 'tasks_crud_notifier.dart';
-import 'tasks_query_notifier.dart';
 
 part 'tasks_notifier.g.dart';
 
@@ -23,26 +25,34 @@ part 'tasks_notifier.g.dart';
 /// - Coordinate between specialized notifiers
 /// - Authentication state management
 /// - Notification service management
+/// - CRUD operations (Merged from TasksCrudNotifier to fix state split)
 ///
 /// Delegates to specialized notifiers:
-/// - TasksCrudNotifier: ADD, UPDATE, DELETE, GET
 /// - TasksQueryNotifier: LIST, SEARCH, FILTER
 /// - TasksScheduleNotifier: RECURRING, REMINDERS, SCHEDULING
 /// - TasksRecommendationNotifier: RECOMMENDATIONS, SUGGESTIONS
 @riverpod
 class TasksNotifier extends _$TasksNotifier {
   late final GetTasksUseCase _getTasksUseCase;
+  late final AddTaskUseCase _addTaskUseCase;
+  late final CompleteTaskUseCase _completeTaskUseCase;
+  late final GetTaskByIdUseCase _getTaskByIdUseCase;
   late final TaskNotificationService _notificationService;
   late final AuthStateNotifier _authStateNotifier;
   late final ITaskFilterService _filterService;
+  late final ITaskOwnershipValidator _ownershipValidator;
   StreamSubscription<UserEntity?>? _authSubscription;
 
   @override
   Future<TasksState> build() async {
     _getTasksUseCase = ref.read(getTasksUseCaseProvider);
+    _addTaskUseCase = ref.read(addTaskUseCaseProvider);
+    _completeTaskUseCase = ref.read(completeTaskUseCaseProvider);
+    _getTaskByIdUseCase = ref.read(getTaskByIdUseCaseProvider);
     _notificationService = TaskNotificationService();
     _authStateNotifier = AuthStateNotifier.instance;
     _filterService = ref.read(taskFilterServiceProvider);
+    _ownershipValidator = ref.read(taskOwnershipValidatorProvider);
 
     await _initializeNotificationService();
     _initializeAuthListener();
@@ -180,46 +190,259 @@ class TasksNotifier extends _$TasksNotifier {
     }
   }
 
-  /// Delegates to specialized CRUD notifier
+  /// Adds a new task with offline support
   Future<bool> addTask(task_entity.Task task) async {
-    return await ref.read(tasksCrudNotifierProvider.notifier).addTask(task);
+    try {
+      final currentUser = _authStateNotifier.currentUser;
+      if (currentUser == null) {
+        _updateState(
+          (current) => current.copyWith(
+            errorMessage: 'Você deve estar autenticado para criar tarefas',
+          ),
+        );
+        return false;
+      }
+
+      final taskWithUser = task.withUserId(currentUser.id);
+      final result = await _addTaskUseCase(AddTaskParams(task: taskWithUser));
+
+      return result.fold(
+        (failure) {
+          if (_isNetworkFailure(failure)) {
+            _addOptimisticTask(taskWithUser);
+            return true;
+          } else {
+            _updateState(
+              (current) => current.copyWith(errorMessage: failure.userMessage),
+            );
+            return false;
+          }
+        },
+        (addedTask) {
+          _addTaskToState(addedTask);
+          return true;
+        },
+      );
+    } catch (e) {
+      debugPrint('❌ TasksNotifier.addTask error: $e');
+      return false;
+    }
   }
 
-  /// Delegates to specialized CRUD notifier
+  /// Completes a task with ownership validation
   Future<bool> completeTask(String taskId, {String? notes}) async {
-    return await ref
-        .read(tasksCrudNotifierProvider.notifier)
-        .completeTask(taskId, notes: notes);
+    try {
+      final task = await _getTaskWithOwnershipValidation(taskId);
+      final result = await _completeTaskUseCase(
+        CompleteTaskParams(taskId: taskId, notes: notes),
+      );
+
+      return result.fold(
+        (failure) {
+          if (_isNetworkFailure(failure)) {
+            _completeTaskOptimistically(task, notes);
+            return true;
+          } else {
+            _updateState(
+              (current) => current.copyWith(errorMessage: failure.userMessage),
+            );
+            return false;
+          }
+        },
+        (completedTask) {
+          _updateTaskInState(completedTask);
+          return true;
+        },
+      );
+    } on UnauthorizedAccessException catch (e) {
+      _updateState((current) => current.copyWith(errorMessage: e.message));
+      return false;
+    } catch (e) {
+      debugPrint('❌ TasksNotifier.completeTask error: $e');
+      return false;
+    }
   }
 
-  /// Delegates to specialized Query notifier
+  /// Helper: Get task with ownership validation
+  Future<task_entity.Task> _getTaskWithOwnershipValidation(
+      String taskId) async {
+    final currentState = state.valueOrNull ?? TasksState.initial();
+
+    // 1. Try to find in local state first (fastest)
+    final localTask = currentState.allTasks
+        .whereType<task_entity.Task>()
+        .cast<task_entity.Task?>()
+        .firstWhere(
+          (t) => t?.id == taskId,
+          orElse: () => null,
+        );
+
+    if (localTask != null) {
+      _ownershipValidator.validateOwnershipOrThrow(localTask);
+      return localTask;
+    }
+
+    // 2. If not found locally, fetch from repository
+    final result = await _getTaskByIdUseCase(taskId);
+
+    return result.fold(
+      (failure) => throw Exception('Task not found: $taskId'),
+      (task) {
+        _ownershipValidator.validateOwnershipOrThrow(task);
+        return task;
+      },
+    );
+  }
+
+  /// Helper: Add optimistic task for offline support
+  void _addOptimisticTask(task_entity.Task task) {
+    final optimisticTask = task.copyWith(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      isDirty: true,
+    );
+    _addTaskToState(optimisticTask);
+  }
+
+  /// Helper: Add task to current state
+  void _addTaskToState(task_entity.Task task) {
+    final currentState = state.valueOrNull ?? TasksState.initial();
+    final updatedTasks = List<task_entity.Task>.from(currentState.allTasks)
+      ..add(task);
+    final filteredTasks = _applyCurrentFilters(updatedTasks);
+
+    _updateState(
+      (current) => current.copyWith(
+        allTasks: updatedTasks,
+        filteredTasks: filteredTasks,
+        errorMessage: null,
+      ),
+    );
+  }
+
+  /// Helper: Update task in state
+  void _updateTaskInState(task_entity.Task task) {
+    final currentState = state.valueOrNull ?? TasksState.initial();
+    final updatedTasks = currentState.allTasks
+        .whereType<task_entity.Task>()
+        .map((t) => t.id == task.id ? task : t)
+        .toList();
+
+    final filteredTasks = _applyCurrentFilters(updatedTasks);
+
+    _updateState(
+      (current) => current.copyWith(
+        allTasks: updatedTasks,
+        filteredTasks: filteredTasks,
+        errorMessage: null,
+      ),
+    );
+  }
+
+  /// Helper: Complete task optimistically
+  void _completeTaskOptimistically(
+    task_entity.Task task,
+    String? notes,
+  ) {
+    final completedTask = task.copyWithTaskData(
+      status: task_entity.TaskStatus.completed,
+      completedAt: DateTime.now(),
+      completionNotes: notes,
+    );
+    _updateTaskInState(completedTask);
+  }
+
+  /// Helper: Apply current filters to task list
+  List<task_entity.Task> _applyCurrentFilters(
+    List<task_entity.Task> tasks,
+  ) {
+    final currentState = state.valueOrNull ?? TasksState.initial();
+    return _filterService.applyFilters(
+      tasks,
+      currentState.currentFilter,
+      currentState.searchQuery,
+      currentState.selectedPlantId,
+      currentState.selectedTaskTypes,
+      currentState.selectedPriorities,
+    );
+  }
+
+  /// Helper: Check if failure is network-related
+  bool _isNetworkFailure(Failure failure) {
+    return failure is NetworkFailure ||
+        failure.toString().contains('NetworkException');
+  }
+
+  /// Searches tasks by query string
   void searchTasks(String query) {
-    ref.read(tasksQueryNotifierProvider.notifier).searchTasks(query);
-    _syncQueryStateToRoot();
+    final currentState = state.valueOrNull ?? TasksState.initial();
+    if (currentState.allTasks.isEmpty) return;
+
+    _updateState(
+      (current) => current.copyWith(
+        searchQuery: query,
+        filteredTasks: _applyAllFilters(
+          current.allTasks,
+          query,
+          current.currentFilter,
+          current.selectedPlantId,
+          current.selectedTaskTypes,
+          current.selectedPriorities,
+        ),
+      ),
+    );
   }
 
-  /// Delegates to specialized Query notifier
-  void setFilter(TasksFilterType filter, {String? plantId}) {
-    ref
-        .read(tasksQueryNotifierProvider.notifier)
-        .setFilter(filter, plantId: plantId);
-    _syncQueryStateToRoot();
+  /// Sets task type filter
+  void setFilter(
+    TasksFilterType filter, {
+    String? plantId,
+  }) {
+    final currentState = state.valueOrNull ?? TasksState.initial();
+    if (currentState.allTasks.isEmpty) return;
+
+    _updateState(
+      (current) => current.copyWith(
+        currentFilter: filter,
+        selectedPlantId: plantId,
+        filteredTasks: _applyAllFilters(
+          current.allTasks,
+          current.searchQuery,
+          filter,
+          plantId,
+          current.selectedTaskTypes,
+          current.selectedPriorities,
+        ),
+      ),
+    );
   }
 
-  /// Delegates to specialized Query notifier
+  /// Sets advanced filters for multiple criteria
   void setAdvancedFilters({
     List<task_entity.TaskType>? taskTypes,
     List<task_entity.TaskPriority>? priorities,
     String? plantId,
   }) {
-    ref
-        .read(tasksQueryNotifierProvider.notifier)
-        .setAdvancedFilters(
-          taskTypes: taskTypes,
-          priorities: priorities,
-          plantId: plantId,
-        );
-    _syncQueryStateToRoot();
+    final currentState = state.valueOrNull ?? TasksState.initial();
+    if (currentState.allTasks.isEmpty) return;
+
+    final newTaskTypes = taskTypes ?? currentState.selectedTaskTypes;
+    final newPriorities = priorities ?? currentState.selectedPriorities;
+
+    _updateState(
+      (current) => current.copyWith(
+        selectedTaskTypes: newTaskTypes,
+        selectedPriorities: newPriorities,
+        selectedPlantId: plantId ?? current.selectedPlantId,
+        filteredTasks: _applyAllFilters(
+          current.allTasks,
+          current.searchQuery,
+          current.currentFilter,
+          plantId ?? current.selectedPlantId,
+          newTaskTypes,
+          newPriorities,
+        ),
+      ),
+    );
   }
 
   /// Refreshes tasks from the remote data source with visual feedback
@@ -240,6 +463,26 @@ class TasksNotifier extends _$TasksNotifier {
   void setPlantFilter(String? plantId) {
     setFilter(TasksFilterType.byPlant, plantId: plantId);
   }
+
+  /// Helper: Apply all filters to task list
+  List<task_entity.Task> _applyAllFilters(
+    List<task_entity.Task> tasks,
+    String searchQuery,
+    TasksFilterType filter,
+    String? plantId,
+    List<task_entity.TaskType> taskTypes,
+    List<task_entity.TaskPriority> priorities,
+  ) {
+    return _filterService.applyFilters(
+      tasks,
+      filter,
+      searchQuery,
+      plantId,
+      taskTypes,
+      priorities,
+    );
+  }
+
 
   /// Initializes the notification service with comprehensive setup
   Future<void> _initializeNotificationService() async {
@@ -285,21 +528,6 @@ class TasksNotifier extends _$TasksNotifier {
   /// Returns the count of currently scheduled notifications
   Future<int> getScheduledNotificationsCount() async {
     return await _notificationService.getScheduledNotificationsCount();
-  }
-
-  /// Helper: Sync query state to root
-  void _syncQueryStateToRoot() {
-    final queryState = ref.read(tasksQueryNotifierProvider);
-    _updateState(
-      (current) => current.copyWith(
-        searchQuery: queryState.searchQuery,
-        currentFilter: queryState.currentFilter,
-        selectedPlantId: queryState.selectedPlantId,
-        selectedTaskTypes: queryState.selectedTaskTypes,
-        selectedPriorities: queryState.selectedPriorities,
-        filteredTasks: queryState.filteredTasks,
-      ),
-    );
   }
 
   /// Helper: Update state

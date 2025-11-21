@@ -98,6 +98,8 @@ class RevenueCatService implements ISubscriptionRepository, IDisposableService {
 
   @override
   Future<Either<Failure, bool>> hasActiveSubscription() async {
+    if (kIsWeb) return const Right(false);
+
     try {
       await _ensureInitialized();
 
@@ -115,6 +117,8 @@ class RevenueCatService implements ISubscriptionRepository, IDisposableService {
 
   @override
   Future<Either<Failure, core_entities.SubscriptionEntity?>> getCurrentSubscription() async {
+    if (kIsWeb) return const Right(null);
+
     try {
       await _ensureInitialized();
 
@@ -131,6 +135,8 @@ class RevenueCatService implements ISubscriptionRepository, IDisposableService {
 
   @override
   Future<Either<Failure, List<core_entities.SubscriptionEntity>>> getUserSubscriptions() async {
+    if (kIsWeb) return const Right([]);
+
     try {
       await _ensureInitialized();
       
@@ -165,6 +171,8 @@ class RevenueCatService implements ISubscriptionRepository, IDisposableService {
   Future<Either<Failure, List<ProductInfo>>> getAvailableProducts({
     required List<String> productIds,
   }) async {
+    if (kIsWeb) return const Right([]);
+
     try {
       debugPrint('🔍 [RevenueCat] Buscando produtos: ${productIds.join(", ")}');
 
@@ -218,6 +226,10 @@ class RevenueCatService implements ISubscriptionRepository, IDisposableService {
   Future<Either<Failure, core_entities.SubscriptionEntity>> purchaseProduct({
     required String productId,
   }) async {
+    if (kIsWeb) {
+      return const Left(SubscriptionPaymentFailure('Compras não disponíveis na web'));
+    }
+
     try {
       await _ensureInitialized();
 
@@ -262,6 +274,8 @@ class RevenueCatService implements ISubscriptionRepository, IDisposableService {
 
   @override
   Future<Either<Failure, List<core_entities.SubscriptionEntity>>> restorePurchases() async {
+    if (kIsWeb) return const Right([]);
+
     try {
       await _ensureInitialized();
       
@@ -289,6 +303,8 @@ class RevenueCatService implements ISubscriptionRepository, IDisposableService {
     required String userId,
     Map<String, String>? attributes,
   }) async {
+    if (kIsWeb) return const Right(null);
+
     try {
       await _ensureInitialized();
       
@@ -310,6 +326,8 @@ class RevenueCatService implements ISubscriptionRepository, IDisposableService {
   Future<Either<Failure, void>> setUserAttributes({
     required Map<String, String> attributes,
   }) async {
+    if (kIsWeb) return const Right(null);
+
     try {
       await _ensureInitialized();
       
@@ -326,6 +344,8 @@ class RevenueCatService implements ISubscriptionRepository, IDisposableService {
   Future<Either<Failure, bool>> isEligibleForTrial({
     required String productId,
   }) async {
+    if (kIsWeb) return const Right(false);
+
     try {
       await _ensureInitialized();
       final hasActive = await hasActiveSubscription();
@@ -341,6 +361,8 @@ class RevenueCatService implements ISubscriptionRepository, IDisposableService {
 
   @override
   Future<Either<Failure, String?>> getManagementUrl() async {
+    if (kIsWeb) return const Right(null);
+
     try {
       await _ensureInitialized();
       

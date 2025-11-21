@@ -3,13 +3,11 @@ import 'package:gasometer_drift/features/auth/presentation/state/auth_state.dart
 import 'package:gasometer_drift/features/auth/domain/entities/user_entity.dart';
 import 'package:gasometer_drift/features/vehicles/presentation/pages/add_vehicle_page.dart';
 import 'package:gasometer_drift/features/vehicles/presentation/providers/vehicles_notifier.dart';
-import 'package:gasometer_drift/features/vehicles/presentation/state/vehicles_state.dart';
 import 'package:gasometer_drift/features/vehicles/domain/entities/vehicle_entity.dart';
 import 'package:core/core.dart' hide AuthState, AuthStatus, UserEntity;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 
 class MockVehiclesNotifier extends VehiclesNotifier {
   @override
@@ -26,13 +24,10 @@ class MockVehiclesNotifier extends VehiclesNotifier {
   Future<VehicleEntity> updateVehicle(VehicleEntity vehicle) async {
     return vehicle;
   }
-  
+
   @override
   Future<void> deleteVehicle(String vehicleId) async {}
-  
-  @override
-  Future<void> loadVehicles() async {}
-  
+
   @override
   Future<VehicleEntity?> getVehicleById(String id) async => null;
 }
@@ -72,7 +67,7 @@ void main() {
         authProvider.overrideWith(() => MockAuth()),
       ],
     );
-    
+
     await tester.pumpWidget(createWidgetUnderTest(container));
     await tester.pumpAndSettle();
 
@@ -82,7 +77,9 @@ void main() {
     expect(find.text('Salvar'), findsOneWidget);
   });
 
-  testWidgets('AddVehiclePage shows validation errors and focuses on first error', (tester) async {
+  testWidgets(
+      'AddVehiclePage shows validation errors and focuses on first error',
+      (tester) async {
     final container = ProviderContainer(
       overrides: [
         vehiclesNotifierProvider.overrideWith(() => MockVehiclesNotifier()),
@@ -104,14 +101,14 @@ void main() {
     // Find the TextField that corresponds to 'Marca'
     final textFields = find.byType(TextField);
     TextField? brandTextField;
-    
+
     for (final widget in tester.widgetList<TextField>(textFields)) {
       if (widget.decoration?.labelText?.contains('Marca') == true) {
         brandTextField = widget;
         break;
       }
     }
-    
+
     expect(brandTextField, isNotNull);
     expect(brandTextField!.focusNode?.hasFocus, isTrue);
   });

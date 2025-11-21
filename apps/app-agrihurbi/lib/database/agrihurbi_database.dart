@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:core/core.dart';
 
-import 'converters/livestock_converters.dart';
 import 'tables/livestock_tables.dart';
 
 part 'agrihurbi_database.g.dart'; // Será gerado pelo Drift
@@ -79,7 +78,7 @@ class AgrihurbiDatabase extends _$AgrihurbiDatabase with BaseDriftDatabase {
   factory AgrihurbiDatabase.withPath(String path) {
     return AgrihurbiDatabase(
       DriftDatabaseConfig.createExecutor(
-        databasePath: path,
+        databaseName: path,
         logStatements: false,
       ),
     );
@@ -89,20 +88,21 @@ class AgrihurbiDatabase extends _$AgrihurbiDatabase with BaseDriftDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (Migrator m) async {
-      await m.createAll();
-      print('✅ Database created with schema version: $schemaVersion');
-    },
-    onUpgrade: (Migrator m, int from, int to) async {
-      print('🔄 Upgrading database from v$from to v$to');
-      // Implementar migrações aqui se necessário no futuro
-    },
-    beforeOpen: (details) async {
-      print('📝 Database open. Version: ${details.versionBefore} → ${details.versionNow}');
-      // Habilitar foreign keys
-      await customStatement('PRAGMA foreign_keys = ON');
-    },
-  );
+        onCreate: (Migrator m) async {
+          await m.createAll();
+          print('✅ Database created with schema version: $schemaVersion');
+        },
+        onUpgrade: (Migrator m, int from, int to) async {
+          print('🔄 Upgrading database from v$from to v$to');
+          // Implementar migrações aqui se necessário no futuro
+        },
+        beforeOpen: (details) async {
+          print(
+              '📝 Database open. Version: ${details.versionBefore} → ${details.versionNow}');
+          // Habilitar foreign keys
+          await customStatement('PRAGMA foreign_keys = ON');
+        },
+      );
 
   // ========== CUSTOM QUERIES & HELPERS ==========
 
@@ -124,14 +124,12 @@ class AgrihurbiDatabase extends _$AgrihurbiDatabase with BaseDriftDatabase {
 
   /// Stream reativo de bovinos ativos
   Stream<List<Bovine>> watchActiveBovines() {
-    return (select(bovines)..where((tbl) => tbl.isActive.equals(true)))
-        .watch();
+    return (select(bovines)..where((tbl) => tbl.isActive.equals(true))).watch();
   }
 
   /// Stream reativo de equinos ativos
   Stream<List<Equine>> watchActiveEquines() {
-    return (select(equines)..where((tbl) => tbl.isActive.equals(true)))
-        .watch();
+    return (select(equines)..where((tbl) => tbl.isActive.equals(true))).watch();
   }
 
   /// Limpa todos os dados (útil para testes)
@@ -168,14 +166,14 @@ class AgrihurbiDatabase extends _$AgrihurbiDatabase with BaseDriftDatabase {
       await transaction(() async {
         if (bovinesData != null) {
           for (final bovineJson in bovinesData) {
-            final bovine = _bovineFromJson(bovineJson);
+            final bovine = _bovineFromJson(bovineJson as Map<String, dynamic>);
             await into(bovines).insertOnConflictUpdate(bovine);
           }
         }
 
         if (equinesData != null) {
           for (final equineJson in equinesData) {
-            final equine = _equineFromJson(equineJson);
+            final equine = _equineFromJson(equineJson as Map<String, dynamic>);
             await into(equines).insertOnConflictUpdate(equine);
           }
         }
@@ -203,9 +201,9 @@ class AgrihurbiDatabase extends _$AgrihurbiDatabase with BaseDriftDatabase {
       'origin': bovine.origin,
       'characteristics': bovine.characteristics,
       'breed': bovine.breed,
-      'aptitude': bovine.aptitude.index,
+      'aptitude': bovine.aptitude,
       'tags': bovine.tags,
-      'breedingSystem': bovine.breedingSystem.index,
+      'breedingSystem': bovine.breedingSystem,
       'purpose': bovine.purpose,
       'notes': bovine.notes,
     };
@@ -213,24 +211,32 @@ class AgrihurbiDatabase extends _$AgrihurbiDatabase with BaseDriftDatabase {
 
   BovinesCompanion _bovineFromJson(Map<String, dynamic> json) {
     return BovinesCompanion.insert(
-      id: Value(json['id'] as String),
-      createdAt: json['createdAt'] != null ? Value(DateTime.parse(json['createdAt'] as String)) : const Value(null),
-      updatedAt: json['updatedAt'] != null ? Value(DateTime.parse(json['updatedAt'] as String)) : const Value(null),
+      id: json['id'] as String,
+      createdAt: json['createdAt'] != null
+          ? Value(DateTime.parse(json['createdAt'] as String))
+          : const Value(null),
+      updatedAt: json['updatedAt'] != null
+          ? Value(DateTime.parse(json['updatedAt'] as String))
+          : const Value(null),
       isActive: Value(json['isActive'] as bool? ?? true),
-      registrationId: Value(json['registrationId'] as String),
-      commonName: Value(json['commonName'] as String),
-      originCountry: Value(json['originCountry'] as String),
+      registrationId: json['registrationId'] as String,
+      commonName: json['commonName'] as String,
+      originCountry: json['originCountry'] as String,
       imageUrls: Value(json['imageUrls'] as String? ?? '[]'),
-      thumbnailUrl: json['thumbnailUrl'] != null ? Value(json['thumbnailUrl'] as String) : const Value(null),
-      animalType: Value(json['animalType'] as String),
-      origin: Value(json['origin'] as String),
-      characteristics: Value(json['characteristics'] as String),
-      breed: Value(json['breed'] as String),
-      aptitude: Value(json['aptitude'] as int),
+      thumbnailUrl: json['thumbnailUrl'] != null
+          ? Value(json['thumbnailUrl'] as String)
+          : const Value(null),
+      animalType: json['animalType'] as String,
+      origin: json['origin'] as String,
+      characteristics: json['characteristics'] as String,
+      breed: json['breed'] as String,
+      aptitude: json['aptitude'] as int,
       tags: Value(json['tags'] as String? ?? '[]'),
-      breedingSystem: Value(json['breedingSystem'] as int),
-      purpose: Value(json['purpose'] as String),
-      notes: json['notes'] != null ? Value(json['notes'] as String) : const Value(null),
+      breedingSystem: json['breedingSystem'] as int,
+      purpose: json['purpose'] as String,
+      notes: json['notes'] != null
+          ? Value(json['notes'] as String)
+          : const Value(null),
     );
   }
 
@@ -246,9 +252,9 @@ class AgrihurbiDatabase extends _$AgrihurbiDatabase with BaseDriftDatabase {
       'imageUrls': equine.imageUrls,
       'thumbnailUrl': equine.thumbnailUrl,
       'history': equine.history,
-      'temperament': equine.temperament.index,
-      'coat': equine.coat.index,
-      'primaryUse': equine.primaryUse.index,
+      'temperament': equine.temperament,
+      'coat': equine.coat,
+      'primaryUse': equine.primaryUse,
       'geneticInfluences': equine.geneticInfluences,
       'height': equine.height,
       'weight': equine.weight,
@@ -257,22 +263,28 @@ class AgrihurbiDatabase extends _$AgrihurbiDatabase with BaseDriftDatabase {
 
   EquinesCompanion _equineFromJson(Map<String, dynamic> json) {
     return EquinesCompanion.insert(
-      id: Value(json['id'] as String),
-      createdAt: json['createdAt'] != null ? Value(DateTime.parse(json['createdAt'] as String)) : const Value(null),
-      updatedAt: json['updatedAt'] != null ? Value(DateTime.parse(json['updatedAt'] as String)) : const Value(null),
+      id: json['id'] as String,
+      createdAt: json['createdAt'] != null
+          ? Value(DateTime.parse(json['createdAt'] as String))
+          : const Value(null),
+      updatedAt: json['updatedAt'] != null
+          ? Value(DateTime.parse(json['updatedAt'] as String))
+          : const Value(null),
       isActive: Value(json['isActive'] as bool? ?? true),
-      registrationId: Value(json['registrationId'] as String),
-      commonName: Value(json['commonName'] as String),
-      originCountry: Value(json['originCountry'] as String),
+      registrationId: json['registrationId'] as String,
+      commonName: json['commonName'] as String,
+      originCountry: json['originCountry'] as String,
       imageUrls: Value(json['imageUrls'] as String? ?? '[]'),
-      thumbnailUrl: json['thumbnailUrl'] != null ? Value(json['thumbnailUrl'] as String) : const Value(null),
-      history: Value(json['history'] as String),
-      temperament: Value(json['temperament'] as int),
-      coat: Value(json['coat'] as int),
-      primaryUse: Value(json['primaryUse'] as int),
-      geneticInfluences: Value(json['geneticInfluences'] as String),
-      height: Value(json['height'] as String),
-      weight: Value(json['weight'] as String),
+      thumbnailUrl: json['thumbnailUrl'] != null
+          ? Value(json['thumbnailUrl'] as String)
+          : const Value(null),
+      history: json['history'] as String,
+      temperament: json['temperament'] as int,
+      coat: json['coat'] as int,
+      primaryUse: json['primaryUse'] as int,
+      geneticInfluences: json['geneticInfluences'] as String,
+      height: json['height'] as String,
+      weight: json['weight'] as String,
     );
   }
 }

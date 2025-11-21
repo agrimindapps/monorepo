@@ -6,6 +6,7 @@ import 'modules/account_deletion_module.dart';
 import 'modules/connectivity_module.dart';
 import 'modules/core_module.dart';
 import 'modules/data_integrity_module.dart';
+import 'modules/fuel_services_module.dart';
 import 'modules/sync_module.dart';
 
 /// Modular Dependency Injection Container following SOLID principles
@@ -37,7 +38,7 @@ class ModularInjectionContainer {
       // NOTE: database_module.dart is deprecated
       // All repositories now use @lazySingleton and are registered via injectable
       // Database and repositories are automatically registered by configureDependencies()
-      
+
       print('📦 Registering core modules...');
       final modules = _createModules(firebaseEnabled: firebaseEnabled);
       for (final module in modules) {
@@ -46,8 +47,7 @@ class ModularInjectionContainer {
 
       print('📦 Initializing account deletion module...');
       AccountDeletionModule.init(_getIt);
-      print('📦 Initializing sync module...');
-      SyncDIModule.init(_getIt);
+
       print('📦 Initializing data integrity module...');
       DataIntegrityModule.init(_getIt);
 
@@ -68,6 +68,8 @@ class ModularInjectionContainer {
         firebaseEnabled: firebaseEnabled,
       ), // External services and core infrastructure
       ConnectivityModule(), // Connectivity monitoring services
+      FuelServicesModule(), // Fuel domain services
+      SyncModule(), // Sync services
     ];
   }
 

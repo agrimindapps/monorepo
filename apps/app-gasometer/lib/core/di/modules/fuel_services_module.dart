@@ -10,42 +10,50 @@ import '../../../features/fuel/domain/usecases/delete_fuel_record.dart';
 import '../../../features/fuel/domain/usecases/get_all_fuel_records.dart';
 import '../../../features/fuel/domain/usecases/get_fuel_records_by_vehicle.dart';
 import '../../../features/fuel/domain/usecases/update_fuel_record.dart';
+import '../di_module.dart';
 
 /// Módulo de Dependency Injection para serviços de combustível
 /// Registra serviços especializados seguindo SRP:
 /// - FuelCrudService: Add/Update/Delete operations
 /// - FuelQueryService: Read/Query/Filter/Search operations
 /// - FuelSyncService: Sync pending records operations
-abstract class FuelServicesModule {
-  static void init(GetIt sl) {
+class FuelServicesModule implements DIModule {
+  @override
+  Future<void> register(GetIt sl) async {
     if (kDebugMode) {
       print('📦 Registering Fuel Services...');
     }
 
     try {
       // Register CRUD service (Add/Update/Delete)
-      sl.registerLazySingleton<FuelCrudService>(
-        () => FuelCrudService(
-          addFuelRecord: sl<AddFuelRecord>(),
-          updateFuelRecord: sl<UpdateFuelRecord>(),
-          deleteFuelRecord: sl<DeleteFuelRecord>(),
-        ),
-      );
+      if (!sl.isRegistered<FuelCrudService>()) {
+        sl.registerLazySingleton<FuelCrudService>(
+          () => FuelCrudService(
+            addFuelRecord: sl<AddFuelRecord>(),
+            updateFuelRecord: sl<UpdateFuelRecord>(),
+            deleteFuelRecord: sl<DeleteFuelRecord>(),
+          ),
+        );
+      }
 
       // Register Query service (Read/Filter/Search)
-      sl.registerLazySingleton<FuelQueryService>(
-        () => FuelQueryService(
-          getAllFuelRecords: sl<GetAllFuelRecords>(),
-          getFuelRecordsByVehicle: sl<GetFuelRecordsByVehicle>(),
-        ),
-      );
+      if (!sl.isRegistered<FuelQueryService>()) {
+        sl.registerLazySingleton<FuelQueryService>(
+          () => FuelQueryService(
+            getAllFuelRecords: sl<GetAllFuelRecords>(),
+            getFuelRecordsByVehicle: sl<GetFuelRecordsByVehicle>(),
+          ),
+        );
+      }
 
       // Register Sync service (Sync pending records)
-      sl.registerLazySingleton<FuelSyncService>(
-        () => FuelSyncService(
-          localDataSource: sl<FuelSupplyLocalDataSource>(),
-        ),
-      );
+      if (!sl.isRegistered<FuelSyncService>()) {
+        sl.registerLazySingleton<FuelSyncService>(
+          () => FuelSyncService(
+            localDataSource: sl<FuelSupplyLocalDataSource>(),
+          ),
+        );
+      }
 
       if (kDebugMode) {
         print('✅ Fuel Services registered successfully');

@@ -75,7 +75,7 @@ Future<void> main() async {
       await GasometerSyncConfig.initialize();
       print('🔥 [MAIN] DEPOIS de inicializar GasometerSyncConfig');
       SecureLogger.info('GasometerSyncConfig initialized successfully');
-      await SyncDIModule.initializeSyncService(di.sl);
+      await SyncModule.initializeSyncService(di.sl);
     } else {
       SecureLogger.warning(
         'Sync services not initialized - running in local-only mode',

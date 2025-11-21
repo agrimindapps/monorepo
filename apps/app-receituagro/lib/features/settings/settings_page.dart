@@ -103,14 +103,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
       children: const [
-        SizedBox(height: 8),
+        SizedBox(height: 16),
         AuthSection(),
-        SizedBox(height: 8),
+        SizedBox(height: 16),
         // New refactored sections using new notifiers
         NewNotificationSection(),
-        SizedBox(height: 8),
+        SizedBox(height: 16),
         NewPremiumSection(),
-        SizedBox(height: 8),
+        SizedBox(height: 16),
         // Legacy sections (to be removed after migration)
         // PremiumSection(),
         // NotificationsSection(),
@@ -118,7 +118,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         FeatureFlagsSection(),
         LegalSection(),
         SupportSection(),
-        SizedBox(height: 16),
+        SizedBox(height: 32),
       ],
     );
   }

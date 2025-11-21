@@ -59,13 +59,14 @@ class SettingsDesignTokens {
   }
   static BoxDecoration getCardDecoration(BuildContext context) {
     return BoxDecoration(
-      color: Theme.of(context).colorScheme.surface,
+      color: Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(cardBorderRadius),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.05),
-          blurRadius: 4,
+          color: Colors.black.withValues(alpha: 0.08),
+          blurRadius: 8,
           offset: const Offset(0, 2),
+          spreadRadius: 0,
         ),
       ],
     );

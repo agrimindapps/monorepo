@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide Column;
 
 import '../../../database/repositories/fitossanitarios_repository.dart';
+import '../../../database/repositories/fitossanitarios_info_repository.dart';
 import '../data/repositories/defensivos_repository_impl.dart';
 import '../data/services/defensivos_filter_service.dart';
 import '../data/services/defensivos_query_service.dart';
@@ -48,6 +49,7 @@ void configureDefensivosDependencies() {
   getIt.registerLazySingleton<IDefensivosRepository>(
     () => DefensivosRepositoryImpl(
       getIt<FitossanitariosRepository>(),
+      getIt<FitossanitariosInfoRepository>(),
       getIt<IDefensivosQueryService>(),
       getIt<IDefensivosSearchService>(),
       getIt<IDefensivosStatsService>(),

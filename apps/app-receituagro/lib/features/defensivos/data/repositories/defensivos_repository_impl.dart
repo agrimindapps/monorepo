@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
+import '../../../../database/repositories/fitossanitarios_info_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../domain/entities/defensivo_entity.dart';
 import '../../domain/repositories/i_defensivos_repository.dart';
@@ -25,6 +26,7 @@ import '../services/defensivos_stats_service.dart';
 @LazySingleton(as: IDefensivosRepository)
 class DefensivosRepositoryImpl implements IDefensivosRepository {
   final FitossanitariosRepository _repository;
+  final FitossanitariosInfoRepository _infoRepository;
   final IDefensivosQueryService _queryService;
   final IDefensivosSearchService _searchService;
   final IDefensivosStatsService _statsService;
@@ -32,18 +34,26 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
 
   DefensivosRepositoryImpl(
     this._repository,
+    this._infoRepository,
     this._queryService,
     this._searchService,
     this._statsService,
     this._filterService,
   );
 
+  Future<Map<int, String?>> _fetchInfoMap() async {
+    final infos = await _infoRepository.findAll();
+    return {for (var i in infos) i.defensivoId: i.modoAcao};
+  }
+
   @override
   Future<Either<Failure, List<DefensivoEntity>>> getAllDefensivos() async {
     try {
       final allDrift = await _repository.findAll();
+      final infoMap = await _fetchInfoMap();
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
         allDrift,
+        infoMap: infoMap,
       );
 
       return Right(defensivosEntities);
@@ -59,10 +69,12 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
     try {
       final allDrift = await _repository.findAll();
       final allDefensivos = allDrift;
+      final infoMap = await _fetchInfoMap();
 
       // Convert to entities and use search service
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
         allDefensivos,
+        infoMap: infoMap,
       );
       final defensivosFiltrados = _searchService.searchAdvanced(
         defensivosEntities,
@@ -86,7 +98,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
         return const Right(null);
       }
 
-      final defensivoEntity = DefensivoMapper.fromDriftToEntity(defensivo);
+      final info = await _infoRepository.findByDefensivoId(defensivo.id);
+      final defensivoEntity = DefensivoMapper.fromDriftToEntity(
+        defensivo,
+        modoAcao: info?.modoAcao,
+      );
       return Right(defensivoEntity);
     } catch (e) {
       return Left(
@@ -103,8 +119,10 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       final allDrift = await _repository.findAll();
 
       final allDefensivos = allDrift;
+      final infoMap = await _fetchInfoMap();
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
         allDefensivos,
+        infoMap: infoMap,
       );
 
       // Delegate search to service
@@ -129,8 +147,10 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       final allDrift = await _repository.findAll();
 
       final allDefensivos = allDrift;
+      final infoMap = await _fetchInfoMap();
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
         allDefensivos,
+        infoMap: infoMap,
       );
 
       // Delegate search to service
@@ -157,8 +177,10 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       final allDrift = await _repository.findAll();
 
       final allDefensivos = allDrift;
+      final infoMap = await _fetchInfoMap();
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
         allDefensivos,
+        infoMap: infoMap,
       );
 
       // Note: Should have a dedicated filter for modoAcao in future
@@ -185,8 +207,10 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       final allDrift = await _repository.findAll();
 
       final allDefensivos = allDrift;
+      final infoMap = await _fetchInfoMap();
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
         allDefensivos,
+        infoMap: infoMap,
       );
 
       // Delegate to query service
@@ -205,8 +229,10 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       final allDrift = await _repository.findAll();
 
       final allDefensivos = allDrift;
+      final infoMap = await _fetchInfoMap();
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
         allDefensivos,
+        infoMap: infoMap,
       );
 
       // Delegate to query service
@@ -223,8 +249,10 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       final allDrift = await _repository.findAll();
 
       final allDefensivos = allDrift;
+      final infoMap = await _fetchInfoMap();
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
         allDefensivos,
+        infoMap: infoMap,
       );
 
       // Delegate to query service
@@ -245,8 +273,10 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       final allDrift = await _repository.findAll();
 
       final allDefensivos = allDrift;
+      final infoMap = await _fetchInfoMap();
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
         allDefensivos,
+        infoMap: infoMap,
       );
 
       // Delegate to query service
@@ -269,8 +299,10 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       final allDrift = await _repository.findAll();
 
       final allDefensivos = allDrift;
+      final infoMap = await _fetchInfoMap();
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
         allDefensivos,
+        infoMap: infoMap,
       );
 
       // Delegate to stats service
@@ -295,7 +327,11 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
         return const Right(false);
       }
 
-      final defensivoEntity = DefensivoMapper.fromDriftToEntity(defensivo);
+      final info = await _infoRepository.findByDefensivoId(defensivo.id);
+      final defensivoEntity = DefensivoMapper.fromDriftToEntity(
+        defensivo,
+        modoAcao: info?.modoAcao,
+      );
       // Delegate to query service
       final isActive = _queryService.isDefensivoActive([
         defensivoEntity,
@@ -315,15 +351,19 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
     String? filtroTexto,
   }) async {
     try {
-      debugPrint('🔍 [REPO AGRUPADOS] Buscando todos os defensivos do banco de dados...');
+      debugPrint(
+        '🔍 [REPO AGRUPADOS] Buscando todos os defensivos do banco de dados...',
+      );
       final allDefensivos = await _repository.findAll();
 
       debugPrint(
         '✅ [REPO AGRUPADOS] Defensivos retornados: ${allDefensivos.length} itens',
       );
 
+      final infoMap = await _fetchInfoMap();
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
         allDefensivos,
+        infoMap: infoMap,
       );
 
       // Apply text filter if provided
@@ -358,8 +398,13 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   getDefensivosCompletos() async {
     try {
       final allDrift = await _repository.findAll();
+      final infoMap = await _fetchInfoMap();
       final defensivosEntities = allDrift.map((drift) {
-        return DefensivoMapper.fromDriftToEntity(drift).copyWith(
+        final modoAcao = infoMap[drift.id];
+        return DefensivoMapper.fromDriftToEntity(
+          drift,
+          modoAcao: modoAcao,
+        ).copyWith(
           quantidadeDiagnosticos: 0,
           nivelPrioridade: 1,
           isComercializado: drift.status,
@@ -387,8 +432,10 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       final allDrift = await _repository.findAll();
 
       final allDefensivos = allDrift;
+      final infoMap = await _fetchInfoMap();
       final defensivosEntities = DefensivoMapper.fromDriftToEntityList(
         allDefensivos,
+        infoMap: infoMap,
       );
 
       // Delegate all filtering and sorting to service

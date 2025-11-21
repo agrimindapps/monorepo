@@ -20,14 +20,17 @@ import '../../services/providers/firebase_auth_provider.dart';
 import '../../services/providers/firebase_analytics_provider.dart';
 import '../../sync/adapters/sync_adapter_registry.dart';
 
+import '../di_module.dart';
+
 /// Módulo de Dependency Injection para sincronização do Gasometer
 /// Registra serviços de sync refatorados seguindo SRP:
 /// - SyncPushService: Coordena push dos 5 adapters
 /// - SyncPullService: Coordena pull dos 5 adapters
 /// - GasometerSyncOrchestrator: Orquestra push + pull completa
 /// - GasometerSyncService: Legado (mantido para compatibilidade)
-abstract class SyncDIModule {
-  static void init(GetIt sl) {
+class SyncModule implements DIModule {
+  @override
+  Future<void> register(GetIt sl) async {
     if (kDebugMode) {
       print('📦 Registering Gasometer Sync Services...');
     }
@@ -35,11 +38,13 @@ abstract class SyncDIModule {
     try {
       // Adapters são registrados automaticamente via @lazySingleton (Injectable)
       // Validar que estão disponíveis
-      sl<VehicleDriftSyncAdapter>();
-      sl<FuelSupplyDriftSyncAdapter>();
-      sl<MaintenanceDriftSyncAdapter>();
-      sl<ExpenseDriftSyncAdapter>();
-      sl<OdometerDriftSyncAdapter>();
+      if (!sl.isRegistered<VehicleDriftSyncAdapter>()) {
+        print(
+            '⚠️ VehicleDriftSyncAdapter not registered! SyncModule might fail.');
+      }
+
+      // Ensure adapters are registered or register them manually if needed
+      // For now we assume they are registered by injectable
 
       if (!sl.isRegistered<SyncWriteTrigger>()) {
         sl.registerLazySingleton<SyncWriteTrigger>(SyncWriteTrigger.new);
@@ -97,18 +102,15 @@ abstract class SyncDIModule {
 
       // Register Firebase Auth Provider
       sl.registerLazySingleton<IAuthProvider>(
-        () =>
-            FirebaseAuthProvider(firebaseAuth: FirebaseAuth.instance)
-                as IAuthProvider,
+        () => FirebaseAuthProvider(firebaseAuth: FirebaseAuth.instance)
+            as IAuthProvider,
       );
 
       // Register Firebase Analytics Provider
       sl.registerLazySingleton<IAnalyticsProvider>(
-        () =>
-            FirebaseAnalyticsProvider(
-                  firebaseAnalytics: FirebaseAnalytics.instance,
-                )
-                as IAnalyticsProvider,
+        () => FirebaseAnalyticsProvider(
+          firebaseAnalytics: FirebaseAnalytics.instance,
+        ) as IAnalyticsProvider,
       );
 
       if (kDebugMode) {

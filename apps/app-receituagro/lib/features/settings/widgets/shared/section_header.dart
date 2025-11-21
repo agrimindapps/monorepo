@@ -37,7 +37,7 @@ class SectionHeader extends StatelessWidget {
               title,
               style: SettingsDesignTokens.getSectionTitleStyle(context)
                   .copyWith(
-                    color: theme.colorScheme.primary,
+                    // color: theme.colorScheme.primary, // Removed to use default onSurface
                     fontWeight: FontWeight.bold,
                   ),
             ),

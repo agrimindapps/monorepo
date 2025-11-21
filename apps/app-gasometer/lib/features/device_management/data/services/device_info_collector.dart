@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'device_uuid_generator.dart';
 
 /// Resultado da coleta de informações do dispositivo
@@ -26,7 +25,7 @@ class DeviceInfoResult {
 ///
 /// Isola a lógica de coleta de informações específicas da plataforma,
 /// seguindo o princípio Single Responsibility.
-@lazySingleton
+
 class DeviceInfoCollector {
   DeviceInfoCollector(this._uuidGenerator);
 

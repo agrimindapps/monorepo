@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
 
 /// Service responsible for smooth scrolling to sections
 /// Follows SRP by handling only scroll navigation logic
-@lazySingleton
+
 class ScrollNavigationService {
   /// Scroll to a specific section identified by GlobalKey
   void scrollToSection(

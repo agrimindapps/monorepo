@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import '../entities/fuel_record_entity.dart';
 import '../repositories/fuel_repository.dart';
 
-@injectable
+
 class UpdateFuelRecord implements UseCase<FuelRecordEntity, UpdateFuelRecordParams> {
 
   UpdateFuelRecord(this.repository);

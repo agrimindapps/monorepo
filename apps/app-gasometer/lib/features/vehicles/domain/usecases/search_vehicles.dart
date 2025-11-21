@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import '../entities/vehicle_entity.dart';
 import '../repositories/vehicle_repository.dart';
 
-@injectable
+
 class SearchVehicles implements UseCase<List<VehicleEntity>, SearchVehiclesParams> {
 
   SearchVehicles(this.repository);

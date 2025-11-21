@@ -13,7 +13,7 @@ import '../../domain/entities/premium_status.dart';
 ///
 /// Fornece sincronização cross-device em tempo real e cache distribuído
 /// do status de assinatura premium
-@injectable
+
 class PremiumFirebaseDataSource {
   PremiumFirebaseDataSource(this._firestore, this._authService) {
     _initializeFirebaseSync();

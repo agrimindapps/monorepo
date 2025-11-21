@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import 'package:flutter/foundation.dart';
 import '../core/drift_exports.dart';
 import 'tables/gasometer_tables.dart';
@@ -43,7 +42,7 @@ part 'gasometer_database.g.dart';
     AuditTrail,
   ],
 )
-@lazySingleton
+
 class GasometerDatabase extends _$GasometerDatabase with BaseDriftDatabase {
   GasometerDatabase(QueryExecutor e) : super(e);
 

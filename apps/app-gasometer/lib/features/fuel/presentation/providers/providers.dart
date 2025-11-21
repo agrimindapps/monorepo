@@ -6,6 +6,7 @@ library;
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/providers/dependency_providers.dart' as deps;
 import '../../domain/services/fuel_calculation_service.dart';
 import '../../domain/services/fuel_connectivity_service.dart';
 import '../../domain/services/fuel_crud_service.dart';
@@ -22,42 +23,51 @@ part 'providers.g.dart';
 
 @riverpod
 FuelCrudService fuelCrudService(Ref ref) {
-  return GetIt.instance<FuelCrudService>();
+  return FuelCrudService(
+    addFuelRecord: ref.watch(deps.addFuelRecordProvider),
+    updateFuelRecord: ref.watch(deps.updateFuelRecordProvider),
+    deleteFuelRecord: ref.watch(deps.deleteFuelRecordProvider),
+  );
 }
 
 @riverpod
 FuelQueryService fuelQueryService(Ref ref) {
-  return GetIt.instance<FuelQueryService>();
+  return FuelQueryService(
+    getAllFuelRecords: ref.watch(deps.getAllFuelRecordsProvider),
+    getFuelRecordsByVehicle: ref.watch(deps.getFuelRecordsByVehicleProvider),
+  );
 }
 
 @riverpod
 FuelSyncService fuelSyncService(Ref ref) {
-  return GetIt.instance<FuelSyncService>();
+  return FuelSyncService(
+    localDataSource: ref.watch(deps.fuelSupplyLocalDataSourceProvider),
+  );
 }
 
 @riverpod
 FuelCalculationService fuelCalculationService(Ref ref) {
-  return GetIt.instance<FuelCalculationService>();
+  return FuelCalculationService();
 }
 
 @riverpod
 FuelConnectivityService fuelConnectivityService(Ref ref) {
-  return GetIt.instance<FuelConnectivityService>();
+  return FuelConnectivityService(ref.watch(deps.connectivityServiceProvider));
 }
 
 // --- Bridge Providers for Use Cases ---
 
 @riverpod
 GetAverageConsumption getAverageConsumption(Ref ref) {
-  return GetIt.instance<GetAverageConsumption>();
+  return GetAverageConsumption(ref.watch(deps.fuelRepositoryProvider));
 }
 
 @riverpod
 GetTotalSpent getTotalSpent(Ref ref) {
-  return GetIt.instance<GetTotalSpent>();
+  return GetTotalSpent(ref.watch(deps.fuelRepositoryProvider));
 }
 
 @riverpod
 GetRecentFuelRecords getRecentFuelRecords(Ref ref) {
-  return GetIt.instance<GetRecentFuelRecords>();
+  return GetRecentFuelRecords(ref.watch(deps.fuelRepositoryProvider));
 }

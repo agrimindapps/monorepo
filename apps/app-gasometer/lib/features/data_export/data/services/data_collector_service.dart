@@ -13,7 +13,7 @@ import '../../domain/entities/export_request.dart';
 ///
 /// Responsabilidade: Coletar dados das diferentes fontes (Drift, SharedPreferences)
 /// Aplica SRP (Single Responsibility Principle)
-@LazySingleton()
+
 class DataCollectorService {
   DataCollectorService(
     this._vehicleRepository,

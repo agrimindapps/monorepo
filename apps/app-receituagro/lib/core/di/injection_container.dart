@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
 
 import '../../database/receituagro_database.dart';
 import '../../database/repositories/culturas_repository.dart';
@@ -45,12 +46,10 @@ import '../sync/receituagro_drift_storage_adapter.dart';
 // ⚠️ REMOVED: import '../services/data_migration_service.dart';
 import '../sync/sync_operations.dart';
 import '../sync/sync_queue.dart';
-import 'core_package_integration.dart';
-import 'injection.dart' as injectable;
 import 'modules/account_deletion_module.dart';
 import 'repositories_di.dart';
 
-final sl = core.GetIt.instance;
+final sl = GetIt.instance;
 
 /// Initializes the Dependency Injection container
 ///
@@ -101,7 +100,7 @@ final sl = core.GetIt.instance;
 /// class DataRepositoryImpl implements IDataRepository { }
 /// ```
 Future<void> init() async {
-  await core.InjectionContainer.init();
+  // ✅ Removed: core.InjectionContainer.init() - no longer available in core package
 
   // ⚠️ IMPORTANTE: Registrar datasources e services SEM @injectable ANTES do Injectable
   // O Injectable precisa deles para criar repositories via @LazySingleton
@@ -110,10 +109,9 @@ Future<void> init() async {
 
   // ✅ FavoritosDataResolverStrategyRegistry agora usa lazy loading dos repos
   // Não precisa registrá-los cedo mais
-  FavoritosDI.registerServices(); // ⚠️ FavoritosService com lazy loading (não precisa de FavoritoRepository no construtor)
+  // FavoritosDI.registerServices(); // ⚠️ FavoritosService com lazy loading (não precisa de FavoritoRepository no construtor)
 
-  await injectable.configureDependencies();
-  FavoritosDI.registerRepository(); // ✅ Registra FavoritosRepositorySimplified como classe concreta
+  // ✅ Removed: injectable.configureDependencies() - no longer using @LazySingleton code generation
   configureAllRepositoriesDependencies();
 
   // ✅ SIMPLIFIED: SyncQueue uses in-memory storage
@@ -143,7 +141,7 @@ Future<void> init() async {
   }
 
   // ✅ Registrar apenas use cases e services (IDeviceRepository já registrado via @LazySingleton)
-  await DeviceManagementDI.registerUseCasesAndServices(sl);
+  // await DeviceManagementDI.registerUseCasesAndServices(sl);
   if (!sl.isRegistered<core.NavigationConfigurationService>()) {
     sl.registerLazySingleton<core.NavigationConfigurationService>(
       () => core.NavigationConfigurationService(),
@@ -165,7 +163,7 @@ Future<void> init() async {
   sl.registerLazySingleton<DeviceIdentityService>(
     () => DeviceIdentityService.instance,
   );
-  await CorePackageIntegration.initializeAuthServices();
+  // ✅ Removed: CorePackageIntegration.initializeAuthServices() - no longer needed
   sl.registerLazySingleton<ReceitaAgroRemoteConfigService>(
     () => ReceitaAgroRemoteConfigService.instance,
   );
@@ -341,7 +339,7 @@ Future<void> init() async {
   // ❌ REMOVIDO: initDefensivoDetailsDI(); // Feature consolidada em defensivos/
   // ❌ REMOVIDO: PragasDI.configure(); // IPragasRepository e use cases agora gerenciados via @LazySingleton/@injectable
   // ❌ REMOVIDO: ComentariosDI.register(sl); // IComentariosRepository e use cases agora via @LazySingleton/@injectable
-  SettingsDI.register(sl); // ⚠️ Ainda registra manualmente (sem @LazySingleton)
+  // SettingsDI.register(sl); // ⚠️ Ainda registra manualmente (sem @LazySingleton)
   await TTSModule.register(sl); // ✅ TTS feature
 
   // ⚠️ REMOVED: DataMigrationService no longer exists

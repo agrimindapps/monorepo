@@ -5,7 +5,6 @@ import '../repositories/i_culturas_repository.dart';
 import 'get_culturas_params.dart';
 
 /// Use Case consolidado para todas as operações de culturas
-@injectable
 class GetCulturasUseCase {
   final ICulturasRepository repository;
 
@@ -93,7 +92,6 @@ class GetCulturasUseCase {
 
 /// Use case para buscar todas as culturas [DEPRECATED]
 @Deprecated("Deprecated - use alternative")
-@injectable
 class GetAllCulturasUseCase implements UseCase<List<CulturaEntity>, NoParams> {
   final ICulturasRepository repository;
 
@@ -109,7 +107,6 @@ class GetAllCulturasUseCase implements UseCase<List<CulturaEntity>, NoParams> {
 
 /// Use case para buscar culturas por grupo [DEPRECATED]
 @Deprecated('Use GetCulturasUseCase com GetCulturasByGrupoParams')
-@injectable
 class GetCulturasByGrupoUseCase
     implements UseCase<List<CulturaEntity>, String> {
   final ICulturasRepository repository;
@@ -126,7 +123,6 @@ class GetCulturasByGrupoUseCase
 
 /// Use case para pesquisar culturas [DEPRECATED]
 @Deprecated('Use GetCulturasUseCase com SearchCulturasParams')
-@injectable
 class SearchCulturasUseCase implements UseCase<List<CulturaEntity>, String> {
   final ICulturasRepository repository;
 
@@ -145,7 +141,6 @@ class SearchCulturasUseCase implements UseCase<List<CulturaEntity>, String> {
 
 /// Use case para buscar grupos de culturas [DEPRECATED]
 @Deprecated('Use GetCulturasUseCase com GetGruposCulturasParams')
-@injectable
 class GetGruposCulturasUseCase implements UseCase<List<String>, NoParams> {
   final ICulturasRepository repository;
 

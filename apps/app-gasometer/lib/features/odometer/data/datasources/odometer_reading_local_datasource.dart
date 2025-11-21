@@ -1,11 +1,10 @@
 import 'package:core/core.dart' show GetIt;
-import 'package:injectable/injectable.dart';
 
 import '../../../../database/repositories/odometer_reading_repository.dart';
 import '../../../sync/domain/services/sync_write_trigger.dart';
 
 /// DataSource local para leituras de odômetro usando Drift
-@lazySingleton
+
 class OdometerReadingLocalDataSource {
   OdometerReadingLocalDataSource(this._repository);
 

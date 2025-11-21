@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:core/core.dart' as core;
 
 /// Estatísticas de dispositivos
@@ -66,7 +65,7 @@ class DeviceStatistics {
 ///
 /// Isola a lógica de cálculo de estatísticas,
 /// seguindo o princípio Single Responsibility.
-@lazySingleton
+
 class DeviceStatisticsCalculator {
   DeviceStatisticsCalculator();
 

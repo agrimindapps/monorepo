@@ -127,7 +127,7 @@ class MaintenanceSorting {
 }
 
 /// Service for filtering and sorting maintenance records
-@injectable
+
 class MaintenanceFilterService {
   /// Apply filters to a list of maintenance records
   List<MaintenanceEntity> applyFilters(

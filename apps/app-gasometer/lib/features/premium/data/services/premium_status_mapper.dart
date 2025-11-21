@@ -1,10 +1,9 @@
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/premium_status.dart';
 
 /// Service responsible for mapping between PremiumStatus and Firebase data
 /// Follows SRP by handling only data conversion logic
-@lazySingleton
+
 class PremiumStatusMapper {
   /// Map PremiumStatus to Firebase data
   Map<String, dynamic> statusToFirebaseMap(PremiumStatus status) {

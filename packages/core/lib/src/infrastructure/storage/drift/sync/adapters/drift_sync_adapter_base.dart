@@ -4,7 +4,6 @@ import 'dart:developer' as developer;
 import 'package:cloud_firestore/cloud_firestore.dart' as fs;
 import 'package:dartz/dartz.dart';
 import 'package:drift/drift.dart';
-import 'package:get_it/get_it.dart';
 
 import '../../../../../domain/entities/base_sync_entity.dart';
 import '../../../../../shared/utils/failure.dart';
@@ -25,7 +24,7 @@ import '../models/sync_results.dart';
 /// - Logging: Debug detalhado de operações de sync
 abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
     implements IDriftSyncAdapter<TEntity, TDriftRow> {
-  DriftSyncAdapterBase(this.db, this.firestore);
+  DriftSyncAdapterBase(this.db, this.firestore, this.connectivityService);
 
   /// Database Drift para operações locais
   final GeneratedDatabase db;
@@ -34,7 +33,7 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
   final fs.FirebaseFirestore firestore;
 
   /// Serviço de conectividade (verificar se está online)
-  ConnectivityService get connectivityService => GetIt.I<ConnectivityService>();
+  final ConnectivityService connectivityService;
 
   // ==========================================================================
   // PUSH: Local → Firestore

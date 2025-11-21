@@ -14,7 +14,7 @@ class GetUpcomingMaintenanceRecordsParams extends Equatable {
   List<Object> get props => [vehicleId, days];
 }
 
-@injectable
+
 class GetUpcomingMaintenanceRecords
     implements
         UseCase<List<MaintenanceEntity>, GetUpcomingMaintenanceRecordsParams> {

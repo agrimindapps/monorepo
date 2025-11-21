@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'package:image_picker/image_picker.dart';
-import 'package:injectable/injectable.dart';
 
 /// Serviço responsável por gerenciar upload de imagens de recibos
 ///
 /// Isola lógica de seleção, validação e upload de imagens,
 /// seguindo o princípio Single Responsibility.
-@injectable
+
 class ExpenseReceiptImageManager {
   ExpenseReceiptImageManager(this._imagePicker);
 

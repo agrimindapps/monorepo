@@ -32,7 +32,7 @@ import '../../domain/entities/odometer_entity.dart';
 ///
 /// **Conflict Resolution:**
 /// - Last Write Wins (LWW) com version checking
-@lazySingleton
+
 class OdometerDriftSyncAdapter
     extends DriftSyncAdapterBase<OdometerEntity, OdometerReading> {
   OdometerDriftSyncAdapter(GasometerDatabase db, FirebaseFirestore firestore)

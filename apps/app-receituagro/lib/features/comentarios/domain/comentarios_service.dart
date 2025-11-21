@@ -2,7 +2,6 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart' as core;
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:injectable/injectable.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/interfaces/i_premium_service.dart';
@@ -16,7 +15,6 @@ part 'comentarios_service.g.dart';
 
 /// Comentarios Service - Business Logic Layer
 /// Does not manage state (no ChangeNotifier/Riverpod), just business operations
-@lazySingleton
 class ComentariosService {
   final IComentariosRepository? _repository;
   final IPremiumService? _premiumService;

@@ -8,7 +8,7 @@ import '../models/fuel_supply_model.dart';
 ///
 /// Isola a lógica de conversão de dados Firestore para entidades,
 /// seguindo o princípio Single Responsibility.
-@lazySingleton
+
 class FirestoreFuelConverter {
   FirestoreFuelConverter();
 

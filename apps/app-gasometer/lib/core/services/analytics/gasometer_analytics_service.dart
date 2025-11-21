@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 /// - Gasometer-specific business events (fuel, maintenance, expenses)
 /// - LGPD compliance analytics (data export tracking)
 /// - Consistent error handling and environment awareness
-@singleton
+
 class GasometerAnalyticsService {
   GasometerAnalyticsService(this._enhanced);
 

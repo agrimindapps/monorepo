@@ -17,7 +17,7 @@ class ConnectivityModule implements DIModule {
 
   Future<void> _registerConnectivityServices(GetIt getIt) async {
     try {
-      // Note: ConnectivityService is registered via @injectable in injection.config.dart
+      // Note: ConnectivityService is registered via  in injection.config.dart
       // Commenting out manual registration to avoid duplicate registration error
 
       // Register ConnectivityStateManager for state persistence

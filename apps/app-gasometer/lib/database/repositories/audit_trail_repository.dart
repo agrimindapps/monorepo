@@ -2,7 +2,6 @@ import 'dart:convert';
 import '../../core/drift_exports.dart';
 
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../core/data/models/audit_trail_model.dart';
 import '../gasometer_database.dart';
@@ -11,7 +10,7 @@ import '../gasometer_database.dart';
 ///
 /// Gerencia todas as operações de CRUD e queries relacionadas ao audit trail
 /// usando o banco de dados Drift.
-@lazySingleton
+
 class AuditTrailRepository {
   AuditTrailRepository(this._db);
 

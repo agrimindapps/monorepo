@@ -6,7 +6,6 @@ import '../repositories/i_user_settings_repository.dart';
 
 /// Use case for updating user settings with business validation.
 /// Handles business rules, validation, and side effects of settings changes.
-@injectable
 class UpdateUserSettingsUseCase {
   final IUserSettingsRepository _repository;
 

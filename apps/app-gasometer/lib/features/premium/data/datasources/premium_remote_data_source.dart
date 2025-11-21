@@ -1,6 +1,5 @@
 import 'package:core/core.dart' as core;
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 
@@ -39,7 +38,7 @@ abstract class PremiumRemoteDataSource {
   Future<Either<Failure, bool>> isEligibleForTrial();
 }
 
-@LazySingleton(as: PremiumRemoteDataSource)
+
 class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
 
   PremiumRemoteDataSourceImpl(this.subscriptionRepository);

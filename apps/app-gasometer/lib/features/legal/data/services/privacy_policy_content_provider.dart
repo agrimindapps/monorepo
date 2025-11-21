@@ -1,11 +1,10 @@
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/theme/gasometer_colors.dart';
 import '../../presentation/widgets/base_legal_page.dart';
 
 /// Service responsible for providing Privacy Policy content
 /// Follows SRP by handling only privacy policy content
-@lazySingleton
+
 class PrivacyPolicyContentProvider {
   static const String _lastUpdatedDate = '2025-10-29';
 

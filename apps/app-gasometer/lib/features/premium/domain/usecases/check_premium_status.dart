@@ -7,7 +7,7 @@ import '../entities/premium_status.dart';
 import '../repositories/premium_repository.dart';
 
 /// Use case para verificar o status premium do usuário
-@injectable
+
 class CheckPremiumStatus implements UseCase<PremiumStatus, NoParams> {
   CheckPremiumStatus(this.repository);
   final PremiumRepository repository;

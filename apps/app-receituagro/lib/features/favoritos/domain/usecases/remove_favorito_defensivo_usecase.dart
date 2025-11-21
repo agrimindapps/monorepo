@@ -21,7 +21,6 @@ import '../repositories/i_favoritos_repository.dart';
 ///
 /// **Benefício:** Um único usecase para todos os tipos (Defensivos, Pragas, Diagnósticos, Culturas)
 @Deprecated("Deprecated - use alternative")
-@injectable
 class RemoveFavoritoDefensivoUseCase {
   final IFavoritosDefensivosRepository _repository;
   final IFavoritosValidator _validator;

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
-import '../../../core/di/injection.dart';
 import 'haptic_service.dart';
 
 /// Serviço de toast messages contextuais e não intrusivas
 /// Complementa o FeedbackSystem para mensagens rápidas
-@lazySingleton
 class ToastService {
   final HapticService _hapticService;
 
@@ -486,6 +483,8 @@ enum ToastType { success, error, warning, info, custom }
 
 /// Contextos pré-definidos para toasts
 class ToastContexts {
+  // TODO: Refactor to use Riverpod provider instead of GetIt
+  /*
   static void taskCompleted(BuildContext context, String taskName) {
     getIt<ToastService>().showSuccess(
       context: context,
@@ -709,4 +708,5 @@ class ToastContexts {
       actionLabel: 'Tentar novamente',
     );
   }
+  */
 }

@@ -6,7 +6,6 @@ import '../datasources/device_remote_datasource.dart';
 
 /// Implementação do repositório de dispositivos
 /// Segue o padrão Repository coordenando operações entre local e remote datasources
-@LazySingleton(as: IDeviceRepository)
 class DeviceRepositoryImpl implements IDeviceRepository {
   final DeviceLocalDataSource _localDataSource;
   final DeviceRemoteDataSource _remoteDataSource;

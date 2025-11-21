@@ -31,10 +31,6 @@ dependencies:
   flutter_riverpod: ^2.5.1
   riverpod_annotation: ^2.3.5
 
-  # Dependency Injection
-  get_it: ^8.2.0
-  injectable: ^2.4.4
-
   # Functional Programming
   dartz: ^0.10.1
 

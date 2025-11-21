@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -38,7 +37,6 @@ import '../../../shared/utils/failure.dart';
 /// // Fetch from local
 /// final result = await provider.fetch();
 /// ```
-@lazySingleton
 class LocalSubscriptionProvider implements ISubscriptionDataProvider {
   /// Creates a local subscription provider.
   LocalSubscriptionProvider({required SharedPreferences sharedPreferences})

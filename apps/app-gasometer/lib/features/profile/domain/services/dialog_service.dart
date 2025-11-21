@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
 
 /// Service responsible for showing dialogs
 /// Follows SRP by handling only dialog operations
-@lazySingleton
+
 class DialogService {
   /// Show loading dialog
   void showLoading(

@@ -1,14 +1,13 @@
 import 'package:drift/drift.dart';
 import '../../core/drift_exports.dart';
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../gasometer_database.dart';
 import '../tables/gasometer_tables.dart';
 
 /// Repositório de Leituras de Odômetro usando Drift
 ///
 /// Gerencia operações de CRUD e queries para registros de odômetro
-@lazySingleton
+
 class OdometerReadingRepository
     extends BaseDriftRepositoryImpl<OdometerReadingData, OdometerReading> {
   OdometerReadingRepository(this._db);

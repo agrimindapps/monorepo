@@ -11,7 +11,6 @@ import '../receituagro_database.dart';
 /// - Não há operações de create/update/delete por usuário
 ///
 /// Para diagnósticos do usuário, criar tabela separada "UserDiagnosticos"
-@lazySingleton
 class DiagnosticoRepository {
   DiagnosticoRepository(this._db);
 

@@ -17,7 +17,7 @@ class OdometerPeriodParams {
 /// - Buscar leituras dentro de um intervalo de datas
 /// - Retornar ordenadas por data (mais recente primeiro)
 /// - Filtrar registros deletados
-@injectable
+
 class GetOdometerReadingsByPeriodUseCase
     implements UseCase<List<OdometerEntity>, OdometerPeriodParams> {
   const GetOdometerReadingsByPeriodUseCase(this._repository);

@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import '../entities/report_summary_entity.dart';
 import '../repositories/reports_repository.dart';
 
-@injectable
+
 class ExportReportToCSV implements UseCase<String, ExportReportToCSVParams> {
 
   ExportReportToCSV(this.repository);
@@ -14,7 +14,7 @@ class ExportReportToCSV implements UseCase<String, ExportReportToCSVParams> {
   }
 }
 
-@injectable
+
 class ExportReportToPDF implements UseCase<String, ExportReportToPDFParams> {
 
   ExportReportToPDF(this.repository);

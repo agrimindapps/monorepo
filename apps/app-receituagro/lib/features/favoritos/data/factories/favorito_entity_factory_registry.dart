@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/favorito_entity.dart';
 import 'favorito_entity_factory.dart';
@@ -31,7 +30,6 @@ abstract class IFavoritoEntityFactoryRegistry {
 }
 
 /// Default implementation of factory registry
-@LazySingleton(as: IFavoritoEntityFactoryRegistry)
 class FavoritoEntityFactoryRegistry implements IFavoritoEntityFactoryRegistry {
   final Map<String, IFavoritoEntityFactory> _factories = {};
 

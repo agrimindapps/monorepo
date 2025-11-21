@@ -1,11 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 /// Service responsible for retry logic with exponential backoff
 /// Follows SRP by handling only retry operations
-@lazySingleton
+
 class PremiumRetryManager {
   final Map<String, int> _retryCounts = {};
   final Map<String, Timer> _retryTimers = {};

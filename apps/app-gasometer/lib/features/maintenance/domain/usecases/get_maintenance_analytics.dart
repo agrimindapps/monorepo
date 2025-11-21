@@ -26,7 +26,7 @@ class MaintenanceAnalytics {
   final Map<String, int> countByType;
 }
 
-@injectable
+
 class GetMaintenanceAnalytics
     implements UseCase<MaintenanceAnalytics, GetMaintenanceAnalyticsParams> {
   GetMaintenanceAnalytics(this.repository);

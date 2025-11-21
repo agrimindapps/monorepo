@@ -1,10 +1,9 @@
-import 'package:injectable/injectable.dart';
 
 /// Utility class for date-related calculations and formatting
 /// 
 /// Provides reusable date manipulation methods to avoid code duplication
 /// across the application.
-@lazySingleton
+
 class DateUtils {
   /// Generates a consistent month key in YYYY-MM format for date grouping
   /// 

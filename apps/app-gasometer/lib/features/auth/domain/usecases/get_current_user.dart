@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 
 import '../repositories/auth_repository.dart';
 
-@injectable
+
 class GetCurrentUser implements NoParamsUseCase<UserEntity?> {
   const GetCurrentUser(this.repository);
 

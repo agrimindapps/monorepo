@@ -15,7 +15,7 @@ abstract class AdvancedSubscriptionModule {
   /// Provider RevenueCat (Priority: 100)
   ///
   /// NOTE: ISubscriptionRepository is now registered in RegisterModule
-  @lazySingleton
+  
   RevenueCatSubscriptionProvider revenueCatProvider(
     ISubscriptionRepository subscriptionRepository,
   ) {
@@ -27,7 +27,7 @@ abstract class AdvancedSubscriptionModule {
   /// Provider Firebase (Priority: 80)
   ///
   /// NOTE: IAuthRepository is now registered in RegisterModule
-  @lazySingleton
+  
   FirebaseSubscriptionProvider firebaseProvider(
     FirebaseFirestore firestore,
     IAuthRepository authRepository,
@@ -39,7 +39,7 @@ abstract class AdvancedSubscriptionModule {
   }
 
   /// Provider Local (Priority: 40)
-  @lazySingleton
+  
   LocalSubscriptionProvider localProvider(SharedPreferences sharedPreferences) {
     return LocalSubscriptionProvider(sharedPreferences: sharedPreferences);
   }
@@ -47,7 +47,7 @@ abstract class AdvancedSubscriptionModule {
   // ==================== Support Services ====================
 
   /// Conflict resolver com estratégia baseada em prioridade
-  @lazySingleton
+  
   SubscriptionConflictResolver conflictResolver() {
     return const SubscriptionConflictResolver(
       strategy: subscription_models.ConflictResolutionStrategy.priorityBased,
@@ -55,19 +55,19 @@ abstract class AdvancedSubscriptionModule {
   }
 
   /// Debounce manager para throttling
-  @lazySingleton
+  
   SubscriptionDebounceManager debounceManager() {
     return SubscriptionDebounceManager();
   }
 
   /// Retry manager com exponential backoff
-  @lazySingleton
+  
   SubscriptionRetryManager retryManager() {
     return SubscriptionRetryManager();
   }
 
   /// Cache service em memória
-  @lazySingleton
+  
   SubscriptionCacheService cacheService() {
     return SubscriptionCacheService();
   }
@@ -80,7 +80,7 @@ abstract class AdvancedSubscriptionModule {
   /// - RevenueCat (in-app purchases)
   /// - Firebase (cross-device sync)
   /// - Local (offline support)
-  @lazySingleton
+  
   AdvancedSubscriptionSyncService advancedSyncService(
     RevenueCatSubscriptionProvider revenueCatProvider,
     FirebaseSubscriptionProvider firebaseProvider,
@@ -106,7 +106,7 @@ abstract class AdvancedSubscriptionModule {
   ///
   /// Permite usar ISubscriptionSyncService no lugar de PremiumSyncService
   /// sem quebrar código existente.
-  @lazySingleton
+  
   ISubscriptionSyncService subscriptionSyncService(
     AdvancedSubscriptionSyncService advancedSyncService,
   ) {
@@ -120,5 +120,5 @@ abstract class AdvancedSubscriptionModule {
 @module
 abstract class LegacyPremiumModule {
   // Note: PremiumSyncServiceAdapter deve ser registrado manualmente
-  // ou via @injectable no próprio arquivo para evitar dependências circulares
+  // ou via  no próprio arquivo para evitar dependências circulares
 }

@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import '../entities/report_comparison_entity.dart';
 import '../repositories/reports_repository.dart';
 
-@injectable
+
 class CompareMonthlyReports implements UseCase<ReportComparisonEntity, CompareMonthlyReportsParams> {
 
   CompareMonthlyReports(this.repository);
@@ -37,7 +37,7 @@ class CompareMonthlyReportsParams with EquatableMixin {
   List<Object> get props => [vehicleId, currentMonth, previousMonth];
 }
 
-@injectable
+
 class CompareYearlyReports implements UseCase<ReportComparisonEntity, CompareYearlyReportsParams> {
 
   CompareYearlyReports(this.repository);

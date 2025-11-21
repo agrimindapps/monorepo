@@ -7,7 +7,7 @@ import 'package:core/core.dart';
 ///
 /// Evita excesso de requisições aplicando debounce curto e usa prioridade alta
 /// para que o BackgroundSyncManager processe rapidamente as mudanças locais.
-@lazySingleton
+
 class SyncWriteTrigger {
   SyncWriteTrigger();
 

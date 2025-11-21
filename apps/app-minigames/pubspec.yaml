@@ -23,7 +23,6 @@ dependencies:
   logger: ^2.4.0
   shared_preferences: any
   equatable: any
-  injectable: any
   dartz: any
   flutter_riverpod: any
   riverpod_annotation: any
@@ -38,7 +37,6 @@ dev_dependencies:
   # Code Generation
   build_runner: ^2.4.12
   riverpod_generator: ^2.4.0
-  injectable_generator: ^2.6.2
 
   # Custom Linting
   # custom_lint: ^0.7.3  # Temporarily disabled due to analyzer compatibility issues

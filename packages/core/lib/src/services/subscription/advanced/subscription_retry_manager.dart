@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 /// Service responsible for retry logic with exponential backoff
 ///
@@ -22,7 +21,6 @@ import 'package:injectable/injectable.dart';
 ///   maxRetries: 3,
 /// );
 /// ```
-@lazySingleton
 class SubscriptionRetryManager {
   final Map<String, int> _retryCounts = {};
   final Map<String, Timer> _retryTimers = {};

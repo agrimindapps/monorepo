@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 
 import '../repositories/auth_repository.dart';
 
-@injectable
+
 class DeleteAccount implements NoParamsUseCase<Unit> {
   const DeleteAccount(this.repository);
 

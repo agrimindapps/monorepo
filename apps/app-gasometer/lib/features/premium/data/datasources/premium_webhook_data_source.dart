@@ -11,7 +11,7 @@ import '../../../../core/error/failures.dart';
 ///
 /// Processa eventos de webhook para sincronização em tempo real
 /// do status de assinatura entre dispositivos
-@injectable
+
 class PremiumWebhookDataSource {
   PremiumWebhookDataSource(this._firestore);
   final FirebaseFirestore _firestore;

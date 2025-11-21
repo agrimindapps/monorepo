@@ -48,7 +48,6 @@ import 'i_favorito_query_repository.dart';
 /// ⚠️ NOTA: Este repository utiliza queries Drift para filtering de forma eficiente.
 /// Para operações de filtro em-memória em notifiers/providers, use FilterService
 /// que fornece operações genéricas de filtro sem persistência.
-@lazySingleton
 class FavoritoRepository extends BaseDriftRepositoryImpl<FavoritoData, Favorito>
     implements IFavoritoCrudRepository, IFavoritoQueryRepository {
   FavoritoRepository(this._db);

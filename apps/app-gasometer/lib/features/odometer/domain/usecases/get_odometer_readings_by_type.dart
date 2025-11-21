@@ -9,7 +9,7 @@ import '../repositories/odometer_repository.dart';
 /// - Buscar leituras filtradas por tipo (viagem, manutenção, etc)
 /// - Retornar ordenadas por data (mais recente primeiro)
 /// - Filtrar registros deletados
-@injectable
+
 class GetOdometerReadingsByTypeUseCase
     implements UseCase<List<OdometerEntity>, OdometerType> {
   const GetOdometerReadingsByTypeUseCase(this._repository);

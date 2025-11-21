@@ -1,11 +1,10 @@
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/theme/gasometer_colors.dart';
 import '../../presentation/widgets/base_legal_page.dart';
 
 /// Service responsible for providing Terms of Service content
 /// Follows SRP by handling only terms of service content
-@lazySingleton
+
 class TermsOfServiceContentProvider {
   static const String _lastUpdatedDate = '2025-10-29';
 

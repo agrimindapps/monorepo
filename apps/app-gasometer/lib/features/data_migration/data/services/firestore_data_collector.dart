@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 ///
 /// Responsabilidade: Coletar dados específicos do Firestore
 /// Aplica SRP (Single Responsibility Principle)
-@injectable
+
 class FirestoreDataCollector {
   FirestoreDataCollector(this._firestore);
 

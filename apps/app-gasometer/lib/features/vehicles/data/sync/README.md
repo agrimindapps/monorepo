@@ -331,7 +331,7 @@ flutter analyze lib/features/vehicles/data/sync/vehicle_drift_sync_adapter.dart
 
 ```dart
 // lib/core/di/injection.dart
-@lazySingleton
+
 VehicleDriftSyncAdapter vehicleDriftSyncAdapter(
   GasometerDatabase db,
   FirebaseFirestore firestore,

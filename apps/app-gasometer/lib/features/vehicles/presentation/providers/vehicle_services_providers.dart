@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 
 import '../../../../core/error/error_mapper.dart';
+import '../../../../core/providers/dependency_providers.dart' as deps;
 import '../../domain/services/vehicle_filter_service.dart';
 import '../../domain/usecases/add_vehicle.dart';
 import '../../domain/usecases/delete_vehicle.dart';
@@ -27,30 +28,30 @@ ErrorMapper errorMapper(Ref ref) {
 
 @riverpod
 AddVehicle addVehicle(Ref ref) {
-  return GetIt.instance<AddVehicle>();
+  return ref.watch(deps.addVehicleProvider);
 }
 
 @riverpod
 UpdateVehicle updateVehicle(Ref ref) {
-  return GetIt.instance<UpdateVehicle>();
+  return ref.watch(deps.updateVehicleProvider);
 }
 
 @riverpod
 DeleteVehicle deleteVehicle(Ref ref) {
-  return GetIt.instance<DeleteVehicle>();
+  return ref.watch(deps.deleteVehicleProvider);
 }
 
 @riverpod
 GetVehicleById getVehicleById(Ref ref) {
-  return GetIt.instance<GetVehicleById>();
+  return ref.watch(deps.getVehicleByIdProvider);
 }
 
 @riverpod
 SearchVehicles searchVehicles(Ref ref) {
-  return GetIt.instance<SearchVehicles>();
+  return ref.watch(deps.searchVehiclesProvider);
 }
 
 @riverpod
 GetAllVehicles getAllVehicles(Ref ref) {
-  return GetIt.instance<GetAllVehicles>();
+  return ref.watch(deps.getAllVehiclesProvider);
 }

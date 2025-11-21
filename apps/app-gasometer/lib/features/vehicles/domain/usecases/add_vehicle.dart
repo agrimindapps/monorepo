@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import '../entities/vehicle_entity.dart';
 import '../repositories/vehicle_repository.dart';
 
-@injectable
+
 class AddVehicle implements UseCase<VehicleEntity, AddVehicleParams> {
 
   AddVehicle(this.repository);

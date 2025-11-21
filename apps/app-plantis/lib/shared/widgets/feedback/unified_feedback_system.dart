@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/di/injection.dart';
 import '../loading/contextual_loading_manager.dart';
 import 'confirmation_system.dart';
 import 'feedback_system.dart';
@@ -16,7 +15,7 @@ class UnifiedFeedbackSystem {
   /// Inicializa todos os sistemas de feedback
   static Future<void> initialize() async {
     if (_isInitialized) return;
-    await getIt<HapticService>().initialize();
+    // await getIt<HapticService>().initialize();
 
     _isInitialized = true;
   }
@@ -46,57 +45,57 @@ class UnifiedFeedbackSystem {
     );
 
     if (includeHaptic) {
-      await getIt<HapticService>().light();
+      // await getIt<HapticService>().light();
     }
 
     try {
       final result = await operation();
       ContextualLoadingManager.stopLoading(operationKey);
       if (includeHaptic) {
-        await getIt<HapticService>().success();
+        // await getIt<HapticService>().success();
       }
 
       if (showToast && context.mounted) {
-        getIt<ToastService>().showSuccess(
-          context: context,
-          message: successMessage ?? 'Operação concluída com sucesso!',
-        );
+        // getIt<ToastService>().showSuccess(
+        //   context: context,
+        //   message: successMessage ?? 'Operação concluída com sucesso!',
+        // );
       }
       if (context.mounted) {
-        getIt<FeedbackService>().showSuccess(
-          context: context,
-          message: successMessage ?? 'Sucesso!',
-          animation: successAnimation,
-          includeHaptic: false, // Já foi feito acima
-        );
+        // getIt<FeedbackService>().showSuccess(
+        //   context: context,
+        //   message: successMessage ?? 'Sucesso!',
+        //   animation: successAnimation,
+        //   includeHaptic: false, // Já foi feito acima
+        // );
       }
 
       return result;
     } catch (error) {
       ContextualLoadingManager.stopLoading(operationKey);
       if (includeHaptic) {
-        await getIt<HapticService>().error();
+        // await getIt<HapticService>().error();
       }
 
       final errorMsg = errorMessage ?? 'Erro na operação: ${error.toString()}';
 
       if (showToast && context.mounted) {
-        getIt<ToastService>().showError(
-          context: context,
-          message: errorMsg,
-          actionLabel: 'Tentar novamente',
-          onAction: () {
-          },
-        );
+        // getIt<ToastService>().showError(
+        //   context: context,
+        //   message: errorMsg,
+        //   actionLabel: 'Tentar novamente',
+        //   onAction: () {
+        //   },
+        // );
       }
 
       if (context.mounted) {
-        getIt<FeedbackService>().showError(
-          context: context,
-          message: errorMsg,
-          animation: ErrorAnimationType.shake,
-          includeHaptic: false,
-        );
+        // getIt<FeedbackService>().showError(
+        //   context: context,
+        //   message: errorMsg,
+        //   animation: ErrorAnimationType.shake,
+        //   includeHaptic: false,
+        // );
       }
 
       rethrow;
@@ -289,15 +288,16 @@ class UnifiedFeedbackSystem {
     ConfirmationType type = ConfirmationType.info,
     IconData? icon,
   }) async {
-    return getIt<ConfirmationService>().showConfirmation(
-      context: context,
-      title: title,
-      message: message,
-      confirmLabel: confirmLabel,
-      cancelLabel: cancelLabel,
-      type: type,
-      icon: icon,
-    );
+    // return getIt<ConfirmationService>().showConfirmation(
+    //   context: context,
+    //   title: title,
+    //   message: message,
+    //   confirmLabel: confirmLabel,
+    //   cancelLabel: cancelLabel,
+    //   type: type,
+    //   icon: icon,
+    // );
+    return false;
   }
 
   /// Confirmação destrutiva com feedback
@@ -308,22 +308,23 @@ class UnifiedFeedbackSystem {
     String confirmLabel = 'Deletar',
     bool requireDouble = false,
   }) async {
-    return getIt<ConfirmationService>().showDestructiveConfirmation(
-      context: context,
-      title: title,
-      message: message,
-      confirmLabel: confirmLabel,
-      requiresDoubleConfirmation: requireDouble,
-    );
+    // return getIt<ConfirmationService>().showDestructiveConfirmation(
+    //   context: context,
+    //   title: title,
+    //   message: message,
+    //   confirmLabel: confirmLabel,
+    //   requiresDoubleConfirmation: requireDouble,
+    // );
+    return false;
   }
 
   /// Toast de sucesso rápido
   static void successToast(BuildContext context, String message) {
-    getIt<ToastService>().showSuccess(
-      context: context,
-      message: message,
-      includeHaptic: true,
-    );
+    // getIt<ToastService>().showSuccess(
+    //   context: context,
+    //   message: message,
+    //   includeHaptic: true,
+    // );
   }
 
   /// Toast de erro com ação
@@ -332,76 +333,82 @@ class UnifiedFeedbackSystem {
     String message, {
     VoidCallback? onRetry,
   }) {
-    getIt<ToastService>().showError(
-      context: context,
-      message: message,
-      actionLabel: onRetry != null ? 'Tentar novamente' : null,
-      onAction: onRetry,
-      includeHaptic: true,
-    );
+    // getIt<ToastService>().showError(
+    //   context: context,
+    //   message: message,
+    //   actionLabel: onRetry != null ? 'Tentar novamente' : null,
+    //   onAction: onRetry,
+    //   includeHaptic: true,
+    // );
   }
 
   /// Toast de info
   static void infoToast(BuildContext context, String message) {
-    getIt<ToastService>().showInfo(context: context, message: message);
+    // getIt<ToastService>().showInfo(context: context, message: message);
   }
 
   /// Toast de warning
   static void warningToast(BuildContext context, String message) {
-    getIt<ToastService>().showWarning(
-      context: context,
-      message: message,
-      includeHaptic: true,
-    );
+    // getIt<ToastService>().showWarning(
+    //   context: context,
+    //   message: message,
+    //   includeHaptic: true,
+    // );
   }
 
   /// Haptic para ações básicas
-  static Future<void> lightHaptic() => getIt<HapticService>().light();
+  static Future<void> lightHaptic() async {
+    // return getIt<HapticService>().light();
+  }
 
   /// Haptic para ações importantes
-  static Future<void> mediumHaptic() => getIt<HapticService>().medium();
+  static Future<void> mediumHaptic() async {
+    // return getIt<HapticService>().medium();
+  }
 
   /// Haptic para ações críticas
-  static Future<void> heavyHaptic() => getIt<HapticService>().heavy();
+  static Future<void> heavyHaptic() async {
+    // return getIt<HapticService>().heavy();
+  }
 
   /// Haptic contextual
   static Future<void> contextualHaptic(String context) async {
-    final hapticService = getIt<HapticService>();
-    switch (context) {
-      case 'task_complete':
-        await hapticService.completeTask();
-        break;
-      case 'plant_save':
-        await hapticService.addPlant();
-        break;
-      case 'premium_purchase':
-        await hapticService.purchaseSuccess();
-        break;
-      case 'error':
-        await hapticService.error();
-        break;
-      case 'success':
-        await hapticService.success();
-        break;
-      default:
-        await hapticService.light();
-    }
+    // final hapticService = getIt<HapticService>();
+    // switch (context) {
+    //   case 'task_complete':
+    //     await hapticService.completeTask();
+    //     break;
+    //   case 'plant_save':
+    //     await hapticService.addPlant();
+    //     break;
+    //   case 'premium_purchase':
+    //     await hapticService.purchaseSuccess();
+    //     break;
+    //   case 'error':
+    //     await hapticService.error();
+    //     break;
+    //   case 'success':
+    //     await hapticService.success();
+    //     break;
+    //   default:
+    //     await hapticService.light();
+    // }
   }
 
   /// Limpa todos os sistemas de feedback
   static void dispose() {
-    getIt<FeedbackService>().dispose();
+    // getIt<FeedbackService>().dispose();
     ContextualLoadingManager.dispose();
     ProgressTracker.clearAll();
-    getIt<ToastService>().dismissAll();
+    // getIt<ToastService>().dismissAll();
   }
 
   /// Para todas as operações ativas
   static void stopAll() {
-    getIt<FeedbackService>().dismissAll();
+    // getIt<FeedbackService>().dismissAll();
     ContextualLoadingManager.stopAllLoadings();
     ProgressTracker.clearAll();
-    getIt<ToastService>().dismissAll();
+    // getIt<ToastService>().dismissAll();
   }
 }
 
@@ -444,11 +451,11 @@ class _UnifiedFeedbackProviderState extends State<UnifiedFeedbackProvider> {
     Widget child = widget.child;
     child = ContextualLoadingListener(child: child);
     if (widget.enableFeedbackOverlay) {
-      child = FeedbackListener(
-        feedbackService: getIt<FeedbackService>(),
-        alignment: widget.feedbackAlignment,
-        child: child,
-      );
+      // child = FeedbackListener(
+      //   feedbackService: getIt<FeedbackService>(),
+      //   alignment: widget.feedbackAlignment,
+      //   child: child,
+      // );
     }
     if (widget.enableProgressOverlay) {
       child = Stack(

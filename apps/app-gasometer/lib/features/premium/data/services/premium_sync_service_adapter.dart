@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/premium_status.dart';
 
@@ -16,7 +15,7 @@ import '../../domain/entities/premium_status.dart';
 /// 1. Deploy com adapter (zero breaking changes)
 /// 2. Gradualmente migrar features para usar Core diretamente
 /// 3. Deprecar adapter quando todas features migrarem
-@injectable
+
 class PremiumSyncServiceAdapter {
   PremiumSyncServiceAdapter(this._advancedSyncService);
 

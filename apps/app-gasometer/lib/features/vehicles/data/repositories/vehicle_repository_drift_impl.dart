@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../database/gasometer_database.dart';
 import '../../../../database/repositories/vehicle_repository.dart'
@@ -17,7 +16,7 @@ import '../models/vehicle_model.dart';
 ///
 /// This implementation bridges the domain layer (Clean Architecture)
 /// with the Drift data layer, converting between VehicleEntity and VehicleData.
-@LazySingleton(as: VehicleRepository)
+
 class VehicleRepositoryDriftImpl implements VehicleRepository {
   final VehicleLocalDataSource _datasource;
 

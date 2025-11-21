@@ -7,7 +7,7 @@ import '../repositories/odometer_repository.dart';
 /// Responsável por:
 /// - Validar se leitura existe
 /// - Deletar localmente (hard delete)
-@injectable
+
 class DeleteOdometerReadingUseCase implements UseCase<bool, String> {
   const DeleteOdometerReadingUseCase(this._repository);
 

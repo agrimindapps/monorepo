@@ -7,7 +7,7 @@ import 'user_converter.dart';
 ///
 /// Responsabilidade: Gerenciar persistência de dados do usuário no Firestore
 /// Aplica SRP (Single Responsibility Principle)
-@LazySingleton()
+
 class FirestoreUserRepository {
   FirestoreUserRepository(this._firestore, this._userConverter);
 

@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 import 'package:dartz/dartz.dart';
 
 import '../../domain/entities/base_sync_entity.dart';
+import '../../domain/repositories/i_local_storage_repository.dart';
 import '../../domain/repositories/i_sync_repository.dart';
 import '../../infrastructure/services/sync_firebase_service.dart';
 import '../../shared/utils/failure.dart';
@@ -47,6 +48,7 @@ class SyncCoordinator {
   Future<Either<Failure, void>> registerEntity({
     required String appName,
     required EntitySyncRegistration registration,
+    required ILocalStorageRepository localStorage,
   }) async {
     try {
       if (!_appConfigs.containsKey(appName)) {
@@ -63,7 +65,7 @@ class SyncCoordinator {
       _entityRegistrations[appName]![entityTypeKey] = registration;
 
       // Create typed repository
-      final repository = await _createRepository(registration);
+      final repository = await _createRepository(registration, localStorage);
       _syncRepositories[appName]![entityTypeKey] = repository;
 
       developer.log(
@@ -80,12 +82,14 @@ class SyncCoordinator {
   /// Cria um repositório tipado para a entidade
   Future<ISyncRepository<BaseSyncEntity>> _createRepository(
     EntitySyncRegistration registration,
+    ILocalStorageRepository localStorage,
   ) async {
     final service = SyncFirebaseService<BaseSyncEntity>.getInstance(
       registration.collectionName,
       registration.fromMap,
       (entity) => entity.toFirebaseMap(),
       config: registration.toSyncConfig(),
+      localStorage: localStorage,
     );
 
     await service.initialize();

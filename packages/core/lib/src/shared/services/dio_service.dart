@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 /// Service centralizado para requisições HTTP usando Dio
 ///
@@ -16,7 +15,7 @@ import 'package:injectable/injectable.dart';
 ///
 /// Exemplos:
 /// ```dart
-/// final dioService = getIt<DioService>();
+/// final dioService = DioService();
 ///
 /// // GET request
 /// final response = await dioService.get('/users');
@@ -27,7 +26,6 @@ import 'package:injectable/injectable.dart';
 /// // Download arquivo
 /// await dioService.download('/file.pdf', '/path/local/file.pdf');
 /// ```
-@lazySingleton
 class DioService {
   late final Dio _dio;
 

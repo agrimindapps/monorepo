@@ -1,10 +1,9 @@
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/utils/date_utils.dart';
 import '../../../fuel/domain/entities/fuel_record_entity.dart';
 import 'usage_pattern_analyzer.dart';
 
-@LazySingleton(as: UsagePatternAnalyzer)
+
 class UsagePatternAnalyzerImpl implements UsagePatternAnalyzer {
   const UsagePatternAnalyzerImpl(this._dateUtils);
   

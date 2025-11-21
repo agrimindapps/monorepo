@@ -50,7 +50,7 @@ import '../../domain/entities/maintenance_entity.dart';
 ///
 /// **Conflict Resolution:**
 /// - Last Write Wins (LWW) com version checking
-@lazySingleton
+
 class MaintenanceDriftSyncAdapter
     extends DriftSyncAdapterBase<MaintenanceEntity, Maintenance> {
   MaintenanceDriftSyncAdapter(GasometerDatabase db, FirebaseFirestore firestore)

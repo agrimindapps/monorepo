@@ -8,7 +8,6 @@ import '../../tables/receituagro_tables.dart';
 /// Adapter de sincronização para Comentários
 ///
 /// Gerencia a sincronização bidirecional da tabela [Comentarios] com a coleção 'comentarios' no Firestore.
-@injectable
 class ComentariosDriftSyncAdapter
     extends DriftSyncAdapterBase<ComentarioSyncEntity, Comentario> {
   ComentariosDriftSyncAdapter(

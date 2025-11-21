@@ -1,9 +1,8 @@
-import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 
 /// Service responsible for date and time formatting
 /// Follows SRP by handling only formatting operations
-@lazySingleton
+
 class DateTimeFormatterService {
   static final DateFormat _brazilianDateFormat = DateFormat('dd/MM/yyyy');
   static final DateFormat _brazilianDateTimeFormat = DateFormat(

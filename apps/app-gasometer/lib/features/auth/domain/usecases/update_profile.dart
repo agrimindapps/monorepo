@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 
 import '../repositories/auth_repository.dart';
 
-@injectable
+
 class UpdateProfile implements UseCase<UserEntity, UpdateProfileParams> {
 
   UpdateProfile(this.repository);

@@ -6,7 +6,6 @@ import '../repositories/i_user_settings_repository.dart';
 
 /// Use case for retrieving user settings with business logic applied.
 /// Handles default creation, validation, and migration logic.
-@injectable
 class GetUserSettingsUseCase {
   final IUserSettingsRepository _repository;
   String? _currentUserId; // Track current userId for fixing corrupted data

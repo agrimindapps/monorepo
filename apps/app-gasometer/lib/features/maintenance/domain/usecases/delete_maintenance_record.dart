@@ -9,7 +9,7 @@ class DeleteMaintenanceRecordParams extends Equatable {
   List<Object> get props => [id];
 }
 
-@injectable
+
 class DeleteMaintenanceRecord
     implements UseCase<Unit, DeleteMaintenanceRecordParams> {
   DeleteMaintenanceRecord(this.repository);

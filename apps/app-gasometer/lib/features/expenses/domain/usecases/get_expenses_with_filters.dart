@@ -37,7 +37,7 @@ class ExpensesFilterParams {
 /// - Aplicar múltiplos filtros simultaneamente
 /// - Validar parâmetros de filtro
 /// - Retornar resultados ordenados
-@injectable
+
 class GetExpensesWithFiltersUseCase
     implements UseCase<List<ExpenseEntity>, ExpensesFilterParams> {
   const GetExpensesWithFiltersUseCase(this._repository);

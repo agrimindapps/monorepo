@@ -1,10 +1,9 @@
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/utils/date_utils.dart';
 import '../../../fuel/domain/entities/fuel_record_entity.dart';
 import 'cost_analysis_service.dart';
 
-@LazySingleton(as: CostAnalysisService)
+
 class CostAnalysisServiceImpl implements CostAnalysisService {
   const CostAnalysisServiceImpl(this._dateUtils);
   

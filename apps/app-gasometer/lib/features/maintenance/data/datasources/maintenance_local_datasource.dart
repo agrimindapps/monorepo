@@ -1,11 +1,10 @@
 import 'package:core/core.dart' show GetIt;
-import 'package:injectable/injectable.dart';
 
 import '../../../../database/repositories/maintenance_repository.dart';
 import '../../../sync/domain/services/sync_write_trigger.dart';
 
 /// DataSource local para manutenções usando Drift
-@lazySingleton
+
 class MaintenanceLocalDataSource {
   MaintenanceLocalDataSource(this._repository);
 

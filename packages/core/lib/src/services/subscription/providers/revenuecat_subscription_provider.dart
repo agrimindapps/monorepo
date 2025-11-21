@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../domain/entities/subscription_entity.dart';
@@ -33,7 +32,6 @@ import '../../../shared/utils/failure.dart';
 /// // Manual fetch
 /// final result = await provider.fetch();
 /// ```
-@lazySingleton
 class RevenueCatSubscriptionProvider implements ISubscriptionDataProvider {
   /// Creates a RevenueCat subscription provider.
   RevenueCatSubscriptionProvider({

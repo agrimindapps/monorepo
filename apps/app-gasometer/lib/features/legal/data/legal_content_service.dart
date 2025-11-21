@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../presentation/widgets/base_legal_page.dart';
 import 'services/privacy_policy_content_provider.dart';
@@ -6,7 +5,7 @@ import 'services/terms_of_service_content_provider.dart';
 
 /// Service providing legal content for Gasometer
 /// Delegates to specialized content providers following SRP
-@lazySingleton
+
 class LegalContentService {
   final PrivacyPolicyContentProvider _privacyPolicyProvider;
   final TermsOfServiceContentProvider _termsOfServiceProvider;

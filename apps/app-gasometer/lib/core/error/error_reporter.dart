@@ -49,7 +49,7 @@ class _CrashlyticsHelper {
 
 /// Service responsible for reporting errors to external services
 /// Integrates with Firebase Crashlytics and Analytics
-@injectable
+
 class ErrorReporter {
   const ErrorReporter(this._analyticsService);
   final GasometerAnalyticsService _analyticsService;

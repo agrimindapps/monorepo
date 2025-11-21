@@ -4,7 +4,7 @@ import 'package:core/core.dart';
 ///
 /// Responsabilidade: Validar entradas de formulários (email, senha, etc.)
 /// Aplica SRP (Single Responsibility Principle)
-@injectable
+
 class AuthFormValidator {
   /// Valida email
   Either<Failure, Unit> validateEmail(String email) {

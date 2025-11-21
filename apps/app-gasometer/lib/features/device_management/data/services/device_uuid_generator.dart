@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 import 'package:uuid/enums.dart';
 
@@ -8,7 +7,7 @@ import 'package:uuid/enums.dart';
 ///
 /// Centraliza a lógica de geração de identificadores únicos,
 /// seguindo o princípio Single Responsibility.
-@lazySingleton
+
 class DeviceUuidGenerator {
   DeviceUuidGenerator();
 

@@ -1,8 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart' show GetIt;
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../database/repositories/vehicle_repository.dart';
 import '../../../../database/gasometer_database.dart';
@@ -15,13 +13,12 @@ import '../../../sync/domain/services/sync_write_trigger.dart';
 ///
 /// **IMPORTANT:** This datasource uses the Drift repositories directly.
 /// IDs are integers (auto-increment), not UUIDs.
-@lazySingleton
+
 class VehicleLocalDataSource {
   final VehicleRepository _repository;
+  final SyncWriteTrigger _syncTrigger;
 
-  VehicleLocalDataSource(this._repository);
-
-  SyncWriteTrigger get _syncTrigger => GetIt.instance<SyncWriteTrigger>();
+  VehicleLocalDataSource(this._repository, this._syncTrigger);
 
   void _notifySync() {
     // Debounced para consolidar múltiplas operações em sequência

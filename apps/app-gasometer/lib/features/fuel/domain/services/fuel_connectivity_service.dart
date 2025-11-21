@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 
 /// Service especializado para gerenciamento de conectividade do módulo de combustível
 /// Aplica SRP (Single Responsibility Principle) - responsável apenas por conectividade
-@lazySingleton
+
 class FuelConnectivityService {
   FuelConnectivityService(this._connectivityService);
 

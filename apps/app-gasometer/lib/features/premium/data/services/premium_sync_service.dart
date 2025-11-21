@@ -16,7 +16,7 @@ import '../datasources/premium_webhook_data_source.dart';
 ///
 /// Combina múltiplas fontes de dados (RevenueCat, Firebase, Webhooks)
 /// para fornecer sincronização em tempo real e cross-device
-@injectable
+
 class PremiumSyncService {
   PremiumSyncService(
     this._remoteDataSource,

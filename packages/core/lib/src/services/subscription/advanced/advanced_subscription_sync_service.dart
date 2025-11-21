@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../domain/entities/subscription_entity.dart';
@@ -52,7 +51,6 @@ import 'subscription_retry_manager.dart';
 /// // Force sync
 /// await syncService.forceSync();
 /// ```
-@lazySingleton
 class AdvancedSubscriptionSyncService implements ISubscriptionSyncService {
   /// Creates an advanced subscription sync service.
   AdvancedSubscriptionSyncService({

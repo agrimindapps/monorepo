@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import '../entities/maintenance_entity.dart';
 import '../repositories/maintenance_repository.dart';
 
-@injectable
+
 class GetAllMaintenanceRecords implements UseCase<List<MaintenanceEntity>, NoParams> {
 
   GetAllMaintenanceRecords(this.repository);

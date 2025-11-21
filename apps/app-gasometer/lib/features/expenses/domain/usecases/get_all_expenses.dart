@@ -9,7 +9,7 @@ import '../entities/expense_entity.dart';
 /// - Buscar todas as despesas não-deletadas
 /// - Retornar ordenadas por data (mais recente primeiro)
 /// - Utilizar cache quando disponível
-@injectable
+
 class GetAllExpensesUseCase implements UseCase<List<ExpenseEntity>, NoParams> {
   const GetAllExpensesUseCase(this._repository);
 

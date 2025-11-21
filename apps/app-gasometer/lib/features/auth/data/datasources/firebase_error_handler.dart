@@ -7,7 +7,7 @@ import '../../../../core/error/exceptions.dart';
 ///
 /// Responsabilidade: Mapear FirebaseAuthException para exceções da aplicação
 /// Aplica SRP (Single Responsibility Principle)
-@injectable
+
 class FirebaseErrorHandler {
   /// Trata erros de autenticação do Firebase
   ///

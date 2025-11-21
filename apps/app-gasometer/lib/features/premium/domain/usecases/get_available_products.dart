@@ -6,7 +6,7 @@ import '../../../../core/usecases/usecase.dart';
 import '../repositories/premium_repository.dart';
 
 /// Use case para obter produtos disponíveis
-@injectable
+
 class GetAvailableProducts
     implements UseCase<List<core.ProductInfo>, NoParams> {
   GetAvailableProducts(this.repository);

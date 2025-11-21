@@ -5,9 +5,9 @@ import '../core/device_integration_service.dart';
 /// Módulo de injeção de dependência para Device Management
 @module
 abstract class DeviceManagementModule {
-  @lazySingleton
+  
   DeviceInfoPlugin get deviceInfoPlugin => DeviceInfoPlugin();
-  @lazySingleton
+  
   DeviceManagementService provideDeviceManagementService(
     FirebaseDeviceService firebaseDeviceService,
     FirebaseAuthService authService,
@@ -19,7 +19,7 @@ abstract class DeviceManagementModule {
     analyticsService: analyticsService,
     deviceRepository: deviceRepository,
   );
-  @lazySingleton
+  
   DeviceIntegrationService provideDeviceIntegrationService(
     DeviceManagementService coreDeviceService,
     DeviceInfoPlugin deviceInfoPlugin,

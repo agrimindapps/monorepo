@@ -10,7 +10,7 @@ class UpdateMaintenanceRecordParams extends Equatable {
   List<Object> get props => [maintenance];
 }
 
-@injectable
+
 class UpdateMaintenanceRecord
     implements UseCase<MaintenanceEntity, UpdateMaintenanceRecordParams> {
   UpdateMaintenanceRecord(this.repository);

@@ -1,11 +1,10 @@
-import 'package:get_it/get_it.dart';
 import '../../database/gasometer_database.dart';
 import '../../database/repositories/repositories.dart';
 
 /// ⚠️ DEPRECATED MODULE - DO NOT USE
 ///
 /// Este módulo está DEPRECATED e NÃO deve ser usado.
-/// O GasometerDatabase agora é registrado automaticamente via @lazySingleton
+/// O GasometerDatabase agora é registrado automaticamente via 
 /// pelo injectable/build_runner em injection.config.dart.
 ///
 /// O Riverpod provider (gasometerDatabaseProvider) acessa a instância via GetIt.I<>().
@@ -18,7 +17,7 @@ import '../../database/repositories/repositories.dart';
 
 final getIt = GetIt.instance;
 
-@Deprecated('Use @lazySingleton no GasometerDatabase + injectable')
+@Deprecated('Use  no GasometerDatabase + injectable')
 void registerDatabaseModule() {
   print('📦 [DatabaseModule] Registering Drift database for all platforms');
   print('    - Mobile/Desktop: SQLite nativo');

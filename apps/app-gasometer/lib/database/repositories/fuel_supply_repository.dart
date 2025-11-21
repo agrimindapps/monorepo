@@ -1,14 +1,13 @@
 import 'package:drift/drift.dart';
 import '../../core/drift_exports.dart';
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../gasometer_database.dart';
 import '../tables/gasometer_tables.dart';
 
 /// Repositório de Abastecimentos usando Drift
 ///
 /// Gerencia operações de CRUD e queries para abastecimentos de combustível
-@lazySingleton
+
 class FuelSupplyRepository
     extends BaseDriftRepositoryImpl<FuelSupplyData, FuelSupply> {
   FuelSupplyRepository(this._db);

@@ -1,8 +1,6 @@
-import 'package:injectable/injectable.dart';
 
 /// Service specialized in validating comentario content
 /// Principle: Single Responsibility - Only handles validation logic
-@lazySingleton
 class ComentariosValidationService {
   // Validation constants
   static const int minContentLength = 3;

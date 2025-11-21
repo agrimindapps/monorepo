@@ -4,7 +4,7 @@ import 'package:core/core.dart';
 ///
 /// Responsabilidade: Converter dados Firebase/Firestore para UserEntity
 /// Aplica SRP (Single Responsibility Principle)
-@injectable
+
 class UserEntityConverter {
   /// Converte Firebase User para UserEntity
   UserEntity fromFirebaseUser(User firebaseUser) {

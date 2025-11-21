@@ -6,7 +6,7 @@ import 'i_data_cleaner_service.dart';
 
 /// Serviço para limpeza de dados do GasOMeter
 /// Permite limpar tabelas Drift e SharedPreferences de forma segura
-@lazySingleton
+
 class DataCleanerService implements IDataCleanerService {
   DataCleanerService(this._database);
 

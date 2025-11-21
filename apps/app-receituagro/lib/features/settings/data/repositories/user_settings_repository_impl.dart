@@ -5,7 +5,6 @@ import '../../domain/repositories/i_user_settings_repository.dart';
 
 /// Implementation of IUserSettingsRepository using SharedPreferences.
 /// This is the data layer implementation that handles actual data persistence.
-@LazySingleton(as: IUserSettingsRepository)
 class UserSettingsRepositoryImpl implements IUserSettingsRepository {
   static const String _keyPrefix = 'user_settings_';
   static const String _syncPrefix = 'sync_enabled_';

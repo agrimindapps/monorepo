@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
-
 import '../../../domain/entities/subscription_entity.dart';
 
 /// In-memory cache service for subscription data
@@ -28,7 +26,6 @@ import '../../../domain/entities/subscription_entity.dart';
 ///   // Use cached value
 /// }
 /// ```
-@lazySingleton
 class SubscriptionCacheService {
   final Map<String, _CacheEntry> _cache = {};
   Timer? _cleanupTimer;

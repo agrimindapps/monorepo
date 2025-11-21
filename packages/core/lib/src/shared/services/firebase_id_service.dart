@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:injectable/injectable.dart';
 
 /// Service centralizado para geração de IDs únicos usando Firebase
 ///
@@ -15,7 +14,7 @@ import 'package:injectable/injectable.dart';
 ///
 /// Exemplos:
 /// ```dart
-/// final idService = getIt<FirebaseIdService>();
+/// final idService = FirebaseIdService();
 ///
 /// // Gerar ID único
 /// final id = idService.generate();
@@ -26,7 +25,6 @@ import 'package:injectable/injectable.dart';
 /// // Gerar múltiplos IDs
 /// final ids = idService.generateBatch(5);
 /// ```
-@lazySingleton
 class FirebaseIdService {
   final FirebaseFirestore _firestore;
 

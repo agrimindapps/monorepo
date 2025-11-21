@@ -1,11 +1,9 @@
-import 'package:injectable/injectable.dart';
 
 import '../../domain/services/i_pragas_error_message_service.dart';
 
 /// Service responsible for pragas-specific error messages
 /// Centralizes error text for i18n readiness and consistency
 /// Follows SRP by managing only error message logic
-@LazySingleton(as: IPragasErrorMessageService)
 class PragasErrorMessageService implements IPragasErrorMessageService {
   PragasErrorMessageService();
 

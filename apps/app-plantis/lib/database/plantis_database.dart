@@ -43,7 +43,6 @@ part 'plantis_database.g.dart';
     PlantsSyncQueue,
   ],
 )
-@lazySingleton
 class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
   PlantisDatabase(super.e);
 
@@ -57,7 +56,6 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
   ///
   /// Este é o método padrão usado pelo @lazySingleton do Injectable.
   /// Retorna a instância de produção.
-  @factoryMethod
   factory PlantisDatabase.injectable() {
     return PlantisDatabase.production();
   }

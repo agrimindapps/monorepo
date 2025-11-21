@@ -12,7 +12,7 @@ import '../../domain/repositories/data_export_repository.dart';
 import '../../domain/services/data_export_service.dart';
 
 /// Implementação do repositório de exportação de dados LGPD
-@LazySingleton(as: DataExportRepository)
+
 class DataExportRepositoryImpl implements DataExportRepository {
   DataExportRepositoryImpl() : _exportService = DataExportService.instance;
   final DataExportService _exportService;

@@ -4,7 +4,7 @@ import '../entities/fuel_record_entity.dart';
 
 /// Service especializado para cálculos e estatísticas de combustível
 /// Aplica SRP (Single Responsibility Principle) - responsável apenas por cálculos
-@lazySingleton
+
 class FuelCalculationService {
   /// Calcula consumo médio a partir de uma lista de registros
   /// Apenas registros com tanque cheio são considerados para cálculo preciso

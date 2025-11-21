@@ -85,8 +85,9 @@ class PremiumNotifier extends _$PremiumNotifier {
   }
 
   void _initializeRepositories() {
-    _subscriptionRepository = GetIt.instance<ISubscriptionRepository>();
-    _analytics = GetIt.instance<IAnalyticsRepository>();
+    // _subscriptionRepository = GetIt.instance<ISubscriptionRepository>();
+    // _analytics = GetIt.instance<IAnalyticsRepository>();
+    // TODO: Inject repositories via Riverpod
   }
 
   Future<PremiumState> _initialize() async {

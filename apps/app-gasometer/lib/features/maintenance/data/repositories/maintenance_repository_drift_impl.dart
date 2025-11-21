@@ -1,13 +1,12 @@
 import 'package:core/core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../database/repositories/maintenance_repository.dart' as db;
 import '../../domain/entities/maintenance_entity.dart';
 import '../../domain/repositories/maintenance_repository.dart';
 import '../datasources/maintenance_local_datasource.dart';
 
 /// Implementação do repositório de manutenções usando Drift
-@LazySingleton(as: MaintenanceRepository)
+
 class MaintenanceRepositoryDriftImpl implements MaintenanceRepository {
   const MaintenanceRepositoryDriftImpl(this._dataSource);
 

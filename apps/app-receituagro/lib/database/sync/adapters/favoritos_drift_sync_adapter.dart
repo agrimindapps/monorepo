@@ -8,7 +8,6 @@ import '../../tables/receituagro_tables.dart';
 /// Adapter de sincronização para Favoritos
 ///
 /// Gerencia a sincronização bidirecional da tabela [Favoritos] com a coleção 'favoritos' no Firestore.
-@injectable
 class FavoritosDriftSyncAdapter
     extends DriftSyncAdapterBase<FavoritoSyncEntity, Favorito> {
   FavoritosDriftSyncAdapter(ReceituagroDatabase db, FirebaseFirestore firestore)

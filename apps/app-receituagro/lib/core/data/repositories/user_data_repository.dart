@@ -25,17 +25,12 @@ class UserDataRepository {
   final IComentariosWriteRepository _comentariosWriteRepository;
 
   UserDataRepository({
-    IFavoritosRepository? favoritosRepository,
-    IComentariosReadRepository? comentariosReadRepository,
-    IComentariosWriteRepository? comentariosWriteRepository,
-  }) : _favoritosRepository =
-           favoritosRepository ?? GetIt.instance<IFavoritosRepository>(),
-       _comentariosReadRepository =
-           comentariosReadRepository ??
-           GetIt.instance<IComentariosReadRepository>(),
-       _comentariosWriteRepository =
-           comentariosWriteRepository ??
-           GetIt.instance<IComentariosWriteRepository>();
+    required IFavoritosRepository favoritosRepository,
+    required IComentariosReadRepository comentariosReadRepository,
+    required IComentariosWriteRepository comentariosWriteRepository,
+  }) : _favoritosRepository = favoritosRepository,
+       _comentariosReadRepository = comentariosReadRepository,
+       _comentariosWriteRepository = comentariosWriteRepository;
 
   /// Obtém o userId atual via Firebase Auth (synchronous access)
   String? get currentUserId {

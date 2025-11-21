@@ -1,10 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:injectable/injectable.dart';
 
 /// Serviço para controlar rate limiting em tentativas de login
 /// Protege contra ataques de força bruta implementando backoff exponencial
-@LazySingleton()
+
 class AuthRateLimiter {
   
   AuthRateLimiter(this._secureStorage);

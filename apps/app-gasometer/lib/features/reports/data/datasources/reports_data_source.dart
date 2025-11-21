@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../fuel/domain/repositories/fuel_repository.dart';
@@ -34,7 +33,7 @@ abstract class ReportsDataSource {
   Future<Map<String, dynamic>> getUsagePatterns(String vehicleId, int months);
 }
 
-@LazySingleton(as: ReportsDataSource)
+
 class ReportsDataSourceImpl implements ReportsDataSource {
   ReportsDataSourceImpl(
     this._fuelRepository,

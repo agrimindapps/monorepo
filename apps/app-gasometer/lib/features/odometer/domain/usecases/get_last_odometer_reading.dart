@@ -8,7 +8,7 @@ import '../repositories/odometer_repository.dart';
 /// Responsável por:
 /// - Buscar a leitura mais recente de um veículo
 /// - Retornar null se não houver leituras
-@injectable
+
 class GetLastOdometerReadingUseCase
     implements UseCase<OdometerEntity?, String> {
   const GetLastOdometerReadingUseCase(this._repository);

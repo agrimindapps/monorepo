@@ -9,7 +9,7 @@ import '../repositories/odometer_repository.dart';
 /// - Buscar leituras de um veículo específico
 /// - Retornar ordenadas por data (mais recente primeiro)
 /// - Utilizar cache quando disponível
-@injectable
+
 class GetOdometerReadingsByVehicleUseCase
     implements UseCase<List<OdometerEntity>, String> {
   const GetOdometerReadingsByVehicleUseCase(this._repository);

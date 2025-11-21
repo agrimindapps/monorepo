@@ -1,10 +1,9 @@
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/utils/date_utils.dart';
 import '../../../fuel/domain/entities/fuel_record_entity.dart';
 import 'fuel_efficiency_analyzer.dart';
 
-@LazySingleton(as: FuelEfficiencyAnalyzer)
+
 class FuelEfficiencyAnalyzerImpl implements FuelEfficiencyAnalyzer {
   const FuelEfficiencyAnalyzerImpl(this._dateUtils);
   

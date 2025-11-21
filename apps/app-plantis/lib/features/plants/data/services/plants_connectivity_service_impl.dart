@@ -1,13 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/data/adapters/network_info_adapter.dart';
 import '../../../../core/interfaces/network_info.dart';
 import '../../domain/services/plants_connectivity_service.dart';
 
-@LazySingleton(as: PlantsConnectivityService)
 class PlantsConnectivityServiceImpl implements PlantsConnectivityService {
   PlantsConnectivityServiceImpl({required this.networkInfo}) {
     // Initialize monitoring in constructor

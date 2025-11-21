@@ -4,7 +4,7 @@ import 'package:core/core.dart';
 ///
 /// Responsabilidade: Validar pré-condições e regras de negócio de migração
 /// Aplica SRP (Single Responsibility Principle)
-@injectable
+
 class MigrationValidator {
   /// Valida IDs de usuário
   Either<Failure, Unit> validateUserIds({

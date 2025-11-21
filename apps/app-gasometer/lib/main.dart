@@ -1,12 +1,12 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'app.dart';
-import 'core/di/injection_container.dart' as di;
-import 'core/di/modules/sync_module.dart';
 import 'core/gasometer_sync_config.dart';
+import 'core/providers/dependency_providers.dart';
 import 'core/services/connectivity/connectivity_state_manager.dart';
 import 'core/services/connectivity/connectivity_sync_integration.dart';
 import 'features/sync/domain/services/auto_sync_service.dart';
@@ -38,10 +38,12 @@ Future<void> main() async {
 
   try {
     await initializeDateFormatting('pt_BR', null);
-    await di.init(firebaseEnabled: firebaseInitialized);
+    
+    // Create ProviderContainer for manual dependency resolution
+    final container = ProviderContainer();
 
     if (firebaseInitialized) {
-      _crashlyticsRepository = di.sl<ICrashlyticsRepository>();
+      _crashlyticsRepository = container.read(crashlyticsRepositoryProvider);
 
       if (!kIsWeb) {
         FlutterError.onError = (errorDetails) {
@@ -75,7 +77,17 @@ Future<void> main() async {
       await GasometerSyncConfig.initialize();
       print('🔥 [MAIN] DEPOIS de inicializar GasometerSyncConfig');
       SecureLogger.info('GasometerSyncConfig initialized successfully');
-      await SyncModule.initializeSyncService(di.sl);
+      
+      // Initialize Sync Service via Provider
+      final syncService = container.read(gasometerSyncServiceProvider);
+      await syncService.initialize();
+      
+      // Setup connectivity monitoring for sync
+      final connectivityService = container.read(connectivityServiceProvider);
+      syncService.startConnectivityMonitoring(
+        connectivityService.connectivityStream,
+      );
+      
     } else {
       SecureLogger.warning(
         'Sync services not initialized - running in local-only mode',
@@ -83,17 +95,20 @@ Future<void> main() async {
     }
 
     if (firebaseInitialized) {
-      await _initializeFirebaseServices();
+      await _initializeFirebaseServices(container);
     } else {
       SecureLogger.warning(
         'Firebase services not initialized - running in local-first mode',
       );
     }
 
-    await _initializeConnectivityMonitoring();
-    await _initializeAutoSync();
+    await _initializeConnectivityMonitoring(container);
+    await _initializeAutoSync(container);
 
-    runApp(const ProviderScope(child: GasOMeterApp()));
+    runApp(UncontrolledProviderScope(
+      container: container,
+      child: const GasOMeterApp(),
+    ));
   } catch (error) {
     runApp(
       MaterialApp(
@@ -124,13 +139,13 @@ Future<void> main() async {
 }
 
 /// Initialize Firebase services (Analytics, Crashlytics, Performance)
-Future<void> _initializeFirebaseServices() async {
+Future<void> _initializeFirebaseServices(ProviderContainer container) async {
   try {
     if (kDebugMode) {
       SecureLogger.info('Initializing Firebase services');
     }
-    final analyticsRepository = di.sl<IAnalyticsRepository>();
-    final performanceRepository = di.sl<IPerformanceRepository>();
+    final analyticsRepository = container.read(analyticsRepositoryProvider);
+    final performanceRepository = container.read(performanceRepositoryProvider);
     await _crashlyticsRepository.setCustomKey(
       key: 'app_name',
       value: 'GasOMeter',
@@ -168,14 +183,14 @@ Future<void> _initializeFirebaseServices() async {
 }
 
 /// Initialize connectivity monitoring and sync integration
-Future<void> _initializeConnectivityMonitoring() async {
+Future<void> _initializeConnectivityMonitoring(ProviderContainer container) async {
   try {
     if (kDebugMode) {
       SecureLogger.info('Initializing connectivity monitoring');
     }
 
-    final connectivityService = di.sl<ConnectivityService>();
-    final stateManager = di.sl<ConnectivityStateManager>();
+    final connectivityService = container.read(connectivityServiceProvider);
+    final stateManager = container.read(connectivityStateManagerProvider);
 
     _connectivityIntegration = ConnectivitySyncIntegration(
       connectivityService: connectivityService,
@@ -190,28 +205,26 @@ Future<void> _initializeConnectivityMonitoring() async {
   } catch (e, stackTrace) {
     SecureLogger.error('Error initializing connectivity monitoring', error: e);
     // Only try to record error if crashlytics is available
-    if (di.sl.isRegistered<ICrashlyticsRepository>()) {
-      try {
-        await _crashlyticsRepository.recordError(
-          exception: e,
-          stackTrace: stackTrace,
-          reason: 'Connectivity monitoring initialization failed',
-        );
-      } catch (_) {
-        // Fail silently - app can still work without connectivity monitoring
-      }
+    try {
+      await _crashlyticsRepository.recordError(
+        exception: e,
+        stackTrace: stackTrace,
+        reason: 'Connectivity monitoring initialization failed',
+      );
+    } catch (_) {
+      // Fail silently - app can still work without connectivity monitoring
     }
   }
 }
 
 /// Initialize auto-sync service for periodic background sync
-Future<void> _initializeAutoSync() async {
+Future<void> _initializeAutoSync(ProviderContainer container) async {
   try {
     if (kDebugMode) {
       SecureLogger.info('Initializing auto-sync service');
     }
 
-    _autoSyncService = di.sl<AutoSyncService>();
+    _autoSyncService = container.read(autoSyncServiceProvider);
     await _autoSyncService.initialize();
 
     // Auto-sync will be started by app lifecycle observer in GasOMeterApp
@@ -223,16 +236,14 @@ Future<void> _initializeAutoSync() async {
   } catch (e, stackTrace) {
     SecureLogger.error('Error initializing auto-sync service', error: e);
     // Only try to record error if crashlytics is available
-    if (di.sl.isRegistered<ICrashlyticsRepository>()) {
-      try {
-        await _crashlyticsRepository.recordError(
-          exception: e,
-          stackTrace: stackTrace,
-          reason: 'Auto-sync service initialization failed',
-        );
-      } catch (_) {
-        // Fail silently - app can still work without auto-sync
-      }
+    try {
+      await _crashlyticsRepository.recordError(
+        exception: e,
+        stackTrace: stackTrace,
+        reason: 'Auto-sync service initialization failed',
+      );
+    } catch (_) {
+      // Fail silently - app can still work without auto-sync
     }
   }
 }

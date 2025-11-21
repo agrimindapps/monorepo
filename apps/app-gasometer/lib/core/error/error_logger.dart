@@ -7,7 +7,7 @@ import 'app_error.dart';
 
 /// Service for structured error logging
 /// Provides consistent error logging across the application
-@injectable
+
 class ErrorLogger {
   static const String _logPrefix = '🚨 [ERROR]';
   static const String _warningPrefix = '⚠️ [WARNING]';

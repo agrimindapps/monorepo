@@ -6,7 +6,6 @@ import '../repositories/i_comentarios_write_repository.dart';
 
 /// Use case for deleting comentarios with business logic.
 /// Handles soft delete and business rules around comment deletion.
-@injectable
 class DeleteComentarioUseCase {
   final IComentariosReadRepository _readRepository;
   final IComentariosWriteRepository _writeRepository;

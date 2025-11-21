@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/favorito_entity.dart';
 import 'favoritos_data_resolver_service.dart';
@@ -72,7 +71,6 @@ class FavoritoFallbackValidatorRegistry {
 /// Refatoração: Usa Strategy Pattern via FavoritoFallbackValidatorRegistry
 /// - Eliminado switch case (OCP violation)
 /// - Agora extensível sem modificar este serviço
-@injectable
 class FavoritosValidatorService {
   final FavoritosDataResolverService _dataResolver;
   late final FavoritoFallbackValidatorRegistry _fallbackValidators;

@@ -4,7 +4,6 @@ import '../../../../core/data/models/comentario_model.dart';
 import '../../domain/repositories/plant_comments_repository.dart';
 
 /// Implementation of PlantCommentsRepository using the unified sync system
-@LazySingleton(as: PlantCommentsRepository)
 class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
   static const String _appName = 'plantis';
 

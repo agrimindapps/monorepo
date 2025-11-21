@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/expense_entity.dart';
 import '../models/expense_model.dart';
@@ -8,7 +7,7 @@ import '../models/expense_model.dart';
 ///
 /// Isola a lógica de conversão de dados Firestore,
 /// seguindo o princípio Single Responsibility.
-@lazySingleton
+
 class FirestoreExpenseConverter {
   FirestoreExpenseConverter();
 

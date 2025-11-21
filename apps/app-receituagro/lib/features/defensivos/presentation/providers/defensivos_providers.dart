@@ -2,10 +2,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/failure_message_service.dart';
+import '../../../../database/providers/database_providers.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../comentarios/domain/comentarios_service.dart';
+import '../../../../core/providers/premium_providers.dart';
+import '../../../comentarios/presentation/providers/comentarios_mapper_provider.dart';
 import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
-import '../../../favoritos/favoritos_di.dart';
+import '../../../favoritos/presentation/providers/favoritos_services_providers.dart';
 import '../../data/repositories/defensivos_repository_impl.dart';
 import '../../data/services/defensivos_filter_service.dart';
 import '../../data/services/defensivos_query_service.dart';
@@ -22,19 +25,25 @@ part 'defensivos_providers.g.dart';
 /// Bridge Provider for FitossanitariosRepository
 @Riverpod(keepAlive: true)
 FitossanitariosRepository fitossanitariosRepository(FitossanitariosRepositoryRef ref) {
-  return di.sl<FitossanitariosRepository>();
+  return ref.watch(fitossanitariosRepositoryProvider);
 }
 
 /// Bridge Provider for ComentariosService
 @Riverpod(keepAlive: true)
 ComentariosService comentariosService(ComentariosServiceRef ref) {
-  return di.sl<ComentariosService>();
+  return ComentariosService(
+    repository: ref.watch(comentarioRepositoryProvider),
+    premiumService: ref.watch(premiumServiceProvider),
+    mapper: ref.watch(comentariosMapperProvider),
+  );
 }
 
 /// Bridge Provider for FavoritosRepositorySimplified
 @Riverpod(keepAlive: true)
 FavoritosRepositorySimplified favoritosRepositorySimplified(FavoritosRepositorySimplifiedRef ref) {
-  return FavoritosDI.get<FavoritosRepositorySimplified>();
+  return FavoritosRepositorySimplified(
+    service: ref.watch(favoritosServiceProvider),
+  );
 }
 
 /// Bridge Provider for FailureMessageService

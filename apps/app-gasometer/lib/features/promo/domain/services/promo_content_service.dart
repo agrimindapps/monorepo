@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
 
 /// Service responsible for providing promo page content
 /// Follows SRP by handling only content data
-@lazySingleton
+
 class PromoContentService {
   /// Get features list for carousel
   List<PromoFeature> getFeaturesList() {

@@ -1,10 +1,9 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
 
 /// Service responsible for debouncing operations
 /// Follows SRP by handling only debounce logic
-@lazySingleton
+
 class PremiumDebounceManager {
   final Map<String, Timer> _timers = {};
   final Map<String, Completer<void>> _completers = {};

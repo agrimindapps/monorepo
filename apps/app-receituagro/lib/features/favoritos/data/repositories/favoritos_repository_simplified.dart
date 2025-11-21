@@ -1,12 +1,10 @@
 import 'package:core/core.dart';
 
 import '../../domain/entities/favorito_entity.dart';
-import '../../domain/repositories/i_favoritos_repository.dart';
 import '../services/favoritos_service.dart';
 
 /// Repositório simplificado para Favoritos usando o FavoritosService consolidado
 /// Princípio: Simplicidade e redução de complexidade desnecessária
-@LazySingleton(as: IFavoritosRepository)
 class FavoritosRepositorySimplified implements IFavoritosRepository {
   final FavoritosService _service;
 

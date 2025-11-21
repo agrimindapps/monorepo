@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../core/di/injection.dart';
 import 'feedback_system.dart';
 import 'haptic_service.dart';
 import 'toast_service.dart';
@@ -23,7 +22,7 @@ class ProgressTracker {
     bool includeHaptic = true,
   }) {
     if (includeHaptic) {
-      getIt<HapticService>().uploadStart();
+      // getIt<HapticService>().uploadStart();
     }
 
     final operation = ProgressOperation(
@@ -57,7 +56,7 @@ class ProgressTracker {
       );
 
       if (includeHaptic) {
-        getIt<HapticService>().uploadProgress();
+        // getIt<HapticService>().uploadProgress();
       }
 
       _notifyListeners();
@@ -76,15 +75,15 @@ class ProgressTracker {
       operation._complete(successMessage);
 
       if (includeHaptic) {
-        getIt<HapticService>().uploadComplete();
+        // getIt<HapticService>().uploadComplete();
       }
 
       if (showToast && operation.context != null) {
-        getIt<ToastService>().showSuccess(
-          context: operation.context!,
-          message: successMessage ?? 'Operação concluída!',
-          icon: Icons.check_circle,
-        );
+        // getIt<ToastService>().showSuccess(
+        //   context: operation.context!,
+        //   message: successMessage ?? 'Operação concluída!',
+        //   icon: Icons.check_circle,
+        // );
       }
       Future.delayed(const Duration(seconds: 2), () {
         _activeOperations.remove(key);
@@ -106,16 +105,16 @@ class ProgressTracker {
       operation._fail(errorMessage);
 
       if (includeHaptic) {
-        getIt<HapticService>().uploadError();
+        // getIt<HapticService>().uploadError();
       }
 
       if (showToast && operation.context != null) {
-        getIt<ToastService>().showError(
-          context: operation.context!,
-          message: errorMessage,
-          actionLabel: onRetry != null ? 'Tentar novamente' : null,
-          onAction: onRetry,
-        );
+        // getIt<ToastService>().showError(
+        //   context: operation.context!,
+        //   message: errorMessage,
+        //   actionLabel: onRetry != null ? 'Tentar novamente' : null,
+        //   onAction: onRetry,
+        // );
       }
 
       _notifyListeners();
@@ -151,15 +150,15 @@ class ProgressTracker {
       operation._cancel();
 
       if (includeHaptic) {
-        getIt<HapticService>().selection();
+        // getIt<HapticService>().selection();
       }
 
       if (showToast && operation.context != null) {
-        getIt<ToastService>().showInfo(
-          context: operation.context!,
-          message: 'Operação cancelada',
-          icon: Icons.cancel,
-        );
+        // getIt<ToastService>().showInfo(
+        //   context: operation.context!,
+        //   message: 'Operação cancelada',
+        //   icon: Icons.cancel,
+        // );
       }
 
       _activeOperations.remove(key);

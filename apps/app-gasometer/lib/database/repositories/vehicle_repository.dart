@@ -1,14 +1,13 @@
 import 'package:drift/drift.dart';
 import '../../core/drift_exports.dart';
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../gasometer_database.dart';
 import '../tables/gasometer_tables.dart';
 
 /// Repositório de Veículos usando Drift
 ///
 /// Gerencia todas as operações de CRUD e queries relacionadas a veículos
-@lazySingleton
+
 class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
   VehicleRepository(this._db);
 

@@ -3,10 +3,9 @@ import '../receituagro_database.dart';
 import 'diagnostico_repository.dart';
 
 /// Wrapper do DiagnosticoRepository (Drift) com nomenclatura compatível
-/// 
+///
 /// NOTA: Diagnosticos são dados ESTÁTICOS (lookup table)
 /// Métodos de userId removidos - tabela não possui campos de usuário
-@lazySingleton
 class DiagnosticosRepository {
   DiagnosticosRepository(this._baseRepo);
 

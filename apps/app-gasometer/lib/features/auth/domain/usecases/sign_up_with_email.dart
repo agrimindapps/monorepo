@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 
 import '../repositories/auth_repository.dart';
 
-@injectable
+
 class SignUpWithEmail implements UseCase<UserEntity, SignUpWithEmailParams> {
 
   SignUpWithEmail(this.repository);

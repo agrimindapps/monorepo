@@ -6,7 +6,6 @@ import '../../domain/services/i_pragas_type_service.dart';
 /// Service responsible for praga type-related mappings and configurations
 /// Centralizes type-based logic (colors, icons, labels, emojis)
 /// Follows SRP and OCP - uses Map registry instead of switch statements
-@LazySingleton(as: IPragasTypeService)
 class PragasTypeService implements IPragasTypeService {
   PragasTypeService();
 

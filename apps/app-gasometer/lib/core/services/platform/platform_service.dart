@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 
 /// Serviço para detectar a plataforma e fornecer configurações específicas do Gasometer
 /// Wrapper around PlatformCapabilitiesService from core package
-@lazySingleton
+
 class PlatformService {
   const PlatformService();
   static const _coreService = PlatformCapabilitiesService();

@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../domain/entities/fuel_record_entity.dart';
@@ -8,7 +7,7 @@ import '../../domain/entities/fuel_record_entity.dart';
 ///
 /// Centraliza cálculos de média de consumo, eficiência e análises,
 /// seguindo o princípio Single Responsibility.
-@lazySingleton
+
 class FuelConsumptionCalculator {
   FuelConsumptionCalculator();
 

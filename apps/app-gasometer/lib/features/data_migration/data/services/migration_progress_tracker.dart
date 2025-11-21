@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 ///
 /// Responsabilidade: Gerenciar e emitir atualizações de progresso
 /// Aplica SRP (Single Responsibility Principle)
-@LazySingleton()
+
 class MigrationProgressTracker {
   final StreamController<MigrationProgress> _progressController =
       StreamController<MigrationProgress>.broadcast();

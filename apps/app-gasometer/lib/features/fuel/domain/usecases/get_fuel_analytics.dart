@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import '../entities/fuel_record_entity.dart';
 import '../repositories/fuel_repository.dart';
 
-@injectable
+
 class GetAverageConsumption implements UseCase<double, GetAverageConsumptionParams> {
 
   GetAverageConsumption(this.repository);
@@ -27,7 +27,7 @@ class GetAverageConsumptionParams with EquatableMixin {
   List<Object> get props => [vehicleId];
 }
 
-@injectable
+
 class GetTotalSpent implements UseCase<double, GetTotalSpentParams> {
 
   GetTotalSpent(this.repository);
@@ -62,7 +62,7 @@ class GetTotalSpentParams with EquatableMixin {
   List<Object?> get props => [vehicleId, startDate, endDate];
 }
 
-@injectable
+
 class GetRecentFuelRecords implements UseCase<List<FuelRecordEntity>, GetRecentFuelRecordsParams> {
 
   GetRecentFuelRecords(this.repository);

@@ -7,7 +7,7 @@ import '../../domain/repositories/reports_repository.dart';
 import '../../domain/validators/report_validator.dart';
 import '../datasources/reports_data_source.dart';
 
-@LazySingleton(as: ReportsRepository)
+
 class ReportsRepositoryImpl implements ReportsRepository {
 
   ReportsRepositoryImpl(this._dataSource, this._validator);

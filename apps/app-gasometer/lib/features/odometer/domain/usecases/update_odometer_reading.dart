@@ -9,7 +9,7 @@ import '../repositories/odometer_repository.dart';
 /// - Validar alterações
 /// - Atualizar localmente
 /// - Sincronizar com Firebase em background
-@injectable
+
 class UpdateOdometerReadingUseCase
     implements UseCase<OdometerEntity?, OdometerEntity> {
   const UpdateOdometerReadingUseCase(this._repository);

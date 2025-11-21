@@ -9,7 +9,7 @@ import '../repositories/odometer_repository.dart';
 /// - Detectar leituras potencialmente duplicadas
 /// - Considerar mesma veículo, valores próximos e datas próximas
 /// - Retornar lista de duplicatas para revisão
-@injectable
+
 class FindDuplicateOdometerReadingsUseCase
     implements UseCase<List<OdometerEntity>, NoParams> {
   const FindDuplicateOdometerReadingsUseCase(this._repository);

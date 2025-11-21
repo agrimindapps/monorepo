@@ -44,7 +44,6 @@ import '../repositories/i_comentarios_read_repository.dart';
 /// - Search relevance calculated on-demand for flexibility
 /// - Repository layer handles database-specific optimizations
 /// - Consistent sorting prevents UI flickering and confusion
-@injectable
 class GetComentariosUseCase {
   final IComentariosReadRepository _repository;
 

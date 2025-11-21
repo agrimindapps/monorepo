@@ -12,7 +12,7 @@ import 'gasometer_migration_data_source.dart';
 ///
 /// This class provides concrete implementation for accessing and managing
 /// gasometer-specific data during migration operations.
-@LazySingleton(as: GasometerMigrationDataSource)
+
 class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
   GasometerMigrationDataSourceImpl(
     this._firebaseAuth,

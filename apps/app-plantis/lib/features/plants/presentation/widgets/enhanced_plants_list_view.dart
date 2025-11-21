@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/plant.dart';
 import '../providers/plant_task_provider.dart';
 import '../providers/plants_notifier.dart';
@@ -96,11 +95,13 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
   @override
   Future<List<TaskInfo>> getPendingTasks(String plantId) async {
     try {
-      final plantTaskProvider = di.sl<PlantTaskProvider>();
-      await plantTaskProvider.loadTasksForPlant(plantId);
-      final overdueTasks = plantTaskProvider.getOverdueTasksForPlant(plantId);
-      final upcomingTasks = plantTaskProvider.getUpcomingTasksForPlant(plantId);
+      // TODO: Use Riverpod provider instead of GetIt
+      // final plantTaskProvider = di.sl<PlantTaskProvider>();
+      // await plantTaskProvider.loadTasksForPlant(plantId);
+      // final overdueTasks = plantTaskProvider.getOverdueTasksForPlant(plantId);
+      // final upcomingTasks = plantTaskProvider.getUpcomingTasksForPlant(plantId);
       final tasks = <TaskInfo>[];
+      /*
       for (final task in overdueTasks) {
         tasks.add(TaskInfo(
           type: task.type.toString().split('.').last,
@@ -117,6 +118,7 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
           ));
         }
       }
+      */
 
       return tasks;
     } catch (e) {

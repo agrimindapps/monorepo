@@ -8,7 +8,7 @@ import '../entities/expense_entity.dart';
 ///
 /// Este serviço é stateless e pode ser injetado como dependency normal.
 /// Não utiliza singleton pattern pois não mantém estado interno.
-@injectable
+
 class ExpenseValidationService {
   /// Cria uma nova instância do serviço de validação
   const ExpenseValidationService();

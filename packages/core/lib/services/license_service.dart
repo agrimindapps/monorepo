@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/license_info.dart';
 
 /// Service for managing app licenses using SharedPreferences
 /// ✅ Migrated from Hive to SharedPreferences
-@LazySingleton()
 class LicenseService {
   static const String _licenseKey = 'app_license_info';
   static const String _activationDateKey = 'license_activation_date';

@@ -15,7 +15,7 @@ abstract class PremiumLocalDataSource {
   Future<DateTime?> getLocalLicenseExpiration();
 }
 
-@LazySingleton(as: PremiumLocalDataSource)
+
 class PremiumLocalDataSourceImpl implements PremiumLocalDataSource {
   PremiumLocalDataSourceImpl(this.sharedPreferences);
   static const String _localLicenseKey = 'gasometer_local_license';

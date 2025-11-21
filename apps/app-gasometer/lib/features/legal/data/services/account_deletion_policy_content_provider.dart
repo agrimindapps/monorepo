@@ -1,11 +1,10 @@
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/theme/gasometer_colors.dart';
 import '../../presentation/widgets/base_legal_page.dart';
 
 /// Service responsible for providing Account Deletion Policy content
 /// Follows SRP by handling only account deletion policy content
-@lazySingleton
+
 class AccountDeletionPolicyContentProvider {
   static const String _lastUpdatedDate = '2025-11-05';
 

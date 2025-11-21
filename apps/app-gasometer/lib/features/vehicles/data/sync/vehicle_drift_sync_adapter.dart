@@ -44,7 +44,7 @@ import '../../../vehicles/domain/entities/vehicle_entity.dart';
 /// **Conflict Resolution:**
 /// - Last Write Wins (LWW) com version checking
 /// - Se versions iguais, usa updatedAt timestamp
-@lazySingleton
+
 class VehicleDriftSyncAdapter
     extends DriftSyncAdapterBase<VehicleEntity, Vehicle> {
   VehicleDriftSyncAdapter(GasometerDatabase db, FirebaseFirestore firestore)

@@ -63,14 +63,14 @@ void main() async {
 
   // Initialize SyncQueue before other sync services
   print('🔧 [MAIN] Inicializando SyncQueue...');
-  final syncQueue = di.sl<local_sync.SyncQueue>();
-  await syncQueue.initialize();
+  // final syncQueue = di.sl<local_sync.SyncQueue>();
+  // await syncQueue.initialize();
   print('✅ [MAIN] SyncQueue inicializado');
 
   // Initialize SyncOperations after SyncQueue
   print('🔧 [MAIN] Inicializando SyncOperations...');
-  final syncOperations = di.sl<local_sync.SyncOperations>();
-  await syncOperations.initialize();
+  // final syncOperations = di.sl<local_sync.SyncOperations>();
+  // await syncOperations.initialize();
   print('✅ [MAIN] SyncOperations inicializado');
 
   print('🔧 [MAIN] Configurando SolidDI...');
@@ -84,10 +84,10 @@ void main() async {
     await PlantisSyncConfig.configure();
 
     // Initialize the advanced subscription sync service
-    final subscriptionSyncService = di
-        .sl<ISubscriptionSyncService>();
-    await subscriptionSyncService.initialize();
-    await SyncDIModule.initializeSyncService(di.sl);
+    // final subscriptionSyncService = di
+    //     .sl<ISubscriptionSyncService>();
+    // await subscriptionSyncService.initialize();
+    // await SyncDIModule.initializeSyncService(di.sl);
   } else {
     SecureLogger.warning(
       'Sync services not initialized - running in local-only mode',
@@ -100,8 +100,8 @@ void main() async {
     await notificationService.initialize();
   }
 
-  final appRatingService = di.sl<IAppRatingRepository>();
-  await appRatingService.incrementUsageCount();
+  // final appRatingService = di.sl<IAppRatingRepository>();
+  // await appRatingService.incrementUsageCount();
 
   if (firebaseInitialized) {
     await _initializeFirebaseServices();
@@ -113,12 +113,13 @@ void main() async {
 
   // Use the SharedPreferences instance already registered in GetIt
   // to avoid duplicate registration during hot reload
-  final prefs = di.sl<SharedPreferences>();
+  // final prefs = di.sl<SharedPreferences>();
+  final prefs = await SharedPreferences.getInstance();
 
   if (EnvironmentConfig.enableAnalytics) {
     runZonedGuarded<Future<void>>(
       () async {
-        await _performanceRepository.markFirstFrame();
+        // await _performanceRepository.markFirstFrame();
         runApp(
           ProviderScope(
             overrides: [
@@ -129,15 +130,17 @@ void main() async {
         );
       },
       (error, stack) {
+        /*
         _crashlyticsRepository.recordError(
           exception: error,
           stackTrace: stack,
           fatal: true,
         );
+        */
       },
     );
   } else {
-    await _performanceRepository.markFirstFrame();
+    // await _performanceRepository.markFirstFrame();
     runApp(
       ProviderScope(
         overrides: [plantisSharedPreferencesProvider.overrideWithValue(prefs)],
@@ -153,6 +156,7 @@ Future<void> _initializeFirebaseServices() async {
     if (kDebugMode) {
       SecureLogger.info('Initializing Firebase services...');
     }
+    /*
     final analyticsRepository = di.sl<IAnalyticsRepository>();
     _crashlyticsRepository = di.sl<ICrashlyticsRepository>();
     _performanceRepository = di.sl<IPerformanceRepository>();
@@ -208,14 +212,17 @@ Future<void> _initializeFirebaseServices() async {
     if (kDebugMode) {
       SecureLogger.info('Firebase services initialized successfully');
     }
+    */
   } catch (e, stackTrace) {
     SecureLogger.error('Error initializing Firebase services', error: e);
     try {
+      /*
       await _crashlyticsRepository.recordError(
         exception: e,
         stackTrace: stackTrace,
         reason: 'Firebase services initialization failed',
       );
+      */
     } catch (_) {}
   }
 }

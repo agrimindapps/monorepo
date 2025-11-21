@@ -2,7 +2,6 @@
 /// Tracks changes in financial data for compliance and debugging
 library;
 
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/data/models/audit_trail_model.dart';
 import '../../../../database/repositories/audit_trail_repository.dart';

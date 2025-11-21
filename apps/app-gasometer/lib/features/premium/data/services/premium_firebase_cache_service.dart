@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/premium_status.dart';
@@ -8,7 +7,7 @@ import 'premium_status_mapper.dart';
 
 /// Service responsible for Firebase cache operations
 /// Follows SRP by handling only cache-related Firebase operations
-@lazySingleton
+
 class PremiumFirebaseCacheService {
   PremiumFirebaseCacheService(this._firestore, this._statusMapper);
 

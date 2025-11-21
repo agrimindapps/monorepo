@@ -16,7 +16,6 @@ abstract class DeviceLocalDataSource {
   );
 }
 
-@LazySingleton(as: DeviceLocalDataSource)
 class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
   final ILocalStorageRepository _localStorage;
 

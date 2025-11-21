@@ -9,7 +9,7 @@ import '../../domain/entities/export_metadata.dart';
 ///
 /// Responsabilidade: Formatar dados em diferentes formatos (JSON, CSV)
 /// Aplica SRP (Single Responsibility Principle)
-@injectable
+
 class ExportFormatterService {
   /// Gera arquivo JSON estruturado com todos os dados
   Future<Uint8List> generateJsonExport(

@@ -23,7 +23,7 @@ class CoreModule implements DIModule {
     // Register Firebase services only if Firebase is initialized
     if (firebaseEnabled) {
       try {
-        // NOTE: These may already be registered via @injectable in injection.config.dart
+        // NOTE: These may already be registered via  in injection.config.dart
         // Only register if not already present to avoid duplicate registration errors
         if (!getIt.isRegistered<core.IAuthRepository>()) {
           getIt.registerLazySingleton<core.IAuthRepository>(
@@ -107,7 +107,7 @@ class CoreModule implements DIModule {
           () => core.RevenueCatService(),
         );
       }
-      // DataCleanerService is registered via Injectable (@lazySingleton)
+      // DataCleanerService is registered via Injectable ()
 
       debugPrint(
         '✅ Core package services registered for Injectable dependencies',

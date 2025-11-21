@@ -6,7 +6,7 @@ import '../../../../core/usecases/usecase.dart';
 import '../repositories/premium_repository.dart';
 
 /// Use case para comprar premium
-@injectable
+
 class PurchasePremium
     implements UseCase<core.SubscriptionEntity, PurchasePremiumParams> {
   PurchasePremium(this.repository);
@@ -21,7 +21,7 @@ class PurchasePremium
 }
 
 /// Use case para iniciar trial gratuito
-@injectable
+
 class StartFreeTrial implements UseCase<bool, NoParams> {
   StartFreeTrial(this.repository);
   final PremiumRepository repository;
@@ -33,7 +33,7 @@ class StartFreeTrial implements UseCase<bool, NoParams> {
 }
 
 /// Use case para verificar elegibilidade para trial
-@injectable
+
 class IsEligibleForTrial implements UseCase<bool, NoParams> {
   IsEligibleForTrial(this.repository);
   final PremiumRepository repository;
@@ -45,7 +45,7 @@ class IsEligibleForTrial implements UseCase<bool, NoParams> {
 }
 
 /// Use case para obter URL de gerenciamento
-@injectable
+
 class GetManagementUrl implements UseCase<String?, NoParams> {
   GetManagementUrl(this.repository);
   final PremiumRepository repository;

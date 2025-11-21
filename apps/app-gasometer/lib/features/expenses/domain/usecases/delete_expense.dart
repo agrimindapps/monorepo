@@ -8,7 +8,7 @@ import '../../../../core/interfaces/i_expenses_repository.dart';
 /// - Soft delete (marca isDeleted=true)
 /// - Preservar dados para sync multi-dispositivo
 /// - Sincronizar deleção com Firebase
-@injectable
+
 class DeleteExpenseUseCase implements UseCase<bool, String> {
   const DeleteExpenseUseCase(this._repository);
 

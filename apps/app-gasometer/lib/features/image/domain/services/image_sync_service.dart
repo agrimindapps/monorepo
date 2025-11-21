@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/data/models/pending_image_upload.dart';
@@ -81,7 +80,7 @@ class SyncProgress {
 /// - Sincronizar automaticamente quando volta online
 /// - Retry com backoff exponencial
 /// - Persistir fila em memória (Drift pode ser usado futuramente)
-@lazySingleton
+
 class ImageSyncService {
   final app_storage.FirebaseStorageService _storageService;
   final ConnectivityService _connectivityService;

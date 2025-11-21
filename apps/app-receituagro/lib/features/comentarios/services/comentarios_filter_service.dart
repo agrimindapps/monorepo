@@ -1,10 +1,8 @@
-import 'package:injectable/injectable.dart';
 
 import '../domain/entities/comentario_entity.dart';
 
 /// Service specialized in filtering and searching comentarios
 /// Principle: Single Responsibility - Only handles filtering and search logic
-@lazySingleton
 class ComentariosFilterService {
   /// Filters comentarios by age category
   List<ComentarioEntity> filterByAgeCategory(

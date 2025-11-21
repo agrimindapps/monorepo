@@ -4,7 +4,7 @@ import 'package:core/core.dart';
 ///
 /// Responsabilidade: Gerenciar limites de frequência de exportações
 /// Aplica SRP (Single Responsibility Principle)
-@LazySingleton()
+
 class ExportRateLimiter {
   static const int _hoursBetweenExports = 24;
 

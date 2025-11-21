@@ -104,7 +104,7 @@ Future<Either<Failure, void>> _markAsSynced(String id);
 ### 1. Criar Adapter Concreto
 
 ```dart
-@injectable
+
 class VehicleDriftSyncAdapter extends DriftSyncAdapterBase<VehicleEntity, VehicleTableData> {
   VehicleDriftSyncAdapter(
     GasometerDatabase db,

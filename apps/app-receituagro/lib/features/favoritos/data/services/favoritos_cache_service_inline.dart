@@ -1,8 +1,6 @@
-import 'package:injectable/injectable.dart';
 
 /// Service especializado para cache em memória de favoritos
 /// Responsabilidade: Cache simples com TTL de 5 minutos
-@injectable
 class FavoritosCacheServiceInline {
   final Map<String, dynamic> _memoryCache = {};
   final Map<String, DateTime> _cacheTimestamps = {};

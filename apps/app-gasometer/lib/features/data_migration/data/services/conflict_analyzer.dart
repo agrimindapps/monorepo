@@ -7,7 +7,7 @@ import '../../domain/entities/gasometer_anonymous_data.dart';
 ///
 /// Responsabilidade: Analisar e identificar conflitos entre dados anônimos e de conta
 /// Aplica SRP (Single Responsibility Principle)
-@injectable
+
 class ConflictAnalyzer {
   /// Analisa conflito entre dados anônimos e de conta
   DataConflictResult analyzeConflict(

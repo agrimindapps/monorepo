@@ -6,7 +6,7 @@ import '../../../../core/usecases/usecase.dart';
 import '../repositories/premium_repository.dart';
 
 /// Use case para verificar se pode usar uma feature
-@injectable
+
 class CanUseFeature implements UseCase<bool, CanUseFeatureParams> {
   CanUseFeature(this.repository);
   final PremiumRepository repository;

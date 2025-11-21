@@ -9,7 +9,7 @@ import '../repositories/odometer_repository.dart';
 /// - Buscar todas as leituras não-deletadas
 /// - Retornar ordenadas por data (mais recente primeiro)
 /// - Utilizar cache quando disponível
-@injectable
+
 class GetAllOdometerReadingsUseCase
     implements UseCase<List<OdometerEntity>, NoParams> {
   const GetAllOdometerReadingsUseCase(this._repository);

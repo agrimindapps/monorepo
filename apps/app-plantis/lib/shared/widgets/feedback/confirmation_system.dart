@@ -1,15 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
 
-import '../../../core/di/injection.dart';
 import 'animated_feedback.dart';
 import 'haptic_service.dart';
 
 /// Serviço de confirmação com feedback visual e háptico
 /// Para ações críticas que precisam de confirmação do usuário
-@injectable
 class ConfirmationService {
   final HapticService _hapticService;
 
@@ -280,7 +277,7 @@ class _ConfirmationDialogState extends State<ConfirmationDialog>
               actions: [
                 TextButton(
                   onPressed: () {
-                    getIt<HapticService>().light();
+                    // getIt<HapticService>().light();
                     Navigator.of(context).pop(false);
                   },
                   style: TextButton.styleFrom(
@@ -290,7 +287,7 @@ class _ConfirmationDialogState extends State<ConfirmationDialog>
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    getIt<HapticService>().selection();
+                    // getIt<HapticService>().selection();
                     Navigator.of(context).pop(true);
                   },
                   style: ElevatedButton.styleFrom(
@@ -402,14 +399,14 @@ class _DestructiveConfirmationDialogState
       setState(() {
         _firstConfirmation = true;
       });
-      getIt<HapticService>().warning();
+      // getIt<HapticService>().warning();
       _shakeController.forward().then((_) {
         _shakeController.reset();
       });
       return;
     }
 
-    getIt<HapticService>().heavy();
+    // getIt<HapticService>().heavy();
     Navigator.of(context).pop(true);
   }
 
@@ -480,7 +477,7 @@ class _DestructiveConfirmationDialogState
         actions: [
           TextButton(
             onPressed: () {
-              getIt<HapticService>().light();
+              // getIt<HapticService>().light();
               Navigator.of(context).pop(false);
             },
             style: TextButton.styleFrom(
@@ -560,10 +557,10 @@ class _InputConfirmationDialogState extends State<InputConfirmationDialog> {
 
   void _handleConfirm() {
     if (_formKey.currentState?.validate() ?? false) {
-      getIt<HapticService>().selection();
+      // getIt<HapticService>().selection();
       Navigator.of(context).pop(_controller.text.trim());
     } else {
-      getIt<HapticService>().warning();
+      // getIt<HapticService>().warning();
     }
   }
 
@@ -629,7 +626,7 @@ class _InputConfirmationDialogState extends State<InputConfirmationDialog> {
       actions: [
         TextButton(
           onPressed: () {
-            getIt<HapticService>().light();
+            // getIt<HapticService>().light();
             Navigator.of(context).pop(null);
           },
           style: TextButton.styleFrom(
@@ -695,7 +692,7 @@ class _ChecklistConfirmationDialogState
 
   void _handleConfirm() {
     if (_canConfirm) {
-      getIt<HapticService>().selection();
+      // getIt<HapticService>().selection();
       final selectedItems = <String>[];
       for (int i = 0; i < widget.items.length; i++) {
         if (_checkedItems[i]) {
@@ -704,7 +701,7 @@ class _ChecklistConfirmationDialogState
       }
       Navigator.of(context).pop(selectedItems);
     } else {
-      getIt<HapticService>().warning();
+      // getIt<HapticService>().warning();
     }
   }
 
@@ -756,7 +753,7 @@ class _ChecklistConfirmationDialogState
                   setState(() {
                     _checkedItems[index] = value ?? false;
                   });
-                  getIt<HapticService>().selection();
+                  // getIt<HapticService>().selection();
                 },
                 title: Text(item.title),
                 subtitle: item.subtitle != null ? Text(item.subtitle!) : null,
@@ -770,7 +767,7 @@ class _ChecklistConfirmationDialogState
       actions: [
         TextButton(
           onPressed: () {
-            getIt<HapticService>().light();
+            // getIt<HapticService>().light();
             Navigator.of(context).pop(null);
           },
           style: TextButton.styleFrom(
@@ -874,7 +871,7 @@ class ConfirmationBottomSheet extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      getIt<HapticService>().light();
+                      // getIt<HapticService>().light();
                       Navigator.of(context).pop(false);
                     },
                     style: OutlinedButton.styleFrom(
@@ -889,7 +886,7 @@ class ConfirmationBottomSheet extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      getIt<HapticService>().selection();
+                      // getIt<HapticService>().selection();
                       Navigator.of(context).pop(true);
                     },
                     style: ElevatedButton.styleFrom(
@@ -966,6 +963,8 @@ class ConfirmationColors {
 
 /// Contextos pré-definidos para confirmações
 class ConfirmationContexts {
+  // TODO: Refactor to use Riverpod provider instead of GetIt
+  /*
   static Future<bool> deletePlant(BuildContext context, String plantName) {
     return getIt<ConfirmationService>().showDestructiveConfirmation(
       context: context,
@@ -1097,4 +1096,5 @@ class ConfirmationContexts {
       requireAllChecked: false,
     );
   }
+  */
 }

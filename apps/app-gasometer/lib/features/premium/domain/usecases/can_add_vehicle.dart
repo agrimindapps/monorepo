@@ -6,7 +6,7 @@ import '../../../../core/usecases/usecase.dart';
 import '../repositories/premium_repository.dart';
 
 /// Use case para verificar limites de veículos
-@injectable
+
 class CanAddVehicle implements UseCase<bool, CanAddVehicleParams> {
   CanAddVehicle(this.repository);
   final PremiumRepository repository;

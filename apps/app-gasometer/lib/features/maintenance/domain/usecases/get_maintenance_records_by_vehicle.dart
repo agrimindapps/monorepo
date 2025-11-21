@@ -10,7 +10,7 @@ class GetMaintenanceRecordsByVehicleParams extends Equatable {
   List<Object> get props => [vehicleId];
 }
 
-@injectable
+
 class GetMaintenanceRecordsByVehicle
     implements
         UseCase<List<MaintenanceEntity>, GetMaintenanceRecordsByVehicleParams> {

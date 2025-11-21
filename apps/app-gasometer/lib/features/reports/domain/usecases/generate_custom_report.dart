@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import '../entities/report_summary_entity.dart';
 import '../repositories/reports_repository.dart';
 
-@injectable
+
 class GenerateCustomReport implements UseCase<ReportSummaryEntity, GenerateCustomReportParams> {
 
   GenerateCustomReport(this.repository);

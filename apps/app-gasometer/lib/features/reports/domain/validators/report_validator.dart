@@ -7,7 +7,7 @@ abstract class ReportValidator {
   Either<Failure, Unit> validateMonthsRange(int months);
 }
 
-@LazySingleton(as: ReportValidator)
+
 class ReportValidatorImpl implements ReportValidator {
   @override
   Either<Failure, Unit> validateVehicleId(String vehicleId) {

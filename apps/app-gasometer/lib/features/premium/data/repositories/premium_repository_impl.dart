@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:core/core.dart' as core;
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/premium_status.dart';
 import '../../domain/repositories/premium_repository.dart';
@@ -10,7 +9,7 @@ import '../datasources/premium_local_data_source.dart';
 import '../datasources/premium_remote_data_source.dart';
 import '../services/premium_sync_service.dart';
 
-@LazySingleton(as: PremiumRepository)
+
 class PremiumRepositoryImpl implements PremiumRepository {
 
   PremiumRepositoryImpl({

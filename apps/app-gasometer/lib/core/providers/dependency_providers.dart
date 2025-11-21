@@ -1,100 +1,235 @@
 import 'package:core/core.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../features/image/domain/services/image_sync_service.dart';
+import '../../database/providers/database_providers.dart' as db_providers;
+import '../../features/fuel/data/datasources/fuel_supply_local_datasource.dart';
+import '../../features/fuel/data/repositories/fuel_repository_drift_impl.dart';
 import '../../features/fuel/domain/repositories/fuel_repository.dart';
 import '../../features/fuel/domain/usecases/add_fuel_record.dart';
 import '../../features/fuel/domain/usecases/delete_fuel_record.dart';
 import '../../features/fuel/domain/usecases/get_all_fuel_records.dart';
 import '../../features/fuel/domain/usecases/get_fuel_records_by_vehicle.dart';
 import '../../features/fuel/domain/usecases/update_fuel_record.dart';
+import '../../features/image/domain/services/image_sync_service.dart';
+import '../../features/sync/domain/services/sync_write_trigger.dart';
+import '../../features/vehicles/data/datasources/vehicle_local_datasource.dart';
+import '../../features/vehicles/data/repositories/vehicle_repository_drift_impl.dart';
 import '../../features/vehicles/domain/repositories/vehicle_repository.dart';
 import '../../features/vehicles/domain/usecases/add_vehicle.dart';
 import '../../features/vehicles/domain/usecases/delete_vehicle.dart';
 import '../../features/vehicles/domain/usecases/get_all_vehicles.dart';
 import '../../features/vehicles/domain/usecases/get_vehicle_by_id.dart';
+import '../../features/vehicles/domain/usecases/search_vehicles.dart';
 import '../../features/vehicles/domain/usecases/update_vehicle.dart';
+import '../../core/services/connectivity/connectivity_state_manager.dart';
+import '../../features/sync/domain/services/auto_sync_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../features/sync/domain/services/sync_checkpoint_store.dart';
+import '../../features/sync/adapters/sync_adapter_registry.dart';
+import '../../features/sync/domain/services/sync_push_service.dart';
+import '../../features/sync/domain/services/sync_pull_service.dart';
+import '../../features/sync/domain/services/gasometer_sync_orchestrator.dart';
+import '../../features/sync/domain/services/gasometer_sync_service.dart';
+import '../../features/vehicles/data/sync/vehicle_drift_sync_adapter.dart';
+import '../../features/fuel/data/sync/fuel_supply_drift_sync_adapter.dart';
+import '../../features/maintenance/data/sync/maintenance_drift_sync_adapter.dart';
+import '../../features/expenses/data/sync/expense_drift_sync_adapter.dart';
+import '../../features/odometer/data/sync/odometer_drift_sync_adapter.dart';
+import '../../features/sync/domain/interfaces/i_drift_sync_adapter.dart';
 
+// Core Services
 final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
-  return GetIt.instance<FirebaseAuthService>();
+  return FirebaseAuthService();
 });
 
-
-final firebaseAnalyticsServiceProvider = Provider<FirebaseAnalyticsService>((
-  ref,
-) {
-  return GetIt.instance<FirebaseAnalyticsService>();
+final firebaseAnalyticsServiceProvider = Provider<FirebaseAnalyticsService>((ref) {
+  return FirebaseAnalyticsService(FirebaseAnalytics.instance);
 });
 
-final firebaseCrashlyticsServiceProvider = Provider<FirebaseCrashlyticsService>(
-  (ref) {
-    return GetIt.instance<FirebaseCrashlyticsService>();
-  },
-);
+final firebaseCrashlyticsServiceProvider = Provider<FirebaseCrashlyticsService>((ref) {
+  return FirebaseCrashlyticsService(FirebaseCrashlytics.instance);
+});
 
 final connectivityServiceProvider = Provider<ConnectivityService>((ref) {
-  return GetIt.instance<ConnectivityService>();
+  return ConnectivityService();
 });
 
 final imageSyncServiceProvider = Provider<ImageSyncService>((ref) {
-  return GetIt.instance<ImageSyncService>();
+  final storageService = FirebaseStorageService();
+  final connectivityService = ref.watch(connectivityServiceProvider);
+  return ImageSyncService(storageService, connectivityService);
 });
 
+final gasometerSharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  throw UnimplementedError('SharedPreferences must be overridden in main');
+});
+
+final appRatingRepositoryProvider = Provider<IAppRatingRepository>((ref) {
+   return AppRatingService(ref.watch(gasometerSharedPreferencesProvider));
+});
+
+// Sync
+final syncWriteTriggerProvider = Provider<SyncWriteTrigger>((ref) {
+  return SyncWriteTrigger();
+});
+
+// Datasources
+final vehicleLocalDataSourceProvider = Provider<VehicleLocalDataSource>((ref) {
+  final driftRepo = ref.watch(db_providers.vehicleRepositoryProvider);
+  final syncTrigger = ref.watch(syncWriteTriggerProvider);
+  return VehicleLocalDataSource(driftRepo, syncTrigger);
+});
+
+final fuelSupplyLocalDataSourceProvider = Provider<FuelSupplyLocalDataSource>((ref) {
+  final driftRepo = ref.watch(db_providers.fuelSupplyRepositoryProvider);
+  final syncTrigger = ref.watch(syncWriteTriggerProvider);
+  return FuelSupplyLocalDataSource(driftRepo, syncTrigger);
+});
+
+// Repositories
 final vehicleRepositoryProvider = Provider<VehicleRepository>((ref) {
-  return GetIt.instance<VehicleRepository>();
+  final dataSource = ref.watch(vehicleLocalDataSourceProvider);
+  return VehicleRepositoryDriftImpl(dataSource);
 });
 
 final fuelRepositoryProvider = Provider<FuelRepository>((ref) {
-  return GetIt.instance<FuelRepository>();
+  final dataSource = ref.watch(fuelSupplyLocalDataSourceProvider);
+  return FuelRepositoryDriftImpl(dataSource);
 });
+
+// Use Cases - Vehicles
 final getAllVehiclesProvider = Provider<GetAllVehicles>((ref) {
-  return GetIt.instance<GetAllVehicles>();
+  return GetAllVehicles(ref.watch(vehicleRepositoryProvider));
 });
 
 final addVehicleProvider = Provider<AddVehicle>((ref) {
-  return GetIt.instance<AddVehicle>();
+  return AddVehicle(ref.watch(vehicleRepositoryProvider));
 });
 
 final updateVehicleProvider = Provider<UpdateVehicle>((ref) {
-  return GetIt.instance<UpdateVehicle>();
+  return UpdateVehicle(ref.watch(vehicleRepositoryProvider));
 });
 
 final deleteVehicleProvider = Provider<DeleteVehicle>((ref) {
-  return GetIt.instance<DeleteVehicle>();
+  return DeleteVehicle(ref.watch(vehicleRepositoryProvider));
 });
 
 final getVehicleByIdProvider = Provider<GetVehicleById>((ref) {
-  return GetIt.instance<GetVehicleById>();
-});
-final getAllFuelRecordsProvider = Provider<GetAllFuelRecords>((ref) {
-  return GetIt.instance<GetAllFuelRecords>();
+  return GetVehicleById(ref.watch(vehicleRepositoryProvider));
 });
 
-final getFuelRecordsByVehicleProvider = Provider<GetFuelRecordsByVehicle>((
-  ref,
-) {
-  return GetIt.instance<GetFuelRecordsByVehicle>();
+final searchVehiclesProvider = Provider<SearchVehicles>((ref) {
+  return SearchVehicles(ref.watch(vehicleRepositoryProvider));
+});
+
+// Use Cases - Fuel
+final getAllFuelRecordsProvider = Provider<GetAllFuelRecords>((ref) {
+  return GetAllFuelRecords(ref.watch(fuelRepositoryProvider));
+});
+
+final getFuelRecordsByVehicleProvider = Provider<GetFuelRecordsByVehicle>((ref) {
+  return GetFuelRecordsByVehicle(ref.watch(fuelRepositoryProvider));
 });
 
 final addFuelRecordProvider = Provider<AddFuelRecord>((ref) {
-  return GetIt.instance<AddFuelRecord>();
+  return AddFuelRecord(ref.watch(fuelRepositoryProvider));
 });
 
 final updateFuelRecordProvider = Provider<UpdateFuelRecord>((ref) {
-  return GetIt.instance<UpdateFuelRecord>();
+  return UpdateFuelRecord(ref.watch(fuelRepositoryProvider));
 });
 
 final deleteFuelRecordProvider = Provider<DeleteFuelRecord>((ref) {
-  return GetIt.instance<DeleteFuelRecord>();
+  return DeleteFuelRecord(ref.watch(fuelRepositoryProvider));
 });
-final gasometerSharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  return GetIt.instance<SharedPreferences>();
+
+// Infrastructure
+final crashlyticsRepositoryProvider = Provider<ICrashlyticsRepository>((ref) {
+  return FirebaseCrashlyticsService(crashlytics: FirebaseCrashlytics.instance);
 });
-final appRatingRepositoryProvider = Provider<IAppRatingRepository>((ref) {
-  try {
-    return GetIt.instance<IAppRatingRepository>();
-  } catch (e) {
-    throw Exception(
-      'IAppRatingRepository not registered in GetIt. Please register it in your dependency injection setup.',
-    );
-  }
+
+final analyticsRepositoryProvider = Provider<IAnalyticsRepository>((ref) {
+  return FirebaseAnalyticsService(analytics: FirebaseAnalytics.instance);
+});
+
+final performanceRepositoryProvider = Provider<IPerformanceRepository>((ref) {
+  return PerformanceService();
+});
+
+final connectivityStateManagerProvider = Provider<ConnectivityStateManager>((ref) {
+  return ConnectivityStateManager();
+});
+
+final autoSyncServiceProvider = Provider<AutoSyncService>((ref) {
+  return AutoSyncService(connectivityService: ref.watch(connectivityServiceProvider));
+});
+
+// Sync Adapters & Services
+final syncCheckpointStoreProvider = Provider<SyncCheckpointStore>((ref) {
+  return SyncCheckpointStore();
+});
+
+final vehicleDriftSyncAdapterProvider = Provider<VehicleDriftSyncAdapter>((ref) {
+  final db = ref.watch(db_providers.gasometerDatabaseProvider);
+  return VehicleDriftSyncAdapter(db, FirebaseFirestore.instance);
+});
+
+final fuelSupplyDriftSyncAdapterProvider = Provider<FuelSupplyDriftSyncAdapter>((ref) {
+  final db = ref.watch(db_providers.gasometerDatabaseProvider);
+  return FuelSupplyDriftSyncAdapter(db, FirebaseFirestore.instance);
+});
+
+final maintenanceDriftSyncAdapterProvider = Provider<MaintenanceDriftSyncAdapter>((ref) {
+  final db = ref.watch(db_providers.gasometerDatabaseProvider);
+  return MaintenanceDriftSyncAdapter(db, FirebaseFirestore.instance);
+});
+
+final expenseDriftSyncAdapterProvider = Provider<ExpenseDriftSyncAdapter>((ref) {
+  final db = ref.watch(db_providers.gasometerDatabaseProvider);
+  return ExpenseDriftSyncAdapter(db, FirebaseFirestore.instance);
+});
+
+final odometerDriftSyncAdapterProvider = Provider<OdometerDriftSyncAdapter>((ref) {
+  final db = ref.watch(db_providers.gasometerDatabaseProvider);
+  return OdometerDriftSyncAdapter(db, FirebaseFirestore.instance);
+});
+
+final syncAdapterRegistryProvider = Provider<SyncAdapterRegistry>((ref) {
+  return SyncAdapterRegistry(
+    adapters: [
+      ref.watch(vehicleDriftSyncAdapterProvider) as IDriftSyncAdapter<dynamic, dynamic>,
+      ref.watch(fuelSupplyDriftSyncAdapterProvider) as IDriftSyncAdapter<dynamic, dynamic>,
+      ref.watch(maintenanceDriftSyncAdapterProvider) as IDriftSyncAdapter<dynamic, dynamic>,
+      ref.watch(expenseDriftSyncAdapterProvider) as IDriftSyncAdapter<dynamic, dynamic>,
+      ref.watch(odometerDriftSyncAdapterProvider) as IDriftSyncAdapter<dynamic, dynamic>,
+    ],
+  );
+});
+
+final syncPushServiceProvider = Provider<SyncPushService>((ref) {
+  return SyncPushService(ref.watch(syncAdapterRegistryProvider));
+});
+
+final syncPullServiceProvider = Provider<SyncPullService>((ref) {
+  return SyncPullService(
+    ref.watch(syncAdapterRegistryProvider),
+    ref.watch(syncCheckpointStoreProvider),
+  );
+});
+
+final gasometerSyncOrchestratorProvider = Provider<GasometerSyncOrchestrator>((ref) {
+  return GasometerSyncOrchestrator(
+    pushService: ref.watch(syncPushServiceProvider),
+    pullService: ref.watch(syncPullServiceProvider),
+  );
+});
+
+final gasometerSyncServiceProvider = Provider<GasometerSyncService>((ref) {
+  return GasometerSyncService(
+    pushService: ref.watch(syncPushServiceProvider),
+    pullService: ref.watch(syncPullServiceProvider),
+  );
 });

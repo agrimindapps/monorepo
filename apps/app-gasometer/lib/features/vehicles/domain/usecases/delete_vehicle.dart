@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import '../repositories/vehicle_repository.dart';
 
-@injectable
+
 class DeleteVehicle implements UseCase<Unit, DeleteVehicleParams> {
 
   DeleteVehicle(this.repository);

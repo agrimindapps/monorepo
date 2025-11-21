@@ -3,7 +3,7 @@ import 'package:core/core.dart';
 /// Persiste o cursor incremental de cada adapter de sync.
 /// Mantém apenas a última timestamp remota processada por usuário+adapter,
 /// permitindo que o pull solicite apenas alterações mais recentes.
-@lazySingleton
+
 class SyncCheckpointStore {
   SyncCheckpointStore();
 

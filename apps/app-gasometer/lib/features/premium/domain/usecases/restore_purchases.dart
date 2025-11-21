@@ -6,7 +6,7 @@ import '../../../../core/usecases/usecase.dart';
 import '../repositories/premium_repository.dart';
 
 /// Use case para restaurar compras
-@injectable
+
 class RestorePurchases implements UseCase<bool, NoParams> {
   RestorePurchases(this.repository);
   final PremiumRepository repository;

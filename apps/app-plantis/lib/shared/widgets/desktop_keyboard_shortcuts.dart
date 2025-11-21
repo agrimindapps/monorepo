@@ -3,8 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../core/di/injection_container.dart';
-
 /// Widget para atalhos de teclado desktop
 class DesktopKeyboardShortcuts extends StatefulWidget {
   final Widget child;
@@ -118,10 +116,11 @@ class CustomIntent extends Intent {
 class NavigateToAction extends Action<NavigateToIntent> {
   @override
   Object? invoke(NavigateToIntent intent) {
-    final context = sl<INavigationService>().currentContext;
-    if (context != null && context.mounted) {
-      context.go(intent.route);
-    }
+    // TODO: Replace with Riverpod provider or context.go directly
+    // final context = sl<INavigationService>().currentContext;
+    // if (context != null && context.mounted) {
+    //   context.go(intent.route);
+    // }
     return null;
   }
 }
@@ -129,10 +128,11 @@ class NavigateToAction extends Action<NavigateToIntent> {
 class CreateNewPlantAction extends Action<CreateNewPlantIntent> {
   @override
   Object? invoke(CreateNewPlantIntent intent) {
-    final context = sl<INavigationService>().currentContext;
-    if (context != null && context.mounted) {
-      context.go('/plants/add');
-    }
+    // TODO: Replace with Riverpod provider or context.go directly
+    // final context = sl<INavigationService>().currentContext;
+    // if (context != null && context.mounted) {
+    //   context.go('/plants/add');
+    // }
     return null;
   }
 }
@@ -140,13 +140,14 @@ class CreateNewPlantAction extends Action<CreateNewPlantIntent> {
 class SaveAction extends Action<SaveIntent> {
   @override
   Object? invoke(SaveIntent intent) {
-    final context = sl<INavigationService>().currentContext;
-    if (context != null && context.mounted) {
-      final saveNotifier = SaveNotifier.maybeOf(context);
-      if (saveNotifier != null) {
-        saveNotifier.save();
-      }
-    }
+    // TODO: Replace with Riverpod provider or context.go directly
+    // final context = sl<INavigationService>().currentContext;
+    // if (context != null && context.mounted) {
+    //   final saveNotifier = SaveNotifier.maybeOf(context);
+    //   if (saveNotifier != null) {
+    //     saveNotifier.save();
+    //   }
+    // }
     return null;
   }
 }
@@ -154,12 +155,13 @@ class SaveAction extends Action<SaveIntent> {
 class EscapeAction extends Action<EscapeIntent> {
   @override
   Object? invoke(EscapeIntent intent) {
-    final context = sl<INavigationService>().currentContext;
-    if (context != null && context.mounted) {
-      if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
-      }
-    }
+    // TODO: Replace with Riverpod provider or context.go directly
+    // final context = sl<INavigationService>().currentContext;
+    // if (context != null && context.mounted) {
+    //   if (Navigator.of(context).canPop()) {
+    //     Navigator.of(context).pop();
+    //   }
+    // }
     return null;
   }
 }
@@ -167,12 +169,13 @@ class EscapeAction extends Action<EscapeIntent> {
 class GoBackAction extends Action<GoBackIntent> {
   @override
   Object? invoke(GoBackIntent intent) {
-    final context = sl<INavigationService>().currentContext;
-    if (context != null && context.mounted) {
-      if (context.canPop()) {
-        context.pop();
-      }
-    }
+    // TODO: Replace with Riverpod provider or context.go directly
+    // final context = sl<INavigationService>().currentContext;
+    // if (context != null && context.mounted) {
+    //   if (context.canPop()) {
+    //     context.pop();
+    //   }
+    // }
     return null;
   }
 }
@@ -180,13 +183,14 @@ class GoBackAction extends Action<GoBackIntent> {
 class SearchAction extends Action<SearchIntent> {
   @override
   Object? invoke(SearchIntent intent) {
-    final context = sl<INavigationService>().currentContext;
-    if (context != null && context.mounted) {
-      final searchNotifier = SearchNotifier.maybeOf(context);
-      if (searchNotifier != null) {
-        searchNotifier.toggleSearch();
-      }
-    }
+    // TODO: Replace with Riverpod provider or context.go directly
+    // final context = sl<INavigationService>().currentContext;
+    // if (context != null && context.mounted) {
+    //   final searchNotifier = SearchNotifier.maybeOf(context);
+    //   if (searchNotifier != null) {
+    //     searchNotifier.toggleSearch();
+    //   }
+    // }
     return null;
   }
 }
@@ -194,13 +198,14 @@ class SearchAction extends Action<SearchIntent> {
 class RefreshAction extends Action<RefreshIntent> {
   @override
   Object? invoke(RefreshIntent intent) {
-    final context = sl<INavigationService>().currentContext;
-    if (context != null && context.mounted) {
-      final refreshNotifier = RefreshNotifier.maybeOf(context);
-      if (refreshNotifier != null) {
-        refreshNotifier.refresh();
-      }
-    }
+    // TODO: Replace with Riverpod provider or context.go directly
+    // final context = sl<INavigationService>().currentContext;
+    // if (context != null && context.mounted) {
+    //   final refreshNotifier = RefreshNotifier.maybeOf(context);
+    //   if (refreshNotifier != null) {
+    //     refreshNotifier.refresh();
+    //   }
+    // }
     return null;
   }
 }

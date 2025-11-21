@@ -42,7 +42,7 @@ import '../../domain/entities/expense_entity.dart';
 ///
 /// **Conflict Resolution:**
 /// - Last Write Wins (LWW) com version checking
-@lazySingleton
+
 class ExpenseDriftSyncAdapter
     extends DriftSyncAdapterBase<ExpenseEntity, Expense> {
   ExpenseDriftSyncAdapter(GasometerDatabase db, FirebaseFirestore firestore)

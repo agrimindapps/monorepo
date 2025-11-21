@@ -1,11 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:injectable/injectable.dart';
 
 /// Serviço centralizado para feedback háptico
 /// Gerencia vibrações e feedback tátil para melhorar UX
-@lazySingleton
 class HapticService {
   bool _isEnabled = true;
   bool _isInitialized = false;

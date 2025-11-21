@@ -16,7 +16,7 @@ abstract class ResolutionStrategy {
 }
 
 /// Estratégia: Manter dados da conta (remover dados anônimos)
-@injectable
+
 class KeepAccountDataStrategy implements ResolutionStrategy {
   KeepAccountDataStrategy(this._dataSource, this._progressTracker);
 
@@ -127,7 +127,7 @@ class KeepAccountDataStrategy implements ResolutionStrategy {
 }
 
 /// Estratégia: Manter dados anônimos
-@injectable
+
 class KeepAnonymousDataStrategy implements ResolutionStrategy {
   @override
   Future<Either<Failure, DataMigrationResult>> execute(
@@ -148,7 +148,7 @@ class KeepAnonymousDataStrategy implements ResolutionStrategy {
 }
 
 /// Estratégia: Cancelar operação
-@injectable
+
 class CancelMigrationStrategy implements ResolutionStrategy {
   @override
   Future<Either<Failure, DataMigrationResult>> execute(
@@ -169,7 +169,7 @@ class CancelMigrationStrategy implements ResolutionStrategy {
 ///
 /// Responsabilidade: Criar instâncias apropriadas de estratégias
 /// Aplica Factory Pattern
-@injectable
+
 class ResolutionStrategyFactory {
   ResolutionStrategyFactory(this._dataSource, this._progressTracker);
 

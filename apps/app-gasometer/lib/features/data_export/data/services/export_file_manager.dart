@@ -8,7 +8,7 @@ import 'package:path_provider/path_provider.dart';
 ///
 /// Responsabilidade: Gerenciar operações de I/O de arquivos de exportação
 /// Aplica SRP (Single Responsibility Principle)
-@LazySingleton()
+
 class ExportFileManager {
   /// Salva dados de exportação em arquivo
   Future<String> saveExportFile(Uint8List data, String userId) async {

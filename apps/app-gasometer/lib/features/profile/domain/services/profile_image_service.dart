@@ -34,7 +34,7 @@ class Result<T> {
 
 /// Serviço específico do Gasometer para manipulação de imagens de perfil
 /// Focado em operações locais com base64 encoding
-@injectable
+
 class GasometerProfileImageService {
   GasometerProfileImageService(this._analytics);
   final GasometerAnalyticsService _analytics;

@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/fuel_record_entity.dart';
 
@@ -6,7 +5,7 @@ import '../../domain/entities/fuel_record_entity.dart';
 ///
 /// Detecta padrões suspeitos, valores fora do normal e possíveis erros,
 /// seguindo o princípio Single Responsibility.
-@lazySingleton
+
 class FuelAnomalyDetector {
   FuelAnomalyDetector();
 

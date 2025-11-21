@@ -3,11 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-import 'core/di/injection_container.dart' as di;
 import 'core/providers/dependency_providers.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/gasometer_theme.dart';
-import 'features/auth/domain/repositories/auth_repository.dart';
 import 'features/settings/presentation/providers/settings_notifier.dart';
 import 'main.dart' as main;
 import 'shared/widgets/connectivity_banner.dart';
@@ -39,11 +37,13 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
     _syncPendingImages();
 
     // 🧪 AUTO-LOGIN PARA TESTES (remover em produção)
+    /*
     if (kDebugMode) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _performTestAutoLogin();
       });
     }
+    */
   }
 
   @override
@@ -144,6 +144,7 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
 
   /// 🧪 AUTO-LOGIN PARA TESTES
   /// Remove this method in production!
+  /*
   void _performTestAutoLogin() async {
     // 🔒 Verificação de segurança: apenas executa se o widget ainda está montado
     if (!mounted) return;
@@ -191,4 +192,5 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
       }
     }
   }
+  */
 }

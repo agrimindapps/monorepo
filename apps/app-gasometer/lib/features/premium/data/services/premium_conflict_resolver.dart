@@ -1,10 +1,9 @@
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/premium_status.dart';
 
 /// Service responsible for resolving conflicts between premium statuses
 /// Follows SRP by handling only conflict resolution logic
-@lazySingleton
+
 class PremiumConflictResolver {
   /// Resolve conflict between two premium statuses
   ///

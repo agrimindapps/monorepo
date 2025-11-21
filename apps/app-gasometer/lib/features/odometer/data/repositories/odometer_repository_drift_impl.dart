@@ -1,13 +1,12 @@
 import 'package:core/core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../database/repositories/odometer_reading_repository.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../../domain/repositories/odometer_repository.dart';
 import '../datasources/odometer_reading_local_datasource.dart';
 
 /// Implementação do repositório de odômetro usando Drift
-@LazySingleton(as: OdometerRepository)
+
 class OdometerRepositoryDriftImpl implements OdometerRepository {
   const OdometerRepositoryDriftImpl(this._dataSource);
 

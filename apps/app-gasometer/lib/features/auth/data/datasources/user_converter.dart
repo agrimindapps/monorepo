@@ -6,7 +6,7 @@ import '../../../../core/extensions/user_entity_gasometer_extension.dart';
 ///
 /// Responsabilidade: Converter entre diferentes representações de UserEntity
 /// Aplica SRP (Single Responsibility Principle) e ISP (Interface Segregation)
-@injectable
+
 class UserConverter {
   /// Converte Firebase User para UserEntity do Gasometer
   UserEntity fromFirebaseUser(User firebaseUser) {

@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:core/core.dart' as core;
 import '../../domain/entities/device_session.dart';
 
@@ -40,7 +39,7 @@ class DeviceValidationResult {
 ///
 /// Centraliza todas as regras de validação de dispositivos,
 /// seguindo o princípio Single Responsibility.
-@lazySingleton
+
 class DeviceValidator {
   DeviceValidator();
 

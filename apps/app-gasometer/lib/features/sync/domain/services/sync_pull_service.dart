@@ -23,7 +23,7 @@ class ServicePullSnapshot {
   final String? error;
 }
 
-@lazySingleton
+
 class SyncPullService implements ISyncPullService {
   SyncPullService(this.registry, this.checkpointStore);
 

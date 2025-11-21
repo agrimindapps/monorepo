@@ -49,7 +49,7 @@ import '../../domain/entities/fuel_record_entity.dart';
 ///
 /// **Conflict Resolution:**
 /// - Last Write Wins (LWW) com version checking
-@lazySingleton
+
 class FuelSupplyDriftSyncAdapter
     extends DriftSyncAdapterBase<FuelRecordEntity, FuelSupply> {
   FuelSupplyDriftSyncAdapter(GasometerDatabase db, FirebaseFirestore firestore)

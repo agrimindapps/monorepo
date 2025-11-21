@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import '../repositories/auth_repository.dart';
 
-@injectable
+
 class SendPasswordReset implements UseCase<Unit, SendPasswordResetParams> {
 
   SendPasswordReset(this.repository);

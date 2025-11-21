@@ -8,7 +8,7 @@ import '../entities/expense_entity.dart';
 /// Responsável por:
 /// - Buscar em múltiplos campos (descrição, notas, location)
 /// - Retornar resultados ordenados por relevância
-@injectable
+
 class SearchExpensesUseCase implements UseCase<List<ExpenseEntity>, String> {
   const SearchExpensesUseCase(this._repository);
 

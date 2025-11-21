@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
-
 /// Service responsible for debouncing subscription sync operations
 ///
 /// Prevents excessive sync calls by delaying execution until a quiet period.
@@ -11,7 +9,6 @@ import 'package:injectable/injectable.dart';
 /// - Preventing race conditions
 ///
 /// Configuration via [AdvancedSyncConfiguration.debounceDuration]
-@lazySingleton
 class SubscriptionDebounceManager {
   final Map<String, Timer> _timers = {};
   final Map<String, Completer<void>> _completers = {};

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 
 /// Service responsible for UI feedback operations
 /// Follows SRP by handling only user feedback logic
-@lazySingleton
+
 class SnackBarService {
   /// Show success snackbar
   void showSuccess(BuildContext context, String message) {

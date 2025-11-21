@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../database/repositories/fuel_supply_repository.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../domain/entities/fuel_record_entity.dart';
@@ -8,7 +7,7 @@ import '../../domain/repositories/fuel_repository.dart';
 import '../datasources/fuel_supply_local_datasource.dart';
 
 /// Implementação do repositório de combustível usando Drift
-@LazySingleton(as: FuelRepository)
+
 class FuelRepositoryDriftImpl implements FuelRepository {
   const FuelRepositoryDriftImpl(this._dataSource);
 

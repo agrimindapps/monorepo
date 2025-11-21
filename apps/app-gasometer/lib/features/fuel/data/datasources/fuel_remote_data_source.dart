@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
@@ -18,7 +17,7 @@ abstract class FuelRemoteDataSource {
   Stream<List<FuelRecordEntity>> watchFuelRecordsByVehicle(String userId, String vehicleId);
 }
 
-@LazySingleton(as: FuelRemoteDataSource)
+
 class FuelRemoteDataSourceImpl implements FuelRemoteDataSource {
 
   FuelRemoteDataSourceImpl(this._firestore);

@@ -13,7 +13,6 @@ abstract class DeviceRemoteDataSource {
 }
 
 /// Implementação do datasource remoto usando Firebase
-@LazySingleton(as: DeviceRemoteDataSource)
 class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
   final FirebaseDeviceService? _firebaseDeviceService;
   

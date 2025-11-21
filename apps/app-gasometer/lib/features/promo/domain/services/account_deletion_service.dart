@@ -1,8 +1,7 @@
-import 'package:injectable/injectable.dart';
 
 /// Service responsible for account deletion business logic
 /// Follows SRP by handling only account deletion operations
-@lazySingleton
+
 class AccountDeletionService {
   /// Validate if user can delete account
   AccountDeletionValidation validateDeletion({

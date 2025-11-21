@@ -18,7 +18,7 @@ abstract class AuthLocalDataSource {
   Future<void> clearCachedCredentialsPreservingEmail();
 }
 
-@LazySingleton(as: AuthLocalDataSource)
+
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
   AuthLocalDataSourceImpl(

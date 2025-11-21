@@ -9,7 +9,7 @@ import '../repositories/odometer_repository.dart';
 /// - Validar dados da leitura
 /// - Persistir localmente (Drift)
 /// - Sincronizar com Firebase em background
-@injectable
+
 class AddOdometerReadingUseCase
     implements UseCase<OdometerEntity?, OdometerEntity> {
   const AddOdometerReadingUseCase(this._repository);

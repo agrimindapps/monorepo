@@ -36,7 +36,7 @@ class SyncModule implements DIModule {
     }
 
     try {
-      // Adapters são registrados automaticamente via @lazySingleton (Injectable)
+      // Adapters são registrados automaticamente via 
       // Validar que estão disponíveis
       if (!sl.isRegistered<VehicleDriftSyncAdapter>()) {
         print(

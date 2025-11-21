@@ -10,7 +10,7 @@ import '../entities/expense_entity.dart';
 /// - Persistir localmente (Drift)
 /// - Sincronizar com Firebase em background
 /// - Invalidar caches relacionados
-@injectable
+
 class AddExpenseUseCase implements UseCase<ExpenseEntity?, ExpenseEntity> {
   const AddExpenseUseCase(this._repository);
 

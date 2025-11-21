@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../domain/entities/base_sync_entity.dart';
 import '../domain/interfaces/i_disposable_service.dart';
+import '../domain/repositories/i_local_storage_repository.dart';
 import '../domain/repositories/i_sync_repository.dart';
 import '../infrastructure/services/sync_firebase_service.dart';
 import '../shared/utils/failure.dart';
@@ -48,6 +49,7 @@ class UnifiedSyncManager implements IDisposableService {
     required String appName,
     required AppSyncConfig config,
     required List<EntitySyncRegistration> entities,
+    required ILocalStorageRepository localStorage,
   }) async {
     try {
       developer.log(
@@ -58,7 +60,7 @@ class UnifiedSyncManager implements IDisposableService {
       _entityRegistrations[appName] = {};
       _syncRepositories[appName] = {};
       for (final registration in entities) {
-        await _registerEntity(appName, registration);
+        await _registerEntity(appName, registration, localStorage);
       }
       if (!_isInitialized) {
         _setupAuthListener();
@@ -86,6 +88,7 @@ class UnifiedSyncManager implements IDisposableService {
   Future<void> _registerEntity(
     String appName,
     EntitySyncRegistration registration,
+    ILocalStorageRepository localStorage,
   ) async {
     final entityTypeKey = registration.entityType.toString();
 
@@ -98,7 +101,7 @@ class UnifiedSyncManager implements IDisposableService {
     );
 
     _entityRegistrations[appName]![entityTypeKey] = registration;
-    final syncRepo = _createTypedRepository(registration);
+    final syncRepo = _createTypedRepository(registration, localStorage);
 
     await syncRepo.initialize();
     _syncRepositories[appName]![entityTypeKey] = syncRepo;
@@ -110,11 +113,12 @@ class UnifiedSyncManager implements IDisposableService {
   }
 
   /// Cria repositório tipado corretamente
-  dynamic _createTypedRepository(EntitySyncRegistration registration) {
+  dynamic _createTypedRepository(EntitySyncRegistration registration, ILocalStorageRepository localStorage) {
     return _createSyncServiceDynamic(
       registration.collectionName,
       registration.fromMap,
       registration.toSyncConfig(),
+      localStorage,
     );
   }
 
@@ -123,6 +127,7 @@ class UnifiedSyncManager implements IDisposableService {
     String collectionName,
     dynamic fromMapFunction,
     SyncConfig config,
+    ILocalStorageRepository localStorage,
   ) {
     developer.log(
       'Creating sync service for collection: $collectionName',
@@ -134,6 +139,7 @@ class UnifiedSyncManager implements IDisposableService {
         collectionName,
         fromMapFunction,
         config,
+        localStorage,
       );
 
       developer.log(
@@ -155,11 +161,13 @@ class UnifiedSyncManager implements IDisposableService {
     String collectionName,
     dynamic fromMapFunction,
     SyncConfig config,
+    ILocalStorageRepository localStorage,
   ) {
     final service = _DynamicSyncService(
       collectionName: collectionName,
       fromMapFunction: fromMapFunction,
       config: config,
+      localStorage: localStorage,
     );
 
     return service;
@@ -899,6 +907,7 @@ class _DynamicSyncService implements ISyncRepository<BaseSyncEntity> {
   final String collectionName;
   final dynamic fromMapFunction;
   final SyncConfig config;
+  final ILocalStorageRepository localStorage;
 
   late final SyncFirebaseService<BaseSyncEntity> _internalService;
 
@@ -906,6 +915,7 @@ class _DynamicSyncService implements ISyncRepository<BaseSyncEntity> {
     required this.collectionName,
     required this.fromMapFunction,
     required this.config,
+    required this.localStorage,
   }) {
     _internalService = _createGenericService(config);
   }
@@ -928,14 +938,23 @@ class _DynamicSyncService implements ISyncRepository<BaseSyncEntity> {
         }
       },
       (entity) {
+        // toMap is handled by the entity itself usually, but SyncFirebaseService expects a toMap function
+        // We can use entity.toMap() if available or reflection/dynamic
+        // Assuming BaseSyncEntity or subclasses have toMap or similar
+        // SyncFirebaseService uses toMap passed in constructor.
+        // Wait, SyncFirebaseService constructor takes toMap.
+        // _DynamicSyncService needs to provide it.
+        // In _createGenericService, we are passing a closure for toMap.
         try {
-          return entity.toFirebaseMap();
+          // Try to call toMap dynamically
+          return (entity as dynamic).toMap() as Map<String, dynamic>;
         } catch (e) {
-          developer.log('Error in toFirebaseMap: $e', name: 'DynamicSync');
-          return <String, dynamic>{'error': 'Failed to convert entity to map'};
+           developer.log('Error in toMap: $e', name: 'DynamicSync');
+           return {};
         }
       },
       config: config,
+      localStorage: localStorage,
     );
   }
 

@@ -11,7 +11,6 @@ import '../../domain/entities/base_sync_entity.dart';
 import '../../domain/interfaces/i_disposable_service.dart';
 import '../../domain/repositories/i_local_storage_repository.dart';
 import '../../domain/repositories/i_sync_repository.dart';
-import '../../shared/di/injection_container.dart';
 import '../../shared/utils/failure.dart';
 import 'connectivity_service.dart';
 
@@ -38,6 +37,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
     T Function(Map<String, dynamic>) fromMap,
     Map<String, dynamic> Function(T) toMap, {
     SyncConfig? config,
+    required ILocalStorageRepository localStorage,
   }) {
     final key = '${T.toString()}_$collectionName';
 
@@ -47,6 +47,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
         fromMap,
         toMap,
         config ?? const SyncConfig(),
+        localStorage,
       );
     }
 
@@ -58,13 +59,14 @@ class SyncFirebaseService<T extends BaseSyncEntity>
     this.fromMap,
     this.toMap,
     this.config,
+    this._localStorage,
   );
 
   final String collectionName;
   final T Function(Map<String, dynamic>) fromMap;
   final Map<String, dynamic> Function(T) toMap;
   final SyncConfig config;
-  late final ILocalStorageRepository _localStorage;
+  final ILocalStorageRepository _localStorage;
   late final ConnectivityService _connectivity;
   late final FirebaseFirestore _firestore;
   late final FirebaseAuth _auth;
@@ -97,7 +99,6 @@ class SyncFirebaseService<T extends BaseSyncEntity>
     _initCompleter = Completer<void>();
 
     try {
-      _localStorage = getIt<ILocalStorageRepository>();
       _connectivity = ConnectivityService.instance;
       _firestore = FirebaseFirestore.instance;
       _auth = FirebaseAuth.instance;

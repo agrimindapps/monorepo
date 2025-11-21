@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../database/receituagro_database.dart';
+import '../../database/providers/database_providers.dart';
 import '../../features/analytics/analytics_service.dart';
 import '../../features/analytics/analytics_providers.dart';
 import '../di/injection_container.dart' as di;
@@ -18,6 +19,7 @@ import '../services/receituagro_navigation_service.dart';
 import '../services/receituagro_notification_service.dart';
 import '../services/remote_config_service.dart';
 import '../services/receita_agro_sync_service.dart';
+import '../sync/receituagro_drift_storage_adapter.dart';
 import '../sync/sync_operations.dart';
 import '../sync/sync_queue.dart';
 
@@ -36,8 +38,12 @@ ReceituagroDatabase receituagroDatabase(Ref ref) {
 /// Provider do serviço de analytics
 @Riverpod(keepAlive: true)
 ReceitaAgroAnalyticsService analyticsService(Ref ref) {
-  final repo = ref.watch(analyticsRepositoryProvider);
-  return ReceitaAgroAnalyticsService(repo);
+  final analyticsRepo = ref.watch(analyticsRepositoryProvider);
+  final crashlyticsRepo = ref.watch(crashlyticsRepositoryProvider);
+  return ReceitaAgroAnalyticsService(
+    analyticsRepository: analyticsRepo,
+    crashlyticsRepository: crashlyticsRepo,
+  );
 }
 
 /// Provider do serviço de device identity
@@ -96,7 +102,12 @@ core.EnhancedNavigationService coreNavigationService(Ref ref) {
 /// Provider do serviço de integração de diagnósticos
 @Riverpod(keepAlive: true)
 DiagnosticoIntegrationService diagnosticoIntegrationService(Ref ref) {
-  return di.sl<DiagnosticoIntegrationService>();
+  return DiagnosticoIntegrationService(
+    diagnosticoRepo: ref.watch(diagnosticoRepositoryProvider),
+    fitossanitarioRepo: ref.watch(fitossanitariosRepositoryProvider),
+    culturaRepo: ref.watch(culturasRepositoryProvider),
+    pragasRepo: ref.watch(pragasRepositoryProvider),
+  );
 }
 
 /// Provider do data cleaner
@@ -156,7 +167,7 @@ core.FirebaseDeviceService firebaseDeviceService(Ref ref) {
 /// Provider do serviço de analytics do Firebase
 @Riverpod(keepAlive: true)
 core.FirebaseAnalyticsService firebaseAnalyticsService(Ref ref) {
-  return di.sl<core.FirebaseAnalyticsService>();
+  return core.FirebaseAnalyticsService();
 }
 
 // ========== AUTH SERVICES (from core) ==========
@@ -164,7 +175,19 @@ core.FirebaseAnalyticsService firebaseAnalyticsService(Ref ref) {
 /// Provider do repositório de autenticação
 @Riverpod(keepAlive: true)
 core.IAuthRepository authRepository(Ref ref) {
-  return di.sl<core.IAuthRepository>();
+  return core.FirebaseAuthRepository();
+}
+
+/// Provider do serviço de autenticação Firebase
+@Riverpod(keepAlive: true)
+core.FirebaseAuthService firebaseAuthService(Ref ref) {
+  return core.FirebaseAuthService();
+}
+
+/// Provider do repositório de armazenamento local
+@Riverpod(keepAlive: true)
+core.ILocalStorageRepository localStorageRepository(Ref ref) {
+  return ReceituagroDriftStorageAdapter(ref.watch(receituagroDatabaseProvider));
 }
 
 /// Provider do serviço de account deletion

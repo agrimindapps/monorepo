@@ -9,7 +9,7 @@ import '../entities/expense_entity.dart';
 /// - Buscar despesas filtradas por veículo
 /// - Retornar ordenadas por data (mais recente primeiro)
 /// - Utilizar cache quando disponível
-@injectable
+
 class GetExpensesByVehicleUseCase implements UseCase<List<ExpenseEntity>, String> {
   const GetExpensesByVehicleUseCase(this._repository);
 

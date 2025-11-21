@@ -21,7 +21,7 @@ class ServicePushResult {
   final String? error;
 }
 
-@lazySingleton
+
 class SyncPushService implements ISyncPushService {
   SyncPushService(this.registry);
 

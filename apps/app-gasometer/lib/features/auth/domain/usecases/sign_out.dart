@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import '../repositories/auth_repository.dart';
 
-@injectable
+
 class SignOut implements NoParamsUseCase<Unit> {
 
   SignOut(this.repository);

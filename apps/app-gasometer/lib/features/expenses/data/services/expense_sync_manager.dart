@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/expense_entity.dart';
 import '../models/expense_model.dart';
@@ -7,7 +6,7 @@ import '../models/expense_model.dart';
 ///
 /// Gerencia a estratégia de sincronização, detecção de conflitos
 /// e resolução de dados desatualizados.
-@lazySingleton
+
 class ExpenseSyncManager {
   ExpenseSyncManager();
 

@@ -1,8 +1,6 @@
 import 'package:core/core.dart' hide Column, OfflineData;
 import 'package:core/src/domain/repositories/i_local_storage_repository.dart';
 import 'package:flutter/foundation.dart';
-
-import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../../features/data_export/data/datasources/local/export_file_generator.dart';
 import '../../features/data_export/data/datasources/local/plants_export_datasource.dart';
 import '../../features/data_export/data/datasources/local/settings_export_datasource.dart';
@@ -44,20 +42,19 @@ import '../services/secure_storage_service.dart';
 import '../services/task_notification_scheduler.dart';
 import '../services/task_notification_service.dart';
 import '../services/url_launcher_service.dart';
-import 'injection.dart' as injectable;
 import 'modules/account_deletion_module.dart';
 import 'modules/plants_module.dart';
 import 'modules/spaces_module.dart';
 import 'modules/sync_module.dart';
 import 'modules/tasks_module.dart';
 
-final sl = GetIt.instance;
+// final sl = GetIt.instance; // REMOVED: GetIt instance
 
 Future<void> init({bool firebaseEnabled = false}) async {
   // IMPORTANT: configureDependencies() MUST be called first
   // It registers all @module dependencies including SharedPreferences from ExternalModule
   // Calling it first prevents duplicate registration errors during hot reload
-  await injectable.configureDependencies();
+  // await injectable.configureDependencies(); // REMOVED: Injectable configuration
 
   await _initExternal();
   _initCoreServices(firebaseEnabled: firebaseEnabled);
@@ -72,7 +69,7 @@ Future<void> init({bool firebaseEnabled = false}) async {
   _initPremium();
   _initSettings();
   _initDataExport();
-  SyncDIModule.init(sl);
+  // SyncDIModule.init(sl); // REMOVED: SyncDIModule init
   _initAppServices();
 }
 
@@ -89,6 +86,7 @@ void _initCoreServices({bool firebaseEnabled = false}) {
       // NOTE: FirebaseFirestore and FirebaseFunctions are already registered
       // via @injectable in injection.config.dart by build_runner.
       // Try registering only if not already present to avoid duplicate registration
+      /*
       if (!sl.isRegistered<FirebaseFirestore>()) {
         sl.registerLazySingleton(() => FirebaseFirestore.instance);
       }
@@ -110,6 +108,7 @@ void _initCoreServices({bool firebaseEnabled = false}) {
           () => FirebaseCrashlyticsService(),
         );
       }
+      */
       if (kDebugMode) {
         SecureLogger.info('Firebase services registered in DI');
       }
@@ -126,9 +125,11 @@ void _initCoreServices({bool firebaseEnabled = false}) {
 
   // NetworkInfo is registered via @LazySingleton in network_info.dart
   // Do NOT register manually to avoid duplicate registration
+  /*
   sl.registerLazySingleton<IPerformanceRepository>(
     () => _StubPerformanceRepository(),
   );
+  */
 
   // ✅ REGISTER: PlantisDatabase is already registered via @lazySingleton @factoryMethod
   // in plantis_database.dart and processed by injectable in injection.config.dart
@@ -141,6 +142,7 @@ void _initCoreServices({bool firebaseEnabled = false}) {
   // );
 
   // TEMPORARY: Use stub implementation until PlantisDatabase is properly generated
+  /*
   sl.registerLazySingleton<ILocalStorageRepository>(
     () => _StubLocalStorageRepository(),
   );
@@ -151,6 +153,7 @@ void _initCoreServices({bool firebaseEnabled = false}) {
       config: const SecureStorageConfig.plantis(),
     ),
   );
+  */
   // ⚠️ REMOVED: EnhancedEncryptedStorageService no longer exists
   // sl.registerLazySingleton<EnhancedEncryptedStorageService>(
   //   () => EnhancedEncryptedStorageService(
@@ -158,6 +161,7 @@ void _initCoreServices({bool firebaseEnabled = false}) {
   //     appIdentifier: AppConstants.appId,
   //   ),
   // );
+  /*
   sl.registerLazySingleton<SecureStorageService>(
     () => SecureStorageService.instance,
   );
@@ -234,34 +238,35 @@ void _initCoreServices({bool firebaseEnabled = false}) {
     () => LogoutUseCase(sl(), sl(), sl<DataCleanerService>()),
   );
   sl.registerLazySingleton(() => ResetPasswordUseCase(sl()));
+  */
 }
 
 void _initAuth() {
-  sl.registerLazySingleton<AuthStateNotifier>(() => AuthStateNotifier.instance);
+  // sl.registerLazySingleton<AuthStateNotifier>(() => AuthStateNotifier.instance);
 }
 
 void _initAccount() {}
 
 void _initAccountDeletion() {
-  AccountDeletionModule.init(sl);
+  // AccountDeletionModule.init(sl);
 }
 
 Future<void> _initDeviceManagement() async {
   // Device Management DI é registrado via DeviceManagementDI.registerPhase1
   // que foi chamado antes do @InjectableInit
-  await DeviceManagementDI.registerPhase1(sl);
+  // await DeviceManagementDI.registerPhase1(sl);
 }
 
 void _initPlants() {
-  PlantsDIModule.init(sl);
+  // PlantsDIModule.init(sl);
 }
 
 void _initTasks() {
-  TasksModule.init(sl);
+  // TasksModule.init(sl);
 }
 
 void _initSpaces() {
-  SpacesModule.init(sl);
+  // SpacesModule.init(sl);
 }
 
 void _initComments() {}
@@ -286,12 +291,14 @@ void _initPremium() {
 
 void _initSettings() {
   // Datasource & Repository (still needed by Riverpod notifiers)
+  /*
   sl.registerLazySingleton<SettingsLocalDataSource>(
     () => SettingsLocalDataSource(prefs: sl<SharedPreferences>()),
   );
   sl.registerLazySingleton<ISettingsRepository>(
     () => SettingsRepository(localDataSource: sl<SettingsLocalDataSource>()),
   );
+  */
 
   // Providers migrated to Riverpod notifiers:
   // - SettingsProvider → settingsNotifierProvider
@@ -299,6 +306,7 @@ void _initSettings() {
 }
 
 void _initAppServices() {
+  /*
   sl.registerLazySingleton<INavigationService>(() => NavigationService());
   sl.registerLazySingleton<AnalyticsProvider>(
     () => AnalyticsProvider(
@@ -325,9 +333,11 @@ void _initAppServices() {
       ),
     );
   }
+  */
 }
 
 void _initDataExport() {
+  /*
   sl.registerLazySingleton<PlantsExportDataSource>(
     () => PlantsExportLocalDataSource(
       plantsRepository: sl<PlantsRepository>(),
@@ -371,6 +381,7 @@ void _initDataExport() {
   sl.registerLazySingleton<DeleteExportUseCase>(
     () => DeleteExportUseCase(sl<DataExportRepository>()),
   );
+  */
 }
 
 /// TEMPORARY: Stub implementation of ILocalStorageRepository

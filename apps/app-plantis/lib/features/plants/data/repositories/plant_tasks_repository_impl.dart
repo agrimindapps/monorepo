@@ -9,7 +9,6 @@ import '../datasources/local/plant_tasks_local_datasource.dart';
 import '../datasources/remote/plant_tasks_remote_datasource.dart';
 import '../models/plant_task_model.dart';
 
-@LazySingleton(as: PlantTasksRepository)
 class PlantTasksRepositoryImpl implements PlantTasksRepository {
   final PlantTasksLocalDatasource localDatasource;
   final PlantTasksRemoteDatasource remoteDatasource;

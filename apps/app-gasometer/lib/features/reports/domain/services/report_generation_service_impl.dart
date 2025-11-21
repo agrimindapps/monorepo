@@ -1,10 +1,9 @@
-import 'package:injectable/injectable.dart';
 
 import '../../../fuel/domain/entities/fuel_record_entity.dart';
 import '../entities/report_summary_entity.dart';
 import 'report_generation_service.dart';
 
-@LazySingleton(as: ReportGenerationService)
+
 class ReportGenerationServiceImpl implements ReportGenerationService {
   @override
   Future<ReportSummaryEntity> generateReport(

@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import '../repositories/reports_repository.dart';
 
-@injectable
+
 class GetFuelEfficiencyTrends implements UseCase<Map<String, dynamic>, GetFuelEfficiencyTrendsParams> {
 
   GetFuelEfficiencyTrends(this.repository);
@@ -34,7 +34,7 @@ class GetFuelEfficiencyTrendsParams with EquatableMixin {
   List<Object> get props => [vehicleId, months];
 }
 
-@injectable
+
 class GetCostAnalysis implements UseCase<Map<String, dynamic>, GetCostAnalysisParams> {
 
   GetCostAnalysis(this.repository);
@@ -69,7 +69,7 @@ class GetCostAnalysisParams with EquatableMixin {
   List<Object> get props => [vehicleId, startDate, endDate];
 }
 
-@injectable
+
 class GetUsagePatterns implements UseCase<Map<String, dynamic>, GetUsagePatternsParams> {
 
   GetUsagePatterns(this.repository);

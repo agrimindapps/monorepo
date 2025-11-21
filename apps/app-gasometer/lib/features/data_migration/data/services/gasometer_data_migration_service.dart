@@ -12,7 +12,7 @@ import '../datasources/gasometer_migration_data_source.dart';
 /// This service handles the detection and resolution of data conflicts
 /// specific to the Gasometer app, including vehicles, fuel records,
 /// maintenance records, and other gasometer-specific data.
-@LazySingleton()
+
 class GasometerDataMigrationService implements DataMigrationService {
   
   GasometerDataMigrationService(this._dataSource);

@@ -9,7 +9,7 @@ import '../repositories/odometer_repository.dart';
 /// - Calcular odômetro atual
 /// - Identificar primeira e última leitura
 /// - Calcular distância total percorrida
-@injectable
+
 class GetVehicleOdometerStatsUseCase
     implements UseCase<Map<String, dynamic>, String> {
   const GetVehicleOdometerStatsUseCase(this._repository);

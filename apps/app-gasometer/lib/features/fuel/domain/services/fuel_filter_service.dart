@@ -5,7 +5,7 @@ import '../entities/fuel_record_entity.dart';
 
 /// Service especializado para filtros e ordenação de registros de combustível
 /// Aplica SRP (Single Responsibility Principle) - responsável apenas por filtros
-@lazySingleton
+
 class FuelFilterService {
   /// Filtra registros por veículo
   List<FuelRecordEntity> filterByVehicle(

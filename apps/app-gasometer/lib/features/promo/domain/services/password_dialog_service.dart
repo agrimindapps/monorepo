@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
 
 /// Service responsible for password confirmation dialogs
 /// Follows SRP by handling only password input dialogs
-@lazySingleton
+
 class PasswordDialogService {
   /// Show password confirmation dialog
   Future<String?> showPasswordConfirmation(

@@ -1,8 +1,7 @@
-import 'package:injectable/injectable.dart';
 
 /// Service responsible for formatting legal document dates
 /// Follows SRP by handling only date formatting concerns
-@lazySingleton
+
 class LegalDateFormatter {
   /// Format the current date in Portuguese format
   /// Example: "31 de Outubro de 2025"

@@ -1,7 +1,6 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import 'favoritos_data_resolver_service.dart';
 
@@ -12,7 +11,6 @@ import 'favoritos_data_resolver_service.dart';
 ///
 /// Esta classe agora serve apenas como um utilitário para resolver dados antes de salvar no banco local,
 /// se necessário, ou pode ser depreciada futuramente.
-@injectable
 class FavoritosSyncService {
   final FavoritosDataResolverService _dataResolver;
 

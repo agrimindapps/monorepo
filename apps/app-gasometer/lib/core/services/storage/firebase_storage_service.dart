@@ -1,12 +1,11 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:injectable/injectable.dart';
 import 'package:path/path.dart' as path;
 
 /// Service for uploading and managing files in Firebase Storage
 /// Handles receipt images for fuel, maintenance, and expense records
-@lazySingleton
+
 class FirebaseStorageService {
   static const String _receiptsBasePath = 'receipts';
   static const int _uploadTimeoutSeconds = 60;

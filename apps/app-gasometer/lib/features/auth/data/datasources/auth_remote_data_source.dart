@@ -44,7 +44,7 @@ abstract class AuthRemoteDataSource {
 /// - Delegação de conversão para UserConverter
 /// - Delegação de persistência Firestore para FirestoreUserRepository
 /// - Delegação de tratamento de erros para FirebaseErrorHandler
-@LazySingleton(as: AuthRemoteDataSource)
+
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl(
     this._firebaseAuth,

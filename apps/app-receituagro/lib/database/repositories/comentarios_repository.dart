@@ -5,7 +5,6 @@ import 'comentario_repository.dart';
 ///
 /// Wrapper que fornece acesso aos métodos do ComentarioRepository
 /// com nomenclatura compatível com o legacy repository
-@lazySingleton
 class ComentariosRepository {
   ComentariosRepository(this._baseRepo);
 

@@ -21,7 +21,6 @@ import 'get_defensivos_params.dart';
 /// final byClass = await getDefensivosUseCase.call(const GetDefensivosByClasseParams('insecticida'));
 /// final search = await getDefensivosUseCase.call(const SearchDefensivosParams('parathion'));
 /// ```
-@injectable
 class GetDefensivosUseCase implements UseCase<dynamic, GetDefensivosParams> {
   final IDefensivosRepository repository;
 
@@ -75,7 +74,6 @@ class GetDefensivosUseCase implements UseCase<dynamic, GetDefensivosParams> {
 
 /// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(const GetAllDefensivosParams())`
 @Deprecated('Use GetDefensivosUseCase com GetAllDefensivosParams')
-@injectable
 class GetDefensivosUseCaseOld
     implements UseCase<List<DefensivoEntity>, NoParams> {
   final IDefensivosRepository repository;
@@ -90,7 +88,6 @@ class GetDefensivosUseCaseOld
 
 /// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(GetDefensivosByClasseParams(classe))`
 @Deprecated('Use GetDefensivosUseCase com GetDefensivosByClasseParams')
-@injectable
 class GetDefensivosByClasseUseCase
     implements UseCase<List<DefensivoEntity>, String> {
   final IDefensivosRepository repository;
@@ -105,7 +102,6 @@ class GetDefensivosByClasseUseCase
 
 /// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(SearchDefensivosParams(query))`
 @Deprecated('Use GetDefensivosUseCase com SearchDefensivosParams')
-@injectable
 class SearchDefensivosUseCase
     implements UseCase<List<DefensivoEntity>, String> {
   final IDefensivosRepository repository;
@@ -123,7 +119,6 @@ class SearchDefensivosUseCase
 
 /// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(GetDefensivosRecentesParams(limit))`
 @Deprecated('Use GetDefensivosUseCase com GetDefensivosRecentesParams')
-@injectable
 class GetDefensivosRecentesUseCase
     implements UseCase<List<DefensivoEntity>, int?> {
   final IDefensivosRepository repository;
@@ -138,7 +133,6 @@ class GetDefensivosRecentesUseCase
 
 /// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(const GetDefensivosStatsParams())`
 @Deprecated('Use GetDefensivosUseCase com GetDefensivosStatsParams')
-@injectable
 class GetDefensivosStatsUseCase implements UseCase<Map<String, int>, NoParams> {
   final IDefensivosRepository repository;
 
@@ -152,7 +146,6 @@ class GetDefensivosStatsUseCase implements UseCase<Map<String, int>, NoParams> {
 
 /// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(const GetClassesAgronomicasParams())`
 @Deprecated('Use GetDefensivosUseCase com GetClassesAgronomicasParams')
-@injectable
 class GetClassesAgronomicasUseCase implements UseCase<List<String>, NoParams> {
   final IDefensivosRepository repository;
 
@@ -166,7 +159,6 @@ class GetClassesAgronomicasUseCase implements UseCase<List<String>, NoParams> {
 
 /// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(const GetFabricantesParams())`
 @Deprecated('Use GetDefensivosUseCase com GetFabricantesParams')
-@injectable
 class GetFabricantesUseCase implements UseCase<List<String>, NoParams> {
   final IDefensivosRepository repository;
 

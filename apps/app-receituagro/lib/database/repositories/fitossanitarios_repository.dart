@@ -7,7 +7,6 @@ import '../receituagro_database.dart';
 ///
 /// Gerencia todas as operações de leitura dos dados estáticos de fitossanitários
 ///
-@lazySingleton
 class FitossanitariosRepository {
   FitossanitariosRepository(this._db);
 

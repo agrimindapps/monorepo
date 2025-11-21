@@ -2,8 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
-import '../../../../core/auth/auth_providers.dart';
-import '../../../../core/services/services_providers.dart';
+import '../../../../core/providers/core_di_providers.dart';
 import '../../../../database/providers/database_providers.dart';
 import '../../../plants/presentation/providers/plants_providers.dart';
 import '../../data/datasources/local/tasks_local_datasource.dart';

@@ -1,14 +1,13 @@
 import 'package:drift/drift.dart';
 import '../../core/drift_exports.dart';
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../gasometer_database.dart';
 import '../tables/gasometer_tables.dart';
 
 /// Repositório de Manutenções usando Drift
 ///
 /// Gerencia operações de CRUD e queries para manutenções de veículos
-@lazySingleton
+
 class MaintenanceRepository
     extends BaseDriftRepositoryImpl<MaintenanceData, Maintenance> {
   MaintenanceRepository(this._db);

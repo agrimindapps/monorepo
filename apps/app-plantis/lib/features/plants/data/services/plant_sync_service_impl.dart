@@ -1,11 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/services/plant_sync_service.dart';
 import '../datasources/local/plants_local_datasource.dart';
 import '../datasources/remote/plants_remote_datasource.dart';
 
-@LazySingleton(as: PlantSyncService)
 class PlantSyncServiceImpl implements PlantSyncService {
   PlantSyncServiceImpl({
     required this.localDatasource,

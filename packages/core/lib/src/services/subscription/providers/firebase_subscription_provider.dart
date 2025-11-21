@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../domain/entities/subscription_entity.dart';
@@ -44,7 +43,6 @@ import '../../../shared/utils/failure.dart';
 ///   print('Firebase: ${subscription?.isActive}');
 /// });
 /// ```
-@lazySingleton
 class FirebaseSubscriptionProvider implements ISubscriptionDataProvider {
   /// Creates a Firebase subscription provider.
   FirebaseSubscriptionProvider({

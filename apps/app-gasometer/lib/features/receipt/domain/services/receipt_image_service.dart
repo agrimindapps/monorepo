@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:core/core.dart' as core;
-import 'package:injectable/injectable.dart';
 import 'package:core/core.dart';
 import '../../../image/domain/services/image_sync_service.dart';
 import '../../../../core/services/storage/firebase_storage_service.dart'
@@ -23,7 +22,7 @@ class ImageProcessingResult {
 
 /// Unified service for handling receipt images
 /// Combines compression and upload in a single operation
-@lazySingleton
+
 class ReceiptImageService {
   ReceiptImageService(
     this._compressionService,

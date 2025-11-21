@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
 
 /// Serviço responsável por gerenciar TextEditingControllers
 ///
 /// Centraliza criação, listeners e dispose de controllers,
 /// seguindo o princípio Single Responsibility.
-@injectable
+
 class ExpenseFormControllersManager {
   ExpenseFormControllersManager() {
     _initializeControllers();

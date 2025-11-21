@@ -31,12 +31,12 @@ class ModularInjectionContainer {
       print('✅ Core package DI initialized');
 
       // Configure injectable dependencies FIRST
-      // This registers all @injectable dependencies from build_runner
+      // This registers all  dependencies from build_runner
       print('📦 Configuring injectable dependencies...');
       await configureDependencies();
 
       // NOTE: database_module.dart is deprecated
-      // All repositories now use @lazySingleton and are registered via injectable
+      // All repositories now use  and are registered via injectable
       // Database and repositories are automatically registered by configureDependencies()
 
       print('📦 Registering core modules...');

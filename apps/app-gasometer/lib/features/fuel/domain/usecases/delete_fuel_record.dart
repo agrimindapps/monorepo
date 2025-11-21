@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import '../repositories/fuel_repository.dart';
 
-@injectable
+
 class DeleteFuelRecord implements UseCase<Unit, DeleteFuelRecordParams> {
 
   DeleteFuelRecord(this.repository);

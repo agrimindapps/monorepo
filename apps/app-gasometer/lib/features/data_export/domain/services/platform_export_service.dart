@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 /// Interface para serviços de exportação específicos por plataforma
 abstract class PlatformExportService {
@@ -162,7 +161,7 @@ class WebExportService implements PlatformExportService {
 /// Factory para criar serviço de plataforma apropriado
 @module
 abstract class PlatformExportServiceModule {
-  @singleton
+  
   PlatformExportService get platformExportService {
     if (kIsWeb) {
       return WebExportService();

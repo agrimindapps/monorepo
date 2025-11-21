@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import '../entities/report_summary_entity.dart';
 import '../repositories/reports_repository.dart';
 
-@injectable
+
 class GenerateYearlyReport implements UseCase<ReportSummaryEntity, GenerateYearlyReportParams> {
 
   GenerateYearlyReport(this.repository);

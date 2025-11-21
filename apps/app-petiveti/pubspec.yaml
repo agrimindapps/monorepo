@@ -36,10 +36,6 @@ dependencies:
   hive: any
   hive_flutter: any
 
-  # Dependency Injection
-  injectable: ^2.4.4
-  get_it: ^8.3.0
-
   # Auth & Preferences
   google_sign_in: ^6.2.1
   shared_preferences: ^2.3.2

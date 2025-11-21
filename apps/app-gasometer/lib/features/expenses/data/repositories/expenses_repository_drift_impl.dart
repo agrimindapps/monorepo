@@ -1,13 +1,12 @@
 import 'package:core/core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/interfaces/i_expenses_repository.dart';
 import '../../../../database/repositories/expense_repository.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../datasources/expenses_local_datasource.dart';
 
 /// Implementação do repositório de despesas usando Drift
-@LazySingleton(as: IExpensesRepository)
+
 class ExpensesRepositoryDriftImpl implements IExpensesRepository {
   const ExpensesRepositoryDriftImpl(this._dataSource);
 

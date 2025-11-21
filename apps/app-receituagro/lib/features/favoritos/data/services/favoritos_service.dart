@@ -2,9 +2,7 @@ import 'dart:developer' as developer;
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
-import '../../../../core/di/injection_container.dart';
 import '../../../../database/repositories/favorito_repository.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
@@ -21,7 +19,6 @@ import 'favoritos_validator_service.dart';
 /// - Removed switch case factory (OCP violation)
 /// - Now uses FavoritoEntityFactoryRegistry (Strategy Pattern)
 /// - Extensible: adding new tipos doesn't require modifying this service
-@lazySingleton
 class FavoritosService {
   // Lazy loading do repository (evita erro de acesso antes do registro no GetIt)
   late final FavoritoRepository _repository;
@@ -40,20 +37,17 @@ class FavoritosService {
     required FavoritosSyncService syncService,
     required FavoritosCacheServiceInline cache,
     required IFavoritoEntityFactoryRegistry factoryRegistry,
+    required FavoritoRepository repository,
   }) : _dataResolver = dataResolver,
        _validator = validator,
        _syncService = syncService,
        _cache = cache,
-       _factoryRegistry = factoryRegistry;
+       _factoryRegistry = factoryRegistry,
+       _repository = repository,
+       _repositoryInitialized = true;
 
   // Getter lazy para repository (inicializado na primeira vez que é acessado)
-  FavoritoRepository get repo {
-    if (!_repositoryInitialized) {
-      _repository = sl<FavoritoRepository>();
-      _repositoryInitialized = true;
-    }
-    return _repository;
-  }
+  FavoritoRepository get repo => _repository;
 
   // ========== STORAGE/CRUD OPERATIONS ==========
 

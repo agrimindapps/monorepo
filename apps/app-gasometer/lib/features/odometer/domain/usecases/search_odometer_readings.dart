@@ -9,7 +9,7 @@ import '../repositories/odometer_repository.dart';
 /// - Buscar leituras que contenham o texto na descrição
 /// - Retornar ordenadas por data (mais recente primeiro)
 /// - Filtrar registros deletados
-@injectable
+
 class SearchOdometerReadingsUseCase
     implements UseCase<List<OdometerEntity>, String> {
   const SearchOdometerReadingsUseCase(this._repository);

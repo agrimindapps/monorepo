@@ -6,7 +6,7 @@ import '../../../../core/usecases/usecase.dart';
 import '../repositories/premium_repository.dart';
 
 /// Use case para verificar se tem premium ativo
-@injectable
+
 class HasActivePremium implements UseCase<bool, NoParams> {
   HasActivePremium(this.repository);
   final PremiumRepository repository;

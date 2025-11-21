@@ -150,7 +150,7 @@ class RetryPolicy {
 }
 
 /// Main error handler service
-@injectable
+
 class ErrorHandler {
   const ErrorHandler(this._logger);
   final ErrorLogger _logger;

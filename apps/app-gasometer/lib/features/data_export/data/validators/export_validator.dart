@@ -6,7 +6,7 @@ import '../../domain/entities/export_request.dart';
 ///
 /// Responsabilidade: Validar requisições de exportação
 /// Aplica SRP (Single Responsibility Principle)
-@injectable
+
 class ExportValidator {
   /// Valida uma solicitação de exportação
   Either<Failure, Unit> validateExportRequest(ExportRequest request) {

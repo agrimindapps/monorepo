@@ -1,25 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/failure_message_service.dart';
 import '../../domain/services/metadata/i_diagnosticos_metadata_service.dart';
 import '../../domain/services/stats/i_diagnosticos_stats_service.dart';
+import '../providers/diagnosticos_providers.dart';
 import '../state/diagnosticos_stats_state.dart';
 
 /// Notifier para gerenciamento de estatísticas de diagnósticos
 /// Responsabilidade: Handle statistics
 /// Métodos: loadStatistics(), refresh(), getStatistics()
 class DiagnosticosStatsNotifier extends StateNotifier<DiagnosticosStatsState> {
-  DiagnosticosStatsNotifier()
-      : super(DiagnosticosStatsState.initial()) {
-    _statsService = di.sl<IDiagnosticosStatsService>();
-    _metadataService = di.sl<IDiagnosticosMetadataService>();
-    _failureMessageService = di.sl<FailureMessageService>();
-  }
+  DiagnosticosStatsNotifier({
+    required IDiagnosticosStatsService statsService,
+    required IDiagnosticosMetadataService metadataService,
+    required FailureMessageService failureMessageService,
+  })  : _statsService = statsService,
+        _metadataService = metadataService,
+        _failureMessageService = failureMessageService,
+        super(DiagnosticosStatsState.initial());
 
-  late final IDiagnosticosStatsService _statsService;
-  late final IDiagnosticosMetadataService _metadataService;
-  late final FailureMessageService _failureMessageService;
+  final IDiagnosticosStatsService _statsService;
+  final IDiagnosticosMetadataService _metadataService;
+  final FailureMessageService _failureMessageService;
 
   /// Carrega estatísticas dos diagnósticos
   Future<void> loadStatistics() async {
@@ -94,5 +96,9 @@ class DiagnosticosStatsNotifier extends StateNotifier<DiagnosticosStatsState> {
 /// Provider para DiagnosticosStatsNotifier
 final diagnosticosStatsNotifierProvider =
     StateNotifierProvider<DiagnosticosStatsNotifier, DiagnosticosStatsState>(
-  (ref) => DiagnosticosStatsNotifier(),
+  (ref) => DiagnosticosStatsNotifier(
+    statsService: ref.watch(iDiagnosticosStatsServiceProvider),
+    metadataService: ref.watch(iDiagnosticosMetadataServiceProvider),
+    failureMessageService: ref.watch(failureMessageServiceProvider),
+  ),
 );

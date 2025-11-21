@@ -1,8 +1,9 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../core/di/injection_container.dart' as di;
 import '../../core/enums/analytics_user_type.dart';
+import 'analytics_providers.dart';
 
 part 'enhanced_analytics_notifier.g.dart';
 
@@ -48,8 +49,8 @@ class EnhancedAnalyticsNotifier extends _$EnhancedAnalyticsNotifier {
 
   @override
   Future<EnhancedAnalyticsState> build() async {
-    final analyticsRepository = di.sl<IAnalyticsRepository>();
-    final crashlyticsRepository = di.sl<ICrashlyticsRepository>();
+    final analyticsRepository = ref.watch(analyticsRepositoryProvider);
+    final crashlyticsRepository = ref.watch(crashlyticsRepositoryProvider);
 
     _enhancedService = EnhancedAnalyticsService(
       analytics: analyticsRepository,

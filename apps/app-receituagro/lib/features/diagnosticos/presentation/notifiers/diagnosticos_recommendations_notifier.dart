@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/failure_message_service.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/usecases/get_diagnosticos_params.dart';
 import '../../domain/usecases/get_diagnosticos_usecase.dart';
+import '../providers/diagnosticos_providers.dart';
 import '../state/diagnosticos_recommendations_state.dart';
 
 /// Notifier para gerenciamento de recomendações de diagnósticos
@@ -12,14 +12,15 @@ import '../state/diagnosticos_recommendations_state.dart';
 /// Métodos: getRecommendations(), clearRecommendations()
 class DiagnosticosRecommendationsNotifier
     extends StateNotifier<DiagnosticosRecommendationsState> {
-  DiagnosticosRecommendationsNotifier()
-      : super(DiagnosticosRecommendationsState.initial()) {
-    _getDiagnosticosUseCase = di.sl<GetDiagnosticosUseCase>();
-    _failureMessageService = di.sl<FailureMessageService>();
-  }
+  DiagnosticosRecommendationsNotifier({
+    required GetDiagnosticosUseCase getDiagnosticosUseCase,
+    required FailureMessageService failureMessageService,
+  })  : _getDiagnosticosUseCase = getDiagnosticosUseCase,
+        _failureMessageService = failureMessageService,
+        super(DiagnosticosRecommendationsState.initial());
 
-  late final GetDiagnosticosUseCase _getDiagnosticosUseCase;
-  late final FailureMessageService _failureMessageService;
+  final GetDiagnosticosUseCase _getDiagnosticosUseCase;
+  final FailureMessageService _failureMessageService;
 
   /// Obtém recomendações por cultura e praga
   Future<void> getRecommendations({
@@ -101,5 +102,8 @@ class DiagnosticosRecommendationsNotifier
 /// Provider para DiagnosticosRecommendationsNotifier
 final diagnosticosRecommendationsNotifierProvider =
     StateNotifierProvider<DiagnosticosRecommendationsNotifier, DiagnosticosRecommendationsState>(
-  (ref) => DiagnosticosRecommendationsNotifier(),
+  (ref) => DiagnosticosRecommendationsNotifier(
+    getDiagnosticosUseCase: ref.watch(getDiagnosticosUseCaseProvider),
+    failureMessageService: ref.watch(failureMessageServiceProvider),
+  ),
 );

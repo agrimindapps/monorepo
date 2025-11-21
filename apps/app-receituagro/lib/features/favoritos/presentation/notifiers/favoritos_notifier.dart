@@ -2,7 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/repositories/favoritos_repository_simplified.dart';
 import '../../data/services/favoritos_error_message_service.dart';
 import '../../domain/entities/favorito_entity.dart';
-import '../../favoritos_di.dart';
+import '../providers/favoritos_providers.dart';
 
 part 'favoritos_notifier.g.dart';
 
@@ -138,8 +138,8 @@ class FavoritosNotifier extends _$FavoritosNotifier {
 
   @override
   FavoritosState build() {
-    _repository = FavoritosDI.get<FavoritosRepositorySimplified>();
-    _errorMessageService = FavoritosDI.get<FavoritosErrorMessageService>();
+    _repository = ref.watch(favoritosRepositorySimplifiedProvider);
+    _errorMessageService = ref.watch(favoritosErrorMessageServiceProvider);
     return const FavoritosState();
   }
 

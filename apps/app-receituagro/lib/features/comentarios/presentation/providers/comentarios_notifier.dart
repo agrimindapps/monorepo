@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/error_handler_service.dart';
 import '../../domain/entities/comentario_entity.dart';
 import '../../domain/usecases/add_comentario_usecase.dart';
@@ -10,6 +9,7 @@ import '../../domain/usecases/delete_comentario_usecase.dart';
 import '../../domain/usecases/get_comentarios_usecase.dart';
 import '../../services/comentarios_filter_service.dart';
 import '../../services/comentarios_validation_service.dart';
+import 'comentarios_providers.dart';
 import 'comentarios_state.dart';
 
 part 'comentarios_notifier.g.dart';
@@ -31,12 +31,12 @@ class ComentariosNotifier extends _$ComentariosNotifier {
 
   @override
   Future<ComentariosState> build() async {
-    _getComentariosUseCase = di.sl<GetComentariosUseCase>();
-    _addComentarioUseCase = di.sl<AddComentarioUseCase>();
-    _deleteComentarioUseCase = di.sl<DeleteComentarioUseCase>();
+    _getComentariosUseCase = ref.watch(getComentariosUseCaseProvider);
+    _addComentarioUseCase = ref.watch(addComentarioUseCaseProvider);
+    _deleteComentarioUseCase = ref.watch(deleteComentarioUseCaseProvider);
     _errorHandler = ErrorHandlerService();
-    _filterService = di.sl<ComentariosFilterService>();
-    _validationService = di.sl<ComentariosValidationService>();
+    _filterService = ref.watch(comentariosFilterServiceProvider);
+    _validationService = ref.watch(comentariosValidationServiceProvider);
 
     // ✅ CORREÇÃO: Carregar comentários automaticamente no build
     // Isso garante que a página sempre tenha dados na inicialização

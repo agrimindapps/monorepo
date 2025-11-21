@@ -1,12 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/analytics/advanced_health_monitoring_service.dart';
-import '../../core/di/injection_container.dart' as di;
 import 'domain/services/monitoring_alert_service.dart';
 import 'domain/services/monitoring_formatter_service.dart';
 import 'domain/services/monitoring_ui_mapper_service.dart';
+import 'monitoring_providers.dart';
 
 /// Error tracking dashboard for monitoring system health and issues
 ///
@@ -14,14 +15,14 @@ import 'domain/services/monitoring_ui_mapper_service.dart';
 /// - Usa serviços especializados para formatação, mapeamento UI e alertas
 /// - Lógica de negócio extraída para serviços reutilizáveis
 /// - Dependency Injection: serviços injetados via DI
-class ErrorTrackingDashboard extends StatefulWidget {
+class ErrorTrackingDashboard extends ConsumerStatefulWidget {
   const ErrorTrackingDashboard({super.key});
 
   @override
-  State<ErrorTrackingDashboard> createState() => _ErrorTrackingDashboardState();
+  ConsumerState<ErrorTrackingDashboard> createState() => _ErrorTrackingDashboardState();
 }
 
-class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
+class _ErrorTrackingDashboardState extends ConsumerState<ErrorTrackingDashboard>
     with TickerProviderStateMixin {
   late TabController _tabController;
   late AdvancedHealthMonitoringService _healthService;
@@ -41,10 +42,10 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
     _tabController = TabController(length: 3, vsync: this);
     _healthService = AdvancedHealthMonitoringService.instance;
 
-    // Injeção de serviços via DI (SOLID - Dependency Inversion Principle)
-    _formatterService = di.sl<MonitoringFormatterService>();
-    _uiMapperService = di.sl<MonitoringUIMapperService>();
-    _alertService = di.sl<MonitoringAlertService>();
+    // Injeção de serviços via Riverpod
+    _formatterService = ref.read(monitoringFormatterServiceProvider);
+    _uiMapperService = ref.read(monitoringUIMapperServiceProvider);
+    _alertService = ref.read(monitoringAlertServiceProvider);
 
     _loadHealthData();
     _startAutoRefresh();

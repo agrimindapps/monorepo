@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
 import '../pages/detalhe_praga_page.dart';
 import '../providers/home_pragas_notifier.dart';
+import '../providers/pragas_providers.dart';
 
 /// Widget para exibir seção de sugestões com carrossel na home de pragas
 ///
@@ -12,18 +14,18 @@ import '../providers/home_pragas_notifier.dart';
 /// - Controlar indicadores de página (dots)
 /// - Navegação para detalhes da praga
 /// - Estados vazio e loading
-class HomePragasSuggestionsWidget extends StatefulWidget {
+class HomePragasSuggestionsWidget extends ConsumerStatefulWidget {
   final HomePragasState state;
 
   const HomePragasSuggestionsWidget({super.key, required this.state});
 
   @override
-  State<HomePragasSuggestionsWidget> createState() =>
+  ConsumerState<HomePragasSuggestionsWidget> createState() =>
       _HomePragasSuggestionsWidgetState();
 }
 
 class _HomePragasSuggestionsWidgetState
-    extends State<HomePragasSuggestionsWidget> {
+    extends ConsumerState<HomePragasSuggestionsWidget> {
   final PageController _pageController = PageController(viewportFraction: 0.6);
 
   @override
@@ -84,7 +86,8 @@ class _HomePragasSuggestionsWidgetState
   }
 
   Widget _buildCarousel(BuildContext context) {
-    final suggestions = widget.state.getSuggestionsList();
+    final typeService = ref.read(pragasTypeServiceProvider);
+    final suggestions = widget.state.getSuggestionsList(typeService);
 
     if (suggestions.isEmpty) {
       return _buildEmptyCarousel(context);
@@ -335,7 +338,8 @@ class _HomePragasSuggestionsWidgetState
   }
 
   Widget _buildDotIndicators(BuildContext context) {
-    final suggestions = widget.state.getSuggestionsList();
+    final typeService = ref.read(pragasTypeServiceProvider);
+    final suggestions = widget.state.getSuggestionsList(typeService);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,

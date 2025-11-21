@@ -1,10 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
-import '../../../../database/repositories/culturas_repository.dart';
-import '../../../../database/repositories/fitossanitarios_repository.dart';
-import '../../../../database/repositories/pragas_repository.dart';
-import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
+import 'pragas_providers.dart';
 
 part 'diagnosticos_praga_notifier.g.dart';
 
@@ -145,18 +141,8 @@ class DiagnosticosPragaState {
 /// Isso previne perda de dados ao navegar entre tabs ou fazer rebuilds temporários
 @Riverpod(keepAlive: true)
 class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
-  late final IDiagnosticosRepository _diagnosticosRepository;
-  late final CulturasRepository _culturaRepository;
-  late final PragasRepository _pragasRepository;
-  late final FitossanitariosRepository _defensivoRepository;
-
   @override
   Future<DiagnosticosPragaState> build() async {
-    _diagnosticosRepository = di.sl<IDiagnosticosRepository>();
-    _culturaRepository = di.sl<CulturasRepository>();
-    _pragasRepository = di.sl<PragasRepository>();
-    _defensivoRepository = di.sl<FitossanitariosRepository>();
-
     return DiagnosticosPragaState.initial();
   }
 
@@ -173,7 +159,8 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
 
     try {
       // Use queryByPraga instead of deprecated getByPraga
-      final result = await _diagnosticosRepository.queryByPraga(pragaId);
+      final diagnosticosRepository = ref.read(iDiagnosticosRepositoryProvider);
+      final result = await diagnosticosRepository.queryByPraga(pragaId);
 
       await result.fold(
         (failure) async {
@@ -271,7 +258,8 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
       final idCulturaInt = int.tryParse(idCultura);
       if (idCulturaInt == null) return 'Não especificado';
 
-      final culturaData = await _culturaRepository.findById(idCulturaInt);
+      final culturaRepository = ref.read(culturasRepositoryProvider);
+      final culturaData = await culturaRepository.findById(idCulturaInt);
       if (culturaData != null && culturaData.nome.isNotEmpty) {
         return culturaData.nome;
       }
@@ -284,7 +272,8 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
   /// Resolve o nome da praga pelo ID usando o repository
   Future<String> _resolvePragaNome(String idPraga) async {
     try {
-      final pragaData = await _pragasRepository.findByIdPraga(idPraga);
+      final pragasRepository = ref.read(pragasRepositoryProvider);
+      final pragaData = await pragasRepository.findByIdPraga(idPraga);
       if (pragaData != null && pragaData.nome.isNotEmpty) {
         return pragaData.nome;
       }
@@ -298,7 +287,8 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
   /// Retorna (nome, ingredienteAtivo)
   Future<(String, String)> _resolveDefensivoData(String idDefensivo) async {
     try {
-      final defensivoData = await _defensivoRepository.findByIdDefensivo(
+      final defensivoRepository = ref.read(fitossanitariosRepositoryProvider);
+      final defensivoData = await defensivoRepository.findByIdDefensivo(
         idDefensivo,
       );
       if (defensivoData != null) {

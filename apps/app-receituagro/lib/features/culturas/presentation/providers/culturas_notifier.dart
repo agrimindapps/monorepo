@@ -1,10 +1,9 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/services/failure_message_service.dart';
 import '../../domain/entities/cultura_entity.dart';
 import '../../domain/usecases/get_culturas_params.dart';
 import '../../domain/usecases/get_culturas_usecase.dart';
+import 'culturas_providers.dart';
 import 'culturas_state.dart';
 
 part 'culturas_notifier.g.dart';
@@ -13,13 +12,8 @@ part 'culturas_notifier.g.dart';
 /// Usa novo GetCulturasUseCase consolidado com typed params
 @riverpod
 class CulturasNotifier extends _$CulturasNotifier {
-  late final GetCulturasUseCase _getCulturasUseCase;
-  late final FailureMessageService _failureMessageService;
-
   @override
   Future<CulturasState> build() async {
-    _getCulturasUseCase = di.sl<GetCulturasUseCase>();
-    _failureMessageService = di.sl<FailureMessageService>();
     return CulturasState.initial();
   }
 
@@ -33,16 +27,18 @@ class CulturasNotifier extends _$CulturasNotifier {
     );
 
     try {
-      final result = await _getCulturasUseCase.call(
+      final getCulturasUseCase = ref.read(getCulturasUseCaseProvider);
+      final result = await getCulturasUseCase.call(
         const GetAllCulturasParams(),
       );
 
       result.fold(
         (Failure failure) {
+          final failureMessageService = ref.read(failureMessageServiceProvider);
           state = AsyncValue.data(
             currentState.copyWith(
               isLoading: false,
-              errorMessage: _failureMessageService.mapFailureToMessage(failure),
+              errorMessage: failureMessageService.mapFailureToMessage(failure),
             ),
           );
         },
@@ -75,7 +71,8 @@ class CulturasNotifier extends _$CulturasNotifier {
     if (currentState == null) return;
 
     try {
-      final result = await _getCulturasUseCase.call(
+      final getCulturasUseCase = ref.read(getCulturasUseCaseProvider);
+      final result = await getCulturasUseCase.call(
         const GetGruposCulturasParams(),
       );
 
@@ -105,16 +102,18 @@ class CulturasNotifier extends _$CulturasNotifier {
     );
 
     try {
-      final result = await _getCulturasUseCase.call(
+      final getCulturasUseCase = ref.read(getCulturasUseCaseProvider);
+      final result = await getCulturasUseCase.call(
         SearchCulturasParams(query),
       );
 
       result.fold(
         (Failure failure) {
+          final failureMessageService = ref.read(failureMessageServiceProvider);
           state = AsyncValue.data(
             currentState.copyWith(
               isLoading: false,
-              errorMessage: _failureMessageService.mapFailureToMessage(failure),
+              errorMessage: failureMessageService.mapFailureToMessage(failure),
             ),
           );
         },
@@ -155,16 +154,18 @@ class CulturasNotifier extends _$CulturasNotifier {
     }
 
     try {
-      final result = await _getCulturasUseCase.call(
+      final getCulturasUseCase = ref.read(getCulturasUseCaseProvider);
+      final result = await getCulturasUseCase.call(
         GetCulturasByGrupoParams(grupo),
       );
 
       result.fold(
         (Failure failure) {
+          final failureMessageService = ref.read(failureMessageServiceProvider);
           state = AsyncValue.data(
             currentState.copyWith(
               isLoading: false,
-              errorMessage: _failureMessageService.mapFailureToMessage(failure),
+              errorMessage: failureMessageService.mapFailureToMessage(failure),
             ),
           );
         },

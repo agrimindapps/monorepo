@@ -1,11 +1,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/diagnostico_compatibility_service_drift.dart';
 import '../../../../core/services/diagnostico_entity_resolver_drift.dart';
 import '../../../../core/services/diagnostico_grouping_service.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
-import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
+import 'pragas_providers.dart';
 
 part 'enhanced_diagnosticos_praga_notifier.g.dart';
 
@@ -176,14 +175,12 @@ class EnhancedDiagnosticosPragaState {
 @Riverpod(keepAlive: true)
 class EnhancedDiagnosticosPragaNotifier
     extends _$EnhancedDiagnosticosPragaNotifier {
-  late final IDiagnosticosRepository _repository;
   late final DiagnosticoEntityResolver _resolver;
   late final DiagnosticoGroupingService _groupingService;
   late final DiagnosticoCompatibilityServiceDrift _compatibilityService;
 
   @override
   Future<EnhancedDiagnosticosPragaState> build() async {
-    _repository = di.sl<IDiagnosticosRepository>();
     _resolver = DiagnosticoEntityResolver.instance;
     _groupingService = DiagnosticoGroupingService.instance;
     _compatibilityService = DiagnosticoCompatibilityServiceDrift.instance;
@@ -218,7 +215,8 @@ class EnhancedDiagnosticosPragaNotifier
     );
 
     try {
-      final result = await _repository.queryByPraga(pragaId);
+      final repository = ref.read(iDiagnosticosRepositoryProvider);
+      final result = await repository.queryByPraga(pragaId);
 
       await result.fold(
         (failure) async {
@@ -262,7 +260,8 @@ class EnhancedDiagnosticosPragaNotifier
     state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
     try {
-      final diagnosticos = await _repository.queryByPattern(query);
+      final repository = ref.read(iDiagnosticosRepositoryProvider);
+      final diagnosticos = await repository.queryByPattern(query);
       final diagnosticosDrift = diagnosticos.fold(
         (failure) => <DiagnosticoEntity>[],
         (data) => data,
@@ -273,7 +272,7 @@ class EnhancedDiagnosticosPragaNotifier
         final filteredResults = <DiagnosticoEntity>[];
 
         for (final id in ids) {
-          final result = await _repository.getById(id);
+          final result = await repository.getById(id);
           result.fold((failure) => null, (entity) {
             if (entity != null) filteredResults.add(entity);
           });

@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/failure_message_service.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/services/search/i_diagnosticos_search_service.dart';
+import '../providers/diagnosticos_providers.dart';
 import '../state/diagnosticos_search_state.dart';
 
 /// Notifier para gerenciamento de busca de diagnósticos
@@ -11,14 +11,15 @@ import '../state/diagnosticos_search_state.dart';
 /// Métodos: search(), findSimilar(), clearSearch()
 class DiagnosticosSearchNotifier
     extends StateNotifier<DiagnosticosSearchState> {
-  DiagnosticosSearchNotifier()
-      : super(DiagnosticosSearchState.initial()) {
-    _searchService = di.sl<IDiagnosticosSearchService>();
-    _failureMessageService = di.sl<FailureMessageService>();
-  }
+  DiagnosticosSearchNotifier({
+    required IDiagnosticosSearchService searchService,
+    required FailureMessageService failureMessageService,
+  })  : _searchService = searchService,
+        _failureMessageService = failureMessageService,
+        super(DiagnosticosSearchState.initial());
 
-  late final IDiagnosticosSearchService _searchService;
-  late final FailureMessageService _failureMessageService;
+  final IDiagnosticosSearchService _searchService;
+  final FailureMessageService _failureMessageService;
 
   /// Busca diagnósticos por padrão de texto
   Future<void> search(
@@ -121,5 +122,8 @@ class DiagnosticosSearchNotifier
 /// Provider para DiagnosticosSearchNotifier
 final diagnosticosSearchNotifierProvider =
     StateNotifierProvider<DiagnosticosSearchNotifier, DiagnosticosSearchState>(
-  (ref) => DiagnosticosSearchNotifier(),
+  (ref) => DiagnosticosSearchNotifier(
+    searchService: ref.watch(iDiagnosticosSearchServiceProvider),
+    failureMessageService: ref.watch(failureMessageServiceProvider),
+  ),
 );

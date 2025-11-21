@@ -1,10 +1,10 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/failure_message_service.dart';
 import '../../domain/entities/defensivo_entity.dart';
 import '../../domain/usecases/get_defensivos_params.dart';
 import '../../domain/usecases/get_defensivos_usecase.dart';
+import 'defensivos_providers.dart';
 import 'defensivos_state.dart';
 
 part 'defensivos_notifier.g.dart';
@@ -18,8 +18,8 @@ class DefensivosNotifier extends _$DefensivosNotifier {
 
   @override
   Future<DefensivosState> build() async {
-    _getDefensivosUseCase = di.sl<GetDefensivosUseCase>();
-    _failureMessageService = di.sl<FailureMessageService>();
+    _getDefensivosUseCase = ref.watch(getDefensivosUseCaseProvider);
+    _failureMessageService = ref.watch(failureMessageServiceProvider);
     return await _loadDefensivos();
   }
 

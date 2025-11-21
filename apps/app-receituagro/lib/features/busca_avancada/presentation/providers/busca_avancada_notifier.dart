@@ -1,10 +1,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/diagnostico_integration_service.dart';
 import '../../domain/entities/busca_entity.dart';
 import '../../domain/services/i_busca_metadata_service.dart';
 import '../../domain/services/i_busca_validation_service.dart';
+import 'busca_avancada_providers.dart';
 
 part 'busca_avancada_notifier.g.dart';
 
@@ -103,9 +103,9 @@ class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
 
   @override
   Future<BuscaAvancadaState> build() async {
-    _integrationService = di.sl<DiagnosticoIntegrationService>();
-    _metadataService = di.sl<IBuscaMetadataService>();
-    _validationService = di.sl<IBuscaValidationService>();
+    _integrationService = ref.watch(diagnosticoIntegrationServiceProvider);
+    _metadataService = ref.watch(buscaMetadataServiceProvider);
+    _validationService = ref.watch(buscaValidationServiceProvider);
 
     return BuscaAvancadaState.initial();
   }

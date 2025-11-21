@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/failure_message_service.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/usecases/get_diagnosticos_params.dart';
 import '../../domain/usecases/get_diagnosticos_usecase.dart';
+import '../providers/diagnosticos_providers.dart';
 import '../state/diagnosticos_list_state.dart';
 
 /// Notifier para gerenciamento de lista de diagnósticos
@@ -12,14 +12,15 @@ import '../state/diagnosticos_list_state.dart';
 /// Métodos: loadAll(), loadById(), refresh(), clear()
 class DiagnosticosListNotifier
     extends StateNotifier<DiagnosticosListState> {
-  DiagnosticosListNotifier()
-      : super(DiagnosticosListState.initial()) {
-    _getDiagnosticosUseCase = di.sl<GetDiagnosticosUseCase>();
-    _failureMessageService = di.sl<FailureMessageService>();
-  }
+  DiagnosticosListNotifier({
+    required GetDiagnosticosUseCase getDiagnosticosUseCase,
+    required FailureMessageService failureMessageService,
+  })  : _getDiagnosticosUseCase = getDiagnosticosUseCase,
+        _failureMessageService = failureMessageService,
+        super(DiagnosticosListState.initial());
 
-  late final GetDiagnosticosUseCase _getDiagnosticosUseCase;
-  late final FailureMessageService _failureMessageService;
+  final GetDiagnosticosUseCase _getDiagnosticosUseCase;
+  final FailureMessageService _failureMessageService;
 
   /// Carrega todos os diagnósticos
   Future<void> loadAll({int? limit, int? offset}) async {
@@ -116,5 +117,8 @@ class DiagnosticosListNotifier
 /// Provider para DiagnosticosListNotifier
 final diagnosticosListNotifierProvider =
     StateNotifierProvider<DiagnosticosListNotifier, DiagnosticosListState>(
-  (ref) => DiagnosticosListNotifier(),
+  (ref) => DiagnosticosListNotifier(
+    getDiagnosticosUseCase: ref.watch(getDiagnosticosUseCaseProvider),
+    failureMessageService: ref.watch(failureMessageServiceProvider),
+  ),
 );

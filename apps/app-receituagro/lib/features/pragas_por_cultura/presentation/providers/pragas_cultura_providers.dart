@@ -1,6 +1,6 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get_it/get_it.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/di/injection_container.dart' as di;
 import '../../data/services/pragas_cultura_data_service.dart';
 import '../../data/services/pragas_cultura_query_service.dart';
 import '../../data/services/pragas_cultura_sort_service.dart';
@@ -8,40 +8,37 @@ import '../../data/services/pragas_cultura_statistics_service.dart';
 import '../services/pragas_cultura_error_message_service.dart';
 import 'pragas_cultura_page_view_model.dart';
 
-final sl = GetIt.instance;
+part 'pragas_cultura_providers.g.dart';
 
 /// Provider para o Query Service
-final pragasCulturaQueryServiceProvider = Provider<IPragasCulturaQueryService>((
-  ref,
-) {
-  return sl<IPragasCulturaQueryService>();
-});
+@riverpod
+IPragasCulturaQueryService pragasCulturaQueryService(PragasCulturaQueryServiceRef ref) {
+  return di.sl<IPragasCulturaQueryService>();
+}
 
 /// Provider para o Sort Service
-final pragasCulturaSortServiceProvider = Provider<IPragasCulturaSortService>((
-  ref,
-) {
-  return sl<IPragasCulturaSortService>();
-});
+@riverpod
+IPragasCulturaSortService pragasCulturaSortService(PragasCulturaSortServiceRef ref) {
+  return di.sl<IPragasCulturaSortService>();
+}
 
 /// Provider para o Statistics Service
-final pragasCulturaStatisticsServiceProvider =
-    Provider<IPragasCulturaStatisticsService>((ref) {
-      return sl<IPragasCulturaStatisticsService>();
-    });
+@riverpod
+IPragasCulturaStatisticsService pragasCulturaStatisticsService(PragasCulturaStatisticsServiceRef ref) {
+  return di.sl<IPragasCulturaStatisticsService>();
+}
 
 /// Provider para o Data Service
-final pragasCulturaDataServiceProvider = Provider<IPragasCulturaDataService>((
-  ref,
-) {
-  return sl<IPragasCulturaDataService>();
-});
+@riverpod
+IPragasCulturaDataService pragasCulturaDataService(PragasCulturaDataServiceRef ref) {
+  return di.sl<IPragasCulturaDataService>();
+}
 
 /// Provider para o Error Message Service
-final pragasCulturaErrorServiceProvider =
-    Provider<PragasCulturaErrorMessageService>((ref) {
-      return sl<PragasCulturaErrorMessageService>();
-    });
+@riverpod
+PragasCulturaErrorMessageService pragasCulturaErrorService(PragasCulturaErrorServiceRef ref) {
+  return di.sl<PragasCulturaErrorMessageService>();
+}
 
 /// StateNotifierProvider para o ViewModel
 final pragasCulturaPageViewModelProvider =

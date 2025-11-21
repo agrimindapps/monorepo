@@ -1,11 +1,8 @@
-import 'package:app_receituagro/core/di/injection.dart' as di;
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/services/access_history_service.dart';
-import '../../../../database/repositories/pragas_repository.dart';
 import '../../data/mappers/praga_mapper.dart';
 import '../../domain/entities/praga_entity.dart';
-import '../../domain/services/i_pragas_error_message_service.dart';
+import 'pragas_providers.dart';
 import 'pragas_state.dart';
 
 part 'pragas_notifier.g.dart';
@@ -14,15 +11,8 @@ part 'pragas_notifier.g.dart';
 /// Princípios: Single Responsibility + Dependency Inversion
 @Riverpod(keepAlive: true)
 class PragasNotifier extends _$PragasNotifier {
-  late final AccessHistoryService _historyService;
-  late final IPragasErrorMessageService _errorService;
-  late final PragasRepository _pragasRepository;
-
   @override
   Future<PragasState> build() async {
-    _historyService = AccessHistoryService();
-    _errorService = di.getIt<IPragasErrorMessageService>();
-    _pragasRepository = GetIt.instance<PragasRepository>();
     return await _loadInitialData();
   }
 
@@ -30,7 +20,8 @@ class PragasNotifier extends _$PragasNotifier {
   Future<PragasState> _loadInitialData() async {
     try {
       // Carregar todas as pragas
-      final pragasDrift = await _pragasRepository.findAll();
+      final pragasRepository = ref.read(pragasRepositoryProvider);
+      final pragasDrift = await pragasRepository.findAll();
       final pragas = PragaMapper.fromDriftToEntityList(pragasDrift);
 
       return PragasState(
@@ -40,12 +31,13 @@ class PragasNotifier extends _$PragasNotifier {
         isLoading: false,
       );
     } catch (e) {
+      final errorService = ref.read(pragasErrorMessageServiceProvider);
       return PragasState(
         pragas: const [],
         recentPragas: const [],
         suggestedPragas: const [],
         isLoading: false,
-        errorMessage: _errorService.getLoadInitialError(e.toString()),
+        errorMessage: errorService.getLoadInitialError(e.toString()),
       );
     }
   }
@@ -66,10 +58,11 @@ class PragasNotifier extends _$PragasNotifier {
         loadStats(),
       ]);
     } catch (e) {
+      final errorService = ref.read(pragasErrorMessageServiceProvider);
       state = AsyncValue.data(
         currentState.copyWith(
           isLoading: false,
-          errorMessage: _errorService.getInitializeError(e.toString()),
+          errorMessage: errorService.getInitializeError(e.toString()),
         ),
       );
     }
@@ -178,7 +171,8 @@ class PragasNotifier extends _$PragasNotifier {
       // Se pragas já foram carregadas, apenas atualiza o estado
       // As propriedades computed (insetos, doencas, plantas) são calculadas automaticamente
       if (currentState.pragas.isEmpty) {
-        final pragasDrift = await _pragasRepository.findAll();
+        final pragasRepository = ref.read(pragasRepositoryProvider);
+        final pragasDrift = await pragasRepository.findAll();
         final pragas = PragaMapper.fromDriftToEntityList(pragasDrift);
 
         state = AsyncValue.data(currentState.copyWith(pragas: pragas));
@@ -240,7 +234,8 @@ class PragasNotifier extends _$PragasNotifier {
 
   /// Registra acesso a uma praga
   Future<void> recordPragaAccess(PragaEntity praga) async {
-    await _historyService.recordPragaAccess(
+    final historyService = ref.read(accessHistoryServiceProvider);
+    await historyService.recordPragaAccess(
       id: praga.idReg,
       nomeComum: praga.nomeComum,
       nomeCientifico: praga.nomeCientifico,

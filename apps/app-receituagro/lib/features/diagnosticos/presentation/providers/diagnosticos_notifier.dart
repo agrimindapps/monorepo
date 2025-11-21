@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/failure_message_service.dart';
 import '../../../../core/services/i_recommendation_service.dart';
 import '../../domain/entities/diagnostico_entity.dart';
@@ -11,6 +10,7 @@ import '../../domain/services/search/i_diagnosticos_search_service.dart';
 import '../../domain/services/stats/i_diagnosticos_stats_service.dart';
 import '../../domain/usecases/get_diagnosticos_params.dart';
 import '../../domain/usecases/get_diagnosticos_usecase.dart';
+import 'diagnosticos_providers.dart';
 import 'diagnosticos_state.dart';
 
 part 'diagnosticos_notifier.g.dart';
@@ -57,16 +57,16 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   @override
   Future<DiagnosticosState> build() async {
     // ========== Inject Specialized Services (New Architecture) ==========
-    _filterService = di.sl<IDiagnosticosFilterService>();
-    _searchService = di.sl<IDiagnosticosSearchService>();
-    _metadataService = di.sl<IDiagnosticosMetadataService>();
-    _statsService = di.sl<IDiagnosticosStatsService>();
-    _recommendationService = di.sl<IRecommendationService>();
-    _failureMessageService = di.sl<FailureMessageService>();
+    _filterService = ref.read(iDiagnosticosFilterServiceProvider);
+    _searchService = ref.read(iDiagnosticosSearchServiceProvider);
+    _metadataService = ref.read(iDiagnosticosMetadataServiceProvider);
+    _statsService = ref.read(iDiagnosticosStatsServiceProvider);
+    _recommendationService = ref.read(iRecommendationServiceProvider);
+    _failureMessageService = ref.read(failureMessageServiceProvider);
 
     // ========== Inject Use Cases (Kept for backward compatibility) ==========
-    _getDiagnosticosUseCase = di.sl<GetDiagnosticosUseCase>();
-    _getDiagnosticoByIdUseCase = di.sl<GetDiagnosticoByIdUseCase>();
+    _getDiagnosticosUseCase = ref.read(getDiagnosticosUseCaseProvider);
+    _getDiagnosticoByIdUseCase = ref.read(getDiagnosticoByIdUseCaseProvider);
 
     return DiagnosticosState.initial();
   }

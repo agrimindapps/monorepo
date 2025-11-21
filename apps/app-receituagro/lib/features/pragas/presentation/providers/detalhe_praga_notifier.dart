@@ -2,15 +2,13 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/premium_notifier.dart';
 import '../../../../database/receituagro_database.dart';
 import '../../../comentarios/data/comentario_model.dart';
-import '../../../comentarios/domain/comentarios_service.dart';
 import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
-import '../../../favoritos/favoritos_di.dart';
 import '../../domain/entities/praga_entity.dart';
-import '../../domain/repositories/i_pragas_repository.dart';
+import 'pragas_providers.dart';
+import 'pragas_state.dart';
 
 part 'detalhe_praga_notifier.g.dart';
 
@@ -110,23 +108,9 @@ class DetalhePragaState {
 /// Responsabilidade única: coordenar dados e estado da praga
 @Riverpod(keepAlive: true)
 class DetalhePragaNotifier extends _$DetalhePragaNotifier {
-  late final FavoritosRepositorySimplified _favoritosRepository;
-  late final IPragasRepository _pragasRepository;
-  // MIGRATION TODO: Legacy repositories removed, need Drift-based replacements
-  // late final PragasInfLegacyRepository _pragasInfRepository;
-  // late final PlantasInfLegacyRepository _plantasInfRepository;
-  late final ComentariosService _comentariosService;
-
   @override
   Future<DetalhePragaState> build() async {
-    _favoritosRepository = FavoritosDI.get<FavoritosRepositorySimplified>();
-    _pragasRepository = di.sl<IPragasRepository>();
-    // MIGRATION TODO: Initialize Drift-based repositories
-    // _pragasInfRepository = di.sl<PragasInfLegacyRepository>();
-    // _plantasInfRepository = di.sl<PlantasInfLegacyRepository>();
-    _comentariosService = di.sl<ComentariosService>();
     _setupPremiumStatusListener();
-
     return DetalhePragaState.initial();
   }
 
@@ -199,7 +183,8 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
     try {
-      final allPragasResult = await _pragasRepository.getAll();
+      final pragasRepository = ref.read(iPragasRepositoryProvider);
+      final allPragasResult = await pragasRepository.getAll();
       PragaEntity? pragaData;
 
       allPragasResult.fold((failure) => pragaData = null, (allPragas) {
@@ -255,7 +240,8 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   Future<void> _loadFavoritoState() async {
     final currentState = state.value;
     if (currentState == null) return;
-    final allPragasResult = await _pragasRepository.getAll();
+    final pragasRepository = ref.read(iPragasRepositoryProvider);
+    final allPragasResult = await pragasRepository.getAll();
     PragaEntity? pragaData;
 
     allPragasResult.fold(
@@ -273,7 +259,8 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     final itemId = pragaData?.idReg ?? currentState.pragaName;
 
     try {
-      final result = await _favoritosRepository.isFavorito(
+      final favoritosRepository = ref.read(favoritosRepositorySimplifiedProvider);
+      final result = await favoritosRepository.isFavorito(
         'praga',
         itemId,
       );
@@ -296,7 +283,8 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    final allPragasResult = await _pragasRepository.getAll();
+    final pragasRepository = ref.read(iPragasRepositoryProvider);
+    final allPragasResult = await pragasRepository.getAll();
     PragaEntity? pragaData;
 
     allPragasResult.fold(
@@ -314,7 +302,8 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     final itemId = pragaData?.idReg ?? currentState.pragaName;
 
     try {
-      final result = await _favoritosRepository.isFavorito(
+      final favoritosRepository = ref.read(favoritosRepositorySimplifiedProvider);
+      final result = await favoritosRepository.isFavorito(
         'praga',
         itemId,
       );
@@ -398,7 +387,8 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
 
     try {
       final pkIdentificador = currentState.itemId;
-      final comentarios = await _comentariosService.getAllComentarios(
+      final comentariosService = ref.read(comentariosServiceProvider);
+      final comentarios = await comentariosService.getAllComentarios(
         pkIdentificador: pkIdentificador,
       );
 
@@ -422,16 +412,17 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     final currentState = state.value;
     if (currentState == null) return false;
 
-    if (!_comentariosService.isValidContent(content)) {
+    final comentariosService = ref.read(comentariosServiceProvider);
+    if (!comentariosService.isValidContent(content)) {
       state = AsyncValue.data(
         currentState.copyWith(
-          errorMessage: _comentariosService.getValidationErrorMessage(),
+          errorMessage: comentariosService.getValidationErrorMessage(),
         ),
       );
       return false;
     }
 
-    if (!_comentariosService.canAddComentario(
+    if (!comentariosService.canAddComentario(
       currentState.comentarios.length,
     )) {
       state = AsyncValue.data(
@@ -445,8 +436,8 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
 
     try {
       final newComment = ComentarioModel(
-        id: _comentariosService.generateId(),
-        idReg: _comentariosService.generateIdReg(),
+        id: comentariosService.generateId(),
+        idReg: comentariosService.generateIdReg(),
         titulo: '',
         conteudo: content,
         createdAt: DateTime.now(),
@@ -459,7 +450,7 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
         status: true,
       );
 
-      await _comentariosService.addComentario(newComment);
+      await comentariosService.addComentario(newComment);
 
       final updatedComentarios = [newComment, ...currentState.comentarios];
 
@@ -481,7 +472,8 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     if (currentState == null) return false;
 
     try {
-      await _comentariosService.deleteComentario(commentId);
+      final comentariosService = ref.read(comentariosServiceProvider);
+      await comentariosService.deleteComentario(commentId);
 
       final updatedComentarios = currentState.comentarios
           .where((c) => c.id != commentId)
@@ -511,7 +503,8 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     );
 
     try {
-      final result = await _favoritosRepository.toggleFavorito(
+      final favoritosRepository = ref.read(favoritosRepositorySimplifiedProvider);
+      final result = await favoritosRepository.toggleFavorito(
         'praga',
         itemId,
       );

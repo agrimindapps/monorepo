@@ -39,14 +39,14 @@ Um aplicativo Flutter moderno para gerenciamento de tarefas pessoais, seguindo p
 
 🔧 Core (Infraestrutura)
 ├── DI (Injeção de Dependência)
-├── Database (Hive Config)
+├── Database (Drift Config)
 └── Utils (Utilitários)
 ```
 
 ### Stack Tecnológica
 - **Flutter 3.24+** - Framework UI
 - **Riverpod** - Gerenciamento de estado
-- **Hive** - Database local
+- **Drift** - Database local (SQLite)
 - **Dartz** - Programação funcional
 - **GetIt** - Injeção de dependência
 - **UUID** - Geração de IDs únicos
@@ -60,7 +60,7 @@ Um aplicativo Flutter moderno para gerenciamento de tarefas pessoais, seguindo p
 - ✅ **Prioridades** - Baixa, média, alta, urgente
 - ✅ **Favoritos** - Marcar tasks importantes
 - ✅ **Filtros** - Por status (pendente, progresso, concluída)
-- ✅ **Persistência** - Armazenamento local com Hive
+- ✅ **Persistência** - Armazenamento local com Drift (SQLite)
 - ✅ **Offline** - Funciona completamente offline
 - ✅ **UI Responsiva** - Estados de loading/erro/dados
 
@@ -70,7 +70,7 @@ Um aplicativo Flutter moderno para gerenciamento de tarefas pessoais, seguindo p
 - ✅ **Error Handling** tipificado
 - ✅ **Use Cases** granulares
 - ✅ **Repository Pattern** implementado
-- ✅ **TypeAdapters** Hive configurados
+- ✅ **TypeAdapters** Drift configurados
 
 ## 🚀 Roadmap
 
@@ -142,7 +142,7 @@ cd monorepo/apps/app_task_manager
 # Instalar dependências
 flutter pub get
 
-# Gerar código (adapters, serialização)
+# Gerar código (tables, serialização)
 dart run build_runner build --delete-conflicting-outputs
 
 # Executar
@@ -176,7 +176,7 @@ lib/
 # Análise de código
 flutter analyze
 
-# Gerar código Hive/JSON
+# Gerar código Drift/JSON
 dart run build_runner build
 
 # Limpar cache de build

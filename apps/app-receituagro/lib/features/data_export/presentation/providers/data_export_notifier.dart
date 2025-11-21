@@ -1,9 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/export_request.dart';
 import '../../services/export_progress_service.dart';
 import '../../services/export_validation_service.dart';
+import 'data_export_providers.dart';
 
 part 'data_export_notifier.g.dart';
 
@@ -67,8 +67,8 @@ class DataExportNotifier extends _$DataExportNotifier {
 
   @override
   Future<DataExportState> build() async {
-    _progressService = di.sl<ExportProgressService>();
-    _validationService = di.sl<ExportValidationService>();
+    _progressService = ref.watch(exportProgressServiceProvider);
+    _validationService = ref.watch(exportValidationServiceProvider);
     return DataExportState.initial();
   }
 

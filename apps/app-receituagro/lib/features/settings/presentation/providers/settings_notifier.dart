@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/feature_flags_notifier.dart';
 import '../../domain/entities/user_settings_entity.dart';
 import '../../domain/usecases/get_user_settings_usecase.dart';
 import '../../domain/usecases/update_user_settings_usecase.dart';
+import 'settings_providers.dart';
 import 'settings_state.dart';
 
 part 'settings_notifier.g.dart';
@@ -30,8 +30,8 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   @override
   Future<SettingsState> build() async {
-    _getUserSettingsUseCase = di.sl<GetUserSettingsUseCase>();
-    _updateUserSettingsUseCase = di.sl<UpdateUserSettingsUseCase>();
+    _getUserSettingsUseCase = ref.watch(getUserSettingsUseCaseProvider);
+    _updateUserSettingsUseCase = ref.watch(updateUserSettingsUseCaseProvider);
     _initializeServices();
 
     return SettingsState.initial();
@@ -40,9 +40,9 @@ class SettingsNotifier extends _$SettingsNotifier {
   void _initializeServices() {
     try {
       _featureFlagsNotifier = ref.read(featureFlagsNotifierProvider.notifier);
-      if (di.sl.isRegistered<DeviceManagementService>()) {
-        _deviceManagementService = di.sl<DeviceManagementService>();
-      } else {
+      _deviceManagementService = ref.watch(deviceManagementServiceProvider);
+      
+      if (_deviceManagementService == null) {
         debugPrint('⚠️  DeviceManagementService not available (Web platform)');
       }
     } catch (e) {

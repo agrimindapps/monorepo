@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/premium_notifier.dart';
 import '../../domain/usecases/get_available_products.dart';
 import '../../domain/usecases/get_current_subscription.dart';
@@ -10,6 +10,7 @@ import '../../domain/usecases/manage_subscription.dart';
 import '../../domain/usecases/purchase_product.dart';
 import '../../domain/usecases/refresh_subscription_status.dart';
 import '../../domain/usecases/restore_purchases.dart';
+import 'subscription_providers.dart';
 
 part 'subscription_notifier.g.dart';
 
@@ -105,13 +106,13 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
 
   @override
   Future<SubscriptionState> build() async {
-    _getUserPremiumStatusUseCase = di.sl<GetUserPremiumStatusUseCase>();
-    _getAvailableProductsUseCase = di.sl<GetAvailableProductsUseCase>();
-    _getCurrentSubscriptionUseCase = di.sl<GetCurrentSubscriptionUseCase>();
-    _purchaseProductUseCase = di.sl<PurchaseProductUseCase>();
-    _restorePurchasesUseCase = di.sl<RestorePurchasesUseCase>();
-    _refreshSubscriptionStatusUseCase = di.sl<RefreshSubscriptionStatusUseCase>();
-    _manageSubscriptionUseCase = di.sl<ManageSubscriptionUseCase>();
+    _getUserPremiumStatusUseCase = ref.watch(getUserPremiumStatusUseCaseProvider);
+    _getAvailableProductsUseCase = ref.watch(getAvailableProductsUseCaseProvider);
+    _getCurrentSubscriptionUseCase = ref.watch(getCurrentSubscriptionUseCaseProvider);
+    _purchaseProductUseCase = ref.watch(purchaseProductUseCaseProvider);
+    _restorePurchasesUseCase = ref.watch(restorePurchasesUseCaseProvider);
+    _refreshSubscriptionStatusUseCase = ref.watch(refreshSubscriptionStatusUseCaseProvider);
+    _manageSubscriptionUseCase = ref.watch(manageSubscriptionUseCaseProvider);
     return _loadInitialData();
   }
 

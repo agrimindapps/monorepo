@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/di/injection_container.dart' as di;
 import 'domain/navigation_constants.dart';
 import 'domain/navigation_item_builder.dart';
 import 'domain/navigation_page_service.dart';
+import 'navigation_providers.dart';
 
 /// Main navigation page com BottomNavigationBar
 ///
@@ -11,7 +12,7 @@ import 'domain/navigation_page_service.dart';
 /// - Usa NavigationPageService para gerenciar páginas (elimina switch case)
 /// - Usa NavigationItemBuilder para criar items (elimina duplicação)
 /// - Usa NavigationConstants para índices (elimina magic numbers)
-class MainNavigationPage extends StatefulWidget {
+class MainNavigationPage extends ConsumerStatefulWidget {
   final int initialIndex;
 
   const MainNavigationPage({
@@ -20,17 +21,17 @@ class MainNavigationPage extends StatefulWidget {
   });
 
   @override
-  State<MainNavigationPage> createState() => _MainNavigationPageState();
+  ConsumerState<MainNavigationPage> createState() => _MainNavigationPageState();
 }
 
-class _MainNavigationPageState extends State<MainNavigationPage> {
+class _MainNavigationPageState extends ConsumerState<MainNavigationPage> {
   late final NavigationPageService _pageService;
   int _currentBottomNavIndex = NavigationConstants.indexDefensivos;
 
   @override
   void initState() {
     super.initState();
-    _pageService = di.sl<NavigationPageService>();
+    _pageService = ref.read(navigationPageServiceProvider);
     _currentBottomNavIndex = widget.initialIndex;
   }
 

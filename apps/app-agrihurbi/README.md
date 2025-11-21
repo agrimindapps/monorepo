@@ -108,8 +108,12 @@ class LivestockRepositoryImpl implements LivestockRepository {
 }
 
 // Presentation Layer (UI)
-class LivestockProvider extends ChangeNotifier {
-  final GetBovines getBovinesUseCase;
+@riverpod
+class BovinesNotifier extends _$BovinesNotifier {
+  @override
+  BovinesState build() {
+    return const BovinesState();
+  }
   // UI state management...
 }
 ```
@@ -117,13 +121,13 @@ class LivestockProvider extends ChangeNotifier {
 #### 2. **Dependency Injection**
 
 ```dart
-@module
-abstract class AppModule {
-  @lazySingleton
-  LivestockRepository get livestockRepository => LivestockRepositoryImpl();
-  
-  @factory
-  GetBovines get getBovines => GetBovines();
+// Riverpod Providers replace traditional DI
+@riverpod
+LivestockRepository livestockRepository(Ref ref) {
+  return LivestockRepositoryImpl(
+    localDataSource: ref.watch(livestockLocalDataSourceProvider),
+    remoteDataSource: ref.watch(livestockRemoteDataSourceProvider),
+  );
 }
 ```
 
@@ -205,7 +209,7 @@ Sistema modular com **20+ calculadoras especializadas**:
 
 ```dart
 // Executando uma calculadora
-final result = await calculatorProvider.executeCalculation(
+final result = await ref.read(calculatorProvider.notifier).executeCalculation(
   'npk_calculator',
   {
     'nitrogen': 120.0,

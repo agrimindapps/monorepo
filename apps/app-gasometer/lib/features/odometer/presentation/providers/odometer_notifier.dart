@@ -1,38 +1,52 @@
 import 'package:core/core.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../database/providers/database_providers.dart';
-import '../../../../database/repositories/odometer_reading_repository.dart';
 import '../../domain/entities/odometer_entity.dart';
+import '../../domain/usecases/get_last_odometer_reading.dart';
+import '../../domain/usecases/get_odometer_readings_by_vehicle.dart';
+import 'odometer_providers.dart';
 import 'odometer_state.dart';
 
-class OdometerNotifier extends StateNotifier<OdometerState> {
-  OdometerNotifier(this._ref) : super(const OdometerState()) {
-    _repository = _ref.read(odometerReadingRepositoryProvider);
-  }
+part 'odometer_notifier.g.dart';
 
-  final Ref _ref;
-  late final OdometerReadingRepository _repository;
+@Riverpod(keepAlive: true)
+class OdometerNotifier extends _$OdometerNotifier {
+  late final GetOdometerReadingsByVehicleUseCase _getReadingsUseCase;
+  late final GetLastOdometerReadingUseCase _getLastReadingUseCase;
+
+  @override
+  OdometerState build() {
+    _getReadingsUseCase = ref.watch(getOdometerReadingsByVehicleProvider);
+    _getLastReadingUseCase = ref.watch(getLastOdometerReadingProvider);
+    return const OdometerState();
+  }
 
   /// Carrega leituras de odômetro por veículo
   Future<void> loadByVehicle(String vehicleId) async {
     try {
-      final vehicleIdInt = int.tryParse(vehicleId);
-      if (vehicleIdInt == null) {
+      if (vehicleId.trim().isEmpty) {
         state = state.copyWith(readings: [], filteredReadings: []);
         return;
       }
 
       state = state.copyWith(isLoading: true, selectedVehicleId: vehicleId);
 
-      final readings = await _repository.findByVehicleId(vehicleIdInt);
-      final entities = readings.map((data) => _toEntity(data)).toList();
+      final result = await _getReadingsUseCase(vehicleId);
 
-      state = state.copyWith(
-        readings: entities,
-        isLoading: false,
+      result.fold(
+        (failure) => state = state.copyWith(
+          isLoading: false,
+          errorMessage: failure.message,
+        ),
+        (readings) {
+          state = state.copyWith(
+            readings: readings,
+            isLoading: false,
+            errorMessage: null,
+          );
+          _applyFilters();
+        },
       );
-      _applyFilters();
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -69,40 +83,16 @@ class OdometerNotifier extends StateNotifier<OdometerState> {
   /// Obtém última leitura de odômetro
   Future<OdometerEntity?> getLatestReading(String vehicleId) async {
     try {
-      final vehicleIdInt = int.tryParse(vehicleId);
-      if (vehicleIdInt == null) return null;
+      if (vehicleId.trim().isEmpty) return null;
 
-      final data = await _repository.findLatestByVehicleId(vehicleIdInt);
-      return data != null ? _toEntity(data) : null;
+      final result = await _getLastReadingUseCase(vehicleId);
+      
+      return result.fold(
+        (failure) => null,
+        (reading) => reading,
+      );
     } catch (e) {
       return null;
     }
   }
-
-  /// Converte OdometerReadingData para OdometerEntity
-  OdometerEntity _toEntity(OdometerReadingData data) {
-    return OdometerEntity(
-      id: data.id.toString(),
-      vehicleId: data.vehicleId.toString(),
-      value: data.reading,
-      registrationDate: DateTime.fromMillisecondsSinceEpoch(data.date),
-      description: data.notes ?? '',
-      type: OdometerType.other, // Default type
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
-      lastSyncAt: data.lastSyncAt,
-      isDirty: data.isDirty,
-      isDeleted: data.isDeleted,
-      version: data.version,
-      userId: data.userId,
-      moduleName: data.moduleName,
-      metadata: const {},
-    );
-  }
 }
-
-/// Provider do notifier de odômetro
-final odometerNotifierProvider =
-    StateNotifierProvider<OdometerNotifier, OdometerState>(
-  (ref) => OdometerNotifier(ref),
-);

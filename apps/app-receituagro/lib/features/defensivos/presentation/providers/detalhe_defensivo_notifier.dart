@@ -2,14 +2,13 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/premium_notifier.dart';
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../comentarios/data/comentario_model.dart';
 import '../../../comentarios/domain/comentarios_service.dart';
 import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
-import '../../../favoritos/favoritos_di.dart';
+import 'defensivos_providers.dart';
 
 part 'detalhe_defensivo_notifier.g.dart';
 
@@ -87,9 +86,9 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
 
   @override
   Future<DetalheDefensivoState> build() async {
-    _favoritosRepository = FavoritosDI.get<FavoritosRepositorySimplified>();
-    _fitossanitarioRepository = di.sl<FitossanitariosRepository>();
-    _comentariosService = di.sl<ComentariosService>();
+    _favoritosRepository = ref.watch(favoritosRepositorySimplifiedProvider);
+    _fitossanitarioRepository = ref.watch(fitossanitariosRepositoryProvider);
+    _comentariosService = ref.watch(comentariosServiceProvider);
     _setupPremiumStatusListener();
 
     return DetalheDefensivoState.initial();

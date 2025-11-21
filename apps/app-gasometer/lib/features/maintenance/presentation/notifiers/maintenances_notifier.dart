@@ -1,12 +1,13 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../../vehicles/domain/usecases/get_vehicle_by_id.dart';
+import '../../../vehicles/presentation/providers/vehicle_services_providers.dart';
 import '../../domain/repositories/maintenance_repository.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../../domain/services/maintenance_formatter_service.dart';
 import '../models/maintenance_form_model.dart';
+import '../providers/maintenance_providers.dart';
 import 'maintenances_state.dart';
 
 part 'maintenances_notifier.g.dart';
@@ -28,9 +29,9 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
 
   @override
   MaintenancesState build() {
-    _repository = getIt<MaintenanceRepository>();
-    _formatter = MaintenanceFormatterService();
-    _getVehicleById = getIt<GetVehicleById>();
+    _repository = ref.watch(maintenanceRepositoryProvider);
+    _formatter = ref.watch(maintenanceFormatterServiceProvider);
+    _getVehicleById = ref.watch(getVehicleByIdProvider);
     Future.microtask(() => loadMaintenances());
 
     return const MaintenancesState();

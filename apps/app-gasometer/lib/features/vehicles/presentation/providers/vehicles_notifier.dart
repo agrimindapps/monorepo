@@ -44,7 +44,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
     _logInfo('Loading initial vehicles for user: ${currentUser.id}');
 
     return await _executeOperation(() async {
-      final getAllVehicles = GetIt.instance<GetAllVehicles>();
+      final getAllVehicles = ref.read(getAllVehiclesProvider);
       final result = await getAllVehicles();
 
       return result.fold(
@@ -114,7 +114,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
     VehicleEntity? addedVehicle;
 
     await _executeOperation(() async {
-      final addVehicleUseCase = GetIt.instance<AddVehicle>();
+      final addVehicleUseCase = ref.read(addVehicleProvider);
       final result = await addVehicleUseCase(
         AddVehicleParams(vehicle: vehicle),
       ).timeout(const Duration(seconds: 30));
@@ -148,7 +148,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
     VehicleEntity? updatedVehicle;
 
     await _executeOperation(() async {
-      final updateVehicleUseCase = GetIt.instance<UpdateVehicle>();
+      final updateVehicleUseCase = ref.read(updateVehicleProvider);
       final result = await updateVehicleUseCase(
         UpdateVehicleParams(vehicle: vehicle),
       );
@@ -185,7 +185,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
     _logInfo('Deleting vehicle: $vehicleId');
 
     await _executeOperation(() async {
-      final deleteVehicleUseCase = GetIt.instance<DeleteVehicle>();
+      final deleteVehicleUseCase = ref.read(deleteVehicleProvider);
       final result = await deleteVehicleUseCase(
         DeleteVehicleParams(vehicleId: vehicleId),
       );
@@ -221,7 +221,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
       VehicleEntity? foundVehicle;
 
       await _executeOperation(() async {
-        final getVehicleByIdUseCase = GetIt.instance<GetVehicleById>();
+        final getVehicleByIdUseCase = ref.read(getVehicleByIdProvider);
         final result = await getVehicleByIdUseCase(
           GetVehicleByIdParams(vehicleId: vehicleId),
         );
@@ -258,7 +258,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
       List<VehicleEntity> searchResults = [];
 
       await _executeOperation(() async {
-        final searchVehiclesUseCase = GetIt.instance<SearchVehicles>();
+        final searchVehiclesUseCase = ref.read(searchVehiclesProvider);
         final result = await searchVehiclesUseCase(
           SearchVehiclesParams(query: query),
         );

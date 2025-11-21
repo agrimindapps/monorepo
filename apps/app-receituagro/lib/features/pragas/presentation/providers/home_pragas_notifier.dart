@@ -1,10 +1,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../database/repositories/culturas_repository.dart';
 import '../../domain/entities/praga_entity.dart';
 import '../../domain/services/i_pragas_type_service.dart';
 import 'pragas_notifier.dart';
+import 'pragas_providers.dart';
 
 part 'home_pragas_notifier.g.dart';
 
@@ -96,13 +96,10 @@ class HomePragasState {
 
   /// Helper method to get suggestions list formatted for carousel
   /// Refactored to use IPragasTypeService (SOLID compliance)
-  List<Map<String, dynamic>> getSuggestionsList() {
+  List<Map<String, dynamic>> getSuggestionsList(IPragasTypeService typeService) {
     if (isLoading || suggestedPragas.isEmpty) {
       return [];
     }
-
-    // Get service via DI
-    final typeService = di.sl<IPragasTypeService>();
 
     return suggestedPragas.map((praga) {
       final emoji = typeService.getTypeEmoji(praga.tipoPraga);
@@ -122,11 +119,8 @@ class HomePragasState {
 /// Notifier para gerenciamento de estado da página Home de Pragas
 @Riverpod(keepAlive: true)
 class HomePragasNotifier extends _$HomePragasNotifier {
-  late final CulturasRepository _culturaRepository;
-
   @override
   Future<HomePragasState> build() async {
-    _culturaRepository = di.sl<CulturasRepository>();
     return await _initialize();
   }
 
@@ -169,7 +163,8 @@ class HomePragasNotifier extends _$HomePragasNotifier {
   /// Carrega dados de culturas do repositório
   Future<int> _loadCulturaData() async {
     try {
-      final culturas = await _culturaRepository.findAll();
+      final culturaRepository = ref.read(culturasRepositoryProvider);
+      final culturas = await culturaRepository.findAll();
       return culturas.length;
     } catch (e) {
       return 0;

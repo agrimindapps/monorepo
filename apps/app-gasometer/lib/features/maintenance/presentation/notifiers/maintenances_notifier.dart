@@ -464,8 +464,7 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
 
       final firstDate = sortedByDate.first.serviceDate;
       final lastDate = sortedByDate.last.serviceDate;
-      final monthsDiff =
-          ((lastDate.year - firstDate.year) * 12 +
+      final monthsDiff = ((lastDate.year - firstDate.year) * 12 +
               lastDate.month -
               firstDate.month) +
           1;
@@ -533,16 +532,15 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
     if (similarMaintenances.isNotEmpty) {
       averageSimilar =
           similarMaintenances.fold<double>(0, (sum, m) => sum + m.cost) /
-          similarMaintenances.length;
+              similarMaintenances.length;
     }
     final lastSimilar = similarMaintenances
         .where((m) => m.serviceDate.isBefore(maintenance.serviceDate))
         .fold<MaintenanceEntity?>(null, (latest, current) {
-          return latest == null ||
-                  current.serviceDate.isAfter(latest.serviceDate)
-              ? current
-              : latest;
-        });
+      return latest == null || current.serviceDate.isAfter(latest.serviceDate)
+          ? current
+          : latest;
+    });
 
     return {
       'maintenance': maintenance,
@@ -557,8 +555,7 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
         'daysSinceLastSimilar': lastSimilar != null
             ? maintenance.serviceDate.difference(lastSimilar.serviceDate).inDays
             : null,
-        'isOverdue':
-            maintenance.hasNextService &&
+        'isOverdue': maintenance.hasNextService &&
             maintenance.isNextServiceDue(vehicle!.currentOdometer),
         'urgencyLevel': maintenance.urgencyLevel,
       },

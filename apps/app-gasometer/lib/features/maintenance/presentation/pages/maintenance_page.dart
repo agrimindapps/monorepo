@@ -1,4 +1,4 @@
-import 'package:core/core.dart' ;
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection_container.dart';
@@ -182,9 +182,13 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
           return GestureDetector(
             onTap: () {
               if (isSelected) {
-                ref.read(maintenancesNotifierProvider.notifier).clearMonthFilter();
+                ref
+                    .read(maintenancesNotifierProvider.notifier)
+                    .clearMonthFilter();
               } else {
-                ref.read(maintenancesNotifierProvider.notifier).selectMonth(month);
+                ref
+                    .read(maintenancesNotifierProvider.notifier)
+                    .selectMonth(month);
               }
             },
             child: Container(
@@ -208,9 +212,8 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
                     color: isSelected
                         ? Colors.white
                         : Theme.of(context).textTheme.bodyMedium?.color,
-                    fontWeight: isSelected
-                        ? FontWeight.w600
-                        : FontWeight.normal,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
               ),
@@ -287,8 +290,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
 
   Widget _buildMaintenanceCard(MaintenanceEntity record) {
     final date = record.serviceDate;
-    final formattedDate =
-        '${date.day.toString().padLeft(2, '0')}/'
+    final formattedDate = '${date.day.toString().padLeft(2, '0')}/'
         '${date.month.toString().padLeft(2, '0')}/'
         '${date.year}';
 

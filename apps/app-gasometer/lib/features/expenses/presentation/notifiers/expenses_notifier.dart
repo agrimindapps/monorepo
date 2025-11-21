@@ -60,7 +60,8 @@ class ExpensesNotifier extends _$ExpensesNotifier {
   @override
   ExpensesState build() {
     _getAllExpensesUseCase = ref.watch(getAllExpensesUseCaseProvider);
-    _getExpensesByVehicleUseCase = ref.watch(getExpensesByVehicleUseCaseProvider);
+    _getExpensesByVehicleUseCase =
+        ref.watch(getExpensesByVehicleUseCaseProvider);
     _addExpenseUseCase = ref.watch(addExpenseUseCaseProvider);
     _updateExpenseUseCase = ref.watch(updateExpenseUseCaseProvider);
     _deleteExpenseUseCase = ref.watch(deleteExpenseUseCaseProvider);
@@ -82,7 +83,8 @@ class ExpensesNotifier extends _$ExpensesNotifier {
 
     result.fold(
       (failure) {
-        debugPrint('[ExpensesNotifier] Error loading expenses: ${failure.message}');
+        debugPrint(
+            '[ExpensesNotifier] Error loading expenses: ${failure.message}');
         state = state.setError(failure.message);
       },
       (expenses) {
@@ -99,11 +101,13 @@ class ExpensesNotifier extends _$ExpensesNotifier {
 
     result.fold(
       (failure) {
-        debugPrint('[ExpensesNotifier] Error loading expenses by vehicle: ${failure.message}');
+        debugPrint(
+            '[ExpensesNotifier] Error loading expenses by vehicle: ${failure.message}');
         state = state.setError(failure.message);
       },
       (expenses) {
-        final newFiltersConfig = state.filtersConfig.copyWith(vehicleId: vehicleId);
+        final newFiltersConfig =
+            state.filtersConfig.copyWith(vehicleId: vehicleId);
         _updateStateWithExpenses(expenses, filtersConfig: newFiltersConfig);
       },
     );
@@ -130,7 +134,8 @@ class ExpensesNotifier extends _$ExpensesNotifier {
 
       if (!validationResult.isValid) {
         final errorMessage = validationResult.errors.values.first;
-        debugPrint('[ExpensesNotifier] Contextual validation error: $errorMessage');
+        debugPrint(
+            '[ExpensesNotifier] Contextual validation error: $errorMessage');
         state = state.setError(errorMessage);
         return false;
       }
@@ -141,7 +146,8 @@ class ExpensesNotifier extends _$ExpensesNotifier {
 
     return result.fold(
       (failure) {
-        debugPrint('[ExpensesNotifier] Error adding expense: ${failure.message}');
+        debugPrint(
+            '[ExpensesNotifier] Error adding expense: ${failure.message}');
         state = state.setError(failure.message);
         return false;
       },
@@ -150,7 +156,8 @@ class ExpensesNotifier extends _$ExpensesNotifier {
           ..add(savedExpense!);
         _updateStateWithExpenses(updatedExpenses);
 
-        debugPrint('[ExpensesNotifier] Expense added successfully: ${savedExpense.id}');
+        debugPrint(
+            '[ExpensesNotifier] Expense added successfully: ${savedExpense.id}');
         return true;
       },
     );
@@ -187,7 +194,8 @@ class ExpensesNotifier extends _$ExpensesNotifier {
 
       if (!validationResult.isValid) {
         final errorMessage = validationResult.errors.values.first;
-        debugPrint('[ExpensesNotifier] Contextual validation error: $errorMessage');
+        debugPrint(
+            '[ExpensesNotifier] Contextual validation error: $errorMessage');
         state = state.setError(errorMessage);
         return false;
       }
@@ -198,7 +206,8 @@ class ExpensesNotifier extends _$ExpensesNotifier {
 
     return result.fold(
       (failure) {
-        debugPrint('[ExpensesNotifier] Error updating expense: ${failure.message}');
+        debugPrint(
+            '[ExpensesNotifier] Error updating expense: ${failure.message}');
         state = state.setError(failure.message);
         return false;
       },
@@ -213,7 +222,8 @@ class ExpensesNotifier extends _$ExpensesNotifier {
         );
         _updateStateWithExpenses(updatedExpenses);
 
-        debugPrint('[ExpensesNotifier] Expense updated successfully: ${updatedExpense!.id}');
+        debugPrint(
+            '[ExpensesNotifier] Expense updated successfully: ${updatedExpense!.id}');
         return true;
       },
     );
@@ -235,16 +245,19 @@ class ExpensesNotifier extends _$ExpensesNotifier {
 
     return result.fold(
       (failure) {
-        debugPrint('[ExpensesNotifier] Error deleting expense: ${failure.message}');
+        debugPrint(
+            '[ExpensesNotifier] Error deleting expense: ${failure.message}');
         state = state.setError(failure.message);
         return false;
       },
       (deleted) {
         if (deleted) {
-          final updatedExpenses = state.expenses.where((e) => e.id != expenseId).toList();
+          final updatedExpenses =
+              state.expenses.where((e) => e.id != expenseId).toList();
           _updateStateWithExpenses(updatedExpenses);
 
-          debugPrint('[ExpensesNotifier] Expense deleted successfully: $expenseId');
+          debugPrint(
+              '[ExpensesNotifier] Expense deleted successfully: $expenseId');
           return true;
         }
 
@@ -349,9 +362,9 @@ class ExpensesNotifier extends _$ExpensesNotifier {
 
     double? averageSimilar;
     if (similarExpenses.isNotEmpty) {
-      averageSimilar = similarExpenses.fold<double>(
-              0, (total, e) => total + e.amount) /
-          similarExpenses.length;
+      averageSimilar =
+          similarExpenses.fold<double>(0, (total, e) => total + e.amount) /
+              similarExpenses.length;
     }
 
     return {
@@ -405,7 +418,8 @@ class ExpensesNotifier extends _$ExpensesNotifier {
 
   /// Obtém estatísticas por período específico
   Map<String, dynamic> getStatsByPeriod(DateTime start, DateTime end) {
-    return _statisticsService.calculateStatsByPeriod(state.expenses, start, end);
+    return _statisticsService.calculateStatsByPeriod(
+        state.expenses, start, end);
   }
 
   /// Obtém estatísticas de crescimento

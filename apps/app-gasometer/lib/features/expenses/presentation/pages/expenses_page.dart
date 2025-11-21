@@ -1,4 +1,4 @@
-import 'package:core/core.dart' ;
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection_container.dart';
@@ -159,9 +159,8 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
   }
 
   Widget _buildMonthSelector(ExpensesState state) {
-    final vehicleRecords = state.expenses
-        .where((r) => r.vehicleId == _selectedVehicleId)
-        .toList();
+    final vehicleRecords =
+        state.expenses.where((r) => r.vehicleId == _selectedVehicleId).toList();
 
     final months = _getMonths(vehicleRecords);
     final selectedMonth = state.filtersConfig.selectedMonth;
@@ -212,9 +211,8 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
                     color: isSelected
                         ? Colors.white
                         : Theme.of(context).textTheme.bodyMedium?.color,
-                    fontWeight: isSelected
-                        ? FontWeight.w600
-                        : FontWeight.normal,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
               ),
@@ -290,8 +288,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
 
   Widget _buildExpenseCard(ExpenseEntity record) {
     final date = record.date;
-    final formattedDate =
-        '${date.day.toString().padLeft(2, '0')}/'
+    final formattedDate = '${date.day.toString().padLeft(2, '0')}/'
         '${date.month.toString().padLeft(2, '0')}/'
         '${date.year}';
 

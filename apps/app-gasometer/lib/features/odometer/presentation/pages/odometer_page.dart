@@ -1,4 +1,4 @@
-import 'package:core/core.dart' ;
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection_container.dart';
@@ -207,9 +207,8 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
                     color: isSelected
                         ? Colors.white
                         : Theme.of(context).textTheme.bodyMedium?.color,
-                    fontWeight: isSelected
-                        ? FontWeight.w600
-                        : FontWeight.normal,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
               ),
@@ -255,7 +254,8 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
         icon: Icons.speed_outlined,
         actionLabel: state.hasActiveFilters ? 'Limpar filtros' : null,
         onAction: state.hasActiveFilters
-            ? () => ref.read(odometerNotifierProvider.notifier).clearMonthFilter()
+            ? () =>
+                ref.read(odometerNotifierProvider.notifier).clearMonthFilter()
             : null,
       );
     }

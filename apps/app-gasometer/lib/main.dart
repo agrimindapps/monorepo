@@ -1,4 +1,4 @@
-import 'package:core/core.dart' ;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -239,4 +239,3 @@ Future<void> _initializeAutoSync() async {
 
 /// Get auto-sync service instance for lifecycle management
 AutoSyncService get autoSyncService => _autoSyncService;
-

@@ -1,4 +1,4 @@
-import 'package:core/core.dart' ;
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/semantic_widgets.dart';
@@ -239,9 +239,9 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
             Text(
               value,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
             ),
           ],
         ),
@@ -301,12 +301,12 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                         const SizedBox(height: 8),
                         Text(
                           'Gráficos serão implementados',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
                         ),
                       ],
                     ),

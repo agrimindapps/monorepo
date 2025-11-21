@@ -1,4 +1,4 @@
-import 'package:core/core.dart' ;
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection_container.dart';
@@ -296,9 +296,8 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                     color: isSelected
                         ? Colors.white
                         : Theme.of(context).textTheme.bodyMedium?.color,
-                    fontWeight: isSelected
-                        ? FontWeight.w600
-                        : FontWeight.normal,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
               ),
@@ -366,8 +365,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
 
   Widget _buildFuelRecordCard(FuelRecordEntity record) {
     final date = record.date;
-    final formattedDate =
-        '${date.day.toString().padLeft(2, '0')}/'
+    final formattedDate = '${date.day.toString().padLeft(2, '0')}/'
         '${date.month.toString().padLeft(2, '0')}/'
         '${date.year}';
 

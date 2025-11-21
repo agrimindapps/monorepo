@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
+import '../providers/appointments_providers.dart';
 import '../../domain/entities/appointment.dart';
 import '../../domain/usecases/add_appointment.dart';
 import '../../domain/usecases/delete_appointment.dart';
@@ -57,12 +57,12 @@ class AppointmentsNotifier extends _$AppointmentsNotifier {
 
   @override
   AppointmentState build() {
-    _getAppointments = di.getIt<GetAppointments>();
-    _getUpcomingAppointments = di.getIt<GetUpcomingAppointments>();
-    _getAppointmentById = di.getIt<GetAppointmentById>();
-    _addAppointment = di.getIt<AddAppointment>();
-    _updateAppointment = di.getIt<UpdateAppointment>();
-    _deleteAppointment = di.getIt<DeleteAppointment>();
+    _getAppointments = ref.watch(getAppointmentsProvider);
+    _getUpcomingAppointments = ref.watch(getUpcomingAppointmentsProvider);
+    _getAppointmentById = ref.watch(getAppointmentByIdProvider);
+    _addAppointment = ref.watch(addAppointmentProvider);
+    _updateAppointment = ref.watch(updateAppointmentProvider);
+    _deleteAppointment = ref.watch(deleteAppointmentProvider);
 
     return const AppointmentState();
   }

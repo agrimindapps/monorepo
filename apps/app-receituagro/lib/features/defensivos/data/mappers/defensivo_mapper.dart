@@ -101,7 +101,7 @@ class DefensivoMapper {
   }
 
   /// Converte Drift Fitossanitario para Entity (updated for Drift migration)
-  static DefensivoEntity fromHiveToEntity(Fitossanitario drift) {
+  static DefensivoEntity fromDriftToEntity(Fitossanitario drift) {
     return DefensivoEntity(
       id: drift.idDefensivo,
       nome: drift.nome,
@@ -116,15 +116,15 @@ class DefensivoMapper {
   }
 
   /// Converte lista de Fitossanitario para Entities
-  static List<DefensivoEntity> fromHiveToEntityList(
+  static List<DefensivoEntity> fromDriftToEntityList(
     List<Fitossanitario> drifts,
   ) {
-    return drifts.map((drift) => fromHiveToEntity(drift)).toList();
+    return drifts.map((drift) => fromDriftToEntity(drift)).toList();
   }
 
   /// Converte Fitossanitario Drift para Entity (alias for consistency)
   static DefensivoEntity fromDriftToEntity(Fitossanitario drift) {
-    return fromHiveToEntity(drift);
+    return fromDriftToEntity(drift);
     return DefensivoEntity(
       id: drift.idDefensivo,
       nome: drift.nome,

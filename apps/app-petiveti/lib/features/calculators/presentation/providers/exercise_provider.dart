@@ -1,9 +1,9 @@
 import 'package:core/core.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/calculators/exercise_calculator.dart';
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/usecases/perform_calculation.dart';
+import 'calculators_providers.dart';
 
 /// Estado da calculadora de exercícios
 class ExerciseState {
@@ -32,10 +32,10 @@ class ExerciseState {
 
 /// Notifier para gerenciar o estado da calculadora de exercícios
 class ExerciseNotifier extends StateNotifier<ExerciseState> {
-  ExerciseNotifier() : super(const ExerciseState());
+  ExerciseNotifier(this._performCalculation) : super(const ExerciseState());
 
   final _calculator = const ExerciseCalculator();
-  final _performCalculation = di.getIt<PerformCalculation>();
+  final PerformCalculation _performCalculation;
 
   /// Calcula o plano de exercícios baseado nos inputs
   Future<void> calculate(Map<String, dynamic> inputs) async {
@@ -108,7 +108,7 @@ class ExerciseNotifier extends StateNotifier<ExerciseState> {
 
 /// Provider para a calculadora de exercícios
 final exerciseProvider = StateNotifierProvider<ExerciseNotifier, ExerciseState>(
-  (ref) => ExerciseNotifier(),
+  (ref) => ExerciseNotifier(ref.watch(performCalculationProvider)),
 );
 
 /// Provider para obter histórico de cálculos de exercício

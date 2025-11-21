@@ -1,19 +1,19 @@
 # 📊 Resumo da Auditoria de Comentários
 
-**Data**: 2025-11-21 17:22:03
+**Data**: 2025-11-21 17:33:53
 **App**: app-receituagro
 
 ## 📈 Estatísticas Gerais
 
 - **Total de arquivos**: 871 arquivos .dart
 - **Total de linhas**: 160229 linhas
-- **Total de comentários**: 14305 comentários //
+- **Total de comentários**: 14285 comentários //
 
 ## 🚨 Problemas Encontrados
 
 ### Críticos
-- **@deprecated**: 27 ocorrências
-- **@Deprecated**: 240 ocorrências
+- **@deprecated**: 0 ocorrências
+- **@Deprecated**: 267 ocorrências
 
 ### Altos
 - **TODO**: 135 ocorrências

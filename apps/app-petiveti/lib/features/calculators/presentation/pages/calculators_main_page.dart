@@ -1,13 +1,11 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
-import '../../domain/entities/calculator.dart';
-import '../../domain/usecases/get_calculators.dart';
+import '../providers/calculators_providers.dart';
 
 /// Provider para gerenciar estado das calculadoras
 final calculatorsProvider = FutureProvider<List<Calculator>>((ref) async {
-  final getCalculators = di.getIt<GetCalculators>();
+  final getCalculators = ref.watch(getCalculatorsProvider);
   return await getCalculators();
 });
 

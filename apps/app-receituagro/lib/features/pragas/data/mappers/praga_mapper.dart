@@ -31,7 +31,7 @@ class PragaMapper {
   }
 
   /// Converte Drift Praga para Entity (updated for Drift migration)
-  static PragaEntity fromHiveToEntity(Praga drift) {
+  static PragaEntity fromDriftToEntity(Praga drift) {
     return PragaEntity(
       idReg: drift.idPraga,
       nomeComum: drift.nome,
@@ -46,7 +46,7 @@ class PragaMapper {
   }
 
   /// Converte Entity para Drift Praga (Companion for insertion)
-  static PragasCompanion fromEntityToHive(PragaEntity entity) {
+  static PragasCompanion fromEntityToDrift(PragaEntity entity) {
     return PragasCompanion(
       idPraga: Value(entity.idReg),
       nome: Value(entity.nomeComum),
@@ -66,22 +66,22 @@ class PragaMapper {
   }
 
   /// Converte lista de Praga para Entities
-  static List<PragaEntity> fromHiveToEntityList(List<Praga> drifts) {
-    return drifts.map((drift) => fromHiveToEntity(drift)).toList();
+  static List<PragaEntity> fromDriftToEntityList(List<Praga> drifts) {
+    return drifts.map((drift) => fromDriftToEntity(drift)).toList();
   }
 
   /// Converte lista de Entities para Praga Companions
-  static List<PragasCompanion> fromEntityToHiveList(List<PragaEntity> entities) {
-    return entities.map((entity) => fromEntityToHive(entity)).toList();
+  static List<PragasCompanion> fromEntityToDriftList(List<PragaEntity> entities) {
+    return entities.map((entity) => fromEntityToDrift(entity)).toList();
   }
 
   /// Converte Drift Praga para Entity (alias for consistency)
   static PragaEntity fromDriftToEntity(Praga drift) {
-    return fromHiveToEntity(drift);
+    return fromDriftToEntity(drift);
   }
 
   /// Converte lista de Drift Praga para Entities (alias for consistency)
   static List<PragaEntity> fromDriftToEntityList(List<Praga> drifts) {
-    return fromHiveToEntityList(drifts);
+    return fromDriftToEntityList(drifts);
   }
 }

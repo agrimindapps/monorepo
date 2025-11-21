@@ -16,6 +16,14 @@
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/providers/database_providers.g.dart:953:@Deprecated('Will be removed in 3.0. Use Ref instead')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/providers/database_providers.g.dart:1105:@Deprecated('Will be removed in 3.0. Use Ref instead')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/providers/database_providers.g.dart:1250:@Deprecated('Will be removed in 3.0. Use Ref instead')
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/favorito_repository.dart:257:  /// @Deprecated("Deprecated - use alternative") Legacy method - remove favorito sem userId (busca qualquer user)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/favorito_repository.dart:307:  /// @Deprecated("Deprecated - use alternative") Legacy method - busca favoritos por tipo
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/favorito_repository.dart:317:  /// @Deprecated("Deprecated - use alternative") Legacy method - adiciona favorito
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/favorito_repository.dart:336:  /// @Deprecated("Deprecated - use alternative") Legacy method - verifica se é favorito
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/favorito_repository.dart:351:  /// @Deprecated("Deprecated - use alternative") Legacy method - limpa favoritos por tipo
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/favorito_repository.dart:358:  /// @Deprecated("Deprecated - use alternative") Legacy method - estatísticas de favoritos
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/fitossanitarios_repository.dart:136:  /// @Deprecated("Deprecated - use alternative") Use findById instead
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/pragas_repository.dart:88:  /// @Deprecated("Deprecated - use alternative") Use findByIdPraga instead
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/mixins/premium_status_listener.dart:6:@Deprecated('Use ConsumerStatefulWidget with Riverpod premiumStatusNotifierProvider instead')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/providers/remote_config_provider.g.dart:27:@Deprecated('Will be removed in 3.0. Use Ref instead')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/providers/remote_config_provider.g.dart:179:@Deprecated('Will be removed in 3.0. Use Ref instead')
@@ -96,6 +104,8 @@
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/providers/profile_providers.g.dart:26:@Deprecated('Will be removed in 3.0. Use Ref instead')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/domain/theme_service.g.dart:24:@Deprecated('Will be removed in 3.0. Use Ref instead')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/domain/theme_service.g.dart:42:@Deprecated('Will be removed in 3.0. Use Ref instead')
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/settings_notifier.g.dart:11:/// @Deprecated("Deprecated - use alternative") Wrapper notifier for backward compatibility
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/settings_notifier.dart:15:/// @Deprecated("Deprecated - use alternative") Wrapper notifier for backward compatibility
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/device_notifier.g.dart:269:@Deprecated('Will be removed in 3.0. Use Ref instead')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/settings_providers.g.dart:27:@Deprecated('Will be removed in 3.0. Use Ref instead')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/settings_providers.g.dart:49:@Deprecated('Will be removed in 3.0. Use Ref instead')
@@ -109,9 +119,13 @@
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/data/repositories/favoritos_repository_simplified.dart:335:  /// @Deprecated Use `addFavorito(FavoritoEntity)` em vez disso
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/data/repositories/favoritos_repository_simplified.dart:341:  /// @Deprecated Use `addFavorito(FavoritoEntity)` em vez disso
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/data/repositories/favoritos_repository_simplified.dart:347:  /// @Deprecated Use `addFavorito(FavoritoEntity)` em vez disso
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/data/services/favoritos_sync_service.dart:64:  /// @Deprecated("Deprecated - use alternative") Use prepareDataForLocalSave e salve no repositório Drift
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/domain/usecases/add_favorito_defensivo_usecase.dart:8:/// @Deprecated Substituído por `AddFavoritoUseCase` genérico (mais reutilizável)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/domain/usecases/add_favorito_defensivo_usecase.dart:21:@Deprecated("Deprecated - use alternative")
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/domain/usecases/get_favorito_defensivos_usecase.dart:9:/// @Deprecated Substituído por `IFavoritosRepository.getByTipo()` genérico
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/domain/usecases/get_favorito_defensivos_usecase.dart:27:@Deprecated("Deprecated - use alternative")
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/domain/usecases/remove_favorito_defensivo_usecase.dart:8:/// @Deprecated Substituído por `RemoveFavoritoUseCase` genérico (mais reutilizável)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/domain/usecases/remove_favorito_defensivo_usecase.dart:23:@Deprecated("Deprecated - use alternative")
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/presentation/providers/favoritos_providers.g.dart:27:@Deprecated('Will be removed in 3.0. Use Ref instead')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/presentation/providers/favoritos_providers.g.dart:49:@Deprecated('Will be removed in 3.0. Use Ref instead')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/presentation/notifiers/favoritos_notifier.dart:181:  /// @Deprecated Use loadAllFavoritos() + state.defensivos getter em vez disso
@@ -123,6 +137,7 @@
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/presentation/notifiers/favoritos_notifier.dart:409:  @Deprecated('Não é mais necessário - todos os favoritos já estão em memória')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/navigation/navigation_providers.g.dart:25:@Deprecated('Will be removed in 3.0. Use Ref instead')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/navigation/navigation_providers.g.dart:45:@Deprecated('Will be removed in 3.0. Use Ref instead')
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart:10:/// @Deprecated("Deprecated - use alternative") Use specialized repository interfaces instead:
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/domain/entities/diagnostico_entity.dart:47:  @Deprecated('Use DiagnosticoEntityResolver.resolveDefensivoNome() instead')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/domain/entities/diagnostico_entity.dart:51:  @Deprecated('Use DiagnosticoEntityResolver.resolveCulturaNome() instead')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/domain/entities/diagnostico_entity.dart:55:  @Deprecated('Use DiagnosticoEntityResolver.resolvePragaNome() instead')
@@ -137,7 +152,12 @@
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/presentation/providers/diagnosticos_providers.g.dart:185:@Deprecated('Will be removed in 3.0. Use Ref instead')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/presentation/providers/diagnosticos_providers.g.dart:205:@Deprecated('Will be removed in 3.0. Use Ref instead')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/presentation/providers/diagnosticos_providers.g.dart:225:@Deprecated('Will be removed in 3.0. Use Ref instead')
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/presentation/providers/diagnosticos_notifier.dart:18:/// @Deprecated("Deprecated - use alternative")
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/presentation/providers/diagnosticos_notifier.g.dart:12:/// @Deprecated("Deprecated - use alternative")
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/release/production_release_dashboard.dart:12:@Deprecated('BetaTestingService foi removido. Use novo sistema de release management.')
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/domain/usecases/get_culturas_usecase.dart:95:@Deprecated("Deprecated - use alternative")
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/domain/usecases/get_culturas_usecase.dart:100:  @Deprecated("Deprecated - use alternative")
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/domain/usecases/get_culturas_usecase.dart:104:  @Deprecated("Deprecated - use alternative")
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/domain/usecases/get_culturas_usecase.dart:111:@Deprecated('Use GetCulturasUseCase com GetCulturasByGrupoParams')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/domain/usecases/get_culturas_usecase.dart:117:  @Deprecated('Use GetCulturasUseCase com GetCulturasByGrupoParams')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/domain/usecases/get_culturas_usecase.dart:121:  @Deprecated('Use GetCulturasUseCase com GetCulturasByGrupoParams')
@@ -196,12 +216,19 @@
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/presentation/providers/pragas_providers.g.dart:155:@Deprecated('Will be removed in 3.0. Use Ref instead')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/presentation/providers/pragas_providers.g.dart:175:@Deprecated('Will be removed in 3.0. Use Ref instead')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/presentation/providers/pragas_providers.g.dart:195:@Deprecated('Will be removed in 3.0. Use Ref instead')
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:76:/// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(const GetAllDefensivosParams())`
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:77:@Deprecated('Use GetDefensivosUseCase com GetAllDefensivosParams')
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:91:/// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(GetDefensivosByClasseParams(classe))`
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:92:@Deprecated('Use GetDefensivosUseCase com GetDefensivosByClasseParams')
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:106:/// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(SearchDefensivosParams(query))`
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:107:@Deprecated('Use GetDefensivosUseCase com SearchDefensivosParams')
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:124:/// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(GetDefensivosRecentesParams(limit))`
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:125:@Deprecated('Use GetDefensivosUseCase com GetDefensivosRecentesParams')
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:139:/// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(const GetDefensivosStatsParams())`
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:140:@Deprecated('Use GetDefensivosUseCase com GetDefensivosStatsParams')
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:153:/// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(const GetClassesAgronomicasParams())`
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:154:@Deprecated('Use GetDefensivosUseCase com GetClassesAgronomicasParams')
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:167:/// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(const GetFabricantesParams())`
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:168:@Deprecated('Use GetDefensivosUseCase com GetFabricantesParams')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/presentation/providers/defensivos_providers.g.dart:27:@Deprecated('Will be removed in 3.0. Use Ref instead')
 /Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/presentation/providers/defensivos_providers.g.dart:47:@Deprecated('Will be removed in 3.0. Use Ref instead')

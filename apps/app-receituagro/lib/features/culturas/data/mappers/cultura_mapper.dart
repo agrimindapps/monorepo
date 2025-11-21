@@ -17,7 +17,7 @@ class CulturaMapper {
   }
 
   /// Converte Drift Cultura para Entity (updated for Drift migration)
-  static CulturaEntity fromHiveToEntity(Cultura drift) {
+  static CulturaEntity fromDriftToEntity(Cultura drift) {
     return CulturaEntity(
       id: drift.idCultura,
       nome: drift.nome,
@@ -44,18 +44,18 @@ class CulturaMapper {
   }
 
   /// Converte lista de Cultura para Entities
-  static List<CulturaEntity> fromHiveToEntityList(List<Cultura> drifts) {
-    return drifts.map((drift) => fromHiveToEntity(drift)).toList();
+  static List<CulturaEntity> fromDriftToEntityList(List<Cultura> drifts) {
+    return drifts.map((drift) => fromDriftToEntity(drift)).toList();
   }
 
   /// Converte Cultura Drift para Entity (alias for consistency)
   static CulturaEntity fromDriftToEntity(Cultura drift) {
-    return fromHiveToEntity(drift);
+    return fromDriftToEntity(drift);
   }
 
   /// Converte lista de Cultura Drift para Entities (alias for consistency)
   static List<CulturaEntity> fromDriftToEntityList(List<Cultura> drifts) {
-    return fromHiveToEntityList(drifts);
+    return fromDriftToEntityList(drifts);
   }
 
   /// Converte lista de Entities para Models

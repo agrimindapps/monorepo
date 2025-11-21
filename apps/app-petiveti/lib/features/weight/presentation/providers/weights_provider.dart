@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
+import 'weight_providers.dart';
 import '../../../../core/interfaces/usecase.dart' as local;
 import '../../domain/entities/weight.dart';
 import '../../domain/repositories/weight_repository.dart';
@@ -386,8 +386,8 @@ class WeightsNotifier extends StateNotifier<WeightsState> {
 final weightsCrudProvider =
     StateNotifierProvider<WeightsCrudNotifier, WeightsCrudState>((ref) {
       return WeightsCrudNotifier(
-        addWeight: di.getIt<AddWeight>(),
-        updateWeight: di.getIt<UpdateWeight>(),
+        addWeight: ref.watch(addWeightProvider),
+        updateWeight: ref.watch(updateWeightProvider),
       );
     });
 
@@ -396,8 +396,8 @@ final weightsCrudProvider =
 final weightsQueryProvider =
     StateNotifierProvider<WeightsQueryNotifier, WeightsQueryState>((ref) {
       return WeightsQueryNotifier(
-        getWeights: di.getIt<GetWeights>(),
-        getWeightsByAnimalId: di.getIt<GetWeightsByAnimalId>(),
+        getWeights: ref.watch(getWeightsProvider),
+        getWeightsByAnimalId: ref.watch(getWeightsByAnimalIdProvider),
       );
     });
 
@@ -440,11 +440,11 @@ final weightsProvider = StateNotifierProvider<WeightsNotifier, WeightsState>((
   ref,
 ) {
   return WeightsNotifier(
-    getWeights: di.getIt<GetWeights>(),
-    getWeightsByAnimalId: di.getIt<GetWeightsByAnimalId>(),
-    getWeightStatistics: di.getIt<GetWeightStatistics>(),
-    addWeight: di.getIt<AddWeight>(),
-    updateWeight: di.getIt<UpdateWeight>(),
+    getWeights: ref.watch(getWeightsProvider),
+    getWeightsByAnimalId: ref.watch(getWeightsByAnimalIdProvider),
+    getWeightStatistics: ref.watch(getWeightStatisticsProvider),
+    addWeight: ref.watch(addWeightProvider),
+    updateWeight: ref.watch(updateWeightProvider),
   );
 });
 final weightsByAnimalProvider = FutureProvider.family<List<Weight>, String>((
@@ -457,7 +457,7 @@ final weightsByAnimalProvider = FutureProvider.family<List<Weight>, String>((
 });
 final weightStatisticsProvider =
     FutureProvider.family<WeightStatistics, String>((ref, animalId) async {
-      final useCase = di.getIt<GetWeightStatistics>();
+      final useCase = ref.watch(getWeightStatisticsProvider);
       final result = await useCase(animalId);
 
       return result.fold(
@@ -469,7 +469,7 @@ final weightsStreamProvider = StreamProvider.family<List<Weight>, String?>((
   ref,
   animalId,
 ) {
-  final repository = di.getIt.get<WeightRepository>();
+  final repository = ref.watch(weightRepositoryProvider);
   if (animalId != null) {
     return repository.watchWeightsByAnimalId(animalId);
   }

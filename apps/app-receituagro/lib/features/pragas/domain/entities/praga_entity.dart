@@ -24,7 +24,6 @@ class PragaEntity {
   });
 
   /// Factory para criar do Drift model (Praga)
-  /// Note: Drift Praga uses different field names than legacy Hive
   /// TODO: Verify field mapping with actual Drift schema
   factory PragaEntity.fromDrift(dynamic driftModel) {
     // Temporarily disabled until proper Drift model mapping is established
@@ -33,19 +32,16 @@ class PragaEntity {
     );
   }
   
-  // COMMENTED OUT: Legacy Hive model no longer exists
-  // /// Factory para criar do Hive model
-  // factory PragaEntity.fromHive(Praga hiveModel) {
   //   return PragaEntity(
-  //     idReg: hiveModel.idReg,
-  //     nomeComum: hiveModel.nomeComum,
-  //     nomeCientifico: hiveModel.nomeCientifico,
-  //     tipoPraga: hiveModel.tipoPraga,
-  //     dominio: hiveModel.dominio,
-  //     reino: hiveModel.reino,
-  //     familia: hiveModel.familia,
-  //     genero: hiveModel.genero,
-  //     especie: hiveModel.especie,
+  //     idReg: driftModel.idReg,
+  //     nomeComum: driftModel.nomeComum,
+  //     nomeCientifico: driftModel.nomeCientifico,
+  //     tipoPraga: driftModel.tipoPraga,
+  //     dominio: driftModel.dominio,
+  //     reino: driftModel.reino,
+  //     familia: driftModel.familia,
+  //     genero: driftModel.genero,
+  //     especie: driftModel.especie,
   //   );
   // }
 

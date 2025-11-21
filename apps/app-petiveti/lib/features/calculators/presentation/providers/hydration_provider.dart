@@ -1,9 +1,9 @@
 import 'package:core/core.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/calculators/hydration_calculator.dart';
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/usecases/perform_calculation.dart';
+import 'calculators_providers.dart';
 
 /// Estado da calculadora de hidratação
 class HydrationState {
@@ -32,19 +32,10 @@ class HydrationState {
 
 /// Notifier para gerenciar estado da calculadora de hidratação
 class HydrationNotifier extends StateNotifier<HydrationState> {
-  HydrationNotifier() : super(const HydrationState());
+  HydrationNotifier(this._performCalculation) : super(const HydrationState());
 
   final _calculator = const HydrationCalculator();
-  late final PerformCalculation _performCalculation;
-
-  /// Inicializa o provider com dependências
-  void initialize() {
-    try {
-      _performCalculation = di.getIt<PerformCalculation>();
-    } catch (e) {
-      _performCalculation = PerformCalculation(di.getIt());
-    }
-  }
+  final PerformCalculation _performCalculation;
 
   /// Realiza o cálculo de hidratação
   Future<void> calculate(Map<String, dynamic> inputs) async {
@@ -103,9 +94,7 @@ class HydrationNotifier extends StateNotifier<HydrationState> {
 
 /// Provider para a calculadora de hidratação
 final hydrationProvider = StateNotifierProvider<HydrationNotifier, HydrationState>((ref) {
-  final notifier = HydrationNotifier();
-  notifier.initialize();
-  return notifier;
+  return HydrationNotifier(ref.watch(performCalculationProvider));
 });
 
 /// Provider para obter informações sobre a calculadora de hidratação

@@ -114,9 +114,9 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
         },
         (diagnosticoEntity) async {
           if (diagnosticoEntity != null) {
-            final hiveRepository = ref.read(diagnosticoRepositoryProvider);
+            final driftRepository = ref.read(diagnosticoRepositoryProvider);
             final diagnosticoDrift =
-                await hiveRepository.getDiagnosticoByIdOrObjectId(
+                await driftRepository.getDiagnosticoByIdOrObjectId(
               diagnosticoId,
             );
 
@@ -153,8 +153,8 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
             // Load premium status after loading data
             await loadPremiumStatus();
           } else {
-            final hiveRepository = ref.read(diagnosticoRepositoryProvider);
-            final result = await hiveRepository.getAll();
+            final driftRepository = ref.read(diagnosticoRepositoryProvider);
+            final result = await driftRepository.getAll();
             final totalDiagnosticos = result.length;
             final errorMsg = totalDiagnosticos == 0
                 ? 'Base de dados vazia. Nenhum diagnóstico foi carregado. Verifique se o aplicativo foi inicializado corretamente ou tente resincronizar os dados.'
@@ -168,9 +168,9 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
       );
     } catch (e) {
       try {
-        final hiveRepository = ref.read(diagnosticoRepositoryProvider);
+        final driftRepository = ref.read(diagnosticoRepositoryProvider);
         final diagnosticoDrift =
-            await hiveRepository.getDiagnosticoByIdOrObjectId(
+            await driftRepository.getDiagnosticoByIdOrObjectId(
           diagnosticoId,
         );
         if (diagnosticoDrift != null) {

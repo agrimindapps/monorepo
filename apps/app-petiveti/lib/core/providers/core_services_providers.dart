@@ -58,6 +58,24 @@ FirebaseFirestore firebaseFirestore(FirebaseFirestoreRef ref) {
   return FirebaseFirestore.instance;
 }
 
+@riverpod
+FirebaseAuth firebaseAuth(FirebaseAuthRef ref) {
+  return FirebaseAuth.instance;
+}
+
+@riverpod
+GoogleSignIn googleSignIn(GoogleSignInRef ref) {
+  if (kIsWeb) {
+    return GoogleSignIn(clientId: '');
+  }
+  return GoogleSignIn();
+}
+
+@riverpod
+SharedPreferences sharedPreferences(SharedPreferencesRef ref) {
+  throw UnimplementedError('SharedPreferences must be overridden in main.dart');
+}
+
 // ============================================================================
 // LOCAL CORE SERVICES
 // ============================================================================

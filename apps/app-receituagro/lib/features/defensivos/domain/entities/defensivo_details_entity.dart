@@ -36,9 +36,8 @@ class DefensivoDetailsEntity {
     this.mapa,
   });
 
-  /// Cria entity a partir do modelo Hive
   /// Cria entity a partir do modelo Drift (updated for Drift migration)
-  factory DefensivoDetailsEntity.fromHive(Fitossanitario drift) {
+  factory DefensivoDetailsEntity.fromDrift(Fitossanitario drift) {
     return DefensivoDetailsEntity(
       id: drift.idDefensivo,
       nomeComum: drift.nomeComum ?? drift.nome,

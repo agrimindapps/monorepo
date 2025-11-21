@@ -113,49 +113,49 @@ Encontradas 267 ocorrências
 **Arquivo**: `lib/database/repositories/favorito_repository.dart`
 **Linha**: 257
 ```dart
-  /// @deprecated Legacy method - remove favorito sem userId (busca qualquer user)
+  /// @Deprecated("Deprecated - use alternative") Legacy method - remove favorito sem userId (busca qualquer user)
 ```
 
 **Arquivo**: `lib/database/repositories/favorito_repository.dart`
 **Linha**: 307
 ```dart
-  /// @deprecated Legacy method - busca favoritos por tipo
+  /// @Deprecated("Deprecated - use alternative") Legacy method - busca favoritos por tipo
 ```
 
 **Arquivo**: `lib/database/repositories/favorito_repository.dart`
 **Linha**: 317
 ```dart
-  /// @deprecated Legacy method - adiciona favorito
+  /// @Deprecated("Deprecated - use alternative") Legacy method - adiciona favorito
 ```
 
 **Arquivo**: `lib/database/repositories/favorito_repository.dart`
 **Linha**: 336
 ```dart
-  /// @deprecated Legacy method - verifica se é favorito
+  /// @Deprecated("Deprecated - use alternative") Legacy method - verifica se é favorito
 ```
 
 **Arquivo**: `lib/database/repositories/favorito_repository.dart`
 **Linha**: 351
 ```dart
-  /// @deprecated Legacy method - limpa favoritos por tipo
+  /// @Deprecated("Deprecated - use alternative") Legacy method - limpa favoritos por tipo
 ```
 
 **Arquivo**: `lib/database/repositories/favorito_repository.dart`
 **Linha**: 358
 ```dart
-  /// @deprecated Legacy method - estatísticas de favoritos
+  /// @Deprecated("Deprecated - use alternative") Legacy method - estatísticas de favoritos
 ```
 
 **Arquivo**: `lib/database/repositories/fitossanitarios_repository.dart`
 **Linha**: 136
 ```dart
-  /// @deprecated Use findById instead
+  /// @Deprecated("Deprecated - use alternative") Use findById instead
 ```
 
 **Arquivo**: `lib/database/repositories/pragas_repository.dart`
 **Linha**: 88
 ```dart
-  /// @deprecated Use findByIdPraga instead
+  /// @Deprecated("Deprecated - use alternative") Use findByIdPraga instead
 ```
 
 **Arquivo**: `lib/core/mixins/premium_status_listener.dart`
@@ -641,13 +641,13 @@ Encontradas 267 ocorrências
 **Arquivo**: `lib/features/settings/presentation/providers/settings_notifier.g.dart`
 **Linha**: 11
 ```dart
-/// @deprecated Wrapper notifier for backward compatibility
+/// @Deprecated("Deprecated - use alternative") Wrapper notifier for backward compatibility
 ```
 
 **Arquivo**: `lib/features/settings/presentation/providers/settings_notifier.dart`
 **Linha**: 15
 ```dart
-/// @deprecated Wrapper notifier for backward compatibility
+/// @Deprecated("Deprecated - use alternative") Wrapper notifier for backward compatibility
 ```
 
 **Arquivo**: `lib/features/settings/presentation/providers/device_notifier.g.dart`
@@ -731,7 +731,7 @@ Encontradas 267 ocorrências
 **Arquivo**: `lib/features/favoritos/data/services/favoritos_sync_service.dart`
 **Linha**: 64
 ```dart
-  /// @deprecated Use prepareDataForLocalSave e salve no repositório Drift
+  /// @Deprecated("Deprecated - use alternative") Use prepareDataForLocalSave e salve no repositório Drift
 ```
 
 **Arquivo**: `lib/features/favoritos/domain/usecases/add_favorito_defensivo_usecase.dart`
@@ -743,7 +743,7 @@ Encontradas 267 ocorrências
 **Arquivo**: `lib/features/favoritos/domain/usecases/add_favorito_defensivo_usecase.dart`
 **Linha**: 21
 ```dart
-@deprecated
+@Deprecated("Deprecated - use alternative")
 ```
 
 **Arquivo**: `lib/features/favoritos/domain/usecases/get_favorito_defensivos_usecase.dart`
@@ -755,7 +755,7 @@ Encontradas 267 ocorrências
 **Arquivo**: `lib/features/favoritos/domain/usecases/get_favorito_defensivos_usecase.dart`
 **Linha**: 27
 ```dart
-@deprecated
+@Deprecated("Deprecated - use alternative")
 ```
 
 **Arquivo**: `lib/features/favoritos/domain/usecases/remove_favorito_defensivo_usecase.dart`
@@ -767,7 +767,7 @@ Encontradas 267 ocorrências
 **Arquivo**: `lib/features/favoritos/domain/usecases/remove_favorito_defensivo_usecase.dart`
 **Linha**: 23
 ```dart
-@deprecated
+@Deprecated("Deprecated - use alternative")
 ```
 
 **Arquivo**: `lib/features/favoritos/presentation/providers/favoritos_providers.g.dart`
@@ -839,7 +839,7 @@ Encontradas 267 ocorrências
 **Arquivo**: `lib/features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart`
 **Linha**: 10
 ```dart
-/// @deprecated Use specialized repository interfaces instead
+/// @Deprecated("Deprecated - use alternative") Use specialized repository interfaces instead
 ```
 
 **Arquivo**: `lib/features/diagnosticos/domain/entities/diagnostico_entity.dart`
@@ -929,13 +929,13 @@ Encontradas 267 ocorrências
 **Arquivo**: `lib/features/diagnosticos/presentation/providers/diagnosticos_notifier.dart`
 **Linha**: 18
 ```dart
-/// @deprecated
+/// @Deprecated("Deprecated - use alternative")
 ```
 
 **Arquivo**: `lib/features/diagnosticos/presentation/providers/diagnosticos_notifier.g.dart`
 **Linha**: 12
 ```dart
-/// @deprecated
+/// @Deprecated("Deprecated - use alternative")
 ```
 
 **Arquivo**: `lib/features/release/production_release_dashboard.dart`
@@ -947,19 +947,19 @@ Encontradas 267 ocorrências
 **Arquivo**: `lib/features/culturas/domain/usecases/get_culturas_usecase.dart`
 **Linha**: 95
 ```dart
-@deprecated
+@Deprecated("Deprecated - use alternative")
 ```
 
 **Arquivo**: `lib/features/culturas/domain/usecases/get_culturas_usecase.dart`
 **Linha**: 100
 ```dart
-  @deprecated
+  @Deprecated("Deprecated - use alternative")
 ```
 
 **Arquivo**: `lib/features/culturas/domain/usecases/get_culturas_usecase.dart`
 **Linha**: 104
 ```dart
-  @deprecated
+  @Deprecated("Deprecated - use alternative")
 ```
 
 **Arquivo**: `lib/features/culturas/domain/usecases/get_culturas_usecase.dart`
@@ -1313,7 +1313,7 @@ Encontradas 267 ocorrências
 **Arquivo**: `lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart`
 **Linha**: 76
 ```dart
-/// @deprecated Use `GetDefensivosUseCase(const GetAllDefensivosParams())`
+/// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(const GetAllDefensivosParams())`
 ```
 
 **Arquivo**: `lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart`
@@ -1325,7 +1325,7 @@ Encontradas 267 ocorrências
 **Arquivo**: `lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart`
 **Linha**: 91
 ```dart
-/// @deprecated Use `GetDefensivosUseCase(GetDefensivosByClasseParams(classe))`
+/// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(GetDefensivosByClasseParams(classe))`
 ```
 
 **Arquivo**: `lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart`
@@ -1337,7 +1337,7 @@ Encontradas 267 ocorrências
 **Arquivo**: `lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart`
 **Linha**: 106
 ```dart
-/// @deprecated Use `GetDefensivosUseCase(SearchDefensivosParams(query))`
+/// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(SearchDefensivosParams(query))`
 ```
 
 **Arquivo**: `lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart`
@@ -1349,7 +1349,7 @@ Encontradas 267 ocorrências
 **Arquivo**: `lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart`
 **Linha**: 124
 ```dart
-/// @deprecated Use `GetDefensivosUseCase(GetDefensivosRecentesParams(limit))`
+/// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(GetDefensivosRecentesParams(limit))`
 ```
 
 **Arquivo**: `lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart`
@@ -1361,7 +1361,7 @@ Encontradas 267 ocorrências
 **Arquivo**: `lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart`
 **Linha**: 139
 ```dart
-/// @deprecated Use `GetDefensivosUseCase(const GetDefensivosStatsParams())`
+/// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(const GetDefensivosStatsParams())`
 ```
 
 **Arquivo**: `lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart`
@@ -1373,7 +1373,7 @@ Encontradas 267 ocorrências
 **Arquivo**: `lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart`
 **Linha**: 153
 ```dart
-/// @deprecated Use `GetDefensivosUseCase(const GetClassesAgronomicasParams())`
+/// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(const GetClassesAgronomicasParams())`
 ```
 
 **Arquivo**: `lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart`
@@ -1385,7 +1385,7 @@ Encontradas 267 ocorrências
 **Arquivo**: `lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart`
 **Linha**: 167
 ```dart
-/// @deprecated Use `GetDefensivosUseCase(const GetFabricantesParams())`
+/// @Deprecated("Deprecated - use alternative") Use `GetDefensivosUseCase(const GetFabricantesParams())`
 ```
 
 **Arquivo**: `lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart`

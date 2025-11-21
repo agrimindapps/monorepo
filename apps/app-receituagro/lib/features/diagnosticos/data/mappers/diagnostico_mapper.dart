@@ -77,45 +77,45 @@ class DiagnosticoMapper {
     );
   }
 
-  static DiagnosticoEntity fromHive(Diagnostico hive) {
+  static DiagnosticoEntity fromDrift(Diagnostico drift) {
     return DiagnosticoEntity(
-      id: hive.firebaseId ?? hive.id.toString(),
-      idDefensivo: hive.defensivoId.toString(),
-      idCultura: hive.culturaId.toString(),
-      idPraga: hive.pragaId.toString(),
+      id: drift.firebaseId ?? drift.id.toString(),
+      idDefensivo: drift.defensivoId.toString(),
+      idCultura: drift.culturaId.toString(),
+      idPraga: drift.pragaId.toString(),
       nomeDefensivo: '', // Resolved via extension
       nomeCultura: '', // Resolved via extension
       nomePraga: '', // Resolved via extension
       dosagem: DosagemEntity(
-        dosagemMinima: double.tryParse(hive.dsMin ?? '0'),
-        dosagemMaxima: double.tryParse(hive.dsMax) ?? 0.0,
-        unidadeMedida: hive.um,
+        dosagemMinima: double.tryParse(drift.dsMin ?? '0'),
+        dosagemMaxima: double.tryParse(drift.dsMax) ?? 0.0,
+        unidadeMedida: drift.um,
       ),
       aplicacao: AplicacaoEntity(
-        terrestre: hive.minAplicacaoT != null
+        terrestre: drift.minAplicacaoT != null
             ? AplicacaoTerrestrefEntity(
-                volumeMinimo: double.tryParse(hive.minAplicacaoT!),
-                volumeMaximo: double.tryParse(hive.maxAplicacaoT ?? '0'),
-                unidadeMedida: hive.umT,
+                volumeMinimo: double.tryParse(drift.minAplicacaoT!),
+                volumeMaximo: double.tryParse(drift.maxAplicacaoT ?? '0'),
+                unidadeMedida: drift.umT,
               )
             : null,
-        aerea: hive.minAplicacaoA != null
+        aerea: drift.minAplicacaoA != null
             ? AplicacaoAereaEntity(
-                volumeMinimo: double.tryParse(hive.minAplicacaoA!),
-                volumeMaximo: double.tryParse(hive.maxAplicacaoA ?? '0'),
-                unidadeMedida: hive.umA,
+                volumeMinimo: double.tryParse(drift.minAplicacaoA!),
+                volumeMaximo: double.tryParse(drift.maxAplicacaoA ?? '0'),
+                unidadeMedida: drift.umA,
               )
             : null,
-        intervaloReaplicacao: hive.intervalo,
-        intervaloReaplicacao2: hive.intervalo2,
-        epocaAplicacao: hive.epocaAplicacao,
+        intervaloReaplicacao: drift.intervalo,
+        intervaloReaplicacao2: drift.intervalo2,
+        epocaAplicacao: drift.epocaAplicacao,
       ),
       createdAt: null, // Static data doesn't have user timestamps
       updatedAt: null,
     );
   }
 
-  static DiagnosticosStats statsFromHiveStats(dynamic hiveStats) {
+  static DiagnosticosStats statsFromDriftStats(dynamic driftStats) {
     return const DiagnosticosStats(
       total: 0,
       completos: 0,

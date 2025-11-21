@@ -1,9 +1,9 @@
 import 'package:core/core.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/calculators/diabetes_insulin_calculator.dart';
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/usecases/perform_calculation.dart';
+import 'calculators_providers.dart';
 
 /// Estado da calculadora de diabetes insulina
 class DiabetesInsulinState {
@@ -32,19 +32,10 @@ class DiabetesInsulinState {
 
 /// Notifier para gerenciar estado da calculadora de diabetes insulina
 class DiabetesInsulinNotifier extends StateNotifier<DiabetesInsulinState> {
-  DiabetesInsulinNotifier() : super(const DiabetesInsulinState());
+  DiabetesInsulinNotifier(this._performCalculation) : super(const DiabetesInsulinState());
 
   final _calculator = const DiabetesInsulinCalculator();
-  late final PerformCalculation _performCalculation;
-
-  /// Inicializa o provider com dependências
-  void initialize() {
-    try {
-      _performCalculation = di.getIt<PerformCalculation>();
-    } catch (e) {
-      _performCalculation = PerformCalculation(di.getIt());
-    }
-  }
+  final PerformCalculation _performCalculation;
 
   /// Realiza o cálculo de insulina para diabetes
   Future<void> calculate(Map<String, dynamic> inputs) async {
@@ -111,9 +102,7 @@ class DiabetesInsulinNotifier extends StateNotifier<DiabetesInsulinState> {
 
 /// Provider para a calculadora de diabetes insulina
 final diabetesInsulinProvider = StateNotifierProvider<DiabetesInsulinNotifier, DiabetesInsulinState>((ref) {
-  final notifier = DiabetesInsulinNotifier();
-  notifier.initialize();
-  return notifier;
+  return DiabetesInsulinNotifier(ref.watch(performCalculationProvider));
 });
 
 /// Provider para obter informações sobre a calculadora de diabetes insulina

@@ -33,7 +33,7 @@ class MedicationFilters extends ConsumerWidget {
               )),
             ],
             onChanged: (value) {
-              ref.read(medicationTypeFilterProvider.notifier).state = value;
+              ref.read(medicationTypeFilterProvider.notifier).set(value);
             },
           ),
         ),
@@ -58,7 +58,7 @@ class MedicationFilters extends ConsumerWidget {
               )),
             ],
             onChanged: (value) {
-              ref.read(medicationStatusFilterProvider.notifier).state = value;
+              ref.read(medicationStatusFilterProvider.notifier).set(value);
             },
           ),
         ),
@@ -66,9 +66,9 @@ class MedicationFilters extends ConsumerWidget {
         const SizedBox(width: 12),
         IconButton(
           onPressed: () {
-            ref.read(medicationTypeFilterProvider.notifier).state = null;
-            ref.read(medicationStatusFilterProvider.notifier).state = null;
-            ref.read(medicationSearchQueryProvider.notifier).state = '';
+            ref.read(medicationTypeFilterProvider.notifier).set(null);
+            ref.read(medicationStatusFilterProvider.notifier).set(null);
+            ref.read(medicationSearchQueryProvider.notifier).set('');
           },
           icon: const Icon(Icons.clear),
           tooltip: 'Limpar filtros',

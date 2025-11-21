@@ -1,18 +1,19 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/interfaces/usecase.dart' as local;
 import '../../../../core/performance/performance_service.dart';
 import '../../domain/entities/medication.dart';
-import '../../domain/repositories/medication_repository.dart';
 import '../../domain/usecases/add_medication.dart';
+import '../../domain/usecases/check_medication_conflicts.dart';
 import '../../domain/usecases/delete_medication.dart';
+import '../../domain/usecases/discontinue_medication.dart';
 import '../../domain/usecases/get_active_medications.dart';
 import '../../domain/usecases/get_expiring_medications.dart';
 import '../../domain/usecases/get_medication_by_id.dart';
 import '../../domain/usecases/get_medications.dart';
 import '../../domain/usecases/get_medications_by_animal_id.dart';
 import '../../domain/usecases/update_medication.dart';
+import '../providers/medications_providers.dart';
 
 part 'medications_notifier.g.dart';
 
@@ -62,15 +63,15 @@ class MedicationsNotifier extends _$MedicationsNotifier with PerformanceMonitori
 
   @override
   MedicationsState build() {
-    _getMedications = di.getIt<GetMedications>();
-    _getMedicationsByAnimalId = di.getIt<GetMedicationsByAnimalId>();
-    _getActiveMedications = di.getIt<GetActiveMedications>();
-    _getMedicationById = di.getIt<GetMedicationById>();
-    _addMedication = di.getIt<AddMedication>();
-    _updateMedication = di.getIt<UpdateMedication>();
-    _deleteMedication = di.getIt<DeleteMedication>();
-    _discontinueMedication = di.getIt<DiscontinueMedication>();
-    _getExpiringSoonMedications = di.getIt<GetExpiringSoonMedications>();
+    _getMedications = ref.watch(getMedicationsProvider);
+    _getMedicationsByAnimalId = ref.watch(getMedicationsByAnimalIdProvider);
+    _getActiveMedications = ref.watch(getActiveMedicationsProvider);
+    _getMedicationById = ref.watch(getMedicationByIdProvider);
+    _addMedication = ref.watch(addMedicationProvider);
+    _updateMedication = ref.watch(updateMedicationProvider);
+    _deleteMedication = ref.watch(deleteMedicationProvider);
+    _discontinueMedication = ref.watch(discontinueMedicationProvider);
+    _getExpiringSoonMedications = ref.watch(getExpiringSoonMedicationsProvider);
 
     return const MedicationsState();
   }
@@ -260,7 +261,7 @@ Future<Medication?> medicationById(MedicationByIdRef ref, String id) async {
 
 @riverpod
 Stream<List<Medication>> medicationsStream(MedicationsStreamRef ref) {
-  final repository = di.getIt.get<MedicationRepository>();
+  final repository = ref.watch(medicationRepositoryProvider);
   return repository.watchMedications();
 }
 
@@ -269,13 +270,13 @@ Stream<List<Medication>> medicationsByAnimalStream(
   MedicationsByAnimalStreamRef ref,
   String animalId,
 ) {
-  final repository = di.getIt.get<MedicationRepository>();
+  final repository = ref.watch(medicationRepositoryProvider);
   return repository.watchMedicationsByAnimalId(animalId);
 }
 
 @riverpod
 Stream<List<Medication>> activeMedicationsStream(ActiveMedicationsStreamRef ref) {
-  final repository = di.getIt.get<MedicationRepository>();
+  final repository = ref.watch(medicationRepositoryProvider);
   return repository.watchActiveMedications();
 }
 

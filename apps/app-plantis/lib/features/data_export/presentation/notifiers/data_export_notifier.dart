@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide Column, getIt;
+import 'package:core/core.dart' hide Column;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/providers/auth_providers.dart';
+import '../../../../core/auth/auth_providers.dart';
 import '../../domain/entities/export_request.dart';
 import '../../domain/repositories/data_export_repository.dart';
 import '../../domain/usecases/check_export_availability_usecase.dart';
@@ -10,6 +11,7 @@ import '../../domain/usecases/delete_export_usecase.dart';
 import '../../domain/usecases/download_export_usecase.dart';
 import '../../domain/usecases/get_export_history_usecase.dart';
 import '../../domain/usecases/request_export_usecase.dart';
+import '../providers/data_export_providers.dart';
 
 part 'data_export_notifier.g.dart';
 
@@ -532,34 +534,4 @@ class DataExportNotifier extends _$DataExportNotifier {
     );
     return nextAllowedTime.difference(DateTime.now());
   }
-}
-
-@riverpod
-CheckExportAvailabilityUseCase checkExportAvailabilityUseCase(Ref ref) {
-  return GetIt.instance<CheckExportAvailabilityUseCase>();
-}
-
-@riverpod
-RequestExportUseCase requestExportUseCase(Ref ref) {
-  return GetIt.instance<RequestExportUseCase>();
-}
-
-@riverpod
-GetExportHistoryUseCase getExportHistoryUseCase(Ref ref) {
-  return GetIt.instance<GetExportHistoryUseCase>();
-}
-
-@riverpod
-DownloadExportUseCase downloadExportUseCase(Ref ref) {
-  return GetIt.instance<DownloadExportUseCase>();
-}
-
-@riverpod
-DeleteExportUseCase deleteExportUseCase(Ref ref) {
-  return GetIt.instance<DeleteExportUseCase>();
-}
-
-@riverpod
-DataExportRepository dataExportRepository(Ref ref) {
-  return GetIt.instance<DataExportRepository>();
 }

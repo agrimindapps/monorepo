@@ -15,6 +15,8 @@ import '../services/plants_care_calculator.dart';
 import '../services/plants_data_service.dart';
 import '../services/plants_filter_service.dart';
 
+import '../../features/plants/presentation/providers/plants_providers.dart';
+
 part 'plants_providers.g.dart';
 
 // ============================================================================
@@ -363,38 +365,10 @@ enum CareStatus {
 }
 
 // ============================================================================
-// USE CASE PROVIDERS (GetIt wrappers)
+// USE CASE PROVIDERS (Delegated to feature providers)
 // ============================================================================
 
-@riverpod
-GetPlantsUseCase getPlantsUseCase(GetPlantsUseCaseRef ref) {
-  return GetIt.instance<GetPlantsUseCase>();
-}
-
-@riverpod
-GetPlantByIdUseCase getPlantByIdUseCase(GetPlantByIdUseCaseRef ref) {
-  return GetIt.instance<GetPlantByIdUseCase>();
-}
-
-@riverpod
-SearchPlantsUseCase searchPlantsUseCase(SearchPlantsUseCaseRef ref) {
-  return GetIt.instance<SearchPlantsUseCase>();
-}
-
-@riverpod
-AddPlantUseCase addPlantUseCase(AddPlantUseCaseRef ref) {
-  return GetIt.instance<AddPlantUseCase>();
-}
-
-@riverpod
-UpdatePlantUseCase updatePlantUseCase(UpdatePlantUseCaseRef ref) {
-  return GetIt.instance<UpdatePlantUseCase>();
-}
-
-@riverpod
-DeletePlantUseCase deletePlantUseCase(DeletePlantUseCaseRef ref) {
-  return GetIt.instance<DeletePlantUseCase>();
-}
+// UseCases are now provided by plants_providers.dart in features/plants
 
 // ============================================================================
 // SPECIALIZED SERVICES PROVIDERS (SOLID pattern)

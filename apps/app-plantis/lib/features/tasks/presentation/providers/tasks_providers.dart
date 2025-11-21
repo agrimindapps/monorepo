@@ -1,7 +1,14 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
-import '../../../../core/di/injection.dart';
+import '../../../../core/auth/auth_providers.dart';
+import '../../../../core/services/services_providers.dart';
+import '../../../../database/providers/database_providers.dart';
+import '../../../plants/presentation/providers/plants_providers.dart';
+import '../../data/datasources/local/tasks_local_datasource.dart';
+import '../../data/datasources/remote/tasks_remote_datasource.dart';
+import '../../data/repositories/tasks_repository_impl.dart';
 import '../../domain/repositories/tasks_repository.dart';
 import '../../domain/services/task_filter_service.dart';
 import '../../domain/services/task_ownership_validator.dart';
@@ -12,10 +19,36 @@ import '../../domain/usecases/get_tasks_usecase.dart';
 
 part 'tasks_providers.g.dart';
 
-/// Provider for TasksRepository from dependency injection
+// Datasources
+@riverpod
+TasksLocalDataSource tasksLocalDataSource(TasksLocalDataSourceRef ref) {
+  final driftRepo = ref.watch(tasksDriftRepositoryProvider);
+  return TasksLocalDataSourceImpl(driftRepo);
+}
+
+@riverpod
+TasksRemoteDataSource tasksRemoteDataSource(TasksRemoteDataSourceRef ref) {
+  final firestore = ref.watch(firebaseFirestoreProvider);
+  final rateLimiter = ref.watch(rateLimiterServiceProvider);
+  return TasksRemoteDataSourceImpl(firestore, rateLimiter: rateLimiter);
+}
+
+/// Provider for TasksRepository
 @riverpod
 TasksRepository tasksRepository(TasksRepositoryRef ref) {
-  return getIt<TasksRepository>();
+  final localDataSource = ref.watch(tasksLocalDataSourceProvider);
+  final remoteDataSource = ref.watch(tasksRemoteDataSourceProvider);
+  final networkInfo = ref.watch(networkInfoProvider);
+  final authRepository = ref.watch(authRepositoryProvider);
+  final plantsRepository = ref.watch(plantsRepositoryProvider);
+
+  return TasksRepositoryImpl(
+    localDataSource: localDataSource,
+    remoteDataSource: remoteDataSource,
+    networkInfo: networkInfo,
+    authService: authRepository,
+    plantsRepository: plantsRepository,
+  );
 }
 
 /// Provider for GetTasksUseCase

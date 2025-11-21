@@ -69,8 +69,8 @@ lib/
 #### **Frontend**
 - **Flutter 3.10.0+** - Framework UI multiplataforma
 - **Dart 3.7.2+** - Linguagem de programação
-- **Provider 6.1.2** - Gerenciamento de estado
-- **Riverpod 2.6.1** - State management alternativo
+- **Riverpod 2.6.1** - Gerenciamento de estado principal
+- **Provider 6.1.2** - Legado (em migração)
 - **Material Design** - Design system
 
 #### **Backend & Dados**
@@ -83,7 +83,8 @@ lib/
   - 📬 **Messaging** - Push notifications
 
 #### **Armazenamento Local**
-- **Hive 2.2.3** - Banco de dados local NoSQL
+- **Drift (SQLite)** - Banco de dados relacional (Novo)
+- **Hive 2.2.3** - Banco de dados local NoSQL (Legado)
 - **Shared Preferences** - Configurações simples
 - **Flutter Secure Storage** - Dados sensíveis
 

@@ -6,6 +6,7 @@ import '../../domain/entities/plant.dart';
 import '../../domain/entities/plant_task.dart';
 import '../../domain/repositories/plant_tasks_repository.dart';
 import '../../domain/services/plant_task_generator.dart';
+import 'plants_providers.dart';
 
 part 'plant_task_provider.freezed.dart';
 part 'plant_task_provider.g.dart';
@@ -485,16 +486,6 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 @riverpod
 PlantTaskGenerator plantTaskGenerator(PlantTaskGeneratorRef ref) {
   return PlantTaskGenerator();
-}
-
-@riverpod
-PlantTasksRepository? plantTasksRepository(PlantTasksRepositoryRef ref) {
-  try {
-    return GetIt.instance<PlantTasksRepository>();
-  } catch (e) {
-    // Repository not registered, return null
-    return null;
-  }
 }
 
 /// Type alias for backwards compatibility with existing code

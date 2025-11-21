@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide User;
 
-import '../../../../core/di/injection_container.dart' as di;
+import '../providers/auth_providers.dart';
 import '../../../../core/interfaces/usecase.dart' as local;
 import '../../domain/entities/user.dart';
 import '../../domain/services/pet_data_sync_service.dart';
@@ -69,98 +69,23 @@ class AuthNotifier extends _$AuthNotifier {
 
   @override
   AuthState build() {
-    // Initialize use cases with safe fallback for DI issues on web
-    try {
-      _signInWithEmail = di.getIt<auth_usecases.SignInWithEmail>();
-    } catch (e) {
-      print('⚠️ AUTH: SignInWithEmail not available yet: $e');
-      // Will be initialized lazily when needed
-    }
+    _signInWithEmail = ref.watch(signInWithEmailProvider);
+    _signUpWithEmail = ref.watch(signUpWithEmailProvider);
+    _signInWithGoogle = ref.watch(signInWithGoogleProvider);
+    _signInWithApple = ref.watch(signInWithAppleProvider);
+    _signInWithFacebook = ref.watch(signInWithFacebookProvider);
+    _signInAnonymously = ref.watch(signInAnonymouslyProvider);
+    _signOut = ref.watch(signOutProvider);
+    _getCurrentUser = ref.watch(getCurrentUserProvider);
+    _sendEmailVerification = ref.watch(sendEmailVerificationProvider);
+    _sendPasswordResetEmail = ref.watch(sendPasswordResetEmailProvider);
+    _updateProfile = ref.watch(updateProfileProvider);
+    _enhancedDeletionService = ref.watch(enhancedAccountDeletionServiceProvider);
+    _rateLimitService = ref.watch(rateLimitServiceProvider);
+    _petDataSyncService = ref.watch(petDataSyncServiceProvider);
 
-    try {
-      _signUpWithEmail = di.getIt<auth_usecases.SignUpWithEmail>();
-    } catch (e) {
-      print('⚠️ AUTH: SignUpWithEmail not available yet: $e');
-    }
-
-    try {
-      _signInWithGoogle = di.getIt<auth_usecases.SignInWithGoogle>();
-    } catch (e) {
-      print('⚠️ AUTH: SignInWithGoogle not available yet: $e');
-    }
-
-    try {
-      _signInWithApple = di.getIt<auth_usecases.SignInWithApple>();
-    } catch (e) {
-      print('⚠️ AUTH: SignInWithApple not available yet: $e');
-    }
-
-    try {
-      _signInWithFacebook = di.getIt<auth_usecases.SignInWithFacebook>();
-    } catch (e) {
-      print('⚠️ AUTH: SignInWithFacebook not available yet: $e');
-    }
-
-    try {
-      _signInAnonymously = di.getIt<auth_usecases.SignInAnonymously>();
-    } catch (e) {
-      print('⚠️ AUTH: SignInAnonymously not available yet: $e');
-    }
-
-    try {
-      _signOut = di.getIt<auth_usecases.SignOut>();
-    } catch (e) {
-      print('⚠️ AUTH: SignOut not available yet: $e');
-    }
-
-    try {
-      _getCurrentUser = di.getIt<auth_usecases.GetCurrentUser>();
-    } catch (e) {
-      print('⚠️ AUTH: GetCurrentUser not available yet: $e');
-    }
-
-    try {
-      _sendEmailVerification = di.getIt<auth_usecases.SendEmailVerification>();
-    } catch (e) {
-      print('⚠️ AUTH: SendEmailVerification not available yet: $e');
-    }
-
-    try {
-      _sendPasswordResetEmail = di.getIt<auth_usecases.SendPasswordResetEmail>();
-    } catch (e) {
-      print('⚠️ AUTH: SendPasswordResetEmail not available yet: $e');
-    }
-
-    try {
-      _updateProfile = di.getIt<auth_usecases.UpdateProfile>();
-    } catch (e) {
-      print('⚠️ AUTH: UpdateProfile not available yet: $e');
-    }
-
-    try {
-      _enhancedDeletionService = di.getIt<EnhancedAccountDeletionService>();
-    } catch (e) {
-      print('⚠️ AUTH: EnhancedAccountDeletionService not available yet: $e');
-    }
-
-    try {
-      _rateLimitService = di.getIt<RateLimitService>();
-    } catch (e) {
-      print('⚠️ AUTH: RateLimitService not available yet: $e');
-    }
-
-    try {
-      _petDataSyncService = di.getIt<PetDataSyncService>();
-    } catch (e) {
-      print('⚠️ AUTH: PetDataSyncService not available yet: $e');
-    }
-
-    // Check auth state if dependencies are available
-    try {
-      _checkAuthState();
-    } catch (e) {
-      print('⚠️ AUTH: Error checking auth state: $e');
-    }
+    // Check auth state
+    _checkAuthState();
 
     return const AuthState();
   }

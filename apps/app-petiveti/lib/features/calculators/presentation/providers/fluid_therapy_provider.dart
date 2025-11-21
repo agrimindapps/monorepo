@@ -1,9 +1,9 @@
 import 'package:core/core.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/calculators/fluid_therapy_calculator.dart';
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/usecases/perform_calculation.dart';
+import 'calculators_providers.dart';
 
 /// Estado da calculadora de fluidoterapia
 class FluidTherapyState {
@@ -32,19 +32,10 @@ class FluidTherapyState {
 
 /// Notifier para gerenciar estado da calculadora de fluidoterapia
 class FluidTherapyNotifier extends StateNotifier<FluidTherapyState> {
-  FluidTherapyNotifier() : super(const FluidTherapyState());
+  FluidTherapyNotifier(this._performCalculation) : super(const FluidTherapyState());
 
   final _calculator = const FluidTherapyCalculator();
-  late final PerformCalculation _performCalculation;
-
-  /// Inicializa o provider com dependências
-  void initialize() {
-    try {
-      _performCalculation = di.getIt<PerformCalculation>();
-    } catch (e) {
-      _performCalculation = PerformCalculation(di.getIt());
-    }
-  }
+  final PerformCalculation _performCalculation;
 
   /// Realiza o cálculo de fluidoterapia
   Future<void> calculate(Map<String, dynamic> inputs) async {
@@ -102,9 +93,7 @@ class FluidTherapyNotifier extends StateNotifier<FluidTherapyState> {
 
 /// Provider para a calculadora de fluidoterapia
 final fluidTherapyProvider = StateNotifierProvider<FluidTherapyNotifier, FluidTherapyState>((ref) {
-  final notifier = FluidTherapyNotifier();
-  notifier.initialize();
-  return notifier;
+  return FluidTherapyNotifier(ref.watch(performCalculationProvider));
 });
 
 /// Provider para obter informações sobre a calculadora de fluidoterapia

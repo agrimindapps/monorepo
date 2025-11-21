@@ -114,7 +114,7 @@ class DataIntegrityService {
   COMMENTED OUT - Original Hive Implementation
   ============================================================================
   
-  This entire service was based on Hive/BoxManager which has been removed.
+  This entire service was based on Drift which has been removed.
   
   Key functionality that needs to be reimplemented with Drift:
   
@@ -131,8 +131,8 @@ class DataIntegrityService {
   Original implementation relied on:
   - IHiveManager for box access
   - BoxManager.withMultipleBoxes for safe concurrent access
-  - Hive Box<T> types for data storage
-  - Legacy Hive models: Diagnostico, Fitossanitario, Praga, Cultura
+  - Drift Table<T> types for data storage
+  - Legacy models: Diagnostico, Fitossanitario, Praga, Cultura
   
   ============================================================================
   */

@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
+import '../providers/reminders_providers.dart';
 import '../../domain/entities/reminder.dart';
 import '../../domain/usecases/add_reminder.dart';
 import '../../domain/usecases/delete_reminder.dart';
@@ -55,14 +55,14 @@ class RemindersNotifier extends _$RemindersNotifier {
 
   @override
   RemindersState build() {
-    _getReminders = di.getIt<GetReminders>();
-    _getTodayReminders = di.getIt<GetTodayReminders>();
-    _getOverdueReminders = di.getIt<GetOverdueReminders>();
-    _addReminder = di.getIt<AddReminder>();
-    _updateReminder = di.getIt<UpdateReminder>();
-    _completeReminder = di.getIt<CompleteReminder>();
-    _snoozeReminder = di.getIt<SnoozeReminder>();
-    _deleteReminder = di.getIt<DeleteReminder>();
+    _getReminders = ref.watch(getRemindersProvider);
+    _getTodayReminders = ref.watch(getTodayRemindersProvider);
+    _getOverdueReminders = ref.watch(getOverdueRemindersProvider);
+    _addReminder = ref.watch(addReminderProvider);
+    _updateReminder = ref.watch(updateReminderProvider);
+    _completeReminder = ref.watch(completeReminderProvider);
+    _snoozeReminder = ref.watch(snoozeReminderProvider);
+    _deleteReminder = ref.watch(deleteReminderProvider);
 
     return const RemindersState();
   }

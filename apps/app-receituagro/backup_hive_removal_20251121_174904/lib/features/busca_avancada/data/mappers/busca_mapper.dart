@@ -1,0 +1,192 @@
+import '../../../../core/di/injection_container.dart';
+import '../../../../database/receituagro_database.dart';
+import '../../../../database/repositories/culturas_repository.dart';
+import '../../../../database/repositories/fitossanitarios_repository.dart';
+import '../../../../database/repositories/pragas_repository.dart';
+import '../../domain/entities/busca_entity.dart';
+
+/// Mapper para conversão entre diferentes modelos e BuscaResultEntity
+class BuscaMapper {
+  /// Converte Diagnostico para BuscaResultEntity
+  /// ✅ CORRETO: Resolve nomes usando repositories, NUNCA usa campos cached
+  static Future<BuscaResultEntity> diagnosticoToEntity(
+    Diagnostico diagnostico,
+  ) async {
+    String defensivoNome = 'Defensivo não encontrado';
+    String culturaNome = 'Cultura não encontrada';
+    String pragaNome = 'Praga não encontrada';
+
+    try {
+      final defensivoRepo = sl<FitossanitariosRepository>();
+      final defensivo = await defensivoRepo.findByIdDefensivo(
+        diagnostico.defensivoId.toString(),
+      );
+      if (defensivo != null && defensivo.nome.isNotEmpty) {
+        defensivoNome = defensivo.nome;
+      }
+      final culturaRepo = sl<CulturasRepository>();
+      final culturaIdInt = diagnostico.culturaId;
+      final cultura = await culturaRepo.findById(culturaIdInt);
+      if (cultura != null && cultura.nome.isNotEmpty) {
+        culturaNome = cultura.nome;
+      }
+          final pragaRepo = sl<PragasRepository>();
+      final praga = await pragaRepo.findByIdPraga(diagnostico.pragaId.toString());
+      if (praga != null && praga.nome.isNotEmpty) {
+        pragaNome = praga.nome;
+      }
+    } catch (e) {}
+
+    return BuscaResultEntity(
+      id: diagnostico.firebaseId ?? diagnostico.idReg,
+      tipo: 'diagnostico',
+      titulo: defensivoNome,
+      subtitulo: culturaNome,
+      descricao: '$pragaNome - ${diagnostico.dsMax}${diagnostico.um}',
+      metadata: {
+        'idCultura': diagnostico.culturaId.toString(),
+        'idPraga': diagnostico.pragaId.toString(),
+        'idDefensivo': diagnostico.defensivoId.toString(),
+        'cultura': culturaNome,
+        'praga': pragaNome,
+        'defensivo': defensivoNome,
+        'dosagem': '${diagnostico.dsMax}${diagnostico.um}',
+      },
+      relevancia: 1.0,
+    );
+  }
+
+  /// Converte Praga para BuscaResultEntity
+  static BuscaResultEntity pragaToEntity(Praga praga) {
+    final nomeExibicao = (praga.nome.isNotEmpty == true)
+        ? praga.nome
+        : praga.nomeLatino ?? '';
+
+    return BuscaResultEntity(
+      id: praga.idPraga,
+      tipo: 'praga',
+      titulo: nomeExibicao,
+      subtitulo: praga.nomeLatino != nomeExibicao
+          ? praga.nomeLatino
+          : null,
+      descricao: 'Praga identificada',
+      metadata: {
+        'nomeCientifico': praga.nomeLatino ?? '',
+        'nomeComum': praga.nome,
+        'tipo': praga.tipo ?? '',
+        'descricao': praga.descricao ?? '',
+      },
+      relevancia: 1.0,
+    );
+  }
+
+  /// Converte Fitossanitario para BuscaResultEntity
+  static BuscaResultEntity defensivoToEntity(Fitossanitario defensivo) {
+    final nomeExibicao = (defensivo.nomeComum?.isNotEmpty ?? false)
+        ? defensivo.nomeComum!
+        : defensivo.nome;
+
+    return BuscaResultEntity(
+      id: defensivo.idDefensivo,
+      tipo: 'defensivo',
+      titulo: nomeExibicao,
+      subtitulo: defensivo.ingredienteAtivo,
+      descricao: defensivo.classe ?? '',
+      metadata: {
+        'nome': defensivo.nome,
+        'nomeComum': defensivo.nomeComum ?? '',
+        'ingredienteAtivo': defensivo.ingredienteAtivo ?? '',
+        'classe': defensivo.classe ?? '',
+        'classeAgronomica': defensivo.classeAgronomica ?? '',
+        'fabricante': defensivo.fabricante ?? '',
+      },
+      relevancia: 1.0,
+    );
+  }
+
+  /// Converte Cultura para BuscaResultEntity - SIMPLIFICADO
+  static BuscaResultEntity culturaToEntity(Cultura cultura) {
+    return BuscaResultEntity(
+      id: cultura.id.toString(),
+      tipo: 'cultura',
+      titulo: cultura.nome,
+      subtitulo: cultura.nomeLatino,
+      metadata: {
+        'nome': cultura.nome,
+        'nomeLatino': cultura.nomeLatino ?? '',
+        'familia': cultura.familia ?? '',
+      },
+      relevancia: 1.0,
+    );
+  }
+
+  /// Converte lista de diagnósticos com resolução assíncrona
+  static Future<List<BuscaResultEntity>> diagnosticosToEntityList(
+    List<Diagnostico> diagnosticos,
+  ) async {
+    final results = <BuscaResultEntity>[];
+    for (final d in diagnosticos) {
+      results.add(await diagnosticoToEntity(d));
+    }
+    return results;
+  }
+
+  /// Converte lista de pragas
+  static List<BuscaResultEntity> pragasToEntityList(List<Praga> pragas) {
+    return pragas.map((p) => pragaToEntity(p)).toList();
+  }
+
+  /// Converte lista de defensivos
+  static List<BuscaResultEntity> defensivosToEntityList(
+    List<Fitossanitario> defensivos,
+  ) {
+    return defensivos.map((d) => defensivoToEntity(d)).toList();
+  }
+
+  /// Converte lista de culturas
+  static List<BuscaResultEntity> culturasToEntityList(
+    List<Cultura> culturas,
+  ) {
+    return culturas.map((c) => culturaToEntity(c)).toList();
+  }
+
+  /// Converte Cultura para DropdownItemEntity - SIMPLIFICADO
+  static DropdownItemEntity culturaToDropdownItem(Cultura cultura) {
+    return DropdownItemEntity(
+      id: cultura.id.toString(),
+      nome: cultura.nome,
+      grupo: cultura.familia ?? 'Família não informada',
+      isActive: true,
+    );
+  }
+
+  /// Converte Praga para DropdownItemEntity
+  static DropdownItemEntity pragaToDropdownItem(Praga praga) {
+    final nomeExibicao = (praga.nome.isNotEmpty == true)
+        ? praga.nome
+        : praga.nomeLatino ?? '';
+
+    return DropdownItemEntity(
+      id: praga.idPraga,
+      nome: nomeExibicao,
+      grupo: praga.tipo ?? 'Tipo não informado',
+      isActive: true,
+    );
+  }
+
+  /// Converte Fitossanitario para DropdownItemEntity
+  static DropdownItemEntity defensivoToDropdownItem(
+    Fitossanitario defensivo,
+  ) {
+    final nomeExibicao = (defensivo.nomeComum?.isNotEmpty ?? false)
+        ? defensivo.nomeComum!
+        : defensivo.nome;
+
+    return DropdownItemEntity(
+      id: defensivo.idDefensivo,
+      nome: nomeExibicao,
+      grupo: defensivo.classeAgronomica ?? 'Classe não informada',
+      isActive: true,
+    );
+  }
+}

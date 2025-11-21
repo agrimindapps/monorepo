@@ -1,9 +1,9 @@
 import 'package:core/core.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/calculators/anesthesia_calculator.dart';
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/usecases/perform_calculation.dart';
+import 'calculators_providers.dart';
 
 /// Estado da calculadora de anestesia
 class AnesthesiaState {
@@ -32,19 +32,10 @@ class AnesthesiaState {
 
 /// Notifier para gerenciar estado da calculadora de anestesia
 class AnesthesiaNotifier extends StateNotifier<AnesthesiaState> {
-  AnesthesiaNotifier() : super(const AnesthesiaState());
+  AnesthesiaNotifier(this._performCalculation) : super(const AnesthesiaState());
 
   final _calculator = const AnesthesiaCalculator();
-  late final PerformCalculation _performCalculation;
-
-  /// Inicializa o provider com dependências
-  void initialize() {
-    try {
-      _performCalculation = di.getIt<PerformCalculation>();
-    } catch (e) {
-      _performCalculation = PerformCalculation(di.getIt());
-    }
-  }
+  final PerformCalculation _performCalculation;
 
   /// Realiza o cálculo de anestesia
   Future<void> calculate(Map<String, dynamic> inputs) async {
@@ -102,9 +93,7 @@ class AnesthesiaNotifier extends StateNotifier<AnesthesiaState> {
 
 /// Provider para a calculadora de anestesia
 final anesthesiaProvider = StateNotifierProvider<AnesthesiaNotifier, AnesthesiaState>((ref) {
-  final notifier = AnesthesiaNotifier();
-  notifier.initialize();
-  return notifier;
+  return AnesthesiaNotifier(ref.watch(performCalculationProvider));
 });
 
 /// Provider para obter informações sobre a calculadora de anestesia

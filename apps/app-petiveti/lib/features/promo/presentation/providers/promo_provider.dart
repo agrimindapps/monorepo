@@ -1,20 +1,18 @@
 import 'package:core/core.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/interfaces/usecase.dart' as local;
 import '../../domain/entities/promo_content.dart';
 import '../../domain/usecases/get_promo_content.dart';
 import '../../domain/usecases/submit_pre_registration.dart';
 import '../../domain/usecases/track_analytics.dart';
 import '../states/promo_state.dart';
-final getPromoContentProvider = Provider<GetPromoContent>((ref) => di.getIt<GetPromoContent>());
-final submitPreRegistrationProvider = Provider<SubmitPreRegistration>((ref) => di.getIt<SubmitPreRegistration>());
-final trackAnalyticsProvider = Provider<TrackAnalytics>((ref) => di.getIt<TrackAnalytics>());
+import 'promo_providers.dart';
+
 final promoProvider = StateNotifierProvider<PromoNotifier, PromoState>((ref) {
   return PromoNotifier(
-    ref.read(getPromoContentProvider),
-    ref.read(submitPreRegistrationProvider),
-    ref.read(trackAnalyticsProvider),
+    ref.watch(getPromoContentProvider),
+    ref.watch(submitPreRegistrationProvider),
+    ref.watch(trackAnalyticsProvider),
   );
 });
 

@@ -1,0 +1,21 @@
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/settings_notifier.g.dart:13:/// REFACTORED: This notifier now delegates to specialized notifiers:
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/settings_notifier.dart:17:/// REFACTORED: This notifier now delegates to specialized notifiers:
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/presentation/notifiers/favoritos_notifier.dart:11:/// **REFACTORED (Task 4):**
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/presentation/notifiers/favoritos_notifier.dart:132:/// **REFACTORED (SOLID):**
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/presentation/notifiers/favoritos_notifier.g.dart:13:/// **REFACTORED (SOLID):**
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/navigation/main_navigation_page.dart:11:/// **REFACTORED (SOLID):**
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/navigation/main_navigation_page.dart:59:      // REFACTORED: Usa NavigationItemBuilder (elimina 50+ linhas de código)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/navigation/main_navigation_page.dart:73:    // REFACTORED: Usa NavigationPageService (elimina magic number)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/navigation/main_navigation_page.dart:78:    // REFACTORED: Usa NavigationPageService (elimina switch case - OCP violation)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/navigation/bottom_nav_wrapper.dart:9:/// **REFACTORED (SOLID):**
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/navigation/bottom_nav_wrapper.dart:29:        // REFACTORED: Usa NavigationItemBuilder (elimina duplicação)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/data/repositories/diagnosticos_repository_impl.dart:22:/// REFACTORED: Interface Segregation Principle (ISP) applied
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart:23:/// REFACTORED (Phase 4): 30+ methods split into 7 specialized interfaces
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/presentation/providers/diagnosticos_notifier.dart:155:  /// REFACTORED: Now uses injected RecommendationService
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/presentation/providers/diagnosticos_notifier.dart:533:  /// REFACTORED: Now uses injected RecommendationService
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/monitoring/error_tracking_dashboard.dart:14:/// **REFACTORED (SOLID):**
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/monitoring/error_tracking_dashboard.dart:182:    // REFACTORED: Usa MonitoringAlertService para obter alertas reais
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/monitoring/error_tracking_dashboard.dart:198:    // REFACTORED: Usa MonitoringUIMapperService para mapear status -> UI
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/monitoring/error_tracking_dashboard.dart:245:    // REFACTORED: Usa MonitoringUIMapperService para mapear status -> UI
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/monitoring/error_tracking_dashboard.dart:318:    // REFACTORED: Usa MonitoringUIMapperService para mapear status -> UI
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/monitoring/error_tracking_dashboard.dart:352:    // REFACTORED: Usa MonitoringUIMapperService para mapear nível -> UI

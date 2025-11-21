@@ -1,11 +1,11 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../core/di/injection_container.dart' as di;
 import '../../core/services/device_identity_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/responsive_content_wrapper.dart';
 import 'presentation/providers/settings_notifier.dart';
+import 'presentation/providers/settings_providers.dart';
 import 'widgets/sections/auth_section.dart';
 import 'widgets/sections/feature_flags_section.dart';
 import 'widgets/sections/legal_section.dart';
@@ -136,7 +136,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Future<void> _initializeSettings() async {
     try {
-      final deviceService = di.sl<DeviceIdentityService>();
+      final deviceService = ref.read(deviceIdentityServiceProvider);
       final deviceId = await deviceService.getDeviceUuid();
       await ref.read(settingsNotifierProvider.notifier).initialize(deviceId);
     } catch (e) {

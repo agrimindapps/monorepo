@@ -1,9 +1,9 @@
 import 'package:core/core.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/calculators/ideal_weight_calculator.dart';
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/usecases/perform_calculation.dart';
+import 'calculators_providers.dart';
 
 /// Estado da calculadora de peso ideal
 class IdealWeightState {
@@ -32,10 +32,10 @@ class IdealWeightState {
 
 /// Notifier para gerenciar o estado da calculadora de peso ideal
 class IdealWeightNotifier extends StateNotifier<IdealWeightState> {
-  IdealWeightNotifier() : super(const IdealWeightState());
+  IdealWeightNotifier(this._performCalculation) : super(const IdealWeightState());
 
   final _calculator = const IdealWeightCalculator();
-  final _performCalculation = di.getIt<PerformCalculation>();
+  final PerformCalculation _performCalculation;
 
   /// Calcula o peso ideal baseado nos inputs
   Future<void> calculate(Map<String, dynamic> inputs) async {
@@ -87,7 +87,7 @@ class IdealWeightNotifier extends StateNotifier<IdealWeightState> {
 
 /// Provider para a calculadora de peso ideal
 final idealWeightProvider = StateNotifierProvider<IdealWeightNotifier, IdealWeightState>(
-  (ref) => IdealWeightNotifier(),
+  (ref) => IdealWeightNotifier(ref.watch(performCalculationProvider)),
 );
 
 /// Provider para obter histórico de cálculos de peso ideal

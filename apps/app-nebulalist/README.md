@@ -81,7 +81,7 @@ Este aplicativo é uma **implementação pura de Riverpod** no monorepo, atingin
   - Notas personalizadas por item
 
 - **Offline-First**
-  - Hive para storage local (rápido e eficiente)
+  - Hive e Drift para storage local (rápido e eficiente)
   - Firestore para sync remoto (best-effort)
   - Funciona 100% offline
   - Sync não-bloqueante em background
@@ -380,6 +380,7 @@ flutter run
 
 ### Local Storage
 - **hive** + **hive_flutter**: NoSQL local database
+- **drift**: SQLite database (Relational)
 - **path_provider**: File system paths
 
 ### Firebase

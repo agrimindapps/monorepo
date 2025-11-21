@@ -1,7 +1,6 @@
 import 'package:core/core.dart' hide Column, DeleteAccountUseCase;
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/data_cleaner_service.dart';
 import '../../../../database/repositories/plant_tasks_drift_repository.dart';
 import '../../../../database/repositories/plants_drift_repository.dart';
@@ -16,6 +15,10 @@ import '../../domain/usecases/clear_data_usecase.dart';
 import '../../domain/usecases/delete_account_usecase.dart';
 import '../../domain/usecases/get_account_info_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart' as account_logout;
+
+import '../../../../core/auth/auth_providers.dart';
+import '../../../../core/services/services_providers.dart';
+import '../../../../database/providers/database_providers.dart';
 
 part 'account_providers.g.dart';
 
@@ -37,11 +40,10 @@ AccountRemoteDataSource accountRemoteDataSource(
 
 @riverpod
 AccountLocalDataSource accountLocalDataSource(AccountLocalDataSourceRef ref) {
-  // Injeta Drift repositories via GetIt
-  final plantsRepo = di.sl<PlantsDriftRepository>();
-  final spacesRepo = di.sl<SpacesDriftRepository>();
-  final tasksRepo = di.sl<TasksDriftRepository>();
-  final plantTasksRepo = di.sl<PlantTasksDriftRepository>();
+  final plantsRepo = ref.watch(plantsDriftRepositoryProvider);
+  final spacesRepo = ref.watch(spacesDriftRepositoryProvider);
+  final tasksRepo = ref.watch(tasksDriftRepositoryProvider);
+  final plantTasksRepo = ref.watch(plantTasksDriftRepositoryProvider);
 
   return AccountLocalDataSourceImpl(
     plantsRepo: plantsRepo,
@@ -57,9 +59,8 @@ AccountLocalDataSource accountLocalDataSource(AccountLocalDataSourceRef ref) {
 
 @riverpod
 EnhancedAccountDeletionService enhancedAccountDeletionService(Ref ref) {
-  // Obtém dependências via GetIt (injetadas no DI principal)
-  final authRepository = di.sl<IAuthRepository>();
-  final appDataCleaner = di.sl<DataCleanerService>();
+  final authRepository = ref.watch(authRepositoryProvider);
+  final appDataCleaner = ref.watch(dataCleanerServiceProvider);
 
   return EnhancedAccountDeletionService(
     authRepository: authRepository,

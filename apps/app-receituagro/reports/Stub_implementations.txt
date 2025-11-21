@@ -1,0 +1,13 @@
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/mixins/premium_status_listener.dart:5:/// This stub provides basic compatibility but does not function
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/sync/conflict_resolver.dart:12:  /// Resolve conflito baseado na estratégia definida (stub during migration)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/sync/sync_operations.dart:2:// Minimal stub implementation - full implementation in sync_operations_backup.dart
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/receituagro_storage_service.dart:9:/// EMERGENCY FIX: Interface mínima para stub do storage
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/receituagro_storage_service.dart:32:/// EMERGENCY FIX: Implementação stub mínima do StorageService
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/receituagro_storage_service.dart:96:  /// EMERGENCY FIX: Constructor stub para uso sem Core Package
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/receituagro_storage_service.dart:98:  ReceitaAgroStorageService.stub() : _storage = _StubStorageService();
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/premium_status_notifier.dart:57:  /// Check premium status (stub for compatibility)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/premium_status_notifier.dart:78:  // This is a stub - actual implementation should use Riverpod
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/widgets/optimized_remote_image_widget.dart:4:/// This stub provides the same API but uses only local assets
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/release/production_release_dashboard.dart:5:/// Razão: Dependência em BetaTestingService (legacy stub service) que foi removido
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/release/production_release_dashboard.dart:10:/// 2. Usar um serviço real ao invés de stub
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/release/production_release_dashboard.dart:41:                'Razão: Dependência em BetaTestingService (legacy stub service)\n\n'

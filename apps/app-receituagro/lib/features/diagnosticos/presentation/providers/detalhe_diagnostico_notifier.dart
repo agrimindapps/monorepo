@@ -4,16 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/extensions/diagnostico_drift_extension.dart';
 import '../../../../core/providers/premium_notifier.dart';
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/diagnostico_repository.dart';
 import '../../../diagnosticos/data/mappers/diagnostico_mapper.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
-import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
-import '../../../favoritos/favoritos_di.dart';
+import 'diagnosticos_providers.dart';
 
 part 'detalhe_diagnostico_notifier.g.dart';
 
@@ -89,16 +87,8 @@ class DetalheDiagnosticoState {
 /// Isso previne perda de dados ao navegar entre tabs ou fazer rebuilds temporários
 @Riverpod(keepAlive: true)
 class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
-  late final IDiagnosticosRepository _diagnosticosRepository;
-  late final DiagnosticoRepository _hiveRepository;
-  late final FavoritosRepositorySimplified _favoritosRepository;
-
   @override
   Future<DetalheDiagnosticoState> build() async {
-    _diagnosticosRepository = di.sl<IDiagnosticosRepository>();
-    _hiveRepository = di.sl<DiagnosticoRepository>();
-    _favoritosRepository = FavoritosDI.get<FavoritosRepositorySimplified>();
-
     // Setup listener APÓS o estado inicial ser retornado
     unawaited(Future.microtask(() => _setupPremiumStatusListener()));
 
@@ -115,7 +105,8 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     );
 
     try {
-      final result = await _diagnosticosRepository.getById(diagnosticoId);
+      final diagnosticosRepository = ref.read(iDiagnosticosRepositoryProvider);
+      final result = await diagnosticosRepository.getById(diagnosticoId);
 
       await result.fold(
         (failure) async {
@@ -123,8 +114,9 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
         },
         (diagnosticoEntity) async {
           if (diagnosticoEntity != null) {
+            final driftRepository = ref.read(diagnosticoRepositoryProvider);
             final diagnosticoDrift =
-                await _hiveRepository.getDiagnosticoByIdOrObjectId(
+                await driftRepository.getDiagnosticoByIdOrObjectId(
               diagnosticoId,
             );
 
@@ -161,7 +153,8 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
             // Load premium status after loading data
             await loadPremiumStatus();
           } else {
-            final result = await _hiveRepository.getAll();
+            final driftRepository = ref.read(diagnosticoRepositoryProvider);
+            final result = await driftRepository.getAll();
             final totalDiagnosticos = result.length;
             final errorMsg = totalDiagnosticos == 0
                 ? 'Base de dados vazia. Nenhum diagnóstico foi carregado. Verifique se o aplicativo foi inicializado corretamente ou tente resincronizar os dados.'
@@ -175,8 +168,9 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
       );
     } catch (e) {
       try {
+        final driftRepository = ref.read(diagnosticoRepositoryProvider);
         final diagnosticoDrift =
-            await _hiveRepository.getDiagnosticoByIdOrObjectId(
+            await driftRepository.getDiagnosticoByIdOrObjectId(
           diagnosticoId,
         );
         if (diagnosticoDrift != null) {
@@ -253,7 +247,8 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     if (currentState == null) return;
 
     try {
-      final result = await _favoritosRepository.isFavorito(
+      final favoritosRepository = ref.read(favoritosRepositorySimplifiedProvider);
+      final result = await favoritosRepository.isFavorito(
         'diagnostico',
         diagnosticoId,
       );
@@ -268,7 +263,8 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     } catch (e) {
       // Fallback: try with 'diagnosticos' (plural)
       try {
-        final result = await _favoritosRepository.isFavorito(
+        final favoritosRepository = ref.read(favoritosRepositorySimplifiedProvider);
+        final result = await favoritosRepository.isFavorito(
           'diagnosticos',
           diagnosticoId,
         );
@@ -300,7 +296,8 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     );
 
     try {
-      final result = await _favoritosRepository.toggleFavorito(
+      final favoritosRepository = ref.read(favoritosRepositorySimplifiedProvider);
+      final result = await favoritosRepository.toggleFavorito(
         'diagnostico',
         diagnosticoId,
       );

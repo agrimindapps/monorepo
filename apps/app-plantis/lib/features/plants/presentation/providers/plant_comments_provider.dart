@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide Column;
 
 import '../../../../core/data/models/comentario_model.dart';
 import '../../domain/repositories/plant_comments_repository.dart';
+import 'plants_providers.dart';
 
 part 'plant_comments_provider.g.dart';
 
@@ -271,13 +272,6 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
       state = AsyncValue.data(currentState.copyWith(clearError: true));
     }
   }
-}
-
-@riverpod
-PlantCommentsRepository plantCommentsRepository(
-  PlantCommentsRepositoryRef ref,
-) {
-  return GetIt.instance<PlantCommentsRepository>();
 }
 
 @riverpod

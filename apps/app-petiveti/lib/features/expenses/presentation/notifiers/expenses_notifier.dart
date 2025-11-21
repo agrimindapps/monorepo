@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
+import '../providers/expenses_providers.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/entities/expense_summary.dart';
 import '../../domain/repositories/expense_repository.dart';
@@ -73,14 +73,14 @@ class ExpensesNotifier extends _$ExpensesNotifier {
 
   @override
   ExpensesState build() {
-    _getExpenses = di.getIt<GetExpenses>();
-    _getExpensesByDateRange = di.getIt<GetExpensesByDateRange>();
-    _getExpensesByCategory = di.getIt<GetExpensesByCategory>();
-    _getExpenseSummary = di.getIt<GetExpenseSummary>();
-    _addExpense = di.getIt<AddExpense>();
-    _updateExpense = di.getIt<UpdateExpense>();
-    _deleteExpense = di.getIt<DeleteExpense>();
-    _processingService = di.getIt<ExpenseProcessingService>();
+    _getExpenses = ref.watch(getExpensesProvider);
+    _getExpensesByDateRange = ref.watch(getExpensesByDateRangeProvider);
+    _getExpensesByCategory = ref.watch(getExpensesByCategoryProvider);
+    _getExpenseSummary = ref.watch(getExpenseSummaryProvider);
+    _addExpense = ref.watch(addExpenseProvider);
+    _updateExpense = ref.watch(updateExpenseProvider);
+    _deleteExpense = ref.watch(deleteExpenseProvider);
+    _processingService = ref.watch(expenseProcessingServiceProvider);
 
     return const ExpensesState();
   }
@@ -253,7 +253,7 @@ Future<List<Expense>> categoryExpenses(
 
 @riverpod
 Stream<List<Expense>> expensesStream(ExpensesStreamRef ref, String userId) {
-  final repository = di.getIt.get<ExpenseRepository>();
+  final repository = ref.watch(expenseRepositoryProvider);
   return repository.watchExpenses(userId).map((either) => either.fold(
         (failure) => <Expense>[],
         (expenses) => expenses,

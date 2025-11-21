@@ -1,15 +1,16 @@
-import 'dart:async';
-
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/validation/input_sanitizer.dart';
-import '../../../vehicles/domain/usecases/get_vehicle_by_id.dart';
+import '../../../vehicles/presentation/providers/vehicle_services_providers.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../../domain/services/odometer_formatter.dart';
 import '../../domain/services/odometer_validator.dart';
 import '../../domain/usecases/add_odometer_reading.dart';
+import '../../domain/usecases/get_vehicle_by_id.dart';
 import '../../domain/usecases/update_odometer_reading.dart';
+import '../providers/odometer_providers.dart';
 import 'odometer_form_state.dart';
 
 part 'odometer_form_notifier.g.dart';
@@ -27,6 +28,9 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
   late final TextEditingController odometerController;
   late final TextEditingController descriptionController;
   late final GetVehicleById _getVehicleById;
+  late final AddOdometerReadingUseCase _addOdometerReading;
+  late final UpdateOdometerReadingUseCase _updateOdometerReading;
+  
   Timer? _odometerDebounceTimer;
   Timer? _descriptionDebounceTimer;
   static const int _odometerDebounceMs = 500;
@@ -36,7 +40,12 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
   OdometerFormState build() {
     odometerController = TextEditingController();
     descriptionController = TextEditingController();
-    _getVehicleById = getIt<GetVehicleById>();
+    
+    // Inject dependencies via Bridge Providers
+    _getVehicleById = ref.watch(getVehicleByIdProvider);
+    _addOdometerReading = ref.watch(addOdometerReadingProvider);
+    _updateOdometerReading = ref.watch(updateOdometerReadingProvider);
+    
     _initializeControllers();
     ref.onDispose(() {
       _odometerDebounceTimer?.cancel();
@@ -419,12 +428,10 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
 
       if (state.id.isEmpty) {
         // Criar novo
-        final addUseCase = getIt<AddOdometerReadingUseCase>();
-        result = await addUseCase(odometerEntity);
+        result = await _addOdometerReading(odometerEntity);
       } else {
         // Atualizar existente
-        final updateUseCase = getIt<UpdateOdometerReadingUseCase>();
-        result = await updateUseCase(odometerEntity);
+        result = await _updateOdometerReading(odometerEntity);
       }
 
       state = state.copyWith(isLoading: false);

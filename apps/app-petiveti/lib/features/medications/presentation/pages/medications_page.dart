@@ -84,9 +84,9 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
 
   /// Cached provider references for better performance
   /// Avoids repeated provider lookups which can impact performance in large lists
-  late final StateNotifierProvider<MedicationsNotifier, MedicationsState>
+  late final AutoDisposeNotifierProvider<MedicationsNotifier, MedicationsState>
   _medicationsProvider;
-  late final Provider<List<Medication>> _filteredProvider;
+  late final AutoDisposeProvider<List<Medication>> _filteredProvider;
 
   @override
   void initState() {

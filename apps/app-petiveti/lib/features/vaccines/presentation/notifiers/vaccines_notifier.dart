@@ -1,6 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/vaccine.dart';
 import '../../domain/usecases/add_vaccine.dart';
 import '../../domain/usecases/delete_vaccine.dart';
@@ -15,6 +14,7 @@ import '../../domain/usecases/mark_vaccine_completed.dart';
 import '../../domain/usecases/schedule_vaccine_reminder.dart';
 import '../../domain/usecases/search_vaccines.dart';
 import '../../domain/usecases/update_vaccine.dart';
+import '../providers/vaccines_providers.dart';
 
 part 'vaccines_notifier.g.dart';
 
@@ -116,32 +116,8 @@ extension VaccinesFilterExtension on VaccinesFilter {
 
 @riverpod
 class VaccinesNotifier extends _$VaccinesNotifier {
-  late final GetVaccines _getVaccines;
-  late final GetVaccineById _getVaccineById;
-  late final GetVaccinesByAnimal _getVaccinesByAnimal;
-  late final GetOverdueVaccines _getOverdueVaccines;
-  late final GetUpcomingVaccines _getUpcomingVaccines;
-  late final SearchVaccines _searchVaccines;
-  late final AddVaccine _addVaccine;
-  late final UpdateVaccine _updateVaccine;
-  late final DeleteVaccine _deleteVaccine;
-  late final MarkVaccineCompleted _markVaccineCompleted;
-  late final ScheduleVaccineReminder _scheduleVaccineReminder;
-
   @override
   VaccinesState build() {
-    _getVaccines = di.getIt<GetVaccines>();
-    _getVaccineById = di.getIt<GetVaccineById>();
-    _getVaccinesByAnimal = di.getIt<GetVaccinesByAnimal>();
-    _getOverdueVaccines = di.getIt<GetOverdueVaccines>();
-    _getUpcomingVaccines = di.getIt<GetUpcomingVaccines>();
-    _searchVaccines = di.getIt<SearchVaccines>();
-    _addVaccine = di.getIt<AddVaccine>();
-    _updateVaccine = di.getIt<UpdateVaccine>();
-    _deleteVaccine = di.getIt<DeleteVaccine>();
-    _markVaccineCompleted = di.getIt<MarkVaccineCompleted>();
-    _scheduleVaccineReminder = di.getIt<ScheduleVaccineReminder>();
-
     return const VaccinesState();
   }
 
@@ -149,10 +125,14 @@ class VaccinesNotifier extends _$VaccinesNotifier {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
+      final getVaccines = ref.read(getVaccinesProvider);
+      final getOverdueVaccines = ref.read(getOverdueVaccinesProvider);
+      final getUpcomingVaccines = ref.read(getUpcomingVaccinesProvider);
+
       final results = await Future.wait([
-        _getVaccines(GetVaccinesParams.all()),
-        _getOverdueVaccines(GetOverdueVaccinesParams.all()),
-        _getUpcomingVaccines(GetUpcomingVaccinesParams.all()),
+        getVaccines(GetVaccinesParams.all()),
+        getOverdueVaccines(GetOverdueVaccinesParams.all()),
+        getUpcomingVaccines(GetUpcomingVaccinesParams.all()),
       ]);
 
       final vaccinesResult = results[0];
@@ -197,7 +177,8 @@ class VaccinesNotifier extends _$VaccinesNotifier {
   Future<void> loadVaccinesByAnimal(String animalId) async {
     state = state.copyWith(isLoading: true, error: null);
 
-    final result = await _getVaccinesByAnimal(animalId);
+    final getVaccinesByAnimal = ref.read(getVaccinesByAnimalProvider);
+    final result = await getVaccinesByAnimal(animalId);
 
     result.fold(
       (failure) => state = state.copyWith(isLoading: false, error: failure.message),
@@ -210,7 +191,8 @@ class VaccinesNotifier extends _$VaccinesNotifier {
   }
 
   Future<void> addVaccine(Vaccine vaccine) async {
-    final result = await _addVaccine(vaccine);
+    final addVaccine = ref.read(addVaccineProvider);
+    final result = await addVaccine(vaccine);
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
@@ -225,7 +207,8 @@ class VaccinesNotifier extends _$VaccinesNotifier {
   }
 
   Future<void> updateVaccine(Vaccine vaccine) async {
-    final result = await _updateVaccine(vaccine);
+    final updateVaccine = ref.read(updateVaccineProvider);
+    final result = await updateVaccine(vaccine);
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
@@ -243,7 +226,8 @@ class VaccinesNotifier extends _$VaccinesNotifier {
   }
 
   Future<void> deleteVaccine(String id) async {
-    final result = await _deleteVaccine(id);
+    final deleteVaccine = ref.read(deleteVaccineProvider);
+    final result = await deleteVaccine(id);
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
@@ -258,7 +242,8 @@ class VaccinesNotifier extends _$VaccinesNotifier {
   }
 
   Future<void> markAsCompleted(String id) async {
-    final result = await _markVaccineCompleted(id);
+    final markVaccineCompleted = ref.read(markVaccineCompletedProvider);
+    final result = await markVaccineCompleted(id);
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
@@ -276,8 +261,9 @@ class VaccinesNotifier extends _$VaccinesNotifier {
   }
 
   Future<void> scheduleReminder(String vaccineId, DateTime reminderDate) async {
+    final scheduleVaccineReminder = ref.read(scheduleVaccineReminderProvider);
     final params = ScheduleVaccineReminderParams(vaccineId: vaccineId, reminderDate: reminderDate);
-    final result = await _scheduleVaccineReminder(params);
+    final result = await scheduleVaccineReminder(params);
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
@@ -295,7 +281,8 @@ class VaccinesNotifier extends _$VaccinesNotifier {
   }
 
   Future<Vaccine?> getVaccineById(String id) async {
-    final result = await _getVaccineById(id);
+    final getVaccineById = ref.read(getVaccineByIdProvider);
+    final result = await getVaccineById(id);
 
     return result.fold(
       (failure) {
@@ -313,7 +300,8 @@ class VaccinesNotifier extends _$VaccinesNotifier {
       return;
     }
 
-    final result = await _searchVaccines(SearchVaccinesParams.global(query));
+    final searchVaccines = ref.read(searchVaccinesProvider);
+    final result = await searchVaccines(SearchVaccinesParams.global(query));
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
@@ -349,7 +337,7 @@ Future<Map<DateTime, List<Vaccine>>> vaccineCalendar(
   VaccineCalendarRef ref,
   DateTime startDate,
 ) async {
-  final useCase = di.getIt<GetVaccineCalendar>();
+  final useCase = ref.watch(getVaccineCalendarProvider);
   final endDate = startDate.add(const Duration(days: 30)); // 30 days calendar
   final result = await useCase(GetVaccineCalendarParams(startDate: startDate, endDate: endDate));
 
@@ -367,7 +355,7 @@ VaccinesFilter vaccinesFilter(VaccinesFilterRef ref) {
 
 @riverpod
 Future<Map<String, int>> vaccineStatistics(VaccineStatisticsRef ref) async {
-  final useCase = di.getIt<GetVaccineStatistics>();
+  final useCase = ref.watch(getVaccineStatisticsProvider);
   final result = await useCase(GetVaccineStatisticsParams.all());
 
   return result.fold(
@@ -375,3 +363,6 @@ Future<Map<String, int>> vaccineStatistics(VaccineStatisticsRef ref) async {
     (statistics) => statistics,
   );
 }
+
+// Alias for compatibility
+final vaccinesProvider = vaccinesNotifierProvider;

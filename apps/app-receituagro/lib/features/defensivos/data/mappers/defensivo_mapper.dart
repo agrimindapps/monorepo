@@ -101,10 +101,7 @@ class DefensivoMapper {
   }
 
   /// Converte Drift Fitossanitario para Entity (updated for Drift migration)
-  static DefensivoEntity fromHiveToEntity(
-    Fitossanitario drift, {
-    String? modoAcao,
-  }) {
+  static DefensivoEntity fromDriftToEntity(Fitossanitario drift) {
     return DefensivoEntity(
       id: drift.idDefensivo,
       nome: drift.nome,
@@ -112,36 +109,39 @@ class DefensivoMapper {
       nomeComum: drift.nomeComum ?? drift.nome,
       classeAgronomica: drift.classeAgronomica,
       fabricante: drift.fabricante,
-      modoAcao: modoAcao,
+      modoAcao: null, // Not available in Drift Fitossanitario
       isActive: drift.status,
       lastUpdated: DateTime.now(),
     );
   }
 
   /// Converte lista de Fitossanitario para Entities
-  static List<DefensivoEntity> fromHiveToEntityList(
-    List<Fitossanitario> drifts, {
-    Map<int, String?>? infoMap,
-  }) {
-    return drifts.map((drift) {
-      final modoAcao = infoMap?[drift.id];
-      return fromHiveToEntity(drift, modoAcao: modoAcao);
-    }).toList();
+  static List<DefensivoEntity> fromDriftToEntityList(
+    List<Fitossanitario> drifts,
+  ) {
+    return drifts.map((drift) => fromDriftToEntity(drift)).toList();
   }
 
   /// Converte Fitossanitario Drift para Entity (alias for consistency)
-  static DefensivoEntity fromDriftToEntity(
-    Fitossanitario drift, {
-    String? modoAcao,
-  }) {
-    return fromHiveToEntity(drift, modoAcao: modoAcao);
+  static DefensivoEntity fromDriftToEntity(Fitossanitario drift) {
+    return fromDriftToEntity(drift);
+    return DefensivoEntity(
+      id: drift.idDefensivo,
+      nome: drift.nome,
+      ingredienteAtivo: drift.ingredienteAtivo ?? '',
+      nomeComum: drift.nomeComum ?? drift.nome,
+      classeAgronomica: drift.classeAgronomica,
+      fabricante: drift.fabricante,
+      modoAcao: null, // Drift não tem campo modoAcao
+      isActive: drift.status,
+      lastUpdated: DateTime.now(),
+    );
   }
 
   /// Converte lista de Fitossanitario Drift para Entities
   static List<DefensivoEntity> fromDriftToEntityList(
-    List<Fitossanitario> drifts, {
-    Map<int, String?>? infoMap,
-  }) {
-    return fromHiveToEntityList(drifts, infoMap: infoMap);
+    List<Fitossanitario> drifts,
+  ) {
+    return drifts.map((drift) => fromDriftToEntity(drift)).toList();
   }
 }

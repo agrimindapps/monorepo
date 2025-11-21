@@ -1,0 +1,27 @@
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/favorito_repository.dart:257:  /// @deprecated Legacy method - remove favorito sem userId (busca qualquer user)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/favorito_repository.dart:307:  /// @deprecated Legacy method - busca favoritos por tipo
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/favorito_repository.dart:317:  /// @deprecated Legacy method - adiciona favorito
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/favorito_repository.dart:336:  /// @deprecated Legacy method - verifica se é favorito
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/favorito_repository.dart:351:  /// @deprecated Legacy method - limpa favoritos por tipo
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/favorito_repository.dart:358:  /// @deprecated Legacy method - estatísticas de favoritos
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/fitossanitarios_repository.dart:136:  /// @deprecated Use findById instead
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/database/repositories/pragas_repository.dart:88:  /// @deprecated Use findByIdPraga instead
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/settings_notifier.g.dart:11:/// @deprecated Wrapper notifier for backward compatibility
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/settings_notifier.dart:15:/// @deprecated Wrapper notifier for backward compatibility
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/data/services/favoritos_sync_service.dart:64:  /// @deprecated Use prepareDataForLocalSave e salve no repositório Drift
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/domain/usecases/add_favorito_defensivo_usecase.dart:21:@deprecated
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/domain/usecases/get_favorito_defensivos_usecase.dart:27:@deprecated
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/domain/usecases/remove_favorito_defensivo_usecase.dart:23:@deprecated
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart:10:/// @deprecated Use specialized repository interfaces instead:
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/presentation/providers/diagnosticos_notifier.dart:18:/// @deprecated
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/presentation/providers/diagnosticos_notifier.g.dart:12:/// @deprecated
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/domain/usecases/get_culturas_usecase.dart:95:@deprecated
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/domain/usecases/get_culturas_usecase.dart:100:  @deprecated
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/domain/usecases/get_culturas_usecase.dart:104:  @deprecated
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:76:/// @deprecated Use `GetDefensivosUseCase(const GetAllDefensivosParams())`
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:91:/// @deprecated Use `GetDefensivosUseCase(GetDefensivosByClasseParams(classe))`
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:106:/// @deprecated Use `GetDefensivosUseCase(SearchDefensivosParams(query))`
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:124:/// @deprecated Use `GetDefensivosUseCase(GetDefensivosRecentesParams(limit))`
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:139:/// @deprecated Use `GetDefensivosUseCase(const GetDefensivosStatsParams())`
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:153:/// @deprecated Use `GetDefensivosUseCase(const GetClassesAgronomicasParams())`
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/usecases/get_defensivos_usecase.dart:167:/// @deprecated Use `GetDefensivosUseCase(const GetFabricantesParams())`

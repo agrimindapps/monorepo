@@ -13,6 +13,8 @@ import '../../domain/services/fuel_calculation_service.dart';
 import '../../domain/services/fuel_connectivity_service.dart';
 import '../../domain/usecases/get_fuel_analytics.dart';
 
+import 'providers.dart';
+
 part 'fuel_riverpod_notifier.g.dart';
 
 /// Analytics data from use cases
@@ -166,19 +168,17 @@ class FuelRiverpod extends _$FuelRiverpod {
 
   @override
   FutureOr<FuelState> build() async {
-    final getIt = ModularInjectionContainer.instance;
+    // Initialize specialized services via Bridge Providers
+    _crudService = ref.watch(fuelCrudServiceProvider);
+    _queryService = ref.watch(fuelQueryServiceProvider);
+    _syncService = ref.watch(fuelSyncServiceProvider);
+    _calculationService = ref.watch(fuelCalculationServiceProvider);
+    _connectivityService = ref.watch(fuelConnectivityServiceProvider);
 
-    // Initialize specialized services
-    _crudService = getIt<FuelCrudService>();
-    _queryService = getIt<FuelQueryService>();
-    _syncService = getIt<FuelSyncService>();
-    _calculationService = getIt<FuelCalculationService>();
-    _connectivityService = getIt<FuelConnectivityService>();
-
-    // Initialize use cases for analytics
-    _getAverageConsumption = getIt<GetAverageConsumption>();
-    _getTotalSpent = getIt<GetTotalSpent>();
-    _getRecentFuelRecords = getIt<GetRecentFuelRecords>();
+    // Initialize use cases for analytics via Bridge Providers
+    _getAverageConsumption = ref.watch(getAverageConsumptionProvider);
+    _getTotalSpent = ref.watch(getTotalSpentProvider);
+    _getRecentFuelRecords = ref.watch(getRecentFuelRecordsProvider);
 
     ref.onDispose(() {
       _connectivitySubscription?.cancel();

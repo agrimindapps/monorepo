@@ -1,0 +1,612 @@
+import 'dart:developer' as developer;
+
+import 'package:core/core.dart' hide Column;
+
+import '../../../../database/repositories/culturas_repository.dart';
+import '../../../../database/repositories/diagnosticos_repository.dart';
+import '../../../../database/repositories/fitossanitarios_repository.dart';
+import '../../../../database/repositories/pragas_repository.dart';
+import '../../domain/entities/diagnostico_entity.dart';
+import '../../domain/repositories/i_diagnosticos_metadata_repository.dart';
+import '../../domain/repositories/i_diagnosticos_query_repository.dart';
+import '../../domain/repositories/i_diagnosticos_read_repository.dart';
+import '../../domain/repositories/i_diagnosticos_recommendation_repository.dart';
+import '../../domain/repositories/i_diagnosticos_repository.dart';
+import '../../domain/repositories/i_diagnosticos_search_repository.dart';
+import '../../domain/repositories/i_diagnosticos_stats_repository.dart';
+import '../../domain/repositories/i_diagnosticos_validation_repository.dart';
+import '../mappers/diagnostico_mapper.dart';
+
+/// Implementation of diagnosticos repository (Data Layer)
+///
+/// REFACTORED: Interface Segregation Principle (ISP) applied
+/// - Originally had 30+ methods in single fat interface
+/// - Now split into 7 specialized interfaces:
+///   1. IDiagnosticosReadRepository (2 methods: CRUD)
+///   2. IDiagnosticosQueryRepository (5 methods: basic queries)
+///   3. IDiagnosticosSearchRepository (3 methods: advanced search)
+///   4. IDiagnosticosStatsRepository (3 methods: statistics)
+///   5. IDiagnosticosMetadataRepository (4 methods: lookup data)
+///   6. IDiagnosticosValidationRepository (2 methods: validation)
+///   7. IDiagnosticosRecommendationRepository (1 method: recommendations)
+///
+/// Implementation class provides all 7 interfaces.
+/// Services inject only the interfaces they need, reducing coupling.
+@LazySingleton(
+  as: IDiagnosticosRepository,
+)
+class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
+  final DiagnosticosRepository _repository;
+  final FitossanitariosRepository _fitossanitariosRepository;
+  final CulturasRepository _culturasRepository;
+  final PragasRepository _pragasRepository;
+
+  const DiagnosticosRepositoryImpl(
+    this._repository,
+    this._fitossanitariosRepository,
+    this._culturasRepository,
+    this._pragasRepository,
+  );
+
+  @override
+  Future<Either<Failure, List<DiagnosticoEntity>>> getAll({
+    int? limit,
+    int? offset,
+  }) async {
+    try {
+      var diagnosticosDrift = await _repository.findAll();
+
+      if (offset != null && offset > 0) {
+        diagnosticosDrift = diagnosticosDrift.skip(offset).toList();
+      }
+      if (limit != null && limit > 0) {
+        diagnosticosDrift = diagnosticosDrift.take(limit).toList();
+      }
+
+      final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
+
+      return Right(entities);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar diagnósticos: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, DiagnosticoEntity?>> getById(String id) async {
+    try {
+      final diagnosticoDrift = await _repository.findByIdOrObjectId(id);
+
+      if (diagnosticoDrift == null) {
+        return const Right(null);
+      }
+
+      final entity = DiagnosticoMapper.fromDrift(
+          diagnosticoDrift); // Changed from fromDriftData
+      return Right(entity);
+    } catch (e) {
+      return Left(
+        CacheFailure('Erro ao buscar diagnóstico por ID: ${e.toString()}'),
+      );
+    }
+  }
+
+  // ========== Basic Query Operations ==========
+
+  @override
+  Future<Either<Failure, List<DiagnosticoEntity>>> queryByDefensivo(
+    String idDefensivo,
+  ) async {
+    try {
+      developer.log(
+        '🔍 queryByDefensivo (Repository) - ID do defensivo: $idDefensivo',
+        name: 'DiagnosticosRepository',
+      );
+
+      // Resolve ID if it's not an integer
+      int? defensivoId = int.tryParse(idDefensivo);
+      if (defensivoId == null) {
+        final fitossanitario =
+            await _fitossanitariosRepository.findByIdDefensivo(idDefensivo);
+        if (fitossanitario != null) {
+          defensivoId = fitossanitario.id;
+          developer.log(
+            '✅ queryByDefensivo (Repository) - ID resolvido: $idDefensivo -> $defensivoId',
+            name: 'DiagnosticosRepository',
+          );
+        } else {
+          developer.log(
+            '⚠️ queryByDefensivo (Repository) - Fitossanitário não encontrado para ID: $idDefensivo',
+            name: 'DiagnosticosRepository',
+          );
+          return const Right([]);
+        }
+      }
+
+      final diagnosticosDrift = await _repository.findByDefensivo(
+        defensivoId,
+      );
+
+      developer.log(
+        '✅ queryByDefensivo (Repository) - ${diagnosticosDrift.length} registros Drift encontrados',
+        name: 'DiagnosticosRepository',
+      );
+
+      final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
+
+      developer.log(
+        '✅ queryByDefensivo (Repository) - ${entities.length} entities mapeadas, retornando Right()',
+        name: 'DiagnosticosRepository',
+      );
+
+      return Right(entities);
+    } catch (e, stack) {
+      developer.log(
+        '❌ queryByDefensivo (Repository) - Erro: $e',
+        name: 'DiagnosticosRepository',
+        error: e,
+        stackTrace: stack,
+      );
+      return Left(
+        CacheFailure('Erro ao buscar por defensivo: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<DiagnosticoEntity>>> queryByCultura(
+    String idCultura,
+  ) async {
+    try {
+      int? culturaId = int.tryParse(idCultura);
+      if (culturaId == null) {
+        final cultura = await _culturasRepository.findByIdCultura(idCultura);
+        if (cultura != null) {
+          culturaId = cultura.id;
+        } else {
+          return const Right([]);
+        }
+      }
+
+      final diagnosticosDrift = await _repository.findByCultura(
+        culturaId,
+      );
+      final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
+
+      return Right(entities);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar por cultura: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<DiagnosticoEntity>>> queryByPraga(
+    String idPraga,
+  ) async {
+    try {
+      int? pragaId = int.tryParse(idPraga);
+      if (pragaId == null) {
+        final praga = await _pragasRepository.findByIdPraga(idPraga);
+        if (praga != null) {
+          pragaId = praga.id;
+        } else {
+          return const Right([]);
+        }
+      }
+
+      final diagnosticosDrift = await _repository.findByPraga(
+        pragaId,
+      );
+      final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
+
+      return Right(entities);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar por praga: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<DiagnosticoEntity>>> queryByTriplaCombinacao({
+    String? idDefensivo,
+    String? idCultura,
+    String? idPraga,
+  }) async {
+    try {
+      int? defensivoId;
+      if (idDefensivo != null) {
+        defensivoId = int.tryParse(idDefensivo);
+        if (defensivoId == null) {
+          final fitossanitario =
+              await _fitossanitariosRepository.findByIdDefensivo(idDefensivo);
+          if (fitossanitario != null) {
+            defensivoId = fitossanitario.id;
+          } else {
+            return const Right([]);
+          }
+        }
+      }
+
+      int? culturaId;
+      if (idCultura != null) {
+        culturaId = int.tryParse(idCultura);
+        if (culturaId == null) {
+          final cultura = await _culturasRepository.findByIdCultura(idCultura);
+          if (cultura != null) {
+            culturaId = cultura.id;
+          } else {
+            return const Right([]);
+          }
+        }
+      }
+
+      int? pragaId;
+      if (idPraga != null) {
+        pragaId = int.tryParse(idPraga);
+        if (pragaId == null) {
+          final praga = await _pragasRepository.findByIdPraga(idPraga);
+          if (praga != null) {
+            pragaId = praga.id;
+          } else {
+            return const Right([]);
+          }
+        }
+      }
+
+      final diagnosticosDrift = await _repository.findByTriplaCombinacao(
+        defensivoId: defensivoId,
+        culturaId: culturaId,
+        pragaId: pragaId,
+      );
+      final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
+
+      return Right(entities);
+    } catch (e) {
+      return Left(
+        CacheFailure('Erro ao buscar por combinação: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<DiagnosticoEntity>>> queryByPattern(
+    String pattern,
+  ) async {
+    try {
+      if (pattern.trim().isEmpty) {
+        return const Right(<DiagnosticoEntity>[]);
+      }
+
+      final allDiagnosticos = await _repository.findAll();
+
+      final matchingDiagnosticos = allDiagnosticos
+          .where(
+            (d) =>
+                d.defensivoId.toString().contains(pattern) ||
+                d.culturaId.toString().contains(pattern) ||
+                d.pragaId.toString().contains(pattern),
+          )
+          .toList();
+
+      final entities = DiagnosticoMapper.fromDriftList(matchingDiagnosticos);
+
+      return Right(entities);
+    } catch (e) {
+      return Left(CacheFailure('Erro na busca por padrão: ${e.toString()}'));
+    }
+  }
+
+  // ========== Metadata Operations ==========
+
+  @override
+  Future<Either<Failure, List<Map<String, dynamic>>>> getAllDefensivos() async {
+    try {
+      final diagnosticos = await _repository.findAll();
+      final defensivosMap = <String, Map<String, dynamic>>{};
+
+      for (final d in diagnosticos) {
+        final idStr = d.defensivoId.toString();
+        if (!defensivosMap.containsKey(idStr)) {
+          defensivosMap[idStr] = {
+            'id': idStr,
+            'nome': idStr, // Nome seria ideal vir de outra tabela
+          };
+        }
+      }
+
+      return Right(defensivosMap.values.toList());
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar defensivos: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Map<String, dynamic>>>> getAllCulturas() async {
+    try {
+      final diagnosticos = await _repository.findAll();
+      final culturasMap = <String, Map<String, dynamic>>{};
+
+      for (final d in diagnosticos) {
+        final idStr = d.culturaId.toString();
+        if (!culturasMap.containsKey(idStr)) {
+          culturasMap[idStr] = {'id': idStr, 'nome': idStr};
+        }
+      }
+
+      return Right(culturasMap.values.toList());
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar culturas: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Map<String, dynamic>>>> getAllPragas() async {
+    try {
+      final diagnosticos = await _repository.findAll();
+      final pragasMap = <String, Map<String, dynamic>>{};
+
+      for (final d in diagnosticos) {
+        final idStr = d.pragaId.toString();
+        if (!pragasMap.containsKey(idStr)) {
+          pragasMap[idStr] = {'id': idStr, 'nome': idStr};
+        }
+      }
+
+      return Right(pragasMap.values.toList());
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar pragas: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<String>>> getUnidadesMedida() async {
+    try {
+      final diagnosticos = await _repository.findAll();
+      final unidades = <String>{};
+
+      for (final d in diagnosticos) {
+        if (d.um.isNotEmpty) {
+          unidades.add(d.um);
+        }
+      }
+
+      return Right(unidades.toList()..sort());
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar unidades: ${e.toString()}'));
+    }
+  }
+
+  // ========== Recommendation Operations ==========
+
+  @override
+  Future<Either<Failure, List<DiagnosticoEntity>>> getRecomendacoesPara({
+    required String culturaId,
+    required String pragaId,
+  }) async {
+    try {
+      final diagnosticosDrift = await _repository.findByTriplaCombinacao(
+        culturaId: int.tryParse(culturaId ?? ''),
+        pragaId: int.tryParse(pragaId ?? ''),
+      );
+
+      final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
+
+      return Right(entities);
+    } catch (e) {
+      return Left(
+        CacheFailure('Erro ao buscar recomendações: ${e.toString()}'),
+      );
+    }
+  }
+
+  // ========== Search Operations ==========
+
+  @override
+  Future<Either<Failure, List<DiagnosticoEntity>>> searchWithFilters({
+    String? defensivo,
+    String? cultura,
+    String? praga,
+    String? tipoAplicacao,
+  }) async {
+    try {
+      final diagnosticosDrift = await _repository.findByTriplaCombinacao(
+        defensivoId: int.tryParse(defensivo ?? ''),
+        culturaId: int.tryParse(cultura ?? ''),
+        pragaId: int.tryParse(praga ?? ''),
+      );
+
+      var entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
+
+      // Filter by tipo de aplicacao (terrestre/aerea)
+      if (tipoAplicacao != null && tipoAplicacao.isNotEmpty) {
+        entities = entities.where((e) {
+          if (tipoAplicacao.toLowerCase().contains('terrestre')) {
+            return e.aplicacao.terrestre != null;
+          } else if (tipoAplicacao.toLowerCase().contains('aerea')) {
+            return e.aplicacao.aerea != null;
+          }
+          return true;
+        }).toList();
+      }
+
+      return Right(entities);
+    } catch (e) {
+      return Left(CacheFailure('Erro na busca com filtros: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<DiagnosticoEntity>>> getSimilarDiagnosticos(
+    String idDiagnostico,
+  ) async {
+    try {
+      final diagnosticoResult = await getById(idDiagnostico);
+      if (diagnosticoResult.isLeft()) {
+        return const Left(CacheFailure('Diagnóstico não encontrado'));
+      }
+
+      final diagnostico = diagnosticoResult.getOrElse(() => null);
+      if (diagnostico == null) {
+        return const Right(<DiagnosticoEntity>[]);
+      }
+
+      final allDiagnosticos = await _repository.findAll();
+
+      final similar = allDiagnosticos
+          .where(
+            (d) => // Changed from DiagnosticoData to inferred type
+                d.firebaseId != diagnostico.id &&
+                d.id.toString() != diagnostico.id &&
+                (d.culturaId.toString() == diagnostico.idCultura ||
+                    d.pragaId.toString() == diagnostico.idPraga),
+          )
+          .take(10)
+          .toList();
+
+      final entities = DiagnosticoMapper.fromDriftList(similar);
+
+      return Right(entities);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar similares: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<DiagnosticoEntity>>> searchByPattern(
+    String pattern,
+  ) async {
+    return queryByPattern(pattern);
+  }
+
+  // ========== Statistics Operations ==========
+
+  @override
+  Future<Either<Failure, Map<String, dynamic>>> getStatistics() async {
+    try {
+      final diagnosticos = await _repository.findAll();
+
+      final stats = {
+        'total': diagnosticos.length,
+        'totalDefensivos':
+            diagnosticos.map((e) => e.defensivoId).toSet().length,
+        'totalCulturas': diagnosticos.map((e) => e.culturaId).toSet().length,
+        'totalPragas': diagnosticos.map((e) => e.pragaId).toSet().length,
+      };
+
+      return Right(stats);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar estatísticas: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<DiagnosticoEntity>>> getPopularDiagnosticos({
+    int limit = 10,
+  }) async {
+    try {
+      final diagnosticos = (await _repository.findAll()).take(limit).toList();
+      final entities = DiagnosticoMapper.fromDriftList(diagnosticos);
+
+      return Right(entities);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar populares: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, int>> countByFilters({
+    String? defensivo,
+    String? cultura,
+    String? praga,
+  }) async {
+    try {
+      int? defensivoId;
+      if (defensivo != null) {
+        defensivoId = int.tryParse(defensivo);
+        if (defensivoId == null) {
+          final fitossanitario =
+              await _fitossanitariosRepository.findByIdDefensivo(defensivo);
+          if (fitossanitario != null) {
+            defensivoId = fitossanitario.id;
+          } else {
+            return const Right(0);
+          }
+        }
+      }
+
+      int? culturaId;
+      if (cultura != null) {
+        culturaId = int.tryParse(cultura);
+        if (culturaId == null) {
+          final c = await _culturasRepository.findByIdCultura(cultura);
+          if (c != null) {
+            culturaId = c.id;
+          } else {
+            return const Right(0);
+          }
+        }
+      }
+
+      int? pragaId;
+      if (praga != null) {
+        pragaId = int.tryParse(praga);
+        if (pragaId == null) {
+          final p = await _pragasRepository.findByIdPraga(praga);
+          if (p != null) {
+            pragaId = p.id;
+          } else {
+            return const Right(0);
+          }
+        }
+      }
+
+      final diagnosticosDrift = await _repository.findByTriplaCombinacao(
+        defensivoId: defensivoId,
+        culturaId: culturaId,
+        pragaId: pragaId,
+      );
+
+      return Right(diagnosticosDrift.length);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao contar filtros: ${e.toString()}'));
+    }
+  }
+
+  // ========== Validation Operations ==========
+
+  @override
+  Future<Either<Failure, bool>> exists(String id) async {
+    try {
+      final result = await getById(id);
+      if (result.isLeft()) {
+        return const Right(false);
+      }
+
+      final diagnostico = result.getOrElse(() => null);
+      return Right(diagnostico != null);
+    } catch (e) {
+      return Left(
+        CacheFailure('Erro ao verificar existência: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> validarCompatibilidade({
+    required String idDefensivo,
+    required String idCultura,
+    required String idPraga,
+  }) async {
+    try {
+      final diagnosticosDrift = await _repository.findByTriplaCombinacao(
+        defensivoId: int.tryParse(idDefensivo ?? ''),
+        culturaId: int.tryParse(idCultura ?? ''),
+        pragaId: int.tryParse(idPraga ?? ''),
+      );
+
+      return Right(diagnosticosDrift.isNotEmpty);
+    } catch (e) {
+      return Left(
+        CacheFailure('Erro ao validar compatibilidade: ${e.toString()}'),
+      );
+    }
+  }
+}

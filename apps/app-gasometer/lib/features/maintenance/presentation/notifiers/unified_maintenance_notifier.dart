@@ -9,6 +9,38 @@ import '../../domain/usecases/update_maintenance_record.dart';
 
 part 'unified_maintenance_notifier.g.dart';
 
+// --- Bridge Providers ---
+
+@riverpod
+GetAllMaintenanceRecords getAllMaintenanceRecords(Ref ref) {
+  return getIt<GetAllMaintenanceRecords>();
+}
+
+@riverpod
+GetMaintenanceRecordsByVehicle getMaintenanceRecordsByVehicle(Ref ref) {
+  return getIt<GetMaintenanceRecordsByVehicle>();
+}
+
+@riverpod
+AddMaintenanceRecord addMaintenanceRecord(Ref ref) {
+  return getIt<AddMaintenanceRecord>();
+}
+
+@riverpod
+UpdateMaintenanceRecord updateMaintenanceRecord(Ref ref) {
+  return getIt<UpdateMaintenanceRecord>();
+}
+
+@riverpod
+DeleteMaintenanceRecord deleteMaintenanceRecord(Ref ref) {
+  return getIt<DeleteMaintenanceRecord>();
+}
+
+@riverpod
+MaintenanceFilterService maintenanceFilterService(Ref ref) {
+  return getIt<MaintenanceFilterService>();
+}
+
 /// State for unified maintenance management
 class UnifiedMaintenanceState {
   const UnifiedMaintenanceState({
@@ -97,12 +129,12 @@ class UnifiedMaintenanceNotifier extends _$UnifiedMaintenanceNotifier {
 
   @override
   Future<UnifiedMaintenanceState> build() async {
-    _getAllMaintenanceRecords = getIt<GetAllMaintenanceRecords>();
-    _getMaintenanceRecordsByVehicle = getIt<GetMaintenanceRecordsByVehicle>();
-    _addMaintenanceRecord = getIt<AddMaintenanceRecord>();
-    _updateMaintenanceRecord = getIt<UpdateMaintenanceRecord>();
-    _deleteMaintenanceRecord = getIt<DeleteMaintenanceRecord>();
-    _filterService = getIt<MaintenanceFilterService>();
+    _getAllMaintenanceRecords = ref.watch(getAllMaintenanceRecordsProvider);
+    _getMaintenanceRecordsByVehicle = ref.watch(getMaintenanceRecordsByVehicleProvider);
+    _addMaintenanceRecord = ref.watch(addMaintenanceRecordProvider);
+    _updateMaintenanceRecord = ref.watch(updateMaintenanceRecordProvider);
+    _deleteMaintenanceRecord = ref.watch(deleteMaintenanceRecordProvider);
+    _filterService = ref.watch(maintenanceFilterServiceProvider);
     return _loadMaintenances();
   }
 

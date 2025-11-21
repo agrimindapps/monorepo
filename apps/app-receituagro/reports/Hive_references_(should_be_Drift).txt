@@ -1,0 +1,104 @@
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/di/injection_container.dart:186:  // if (!sl.isRegistered<core.HiveStorageService>()) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/di/injection_container.dart:187:  //   sl.registerLazySingleton<core.HiveStorageService>(
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/di/injection_container.dart:188:  //     () => core.HiveStorageService(sl<core.IBoxRegistryService>()),
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/favorito_item_hive.g.dart:9:class FavoritoItemHiveAdapter extends TypeAdapter<FavoritoItemHive> {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/favorito_item_hive.g.dart:14:  FavoritoItemHive read(BinaryReader reader) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/favorito_item_hive.g.dart:19:    return FavoritoItemHive(
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/favorito_item_hive.g.dart:30:  void write(BinaryWriter writer, FavoritoItemHive obj) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/favorito_item_hive.g.dart:53:      other is FavoritoItemHiveAdapter &&
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/comentario_hive.g.dart:9:class ComentarioHiveAdapter extends TypeAdapter<ComentarioHive> {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/comentario_hive.g.dart:14:  ComentarioHive read(BinaryReader reader) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/comentario_hive.g.dart:19:    return ComentarioHive(
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/comentario_hive.g.dart:34:  void write(BinaryWriter writer, ComentarioHive obj) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/comentario_hive.g.dart:65:      other is ComentarioHiveAdapter &&
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/fitossanitario_hive.g.dart:9:class FitossanitarioHiveAdapter extends TypeAdapter<FitossanitarioHive> {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/fitossanitario_hive.g.dart:14:  FitossanitarioHive read(BinaryReader reader) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/fitossanitario_hive.g.dart:19:    return FitossanitarioHive(
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/fitossanitario_hive.g.dart:44:  void write(BinaryWriter writer, FitossanitarioHive obj) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/fitossanitario_hive.g.dart:95:      other is FitossanitarioHiveAdapter &&
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/premium_status_hive.g.dart:9:class PremiumStatusHiveAdapter extends TypeAdapter<PremiumStatusHive> {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/premium_status_hive.g.dart:14:  PremiumStatusHive read(BinaryReader reader) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/premium_status_hive.g.dart:19:    return PremiumStatusHive(
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/premium_status_hive.g.dart:36:  void write(BinaryWriter writer, PremiumStatusHive obj) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/premium_status_hive.g.dart:71:      other is PremiumStatusHiveAdapter &&
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/fitossanitario_info_hive.g.dart:9:class FitossanitarioInfoHiveAdapter
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/fitossanitario_info_hive.g.dart:10:    extends TypeAdapter<FitossanitarioInfoHive> {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/fitossanitario_info_hive.g.dart:15:  FitossanitarioInfoHive read(BinaryReader reader) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/fitossanitario_info_hive.g.dart:20:    return FitossanitarioInfoHive(
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/fitossanitario_info_hive.g.dart:37:  void write(BinaryWriter writer, FitossanitarioInfoHive obj) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/fitossanitario_info_hive.g.dart:72:      other is FitossanitarioInfoHiveAdapter &&
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/plantas_inf_hive.g.dart:9:class PlantasInfHiveAdapter extends TypeAdapter<PlantasInfHive> {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/plantas_inf_hive.g.dart:14:  PlantasInfHive read(BinaryReader reader) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/plantas_inf_hive.g.dart:19:    return PlantasInfHive(
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/plantas_inf_hive.g.dart:44:  void write(BinaryWriter writer, PlantasInfHive obj) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/plantas_inf_hive.g.dart:95:      other is PlantasInfHiveAdapter &&
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/pragas_hive.g.dart:9:class PragasHiveAdapter extends TypeAdapter<PragasHive> {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/pragas_hive.g.dart:14:  PragasHive read(BinaryReader reader) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/pragas_hive.g.dart:19:    return PragasHive(
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/pragas_hive.g.dart:53:  void write(BinaryWriter writer, PragasHive obj) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/pragas_hive.g.dart:122:      other is PragasHiveAdapter &&
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/cultura_hive.g.dart:9:class CulturaHiveAdapter extends TypeAdapter<CulturaHive> {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/cultura_hive.g.dart:14:  CulturaHive read(BinaryReader reader) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/cultura_hive.g.dart:19:    return CulturaHive(
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/cultura_hive.g.dart:29:  void write(BinaryWriter writer, CulturaHive obj) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/cultura_hive.g.dart:50:      other is CulturaHiveAdapter &&
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/diagnostico_hive.g.dart:9:class DiagnosticoHiveAdapter extends TypeAdapter<DiagnosticoHive> {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/diagnostico_hive.g.dart:14:  DiagnosticoHive read(BinaryReader reader) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/diagnostico_hive.g.dart:19:    return DiagnosticoHive(
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/diagnostico_hive.g.dart:46:  void write(BinaryWriter writer, DiagnosticoHive obj) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/diagnostico_hive.g.dart:101:      other is DiagnosticoHiveAdapter &&
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/pragas_inf_hive.g.dart:9:class PragasInfHiveAdapter extends TypeAdapter<PragasInfHive> {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/pragas_inf_hive.g.dart:14:  PragasInfHive read(BinaryReader reader) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/pragas_inf_hive.g.dart:19:    return PragasInfHive(
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/pragas_inf_hive.g.dart:33:  void write(BinaryWriter writer, PragasInfHive obj) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/models/pragas_inf_hive.g.dart:62:      other is PragasInfHiveAdapter &&
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/data_integrity_service.dart:114:  COMMENTED OUT - Original Hive Implementation
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/data_integrity_service.dart:117:  This entire service was based on Hive/BoxManager which has been removed.
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/data_integrity_service.dart:132:  - IHiveManager for box access
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/data_integrity_service.dart:134:  - Hive Box<T> types for data storage
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/data_integrity_service.dart:135:  - Legacy Hive models: Diagnostico, Fitossanitario, Praga, Cultura
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/data_integrity_validator.dart:31:/// Relatório de integridade referencial dos dados Hive
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/data_integrity_validator.dart:121:/// Serviço para validar integridade referencial dos dados Hive
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/receituagro_storage_service.dart:83:/// Adapter para ReceitaAgroStorageService que usa HiveStorageService do core
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/core/services/receituagro_storage_service.dart:93:  /// Constructor que aceita HiveStorageService como dependência (Core Package)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/busca_avancada/di/busca_di.dart:5:/// Focando em simplificar o acesso direto ao Hive
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/data/datasources/device_local_datasource.dart:4:/// Usa Hive para cache local temporário
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/data/datasources/device_local_datasource.dart:20:/// Implementação do datasource local usando Hive
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/providers/theme_notifier.dart:81:      // TODO: Persist to storage (Hive/SharedPreferences)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/settings/presentation/pages/data_inspector/index.dart:11:// - hive_tab_widget.dart (~450 linhas) - Tab HiveBoxes
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/data/services/favoritos_storage_service_drift.dart:10:/// Substitui a versão baseada em Hive repositories
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/favoritos/data/services/favoritos_storage_service.dart:14:/// Implementação do storage local para favoritos usando Hive (Data Layer)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/data/mappers/diagnostico_mapper.dart:80:  static DiagnosticoEntity fromHive(Diagnostico hive) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/diagnosticos/data/mappers/diagnostico_mapper.dart:118:  static DiagnosticosStats statsFromHiveStats(dynamic hiveStats) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/data/mappers/cultura_mapper.dart:20:  static CulturaEntity fromHiveToEntity(Cultura drift) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/data/mappers/cultura_mapper.dart:47:  static List<CulturaEntity> fromHiveToEntityList(List<Cultura> drifts) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/data/mappers/cultura_mapper.dart:48:    return drifts.map((drift) => fromHiveToEntity(drift)).toList();
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/data/mappers/cultura_mapper.dart:53:    return fromHiveToEntity(drift);
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/culturas/data/mappers/cultura_mapper.dart:58:    return fromHiveToEntityList(drifts);
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/subscription_status_notifier.dart:97:  /// - Base de dados local (Hive)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/trial_notifier.dart:88:  /// - Banco de dados local (Hive)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/subscription/presentation/notifiers/purchase_notifier.dart:126:  /// - Banco de dados local (Hive)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/comentarios/data/datasources/comentarios_local_datasource.dart:6:/// Simplified version without Hive persistence (session only)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/data/mappers/praga_mapper.dart:34:  static PragaEntity fromHiveToEntity(Praga drift) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/data/mappers/praga_mapper.dart:49:  static PragasCompanion fromEntityToHive(PragaEntity entity) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/data/mappers/praga_mapper.dart:69:  static List<PragaEntity> fromHiveToEntityList(List<Praga> drifts) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/data/mappers/praga_mapper.dart:70:    return drifts.map((drift) => fromHiveToEntity(drift)).toList();
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/data/mappers/praga_mapper.dart:74:  static List<PragasCompanion> fromEntityToHiveList(List<PragaEntity> entities) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/data/mappers/praga_mapper.dart:75:    return entities.map((entity) => fromEntityToHive(entity)).toList();
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/data/mappers/praga_mapper.dart:80:    return fromHiveToEntity(drift);
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/data/mappers/praga_mapper.dart:85:    return fromHiveToEntityList(drifts);
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/domain/entities/praga_entity.dart:27:  /// Note: Drift Praga uses different field names than legacy Hive
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/domain/entities/praga_entity.dart:36:  // COMMENTED OUT: Legacy Hive model no longer exists
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/domain/entities/praga_entity.dart:37:  // /// Factory para criar do Hive model
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/domain/entities/praga_entity.dart:38:  // factory PragaEntity.fromHive(Praga hiveModel) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/presentation/providers/detalhe_praga_notifier.dart:27:  // MIGRATION TODO: Replace legacy Hive types with Drift types
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/presentation/providers/detalhe_praga_notifier.dart:28:  // final PragasInfHive? pragaInfo;
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/pragas/presentation/providers/detalhe_praga_notifier.dart:29:  // final PlantasInfHive? plantaInfo;
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/data/mappers/defensivo_mapper.dart:104:  static DefensivoEntity fromHiveToEntity(Fitossanitario drift) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/data/mappers/defensivo_mapper.dart:119:  static List<DefensivoEntity> fromHiveToEntityList(
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/data/mappers/defensivo_mapper.dart:122:    return drifts.map((drift) => fromHiveToEntity(drift)).toList();
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/data/mappers/defensivo_mapper.dart:127:    return fromHiveToEntity(drift);
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/entities/defensivo_details_entity.dart:39:  /// Cria entity a partir do modelo Hive
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/defensivos/domain/entities/defensivo_details_entity.dart:41:  factory DefensivoDetailsEntity.fromHive(Fitossanitario drift) {
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/onboarding/data/datasources/onboarding_local_datasource.dart:8:/// Handles CRUD operations with persistent storage (Hive/LocalStorage)
+/Users/lucineiloch/Documents/deveopment/monorepo/apps/app-receituagro/lib/features/onboarding/data/repositories/onboarding_repository_impl.dart:10:/// - [OnboardingLocalDataSource]: Persistent storage operations (Hive/LocalStorage)

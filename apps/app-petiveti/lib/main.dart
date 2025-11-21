@@ -16,11 +16,17 @@ Future<void> main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
+    final sharedPreferences = await SharedPreferences.getInstance();
+
     // Initialize GetIt dependency injection
     await di.init();
 
     // Create ProviderContainer for initialization
-    final container = ProviderContainer();
+    final container = ProviderContainer(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+      ],
+    );
 
     final crashlyticsRepository = container.read(crashlyticsRepositoryProvider);
 

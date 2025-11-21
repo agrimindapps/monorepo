@@ -46,6 +46,10 @@
 dart run build_runner watch --delete-conflicting-outputs
 ```
 
+### **Documentação Gerada (Markdown)**
+- **Localização Obrigatória**: Toda análise, plano ou documentação técnica gerada em Markdown deve ser salva em `apps/[app-name]/docs/`.
+- **Ação**: Se a pasta `docs/` não existir no app alvo, crie-a antes de salvar o arquivo.
+
 ---
 
 ## 🏆 Gold Standard de Qualidade
@@ -200,6 +204,15 @@ melos run build:all:apk:debug
 ---
 
 ## 📚 Documentação
+
+### **Documentação Técnica (IA Context)**
+Para garantir consistência e qualidade, consulte estes documentos antes de gerar código:
+- **[Arquitetura & Camadas](.claude/docs/ARCHITECTURE.md)**: Estrutura de pastas e regras de dependência.
+- **[Padrões de Código](.claude/docs/CODE_PATTERNS.md)**: Snippets "Gold Standard" (UseCase, Repository, Riverpod).
+- **[Nomenclatura](.claude/docs/NAMING_CONVENTIONS.md)**: Regras de nomes para arquivos, classes e métodos.
+- **[Padrões de Testes](.claude/docs/TESTING_STANDARDS.md)**: Como testar usando Mocktail e AAA.
+- **[Definition of Done](.claude/docs/DEFINITION_OF_DONE.md)**: Checklist antes de finalizar tarefas.
+- **[Tech Stack](.claude/docs/TECH_STACK.md)**: Versões e pacotes permitidos.
 
 ### **Guias Técnicos**
 - `.claude/guides/MIGRATION_PROVIDER_TO_RIVERPOD.md` - Guia completo de migração

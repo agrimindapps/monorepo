@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
@@ -64,4 +66,13 @@ Logger logger(LoggerRef ref) {
       printTime: true,
     ),
   );
+}
+
+/// Random provider
+///
+/// Provides a Random instance for game logic.
+/// KeepAlive ensures consistent random seed during app lifecycle.
+@Riverpod(keepAlive: true)
+Random random(RandomRef ref) {
+  return Random();
 }

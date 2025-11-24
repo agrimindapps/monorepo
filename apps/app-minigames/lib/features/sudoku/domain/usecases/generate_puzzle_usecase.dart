@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import 'package:core/core.dart';
 import '../entities/enums.dart';
 import '../entities/sudoku_grid_entity.dart';
@@ -8,7 +7,6 @@ import '../services/puzzle_generator_service.dart';
 /// Use case for generating a new Sudoku puzzle
 ///
 /// Delegates generation logic to [PuzzleGeneratorService]
-@injectable
 class GeneratePuzzleUseCase {
   final PuzzleGeneratorService _puzzleGeneratorService;
 

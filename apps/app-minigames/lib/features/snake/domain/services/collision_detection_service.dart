@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../entities/position.dart';
 
@@ -9,7 +8,6 @@ import '../entities/position.dart';
 /// - Food collision detection
 /// - Boundary checks
 /// - Collision predictions
-@lazySingleton
 class CollisionDetectionService {
   CollisionDetectionService();
 

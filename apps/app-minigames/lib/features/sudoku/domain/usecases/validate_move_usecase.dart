@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import 'package:core/core.dart';
 import '../entities/sudoku_grid_entity.dart';
 import '../services/grid_validation_service.dart';
@@ -10,7 +9,6 @@ import '../services/grid_validation_service.dart';
 /// - Cell is editable (not a fixed clue)
 /// - Number is valid (1-9)
 /// - No conflicts in row/column/block
-@injectable
 class ValidateMoveUseCase {
   final GridValidationService _validationService;
 

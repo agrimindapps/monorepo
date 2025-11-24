@@ -1,8 +1,5 @@
-import 'package:injectable/injectable.dart';
-
 /// Service responsible for providing word lists for the game
 /// Follows SRP by handling only word data
-@lazySingleton
 class WordDictionaryService {
   /// Get available words for the game
   /// Words are organized by categories for easy management

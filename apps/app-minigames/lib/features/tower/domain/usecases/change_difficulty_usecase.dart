@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/game_state.dart';
 import '../entities/enums.dart';
@@ -7,7 +6,6 @@ import '../services/physics_service.dart';
 
 /// Use case for changing game difficulty
 /// Updates difficulty and recalculates speed using PhysicsService
-@injectable
 class ChangeDifficultyUseCase {
   final PhysicsService _physicsService;
 

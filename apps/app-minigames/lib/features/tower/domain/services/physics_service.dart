@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import '../entities/enums.dart';
 
 /// Model representing physics update result
@@ -44,7 +43,6 @@ class SpeedCalculationResult {
 /// - Boundary detection and collision
 /// - Direction control and reversal
 /// - Speed progression and calculation
-@lazySingleton
 class PhysicsService {
   /// Base speed increment per drop
   static const double baseSpeedIncrement = 0.2;

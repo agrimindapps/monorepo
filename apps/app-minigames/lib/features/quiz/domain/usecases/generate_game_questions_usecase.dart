@@ -1,6 +1,5 @@
 // Package imports:
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 // Core imports:
 import 'package:app_minigames/core/error/failures.dart';
@@ -10,7 +9,6 @@ import '../entities/quiz_question.dart';
 import '../repositories/quiz_repository.dart';
 
 /// Use case to generate quiz questions for a new game
-@injectable
 class GenerateGameQuestionsUseCase {
   final QuizRepository repository;
 

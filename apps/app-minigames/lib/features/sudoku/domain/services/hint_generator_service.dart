@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../entities/position_entity.dart';
 import '../entities/sudoku_grid_entity.dart';
@@ -14,7 +13,6 @@ import 'grid_validation_service.dart';
 /// - Hint selection strategies
 /// - Hint validation
 /// - Hint statistics
-@lazySingleton
 class HintGeneratorService {
   final GridValidationService _gridValidation;
   final Random _random;

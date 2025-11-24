@@ -6,9 +6,6 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-// Core imports:
-import 'package:app_minigames/core/di/injection.dart';
-
 // Domain imports:
 import '../../domain/entities/game_state.dart';
 import '../../domain/entities/enums.dart';
@@ -21,12 +18,13 @@ import '../../domain/usecases/toggle_pause_usecase.dart';
 import '../../domain/usecases/change_difficulty_usecase.dart';
 import '../../domain/usecases/load_high_score_usecase.dart';
 import '../../domain/usecases/save_high_score_usecase.dart';
+import 'snake_providers.dart';
 
 part 'snake_game_notifier.g.dart';
 
 @riverpod
 class SnakeGameNotifier extends _$SnakeGameNotifier {
-  // Use cases injected via GetIt
+  // Use cases injected via Riverpod
   late final UpdateSnakePositionUseCase _updateSnakePositionUseCase;
   late final ChangeDirectionUseCase _changeDirectionUseCase;
   late final StartNewGameUseCase _startNewGameUseCase;
@@ -53,16 +51,16 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
   @override
   FutureOr<SnakeGameState> build() async {
     // Inject use cases
-    _updateSnakePositionUseCase = getIt<UpdateSnakePositionUseCase>();
-    _changeDirectionUseCase = getIt<ChangeDirectionUseCase>();
-    _startNewGameUseCase = getIt<StartNewGameUseCase>();
-    _togglePauseUseCase = getIt<TogglePauseUseCase>();
-    _changeDifficultyUseCase = getIt<ChangeDifficultyUseCase>();
-    _loadHighScoreUseCase = getIt<LoadHighScoreUseCase>();
-    _saveHighScoreUseCase = getIt<SaveHighScoreUseCase>();
+    _updateSnakePositionUseCase = ref.read(updateSnakePositionUseCaseProvider);
+    _changeDirectionUseCase = ref.read(changeDirectionUseCaseProvider);
+    _startNewGameUseCase = ref.read(startNewGameUseCaseProvider);
+    _togglePauseUseCase = ref.read(togglePauseUseCaseProvider);
+    _changeDifficultyUseCase = ref.read(changeDifficultyUseCaseProvider);
+    _loadHighScoreUseCase = ref.read(loadHighScoreUseCaseProvider);
+    _saveHighScoreUseCase = ref.read(saveHighScoreUseCaseProvider);
 
     // Inject services
-    _movementService = getIt<SnakeMovementService>();
+    _movementService = ref.read(snakeMovementServiceProvider);
 
     // Cleanup on dispose
     ref.onDispose(() {
@@ -108,7 +106,8 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
   Future<void> startGame() async {
     if (!_isMounted) return;
 
-    final currentDifficulty = state.valueOrNull?.difficulty ?? SnakeDifficulty.medium;
+    final currentDifficulty =
+        state.valueOrNull?.difficulty ?? SnakeDifficulty.medium;
 
     final result = await _startNewGameUseCase(difficulty: currentDifficulty);
     if (!_isMounted) return;
@@ -141,7 +140,8 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
       score: initialState.score,
     );
 
-    _gameTimer = Timer.periodic(Duration(milliseconds: dynamicGameSpeed), (_) async {
+    _gameTimer =
+        Timer.periodic(Duration(milliseconds: dynamicGameSpeed), (_) async {
       if (!_isMounted) return;
 
       var currentState = state.valueOrNull;
@@ -167,7 +167,8 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
 
       // Update snake position
       if (currentState != null) {
-        final result = await _updateSnakePositionUseCase(currentState: currentState!);
+        final result =
+            await _updateSnakePositionUseCase(currentState: currentState!);
         if (!_isMounted) return;
 
         result.fold(
@@ -190,9 +191,10 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
               if (newState.score > currentState!.score) {
                 HapticFeedback.lightImpact();
               }
-              
+
               // Recalculate game speed if score changed (dynamic difficulty)
-              final newDynamicSpeed = _movementService.calculateDynamicGameSpeed(
+              final newDynamicSpeed =
+                  _movementService.calculateDynamicGameSpeed(
                 baseDifficulty: newState.difficulty,
                 score: newState.score,
               );
@@ -340,15 +342,15 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
 
     // Restart game with new setting
     _gameTimer?.cancel();
-    
+
     // We need to update the startNewGameUseCase to accept hasWalls or update state manually
     // For now, let's update state manually and restart
-    
+
     final newState = SnakeGameState.initial(
       difficulty: currentState.difficulty,
       hasWalls: newHasWalls,
     );
-    
+
     state = AsyncValue.data(newState);
     // Don't auto-start, let user start
   }

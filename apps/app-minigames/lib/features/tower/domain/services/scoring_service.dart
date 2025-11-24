@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 /// Model representing score calculation result
 class ScoreResult {
@@ -29,7 +28,6 @@ class ScoreResult {
 /// - Combo system management
 /// - Perfect placement bonuses
 /// - Score accumulation
-@lazySingleton
 class ScoringService {
   /// Base multiplier for score calculation
   static const int baseScoreMultiplier = 10;

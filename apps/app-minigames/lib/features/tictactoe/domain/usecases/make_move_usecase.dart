@@ -1,12 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/game_state.dart';
 import '../entities/enums.dart';
 
 /// Use case for making a move in the TicTacToe game
 /// Validates move and returns updated game state
-@injectable
 class MakeMoveUseCase {
   /// Makes a move at the specified position
   ///

@@ -1,11 +1,8 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/cell_data.dart';
 import '../entities/enums.dart';
 
 /// Service responsible for calculating neighbor mine counts
 /// Follows SRP by handling only neighbor count calculations
-@lazySingleton
 class NeighborCalculatorService {
   /// Calculates neighbor mine counts for all cells in the grid
   List<List<CellData>> calculateNeighborCounts({

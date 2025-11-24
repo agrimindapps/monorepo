@@ -1,10 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../entities/game_state_entity.dart';
 import '../services/ai_paddle_service.dart';
 
-@lazySingleton
 class UpdateAiPaddleUseCase {
   final AiPaddleService _aiPaddleService;
 

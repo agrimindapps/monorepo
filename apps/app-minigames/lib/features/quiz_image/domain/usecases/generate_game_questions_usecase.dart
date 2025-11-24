@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/enums.dart';
 import '../entities/quiz_question.dart';
@@ -7,7 +6,6 @@ import '../repositories/quiz_image_repository.dart';
 
 /// Use case that generates a randomized set of quiz questions
 /// Selects 10 random questions from available pool and adjusts options based on difficulty
-@injectable
 class GenerateGameQuestionsUseCase {
   final QuizImageRepository repository;
 

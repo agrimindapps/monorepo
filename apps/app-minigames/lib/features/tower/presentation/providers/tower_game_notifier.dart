@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../../core/di/injection.dart';
 import '../../domain/entities/game_state.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/usecases/update_moving_block_usecase.dart';
@@ -11,6 +10,7 @@ import '../../domain/usecases/toggle_pause_usecase.dart';
 import '../../domain/usecases/change_difficulty_usecase.dart';
 import '../../domain/usecases/load_high_score_usecase.dart';
 import '../../domain/usecases/save_high_score_usecase.dart';
+import 'tower_providers.dart';
 
 part 'tower_game_notifier.g.dart';
 
@@ -39,13 +39,13 @@ class TowerGameNotifier extends _$TowerGameNotifier {
   @override
   Future<GameState> build(double screenWidth) async {
     // Inject use cases from GetIt
-    _updateMovingBlockUseCase = getIt<UpdateMovingBlockUseCase>();
-    _dropBlockUseCase = getIt<DropBlockUseCase>();
-    _startNewGameUseCase = getIt<StartNewGameUseCase>();
-    _togglePauseUseCase = getIt<TogglePauseUseCase>();
-    _changeDifficultyUseCase = getIt<ChangeDifficultyUseCase>();
-    _loadHighScoreUseCase = getIt<LoadHighScoreUseCase>();
-    _saveHighScoreUseCase = getIt<SaveHighScoreUseCase>();
+    _updateMovingBlockUseCase = ref.read(UpdateMovingBlockUseCase>();
+    _dropBlockUseCase = ref.read(DropBlockUseCase>();
+    _startNewGameUseCase = ref.read(StartNewGameUseCase>();
+    _togglePauseUseCase = ref.read(TogglePauseUseCase>();
+    _changeDifficultyUseCase = ref.read(ChangeDifficultyUseCase>();
+    _loadHighScoreUseCase = ref.read(LoadHighScoreUseCase>();
+    _saveHighScoreUseCase = ref.read(SaveHighScoreUseCase>();
 
     // Cleanup on dispose
     ref.onDispose(() {

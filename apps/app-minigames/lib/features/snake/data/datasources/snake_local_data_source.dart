@@ -1,5 +1,4 @@
 // Package imports:
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Core imports:
@@ -18,7 +17,6 @@ abstract class SnakeLocalDataSource {
 }
 
 /// Implementation of snake local data source
-@LazySingleton(as: SnakeLocalDataSource)
 class SnakeLocalDataSourceImpl implements SnakeLocalDataSource {
   final SharedPreferences sharedPreferences;
 

@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../entities/ball_entity.dart';
 import '../entities/enums.dart';
@@ -12,7 +11,6 @@ import '../entities/paddle_entity.dart';
 /// - Reaction delays
 /// - Movement speed
 /// - Prediction logic
-@lazySingleton
 class AiPaddleService {
   // ============================================================================
   // Constants

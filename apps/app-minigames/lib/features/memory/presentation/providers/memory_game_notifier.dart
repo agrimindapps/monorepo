@@ -1,16 +1,15 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
-import 'package:get_it/get_it.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/game_state_entity.dart';
 import '../../domain/entities/high_score_entity.dart';
 import '../../domain/usecases/check_match_usecase.dart';
 import '../../domain/usecases/flip_card_usecase.dart';
-import '../../domain/usecases/generate_cards_usecase.dart';
 import '../../domain/usecases/load_high_score_usecase.dart';
 import '../../domain/usecases/restart_game_usecase.dart';
 import '../../domain/usecases/save_high_score_usecase.dart';
+import 'memory_providers.dart';
 
 part 'memory_game_notifier.g.dart';
 
@@ -175,33 +174,4 @@ class MemoryGameNotifier extends _$MemoryGameNotifier {
   }
 }
 
-@riverpod
-GenerateCardsUseCase generateCardsUseCase(GenerateCardsUseCaseRef ref) {
-  return GenerateCardsUseCase();
-}
-
-@riverpod
-FlipCardUseCase flipCardUseCase(FlipCardUseCaseRef ref) {
-  return FlipCardUseCase();
-}
-
-@riverpod
-CheckMatchUseCase checkMatchUseCase(CheckMatchUseCaseRef ref) {
-  return CheckMatchUseCase();
-}
-
-@riverpod
-RestartGameUseCase restartGameUseCase(RestartGameUseCaseRef ref) {
-  final generateCardsUseCase = ref.watch(generateCardsUseCaseProvider);
-  return RestartGameUseCase(generateCardsUseCase);
-}
-
-@riverpod
-LoadHighScoreUseCase loadHighScoreUseCase(LoadHighScoreUseCaseRef ref) {
-  return GetIt.instance.get<LoadHighScoreUseCase>();
-}
-
-@riverpod
-SaveHighScoreUseCase saveHighScoreUseCase(SaveHighScoreUseCaseRef ref) {
-  return GetIt.instance.get<SaveHighScoreUseCase>();
-}
+// Note: Use cases providers moved to memory_providers.dart

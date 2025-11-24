@@ -2,11 +2,10 @@
 import 'package:flutter/foundation.dart';
 
 // Package imports:
-import 'package:get_it/get_it.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 // Project imports:
-import '../../../drift_database/daos/agua_dao.dart';
+import '../../../core/providers/dependency_providers.dart';
 import '../models/achievement_model.dart' as local_models;
 import '../models/beber_agua_model.dart';
 import '../repository/agua_repository.dart';
@@ -49,9 +48,7 @@ class AguaState {
 /// Provider for AguaRepository
 @riverpod
 AguaRepository aguaRepository(AguaRepositoryRef ref) {
-  // Get AguaDao from GetIt (since it's already configured in DI)
-  final getIt = GetIt.instance;
-  final aguaDao = getIt<AguaDao>();
+  final aguaDao = ref.watch(aguaDaoProvider);
   return AguaRepository(aguaDao);
 }
 

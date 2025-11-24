@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/game_state.dart';
 import '../entities/enums.dart';
@@ -7,7 +6,6 @@ import '../services/ai_move_strategy_service.dart';
 
 /// Use case for making AI moves based on difficulty level
 /// Implements minimax-like strategy with memoization cache
-@injectable
 class MakeAIMoveUseCase {
   final AIMoveStrategyService _aiStrategyService;
 

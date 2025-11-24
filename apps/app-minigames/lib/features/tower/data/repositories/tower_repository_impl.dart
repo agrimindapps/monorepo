@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/high_score.dart';
@@ -8,7 +7,6 @@ import '../datasources/tower_local_data_source.dart';
 
 /// Implementation of TowerRepository
 /// Handles data operations and converts exceptions to failures
-@LazySingleton(as: TowerRepository)
 class TowerRepositoryImpl implements TowerRepository {
   final TowerLocalDataSource localDataSource;
 

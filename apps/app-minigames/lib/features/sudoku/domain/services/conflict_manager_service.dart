@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/sudoku_grid_entity.dart';
 import 'grid_validation_service.dart';
 
@@ -9,7 +7,6 @@ import 'grid_validation_service.dart';
 /// - Conflict detection across grid
 /// - Conflict marking and clearing
 /// - Conflict updates after moves
-@lazySingleton
 class ConflictManagerService {
   final GridValidationService _gridValidation;
 

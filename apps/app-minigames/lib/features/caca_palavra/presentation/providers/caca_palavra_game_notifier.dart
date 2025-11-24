@@ -1,17 +1,10 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../../core/di/injection.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/game_state.dart';
 import '../../domain/entities/high_score.dart';
-import '../../domain/usecases/generate_grid_usecase.dart';
-import '../../domain/usecases/select_cell_usecase.dart';
-import '../../domain/usecases/check_word_match_usecase.dart';
-import '../../domain/usecases/toggle_word_highlight_usecase.dart';
-import '../../domain/usecases/restart_game_usecase.dart';
-import '../../domain/usecases/load_high_score_usecase.dart';
-import '../../domain/usecases/save_high_score_usecase.dart';
+import 'caca_palavra_providers.dart';
 
 part 'caca_palavra_game_notifier.g.dart';
 
@@ -19,15 +12,6 @@ part 'caca_palavra_game_notifier.g.dart';
 /// Handles grid generation, cell selection, word matching, and scoring
 @riverpod
 class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
-  // Use cases
-  late final GenerateGridUseCase _generateGridUseCase;
-  late final SelectCellUseCase _selectCellUseCase;
-  late final CheckWordMatchUseCase _checkWordMatchUseCase;
-  late final ToggleWordHighlightUseCase _toggleWordHighlightUseCase;
-  late final RestartGameUseCase _restartGameUseCase;
-  late final LoadHighScoreUseCase _loadHighScoreUseCase;
-  late final SaveHighScoreUseCase _saveHighScoreUseCase;
-
   // Debounce timer for cell taps (100ms as per requirements)
   Timer? _debounceTimer;
   static const Duration _debounceDuration = Duration(milliseconds: 100);
@@ -43,15 +27,6 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
 
   @override
   Future<GameState> build() async {
-    // Inject use cases
-    _generateGridUseCase = getIt<GenerateGridUseCase>();
-    _selectCellUseCase = getIt<SelectCellUseCase>();
-    _checkWordMatchUseCase = getIt<CheckWordMatchUseCase>();
-    _toggleWordHighlightUseCase = getIt<ToggleWordHighlightUseCase>();
-    _restartGameUseCase = getIt<RestartGameUseCase>();
-    _loadHighScoreUseCase = getIt<LoadHighScoreUseCase>();
-    _saveHighScoreUseCase = getIt<SaveHighScoreUseCase>();
-
     // Cleanup on dispose
     ref.onDispose(() {
       _isMounted = false;
@@ -70,7 +45,8 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
 
   /// Loads high score from storage
   Future<void> _loadHighScore() async {
-    final result = await _loadHighScoreUseCase();
+    final loadHighScoreUseCase = ref.read(loadHighScoreUseCaseProvider);
+    final result = await loadHighScoreUseCase();
     result.fold(
       (failure) => _highScore = const HighScore.empty(),
       (score) => _highScore = score,
@@ -82,7 +58,8 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
     _gameStartTime = DateTime.now();
 
     final difficulty = state.valueOrNull?.difficulty ?? GameDifficulty.medium;
-    final result = await _generateGridUseCase(difficulty: difficulty);
+    final generateGridUseCase = ref.read(generateGridUseCaseProvider);
+    final result = await generateGridUseCase(difficulty: difficulty);
 
     return result.fold(
       (failure) => GameState.initial(difficulty: difficulty),
@@ -115,7 +92,8 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
     state = const AsyncValue.loading();
 
     // Select cell
-    final selectResult = _selectCellUseCase(
+    final selectCellUseCase = ref.read(selectCellUseCaseProvider);
+    final selectResult = selectCellUseCase(
       currentState: currentState,
       row: row,
       col: col,
@@ -133,7 +111,8 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
         if (newState.selectedPositions.length >= 2) {
           final previousFoundCount = newState.foundWordsCount;
 
-          final checkResult = _checkWordMatchUseCase(currentState: newState);
+          final checkWordMatchUseCase = ref.read(checkWordMatchUseCaseProvider);
+          final checkResult = checkWordMatchUseCase(currentState: newState);
 
           await checkResult.fold(
             (failure) async {
@@ -169,7 +148,9 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
     final currentState = state.valueOrNull;
     if (currentState == null) return;
 
-    final result = _toggleWordHighlightUseCase(
+    final toggleWordHighlightUseCase =
+        ref.read(toggleWordHighlightUseCaseProvider);
+    final result = toggleWordHighlightUseCase(
       currentState: currentState,
       wordIndex: wordIndex,
     );
@@ -188,7 +169,8 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
 
     final completionTime = DateTime.now().difference(_gameStartTime!).inSeconds;
 
-    final result = await _saveHighScoreUseCase(
+    final saveHighScoreUseCase = ref.read(saveHighScoreUseCaseProvider);
+    final result = await saveHighScoreUseCase(
       difficulty: finalState.difficulty,
       completionTime: completionTime,
     );
@@ -210,7 +192,8 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
 
     state = const AsyncValue.loading();
 
-    final result = await _restartGameUseCase(newDifficulty: newDifficulty);
+    final restartGameUseCase = ref.read(restartGameUseCaseProvider);
+    final result = await restartGameUseCase(newDifficulty: newDifficulty);
 
     result.fold(
       (failure) {
@@ -246,13 +229,10 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
 /// Provider for high score
 @riverpod
 class CacaPalavraHighScoreNotifier extends _$CacaPalavraHighScoreNotifier {
-  late final LoadHighScoreUseCase _loadHighScoreUseCase;
-
   @override
   Future<HighScore> build() async {
-    _loadHighScoreUseCase = getIt<LoadHighScoreUseCase>();
-
-    final result = await _loadHighScoreUseCase();
+    final loadHighScoreUseCase = ref.read(loadHighScoreUseCaseProvider);
+    final result = await loadHighScoreUseCase();
 
     return result.fold(
       (_) => const HighScore.empty(),

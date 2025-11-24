@@ -1,10 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/game_state.dart';
 
 /// Use case for toggling pause state
-@injectable
 class TogglePauseUseCase {
   TogglePauseUseCase();
 

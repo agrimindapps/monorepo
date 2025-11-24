@@ -14,6 +14,9 @@ import '../../domain/usecases/load_stats_usecase.dart';
 import '../../domain/usecases/update_stats_usecase.dart';
 import '../../data/datasources/campo_minado_local_data_source.dart';
 import '../../data/repositories/campo_minado_repository_impl.dart';
+import '../../domain/services/flood_fill_service.dart';
+import '../../domain/services/mine_generator_service.dart';
+import '../../domain/services/neighbor_calculator_service.dart';
 
 part 'campo_minado_game_notifier.g.dart';
 
@@ -38,6 +41,25 @@ Future<CampoMinadoRepositoryImpl> campoMinadoRepository(
 ) async {
   final dataSource = await ref.watch(campoMinadoLocalDataSourceProvider.future);
   return CampoMinadoRepositoryImpl(dataSource);
+}
+
+// Services providers
+
+@riverpod
+FloodFillService floodFillService(FloodFillServiceRef ref) {
+  return FloodFillService();
+}
+
+@riverpod
+MineGeneratorService mineGeneratorService(MineGeneratorServiceRef ref) {
+  return MineGeneratorService();
+}
+
+@riverpod
+NeighborCalculatorService neighborCalculatorService(
+  NeighborCalculatorServiceRef ref,
+) {
+  return NeighborCalculatorService();
 }
 
 // Use cases providers
@@ -121,7 +143,9 @@ class CampoMinadoGameNotifier extends _$CampoMinadoGameNotifier {
         state = newState;
 
         // Start timer on first move
-        if (newState.isPlaying && !newState.isFirstClick && _gameTimer == null) {
+        if (newState.isPlaying &&
+            !newState.isFirstClick &&
+            _gameTimer == null) {
           _startTimer();
         }
 

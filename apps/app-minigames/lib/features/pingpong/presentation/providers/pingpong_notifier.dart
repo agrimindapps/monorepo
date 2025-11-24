@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:get_it/get_it.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/game_state_entity.dart';
 import '../../domain/entities/high_score_entity.dart';
@@ -12,6 +11,7 @@ import '../../domain/usecases/check_collision_usecase.dart';
 import '../../domain/usecases/check_score_usecase.dart';
 import '../../domain/usecases/load_high_score_usecase.dart';
 import '../../domain/usecases/save_high_score_usecase.dart';
+import 'pingpong_providers.dart';
 
 part 'pingpong_notifier.g.dart';
 
@@ -40,20 +40,14 @@ class PingpongGame extends _$PingpongGame {
   }
 
   void _initializeUseCases() {
-    _startGameUseCase = GetIt.I<StartGameUseCase>();
-    _updateBallUseCase = GetIt.I<UpdateBallUseCase>();
-    _updatePlayerPaddleUseCase = GetIt.I<UpdatePlayerPaddleUseCase>();
-    _updateAiPaddleUseCase = GetIt.I<UpdateAiPaddleUseCase>();
-    _checkCollisionUseCase = GetIt.I<CheckCollisionUseCase>();
-    _checkScoreUseCase = GetIt.I<CheckScoreUseCase>();
-  }
-
-  void setUseCases({
-    required LoadHighScoreUseCase loadHighScoreUseCase,
-    required SaveHighScoreUseCase saveHighScoreUseCase,
-  }) {
-    _loadHighScoreUseCase = loadHighScoreUseCase;
-    _saveHighScoreUseCase = saveHighScoreUseCase;
+    _startGameUseCase = ref.read(startGameUseCaseProvider);
+    _updateBallUseCase = ref.read(updateBallUseCaseProvider);
+    _updatePlayerPaddleUseCase = ref.read(updatePlayerPaddleUseCaseProvider);
+    _updateAiPaddleUseCase = ref.read(updateAiPaddleUseCaseProvider);
+    _checkCollisionUseCase = ref.read(checkCollisionUseCaseProvider);
+    _checkScoreUseCase = ref.read(checkScoreUseCaseProvider);
+    _loadHighScoreUseCase = ref.read(loadHighScoreUseCaseProvider);
+    _saveHighScoreUseCase = ref.read(saveHighScoreUseCaseProvider);
   }
 
   Future<void> _loadHighScore(GameDifficulty difficulty) async {

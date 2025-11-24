@@ -1,6 +1,5 @@
 // Package imports:
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 // Core imports:
 import 'package:app_minigames/core/error/failures.dart';
@@ -9,7 +8,6 @@ import 'package:app_minigames/core/error/failures.dart';
 import '../repositories/quiz_repository.dart';
 
 /// Use case to save high score
-@injectable
 class SaveHighScoreUseCase {
   final QuizRepository repository;
 

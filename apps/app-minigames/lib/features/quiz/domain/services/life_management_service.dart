@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 /// Service responsible for game life management and game over conditions
 ///
@@ -7,7 +6,6 @@ import 'package:injectable/injectable.dart';
 /// - Game over detection
 /// - Penalty application
 /// - Life statistics
-@lazySingleton
 class LifeManagementService {
   // ============================================================================
   // Constants

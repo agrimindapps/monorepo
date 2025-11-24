@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'package:injectable/injectable.dart';
 
 import '../entities/enums.dart';
 import '../entities/position.dart';
@@ -7,7 +6,6 @@ import '../entities/word_entity.dart';
 
 /// Service responsible for grid generation logic
 /// Follows SRP by handling only grid placement operations
-@lazySingleton
 class GridGeneratorService {
   final Random _random = Random();
 

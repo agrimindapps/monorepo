@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../entities/enums.dart';
 import 'game_result_validation_service.dart';
@@ -13,7 +12,6 @@ import 'game_result_validation_service.dart';
 /// - Smart move calculation (winning, blocking, center, corners)
 /// - Random move generation
 /// - Move prioritization
-@lazySingleton
 class AIMoveStrategyService {
   final GameResultValidationService _gameValidation;
   final Random _random;

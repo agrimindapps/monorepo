@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 /// Model representing overlap calculation result
 class OverlapResult {
@@ -29,7 +28,6 @@ class OverlapResult {
 /// - Precision ratio calculation
 /// - Perfect placement detection
 /// - Game over condition checking
-@lazySingleton
 class OverlapCalculationService {
   /// Threshold for perfect placement (90% precision)
   static const double perfectPlacementThreshold = 0.9;

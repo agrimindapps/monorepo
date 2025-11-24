@@ -29,15 +29,15 @@ final petivetiDatabaseProvider = Provider<PetivetiDatabase>((ref) {
   return db;
 });
 
-/// Provider legado (mantido para compatibilidade)
-///
-/// **DEPRECADO:** Use petivetiDatabaseProvider ao invés deste.
-@Deprecated('Use petivetiDatabaseProvider (Provider) ao invés de @riverpod')
-@riverpod
-PetivetiDatabase petivetiDatabase(PetivetiDatabaseRef ref) {
-  // Redireciona para o provider correto
-  return ref.watch(petivetiDatabaseProvider);
-}
+// /// Provider legado (mantido para compatibilidade)
+// ///
+// /// **DEPRECADO:** Use petivetiDatabaseProvider ao invés deste.
+// // @Deprecated('Use petivetiDatabaseProvider (Provider) ao invés de @riverpod')
+// // @riverpod
+// // PetivetiDatabase petivetiDatabase(PetivetiDatabaseRef ref) {
+// //   // Redireciona para o provider correto
+// //   return ref.watch(petivetiDatabaseProvider);
+// // }
 
 /// Provider for Firestore instance
 @riverpod

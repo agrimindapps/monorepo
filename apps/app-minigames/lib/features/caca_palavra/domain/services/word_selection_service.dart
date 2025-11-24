@@ -1,9 +1,7 @@
 import 'dart:math';
-import 'package:injectable/injectable.dart';
 
 /// Service responsible for word selection logic
 /// Follows SRP by handling only word selection strategies
-@lazySingleton
 class WordSelectionService {
   final Random _random = Random();
 

@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:injectable/injectable.dart';
 
 import '../entities/ball_entity.dart';
 
@@ -12,7 +11,6 @@ import '../entities/ball_entity.dart';
 /// - Bounce physics
 /// - Speed capping
 /// - Angle adjustments
-@lazySingleton
 class BallPhysicsService {
   final Random _random;
 

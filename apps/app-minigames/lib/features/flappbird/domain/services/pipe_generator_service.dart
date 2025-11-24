@@ -1,12 +1,10 @@
 import 'dart:math';
-import 'package:injectable/injectable.dart';
 
 import '../entities/pipe_entity.dart';
 import '../entities/enums.dart';
 
 /// Service responsible for pipe generation and management
 /// Follows SRP by handling only pipe operations
-@lazySingleton
 class PipeGeneratorService {
   final Random _random = Random();
 
@@ -40,7 +38,8 @@ class PipeGeneratorService {
     // Ensure max top height doesn't create impossible gaps
     // maxTopHeight = screen * maxTopHeightPercent, but ensure gap fits
     final maxPossibleTop = screenHeight * (1 - gapSize) - minTopHeight;
-    final maxTopHeight = minTopHeight + maxPossibleTop * 0.9; // Use 90% of range
+    final maxTopHeight =
+        minTopHeight + maxPossibleTop * 0.9; // Use 90% of range
 
     final topHeight =
         minTopHeight + _random.nextDouble() * (maxTopHeight - minTopHeight);

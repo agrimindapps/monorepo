@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:injectable/injectable.dart';
 
 import '../entities/position.dart';
 
@@ -11,7 +10,6 @@ import '../entities/position.dart';
 /// - Food validation (avoiding snake body)
 /// - Food placement strategies
 /// - Food statistics
-@lazySingleton
 class FoodGeneratorService {
   final Random _random;
 

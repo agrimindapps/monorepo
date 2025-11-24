@@ -12,7 +12,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app_page.dart';
 import 'core/config/firebase_options.dart';
-import 'core/di/injection.dart';
 import 'core/providers/core_providers.dart';
 
 void main() async {
@@ -51,9 +50,6 @@ void main() async {
     );
     // App continues without Firebase - local storage works independently
   }
-
-  // Initialize DI with Firebase status (kept for backwards compatibility during migration)
-  await configureDependencies(firebaseEnabled: firebaseInitialized);
 
   if (!kIsWeb &&
       firebaseInitialized &&

@@ -1,12 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../entities/game_state_entity.dart';
 import '../entities/ball_entity.dart';
 import '../entities/paddle_entity.dart';
 import '../entities/enums.dart';
 
-@lazySingleton
 class StartGameUseCase {
   Future<Either<Failure, GameStateEntity>> call(
     GameStateEntity currentState,

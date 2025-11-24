@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/high_score_model.dart';
@@ -13,7 +12,6 @@ abstract class TowerLocalDataSource {
 }
 
 /// Implementation of TowerLocalDataSource using SharedPreferences
-@LazySingleton(as: TowerLocalDataSource)
 class TowerLocalDataSourceImpl implements TowerLocalDataSource {
   final SharedPreferences sharedPreferences;
   static const String _highScoreKey = 'tower_high_score';

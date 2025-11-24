@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../entities/enums.dart';
 import '../entities/game_state.dart';
@@ -10,7 +9,6 @@ import '../entities/game_state.dart';
 /// - Answer state management (unanswered/correct/incorrect)
 /// - Game over detection
 /// - State validation
-@lazySingleton
 class GameStateManagerService {
   GameStateManagerService();
 

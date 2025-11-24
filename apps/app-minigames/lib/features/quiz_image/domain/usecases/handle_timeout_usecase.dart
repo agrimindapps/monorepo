@@ -1,12 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/enums.dart';
 import '../entities/game_state.dart';
 
 /// Use case that handles timeout for current question
 /// Marks question as incorrect if unanswered when time runs out
-@injectable
 class HandleTimeoutUseCase {
   HandleTimeoutUseCase();
 

@@ -1,17 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:get_it/get_it.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/game_state_entity.dart';
-import '../../domain/repositories/soletrando_repository.dart';
 import '../../domain/usecases/check_letter_usecase.dart';
 import '../../domain/usecases/generate_word_usecase.dart';
 import '../../domain/usecases/restart_game_usecase.dart';
 import '../../domain/usecases/reveal_hint_usecase.dart';
 import '../../domain/usecases/skip_word_usecase.dart';
+import 'soletrando_providers.dart';
 
 part 'soletrando_game_notifier.g.dart';
 
@@ -39,7 +38,7 @@ class SoletrandoGame extends _$SoletrandoGame {
     _timer?.cancel();
 
     // Generate word
-    final generateUseCase = ref.read(generateWordUseCaseProvider);
+    final generateUseCase = await ref.read(generateWordUseCaseProvider.future);
     final result = await generateUseCase(GenerateWordParams(
       difficulty: difficulty,
       category: category,
@@ -121,7 +120,7 @@ class SoletrandoGame extends _$SoletrandoGame {
   Future<void> skipWord() async {
     if (!state.isActive) return;
 
-    final skipWordUseCase = ref.read(skipWordUseCaseProvider);
+    final skipWordUseCase = await ref.read(skipWordUseCaseProvider.future);
     final result = await skipWordUseCase(state);
 
     result.fold(
@@ -139,8 +138,9 @@ class SoletrandoGame extends _$SoletrandoGame {
 
   /// Restart game with current settings
   Future<void> restartGame() async {
-    final restartUseCase = ref.read(restartGameUseCaseProvider);
-    final result = await restartUseCase(RestartGameParams(
+    final restartUseCaseAsync =
+        await ref.read(restartGameUseCaseProvider.future);
+    final result = await restartUseCaseAsync(RestartGameParams(
       difficulty: state.difficulty,
       category: state.currentWord.category,
     ));
@@ -191,21 +191,4 @@ class SoletrandoGame extends _$SoletrandoGame {
   }
 }
 
-// Provider for dependencies using GetIt
-@riverpod
-GenerateWordUseCase generateWordUseCase(GenerateWordUseCaseRef ref) {
-  final repository = GetIt.I<SoletrandoRepository>();
-  return GenerateWordUseCase(repository);
-}
-
-@riverpod
-SkipWordUseCase skipWordUseCase(SkipWordUseCaseRef ref) {
-  final repository = GetIt.I<SoletrandoRepository>();
-  return SkipWordUseCase(repository);
-}
-
-@riverpod
-RestartGameUseCase restartGameUseCase(RestartGameUseCaseRef ref) {
-  final repository = GetIt.I<SoletrandoRepository>();
-  return RestartGameUseCase(repository);
-}
+// Note: Use cases providers moved to soletrando_providers.dart

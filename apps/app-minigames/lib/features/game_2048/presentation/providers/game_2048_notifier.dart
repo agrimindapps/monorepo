@@ -1,40 +1,18 @@
-import 'package:get_it/get_it.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/game_state_entity.dart';
 import '../../domain/entities/high_score_entity.dart';
-import '../../domain/usecases/check_game_over_usecase.dart';
-import '../../domain/usecases/load_high_score_usecase.dart';
-import '../../domain/usecases/move_tiles_usecase.dart';
-import '../../domain/usecases/restart_game_usecase.dart';
-import '../../domain/usecases/save_high_score_usecase.dart';
-import '../../domain/usecases/spawn_tile_usecase.dart';
+import 'game_2048_providers.dart';
 
 part 'game_2048_notifier.g.dart';
 
 @riverpod
 class Game2048Notifier extends _$Game2048Notifier {
-  late final MoveTilesUseCase _moveTilesUseCase;
-  late final SpawnTileUseCase _spawnTileUseCase;
-  late final CheckGameOverUseCase _checkGameOverUseCase;
-  late final RestartGameUseCase _restartGameUseCase;
-  late final LoadHighScoreUseCase _loadHighScoreUseCase;
-  late final SaveHighScoreUseCase _saveHighScoreUseCase;
-
   HighScoreEntity _currentBestScore = HighScoreEntity.empty(BoardSize.size4x4);
 
   @override
   GameStateEntity build() {
-    // Get use cases from GetIt
-    final sl = GetIt.instance;
-    _moveTilesUseCase = sl<MoveTilesUseCase>();
-    _spawnTileUseCase = sl<SpawnTileUseCase>();
-    _checkGameOverUseCase = sl<CheckGameOverUseCase>();
-    _restartGameUseCase = sl<RestartGameUseCase>();
-    _loadHighScoreUseCase = sl<LoadHighScoreUseCase>();
-    _saveHighScoreUseCase = sl<SaveHighScoreUseCase>();
-
     // Load high score and initialize game
     _loadHighScore();
 
@@ -49,7 +27,8 @@ class Game2048Notifier extends _$Game2048Notifier {
     await _loadHighScore(size);
 
     // Create new game
-    final result = await _restartGameUseCase.callWithNewSize(
+    final restartUseCase = ref.read(restartGameUseCaseProvider);
+    final result = await restartUseCase.callWithNewSize(
       size,
       _currentBestScore.score,
     );
@@ -68,7 +47,8 @@ class Game2048Notifier extends _$Game2048Notifier {
   Future<void> _loadHighScore([BoardSize? boardSize]) async {
     final size = boardSize ?? state.boardSize;
 
-    final result = await _loadHighScoreUseCase(size);
+    final loadHighScoreUseCase = ref.read(loadHighScoreUseCaseProvider);
+    final result = await loadHighScoreUseCase(size);
 
     result.fold(
       (failure) {
@@ -89,7 +69,8 @@ class Game2048Notifier extends _$Game2048Notifier {
     }
 
     // Execute move
-    final moveResult = await _moveTilesUseCase(state, direction);
+    final moveTilesUseCase = ref.read(moveTilesUseCaseProvider);
+    final moveResult = await moveTilesUseCase(state, direction);
 
     await moveResult.fold(
       (failure) async {
@@ -120,7 +101,8 @@ class Game2048Notifier extends _$Game2048Notifier {
         );
 
         // Spawn new tile
-        final spawnResult = await _spawnTileUseCase(state.grid);
+        final spawnTileUseCase = ref.read(spawnTileUseCaseProvider);
+        final spawnResult = await spawnTileUseCase(state.grid);
 
         spawnResult.fold(
           (failure) {
@@ -147,7 +129,8 @@ class Game2048Notifier extends _$Game2048Notifier {
         }
 
         // Check for game over
-        final gameOverResult = await _checkGameOverUseCase(state.grid);
+        final checkGameOverUseCase = ref.read(checkGameOverUseCaseProvider);
+        final gameOverResult = await checkGameOverUseCase(state.grid);
 
         gameOverResult.fold(
           (failure) {
@@ -166,7 +149,8 @@ class Game2048Notifier extends _$Game2048Notifier {
 
   /// Restarts the game
   Future<void> restart() async {
-    final result = await _restartGameUseCase(state);
+    final restartUseCase = ref.read(restartGameUseCaseProvider);
+    final result = await restartUseCase(state);
 
     result.fold(
       (failure) {
@@ -214,7 +198,8 @@ class Game2048Notifier extends _$Game2048Notifier {
       achievedAt: DateTime.now(),
     );
 
-    final result = await _saveHighScoreUseCase(
+    final saveHighScoreUseCase = ref.read(saveHighScoreUseCaseProvider);
+    final result = await saveHighScoreUseCase(
       currentScore,
       _currentBestScore,
     );

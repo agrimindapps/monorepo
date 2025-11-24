@@ -1,11 +1,9 @@
 import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../entities/game_state_entity.dart';
 import '../entities/enums.dart';
 import '../services/score_manager_service.dart';
 
-@lazySingleton
 class CheckScoreUseCase {
   final ScoreManagerService _scoreService;
 

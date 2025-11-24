@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 // Core imports:
-import 'package:app_minigames/core/di/injection.dart';
 
 // Domain imports:
 import '../../domain/entities/game_state_entity.dart';
@@ -17,6 +16,7 @@ import '../../domain/usecases/update_pipes_usecase.dart';
 import '../../domain/usecases/check_collision_usecase.dart';
 import '../../domain/usecases/load_high_score_usecase.dart';
 import '../../domain/usecases/save_high_score_usecase.dart';
+import 'flappbird_providers.dart';
 
 part 'flappbird_notifier.g.dart';
 
@@ -49,13 +49,13 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
     const double screenWidth = 400.0;
     const double screenHeight = 800.0;
     // Inject use cases
-    _startGameUseCase = getIt<StartGameUseCase>();
-    _flapBirdUseCase = getIt<FlapBirdUseCase>();
-    _updatePhysicsUseCase = getIt<UpdatePhysicsUseCase>();
-    _updatePipesUseCase = getIt<UpdatePipesUseCase>();
-    _checkCollisionUseCase = getIt<CheckCollisionUseCase>();
-    _loadHighScoreUseCase = getIt<LoadHighScoreUseCase>();
-    _saveHighScoreUseCase = getIt<SaveHighScoreUseCase>();
+    _startGameUseCase = ref.read(StartGameUseCase>();
+    _flapBirdUseCase = ref.read(FlapBirdUseCase>();
+    _updatePhysicsUseCase = ref.read(UpdatePhysicsUseCase>();
+    _updatePipesUseCase = ref.read(UpdatePipesUseCase>();
+    _checkCollisionUseCase = ref.read(CheckCollisionUseCase>();
+    _loadHighScoreUseCase = ref.read(LoadHighScoreUseCase>();
+    _saveHighScoreUseCase = ref.read(SaveHighScoreUseCase>();
 
     // Cleanup on dispose
     ref.onDispose(() {

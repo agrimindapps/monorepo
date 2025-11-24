@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/semantics.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../../core/di/injection.dart';
 import '../../domain/entities/game_state.dart';
 import '../../domain/entities/game_stats.dart';
 import '../../domain/entities/game_settings.dart';
@@ -15,6 +14,7 @@ import '../../domain/usecases/save_settings_usecase.dart';
 import '../../domain/usecases/load_stats_usecase.dart';
 import '../../domain/usecases/save_stats_usecase.dart';
 import '../../domain/usecases/reset_stats_usecase.dart';
+import 'tictactoe_providers.dart';
 
 part 'tictactoe_game_notifier.g.dart';
 
@@ -45,13 +45,13 @@ class TicTacToeGameNotifier extends _$TicTacToeGameNotifier {
   @override
   Future<GameState> build() async {
     // Inject use cases
-    _makeMoveUseCase = getIt<MakeMoveUseCase>();
-    _makeAIMoveUseCase = getIt<MakeAIMoveUseCase>();
-    _checkGameResultUseCase = getIt<CheckGameResultUseCase>();
-    _loadSettingsUseCase = getIt<LoadSettingsUseCase>();
-    _saveSettingsUseCase = getIt<SaveSettingsUseCase>();
-    _loadStatsUseCase = getIt<LoadStatsUseCase>();
-    _saveStatsUseCase = getIt<SaveStatsUseCase>();
+    _makeMoveUseCase = ref.read(makeMoveUseCaseProvider);
+    _makeAIMoveUseCase = ref.read(makeAiMoveUseCaseProvider);
+    _checkGameResultUseCase = ref.read(checkGameResultUseCaseProvider);
+    _loadSettingsUseCase = ref.read(loadSettingsUseCaseProvider);
+    _saveSettingsUseCase = ref.read(saveSettingsUseCaseProvider);
+    _loadStatsUseCase = ref.read(loadStatsUseCaseProvider);
+    _saveStatsUseCase = ref.read(saveStatsUseCaseProvider);
 
     // Cleanup on dispose
     ref.onDispose(() {
@@ -346,8 +346,8 @@ class TicTacToeStatsNotifier extends _$TicTacToeStatsNotifier {
 
   @override
   Future<GameStats> build() async {
-    _loadStatsUseCase = getIt<LoadStatsUseCase>();
-    _resetStatsUseCase = getIt<ResetStatsUseCase>();
+    _loadStatsUseCase = ref.read(loadStatsUseCaseProvider);
+    _resetStatsUseCase = ref.read(resetStatsUseCaseProvider);
 
     final result = await _loadStatsUseCase();
 

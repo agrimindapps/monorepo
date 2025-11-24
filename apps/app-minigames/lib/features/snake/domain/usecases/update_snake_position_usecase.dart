@@ -1,6 +1,5 @@
 // Package imports:
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 // Core imports:
 import 'package:app_minigames/core/error/failures.dart';
@@ -14,7 +13,6 @@ import '../services/snake_movement_service.dart';
 import '../services/collision_detection_service.dart';
 
 /// Use case to update snake position (game physics)
-@injectable
 class UpdateSnakePositionUseCase {
   final FoodGeneratorService _foodGeneratorService;
   final SnakeMovementService _movementService;

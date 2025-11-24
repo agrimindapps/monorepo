@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/game_state.dart';
 import '../entities/enums.dart';
@@ -7,7 +6,6 @@ import '../services/game_result_validation_service.dart';
 
 /// Use case for checking if the game has ended (win/draw)
 /// Checks all winning conditions and updates game result
-@injectable
 class CheckGameResultUseCase {
   final GameResultValidationService _validationService;
 

@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../entities/enums.dart';
 
@@ -9,7 +8,6 @@ import '../entities/enums.dart';
 /// - Board state serialization
 /// - Cache statistics (hits, misses, hit rate)
 /// - Cache clearing
-@lazySingleton
 class MoveCacheService {
   final Map<String, CachedMove> _cache = {};
   int _cacheHits = 0;

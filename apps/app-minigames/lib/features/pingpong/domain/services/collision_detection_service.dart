@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../entities/ball_entity.dart';
 import '../entities/paddle_entity.dart';
@@ -10,7 +9,6 @@ import '../entities/paddle_entity.dart';
 /// - Hit position calculation
 /// - Collision response
 /// - Rally tracking
-@lazySingleton
 class CollisionDetectionService {
   // ============================================================================
   // Constants

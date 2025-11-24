@@ -1,6 +1,5 @@
 // Package imports:
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 // Core imports:
 import 'package:app_minigames/core/error/exceptions.dart';
@@ -15,7 +14,6 @@ import '../../domain/repositories/quiz_repository.dart';
 import '../datasources/quiz_local_data_source.dart';
 
 /// Implementation of QuizRepository
-@LazySingleton(as: QuizRepository)
 class QuizRepositoryImpl implements QuizRepository {
   final QuizLocalDataSource localDataSource;
 

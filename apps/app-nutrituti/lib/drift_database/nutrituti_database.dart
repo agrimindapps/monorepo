@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
 // Tables
 import 'tables/perfis_table.dart';
@@ -58,19 +57,12 @@ part 'nutrituti_database.g.dart';
   ],
   daos: [PerfilDao, PesoDao, AguaDao, WaterDao, ExercicioDao, ComentarioDao],
 )
-@lazySingleton
 class NutritutiDatabase extends _$NutritutiDatabase with BaseDriftDatabase {
   NutritutiDatabase(QueryExecutor e) : super(e);
 
   /// Versão do schema do banco de dados
   @override
   int get schemaVersion => 1;
-
-  /// Factory constructor para injeção de dependência (GetIt/Injectable)
-  @factoryMethod
-  factory NutritutiDatabase.injectable() {
-    return NutritutiDatabase.production();
-  }
 
   /// Factory constructor para ambiente de produção
   factory NutritutiDatabase.production() {

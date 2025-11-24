@@ -33,12 +33,12 @@ final taskolistDatabaseProvider = Provider<TaskolistDatabase>((ref) {
   return db;
 });
 
-/// Provider legado (mantido para compatibilidade)
-@Deprecated('Use taskolistDatabaseProvider')
-@riverpod
-TaskolistDatabase taskolistDatabase(Ref ref) {
-  return ref.watch(taskolistDatabaseProvider);
-}
+// /// Provider legado (mantido para compatibilidade)
+// @Deprecated('Use taskolistDatabaseProvider')
+// // @riverpod
+// // TaskolistDatabase taskolistDatabase(Ref ref) {
+// //   return ref.watch(taskolistDatabaseProvider);
+// // }
 
 // ============================================================================
 // CORE SERVICES (from core package)

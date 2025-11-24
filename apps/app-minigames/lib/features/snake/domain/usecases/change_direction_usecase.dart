@@ -1,6 +1,5 @@
 // Package imports:
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 // Core imports:
 import 'package:app_minigames/core/error/failures.dart';
@@ -10,7 +9,6 @@ import '../entities/game_state.dart';
 import '../entities/enums.dart';
 
 /// Use case to change snake direction
-@injectable
 class ChangeDirectionUseCase {
   ChangeDirectionUseCase();
 

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../../core/di/injection.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/game_state.dart';
 import '../../domain/usecases/generate_game_questions_usecase.dart';
@@ -12,6 +11,7 @@ import '../../domain/usecases/update_timer_usecase.dart';
 import '../../domain/usecases/restart_game_usecase.dart';
 import '../../domain/usecases/load_high_score_usecase.dart';
 import '../../domain/usecases/save_high_score_usecase.dart';
+import 'quiz_image_providers.dart';
 
 part 'quiz_image_notifier.g.dart';
 
@@ -42,15 +42,15 @@ class QuizImageNotifier extends _$QuizImageNotifier {
   @override
   Future<QuizGameState> build(GameDifficulty difficulty) async {
     // Inject use cases from GetIt
-    _generateQuestionsUseCase = getIt<GenerateGameQuestionsUseCase>();
-    _startGameUseCase = getIt<StartGameUseCase>();
-    _selectAnswerUseCase = getIt<SelectAnswerUseCase>();
-    _handleTimeoutUseCase = getIt<HandleTimeoutUseCase>();
-    _nextQuestionUseCase = getIt<NextQuestionUseCase>();
-    _updateTimerUseCase = getIt<UpdateTimerUseCase>();
-    _restartGameUseCase = getIt<RestartGameUseCase>();
-    _loadHighScoreUseCase = getIt<LoadHighScoreUseCase>();
-    _saveHighScoreUseCase = getIt<SaveHighScoreUseCase>();
+    _generateQuestionsUseCase = ref.read(GenerateGameQuestionsUseCase>();
+    _startGameUseCase = ref.read(StartGameUseCase>();
+    _selectAnswerUseCase = ref.read(SelectAnswerUseCase>();
+    _handleTimeoutUseCase = ref.read(HandleTimeoutUseCase>();
+    _nextQuestionUseCase = ref.read(NextQuestionUseCase>();
+    _updateTimerUseCase = ref.read(UpdateTimerUseCase>();
+    _restartGameUseCase = ref.read(RestartGameUseCase>();
+    _loadHighScoreUseCase = ref.read(LoadHighScoreUseCase>();
+    _saveHighScoreUseCase = ref.read(SaveHighScoreUseCase>();
 
     // Cleanup on dispose
     ref.onDispose(() {

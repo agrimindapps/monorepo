@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:injectable/injectable.dart';
 import '../entities/block_data.dart';
 
 /// Model representing block generation result
@@ -31,7 +30,6 @@ class BlockGenerationResult {
 /// - Color cycling through palette
 /// - Block positioning and sizing
 /// - Initial block generation
-@lazySingleton
 class BlockGenerationService {
   /// Color palette for blocks (cycles through these colors)
   static const List<Color> blockColors = [

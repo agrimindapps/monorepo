@@ -1,6 +1,5 @@
 // Package imports:
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 // Core imports:
 import 'package:app_minigames/core/error/failures.dart';
@@ -12,7 +11,6 @@ import '../services/answer_validation_service.dart';
 import '../services/life_management_service.dart';
 
 /// Use case to process answer selection
-@injectable
 class SelectAnswerUseCase {
   final AnswerValidationService _answerValidationService;
   final LifeManagementService _lifeManagementService;

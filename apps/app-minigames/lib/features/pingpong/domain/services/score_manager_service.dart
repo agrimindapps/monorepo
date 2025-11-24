@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../entities/ball_entity.dart';
 
@@ -9,7 +8,6 @@ import '../entities/ball_entity.dart';
 /// - Win condition checking
 /// - Rally tracking
 /// - Score statistics
-@lazySingleton
 class ScoreManagerService {
   // ============================================================================
   // Constants

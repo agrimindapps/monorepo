@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/game_state.dart';
 import '../services/overlap_calculation_service.dart';
@@ -9,7 +8,6 @@ import '../services/block_generation_service.dart';
 
 /// Use case for dropping the current block
 /// Orchestrates services for overlap, scoring, and block generation
-@injectable
 class DropBlockUseCase {
   final OverlapCalculationService _overlapService;
   final ScoringService _scoringService;

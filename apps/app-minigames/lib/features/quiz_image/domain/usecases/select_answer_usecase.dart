@@ -1,12 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/enums.dart';
 import '../entities/game_state.dart';
 
 /// Use case that handles answer selection for current question
 /// Validates answer, checks correctness, and updates score
-@injectable
 class SelectAnswerUseCase {
   SelectAnswerUseCase();
 

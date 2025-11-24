@@ -1,11 +1,9 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/game_settings.dart';
 import '../repositories/tictactoe_repository.dart';
 
 /// Use case for saving game settings to storage
-@injectable
 class SaveSettingsUseCase {
   final TicTacToeRepository repository;
 

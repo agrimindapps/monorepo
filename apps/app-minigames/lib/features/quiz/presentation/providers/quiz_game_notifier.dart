@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 // Core imports:
-import 'package:app_minigames/core/di/injection.dart';
 
 // Domain imports:
 import '../../domain/entities/game_state.dart';
@@ -19,6 +18,7 @@ import '../../domain/usecases/start_game_usecase.dart';
 import '../../domain/usecases/restart_game_usecase.dart';
 import '../../domain/usecases/load_high_score_usecase.dart';
 import '../../domain/usecases/save_high_score_usecase.dart';
+import 'quiz_providers.dart';
 
 part 'quiz_game_notifier.g.dart';
 
@@ -47,15 +47,15 @@ class QuizGameNotifier extends _$QuizGameNotifier {
   @override
   FutureOr<QuizGameState> build() async {
     // Inject use cases
-    _generateGameQuestionsUseCase = getIt<GenerateGameQuestionsUseCase>();
-    _selectAnswerUseCase = getIt<SelectAnswerUseCase>();
-    _handleTimeoutUseCase = getIt<HandleTimeoutUseCase>();
-    _nextQuestionUseCase = getIt<NextQuestionUseCase>();
-    _updateTimerUseCase = getIt<UpdateTimerUseCase>();
-    _startGameUseCase = getIt<StartGameUseCase>();
-    _restartGameUseCase = getIt<RestartGameUseCase>();
-    _loadHighScoreUseCase = getIt<LoadHighScoreUseCase>();
-    _saveHighScoreUseCase = getIt<SaveHighScoreUseCase>();
+    _generateGameQuestionsUseCase = ref.read(GenerateGameQuestionsUseCase>();
+    _selectAnswerUseCase = ref.read(SelectAnswerUseCase>();
+    _handleTimeoutUseCase = ref.read(HandleTimeoutUseCase>();
+    _nextQuestionUseCase = ref.read(NextQuestionUseCase>();
+    _updateTimerUseCase = ref.read(UpdateTimerUseCase>();
+    _startGameUseCase = ref.read(StartGameUseCase>();
+    _restartGameUseCase = ref.read(RestartGameUseCase>();
+    _loadHighScoreUseCase = ref.read(LoadHighScoreUseCase>();
+    _saveHighScoreUseCase = ref.read(SaveHighScoreUseCase>();
 
     // Cleanup on dispose
     ref.onDispose(() {

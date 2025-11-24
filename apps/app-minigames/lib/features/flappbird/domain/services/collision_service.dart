@@ -1,11 +1,8 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/bird_entity.dart';
 import '../entities/pipe_entity.dart';
 
 /// Service responsible for collision detection
 /// Follows SRP by handling only collision calculations
-@lazySingleton
 class CollisionService {
   /// Collision box padding (makes hitbox slightly smaller for fairness)
   static const double collisionPadding = 2.0;

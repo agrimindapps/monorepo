@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/high_score_model.dart';
@@ -17,7 +16,6 @@ abstract class QuizImageLocalDataSource {
   List<QuizQuestionModel> getAvailableQuestions();
 }
 
-@LazySingleton(as: QuizImageLocalDataSource)
 class QuizImageLocalDataSourceImpl implements QuizImageLocalDataSource {
   static const String _highScoreKey = 'quiz_image_high_score';
 

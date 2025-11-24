@@ -1,12 +1,10 @@
 import 'dart:math';
-import 'package:injectable/injectable.dart';
 
 import '../entities/cell_data.dart';
 import '../entities/enums.dart';
 
 /// Service responsible for mine placement logic
 /// Follows SRP by handling only mine generation operations
-@lazySingleton
 class MineGeneratorService {
   final Random _random = Random();
 

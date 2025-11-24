@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/high_score.dart';
@@ -9,7 +8,6 @@ import '../datasources/quiz_image_local_data_source.dart';
 
 /// Implementation of QuizImageRepository
 /// Handles data operations for quiz game through local data source
-@LazySingleton(as: QuizImageRepository)
 class QuizImageRepositoryImpl implements QuizImageRepository {
   final QuizImageLocalDataSource localDataSource;
 

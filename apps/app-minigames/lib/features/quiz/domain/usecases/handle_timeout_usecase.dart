@@ -1,6 +1,5 @@
 // Package imports:
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 // Core imports:
 import 'package:app_minigames/core/error/failures.dart';
@@ -11,7 +10,6 @@ import '../entities/enums.dart';
 import '../services/life_management_service.dart';
 
 /// Use case to handle question timeout
-@injectable
 class HandleTimeoutUseCase {
   final LifeManagementService _lifeManagementService;
 

@@ -3,17 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/game_state_entity.dart';
 import '../../domain/entities/position_entity.dart';
-import '../../domain/services/grid_validation_service.dart';
-import '../../domain/services/puzzle_generator_service.dart';
-import '../../domain/usecases/check_completion_usecase.dart';
-import '../../domain/usecases/generate_puzzle_usecase.dart';
-import '../../domain/usecases/get_hint_usecase.dart';
-import '../../domain/usecases/load_high_score_usecase.dart';
-import '../../domain/usecases/place_number_usecase.dart';
-import '../../domain/usecases/save_high_score_usecase.dart';
-import '../../domain/usecases/toggle_notes_usecase.dart';
-import '../../domain/usecases/update_conflicts_usecase.dart';
-import '../../domain/usecases/validate_move_usecase.dart';
+import 'sudoku_providers.dart';
 
 part 'sudoku_notifier.g.dart';
 
@@ -21,15 +11,6 @@ part 'sudoku_notifier.g.dart';
 class SudokuGame extends _$SudokuGame {
   Timer? _gameTimer;
   bool _isMounted = true;
-
-  // Use cases injected via providers (TODO: implement in DI)
-  late final GeneratePuzzleUseCase _generatePuzzleUseCase;
-  late final PlaceNumberUseCase _placeNumberUseCase;
-  late final ToggleNotesUseCase _toggleNotesUseCase;
-  late final GetHintUseCase _getHintUseCase;
-  late final CheckCompletionUseCase _checkCompletionUseCase;
-  late final LoadHighScoreUseCase _loadHighScoreUseCase;
-  late final SaveHighScoreUseCase _saveHighScoreUseCase;
 
   @override
   GameStateEntity build() {
@@ -39,16 +20,6 @@ class SudokuGame extends _$SudokuGame {
       _gameTimer?.cancel();
     });
 
-    // Initialize use cases (will be replaced with DI)
-    _generatePuzzleUseCase = GeneratePuzzleUseCase(PuzzleGeneratorService());
-    _placeNumberUseCase = PlaceNumberUseCase(
-      ref.read(validateMoveUseCaseProvider),
-      ref.read(updateConflictsUseCaseProvider),
-    );
-    _toggleNotesUseCase = ToggleNotesUseCase();
-    _getHintUseCase = GetHintUseCase();
-    _checkCompletionUseCase = CheckCompletionUseCase();
-
     // Return initial state
     return GameStateEntity.initial();
   }
@@ -56,7 +27,8 @@ class SudokuGame extends _$SudokuGame {
   /// Start new game
   Future<void> startNewGame(GameDifficulty difficulty) async {
     // Generate puzzle
-    final result = await _generatePuzzleUseCase(difficulty);
+    final generatePuzzleUseCase = ref.read(generatePuzzleUseCaseProvider);
+    final result = await generatePuzzleUseCase(difficulty);
 
     result.fold(
       (failure) {
@@ -67,7 +39,8 @@ class SudokuGame extends _$SudokuGame {
       },
       (grid) async {
         // Load high score
-        final highScoreResult = await _loadHighScoreUseCase(difficulty);
+        final loadHighScoreUseCase = ref.read(loadHighScoreUseCaseProvider);
+        final highScoreResult = await loadHighScoreUseCase(difficulty);
         final highScore = highScoreResult.fold((_) => null, (score) => score);
 
         // Update state
@@ -146,7 +119,8 @@ class SudokuGame extends _$SudokuGame {
       _toggleNote(position.row, position.col, value);
     } else {
       // Place number
-      final result = _placeNumberUseCase(
+      final placeNumberUseCase = ref.read(placeNumberUseCaseProvider);
+      final result = placeNumberUseCase(
         grid: state.grid,
         row: position.row,
         col: position.col,
@@ -190,7 +164,7 @@ class SudokuGame extends _$SudokuGame {
     var updatedGrid = state.grid.updateCell(clearedCell);
 
     // Update conflicts
-    final updateConflicts = UpdateConflictsUseCase();
+    final updateConflicts = ref.read(updateConflictsUseCaseProvider);
     updatedGrid = updateConflicts(updatedGrid);
 
     state = state.copyWith(grid: updatedGrid);
@@ -203,7 +177,8 @@ class SudokuGame extends _$SudokuGame {
 
   /// Toggle note on cell
   void _toggleNote(int row, int col, int note) {
-    final result = _toggleNotesUseCase(
+    final toggleNotesUseCase = ref.read(toggleNotesUseCaseProvider);
+    final result = toggleNotesUseCase(
       grid: state.grid,
       row: row,
       col: col,
@@ -224,7 +199,8 @@ class SudokuGame extends _$SudokuGame {
   void getHint() {
     if (!state.canUseHint) return;
 
-    final result = _getHintUseCase(state.grid);
+    final getHintUseCase = ref.read(getHintUseCaseProvider);
+    final result = getHintUseCase(state.grid);
 
     result.fold(
       (failure) {
@@ -235,7 +211,8 @@ class SudokuGame extends _$SudokuGame {
         final value = hint.$2;
 
         // Place hint value
-        final placeResult = _placeNumberUseCase(
+        final placeNumberUseCase = ref.read(placeNumberUseCaseProvider);
+        final placeResult = placeNumberUseCase(
           grid: state.grid,
           row: position.row,
           col: position.col,
@@ -285,7 +262,8 @@ class SudokuGame extends _$SudokuGame {
 
   /// Check if puzzle is complete
   void _checkCompletion() {
-    final result = _checkCompletionUseCase(state.grid);
+    final checkCompletionUseCase = ref.read(checkCompletionUseCaseProvider);
+    final result = checkCompletionUseCase(state.grid);
 
     result.fold(
       (_) {}, // Ignore errors
@@ -310,7 +288,8 @@ class SudokuGame extends _$SudokuGame {
         mistakes: state.mistakes,
       );
 
-      await _saveHighScoreUseCase(updatedHighScore);
+      final saveHighScoreUseCase = ref.read(saveHighScoreUseCaseProvider);
+      await saveHighScoreUseCase(updatedHighScore);
 
       state = state.copyWith(highScore: updatedHighScore);
     }
@@ -330,15 +309,4 @@ class SudokuGame extends _$SudokuGame {
       }
     });
   }
-}
-
-// TODO: Implement proper DI - temporary providers
-@riverpod
-UpdateConflictsUseCase updateConflictsUseCase(UpdateConflictsUseCaseRef ref) {
-  return UpdateConflictsUseCase();
-}
-
-@riverpod
-ValidateMoveUseCase validateMoveUseCase(ValidateMoveUseCaseRef ref) {
-  return ValidateMoveUseCase(GridValidationService());
 }

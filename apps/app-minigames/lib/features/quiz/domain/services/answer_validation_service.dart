@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../entities/enums.dart';
 import '../entities/quiz_question.dart';
@@ -10,7 +9,6 @@ import '../entities/quiz_question.dart';
 /// - Score calculation based on time left
 /// - Answer statistics
 /// - Response time analysis
-@lazySingleton
 class AnswerValidationService {
   // ============================================================================
   // Core Methods

@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:injectable/injectable.dart';
 
 import '../entities/enums.dart';
 import '../entities/quiz_question.dart';
@@ -12,7 +11,6 @@ import '../entities/quiz_question.dart';
 /// - Question progression
 /// - Timer management
 /// - Quiz statistics
-@lazySingleton
 class QuestionManagerService {
   final Random _random;
 

@@ -1,10 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../repositories/quiz_image_repository.dart';
 
 /// Use case that saves a new high score to storage
-@injectable
 class SaveHighScoreUseCase {
   final QuizImageRepository repository;
 

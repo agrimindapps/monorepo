@@ -83,10 +83,3 @@ DeletePlantUseCase deletePlantUseCase(DeletePlantUseCaseRef ref) {
   final repository = ref.watch(plantsRepositoryProvider);
   return DeletePlantUseCase(repository);
 }
-
-@riverpod
-PlantCommentsRepository plantCommentsRepository(
-    PlantCommentsRepositoryRef ref) {
-  // TODO: Implement actual repository
-  throw UnimplementedError('PlantCommentsRepository not implemented yet');
-}

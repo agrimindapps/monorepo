@@ -1,12 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/game_state.dart';
 import '../services/physics_service.dart';
 
 /// Use case for updating the moving block's position
 /// Delegates physics calculations to PhysicsService
-@injectable
 class UpdateMovingBlockUseCase {
   final PhysicsService _physicsService;
 

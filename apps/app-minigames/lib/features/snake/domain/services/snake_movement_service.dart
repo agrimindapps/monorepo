@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../entities/enums.dart';
 import '../entities/position.dart';
@@ -10,7 +9,6 @@ import '../entities/position.dart';
 /// - Grid wraparound (passing through walls)
 /// - Movement validation
 /// - Speed calculations
-@lazySingleton
 class SnakeMovementService {
   SnakeMovementService();
 

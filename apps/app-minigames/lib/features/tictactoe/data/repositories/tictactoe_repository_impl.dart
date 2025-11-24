@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/game_settings.dart';
@@ -10,7 +9,6 @@ import '../models/game_settings_model.dart';
 import '../models/game_stats_model.dart';
 
 /// Implementation of TicTacToeRepository using local data source
-@LazySingleton(as: TicTacToeRepository)
 class TicTacToeRepositoryImpl implements TicTacToeRepository {
   final TicTacToeLocalDataSource localDataSource;
 

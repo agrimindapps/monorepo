@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../entities/enums.dart';
 import '../entities/sudoku_grid_entity.dart';
@@ -14,7 +13,6 @@ import '../entities/sudoku_grid_entity.dart';
 /// - Backtracking solver algorithm
 /// - Cell removal based on difficulty
 /// - Puzzle uniqueness validation
-@lazySingleton
 class PuzzleGeneratorService {
   final Random _random;
 

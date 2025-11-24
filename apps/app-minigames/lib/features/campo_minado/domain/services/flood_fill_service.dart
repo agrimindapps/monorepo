@@ -1,12 +1,9 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/cell_data.dart';
 import '../entities/game_state.dart';
 import '../entities/enums.dart';
 
 /// Service responsible for flood-fill algorithm (auto-revealing empty cells)
 /// Follows SRP by handling only cell revelation logic
-@lazySingleton
 class FloodFillService {
   /// Auto-reveals empty neighboring cells recursively
   GameState autoRevealNeighbors({

@@ -2,7 +2,6 @@
 import 'dart:convert';
 
 // Package imports:
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Core imports:
@@ -25,7 +24,6 @@ abstract class QuizLocalDataSource {
 }
 
 /// Implementation of quiz local data source
-@LazySingleton(as: QuizLocalDataSource)
 class QuizLocalDataSourceImpl implements QuizLocalDataSource {
   final SharedPreferences sharedPreferences;
 

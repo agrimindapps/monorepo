@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../entities/enums.dart';
 
@@ -9,7 +8,6 @@ import '../entities/enums.dart';
 /// - Draw detection
 /// - Winning line calculation
 /// - Game status determination
-@lazySingleton
 class GameResultValidationService {
   GameResultValidationService();
 

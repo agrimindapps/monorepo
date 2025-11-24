@@ -1,12 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/enums.dart';
 import '../entities/game_state.dart';
 
 /// Use case that starts a new quiz game
 /// Validates game state and transitions to playing state
-@injectable
 class StartGameUseCase {
   StartGameUseCase();
 

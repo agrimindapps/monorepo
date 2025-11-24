@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/game_stats_model.dart';
@@ -28,7 +27,6 @@ abstract class TicTacToeLocalDataSource {
 }
 
 /// Implementation of TicTacToe local data source using SharedPreferences
-@LazySingleton(as: TicTacToeLocalDataSource)
 class TicTacToeLocalDataSourceImpl implements TicTacToeLocalDataSource {
   final SharedPreferences sharedPreferences;
 

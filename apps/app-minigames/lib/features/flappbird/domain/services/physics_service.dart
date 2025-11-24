@@ -1,11 +1,8 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/bird_entity.dart';
 
 /// Service responsible for bird physics calculations
 /// Follows SRP by handling only physics operations
 /// Supports delta time for frame-rate independent movement
-@lazySingleton
 class PhysicsService {
   /// Gravity constant (pixels per second²)
   /// Adjusted for display: ~960 pixels/s² = 0.6 pixels/frame at 60fps

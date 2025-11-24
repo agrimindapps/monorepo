@@ -2,14 +2,11 @@
 import 'package:flutter/foundation.dart';
 
 // Package imports:
-import 'package:get_it/get_it.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../drift_database/nutrituti_database.dart';
-import '../../../../core/services/firebase_firestore_service.dart';
+import '../../../core/providers/dependency_providers.dart';
 import '../models/achievement_model.dart';
 import '../models/peso_model.dart';
 import '../repository/peso_repository.dart';
@@ -56,10 +53,9 @@ class PesoState {
 /// Provider for PesoRepository
 @riverpod
 PesoRepository pesoRepository(PesoRepositoryRef ref) {
-  return PesoRepository(
-    FirestoreService(FirebaseFirestore.instance),
-    GetIt.I<NutritutiDatabase>(),
-  );
+  final firestoreService = ref.watch(firestoreServiceProvider);
+  final database = ref.watch(nutritutiDatabaseProvider);
+  return PesoRepository(firestoreService, database);
 }
 
 /// Main Peso Notifier

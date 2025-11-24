@@ -5,26 +5,26 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 // Package imports:
-import 'package:get_it/get_it.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
+import '../core/providers/dependency_providers.dart';
 import '../database/perfil_model.dart';
 import '../repository/database.dart';
-import '../repository/perfil_repository.dart';
 import '../widgets/appbar.dart';
 
 // import 'package:image_picker/image_picker.dart';
 
-class CadastroPerfilPage extends StatefulWidget {
+class CadastroPerfilPage extends ConsumerStatefulWidget {
   const CadastroPerfilPage({super.key, this.perfil});
   final PerfilModel? perfil;
 
   @override
-  State<CadastroPerfilPage> createState() => _CadastroPerfilPageState();
+  ConsumerState<CadastroPerfilPage> createState() => _CadastroPerfilPageState();
 }
 
-class _CadastroPerfilPageState extends State<CadastroPerfilPage> {
+class _CadastroPerfilPageState extends ConsumerState<CadastroPerfilPage> {
   final _formKey = GlobalKey<FormState>();
   // final ImagePicker _picker = ImagePicker();
 
@@ -62,10 +62,11 @@ class _CadastroPerfilPageState extends State<CadastroPerfilPage> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
+      final repository = ref.read(perfilRepositoryProvider);
       if (widget.perfil != null) {
-        GetIt.I.get<PerfilRepository>().put(_localPerfil);
+        repository.put(_localPerfil);
       } else {
-        GetIt.I.get<PerfilRepository>().post(_localPerfil);
+        repository.post(_localPerfil);
       }
 
       Navigator.of(context).pop();

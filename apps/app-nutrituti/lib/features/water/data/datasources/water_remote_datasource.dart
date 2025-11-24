@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../models/water_achievement_model.dart';
@@ -52,7 +51,6 @@ abstract class WaterRemoteDataSource {
   Future<void> updateStreak(String userId, int streak);
 }
 
-@Injectable(as: WaterRemoteDataSource)
 class WaterRemoteDataSourceImpl implements WaterRemoteDataSource {
   static const String _usersCollection = 'users';
   static const String _waterRecordsCollection = 'waterRecords';
@@ -181,7 +179,8 @@ class WaterRemoteDataSourceImpl implements WaterRemoteDataSource {
     try {
       final collection = _getRecordsCollection(userId);
       final start = DateTime(startDate.year, startDate.month, startDate.day);
-      final end = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
+      final end =
+          DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
 
       final snapshot = await collection
           .where('timestamp', isGreaterThanOrEqualTo: start.toIso8601String())

@@ -2,7 +2,6 @@
 import 'package:flutter/foundation.dart';
 
 // Package imports:
-import 'package:injectable/injectable.dart';
 import 'package:drift/drift.dart' as drift;
 
 // Project imports:
@@ -11,7 +10,6 @@ import '../../../../drift_database/nutrituti_database.dart';
 import '../../../../drift_database/daos/peso_dao.dart';
 import '../models/peso_model.dart';
 
-@injectable
 class PesoRepository {
   static const String collectionName = 'box_peso';
   final FirestoreService _firestore;

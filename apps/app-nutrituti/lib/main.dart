@@ -10,7 +10,6 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'app_page.dart';
 import 'const/environment_const.dart';
 import 'const/firebase_options.dart';
-import 'core/di/injection.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,9 +25,6 @@ void main() async {
     url: AppEnvironment().supabaseUrl,
     anonKey: AppEnvironment().supabaseAnnoKey,
   );
-
-  // Initialize DI (includes Drift database initialization)
-  await configureDependencies();
 
   // Initialize Firebase
   await Firebase.initializeApp(

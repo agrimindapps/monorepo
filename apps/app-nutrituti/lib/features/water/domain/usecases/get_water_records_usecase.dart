@@ -2,7 +2,6 @@ import 'package:app_nutrituti/core/error/failures.dart';
 import 'package:app_nutrituti/features/water/domain/entities/water_record.dart';
 import 'package:app_nutrituti/features/water/domain/repositories/water_repository.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 /// Parameters for getting water records (optional filtering)
 class GetWaterRecordsParams {
@@ -59,7 +58,6 @@ class GetWaterRecordsParams {
 
 /// Use case for retrieving water intake records
 /// Supports filtering by date or date range
-@lazySingleton
 class GetWaterRecordsUseCase {
   final WaterRepository _repository;
 

@@ -3,7 +3,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:drift/drift.dart' as drift;
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
@@ -11,7 +10,6 @@ import '../../../drift_database/daos/agua_dao.dart';
 import '../../../drift_database/nutrituti_database.dart';
 import '../models/beber_agua_model.dart';
 
-@injectable
 class AguaRepository {
   static const String _collection = 'box_nut_beberagua';
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -102,8 +100,7 @@ class AguaRepository {
     );
     final todayDate = DateTime.fromMillisecondsSinceEpoch(today);
 
-    final isSameDay =
-        lastUpdateDate.year == todayDate.year &&
+    final isSameDay = lastUpdateDate.year == todayDate.year &&
         lastUpdateDate.month == todayDate.month &&
         lastUpdateDate.day == todayDate.day;
 
@@ -131,8 +128,7 @@ class AguaRepository {
     );
     final todayDate = DateTime.fromMillisecondsSinceEpoch(today);
 
-    final isSameDay =
-        lastUpdateDate.year == todayDate.year &&
+    final isSameDay = lastUpdateDate.year == todayDate.year &&
         lastUpdateDate.month == todayDate.month &&
         lastUpdateDate.day == todayDate.day;
 
@@ -194,9 +190,8 @@ class AguaRepository {
     return {
       'totalRegistros': registros.length,
       'totalQuantidade': totalQuantidade,
-      'mediaQuantidade': registros.isEmpty
-          ? 0.0
-          : totalQuantidade / registros.length,
+      'mediaQuantidade':
+          registros.isEmpty ? 0.0 : totalQuantidade / registros.length,
       'streak': await getStreak(),
     };
   }

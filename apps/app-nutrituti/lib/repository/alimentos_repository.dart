@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:icons_plus/icons_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -11,10 +10,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/services/localstorage_service.dart';
 import 'database.dart';
 
-@injectable
 class AlimentosRepository {
   final ValueNotifier<List<dynamic>> listaAlimentos = ValueNotifier([]);
-  final ValueNotifier<List<dynamic>> listaAlimentosFiltrados = ValueNotifier([]);
+  final ValueNotifier<List<dynamic>> listaAlimentosFiltrados =
+      ValueNotifier([]);
   final ValueNotifier<bool> isLoading = ValueNotifier(false);
 
   List<Map<String, dynamic>> getCategorias() {

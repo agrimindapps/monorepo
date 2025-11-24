@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../entities/exercicio.dart';
@@ -25,7 +24,6 @@ class AddExercicioParams {
 }
 
 /// Use case for getting all exercises
-@lazySingleton
 class GetAllExerciciosUseCase {
   final ExercicioRepository _repository;
 
@@ -37,7 +35,6 @@ class GetAllExerciciosUseCase {
 }
 
 /// Use case for adding an exercise
-@lazySingleton
 class AddExercicioUseCase {
   final ExercicioRepository _repository;
 
@@ -57,7 +54,6 @@ class AddExercicioUseCase {
 }
 
 /// Use case for updating an exercise
-@lazySingleton
 class UpdateExercicioUseCase {
   final ExercicioRepository _repository;
 
@@ -69,7 +65,6 @@ class UpdateExercicioUseCase {
 }
 
 /// Use case for deleting an exercise
-@lazySingleton
 class DeleteExercicioUseCase {
   final ExercicioRepository _repository;
 

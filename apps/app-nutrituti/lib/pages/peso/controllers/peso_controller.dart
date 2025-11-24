@@ -328,8 +328,8 @@ class PesoNotifier extends _$PesoNotifier {
     if (currentState.pesoInicial > 0 && currentState.pesoAtual > 0) {
       double percentageLost =
           ((currentState.pesoInicial - currentState.pesoAtual) /
-              currentState.pesoInicial) *
-          100;
+                  currentState.pesoInicial) *
+              100;
 
       if (percentageLost >= 5) {
         await unlockAchievement('🏃 Em Progresso');

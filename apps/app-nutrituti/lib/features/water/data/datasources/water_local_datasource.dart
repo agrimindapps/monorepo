@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart' as drift;
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/error/exceptions.dart';
@@ -59,7 +58,6 @@ abstract class WaterLocalDataSource {
   Future<void> clearAllData();
 }
 
-@Injectable(as: WaterLocalDataSource)
 class WaterLocalDataSourceImpl implements WaterLocalDataSource {
   static const String _dailyGoalKey = 'water_daily_goal';
   static const String _currentStreakKey = 'water_current_streak';

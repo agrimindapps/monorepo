@@ -1,9 +1,6 @@
-import 'package:injectable/injectable.dart';
-
 import '../drift_database/nutrituti_database.dart';
 import '../drift_database/daos/comentario_dao.dart';
 
-@injectable
 class ComentariosRepository {
   final NutritutiDatabase _database;
 

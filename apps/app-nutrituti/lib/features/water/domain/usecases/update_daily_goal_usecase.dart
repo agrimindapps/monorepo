@@ -1,7 +1,6 @@
 import 'package:app_nutrituti/core/error/failures.dart';
 import 'package:app_nutrituti/features/water/domain/repositories/water_repository.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 /// Parameters for updating daily water goal
 class UpdateDailyGoalParams {
@@ -14,7 +13,6 @@ class UpdateDailyGoalParams {
 
 /// Use case for updating the daily water intake goal
 /// Implements validation and business rules
-@lazySingleton
 class UpdateDailyGoalUseCase {
   final WaterRepository _repository;
 

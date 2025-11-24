@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:injectable/injectable.dart';
 
 /// Simple wrapper around FirebaseFirestore
 /// TODO: Implement full service methods as needed
-@injectable
 class FirestoreService {
   final FirebaseFirestore _firestore;
 
@@ -23,12 +21,14 @@ class FirestoreService {
   FirebaseFirestore get instance => _firestore;
 
   /// Create a new record in a collection
-  Future<void> createRecord(String collectionPath, Map<String, dynamic> data) async {
+  Future<void> createRecord(
+      String collectionPath, Map<String, dynamic> data) async {
     await _firestore.collection(collectionPath).add(data);
   }
 
   /// Update an existing record
-  Future<void> updateRecord(String collectionPath, String docId, Map<String, dynamic> data) async {
+  Future<void> updateRecord(
+      String collectionPath, String docId, Map<String, dynamic> data) async {
     await _firestore.collection(collectionPath).doc(docId).update(data);
   }
 }

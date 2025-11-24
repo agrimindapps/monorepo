@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart' as drift;
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/error/exceptions.dart';
@@ -49,7 +48,6 @@ abstract class ExercicioLocalDataSource {
   Future<void> clearAllData();
 }
 
-@Injectable(as: ExercicioLocalDataSource)
 class ExercicioLocalDataSourceImpl implements ExercicioLocalDataSource {
   final ExercicioDao _exercicioDao;
   final SharedPreferences _prefs;

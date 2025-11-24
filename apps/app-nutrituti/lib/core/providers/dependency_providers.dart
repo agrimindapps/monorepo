@@ -12,6 +12,8 @@ import '../../drift_database/daos/peso_dao.dart';
 import '../../drift_database/daos/water_dao.dart';
 import '../../drift_database/nutrituti_database.dart';
 import '../../pages/agua/repository/agua_repository.dart';
+import '../../pages/exercicios/repository/exercicio_repository.dart';
+import '../../pages/exercicios/services/exercicio_business_service.dart';
 import '../../pages/peso/repository/peso_repository.dart';
 import '../../repository/alimentos_repository.dart';
 import '../../repository/comentarios_repository.dart';
@@ -175,4 +177,19 @@ PesoRepository pesoRepository(PesoRepositoryRef ref) {
   final firestoreService = ref.watch(firestoreServiceProvider);
   final database = ref.watch(nutritutiDatabaseProvider);
   return PesoRepository(firestoreService, database);
+}
+
+/// ExercicioRepository provider
+@riverpod
+ExercicioRepository exercicioRepository(ExercicioRepositoryRef ref) {
+  return ExercicioRepository();
+}
+
+/// ExercicioBusinessService provider
+@riverpod
+ExercicioBusinessService exercicioBusinessService(
+    ExercicioBusinessServiceRef ref) {
+  final database = ref.watch(nutritutiDatabaseProvider);
+  final repository = ref.watch(exercicioRepositoryProvider);
+  return ExercicioBusinessService(database, repository);
 }

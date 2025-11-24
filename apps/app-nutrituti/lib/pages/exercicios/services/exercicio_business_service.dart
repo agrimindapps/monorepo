@@ -3,7 +3,6 @@ import 'package:uuid/uuid.dart';
 
 // Project imports:
 import '../../../drift_database/nutrituti_database.dart';
-import '../../../core/di/injection.dart';
 import '../models/exercicio_model.dart';
 import '../repository/exercicio_repository.dart';
 import 'exercicio_drift_adapter.dart';
@@ -12,13 +11,11 @@ import 'exercicio_validation_service.dart';
 
 /// Service responsável pela lógica de negócio de exercícios
 class ExercicioBusinessService {
-  final ExercicioRepository _repository = ExercicioRepository();
-  late final NutritutiDatabase _database;
+  final ExercicioRepository _repository;
+  final NutritutiDatabase _database;
   final _uuid = const Uuid();
 
-  ExercicioBusinessService() {
-    _database = getIt<NutritutiDatabase>();
-  }
+  ExercicioBusinessService(this._database, this._repository);
 
   /// Inicializa o serviço (não necessário mais com Drift)
   Future<void> initialize() async {
@@ -31,25 +28,25 @@ class ExercicioBusinessService {
       // Usar validação centralizada
       if (exercicio.id == null || exercicio.id!.isEmpty) {
         ExercicioValidationService.validateExercicioForCreation(exercicio);
-        
+
         // Gerar ID se não existir
         final novoExercicio = exercicio.copyWith(id: _uuid.v4());
-        
+
         // Salvar com Drift
         await _database.exercicioDao.addExercicio(
           novoExercicio.toCompanion(),
         );
-        
+
         return novoExercicio;
       } else {
         ExercicioValidationService.validateExercicioForUpdate(exercicio);
-        
+
         // Atualizar com Drift (precisa passar ID separadamente)
         await _database.exercicioDao.updateExercicio(
           exercicio.id!,
           exercicio.toUpdateCompanion(),
         );
-        
+
         return exercicio;
       }
     } on ExercicioValidationException catch (e) {
@@ -64,7 +61,7 @@ class ExercicioBusinessService {
     try {
       // Usar validação centralizada
       ExercicioValidationService.validateExercicioId(exercicioId);
-      
+
       // Deletar com Drift
       await _database.exercicioDao.deleteExercicio(exercicioId);
     } on ExercicioValidationException catch (e) {
@@ -90,7 +87,7 @@ class ExercicioBusinessService {
     try {
       // Usar validação centralizada
       ExercicioValidationService.validateMetas(metaMinutos, metaCalorias);
-      
+
       await _repository.saveMetasExercicios({
         'minutosSemanal': metaMinutos,
         'caloriasSemanal': metaCalorias,
@@ -115,7 +112,6 @@ class ExercicioBusinessService {
     }
   }
 
-
   /// Valida parâmetros de busca por período
   void validarPeriodo(DateTime inicio, DateTime fim) {
     try {
@@ -126,7 +122,8 @@ class ExercicioBusinessService {
   }
 
   /// Calcula estimativa de calorias baseada no tipo de exercício e duração
-  int calcularCaloriasEstimadas(String categoria, int duracaoMinutos, {double peso = 70.0}) {
+  int calcularCaloriasEstimadas(String categoria, int duracaoMinutos,
+      {double peso = 70.0}) {
     // Valores aproximados de MET (Metabolic Equivalent of Task)
     final Map<String, double> metValues = {
       'Aeróbico': 6.0,
@@ -140,15 +137,16 @@ class ExercicioBusinessService {
     };
 
     final met = metValues[categoria] ?? 4.0; // Valor padrão
-    
+
     // Fórmula: Calorias = MET × peso(kg) × tempo(horas)
     final calorias = met * peso * (duracaoMinutos / 60.0);
-    
+
     return calorias.round();
   }
 
   /// Sugere duração baseada no nível de condicionamento
-  Map<String, int> sugerirDuracao(String categoria, String nivelCondicionamento) {
+  Map<String, int> sugerirDuracao(
+      String categoria, String nivelCondicionamento) {
     final Map<String, Map<String, int>> sugestoes = {
       'Aeróbico': {
         'iniciante': 15,
@@ -172,24 +170,27 @@ class ExercicioBusinessService {
       },
     };
 
-    return sugestoes[categoria] ?? {
-      'iniciante': 15,
-      'intermediario': 30,
-      'avancado': 45,
-    };
+    return sugestoes[categoria] ??
+        {
+          'iniciante': 15,
+          'intermediario': 30,
+          'avancado': 45,
+        };
   }
 
   /// Verifica se o usuário está dentro dos limites saudáveis de exercício
-  Map<String, dynamic> verificarLimitesSaudaveis(List<ExercicioModel> registros) {
+  Map<String, dynamic> verificarLimitesSaudaveis(
+      List<ExercicioModel> registros) {
     final agora = DateTime.now();
     final ultimaSemana = agora.subtract(const Duration(days: 7));
-    
+
     int minutosUltimaSemana = 0;
     int sessoesUltimaSemana = 0;
-    
+
     for (var registro in registros) {
       try {
-        final dataRegistro = DateTime.fromMillisecondsSinceEpoch(registro.dataRegistro);
+        final dataRegistro =
+            DateTime.fromMillisecondsSinceEpoch(registro.dataRegistro);
         if (dataRegistro.isAfter(ultimaSemana)) {
           minutosUltimaSemana += registro.duracao;
           sessoesUltimaSemana++;
@@ -200,20 +201,22 @@ class ExercicioBusinessService {
     }
 
     final alertas = <String>[];
-    
+
     // Verificar se está exercitando demais (mais de 14 horas por semana)
     if (minutosUltimaSemana > 840) {
-      alertas.add('Você pode estar se exercitando demais. Considere dar descanso ao corpo.');
+      alertas.add(
+          'Você pode estar se exercitando demais. Considere dar descanso ao corpo.');
     }
-    
+
     // Verificar se está exercitando muito pouco (menos de 75 minutos por semana)
     if (minutosUltimaSemana < 75) {
       alertas.add('Tente aumentar gradualmente o tempo de exercício semanal.');
     }
-    
+
     // Verificar frequência
     if (sessoesUltimaSemana > 14) {
-      alertas.add('Muitas sessões por semana. Lembre-se da importância do descanso.');
+      alertas.add(
+          'Muitas sessões por semana. Lembre-se da importância do descanso.');
     }
 
     return {

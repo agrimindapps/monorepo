@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 
 import '../../../../core/error/exceptions.dart';
@@ -15,7 +14,6 @@ import '../models/water_record_model.dart';
 
 /// Repository implementation for water intake data
 /// Follows offline-first strategy: local operations first, then sync to remote when connected
-@Injectable(as: WaterRepository)
 class WaterRepositoryImpl implements WaterRepository {
   final WaterLocalDataSource _localDataSource;
   final WaterRemoteDataSource _remoteDataSource;
@@ -36,7 +34,8 @@ class WaterRepositoryImpl implements WaterRepository {
   bool get _isAuthenticated => _currentUserId != null;
 
   @override
-  Future<Either<Failure, WaterRecord>> addWaterRecord(WaterRecord record) async {
+  Future<Either<Failure, WaterRecord>> addWaterRecord(
+      WaterRecord record) async {
     try {
       // Convert entity to model
       final model = WaterRecordModel.fromEntity(record);
@@ -257,8 +256,7 @@ class WaterRepositoryImpl implements WaterRepository {
       }
 
       // Return local cache
-      return Right(
-          localAchievements.map((model) => model.toEntity()).toList());
+      return Right(localAchievements.map((model) => model.toEntity()).toList());
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
     } catch (e) {

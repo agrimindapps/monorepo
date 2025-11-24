@@ -82,14 +82,9 @@ dev_dependencies:
   drift_dev: any  # Versão do core: ^2.28.0
   build_runner: ^2.4.12
   riverpod_generator: ^2.4.0
-  injectable_generator: ^2.6.2
 
   # Testing
   mocktail: ^1.0.0
-  
-  # DI (temporary during migration)
-  get_it: ^8.0.0
-  injectable: ^2.5.0
 
 flutter:
   uses-material-design: true

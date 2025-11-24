@@ -28,7 +28,6 @@ part 'nutrituti_database.g.dart';
 ///
 /// **PADRÃO ESTABELECIDO (gasometer-drift):**
 /// - Usa DriftDatabaseConfig do core para configuração unificada
-/// - Injectable com @lazySingleton para DI
 /// - Factory methods: production(), development(), test()
 /// - MigrationStrategy com onCreate e beforeOpen
 /// - Extends BaseDriftDatabase do core (funcionalidades compartilhadas)
@@ -105,14 +104,14 @@ class NutritutiDatabase extends _$NutritutiDatabase with BaseDriftDatabase {
   /// Estratégia de migração do banco de dados
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (Migrator m) async {
-      await m.createAll();
-    },
-    beforeOpen: (details) async {
-      await customStatement('PRAGMA foreign_keys = ON');
-    },
-    onUpgrade: (Migrator m, int from, int to) async {
-      // Future schema migrations will go here
-    },
-  );
+        onCreate: (Migrator m) async {
+          await m.createAll();
+        },
+        beforeOpen: (details) async {
+          await customStatement('PRAGMA foreign_keys = ON');
+        },
+        onUpgrade: (Migrator m, int from, int to) async {
+          // Future schema migrations will go here
+        },
+      );
 }

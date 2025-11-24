@@ -2,7 +2,6 @@
 import 'package:flutter/foundation.dart';
 
 // Package imports:
-import 'package:injectable/injectable.dart';
 import 'package:drift/drift.dart' as drift;
 
 // Project imports:
@@ -10,7 +9,6 @@ import '../database/perfil_model.dart';
 import '../drift_database/nutrituti_database.dart';
 import '../drift_database/daos/perfil_dao.dart';
 
-@injectable
 class PerfilRepository {
   final NutritutiDatabase _database;
 

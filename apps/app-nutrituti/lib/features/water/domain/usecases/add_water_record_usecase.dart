@@ -2,7 +2,6 @@ import 'package:app_nutrituti/core/error/failures.dart';
 import 'package:app_nutrituti/features/water/domain/entities/water_record.dart';
 import 'package:app_nutrituti/features/water/domain/repositories/water_repository.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 /// Parameters for adding a water record
 class AddWaterRecordParams {
@@ -21,7 +20,6 @@ class AddWaterRecordParams {
 
 /// Use case for adding a water intake record
 /// Implements validation and business rules
-@lazySingleton
 class AddWaterRecordUseCase {
   final WaterRepository _repository;
 

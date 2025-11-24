@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
@@ -8,7 +7,6 @@ import '../../data/models/exercicio_model.dart';
 import '../../domain/entities/exercicio.dart';
 import '../../domain/repositories/exercicio_repository.dart';
 
-@Injectable(as: ExercicioRepository)
 class ExercicioRepositoryImpl implements ExercicioRepository {
   final ExercicioLocalDataSource _localDataSource;
 

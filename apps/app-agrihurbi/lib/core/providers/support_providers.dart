@@ -330,11 +330,10 @@ class SettingsStateNotifier extends StateNotifier<SettingsState> {
     final result = await _manageSettings.getSettings();
 
     result.fold(
-      (failure) =>
-          state = state.copyWith(
-            isLoadingSettings: false,
-            errorMessage: 'Erro ao carregar configurações: ${failure.message}',
-          ),
+      (failure) => state = state.copyWith(
+        isLoadingSettings: false,
+        errorMessage: 'Erro ao carregar configurações: ${failure.message}',
+      ),
       (settings) =>
           state = state.copyWith(isLoadingSettings: false, settings: settings),
     );
@@ -469,18 +468,16 @@ class MarketStateNotifier extends StateNotifier<MarketState> {
     );
 
     result.fold(
-      (failure) =>
-          state = state.copyWith(
-            isLoadingMarkets: false,
-            errorMessage: failure.message,
-          ),
-      (markets) =>
-          state = state.copyWith(
-            isLoadingMarkets: false,
-            markets: markets,
-            currentFilter: filter ?? state.currentFilter,
-            lastUpdate: DateTime.now(),
-          ),
+      (failure) => state = state.copyWith(
+        isLoadingMarkets: false,
+        errorMessage: failure.message,
+      ),
+      (markets) => state = state.copyWith(
+        isLoadingMarkets: false,
+        markets: markets,
+        currentFilter: filter ?? state.currentFilter,
+        lastUpdate: DateTime.now(),
+      ),
     );
   }
 
@@ -491,16 +488,14 @@ class MarketStateNotifier extends StateNotifier<MarketState> {
     final result = await _getMarketSummary();
 
     result.fold(
-      (failure) =>
-          state = state.copyWith(
-            isLoadingSummary: false,
-            errorMessage: failure.message,
-          ),
-      (summary) =>
-          state = state.copyWith(
-            isLoadingSummary: false,
-            marketSummary: summary,
-          ),
+      (failure) => state = state.copyWith(
+        isLoadingSummary: false,
+        errorMessage: failure.message,
+      ),
+      (summary) => state = state.copyWith(
+        isLoadingSummary: false,
+        marketSummary: summary,
+      ),
     );
   }
 
@@ -511,11 +506,10 @@ class MarketStateNotifier extends StateNotifier<MarketState> {
     final result = await _repository.searchMarkets(query: query);
 
     result.fold(
-      (Failure failure) =>
-          state = state.copyWith(
-            isLoadingSearch: false,
-            errorMessage: failure.message,
-          ),
+      (Failure failure) => state = state.copyWith(
+        isLoadingSearch: false,
+        errorMessage: failure.message,
+      ),
       (List<MarketEntity> results) {
         final updatedHistory = List<String>.from(state.searchHistory);
         if (!updatedHistory.contains(query)) {
@@ -543,7 +537,7 @@ class MarketStateNotifier extends StateNotifier<MarketState> {
 /// StateNotifier para gerenciamento de notícias
 class NewsStateNotifier extends StateNotifier<NewsState> {
   NewsStateNotifier(this._getNews, this._getCommodityPrices)
-    : super(const NewsState());
+      : super(const NewsState());
 
   final GetNews _getNews;
   final GetCommodityPrices _getCommodityPrices;
@@ -566,18 +560,16 @@ class NewsStateNotifier extends StateNotifier<NewsState> {
     );
 
     result.fold(
-      (failure) =>
-          state = state.copyWith(
-            isLoadingNews: false,
-            errorMessage: failure.message,
-          ),
-      (articles) =>
-          state = state.copyWith(
-            isLoadingNews: false,
-            articles: articles,
-            currentCategory: category,
-            lastUpdate: DateTime.now(),
-          ),
+      (failure) => state = state.copyWith(
+        isLoadingNews: false,
+        errorMessage: failure.message,
+      ),
+      (articles) => state = state.copyWith(
+        isLoadingNews: false,
+        articles: articles,
+        currentCategory: category,
+        lastUpdate: DateTime.now(),
+      ),
     );
   }
 
@@ -588,16 +580,14 @@ class NewsStateNotifier extends StateNotifier<NewsState> {
     final result = await _getCommodityPrices();
 
     result.fold(
-      (failure) =>
-          state = state.copyWith(
-            isLoadingCommodities: false,
-            errorMessage: failure.message,
-          ),
-      (prices) =>
-          state = state.copyWith(
-            isLoadingCommodities: false,
-            commodityPrices: prices,
-          ),
+      (failure) => state = state.copyWith(
+        isLoadingCommodities: false,
+        errorMessage: failure.message,
+      ),
+      (prices) => state = state.copyWith(
+        isLoadingCommodities: false,
+        commodityPrices: prices,
+      ),
     );
   }
 

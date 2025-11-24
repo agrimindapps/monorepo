@@ -229,11 +229,10 @@ class CalculatorNotifier extends _$CalculatorNotifier {
     final result = await _getCalculators();
 
     result.fold(
-      (failure) =>
-          state = state.copyWith(
-            isLoading: false,
-            errorMessage: failure.message,
-          ),
+      (failure) => state = state.copyWith(
+        isLoading: false,
+        errorMessage: failure.message,
+      ),
       (calculators) {
         state = state.copyWith(isLoading: false, calculators: calculators);
         _applyFilters();
@@ -249,11 +248,10 @@ class CalculatorNotifier extends _$CalculatorNotifier {
 
     bool success = false;
     result.fold(
-      (failure) =>
-          state = state.copyWith(
-            isLoading: false,
-            errorMessage: failure.message,
-          ),
+      (failure) => state = state.copyWith(
+        isLoading: false,
+        errorMessage: failure.message,
+      ),
       (calculator) {
         state = state.copyWith(
           isLoading: false,
@@ -316,11 +314,10 @@ class CalculatorNotifier extends _$CalculatorNotifier {
 
     bool success = false;
     result.fold(
-      (failure) =>
-          state = state.copyWith(
-            isCalculating: false,
-            errorMessage: failure.message,
-          ),
+      (failure) => state = state.copyWith(
+        isCalculating: false,
+        errorMessage: failure.message,
+      ),
       (calculationResult) {
         state = state.copyWith(
           isCalculating: false,
@@ -377,21 +374,19 @@ class CalculatorNotifier extends _$CalculatorNotifier {
   void _applyFilters() {
     var filtered = List<CalculatorEntity>.from(state.calculators);
     if (state.selectedCategory != null) {
-      filtered =
-          filtered
-              .where((calc) => calc.category == state.selectedCategory)
-              .toList();
+      filtered = filtered
+          .where((calc) => calc.category == state.selectedCategory)
+          .toList();
     }
     if (state.searchQuery.isNotEmpty) {
       final query = state.searchQuery.toLowerCase();
-      filtered =
-          filtered
-              .where(
-                (calc) =>
-                    calc.name.toLowerCase().contains(query) ||
-                    calc.description.toLowerCase().contains(query),
-              )
-              .toList();
+      filtered = filtered
+          .where(
+            (calc) =>
+                calc.name.toLowerCase().contains(query) ||
+                calc.description.toLowerCase().contains(query),
+          )
+          .toList();
     }
 
     state = state.copyWith(filteredCalculators: filtered);
@@ -404,16 +399,14 @@ class CalculatorNotifier extends _$CalculatorNotifier {
     final result = await _getCalculationHistory.call();
 
     result.fold(
-      (failure) =>
-          state = state.copyWith(
-            isLoadingHistory: false,
-            errorMessage: failure.message,
-          ),
-      (history) =>
-          state = state.copyWith(
-            isLoadingHistory: false,
-            calculationHistory: history,
-          ),
+      (failure) => state = state.copyWith(
+        isLoadingHistory: false,
+        errorMessage: failure.message,
+      ),
+      (history) => state = state.copyWith(
+        isLoadingHistory: false,
+        calculationHistory: history,
+      ),
     );
   }
 
@@ -438,11 +431,10 @@ class CalculatorNotifier extends _$CalculatorNotifier {
     final result = await _manageFavorites.call(const GetFavoritesParams());
 
     result.fold(
-      (failure) =>
-          state = state.copyWith(
-            isLoadingFavorites: false,
-            errorMessage: failure.message,
-          ),
+      (failure) => state = state.copyWith(
+        isLoadingFavorites: false,
+        errorMessage: failure.message,
+      ),
       (favorites) {
         final favoriteIds =
             favorites is List ? List<String>.from(favorites) : <String>[];
@@ -611,11 +603,10 @@ class CalculatorExecutionNotifier extends _$CalculatorExecutionNotifier {
 
     bool success = false;
     result.fold(
-      (failure) =>
-          state = state.copyWith(
-            isCalculating: false,
-            errorMessage: failure.message,
-          ),
+      (failure) => state = state.copyWith(
+        isCalculating: false,
+        errorMessage: failure.message,
+      ),
       (calculationResult) {
         state = state.copyWith(
           isCalculating: false,
@@ -842,19 +833,18 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
     var filtered = List<CalculationTemplate>.from(state.templates);
     if (state.templateSearchQuery.isNotEmpty) {
       final query = state.templateSearchQuery.toLowerCase();
-      filtered =
-          filtered
-              .where(
-                (template) =>
-                    template.name.toLowerCase().contains(query) ||
-                    (template.description?.toLowerCase() ?? '').contains(
-                      query,
-                    ) ||
-                    template.tags.any(
-                      (tag) => tag.toLowerCase().contains(query),
-                    ),
-              )
-              .toList();
+      filtered = filtered
+          .where(
+            (template) =>
+                template.name.toLowerCase().contains(query) ||
+                (template.description?.toLowerCase() ?? '').contains(
+                  query,
+                ) ||
+                template.tags.any(
+                  (tag) => tag.toLowerCase().contains(query),
+                ),
+          )
+          .toList();
     }
     filtered.sort((a, b) {
       if (a.lastUsed != null && b.lastUsed == null) return -1;

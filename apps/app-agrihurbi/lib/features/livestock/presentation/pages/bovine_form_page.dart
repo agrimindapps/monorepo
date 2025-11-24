@@ -70,10 +70,9 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
         title: Text(widget.isEditing ? 'Editar Bovino' : 'Novo Bovino'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body:
-          _isLoading
-              ? _buildLoadingState()
-              : _buildFormContent(formProvider, bovinesProviderState),
+      body: _isLoading
+          ? _buildLoadingState()
+          : _buildFormContent(formProvider, bovinesProviderState),
     );
   }
 
@@ -193,8 +192,8 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
             provider.errorMessage!,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           const SizedBox(height: 24),
           Row(
@@ -265,19 +264,16 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
     }
 
     final provider = ref.read(bovinesProviderProvider);
-    final bovine = ref
-        .read(bovineFormProvider)
-        .prepareBovineForSaving(
+    final bovine = ref.read(bovineFormProvider).prepareBovineForSaving(
           isEditing: widget.isEditing,
           existingId: widget.bovineId,
           existingImageUrls: provider.selectedBovine?.imageUrls,
           existingCreatedAt: provider.selectedBovine?.createdAt,
         );
 
-    final success =
-        widget.isEditing
-            ? await provider.updateBovine(bovine)
-            : await provider.createBovine(bovine);
+    final success = widget.isEditing
+        ? await provider.updateBovine(bovine)
+        : await provider.createBovine(bovine);
 
     if (!mounted) return;
 

@@ -40,14 +40,12 @@ class _LivestockDashboardExampleState
         title: const Text('Livestock Dashboard'),
         actions: [
           IconButton(
-            icon:
-                coordinator.syncProvider.isSyncing
-                    ? const CircularProgressIndicator()
-                    : const Icon(Icons.sync),
-            onPressed:
-                coordinator.syncProvider.isSyncing
-                    ? null
-                    : () => coordinator.performCompleteSync(),
+            icon: coordinator.syncProvider.isSyncing
+                ? const CircularProgressIndicator()
+                : const Icon(Icons.sync),
+            onPressed: coordinator.syncProvider.isSyncing
+                ? null
+                : () => coordinator.performCompleteSync(),
           ),
         ],
       ),
@@ -150,15 +148,14 @@ class _LivestockDashboardExampleState
                   child: DropdownButtonFormField<String>(
                     decoration: const InputDecoration(labelText: 'Raça'),
                     initialValue: coordinator.filtersProvider.selectedBreed,
-                    items:
-                        coordinator.filtersProvider.availableBreeds
-                            .map(
-                              (breed) => DropdownMenuItem(
-                                value: breed,
-                                child: Text(breed),
-                              ),
-                            )
-                            .toList(),
+                    items: coordinator.filtersProvider.availableBreeds
+                        .map(
+                          (breed) => DropdownMenuItem(
+                            value: breed,
+                            child: Text(breed),
+                          ),
+                        )
+                        .toList(),
                     onChanged: coordinator.filtersProvider.updateBreedFilter,
                   ),
                 ),
@@ -167,15 +164,14 @@ class _LivestockDashboardExampleState
                   child: DropdownButtonFormField<BovineAptitude>(
                     decoration: const InputDecoration(labelText: 'Aptidão'),
                     initialValue: coordinator.filtersProvider.selectedAptitude,
-                    items:
-                        coordinator.filtersProvider.availableAptitudes
-                            .map(
-                              (aptitude) => DropdownMenuItem(
-                                value: aptitude,
-                                child: Text(aptitude.displayName),
-                              ),
-                            )
-                            .toList(),
+                    items: coordinator.filtersProvider.availableAptitudes
+                        .map(
+                          (aptitude) => DropdownMenuItem(
+                            value: aptitude,
+                            child: Text(aptitude.displayName),
+                          ),
+                        )
+                        .toList(),
                     onChanged: coordinator.filtersProvider.updateAptitudeFilter,
                   ),
                 ),
@@ -250,36 +246,34 @@ class _LivestockDashboardExampleState
                 else
                   const Icon(Icons.cancel, color: Colors.red),
                 PopupMenuButton<String>(
-                  onSelected:
-                      (action) => _handleBovineAction(
-                        context,
-                        coordinator,
-                        bovine,
-                        action,
+                  onSelected: (action) => _handleBovineAction(
+                    context,
+                    coordinator,
+                    bovine,
+                    action,
+                  ),
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit),
+                          SizedBox(width: 8),
+                          Text('Editar'),
+                        ],
                       ),
-                  itemBuilder:
-                      (context) => [
-                        const PopupMenuItem(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              Icon(Icons.edit),
-                              SizedBox(width: 8),
-                              Text('Editar'),
-                            ],
-                          ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete, color: Colors.red),
-                              SizedBox(width: 8),
-                              Text('Excluir'),
-                            ],
-                          ),
-                        ),
-                      ],
+                    ),
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text('Excluir'),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -308,15 +302,13 @@ class _LivestockDashboardExampleState
     }
   }
 
-  void _showAddBovineDialog(BuildContext context) {
-  }
+  void _showAddBovineDialog(BuildContext context) {}
 
   void _showEditBovineDialog(
     BuildContext context,
     LivestockCoordinatorProvider coordinator,
     BovineEntity bovine,
-  ) {
-  }
+  ) {}
 
   void _showDeleteConfirmation(
     BuildContext context,
@@ -325,35 +317,34 @@ class _LivestockDashboardExampleState
   ) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Confirmar exclusão'),
-            content: Text('Deseja excluir o bovino "${bovine.commonName}"?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  await coordinator.bovinesProvider.deleteBovine(bovine.id);
-
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Bovino "${bovine.commonName}" excluído'),
-                      ),
-                    );
-                  }
-                },
-                child: const Text(
-                  'Excluir',
-                  style: TextStyle(color: Colors.red),
-                ),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar exclusão'),
+        content: Text('Deseja excluir o bovino "${bovine.commonName}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
           ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await coordinator.bovinesProvider.deleteBovine(bovine.id);
+
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Bovino "${bovine.commonName}" excluído'),
+                  ),
+                );
+              }
+            },
+            child: const Text(
+              'Excluir',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -202,7 +202,8 @@ extension LivestockCoordinatorProviderExtension
 }
 
 /// Riverpod provider for LivestockCoordinatorProvider
-final livestockCoordinatorProvider = Provider<LivestockCoordinatorProvider?>((ref) {
+final livestockCoordinatorProvider =
+    Provider<LivestockCoordinatorProvider?>((ref) {
   // TODO: Replace getIt calls with Riverpod providers
   // return getIt<LivestockCoordinatorProvider>();
   // Temporary null return for migration

@@ -207,8 +207,9 @@ class BovinesManagementNotifier extends _$BovinesManagementNotifier {
 
         state = state.copyWith(
           bovines: updatedBovines,
-          selectedBovine:
-              state.selectedBovine?.id == bovineId ? null : state.selectedBovine,
+          selectedBovine: state.selectedBovine?.id == bovineId
+              ? null
+              : state.selectedBovine,
           isDeleting: false,
         );
         success = true;
@@ -223,7 +224,8 @@ class BovinesManagementNotifier extends _$BovinesManagementNotifier {
 
   /// Removes bovine permanently from local list
   void removeBovineFromList(String bovineId) {
-    final updatedBovines = state.bovines.where((b) => b.id != bovineId).toList();
+    final updatedBovines =
+        state.bovines.where((b) => b.id != bovineId).toList();
     state = state.copyWith(
       bovines: updatedBovines,
       selectedBovine:

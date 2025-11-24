@@ -23,12 +23,14 @@ final networkInfoProvider = Provider<NetworkInfo>((ref) {
 });
 
 // Datasources
-final livestockLocalDataSourceProvider = Provider<LivestockLocalDataSource>((ref) {
+final livestockLocalDataSourceProvider =
+    Provider<LivestockLocalDataSource>((ref) {
   final database = ref.watch(agrihurbiDatabaseProvider);
   return LivestockDriftLocalDataSource(database);
 });
 
-final livestockRemoteDataSourceProvider = Provider<LivestockRemoteDataSource>((ref) {
+final livestockRemoteDataSourceProvider =
+    Provider<LivestockRemoteDataSource>((ref) {
   return LivestockRemoteDataSourceImpl();
 });
 
@@ -37,7 +39,7 @@ final livestockRepositoryProvider = Provider<LivestockRepository>((ref) {
   final localDataSource = ref.watch(livestockLocalDataSourceProvider);
   final remoteDataSource = ref.watch(livestockRemoteDataSourceProvider);
   final connectivity = Connectivity();
-  
+
   return LivestockRepositoryImpl(
     localDataSource,
     remoteDataSource,

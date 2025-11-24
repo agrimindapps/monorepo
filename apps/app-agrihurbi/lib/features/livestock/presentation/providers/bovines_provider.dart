@@ -20,7 +20,6 @@ final bovinesProviderProvider = ChangeNotifierProvider<BovinesProvider>((ref) {
   );
 });
 
-
 /// Provider especializado para operações de bovinos
 ///
 /// Separado do provider principal para otimização e modularização
@@ -38,11 +37,11 @@ class BovinesProvider extends ChangeNotifier {
     required CreateBovineUseCase createBovine,
     required UpdateBovineUseCase updateBovine,
     required DeleteBovineUseCase deleteBovine,
-  }) : _getAllBovines = getAllBovines,
-       _getBovineById = getBovineById,
-       _createBovine = createBovine,
-       _updateBovine = updateBovine,
-       _deleteBovine = deleteBovine;
+  })  : _getAllBovines = getAllBovines,
+        _getBovineById = getBovineById,
+        _createBovine = createBovine,
+        _updateBovine = updateBovine,
+        _deleteBovine = deleteBovine;
 
   List<BovineEntity> _bovines = [];
   BovineEntity? _selectedBovine;
@@ -77,21 +76,20 @@ class BovinesProvider extends ChangeNotifier {
     var filtered = activeBovines;
 
     if (_searchQuery.isNotEmpty) {
-      filtered =
-          filtered
-              .where(
-                (bovine) =>
-                    bovine.commonName.toLowerCase().contains(
+      filtered = filtered
+          .where(
+            (bovine) =>
+                bovine.commonName.toLowerCase().contains(
                       _searchQuery.toLowerCase(),
                     ) ||
-                    bovine.breed.toLowerCase().contains(
+                bovine.breed.toLowerCase().contains(
                       _searchQuery.toLowerCase(),
                     ) ||
-                    bovine.registrationId.toLowerCase().contains(
+                bovine.registrationId.toLowerCase().contains(
                       _searchQuery.toLowerCase(),
                     ),
-              )
-              .toList();
+          )
+          .toList();
     }
 
     return filtered;

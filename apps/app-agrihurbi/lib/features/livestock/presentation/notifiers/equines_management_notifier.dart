@@ -118,17 +118,20 @@ class EquinesManagementNotifier extends _$EquinesManagementNotifier {
 
   // Placeholder methods for future implementation
   Future<bool> createEquine(EquineEntity equine) async {
-    debugPrint('EquinesManagementNotifier: createEquine não implementado ainda');
+    debugPrint(
+        'EquinesManagementNotifier: createEquine não implementado ainda');
     return false;
   }
 
   Future<bool> updateEquine(EquineEntity equine) async {
-    debugPrint('EquinesManagementNotifier: updateEquine não implementado ainda');
+    debugPrint(
+        'EquinesManagementNotifier: updateEquine não implementado ainda');
     return false;
   }
 
   Future<bool> deleteEquine(String equineId) async {
-    debugPrint('EquinesManagementNotifier: deleteEquine não implementado ainda');
+    debugPrint(
+        'EquinesManagementNotifier: deleteEquine não implementado ainda');
     return false;
   }
 }

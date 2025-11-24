@@ -14,7 +14,8 @@ import '../../domain/usecases/update_bovine.dart';
 import 'livestock_di_providers.dart';
 
 /// Provider Riverpod para LivestockProvider
-final livestockProviderProvider = ChangeNotifierProvider<LivestockProvider>((ref) {
+final livestockProviderProvider =
+    ChangeNotifierProvider<LivestockProvider>((ref) {
   return LivestockProvider(
     repository: ref.watch(livestockRepositoryProvider),
     getAllBovines: ref.watch(getAllBovinesUseCaseProvider),
@@ -35,7 +36,6 @@ final bovinesProviderProvider = ChangeNotifierProvider<BovinesProvider>((ref) {
 final equinesProviderProvider = ChangeNotifierProvider<EquinesProvider>((ref) {
   return EquinesProvider(ref.watch(livestockRepositoryProvider));
 });
-
 
 /// Provider principal para gerenciamento de estado do livestock
 ///
@@ -59,13 +59,13 @@ class LivestockProvider extends ChangeNotifier {
     required UpdateBovineUseCase updateBovine,
     required DeleteBovineUseCase deleteBovine,
     required search_use_case.SearchAnimalsUseCase searchAnimals,
-  }) : _repository = repository,
-       _getAllBovines = getAllBovines,
-       _getEquines = getEquines,
-       _createBovine = createBovine,
-       _updateBovine = updateBovine,
-       _deleteBovine = deleteBovine,
-       _searchAnimals = searchAnimals;
+  })  : _repository = repository,
+        _getAllBovines = getAllBovines,
+        _getEquines = getEquines,
+        _createBovine = createBovine,
+        _updateBovine = updateBovine,
+        _deleteBovine = deleteBovine,
+        _searchAnimals = searchAnimals;
 
   /// Estados de loading
   bool _isLoading = false;
@@ -125,59 +125,54 @@ class LivestockProvider extends ChangeNotifier {
     var filtered = _bovines.where((bovine) => bovine.isActive).toList();
 
     if (_searchQuery.isNotEmpty) {
-      filtered =
-          filtered
-              .where(
-                (bovine) =>
-                    bovine.commonName.toLowerCase().contains(
+      filtered = filtered
+          .where(
+            (bovine) =>
+                bovine.commonName.toLowerCase().contains(
                       _searchQuery.toLowerCase(),
                     ) ||
-                    bovine.breed.toLowerCase().contains(
+                bovine.breed.toLowerCase().contains(
                       _searchQuery.toLowerCase(),
                     ) ||
-                    bovine.registrationId.toLowerCase().contains(
+                bovine.registrationId.toLowerCase().contains(
                       _searchQuery.toLowerCase(),
                     ),
-              )
-              .toList();
+          )
+          .toList();
     }
 
     if (_selectedBreed != null) {
-      filtered =
-          filtered
-              .where(
-                (bovine) => bovine.breed.toLowerCase().contains(
+      filtered = filtered
+          .where(
+            (bovine) => bovine.breed.toLowerCase().contains(
                   _selectedBreed!.toLowerCase(),
                 ),
-              )
-              .toList();
+          )
+          .toList();
     }
 
     if (_selectedOriginCountry != null) {
-      filtered =
-          filtered
-              .where(
-                (bovine) => bovine.originCountry.toLowerCase().contains(
+      filtered = filtered
+          .where(
+            (bovine) => bovine.originCountry.toLowerCase().contains(
                   _selectedOriginCountry!.toLowerCase(),
                 ),
-              )
-              .toList();
+          )
+          .toList();
     }
 
     if (_selectedAptitude != null) {
-      filtered =
-          filtered
-              .where((bovine) => bovine.aptitude == _selectedAptitude)
-              .toList();
+      filtered = filtered
+          .where((bovine) => bovine.aptitude == _selectedAptitude)
+          .toList();
     }
 
     if (_selectedBreedingSystem != null) {
-      filtered =
-          filtered
-              .where(
-                (bovine) => bovine.breedingSystem == _selectedBreedingSystem,
-              )
-              .toList();
+      filtered = filtered
+          .where(
+            (bovine) => bovine.breedingSystem == _selectedBreedingSystem,
+          )
+          .toList();
     }
 
     return filtered;
@@ -188,18 +183,17 @@ class LivestockProvider extends ChangeNotifier {
     var filtered = _equines.where((equine) => equine.isActive).toList();
 
     if (_searchQuery.isNotEmpty) {
-      filtered =
-          filtered
-              .where(
-                (equine) =>
-                    equine.commonName.toLowerCase().contains(
+      filtered = filtered
+          .where(
+            (equine) =>
+                equine.commonName.toLowerCase().contains(
                       _searchQuery.toLowerCase(),
                     ) ||
-                    equine.registrationId.toLowerCase().contains(
+                equine.registrationId.toLowerCase().contains(
                       _searchQuery.toLowerCase(),
                     ),
-              )
-              .toList();
+          )
+          .toList();
     }
 
     return filtered;
@@ -506,8 +500,6 @@ class LivestockProvider extends ChangeNotifier {
 
     return countries.toList()..sort();
   }
-
-
 }
 
 /// Provider específico para operações de bovinos

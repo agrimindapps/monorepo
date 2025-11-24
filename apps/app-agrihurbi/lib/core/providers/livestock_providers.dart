@@ -243,17 +243,15 @@ class BovinesNotifier extends _$BovinesNotifier {
         return false;
       },
       (updatedBovine) {
-        final updatedBovines =
-            state.bovines.map((b) {
-              return b.id == updatedBovine.id ? updatedBovine : b;
-            }).toList();
+        final updatedBovines = state.bovines.map((b) {
+          return b.id == updatedBovine.id ? updatedBovine : b;
+        }).toList();
 
         state = state.copyWith(
           bovines: updatedBovines,
-          selectedBovine:
-              state.selectedBovine?.id == updatedBovine.id
-                  ? updatedBovine
-                  : state.selectedBovine,
+          selectedBovine: state.selectedBovine?.id == updatedBovine.id
+              ? updatedBovine
+              : state.selectedBovine,
           isUpdating: false,
         );
         return true;
@@ -275,17 +273,15 @@ class BovinesNotifier extends _$BovinesNotifier {
         return false;
       },
       (_) {
-        final updatedBovines =
-            state.bovines.map((b) {
-              return b.id == bovineId ? b.copyWith(isActive: false) : b;
-            }).toList();
+        final updatedBovines = state.bovines.map((b) {
+          return b.id == bovineId ? b.copyWith(isActive: false) : b;
+        }).toList();
 
         state = state.copyWith(
           bovines: updatedBovines,
-          selectedBovine:
-              state.selectedBovine?.id == bovineId
-                  ? null
-                  : state.selectedBovine,
+          selectedBovine: state.selectedBovine?.id == bovineId
+              ? null
+              : state.selectedBovine,
           isDeleting: false,
         );
         return true;
@@ -391,60 +387,54 @@ class LivestockFiltersNotifier extends _$LivestockFiltersNotifier {
     var filtered = bovines.where((bovine) => bovine.isActive).toList();
 
     if (state.searchQuery.isNotEmpty) {
-      filtered =
-          filtered
-              .where(
-                (bovine) =>
-                    bovine.commonName.toLowerCase().contains(
+      filtered = filtered
+          .where(
+            (bovine) =>
+                bovine.commonName.toLowerCase().contains(
                       state.searchQuery.toLowerCase(),
                     ) ||
-                    bovine.breed.toLowerCase().contains(
+                bovine.breed.toLowerCase().contains(
                       state.searchQuery.toLowerCase(),
                     ) ||
-                    bovine.registrationId.toLowerCase().contains(
+                bovine.registrationId.toLowerCase().contains(
                       state.searchQuery.toLowerCase(),
                     ),
-              )
-              .toList();
+          )
+          .toList();
     }
 
     if (state.selectedBreed != null) {
-      filtered =
-          filtered
-              .where(
-                (bovine) => bovine.breed.toLowerCase().contains(
+      filtered = filtered
+          .where(
+            (bovine) => bovine.breed.toLowerCase().contains(
                   state.selectedBreed!.toLowerCase(),
                 ),
-              )
-              .toList();
+          )
+          .toList();
     }
 
     if (state.selectedOriginCountry != null) {
-      filtered =
-          filtered
-              .where(
-                (bovine) => bovine.originCountry.toLowerCase().contains(
+      filtered = filtered
+          .where(
+            (bovine) => bovine.originCountry.toLowerCase().contains(
                   state.selectedOriginCountry!.toLowerCase(),
                 ),
-              )
-              .toList();
+          )
+          .toList();
     }
 
     if (state.selectedAptitude != null) {
-      filtered =
-          filtered
-              .where((bovine) => bovine.aptitude == state.selectedAptitude)
-              .toList();
+      filtered = filtered
+          .where((bovine) => bovine.aptitude == state.selectedAptitude)
+          .toList();
     }
 
     if (state.selectedBreedingSystem != null) {
-      filtered =
-          filtered
-              .where(
-                (bovine) =>
-                    bovine.breedingSystem == state.selectedBreedingSystem,
-              )
-              .toList();
+      filtered = filtered
+          .where(
+            (bovine) => bovine.breedingSystem == state.selectedBreedingSystem,
+          )
+          .toList();
     }
 
     return filtered;

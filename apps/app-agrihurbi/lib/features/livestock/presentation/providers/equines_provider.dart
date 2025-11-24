@@ -15,7 +15,6 @@ final equinesProviderProvider = ChangeNotifierProvider<EquinesProvider>((ref) {
   );
 });
 
-
 /// Provider especializado para operações de equinos
 ///
 /// Separado do provider principal para otimização e modularização
@@ -29,9 +28,9 @@ class EquinesProvider extends ChangeNotifier {
     required GetAllEquinesUseCase getAllEquines,
     required GetEquinesUseCase getEquines,
     required GetEquineByIdUseCase getEquineById,
-  }) : _getAllEquines = getAllEquines,
-       _getEquines = getEquines,
-       _getEquineById = getEquineById;
+  })  : _getAllEquines = getAllEquines,
+        _getEquines = getEquines,
+        _getEquineById = getEquineById;
 
   List<EquineEntity> _equines = [];
   EquineEntity? _selectedEquine;
@@ -60,21 +59,20 @@ class EquinesProvider extends ChangeNotifier {
     var filtered = activeEquines;
 
     if (_searchQuery.isNotEmpty) {
-      filtered =
-          filtered
-              .where(
-                (equine) =>
-                    equine.commonName.toLowerCase().contains(
+      filtered = filtered
+          .where(
+            (equine) =>
+                equine.commonName.toLowerCase().contains(
                       _searchQuery.toLowerCase(),
                     ) ||
-                    equine.registrationId.toLowerCase().contains(
+                equine.registrationId.toLowerCase().contains(
                       _searchQuery.toLowerCase(),
                     ) ||
-                    equine.originCountry.toLowerCase().contains(
+                equine.originCountry.toLowerCase().contains(
                       _searchQuery.toLowerCase(),
                     ),
-              )
-              .toList();
+          )
+          .toList();
     }
 
     return filtered;
@@ -277,5 +275,3 @@ class EquinesProvider extends ChangeNotifier {
     super.dispose();
   }
 }
-
-

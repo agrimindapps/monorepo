@@ -1,5 +1,5 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:injectable/injectable.dart';
+// import 'package:injectable/injectable.dart'; // Commented out - migrating to Riverpod
 
 /// Abstract class for network information
 abstract class NetworkInfo {
@@ -8,7 +8,6 @@ abstract class NetworkInfo {
 }
 
 /// Implementation of NetworkInfo using connectivity_plus package
-@LazySingleton(as: NetworkInfo)
 class NetworkInfoImpl implements NetworkInfo {
   final Connectivity connectivity;
 

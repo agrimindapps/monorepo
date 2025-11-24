@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/user_settings_entity.dart';
 import '../../domain/usecases/get_user_settings_usecase.dart';
 import '../../domain/usecases/update_user_settings_usecase.dart';
+import 'settings_providers.dart';
 
 part 'user_settings_notifier.g.dart';
 
@@ -70,8 +70,8 @@ class UserSettingsNotifier extends _$UserSettingsNotifier {
 
   @override
   Future<UserSettingsState> build() async {
-    _getUserSettingsUseCase = di.sl<GetUserSettingsUseCase>();
-    _updateUserSettingsUseCase = di.sl<UpdateUserSettingsUseCase>();
+    _getUserSettingsUseCase = ref.watch(getUserSettingsUseCaseProvider);
+    _updateUserSettingsUseCase = ref.watch(updateUserSettingsUseCaseProvider);
 
     return UserSettingsState.initial();
   }
@@ -96,14 +96,17 @@ class UserSettingsNotifier extends _$UserSettingsNotifier {
     if (currentState == null) return;
 
     if (currentState.currentUserId.isEmpty) {
-      state = AsyncValue.data(currentState.copyWith(error: 'User not initialized'));
+      state =
+          AsyncValue.data(currentState.copyWith(error: 'User not initialized'));
       return;
     }
 
     try {
-      state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+      state =
+          AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
 
-      final settings = await _getUserSettingsUseCase(currentState.currentUserId);
+      final settings =
+          await _getUserSettingsUseCase(currentState.currentUserId);
 
       state = AsyncValue.data(
         currentState.copyWith(isLoading: false, settings: settings),
@@ -177,7 +180,8 @@ class UserSettingsNotifier extends _$UserSettingsNotifier {
     if (currentState == null) return false;
 
     if (currentState.currentUserId.isEmpty) {
-      state = AsyncValue.data(currentState.copyWith(error: 'User not initialized'));
+      state =
+          AsyncValue.data(currentState.copyWith(error: 'User not initialized'));
       return false;
     }
 
@@ -205,14 +209,16 @@ class UserSettingsNotifier extends _$UserSettingsNotifier {
     if (currentState == null) return false;
 
     if (currentState.currentUserId.isEmpty) {
-      state = AsyncValue.data(currentState.copyWith(error: 'User not initialized'));
+      state =
+          AsyncValue.data(currentState.copyWith(error: 'User not initialized'));
       return false;
     }
 
     try {
       state = AsyncValue.data(currentState.clearError());
 
-      final defaultSettings = UserSettingsEntity.createDefault(currentState.currentUserId);
+      final defaultSettings =
+          UserSettingsEntity.createDefault(currentState.currentUserId);
       final updatedSettings = await _updateUserSettingsUseCase(defaultSettings);
 
       state = AsyncValue.data(currentState.copyWith(settings: updatedSettings));
@@ -226,7 +232,8 @@ class UserSettingsNotifier extends _$UserSettingsNotifier {
   }
 
   /// Get settings optimized for specific context
-  Future<UserSettingsEntity?> getSettingsForContext(SettingsContext context) async {
+  Future<UserSettingsEntity?> getSettingsForContext(
+      SettingsContext context) async {
     final currentState = state.value;
     if (currentState == null || currentState.currentUserId.isEmpty) return null;
 
@@ -271,7 +278,8 @@ class UserSettingsNotifier extends _$UserSettingsNotifier {
     if (currentState == null) return false;
 
     if (currentState.currentUserId.isEmpty) {
-      state = AsyncValue.data(currentState.copyWith(error: 'User not initialized'));
+      state =
+          AsyncValue.data(currentState.copyWith(error: 'User not initialized'));
       return false;
     }
 
@@ -284,7 +292,8 @@ class UserSettingsNotifier extends _$UserSettingsNotifier {
         return false;
       }
       final importedSettings = UserSettingsEntity(
-        userId: currentState.currentUserId, // Use current user, not imported user
+        userId:
+            currentState.currentUserId, // Use current user, not imported user
         isDarkTheme: data['isDarkTheme'] as bool? ?? false,
         notificationsEnabled: data['notificationsEnabled'] as bool? ?? true,
         soundEnabled: data['soundEnabled'] as bool? ?? true,
@@ -296,7 +305,8 @@ class UserSettingsNotifier extends _$UserSettingsNotifier {
         createdAt: currentState.settings?.createdAt ?? DateTime.now(),
       );
 
-      final updatedSettings = await _updateUserSettingsUseCase(importedSettings);
+      final updatedSettings =
+          await _updateUserSettingsUseCase(importedSettings);
 
       state = AsyncValue.data(currentState.copyWith(settings: updatedSettings));
 
@@ -327,7 +337,8 @@ class UserSettingsNotifier extends _$UserSettingsNotifier {
     if (currentState == null) return false;
 
     if (currentState.currentUserId.isEmpty) {
-      state = AsyncValue.data(currentState.copyWith(error: 'User not initialized'));
+      state =
+          AsyncValue.data(currentState.copyWith(error: 'User not initialized'));
       return false;
     }
 

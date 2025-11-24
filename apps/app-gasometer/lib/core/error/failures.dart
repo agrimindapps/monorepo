@@ -20,30 +20,30 @@ export 'package:core/core.dart'
 
 /// Vehicle-specific failures
 class VehicleNotFoundFailure extends core.NotFoundFailure {
-  const VehicleNotFoundFailure(String message)
-      : super(message, code: 'VEHICLE_NOT_FOUND');
+  const VehicleNotFoundFailure(super.message)
+      : super(code: 'VEHICLE_NOT_FOUND');
 }
 
 class DuplicateVehicleFailure extends core.ValidationFailure {
-  const DuplicateVehicleFailure(String message)
-      : super(message, code: 'DUPLICATE_VEHICLE');
+  const DuplicateVehicleFailure(super.message)
+      : super(code: 'DUPLICATE_VEHICLE');
 }
 
 /// Fuel-specific failures
 class InvalidFuelDataFailure extends core.ValidationFailure {
-  const InvalidFuelDataFailure(String message)
-      : super(message, code: 'INVALID_FUEL_DATA');
+  const InvalidFuelDataFailure(super.message)
+      : super(code: 'INVALID_FUEL_DATA');
 }
 
 /// Maintenance-specific failures
 class MaintenanceNotFoundFailure extends core.NotFoundFailure {
-  const MaintenanceNotFoundFailure(String message)
-      : super(message, code: 'MAINTENANCE_NOT_FOUND');
+  const MaintenanceNotFoundFailure(super.message)
+      : super(code: 'MAINTENANCE_NOT_FOUND');
 }
 
 /// Offline/connectivity specific failure
 class OfflineFailure extends core.NetworkFailure {
-  const OfflineFailure(String message) : super(message, code: 'OFFLINE');
+  const OfflineFailure(super.message) : super(code: 'OFFLINE');
 }
 
 /// Financial-specific failures (from core/errors/)
@@ -57,18 +57,14 @@ class FinancialConflictFailure extends core.Failure {
   final String entityId;
 
   const FinancialConflictFailure({
-    required String message,
+    required super.message,
     required this.entityType,
     required this.entityId,
-    String? code,
+    super.code = 'FINANCIAL_CONFLICT',
     this.localData,
     this.remoteData,
-    dynamic details,
-  }) : super(
-          message: message,
-          code: code ?? 'FINANCIAL_CONFLICT',
-          details: details,
-        );
+    super.details,
+  });
 
   @override
   List<Object?> get props => [

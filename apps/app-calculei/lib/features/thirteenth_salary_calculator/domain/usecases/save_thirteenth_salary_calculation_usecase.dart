@@ -1,7 +1,6 @@
 // Package imports:
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 // Project imports:
 import '../entities/thirteenth_salary_calculation.dart';
@@ -12,7 +11,6 @@ import '../repositories/thirteenth_salary_repository.dart';
 /// Follows Single Responsibility Principle (SRP):
 /// - Only responsible for orchestrating the save operation
 /// - Delegates actual storage to repository
-@injectable
 class SaveThirteenthSalaryCalculationUseCase {
   final ThirteenthSalaryRepository _repository;
 

@@ -4,7 +4,7 @@ import '../services/stats/i_diagnosticos_stats_service.dart';
 
 /// Use Case para obter estatísticas dos diagnósticos
 /// Responsabilidade única: Retornar estatísticas agregadas
-@injectable
+
 class GetDiagnosticosStatsUseCase {
   final IDiagnosticosStatsService _statsService;
 

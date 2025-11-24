@@ -1,16 +1,13 @@
-import 'package:injectable/injectable.dart';
-
 import '../../domain/repositories/calculator_data_repository.dart';
 
 /// Implementação do repositório de dados das calculadoras
-/// 
+///
 /// Centraliza todos os dados hardcoded que estavam espalhados nas calculadoras
 /// Implementa Single Responsibility Principle (SRP) e Dependency Inversion (DIP)
-@LazySingleton(as: ICalculatorDataRepository)
 class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
-
   @override
-  Future<CropRequirementsData> getCropRequirements(String cropType, double expectedYield) async {
+  Future<CropRequirementsData> getCropRequirements(
+      String cropType, double expectedYield) async {
     final Map<String, Map<String, double>> cropData = {
       'Milho': {'n': 25.0, 'p': 8.0, 'k': 18.0},
       'Soja': {'n': 80.0, 'p': 15.0, 'k': 37.0}, // N da FBN
@@ -25,7 +22,7 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
     };
 
     final requirements = cropData[cropType] ?? cropData['Milho']!;
-    
+
     return CropRequirementsData(
       cropType: cropType,
       yieldTarget: expectedYield,
@@ -41,8 +38,16 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
   @override
   Future<List<String>> getAvailableCrops() async {
     return [
-      'Milho', 'Soja', 'Trigo', 'Arroz', 'Feijão', 
-      'Café', 'Algodão', 'Cana-de-açúcar', 'Tomate', 'Batata'
+      'Milho',
+      'Soja',
+      'Trigo',
+      'Arroz',
+      'Feijão',
+      'Café',
+      'Algodão',
+      'Cana-de-açúcar',
+      'Tomate',
+      'Batata'
     ];
   }
 
@@ -92,7 +97,7 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
     };
 
     final data = textureData[soilTexture] ?? textureData['Franco']!;
-    
+
     return SoilTextureData(
       textureClass: soilTexture,
       retentionFactor: data['retentionFactor']!,
@@ -106,7 +111,13 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
 
   @override
   Future<List<String>> getAvailableSoilTextures() async {
-    return ['Arenoso', 'Franco-arenoso', 'Franco', 'Franco-argiloso', 'Argiloso'];
+    return [
+      'Arenoso',
+      'Franco-arenoso',
+      'Franco',
+      'Franco-argiloso',
+      'Argiloso'
+    ];
   }
 
   @override
@@ -158,13 +169,14 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
   @override
   Future<FertilizerProduct?> getFertilizerByNutrient(String nutrient) async {
     final products = await getFertilizerProducts();
-    
+
     switch (nutrient.toUpperCase()) {
       case 'N':
         return products.firstWhere((p) => p.name == 'Ureia');
       case 'P2O5':
       case 'P':
-        return products.firstWhere((p) => p.name == 'MAP (Fosfato Monoamônico)');
+        return products
+            .firstWhere((p) => p.name == 'MAP (Fosfato Monoamônico)');
       case 'K2O':
       case 'K':
         return products.firstWhere((p) => p.name == 'Cloreto de Potássio');
@@ -174,7 +186,8 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
   }
 
   @override
-  Future<List<ApplicationSchedule>> getApplicationSchedule(String cropType) async {
+  Future<List<ApplicationSchedule>> getApplicationSchedule(
+      String cropType) async {
     switch (cropType) {
       case 'Milho':
         return [
@@ -255,7 +268,8 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
           cropType: previousCrop,
           nitrogenContribution: 40.0,
           organicMatterContribution: 0.2,
-          description: 'Contribuição da fixação biológica de nitrogênio residual',
+          description:
+              'Contribuição da fixação biológica de nitrogênio residual',
         );
       case 'Adubação Verde':
         return PreviousCropEffect(
@@ -276,7 +290,8 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
           cropType: previousCrop,
           nitrogenContribution: 5.0,
           organicMatterContribution: 0.15,
-          description: 'Contribuição mínima de nitrogênio, boa estruturação do solo',
+          description:
+              'Contribuição mínima de nitrogênio, boa estruturação do solo',
         );
       default: // 'Nenhuma'
         return const PreviousCropEffect(
@@ -299,46 +314,59 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
   }) async {
     final List<String> recommendations = [];
     if (nNeed > 150) {
-      recommendations.add('Alto requerimento de N. Considere aplicação parcelada em 3 vezes para aumentar eficiência.');
+      recommendations.add(
+          'Alto requerimento de N. Considere aplicação parcelada em 3 vezes para aumentar eficiência.');
     } else if (nNeed < 50) {
-      recommendations.add('Baixo requerimento de N. Solo bem suprido ou cultura com fixação biológica.');
+      recommendations.add(
+          'Baixo requerimento de N. Solo bem suprido ou cultura com fixação biológica.');
     }
 
     if (pNeed > 80) {
-      recommendations.add('Alto requerimento de P. Verifique e corrija pH do solo (6,0-6,5) para melhor aproveitamento.');
+      recommendations.add(
+          'Alto requerimento de P. Verifique e corrija pH do solo (6,0-6,5) para melhor aproveitamento.');
     }
 
     if (kNeed > 120) {
-      recommendations.add('Alto requerimento de K. Em solos arenosos, aplique parceladamente para evitar lixiviação.');
+      recommendations.add(
+          'Alto requerimento de K. Em solos arenosos, aplique parceladamente para evitar lixiviação.');
     }
     switch (soilTexture) {
       case 'Arenoso':
-        recommendations.add('Solo arenoso: parcelar N e K em 2-3 aplicações para evitar perdas por lixiviação.');
+        recommendations.add(
+            'Solo arenoso: parcelar N e K em 2-3 aplicações para evitar perdas por lixiviação.');
         break;
       case 'Argiloso':
-        recommendations.add('Solo argiloso: atenção ao parcelamento de P em cultivos sucessivos para evitar fixação.');
+        recommendations.add(
+            'Solo argiloso: atenção ao parcelamento de P em cultivos sucessivos para evitar fixação.');
         break;
       case 'Franco':
-        recommendations.add('Solo franco: textura ideal, manter manejo balanceado de nutrientes.');
+        recommendations.add(
+            'Solo franco: textura ideal, manter manejo balanceado de nutrientes.');
         break;
     }
     if (organicMatter < 2.0) {
-      recommendations.add('Baixo teor de MO (${organicMatter.toStringAsFixed(1)}%). Considere adubação orgânica complementar.');
+      recommendations.add(
+          'Baixo teor de MO (${organicMatter.toStringAsFixed(1)}%). Considere adubação orgânica complementar.');
     } else if (organicMatter > 5.0) {
-      recommendations.add('Alto teor de MO (${organicMatter.toStringAsFixed(1)}%). Monitore disponibilidade de micronutrientes.');
+      recommendations.add(
+          'Alto teor de MO (${organicMatter.toStringAsFixed(1)}%). Monitore disponibilidade de micronutrientes.');
     }
     switch (cropType) {
       case 'Milho':
-        recommendations.add('Milho: aplicar N em V6 (6 folhas) para máxima eficiência de absorção.');
+        recommendations.add(
+            'Milho: aplicar N em V6 (6 folhas) para máxima eficiência de absorção.');
         break;
       case 'Soja':
-        recommendations.add('Soja: priorizar P e K. Realizar inoculação com Bradyrhizobium para fixação de N.');
+        recommendations.add(
+            'Soja: priorizar P e K. Realizar inoculação com Bradyrhizobium para fixação de N.');
         break;
       case 'Café':
-        recommendations.add('Café: dividir adubação em 3-4 aplicações ao longo do ano conforme precipitação.');
+        recommendations.add(
+            'Café: dividir adubação em 3-4 aplicações ao longo do ano conforme precipitação.');
         break;
       case 'Algodão':
-        recommendations.add('Algodão: atenção especial ao boro e enxofre para qualidade da fibra.');
+        recommendations.add(
+            'Algodão: atenção especial ao boro e enxofre para qualidade da fibra.');
         break;
     }
     recommendations.addAll([

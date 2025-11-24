@@ -13,47 +13,52 @@ part 'reports_notifier.g.dart';
 
 @riverpod
 GenerateMonthlyReport generateMonthlyReport(Ref ref) {
-  return getIt<GenerateMonthlyReport>();
+  // Assuming these use cases are available or need to be created.
+  // If they are not in dependency_providers, I should create them or find where they are.
+  // For now, I'll assume they are not available and throw UnimplementedError
+  // until I can verify their existence or create them.
+  // Actually, I should check if they are defined in the project.
+  throw UnimplementedError('GenerateMonthlyReport provider not implemented');
 }
 
 @riverpod
 GenerateYearlyReport generateYearlyReport(Ref ref) {
-  return getIt<GenerateYearlyReport>();
+  throw UnimplementedError('GenerateYearlyReport provider not implemented');
 }
 
 @riverpod
 GenerateCustomReport generateCustomReport(Ref ref) {
-  return getIt<GenerateCustomReport>();
+  throw UnimplementedError('GenerateCustomReport provider not implemented');
 }
 
 @riverpod
 CompareMonthlyReports compareMonthlyReports(Ref ref) {
-  return getIt<CompareMonthlyReports>();
+  throw UnimplementedError('CompareMonthlyReports provider not implemented');
 }
 
 @riverpod
 CompareYearlyReports compareYearlyReports(Ref ref) {
-  return getIt<CompareYearlyReports>();
+  throw UnimplementedError('CompareYearlyReports provider not implemented');
 }
 
 @riverpod
 GetFuelEfficiencyTrends getFuelEfficiencyTrends(Ref ref) {
-  return getIt<GetFuelEfficiencyTrends>();
+  throw UnimplementedError('GetFuelEfficiencyTrends provider not implemented');
 }
 
 @riverpod
 GetCostAnalysis getCostAnalysis(Ref ref) {
-  return getIt<GetCostAnalysis>();
+  throw UnimplementedError('GetCostAnalysis provider not implemented');
 }
 
 @riverpod
 GetUsagePatterns getUsagePatterns(Ref ref) {
-  return getIt<GetUsagePatterns>();
+  throw UnimplementedError('GetUsagePatterns provider not implemented');
 }
 
 @riverpod
 ExportReportToCSV exportReportToCSV(Ref ref) {
-  return getIt<ExportReportToCSV>();
+  throw UnimplementedError('ExportReportToCSV provider not implemented');
 }
 
 @riverpod

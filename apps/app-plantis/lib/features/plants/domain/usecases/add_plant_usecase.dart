@@ -73,7 +73,6 @@ class TaskGenerationResult {
   }
 }
 
-@injectable
 class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
   AddPlantUseCase(
     this.repository,

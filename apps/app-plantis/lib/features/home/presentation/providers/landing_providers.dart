@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/auth/auth_providers.dart';
+import '../../../../core/providers/repository_providers.dart';
 import '../../data/datasources/landing_content_datasource.dart';
 import '../../data/repositories/landing_auth_repository_impl.dart';
 import '../../data/repositories/landing_content_repository_impl.dart';

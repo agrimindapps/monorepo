@@ -1,19 +1,24 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../core/di/injection_container.dart' as di;
-import '../../../core/providers/receituagro_auth_notifier.dart';
+import '../../../core/providers/auth_providers.dart';
 import '../data/repositories/profile_repository_impl.dart';
 import '../domain/repositories/profile_repository.dart';
 
 part 'profile_providers.g.dart';
 
+/// Provider para ProfileImageService
+@riverpod
+ProfileImageService profileImageService(Ref ref) {
+  return ProfileImageServiceFactory.createDefault();
+}
+
 /// Provider para ProfileRepository usando Riverpod
 @riverpod
 ProfileRepository profileRepository(Ref ref) {
   return ProfileRepositoryImpl(
-    profileImageService: di.sl<ProfileImageService>(),
+    profileImageService: ref.watch(profileImageServiceProvider),
     getAuthState: () {
-      return ref.read(receitaAgroAuthNotifierProvider).valueOrNull;
+      return ref.read(authNotifierProvider);
     },
   );
 }

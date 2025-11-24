@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -15,7 +14,6 @@ import '../services/promo_validation_service.dart';
 /// **Dependencies:**
 /// - PromoRepository: For data submission
 /// - PromoValidationService: For email validation
-@lazySingleton
 class SubmitPreRegistration implements UseCase<void, String> {
   final PromoRepository _repository;
   final PromoValidationService _validationService;

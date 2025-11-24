@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../database/petiveti_database.dart';
 import '../models/vaccine_model.dart';
@@ -15,7 +14,6 @@ abstract class VaccineLocalDataSource {
   Stream<List<VaccineModel>> watchVaccinesByAnimalId(int animalId);
 }
 
-@LazySingleton(as: VaccineLocalDataSource)
 class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
   final PetivetiDatabase _database;
 

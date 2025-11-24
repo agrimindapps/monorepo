@@ -2,7 +2,6 @@ import 'package:core/core.dart' hide Column;
 
 import '../repositories/plants_repository.dart';
 
-@injectable
 class DeletePlantUseCase implements UseCase<void, String> {
   const DeletePlantUseCase(this.repository);
 

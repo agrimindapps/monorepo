@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 
 // Tables
 import 'tables/animals_table.dart';
@@ -34,7 +33,6 @@ part 'petiveti_database.g.dart';
 ///
 /// **PADRÃO ESTABELECIDO (gasometer-drift):**
 /// - Usa DriftDatabaseConfig do core para configuração unificada
-/// - Injectable com @lazySingleton para DI
 /// - Factory methods: production(), development(), test()
 /// - MigrationStrategy com onCreate e beforeOpen
 /// - Extends BaseDriftDatabase do core (funcionalidades compartilhadas)
@@ -77,7 +75,6 @@ part 'petiveti_database.g.dart';
     PromoDao,
   ],
 )
-@lazySingleton
 class PetivetiDatabase extends _$PetivetiDatabase with BaseDriftDatabase {
   PetivetiDatabase(QueryExecutor e) : super(e);
 
@@ -89,9 +86,8 @@ class PetivetiDatabase extends _$PetivetiDatabase with BaseDriftDatabase {
 
   /// Factory constructor para injeção de dependência (GetIt/Injectable)
   ///
-  /// Este é o método padrão usado pelo @lazySingleton do Injectable.
   /// Retorna a instância de produção.
-  @factoryMethod
+  // @factoryMethod
   factory PetivetiDatabase.injectable() {
     return PetivetiDatabase.production();
   }

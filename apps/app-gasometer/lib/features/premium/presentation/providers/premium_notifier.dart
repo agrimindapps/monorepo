@@ -16,6 +16,9 @@ import '../../domain/usecases/get_available_products.dart';
 import '../../domain/usecases/manage_local_license.dart';
 import '../../domain/usecases/purchase_premium.dart';
 import '../../domain/usecases/restore_purchases.dart';
+import 'premium_providers.dart';
+
+export 'premium_providers.dart';
 
 /// State para Premium com loading separado para operações
 @immutable
@@ -491,49 +494,4 @@ final availableProductsProvider = core.Provider<List<core.ProductInfo>>((ref) {
 final canPurchasePremiumProvider = core.Provider<bool>((ref) {
   final premiumAsync = ref.watch(premiumNotifierProvider);
   return premiumAsync.valueOrNull?.canPurchasePremium ?? true;
-});
-final checkPremiumStatusProvider = core.Provider<CheckPremiumStatus>((ref) {
-  return core.GetIt.instance<CheckPremiumStatus>();
-});
-
-final canUseFeatureProvider = core.Provider<CanUseFeature>((ref) {
-  return core.GetIt.instance<CanUseFeature>();
-});
-
-final canAddVehicleProvider = core.Provider<CanAddVehicle>((ref) {
-  return core.GetIt.instance<CanAddVehicle>();
-});
-
-final canAddFuelRecordProvider = core.Provider<CanAddFuelRecord>((ref) {
-  return core.GetIt.instance<CanAddFuelRecord>();
-});
-
-final canAddMaintenanceRecordProvider = core.Provider<CanAddMaintenanceRecord>((
-  ref,
-) {
-  return core.GetIt.instance<CanAddMaintenanceRecord>();
-});
-
-final purchasePremiumProvider = core.Provider<PurchasePremium>((ref) {
-  return core.GetIt.instance<PurchasePremium>();
-});
-
-final getAvailableProductsProvider = core.Provider<GetAvailableProducts>((ref) {
-  return core.GetIt.instance<GetAvailableProducts>();
-});
-
-final restorePurchasesProvider = core.Provider<RestorePurchases>((ref) {
-  return core.GetIt.instance<RestorePurchases>();
-});
-
-final generateLocalLicenseProvider = core.Provider<GenerateLocalLicense>((ref) {
-  return core.GetIt.instance<GenerateLocalLicense>();
-});
-
-final revokeLocalLicenseProvider = core.Provider<RevokeLocalLicense>((ref) {
-  return core.GetIt.instance<RevokeLocalLicense>();
-});
-
-final premiumRepositoryProvider = core.Provider<PremiumRepository>((ref) {
-  return core.GetIt.instance<PremiumRepository>();
 });

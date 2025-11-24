@@ -1,6 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../domain/services/schedule_service.dart';
 import '../../domain/services/task_recommendation_service.dart';
 
@@ -9,7 +8,7 @@ part 'specialized_tasks_providers.g.dart';
 /// ScheduleService Provider (DIP)
 @riverpod
 IScheduleService scheduleService(ScheduleServiceRef ref) {
-  return getIt<IScheduleService>();
+  return ScheduleService();
 }
 
 /// TaskRecommendationService Provider (DIP)
@@ -17,7 +16,7 @@ IScheduleService scheduleService(ScheduleServiceRef ref) {
 ITaskRecommendationService taskRecommendationService(
   TaskRecommendationServiceRef ref,
 ) {
-  return getIt<ITaskRecommendationService>();
+  return TaskRecommendationService();
 }
 
 /// Specialized notifier providers are already available via @riverpod decorators

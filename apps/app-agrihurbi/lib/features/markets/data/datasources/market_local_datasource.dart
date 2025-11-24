@@ -56,7 +56,6 @@ abstract class MarketLocalDataSource {
 }
 
 /// Implementation of Market Local DataSource
-@Injectable(as: MarketLocalDataSource)
 class MarketLocalDataSourceImpl implements MarketLocalDataSource {
 
   @override

@@ -1,48 +1,112 @@
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
-import '../../domain/usecases/get_available_products.dart';
+import '../../../../core/providers/core_providers.dart';
+import '../../data/repositories/subscription_repository_impl.dart';
+import '../../domain/repositories/i_subscription_repository.dart';
+import '../../domain/usecases/cancel_subscription.dart';
 import '../../domain/usecases/get_current_subscription.dart';
 import '../../domain/usecases/get_user_premium_status.dart';
-import '../../domain/usecases/manage_subscription.dart';
+import '../../domain/usecases/get_available_products.dart';
 import '../../domain/usecases/purchase_product.dart';
-import '../../domain/usecases/refresh_subscription_status.dart';
 import '../../domain/usecases/restore_purchases.dart';
+import '../../domain/usecases/manage_subscription.dart';
+import '../../domain/usecases/refresh_subscription_status.dart';
+import '../services/subscription_error_message_service.dart';
 
 part 'subscription_providers.g.dart';
 
-@riverpod
-GetUserPremiumStatusUseCase getUserPremiumStatusUseCase(GetUserPremiumStatusUseCaseRef ref) {
-  return di.sl<GetUserPremiumStatusUseCase>();
+// Error Message Service Provider
+@Riverpod(keepAlive: true)
+SubscriptionErrorMessageService subscriptionErrorMessageService(
+  SubscriptionErrorMessageServiceRef ref,
+) {
+  return SubscriptionErrorMessageService();
 }
 
-@riverpod
-GetAvailableProductsUseCase getAvailableProductsUseCase(GetAvailableProductsUseCaseRef ref) {
-  return di.sl<GetAvailableProductsUseCase>();
+// Repository Provider
+@Riverpod(keepAlive: true)
+IAppSubscriptionRepository appSubscriptionRepository(
+  AppSubscriptionRepositoryRef ref,
+) {
+  return SubscriptionRepositoryImpl(
+    ref.watch(subscriptionRepositoryProvider),
+    ref.watch(localStorageRepositoryProvider),
+    ref.watch(subscriptionErrorMessageServiceProvider),
+  );
 }
 
-@riverpod
-GetCurrentSubscriptionUseCase getCurrentSubscriptionUseCase(GetCurrentSubscriptionUseCaseRef ref) {
-  return di.sl<GetCurrentSubscriptionUseCase>();
+// Use Cases Providers
+@Riverpod(keepAlive: true)
+GetCurrentSubscriptionUseCase getCurrentSubscriptionUseCase(
+  GetCurrentSubscriptionUseCaseRef ref,
+) {
+  return GetCurrentSubscriptionUseCase(
+    ref.watch(subscriptionRepositoryProvider),
+  );
 }
 
-@riverpod
-PurchaseProductUseCase purchaseProductUseCase(PurchaseProductUseCaseRef ref) {
-  return di.sl<PurchaseProductUseCase>();
+@Riverpod(keepAlive: true)
+ManageSubscriptionUseCase manageSubscriptionUseCase(
+  ManageSubscriptionUseCaseRef ref,
+) {
+  return ManageSubscriptionUseCase(
+    ref.watch(subscriptionRepositoryProvider),
+  );
 }
 
-@riverpod
-RestorePurchasesUseCase restorePurchasesUseCase(RestorePurchasesUseCaseRef ref) {
-  return di.sl<RestorePurchasesUseCase>();
+@Riverpod(keepAlive: true)
+CancelSubscriptionUseCase cancelSubscriptionUseCase(
+  CancelSubscriptionUseCaseRef ref,
+) {
+  return CancelSubscriptionUseCase(
+    ref.watch(subscriptionRepositoryProvider),
+  );
 }
 
-@riverpod
-RefreshSubscriptionStatusUseCase refreshSubscriptionStatusUseCase(RefreshSubscriptionStatusUseCaseRef ref) {
-  return di.sl<RefreshSubscriptionStatusUseCase>();
+@Riverpod(keepAlive: true)
+RefreshSubscriptionStatusUseCase refreshSubscriptionStatusUseCase(
+  RefreshSubscriptionStatusUseCaseRef ref,
+) {
+  return RefreshSubscriptionStatusUseCase(
+    ref.watch(appSubscriptionRepositoryProvider),
+  );
 }
 
-@riverpod
-ManageSubscriptionUseCase manageSubscriptionUseCase(ManageSubscriptionUseCaseRef ref) {
-  return di.sl<ManageSubscriptionUseCase>();
+@Riverpod(keepAlive: true)
+GetUserPremiumStatusUseCase getUserPremiumStatusUseCase(
+  GetUserPremiumStatusUseCaseRef ref,
+) {
+  return GetUserPremiumStatusUseCase(
+    ref.watch(appSubscriptionRepositoryProvider),
+  );
+}
+
+@Riverpod(keepAlive: true)
+GetAvailableProductsUseCase getAvailableProductsUseCase(
+  GetAvailableProductsUseCaseRef ref,
+) {
+  return GetAvailableProductsUseCase(
+    ref.watch(appSubscriptionRepositoryProvider),
+  );
+}
+
+@Riverpod(keepAlive: true)
+PurchaseProductUseCase purchaseProductUseCase(
+  PurchaseProductUseCaseRef ref,
+) {
+  return PurchaseProductUseCase(
+    ref.watch(subscriptionRepositoryProvider),
+    ref.watch(subscriptionErrorMessageServiceProvider),
+  );
+}
+
+@Riverpod(keepAlive: true)
+RestorePurchasesUseCase restorePurchasesUseCase(
+  RestorePurchasesUseCaseRef ref,
+) {
+  return RestorePurchasesUseCase(
+    ref.watch(subscriptionRepositoryProvider),
+    ref.watch(appSubscriptionRepositoryProvider),
+  );
 }

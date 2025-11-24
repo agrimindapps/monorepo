@@ -2,7 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/providers/tasks_providers.dart';
+import '../notifiers/tasks_notifier.dart';
 
 /// Error boundary widget for the tasks feature
 ///

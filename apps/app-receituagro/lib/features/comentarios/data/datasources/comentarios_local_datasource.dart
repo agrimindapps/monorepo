@@ -1,4 +1,4 @@
-import 'package:injectable/injectable.dart';
+
 
 import '../comentario_model.dart';
 
@@ -15,7 +15,7 @@ abstract class ComentariosLocalDatasource {
   Future<void> clearCache();
 }
 
-@LazySingleton(as: ComentariosLocalDatasource)
+
 class ComentariosLocalDatasourceImpl implements ComentariosLocalDatasource {
   // In-memory storage (session only)
   final Map<String, ComentarioModel> _storage = {};

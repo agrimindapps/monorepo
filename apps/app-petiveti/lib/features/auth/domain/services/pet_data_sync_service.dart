@@ -1,8 +1,6 @@
-import 'package:injectable/injectable.dart';
 
 /// Service responsible for synchronizing pet data after authentication
 /// Follows Single Responsibility Principle - only handles data sync logic
-@lazySingleton
 class PetDataSyncService {
   /// Synchronizes pet data from remote to local storage
   /// In the future, this will handle:

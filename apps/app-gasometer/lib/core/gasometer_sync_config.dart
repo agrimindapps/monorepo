@@ -1,4 +1,5 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide OfflineData;
+import 'package:core/src/domain/repositories/i_local_storage_repository.dart' show OfflineData;
 
 import '../features/sync/domain/services/gasometer_sync_service.dart';
 
@@ -71,7 +72,7 @@ abstract final class GasometerSyncConfig {
   /// Configura o sistema de sincronização para o Gasometer
   /// Configuração unificada com sync frequente para dados financeiros críticos
   /// Firebase Firestore collections: vehicles, fuel, expenses, maintenance, users, subscriptions
-  static Future<void> initialize() async {
+  static Future<void> initialize(GasometerSyncService gasometerSyncService) async {
     // FORCE RECOMPILE - version 1.0.1
     print(
       '🚀 [GasometerSync] ========== INÍCIO DA INICIALIZAÇÃO v1.0.1 ==========',
@@ -102,10 +103,6 @@ abstract final class GasometerSyncConfig {
       },
     );
 
-    // Obter GasometerSyncService do DI
-    print('🔧 [GasometerSync] Obtendo GasometerSyncService do DI...');
-    final gasometerSyncService = GetIt.I<GasometerSyncService>();
-
     // Inicializar o GasometerSyncService
     print('🔧 [GasometerSync] Inicializando GasometerSyncService...');
     await gasometerSyncService.initialize();
@@ -122,6 +119,7 @@ abstract final class GasometerSyncConfig {
         // NOTA: Drift entities são gerenciadas pelo GasometerSyncService
         // Não precisamos registrar entidades individuais aqui
       ],
+      localStorage: _NoOpLocalStorageRepository(),
     );
 
     // 🔥 IMPORTANTE: Registrar o GasometerSyncService no BackgroundSyncManager
@@ -140,25 +138,75 @@ abstract final class GasometerSyncConfig {
 
     print('✅ [GasometerSync] ========== INICIALIZAÇÃO COMPLETA ==========');
   }
+}
 
-  /// Deprecated: Use initialize() instead
-  /// Kept for backward compatibility during transition
-  @Deprecated('Use GasometerSyncConfig.initialize() instead')
-  static Future<void> configure() async {
-    await initialize();
-  }
+class _NoOpLocalStorageRepository implements ILocalStorageRepository {
+  @override
+  Future<Either<Failure, void>> addToList<T>({required String key, required T item, String? box}) async => const Right(null);
 
-  /// Deprecated: Use initialize() instead
-  /// Single environment - development mode is no longer separated
-  @Deprecated('Use GasometerSyncConfig.initialize() instead')
-  static Future<void> configureDevelopment() async {
-    await initialize();
-  }
+  @override
+  Future<Either<Failure, void>> cleanExpiredData({String? box}) async => const Right(null);
 
-  /// Deprecated: Use initialize() instead
-  /// All sync strategies are now unified in single initialize() method
-  @Deprecated('Use GasometerSyncConfig.initialize() instead')
-  static Future<void> configureOfflineFirst() async {
-    await initialize();
-  }
+  @override
+  Future<Either<Failure, void>> clear({String? box}) async => const Right(null);
+
+  @override
+  Future<Either<Failure, bool>> contains({required String key, String? box}) async => const Right(false);
+
+  @override
+  Future<Either<Failure, Map<String, dynamic>>> getAllUserSettings() async => const Right({});
+
+  @override
+  Future<Either<Failure, T?>> get<T>({required String key, String? box}) async => const Right(null);
+
+  @override
+  Future<Either<Failure, List<String>>> getKeys({String? box}) async => const Right([]);
+
+  @override
+  Future<Either<Failure, List<T>>> getList<T>({required String key, String? box}) async => const Right([]);
+
+  @override
+  Future<Either<Failure, OfflineData<T>?>> getOfflineData<T>({required String key}) async => const Right(null);
+
+  @override
+  Future<Either<Failure, List<String>>> getUnsyncedKeys() async => const Right([]);
+
+  @override
+  Future<Either<Failure, T?>> getUserSetting<T>({required String key, T? defaultValue}) async => Right(defaultValue);
+
+  @override
+  Future<Either<Failure, List<T>>> getValues<T>({String? box}) async => const Right([]);
+
+  @override
+  Future<Either<Failure, T?>> getWithTTL<T>({required String key, String? box}) async => const Right(null);
+
+  @override
+  Future<Either<Failure, void>> initialize() async => const Right(null);
+
+  @override
+  Future<Either<Failure, int>> length({String? box}) async => const Right(0);
+
+  @override
+  Future<Either<Failure, void>> markAsSynced({required String key}) async => const Right(null);
+
+  @override
+  Future<Either<Failure, void>> remove({required String key, String? box}) async => const Right(null);
+
+  @override
+  Future<Either<Failure, void>> removeFromList<T>({required String key, required T item, String? box}) async => const Right(null);
+
+  @override
+  Future<Either<Failure, void>> save<T>({required String key, required T data, String? box}) async => const Right(null);
+
+  @override
+  Future<Either<Failure, void>> saveList<T>({required String key, required List<T> data, String? box}) async => const Right(null);
+
+  @override
+  Future<Either<Failure, void>> saveOfflineData<T>({required String key, required T data, DateTime? lastSync}) async => const Right(null);
+
+  @override
+  Future<Either<Failure, void>> saveUserSetting({required String key, required dynamic value}) async => const Right(null);
+
+  @override
+  Future<Either<Failure, void>> saveWithTTL<T>({required String key, required T data, required Duration ttl, String? box}) async => const Right(null);
 }

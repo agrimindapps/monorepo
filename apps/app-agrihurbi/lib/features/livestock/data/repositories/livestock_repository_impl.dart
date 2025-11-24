@@ -18,7 +18,6 @@ import '../models/equine_model.dart';
 /// 2. Sync com Supabase em background quando há conectividade
 /// 3. Conflict resolution: local wins (last-write-wins)
 /// 4. Offline-first approach para melhor UX
-@LazySingleton(as: LivestockRepository)
 class LivestockRepositoryImpl implements LivestockRepository {
   final LivestockLocalDataSource _localDataSource;
   final LivestockRemoteDataSource _remoteDataSource;

@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -15,7 +14,6 @@ import '../services/reminder_validation_service.dart';
 /// **Dependencies:**
 /// - ReminderRepository: For data deletion
 /// - ReminderValidationService: For ID validation
-@lazySingleton
 class DeleteReminder implements UseCase<void, String> {
   final ReminderRepository _repository;
   final ReminderValidationService _validationService;

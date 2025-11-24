@@ -10,7 +10,7 @@ import 'pragas_cultura_params.dart';
 /// Retorno: Either<Failure, List<dynamic>> com pragas filtradas
 /// Validações: Lista não vazia (validação básica)
 /// Nota: Use case de lógica pura - sem chamadas de repositório
-@injectable
+
 class FilterPragasUseCase {
   final PragasCulturaErrorMessageService errorService;
 

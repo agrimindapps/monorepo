@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -11,7 +10,6 @@ import '../repositories/medication_repository.dart';
 /// **SOLID Principles:**
 /// - **Single Responsibility**: Only retrieves active medications
 /// - **Dependency Inversion**: Depends on repository abstraction
-@lazySingleton
 class GetActiveMedications implements UseCase<List<Medication>, NoParams> {
   final MedicationRepository repository;
 
@@ -28,7 +26,6 @@ class GetActiveMedications implements UseCase<List<Medication>, NoParams> {
 /// **SOLID Principles:**
 /// - **Single Responsibility**: Only retrieves active medications by animal
 /// - **Dependency Inversion**: Depends on repository abstraction
-@lazySingleton
 class GetActiveMedicationsByAnimalId
     implements UseCase<List<Medication>, String> {
   final MedicationRepository repository;

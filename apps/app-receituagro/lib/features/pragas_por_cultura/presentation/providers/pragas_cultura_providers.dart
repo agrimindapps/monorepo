@@ -1,43 +1,78 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
+import '../../../../database/providers/database_providers.dart';
+import '../../data/datasources/pragas_cultura_integration_datasource.dart';
+import '../../data/datasources/pragas_cultura_local_datasource.dart';
+import '../../data/repositories/pragas_cultura_repository_impl.dart';
 import '../../data/services/pragas_cultura_data_service.dart';
 import '../../data/services/pragas_cultura_query_service.dart';
 import '../../data/services/pragas_cultura_sort_service.dart';
 import '../../data/services/pragas_cultura_statistics_service.dart';
+import '../../domain/repositories/i_pragas_cultura_repository.dart';
 import '../services/pragas_cultura_error_message_service.dart';
 import 'pragas_cultura_page_view_model.dart';
 
 part 'pragas_cultura_providers.g.dart';
 
+/// Provider para o Local DataSource
+@riverpod
+PragasCulturaLocalDataSource pragasCulturaLocalDataSource(PragasCulturaLocalDataSourceRef ref) {
+  return PragasCulturaLocalDataSource();
+}
+
+/// Provider para o Integration DataSource
+@riverpod
+PragasCulturaIntegrationDataSource pragasCulturaIntegrationDataSource(PragasCulturaIntegrationDataSourceRef ref) {
+  return PragasCulturaIntegrationDataSource(
+    ref.watch(pragasRepositoryProvider),
+    ref.watch(diagnosticoRepositoryProvider),
+    ref.watch(fitossanitariosRepositoryProvider),
+  );
+}
+
+/// Provider para o Repository
+@riverpod
+IPragasCulturaRepository iPragasCulturaRepository(IPragasCulturaRepositoryRef ref) {
+  return PragasCulturaRepositoryImpl(
+    integrationDataSource: ref.watch(pragasCulturaIntegrationDataSourceProvider),
+    localDataSource: ref.watch(pragasCulturaLocalDataSourceProvider),
+    culturaRepository: ref.watch(culturasRepositoryProvider),
+    fitossanitarioRepository: ref.watch(fitossanitariosRepositoryProvider),
+    errorService: ref.watch(pragasCulturaErrorServiceProvider),
+  );
+}
+
 /// Provider para o Query Service
 @riverpod
 IPragasCulturaQueryService pragasCulturaQueryService(PragasCulturaQueryServiceRef ref) {
-  return di.sl<IPragasCulturaQueryService>();
+  return PragasCulturaQueryService();
 }
 
 /// Provider para o Sort Service
 @riverpod
 IPragasCulturaSortService pragasCulturaSortService(PragasCulturaSortServiceRef ref) {
-  return di.sl<IPragasCulturaSortService>();
+  return PragasCulturaSortService();
 }
 
 /// Provider para o Statistics Service
 @riverpod
 IPragasCulturaStatisticsService pragasCulturaStatisticsService(PragasCulturaStatisticsServiceRef ref) {
-  return di.sl<IPragasCulturaStatisticsService>();
+  return PragasCulturaStatisticsService();
 }
 
 /// Provider para o Data Service
 @riverpod
 IPragasCulturaDataService pragasCulturaDataService(PragasCulturaDataServiceRef ref) {
-  return di.sl<IPragasCulturaDataService>();
+  return PragasCulturaDataService(
+    repository: ref.watch(iPragasCulturaRepositoryProvider),
+  );
 }
 
 /// Provider para o Error Message Service
 @riverpod
 PragasCulturaErrorMessageService pragasCulturaErrorService(PragasCulturaErrorServiceRef ref) {
-  return di.sl<PragasCulturaErrorMessageService>();
+  return PragasCulturaErrorMessageService();
 }
 
 /// StateNotifierProvider para o ViewModel

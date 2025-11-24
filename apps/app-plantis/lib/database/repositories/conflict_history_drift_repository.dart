@@ -1,8 +1,6 @@
 import 'dart:convert';
 
-import 'package:core/core.dart' hide Column;
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../core/data/models/conflict_history_model.dart';
 import '../plantis_database.dart' as db;
@@ -11,7 +9,6 @@ import '../plantis_database.dart' as db;
 ///
 /// TODO: This repository needs significant refactoring to align ConflictHistoryModel
 /// with the ConflictHistory table schema. Temporarily simplified for migration.
-@lazySingleton
 class ConflictHistoryDriftRepository {
   final db.PlantisDatabase _db;
 
@@ -83,28 +80,27 @@ class ConflictHistoryDriftRepository {
 
   /// Marcar conflito como resolvido
   Future<bool> markAsResolved(String firebaseId, int resolvedAtMs) async {
-    final updated =
-        await (_db.update(
-          _db.conflictHistory,
-        )..where((c) => c.firebaseId.equals(firebaseId))).write(
-          db.ConflictHistoryCompanion(
-            resolvedAt: Value(resolvedAtMs),
-            updatedAt: Value(DateTime.now()),
-          ),
-        );
+    final updated = await (_db.update(
+      _db.conflictHistory,
+    )..where((c) => c.firebaseId.equals(firebaseId)))
+        .write(
+      db.ConflictHistoryCompanion(
+        resolvedAt: Value(resolvedAtMs),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
 
     return updated > 0;
   }
 
   /// Obter conflitos não resolvidos
   Future<List<ConflictHistoryModel>> getUnresolvedConflicts() async {
-    final conflicts =
-        await (_db.select(_db.conflictHistory)
-              ..where((c) => c.resolvedAt.isNull())
-              ..orderBy([
-                (c) => OrderingTerm.desc(c.occurredAt),
-              ]))
-            .get();
+    final conflicts = await (_db.select(_db.conflictHistory)
+          ..where((c) => c.resolvedAt.isNull())
+          ..orderBy([
+            (c) => OrderingTerm.desc(c.occurredAt),
+          ]))
+        .get();
 
     return conflicts.map(_conflictDriftToModel).toList();
   }
@@ -116,7 +112,8 @@ class ConflictHistoryDriftRepository {
 
     return await (_db.delete(
       _db.conflictHistory,
-    )..where((c) => c.occurredAt.isSmallerThanValue(cutoffMs))).go();
+    )..where((c) => c.occurredAt.isSmallerThanValue(cutoffMs)))
+        .go();
   }
 
   /// Contagem de conflitos não resolvidos

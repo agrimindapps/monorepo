@@ -1,10 +1,13 @@
 import 'dart:async';
 
+import 'package:core/core.dart' as core;
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection.dart' as local_di;
+import '../../../../core/providers/dependency_providers.dart';
+import '../../../../core/services/storage/firebase_storage_service.dart' as local_storage;
 import '../../../../core/validation/input_sanitizer.dart';
 import '../../../../features/receipt/domain/services/receipt_image_service.dart';
 import '../../../vehicles/domain/usecases/get_vehicle_by_id.dart';
@@ -14,6 +17,7 @@ import '../../domain/services/maintenance_formatter_service.dart';
 import '../../domain/services/maintenance_validator_service.dart';
 import '../../domain/usecases/add_maintenance_record.dart';
 import '../../domain/usecases/update_maintenance_record.dart';
+import '../providers/maintenance_providers.dart';
 import 'maintenance_form_state.dart';
 
 part 'maintenance_form_notifier.g.dart';
@@ -44,6 +48,8 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
   late final ReceiptImageService _receiptImageService;
   late final GetVehicleById _getVehicleById;
   late final ImagePicker _imagePicker;
+  late final AddMaintenanceRecord _addMaintenanceRecord;
+  late final UpdateMaintenanceRecord _updateMaintenanceRecord;
   Timer? _costDebounceTimer;
   Timer? _odometerDebounceTimer;
   Timer? _titleDebounceTimer;
@@ -62,8 +68,25 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     notesController = TextEditingController();
     _formatter = MaintenanceFormatterService();
     _validator = MaintenanceValidatorService();
-    _receiptImageService = getIt<ReceiptImageService>();
-    _getVehicleById = getIt<GetVehicleById>();
+    
+    // Inject dependencies
+    final compressionService = core.ImageCompressionService();
+    final storageService = local_storage.FirebaseStorageService();
+    final connectivityService = ref.watch(connectivityServiceProvider);
+    final imageSyncService = ref.watch(imageSyncServiceProvider);
+    
+    _receiptImageService = ReceiptImageService(
+      compressionService,
+      storageService,
+      connectivityService,
+      imageSyncService,
+    );
+    _getVehicleById = ref.watch(getVehicleByIdProvider);
+    _addMaintenanceRecord = ref.watch(addMaintenanceRecordProvider);
+    _updateMaintenanceRecord = ref.watch(updateMaintenanceRecordProvider);
+    _addMaintenanceRecord = ref.watch(addMaintenanceRecordProvider); // Need to ensure this provider exists
+    _updateMaintenanceRecord = ref.watch(updateMaintenanceRecordProvider); // Need to ensure this provider exists
+    
     _imagePicker = ImagePicker();
     _initializeControllers();
     ref.onDispose(() {
@@ -762,14 +785,12 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
 
       if (state.id.isEmpty) {
         // Criar novo
-        final addUseCase = local_di.getIt<AddMaintenanceRecord>();
-        result = await addUseCase(
+        result = await _addMaintenanceRecord(
           AddMaintenanceRecordParams(maintenance: maintenanceEntity),
         );
       } else {
         // Atualizar existente
-        final updateUseCase = local_di.getIt<UpdateMaintenanceRecord>();
-        result = await updateUseCase(
+        result = await _updateMaintenanceRecord(
           UpdateMaintenanceRecordParams(maintenance: maintenanceEntity),
         );
       }

@@ -4,7 +4,6 @@ import '../../../core/usecases/usecase.dart';
 import 'task_entity.dart';
 import 'task_repository.dart';
 
-@lazySingleton
 class WatchTasks extends StreamUseCase<List<TaskEntity>, WatchTasksParams> {
   const WatchTasks(this._repository);
 
@@ -22,7 +21,6 @@ class WatchTasks extends StreamUseCase<List<TaskEntity>, WatchTasksParams> {
   }
 }
 
-@lazySingleton
 class WatchTasksParams extends Equatable {
   const WatchTasksParams({
     this.listId,

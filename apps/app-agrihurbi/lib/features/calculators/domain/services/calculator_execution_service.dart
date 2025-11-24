@@ -1,5 +1,3 @@
-import 'package:core/core.dart' show injectable;
-
 import '../entities/calculation_result.dart';
 import '../entities/calculator_parameter.dart';
 import '../interfaces/calculator_strategy.dart';
@@ -10,7 +8,6 @@ import 'calculator_validation_service.dart';
 ///
 /// Implementa Single Responsibility Principle (SRP) - foca apenas na execução.
 /// Orquestra validação, seleção de estratégia e execução do cálculo.
-@injectable
 class CalculatorExecutionService {
   final CalculatorStrategyRegistry _strategyRegistry;
   final CalculatorValidationService _validationService;
@@ -189,10 +186,9 @@ class CalculatorExecutionService {
     return StrategyCompatibilityResult(
       isCompatible: validationResult.isValid,
       strategyId: strategyId,
-      reason:
-          validationResult.isValid
-              ? 'Compatível'
-              : 'Falha na validação: ${validationResult.errors.join(', ')}',
+      reason: validationResult.isValid
+          ? 'Compatível'
+          : 'Falha na validação: ${validationResult.errors.join(', ')}',
       validationWarnings: validationResult.warnings,
     );
   }
@@ -231,14 +227,13 @@ class CalculatorExecutionService {
   ) {
     final allStrategies = _strategyRegistry.getAllStrategies();
     if (preferredType != null) {
-      final preferredStrategies =
-          allStrategies
-              .where(
-                (s) => s.runtimeType.toString().toLowerCase().contains(
+      final preferredStrategies = allStrategies
+          .where(
+            (s) => s.runtimeType.toString().toLowerCase().contains(
                   preferredType.toLowerCase(),
                 ),
-              )
-              .toList();
+          )
+          .toList();
 
       for (final strategy in preferredStrategies) {
         if (strategy.canProcess(inputs)) {

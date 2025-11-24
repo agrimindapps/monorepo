@@ -1,4 +1,3 @@
-import 'package:app_receituagro/core/di/injection.dart' as di;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -28,8 +27,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
   void initState() {
     super.initState();
     _pageController = PageController();
-    _uiService = di.getIt<OnboardingUIService>();
-    _errorService = di.getIt<OnboardingErrorMessageService>();
+    _uiService = ref.read(onboardingUIServiceProvider);
+    _errorService = ref.read(onboardingErrorMessageServiceProvider);
 
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 500),
@@ -146,9 +145,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
           Text(
             'ReceitauAgro',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           Text(
             '${currentIndex + 1} de $totalSteps',
@@ -173,9 +172,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             step.title,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
           Text(

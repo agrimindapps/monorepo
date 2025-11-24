@@ -7,7 +7,7 @@ import '../../domain/repositories/i_favoritos_repository.dart';
 ///
 /// This adapter implements the segregated interface (ISP) by delegating
 /// to the unified repository implementation.
-@LazySingleton(as: IFavoritosDefensivosRepository)
+
 class FavoritosDefensivosRepositoryAdapter
     implements IFavoritosDefensivosRepository {
   final IFavoritosRepository _repository;

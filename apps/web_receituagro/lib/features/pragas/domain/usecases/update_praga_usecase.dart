@@ -1,12 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
 import '../entities/praga.dart';
 import '../repositories/pragas_repository.dart';
 
-@lazySingleton
 class UpdatePragaUseCase implements UseCase<Praga, Praga> {
   final PragasRepository repository;
 

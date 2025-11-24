@@ -1,6 +1,9 @@
-import 'package:core/core.dart' show GetIt, ConsumerStatefulWidget, ConsumerState;
+import 'package:core/core.dart' show ConsumerStatefulWidget, ConsumerState, EnhancedAnalyticsService;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/providers/dependency_providers.dart';
+import '../../../../core/services/analytics/gasometer_analytics_service.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../../../data_export/presentation/widgets/export_data_section.dart';
@@ -16,6 +19,25 @@ import '../widgets/profile_personal_info_section.dart';
 import '../widgets/profile_settings_section.dart';
 import '../widgets/profile_sync_section.dart';
 
+// Providers for ProfileController dependencies
+final accountServiceProvider = Provider<AccountService>((ref) {
+  return AccountServiceImpl();
+});
+
+final profileImageServiceProvider = Provider<GasometerProfileImageService>((ref) {
+  final analytics = ref.watch(analyticsRepositoryProvider);
+  final crashlytics = ref.watch(crashlyticsRepositoryProvider);
+  
+  return GasometerProfileImageService(
+    GasometerAnalyticsService(
+      EnhancedAnalyticsService(
+        analytics: analytics,
+        crashlytics: crashlytics,
+      ),
+    ),
+  );
+});
+
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
@@ -30,9 +52,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   void initState() {
     super.initState();
+    // We can't access ref in initState directly for reading providers if they depend on other providers
+    // But we can use ref.read in initState if we are careful.
+    // Better to initialize in didChangeDependencies or build if possible,
+    // but ProfileController might be needed early.
+    // However, ProfileController seems to be a simple controller class, not a Riverpod notifier.
+    // Let's initialize it in build or use a provider for it.
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _profileController = ProfileController(
-      GetIt.instance<AccountService>(),
-      GetIt.instance<GasometerProfileImageService>(),
+      ref.read(accountServiceProvider),
+      ref.read(profileImageServiceProvider),
     );
   }
 

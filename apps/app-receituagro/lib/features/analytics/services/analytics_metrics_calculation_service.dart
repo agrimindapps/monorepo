@@ -1,4 +1,4 @@
-import 'package:injectable/injectable.dart';
+
 
 import '../analytics_dashboard_service.dart';
 
@@ -8,7 +8,7 @@ import '../analytics_dashboard_service.dart';
 /// - Separates metric calculation logic from service orchestration
 /// - Provides reusable calculation methods
 /// - Eliminates code duplication across metric types
-@lazySingleton
+
 class AnalyticsMetricsCalculationService {
   /// Calculate Daily Active Users
   /// ⚠️ MOCK DATA: Returns fixed realistic values for development

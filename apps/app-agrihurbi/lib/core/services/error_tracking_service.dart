@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 ///
 /// Integra com Firebase Analytics, Crashlytics e Performance
 /// Implementa diferentes níveis de logging e contexto de erro
-@singleton
 class ErrorTrackingService {
   final IAnalyticsRepository _analyticsService;
   final ICrashlyticsRepository _crashlyticsService;

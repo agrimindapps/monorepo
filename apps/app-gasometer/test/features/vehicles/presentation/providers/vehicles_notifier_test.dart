@@ -1,10 +1,11 @@
-import 'package:core/core.dart' hide test;
+import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gasometer_drift/features/auth/presentation/notifiers/auth_notifier.dart';
-import 'package:gasometer_drift/features/auth/presentation/providers/auth_providers.dart' as auth_providers;
-import 'package:gasometer_drift/features/auth/domain/entities/user_entity.dart' as gasometer_auth;
+import 'package:gasometer_drift/features/auth/presentation/providers/auth_providers.dart'
+    as auth_providers;
+import 'package:gasometer_drift/features/auth/domain/entities/user_entity.dart'
+    as gasometer_auth;
 import 'package:gasometer_drift/features/vehicles/domain/entities/vehicle_entity.dart';
 import 'package:gasometer_drift/features/vehicles/domain/usecases/add_vehicle.dart';
 import 'package:gasometer_drift/features/vehicles/domain/usecases/delete_vehicle.dart';
@@ -18,17 +19,26 @@ import 'package:mocktail/mocktail.dart';
 
 // Mocks
 class MockGetAllVehicles extends Mock implements GetAllVehicles {}
+
 class MockAddVehicle extends Mock implements AddVehicle {}
+
 class MockUpdateVehicle extends Mock implements UpdateVehicle {}
+
 class MockDeleteVehicle extends Mock implements DeleteVehicle {}
+
 class MockGetVehicleById extends Mock implements GetVehicleById {}
+
 class MockSearchVehicles extends Mock implements SearchVehicles {}
+
 class MockUserEntity extends Mock implements gasometer_auth.UserEntity {}
 
 // Fakes
 class FakeVehicleEntity extends Fake implements VehicleEntity {}
+
 class FakeAddVehicleParams extends Fake implements AddVehicleParams {}
+
 class FakeUpdateVehicleParams extends Fake implements UpdateVehicleParams {}
+
 class FakeDeleteVehicleParams extends Fake implements DeleteVehicleParams {}
 
 void main() {
@@ -121,7 +131,9 @@ void main() {
       await container.read(vehiclesNotifierProvider.future);
 
       // Act
-      await container.read(vehiclesNotifierProvider.notifier).addVehicle(tVehicle);
+      await container
+          .read(vehiclesNotifierProvider.notifier)
+          .addVehicle(tVehicle);
 
       // Assert
       final state = await container.read(vehiclesNotifierProvider.future);
@@ -141,7 +153,9 @@ void main() {
       await container.read(vehiclesNotifierProvider.future);
 
       // Act
-      await container.read(vehiclesNotifierProvider.notifier).deleteVehicle(tVehicle.id);
+      await container
+          .read(vehiclesNotifierProvider.notifier)
+          .deleteVehicle(tVehicle.id);
 
       // Assert
       final state = await container.read(vehiclesNotifierProvider.future);

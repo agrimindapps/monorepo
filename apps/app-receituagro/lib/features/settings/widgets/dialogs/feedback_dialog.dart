@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
+import '../../../analytics/analytics_providers.dart';
 import '../../constants/settings_design_tokens.dart';
 
 /// Dialog para envio de feedback do usuário para Firebase Analytics
@@ -265,7 +266,7 @@ class _FeedbackDialogState extends ConsumerState<FeedbackDialog> {
 
     try {
       // Obter analytics repository do core
-      final analyticsRepository = di.sl<IAnalyticsRepository>();
+      final analyticsRepository = ref.watch(analyticsRepositoryProvider);
 
       // Enviar feedback para Firebase Analytics
       final result = await analyticsRepository.logFeedback(

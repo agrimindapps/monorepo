@@ -1,14 +1,16 @@
 import 'dart:async';
-
-import 'package:core/core.dart' hide FormState, getIt;
+import 'package:core/core.dart' as core;
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/providers/dependency_providers.dart';
+import '../../../../core/services/storage/firebase_storage_service.dart' as local_storage;
 import '../../../../core/validation/input_sanitizer.dart';
-import '../../../../core/di/injection.dart';
 import '../../../../features/receipt/domain/services/receipt_image_service.dart';
 import '../../../auth/presentation/notifiers/notifiers.dart';
+import '../../../image/domain/services/image_sync_service.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../core/constants/fuel_constants.dart';
@@ -779,10 +781,20 @@ final fuelFormNotifierProvider =
   vehicleId,
 ) {
   final userId = ref.watch(userIdProvider);
+  final compressionService = core.ImageCompressionService();
+  final storageService = local_storage.FirebaseStorageService();
+  final connectivityService = ref.watch(connectivityServiceProvider);
+  final imageSyncService = ref.watch(imageSyncServiceProvider);
+
   return FuelFormNotifier(
     initialVehicleId: vehicleId,
     userId: userId,
-    receiptImageService: getIt<ReceiptImageService>(),
+    receiptImageService: ReceiptImageService(
+      compressionService,
+      storageService,
+      connectivityService,
+      imageSyncService,
+    ),
     ref: ref,
   );
 });

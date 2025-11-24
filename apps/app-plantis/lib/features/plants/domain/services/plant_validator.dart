@@ -4,7 +4,6 @@ import '../entities/plant.dart';
 
 /// Service responsible for validating Plant data
 /// Centralizes validation logic following Single Responsibility Principle (SRP)
-@injectable
 class PlantValidator {
   /// Validate plant ID
   Either<ValidationFailure, Unit> validateId(String id) {

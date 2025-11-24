@@ -8,8 +8,8 @@ import '../../data/repositories/subscription_repository_impl.dart';
 import '../../data/services/subscription_error_handling_service.dart';
 import '../../domain/repositories/subscription_repository.dart';
 import '../../domain/services/subscription_validation_service.dart';
+import '../../domain/entities/subscription_plan.dart';
 import '../../domain/usecases/subscription_usecases.dart';
-import 'subscription_notifier.dart';
 
 part 'subscription_providers.g.dart';
 
@@ -135,4 +135,52 @@ RestorePurchases restorePurchases(RestorePurchasesRef ref) {
     ref.watch(subscriptionRepositoryProvider),
     ref.watch(subscriptionValidationServiceProvider),
   );
+}
+
+// ============================================================================
+// NOTIFIER & STATE
+// ============================================================================
+
+class SubscriptionState {
+  final bool isLoadingCurrentSubscription;
+  final bool isLoadingPlans;
+  final SubscriptionPlan? currentSubscription;
+  final List<SubscriptionPlan> availablePlans;
+  final String? errorMessage;
+
+  const SubscriptionState({
+    this.isLoadingCurrentSubscription = false,
+    this.isLoadingPlans = false,
+    this.currentSubscription,
+    this.availablePlans = const [],
+    this.errorMessage,
+  });
+
+  bool get hasAnyLoading => isLoadingCurrentSubscription || isLoadingPlans;
+
+  SubscriptionState copyWith({
+    bool? isLoadingCurrentSubscription,
+    bool? isLoadingPlans,
+    SubscriptionPlan? currentSubscription,
+    List<SubscriptionPlan>? availablePlans,
+    String? errorMessage,
+    bool clearError = false,
+  }) {
+    return SubscriptionState(
+      isLoadingCurrentSubscription:
+          isLoadingCurrentSubscription ?? this.isLoadingCurrentSubscription,
+      isLoadingPlans: isLoadingPlans ?? this.isLoadingPlans,
+      currentSubscription: currentSubscription ?? this.currentSubscription,
+      availablePlans: availablePlans ?? this.availablePlans,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+    );
+  }
+}
+
+@riverpod
+class SubscriptionNotifier extends _$SubscriptionNotifier {
+  @override
+  SubscriptionState build() {
+    return const SubscriptionState();
+  }
 }

@@ -1,5 +1,4 @@
 // import 'package:drift/drift.dart' hide Column;
-import 'package:injectable/injectable.dart';
 
 import '../../../../../core/error/exceptions.dart';
 import '../../../../../database/termostecnicos_database.dart' as db;
@@ -19,7 +18,6 @@ abstract class ComentariosLocalDataSource {
 }
 
 /// Implementation of local data source using Drift/SQLite
-@LazySingleton(as: ComentariosLocalDataSource)
 class ComentariosLocalDataSourceImpl implements ComentariosLocalDataSource {
   final db.TermosTecnicosDatabase _database;
 

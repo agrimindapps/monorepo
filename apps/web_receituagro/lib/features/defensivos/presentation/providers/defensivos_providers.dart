@@ -88,7 +88,7 @@ class DefensivosNotifier extends _$DefensivosNotifier {
     );
 
     // Reset pagination when searching
-    ref.read(currentPageProvider.notifier).state = 0;
+    ref.read(currentPageProvider.notifier).firstPage();
   }
 
   /// Refresh defensivos
@@ -101,7 +101,7 @@ class DefensivosNotifier extends _$DefensivosNotifier {
   void showAll() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() => _fetchDefensivos());
-    ref.read(currentPageProvider.notifier).state = 0;
+    ref.read(currentPageProvider.notifier).firstPage();
   }
 
   /// Delete a defensivo by ID

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/core_providers.dart';
-import '../../../core/providers/receituagro_auth_notifier.dart';
+import '../../../core/providers/auth_providers.dart';
 import '../../../core/services/receita_agro_sync_service.dart';
 import '../../../core/widgets/modern_header_widget.dart';
 import '../../../core/widgets/responsive_content_wrapper.dart';
@@ -47,95 +47,97 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final authState = ref.watch(receitaAgroAuthNotifierProvider);
+    final authState = ref.watch(authNotifierProvider);
     final settingsState = ref.watch(settingsNotifierProvider);
 
-    return authState.when(
-      data: (authData) {
-        final isAuthenticated =
-            authData.isAuthenticated && !authData.isAnonymous;
-        final user = authData.currentUser;
-        if (!_settingsInitialized && isAuthenticated && user?.id != null) {
-          _settingsInitialized = true;
-          final userId = user?.id;
-          if (userId != null) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              ref.read(settingsNotifierProvider.notifier).initialize(userId);
-            });
-          }
-        }
-        debugPrint(
-          '🔍 ProfilePage: Auth state - isAuthenticated: $isAuthenticated, user: ${user?.email}',
-        );
+    if (authState.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
-        return Scaffold(
-          body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: ResponsiveContentWrapper(
-                child: Column(
-                  children: [
-                    ModernHeaderWidget(
-                      title: isAuthenticated
-                          ? _getUserDisplayTitle(user)
-                          : 'Perfil do Visitante',
-                      subtitle: isAuthenticated
-                          ? 'Gerencie sua conta e configurações'
-                          : 'Entre em sua conta para recursos completos',
-                      leftIcon: Icons.person,
-                      showBackButton: true,
-                      isDark: isDark,
-                    ),
+    if (authState.errorMessage != null) {
+      return Scaffold(body: Center(child: Text('Erro: ${authState.errorMessage}')));
+    }
 
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: settingsState.when(
-                        data: (settingsData) => SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              _buildUserSection(context, authData),
-                              const SizedBox(height: 8),
-                              if (isAuthenticated) ...[
-                                _buildSubscriptionSection(context),
-                                const SizedBox(height: 8),
-                              ],
-                              if (isAuthenticated) ...[
-                                _buildAccountInfoSection(context, authData),
-                                const SizedBox(height: 8),
-                              ],
-                              if (isAuthenticated) ...[
-                                _buildDevicesSection(context, settingsData),
-                                const SizedBox(height: 8),
-                              ],
-                              if (isAuthenticated) ...[
-                                _buildDataSyncSection(context, authData),
-                                const SizedBox(height: 8),
-                              ],
-                              if (isAuthenticated) ...[
-                                _buildUserActionsSection(context, authData),
-                                const SizedBox(height: 8),
-                              ],
+    final authData = authState;
+    final isAuthenticated =
+        authData.isAuthenticated && !authData.isAnonymous;
+    final user = authData.currentUser;
+    if (!_settingsInitialized && isAuthenticated && user?.id != null) {
+      _settingsInitialized = true;
+      final userId = user?.id;
+      if (userId != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.read(settingsNotifierProvider.notifier).initialize(userId);
+        });
+      }
+    }
+    debugPrint(
+      '🔍 ProfilePage: Auth state - isAuthenticated: $isAuthenticated, user: ${user?.email}',
+    );
 
-                              const SizedBox(height: 16),
-                            ],
-                          ),
-                        ),
-                        loading: () =>
-                            const Center(child: CircularProgressIndicator()),
-                        error: (error, _) =>
-                            Center(child: Text('Erro: $error')),
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: ResponsiveContentWrapper(
+            child: Column(
+              children: [
+                ModernHeaderWidget(
+                  title: isAuthenticated
+                      ? _getUserDisplayTitle(user)
+                      : 'Perfil do Visitante',
+                  subtitle: isAuthenticated
+                      ? 'Gerencie sua conta e configurações'
+                      : 'Entre em sua conta para recursos completos',
+                  leftIcon: Icons.person,
+                  showBackButton: true,
+                  isDark: isDark,
+                ),
+
+                const SizedBox(height: 12),
+                Expanded(
+                  child: settingsState.when(
+                    data: (settingsData) => SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          _buildUserSection(context, authData),
+                          const SizedBox(height: 8),
+                          if (isAuthenticated) ...[
+                            _buildSubscriptionSection(context),
+                            const SizedBox(height: 8),
+                          ],
+                          if (isAuthenticated) ...[
+                            _buildAccountInfoSection(context, authData),
+                            const SizedBox(height: 8),
+                          ],
+                          if (isAuthenticated) ...[
+                            _buildDevicesSection(context, settingsData),
+                            const SizedBox(height: 8),
+                          ],
+                          if (isAuthenticated) ...[
+                            _buildDataSyncSection(context, authData),
+                            const SizedBox(height: 8),
+                          ],
+                          if (isAuthenticated) ...[
+                            _buildUserActionsSection(context, authData),
+                            const SizedBox(height: 8),
+                          ],
+
+                          const SizedBox(height: 16),
+                        ],
                       ),
                     ),
-                  ],
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (error, _) =>
+                        Center(child: Text('Erro: $error')),
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
-        );
-      },
-      loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (error, _) => Scaffold(body: Center(child: Text('Erro: $error'))),
+        ),
+      ),
     );
   }
 
@@ -292,7 +294,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     if (shouldLogout == true && context.mounted) {
       try {
         // Realizar logout
-        await ref.read(receitaAgroAuthNotifierProvider.notifier).signOut();
+        await ref.read(authNotifierProvider.notifier).signOut();
 
         if (context.mounted) {
           // Mostrar mensagem de sucesso
@@ -335,7 +337,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final shouldClear = await ClearDataDialog.show(context);
 
     if (shouldClear == true && context.mounted) {
-      final authState = ref.read(receitaAgroAuthNotifierProvider).value;
+      final authState = ref.read(authNotifierProvider);
       final userId = authState?.currentUser?.id ?? 'unknown';
 
       try {
@@ -543,7 +545,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     if (shouldDelete == true && context.mounted) {
       try {
         final result = await ref
-            .read(receitaAgroAuthNotifierProvider.notifier)
+            .read(authNotifierProvider.notifier)
             .deleteAccount();
         if (context.mounted) {
           if (result.isSuccess) {

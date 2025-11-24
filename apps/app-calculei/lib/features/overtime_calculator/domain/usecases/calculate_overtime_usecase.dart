@@ -1,7 +1,6 @@
 // Package imports:
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 
 // Project imports:
@@ -32,7 +31,6 @@ class CalculateOvertimeParams {
   });
 }
 
-@injectable
 class CalculateOvertimeUseCase {
   static const _uuid = Uuid();
 
@@ -123,7 +121,8 @@ class CalculateOvertimeUseCase {
     final total50 = params.hours50 * hour50Value;
     final total100 = params.hours100 * hour100Value;
     final totalNightAdditional = params.nightHours * nightHourValue;
-    final totalSundayHoliday = params.sundayHolidayHours * sundayHolidayHourValue;
+    final totalSundayHoliday =
+        params.sundayHolidayHours * sundayHolidayHourValue;
     final totalOvertimeHours = params.hours50 + params.hours100;
     final totalOvertime = total50 + total100;
     final dsrOvertime = totalOvertime * CalculationConstants.percentualDsr;
@@ -205,8 +204,8 @@ class CalculateOvertimeUseCase {
   }
 
   Map<String, double> _calculateIrrf(double baseCalculo, int dependents) {
-    final baseComDependentes = baseCalculo -
-        (dependents * CalculationConstants.deducaoDependenteIrrf);
+    final baseComDependentes =
+        baseCalculo - (dependents * CalculationConstants.deducaoDependenteIrrf);
     if (baseComDependentes <= 0) {
       return {'desconto': 0.0, 'aliquota': 0.0};
     }

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/reminders_constants.dart';
 import '../../domain/entities/reminder.dart';
-import '../providers/reminders_provider.dart';
+import '../providers/reminders_providers.dart';
 
 class RemindersPage extends ConsumerStatefulWidget {
   final String userId;
@@ -27,7 +27,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
       vsync: this,
     );
     Future.microtask(() => _loadReminders());
-    ref.listenManual<RemindersState>(remindersProvider, (
+    ref.listenManual<RemindersState>(remindersNotifierProvider, (
       RemindersState? previous,
       RemindersState next,
     ) {
@@ -45,7 +45,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(remindersProvider);
+    final state = ref.watch(remindersNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -383,7 +383,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
         case 'complete':
           setState(() => _isProcessing = true);
           final success = await ref
-              .read(remindersProvider.notifier)
+              .read(remindersNotifierProvider.notifier)
               .completeReminder(reminder.id, widget.userId);
           _showResultSnackBar(success, 'lembrete marcado como concluído');
           break;
@@ -405,7 +405,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
   }
 
   void _loadReminders() {
-    ref.read(remindersProvider.notifier).loadReminders(widget.userId);
+    ref.read(remindersNotifierProvider.notifier).loadReminders(widget.userId);
   }
 
   void _showError(String message) {
@@ -453,7 +453,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
     try {
       final snoozeUntil = DateTime.now().add(duration);
       final success = await ref
-          .read(remindersProvider.notifier)
+          .read(remindersNotifierProvider.notifier)
           .snoozeReminder(reminder.id, snoozeUntil, widget.userId);
       _showResultSnackBar(success, 'lembrete adiado');
     } finally {
@@ -522,7 +522,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
 
               try {
                 final success = await ref
-                    .read(remindersProvider.notifier)
+                    .read(remindersNotifierProvider.notifier)
                     .deleteReminder(reminder.id, widget.userId);
                 _showResultSnackBar(success, 'lembrete excluído');
               } finally {

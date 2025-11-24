@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
+import 'defensivos_providers.dart';
 import '../../data/services/defensivos_grouping_service.dart';
 import '../../domain/entities/defensivo_entity.dart';
 import '../../domain/entities/defensivo_group_entity.dart';
@@ -89,7 +89,7 @@ class DefensivosDrillDownNotifier extends _$DefensivosDrillDownNotifier {
 
   @override
   Future<DefensivosDrillDownState> build() async {
-    _groupingService = di.sl<DefensivosGroupingService>();
+    _groupingService = ref.read(defensivosGroupingServiceProvider);
 
     return DefensivosDrillDownState.initial();
   }

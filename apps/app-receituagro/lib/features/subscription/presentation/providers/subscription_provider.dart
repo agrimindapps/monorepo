@@ -1,13 +1,24 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get_it/get_it.dart';
 
+import '../../../../core/providers/core_providers.dart';
 import '../../domain/entities/index.dart';
 import '../../domain/usecases/get_current_subscription.dart';
 import '../models/user_subscription_model.dart';
 import '../notifiers/index.dart';
 import '../services/subscription_error_message_service.dart';
 
-final sl = GetIt.instance;
+// ═══════════════════════════════════════════════════════════════
+// SERVICE & USECASE PROVIDERS
+// ═══════════════════════════════════════════════════════════════
+
+final subscriptionErrorMessageServiceProvider = Provider<SubscriptionErrorMessageService>((ref) {
+  return SubscriptionErrorMessageService();
+});
+
+final getCurrentSubscriptionUseCaseProvider = Provider<GetCurrentSubscriptionUseCase>((ref) {
+  final repository = ref.watch(subscriptionRepositoryProvider);
+  return GetCurrentSubscriptionUseCase(repository);
+});
 
 // ═══════════════════════════════════════════════════════════════
 // INDIVIDUAL NOTIFIER PROVIDERS
@@ -18,8 +29,8 @@ final sl = GetIt.instance;
 final subscriptionStatusNotifierProvider =
     StateNotifierProvider<SubscriptionStatusNotifier, SubscriptionStatusState>(
       (ref) => SubscriptionStatusNotifier(
-        sl<SubscriptionErrorMessageService>(),
-        sl<GetCurrentSubscriptionUseCase>(),
+        ref.watch(subscriptionErrorMessageServiceProvider),
+        ref.watch(getCurrentSubscriptionUseCaseProvider),
       ),
       name: 'subscriptionStatusNotifier',
     );
@@ -35,7 +46,7 @@ final trialNotifierProvider = StateNotifierProvider<TrialNotifier, TrialState>(
 /// Gerencia problemas de cobrança
 final billingNotifierProvider =
     StateNotifierProvider<BillingNotifier, BillingState>(
-      (ref) => BillingNotifier(sl<SubscriptionErrorMessageService>()),
+      (ref) => BillingNotifier(ref.watch(subscriptionErrorMessageServiceProvider)),
       name: 'billingNotifier',
     );
 

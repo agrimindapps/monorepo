@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -12,7 +11,6 @@ import '../services/medication_validation_service.dart';
 /// **SOLID Principles:**
 /// - **Single Responsibility**: Only retrieves medication by ID
 /// - **Dependency Inversion**: Depends on abstractions (repository, services)
-@lazySingleton
 class GetMedicationById implements UseCase<Medication, String> {
   final MedicationRepository repository;
   final MedicationValidationService validationService;

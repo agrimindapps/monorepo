@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/failure_message_service.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/services/search/i_diagnosticos_search_service.dart';
-import '../providers/diagnosticos_providers.dart';
+import '../providers/diagnosticos_providers.dart' as diagnosticosProviders;
 import '../state/diagnosticos_search_state.dart';
 
 /// Notifier para gerenciamento de busca de diagnósticos
@@ -40,8 +40,7 @@ class DiagnosticosSearchNotifier
     try {
       // Se há contexto (diagnósticos carregados), busca localmente
       if (contexto != null && contexto.isNotEmpty) {
-        final localResults =
-            _searchService.searchInList(contexto, pattern);
+        final localResults = _searchService.searchInList(contexto, pattern);
 
         state = state.copyWith(
           searchQuery: pattern,
@@ -58,8 +57,7 @@ class DiagnosticosSearchNotifier
         (failure) {
           state = state.copyWith(
             isLoading: false,
-            errorMessage:
-                _failureMessageService.mapFailureToMessage(failure),
+            errorMessage: _failureMessageService.mapFailureToMessage(failure),
           );
         },
         (diagnosticos) {
@@ -94,8 +92,7 @@ class DiagnosticosSearchNotifier
         (failure) {
           state = state.copyWith(
             isLoading: false,
-            errorMessage:
-                _failureMessageService.mapFailureToMessage(failure),
+            errorMessage: _failureMessageService.mapFailureToMessage(failure),
           );
         },
         (diagnosticos) {
@@ -123,7 +120,9 @@ class DiagnosticosSearchNotifier
 final diagnosticosSearchNotifierProvider =
     StateNotifierProvider<DiagnosticosSearchNotifier, DiagnosticosSearchState>(
   (ref) => DiagnosticosSearchNotifier(
-    searchService: ref.watch(iDiagnosticosSearchServiceProvider),
-    failureMessageService: ref.watch(failureMessageServiceProvider),
+    searchService:
+        ref.watch(diagnosticosProviders.diagnosticosSearchServiceProvider),
+    failureMessageService:
+        ref.watch(diagnosticosProviders.failureMessageServiceProvider),
   ),
 );

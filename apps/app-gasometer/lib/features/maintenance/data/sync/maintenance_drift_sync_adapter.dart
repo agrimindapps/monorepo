@@ -53,8 +53,11 @@ import '../../domain/entities/maintenance_entity.dart';
 
 class MaintenanceDriftSyncAdapter
     extends DriftSyncAdapterBase<MaintenanceEntity, Maintenance> {
-  MaintenanceDriftSyncAdapter(GasometerDatabase db, FirebaseFirestore firestore)
-      : super(db, firestore);
+  MaintenanceDriftSyncAdapter(
+    GasometerDatabase db,
+    FirebaseFirestore firestore,
+    ConnectivityService connectivityService,
+  ) : super(db, firestore, connectivityService);
 
   GasometerDatabase get _db => db as GasometerDatabase;
 

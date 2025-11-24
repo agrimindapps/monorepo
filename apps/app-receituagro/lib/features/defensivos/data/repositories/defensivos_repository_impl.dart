@@ -23,7 +23,7 @@ import '../services/defensivos_stats_service.dart';
 /// - All dependencies injected to improve testability (DIP)
 ///
 /// This follows the pattern established in diagnosticos and comentarios features.
-@LazySingleton(as: IDefensivosRepository)
+
 class DefensivosRepositoryImpl implements IDefensivosRepository {
   final FitossanitariosRepository _repository;
   final FitossanitariosInfoRepository _infoRepository;

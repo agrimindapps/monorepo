@@ -12,7 +12,6 @@ abstract class SpacesRemoteDatasource {
   Future<void> syncSpaces(List<SpaceModel> spaces, String userId);
 }
 
-@LazySingleton(as: SpacesRemoteDatasource)
 class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
   final FirebaseFirestore firestore;
   final RateLimiterService rateLimiter;

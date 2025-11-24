@@ -3,7 +3,7 @@ import 'package:core/core.dart' hide Column;
 import '../repositories/i_subscription_repository.dart';
 
 /// Use case para verificar status premium do usuário ReceitaAgro
-@injectable
+
 class GetUserPremiumStatusUseCase implements UseCase<bool, NoParams> {
   GetUserPremiumStatusUseCase(this.repository);
 

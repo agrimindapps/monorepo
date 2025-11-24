@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/vacation_calculation_model.dart';
@@ -22,7 +21,6 @@ abstract class VacationLocalDataSource {
   Future<void> clearAll();
 }
 
-@Injectable(as: VacationLocalDataSource)
 class VacationLocalDataSourceImpl implements VacationLocalDataSource {
   static const String _storagePrefix = 'vacation_calculations';
   static const String _idsKey = '${_storagePrefix}_ids';

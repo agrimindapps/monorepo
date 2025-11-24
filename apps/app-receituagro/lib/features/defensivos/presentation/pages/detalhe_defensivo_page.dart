@@ -179,7 +179,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
         debugPrint(
           '🔄 [FORCE DEBUG] Chamando DiagnosticosDataLoader.loadDiagnosticosData()...',
         );
-        await DiagnosticosDataLoader.loadDiagnosticosData();
+        await DiagnosticosDataLoader.loadDiagnosticosData(ref);
         final newResult = await repository.getAll();
         final newCount = newResult.length;
         debugPrint(

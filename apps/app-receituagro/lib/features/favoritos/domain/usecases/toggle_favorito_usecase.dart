@@ -8,7 +8,7 @@ import '../repositories/i_favoritos_repository.dart';
 /// **Responsabilidade:** Trata add/remove de forma atômica
 ///
 /// **Benefício:** Simplifica lógica de UI que precisa adicionar OU remover baseado em estado
-@injectable
+
 class ToggleFavoritoUseCase {
   final IFavoritosRepository _repository;
 

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:injectable/injectable.dart';
 
 import '../../database/plantis_database.dart' as db;
 import '../../database/repositories/sync_queue_drift_repository.dart';
@@ -10,7 +9,6 @@ import '../../database/repositories/sync_queue_drift_repository.dart';
 ///
 /// Responsável por enfileirar operações offline, processar a fila
 /// e gerenciar retry logic para operações falhadas.
-@lazySingleton
 class SyncQueueDriftService {
   final SyncQueueDriftRepository _repository;
   StreamSubscription<List<db.PlantsSyncQueueData>>? _queueSubscription;

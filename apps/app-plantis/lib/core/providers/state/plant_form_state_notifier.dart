@@ -1,10 +1,11 @@
-import 'package:core/core.dart' hide Column, getIt;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 import '../../../features/plants/domain/entities/plant.dart';
 import '../../../features/plants/domain/usecases/add_plant_usecase.dart';
 import '../../../features/plants/domain/usecases/get_plants_usecase.dart';
 import '../../../features/plants/domain/usecases/update_plant_usecase.dart';
+import '../../../features/plants/presentation/providers/plants_providers.dart';
 import '../../services/form_validation_service.dart';
 import '../../services/image_management_service.dart';
 import '../image_providers.dart';
@@ -134,13 +135,17 @@ class PlantFormState {
       isLoading: isLoading ?? this.isLoading,
       isSaving: isSaving ?? this.isSaving,
       isUploadingImages: isUploadingImages ?? this.isUploadingImages,
-      uploadProgress: clearUploadProgress ? 0.0 : (uploadProgress ?? this.uploadProgress),
-      uploadingImageIndex: clearUploadProgress ? null : (uploadingImageIndex ?? this.uploadingImageIndex),
-      totalImagesToUpload: clearUploadProgress ? null : (totalImagesToUpload ?? this.totalImagesToUpload),
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-      originalPlant: clearOriginalPlant
+      uploadProgress:
+          clearUploadProgress ? 0.0 : (uploadProgress ?? this.uploadProgress),
+      uploadingImageIndex: clearUploadProgress
           ? null
-          : (originalPlant ?? this.originalPlant),
+          : (uploadingImageIndex ?? this.uploadingImageIndex),
+      totalImagesToUpload: clearUploadProgress
+          ? null
+          : (totalImagesToUpload ?? this.totalImagesToUpload),
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      originalPlant:
+          clearOriginalPlant ? null : (originalPlant ?? this.originalPlant),
       name: name ?? this.name,
       species: species ?? this.species,
       spaceId: spaceId ?? this.spaceId,
@@ -175,6 +180,7 @@ class PlantFormState {
       isFormValid: isFormValid ?? this.isFormValid,
     );
   }
+
   bool get hasError => errorMessage != null;
   bool get isEditMode => originalPlant != null;
   bool get hasChanges => _hasChanges();
@@ -257,7 +263,8 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
       result.fold(
         (failure) {
           if (kDebugMode) {
-            print('❌ PlantFormStateNotifier.loadPlant - Failure: ${failure.message}');
+            print(
+                '❌ PlantFormStateNotifier.loadPlant - Failure: ${failure.message}');
           }
           state = state.copyWith(
             isLoading: false,
@@ -266,15 +273,18 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
         },
         (plants) {
           if (kDebugMode) {
-            print('🔍 PlantFormStateNotifier.loadPlant - Total plants: ${plants.length}');
-            print('🔍 Available plant IDs: ${plants.map((p) => p.id).join(", ")}');
+            print(
+                '🔍 PlantFormStateNotifier.loadPlant - Total plants: ${plants.length}');
+            print(
+                '🔍 Available plant IDs: ${plants.map((p) => p.id).join(", ")}');
           }
 
           final plant = plants.where((p) => p.id == plantId).firstOrNull;
 
           if (plant == null) {
             if (kDebugMode) {
-              print('❌ PlantFormStateNotifier.loadPlant - Plant not found with ID: $plantId');
+              print(
+                  '❌ PlantFormStateNotifier.loadPlant - Plant not found with ID: $plantId');
             }
             state = state.copyWith(
               isLoading: false,
@@ -285,12 +295,18 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
           if (kDebugMode) {
             print('🌱 loadPlant - Carregando planta: ${plant.name}');
             print('   🔧 plant.config existe? ${plant.config != null}');
-            print('   💧 wateringIntervalDays: ${plant.config?.wateringIntervalDays}');
-            print('   🌿 fertilizingIntervalDays: ${plant.config?.fertilizingIntervalDays}');
-            print('   ✂️ pruningIntervalDays: ${plant.config?.pruningIntervalDays}');
-            print('   ☀️ sunlightCheckIntervalDays: ${plant.config?.sunlightCheckIntervalDays}');
-            print('   🐛 pestInspectionIntervalDays: ${plant.config?.pestInspectionIntervalDays}');
-            print('   🌱 replantingIntervalDays: ${plant.config?.replantingIntervalDays}');
+            print(
+                '   💧 wateringIntervalDays: ${plant.config?.wateringIntervalDays}');
+            print(
+                '   🌿 fertilizingIntervalDays: ${plant.config?.fertilizingIntervalDays}');
+            print(
+                '   ✂️ pruningIntervalDays: ${plant.config?.pruningIntervalDays}');
+            print(
+                '   ☀️ sunlightCheckIntervalDays: ${plant.config?.sunlightCheckIntervalDays}');
+            print(
+                '   🐛 pestInspectionIntervalDays: ${plant.config?.pestInspectionIntervalDays}');
+            print(
+                '   🌱 replantingIntervalDays: ${plant.config?.replantingIntervalDays}');
           }
 
           state = state.copyWith(
@@ -313,16 +329,23 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
             lastFertilizerDate: plant.config?.lastFertilizerDate,
             // Pruning
             pruningIntervalDays: plant.config?.pruningIntervalDays,
-            enablePruning: plant.config?.pruningIntervalDays != null && plant.config!.pruningIntervalDays! > 0,
+            enablePruning: plant.config?.pruningIntervalDays != null &&
+                plant.config!.pruningIntervalDays! > 0,
             // Sunlight
             sunlightIntervalDays: plant.config?.sunlightCheckIntervalDays,
-            enableSunlightCare: plant.config?.sunlightCheckIntervalDays != null && plant.config!.sunlightCheckIntervalDays! > 0,
+            enableSunlightCare:
+                plant.config?.sunlightCheckIntervalDays != null &&
+                    plant.config!.sunlightCheckIntervalDays! > 0,
             // Pest Inspection
-            pestInspectionIntervalDays: plant.config?.pestInspectionIntervalDays,
-            enablePestInspection: plant.config?.pestInspectionIntervalDays != null && plant.config!.pestInspectionIntervalDays! > 0,
+            pestInspectionIntervalDays:
+                plant.config?.pestInspectionIntervalDays,
+            enablePestInspection:
+                plant.config?.pestInspectionIntervalDays != null &&
+                    plant.config!.pestInspectionIntervalDays! > 0,
             // Replanting
             replantingIntervalDays: plant.config?.replantingIntervalDays,
-            enableReplanting: plant.config?.replantingIntervalDays != null && plant.config!.replantingIntervalDays! > 0,
+            enableReplanting: plant.config?.replantingIntervalDays != null &&
+                plant.config!.replantingIntervalDays! > 0,
             // Other
             waterAmount: plant.config?.waterAmount,
             clearError: true,
@@ -642,23 +665,38 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
   AddPlantParams _buildAddParams() {
     if (kDebugMode) {
       print('🔧 _buildAddParams - Building config with:');
-      print('   enableWateringCare: ${state.enableWateringCare}, intervalDays: ${state.wateringIntervalDays}');
-      print('   enableFertilizerCare: ${state.enableFertilizerCare}, intervalDays: ${state.fertilizingIntervalDays}');
-      print('   enablePruning: ${state.enablePruning}, intervalDays: ${state.pruningIntervalDays}');
-      print('   enableSunlightCare: ${state.enableSunlightCare}, intervalDays: ${state.sunlightIntervalDays}');
-      print('   enablePestInspection: ${state.enablePestInspection}, intervalDays: ${state.pestInspectionIntervalDays}');
-      print('   enableReplanting: ${state.enableReplanting}, intervalDays: ${state.replantingIntervalDays}');
+      print(
+          '   enableWateringCare: ${state.enableWateringCare}, intervalDays: ${state.wateringIntervalDays}');
+      print(
+          '   enableFertilizerCare: ${state.enableFertilizerCare}, intervalDays: ${state.fertilizingIntervalDays}');
+      print(
+          '   enablePruning: ${state.enablePruning}, intervalDays: ${state.pruningIntervalDays}');
+      print(
+          '   enableSunlightCare: ${state.enableSunlightCare}, intervalDays: ${state.sunlightIntervalDays}');
+      print(
+          '   enablePestInspection: ${state.enablePestInspection}, intervalDays: ${state.pestInspectionIntervalDays}');
+      print(
+          '   enableReplanting: ${state.enableReplanting}, intervalDays: ${state.replantingIntervalDays}');
     }
 
     final config = PlantConfig(
-      wateringIntervalDays: state.enableWateringCare == true ? state.wateringIntervalDays : null,
-      fertilizingIntervalDays: state.enableFertilizerCare == true ? state.fertilizingIntervalDays : null,
-      pruningIntervalDays: state.enablePruning == true ? state.pruningIntervalDays : null,
-      sunlightCheckIntervalDays: state.enableSunlightCare == true ? state.sunlightIntervalDays : null,
-      pestInspectionIntervalDays: state.enablePestInspection == true ? state.pestInspectionIntervalDays : null,
-      replantingIntervalDays: state.enableReplanting == true ? state.replantingIntervalDays : null,
-      waterAmount:
-          state.waterAmount?.trim().isNotEmpty == true ? state.waterAmount : null,
+      wateringIntervalDays:
+          state.enableWateringCare == true ? state.wateringIntervalDays : null,
+      fertilizingIntervalDays: state.enableFertilizerCare == true
+          ? state.fertilizingIntervalDays
+          : null,
+      pruningIntervalDays:
+          state.enablePruning == true ? state.pruningIntervalDays : null,
+      sunlightCheckIntervalDays:
+          state.enableSunlightCare == true ? state.sunlightIntervalDays : null,
+      pestInspectionIntervalDays: state.enablePestInspection == true
+          ? state.pestInspectionIntervalDays
+          : null,
+      replantingIntervalDays:
+          state.enableReplanting == true ? state.replantingIntervalDays : null,
+      waterAmount: state.waterAmount?.trim().isNotEmpty == true
+          ? state.waterAmount
+          : null,
       enableWateringCare: state.enableWateringCare,
       lastWateringDate: state.lastWateringDate,
       enableFertilizerCare: state.enableFertilizerCare,
@@ -670,8 +708,10 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
       print('   wateringIntervalDays: ${config.wateringIntervalDays}');
       print('   fertilizingIntervalDays: ${config.fertilizingIntervalDays}');
       print('   pruningIntervalDays: ${config.pruningIntervalDays}');
-      print('   sunlightCheckIntervalDays: ${config.sunlightCheckIntervalDays}');
-      print('   pestInspectionIntervalDays: ${config.pestInspectionIntervalDays}');
+      print(
+          '   sunlightCheckIntervalDays: ${config.sunlightCheckIntervalDays}');
+      print(
+          '   pestInspectionIntervalDays: ${config.pestInspectionIntervalDays}');
       print('   replantingIntervalDays: ${config.replantingIntervalDays}');
     }
 
@@ -691,14 +731,23 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
   /// Constrói parâmetros para atualizar planta
   UpdatePlantParams _buildUpdateParams() {
     final config = PlantConfig(
-      wateringIntervalDays: state.enableWateringCare == true ? state.wateringIntervalDays : null,
-      fertilizingIntervalDays: state.enableFertilizerCare == true ? state.fertilizingIntervalDays : null,
-      pruningIntervalDays: state.enablePruning == true ? state.pruningIntervalDays : null,
-      sunlightCheckIntervalDays: state.enableSunlightCare == true ? state.sunlightIntervalDays : null,
-      pestInspectionIntervalDays: state.enablePestInspection == true ? state.pestInspectionIntervalDays : null,
-      replantingIntervalDays: state.enableReplanting == true ? state.replantingIntervalDays : null,
-      waterAmount:
-          state.waterAmount?.trim().isNotEmpty == true ? state.waterAmount : null,
+      wateringIntervalDays:
+          state.enableWateringCare == true ? state.wateringIntervalDays : null,
+      fertilizingIntervalDays: state.enableFertilizerCare == true
+          ? state.fertilizingIntervalDays
+          : null,
+      pruningIntervalDays:
+          state.enablePruning == true ? state.pruningIntervalDays : null,
+      sunlightCheckIntervalDays:
+          state.enableSunlightCare == true ? state.sunlightIntervalDays : null,
+      pestInspectionIntervalDays: state.enablePestInspection == true
+          ? state.pestInspectionIntervalDays
+          : null,
+      replantingIntervalDays:
+          state.enableReplanting == true ? state.replantingIntervalDays : null,
+      waterAmount: state.waterAmount?.trim().isNotEmpty == true
+          ? state.waterAmount
+          : null,
       enableWateringCare: state.enableWateringCare,
       lastWateringDate: state.lastWateringDate,
       enableFertilizerCare: state.enableFertilizerCare,
@@ -837,23 +886,24 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
     state = const PlantFormState();
   }
 }
-// Providers for use cases (GetIt integration)
+
+// Providers for use cases
 @riverpod
-FormValidationService formValidationService(Ref ref) {
-  return GetIt.instance<FormValidationService>();
+FormValidationService formValidationService(FormValidationServiceRef ref) {
+  return FormValidationService();
 }
 
 @riverpod
-GetPlantsUseCase getPlantsUseCase(Ref ref) {
-  return GetIt.instance<GetPlantsUseCase>();
+GetPlantsUseCase getPlantsUseCaseForForm(GetPlantsUseCaseForFormRef ref) {
+  return ref.watch(getPlantsUseCaseProvider);
 }
 
 @riverpod
-AddPlantUseCase addPlantUseCase(Ref ref) {
-  return GetIt.instance<AddPlantUseCase>();
+AddPlantUseCase addPlantUseCaseForForm(AddPlantUseCaseForFormRef ref) {
+  return ref.watch(addPlantUseCaseProvider);
 }
 
 @riverpod
-UpdatePlantUseCase updatePlantUseCase(Ref ref) {
-  return GetIt.instance<UpdatePlantUseCase>();
+UpdatePlantUseCase updatePlantUseCaseForForm(UpdatePlantUseCaseForFormRef ref) {
+  return ref.watch(updatePlantUseCaseProvider);
 }

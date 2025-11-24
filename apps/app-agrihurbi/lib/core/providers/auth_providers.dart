@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-
-import '../../core/di/injection_container.dart' as di;
 import '../../features/auth/domain/usecases/get_current_user_usecase.dart'
     as app_auth;
 import '../../features/auth/domain/usecases/login_usecase.dart' as app_auth;
@@ -9,6 +9,7 @@ import '../../features/auth/domain/usecases/logout_usecase.dart' as app_auth;
 import '../../features/auth/domain/usecases/refresh_user_usecase.dart'
     as app_auth;
 import '../../features/auth/domain/usecases/register_usecase.dart' as app_auth;
+import '../../features/auth/presentation/providers/auth_di_providers.dart';
 
 part 'auth_providers.g.dart';
 
@@ -54,11 +55,11 @@ class AuthNotifier extends _$AuthNotifier {
 
   @override
   AuthState build() {
-    _loginUseCase = di.getIt<app_auth.LoginUseCase>();
-    _registerUseCase = di.getIt<app_auth.RegisterUseCase>();
-    _logoutUseCase = di.getIt<app_auth.LogoutUseCase>();
-    _getCurrentUserUseCase = di.getIt<app_auth.GetCurrentUserUseCase>();
-    _refreshUserUseCase = di.getIt<app_auth.RefreshUserUseCase>();
+    _loginUseCase = ref.watch(loginUseCaseProvider);
+    _registerUseCase = ref.watch(registerUseCaseProvider);
+    _logoutUseCase = ref.watch(logoutUseCaseProvider);
+    _getCurrentUserUseCase = ref.watch(getCurrentUserUseCaseProvider);
+    _refreshUserUseCase = ref.watch(refreshUserUseCaseProvider);
     _initialize();
 
     return const AuthState();

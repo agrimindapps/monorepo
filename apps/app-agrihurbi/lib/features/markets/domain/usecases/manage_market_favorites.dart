@@ -7,7 +7,6 @@ import 'package:dartz/dartz.dart';
 /// Manage Market Favorites Use Case
 ///
 /// Handles adding, removing, and retrieving favorite markets
-@injectable
 class ManageMarketFavorites {
   final MarketRepository _repository;
 

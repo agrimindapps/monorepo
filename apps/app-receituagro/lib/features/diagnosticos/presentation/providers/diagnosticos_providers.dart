@@ -1,73 +1,76 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/failure_message_service.dart';
-import '../../../../core/services/i_recommendation_service.dart';
-import '../../../../database/repositories/diagnostico_repository.dart';
-import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
+import '../../../../database/providers/database_providers.dart';
+import '../../../../database/repositories/diagnosticos_repository.dart';
+import '../../data/repositories/diagnosticos_repository_impl.dart';
 import '../../domain/repositories/i_diagnosticos_repository.dart';
+import '../../domain/services/filtering/diagnosticos_filter_service.dart';
 import '../../domain/services/filtering/i_diagnosticos_filter_service.dart';
+import '../../domain/services/metadata/diagnosticos_metadata_service.dart';
 import '../../domain/services/metadata/i_diagnosticos_metadata_service.dart';
+import '../../domain/services/search/diagnosticos_search_service.dart';
 import '../../domain/services/search/i_diagnosticos_search_service.dart';
+import '../../domain/services/stats/diagnosticos_stats_service.dart';
 import '../../domain/services/stats/i_diagnosticos_stats_service.dart';
 import '../../domain/usecases/get_diagnosticos_usecase.dart';
 
 part 'diagnosticos_providers.g.dart';
 
-// Repositories
-@riverpod
-IDiagnosticosRepository iDiagnosticosRepository(IDiagnosticosRepositoryRef ref) {
-  return di.sl<IDiagnosticosRepository>();
-}
-
-@riverpod
-DiagnosticoRepository diagnosticoRepository(DiagnosticoRepositoryRef ref) {
-  return di.sl<DiagnosticoRepository>();
-}
-
-@riverpod
-FavoritosRepositorySimplified favoritosRepositorySimplified(FavoritosRepositorySimplifiedRef ref) {
-  return di.sl<FavoritosRepositorySimplified>();
-}
-
 // Services
-@riverpod
-IDiagnosticosFilterService iDiagnosticosFilterService(IDiagnosticosFilterServiceRef ref) {
-  return di.sl<IDiagnosticosFilterService>();
+@Riverpod(keepAlive: true)
+IDiagnosticosFilterService diagnosticosFilterService(
+    DiagnosticosFilterServiceRef ref) {
+  return DiagnosticosFilterService(ref.watch(iDiagnosticosRepositoryProvider));
 }
 
-@riverpod
-IDiagnosticosSearchService iDiagnosticosSearchService(IDiagnosticosSearchServiceRef ref) {
-  return di.sl<IDiagnosticosSearchService>();
+@Riverpod(keepAlive: true)
+IDiagnosticosSearchService diagnosticosSearchService(
+    DiagnosticosSearchServiceRef ref) {
+  return DiagnosticosSearchService(ref.watch(iDiagnosticosRepositoryProvider));
 }
 
-@riverpod
-IDiagnosticosMetadataService iDiagnosticosMetadataService(IDiagnosticosMetadataServiceRef ref) {
-  return di.sl<IDiagnosticosMetadataService>();
+@Riverpod(keepAlive: true)
+IDiagnosticosMetadataService diagnosticosMetadataService(
+    DiagnosticosMetadataServiceRef ref) {
+  return DiagnosticosMetadataService(
+      ref.watch(iDiagnosticosRepositoryProvider));
 }
 
-@riverpod
-IDiagnosticosStatsService iDiagnosticosStatsService(IDiagnosticosStatsServiceRef ref) {
-  return di.sl<IDiagnosticosStatsService>();
+@Riverpod(keepAlive: true)
+IDiagnosticosStatsService diagnosticosStatsService(
+    DiagnosticosStatsServiceRef ref) {
+  return DiagnosticosStatsService(ref.watch(iDiagnosticosRepositoryProvider));
 }
 
-@riverpod
-IRecommendationService iRecommendationService(IRecommendationServiceRef ref) {
-  return di.sl<IRecommendationService>();
-}
-
-@riverpod
+@Riverpod(keepAlive: true)
 FailureMessageService failureMessageService(FailureMessageServiceRef ref) {
-  return di.sl<FailureMessageService>();
+  return FailureMessageService();
+}
+
+// Repository
+@Riverpod(keepAlive: true)
+IDiagnosticosRepository iDiagnosticosRepository(
+    IDiagnosticosRepositoryRef ref) {
+  final baseRepo = ref.watch(diagnosticoRepositoryProvider);
+  final wrapperRepo = DiagnosticosRepository(baseRepo);
+
+  return DiagnosticosRepositoryImpl(
+    wrapperRepo,
+    ref.watch(fitossanitariosRepositoryProvider),
+    ref.watch(culturasRepositoryProvider),
+    ref.watch(pragasRepositoryProvider),
+  );
 }
 
 // UseCases
-@riverpod
+@Riverpod(keepAlive: true)
 GetDiagnosticosUseCase getDiagnosticosUseCase(GetDiagnosticosUseCaseRef ref) {
-  return di.sl<GetDiagnosticosUseCase>();
+  return GetDiagnosticosUseCase(ref.watch(iDiagnosticosRepositoryProvider));
 }
 
-@riverpod
-GetDiagnosticoByIdUseCase getDiagnosticoByIdUseCase(GetDiagnosticoByIdUseCaseRef ref) {
-  return di.sl<GetDiagnosticoByIdUseCase>();
+@Riverpod(keepAlive: true)
+GetDiagnosticoByIdUseCase getDiagnosticoByIdUseCase(
+    GetDiagnosticoByIdUseCaseRef ref) {
+  return GetDiagnosticoByIdUseCase(ref.watch(iDiagnosticosRepositoryProvider));
 }

@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -8,7 +7,6 @@ import '../entities/user_subscription.dart';
 import '../repositories/subscription_repository.dart';
 import '../services/subscription_validation_service.dart';
 
-@lazySingleton
 class GetAvailablePlans implements UseCase<List<SubscriptionPlan>, NoParams> {
   final SubscriptionRepository repository;
 
@@ -20,7 +18,6 @@ class GetAvailablePlans implements UseCase<List<SubscriptionPlan>, NoParams> {
   }
 }
 
-@lazySingleton
 class GetCurrentSubscription implements UseCase<UserSubscription?, String> {
   final SubscriptionRepository repository;
   final SubscriptionValidationService validationService;
@@ -48,7 +45,6 @@ class SubscribeToPlanParams {
   });
 }
 
-@lazySingleton
 class SubscribeToPlan
     implements UseCase<UserSubscription, SubscribeToPlanParams> {
   final SubscriptionRepository repository;
@@ -71,7 +67,6 @@ class SubscribeToPlan
   }
 }
 
-@lazySingleton
 class CancelSubscription implements UseCase<void, String> {
   final SubscriptionRepository repository;
   final SubscriptionValidationService validationService;
@@ -89,7 +84,6 @@ class CancelSubscription implements UseCase<void, String> {
   }
 }
 
-@lazySingleton
 class PauseSubscription implements UseCase<void, String> {
   final SubscriptionRepository repository;
   final SubscriptionValidationService validationService;
@@ -107,7 +101,6 @@ class PauseSubscription implements UseCase<void, String> {
   }
 }
 
-@lazySingleton
 class ResumeSubscription implements UseCase<void, String> {
   final SubscriptionRepository repository;
   final SubscriptionValidationService validationService;
@@ -135,7 +128,6 @@ class UpgradePlanParams {
   });
 }
 
-@lazySingleton
 class UpgradePlan implements UseCase<UserSubscription, UpgradePlanParams> {
   final SubscriptionRepository repository;
   final SubscriptionValidationService validationService;
@@ -157,7 +149,6 @@ class UpgradePlan implements UseCase<UserSubscription, UpgradePlanParams> {
   }
 }
 
-@lazySingleton
 class RestorePurchases implements UseCase<void, String> {
   final SubscriptionRepository repository;
   final SubscriptionValidationService validationService;
@@ -175,7 +166,6 @@ class RestorePurchases implements UseCase<void, String> {
   }
 }
 
-@lazySingleton
 class ValidateReceipt implements UseCase<bool, String> {
   final SubscriptionRepository repository;
   final SubscriptionValidationService validationService;

@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/app_settings_model.dart';
@@ -17,7 +16,6 @@ abstract class SettingsLocalDataSource {
 }
 
 /// Implementation of settings local data source using SharedPreferences
-@LazySingleton(as: SettingsLocalDataSource)
 class SettingsLocalDataSourceImpl implements SettingsLocalDataSource {
   final SharedPreferences _prefs;
 

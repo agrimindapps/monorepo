@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
+
 
 /// Service responsible for validating authentication-related data
 ///
@@ -7,7 +7,7 @@ import 'package:injectable/injectable.dart';
 /// - Centralizes all validation logic for auth operations
 /// - Prevents validation duplication across notifiers
 /// - Provides consistent validation rules across the feature
-@lazySingleton
+
 class AuthValidationService {
   /// Validates email format
   ///

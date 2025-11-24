@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -12,7 +14,6 @@ import '../logging/repositories/log_repository_impl.dart';
 import '../notifications/notification_service.dart';
 import '../performance/lazy_loader.dart';
 import '../performance/performance_service.dart' as local_perf;
-import '../services/auto_sync_service.dart';
 import '../services/logging_service_impl.dart';
 import '../services/mock_analytics_service.dart';
 
@@ -23,7 +24,7 @@ part 'core_services_providers.g.dart';
 // ============================================================================
 
 @riverpod
-core.IAuthRepository authRepository(AuthRepositoryRef ref) {
+core.IAuthRepository externalAuthRepository(ExternalAuthRepositoryRef ref) {
   return core.FirebaseAuthService();
 }
 
@@ -71,10 +72,6 @@ GoogleSignIn googleSignIn(GoogleSignInRef ref) {
   return GoogleSignIn();
 }
 
-@riverpod
-SharedPreferences sharedPreferences(SharedPreferencesRef ref) {
-  throw UnimplementedError('SharedPreferences must be overridden in main.dart');
-}
 
 // ============================================================================
 // LOCAL CORE SERVICES
@@ -102,11 +99,6 @@ local_perf.PerformanceService localPerformanceService(
 @riverpod
 LazyLoader lazyLoader(LazyLoaderRef ref) {
   return LazyLoader();
-}
-
-@riverpod
-AutoSyncService autoSyncService(AutoSyncServiceRef ref) {
-  return AutoSyncService.instance;
 }
 
 // ============================================================================

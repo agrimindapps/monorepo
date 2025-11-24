@@ -1,4 +1,3 @@
-import '../../../../core/di/injection_container.dart';
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
@@ -10,28 +9,31 @@ class BuscaMapper {
   /// Converte Diagnostico para BuscaResultEntity
   /// ✅ CORRETO: Resolve nomes usando repositories, NUNCA usa campos cached
   static Future<BuscaResultEntity> diagnosticoToEntity(
-    Diagnostico diagnostico,
-  ) async {
+    Diagnostico diagnostico, {
+    required FitossanitariosRepository fitossanitariosRepo,
+    required CulturasRepository culturasRepo,
+    required PragasRepository pragasRepo,
+  }) async {
     String defensivoNome = 'Defensivo não encontrado';
     String culturaNome = 'Cultura não encontrada';
     String pragaNome = 'Praga não encontrada';
 
     try {
-      final defensivoRepo = sl<FitossanitariosRepository>();
-      final defensivo = await defensivoRepo.findByIdDefensivo(
+      final defensivo = await fitossanitariosRepo.findByIdDefensivo(
         diagnostico.defensivoId.toString(),
       );
       if (defensivo != null && defensivo.nome.isNotEmpty) {
         defensivoNome = defensivo.nome;
       }
-      final culturaRepo = sl<CulturasRepository>();
+
       final culturaIdInt = diagnostico.culturaId;
-      final cultura = await culturaRepo.findById(culturaIdInt);
+      final cultura = await culturasRepo.findById(culturaIdInt);
       if (cultura != null && cultura.nome.isNotEmpty) {
         culturaNome = cultura.nome;
       }
-          final pragaRepo = sl<PragasRepository>();
-      final praga = await pragaRepo.findByIdPraga(diagnostico.pragaId.toString());
+
+      final praga =
+          await pragasRepo.findByIdPraga(diagnostico.pragaId.toString());
       if (praga != null && praga.nome.isNotEmpty) {
         pragaNome = praga.nome;
       }
@@ -58,17 +60,14 @@ class BuscaMapper {
 
   /// Converte Praga para BuscaResultEntity
   static BuscaResultEntity pragaToEntity(Praga praga) {
-    final nomeExibicao = (praga.nome.isNotEmpty == true)
-        ? praga.nome
-        : praga.nomeLatino ?? '';
+    final nomeExibicao =
+        (praga.nome.isNotEmpty == true) ? praga.nome : praga.nomeLatino ?? '';
 
     return BuscaResultEntity(
       id: praga.idPraga,
       tipo: 'praga',
       titulo: nomeExibicao,
-      subtitulo: praga.nomeLatino != nomeExibicao
-          ? praga.nomeLatino
-          : null,
+      subtitulo: praga.nomeLatino != nomeExibicao ? praga.nomeLatino : null,
       descricao: 'Praga identificada',
       metadata: {
         'nomeCientifico': praga.nomeLatino ?? '',
@@ -122,11 +121,19 @@ class BuscaMapper {
 
   /// Converte lista de diagnósticos com resolução assíncrona
   static Future<List<BuscaResultEntity>> diagnosticosToEntityList(
-    List<Diagnostico> diagnosticos,
-  ) async {
+    List<Diagnostico> diagnosticos, {
+    required FitossanitariosRepository fitossanitariosRepo,
+    required CulturasRepository culturasRepo,
+    required PragasRepository pragasRepo,
+  }) async {
     final results = <BuscaResultEntity>[];
     for (final d in diagnosticos) {
-      results.add(await diagnosticoToEntity(d));
+      results.add(await diagnosticoToEntity(
+        d,
+        fitossanitariosRepo: fitossanitariosRepo,
+        culturasRepo: culturasRepo,
+        pragasRepo: pragasRepo,
+      ));
     }
     return results;
   }
@@ -162,9 +169,8 @@ class BuscaMapper {
 
   /// Converte Praga para DropdownItemEntity
   static DropdownItemEntity pragaToDropdownItem(Praga praga) {
-    final nomeExibicao = (praga.nome.isNotEmpty == true)
-        ? praga.nome
-        : praga.nomeLatino ?? '';
+    final nomeExibicao =
+        (praga.nome.isNotEmpty == true) ? praga.nome : praga.nomeLatino ?? '';
 
     return DropdownItemEntity(
       id: praga.idPraga,

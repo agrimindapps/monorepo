@@ -7,7 +7,7 @@
 /// - State classes com valores primitivos (sem TextEditingController)
 /// - Notifier classes com @riverpod annotation
 /// - Controllers gerenciados internamente (disposal automático)
-/// - Use cases injetados via GetIt
+/// - Use cases injetados via Riverpod providers
 library;
 
 export '../providers/auth_providers.dart';

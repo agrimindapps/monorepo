@@ -1,7 +1,6 @@
-import 'package:core/core.dart' hide getIt;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/di/injection_container.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../domain/entities/expense_entity.dart';
@@ -15,35 +14,10 @@ import '../../domain/usecases/get_all_expenses.dart';
 import '../../domain/usecases/get_expenses_by_vehicle.dart';
 import '../../domain/usecases/update_expense.dart';
 import '../models/expense_form_model.dart';
+import '../providers/expenses_providers.dart';
 import '../state/expenses_state.dart';
 
 part 'expenses_notifier.g.dart';
-
-/// Provider de dependências (use cases via GetIt)
-@riverpod
-GetAllExpensesUseCase getAllExpensesUseCase(Ref ref) {
-  return getIt<GetAllExpensesUseCase>();
-}
-
-@riverpod
-GetExpensesByVehicleUseCase getExpensesByVehicleUseCase(Ref ref) {
-  return getIt<GetExpensesByVehicleUseCase>();
-}
-
-@riverpod
-AddExpenseUseCase addExpenseUseCase(Ref ref) {
-  return getIt<AddExpenseUseCase>();
-}
-
-@riverpod
-UpdateExpenseUseCase updateExpenseUseCase(Ref ref) {
-  return getIt<UpdateExpenseUseCase>();
-}
-
-@riverpod
-DeleteExpenseUseCase deleteExpenseUseCase(Ref ref) {
-  return getIt<DeleteExpenseUseCase>();
-}
 
 /// Notifier principal para gerenciar estado de despesas
 @riverpod
@@ -59,12 +33,11 @@ class ExpensesNotifier extends _$ExpensesNotifier {
 
   @override
   ExpensesState build() {
-    _getAllExpensesUseCase = ref.watch(getAllExpensesUseCaseProvider);
-    _getExpensesByVehicleUseCase =
-        ref.watch(getExpensesByVehicleUseCaseProvider);
-    _addExpenseUseCase = ref.watch(addExpenseUseCaseProvider);
-    _updateExpenseUseCase = ref.watch(updateExpenseUseCaseProvider);
-    _deleteExpenseUseCase = ref.watch(deleteExpenseUseCaseProvider);
+    _getAllExpensesUseCase = ref.watch(getAllExpensesProvider);
+    _getExpensesByVehicleUseCase = ref.watch(getExpensesByVehicleProvider);
+    _addExpenseUseCase = ref.watch(addExpenseProvider);
+    _updateExpenseUseCase = ref.watch(updateExpenseProvider);
+    _deleteExpenseUseCase = ref.watch(deleteExpenseProvider);
     Future.microtask(() => _loadInitialData());
 
     return ExpensesState.initial();

@@ -1,9 +1,9 @@
-import 'package:injectable/injectable.dart';
+
 
 /// Service responsible for pragas_cultura-specific error messages
 /// Centralizes error text for i18n readiness and consistency
 /// Follows SRP by managing only error message logic
-@lazySingleton
+
 class PragasCulturaErrorMessageService {
   PragasCulturaErrorMessageService();
 

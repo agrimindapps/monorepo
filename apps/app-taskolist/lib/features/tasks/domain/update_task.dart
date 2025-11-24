@@ -5,7 +5,6 @@ import '../../../core/utils/typedef.dart';
 import 'task_entity.dart';
 import 'task_repository.dart';
 
-@lazySingleton
 class UpdateTask extends UseCaseWithParams<void, UpdateTaskParams> {
   const UpdateTask(this._repository);
 
@@ -17,7 +16,6 @@ class UpdateTask extends UseCaseWithParams<void, UpdateTaskParams> {
   }
 }
 
-@lazySingleton
 class UpdateTaskParams extends Equatable {
   const UpdateTaskParams({required this.task});
 

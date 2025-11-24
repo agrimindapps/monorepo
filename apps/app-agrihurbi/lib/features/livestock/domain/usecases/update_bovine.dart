@@ -7,7 +7,6 @@ import '../repositories/livestock_repository.dart';
 /// 
 /// Implementa UseCase que retorna a entidade atualizada em caso de sucesso
 /// Inclui validações, verificação de existência e controle de versão otimista
-@lazySingleton
 class UpdateBovineUseCase implements UseCase<BovineEntity, UpdateBovineParams> {
   final LivestockRepository repository;
   

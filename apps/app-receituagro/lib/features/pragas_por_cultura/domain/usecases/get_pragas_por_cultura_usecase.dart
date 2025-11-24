@@ -10,7 +10,7 @@ import 'pragas_cultura_params.dart';
 /// Parâmetros: [GetPragasPorCulturaParams] com culturaId
 /// Retorno: Either<Failure, List<dynamic>> com as pragas da cultura
 /// Validações: culturaId não vazio
-@injectable
+
 class GetPragasPorCulturaUseCase {
   final IPragasCulturaRepository _repository;
   final PragasCulturaErrorMessageService errorService;

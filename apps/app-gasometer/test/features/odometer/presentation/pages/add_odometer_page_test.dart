@@ -1,4 +1,3 @@
-import 'package:gasometer_drift/core/di/injection.dart' as local_di;
 import 'package:gasometer_drift/features/auth/presentation/notifiers/auth_notifier.dart';
 import 'package:gasometer_drift/features/auth/presentation/state/auth_state.dart';
 import 'package:gasometer_drift/features/auth/domain/entities/user_entity.dart';
@@ -13,13 +12,15 @@ import 'package:core/core.dart' hide AuthState, AuthStatus, UserEntity;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 
 // Manual Mocks
 class MockGetVehicleById extends GetVehicleById {
   MockGetVehicleById() : super(MockVehicleRepository());
-  
+
   @override
-  Future<Either<Failure, VehicleEntity>> call(GetVehicleByIdParams params) async {
+  Future<Either<Failure, VehicleEntity>> call(
+      GetVehicleByIdParams params) async {
     return Right(VehicleEntity(
       id: 'test_vehicle_id',
       userId: 'test_user',
@@ -75,13 +76,15 @@ class MockAuth extends Auth {
 }
 
 void main() {
-  final getIt = local_di.getIt;
+  final getIt = GetIt.instance;
 
   setUp(() {
     getIt.reset();
     getIt.registerLazySingleton<GetVehicleById>(() => MockGetVehicleById());
-    getIt.registerLazySingleton<AddOdometerReadingUseCase>(() => MockAddOdometerReading());
-    getIt.registerLazySingleton<UpdateOdometerReadingUseCase>(() => MockUpdateOdometerReading());
+    getIt.registerLazySingleton<AddOdometerReadingUseCase>(
+        () => MockAddOdometerReading());
+    getIt.registerLazySingleton<UpdateOdometerReadingUseCase>(
+        () => MockUpdateOdometerReading());
   });
 
   Widget createWidgetUnderTest(ProviderContainer container) {
@@ -109,12 +112,14 @@ void main() {
 
     expect(find.text('Odômetro'), findsWidgets);
     expect(find.text('Salvar'), findsOneWidget);
-    
+
     // Reset screen size
     addTearDown(tester.view.resetPhysicalSize);
   });
 
-  testWidgets('AddOdometerPage shows validation errors and focuses on first error', (tester) async {
+  testWidgets(
+      'AddOdometerPage shows validation errors and focuses on first error',
+      (tester) async {
     // Set a large screen size to avoid overflow
     tester.view.physicalSize = const Size(1080, 1920);
     tester.view.devicePixelRatio = 1.0;
@@ -130,7 +135,7 @@ void main() {
 
     // Tap save without filling anything
     await tester.tap(find.text('Salvar'));
-    
+
     // Wait for debounce (500ms)
     await tester.pump(const Duration(milliseconds: 600));
     await tester.pumpAndSettle();
@@ -143,12 +148,12 @@ void main() {
     final textFields = find.byType(TextField);
     // We expect at least one text field (Odometer)
     expect(textFields, findsWidgets);
-    
+
     final firstTextField = tester.widget<TextField>(textFields.first);
-    
+
     // Verify it has focus
     expect(firstTextField.focusNode?.hasFocus, isTrue);
-    
+
     // Reset screen size
     addTearDown(tester.view.resetPhysicalSize);
   });

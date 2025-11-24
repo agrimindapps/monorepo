@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../database/petiveti_database.dart';
 import '../models/medication_model.dart';
@@ -30,7 +29,6 @@ abstract class MedicationLocalDataSource {
   Future<void> cacheMedications(List<MedicationModel> medications);
 }
 
-@LazySingleton(as: MedicationLocalDataSource)
 class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
   final PetivetiDatabase _database;
 

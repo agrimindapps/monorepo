@@ -19,9 +19,9 @@ abstract class AuthLocalDataSource {
 }
 
 
-class AuthLocalDataSourceImpl implements AuthLocalDataSource {
+class GasometerAuthLocalDataSourceImpl implements AuthLocalDataSource {
 
-  AuthLocalDataSourceImpl(
+  GasometerAuthLocalDataSourceImpl(
     this._sharedPreferences,
     this._secureStorage,
   );

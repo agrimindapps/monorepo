@@ -7,6 +7,8 @@ import '../../features/plants/domain/entities/plant.dart';
 import '../../features/plants/domain/usecases/add_plant_usecase.dart';
 import '../../features/plants/domain/usecases/delete_plant_usecase.dart';
 import '../../features/plants/domain/usecases/get_plants_usecase.dart';
+import '../../features/plants/domain/usecases/get_plant_by_id_usecase.dart';
+import '../../features/plants/domain/usecases/search_plants_usecase.dart';
 import '../../features/plants/domain/usecases/update_plant_usecase.dart';
 import '../auth/auth_state_notifier.dart';
 import '../data/adapters/auth_state_provider_adapter.dart';
@@ -270,16 +272,13 @@ class PlantsState {
   bool _isPlantInGoodCondition(Plant plant, DateTime now) {
     final waterGood =
         !_checkWaterStatus(plant, now, 0) && !_checkWaterStatus(plant, now, 2);
-    final fertilizerGood =
-        !_checkFertilizerStatus(plant, now, 0) &&
+    final fertilizerGood = !_checkFertilizerStatus(plant, now, 0) &&
         !_checkFertilizerStatus(plant, now, 2);
 
     final config = plant.config;
-    final hasWaterCare =
-        config?.enableWateringCare == true ||
+    final hasWaterCare = config?.enableWateringCare == true ||
         config?.wateringIntervalDays != null;
-    final hasFertilizerCare =
-        config?.enableFertilizerCare == true ||
+    final hasFertilizerCare = config?.enableFertilizerCare == true ||
         config?.fertilizingIntervalDays != null;
     return (hasWaterCare ? waterGood : true) &&
         (hasFertilizerCare ? fertilizerGood : true);
@@ -381,8 +380,12 @@ IAuthStateProvider authStateProvider(AuthStateProviderRef ref) {
 
 @riverpod
 PlantsDataService plantsDataService(PlantsDataServiceRef ref) {
-  return PlantsDataService.create(
+  return PlantsDataService(
     authProvider: ref.watch(authStateProviderProvider),
+    getPlantsUseCase: ref.watch(getPlantsUseCaseProvider),
+    addPlantUseCase: ref.watch(addPlantUseCaseProvider),
+    updatePlantUseCase: ref.watch(updatePlantUseCaseProvider),
+    deletePlantUseCase: ref.watch(deletePlantUseCaseProvider),
   );
 }
 
@@ -479,12 +482,11 @@ class PlantsNotifier extends _$PlantsNotifier {
       if (dataStream != null) {
         _realtimeDataSubscription = dataStream.listen(
           (List<dynamic> plants) {
-            final domainPlants =
-                plants
-                    .map((syncPlant) => _convertSyncPlantToDomain(syncPlant))
-                    .where((plant) => plant != null)
-                    .cast<Plant>()
-                    .toList();
+            final domainPlants = plants
+                .map((syncPlant) => _convertSyncPlantToDomain(syncPlant))
+                .where((plant) => plant != null)
+                .cast<Plant>()
+                .toList();
             if (_hasDataChanged(domainPlants)) {
               final currentState = state.valueOrNull ?? const PlantsState();
               final sortedPlants = _sortPlants(
@@ -829,20 +831,18 @@ class PlantsNotifier extends _$PlantsNotifier {
       },
       (updatedPlant) {
         final newState = state.valueOrNull ?? const PlantsState();
-        final updatedPlants =
-            newState.allPlants.map((p) {
-              return p.id == updatedPlant.id ? updatedPlant : p;
-            }).toList();
+        final updatedPlants = newState.allPlants.map((p) {
+          return p.id == updatedPlant.id ? updatedPlant : p;
+        }).toList();
 
         final sortedPlants = _sortPlants(updatedPlants, newState.sortBy);
 
         state = AsyncData(
           newState.copyWith(
             allPlants: sortedPlants,
-            selectedPlant:
-                newState.selectedPlant?.id == updatedPlant.id
-                    ? updatedPlant
-                    : newState.selectedPlant,
+            selectedPlant: newState.selectedPlant?.id == updatedPlant.id
+                ? updatedPlant
+                : newState.selectedPlant,
             isLoading: false,
             error: null,
           ),
@@ -874,8 +874,9 @@ class PlantsNotifier extends _$PlantsNotifier {
         state = AsyncData(
           newState.copyWith(
             allPlants: updatedPlants,
-            selectedPlant:
-                newState.selectedPlant?.id == id ? null : newState.selectedPlant,
+            selectedPlant: newState.selectedPlant?.id == id
+                ? null
+                : newState.selectedPlant,
             isLoading: false,
             error: null,
           ),
@@ -921,7 +922,6 @@ class PlantsNotifier extends _$PlantsNotifier {
   void clearSearch() {
     final currentState = state.valueOrNull ?? const PlantsState();
     if (currentState.searchQuery.isNotEmpty || currentState.isSearching) {
-
       if (kDebugMode) {
         print('🧹 PlantsProvider.clearSearch():');
         print('  - Clearing searchQuery: "${currentState.searchQuery}"');

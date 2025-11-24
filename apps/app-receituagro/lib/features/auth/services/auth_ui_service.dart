@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
+
 
 /// Service responsible for UI-related operations in auth feature
 ///
@@ -7,7 +7,7 @@ import 'package:injectable/injectable.dart';
 /// - Centralizes UI helper methods
 /// - Provides consistent error display across widgets
 /// - Handles theme-related operations
-@lazySingleton
+
 class AuthUIService {
   /// Get ReceitaAgro primary color based on theme brightness
   Color getReceitaAgroPrimaryColor(bool isDark) {

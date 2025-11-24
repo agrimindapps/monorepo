@@ -4,6 +4,8 @@ import '../../features/comentarios/domain/entities/comentario_sync_entity.dart';
 import '../../features/favoritos/domain/entities/favorito_sync_entity.dart';
 import '../../features/settings/domain/entities/user_history_sync_entity.dart';
 import '../../features/settings/domain/entities/user_settings_sync_entity.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/core_providers.dart';
 import '../extensions/user_entity_receituagro_extension.dart';
 
 FavoritoSyncEntity _favoritoFromFirebaseMap(Map<String, dynamic> map) {
@@ -56,9 +58,10 @@ abstract final class ReceitaAgroSyncConfig {
   /// Configura o sistema de sincronização para o ReceitaAgro
   /// ✅ SYNC ATIVADO com ReceituagroDriftStorageAdapter
   /// Sincroniza: Favoritos, Comentários e AppSettings
-  static Future<void> configure() async {
+  static Future<void> configure(ProviderContainer container) async {
     await UnifiedSyncManager.instance.initializeApp(
       appName: 'receituagro',
+      localStorage: container.read(localStorageRepositoryProvider),
       config: AppSyncConfig.advanced(
         appName: 'receituagro',
         syncInterval: const Duration(minutes: 2),
@@ -89,9 +92,10 @@ abstract final class ReceitaAgroSyncConfig {
   }
 
   /// Configuração para desenvolvimento
-  static Future<void> configureDevelopment() async {
+  static Future<void> configureDevelopment(ProviderContainer container) async {
     await UnifiedSyncManager.instance.initializeApp(
       appName: 'receituagro',
+      localStorage: container.read(localStorageRepositoryProvider),
       config: AppSyncConfig.development(
         appName: 'receituagro',
         syncInterval: const Duration(minutes: 1),
@@ -143,9 +147,10 @@ abstract final class ReceitaAgroSyncConfig {
   }
 
   /// Configuração offline-first para áreas rurais com internet limitada
-  static Future<void> configureOfflineFirst() async {
+  static Future<void> configureOfflineFirst(ProviderContainer container) async {
     await UnifiedSyncManager.instance.initializeApp(
       appName: 'receituagro',
+      localStorage: container.read(localStorageRepositoryProvider),
       config: AppSyncConfig.offlineFirst(
         appName: 'receituagro',
         syncInterval: const Duration(hours: 6), // Sync esporádico

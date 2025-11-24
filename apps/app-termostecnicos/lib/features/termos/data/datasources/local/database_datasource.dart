@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../../const/database_const.dart';
 
@@ -16,7 +15,6 @@ abstract class DatabaseDataSource {
 
 /// Implementation of database data source
 /// Handles loading JSON from assets and decryption logic
-@LazySingleton(as: DatabaseDataSource)
 class DatabaseDataSourceImpl implements DatabaseDataSource {
   @override
   Future<List<Map<String, dynamic>>> loadTermosFromAsset(

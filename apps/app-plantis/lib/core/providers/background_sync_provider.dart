@@ -1,17 +1,28 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../services/background_sync_service.dart';
 import '../sync/background_sync_status.dart';
+
+import '../../features/plants/presentation/providers/plants_providers.dart';
+import '../../features/tasks/presentation/providers/tasks_providers.dart';
+import 'auth_providers.dart';
+import 'repository_providers.dart';
 
 part 'background_sync_provider.g.dart';
 
 /// Dependency provider for BackgroundSyncService
 @riverpod
 BackgroundSyncService backgroundSyncService(BackgroundSyncServiceRef ref) {
-  return GetIt.instance<BackgroundSyncService>();
+  return BackgroundSyncService(
+    getPlantsUseCase: ref.watch(getPlantsUseCaseProvider),
+    getTasksUseCase: ref.watch(getTasksUseCaseProvider),
+    syncSettingsUseCase: ref.watch(syncSettingsUseCaseProvider),
+    // syncUserProfileUseCase: ref.watch(syncUserProfileUseCaseProvider), // Not implemented yet
+    // authStateNotifier: AuthStateNotifier.instance, // Or ref.watch(authStateNotifierProvider) if available
+  );
 }
 
 /// State class for background sync
@@ -39,7 +50,8 @@ class BackgroundSyncState {
   }) {
     return BackgroundSyncState(
       isSyncInProgress: isSyncInProgress ?? this.isSyncInProgress,
-      hasPerformedInitialSync: hasPerformedInitialSync ?? this.hasPerformedInitialSync,
+      hasPerformedInitialSync:
+          hasPerformedInitialSync ?? this.hasPerformedInitialSync,
       currentSyncMessage: currentSyncMessage ?? this.currentSyncMessage,
       syncStatus: syncStatus ?? this.syncStatus,
       operationStatus: operationStatus ?? this.operationStatus,
@@ -186,7 +198,8 @@ double syncProgress(SyncProgressRef ref) {
 
   if (operations.isEmpty) return 0.0;
 
-  final completedCount = operations.values.where((completed) => completed).length;
+  final completedCount =
+      operations.values.where((completed) => completed).length;
   return completedCount / operations.length;
 }
 
@@ -214,7 +227,7 @@ String syncStatusMessage(SyncStatusMessageRef ref) {
 bool shouldShowSyncIndicator(ShouldShowSyncIndicatorRef ref) {
   final syncState = ref.watch(backgroundSyncProvider);
   return syncState.isSyncInProgress ||
-         syncState.syncStatus == BackgroundSyncStatus.error;
+      syncState.syncStatus == BackgroundSyncStatus.error;
 }
 
 /// Helper provider to determine sync indicator color

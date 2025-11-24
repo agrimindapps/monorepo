@@ -1,10 +1,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/services/fitossanitarios_data_loader.dart';
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
+import 'defensivos_providers.dart';
 
 part 'defensivos_statistics_notifier.g.dart';
 
@@ -25,11 +25,11 @@ class DefensivosStatistics {
   });
 
   DefensivosStatistics.empty()
-    : totalDefensivos = 0,
-      totalFabricantes = 0,
-      totalModoAcao = 0,
-      totalIngredienteAtivo = 0,
-      totalClasseAgronomica = 0;
+      : totalDefensivos = 0,
+        totalFabricantes = 0,
+        totalModoAcao = 0,
+        totalIngredienteAtivo = 0,
+        totalClasseAgronomica = 0;
 }
 
 /// Static function for compute() - calculates statistics in background isolate
@@ -38,10 +38,8 @@ DefensivosStatistics _calculateDefensivosStatistics(
   List<Fitossanitario> defensivos,
 ) {
   final totalDefensivos = defensivos.length;
-  final totalFabricantes = defensivos
-      .map((d) => d.displayFabricante)
-      .toSet()
-      .length;
+  final totalFabricantes =
+      defensivos.map((d) => d.displayFabricante).toSet().length;
   final totalModoAcao =
       defensivos.length; // Simplificado - usar contagem total por enquanto
   final totalIngredienteAtivo = defensivos
@@ -128,7 +126,7 @@ class DefensivosStatisticsNotifier extends _$DefensivosStatisticsNotifier {
 
   @override
   Future<DefensivosStatisticsState> build() async {
-    _repository = di.sl<FitossanitariosRepository>();
+    _repository = ref.watch(fitossanitariosRepositoryProvider);
     return await _loadStatistics();
   }
 
@@ -137,7 +135,7 @@ class DefensivosStatisticsNotifier extends _$DefensivosStatisticsNotifier {
     try {
       var defensivos = await _repository.findElegiveis();
       if (defensivos.isEmpty) {
-        final isDataLoaded = await FitossanitariosDataLoader.isDataLoaded();
+        final isDataLoaded = await FitossanitariosDataLoader.isDataLoaded(ref);
 
         if (!isDataLoaded) {
           await Future<void>.delayed(const Duration(milliseconds: 500));

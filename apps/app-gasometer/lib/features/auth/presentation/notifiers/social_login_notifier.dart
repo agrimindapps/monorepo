@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../providers/auth_usecase_providers.dart';
 import 'social_login_state.dart';
 
 part 'social_login_notifier.g.dart';
@@ -14,14 +14,14 @@ part 'social_login_notifier.g.dart';
 /// - Apple Sign-In
 /// - Facebook Sign-In
 ///
-/// Utiliza GetIt para injeção de dependências do AuthRepository
+/// Utiliza Riverpod para injeção de dependências do AuthRepository
 @riverpod
 class SocialLoginNotifier extends _$SocialLoginNotifier {
   late final AuthRepository _authRepository;
 
   @override
   SocialLoginState build() {
-    _authRepository = getIt<AuthRepository>();
+    _authRepository = ref.watch(authRepositoryProvider);
     return const SocialLoginState.initial();
   }
 

@@ -1,6 +1,10 @@
 import 'package:core/core.dart' hide Column;
 
 import '../../constants/comentarios_design_tokens.dart';
+import '../entities/comentario_entity.dart';
+import '../repositories/i_comentarios_read_repository.dart';
+import '../repositories/i_comentarios_write_repository.dart';
+import '../repositories/i_comentarios_repository.dart';
 
 /// **USE CASE: Add New Comment**
 ///

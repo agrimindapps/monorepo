@@ -1,4 +1,4 @@
-import 'package:injectable/injectable.dart';
+
 
 import '../../domain/entities/defensivo_entity.dart';
 
@@ -35,7 +35,7 @@ abstract class IDefensivosQueryService {
 }
 
 /// Default implementation of query service
-@LazySingleton(as: IDefensivosQueryService)
+
 class DefensivosQueryService implements IDefensivosQueryService {
   @override
   List<String> getClassesAgronomicas(List<DefensivoEntity> defensivos) {

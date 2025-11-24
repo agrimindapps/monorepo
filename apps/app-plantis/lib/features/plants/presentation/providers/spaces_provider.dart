@@ -8,50 +8,11 @@ import '../../data/datasources/remote/spaces_remote_datasource.dart';
 import '../../data/repositories/spaces_repository_impl.dart';
 import '../../domain/repositories/spaces_repository.dart';
 
-import '../../../../core/auth/auth_providers.dart';
-import '../../../../core/services/services_providers.dart';
+import '../../../../core/providers/auth_providers.dart';
+import '../../../../core/providers/repository_providers.dart';
 import '../../../../database/providers/database_providers.dart';
 
 part 'spaces_provider.g.dart';
-
-// ============================================================================
-// Data Sources
-// ============================================================================
-
-@riverpod
-SpacesLocalDatasource spacesLocalDatasource(SpacesLocalDatasourceRef ref) {
-  final driftRepo = ref.watch(spacesDriftRepositoryProvider);
-  return SpacesLocalDatasourceImpl(driftRepo);
-}
-
-@riverpod
-SpacesRemoteDatasource spacesRemoteDatasource(SpacesRemoteDatasourceRef ref) {
-  final firestore = ref.watch(firebaseFirestoreProvider);
-  final rateLimiter = ref.watch(rateLimiterServiceProvider);
-  return SpacesRemoteDatasourceImpl(
-    firestore: firestore,
-    rateLimiter: rateLimiter,
-  );
-}
-
-// ============================================================================
-// Repository
-// ============================================================================
-
-@riverpod
-SpacesRepository spacesRepository(SpacesRepositoryRef ref) {
-  final localDatasource = ref.watch(spacesLocalDatasourceProvider);
-  final remoteDatasource = ref.watch(spacesRemoteDatasourceProvider);
-  final networkInfo = ref.watch(networkInfoProvider);
-  final authService = ref.watch(authRepositoryProvider);
-
-  return SpacesRepositoryImpl(
-    localDatasource: localDatasource,
-    remoteDatasource: remoteDatasource,
-    networkInfo: networkInfo,
-    authService: authService,
-  );
-}
 
 // ============================================================================
 // Use Cases

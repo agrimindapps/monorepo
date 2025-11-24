@@ -1,4 +1,4 @@
-import 'package:injectable/injectable.dart';
+
 
 import '../../../../core/analytics/advanced_health_monitoring_service.dart';
 
@@ -23,7 +23,7 @@ class MonitoringAlert {
 /// - Gerencia lógica de alertas do sistema
 /// - Analisa relatórios e gera alertas
 /// - Mantém histórico de alertas
-@lazySingleton
+
 class MonitoringAlertService {
   // Usa singleton instance ao invés de injeção para evitar problemas de DI
   AdvancedHealthMonitoringService get _healthService =>

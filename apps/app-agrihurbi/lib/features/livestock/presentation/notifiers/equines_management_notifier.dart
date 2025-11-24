@@ -17,7 +17,8 @@ class EquinesManagementNotifier extends _$EquinesManagementNotifier {
 
   @override
   EquinesManagementState build() {
-    _getEquines = getIt<GetEquinesUseCase>();
+    // TODO: Replace getIt calls with Riverpod providers
+    // _getEquines = getIt<GetEquinesUseCase>();
     return const EquinesManagementState();
   }
 

@@ -1,6 +1,4 @@
-import 'dart:io' show Platform;
-
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart';
 
 import '../../services/info_device_service.dart';
 
@@ -28,7 +26,7 @@ class Environment {
   ];
 
   void initialize() {
-    final bool isAndroid = !kIsWeb && Platform.isAndroid;
+    final bool isAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
 
     if (InfoDeviceService().isProduction.value) {
       admobBanner = isAndroid

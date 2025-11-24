@@ -8,7 +8,7 @@ import 'i_diagnosticos_recommendation_service.dart';
 ///
 /// Provides business logic for scoring and recommending diagnosticos
 /// based on cultura-praga combinations and quality metrics.
-@Injectable(as: IDiagnosticosRecommendationService)
+
 class DiagnosticosRecommendationService
     implements IDiagnosticosRecommendationService {
   final IDiagnosticosRepository _repository;

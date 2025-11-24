@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../../core/providers/tasks_providers.dart';
+import '../notifiers/tasks_notifier.dart';
 import '../../domain/entities/task.dart' as task_entity;
 import 'task_creation_dialog.dart';
 

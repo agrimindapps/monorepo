@@ -321,7 +321,7 @@ mixin HapticFeedbackMixin {
 }
 
 /// Widget que adiciona haptic feedback automaticamente
-/// Requer HapticService como dependência injetada via GetIt
+/// Requer HapticService como dependência injetada
 class HapticWrapper extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;

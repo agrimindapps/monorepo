@@ -1,5 +1,3 @@
-import 'package:core/core.dart' show injectable;
-
 import '../entities/calculation_result.dart';
 import '../interfaces/calculator_strategy.dart';
 import '../registry/calculator_strategy_registry.dart';
@@ -11,7 +9,6 @@ import 'calculator_validation_service.dart';
 ///
 /// Implementa arquitetura SOLID usando composição de services especializados.
 /// Substitui o engine monolítico anterior, seguindo Single Responsibility Principle.
-@injectable
 class CalculatorEngineV2 {
   final CalculatorStrategyRegistry _strategyRegistry;
   final CalculatorValidationService _validationService;
@@ -300,14 +297,13 @@ class CalculatorEngineV2 {
   ) {
     final allStrategies = _strategyRegistry.getAllStrategies();
     if (preferredType != null) {
-      final preferredStrategies =
-          allStrategies
-              .where(
-                (s) => s.runtimeType.toString().toLowerCase().contains(
+      final preferredStrategies = allStrategies
+          .where(
+            (s) => s.runtimeType.toString().toLowerCase().contains(
                   preferredType.toLowerCase(),
                 ),
-              )
-              .toList();
+          )
+          .toList();
 
       for (final strategy in preferredStrategies) {
         if (strategy.canProcess(inputs)) {

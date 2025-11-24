@@ -1,6 +1,5 @@
-import 'package:core/core.dart' hide getIt, Column;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get_it/get_it.dart';
 
 import '../../database/taskolist_database.dart';
 import '../../features/tasks/providers/task_providers.dart';
@@ -23,11 +22,14 @@ part 'core_providers.g.dart';
 
 /// Provider do banco de dados principal
 ///
-/// **IMPORTANTE:** Retorna a instância única do GetIt para evitar múltiplas instâncias.
+/// **IMPORTANTE:** Retorna a instância única do banco de dados.
 /// Funciona em Web (WASM) e Mobile (Native) via DriftDatabaseConfig.
 final taskolistDatabaseProvider = Provider<TaskolistDatabase>((ref) {
-  final db = GetIt.I<TaskolistDatabase>();
+  final db = TaskolistDatabase.production();
   ref.keepAlive();
+  ref.onDispose(() {
+    db.close();
+  });
   return db;
 });
 
@@ -147,7 +149,12 @@ Future<TaskManagerAuthService> taskManagerAuthService(Ref ref) async {
 TaskManagerSyncService taskManagerSyncService(Ref ref) {
   final analyticsService = ref.watch(taskManagerAnalyticsServiceProvider);
   final crashlyticsService = ref.watch(taskManagerCrashlyticsServiceProvider);
-  return TaskManagerSyncService(analyticsService, crashlyticsService);
+  final authRepository = ref.watch(authRepositoryProvider);
+  return TaskManagerSyncService(
+    analyticsService,
+    crashlyticsService,
+    authRepository,
+  );
 }
 
 // ============================================================================

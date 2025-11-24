@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 /// 
 /// Integra com RevenueCat para verificação de assinaturas
 /// Implementa gating de funcionalidades avançadas
-@singleton
 class PremiumService {
   final RevenueCatService _revenueCatService;
   final FirebaseAnalyticsService _analyticsService;

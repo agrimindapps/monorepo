@@ -1,12 +1,12 @@
 import 'package:core/core.dart' hide SubscriptionStatus, Column;
 
-import '../../../../core/di/di_providers.dart';
 import '../../domain/entities/subscription_status.dart';
 import '../../domain/repositories/premium_repository.dart';
 import '../../domain/usecases/check_subscription_status.dart';
 import '../../domain/usecases/restore_purchases.dart';
 import '../../domain/usecases/get_available_packages.dart';
 import '../../data/datasources/local/premium_local_datasource.dart';
+import '../../data/repositories/premium_repository_impl.dart';
 
 part 'premium_providers.g.dart';
 
@@ -18,7 +18,7 @@ part 'premium_providers.g.dart';
 PremiumLocalDataSource premiumLocalDataSource(
   PremiumLocalDataSourceRef ref,
 ) {
-  return ref.watch(getItProvider).get<PremiumLocalDataSource>();
+  return PremiumLocalDataSourceImpl();
 }
 
 // ============================================================================
@@ -27,7 +27,8 @@ PremiumLocalDataSource premiumLocalDataSource(
 
 @riverpod
 PremiumRepository premiumRepository(PremiumRepositoryRef ref) {
-  return ref.watch(getItProvider).get<PremiumRepository>();
+  final dataSource = ref.watch(premiumLocalDataSourceProvider);
+  return PremiumRepositoryImpl(dataSource);
 }
 
 // ============================================================================
@@ -38,19 +39,22 @@ PremiumRepository premiumRepository(PremiumRepositoryRef ref) {
 CheckSubscriptionStatus checkSubscriptionStatusUseCase(
   CheckSubscriptionStatusUseCaseRef ref,
 ) {
-  return CheckSubscriptionStatus(ref.watch(premiumRepositoryProvider));
+  final repository = ref.watch(premiumRepositoryProvider);
+  return CheckSubscriptionStatus(repository);
 }
 
 @riverpod
 RestorePurchases restorePurchasesUseCase(RestorePurchasesUseCaseRef ref) {
-  return RestorePurchases(ref.watch(premiumRepositoryProvider));
+  final repository = ref.watch(premiumRepositoryProvider);
+  return RestorePurchases(repository);
 }
 
 @riverpod
 GetAvailablePackages getAvailablePackagesUseCase(
   GetAvailablePackagesUseCaseRef ref,
 ) {
-  return GetAvailablePackages(ref.watch(premiumRepositoryProvider));
+  final repository = ref.watch(premiumRepositoryProvider);
+  return GetAvailablePackages(repository);
 }
 
 // ============================================================================

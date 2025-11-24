@@ -1,8 +1,8 @@
-import 'package:injectable/injectable.dart';
+
 
 /// Service specialized in validating search filters
 /// Principle: Single Responsibility - Only handles validation logic
-@lazySingleton
+
 class BuscaValidationService {
   /// Checks if at least one filter is active
   bool hasActiveFilters({

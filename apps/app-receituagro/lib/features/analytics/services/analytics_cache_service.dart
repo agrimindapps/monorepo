@@ -1,4 +1,4 @@
-import 'package:injectable/injectable.dart';
+
 
 /// Service responsible for caching analytics metrics
 ///
@@ -6,7 +6,7 @@ import 'package:injectable/injectable.dart';
 /// - Separates caching logic from business logic
 /// - Provides consistent cache key generation
 /// - Manages cache lifecycle and expiration
-@lazySingleton
+
 class AnalyticsCacheService {
   final Map<String, dynamic> _cache = {};
   final Map<String, DateTime> _cacheTimestamps = {};

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/overtime_calculation_model.dart';
@@ -12,7 +11,6 @@ abstract class OvertimeLocalDataSource {
   Future<void> clearAll();
 }
 
-@Injectable(as: OvertimeLocalDataSource)
 class OvertimeLocalDataSourceImpl implements OvertimeLocalDataSource {
   static const String _storagePrefix = 'overtime_calculations';
   static const String _idsKey = '${_storagePrefix}_ids';

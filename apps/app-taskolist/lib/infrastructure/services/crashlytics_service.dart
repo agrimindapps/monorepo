@@ -1,7 +1,6 @@
 import 'package:core/core.dart';
 
 /// Crashlytics service específico do app Task Manager
-@lazySingleton
 class TaskManagerCrashlyticsService {
   final ICrashlyticsRepository _crashlyticsRepository;
 

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/services/data_cleaner_service.dart';
 import '../../../../core/services/data_sanitization_service.dart';
-import '../../../../core/services/services_providers.dart';
+import '../../../../core/providers/core_di_providers.dart';
 import '../utils/text_formatters.dart';
 
 /// Dialog stateful para confirmação de limpeza de dados

@@ -16,8 +16,8 @@ import '../../domain/usecases/delete_account_usecase.dart';
 import '../../domain/usecases/get_account_info_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart' as account_logout;
 
-import '../../../../core/auth/auth_providers.dart';
-import '../../../../core/services/services_providers.dart';
+import '../../../../core/providers/repository_providers.dart';
+import '../../../../core/providers/core_di_providers.dart';
 import '../../../../database/providers/database_providers.dart';
 
 part 'account_providers.g.dart';

@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 import '../entities/cash_vs_installment_calculation.dart';
 
@@ -19,9 +18,9 @@ class CalculateCashVsInstallmentParams {
   });
 }
 
-@injectable
 class CalculateCashVsInstallmentUseCase {
-  Future<Either<Failure, CashVsInstallmentCalculation>> call(CalculateCashVsInstallmentParams params) async {
+  Future<Either<Failure, CashVsInstallmentCalculation>> call(
+      CalculateCashVsInstallmentParams params) async {
     final validationError = _validate(params);
     if (validationError != null) {
       return Left(validationError);
@@ -41,23 +40,28 @@ class CalculateCashVsInstallmentUseCase {
     }
 
     if (params.cashPrice > 10000000) {
-      return const ValidationFailure('Valor à vista não pode exceder R\$ 10.000.000,00');
+      return const ValidationFailure(
+          'Valor à vista não pode exceder R\$ 10.000.000,00');
     }
 
     if (params.installmentPrice <= 0) {
-      return const ValidationFailure('Valor da parcela deve ser maior que zero');
+      return const ValidationFailure(
+          'Valor da parcela deve ser maior que zero');
     }
 
     if (params.installmentPrice > 10000000) {
-      return const ValidationFailure('Valor da parcela não pode exceder R\$ 10.000.000,00');
+      return const ValidationFailure(
+          'Valor da parcela não pode exceder R\$ 10.000.000,00');
     }
 
     if (params.numberOfInstallments <= 0) {
-      return const ValidationFailure('Número de parcelas deve ser maior que zero');
+      return const ValidationFailure(
+          'Número de parcelas deve ser maior que zero');
     }
 
     if (params.numberOfInstallments > 360) {
-      return const ValidationFailure('Número de parcelas não pode exceder 360 (30 anos)');
+      return const ValidationFailure(
+          'Número de parcelas não pode exceder 360 (30 anos)');
     }
 
     if (params.monthlyInterestRate < 0) {
@@ -65,15 +69,18 @@ class CalculateCashVsInstallmentUseCase {
     }
 
     if (params.monthlyInterestRate > 20) {
-      return const ValidationFailure('Taxa de juros não pode exceder 20% ao mês');
+      return const ValidationFailure(
+          'Taxa de juros não pode exceder 20% ao mês');
     }
 
     return null;
   }
 
-  CashVsInstallmentCalculation _performCalculation(CalculateCashVsInstallmentParams params) {
+  CashVsInstallmentCalculation _performCalculation(
+      CalculateCashVsInstallmentParams params) {
     // 1. Calculate total installment price
-    final totalInstallmentPrice = params.installmentPrice * params.numberOfInstallments;
+    final totalInstallmentPrice =
+        params.installmentPrice * params.numberOfInstallments;
 
     // 2. Calculate implicit rate
     final implicitRate = _calculateImplicitRate(
@@ -124,9 +131,10 @@ class CalculateCashVsInstallmentUseCase {
     try {
       // Implicit rate = (total / cash price) ^ (1/n) - 1
       final rate = (math.pow(
-        totalInstallmentPrice / cashPrice,
-        1 / numberOfInstallments,
-      ) as double) - 1;
+            totalInstallmentPrice / cashPrice,
+            1 / numberOfInstallments,
+          ) as double) -
+          1;
 
       // Validate and constrain the rate
       if (rate.isNaN || rate.isInfinite) {

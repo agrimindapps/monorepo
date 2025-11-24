@@ -4,7 +4,7 @@ import '../../../../core/services/failure_message_service.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/usecases/get_diagnosticos_params.dart';
 import '../../domain/usecases/get_diagnosticos_usecase.dart';
-import '../providers/diagnosticos_providers.dart';
+import '../providers/diagnosticos_providers.dart' as diagnosticosProviders;
 import '../state/diagnosticos_recommendations_state.dart';
 
 /// Notifier para gerenciamento de recomendações de diagnósticos
@@ -50,8 +50,7 @@ class DiagnosticosRecommendationsNotifier
         (failure) {
           state = state.copyWith(
             isLoading: false,
-            errorMessage:
-                _failureMessageService.mapFailureToMessage(failure),
+            errorMessage: _failureMessageService.mapFailureToMessage(failure),
           );
         },
         (diagnosticos) {
@@ -100,10 +99,12 @@ class DiagnosticosRecommendationsNotifier
 }
 
 /// Provider para DiagnosticosRecommendationsNotifier
-final diagnosticosRecommendationsNotifierProvider =
-    StateNotifierProvider<DiagnosticosRecommendationsNotifier, DiagnosticosRecommendationsState>(
+final diagnosticosRecommendationsNotifierProvider = StateNotifierProvider<
+    DiagnosticosRecommendationsNotifier, DiagnosticosRecommendationsState>(
   (ref) => DiagnosticosRecommendationsNotifier(
-    getDiagnosticosUseCase: ref.watch(getDiagnosticosUseCaseProvider),
-    failureMessageService: ref.watch(failureMessageServiceProvider),
+    getDiagnosticosUseCase:
+        ref.watch(diagnosticosProviders.getDiagnosticosUseCaseProvider),
+    failureMessageService:
+        ref.watch(diagnosticosProviders.failureMessageServiceProvider),
   ),
 );

@@ -2,7 +2,6 @@ import 'package:core/core.dart' hide Column;
 
 import '../../../../core/data/models/comentario_model.dart';
 import '../../domain/repositories/plant_comments_repository.dart';
-import 'plants_providers.dart';
 
 part 'plant_comments_provider.g.dart';
 
@@ -78,7 +77,8 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
 
   @override
   Future<PlantCommentsState> build() async {
-    _repository = ref.read(plantCommentsRepositoryProvider);
+    // TODO: Initialize repository when plantCommentsRepositoryProvider is available
+    // _repository = ref.read(plantCommentsRepositoryProvider);
     return const PlantCommentsState();
   }
 
@@ -200,8 +200,7 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
       },
       (comment) {
         final newState = state.valueOrNull ?? const PlantCommentsState();
-        final updatedComments =
-            List<ComentarioModel>.from(newState.comments);
+        final updatedComments = List<ComentarioModel>.from(newState.comments);
         updatedComments[commentIndex] = comment;
 
         state = AsyncValue.data(

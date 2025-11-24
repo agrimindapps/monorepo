@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
+
 
 import '../../comentarios/comentarios_page.dart';
 import '../../defensivos/home_defensivos_page.dart';
@@ -14,7 +14,7 @@ import 'navigation_constants.dart';
 /// - Centraliza mapeamento de índice → página
 /// - Elimina switch case no widget (OCP violation)
 /// - Facilita adição de novas páginas
-@lazySingleton
+
 class NavigationPageService {
   /// Mapa de índice para widget builder
   final Map<int, Widget Function()> _pageBuilders = {

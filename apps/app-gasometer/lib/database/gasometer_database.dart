@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 import 'package:core/core.dart';
-import 'package:flutter/foundation.dart';
 import '../core/drift_exports.dart';
 import 'tables/gasometer_tables.dart';
 
@@ -45,19 +44,6 @@ part 'gasometer_database.g.dart';
 
 class GasometerDatabase extends _$GasometerDatabase with BaseDriftDatabase {
   GasometerDatabase(QueryExecutor e) : super(e);
-
-  /// Factory Injectable
-  /// 
-  /// Funciona em todas as plataformas:
-  /// - Mobile/Desktop: SQLite nativo
-  /// - Web: WASM + IndexedDB
-  @factoryMethod
-  factory GasometerDatabase.injectable() {
-    print('🏭 Creating GasometerDatabase via injectable factory');
-    final db = GasometerDatabase.production();
-    print('✅ GasometerDatabase created successfully: ${db.hashCode}');
-    return db;
-  }
 
   @override
   int get schemaVersion => 2; // Incrementado para adicionar firebaseId

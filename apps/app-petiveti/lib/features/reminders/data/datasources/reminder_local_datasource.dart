@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../database/petiveti_database.dart' as db;
 import '../../domain/entities/reminder.dart';
@@ -20,7 +19,6 @@ abstract class ReminderLocalDataSource {
   Future<List<ReminderModel>> getOverdueReminders(String userId);
 }
 
-@LazySingleton(as: ReminderLocalDataSource)
 class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
   final db.PetivetiDatabase _database;
 

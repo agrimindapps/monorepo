@@ -1,29 +1,69 @@
-import 'package:app_receituagro/core/di/injection.dart' as di;
-import 'package:app_receituagro/core/services/failure_message_service.dart';
+import 'package:app_receituagro/core/providers/core_providers.dart';
+import 'package:app_receituagro/core/providers/domain_providers.dart'
+    as domain_providers;
 import 'package:core/core.dart' hide Column;
 
+import '../../../analytics/analytics_providers.dart';
+import '../../data/datasources/datasources.dart';
+import '../../data/repositories/onboarding_repository_impl.dart';
 import '../../domain/domain.dart';
+import '../services/onboarding_error_message_service.dart';
+import '../services/onboarding_ui_service.dart';
 
 part 'onboarding_provider.g.dart';
+
+// ==================== Data Source Providers ====================
+
+/// Provides [OnboardingLocalDataSource] instance
+@riverpod
+OnboardingLocalDataSource onboardingLocalDataSource(
+    OnboardingLocalDataSourceRef ref) {
+  final localStorage = ref.watch(localStorageRepositoryProvider);
+  return OnboardingLocalDataSource(localStorage);
+}
+
+/// Provides [OnboardingConfigDataSource] instance
+@riverpod
+OnboardingConfigDataSource onboardingConfigDataSource(
+    OnboardingConfigDataSourceRef ref) {
+  return OnboardingConfigDataSource();
+}
+
+// ==================== Repository Providers ====================
+
+/// Provides [IOnboardingRepository] instance
+@riverpod
+IOnboardingRepository onboardingRepository(OnboardingRepositoryRef ref) {
+  final localDataSource = ref.watch(onboardingLocalDataSourceProvider);
+  final configDataSource = ref.watch(onboardingConfigDataSourceProvider);
+  return OnboardingRepositoryImpl(localDataSource, configDataSource);
+}
 
 // ==================== Use Case Providers (Dependency Injection) ====================
 
 /// Provides [StartOnboardingUseCase] instance
 @riverpod
 StartOnboardingUseCase startOnboardingUseCase(StartOnboardingUseCaseRef ref) {
-  return di.getIt<StartOnboardingUseCase>();
+  final repository = ref.watch(onboardingRepositoryProvider);
+  final analytics = ref.watch(analyticsRepositoryProvider);
+  return StartOnboardingUseCase(repository, analytics);
 }
 
 /// Provides [CompleteStepUseCase] instance
 @riverpod
 CompleteStepUseCase completeStepUseCase(CompleteStepUseCaseRef ref) {
-  return di.getIt<CompleteStepUseCase>();
+  final repository = ref.watch(onboardingRepositoryProvider);
+  final analytics = ref.watch(analyticsRepositoryProvider);
+  return CompleteStepUseCase(repository, analytics);
 }
 
 /// Provides [SkipStepUseCase] instance
 @riverpod
 SkipStepUseCase skipStepUseCase(SkipStepUseCaseRef ref) {
-  return di.getIt<SkipStepUseCase>();
+  final repository = ref.watch(onboardingRepositoryProvider);
+  final analytics = ref.watch(analyticsRepositoryProvider);
+  final completeStepUseCase = ref.watch(completeStepUseCaseProvider);
+  return SkipStepUseCase(repository, analytics, completeStepUseCase);
 }
 
 /// Provides [GetOnboardingProgressUseCase] instance
@@ -31,7 +71,8 @@ SkipStepUseCase skipStepUseCase(SkipStepUseCaseRef ref) {
 GetOnboardingProgressUseCase getOnboardingProgressUseCase(
   GetOnboardingProgressUseCaseRef ref,
 ) {
-  return di.getIt<GetOnboardingProgressUseCase>();
+  final repository = ref.watch(onboardingRepositoryProvider);
+  return GetOnboardingProgressUseCase(repository);
 }
 
 /// Provides [ShowFeatureTooltipUseCase] instance
@@ -39,33 +80,50 @@ GetOnboardingProgressUseCase getOnboardingProgressUseCase(
 ShowFeatureTooltipUseCase showFeatureTooltipUseCase(
   ShowFeatureTooltipUseCaseRef ref,
 ) {
-  return di.getIt<ShowFeatureTooltipUseCase>();
+  final repository = ref.watch(onboardingRepositoryProvider);
+  final analytics = ref.watch(analyticsRepositoryProvider);
+  return ShowFeatureTooltipUseCase(repository, analytics);
 }
 
 /// Provides [ResetOnboardingUseCase] instance
 @riverpod
 ResetOnboardingUseCase resetOnboardingUseCase(ResetOnboardingUseCaseRef ref) {
-  return di.getIt<ResetOnboardingUseCase>();
+  final repository = ref.watch(onboardingRepositoryProvider);
+  final analytics = ref.watch(analyticsRepositoryProvider);
+  return ResetOnboardingUseCase(repository, analytics);
 }
 
-// ==================== Configuration Providers ====================
+// ==================== UI Services ====================
+
+/// Provides [OnboardingUIService] instance
+@riverpod
+OnboardingUIService onboardingUIService(OnboardingUIServiceRef ref) {
+  return OnboardingUIService();
+}
+
+/// Provides [OnboardingErrorMessageService] instance
+@riverpod
+OnboardingErrorMessageService onboardingErrorMessageService(
+    OnboardingErrorMessageServiceRef ref) {
+  return OnboardingErrorMessageService();
+}
 
 /// Provides list of all onboarding steps configuration
 @riverpod
 List<OnboardingStep> onboardingSteps(OnboardingStepsRef ref) {
-  final repository = di.getIt<IOnboardingRepository>();
+  final repository = ref.watch(onboardingRepositoryProvider);
   final result = repository.getOnboardingSteps();
 
-  return result.fold((failure) => [], (steps) => steps);
+  return result.fold((failure) => <OnboardingStep>[], (steps) => steps);
 }
 
 /// Provides list of all feature discovery tooltips
 @riverpod
 List<FeatureTooltip> featureTooltips(FeatureTooltipsRef ref) {
-  final repository = di.getIt<IOnboardingRepository>();
+  final repository = ref.watch(onboardingRepositoryProvider);
   final result = repository.getFeatureTooltips();
 
-  return result.fold((failure) => [], (tooltips) => tooltips);
+  return result.fold((failure) => <FeatureTooltip>[], (tooltips) => tooltips);
 }
 
 // ==================== Main State Notifier ====================
@@ -99,7 +157,8 @@ class OnboardingNotifier extends _$OnboardingNotifier {
       final result = await useCase.call(const NoParams());
 
       return result.fold((failure) {
-        final messageService = di.getIt<FailureMessageService>();
+        final messageService =
+            ref.watch(domain_providers.failureMessageServiceProvider);
         throw Exception(messageService.mapFailureToMessage(failure));
       }, (progress) => progress);
     });
@@ -124,7 +183,8 @@ class OnboardingNotifier extends _$OnboardingNotifier {
       );
 
       return result.fold((failure) {
-        final messageService = di.getIt<FailureMessageService>();
+        final messageService =
+            ref.watch(domain_providers.failureMessageServiceProvider);
         throw Exception(messageService.mapFailureToMessage(failure));
       }, (updatedProgress) => updatedProgress);
     });
@@ -147,7 +207,8 @@ class OnboardingNotifier extends _$OnboardingNotifier {
       );
 
       return result.fold((failure) {
-        final messageService = di.getIt<FailureMessageService>();
+        final messageService =
+            ref.watch(domain_providers.failureMessageServiceProvider);
         throw Exception(messageService.mapFailureToMessage(failure));
       }, (updatedProgress) => updatedProgress);
     });
@@ -162,7 +223,8 @@ class OnboardingNotifier extends _$OnboardingNotifier {
       final result = await useCase.call(const NoParams());
 
       return result.fold((failure) {
-        final messageService = di.getIt<FailureMessageService>();
+        final messageService =
+            ref.watch(domain_providers.failureMessageServiceProvider);
         throw Exception(messageService.mapFailureToMessage(failure));
       }, (_) => null);
     });

@@ -6,7 +6,7 @@ import '../repositories/i_favoritos_repository.dart';
 /// Substitui os específicos (RemoveFavoritoDefensivoUseCase, RemoveFavoritoPragaUseCase, etc)
 ///
 /// **Benefício:** Consolidação de 4+ usecases em 1 genérico reutilizável
-@injectable
+
 class RemoveFavoritoUseCase {
   final IFavoritosRepository _repository;
 

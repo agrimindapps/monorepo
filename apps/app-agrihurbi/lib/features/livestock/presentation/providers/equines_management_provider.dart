@@ -1,14 +1,12 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/equine_entity.dart';
 import '../../domain/usecases/get_equines.dart';
 
 /// Provider especializado para gerenciamento de equinos
-/// 
+///
 /// Responsabilidade única: CRUD e gerenciamento de estado de equinos
 /// Seguindo Single Responsibility Principle
-@singleton
 class EquinesManagementProvider extends ChangeNotifier {
   final GetEquinesUseCase _getEquines;
 
@@ -18,34 +16,34 @@ class EquinesManagementProvider extends ChangeNotifier {
 
   List<EquineEntity> _equines = [];
   EquineEntity? _selectedEquine;
-  
+
   /// Estados de loading específicos para cada operação
   bool _isLoadingEquines = false;
   final bool _isCreating = false;
   final bool _isUpdating = false;
   final bool _isDeleting = false;
-  
+
   String? _errorMessage;
 
   List<EquineEntity> get equines => _equines;
   EquineEntity? get selectedEquine => _selectedEquine;
-  
+
   bool get isLoadingEquines => _isLoadingEquines;
   bool get isCreating => _isCreating;
   bool get isUpdating => _isUpdating;
   bool get isDeleting => _isDeleting;
-  bool get isAnyOperationInProgress => 
-    _isLoadingEquines || _isCreating || _isUpdating || _isDeleting;
-  
+  bool get isAnyOperationInProgress =>
+      _isLoadingEquines || _isCreating || _isUpdating || _isDeleting;
+
   String? get errorMessage => _errorMessage;
-  
+
   /// Equinos ativos (não deletados)
-  List<EquineEntity> get activeEquines => 
-    _equines.where((equine) => equine.isActive).toList();
-  
+  List<EquineEntity> get activeEquines =>
+      _equines.where((equine) => equine.isActive).toList();
+
   int get totalEquines => _equines.length;
   int get totalActiveEquines => activeEquines.length;
-  
+
   /// Verifica se tem equino selecionado
   bool get hasSelectedEquine => _selectedEquine != null;
 
@@ -56,15 +54,17 @@ class EquinesManagementProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _getEquines(const GetEquinesParams());
-    
+
     result.fold(
       (failure) {
         _errorMessage = failure.message;
-        debugPrint('EquinesManagementProvider: Erro ao carregar equinos - ${failure.message}');
+        debugPrint(
+            'EquinesManagementProvider: Erro ao carregar equinos - ${failure.message}');
       },
       (equines) {
         _equines = equines;
-        debugPrint('EquinesManagementProvider: Equinos carregados - ${equines.length}');
+        debugPrint(
+            'EquinesManagementProvider: Equinos carregados - ${equines.length}');
       },
     );
 
@@ -76,7 +76,8 @@ class EquinesManagementProvider extends ChangeNotifier {
   void selectEquine(EquineEntity? equine) {
     _selectedEquine = equine;
     notifyListeners();
-    debugPrint('EquinesManagementProvider: Equino selecionado - ${equine?.id ?? "nenhum"}');
+    debugPrint(
+        'EquinesManagementProvider: Equino selecionado - ${equine?.id ?? "nenhum"}');
   }
 
   /// Encontra equino por ID
@@ -96,11 +97,11 @@ class EquinesManagementProvider extends ChangeNotifier {
   /// Obtém lista de países de origem únicos
   List<String> get uniqueOriginCountries {
     final countries = <String>{};
-    
+
     for (final equine in _equines) {
       countries.add(equine.originCountry);
     }
-    
+
     return countries.toList()..sort();
   }
 
@@ -128,19 +129,22 @@ class EquinesManagementProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
   }
-  
+
   Future<bool> createEquine(EquineEntity equine) async {
-    debugPrint('EquinesManagementProvider: createEquine não implementado ainda');
+    debugPrint(
+        'EquinesManagementProvider: createEquine não implementado ainda');
     return false;
   }
 
   Future<bool> updateEquine(EquineEntity equine) async {
-    debugPrint('EquinesManagementProvider: updateEquine não implementado ainda');
+    debugPrint(
+        'EquinesManagementProvider: updateEquine não implementado ainda');
     return false;
   }
 
   Future<bool> deleteEquine(String equineId) async {
-    debugPrint('EquinesManagementProvider: deleteEquine não implementado ainda');
+    debugPrint(
+        'EquinesManagementProvider: deleteEquine não implementado ainda');
     return false;
   }
 

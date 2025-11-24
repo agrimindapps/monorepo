@@ -1,7 +1,8 @@
-import 'package:core/core.dart' hide Column, getIt;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../../core/providers/repository_providers.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/entities/plant_task.dart';
 import '../../domain/repositories/plant_tasks_repository.dart';
@@ -79,7 +80,8 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
           }
         },
         (tasks) {
-          final updatedTasks = Map<String, List<PlantTask>>.from(state.plantTasks);
+          final updatedTasks =
+              Map<String, List<PlantTask>>.from(state.plantTasks);
           updatedTasks[plantId] = tasks;
           state = state.copyWith(
             plantTasks: updatedTasks,
@@ -169,7 +171,8 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
             }
           },
           (savedTasks) {
-            final updatedTasks = Map<String, List<PlantTask>>.from(state.plantTasks);
+            final updatedTasks =
+                Map<String, List<PlantTask>>.from(state.plantTasks);
             updatedTasks[plant.id] = savedTasks;
             state = state.copyWith(
               plantTasks: updatedTasks,
@@ -183,7 +186,8 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
           },
         );
       } else {
-        final updatedTasks = Map<String, List<PlantTask>>.from(state.plantTasks);
+        final updatedTasks =
+            Map<String, List<PlantTask>>.from(state.plantTasks);
         updatedTasks[plant.id] = tasks;
         state = state.copyWith(
           plantTasks: updatedTasks,
@@ -483,10 +487,6 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 }
 
 // Dependency providers (to be defined in DI setup)
-@riverpod
-PlantTaskGenerator plantTaskGenerator(PlantTaskGeneratorRef ref) {
-  return PlantTaskGenerator();
-}
 
 /// Type alias for backwards compatibility with existing code
 /// Use PlantTaskNotifier instead in new code for type annotations

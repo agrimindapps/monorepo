@@ -117,10 +117,6 @@ class NavigateToAction extends Action<NavigateToIntent> {
   @override
   Object? invoke(NavigateToIntent intent) {
     // TODO: Replace with Riverpod provider or context.go directly
-    // final context = sl<INavigationService>().currentContext;
-    // if (context != null && context.mounted) {
-    //   context.go(intent.route);
-    // }
     return null;
   }
 }
@@ -129,10 +125,6 @@ class CreateNewPlantAction extends Action<CreateNewPlantIntent> {
   @override
   Object? invoke(CreateNewPlantIntent intent) {
     // TODO: Replace with Riverpod provider or context.go directly
-    // final context = sl<INavigationService>().currentContext;
-    // if (context != null && context.mounted) {
-    //   context.go('/plants/add');
-    // }
     return null;
   }
 }
@@ -141,13 +133,6 @@ class SaveAction extends Action<SaveIntent> {
   @override
   Object? invoke(SaveIntent intent) {
     // TODO: Replace with Riverpod provider or context.go directly
-    // final context = sl<INavigationService>().currentContext;
-    // if (context != null && context.mounted) {
-    //   final saveNotifier = SaveNotifier.maybeOf(context);
-    //   if (saveNotifier != null) {
-    //     saveNotifier.save();
-    //   }
-    // }
     return null;
   }
 }
@@ -156,12 +141,6 @@ class EscapeAction extends Action<EscapeIntent> {
   @override
   Object? invoke(EscapeIntent intent) {
     // TODO: Replace with Riverpod provider or context.go directly
-    // final context = sl<INavigationService>().currentContext;
-    // if (context != null && context.mounted) {
-    //   if (Navigator.of(context).canPop()) {
-    //     Navigator.of(context).pop();
-    //   }
-    // }
     return null;
   }
 }
@@ -170,12 +149,6 @@ class GoBackAction extends Action<GoBackIntent> {
   @override
   Object? invoke(GoBackIntent intent) {
     // TODO: Replace with Riverpod provider or context.go directly
-    // final context = sl<INavigationService>().currentContext;
-    // if (context != null && context.mounted) {
-    //   if (context.canPop()) {
-    //     context.pop();
-    //   }
-    // }
     return null;
   }
 }
@@ -184,13 +157,6 @@ class SearchAction extends Action<SearchIntent> {
   @override
   Object? invoke(SearchIntent intent) {
     // TODO: Replace with Riverpod provider or context.go directly
-    // final context = sl<INavigationService>().currentContext;
-    // if (context != null && context.mounted) {
-    //   final searchNotifier = SearchNotifier.maybeOf(context);
-    //   if (searchNotifier != null) {
-    //     searchNotifier.toggleSearch();
-    //   }
-    // }
     return null;
   }
 }
@@ -199,13 +165,6 @@ class RefreshAction extends Action<RefreshIntent> {
   @override
   Object? invoke(RefreshIntent intent) {
     // TODO: Replace with Riverpod provider or context.go directly
-    // final context = sl<INavigationService>().currentContext;
-    // if (context != null && context.mounted) {
-    //   final refreshNotifier = RefreshNotifier.maybeOf(context);
-    //   if (refreshNotifier != null) {
-    //     refreshNotifier.refresh();
-    //   }
-    // }
     return null;
   }
 }

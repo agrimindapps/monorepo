@@ -1,7 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection.dart' as gasometer_di;
+import '../../../../database/providers/database_providers.dart';
 import '../../../audit/domain/services/audit_trail_service.dart';
 import 'financial_conflict_resolver.dart';
 import 'financial_sync_service.dart';
@@ -10,10 +11,8 @@ import 'financial_validator.dart';
 // Provider for FinancialAuditTrailService
 final financialAuditTrailServiceProvider = Provider<FinancialAuditTrailService>(
   (ref) {
-    final service = gasometer_di.getIt<FinancialAuditTrailService>();
-    // Initialize will be called when service is first accessed
-    service.initialize();
-    return service;
+    final repo = ref.watch(auditTrailRepositoryProvider);
+    return FinancialAuditTrailService(repo);
   },
 );
 

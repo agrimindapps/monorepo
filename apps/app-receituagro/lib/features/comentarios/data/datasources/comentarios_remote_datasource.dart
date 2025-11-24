@@ -37,7 +37,7 @@ abstract class ComentariosRemoteDatasource {
   Future<void> syncComentarios(List<ComentarioModel> comentarios, String userId);
 }
 
-@LazySingleton(as: ComentariosRemoteDatasource)
+
 class ComentariosRemoteDatasourceImpl implements ComentariosRemoteDatasource {
   final FirebaseFirestore _firestore;
 

@@ -6,11 +6,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/extensions/diagnostico_drift_extension.dart';
 import '../../../../core/providers/premium_notifier.dart';
+import '../../../../database/providers/database_providers.dart';
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/diagnostico_repository.dart';
 import '../../../diagnosticos/data/mappers/diagnostico_mapper.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
-import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
+import '../../../favoritos/presentation/providers/favoritos_providers.dart';
 import 'diagnosticos_providers.dart';
 
 part 'detalhe_diagnostico_notifier.g.dart';
@@ -116,8 +117,8 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
           if (diagnosticoEntity != null) {
             final driftRepository = ref.read(diagnosticoRepositoryProvider);
             final diagnosticoDrift =
-                await driftRepository.getDiagnosticoByIdOrObjectId(
-              diagnosticoId,
+                await driftRepository.findById(
+              int.parse(diagnosticoId),
             );
 
             // Extensão DiagnosticoExtension já busca dados do defensivo internamente
@@ -170,8 +171,8 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
       try {
         final driftRepository = ref.read(diagnosticoRepositoryProvider);
         final diagnosticoDrift =
-            await driftRepository.getDiagnosticoByIdOrObjectId(
-          diagnosticoId,
+            await driftRepository.findById(
+          int.parse(diagnosticoId),
         );
         if (diagnosticoDrift != null) {
           final diagnostico = DiagnosticoMapper.fromDrift(diagnosticoDrift);

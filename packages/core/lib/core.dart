@@ -97,8 +97,7 @@ export 'src/domain/repositories/i_device_repository.dart'
     hide DeviceValidationResult;
 export 'src/domain/repositories/i_enhanced_notification_repository.dart';
 export 'src/domain/repositories/i_file_repository.dart';
-export 'src/domain/repositories/i_local_storage_repository.dart'
-    hide OfflineData;
+export 'src/domain/repositories/i_local_storage_repository.dart';
 export 'src/domain/repositories/i_notification_repository.dart';
 export 'src/domain/repositories/i_performance_repository.dart';
 export 'src/domain/repositories/i_security_repository.dart';
@@ -186,7 +185,7 @@ export 'src/riverpod/domain/analytics/analytics_providers.dart';
 export 'src/riverpod/domain/auth/auth_domain_providers.dart';
 export 'src/riverpod/domain/device/device_management_providers.dart';
 export 'src/riverpod/domain/premium/subscription_providers.dart';
-export 'src/riverpod/domain/sync/sync_providers.dart';
+export 'src/riverpod/domain/sync/sync_providers.dart' hide OfflineData;
 export 'src/riverpod/riverpod_utils.dart';
 // Storage - Drift (Novo)
 // export 'src/infrastructure/storage/drift/drift_storage.dart';

@@ -1,9 +1,8 @@
 import 'package:app_agrihurbi/features/markets/data/models/market_model.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_filter_entity.dart';
-import 'package:core/core.dart' hide Environment;
+import 'package:core/core.dart';
 import 'package:dio/dio.dart';
-import 'package:injectable/injectable.dart';
 
 /// Abstract Market Remote DataSource
 abstract class MarketRemoteDataSource {
@@ -52,8 +51,6 @@ abstract class MarketRemoteDataSource {
 }
 
 /// Implementation of Market Remote DataSource using API
-@Injectable(as: MarketRemoteDataSource)
-@Environment('prod')
 class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
   final Dio _dioClient;
 
@@ -267,8 +264,6 @@ class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
 }
 
 /// Mock implementation for development/testing
-@Injectable(as: MarketRemoteDataSource)
-@Environment('dev') // Use this annotation for development environment
 class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
   /// Generate mock market data
   List<MarketModel> _generateMockMarkets() {

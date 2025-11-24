@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../models/plant_task_model.dart';
 
@@ -22,7 +21,6 @@ abstract class PlantTasksRemoteDatasource {
   Future<void> syncPlantTasks(List<PlantTaskModel> tasks, String userId);
 }
 
-@LazySingleton(as: PlantTasksRemoteDatasource)
 class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
   final FirebaseFirestore _firestore;
 

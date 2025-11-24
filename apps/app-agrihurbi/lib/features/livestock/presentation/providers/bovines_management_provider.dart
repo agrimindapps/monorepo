@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/bovine_entity.dart';
 import '../../domain/usecases/create_bovine.dart';
@@ -8,10 +7,9 @@ import '../../domain/usecases/get_bovines.dart';
 import '../../domain/usecases/update_bovine.dart';
 
 /// Provider especializado para gerenciamento de bovinos
-/// 
+///
 /// Responsabilidade única: CRUD e gerenciamento de estado de bovinos
 /// Seguindo Single Responsibility Principle
-@singleton
 class BovinesManagementProvider extends ChangeNotifier {
   final GetAllBovinesUseCase _getAllBovines;
   final CreateBovineUseCase _createBovine;
@@ -30,34 +28,34 @@ class BovinesManagementProvider extends ChangeNotifier {
 
   List<BovineEntity> _bovines = [];
   BovineEntity? _selectedBovine;
-  
+
   /// Estados de loading específicos para cada operação
   bool _isLoadingBovines = false;
   bool _isCreating = false;
   bool _isUpdating = false;
   bool _isDeleting = false;
-  
+
   String? _errorMessage;
 
   List<BovineEntity> get bovines => _bovines;
   BovineEntity? get selectedBovine => _selectedBovine;
-  
+
   bool get isLoadingBovines => _isLoadingBovines;
   bool get isCreating => _isCreating;
   bool get isUpdating => _isUpdating;
   bool get isDeleting => _isDeleting;
-  bool get isAnyOperationInProgress => 
-    _isLoadingBovines || _isCreating || _isUpdating || _isDeleting;
-  
+  bool get isAnyOperationInProgress =>
+      _isLoadingBovines || _isCreating || _isUpdating || _isDeleting;
+
   String? get errorMessage => _errorMessage;
-  
+
   /// Bovinos ativos (não deletados)
-  List<BovineEntity> get activeBovines => 
-    _bovines.where((bovine) => bovine.isActive).toList();
-  
+  List<BovineEntity> get activeBovines =>
+      _bovines.where((bovine) => bovine.isActive).toList();
+
   int get totalBovines => _bovines.length;
   int get totalActiveBovines => activeBovines.length;
-  
+
   /// Verifica se tem bovino selecionado
   bool get hasSelectedBovine => _selectedBovine != null;
 
@@ -68,15 +66,17 @@ class BovinesManagementProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _getAllBovines();
-    
+
     result.fold(
       (failure) {
         _errorMessage = failure.message;
-        debugPrint('BovinesManagementProvider: Erro ao carregar bovinos - ${failure.message}');
+        debugPrint(
+            'BovinesManagementProvider: Erro ao carregar bovinos - ${failure.message}');
       },
       (bovines) {
         _bovines = bovines;
-        debugPrint('BovinesManagementProvider: Bovinos carregados - ${bovines.length}');
+        debugPrint(
+            'BovinesManagementProvider: Bovinos carregados - ${bovines.length}');
       },
     );
 
@@ -88,7 +88,8 @@ class BovinesManagementProvider extends ChangeNotifier {
   void selectBovine(BovineEntity? bovine) {
     _selectedBovine = bovine;
     notifyListeners();
-    debugPrint('BovinesManagementProvider: Bovino selecionado - ${bovine?.id ?? "nenhum"}');
+    debugPrint(
+        'BovinesManagementProvider: Bovino selecionado - ${bovine?.id ?? "nenhum"}');
   }
 
   /// Cria um novo bovino
@@ -98,18 +99,20 @@ class BovinesManagementProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _createBovine(CreateBovineParams(bovine: bovine));
-    
+
     bool success = false;
     result.fold(
       (failure) {
         _errorMessage = failure.message;
-        debugPrint('BovinesManagementProvider: Erro ao criar bovino - ${failure.message}');
+        debugPrint(
+            'BovinesManagementProvider: Erro ao criar bovino - ${failure.message}');
       },
       (createdBovine) {
         _bovines.add(createdBovine);
         _selectedBovine = createdBovine; // Seleciona o bovino recém-criado
         success = true;
-        debugPrint('BovinesManagementProvider: Bovino criado com sucesso - ${createdBovine.id}');
+        debugPrint(
+            'BovinesManagementProvider: Bovino criado com sucesso - ${createdBovine.id}');
       },
     );
 
@@ -125,12 +128,13 @@ class BovinesManagementProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _updateBovine(UpdateBovineParams(bovine: bovine));
-    
+
     bool success = false;
     result.fold(
       (failure) {
         _errorMessage = failure.message;
-        debugPrint('BovinesManagementProvider: Erro ao atualizar bovino - ${failure.message}');
+        debugPrint(
+            'BovinesManagementProvider: Erro ao atualizar bovino - ${failure.message}');
       },
       (updatedBovine) {
         final index = _bovines.indexWhere((b) => b.id == updatedBovine.id);
@@ -139,9 +143,10 @@ class BovinesManagementProvider extends ChangeNotifier {
           if (_selectedBovine?.id == updatedBovine.id) {
             _selectedBovine = updatedBovine;
           }
-          
+
           success = true;
-          debugPrint('BovinesManagementProvider: Bovino atualizado com sucesso - ${updatedBovine.id}');
+          debugPrint(
+              'BovinesManagementProvider: Bovino atualizado com sucesso - ${updatedBovine.id}');
         }
       },
     );
@@ -158,12 +163,13 @@ class BovinesManagementProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _deleteBovine(DeleteBovineParams(bovineId: bovineId));
-    
+
     bool success = false;
     result.fold(
       (failure) {
         _errorMessage = failure.message;
-        debugPrint('BovinesManagementProvider: Erro ao deletar bovino - ${failure.message}');
+        debugPrint(
+            'BovinesManagementProvider: Erro ao deletar bovino - ${failure.message}');
       },
       (_) {
         final index = _bovines.indexWhere((b) => b.id == bovineId);
@@ -172,9 +178,10 @@ class BovinesManagementProvider extends ChangeNotifier {
           if (_selectedBovine?.id == bovineId) {
             _selectedBovine = null;
           }
-          
+
           success = true;
-          debugPrint('BovinesManagementProvider: Bovino deletado com sucesso - $bovineId');
+          debugPrint(
+              'BovinesManagementProvider: Bovino deletado com sucesso - $bovineId');
         }
       },
     );
@@ -190,9 +197,10 @@ class BovinesManagementProvider extends ChangeNotifier {
     if (_selectedBovine?.id == bovineId) {
       _selectedBovine = null;
     }
-    
+
     notifyListeners();
-    debugPrint('BovinesManagementProvider: Bovino removido da lista local - $bovineId');
+    debugPrint(
+        'BovinesManagementProvider: Bovino removido da lista local - $bovineId');
   }
 
   /// Encontra bovino por ID
@@ -212,22 +220,22 @@ class BovinesManagementProvider extends ChangeNotifier {
   /// Obtém lista de raças únicas
   List<String> get uniqueBreeds {
     final breeds = <String>{};
-    
+
     for (final bovine in _bovines) {
       breeds.add(bovine.breed);
     }
-    
+
     return breeds.toList()..sort();
   }
 
   /// Obtém lista de países de origem únicos
   List<String> get uniqueOriginCountries {
     final countries = <String>{};
-    
+
     for (final bovine in _bovines) {
       countries.add(bovine.originCountry);
     }
-    
+
     return countries.toList()..sort();
   }
 

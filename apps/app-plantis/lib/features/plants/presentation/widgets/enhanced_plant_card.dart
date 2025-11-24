@@ -35,14 +35,14 @@ class TaskInfo {
 class EnhancedPlantCard extends StatelessWidget {
   final Plant plant;
   final IPlantCardActions actions;
-  final ITaskDataProvider taskProvider;
+  final ITaskDataProvider? taskProvider;
   final bool isGridView;
 
   const EnhancedPlantCard({
     super.key,
     required this.plant,
     required this.actions,
-    required this.taskProvider,
+    this.taskProvider,
     this.isGridView = false,
   });
 
@@ -50,22 +50,22 @@ class EnhancedPlantCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return isGridView
         ? _PlantGridCard(
-          plant: plant,
-          actions: actions,
-          taskProvider: taskProvider,
-        )
+            plant: plant,
+            actions: actions,
+            taskProvider: taskProvider,
+          )
         : _PlantListCard(
-          plant: plant,
-          actions: actions,
-          taskProvider: taskProvider,
-        );
+            plant: plant,
+            actions: actions,
+            taskProvider: taskProvider,
+          );
   }
 }
 
 class _PlantListCard extends StatelessWidget {
   final Plant plant;
   final IPlantCardActions actions;
-  final ITaskDataProvider taskProvider;
+  final ITaskDataProvider? taskProvider;
 
   const _PlantListCard({
     required this.plant,
@@ -109,12 +109,12 @@ class _PlantListCard extends StatelessWidget {
 class _PlantGridCard extends StatelessWidget {
   final Plant plant;
   final IPlantCardActions actions;
-  final ITaskDataProvider taskProvider;
+  final ITaskDataProvider? taskProvider;
 
   const _PlantGridCard({
     required this.plant,
     required this.actions,
-    required this.taskProvider,
+    this.taskProvider,
   });
 
   @override
@@ -137,7 +137,6 @@ class _PlantGridCard extends StatelessWidget {
                   child: _PlantIllustration(plant: plant, size: 60),
                 ),
               ),
-
               const SizedBox(height: 8),
               Text(
                 plant.name,
@@ -148,7 +147,6 @@ class _PlantGridCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
               ),
-
               if (plant.species?.isNotEmpty == true) ...[
                 const SizedBox(height: 4),
                 Text(
@@ -161,7 +159,6 @@ class _PlantGridCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
               ],
-
               const SizedBox(height: 8),
               Center(
                 child: _CompactTaskStatus(
@@ -269,21 +266,20 @@ class _PlantIllustration extends StatelessWidget {
           width: 1,
         ),
       ),
-      child:
-          plant.primaryImageUrl != null
-              ? ClipRRect(
-                borderRadius: BorderRadius.circular(size / 2),
-                child: Image.network(
-                  plant.primaryImageUrl!,
-                  width: size,
-                  height: size,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return _DefaultPlantIcon(size: size);
-                  },
-                ),
-              )
-              : _DefaultPlantIcon(size: size),
+      child: plant.primaryImageUrl != null
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(size / 2),
+              child: Image.network(
+                plant.primaryImageUrl!,
+                width: size,
+                height: size,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return _DefaultPlantIcon(size: size);
+                },
+              ),
+            )
+          : _DefaultPlantIcon(size: size),
     );
   }
 }
@@ -307,19 +303,28 @@ class _DefaultPlantIcon extends StatelessWidget {
 
 class _TaskStatusSection extends StatelessWidget {
   final Plant plant;
-  final ITaskDataProvider taskProvider;
+  final ITaskDataProvider? taskProvider;
   final ThemeData theme;
 
   const _TaskStatusSection({
     required this.plant,
-    required this.taskProvider,
+    this.taskProvider,
     required this.theme,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (taskProvider == null) {
+      return _StatusBadge(
+        icon: Icons.check_circle,
+        text: 'Em dia',
+        color: Colors.green,
+        backgroundColor: Colors.green.withValues(alpha: 0.1),
+      );
+    }
+
     return FutureBuilder<List<TaskInfo>>(
-      future: taskProvider.getPendingTasks(plant.id),
+      future: taskProvider!.getPendingTasks(plant.id),
       builder: (context, snapshot) {
         final tasks = snapshot.data ?? [];
 
@@ -363,19 +368,29 @@ class _TaskStatusSection extends StatelessWidget {
 
 class _CompactTaskStatus extends StatelessWidget {
   final Plant plant;
-  final ITaskDataProvider taskProvider;
+  final ITaskDataProvider? taskProvider;
   final ThemeData theme;
 
   const _CompactTaskStatus({
     required this.plant,
-    required this.taskProvider,
+    this.taskProvider,
     required this.theme,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (taskProvider == null) {
+      return _StatusBadge(
+        icon: Icons.check_circle,
+        text: 'Em dia',
+        color: Colors.green,
+        backgroundColor: Colors.green.withValues(alpha: 0.1),
+        isCompact: true,
+      );
+    }
+
     return FutureBuilder<List<TaskInfo>>(
-      future: taskProvider.getPendingTasks(plant.id),
+      future: taskProvider!.getPendingTasks(plant.id),
       builder: (context, snapshot) {
         final tasks = snapshot.data ?? [];
 
@@ -457,10 +472,9 @@ class PlantIllustrationPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..style = PaintingStyle.fill
-          ..strokeWidth = 2;
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 2;
 
     final center = Offset(size.width / 2, size.height / 2);
     paint.color = stemColor;

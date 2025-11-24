@@ -5,7 +5,6 @@ import '../repositories/livestock_repository.dart';
 /// 
 /// Implementa UseCase com soft delete por padrão
 /// Inclui verificações de confirmação e operações em cascata
-@lazySingleton
 class DeleteBovineUseCase implements UseCase<void, DeleteBovineParams> {
   final LivestockRepository repository;
   
@@ -114,7 +113,6 @@ class DeleteBovineParams extends Equatable {
 }
 
 /// Use case especializado para exclusão rápida sem confirmações
-@lazySingleton
 class QuickDeleteBovineUseCase implements UseCase<void, String> {
   final DeleteBovineUseCase _deleteUseCase;
   

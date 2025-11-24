@@ -1,13 +1,14 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../../../core/providers/dependency_providers.dart';
 import '../../../../database/providers/database_providers.dart';
 import '../../../../database/repositories/vehicle_repository.dart';
 import '../../data/datasources/vehicle_local_datasource.dart';
 
 part 'vehicle_providers.g.dart';
 
-/// Provides the VehicleRepository instance
+/// Provides the VehicleRepository instance (DAO)
 @riverpod
-VehicleRepository vehicleRepository(VehicleRepositoryRef ref) {
+VehicleRepository vehicleDao(VehicleDaoRef ref) {
   final database = ref.watch(gasometerDatabaseProvider);
   return VehicleRepository(database);
 }
@@ -15,8 +16,9 @@ VehicleRepository vehicleRepository(VehicleRepositoryRef ref) {
 /// Provides the VehicleLocalDataSource instance
 @riverpod
 VehicleLocalDataSource vehicleLocalDataSource(VehicleLocalDataSourceRef ref) {
-  final repository = ref.watch(vehicleRepositoryProvider);
-  return VehicleLocalDataSource(repository);
+  final dao = ref.watch(vehicleDaoProvider);
+  final syncTrigger = ref.watch(syncWriteTriggerProvider);
+  return VehicleLocalDataSource(dao, syncTrigger);
 }
 
 /// Stream of vehicles for a specific user (reactive)

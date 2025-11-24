@@ -1,7 +1,7 @@
 import 'package:core/core.dart' show Ref;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../core/di/injection_container.dart' as di;
+// import '../../core/di/injection_container.dart' as di; // Commented out - migrating to Riverpod
 import '../../features/livestock/domain/entities/animal_base_entity.dart';
 import '../../features/livestock/domain/entities/bovine_entity.dart';
 import '../../features/livestock/domain/entities/equine_entity.dart';
@@ -176,10 +176,11 @@ class BovinesNotifier extends _$BovinesNotifier {
 
   @override
   BovinesState build() {
-    _getAllBovines = di.getIt<GetAllBovinesUseCase>();
-    _createBovine = di.getIt<CreateBovineUseCase>();
-    _updateBovine = di.getIt<UpdateBovineUseCase>();
-    _deleteBovine = di.getIt<DeleteBovineUseCase>();
+    // TODO: Replace getIt calls with Riverpod providers
+    // _getAllBovines = di.getIt<GetAllBovinesUseCase>();
+    // _createBovine = di.getIt<CreateBovineUseCase>();
+    // _updateBovine = di.getIt<UpdateBovineUseCase>();
+    // _deleteBovine = di.getIt<DeleteBovineUseCase>();
     Future.microtask(() => loadBovines());
 
     return const BovinesState();
@@ -324,7 +325,8 @@ class EquinesNotifier extends _$EquinesNotifier {
 
   @override
   EquinesState build() {
-    _getEquines = di.getIt<GetEquinesUseCase>();
+    // TODO: Replace getIt calls with Riverpod providers
+    // _getEquines = di.getIt<GetEquinesUseCase>();
     Future.microtask(() => loadEquines());
 
     return const EquinesState();
@@ -456,7 +458,8 @@ class LivestockSearchNotifier extends _$LivestockSearchNotifier {
 
   @override
   LivestockSearchState build() {
-    _searchAnimals = di.getIt<search_use_case.SearchAnimalsUseCase>();
+    // TODO: Replace getIt calls with Riverpod providers
+    // _searchAnimals = di.getIt<search_use_case.SearchAnimalsUseCase>();
     return const LivestockSearchState();
   }
 
@@ -568,7 +571,8 @@ class LivestockStatisticsNotifier extends _$LivestockStatisticsNotifier {
 
   @override
   LivestockStatisticsState build() {
-    _repository = di.getIt<LivestockRepository>();
+    // TODO: Replace getIt calls with Riverpod providers
+    // _repository = di.getIt<LivestockRepository>();
     return const LivestockStatisticsState();
   }
 
@@ -632,7 +636,8 @@ class LivestockSyncNotifier extends _$LivestockSyncNotifier {
 
   @override
   LivestockSyncState build() {
-    _repository = di.getIt<LivestockRepository>();
+    // TODO: Replace getIt calls with Riverpod providers
+    // _repository = di.getIt<LivestockRepository>();
     return const LivestockSyncState();
   }
 

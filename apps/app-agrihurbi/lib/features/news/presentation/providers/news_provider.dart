@@ -1,25 +1,32 @@
-import 'package:app_agrihurbi/core/di/injection.dart';
-import 'package:app_agrihurbi/features/news/domain/entities/commodity_price_entity.dart';
-import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
-import 'package:app_agrihurbi/features/news/domain/repositories/news_repository.dart';
-import 'package:app_agrihurbi/features/news/domain/usecases/get_commodity_prices.dart';
-import 'package:app_agrihurbi/features/news/domain/usecases/get_news.dart';
-import 'package:core/core.dart' show Provider;
-import 'package:core/core.dart' show injectable;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../domain/entities/commodity_price_entity.dart';
+import '../../domain/entities/news_article_entity.dart';
+import '../../domain/repositories/news_repository.dart';
+import '../../domain/usecases/get_commodity_prices.dart';
+import '../../domain/usecases/get_news.dart';
+import 'news_di_providers.dart';
+
 /// Provider Riverpod para NewsProvider
-///
-/// Integra GetIt com Riverpod para gerenciamento de estado
-final newsProviderProvider = Provider<NewsProvider>((ref) {
-  return getIt<NewsProvider>();
+final newsProviderProvider = ChangeNotifierProvider<NewsProvider>((ref) {
+  return NewsProvider(
+    ref.watch(getNewsUseCaseProvider),
+    ref.watch(getArticleByIdUseCaseProvider),
+    ref.watch(searchArticlesUseCaseProvider),
+    ref.watch(getPremiumArticlesUseCaseProvider),
+    ref.watch(manageFavoritesUseCaseProvider),
+    ref.watch(refreshRSSFeedsUseCaseProvider),
+    ref.watch(getCommodityPricesUseCaseProvider),
+    ref.watch(newsRepositoryProvider),
+  );
 });
+
 
 /// News Provider for State Management
 ///
 /// Manages news articles, commodity prices, and RSS feed state
 /// using Provider pattern for reactive UI updates
-@injectable
 class NewsProvider with ChangeNotifier {
   final GetNews _getNews;
   final GetArticleById _getArticleById;

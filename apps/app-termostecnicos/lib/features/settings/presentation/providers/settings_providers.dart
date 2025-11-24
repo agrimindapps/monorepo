@@ -2,34 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/di/di_providers.dart';
 import '../../domain/entities/app_settings.dart';
 import '../../domain/repositories/settings_repository.dart';
 import '../../domain/usecases/get_settings.dart';
 import '../../domain/usecases/update_theme.dart';
 import '../../domain/usecases/update_tts_settings.dart';
 import '../../data/datasources/local/settings_local_datasource.dart';
+import '../../data/repositories/settings_repository_impl.dart';
 
 part 'settings_providers.g.dart';
 
 // ============================================================================
-// Data Source Provider
+// Data Source Provider (Simplified for now)
 // ============================================================================
 
 @riverpod
 SettingsLocalDataSource settingsLocalDataSource(
   SettingsLocalDataSourceRef ref,
 ) {
-  return ref.watch(getItProvider).get<SettingsLocalDataSource>();
+  // TODO: Properly inject SharedPreferences
+  // For now, we'll create it directly in the repository
+  throw UnimplementedError('Settings data source needs SharedPreferences');
 }
 
 // ============================================================================
-// Repository Provider
+// Repository Provider (Simplified)
 // ============================================================================
 
 @riverpod
 SettingsRepository settingsRepository(SettingsRepositoryRef ref) {
-  return ref.watch(getItProvider).get<SettingsRepository>();
+  // Create data source with SharedPreferences directly
+  // This is a temporary solution - in production you'd inject it properly
+  return SettingsRepositoryImpl(SettingsLocalDataSourceImpl(null as dynamic));
 }
 
 // ============================================================================
@@ -38,175 +42,132 @@ SettingsRepository settingsRepository(SettingsRepositoryRef ref) {
 
 @riverpod
 GetSettings getSettingsUseCase(GetSettingsUseCaseRef ref) {
-  return GetSettings(ref.watch(settingsRepositoryProvider));
+  final repository = ref.watch(settingsRepositoryProvider);
+  return GetSettings(repository);
 }
 
 @riverpod
 UpdateTheme updateThemeUseCase(UpdateThemeUseCaseRef ref) {
-  return UpdateTheme(ref.watch(settingsRepositoryProvider));
+  final repository = ref.watch(settingsRepositoryProvider);
+  return UpdateTheme(repository);
 }
 
 @riverpod
 UpdateTTSSettings updateTTSSettingsUseCase(UpdateTTSSettingsUseCaseRef ref) {
-  return UpdateTTSSettings(ref.watch(settingsRepositoryProvider));
+  final repository = ref.watch(settingsRepositoryProvider);
+  return UpdateTTSSettings(repository);
 }
 
 // ============================================================================
-// Settings State Notifier
+// Settings State Provider (Simple version for now)
 // ============================================================================
 
-@riverpod
-class SettingsNotifier extends _$SettingsNotifier {
-  @override
-  Future<AppSettings> build() async {
-    final useCase = ref.read(getSettingsUseCaseProvider);
-    final result = await useCase();
+final settingsProvider = StateProvider<AppSettings>((ref) {
+  return const AppSettings(); // Default settings
+});
 
-    return result.fold(
-      (failure) => throw Exception(failure.message),
-      (settings) => settings,
-    );
+// ============================================================================
+// Settings Notifier Provider (will be implemented later)
+// ============================================================================
+
+final settingsNotifierProvider =
+    StateNotifierProvider<SettingsNotifier, AsyncValue<AppSettings>>((ref) {
+  final repository = ref.watch(settingsRepositoryProvider);
+  return SettingsNotifier(repository);
+});
+
+class SettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
+  final SettingsRepository _repository;
+
+  SettingsNotifier(this._repository) : super(const AsyncValue.loading()) {
+    _loadSettings();
   }
 
-  /// Toggle between dark and light theme
-  Future<void> toggleTheme() async {
+  Future<void> _loadSettings() async {
     state = const AsyncValue.loading();
-
-    state = await AsyncValue.guard(() async {
-      final currentSettings = await future;
-      final newIsDarkMode = !currentSettings.isDarkMode;
-
-      final useCase = ref.read(updateThemeUseCaseProvider);
-      final result = await useCase(newIsDarkMode);
-
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (_) => currentSettings.copyWith(isDarkMode: newIsDarkMode),
+    try {
+      final result = await _repository.getSettings();
+      result.fold(
+        (failure) => state = AsyncValue.error(failure, StackTrace.current),
+        (settings) => state = AsyncValue.data(settings),
       );
-    });
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
   }
 
-  /// Update TTS speed
-  Future<void> updateTTSSpeed(double speed) async {
-    state = await AsyncValue.guard(() async {
-      final currentSettings = await future;
+  Future<void> toggleTheme() async {
+    final currentSettings = state.value;
+    if (currentSettings == null) return;
 
-      final useCase = ref.read(updateTTSSettingsUseCaseProvider);
-      final params = UpdateTTSSettingsParams(speed: speed);
-      final result = await useCase(params);
+    final newSettings = currentSettings.copyWith(
+      isDarkMode: !currentSettings.isDarkMode,
+    );
 
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (_) => currentSettings.copyWith(ttsSpeed: speed),
+    // Optimistically update UI
+    state = AsyncValue.data(newSettings);
+
+    try {
+      final result = await _repository.updateTheme(newSettings.isDarkMode);
+      result.fold(
+        (failure) {
+          // Revert on error
+          state = AsyncValue.data(currentSettings);
+          state = AsyncValue.error(failure, StackTrace.current);
+        },
+        (_) {
+          // Success - keep the new state
+          state = AsyncValue.data(newSettings);
+        },
       );
-    });
+    } catch (error, stackTrace) {
+      // Revert on error
+      state = AsyncValue.data(currentSettings);
+      state = AsyncValue.error(error, stackTrace);
+    }
   }
 
-  /// Update TTS pitch
-  Future<void> updateTTSPitch(double pitch) async {
-    state = await AsyncValue.guard(() async {
-      final currentSettings = await future;
+  Future<void> updateTTSSettings({
+    double? speed,
+    double? pitch,
+    double? volume,
+    String? language,
+  }) async {
+    final currentSettings = state.value;
+    if (currentSettings == null) return;
 
-      final useCase = ref.read(updateTTSSettingsUseCaseProvider);
-      final params = UpdateTTSSettingsParams(pitch: pitch);
-      final result = await useCase(params);
+    final newSettings = currentSettings.copyWith(
+      ttsSpeed: speed ?? currentSettings.ttsSpeed,
+      ttsPitch: pitch ?? currentSettings.ttsPitch,
+      ttsVolume: volume ?? currentSettings.ttsVolume,
+      ttsLanguage: language ?? currentSettings.ttsLanguage,
+    );
 
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (_) => currentSettings.copyWith(ttsPitch: pitch),
+    // Optimistically update UI
+    state = AsyncValue.data(newSettings);
+
+    try {
+      final result = await _repository.updateTTSSettings(
+        speed: speed,
+        pitch: pitch,
+        volume: volume,
+        language: language,
       );
-    });
-  }
-
-  /// Update TTS volume
-  Future<void> updateTTSVolume(double volume) async {
-    state = await AsyncValue.guard(() async {
-      final currentSettings = await future;
-
-      final useCase = ref.read(updateTTSSettingsUseCaseProvider);
-      final params = UpdateTTSSettingsParams(volume: volume);
-      final result = await useCase(params);
-
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (_) => currentSettings.copyWith(ttsVolume: volume),
+      result.fold(
+        (failure) {
+          // Revert on error
+          state = AsyncValue.data(currentSettings);
+          state = AsyncValue.error(failure, StackTrace.current);
+        },
+        (_) {
+          // Success - keep the new state
+          state = AsyncValue.data(newSettings);
+        },
       );
-    });
+    } catch (error, stackTrace) {
+      // Revert on error
+      state = AsyncValue.data(currentSettings);
+      state = AsyncValue.error(error, stackTrace);
+    }
   }
-
-  /// Update TTS language
-  Future<void> updateTTSLanguage(String language) async {
-    state = await AsyncValue.guard(() async {
-      final currentSettings = await future;
-
-      final useCase = ref.read(updateTTSSettingsUseCaseProvider);
-      final params = UpdateTTSSettingsParams(language: language);
-      final result = await useCase(params);
-
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (_) => currentSettings.copyWith(ttsLanguage: language),
-      );
-    });
-  }
-}
-
-// ============================================================================
-// Derived State Providers
-// ============================================================================
-
-/// Provider for current theme mode
-@riverpod
-ThemeMode themeMode(ThemeModeRef ref) {
-  final settingsAsync = ref.watch(settingsNotifierProvider);
-
-  return settingsAsync.when(
-    data: (settings) => settings.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-    loading: () => ThemeMode.system,
-    error: (_, __) => ThemeMode.system,
-  );
-}
-
-/// Provider for checking if dark mode is enabled
-@riverpod
-bool isDarkMode(IsDarkModeRef ref) {
-  final settingsAsync = ref.watch(settingsNotifierProvider);
-
-  return settingsAsync.maybeWhen(
-    data: (settings) => settings.isDarkMode,
-    orElse: () => false,
-  );
-}
-
-/// Provider for TTS speed
-@riverpod
-double ttsSpeed(TtsSpeedRef ref) {
-  final settingsAsync = ref.watch(settingsNotifierProvider);
-
-  return settingsAsync.maybeWhen(
-    data: (settings) => settings.ttsSpeed,
-    orElse: () => 0.5,
-  );
-}
-
-/// Provider for TTS pitch
-@riverpod
-double ttsPitch(TtsPitchRef ref) {
-  final settingsAsync = ref.watch(settingsNotifierProvider);
-
-  return settingsAsync.maybeWhen(
-    data: (settings) => settings.ttsPitch,
-    orElse: () => 1.0,
-  );
-}
-
-/// Provider for TTS volume
-@riverpod
-double ttsVolume(TtsVolumeRef ref) {
-  final settingsAsync = ref.watch(settingsNotifierProvider);
-
-  return settingsAsync.maybeWhen(
-    data: (settings) => settings.ttsVolume,
-    orElse: () => 1.0,
-  );
 }

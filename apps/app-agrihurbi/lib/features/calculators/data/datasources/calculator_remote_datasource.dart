@@ -38,7 +38,6 @@ abstract class CalculatorRemoteDataSource {
   );
 }
 
-@LazySingleton(as: CalculatorRemoteDataSource)
 class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
   CalculatorRemoteDataSourceImpl();
 

@@ -1,15 +1,13 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/entities/calculator_entity.dart';
 import '../../domain/usecases/execute_calculation.dart';
 
 /// Provider especializado para execução de cálculos
-/// 
+///
 /// Responsabilidade única: Gerenciar execução de cálculos e inputs
 /// Seguindo Single Responsibility Principle
-@singleton
 class CalculatorExecutionProvider extends ChangeNotifier {
   final ExecuteCalculation _executeCalculation;
 
@@ -28,14 +26,14 @@ class CalculatorExecutionProvider extends ChangeNotifier {
   Map<String, dynamic> get currentInputs => _currentInputs;
   String? get errorMessage => _errorMessage;
   CalculatorEntity? get activeCalculator => _activeCalculator;
-  
+
   bool get hasResult => _currentResult != null;
   bool get hasInputs => _currentInputs.isNotEmpty;
   bool get canExecute => _activeCalculator != null && _currentInputs.isNotEmpty;
-  
+
   /// Verifica se um input específico foi definido
   bool hasInput(String parameterId) => _currentInputs.containsKey(parameterId);
-  
+
   /// Obtém valor de um input específico
   T? getInput<T>(String parameterId) => _currentInputs[parameterId] as T?;
 
@@ -46,27 +44,30 @@ class CalculatorExecutionProvider extends ChangeNotifier {
       _currentInputs.clear();
       _currentResult = null;
     }
-    
+
     notifyListeners();
-    debugPrint('CalculatorExecutionProvider: Calculadora ativa definida - ${calculator?.id ?? 'nenhuma'}');
+    debugPrint(
+        'CalculatorExecutionProvider: Calculadora ativa definida - ${calculator?.id ?? 'nenhuma'}');
   }
 
   /// Atualiza input de cálculo
   void updateInput(String parameterId, dynamic value) {
     _currentInputs[parameterId] = value;
     _currentResult = null;
-    
+
     notifyListeners();
-    debugPrint('CalculatorExecutionProvider: Input atualizado - $parameterId: $value');
+    debugPrint(
+        'CalculatorExecutionProvider: Input atualizado - $parameterId: $value');
   }
 
   /// Atualiza múltiplos inputs
   void updateInputs(Map<String, dynamic> inputs) {
     _currentInputs.addAll(inputs);
     _currentResult = null;
-    
+
     notifyListeners();
-    debugPrint('CalculatorExecutionProvider: Múltiplos inputs atualizados - ${inputs.keys.toList()}');
+    debugPrint(
+        'CalculatorExecutionProvider: Múltiplos inputs atualizados - ${inputs.keys.toList()}');
   }
 
   /// Remove um input específico
@@ -105,7 +106,8 @@ class CalculatorExecutionProvider extends ChangeNotifier {
   }
 
   /// Executa cálculo com calculadora específica
-  Future<bool> executeCalculationWithCalculator(CalculatorEntity calculator) async {
+  Future<bool> executeCalculationWithCalculator(
+      CalculatorEntity calculator) async {
     _isCalculating = true;
     _errorMessage = null;
     _activeCalculator = calculator;
@@ -122,12 +124,14 @@ class CalculatorExecutionProvider extends ChangeNotifier {
     result.fold(
       (failure) {
         _errorMessage = failure.message;
-        debugPrint('CalculatorExecutionProvider: Erro no cálculo - ${failure.message}');
+        debugPrint(
+            'CalculatorExecutionProvider: Erro no cálculo - ${failure.message}');
       },
       (calculationResult) {
         _currentResult = calculationResult;
         success = true;
-        debugPrint('CalculatorExecutionProvider: Cálculo executado com sucesso - ${calculator.id}');
+        debugPrint(
+            'CalculatorExecutionProvider: Cálculo executado com sucesso - ${calculator.id}');
       },
     );
 
@@ -150,11 +154,13 @@ class CalculatorExecutionProvider extends ChangeNotifier {
 
     return result.fold(
       (failure) {
-        debugPrint('CalculatorExecutionProvider: Erro no cálculo rápido - ${failure.message}');
+        debugPrint(
+            'CalculatorExecutionProvider: Erro no cálculo rápido - ${failure.message}');
         return null;
       },
       (calculationResult) {
-        debugPrint('CalculatorExecutionProvider: Cálculo rápido executado - ${calculator.id}');
+        debugPrint(
+            'CalculatorExecutionProvider: Cálculo rápido executado - ${calculator.id}');
         return calculationResult;
       },
     );
@@ -188,7 +194,7 @@ class CalculatorExecutionProvider extends ChangeNotifier {
     if (value == null) return false;
     if (value is String && value.trim().isEmpty) return false;
     if (value is num && value.isNaN) return false;
-    
+
     return true;
   }
 

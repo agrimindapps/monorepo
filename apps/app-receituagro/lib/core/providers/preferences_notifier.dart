@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import '../../core/models/user_preferences.dart';
 import '../../database/repositories/i_user_preferences_repository.dart';
+import 'core_providers.dart';
 
 part 'preferences_notifier.g.dart';
 
@@ -58,8 +59,7 @@ class PreferencesNotifier extends _$PreferencesNotifier {
   @override
   Future<PreferencesState> build() async {
     // O repositório será injetado via Riverpod
-    // Por enquanto, vamos inicializar diretamente (será melhorado depois)
-    _preferencesRepository = getIt<IUserPreferencesRepository>();
+    _preferencesRepository = ref.watch(userPreferencesRepositoryProvider);
 
     final userPreferences = await _preferencesRepository.getUserPreferences();
 

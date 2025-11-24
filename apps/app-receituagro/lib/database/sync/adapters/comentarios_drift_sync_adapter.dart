@@ -11,8 +11,10 @@ import '../../tables/receituagro_tables.dart';
 class ComentariosDriftSyncAdapter
     extends DriftSyncAdapterBase<ComentarioSyncEntity, Comentario> {
   ComentariosDriftSyncAdapter(
-      ReceituagroDatabase db, FirebaseFirestore firestore)
-      : super(db, firestore);
+    ReceituagroDatabase db,
+    FirebaseFirestore firestore,
+    ConnectivityService connectivityService,
+  ) : super(db, firestore, connectivityService);
 
   ReceituagroDatabase get localDb => db as ReceituagroDatabase;
 

@@ -4,16 +4,12 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 import '../../features/plants/domain/usecases/get_plants_usecase.dart';
-import '../../features/settings/domain/repositories/i_settings_repository.dart';
 import '../../features/settings/domain/usecases/sync_settings_usecase.dart';
 import '../../features/tasks/domain/usecases/get_tasks_usecase.dart';
-import '../auth/auth_state_notifier.dart';
-import '../di/injection_container.dart' as di;
 import '../sync/background_sync_status.dart';
 
 /// Dedicated service for background synchronization operations
 /// Separates sync concerns from authentication flow
-@singleton
 class BackgroundSyncService extends ChangeNotifier {
   bool _isSyncInProgress = false;
   bool _hasPerformedInitialSync = false;
@@ -25,7 +21,6 @@ class BackgroundSyncService extends ChangeNotifier {
   GetTasksUseCase? _getTasksUseCase;
   SyncUserProfileUseCase? _syncUserProfileUseCase;
   SyncSettingsUseCase? _syncSettingsUseCase;
-  AuthStateNotifier? _authStateNotifier;
 
   final StreamController<String> _syncMessageController =
       StreamController<String>.broadcast();
@@ -33,39 +28,18 @@ class BackgroundSyncService extends ChangeNotifier {
       StreamController<bool>.broadcast();
   final StreamController<BackgroundSyncStatus> _syncStatusController =
       StreamController<BackgroundSyncStatus>.broadcast();
-  void _initializeDependencies() {
-    try {
-      _getPlantsUseCase ??= di.sl<GetPlantsUseCase>();
-      _getTasksUseCase ??= di.sl<GetTasksUseCase>();
-      _authStateNotifier ??= di.sl<AuthStateNotifier>();
-      try {
-        final authRepo = di.sl<IAuthRepository>();
-        _syncUserProfileUseCase ??= SyncUserProfileUseCase(authRepo);
-      } catch (e) {
-        if (kDebugMode) {
-          debugPrint(
-            '⚠️ BackgroundSyncService: SyncUserProfileUseCase não disponível: $e',
-          );
-        }
-      }
+  BackgroundSyncService({
+    GetPlantsUseCase? getPlantsUseCase,
+    GetTasksUseCase? getTasksUseCase,
+    SyncUserProfileUseCase? syncUserProfileUseCase,
+    SyncSettingsUseCase? syncSettingsUseCase,
+  })  : _getPlantsUseCase = getPlantsUseCase,
+        _getTasksUseCase = getTasksUseCase,
+        _syncUserProfileUseCase = syncUserProfileUseCase,
+        _syncSettingsUseCase = syncSettingsUseCase;
 
-      try {
-        final settingsRepo = di.sl<ISettingsRepository>();
-        _syncSettingsUseCase ??= SyncSettingsUseCase(settingsRepo);
-      } catch (e) {
-        if (kDebugMode) {
-          debugPrint(
-            '⚠️ BackgroundSyncService: SyncSettingsUseCase não disponível: $e',
-          );
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint(
-          '⚠️ BackgroundSyncService: Erro ao inicializar dependências: $e',
-        );
-      }
-    }
+  void _initializeDependencies() {
+    // Dependencies are injected via constructor
   }
 
   bool get isSyncInProgress => _isSyncInProgress;

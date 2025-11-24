@@ -3,7 +3,6 @@ import 'package:core/core.dart' hide Column;
 import '../entities/plant.dart';
 import '../repositories/plants_repository.dart';
 
-@injectable
 class UpdatePlantUseCase implements UseCase<Plant, UpdatePlantParams> {
   const UpdatePlantUseCase(this.repository);
 

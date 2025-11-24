@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../../core/di/injection_container.dart';
+import '../../../../../../core/providers/core_providers.dart';
 import '../../../../../../core/extensions/diagnostico_drift_extension.dart';
 import '../../../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../../../core/widgets/praga_image_widget.dart';
@@ -15,7 +15,7 @@ import '../../../../../../database/repositories/pragas_repository.dart';
 /// - Informações detalhadas do diagnóstico
 /// - Ações para navegar para defensivo ou diagnóstico detalhado
 /// - Premium badges para features pagas
-class DiagnosticoDefensivoDialogWidget extends StatefulWidget {
+class DiagnosticoDefensivoDialogWidget extends ConsumerStatefulWidget {
   final dynamic diagnostico;
   final String defensivoName;
   final ReceitaAgroNavigationService navigationService;
@@ -28,16 +28,17 @@ class DiagnosticoDefensivoDialogWidget extends StatefulWidget {
   });
 
   @override
-  State<DiagnosticoDefensivoDialogWidget> createState() =>
+  ConsumerState<DiagnosticoDefensivoDialogWidget> createState() =>
       _DiagnosticoDefensivoDialogWidgetState();
 
   /// Mostra o modal de detalhes
   static Future<void> show(
     BuildContext context,
+    WidgetRef ref,
     dynamic diagnostico,
     String defensivoName,
   ) {
-    final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
+    final navigationService = ref.read(navigationServiceProvider);
     return showDialog<void>(
       context: context,
       builder:
@@ -51,7 +52,7 @@ class DiagnosticoDefensivoDialogWidget extends StatefulWidget {
 }
 
 class _DiagnosticoDefensivoDialogWidgetState
-    extends State<DiagnosticoDefensivoDialogWidget> {
+    extends ConsumerState<DiagnosticoDefensivoDialogWidget> {
   Praga? _pragaData;
 
   @override
@@ -67,7 +68,7 @@ class _DiagnosticoDefensivoDialogWidgetState
       // Need to update data structure to use pragaId instead of nomePraga
       final pragaId = _getProperty('pragaId', null);
       if (pragaId != null) {
-        final pragaRepository = sl<PragasRepository>();
+        final pragaRepository = ref.read(pragasRepositoryProvider);
         final praga = await pragaRepository.findById(int.parse(pragaId.toString()));
         if (mounted) {
           setState(() {

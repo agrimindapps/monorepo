@@ -1,9 +1,9 @@
-import 'package:injectable/injectable.dart';
+
 import '../../core/models/user_preferences.dart';
 import 'app_settings_repository.dart';
 import 'i_user_preferences_repository.dart';
 
-@lazySingleton
+
 class UserPreferencesRepository implements IUserPreferencesRepository {
   final AppSettingsRepository _appSettingsRepository;
 

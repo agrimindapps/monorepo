@@ -1,10 +1,11 @@
 import 'package:core/core.dart' show StateNotifier, StateNotifierProvider;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/interfaces/usecase.dart' as local;
 import '../../domain/entities/subscription_plan.dart';
 import '../../domain/entities/user_subscription.dart';
 import '../../domain/usecases/subscription_usecases.dart';
+import 'subscription_di_providers.dart';
 
 class SubscriptionState {
   final List<SubscriptionPlan> availablePlans;
@@ -292,14 +293,23 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
 
 final subscriptionProvider =
     StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
+      final getAvailablePlans = ref.watch(getAvailablePlansProvider);
+      final getCurrentSubscription = ref.watch(getCurrentSubscriptionProvider);
+      final subscribeToPlan = ref.watch(subscribeToPlanProvider);
+      final cancelSubscription = ref.watch(cancelSubscriptionProvider);
+      final pauseSubscription = ref.watch(pauseSubscriptionProvider);
+      final resumeSubscription = ref.watch(resumeSubscriptionProvider);
+      final upgradePlan = ref.watch(upgradePlanProvider);
+      final restorePurchases = ref.watch(restorePurchasesProvider);
+
       return SubscriptionNotifier(
-        di.getIt<GetAvailablePlans>(),
-        di.getIt<GetCurrentSubscription>(),
-        di.getIt<SubscribeToPlan>(),
-        di.getIt<CancelSubscription>(),
-        di.getIt<PauseSubscription>(),
-        di.getIt<ResumeSubscription>(),
-        di.getIt<UpgradePlan>(),
-        di.getIt<RestorePurchases>(),
+        getAvailablePlans,
+        getCurrentSubscription,
+        subscribeToPlan,
+        cancelSubscription,
+        pauseSubscription,
+        resumeSubscription,
+        upgradePlan,
+        restorePurchases,
       );
     });

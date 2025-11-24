@@ -1,4 +1,4 @@
-import 'package:injectable/injectable.dart';
+
 
 import '../../domain/entities/cultura_entity.dart';
 
@@ -24,7 +24,7 @@ abstract class ICulturasQueryService {
 }
 
 /// Default implementation of query service
-@LazySingleton(as: ICulturasQueryService)
+
 class CulturasQueryService implements ICulturasQueryService {
   @override
   List<String> getGrupos(List<CulturaEntity> culturas) {

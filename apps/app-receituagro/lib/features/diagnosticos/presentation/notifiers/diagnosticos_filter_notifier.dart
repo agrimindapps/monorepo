@@ -1,8 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/failure_message_service.dart';
 import '../../domain/services/filtering/i_diagnosticos_filter_service.dart';
+import '../providers/diagnosticos_providers.dart' as diagnosticosProviders;
 import '../state/diagnosticos_filter_state.dart';
 
 part 'diagnosticos_filter_notifier.g.dart';
@@ -17,8 +17,10 @@ class DiagnosticosFilter extends _$DiagnosticosFilter {
 
   @override
   DiagnosticosFilterState build() {
-    _filterService = di.sl<IDiagnosticosFilterService>();
-    _failureMessageService = di.sl<FailureMessageService>();
+    _filterService =
+        ref.watch(diagnosticosProviders.diagnosticosFilterServiceProvider);
+    _failureMessageService =
+        ref.watch(diagnosticosProviders.failureMessageServiceProvider);
     return DiagnosticosFilterState.initial();
   }
 
@@ -40,8 +42,7 @@ class DiagnosticosFilter extends _$DiagnosticosFilter {
         (failure) {
           state = state.copyWith(
             isLoading: false,
-            errorMessage:
-                _failureMessageService.mapFailureToMessage(failure),
+            errorMessage: _failureMessageService.mapFailureToMessage(failure),
           );
         },
         (diagnosticos) {
@@ -77,8 +78,7 @@ class DiagnosticosFilter extends _$DiagnosticosFilter {
         (failure) {
           state = state.copyWith(
             isLoading: false,
-            errorMessage:
-                _failureMessageService.mapFailureToMessage(failure),
+            errorMessage: _failureMessageService.mapFailureToMessage(failure),
           );
         },
         (diagnosticos) {
@@ -114,8 +114,7 @@ class DiagnosticosFilter extends _$DiagnosticosFilter {
         (failure) {
           state = state.copyWith(
             isLoading: false,
-            errorMessage:
-                _failureMessageService.mapFailureToMessage(failure),
+            errorMessage: _failureMessageService.mapFailureToMessage(failure),
           );
         },
         (diagnosticos) {

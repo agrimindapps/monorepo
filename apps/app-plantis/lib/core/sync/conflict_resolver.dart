@@ -8,7 +8,6 @@ import '../../features/tasks/domain/entities/task.dart';
 import '../widgets/conflict_resolution_dialog.dart';
 import 'conflict_resolution_strategy.dart';
 
-@injectable
 class ConflictResolver {
   /// Resolve conflito baseado na estratégia definida
   ///

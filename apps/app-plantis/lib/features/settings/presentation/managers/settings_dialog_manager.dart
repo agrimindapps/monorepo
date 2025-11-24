@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/providers/core_di_providers.dart';
 import '../../../../core/providers/theme_providers.dart' as theme_providers;
 import '../dialogs/feedback_dialog.dart';
 
@@ -353,8 +353,12 @@ class SettingsDialogManager {
   /// Gerencia rating do app
   Future<void> _handleRateApp() async {
     try {
-      final appRatingService = di.sl<IAppRatingRepository>();
+      if (ref == null) {
+        throw Exception('WidgetRef is null');
+      }
+      final appRatingService = ref!.read(appRatingRepositoryProvider);
       final success = await appRatingService.showRatingDialog(context: context);
+
       if (!context.mounted) return;
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(

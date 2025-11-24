@@ -1,7 +1,8 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/services/receituagro_navigation_service.dart';
+import '../../../../core/providers/core_providers.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/content_section_widget.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
@@ -15,7 +16,7 @@ import '../providers/home_pragas_notifier.dart';
 /// - Navegação para detalhes da praga
 /// - Registro de novos acessos
 /// - Estados vazio e loading
-class HomePragasRecentWidget extends StatelessWidget {
+class HomePragasRecentWidget extends ConsumerWidget {
   final HomePragasState state;
 
   const HomePragasRecentWidget({
@@ -24,7 +25,7 @@ class HomePragasRecentWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ContentSectionWidget(
       title: 'Últimos Acessados',
       actionIcon: Icons.history,
@@ -41,40 +42,48 @@ class HomePragasRecentWidget extends StatelessWidget {
               itemCount: state.recentPragas.length,
               itemBuilder: (context, index) {
                 final praga = state.recentPragas[index];
-                return _buildPragaItem(context, praga);
+                return _buildPragaItem(context, ref, praga);
               },
               separatorBuilder: (context, index) => Divider(
                 height: 1,
                 thickness: 0.5,
-                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                color: Theme.of(context)
+                    .colorScheme
+                    .outline
+                    .withValues(alpha: 0.3),
               ),
             ),
     );
   }
 
-  Widget _buildPragaItem(BuildContext context, PragaEntity praga) {
+  Widget _buildPragaItem(
+      BuildContext context, WidgetRef ref, PragaEntity praga) {
     final emojiAndType = _getEmojiAndType(praga.tipoPraga);
     final emoji = emojiAndType.emoji;
     final type = emojiAndType.type;
-    
+
     return ContentListItemWidget(
       title: praga.nomeComum,
       subtitle: praga.nomeCientifico,
       category: type,
-      leading: _buildPragaItemLeading(context, praga.nomeCientifico, type, emoji),
-      onTap: () => _navigateToPragaDetails(context, praga.nomeComum, praga.nomeCientifico, praga),
+      leading:
+          _buildPragaItemLeading(context, praga.nomeCientifico, type, emoji),
+      onTap: () => _navigateToPragaDetails(
+          context, ref, praga.nomeComum, praga.nomeCientifico, praga),
     );
   }
 
-  Widget _buildPragaItemLeading(BuildContext context, String nomeCientifico, String type, String emoji) {
+  Widget _buildPragaItemLeading(
+      BuildContext context, String nomeCientifico, String type, String emoji) {
     final categoryColor = _getColorForType(type, context);
-    
+
     return PragaImageWidget(
       nomeCientifico: nomeCientifico,
       width: ReceitaAgroDimensions.itemImageSize,
       height: ReceitaAgroDimensions.itemImageSize,
       fit: BoxFit.cover,
-      borderRadius: BorderRadius.circular(ReceitaAgroDimensions.itemImageSize / 2),
+      borderRadius:
+          BorderRadius.circular(ReceitaAgroDimensions.itemImageSize / 2),
       errorWidget: Container(
         width: ReceitaAgroDimensions.itemImageSize,
         height: ReceitaAgroDimensions.itemImageSize,
@@ -119,10 +128,11 @@ class HomePragasRecentWidget extends StatelessWidget {
     }
   }
 
-  void _navigateToPragaDetails(BuildContext context, String pragaName, String scientificName, PragaEntity praga) {
+  void _navigateToPragaDetails(BuildContext context, WidgetRef ref,
+      String pragaName, String scientificName, PragaEntity praga) {
     state.recordPragaAccess(praga);
-    
-    final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
+
+    final navigationService = ref.read(navigationServiceProvider);
     navigationService.navigateToDetalhePraga(
       pragaName: pragaName,
       pragaId: praga.idReg, // Use ID for better precision
@@ -135,6 +145,6 @@ class HomePragasRecentWidget extends StatelessWidget {
 class _EmojiAndType {
   final String emoji;
   final String type;
-  
+
   const _EmojiAndType(this.emoji, this.type);
 }

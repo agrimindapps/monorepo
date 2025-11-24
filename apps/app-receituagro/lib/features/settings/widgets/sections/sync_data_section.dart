@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/providers/receituagro_auth_notifier.dart';
+import '../../../../core/providers/auth_providers.dart';
 import '../../constants/settings_design_tokens.dart';
 
 /// Seção simplificada de sincronização de dados na ProfilePage
@@ -20,9 +20,9 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
   /// Executa sincronização manual
   Future<void> _performManualSync() async {
     if (_isSyncing) return;
-    final authState = ref.read(receitaAgroAuthNotifierProvider).value;
+    final authState = ref.read(authNotifierProvider);
 
-    if (authState == null || !authState.isAuthenticated) {
+    if (!authState.isAuthenticated) {
       _showMessage('Faça login para sincronizar seus dados', isError: true);
       return;
     }
@@ -32,7 +32,8 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
     });
 
     try {
-      final success = await ref.read(receitaAgroAuthNotifierProvider.notifier).forceSyncUserData();
+      final success =
+          await ref.read(authNotifierProvider.notifier).forceSyncUserData();
 
       if (mounted) {
         setState(() {
@@ -43,7 +44,8 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
         if (success) {
           _showMessage('Sincronização concluída com sucesso!');
         } else {
-          _showMessage('Falha na sincronização. Tente novamente.', isError: true);
+          _showMessage('Falha na sincronização. Tente novamente.',
+              isError: true);
         }
       }
     } catch (e) {
@@ -59,7 +61,7 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
   /// Mostra mensagem para o usuário
   void _showMessage(String message, {bool isError = false}) {
     if (!mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -72,19 +74,13 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final authAsync = ref.watch(receitaAgroAuthNotifierProvider);
+    final authState = ref.watch(authNotifierProvider);
 
-    return authAsync.when(
-      data: (authState) {
-        if (!authState.isAuthenticated || authState.isAnonymous) {
-          return const SizedBox.shrink();
-        }
+    if (!authState.isAuthenticated || authState.isAnonymous) {
+      return const SizedBox.shrink();
+    }
 
-        return _buildSyncCard(context, theme);
-      },
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
-    );
+    return _buildSyncCard(context, theme);
   }
 
   Widget _buildSyncCard(BuildContext context, ThemeData theme) {
@@ -102,7 +98,8 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: SettingsDesignTokens.primaryColor.withValues(alpha: 0.1),
+                  color:
+                      SettingsDesignTokens.primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
@@ -111,7 +108,6 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
                   size: 24,
                 ),
               ),
-              
               const SizedBox(width: 16),
               Expanded(
                 child: Column(

@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/subscription_plan.dart';
@@ -9,7 +8,6 @@ import '../datasources/subscription_local_datasource.dart';
 import '../datasources/subscription_remote_datasource.dart';
 import '../services/subscription_error_handling_service.dart';
 
-@LazySingleton(as: SubscriptionRepository)
 class SubscriptionRepositoryImpl implements SubscriptionRepository {
   final SubscriptionLocalDataSource localDataSource;
   final SubscriptionRemoteDataSource remoteDataSource;

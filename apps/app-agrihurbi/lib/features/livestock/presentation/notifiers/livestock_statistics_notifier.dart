@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart';
+// import '../../../../core/di/injection_container.dart';
 import '../../domain/repositories/livestock_repository.dart';
 import 'livestock_statistics_state.dart';
 
@@ -16,7 +16,8 @@ class LivestockStatisticsNotifier extends _$LivestockStatisticsNotifier {
 
   @override
   LivestockStatisticsState build() {
-    _repository = getIt<LivestockRepository>();
+    // TODO: Replace getIt calls with Riverpod providers
+    // _repository = getIt<LivestockRepository>();
     return const LivestockStatisticsState();
   }
 

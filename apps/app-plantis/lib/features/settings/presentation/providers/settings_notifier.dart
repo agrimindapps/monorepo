@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/services/plantis_notification_service.dart';
-import '../../../../core/services/services_providers.dart';
+import '../../../../core/providers/core_di_providers.dart';
 import '../../data/datasources/settings_local_datasource.dart';
 import '../../data/repositories/settings_repository.dart';
 import '../../domain/entities/settings_entity.dart';
@@ -117,7 +117,7 @@ class SettingsState {
 
 @riverpod
 Future<SettingsLocalDataSource> settingsLocalDataSource(SettingsLocalDataSourceRef ref) async {
-  final prefs = await ref.watch(sharedPreferencesProvider.future);
+  final prefs = ref.watch(sharedPreferencesProvider);
   return SettingsLocalDataSource(prefs: prefs);
 }
 

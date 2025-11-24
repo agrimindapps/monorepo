@@ -150,6 +150,7 @@ class FirebaseStorageService {
       final ref = _storage.refFromURL(downloadUrl);
       await ref.delete();
     } catch (e) {
+      // Silently ignore errors when deleting (may be already deleted)
     }
   }
 
@@ -251,9 +252,11 @@ class FirebaseStorageService {
             }
           }
         } catch (e) {
+          // Ignore individual file deletion errors
         }
       }
     } catch (e) {
+      // Ignore batch cleanup errors
     }
   }
 
@@ -283,6 +286,7 @@ class FirebaseStorageService {
       final metadata = SettableMetadata(customMetadata: customMetadata);
       await ref.updateMetadata(metadata);
     } catch (e) {
+      // Silently ignore metadata update errors
     }
   }
 

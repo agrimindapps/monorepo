@@ -1,9 +1,13 @@
+// This module has been migrated to Riverpod dependency injection
+// All dependencies are now managed through providers in lib/core/providers/
+// TODO: Remove this file as it's no longer used
+
+/*
 import 'package:core/core.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Module for registering external dependencies from core package
-@module
 abstract class RegisterModule {
   @lazySingleton
   Dio get dio => Dio();
@@ -51,3 +55,4 @@ abstract class RegisterModule {
 
   // Drift Database é registrado no DriftModule
 }
+*/

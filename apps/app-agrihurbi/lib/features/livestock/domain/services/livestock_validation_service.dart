@@ -1,16 +1,12 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/animal_base_entity.dart';
 import '../entities/bovine_entity.dart';
 import '../entities/equine_entity.dart';
 
 /// Service especializado para validação de dados de livestock
-/// 
+///
 /// Responsabilidade única: Validar entidades e dados de animais
 /// Seguindo Single Responsibility Principle
-@singleton
 class LivestockValidationService {
-
   /// Valida uma entidade bovine completa
   ValidationResult validateBovine(BovineEntity bovine) {
     final errors = <String>[];
@@ -132,7 +128,7 @@ class LivestockValidationService {
     final results = bovines.map((bovine) => validateBovine(bovine)).toList();
     final validCount = results.where((r) => r.isValid).length;
     final invalidCount = results.where((r) => !r.isValid).length;
-    
+
     return BatchValidationResult(
       totalItems: bovines.length,
       validItems: validCount,
@@ -146,7 +142,7 @@ class LivestockValidationService {
     final results = equines.map((equine) => validateEquine(equine)).toList();
     final validCount = results.where((r) => r.isValid).length;
     final invalidCount = results.where((r) => !r.isValid).length;
-    
+
     return BatchValidationResult(
       totalItems: equines.length,
       validItems: validCount,
@@ -164,11 +160,22 @@ class LivestockValidationService {
   /// Valida país de origem
   bool isValidOriginCountry(String country) {
     final validCountries = {
-      'Brasil', 'Argentina', 'Uruguai', 'Estados Unidos', 'Canadá',
-      'França', 'Inglaterra', 'Holanda', 'Alemanha', 'Suíça',
-      'Austrália', 'Nova Zelândia', 'México', 'Colômbia'
+      'Brasil',
+      'Argentina',
+      'Uruguai',
+      'Estados Unidos',
+      'Canadá',
+      'França',
+      'Inglaterra',
+      'Holanda',
+      'Alemanha',
+      'Suíça',
+      'Austrália',
+      'Nova Zelândia',
+      'México',
+      'Colômbia'
     };
-    
+
     return validCountries.contains(country.trim());
   }
 
@@ -176,9 +183,9 @@ class LivestockValidationService {
   bool isValidImageUrl(String url) {
     try {
       final uri = Uri.parse(url);
-      return uri.isAbsolute && 
-             (uri.scheme == 'http' || uri.scheme == 'https') &&
-             (url.toLowerCase().endsWith('.jpg') ||
+      return uri.isAbsolute &&
+          (uri.scheme == 'http' || uri.scheme == 'https') &&
+          (url.toLowerCase().endsWith('.jpg') ||
               url.toLowerCase().endsWith('.jpeg') ||
               url.toLowerCase().endsWith('.png') ||
               url.toLowerCase().endsWith('.webp'));
@@ -190,18 +197,19 @@ class LivestockValidationService {
   /// Valida lista de URLs de imagem
   List<String> validateImageUrls(List<String> imageUrls) {
     final errors = <String>[];
-    
+
     for (int i = 0; i < imageUrls.length; i++) {
       if (!isValidImageUrl(imageUrls[i])) {
         errors.add('URL da imagem ${i + 1} é inválida: ${imageUrls[i]}');
       }
     }
-    
+
     return errors;
   }
 
   /// Valida regras de negócio para criação de animal
-  BusinessValidationResult validateAnimalCreationRules(AnimalBaseEntity animal) {
+  BusinessValidationResult validateAnimalCreationRules(
+      AnimalBaseEntity animal) {
     final issues = <String>[];
     if (animal.imageUrls.isEmpty) {
       issues.add('Animal deve ter pelo menos uma imagem');
@@ -246,14 +254,13 @@ class BatchValidationResult {
     required this.results,
   });
 
-  double get validPercentage => 
-    totalItems > 0 ? (validItems / totalItems * 100) : 100.0;
-    
-  List<ValidationResult> get invalidResults => 
-    results.where((r) => !r.isValid).toList();
-    
-  List<String> get allErrors => 
-    results.expand((r) => r.errors).toList();
+  double get validPercentage =>
+      totalItems > 0 ? (validItems / totalItems * 100) : 100.0;
+
+  List<ValidationResult> get invalidResults =>
+      results.where((r) => !r.isValid).toList();
+
+  List<String> get allErrors => results.expand((r) => r.errors).toList();
 }
 
 class BusinessValidationResult {

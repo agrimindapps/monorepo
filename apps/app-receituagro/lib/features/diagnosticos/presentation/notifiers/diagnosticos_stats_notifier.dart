@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/failure_message_service.dart';
 import '../../domain/services/metadata/i_diagnosticos_metadata_service.dart';
 import '../../domain/services/stats/i_diagnosticos_stats_service.dart';
-import '../providers/diagnosticos_providers.dart';
+import '../providers/diagnosticos_providers.dart' as diagnosticosProviders;
 import '../state/diagnosticos_stats_state.dart';
 
 /// Notifier para gerenciamento de estatísticas de diagnósticos
@@ -34,8 +34,7 @@ class DiagnosticosStatsNotifier extends StateNotifier<DiagnosticosStatsState> {
         (failure) {
           state = state.copyWith(
             isLoading: false,
-            errorMessage:
-                _failureMessageService.mapFailureToMessage(failure),
+            errorMessage: _failureMessageService.mapFailureToMessage(failure),
           );
         },
         (stats) {
@@ -64,8 +63,7 @@ class DiagnosticosStatsNotifier extends StateNotifier<DiagnosticosStatsState> {
         (failure) {
           state = state.copyWith(
             isLoading: false,
-            errorMessage:
-                _failureMessageService.mapFailureToMessage(failure),
+            errorMessage: _failureMessageService.mapFailureToMessage(failure),
           );
         },
         (filtersData) {
@@ -97,8 +95,11 @@ class DiagnosticosStatsNotifier extends StateNotifier<DiagnosticosStatsState> {
 final diagnosticosStatsNotifierProvider =
     StateNotifierProvider<DiagnosticosStatsNotifier, DiagnosticosStatsState>(
   (ref) => DiagnosticosStatsNotifier(
-    statsService: ref.watch(iDiagnosticosStatsServiceProvider),
-    metadataService: ref.watch(iDiagnosticosMetadataServiceProvider),
-    failureMessageService: ref.watch(failureMessageServiceProvider),
+    statsService:
+        ref.watch(diagnosticosProviders.diagnosticosStatsServiceProvider),
+    metadataService:
+        ref.watch(diagnosticosProviders.diagnosticosMetadataServiceProvider),
+    failureMessageService:
+        ref.watch(diagnosticosProviders.failureMessageServiceProvider),
   ),
 );

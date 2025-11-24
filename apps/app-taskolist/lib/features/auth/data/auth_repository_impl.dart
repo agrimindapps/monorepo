@@ -8,7 +8,6 @@ import 'auth_local_datasource.dart';
 import 'auth_remote_datasource.dart';
 import 'user_model.dart';
 
-@LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
   const AuthRepositoryImpl(
     this._remoteDataSource,

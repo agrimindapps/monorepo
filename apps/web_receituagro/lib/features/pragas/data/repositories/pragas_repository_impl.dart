@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/praga.dart';
@@ -7,7 +6,6 @@ import '../../domain/repositories/pragas_repository.dart';
 import '../datasources/pragas_supabase_datasource.dart';
 
 /// Implementation of pragas repository
-@LazySingleton(as: PragasRepository)
 class PragasRepositoryImpl implements PragasRepository {
   final PragasRemoteDataSource remoteDataSource;
 

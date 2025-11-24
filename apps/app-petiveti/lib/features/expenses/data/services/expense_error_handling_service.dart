@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/expense.dart';
@@ -7,7 +6,6 @@ import '../../domain/entities/expense_summary.dart';
 
 /// Service responsible for error handling in expense operations
 /// Follows Single Responsibility Principle - only handles error transformation
-@lazySingleton
 class ExpenseErrorHandlingService {
   const ExpenseErrorHandlingService();
 

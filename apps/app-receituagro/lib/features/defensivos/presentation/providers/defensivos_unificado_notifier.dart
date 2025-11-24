@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
+import 'defensivos_providers.dart';
 import '../../domain/entities/defensivo_entity.dart';
 import '../../domain/usecases/get_defensivos_agrupados_usecase.dart';
 import '../../domain/usecases/get_defensivos_com_filtros_usecase.dart';
@@ -108,21 +108,14 @@ class DefensivosUnificadoState {
 /// para evitar recarregamento desnecessário dos 3148+ defensivos
 @Riverpod(keepAlive: true)
 class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
-  late final GetDefensivosAgrupadosUseCase _getDefensivosAgrupadosUseCase;
-  late final GetDefensivosCompletosUseCase _getDefensivosCompletosUseCase;
-  late final GetDefensivosComFiltrosUseCase _getDefensivosComFiltrosUseCase;
-
   @override
   Future<DefensivosUnificadoState> build() async {
     debugPrint('🏗️ [NOTIFIER] Inicializando DefensivosUnificadoNotifier');
-    _getDefensivosAgrupadosUseCase = di.sl<GetDefensivosAgrupadosUseCase>();
-    _getDefensivosCompletosUseCase = di.sl<GetDefensivosCompletosUseCase>();
-    _getDefensivosComFiltrosUseCase = di.sl<GetDefensivosComFiltrosUseCase>();
-    debugPrint('✅ [NOTIFIER] Use cases inicializados');
 
     // Carregar defensivos completos automaticamente na inicialização
     debugPrint('🔄 [NOTIFIER BUILD] Carregando defensivos completos...');
-    final result = await _getDefensivosCompletosUseCase();
+    final useCase = ref.watch(getDefensivosCompletosUseCaseProvider);
+    final result = await useCase();
 
     return result.fold(
       (failure) {
@@ -169,12 +162,10 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
     debugPrint(
       '🔄 [NOTIFIER AGRUPADOS] Iniciando carregamento de defensivos agrupados - tipo: $tipoAgrupamento, filtro: $filtroTexto',
     );
-    debugPrint(
-      '🔄 [NOTIFIER AGRUPADOS] Use case disponível: $_getDefensivosAgrupadosUseCase',
-    );
 
     try {
-      final result = await _getDefensivosAgrupadosUseCase(
+      final useCase = ref.read(getDefensivosAgrupadosUseCaseProvider);
+      final result = await useCase(
         tipoAgrupamento: tipoAgrupamento,
         filtroTexto: filtroTexto,
       );
@@ -245,7 +236,8 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
     debugPrint(
       '🔄 [NOTIFIER] Carregando defensivos completos pela primeira vez...',
     );
-    final result = await _getDefensivosCompletosUseCase();
+    final useCase = ref.read(getDefensivosCompletosUseCaseProvider);
+    final result = await useCase();
 
     result.fold(
       (failure) {
@@ -292,7 +284,8 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
       currentState.copyWith(isLoading: true).clearError(),
     );
 
-    final result = await _getDefensivosComFiltrosUseCase(
+    final useCase = ref.read(getDefensivosComFiltrosUseCaseProvider);
+    final result = await useCase(
       ordenacao: currentState.ordenacao,
       filtroToxicidade: currentState.filtroToxicidade,
       filtroTipo: currentState.filtroTipo,

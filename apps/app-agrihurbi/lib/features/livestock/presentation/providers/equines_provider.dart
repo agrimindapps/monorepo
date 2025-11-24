@@ -1,17 +1,20 @@
-import 'package:core/core.dart' hide getIt;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
+import 'package:core/core.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../domain/entities/equine_entity.dart';
-import '../../domain/repositories/livestock_repository.dart';
 import '../../domain/usecases/get_equines.dart';
+import 'livestock_di_providers.dart';
 
-/// Provider Riverpod para EquinesProvider
-///
-/// Integra GetIt com Riverpod para gerenciamento de estado
-final equinesProviderProvider = Provider<EquinesProvider>((ref) {
-  return getIt<EquinesProvider>();
+/// Riverpod provider for EquinesProvider
+final equinesProviderProvider = ChangeNotifierProvider<EquinesProvider>((ref) {
+  return EquinesProvider(
+    getAllEquines: ref.watch(getAllEquinesUseCaseProvider),
+    getEquines: ref.watch(getEquinesUseCaseProvider),
+    getEquineById: ref.watch(getEquineByIdUseCaseProvider),
+  );
 });
+
 
 /// Provider especializado para operações de equinos
 ///
@@ -117,12 +120,12 @@ class EquinesProvider extends ChangeNotifier {
   }
 
   /// Carrega equinos com filtros
-  Future<void> loadEquinesWithFilters(EquineSearchParams? searchParams) async {
+  Future<void> loadEquinesWithFilters(dynamic searchParams) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
-    final params = GetEquinesParams(searchParams: searchParams);
+    final params = GetEquinesParams(searchParams: null);
     final result = await _getEquines(params);
 
     result.fold(
@@ -275,11 +278,4 @@ class EquinesProvider extends ChangeNotifier {
   }
 }
 
-/// Riverpod provider for EquinesProvider
-final equinesProvider = ChangeNotifierProvider<EquinesProvider>((ref) {
-  return EquinesProvider(
-    getAllEquines: getIt<GetAllEquinesUseCase>(),
-    getEquines: getIt<GetEquinesUseCase>(),
-    getEquineById: getIt<GetEquineByIdUseCase>(),
-  );
-});
+

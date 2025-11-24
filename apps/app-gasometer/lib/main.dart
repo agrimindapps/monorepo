@@ -1,13 +1,11 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'app.dart';
 import 'core/gasometer_sync_config.dart';
 import 'core/providers/dependency_providers.dart';
-import 'core/services/connectivity/connectivity_state_manager.dart';
 import 'core/services/connectivity/connectivity_sync_integration.dart';
 import 'features/sync/domain/services/auto_sync_service.dart';
 import 'firebase_options.dart';
@@ -15,9 +13,20 @@ import 'firebase_options.dart';
 late ICrashlyticsRepository _crashlyticsRepository;
 late ConnectivitySyncIntegration _connectivityIntegration;
 late AutoSyncService _autoSyncService;
+late SharedPreferences _sharedPreferences;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize SharedPreferences
+  try {
+    _sharedPreferences = await SharedPreferences.getInstance();
+    if (kDebugMode) {
+      SecureLogger.info('SharedPreferences initialized successfully');
+    }
+  } catch (e) {
+    SecureLogger.warning('SharedPreferences initialization failed: $e');
+  }
 
   // Initialize Firebase with error handling
   bool firebaseInitialized = false;
@@ -38,9 +47,14 @@ Future<void> main() async {
 
   try {
     await initializeDateFormatting('pt_BR', null);
-    
+
     // Create ProviderContainer for manual dependency resolution
-    final container = ProviderContainer();
+    // Override SharedPreferences provider with initialized instance
+    final container = ProviderContainer(
+      overrides: [
+        gasometerSharedPreferencesProvider.overrideWithValue(_sharedPreferences),
+      ],
+    );
 
     if (firebaseInitialized) {
       _crashlyticsRepository = container.read(crashlyticsRepositoryProvider);
@@ -70,17 +84,16 @@ Future<void> main() async {
     // UNIFIED ENVIRONMENT: Single configuration for all environments
     // Web platform uses Firestore directly without local sync
     if (firebaseInitialized) {
+      // Initialize Sync Service via Provider
+      final syncService = container.read(gasometerSyncServiceProvider);
+      
       print('🔥 [MAIN] ANTES de inicializar GasometerSyncConfig');
       SecureLogger.info(
         'Initializing GasometerSyncConfig (unified environment)',
       );
-      await GasometerSyncConfig.initialize();
+      await GasometerSyncConfig.initialize(syncService);
       print('🔥 [MAIN] DEPOIS de inicializar GasometerSyncConfig');
       SecureLogger.info('GasometerSyncConfig initialized successfully');
-      
-      // Initialize Sync Service via Provider
-      final syncService = container.read(gasometerSyncServiceProvider);
-      await syncService.initialize();
       
       // Setup connectivity monitoring for sync
       final connectivityService = container.read(connectivityServiceProvider);

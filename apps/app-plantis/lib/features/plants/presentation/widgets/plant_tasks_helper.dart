@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../../core/providers/tasks_providers.dart';
+import '../../../tasks/presentation/notifiers/tasks_notifier.dart';
 import '../../../tasks/domain/entities/task.dart' as task_entity;
 
 /// Helper unificado para calcular e exibir informações de tarefas pendentes

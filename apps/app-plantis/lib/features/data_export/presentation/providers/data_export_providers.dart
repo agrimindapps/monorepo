@@ -1,7 +1,8 @@
 import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/services/services_providers.dart';
+import '../../../../core/providers/core_di_providers.dart';
+import '../../../../core/providers/repository_providers.dart';
 import '../../../../features/plants/presentation/providers/plants_providers.dart';
 import '../../../../features/plants/presentation/providers/spaces_provider.dart';
 import '../../../../features/tasks/presentation/providers/tasks_providers.dart';
@@ -18,10 +19,7 @@ import '../../domain/usecases/request_export_usecase.dart';
 
 part 'data_export_providers.g.dart';
 
-@riverpod
-IFileRepository fileRepository(FileRepositoryRef ref) {
-  return FileManagerService();
-}
+
 
 @riverpod
 PlantsExportDataSource plantsExportDataSource(PlantsExportDataSourceRef ref) {
@@ -54,7 +52,7 @@ DataExportRepository dataExportRepository(DataExportRepositoryRef ref) {
   final plantsDataSource = ref.watch(plantsExportDataSourceProvider);
   final settingsDataSource = ref.watch(settingsExportDataSourceProvider);
   final fileGenerator = ref.watch(exportFileGeneratorProvider);
-  final prefs = ref.watch(sharedPreferencesProvider).requireValue;
+  final prefs = ref.watch(sharedPreferencesProvider);
 
   return DataExportRepositoryImpl(
     plantsDataSource: plantsDataSource,

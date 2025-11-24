@@ -1,6 +1,8 @@
 import 'package:core/core.dart' hide AuthState, Column;
 
-import '../di/injection_container.dart' as di;
+import 'core_providers.dart';
+import 'package:app_receituagro/features/sync/services/sync_coordinator.dart';
+import '../../features/analytics/analytics_providers.dart';
 import 'auth_notifier.dart';
 import 'auth_state.dart' as local;
 
@@ -38,7 +40,7 @@ import 'auth_state.dart' as local;
 /// exposes the state without needing to access the protected .state property.
 final authNotifierProvider =
     StateNotifierProvider<AuthNotifier, local.AuthState>((ref) {
-  return di.sl<AuthNotifier>();
+  return AuthNotifier(ref);
 });
 
 // ============================================================================

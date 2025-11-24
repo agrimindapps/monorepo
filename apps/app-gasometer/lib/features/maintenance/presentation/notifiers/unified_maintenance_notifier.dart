@@ -13,32 +13,32 @@ part 'unified_maintenance_notifier.g.dart';
 
 @riverpod
 GetAllMaintenanceRecords getAllMaintenanceRecords(Ref ref) {
-  return getIt<GetAllMaintenanceRecords>();
+  throw UnimplementedError('GetAllMaintenanceRecords provider not implemented');
 }
 
 @riverpod
 GetMaintenanceRecordsByVehicle getMaintenanceRecordsByVehicle(Ref ref) {
-  return getIt<GetMaintenanceRecordsByVehicle>();
+  throw UnimplementedError('GetMaintenanceRecordsByVehicle provider not implemented');
 }
 
 @riverpod
 AddMaintenanceRecord addMaintenanceRecord(Ref ref) {
-  return getIt<AddMaintenanceRecord>();
+  throw UnimplementedError('AddMaintenanceRecord provider not implemented');
 }
 
 @riverpod
 UpdateMaintenanceRecord updateMaintenanceRecord(Ref ref) {
-  return getIt<UpdateMaintenanceRecord>();
+  throw UnimplementedError('UpdateMaintenanceRecord provider not implemented');
 }
 
 @riverpod
 DeleteMaintenanceRecord deleteMaintenanceRecord(Ref ref) {
-  return getIt<DeleteMaintenanceRecord>();
+  throw UnimplementedError('DeleteMaintenanceRecord provider not implemented');
 }
 
 @riverpod
 MaintenanceFilterService maintenanceFilterService(Ref ref) {
-  return getIt<MaintenanceFilterService>();
+  return MaintenanceFilterService();
 }
 
 /// State for unified maintenance management
@@ -491,7 +491,7 @@ List<MaintenanceEntity> completedMaintenances(Ref ref) {
 
   return stateAsync.when(
     data: (state) {
-      final filterService = getIt<MaintenanceFilterService>();
+      final filterService = ref.watch(maintenanceFilterServiceProvider);
       return filterService.getRecordsByStatus(
         state.filteredMaintenances,
         MaintenanceStatus.completed,
@@ -509,7 +509,7 @@ List<MaintenanceEntity> pendingMaintenances(Ref ref) {
 
   return stateAsync.when(
     data: (state) {
-      final filterService = getIt<MaintenanceFilterService>();
+      final filterService = ref.watch(maintenanceFilterServiceProvider);
       return filterService.getRecordsByStatus(
         state.filteredMaintenances,
         MaintenanceStatus.pending,
@@ -527,7 +527,7 @@ List<MaintenanceEntity> overdueMaintenances(Ref ref) {
 
   return stateAsync.when(
     data: (state) {
-      final filterService = getIt<MaintenanceFilterService>();
+      final filterService = ref.watch(maintenanceFilterServiceProvider);
       return filterService.getOverdueRecords(state.filteredMaintenances);
     },
     loading: () => [],
@@ -542,7 +542,7 @@ List<MaintenanceEntity> upcomingMaintenances(Ref ref) {
 
   return stateAsync.when(
     data: (state) {
-      final filterService = getIt<MaintenanceFilterService>();
+      final filterService = ref.watch(maintenanceFilterServiceProvider);
       return filterService.getUpcomingRecords(state.filteredMaintenances);
     },
     loading: () => [],
@@ -557,7 +557,7 @@ List<MaintenanceEntity> highCostMaintenances(Ref ref) {
 
   return stateAsync.when(
     data: (state) {
-      final filterService = getIt<MaintenanceFilterService>();
+      final filterService = ref.watch(maintenanceFilterServiceProvider);
       return filterService.getHighCostRecords(state.filteredMaintenances);
     },
     loading: () => [],
@@ -575,7 +575,7 @@ List<MaintenanceEntity> maintenancesByType(
 
   return stateAsync.when(
     data: (state) {
-      final filterService = getIt<MaintenanceFilterService>();
+      final filterService = ref.watch(maintenanceFilterServiceProvider);
       return filterService.getRecordsByType(state.filteredMaintenances, type);
     },
     loading: () => [],
@@ -593,7 +593,7 @@ List<MaintenanceEntity> maintenancesByUrgency(
 
   return stateAsync.when(
     data: (state) {
-      final filterService = getIt<MaintenanceFilterService>();
+      final filterService = ref.watch(maintenanceFilterServiceProvider);
       return filterService.getRecordsByUrgency(
         state.filteredMaintenances,
         urgencyLevel,
@@ -614,7 +614,7 @@ List<MaintenanceEntity> recentMaintenances(
 
   return stateAsync.when(
     data: (state) {
-      final filterService = getIt<MaintenanceFilterService>();
+      final filterService = ref.watch(maintenanceFilterServiceProvider);
       return filterService.getRecentRecords(
         state.filteredMaintenances,
         days: days,
@@ -654,7 +654,7 @@ Map<String, dynamic> statisticsForPeriod(
 
   return stateAsync.when(
     data: (state) {
-      final filterService = getIt<MaintenanceFilterService>();
+      final filterService = ref.watch(maintenanceFilterServiceProvider);
       final periodRecords = filterService.getRecordsByDateRange(
         state.allMaintenances,
         start,

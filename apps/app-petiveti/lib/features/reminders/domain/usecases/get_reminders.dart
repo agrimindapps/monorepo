@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -11,7 +10,6 @@ import '../repositories/reminder_repository.dart';
 /// **SOLID Principles Applied:**
 /// - **Single Responsibility**: Only handles reminder retrieval flow
 /// - **Dependency Inversion**: Depends on repository abstraction
-@lazySingleton
 class GetReminders implements UseCase<List<Reminder>, String> {
   final ReminderRepository _repository;
 
@@ -28,7 +26,6 @@ class GetReminders implements UseCase<List<Reminder>, String> {
 /// **SOLID Principles Applied:**
 /// - **Single Responsibility**: Only handles animal-specific reminder retrieval
 /// - **Dependency Inversion**: Depends on repository abstraction
-@lazySingleton
 class GetRemindersByAnimal implements UseCase<List<Reminder>, String> {
   final ReminderRepository _repository;
 
@@ -45,7 +42,6 @@ class GetRemindersByAnimal implements UseCase<List<Reminder>, String> {
 /// **SOLID Principles Applied:**
 /// - **Single Responsibility**: Only handles today's reminder retrieval
 /// - **Dependency Inversion**: Depends on repository abstraction
-@lazySingleton
 class GetTodayReminders implements UseCase<List<Reminder>, String> {
   final ReminderRepository _repository;
 
@@ -62,7 +58,6 @@ class GetTodayReminders implements UseCase<List<Reminder>, String> {
 /// **SOLID Principles Applied:**
 /// - **Single Responsibility**: Only handles overdue reminder retrieval
 /// - **Dependency Inversion**: Depends on repository abstraction
-@lazySingleton
 class GetOverdueReminders implements UseCase<List<Reminder>, String> {
   final ReminderRepository _repository;
 
@@ -89,7 +84,6 @@ class GetUpcomingRemindersParams {
 /// **SOLID Principles Applied:**
 /// - **Single Responsibility**: Only handles upcoming reminder retrieval
 /// - **Dependency Inversion**: Depends on repository abstraction
-@lazySingleton
 class GetUpcomingReminders
     implements UseCase<List<Reminder>, GetUpcomingRemindersParams> {
   final ReminderRepository _repository;

@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -11,7 +10,6 @@ import '../repositories/promo_repository.dart';
 /// **SOLID Principles Applied:**
 /// - **Single Responsibility**: Only handles promo content retrieval flow
 /// - **Dependency Inversion**: Depends on repository abstraction
-@lazySingleton
 class GetPromoContent implements UseCase<PromoContent, NoParams> {
   final PromoRepository _repository;
 

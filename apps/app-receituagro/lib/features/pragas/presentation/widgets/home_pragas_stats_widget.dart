@@ -1,7 +1,8 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/services/receituagro_navigation_service.dart';
+import '../../../../core/providers/core_providers.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../providers/home_pragas_notifier.dart';
 
@@ -12,13 +13,13 @@ import '../providers/home_pragas_notifier.dart';
 /// - Layout responsivo (vertical em dispositivos pequenos)
 /// - Navegação para páginas específicas de cada categoria
 /// - Estados de loading com shimmer
-class HomePragasStatsWidget extends StatelessWidget {
+class HomePragasStatsWidget extends ConsumerWidget {
   final HomePragasState state;
 
   const HomePragasStatsWidget({super.key, required this.state});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 0),
       child: Card(
@@ -32,27 +33,25 @@ class HomePragasStatsWidget extends StatelessWidget {
             horizontal: 0,
             vertical: ReceitaAgroSpacing.sm,
           ),
-          child:
-              state.errorMessage != null
-                  ? _buildErrorState(context)
-                  : LayoutBuilder(
-                    builder: (context, constraints) {
-                      final availableWidth = constraints.maxWidth;
-                      final screenWidth = MediaQuery.of(context).size.width;
-                      final isSmallDevice =
-                          screenWidth < ReceitaAgroBreakpoints.smallDevice;
-                      final useVerticalLayout =
-                          isSmallDevice ||
-                          availableWidth <
-                              ReceitaAgroBreakpoints.verticalLayoutThreshold;
+          child: state.errorMessage != null
+              ? _buildErrorState(context)
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    final availableWidth = constraints.maxWidth;
+                    final screenWidth = MediaQuery.of(context).size.width;
+                    final isSmallDevice =
+                        screenWidth < ReceitaAgroBreakpoints.smallDevice;
+                    final useVerticalLayout = isSmallDevice ||
+                        availableWidth <
+                            ReceitaAgroBreakpoints.verticalLayoutThreshold;
 
-                      if (useVerticalLayout) {
-                        return _buildVerticalLayout(context, availableWidth);
-                      } else {
-                        return _buildGridLayout(context, availableWidth);
-                      }
-                    },
-                  ),
+                    if (useVerticalLayout) {
+                      return _buildVerticalLayout(context, ref, availableWidth);
+                    } else {
+                      return _buildGridLayout(context, ref, availableWidth);
+                    }
+                  },
+                ),
         ),
       ),
     );
@@ -94,9 +93,9 @@ class HomePragasStatsWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildVerticalLayout(BuildContext context, double availableWidth) {
-    final buttonWidth =
-        (availableWidth - 16) /
+  Widget _buildVerticalLayout(
+      BuildContext context, WidgetRef ref, double availableWidth) {
+    final buttonWidth = (availableWidth - 16) /
         3; // Três botões por linha com espaçamento reduzido
     final cultureButtonWidth =
         availableWidth - 8; // Botão cultura ocupa linha inteira
@@ -109,28 +108,34 @@ class HomePragasStatsWidget extends StatelessWidget {
           children: [
             _buildCategoryButton(
               context: context,
-              count: state.isLoading ? '...' : '${state.stats?['insetos'] ?? 0}',
+              count:
+                  state.isLoading ? '...' : '${state.stats?['insetos'] ?? 0}',
               title: 'Insetos',
               width: buttonWidth,
-              onTap: () => _navigateToCategory(context, 'insetos'),
+              onTap: () =>
+                  _navigateToCategory(context, ref, 'insetos'), // Added ref
               icon: Icons.bug_report,
             ),
             const SizedBox(width: 4),
             _buildCategoryButton(
               context: context,
-              count: state.isLoading ? '...' : '${state.stats?['doencas'] ?? 0}',
+              count:
+                  state.isLoading ? '...' : '${state.stats?['doencas'] ?? 0}',
               title: 'Doenças',
               width: buttonWidth,
-              onTap: () => _navigateToCategory(context, 'doencas'),
+              onTap: () =>
+                  _navigateToCategory(context, ref, 'doencas'), // Added ref
               icon: Icons.coronavirus,
             ),
             const SizedBox(width: 4),
             _buildCategoryButton(
               context: context,
-              count: state.isLoading ? '...' : '${state.stats?['plantas'] ?? 0}',
+              count:
+                  state.isLoading ? '...' : '${state.stats?['plantas'] ?? 0}',
               title: 'Plantas',
               width: buttonWidth,
-              onTap: () => _navigateToCategory(context, 'plantas'),
+              onTap: () =>
+                  _navigateToCategory(context, ref, 'plantas'), // Added ref
               icon: Icons.eco,
             ),
           ],
@@ -141,16 +146,17 @@ class HomePragasStatsWidget extends StatelessWidget {
           count: '${state.totalCulturas}',
           title: 'Culturas',
           width: cultureButtonWidth,
-          onTap: () => _navigateToCategory(context, 'culturas'),
+          onTap: () =>
+              _navigateToCategory(context, ref, 'culturas'), // Added ref
           icon: Icons.agriculture,
         ),
       ],
     );
   }
 
-  Widget _buildGridLayout(BuildContext context, double availableWidth) {
-    final buttonWidth =
-        (availableWidth - 16) /
+  Widget _buildGridLayout(
+      BuildContext context, WidgetRef ref, double availableWidth) {
+    final buttonWidth = (availableWidth - 16) /
         3; // Três botões por linha com espaçamento reduzido
     final cultureButtonWidth =
         availableWidth - 8; // Botão cultura ocupa linha inteira
@@ -162,28 +168,31 @@ class HomePragasStatsWidget extends StatelessWidget {
           children: [
             _buildCategoryButton(
               context: context,
-              count: state.isLoading ? '...' : '${state.stats?['insetos'] ?? 0}',
+              count:
+                  state.isLoading ? '...' : '${state.stats?['insetos'] ?? 0}',
               title: 'Insetos',
               width: buttonWidth,
-              onTap: () => _navigateToCategory(context, 'insetos'),
+              onTap: () => _navigateToCategory(context, ref, 'insetos'),
               icon: Icons.bug_report,
             ),
             const SizedBox(width: 4),
             _buildCategoryButton(
               context: context,
-              count: state.isLoading ? '...' : '${state.stats?['doencas'] ?? 0}',
+              count:
+                  state.isLoading ? '...' : '${state.stats?['doencas'] ?? 0}',
               title: 'Doenças',
               width: buttonWidth,
-              onTap: () => _navigateToCategory(context, 'doencas'),
+              onTap: () => _navigateToCategory(context, ref, 'doencas'),
               icon: Icons.coronavirus,
             ),
             const SizedBox(width: 4),
             _buildCategoryButton(
               context: context,
-              count: state.isLoading ? '...' : '${state.stats?['plantas'] ?? 0}',
+              count:
+                  state.isLoading ? '...' : '${state.stats?['plantas'] ?? 0}',
               title: 'Plantas',
               width: buttonWidth,
-              onTap: () => _navigateToCategory(context, 'plantas'),
+              onTap: () => _navigateToCategory(context, ref, 'plantas'),
               icon: Icons.eco,
             ),
           ],
@@ -194,7 +203,7 @@ class HomePragasStatsWidget extends StatelessWidget {
           count: '${state.totalCulturas}',
           title: 'Culturas',
           width: cultureButtonWidth,
-          onTap: () => _navigateToCategory(context, 'culturas'),
+          onTap: () => _navigateToCategory(context, ref, 'culturas'),
           icon: Icons.agriculture,
         ),
       ],
@@ -323,11 +332,12 @@ class HomePragasStatsWidget extends StatelessWidget {
     );
   }
 
-  void _navigateToCategory(BuildContext context, String category) {
+  void _navigateToCategory(
+      BuildContext context, WidgetRef ref, String category) {
     debugPrint('=== NAVEGAÇÃO HOME PRAGAS ===');
     debugPrint('Categoria: $category');
 
-    final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
+    final navigationService = ref.read(navigationServiceProvider);
     switch (category) {
       case 'culturas':
         debugPrint('Navegando para: Lista de Culturas');

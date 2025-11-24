@@ -12,7 +12,6 @@ import '../datasources/local/plants_local_datasource.dart';
 import '../datasources/remote/plants_remote_datasource.dart';
 import '../models/plant_model.dart';
 
-@LazySingleton(as: PlantsRepository)
 class PlantsRepositoryImpl implements PlantsRepository {
   PlantsRepositoryImpl({
     required this.localDatasource,

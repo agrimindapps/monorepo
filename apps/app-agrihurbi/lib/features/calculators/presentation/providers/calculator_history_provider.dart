@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+
 
 import '../../domain/entities/calculation_history.dart';
 import '../../domain/entities/calculation_result.dart';
@@ -10,7 +10,6 @@ import '../../domain/usecases/save_calculation_to_history.dart';
 ///
 /// Responsabilidade única: Gerenciar histórico de cálculos
 /// Seguindo Single Responsibility Principle
-@singleton
 class CalculatorHistoryProvider extends ChangeNotifier {
   final GetCalculationHistory _getCalculationHistory;
   final SaveCalculationToHistory _saveCalculationToHistory;

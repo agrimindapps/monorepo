@@ -1,7 +1,8 @@
-import 'package:get_it/get_it.dart';
+import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../core/providers/core_di_providers.dart';
 import '../managers/auth_dialog_manager.dart';
 import '../managers/auth_submission_manager.dart';
 import '../managers/credentials_persistence_manager.dart';
@@ -17,12 +18,12 @@ AuthDialogManager authDialogManager(AuthDialogManagerRef ref) {
 }
 
 /// Provides CredentialsPersistenceManager instance
-/// Injects SharedPreferences from GetIt to ensure singleton pattern
+/// Injects SharedPreferences to ensure singleton pattern
 @riverpod
 CredentialsPersistenceManager credentialsPersistenceManager(
   CredentialsPersistenceManagerRef ref,
 ) {
-  final prefs = GetIt.instance<SharedPreferences>();
+  final prefs = ref.watch(sharedPreferencesProvider);
   return CredentialsPersistenceManager(prefs: prefs);
 }
 

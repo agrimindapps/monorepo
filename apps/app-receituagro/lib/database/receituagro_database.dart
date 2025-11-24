@@ -50,14 +50,6 @@ part 'receituagro_database.g.dart';
 class ReceituagroDatabase extends _$ReceituagroDatabase with BaseDriftDatabase {
   ReceituagroDatabase(super.e);
 
-  /// Factory Injectable
-  factory ReceituagroDatabase.injectable() {
-    print('🏭 Creating ReceituagroDatabase via injectable factory');
-    final db = ReceituagroDatabase.production();
-    print('✅ ReceituagroDatabase created successfully: ${db.hashCode}');
-    return db;
-  }
-
   @override
   int get schemaVersion => 1;
 

@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../database/petiveti_database.dart';
 import '../models/expense_model.dart';
@@ -26,7 +25,6 @@ abstract class ExpenseLocalDataSource {
   Future<List<ExpenseModel>> getExpensesByAnimal(String animalId);
 }
 
-@LazySingleton(as: ExpenseLocalDataSource)
 class ExpenseLocalDataSourceImpl implements ExpenseLocalDataSource {
   final PetivetiDatabase _database;
 

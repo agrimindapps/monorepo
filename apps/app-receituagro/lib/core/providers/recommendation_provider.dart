@@ -1,7 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../core/di/injection_container.dart' as di;
-import '../../../core/services/i_recommendation_service.dart';
+import '../../../../core/services/i_recommendation_service.dart';
+import '../../features/diagnosticos/presentation/providers/diagnosticos_providers.dart';
+import '../services/recommendation_service.dart';
 
 part 'recommendation_provider.g.dart';
 
@@ -13,5 +14,6 @@ part 'recommendation_provider.g.dart';
 IRecommendationService recommendationService(
   RecommendationServiceRef ref,
 ) {
-  return di.sl<IRecommendationService>();
+  final queryRepository = ref.watch(iDiagnosticosRepositoryProvider);
+  return RecommendationService(queryRepository);
 }

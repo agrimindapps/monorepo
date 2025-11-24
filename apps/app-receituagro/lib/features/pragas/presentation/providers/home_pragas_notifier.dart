@@ -1,6 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../database/repositories/culturas_repository.dart';
 import '../../domain/entities/praga_entity.dart';
 import '../../domain/services/i_pragas_type_service.dart';
 import 'pragas_notifier.dart';
@@ -36,8 +35,8 @@ class HomePragasState {
     required this.recentPragas,
     void Function(PragaEntity)? onRecordPragaAccess,
     void Function(int)? onUpdateCarouselIndex,
-  }) : _onRecordPragaAccess = onRecordPragaAccess,
-       _onUpdateCarouselIndex = onUpdateCarouselIndex;
+  })  : _onRecordPragaAccess = onRecordPragaAccess,
+        _onUpdateCarouselIndex = onUpdateCarouselIndex;
 
   factory HomePragasState.initial() {
     return const HomePragasState(
@@ -96,7 +95,8 @@ class HomePragasState {
 
   /// Helper method to get suggestions list formatted for carousel
   /// Refactored to use IPragasTypeService (SOLID compliance)
-  List<Map<String, dynamic>> getSuggestionsList(IPragasTypeService typeService) {
+  List<Map<String, dynamic>> getSuggestionsList(
+      IPragasTypeService typeService) {
     if (isLoading || suggestedPragas.isEmpty) {
       return [];
     }

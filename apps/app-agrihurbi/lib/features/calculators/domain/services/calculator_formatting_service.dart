@@ -9,7 +9,6 @@ import '../interfaces/calculator_strategy.dart';
 ///
 /// Implementa Single Responsibility Principle (SRP) - foca apenas na formatação.
 /// Separado do Calculator Engine para maior modularidade e personalização.
-@injectable
 class CalculatorFormattingService {
   /// Formata resultado de cálculo com base na estratégia
   Future<FormattedCalculationResult> formatResult(

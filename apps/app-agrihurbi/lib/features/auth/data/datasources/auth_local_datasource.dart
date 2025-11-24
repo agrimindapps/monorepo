@@ -52,7 +52,6 @@ abstract class AuthLocalDataSource {
 ///
 /// Usa Flutter Secure Storage para tokens
 /// Aplica estratégia local-first com persistência robusta
-@LazySingleton(as: AuthLocalDataSource)
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   final SharedPreferences _sharedPreferences;
   final FlutterSecureStorage _secureStorage;

@@ -1,11 +1,9 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../repositories/comentarios_repository.dart';
 
 /// Use case for deleting a comentario
-@injectable
 class DeleteComentario {
   final ComentariosRepository _repository;
 

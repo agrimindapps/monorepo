@@ -19,7 +19,6 @@ class GetBovineByIdParams extends Equatable {
 /// 1. Busca no cache local primeiro
 /// 2. Se não encontrar e houver conectividade, busca remotamente
 /// 3. Salva automaticamente no cache para consultas futuras
-@lazySingleton
 class GetBovineByIdUseCase implements UseCase<BovineEntity, GetBovineByIdParams> {
   const GetBovineByIdUseCase(this._repository);
 

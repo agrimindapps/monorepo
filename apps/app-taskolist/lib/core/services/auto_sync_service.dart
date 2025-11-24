@@ -43,7 +43,6 @@ import 'data_integrity_service.dart';
 /// final stats = autoSync.getStats();
 /// print('Last sync: ${stats['last_sync_at']}');
 /// ```
-@lazySingleton
 class AutoSyncService {
   AutoSyncService(
     this._connectivityService,

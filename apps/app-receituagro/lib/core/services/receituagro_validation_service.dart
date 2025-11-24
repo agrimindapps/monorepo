@@ -20,11 +20,7 @@ class ReceitaAgroValidationService {
     Map<String, dynamic> data,
   ) {
     if (!_isInitialized) {
-      if (kDebugMode) {
-        print(
-          'ReceitaAgroValidationService not initialized, using fallback mode',
-        );
-      }
+      // Fallback mode
     }
 
     final errors = <String>[];
@@ -43,7 +39,7 @@ class ReceitaAgroValidationService {
         }
       }
     } catch (e) {
-      if (kDebugMode) print('Core validation failed, using fallback: $e');
+      // Fallback
     }
     if (data.containsKey('cultura_name')) {
       final culturaResult = validateCulturaName(data['cultura_name'] as String);

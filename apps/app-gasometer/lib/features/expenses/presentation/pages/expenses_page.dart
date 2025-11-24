@@ -1,7 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/di/injection_container.dart';
 import '../../../../core/utils/date_utils.dart' as local_date_utils;
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
@@ -428,8 +427,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
 
   List<DateTime> _getMonths(List<ExpenseEntity> records) {
     final dates = records.map((e) => e.date).toList();
-    final dateUtils =
-        ModularInjectionContainer.instance<local_date_utils.DateUtils>();
+    final dateUtils = local_date_utils.DateUtils();
     return dateUtils.generateMonthRange(dates);
   }
 }

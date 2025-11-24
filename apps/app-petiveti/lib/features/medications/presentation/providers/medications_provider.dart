@@ -1,17 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../notifiers/medications_notifier.dart';
+import 'medications_providers.dart';
 
-export '../notifiers/medications_notifier.dart';
+export 'medications_providers.dart';
 
 // Aliases for backward compatibility
 final medicationsProvider = medicationsNotifierProvider;
 final medicationProvider = medicationByIdProvider;
-final medicationsStreamProvider = medicationsStreamProvider;
-final medicationsByAnimalStreamProvider = medicationsByAnimalStreamProvider;
-final activeMedicationsStreamProvider = activeMedicationsStreamProvider;
-final filteredMedicationsProvider = filteredMedicationsProvider;
-
-final medicationTypeFilterProvider = medicationTypeFilterProvider;
-final medicationStatusFilterProvider = medicationStatusFilterProvider;
-final medicationSearchQueryProvider = medicationSearchQueryProvider;
-final selectedMedicationProvider = StateProvider<dynamic>((ref) => null); // Placeholder if needed, or remove if unused
+final selectedMedicationProvider = StateProvider<dynamic>((ref) => null);

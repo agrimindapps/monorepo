@@ -1,47 +1,43 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/repositories/livestock_repository.dart';
 
 /// Provider especializado para estatísticas de livestock
-/// 
+///
 /// Responsabilidade única: Gerenciar estatísticas e métricas do rebanho
 /// Seguindo Single Responsibility Principle
-@singleton
 class LivestockStatisticsProvider extends ChangeNotifier {
   final LivestockRepository _repository;
 
   LivestockStatisticsProvider({
     required LivestockRepository repository,
   }) : _repository = repository;
-  
+
   bool _isLoading = false;
   Map<String, dynamic>? _statistics;
   String? _errorMessage;
   DateTime? _lastUpdate;
-  
+
   bool get isLoading => _isLoading;
   Map<String, dynamic>? get statistics => _statistics;
   String? get errorMessage => _errorMessage;
   DateTime? get lastUpdate => _lastUpdate;
-  
+
   bool get hasStatistics => _statistics != null;
-  bool get needsUpdate => 
-    _lastUpdate == null || 
-    DateTime.now().difference(_lastUpdate!).inMinutes > 30;
+  bool get needsUpdate =>
+      _lastUpdate == null ||
+      DateTime.now().difference(_lastUpdate!).inMinutes > 30;
   int get totalAnimals => (_statistics?['totalAnimals'] as int?) ?? 0;
   int get totalBovines => (_statistics?['totalBovines'] as int?) ?? 0;
   int get totalEquines => (_statistics?['totalEquines'] as int?) ?? 0;
   int get activeBovines => (_statistics?['activeBovines'] as int?) ?? 0;
   int get activeEquines => (_statistics?['activeEquines'] as int?) ?? 0;
-  
-  double get bovinesPercentage => totalAnimals > 0 
-    ? (totalBovines / totalAnimals * 100) 
-    : 0.0;
-    
-  double get equinesPercentage => totalAnimals > 0 
-    ? (totalEquines / totalAnimals * 100) 
-    : 0.0;
+
+  double get bovinesPercentage =>
+      totalAnimals > 0 ? (totalBovines / totalAnimals * 100) : 0.0;
+
+  double get equinesPercentage =>
+      totalAnimals > 0 ? (totalEquines / totalAnimals * 100) : 0.0;
 
   /// Carrega estatísticas do rebanho
   Future<void> loadStatistics({bool forceRefresh = false}) async {
@@ -55,16 +51,18 @@ class LivestockStatisticsProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _repository.getLivestockStatistics();
-    
+
     result.fold(
       (failure) {
         _errorMessage = failure.message;
-        debugPrint('LivestockStatisticsProvider: Erro ao carregar estatísticas - ${failure.message}');
+        debugPrint(
+            'LivestockStatisticsProvider: Erro ao carregar estatísticas - ${failure.message}');
       },
       (stats) {
         _statistics = stats;
         _lastUpdate = DateTime.now();
-        debugPrint('LivestockStatisticsProvider: Estatísticas carregadas - $stats');
+        debugPrint(
+            'LivestockStatisticsProvider: Estatísticas carregadas - $stats');
       },
     );
 

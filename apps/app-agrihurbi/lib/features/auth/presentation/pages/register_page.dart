@@ -1,28 +1,24 @@
 import 'package:app_agrihurbi/core/constants/app_constants.dart';
-import 'package:app_agrihurbi/core/di/injection_container.dart';
+import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:app_agrihurbi/core/theme/app_theme.dart';
 import 'package:app_agrihurbi/core/theme/design_tokens.dart';
 import 'package:app_agrihurbi/core/utils/error_handler.dart';
 import 'package:app_agrihurbi/core/validators/input_validators.dart';
-import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
-import 'package:core/core.dart' show ChangeNotifierProvider, Consumer;
+import 'package:app_agrihurbi/features/auth/presentation/notifiers/auth_notifier.dart';
+import 'package:core/core.dart' show Consumer;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Riverpod provider exposing the existing AuthProvider (registered with GetIt)
-final authProviderProvider = ChangeNotifierProvider<AuthProvider>(
-  (ref) => getIt<AuthProvider>(),
-);
-
 /// Register page
-class RegisterPage extends StatefulWidget {
+class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  ConsumerState<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -63,22 +59,19 @@ class _RegisterPageState extends State<RegisterPage> {
                 Text(
                   'Criar conta',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: AppTheme.primaryColor,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: AppTheme.primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
                   textAlign: TextAlign.center,
                 ),
-
                 const SizedBox(height: 8),
-
                 Text(
                   'Preencha os dados para criar sua conta',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppTheme.textSecondaryColor,
-                  ),
+                        color: AppTheme.textSecondaryColor,
+                      ),
                   textAlign: TextAlign.center,
                 ),
-
                 const SizedBox(height: 32),
                 TextFormField(
                   controller: _nameController,
@@ -90,7 +83,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   validator: InputValidators.validateFullName,
                 ),
-
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _emailController,
@@ -102,7 +94,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   validator: InputValidators.validateEmail,
                 ),
-
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _phoneController,
@@ -114,7 +105,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   validator: InputValidators.validatePhone,
                 ),
-
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
@@ -138,7 +128,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   validator: PasswordValidator.validatePassword,
                 ),
-
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _confirmPasswordController,
@@ -160,39 +149,35 @@ class _RegisterPageState extends State<RegisterPage> {
                       },
                     ),
                   ),
-                  validator:
-                      (value) => PasswordValidator.validatePasswordConfirmation(
-                        _passwordController.text,
-                        value,
-                      ),
+                  validator: (value) =>
+                      PasswordValidator.validatePasswordConfirmation(
+                    _passwordController.text,
+                    value,
+                  ),
                 ),
-
                 const SizedBox(height: 32),
                 Consumer(
                   builder: (context, ref, child) {
-                    final authProvider = ref.watch(authProviderProvider);
+                    final authState = ref.watch(authNotifierProvider);
                     return ElevatedButton(
-                      onPressed:
-                          authProvider.isLoading
-                              ? null
-                              : () => _handleRegister(context, authProvider),
-                      child:
-                          authProvider.isLoading
-                              ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    DesignTokens.textLightColor,
-                                  ),
+                      onPressed: authState.isLoading || authState.isRegistering
+                          ? null
+                          : () => _handleRegister(context, ref),
+                      child: authState.isLoading || authState.isRegistering
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  DesignTokens.textLightColor,
                                 ),
-                              )
-                              : const Text('Criar conta'),
+                              ),
+                            )
+                          : const Text('Criar conta'),
                     );
                   },
                 ),
-
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -207,12 +192,11 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 24),
                 Consumer(
                   builder: (context, ref, child) {
-                    final authProvider = ref.watch(authProviderProvider);
-                    if (authProvider.errorMessage != null) {
+                    final authState = ref.watch(authNotifierProvider);
+                    if (authState.errorMessage != null) {
                       return Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
@@ -232,7 +216,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                authProvider.errorMessage!,
+                                authState.errorMessage!,
                                 style: const TextStyle(
                                   color: DesignTokens.errorColor,
                                   fontSize: 14,
@@ -245,7 +229,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                 color: DesignTokens.errorColor,
                                 size: 18,
                               ),
-                              onPressed: authProvider.clearError,
+                              onPressed: () => ref
+                                  .read(authNotifierProvider.notifier)
+                                  .clearError(),
                             ),
                           ],
                         ),
@@ -262,22 +248,21 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  void _handleRegister(BuildContext context, AuthProvider authProvider) async {
+  void _handleRegister(BuildContext context, WidgetRef ref) async {
     if (_formKey.currentState!.validate()) {
-      final result = await authProvider.register(
-        name: _nameController.text.trim(),
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-        phone:
-            _phoneController.text.trim().isEmpty
+      final result = await ref.read(authNotifierProvider.notifier).register(
+            name: _nameController.text.trim(),
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+            phone: _phoneController.text.trim().isEmpty
                 ? null
                 : _phoneController.text.trim(),
-      );
+          );
 
       if (!mounted) return; // ✅ Safety check
 
       result.fold(
-        (failure) {
+        (Failure failure) {
           if (mounted) {
             ErrorHandler.showErrorSnackbar(context, failure);
           }

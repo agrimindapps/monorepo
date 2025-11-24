@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/di/injection_container.dart';
 import '../../domain/services/fuel_crud_service.dart';
 import '../../domain/services/fuel_query_service.dart';
 import '../../domain/services/fuel_sync_service.dart';

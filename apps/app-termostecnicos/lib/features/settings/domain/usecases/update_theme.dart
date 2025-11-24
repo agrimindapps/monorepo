@@ -3,7 +3,6 @@ import 'package:core/core.dart' hide Column;
 import '../repositories/settings_repository.dart';
 
 /// Use case for updating theme mode
-@injectable
 class UpdateTheme {
   final SettingsRepository _repository;
 

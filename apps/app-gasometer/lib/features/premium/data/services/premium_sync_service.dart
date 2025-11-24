@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:core/core.dart' as core;
-import 'package:core/core.dart' show injectable;
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';

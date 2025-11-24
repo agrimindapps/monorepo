@@ -8,7 +8,9 @@ import '../../database/receituagro_database.dart';
 /// Implementa IAppDataCleaner do core package
 /// Refatorado para usar Drift
 class ReceitaAgroDataCleaner implements IAppDataCleaner {
-  final ReceituagroDatabase _db = GetIt.instance<ReceituagroDatabase>();
+  final ReceituagroDatabase _db;
+
+  ReceitaAgroDataCleaner(ReceituagroDatabase db) : _db = db;
 
   @override
   String get appName => 'ReceitaAgro';

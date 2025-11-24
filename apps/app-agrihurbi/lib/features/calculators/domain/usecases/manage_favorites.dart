@@ -1,6 +1,5 @@
 import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../repositories/calculator_repository.dart';
 
@@ -31,7 +30,6 @@ class RemoveFavoriteParams extends FavoriteParams {
 /// Use case para gerenciar favoritos
 ///
 /// Centraliza lógica de adicionar, remover e listar favoritos
-@lazySingleton
 class ManageFavorites {
   final CalculatorRepository repository;
 

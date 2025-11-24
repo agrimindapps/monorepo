@@ -1,12 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/error/failures.dart';
 import '../entities/termo.dart';
 
 /// Use case for opening term in external browser (Google search)
-@injectable
 class AbrirTermoExterno {
   Future<Either<Failure, Unit>> call(Termo termo) async {
     try {

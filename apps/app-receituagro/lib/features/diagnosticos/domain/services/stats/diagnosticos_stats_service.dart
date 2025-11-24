@@ -7,7 +7,7 @@ import 'i_diagnosticos_stats_service.dart';
 /// Implementation of statistics service for diagnosticos
 ///
 /// Provides analytics and aggregate operations on diagnosticos data.
-@Injectable(as: IDiagnosticosStatsService)
+
 class DiagnosticosStatsService implements IDiagnosticosStatsService {
   final IDiagnosticosRepository _repository;
 

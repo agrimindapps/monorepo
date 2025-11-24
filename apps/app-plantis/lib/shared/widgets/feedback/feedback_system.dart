@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
-import 'package:injectable/injectable.dart';
 
 /// Sistema centralizado de feedback visual para operações async
 /// Trabalha em conjunto com ContextualLoadingManager para feedback completo
-@lazySingleton
 class FeedbackService {
   final Map<String, FeedbackController> _activeControllers = {};
   final List<VoidCallback> _listeners = [];

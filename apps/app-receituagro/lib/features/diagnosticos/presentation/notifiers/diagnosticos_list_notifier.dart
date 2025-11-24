@@ -4,14 +4,13 @@ import '../../../../core/services/failure_message_service.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/usecases/get_diagnosticos_params.dart';
 import '../../domain/usecases/get_diagnosticos_usecase.dart';
-import '../providers/diagnosticos_providers.dart';
+import '../providers/diagnosticos_providers.dart' as diagnosticosProviders;
 import '../state/diagnosticos_list_state.dart';
 
 /// Notifier para gerenciamento de lista de diagnósticos
 /// Responsabilidade: Load and manage list of diagnosticos
 /// Métodos: loadAll(), loadById(), refresh(), clear()
-class DiagnosticosListNotifier
-    extends StateNotifier<DiagnosticosListState> {
+class DiagnosticosListNotifier extends StateNotifier<DiagnosticosListState> {
   DiagnosticosListNotifier({
     required GetDiagnosticosUseCase getDiagnosticosUseCase,
     required FailureMessageService failureMessageService,
@@ -40,8 +39,7 @@ class DiagnosticosListNotifier
           state = state.copyWith(
             isLoading: false,
             isLoadingMore: false,
-            errorMessage:
-                _failureMessageService.mapFailureToMessage(failure),
+            errorMessage: _failureMessageService.mapFailureToMessage(failure),
           );
         },
         (diagnosticos) {
@@ -83,8 +81,7 @@ class DiagnosticosListNotifier
         (failure) {
           state = state.copyWith(
             isLoading: false,
-            errorMessage:
-                _failureMessageService.mapFailureToMessage(failure),
+            errorMessage: _failureMessageService.mapFailureToMessage(failure),
           );
         },
         (diagnostico) {
@@ -118,7 +115,9 @@ class DiagnosticosListNotifier
 final diagnosticosListNotifierProvider =
     StateNotifierProvider<DiagnosticosListNotifier, DiagnosticosListState>(
   (ref) => DiagnosticosListNotifier(
-    getDiagnosticosUseCase: ref.watch(getDiagnosticosUseCaseProvider),
-    failureMessageService: ref.watch(failureMessageServiceProvider),
+    getDiagnosticosUseCase:
+        ref.watch(diagnosticosProviders.getDiagnosticosUseCaseProvider),
+    failureMessageService:
+        ref.watch(diagnosticosProviders.failureMessageServiceProvider),
   ),
 );

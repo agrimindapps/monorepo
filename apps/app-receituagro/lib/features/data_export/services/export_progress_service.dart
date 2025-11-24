@@ -1,10 +1,10 @@
-import 'package:injectable/injectable.dart';
+
 
 import '../domain/entities/export_request.dart';
 
 /// Service specialized in calculating and managing export progress
 /// Principle: Single Responsibility - Only handles progress calculations
-@lazySingleton
+
 class ExportProgressService {
   /// Calculates progress percentage based on current step
   double calculateProgressPercentage(int currentStep, int totalSteps) {

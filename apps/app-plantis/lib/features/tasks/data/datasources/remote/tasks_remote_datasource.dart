@@ -17,7 +17,6 @@ abstract class TasksRemoteDataSource {
   Future<void> deleteTask(String id, String userId);
 }
 
-@LazySingleton(as: TasksRemoteDataSource)
 class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
   final FirebaseFirestore _firestore;
   final RateLimiterService _rateLimiter;

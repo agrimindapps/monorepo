@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+
 
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/entities/calculator_category.dart';
@@ -14,7 +14,6 @@ import 'calculator_search_provider.dart';
 /// 
 /// Responsabilidade única: Coordenar providers especializados seguindo SRP
 /// Substitui o CalculatorProvider monolítico original de 450 linhas
-@singleton
 class CalculatorCoordinatorProvider extends ChangeNotifier {
   final CalculatorManagementProvider _managementProvider;
   final CalculatorExecutionProvider _executionProvider;

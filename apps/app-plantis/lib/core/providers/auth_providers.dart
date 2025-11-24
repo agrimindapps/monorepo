@@ -9,13 +9,22 @@ import '../../features/device_management/domain/usecases/revoke_device_usecase.d
     as device_revocation;
 import '../../features/device_management/domain/usecases/validate_device_usecase.dart'
     as device_validation;
+import '../../features/device_management/presentation/providers/device_management_providers.dart'
+    as device_management_providers;
 import '../auth/auth_state_notifier.dart';
-import '../di/injection_container.dart' as di;
-import '../providers/analytics_provider.dart';
+import 'auth_state_provider.dart';
+export 'auth_state_provider.dart';
 import '../services/data_sanitization_service.dart';
-import '../widgets/loading_overlay.dart';
+import 'repository_providers.dart';
 
 part 'auth_providers.g.dart';
+
+enum AuthOperation {
+  signIn,
+  signUp,
+  logout,
+  anonymous,
+}
 
 /// Auth State model for Riverpod state management
 class AuthState {
@@ -106,7 +115,7 @@ class AuthState {
 /// AuthNotifier that wraps AuthStateNotifier to integrate with Riverpod
 ///
 /// Manages authentication state using @riverpod code generation
-@riverpod
+@Riverpod(keepAlive: true)
 class AuthNotifier extends _$AuthNotifier {
   late final AuthStateNotifier _authStateNotifier;
   late final device_validation.ValidateDeviceUseCase? _validateDeviceUseCase;
@@ -119,39 +128,18 @@ class AuthNotifier extends _$AuthNotifier {
   StreamSubscription<UserEntity?>? _userSubscription;
   StreamSubscription<SubscriptionEntity?>? _subscriptionStream;
 
-  AnalyticsProvider? get _analytics {
-    try {
-      return di.sl<AnalyticsProvider>();
-    } catch (e) {
-      return null;
-    }
-  }
+  // AnalyticsProvider removed - using Riverpod providers instead
 
   @override
   Future<AuthState> build() async {
     _authStateNotifier = AuthStateNotifier.instance;
-    _authRepository = di.sl<IAuthRepository>();
-    _loginUseCase = di.sl<LoginUseCase>();
-    _logoutUseCase = di.sl<LogoutUseCase>();
-    _resetPasswordUseCase = di.sl<ResetPasswordUseCase>();
-
-    try {
-      _subscriptionRepository = di.sl<ISubscriptionRepository>();
-    } catch (e) {
-      _subscriptionRepository = null;
-    }
-
-    try {
-      _validateDeviceUseCase = di.sl<device_validation.ValidateDeviceUseCase>();
-    } catch (e) {
-      _validateDeviceUseCase = null;
-    }
-
-    try {
-      _revokeDeviceUseCase = di.sl<device_revocation.RevokeDeviceUseCase>();
-    } catch (e) {
-      _revokeDeviceUseCase = null;
-    }
+    _authRepository = ref.watch(authRepositoryProvider);
+    _loginUseCase = ref.watch(loginUseCaseProvider);
+    _logoutUseCase = ref.watch(logoutUseCaseProvider);
+    _resetPasswordUseCase = ref.watch(resetPasswordUseCaseProvider);
+    _subscriptionRepository = ref.watch(subscriptionRepositoryProvider);
+    _validateDeviceUseCase = await ref.watch(device_management_providers.validateDeviceUseCaseProvider.future);
+    _revokeDeviceUseCase = await ref.watch(device_management_providers.revokeDeviceUseCaseProvider.future);
 
     ref.onDispose(() {
       _userSubscription?.cancel();
@@ -337,7 +325,7 @@ class AuthNotifier extends _$AuthNotifier {
           ),
         );
         _authStateNotifier.updateUser(user);
-        _analytics?.logLogin('email');
+        
       },
     );
   }
@@ -461,11 +449,6 @@ class AuthNotifier extends _$AuthNotifier {
       );
     }
 
-    await _analytics?.logEvent('device_limit_exceeded', {
-      'user_id': state.value?.currentUser?.id ?? 'unknown',
-      'device_count': 3,
-    });
-
     Future.delayed(const Duration(milliseconds: 1500), () {
       final currentState = state.valueOrNull;
       if (currentState?.deviceLimitExceeded == true) {
@@ -506,7 +489,7 @@ class AuthNotifier extends _$AuthNotifier {
         state = const AsyncData(AuthState());
         _authStateNotifier.updateUser(null);
         _authStateNotifier.updatePremiumStatus(false);
-        _analytics?.logLogout();
+        
       },
     );
   }
@@ -625,7 +608,7 @@ class AuthNotifier extends _$AuthNotifier {
         return false;
       },
       (_) {
-        _analytics?.logEvent('password_reset_requested', {'method': 'email'});
+        
         return true;
       },
     );
@@ -669,27 +652,20 @@ class AuthNotifier extends _$AuthNotifier {
 
       revokeResult.fold(
         (failure) {
-          _analytics?.logEvent('device_cleanup_failed', {
-            'context': 'logout',
-            'error': failure.message,
-            'device_uuid': currentDevice.uuid,
-            'user_id': state.value!.currentUser!.id,
-          });
+          if (kDebugMode) {
+            debugPrint('Failed to revoke device on logout: ${failure.message}');
+          }
         },
         (_) {
-          _analytics?.logEvent('device_cleanup_success', {
-            'context': 'logout',
-            'device_uuid': currentDevice.uuid,
-            'user_id': state.value!.currentUser!.id,
-          });
+          if (kDebugMode) {
+            debugPrint('Device revoked successfully on logout');
+          }
         },
       );
     } catch (e) {
-      _analytics?.logEvent('device_cleanup_error', {
-        'context': 'logout',
-        'error': e.toString(),
-        'user_id': state.value?.currentUser?.id ?? 'unknown',
-      });
+      if (kDebugMode) {
+        debugPrint('Error during device cleanup: $e');
+      }
     }
   }
 
@@ -709,28 +685,17 @@ class AuthNotifier extends _$AuthNotifier {
           if (kDebugMode) {
             debugPrint('⚠️ Failed to clear sync data: ${failure.message}');
           }
-          _analytics?.logEvent('sync_data_clear_failed', {
-            'context': 'logout',
-            'error': failure.message,
-          });
         },
         (_) {
           if (kDebugMode) {
             debugPrint('✅ Sync data cleared successfully');
           }
-          _analytics?.logEvent('sync_data_clear_success', {
-            'context': 'logout',
-          });
         },
       );
     } catch (e) {
       if (kDebugMode) {
         debugPrint('❌ Error clearing sync data: $e');
       }
-      _analytics?.logEvent('sync_data_clear_error', {
-        'context': 'logout',
-        'error': e.toString(),
-      });
     }
   }
 }
@@ -784,3 +749,18 @@ bool isInitialized(IsInitializedRef ref) {
 /// Alias for backwards compatibility with existing code
 /// Use authNotifierProvider instead in new code
 final authProvider = authNotifierProvider;
+
+/// Device management use case providers aliases
+@riverpod
+Future<device_validation.ValidateDeviceUseCase> validateDeviceUseCaseProvider(
+  ValidateDeviceUseCaseProviderRef ref,
+) async {
+  return ref.watch(device_management_providers.validateDeviceUseCaseProvider.future);
+}
+
+@riverpod
+Future<device_revocation.RevokeDeviceUseCase> revokeDeviceUseCaseProvider(
+  RevokeDeviceUseCaseProviderRef ref,
+) async {
+  return ref.watch(device_management_providers.revokeDeviceUseCaseProvider.future);
+}

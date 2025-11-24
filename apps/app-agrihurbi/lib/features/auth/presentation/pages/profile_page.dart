@@ -1,26 +1,21 @@
 import 'package:core/core.dart' hide AuthProvider, getIt;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection_container.dart';
-import '../providers/auth_provider.dart';
-
-/// Riverpod provider exposing the existing AuthProvider (registered with GetIt)
-final authProviderProvider = ChangeNotifierProvider<AuthProvider>(
-  (ref) => getIt<AuthProvider>(),
-);
+import '../notifiers/auth_notifier.dart';
 
 /// Página de perfil do usuário
 ///
 /// Exibe informações do usuário logado e opções de configuração
 /// Inclui funcionalidades de logout e refresh de dados
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,16 +36,16 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       body: Consumer(
         builder: (context, ref, child) {
-          final authProvider = ref.watch(authProviderProvider);
-          if (authProvider.isInitializing) {
+          final authState = ref.watch(authNotifierProvider);
+          if (authState.isInitializing) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (!authProvider.isLoggedIn || authProvider.currentUser == null) {
+          if (!authState.isLoggedIn || authState.currentUser == null) {
             return _buildNotLoggedInState();
           }
 
-          return _buildProfileContent(authProvider.currentUser!, ref);
+          return _buildProfileContent(authState.currentUser!, ref);
         },
       ),
     );
@@ -67,13 +62,10 @@ class _ProfilePageState extends State<ProfilePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildUserHeader(user),
-
             const SizedBox(height: 32),
             _buildUserDetails(user),
-
             const SizedBox(height: 32),
             _buildUserActions(),
-
             const SizedBox(height: 16),
           ],
         ),
@@ -100,7 +92,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     )
                   : null,
             ),
-
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -160,15 +151,12 @@ class _ProfilePageState extends State<ProfilePage> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
-
             _buildDetailItem('ID do Usuário', user.id, Icons.person),
-
             _buildDetailItem(
               'Telefone',
               user.phone ?? 'Não informado',
               Icons.phone,
             ),
-
             _buildDetailItem(
               'Conta criada em',
               user.createdAt != null
@@ -176,7 +164,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   : 'Não informado',
               Icons.calendar_today,
             ),
-
             if (user.lastLoginAt != null)
               _buildDetailItem(
                 'Último acesso',
@@ -216,7 +203,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildUserActions() {
     return Consumer(
       builder: (context, ref, child) {
-        final authProvider = ref.watch(authProviderProvider);
+        final authState = ref.watch(authNotifierProvider);
         return Card(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -226,10 +213,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 Text('Ações', style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
-                  onPressed: authProvider.isRefreshing
+                  onPressed: authState.isRefreshing
                       ? null
                       : () => _refreshUserData(ref),
-                  icon: authProvider.isRefreshing
+                  icon: authState.isRefreshing
                       ? const SizedBox(
                           width: 16,
                           height: 16,
@@ -237,22 +224,20 @@ class _ProfilePageState extends State<ProfilePage> {
                         )
                       : const Icon(Icons.refresh),
                   label: Text(
-                    authProvider.isRefreshing
+                    authState.isRefreshing
                         ? 'Atualizando...'
                         : 'Atualizar Dados',
                   ),
                 ),
-
                 const SizedBox(height: 12),
                 ElevatedButton.icon(
-                  onPressed: authProvider.isLoggingOut
-                      ? null
-                      : () => _performLogout(ref),
+                  onPressed:
+                      authState.isLoggingOut ? null : () => _performLogout(ref),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     foregroundColor: Colors.white,
                   ),
-                  icon: authProvider.isLoggingOut
+                  icon: authState.isLoggingOut
                       ? const SizedBox(
                           width: 16,
                           height: 16,
@@ -265,7 +250,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         )
                       : const Icon(Icons.logout),
                   label: Text(
-                    authProvider.isLoggingOut ? 'Saindo...' : 'Sair da Conta',
+                    authState.isLoggingOut ? 'Saindo...' : 'Sair da Conta',
                   ),
                 ),
               ],
@@ -305,10 +290,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   /// Atualiza dados do usuário
   Future<void> _refreshUserData(WidgetRef ref) async {
-    final authProvider = ref.read(authProviderProvider);
+    final authNotifier = ref.read(authNotifierProvider.notifier);
 
     try {
-      await authProvider.refreshUser();
+      await authNotifier.refreshUser();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -332,10 +317,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   /// Executa logout
   Future<void> _performLogout(WidgetRef ref) async {
-    final authProvider = ref.read(authProviderProvider);
+    final authNotifier = ref.read(authNotifierProvider.notifier);
 
     try {
-      await authProvider.logout();
+      await authNotifier.logout();
 
       if (mounted) {
         context.go('/login');

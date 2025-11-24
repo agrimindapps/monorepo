@@ -7,7 +7,7 @@ import '../receituagro_database.dart';
 ///
 /// Gerencia todas as operações de leitura dos dados estáticos de culturas
 /// 
-@lazySingleton
+
 class CulturasRepository {
   CulturasRepository(this._db);
 

@@ -1,3 +1,8 @@
+// This module has been migrated to Riverpod dependency injection
+// All dependencies are now managed through providers
+// TODO: Remove this file as it's no longer used
+
+/*
 import 'package:core/core.dart';
 
 /// Módulo de Dependency Injection para Account Deletion
@@ -24,3 +29,4 @@ class AccountDeletionModule {
     );
   }
 }
+*/

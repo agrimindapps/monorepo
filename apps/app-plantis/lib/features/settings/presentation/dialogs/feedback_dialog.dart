@@ -1,7 +1,8 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection.dart' as plantis_di;
+import '../../../../core/providers/core_di_providers.dart';
 import '../../../../core/theme/plantis_colors.dart';
 
 /// Dialog para envio de feedback do usuário para Firebase Analytics
@@ -274,7 +275,7 @@ class _FeedbackDialogState extends ConsumerState<FeedbackDialog> {
 
     try {
       // Obter analytics repository do core
-      final analyticsRepository = plantis_di.getIt<IAnalyticsRepository>();
+      final analyticsRepository = ref.read(analyticsRepositoryProvider);
 
       // Enviar feedback para Firebase Analytics
       final result = await analyticsRepository.logFeedback(

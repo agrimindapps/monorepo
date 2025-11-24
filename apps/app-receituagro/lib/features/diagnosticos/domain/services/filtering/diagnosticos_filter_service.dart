@@ -8,7 +8,7 @@ import 'i_diagnosticos_filter_service.dart';
 ///
 /// Delegates server-side queries to repository and provides
 /// client-side filtering utilities for in-memory operations.
-@Injectable(as: IDiagnosticosFilterService)
+
 class DiagnosticosFilterService implements IDiagnosticosFilterService {
   final IDiagnosticosRepository _repository;
 

@@ -38,7 +38,7 @@ class PragasStats {
 
 /// Use Case consolidado para buscar pragas
 /// Consolida 7 usecases em 1 genérico com type-safe params
-@injectable
+
 class GetPragasUseCase {
   final IPragasRepository _repository;
   final IPragasHistoryRepository? _historyRepository;

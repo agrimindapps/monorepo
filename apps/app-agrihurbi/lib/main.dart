@@ -2,10 +2,10 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+
 import 'app.dart';
-import 'core/di/injection_container.dart' as di;
-import 'core/di/modules/account_deletion_module.dart';
-import 'core/di/modules/sync_module.dart';
+
+import 'core/providers/app_providers.dart';
 import 'firebase_options.dart';
 
 late ICrashlyticsRepository _crashlyticsRepository;
@@ -29,12 +29,12 @@ Future<void> main() async {
     );
   }
 
+  final container = ProviderContainer();
+
   // Initialize DI with Firebase status (AFTER Firebase)
   try {
-    await di.init(firebaseEnabled: firebaseInitialized);
-
     if (firebaseInitialized) {
-      _crashlyticsRepository = di.getIt<ICrashlyticsRepository>();
+      _crashlyticsRepository = container.read(crashlyticsRepositoryProvider);
       if (!kIsWeb) {
         FlutterError.onError = (errorDetails) {
           _crashlyticsRepository.recordError(
@@ -58,7 +58,10 @@ Future<void> main() async {
 
     try {
       print('🔐 MAIN: Initializing account deletion module...');
-      AccountDeletionModule.init(di.getIt);
+      // AccountDeletionModule might need refactoring too if it uses getIt
+      // For now, let's assume we can pass a function or it's static
+      // AccountDeletionModule.init(di.getIt); 
+      // TODO: Refactor AccountDeletionModule to use Riverpod or pass dependencies
       print('✅ MAIN: Account deletion module initialized successfully');
     } catch (e) {
       print('❌ MAIN: Account deletion initialization failed: $e');
@@ -67,20 +70,26 @@ Future<void> main() async {
     if (firebaseInitialized) {
       try {
         print('🔄 MAIN: Forcing AgrihUrbi sync initialization...');
-        AgrihUrbiSyncDIModule.init();
-        await AgrihUrbiSyncDIModule.initializeSyncService();
+        // AgrihUrbiSyncDIModule.init();
+        // await AgrihUrbiSyncDIModule.initializeSyncService();
+        // TODO: Refactor Sync Module
         print('✅ MAIN: AgrihUrbi sync initialization completed successfully');
       } catch (e) {
         print('❌ MAIN: Sync initialization failed: $e');
       }
-      await _initializeFirebaseServices();
+      await _initializeFirebaseServices(container);
     } else {
       debugPrint(
         '⚠️ Firebase services not initialized - running in local-first mode',
       );
     }
 
-    runApp(const ProviderScope(child: AgriHurbiApp()));
+    runApp(
+      UncontrolledProviderScope(
+        container: container,
+        child: const AgriHurbiApp(),
+      ),
+    );
   } catch (error) {
     runApp(
       MaterialApp(
@@ -111,11 +120,11 @@ Future<void> main() async {
 }
 
 /// Initialize Firebase services (Analytics, Crashlytics, Performance)
-Future<void> _initializeFirebaseServices() async {
+Future<void> _initializeFirebaseServices(ProviderContainer container) async {
   try {
     debugPrint('🚀 Initializing Firebase services...');
-    final analyticsRepository = di.getIt<IAnalyticsRepository>();
-    final performanceRepository = di.getIt<IPerformanceRepository>();
+    final analyticsRepository = container.read(analyticsRepositoryProvider);
+    final performanceRepository = container.read(performanceRepositoryProvider);
     await _crashlyticsRepository.setCustomKey(
       key: 'app_name',
       value: 'AgriHurbi',

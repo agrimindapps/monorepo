@@ -5,7 +5,7 @@ import '../../domain/services/i_busca_metadata_service.dart';
 import '../datasources/i_busca_datasource.dart';
 
 /// Implementação do serviço de metadados de busca
-@LazySingleton(as: IBuscaMetadataService)
+
 class BuscaMetadataService implements IBuscaMetadataService {
   final IBuscaDatasource _datasource;
 

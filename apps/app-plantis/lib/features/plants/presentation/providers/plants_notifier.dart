@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide Column, getIt, SortBy;
+import 'package:core/core.dart' hide Column, SortBy;
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
@@ -10,7 +10,9 @@ import '../../domain/services/plants_filter_service.dart';
 import '../../domain/services/plants_sort_service.dart';
 import '../../domain/usecases/add_plant_usecase.dart';
 import '../../domain/usecases/delete_plant_usecase.dart';
+import '../../domain/usecases/get_plant_by_id_usecase.dart';
 import '../../domain/usecases/get_plants_usecase.dart';
+import '../../domain/usecases/search_plants_usecase.dart';
 import '../../domain/usecases/update_plant_usecase.dart';
 import 'plants_state.dart';
 
@@ -403,9 +405,8 @@ class PlantsNotifier extends _$PlantsNotifier {
         state = state.copyWith(
           plants: _applyFilters(state.plants.where((p) => p.id != id).toList()),
           searchResults: state.searchResults.where((p) => p.id != id).toList(),
-          selectedPlant: state.selectedPlant?.id == id
-              ? null
-              : state.selectedPlant,
+          selectedPlant:
+              state.selectedPlant?.id == id ? null : state.selectedPlant,
           isLoading: false,
         );
         return true;
@@ -500,17 +501,15 @@ class PlantsNotifier extends _$PlantsNotifier {
 
   /// Groups plants by spaces for grouped view
   Map<String?, List<Plant>> getPlantsGroupedBySpaces() {
-    final plantsToGroup = state.searchQuery.isNotEmpty
-        ? state.searchResults
-        : state.plants;
+    final plantsToGroup =
+        state.searchQuery.isNotEmpty ? state.searchResults : state.plants;
     return _filterService.groupPlantsBySpaces(plantsToGroup);
   }
 
   /// Gets the count of plants in each space
   Map<String?, int> getPlantCountsBySpace() {
-    final plantsToGroup = state.searchQuery.isNotEmpty
-        ? state.searchResults
-        : state.plants;
+    final plantsToGroup =
+        state.searchQuery.isNotEmpty ? state.searchResults : state.plants;
     return _filterService.getPlantCountsBySpace(plantsToGroup);
   }
 
@@ -527,4 +526,3 @@ class PlantsNotifier extends _$PlantsNotifier {
     return filtered;
   }
 }
-

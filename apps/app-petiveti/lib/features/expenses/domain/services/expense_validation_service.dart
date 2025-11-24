@@ -1,12 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../entities/expense.dart';
 
 /// Service responsible for expense-related validations
 /// Follows Single Responsibility Principle - only handles validation logic
-@lazySingleton
 class ExpenseValidationService {
   const ExpenseValidationService();
 

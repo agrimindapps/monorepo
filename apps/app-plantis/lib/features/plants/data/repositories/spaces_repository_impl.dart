@@ -8,7 +8,6 @@ import '../datasources/local/spaces_local_datasource.dart';
 import '../datasources/remote/spaces_remote_datasource.dart';
 import '../models/space_model.dart';
 
-@LazySingleton(as: SpacesRepository)
 class SpacesRepositoryImpl implements SpacesRepository {
   final SpacesLocalDatasource localDatasource;
   final SpacesRemoteDatasource remoteDatasource;

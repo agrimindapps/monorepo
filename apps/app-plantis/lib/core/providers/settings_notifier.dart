@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/services/plantis_notification_service.dart';
 import '../../features/settings/domain/entities/settings_entity.dart';
 import '../../features/settings/domain/repositories/i_settings_repository.dart';
+import 'repository_providers.dart';
 import 'settings_state.dart';
 
 part 'settings_notifier.g.dart';
@@ -12,7 +13,7 @@ part 'settings_notifier.g.dart';
 /// Provider do repositório de configurações (obtido via DI)
 @riverpod
 ISettingsRepository settingsRepository(SettingsRepositoryRef ref) {
-  return GetIt.instance<ISettingsRepository>();
+  return ref.watch(settingsRepositoryProvider);
 }
 
 /// Provider do serviço de notificações

@@ -1,6 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:firebase_storage/firebase_storage.dart' as storage;
 import 'package:core/core.dart';
 import 'failures.dart';
 
@@ -13,7 +10,7 @@ class ExceptionMapper {
     // Verificar tipos específicos ANTES de tipos genéricos
 
     // Firebase Auth exceptions (FirebaseAuthException extends FirebaseException)
-    if (exception is auth.FirebaseAuthException) {
+    if (exception is FirebaseAuthException) {
       return _mapFirebaseAuthException(exception, stackTrace);
     }
 
@@ -151,7 +148,7 @@ class ExceptionMapper {
 
   /// Mapeia Firebase Auth exceptions
   static Failure _mapFirebaseAuthException(
-    auth.FirebaseAuthException exception,
+    FirebaseAuthException exception,
     StackTrace? stackTrace,
   ) {
     final code = exception.code;
@@ -215,7 +212,7 @@ class ExceptionMapper {
 
   /// Mapeia Firebase Storage exceptions
   static Failure _mapFirebaseStorageException(
-    storage.FirebaseException exception,
+    FirebaseException exception,
     StackTrace? stackTrace,
   ) {
     final code = exception.code;

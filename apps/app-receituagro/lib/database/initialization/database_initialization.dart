@@ -12,14 +12,11 @@ class DatabaseInitialization {
   ///
   /// Deve ser chamado no main() antes de runApp()
   static Future<void> initialize({
-    required GetIt getIt,
+    required ReceituagroDatabase db,
   }) async {
     developer.log('🔧 Inicializando Drift Database...', name: 'DatabaseInit');
 
     try {
-      // 1. Obter instância do banco de dados (já registrado via @lazySingleton)
-      final db = getIt<ReceituagroDatabase>();
-
       // 2. Verificar se o banco foi criado corretamente
       final culturasCount = await _checkDatabase(db);
 

@@ -17,7 +17,6 @@ import 'const/revenuecat_const.dart';
 import 'core/services/admob_service.dart';
 import 'core/services/in_app_purchase_service.dart';
 import 'core/services/revenuecat_service.dart';
-import 'core/di/injection.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,8 +50,7 @@ void main() async {
     // App continues without Firebase - local storage works independently
   }
 
-  // Initialize DI (AFTER Firebase)
-  await configureDependencies();
+  // DI is now handled by Riverpod providers
 
   if (!kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.android ||

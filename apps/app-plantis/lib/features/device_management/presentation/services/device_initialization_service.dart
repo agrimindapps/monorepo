@@ -1,5 +1,5 @@
 import 'package:core/core.dart'
-    hide GetUserDevicesUseCase, GetUserDevicesParams, getIt;
+    hide GetUserDevicesUseCase, GetUserDevicesParams;
 
 import '../../domain/usecases/get_device_statistics_usecase.dart';
 import '../../domain/usecases/get_user_devices_usecase.dart';
@@ -13,8 +13,8 @@ class DeviceInitializationService {
   DeviceInitializationService({
     required GetUserDevicesUseCase getUserDevicesUseCase,
     required GetDeviceStatisticsUseCase getDeviceStatisticsUseCase,
-  }) : _getUserDevicesUseCase = getUserDevicesUseCase,
-       _getDeviceStatisticsUseCase = getDeviceStatisticsUseCase;
+  })  : _getUserDevicesUseCase = getUserDevicesUseCase,
+        _getDeviceStatisticsUseCase = getDeviceStatisticsUseCase;
 
   /// Carrega lista de dispositivos do usuário
   Future<Either<Failure, List<dynamic>>> loadUserDevices() async {

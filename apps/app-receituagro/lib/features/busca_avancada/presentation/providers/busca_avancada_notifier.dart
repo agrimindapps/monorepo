@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/providers/core_providers.dart';
 import '../../../../core/services/diagnostico_integration_service.dart';
 import '../../domain/entities/busca_entity.dart';
 import '../../domain/services/i_busca_metadata_service.dart';

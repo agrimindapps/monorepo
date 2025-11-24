@@ -2,10 +2,10 @@ import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 
 import '../../../../features/animals/domain/entities/animal.dart';
-import '../../../../features/animals/presentation/notifiers/animals_notifier.dart';
+import '../../../../features/animals/presentation/providers/animals_providers.dart';
 import '../../../../shared/widgets/form_components/form_components.dart';
 import '../../domain/entities/reminder.dart';
-import '../providers/reminders_provider.dart';
+import '../providers/reminders_providers.dart';
 
 class AddReminderForm extends ConsumerStatefulWidget {
   final Reminder? reminder;
@@ -331,11 +331,11 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
       bool success;
       if (widget.reminder != null) {
         success = await ref
-            .read(remindersProvider.notifier)
+            .read(remindersNotifierProvider.notifier)
             .updateReminder(reminder);
       } else {
         success = await ref
-            .read(remindersProvider.notifier)
+            .read(remindersNotifierProvider.notifier)
             .addReminder(reminder);
       }
 

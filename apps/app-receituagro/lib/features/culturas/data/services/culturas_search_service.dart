@@ -1,4 +1,4 @@
-import 'package:injectable/injectable.dart';
+
 
 import '../../domain/entities/cultura_entity.dart';
 
@@ -23,7 +23,7 @@ abstract class ICulturasSearchService {
 }
 
 /// Default implementation of search service
-@LazySingleton(as: ICulturasSearchService)
+
 class CulturasSearchService implements ICulturasSearchService {
   @override
   List<CulturaEntity> search(List<CulturaEntity> culturas, String query) {

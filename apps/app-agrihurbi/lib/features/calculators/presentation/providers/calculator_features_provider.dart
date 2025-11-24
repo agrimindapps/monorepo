@@ -15,7 +15,6 @@ final calculatorFeaturesProvider =
 ///
 /// Gerencia templates, favoritos, compartilhamento e histórico
 /// Complementa o CalculatorProvider com features específicas
-@singleton
 class CalculatorFeaturesProvider extends ChangeNotifier {
   late final CalculatorFavoritesService _favoritesService;
   late final CalculatorTemplateService _templateService;

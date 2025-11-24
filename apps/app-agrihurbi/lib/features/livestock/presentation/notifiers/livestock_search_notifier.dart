@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart';
+// import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/animal_base_entity.dart';
 import '../../domain/usecases/search_animals.dart' as search_use_case;
 import 'livestock_search_state.dart';
@@ -17,7 +17,8 @@ class LivestockSearchNotifier extends _$LivestockSearchNotifier {
 
   @override
   LivestockSearchState build() {
-    _searchAnimals = getIt<search_use_case.SearchAnimalsUseCase>();
+    // TODO: Replace getIt calls with Riverpod providers
+    // _searchAnimals = getIt<search_use_case.SearchAnimalsUseCase>();
     return const LivestockSearchState();
   }
 

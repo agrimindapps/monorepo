@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../features/plants/domain/entities/space.dart';
 import '../../features/plants/domain/usecases/spaces_usecases.dart';
+import 'repository_providers.dart';
 
 part 'spaces_providers.g.dart';
 
@@ -268,25 +269,25 @@ class SpacesNotifier extends _$SpacesNotifier {
 
 @riverpod
 GetSpacesUseCase getSpacesUseCase(GetSpacesUseCaseRef ref) {
-  return GetIt.instance<GetSpacesUseCase>();
+  return GetSpacesUseCase(ref.watch(spacesRepositoryProvider));
 }
 
 @riverpod
 GetSpaceByIdUseCase getSpaceByIdUseCase(GetSpaceByIdUseCaseRef ref) {
-  return GetIt.instance<GetSpaceByIdUseCase>();
+  return GetSpaceByIdUseCase(ref.watch(spacesRepositoryProvider));
 }
 
 @riverpod
 AddSpaceUseCase addSpaceUseCase(AddSpaceUseCaseRef ref) {
-  return GetIt.instance<AddSpaceUseCase>();
+  return AddSpaceUseCase(ref.watch(spacesRepositoryProvider));
 }
 
 @riverpod
 UpdateSpaceUseCase updateSpaceUseCase(UpdateSpaceUseCaseRef ref) {
-  return GetIt.instance<UpdateSpaceUseCase>();
+  return UpdateSpaceUseCase(ref.watch(spacesRepositoryProvider));
 }
 
 @riverpod
 DeleteSpaceUseCase deleteSpaceUseCase(DeleteSpaceUseCaseRef ref) {
-  return GetIt.instance<DeleteSpaceUseCase>();
+  return DeleteSpaceUseCase(ref.watch(spacesRepositoryProvider));
 }

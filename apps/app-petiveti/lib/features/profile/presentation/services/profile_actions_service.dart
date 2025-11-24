@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../shared/widgets/dialogs/app_dialogs.dart';
 
@@ -15,7 +14,6 @@ import '../../../../shared/widgets/dialogs/app_dialogs.dart';
 /// final actionsService = getIt<ProfileActionsService>();
 /// actionsService.showNotificationsSettings(context);
 /// ```
-@lazySingleton
 class ProfileActionsService {
   /// Shows coming soon dialog for features under development
   void showComingSoonDialog(BuildContext context, String title) {

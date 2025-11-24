@@ -8,7 +8,7 @@ import 'i_diagnosticos_metadata_service.dart';
 ///
 /// Extracts unique values and metadata from diagnosticos
 /// for UI components, filters, and analytics.
-@Injectable(as: IDiagnosticosMetadataService)
+
 class DiagnosticosMetadataService implements IDiagnosticosMetadataService {
   final IDiagnosticosRepository _repository;
 

@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -13,7 +12,6 @@ import '../services/animal_validation_service.dart';
 /// - **Single Responsibility**: Only handles updating animals
 /// - **Dependency Inversion**: Depends on abstractions (repository, services)
 /// - **Open/Closed**: Validation logic extracted to service
-@lazySingleton
 class UpdateAnimal extends UseCase<void, Animal> {
   final AnimalRepository repository;
   final AnimalValidationService validationService;

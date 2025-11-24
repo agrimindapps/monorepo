@@ -5,7 +5,6 @@ import '../../../core/utils/typedef.dart';
 import 'auth_repository.dart';
 import 'user_entity.dart';
 
-@lazySingleton
 class UpdateProfile extends UseCaseWithParams<void, UpdateProfileParams> {
   const UpdateProfile(this._repository);
 

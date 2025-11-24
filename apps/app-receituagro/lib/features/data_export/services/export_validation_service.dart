@@ -1,10 +1,10 @@
-import 'package:injectable/injectable.dart';
+
 
 import '../domain/entities/export_request.dart';
 
 /// Service specialized in validating export requests
 /// Principle: Single Responsibility - Only handles validation logic
-@lazySingleton
+
 class ExportValidationService {
   /// Validates if user can request a new export
   bool canRequestExport({

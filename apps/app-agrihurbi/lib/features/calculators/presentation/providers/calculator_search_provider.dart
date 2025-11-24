@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+
 
 import '../../domain/entities/calculator_category.dart';
 import '../../domain/entities/calculator_entity.dart';
@@ -9,7 +9,6 @@ import '../../domain/usecases/get_calculators.dart';
 /// 
 /// Responsabilidade única: Gerenciar busca e filtros de calculadoras
 /// Seguindo Single Responsibility Principle
-@singleton
 class CalculatorSearchProvider extends ChangeNotifier {
   final SearchCalculators _searchCalculators;
 

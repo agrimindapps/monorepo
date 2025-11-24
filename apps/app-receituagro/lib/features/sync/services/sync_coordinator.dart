@@ -15,7 +15,7 @@ import '../../../database/sync/adapters/favoritos_drift_sync_adapter.dart';
 /// - Monitora conectividade
 /// - Dispara sincronização periódica
 /// - Gerencia ciclo de vida dos adapters
-@lazySingleton
+
 class SyncCoordinator {
   final ConnectivityService _connectivityService;
   final FavoritosDriftSyncAdapter _favoritosAdapter;

@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../../../../../core/constants/app_constants.dart';
 import '../../../../../core/services/localstorage_service.dart';
@@ -32,7 +31,6 @@ abstract class TermosLocalDataSource {
 
 /// Implementation of local termos data source
 /// Coordinates between database assets and local storage
-@LazySingleton(as: TermosLocalDataSource)
 class TermosLocalDataSourceImpl implements TermosLocalDataSource {
   final DatabaseDataSource _databaseDataSource;
   final LocalStorageService _localStorageService;

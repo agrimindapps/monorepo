@@ -6,7 +6,7 @@ import '../tables/receituagro_tables.dart';
 /// Repositório de Comentários usando Drift
 ///
 /// Gerencia comentários dos usuários vinculados a items
-@lazySingleton
+
 class ComentarioRepository
     extends BaseDriftRepositoryImpl<ComentarioData, Comentario> {
   ComentarioRepository(this._db);

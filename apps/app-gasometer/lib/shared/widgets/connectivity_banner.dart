@@ -1,18 +1,18 @@
-import 'package:core/core.dart' show ConnectivityService;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/di/injection_container.dart';
+import '../../core/providers/dependency_providers.dart';
 
 /// Banner widget that displays connectivity status
 ///
 /// Shows a warning banner when the device is offline
 /// Provides a retry button to force connectivity check
-class ConnectivityBanner extends StatelessWidget {
+class ConnectivityBanner extends ConsumerWidget {
   const ConnectivityBanner({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final connectivityService = getIt<ConnectivityService>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final connectivityService = ref.watch(connectivityServiceProvider);
 
     return StreamBuilder<bool>(
       stream: connectivityService.connectivityStream,
@@ -70,7 +70,8 @@ class ConnectivityBanner extends StatelessWidget {
 extension ConnectivityBannerExtension on BuildContext {
   /// Show connectivity banner if offline
   void showConnectivityBanner() {
-    final connectivityService = getIt<ConnectivityService>();
+    final container = ProviderScope.containerOf(this, listen: false);
+    final connectivityService = container.read(connectivityServiceProvider);
 
     connectivityService.isOnline().then((result) {
       result.fold(

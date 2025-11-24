@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 /// Exceção lançada quando o rate limit é excedido
 class RateLimitException implements Exception {
@@ -52,7 +51,6 @@ class RateLimitConfig {
 /// await _rateLimiter.checkLimit('fetch_plants');
 /// final result = await firestore.collection('plants').get();
 /// ```
-@singleton
 class RateLimiterService {
   /// Timestamp do último request por endpoint (para throttling)
   final Map<String, DateTime> _lastRequestTimes = {};

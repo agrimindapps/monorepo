@@ -1,9 +1,7 @@
 import 'dart:convert';
 
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-@lazySingleton
 class LocalStorageService {
   Future<List<String>> setUltimoAcessado(String box, String id) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../database/petiveti_database.dart';
 import '../models/weight_model.dart';
@@ -34,7 +33,6 @@ abstract class WeightLocalDataSource {
   Stream<List<WeightModel>> watchWeightsByAnimalId(String animalId);
 }
 
-@LazySingleton(as: WeightLocalDataSource)
 class WeightLocalDataSourceImpl implements WeightLocalDataSource {
   final PetivetiDatabase _database;
 

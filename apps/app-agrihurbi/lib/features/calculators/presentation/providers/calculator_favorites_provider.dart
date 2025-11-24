@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+
 
 import '../../domain/entities/calculator_entity.dart';
 import '../../domain/usecases/manage_favorites.dart';
@@ -8,7 +8,6 @@ import '../../domain/usecases/manage_favorites.dart';
 /// 
 /// Responsabilidade única: Gerenciar favoritos de calculadoras
 /// Seguindo Single Responsibility Principle
-@singleton
 class CalculatorFavoritesProvider extends ChangeNotifier {
   final ManageFavorites _manageFavorites;
 

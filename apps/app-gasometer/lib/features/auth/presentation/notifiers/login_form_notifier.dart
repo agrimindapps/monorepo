@@ -1,9 +1,11 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/usecases/sign_in_anonymously.dart';
 import '../../domain/usecases/sign_in_with_email.dart';
 import '../../domain/usecases/sign_up_with_email.dart';
+import '../providers/auth_usecase_providers.dart';
 import 'login_form_state.dart';
 
 part 'login_form_notifier.g.dart';
@@ -25,9 +27,9 @@ class LoginFormNotifier extends _$LoginFormNotifier {
     passwordController = TextEditingController();
     nameController = TextEditingController();
     confirmPasswordController = TextEditingController();
-    _signInWithEmail = getIt<SignInWithEmail>();
-    _signUpWithEmail = getIt<SignUpWithEmail>();
-    _signInAnonymously = getIt<SignInAnonymously>();
+    _signInWithEmail = ref.watch(signInWithEmailProvider);
+    _signUpWithEmail = ref.watch(signUpWithEmailProvider);
+    _signInAnonymously = ref.watch(signInAnonymouslyProvider);
     ref.onDispose(() {
       emailController.dispose();
       passwordController.dispose();
@@ -311,6 +313,7 @@ class LoginFormNotifier extends _$LoginFormNotifier {
 
       state = state.copyWith(rememberMe: savedRememberMe);
     } catch (e) {
+      // Ignore errors loading saved preferences
     }
   }
 
@@ -337,6 +340,7 @@ class LoginFormNotifier extends _$LoginFormNotifier {
 
       await prefs.setBool('gasometer_remember_me', state.rememberMe);
     } catch (e) {
+      // Ignore errors saving preferences
     }
   }
 }

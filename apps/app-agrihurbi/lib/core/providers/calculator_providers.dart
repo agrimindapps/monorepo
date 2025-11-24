@@ -1,7 +1,7 @@
 import 'package:core/core.dart' show Ref;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../core/di/injection_container.dart' as di;
+// import '../../core/di/injection_container.dart' as di; // Commented out - migrating to Riverpod
 import '../../features/calculators/domain/entities/calculation_history.dart';
 import '../../features/calculators/domain/entities/calculation_result.dart';
 import '../../features/calculators/domain/entities/calculation_template.dart';
@@ -211,12 +211,13 @@ class CalculatorNotifier extends _$CalculatorNotifier {
 
   @override
   CalculatorState build() {
-    _getCalculators = di.getIt<GetCalculators>();
-    _getCalculatorById = di.getIt<GetCalculatorById>();
-    _executeCalculation = di.getIt<ExecuteCalculation>();
-    _getCalculationHistory = di.getIt<GetCalculationHistory>();
-    _saveCalculationToHistory = di.getIt<SaveCalculationToHistory>();
-    _manageFavorites = di.getIt<ManageFavorites>();
+    // TODO: Replace getIt calls with Riverpod providers
+    // _getCalculators = di.getIt<GetCalculators>();
+    // _getCalculatorById = di.getIt<GetCalculatorById>();
+    // _executeCalculation = di.getIt<ExecuteCalculation>();
+    // _getCalculationHistory = di.getIt<GetCalculationHistory>();
+    // _saveCalculationToHistory = di.getIt<SaveCalculationToHistory>();
+    // _manageFavorites = di.getIt<ManageFavorites>();
 
     return const CalculatorState();
   }
@@ -522,7 +523,8 @@ class CalculatorExecutionNotifier extends _$CalculatorExecutionNotifier {
 
   @override
   CalculatorExecutionState build() {
-    _executeCalculation = di.getIt<ExecuteCalculation>();
+    // TODO: Replace getIt calls with Riverpod providers
+    // _executeCalculation = di.getIt<ExecuteCalculation>();
     return const CalculatorExecutionState();
   }
 
@@ -668,8 +670,9 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
 
   @override
   CalculatorFeaturesState build() {
-    _favoritesService = di.getIt<CalculatorFavoritesService>();
-    _templateService = di.getIt<CalculatorTemplateService>();
+    // TODO: Replace getIt calls with Riverpod providers
+    // _favoritesService = di.getIt<CalculatorFavoritesService>();
+    // _templateService = di.getIt<CalculatorTemplateService>();
     return const CalculatorFeaturesState();
   }
 

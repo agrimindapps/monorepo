@@ -1,15 +1,12 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/bovine_entity.dart';
 
 /// Provider especializado para filtros de bovinos
-/// 
+///
 /// Responsabilidade única: Gerenciar filtros e filtragem de bovinos
 /// Seguindo Single Responsibility Principle
-@singleton
 class BovinesFilterProvider extends ChangeNotifier {
-  
   /// Filtros ativos
   String _searchQuery = '';
   String? _selectedBreed;
@@ -17,32 +14,32 @@ class BovinesFilterProvider extends ChangeNotifier {
   BovineAptitude? _selectedAptitude;
   BreedingSystem? _selectedBreedingSystem;
   bool _onlyActive = true;
-  
+
   /// Cache de valores únicos para filtros
   final Set<String> _availableBreeds = {};
   final Set<String> _availableCountries = {};
-  
+
   String get searchQuery => _searchQuery;
   String? get selectedBreed => _selectedBreed;
   String? get selectedOriginCountry => _selectedOriginCountry;
   BovineAptitude? get selectedAptitude => _selectedAptitude;
   BreedingSystem? get selectedBreedingSystem => _selectedBreedingSystem;
   bool get onlyActive => _onlyActive;
-  
+
   List<String> get availableBreeds => _availableBreeds.toList()..sort();
   List<String> get availableCountries => _availableCountries.toList()..sort();
   List<BovineAptitude> get availableAptitudes => BovineAptitude.values;
   List<BreedingSystem> get availableBreedingSystems => BreedingSystem.values;
-  
+
   /// Verifica se algum filtro está ativo
-  bool get hasActiveFilters => 
-    _searchQuery.isNotEmpty ||
-    _selectedBreed != null ||
-    _selectedOriginCountry != null ||
-    _selectedAptitude != null ||
-    _selectedBreedingSystem != null ||
-    !_onlyActive;
-    
+  bool get hasActiveFilters =>
+      _searchQuery.isNotEmpty ||
+      _selectedBreed != null ||
+      _selectedOriginCountry != null ||
+      _selectedAptitude != null ||
+      _selectedBreedingSystem != null ||
+      !_onlyActive;
+
   /// Conta quantos filtros estão ativos
   int get activeFiltersCount {
     int count = 0;
@@ -59,7 +56,7 @@ class BovinesFilterProvider extends ChangeNotifier {
   void updateAvailableValues(List<BovineEntity> bovines) {
     _availableBreeds.clear();
     _availableCountries.clear();
-    
+
     for (final bovine in bovines) {
       _availableBreeds.add(bovine.breed);
       _availableCountries.add(bovine.originCountry);
@@ -67,10 +64,11 @@ class BovinesFilterProvider extends ChangeNotifier {
     if (_selectedBreed != null && !_availableBreeds.contains(_selectedBreed)) {
       _selectedBreed = null;
     }
-    if (_selectedOriginCountry != null && !_availableCountries.contains(_selectedOriginCountry)) {
+    if (_selectedOriginCountry != null &&
+        !_availableCountries.contains(_selectedOriginCountry)) {
       _selectedOriginCountry = null;
     }
-    
+
     notifyListeners();
   }
 
@@ -82,27 +80,36 @@ class BovinesFilterProvider extends ChangeNotifier {
     }
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
-      filtered = filtered.where((bovine) =>
-        bovine.commonName.toLowerCase().contains(query) ||
-        bovine.breed.toLowerCase().contains(query) ||
-        bovine.registrationId.toLowerCase().contains(query)
-      ).toList();
+      filtered = filtered
+          .where((bovine) =>
+              bovine.commonName.toLowerCase().contains(query) ||
+              bovine.breed.toLowerCase().contains(query) ||
+              bovine.registrationId.toLowerCase().contains(query))
+          .toList();
     }
     if (_selectedBreed != null) {
-      filtered = filtered.where((bovine) => 
-        bovine.breed.toLowerCase().contains(_selectedBreed!.toLowerCase())
-      ).toList();
+      filtered = filtered
+          .where((bovine) => bovine.breed
+              .toLowerCase()
+              .contains(_selectedBreed!.toLowerCase()))
+          .toList();
     }
     if (_selectedOriginCountry != null) {
-      filtered = filtered.where((bovine) => 
-        bovine.originCountry.toLowerCase().contains(_selectedOriginCountry!.toLowerCase())
-      ).toList();
+      filtered = filtered
+          .where((bovine) => bovine.originCountry
+              .toLowerCase()
+              .contains(_selectedOriginCountry!.toLowerCase()))
+          .toList();
     }
     if (_selectedAptitude != null) {
-      filtered = filtered.where((bovine) => bovine.aptitude == _selectedAptitude).toList();
+      filtered = filtered
+          .where((bovine) => bovine.aptitude == _selectedAptitude)
+          .toList();
     }
     if (_selectedBreedingSystem != null) {
-      filtered = filtered.where((bovine) => bovine.breedingSystem == _selectedBreedingSystem).toList();
+      filtered = filtered
+          .where((bovine) => bovine.breedingSystem == _selectedBreedingSystem)
+          .toList();
     }
 
     return filtered;
@@ -119,35 +126,40 @@ class BovinesFilterProvider extends ChangeNotifier {
   void updateBreedFilter(String? breed) {
     _selectedBreed = breed;
     notifyListeners();
-    debugPrint('BovinesFilterProvider: Filtro de raça atualizado - ${breed ?? "nenhum"}');
+    debugPrint(
+        'BovinesFilterProvider: Filtro de raça atualizado - ${breed ?? "nenhum"}');
   }
 
   /// Atualiza filtro de país de origem
   void updateOriginCountryFilter(String? country) {
     _selectedOriginCountry = country;
     notifyListeners();
-    debugPrint('BovinesFilterProvider: Filtro de país atualizado - ${country ?? "nenhum"}');
+    debugPrint(
+        'BovinesFilterProvider: Filtro de país atualizado - ${country ?? "nenhum"}');
   }
 
   /// Atualiza filtro de aptidão
   void updateAptitudeFilter(BovineAptitude? aptitude) {
     _selectedAptitude = aptitude;
     notifyListeners();
-    debugPrint('BovinesFilterProvider: Filtro de aptidão atualizado - ${aptitude?.name ?? "nenhum"}');
+    debugPrint(
+        'BovinesFilterProvider: Filtro de aptidão atualizado - ${aptitude?.name ?? "nenhum"}');
   }
 
   /// Atualiza filtro de sistema de criação
   void updateBreedingSystemFilter(BreedingSystem? system) {
     _selectedBreedingSystem = system;
     notifyListeners();
-    debugPrint('BovinesFilterProvider: Filtro de sistema atualizado - ${system?.name ?? "nenhum"}');
+    debugPrint(
+        'BovinesFilterProvider: Filtro de sistema atualizado - ${system?.name ?? "nenhum"}');
   }
 
   /// Atualiza filtro de status ativo
   void updateActiveFilter(bool onlyActive) {
     _onlyActive = onlyActive;
     notifyListeners();
-    debugPrint('BovinesFilterProvider: Filtro de ativos atualizado - $onlyActive');
+    debugPrint(
+        'BovinesFilterProvider: Filtro de ativos atualizado - $onlyActive');
   }
 
   /// Limpa todos os filtros
@@ -189,37 +201,37 @@ class BovinesFilterProvider extends ChangeNotifier {
     bool? onlyActive,
   }) {
     bool changed = false;
-    
+
     if (searchQuery != null && searchQuery != _searchQuery) {
       _searchQuery = searchQuery;
       changed = true;
     }
-    
+
     if (breed != _selectedBreed) {
       _selectedBreed = breed;
       changed = true;
     }
-    
+
     if (originCountry != _selectedOriginCountry) {
       _selectedOriginCountry = originCountry;
       changed = true;
     }
-    
+
     if (aptitude != _selectedAptitude) {
       _selectedAptitude = aptitude;
       changed = true;
     }
-    
+
     if (breedingSystem != _selectedBreedingSystem) {
       _selectedBreedingSystem = breedingSystem;
       changed = true;
     }
-    
+
     if (onlyActive != null && onlyActive != _onlyActive) {
       _onlyActive = onlyActive;
       changed = true;
     }
-    
+
     if (changed) {
       notifyListeners();
       debugPrint('BovinesFilterProvider: Múltiplos filtros atualizados');
@@ -249,14 +261,14 @@ class BovinesFilterProvider extends ChangeNotifier {
         orElse: () => BovineAptitude.values.first,
       );
     }
-    
+
     if (filters['selectedBreedingSystem'] != null) {
       _selectedBreedingSystem = BreedingSystem.values.firstWhere(
         (system) => system.name == filters['selectedBreedingSystem'],
         orElse: () => BreedingSystem.values.first,
       );
     }
-    
+
     _onlyActive = (filters['onlyActive'] as bool?) ?? true;
     notifyListeners();
     debugPrint('BovinesFilterProvider: Filtros restaurados');

@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+import '../storage/shared_preferences_local_storage.dart';
 
 import '../../features/animals/domain/entities/sync/animal_sync_entity.dart';
 import '../../features/appointments/domain/entities/sync/appointment_sync_entity.dart';
@@ -55,10 +57,13 @@ class PetivetiSyncService {
         'Initializing PetivetiSyncService with config: ${_config!}',
         name: 'PetivetiSync',
       );
+      final prefs = await SharedPreferences.getInstance();
+      final localStorage = PetivetiSharedPreferencesLocalStorage(prefs);
       final result = await UnifiedSyncManager.instance.initializeApp(
         appName: _config!.appSyncConfig.appName,
         config: _config!.appSyncConfig,
         entities: _config!.entityRegistrations,
+        localStorage: localStorage,
       );
 
       if (result.isLeft()) {

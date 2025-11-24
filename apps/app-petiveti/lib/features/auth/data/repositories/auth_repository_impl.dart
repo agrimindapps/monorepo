@@ -1,12 +1,11 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/logging/entities/log_entry.dart';
-import '../../../../core/logging/mixins/loggable_repository_mixin.dart';
+import '../../../../core/interfaces/logging_service.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_local_datasource.dart';
@@ -14,20 +13,96 @@ import '../datasources/auth_remote_datasource.dart';
 import '../models/user_model.dart';
 import '../services/auth_error_handling_service.dart';
 
-@LazySingleton(as: AuthRepository)
-class AuthRepositoryImpl
-    with LoggableRepositoryMixin
-    implements AuthRepository {
+class AuthRepositoryImpl implements AuthRepository {
   final AuthLocalDataSource localDataSource;
   final AuthRemoteDataSource remoteDataSource;
   final AuthErrorHandlingService errorHandlingService;
-  StreamSubscription<UserModel?>? _authStateSubscription;
+  final ILoggingService loggingService;
+  StreamSubscription<User?>? _authStateSubscription;
 
   AuthRepositoryImpl({
     required this.localDataSource,
     required this.remoteDataSource,
     required this.errorHandlingService,
+    required this.loggingService,
   });
+
+  // Helper methods to replace mixin
+  Future<T> logTimedOperation<T>({
+    required String context,
+    required String operation,
+    required String message,
+    required Future<T> Function() operationFunction,
+    Map<String, dynamic>? metadata,
+  }) async {
+    return await loggingService.logTimedOperation<T>(
+      context: context,
+      operation: operation,
+      message: message,
+      operationFunction: operationFunction,
+      metadata: metadata,
+    );
+  }
+
+  Future<void> logOperationStart({
+    required String context,
+    required String operation,
+    required String message,
+    Map<String, dynamic>? metadata,
+  }) async {
+    await loggingService.logInfo(
+      context: context,
+      operation: operation,
+      message: 'Starting $message',
+      metadata: metadata,
+    );
+  }
+
+  Future<void> logOperationSuccess({
+    required String context,
+    required String operation,
+    required String message,
+    Map<String, dynamic>? metadata,
+  }) async {
+    await loggingService.logInfo(
+      context: context,
+      operation: operation,
+      message: 'Successfully completed $message',
+      metadata: metadata,
+    );
+  }
+
+  Future<void> logOperationError({
+    required String context,
+    required String operation,
+    required String message,
+    required dynamic error,
+    StackTrace? stackTrace,
+    Map<String, dynamic>? metadata,
+  }) async {
+    await loggingService.logError(
+      context: context,
+      operation: operation,
+      message: 'Failed to $message',
+      error: error,
+      stackTrace: stackTrace,
+      metadata: metadata,
+    );
+  }
+
+  Future<void> logLocalStorageOperation({
+    required String context,
+    required String operation,
+    required String message,
+    Map<String, dynamic>? metadata,
+  }) async {
+    await loggingService.logInfo(
+      context: 'storage',
+      operation: operation,
+      message: 'Local storage: $message',
+      metadata: {'original_context': context, ...?metadata},
+    );
+  }
 
   @override
   Future<Either<Failure, User>> signInWithEmail(

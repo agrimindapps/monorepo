@@ -1,4 +1,4 @@
-import 'package:injectable/injectable.dart';
+// ignore_for_file: dangling_library_doc_comments
 
 /// Serviço para formatação de dados de monitoramento
 ///
@@ -6,7 +6,7 @@ import 'package:injectable/injectable.dart';
 /// - Centraliza toda lógica de formatação de tempo e métricas
 /// - Facilita testes unitários
 /// - Reutilizável em toda a feature de monitoring
-@lazySingleton
+
 class MonitoringFormatterService {
   /// Formata timestamp relativo (ex: "2min atrás", "3h atrás")
   String formatRelativeTime(DateTime dateTime) {

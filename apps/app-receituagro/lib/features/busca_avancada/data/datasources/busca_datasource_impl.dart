@@ -1,4 +1,4 @@
-import 'package:injectable/injectable.dart';
+
 
 import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../database/repositories/diagnostico_repository.dart';
@@ -7,7 +7,7 @@ import '../../../../database/repositories/pragas_repository.dart';
 import 'i_busca_datasource.dart';
 
 /// Implementação do datasource de busca usando repositories existentes
-@LazySingleton(as: IBuscaDatasource)
+
 class BuscaDatasourceImpl implements IBuscaDatasource {
   final CulturasRepository _culturaRepo;
   final PragasRepository _pragasRepo;

@@ -18,7 +18,6 @@ class UpdateTTSSettingsParams {
 }
 
 /// Use case for updating TTS settings
-@injectable
 class UpdateTTSSettings {
   final SettingsRepository _repository;
 

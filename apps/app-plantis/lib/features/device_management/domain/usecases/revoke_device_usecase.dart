@@ -1,14 +1,13 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../data/models/device_model.dart';
-import '../repositories/device_repository.dart';
 
 /// Use case para revogar dispositivos no app-plantis
 /// Gerencia revogação individual e em massa com controle de segurança
 class RevokeDeviceUseCase {
-  final DeviceRepository _deviceRepository;
+  final IDeviceRepository _deviceRepository;
   final AuthStateNotifier _authStateNotifier;
 
   RevokeDeviceUseCase(this._deviceRepository, this._authStateNotifier);
@@ -110,7 +109,7 @@ class RevokeDeviceUseCase {
 
 /// Use case para revogar todos os outros dispositivos exceto o atual
 class RevokeAllOtherDevicesUseCase {
-  final DeviceRepository _deviceRepository;
+  final IDeviceRepository _deviceRepository;
   final AuthStateNotifier _authStateNotifier;
 
   RevokeAllOtherDevicesUseCase(this._deviceRepository, this._authStateNotifier);
@@ -153,10 +152,9 @@ class RevokeAllOtherDevicesUseCase {
       final devicesResult = await _deviceRepository.getUserDevices(userId);
       final deviceCount = devicesResult.fold(
         (failure) => 0,
-        (devices) =>
-            devices
-                .where((d) => d.isActive && d.uuid != currentDeviceUuid)
-                .length,
+        (devices) => devices
+            .where((d) => d.isActive && d.uuid != currentDeviceUuid)
+            .length,
       );
 
       if (deviceCount == 0) {
@@ -193,10 +191,9 @@ class RevokeAllOtherDevicesUseCase {
             );
           }
 
-          final message =
-              deviceCount == 1
-                  ? '1 dispositivo foi revogado'
-                  : '$deviceCount dispositivos foram revogados';
+          final message = deviceCount == 1
+              ? '1 dispositivo foi revogado'
+              : '$deviceCount dispositivos foram revogados';
 
           return Right(
             RevokeAllResult(revokedCount: deviceCount, message: message),

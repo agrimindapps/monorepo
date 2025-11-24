@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:core/core.dart' show injectable;
 import 'package:flutter/foundation.dart';
 
 import 'app_error.dart';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/services/diagnostico_entity_resolver_drift.dart';
 import '../../../../core/theme/spacing_tokens.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../providers/enhanced_diagnosticos_praga_notifier.dart';
@@ -107,8 +108,8 @@ class _EnhancedDiagnosticosPragaWidgetState
                 Text(
                   'Diagnósticos para ${widget.pragaName}',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 if (state.hasData) ...[
                   const SizedBox(height: 4),
@@ -117,10 +118,10 @@ class _EnhancedDiagnosticosPragaWidgetState
                         ? '${stats.filtered} de ${stats.total} diagnósticos'
                         : '${stats.total} diagnósticos em ${stats.groups} culturas',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
-                    ),
+                          color: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
+                        ),
                   ),
                 ],
               ],
@@ -134,10 +135,10 @@ class _EnhancedDiagnosticosPragaWidgetState
               onPressed: state.isLoading
                   ? null
                   : () => ref
-                        .read(
-                          enhancedDiagnosticosPragaNotifierProvider.notifier,
-                        )
-                        .refresh(),
+                      .read(
+                        enhancedDiagnosticosPragaNotifierProvider.notifier,
+                      )
+                      .refresh(),
               tooltip: 'Atualizar dados',
             ),
           ],
@@ -151,8 +152,8 @@ class _EnhancedDiagnosticosPragaWidgetState
     final color = hitRate > 80
         ? Colors.green
         : hitRate > 50
-        ? Colors.orange
-        : Colors.red;
+            ? Colors.orange
+            : Colors.red;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -462,9 +463,9 @@ class _EnhancedDiagnosticosPragaWidgetState
             child: Text(
               cultura,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).primaryColor,
-              ),
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).primaryColor,
+                  ),
             ),
           ),
           Container(
@@ -505,23 +506,27 @@ class _EnhancedDiagnosticosPragaWidgetState
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      diagnostico.displayDefensivo,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                    child: FutureBuilder<String?>(
+                      future: DiagnosticoEntityResolver.instance
+                          .resolveDefensivoNome(diagnostico.idDefensivo),
+                      builder: (context, snapshot) {
+                        return Text(
+                          snapshot.data ?? 'Carregando...',
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        );
+                      },
                     ),
                   ),
                 ],
               ),
-
               const SizedBox(height: SpacingTokens.xs),
-
               Text(
                 'Dosagem: ${diagnostico.dosagem.displayDosagem}',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-
               if (diagnostico.aplicacao.isValid) ...[
                 const SizedBox(height: 2),
                 Text(
@@ -529,9 +534,7 @@ class _EnhancedDiagnosticosPragaWidgetState
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
-
               const SizedBox(height: SpacingTokens.xs),
-
               Row(
                 children: [
                   _buildCompletudeChip(diagnostico.completude),
@@ -580,13 +583,28 @@ class _EnhancedDiagnosticosPragaWidgetState
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(diagnostico.displayDefensivo),
+        title: FutureBuilder<String?>(
+          future: DiagnosticoEntityResolver.instance
+              .resolveDefensivoNome(diagnostico.idDefensivo),
+          builder: (context, snapshot) =>
+              Text(snapshot.data ?? 'Carregando...'),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Cultura: ${diagnostico.displayCultura}'),
-            Text('Praga: ${diagnostico.displayPraga}'),
+            FutureBuilder<String?>(
+              future: DiagnosticoEntityResolver.instance
+                  .resolveCulturaNome(diagnostico.idCultura),
+              builder: (context, snapshot) =>
+                  Text('Cultura: ${snapshot.data ?? 'Carregando...'}'),
+            ),
+            FutureBuilder<String?>(
+              future: DiagnosticoEntityResolver.instance
+                  .resolvePragaNome(diagnostico.idPraga),
+              builder: (context, snapshot) =>
+                  Text('Praga: ${snapshot.data ?? 'Carregando...'}'),
+            ),
             Text('Dosagem: ${diagnostico.dosagem.displayDosagem}'),
             Text('Completude: ${diagnostico.completude.displayName}'),
           ],

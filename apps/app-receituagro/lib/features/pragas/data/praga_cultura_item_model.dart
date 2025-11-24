@@ -1,5 +1,4 @@
-import 'package:app_receituagro/core/di/injection.dart' as di;
-import '../domain/services/i_pragas_type_service.dart';
+import '../data/services/pragas_type_service.dart';
 
 class PragaCulturaItemModel {
   final String idReg;
@@ -31,7 +30,7 @@ class PragaCulturaItemModel {
 
   /// Refactored to use IPragasTypeService (SOLID compliance)
   String get displayType {
-    final typeService = di.getIt<IPragasTypeService>();
+    final typeService = PragasTypeService();
     return typeService.getTypeLabel(tipoPraga ?? '');
   }
 

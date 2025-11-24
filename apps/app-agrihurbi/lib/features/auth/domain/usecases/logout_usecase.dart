@@ -6,7 +6,6 @@ import '../repositories/auth_repository.dart';
 /// 
 /// Implementa UseCase que não retorna dados, apenas confirmação de sucesso
 /// Inclui limpeza de cache, sessões e dados sensíveis
-@lazySingleton
 class LogoutUseCase implements UseCase<void, LogoutParams> {
   final AuthRepository repository;
   

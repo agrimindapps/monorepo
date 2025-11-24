@@ -1,9 +1,10 @@
-import 'package:core/core.dart' hide test;
+import 'package:core/core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gasometer_drift/features/fuel/domain/services/fuel_supply_id_reconciliation_service.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockLocalStorageRepository extends Mock implements ILocalStorageRepository {}
+class MockLocalStorageRepository extends Mock
+    implements ILocalStorageRepository {}
 
 void main() {
   late FuelSupplyIdReconciliationService service;
@@ -44,7 +45,9 @@ void main() {
             ));
       });
 
-      test('should successfully reconcile when local record exists and no duplicate', () async {
+      test(
+          'should successfully reconcile when local record exists and no duplicate',
+          () async {
         // Arrange
         when(() => mockLocalStorage.get<Map<String, dynamic>>(
               key: localId,
@@ -151,16 +154,18 @@ void main() {
         expect(result.isRight(), true);
 
         // Verify that newer record was saved
-        final captured = verify(() => mockLocalStorage.save<Map<String, dynamic>>(
-              key: remoteId,
-              data: captureAny(named: 'data'),
-              box: 'fuel_records',
-            )).captured;
+        final captured =
+            verify(() => mockLocalStorage.save<Map<String, dynamic>>(
+                  key: remoteId,
+                  data: captureAny(named: 'data'),
+                  box: 'fuel_records',
+                )).captured;
 
         expect(captured.length, 1);
         final savedMap = captured.first as Map<String, dynamic>;
         expect(savedMap['liters'], 50.0); // Newer value preserved
-        expect(savedMap['updatedAt'], DateTime(2024, 1, 20).millisecondsSinceEpoch);
+        expect(savedMap['updatedAt'],
+            DateTime(2024, 1, 20).millisecondsSinceEpoch);
       });
 
       test('should handle error when saving reconciled record fails', () async {
@@ -211,9 +216,10 @@ void main() {
             )).thenAnswer((_) async => const Right(null));
 
         when(() => mockLocalStorage.remove(
-              key: localId,
-              box: 'fuel_records',
-            )).thenAnswer((_) async => const Left(CacheFailure('Delete failed')));
+                  key: localId,
+                  box: 'fuel_records',
+                ))
+            .thenAnswer((_) async => const Left(CacheFailure('Delete failed')));
 
         // Act
         final result = await service.reconcileId(localId, remoteId);
@@ -265,11 +271,12 @@ void main() {
         await service.reconcileId(localId, remoteId);
 
         // Assert - Verify all data preserved
-        final captured = verify(() => mockLocalStorage.save<Map<String, dynamic>>(
-              key: remoteId,
-              data: captureAny(named: 'data'),
-              box: 'fuel_records',
-            )).captured;
+        final captured =
+            verify(() => mockLocalStorage.save<Map<String, dynamic>>(
+                  key: remoteId,
+                  data: captureAny(named: 'data'),
+                  box: 'fuel_records',
+                )).captured;
 
         final savedMap = captured.first as Map<String, dynamic>;
         expect(savedMap['liters'], 42.5);
@@ -297,7 +304,8 @@ void main() {
     });
 
     group('getPendingCount', () {
-      test('should return 0 as reconciliation is automatic during sync', () async {
+      test('should return 0 as reconciliation is automatic during sync',
+          () async {
         // Act
         final result = await service.getPendingCount();
 

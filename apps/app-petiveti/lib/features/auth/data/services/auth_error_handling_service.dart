@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
@@ -10,7 +9,6 @@ import '../models/user_model.dart';
 
 /// Service responsible for error handling in authentication operations
 /// Follows Single Responsibility Principle - only handles error transformation
-@lazySingleton
 class AuthErrorHandlingService {
   final AuthLocalDataSource localDataSource;
   final AuthRemoteDataSource remoteDataSource;

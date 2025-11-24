@@ -5,13 +5,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../../database/repositories/culturas_repository.dart';
-import '../di/injection_container.dart' as di;
+import '../../database/providers/database_providers.dart';
+import '../../database/receituagro_database.dart';
 
 class CulturasDataLoader {
   static bool _isLoaded = false;
 
   /// Carrega dados de culturas do JSON dos assets
-  static Future<void> loadCulturasData() async {
+  static Future<void> loadCulturasData(dynamic ref) async {
     if (_isLoaded) {
       developer.log(
         'Culturas já carregadas, pulando...',
@@ -34,9 +35,8 @@ class CulturasDataLoader {
 
       final dynamic decodedJson = json.decode(jsonString);
       final List<dynamic> jsonData = decodedJson is List ? decodedJson : [];
-      final List<Map<String, dynamic>> allCulturas = jsonData
-          .cast<Map<String, dynamic>>()
-          .toList();
+      final List<Map<String, dynamic>> allCulturas =
+          jsonData.cast<Map<String, dynamic>>().toList();
       final List<Map<String, dynamic>> culturas = allCulturas
           .where(
             (item) =>
@@ -55,7 +55,7 @@ class CulturasDataLoader {
         '🌱 [CULTURAS] JSON carregado: ${allCulturas.length} registros totais, ${culturas.length} culturas válidas',
       );
 
-      final repository = di.sl<CulturasRepository>();
+      final repository = ref.watch(culturasRepositoryProvider);
 
       try {
         await repository.loadFromJson(culturas, '1.0.0');
@@ -67,7 +67,8 @@ class CulturasDataLoader {
         _isLoaded = true;
 
         // Verificação
-        final loadedCulturas = await repository.findAll();
+        final List<Cultura> loadedCulturas =
+            (await repository.findAll()) as List<Cultura>;
         developer.log(
           'Verificação: ${loadedCulturas.length} culturas disponíveis',
           name: 'CulturasDataLoader',
@@ -75,7 +76,7 @@ class CulturasDataLoader {
 
         if (loadedCulturas.isNotEmpty) {
           developer.log(
-            'Primeiras 3 culturas: ${loadedCulturas.take(3).map((c) => c.nome).join(', ')}',
+            'Primeiras 3 culturas: ${loadedCulturas.take(3).map<Cultura>((c) => c).map((c) => c.nome).join(', ')}',
             name: 'CulturasDataLoader',
           );
         }
@@ -97,18 +98,19 @@ class CulturasDataLoader {
   }
 
   /// Força recarregamento dos dados (para desenvolvimento)
-  static Future<void> forceReload() async {
+  static Future<void> forceReload(dynamic ref) async {
     _isLoaded = false;
-    await loadCulturasData();
+    await loadCulturasData(ref);
   }
 
   /// Verifica se dados estão carregados
-  static Future<bool> isDataLoaded() async {
+  static Future<bool> isDataLoaded(dynamic ref) async {
     if (!_isLoaded) return false;
 
     try {
-      final repository = di.sl<CulturasRepository>();
-      final culturas = await repository.findAll();
+      final repository = ref.watch(culturasRepositoryProvider);
+      final List<Cultura> culturas =
+          (await repository.findAll()) as List<Cultura>;
       return culturas.isNotEmpty;
     } catch (e) {
       return false;
@@ -116,10 +118,11 @@ class CulturasDataLoader {
   }
 
   /// Obtém estatísticas de carregamento
-  static Future<Map<String, dynamic>> getStats() async {
+  static Future<Map<String, dynamic>> getStats(dynamic ref) async {
     try {
-      final repository = di.sl<CulturasRepository>();
-      final culturas = await repository.findAll();
+      final repository = ref.read(culturasRepositoryProvider);
+      final List<Cultura> culturas =
+          (await repository.findAll()) as List<Cultura>;
 
       return {
         'total_culturas': culturas.length,

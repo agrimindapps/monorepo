@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../entities/appointment.dart';
@@ -18,7 +17,6 @@ import '../entities/appointment.dart';
 /// - Validates appointment ID
 /// - Validates appointment date
 /// - Composite validation for add/update operations
-@lazySingleton
 class AppointmentValidationService {
   /// Validates veterinarian name
   ///

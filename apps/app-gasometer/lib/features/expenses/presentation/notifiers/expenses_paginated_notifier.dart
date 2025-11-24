@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container_modular.dart';
 import '../../../../core/interfaces/i_expenses_repository.dart';
+import '../../../../database/providers/database_providers.dart';
 import '../../core/constants/expense_constants.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../../domain/services/expense_filters_service.dart';
@@ -19,7 +19,7 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
 
   @override
   Future<ExpensesPaginatedState> build() async {
-    _repository = getIt<IExpensesRepository>();
+    _repository = ref.watch(expenseRepositoryProvider) as IExpensesRepository;
     _statisticsService = ExpenseStatisticsService();
     return await _loadFirstPageInternal();
   }

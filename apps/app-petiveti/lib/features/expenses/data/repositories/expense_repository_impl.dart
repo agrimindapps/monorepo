@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/expense.dart';
@@ -9,7 +8,6 @@ import '../datasources/expense_local_datasource.dart';
 import '../models/expense_model.dart';
 import '../services/expense_error_handling_service.dart';
 
-@LazySingleton(as: ExpenseRepository)
 class ExpenseRepositoryImpl implements ExpenseRepository {
   final ExpenseLocalDataSource localDataSource;
   final ExpenseErrorHandlingService errorHandlingService;

@@ -6,11 +6,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container_modular.dart';
-import '../../../../features/auth/domain/services/auth_rate_limiter.dart';
+import '../../../../core/providers/dependency_providers.dart';
 import '../../../../core/services/analytics/gasometer_analytics_service.dart';
 import '../../../../core/services/platform/platform_service.dart';
 import '../../../../core/widgets/logout_loading_dialog.dart';
+import '../../../../features/auth/domain/services/auth_rate_limiter.dart';
 import '../../domain/entities/user_entity.dart' as gasometer_auth;
 import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/send_password_reset.dart';
@@ -19,6 +19,7 @@ import '../../domain/usecases/sign_in_with_email.dart';
 import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/sign_up_with_email.dart';
 import '../../domain/usecases/watch_auth_state.dart';
+import '../providers/auth_usecase_providers.dart';
 import '../state/auth_state.dart';
 
 part 'auth_notifier.g.dart';
@@ -43,42 +44,17 @@ part 'auth_notifier.g.dart';
 /// Reduzido de 953 linhas para ~500 linhas (core auth apenas)
 @Riverpod(keepAlive: true)
 class Auth extends _$Auth {
-  // Remove late final - use lazy getters instead to prevent re-initialization
-  GetCurrentUser? _getCurrentUserInstance;
-  WatchAuthState? _watchAuthStateInstance;
-  SignInWithEmail? _signInWithEmailInstance;
-  SignUpWithEmail? _signUpWithEmailInstance;
-  SignInAnonymously? _signInAnonymouslyInstance;
-  SignOut? _signOutInstance;
-  SendPasswordReset? _sendPasswordResetInstance;
-  GasometerAnalyticsService? _analyticsInstance;
-  PlatformService? _platformServiceInstance;
-  AuthRateLimiter? _rateLimiterInstance;
-  EnhancedAccountDeletionService? _enhancedDeletionServiceInstance;
-
-  // Lazy getters to prevent re-initialization
-  GetCurrentUser get _getCurrentUser =>
-      _getCurrentUserInstance ??= sl<GetCurrentUser>();
-  WatchAuthState get _watchAuthState =>
-      _watchAuthStateInstance ??= sl<WatchAuthState>();
-  SignInWithEmail get _signInWithEmail =>
-      _signInWithEmailInstance ??= sl<SignInWithEmail>();
-  SignUpWithEmail get _signUpWithEmail =>
-      _signUpWithEmailInstance ??= sl<SignUpWithEmail>();
-  SignInAnonymously get _signInAnonymously =>
-      _signInAnonymouslyInstance ??= sl<SignInAnonymously>();
-  SignOut get _signOut =>
-      _signOutInstance ??= sl<SignOut>();
-  SendPasswordReset get _sendPasswordReset =>
-      _sendPasswordResetInstance ??= sl<SendPasswordReset>();
-  GasometerAnalyticsService get _analytics =>
-      _analyticsInstance ??= sl<GasometerAnalyticsService>();
-  PlatformService get _platformService =>
-      _platformServiceInstance ??= sl<PlatformService>();
-  AuthRateLimiter get _rateLimiter =>
-      _rateLimiterInstance ??= sl<AuthRateLimiter>();
-  EnhancedAccountDeletionService get _enhancedDeletionService =>
-      _enhancedDeletionServiceInstance ??= sl<EnhancedAccountDeletionService>();
+  late final GetCurrentUser _getCurrentUser;
+  late final WatchAuthState _watchAuthState;
+  late final SignInWithEmail _signInWithEmail;
+  late final SignUpWithEmail _signUpWithEmail;
+  late final SignInAnonymously _signInAnonymously;
+  late final SignOut _signOut;
+  late final SendPasswordReset _sendPasswordReset;
+  late final GasometerAnalyticsService _analytics;
+  late final PlatformService _platformService;
+  late final AuthRateLimiter _rateLimiter;
+  late final EnhancedAccountDeletionService _enhancedDeletionService;
 
   final MonorepoAuthCache _monorepoAuthCache = MonorepoAuthCache();
 
@@ -88,6 +64,19 @@ class Auth extends _$Auth {
 
   @override
   AuthState build() {
+    // Initialize dependencies
+    _getCurrentUser = ref.watch(getCurrentUserProvider);
+    _watchAuthState = ref.watch(watchAuthStateProvider);
+    _signInWithEmail = ref.watch(signInWithEmailProvider);
+    _signUpWithEmail = ref.watch(signUpWithEmailProvider);
+    _signInAnonymously = ref.watch(signInAnonymouslyProvider);
+    _signOut = ref.watch(signOutProvider);
+    _sendPasswordReset = ref.watch(sendPasswordResetProvider);
+    _analytics = ref.watch(gasometerAnalyticsServiceProvider);
+    _platformService = ref.watch(platformServiceProvider);
+    _rateLimiter = ref.watch(authRateLimiterProvider);
+    _enhancedDeletionService = ref.watch(enhancedAccountDeletionServiceProvider);
+
     // Prevent double initialization
     if (_isInitialized) {
       return state;

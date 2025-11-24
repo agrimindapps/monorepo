@@ -1,12 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/error/failures.dart';
 import '../entities/termo.dart';
 
 /// Use case for sharing a term via platform share sheet
-@injectable
 class CompartilharTermo {
   Future<Either<Failure, Unit>> call(Termo termo) async {
     try {

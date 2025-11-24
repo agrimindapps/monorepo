@@ -1,5 +1,3 @@
-import 'package:core/core.dart' show injectable;
-
 import '../entities/calculator_parameter.dart';
 import '../interfaces/calculator_strategy.dart';
 import '../repositories/calculator_data_repository.dart';
@@ -8,7 +6,6 @@ import '../repositories/calculator_data_repository.dart';
 ///
 /// Implementa Single Responsibility Principle (SRP) - foca apenas em validação.
 /// Separado do Calculator Engine para maior modularidade e testabilidade.
-@injectable
 class CalculatorValidationService {
   final ICalculatorDataRepository _dataRepository;
 

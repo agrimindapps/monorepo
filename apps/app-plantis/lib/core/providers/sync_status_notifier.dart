@@ -1,9 +1,10 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide Column, getIt;
+import 'package:core/core.dart' hide Column;
 
 import '../data/models/sync_queue_item.dart' as local;
 import '../sync/sync_queue.dart' as local;
+import 'repository_providers.dart';
 
 part 'sync_status_notifier.g.dart';
 
@@ -33,6 +34,7 @@ class SyncStatusState {
       pendingItems: pendingItems ?? this.pendingItems,
     );
   }
+
   int get pendingItemsCount => pendingItems.length;
   bool get isIdle => currentState == SyncState.idle;
   bool get isSyncing => currentState == SyncState.syncing;
@@ -148,12 +150,13 @@ class SyncStatusNotifier extends _$SyncStatusNotifier {
     }
   }
 }
+
 @riverpod
 ConnectivityService connectivityService(Ref ref) {
-  return GetIt.instance<ConnectivityService>();
+  return ref.watch(connectivityServiceProvider);
 }
 
 @riverpod
 local.SyncQueue syncQueue(Ref ref) {
-  return GetIt.instance<local.SyncQueue>();
+  return ref.watch(syncQueueProvider);
 }

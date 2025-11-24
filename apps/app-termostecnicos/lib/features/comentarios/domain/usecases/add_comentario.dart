@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../entities/comentario.dart';
@@ -7,7 +6,6 @@ import '../repositories/comentarios_repository.dart';
 
 /// Use case for adding a new comentario
 /// Includes business validation rules
-@injectable
 class AddComentario {
   final ComentariosRepository _repository;
 

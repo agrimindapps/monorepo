@@ -1,12 +1,10 @@
 import 'package:app_agrihurbi/core/utils/typedef.dart';
 import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
 import 'package:app_agrihurbi/features/news/domain/repositories/news_repository.dart';
-import 'package:core/core.dart' show injectable;
 
 /// Get News Use Case
 ///
 /// Handles fetching news articles with filtering and pagination
-@injectable
 class GetNews {
   final NewsRepository _repository;
 
@@ -27,7 +25,6 @@ class GetNews {
 }
 
 /// Get Article by ID Use Case
-@injectable
 class GetArticleById {
   final NewsRepository _repository;
 
@@ -39,7 +36,6 @@ class GetArticleById {
 }
 
 /// Search Articles Use Case
-@injectable
 class SearchArticles {
   final NewsRepository _repository;
 
@@ -59,7 +55,6 @@ class SearchArticles {
 }
 
 /// Get Premium Articles Use Case
-@injectable
 class GetPremiumArticles {
   final NewsRepository _repository;
 
@@ -74,7 +69,6 @@ class GetPremiumArticles {
 }
 
 /// Manage Favorites Use Case
-@injectable
 class ManageFavorites {
   final NewsRepository _repository;
 
@@ -102,7 +96,6 @@ class ManageFavorites {
 }
 
 /// Refresh RSS Feeds Use Case
-@injectable
 class RefreshRSSFeeds {
   final NewsRepository _repository;
 

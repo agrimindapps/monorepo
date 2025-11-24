@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../constants/calculation_constants.dart';
 import '../entities/net_salary_calculation.dart';
@@ -21,9 +20,9 @@ class CalculateNetSalaryParams {
   });
 }
 
-@injectable
 class CalculateNetSalaryUseCase {
-  Future<Either<Failure, NetSalaryCalculation>> call(CalculateNetSalaryParams params) async {
+  Future<Either<Failure, NetSalaryCalculation>> call(
+      CalculateNetSalaryParams params) async {
     final validationError = _validate(params);
     if (validationError != null) {
       return Left(validationError);
@@ -49,7 +48,8 @@ class CalculateNetSalaryUseCase {
     }
 
     if (params.dependents < 0) {
-      return const ValidationFailure('Número de dependentes não pode ser negativo');
+      return const ValidationFailure(
+          'Número de dependentes não pode ser negativo');
     }
 
     if (params.dependents > CalculationConstants.maxDependentes) {
@@ -59,22 +59,26 @@ class CalculateNetSalaryUseCase {
     }
 
     if (params.transportationVoucher < 0) {
-      return const ValidationFailure('Valor do vale transporte não pode ser negativo');
+      return const ValidationFailure(
+          'Valor do vale transporte não pode ser negativo');
     }
 
     if (params.healthInsurance < 0) {
-      return const ValidationFailure('Valor do plano de saúde não pode ser negativo');
+      return const ValidationFailure(
+          'Valor do plano de saúde não pode ser negativo');
     }
 
     if (params.otherDiscounts < 0) {
-      return const ValidationFailure('Outros descontos não podem ser negativos');
+      return const ValidationFailure(
+          'Outros descontos não podem ser negativos');
     }
 
     final totalVoluntaryDiscounts = params.transportationVoucher +
-                                    params.healthInsurance +
-                                    params.otherDiscounts;
+        params.healthInsurance +
+        params.otherDiscounts;
     if (totalVoluntaryDiscounts >= params.grossSalary) {
-      return const ValidationFailure('Total de descontos voluntários não pode ser maior ou igual ao salário bruto');
+      return const ValidationFailure(
+          'Total de descontos voluntários não pode ser maior ou igual ao salário bruto');
     }
 
     return null;
@@ -95,17 +99,18 @@ class CalculateNetSalaryUseCase {
     final irrfRate = irrfResult['rate']!;
 
     // 4. Calculate transportation voucher discount
-    final transportationVoucherDiscount = _calculateTransportationVoucherDiscount(
+    final transportationVoucherDiscount =
+        _calculateTransportationVoucherDiscount(
       params.grossSalary,
       params.transportationVoucher,
     );
 
     // 5. Calculate total discounts
     final totalDiscounts = inssDiscount +
-                          irrfDiscount +
-                          transportationVoucherDiscount +
-                          params.healthInsurance +
-                          params.otherDiscounts;
+        irrfDiscount +
+        transportationVoucherDiscount +
+        params.healthInsurance +
+        params.otherDiscounts;
 
     // 6. Calculate net salary
     final netSalary = params.grossSalary - totalDiscounts;
@@ -158,7 +163,7 @@ class CalculateNetSalaryUseCase {
   Map<String, double> _calculateIrrf(double calculationBase, int dependents) {
     // Apply dependent deduction
     final baseWithDependents = calculationBase -
-                              (dependents * CalculationConstants.deducaoDependenteIrrf);
+        (dependents * CalculationConstants.deducaoDependenteIrrf);
 
     if (baseWithDependents <= 0) {
       return {'discount': 0.0, 'rate': 0.0};
@@ -190,7 +195,10 @@ class CalculateNetSalaryUseCase {
       return 0.0;
     }
 
-    final maxDiscount = grossSalary * CalculationConstants.percentualValeTransporte;
-    return transportationVoucher > maxDiscount ? maxDiscount : transportationVoucher;
+    final maxDiscount =
+        grossSalary * CalculationConstants.percentualValeTransporte;
+    return transportationVoucher > maxDiscount
+        ? maxDiscount
+        : transportationVoucher;
   }
 }

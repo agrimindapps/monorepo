@@ -6,7 +6,6 @@ import 'package:core/core.dart' show injectable;
 /// Get Market Summary Use Case
 ///
 /// Retrieves market summary with top performers and statistics
-@injectable
 class GetMarketSummary {
   final MarketRepository _repository;
 
@@ -19,7 +18,6 @@ class GetMarketSummary {
 }
 
 /// Get Top Gainers Use Case
-@injectable
 class GetTopGainers {
   final MarketRepository _repository;
 
@@ -35,7 +33,6 @@ class GetTopGainers {
 }
 
 /// Get Top Losers Use Case
-@injectable
 class GetTopLosers {
   final MarketRepository _repository;
 
@@ -51,7 +48,6 @@ class GetTopLosers {
 }
 
 /// Get Most Active Use Case
-@injectable
 class GetMostActive {
   final MarketRepository _repository;
 

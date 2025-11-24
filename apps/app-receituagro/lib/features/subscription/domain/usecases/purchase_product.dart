@@ -19,7 +19,7 @@ class PurchaseProductUseCaseParams extends Equatable {
 }
 
 /// Use case para comprar produto (usa core repository diretamente)
-@injectable
+
 class PurchaseProductUseCase
     implements UseCase<SubscriptionEntity, PurchaseProductUseCaseParams> {
   PurchaseProductUseCase(this.coreRepository, this.errorService);

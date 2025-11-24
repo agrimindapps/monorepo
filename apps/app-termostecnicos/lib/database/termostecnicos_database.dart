@@ -14,7 +14,7 @@ part 'termostecnicos_database.g.dart';
 ///
 /// **PADRÃO ESTABELECIDO (gasometer-drift):**
 /// - Usa DriftDatabaseConfig do core para configuração unificada
-/// - Injectable com @lazySingleton para DI
+/// - Migrado para Riverpod providers
 /// - Factory methods: production(), development(), test()
 /// - MigrationStrategy com onCreate e beforeOpen
 /// - Extends BaseDriftDatabase do core (funcionalidades compartilhadas)
@@ -26,7 +26,6 @@ part 'termostecnicos_database.g.dart';
 /// ============================================================================
 
 @DriftDatabase(tables: [Comentarios], daos: [ComentarioDao])
-@lazySingleton
 class TermosTecnicosDatabase extends _$TermosTecnicosDatabase
     with BaseDriftDatabase {
   TermosTecnicosDatabase(super.e);
@@ -34,12 +33,6 @@ class TermosTecnicosDatabase extends _$TermosTecnicosDatabase
   /// Versão do schema do banco de dados
   @override
   int get schemaVersion => 1;
-
-  /// Factory constructor para injeção de dependência (GetIt/Injectable)
-  @factoryMethod
-  factory TermosTecnicosDatabase.injectable() {
-    return TermosTecnicosDatabase.production();
-  }
 
   /// Factory constructor para ambiente de produção
   factory TermosTecnicosDatabase.production() {
@@ -82,14 +75,14 @@ class TermosTecnicosDatabase extends _$TermosTecnicosDatabase
   /// Estratégia de migração do banco de dados
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (Migrator m) async {
-      await m.createAll();
-    },
-    beforeOpen: (details) async {
-      await customStatement('PRAGMA foreign_keys = ON');
-    },
-    onUpgrade: (Migrator m, int from, int to) async {
-      // Future schema migrations will go here
-    },
-  );
+        onCreate: (Migrator m) async {
+          await m.createAll();
+        },
+        beforeOpen: (details) async {
+          await customStatement('PRAGMA foreign_keys = ON');
+        },
+        onUpgrade: (Migrator m, int from, int to) async {
+          // Future schema migrations will go here
+        },
+      );
 }

@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../entities/animal.dart';
@@ -16,7 +15,6 @@ import '../entities/animal.dart';
 /// final validationResult = _validationService.validateForAdd(animal);
 /// if (validationResult.isLeft()) return validationResult;
 /// ```
-@lazySingleton
 class AnimalValidationService {
   /// Validates animal name
   ///

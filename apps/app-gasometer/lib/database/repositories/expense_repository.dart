@@ -50,7 +50,7 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
   Insertable<Expense> toCompanion(ExpenseData entity) {
     return ExpensesCompanion(
       // id é autoIncrement, não deve ser especificado no insert
-      id: entity.id > 0 ? Value(entity.id) : Value.absent(),
+      id: entity.id > 0 ? Value(entity.id) : const Value.absent(),
       userId: Value(entity.userId),
       moduleName: Value(entity.moduleName),
       vehicleId: Value(entity.vehicleId),

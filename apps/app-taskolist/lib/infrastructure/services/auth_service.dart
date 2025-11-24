@@ -10,7 +10,6 @@ import 'sync_service.dart';
 
 /// Wrapper para o serviço de autenticação Firebase Auth do core
 /// Adiciona funcionalidades específicas do Task Manager
-@lazySingleton
 class TaskManagerAuthService {
   final IAuthRepository _authRepository;
   final TaskManagerAnalyticsService _analyticsService;

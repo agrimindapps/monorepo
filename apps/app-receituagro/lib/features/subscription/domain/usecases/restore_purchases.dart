@@ -3,7 +3,7 @@ import 'package:core/core.dart' hide Column;
 import '../repositories/i_subscription_repository.dart';
 
 /// Use case para restaurar compras (usa core repository)
-@injectable
+
 class RestorePurchasesUseCase
     implements UseCase<List<SubscriptionEntity>, NoParams> {
   RestorePurchasesUseCase(this.coreRepository, this.appRepository);

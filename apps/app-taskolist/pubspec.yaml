@@ -14,6 +14,9 @@ dependencies:
   core:
     path: ../../packages/core
   
+  riverpod_annotation: ^2.3.5
+  flutter_riverpod: ^2.5.1
+
   # Drift - Local database (SQLite-based)
   drift: ^2.28.0
   sqlite3_flutter_libs: ^0.5.24

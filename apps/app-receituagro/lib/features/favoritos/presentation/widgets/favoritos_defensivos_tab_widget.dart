@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../../../core/providers/core_providers.dart';
 import '../../../../core/services/receituagro_navigation_service.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../notifiers/favoritos_notifier.dart';
@@ -120,7 +121,7 @@ class FavoritosDefensivosTabWidget extends ConsumerWidget {
         await _removeFavorito(context, ref, defensivo);
       },
       child: ListTile(
-        onTap: () => _navigateToDefensivoDetails(context, defensivo),
+        onTap: () => _navigateToDefensivoDetails(context, ref, defensivo),
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
@@ -323,9 +324,10 @@ class FavoritosDefensivosTabWidget extends ConsumerWidget {
 
   void _navigateToDefensivoDetails(
     BuildContext context,
+    WidgetRef ref,
     FavoritoDefensivoEntity defensivo,
   ) {
-    final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
+    final navigationService = ref.read(navigationServiceProvider);
     navigationService.navigateToDetalheDefensivo(
       defensivoName: defensivo.displayName,
       extraData: {'fabricante': defensivo.fabricante},

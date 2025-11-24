@@ -1,11 +1,11 @@
 import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/services/access_history_service.dart';
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
+import 'defensivos_providers.dart';
 
 part 'defensivos_history_notifier.g.dart';
 
@@ -63,7 +63,7 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
 
   @override
   Future<DefensivosHistoryState> build() async {
-    _repository = di.sl<FitossanitariosRepository>();
+    _repository = ref.watch(fitossanitariosRepositoryProvider);
     _historyService = AccessHistoryService();
     return await _loadHistory();
   }
@@ -179,9 +179,8 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
             .where((d) => d.idDefensivo == historyItem.id)
             .firstOrNull;
 
-        defensivo ??= allDefensivos
-            .where((d) => d.nome == historyItem.name)
-            .firstOrNull;
+        defensivo ??=
+            allDefensivos.where((d) => d.nome == historyItem.name).firstOrNull;
 
         if (defensivo != null) {
           historicDefensivos.add(defensivo);

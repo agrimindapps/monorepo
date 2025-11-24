@@ -5,7 +5,6 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../data/adapters/plantis_image_service_adapter.dart';
-import '../di/injection_container.dart';
 import '../services/image_preloader_service.dart';
 
 /// Unified image widget that consolidates all image display functionality
@@ -161,23 +160,13 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
   void _preloadImageIfEnabled() {
     if (!widget.enablePreloading) return;
     if (widget.imageUrl != null && widget.imageUrl!.isNotEmpty) {
-      try {
-        final adapter = sl<PlantisImageServiceAdapter>();
-        adapter.preloadImage(widget.imageUrl!);
-      } catch (e) {
-        ImagePreloaderService.instance.preloadImage(widget.imageUrl!);
-      }
+      ImagePreloaderService.instance.preloadImage(widget.imageUrl!);
     }
     if (widget.imageUrls.isNotEmpty) {
-      try {
-        final adapter = sl<PlantisImageServiceAdapter>();
-        adapter.preloadImages(widget.imageUrls, priority: true);
-      } catch (e) {
-        ImagePreloaderService.instance.preloadImages(
-          widget.imageUrls,
-          priority: true,
-        );
-      }
+      ImagePreloaderService.instance.preloadImages(
+        widget.imageUrls,
+        priority: true,
+      );
     }
   }
 

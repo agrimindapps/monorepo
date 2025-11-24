@@ -1,6 +1,7 @@
-import 'package:core/core.dart' hide Column, getIt;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/providers/repository_providers.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/entities/plant_task.dart';
 import '../../domain/repositories/plant_tasks_repository.dart';
@@ -42,15 +43,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
   @override
   Future<PlantTaskState> build() async {
     _taskGenerationService = PlantTaskGenerator();
-
-    try {
-      _repository = GetIt.instance<PlantTasksRepository>();
-    } catch (e) {
-      _repository = null;
-      if (kDebugMode) {
-        print('⚠️ PlantTaskNotifier: Repository not available');
-      }
-    }
+    _repository = ref.watch(plantTasksRepositoryProvider);
 
     return const PlantTaskState();
   }

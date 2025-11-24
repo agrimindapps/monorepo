@@ -9,7 +9,7 @@ import '../repositories/i_favoritos_repository.dart';
 /// **Benefício:** Consolidação de 4+ usecases em 1 genérico reutilizável
 ///
 /// Vantagem: Reutilizável para Defensivos, Pragas, Diagnósticos, Culturas
-@injectable
+
 class AddFavoritoUseCase {
   final IFavoritosRepository _repository;
 

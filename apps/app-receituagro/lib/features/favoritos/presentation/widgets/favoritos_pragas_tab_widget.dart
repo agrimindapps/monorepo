@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../../../core/providers/core_providers.dart';
 import '../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
 import '../../domain/entities/favorito_entity.dart';
@@ -119,7 +120,7 @@ class FavoritosPragasTabWidget extends ConsumerWidget {
         await _removeFavorito(context, ref, praga);
       },
       child: ListTile(
-        onTap: () => _navigateToPragaDetails(context, praga),
+        onTap: () => _navigateToPragaDetails(context, ref, praga),
         leading: Container(
           width: 56,
           height: 56,
@@ -320,9 +321,10 @@ class FavoritosPragasTabWidget extends ConsumerWidget {
 
   void _navigateToPragaDetails(
     BuildContext context,
+    WidgetRef ref,
     FavoritoPragaEntity praga,
   ) {
-    final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
+    final navigationService = ref.read(navigationServiceProvider);
     navigationService.navigateToDetalhePraga(
       pragaName: praga.nomeComum,
       pragaId: praga.id, // Use ID for better precision

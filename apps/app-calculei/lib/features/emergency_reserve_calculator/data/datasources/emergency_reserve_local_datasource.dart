@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/emergency_reserve_calculation_model.dart';
@@ -14,7 +13,6 @@ abstract class EmergencyReserveLocalDataSource {
   Future<void> clearAll();
 }
 
-@Injectable(as: EmergencyReserveLocalDataSource)
 class EmergencyReserveLocalDataSourceImpl
     implements EmergencyReserveLocalDataSource {
   static const String _storagePrefix = 'emergency_reserve_calculations';

@@ -2,8 +2,8 @@ import 'package:core/core.dart'
     hide
         GetUserDevicesUseCase,
         RevokeDeviceUseCase,
-        RevokeAllOtherDevicesUseCase,
         ValidateDeviceUseCase,
+        RevokeAllOtherDevicesUseCase,
         GetUserDevicesParams,
         RevokeDeviceParams,
         RevokeAllOtherDevicesParams,
@@ -17,6 +17,7 @@ import '../../features/device_management/domain/usecases/get_device_statistics_u
 import '../../features/device_management/domain/usecases/get_user_devices_usecase.dart';
 import '../../features/device_management/domain/usecases/revoke_device_usecase.dart';
 import '../../features/device_management/domain/usecases/validate_device_usecase.dart';
+import '../auth/auth_state_notifier.dart';
 
 part 'device_management_providers.g.dart';
 
@@ -63,17 +64,22 @@ class DeviceManagementState {
   }) {
     return DeviceManagementState(
       devices: devices ?? this.devices,
-      currentDevice: clearCurrentDevice ? null : (currentDevice ?? this.currentDevice),
+      currentDevice:
+          clearCurrentDevice ? null : (currentDevice ?? this.currentDevice),
       statistics: clearStatistics ? null : (statistics ?? this.statistics),
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-      successMessage: clearSuccess ? null : (successMessage ?? this.successMessage),
+      successMessage:
+          clearSuccess ? null : (successMessage ?? this.successMessage),
       isRevoking: isRevoking ?? this.isRevoking,
       revokingDeviceUuid: revokingDeviceUuid,
       isValidating: isValidating ?? this.isValidating,
     );
   }
-  List<DeviceModel> get activeDevices => devices.where((d) => d.isActive).toList();
-  List<DeviceModel> get inactiveDevices => devices.where((d) => !d.isActive).toList();
+
+  List<DeviceModel> get activeDevices =>
+      devices.where((d) => d.isActive).toList();
+  List<DeviceModel> get inactiveDevices =>
+      devices.where((d) => !d.isActive).toList();
   int get activeDeviceCount => activeDevices.length;
   int get totalDeviceCount => devices.length;
   bool get hasDevices => devices.isNotEmpty;
@@ -85,6 +91,7 @@ class DeviceManagementState {
     if (activeDeviceCount == 1) return '1 dispositivo ativo';
     return '$activeDeviceCount dispositivos ativos';
   }
+
   String get statusText {
     if (!hasDevices) return 'Nenhum dispositivo registrado';
 
@@ -92,7 +99,9 @@ class DeviceManagementState {
     final total = totalDeviceCount;
 
     if (active == total) {
-      return active == 1 ? '1 dispositivo ativo' : '$active dispositivos ativos';
+      return active == 1
+          ? '1 dispositivo ativo'
+          : '$active dispositivos ativos';
     } else {
       return '$active de $total dispositivos ativos';
     }
@@ -155,11 +164,19 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
   @override
   Future<DeviceManagementState> build() async {
-    _getUserDevicesUseCase = GetIt.instance<GetUserDevicesUseCase>();
-    _validateDeviceUseCase = GetIt.instance<ValidateDeviceUseCase>();
-    _revokeDeviceUseCase = GetIt.instance<RevokeDeviceUseCase>();
-    _revokeAllOtherDevicesUseCase = GetIt.instance<RevokeAllOtherDevicesUseCase>();
-    _getDeviceStatisticsUseCase = GetIt.instance<GetDeviceStatisticsUseCase>();
+    final deviceRepository = FirebaseDeviceService();
+    final authStateNotifier = AuthStateNotifier.instance;
+
+    _getUserDevicesUseCase =
+        GetUserDevicesUseCase(deviceRepository, authStateNotifier);
+    _validateDeviceUseCase =
+        ValidateDeviceUseCase(deviceRepository, authStateNotifier);
+    _revokeDeviceUseCase =
+        RevokeDeviceUseCase(deviceRepository, authStateNotifier);
+    _revokeAllOtherDevicesUseCase =
+        RevokeAllOtherDevicesUseCase(deviceRepository, authStateNotifier);
+    _getDeviceStatisticsUseCase =
+        GetDeviceStatisticsUseCase(deviceRepository, authStateNotifier);
 
     ref.onDispose(() {
       if (kDebugMode) {
@@ -174,7 +191,8 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
   Future<DeviceManagementState> _initializeDeviceManagement() async {
     try {
       final currentDevice = await _identifyCurrentDevice();
-      final devicesResult = await _getUserDevicesUseCase.call(const GetUserDevicesParams());
+      final devicesResult =
+          await _getUserDevicesUseCase.call(const GetUserDevicesParams());
 
       final List<DeviceModel> devices = devicesResult.fold(
         (failure) => <DeviceModel>[],
@@ -204,13 +222,15 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
       if (currentDevice == null) {
         if (kDebugMode) {
-          debugPrint('🚫 DeviceManagementNotifier: Current platform not supported');
+          debugPrint(
+              '🚫 DeviceManagementNotifier: Current platform not supported');
         }
         return null;
       }
 
       if (kDebugMode) {
-        debugPrint('📱 DeviceManagementNotifier: Current device identified: ${currentDevice.name}');
+        debugPrint(
+            '📱 DeviceManagementNotifier: Current device identified: ${currentDevice.name}');
       }
 
       return currentDevice;
@@ -229,7 +249,8 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
     state = await AsyncValue.guard(() async {
       final currentState = state.valueOrNull ?? DeviceManagementState.initial();
 
-      final result = await _getUserDevicesUseCase.call(const GetUserDevicesParams());
+      final result =
+          await _getUserDevicesUseCase.call(const GetUserDevicesParams());
 
       return result.fold(
         (Failure failure) => currentState.copyWith(
@@ -303,32 +324,34 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
     );
 
     final resultData = result.fold(
-      (Failure failure) => (success: false, message: failure.message, count: 0),
-      (RevokeAllResult revokeResult) => (
-        success: true,
-        message: revokeResult.message,
-        count: revokeResult.revokedCount
-      ),
+      (Failure failure) =>
+          {'success': false, 'message': failure.message, 'count': 0},
+      (RevokeAllResult revokeResult) => {
+        'success': true,
+        'message': revokeResult.message,
+        'count': revokeResult.revokedCount
+      },
     );
 
-    if (resultData.success) {
+    if (resultData['success'] as bool) {
       await loadDevices();
 
       final updatedState = (state.valueOrNull ?? currentState).copyWith(
         isRevoking: false,
-        successMessage: '${resultData.count} dispositivos revogados com sucesso',
+        successMessage:
+            '${resultData['count']} dispositivos revogados com sucesso',
         clearError: true,
       );
       state = AsyncValue.data(updatedState);
     } else {
       final updatedState = (state.valueOrNull ?? currentState).copyWith(
         isRevoking: false,
-        errorMessage: resultData.message,
+        errorMessage: resultData['message'] as String,
       );
       state = AsyncValue.data(updatedState);
     }
 
-    return resultData.success;
+    return resultData['success'] as bool;
   }
 
   /// Validate current device
@@ -383,7 +406,8 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
           } else {
             final updatedState = (state.valueOrNull ?? currentState).copyWith(
               isValidating: false,
-              errorMessage: validationResult.message ?? 'Falha na validação do dispositivo',
+              errorMessage: validationResult.message ??
+                  'Falha na validação do dispositivo',
             );
             state = AsyncValue.data(updatedState);
           }
@@ -414,7 +438,8 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
     final currentState = state.valueOrNull ?? DeviceManagementState.initial();
 
     try {
-      final result = await _getDeviceStatisticsUseCase.call(const GetDeviceStatisticsParams());
+      final result = await _getDeviceStatisticsUseCase
+          .call(const GetDeviceStatisticsParams());
 
       final statistics = result.fold(
         (failure) {

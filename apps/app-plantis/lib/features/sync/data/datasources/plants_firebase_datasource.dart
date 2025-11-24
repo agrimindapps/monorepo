@@ -23,7 +23,6 @@ abstract class PlantsFirebaseDataSource {
   Future<List<PlantModel>> getAllUserPlants(String userId);
 }
 
-@LazySingleton(as: PlantsFirebaseDataSource)
 class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
   final FirebaseFirestore _firestore;
 

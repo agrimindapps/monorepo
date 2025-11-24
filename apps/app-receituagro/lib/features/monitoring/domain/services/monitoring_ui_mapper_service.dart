@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
+
 
 import '../../../../core/analytics/advanced_health_monitoring_service.dart';
 
@@ -9,7 +9,7 @@ import '../../../../core/analytics/advanced_health_monitoring_service.dart';
 /// - Centraliza mapeamento de status para elementos visuais
 /// - Mantém consistência visual em toda a aplicação
 /// - Facilita mudanças de tema e estilo
-@lazySingleton
+
 class MonitoringUIMapperService {
   /// Retorna cor baseada no status de saúde
   Color getStatusColor(HealthStatus status) {

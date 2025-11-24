@@ -1,26 +1,32 @@
-import 'package:app_agrihurbi/core/di/injection.dart';
-import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
-import 'package:app_agrihurbi/features/markets/domain/entities/market_filter_entity.dart';
-import 'package:app_agrihurbi/features/markets/domain/repositories/market_repository.dart';
-import 'package:app_agrihurbi/features/markets/domain/usecases/get_market_summary.dart';
-import 'package:app_agrihurbi/features/markets/domain/usecases/get_markets.dart';
-import 'package:app_agrihurbi/features/markets/domain/usecases/manage_market_favorites.dart';
-import 'package:core/core.dart' show Provider;
-import 'package:core/core.dart' show injectable;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../domain/entities/market_entity.dart';
+import '../../domain/entities/market_filter_entity.dart';
+import '../../domain/repositories/market_repository.dart';
+import '../../domain/usecases/get_market_summary.dart';
+import '../../domain/usecases/get_markets.dart';
+import '../../domain/usecases/manage_market_favorites.dart';
+import 'markets_di_providers.dart';
+
 /// Provider Riverpod para MarketProvider
-///
-/// Integra GetIt com Riverpod para gerenciamento de estado
-final marketProviderProvider = Provider<MarketProvider>((ref) {
-  return getIt<MarketProvider>();
+final marketProviderProvider = ChangeNotifierProvider<MarketProvider>((ref) {
+  return MarketProvider(
+    ref.watch(getMarketsUseCaseProvider),
+    ref.watch(getMarketSummaryUseCaseProvider),
+    ref.watch(getTopGainersUseCaseProvider),
+    ref.watch(getTopLosersUseCaseProvider),
+    ref.watch(getMostActiveUseCaseProvider),
+    ref.watch(manageMarketFavoritesUseCaseProvider),
+    ref.watch(marketRepositoryProvider),
+  );
 });
+
 
 /// Market Provider for State Management
 ///
 /// Manages market data, filtering, favorites, and search state
 /// using Provider pattern for reactive UI updates
-@injectable
 class MarketProvider with ChangeNotifier {
   final GetMarkets _getMarkets;
   final GetMarketSummary _getMarketSummary;

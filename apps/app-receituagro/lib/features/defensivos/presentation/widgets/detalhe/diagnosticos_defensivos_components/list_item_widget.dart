@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../../core/di/injection_container.dart';
 import '../../../../../../core/extensions/diagnostico_drift_extension.dart';
 import '../../../../../../core/theme/spacing_tokens.dart';
+import '../../../../../../database/providers/database_providers.dart';
 import '../../../../../../database/receituagro_database.dart';
-import '../../../../../../database/repositories/pragas_repository.dart';
 
 /// Widget responsável por renderizar um item de diagnóstico na lista
 ///
@@ -14,7 +14,7 @@ import '../../../../../../database/repositories/pragas_repository.dart';
 /// - Avatar com imagem da praga baseada no nome científico
 /// - Ação de tap configurável
 /// - Performance otimizada com RepaintBoundary
-class DiagnosticoDefensivoListItemWidget extends StatefulWidget {
+class DiagnosticoDefensivoListItemWidget extends ConsumerStatefulWidget {
   final dynamic diagnostico;
   final VoidCallback onTap;
   final bool isDense;
@@ -29,12 +29,12 @@ class DiagnosticoDefensivoListItemWidget extends StatefulWidget {
   });
 
   @override
-  State<DiagnosticoDefensivoListItemWidget> createState() =>
+  ConsumerState<DiagnosticoDefensivoListItemWidget> createState() =>
       _DiagnosticoDefensivoListItemWidgetState();
 }
 
 class _DiagnosticoDefensivoListItemWidgetState
-    extends State<DiagnosticoDefensivoListItemWidget> {
+    extends ConsumerState<DiagnosticoDefensivoListItemWidget> {
   Praga? _pragaData;
   bool _isLoadingPraga = true;
 
@@ -46,7 +46,7 @@ class _DiagnosticoDefensivoListItemWidgetState
 
   Future<void> _loadPragaData() async {
     try {
-      final pragasRepository = sl<PragasRepository>();
+      final pragasRepository = ref.read(pragasRepositoryProvider);
       final idPraga = _getProperty('fkIdPraga') ?? _getProperty('idPraga');
 
       if (idPraga != null) {

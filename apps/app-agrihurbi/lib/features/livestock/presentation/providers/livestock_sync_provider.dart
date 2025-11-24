@@ -1,43 +1,41 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/repositories/livestock_repository.dart';
 
 /// Provider especializado para sincronização de dados de livestock
-/// 
+///
 /// Responsabilidade única: Gerenciar sincronização de dados remotos
 /// Seguindo Single Responsibility Principle
-@singleton
 class LivestockSyncProvider extends ChangeNotifier {
   final LivestockRepository _repository;
 
   LivestockSyncProvider({
     required LivestockRepository repository,
   }) : _repository = repository;
-  
+
   bool _isSyncing = false;
   DateTime? _lastSyncTime;
   String? _errorMessage;
   SyncStatus _syncStatus = SyncStatus.idle;
   double _syncProgress = 0.0;
-  
+
   bool get isSyncing => _isSyncing;
   DateTime? get lastSyncTime => _lastSyncTime;
   String? get errorMessage => _errorMessage;
   SyncStatus get syncStatus => _syncStatus;
   double get syncProgress => _syncProgress;
-  
+
   bool get hasSync => _lastSyncTime != null;
-  bool get needsSync => 
-    _lastSyncTime == null || 
-    DateTime.now().difference(_lastSyncTime!).inHours > 1;
-    
+  bool get needsSync =>
+      _lastSyncTime == null ||
+      DateTime.now().difference(_lastSyncTime!).inHours > 1;
+
   String get lastSyncFormatted {
     if (_lastSyncTime == null) return 'Nunca sincronizado';
-    
+
     final now = DateTime.now();
     final difference = now.difference(_lastSyncTime!);
-    
+
     if (difference.inMinutes < 60) {
       return '${difference.inMinutes} min atrás';
     } else if (difference.inHours < 24) {
@@ -70,24 +68,26 @@ class LivestockSyncProvider extends ChangeNotifier {
       }
 
       final result = await _repository.syncLivestockData();
-      
+
       return result.fold(
         (failure) {
           _errorMessage = failure.message;
           _syncStatus = SyncStatus.error;
-          debugPrint('LivestockSyncProvider: Erro na sincronização - ${failure.message}');
+          debugPrint(
+              'LivestockSyncProvider: Erro na sincronização - ${failure.message}');
           return false;
         },
         (_) {
           _lastSyncTime = DateTime.now();
           _syncStatus = SyncStatus.success;
           _syncProgress = 1.0;
-          debugPrint('LivestockSyncProvider: Sincronização realizada com sucesso');
-          
+          debugPrint(
+              'LivestockSyncProvider: Sincronização realizada com sucesso');
+
           if (showProgress && onProgress != null) {
             onProgress(1.0);
           }
-          
+
           return true;
         },
       );

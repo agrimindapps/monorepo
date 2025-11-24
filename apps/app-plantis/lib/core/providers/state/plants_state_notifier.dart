@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide Column, getIt;
+import 'package:core/core.dart' hide Column;
 
 import '../../../features/plants/domain/entities/plant.dart';
 import '../../../features/plants/domain/usecases/add_plant_usecase.dart';
@@ -9,6 +9,7 @@ import '../../interfaces/i_auth_state_provider.dart';
 import '../../services/plants_care_calculator.dart' as care_service;
 import '../../services/plants_data_service.dart';
 import '../../services/plants_filter_service.dart' as filter_service;
+import '../plants_providers.dart';
 
 part 'plants_state_notifier.g.dart';
 
@@ -128,7 +129,7 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
     _dataService = ref.read(plantsDataServiceProvider);
     _filterService = ref.read(plantsFilterServiceProvider);
     _careCalculator = ref.read(plantsCareCalculatorProvider);
-    _authProvider = ref.read(authStateProviderProviderProvider);
+    _authProvider = ref.read(authStateProviderProvider);
     _authSubscription = _authProvider.userStream.listen(_onAuthStateChanged);
     _autoRefreshTimer = Timer.periodic(
       const Duration(minutes: 15),
@@ -320,7 +321,8 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
 
   Future<void> setFavoritesFilter(bool showOnlyFavorites) async {
     final currentState = state.valueOrNull ?? const PlantsState();
-    final newState = currentState.copyWith(showOnlyFavorites: showOnlyFavorites);
+    final newState =
+        currentState.copyWith(showOnlyFavorites: showOnlyFavorites);
     state = AsyncValue.data(newState);
     await _applyFiltersToState(newState);
   }
@@ -451,22 +453,25 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
     state = AsyncValue.data(currentState.copyWith(clearError: true));
   }
 }
+
 @riverpod
-PlantsDataService plantsDataService(Ref ref) {
-  return GetIt.instance<PlantsDataService>();
+PlantsDataService plantsDataServiceLegacy(PlantsDataServiceLegacyRef ref) {
+  return ref.watch(plantsDataServiceProvider);
 }
 
 @riverpod
-filter_service.PlantsFilterService plantsFilterService(Ref ref) {
-  return GetIt.instance<filter_service.PlantsFilterService>();
+filter_service.PlantsFilterService plantsFilterServiceLegacy(
+    PlantsFilterServiceLegacyRef ref) {
+  return ref.watch(plantsFilterServiceProvider);
 }
 
 @riverpod
-care_service.PlantsCareCalculator plantsCareCalculator(Ref ref) {
-  return GetIt.instance<care_service.PlantsCareCalculator>();
+care_service.PlantsCareCalculator plantsCareCalculatorLegacy(
+    PlantsCareCalculatorLegacyRef ref) {
+  return ref.watch(plantsCareCalculatorProvider);
 }
 
 @riverpod
-IAuthStateProvider authStateProviderProvider(Ref ref) {
-  return GetIt.instance<IAuthStateProvider>();
+IAuthStateProvider authStateProviderLegacy(AuthStateProviderLegacyRef ref) {
+  return ref.watch(authStateProviderProvider);
 }

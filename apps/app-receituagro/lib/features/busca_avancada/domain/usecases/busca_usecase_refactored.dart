@@ -4,7 +4,7 @@ import 'busca_params.dart';
 
 /// Use case consolidado para busca avançada
 /// Consolida 7 usecases em 1 genérico com type-safe params
-@injectable
+
 class BuscaUseCase implements UseCase<dynamic, BuscaParams> {
   final IBuscaRepository repository;
 

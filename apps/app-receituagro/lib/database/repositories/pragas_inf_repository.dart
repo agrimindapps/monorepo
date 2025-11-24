@@ -7,7 +7,7 @@ import '../receituagro_database.dart';
 ///
 /// Gerencia todas as operações de leitura dos dados complementares de pragas
 /// 
-@lazySingleton
+
 class PragasInfRepository {
   PragasInfRepository(this._db);
 

@@ -1,11 +1,9 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
 import '../repositories/pragas_repository.dart';
 
-@lazySingleton
 class DeletePragaUseCase implements UseCase<void, String> {
   final PragasRepository repository;
 

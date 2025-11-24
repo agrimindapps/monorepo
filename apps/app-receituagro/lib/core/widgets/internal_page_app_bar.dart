@@ -1,13 +1,15 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../providers/core_providers.dart';
 import '../services/receituagro_navigation_service.dart';
 
 /// AppBar customizado para páginas internas que preserva o bottomNavigation
 ///
 /// Automaticamente adiciona botão de voltar quando especificado
 /// e permite navegação de volta usando o novo serviço de navegação
-class InternalPageAppBar extends StatelessWidget implements PreferredSizeWidget {
+class InternalPageAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final String? title;
   final List<Widget>? actions;
   final Color? backgroundColor;
@@ -28,7 +30,7 @@ class InternalPageAppBar extends StatelessWidget implements PreferredSizeWidget 
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return AppBar(
       title: title != null ? Text(title!) : null,
       actions: actions,
@@ -39,14 +41,14 @@ class InternalPageAppBar extends StatelessWidget implements PreferredSizeWidget 
       leading: automaticallyImplyLeading && showBackButton
           ? IconButton(
               icon: const Icon(Icons.arrow_back),
-              onPressed: () => _handleBackPress(),
+              onPressed: () => _handleBackPress(ref),
             )
           : null,
     );
   }
 
-  void _handleBackPress() {
-    final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
+  void _handleBackPress(WidgetRef ref) {
+    final navigationService = ref.read(navigationServiceProvider);
     navigationService.goBack<void>();
   }
 

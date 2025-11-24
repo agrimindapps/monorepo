@@ -31,7 +31,6 @@ abstract class TasksLocalDataSource {
   Future<void> clearCache();
 }
 
-@LazySingleton(as: TasksLocalDataSource)
 class TasksLocalDataSourceImpl implements TasksLocalDataSource {
   final TasksDriftRepository _driftRepo;
 

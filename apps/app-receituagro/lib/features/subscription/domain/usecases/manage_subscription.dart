@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 
 /// Use case para gerenciar assinatura (usa core repository)
-@injectable
+
 class ManageSubscriptionUseCase implements UseCase<String?, NoParams> {
   ManageSubscriptionUseCase(this.coreRepository);
 

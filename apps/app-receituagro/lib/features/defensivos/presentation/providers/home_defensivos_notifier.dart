@@ -1,10 +1,10 @@
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/services/access_history_service.dart';
 import '../../../../core/services/fitossanitarios_data_loader.dart';
 import '../../../../core/services/receituagro_random_extensions.dart';
+import '../../../../database/providers/database_providers.dart';
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/fitossanitarios_info_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
@@ -110,11 +110,11 @@ class DefensivosStatistics {
   });
 
   DefensivosStatistics.empty()
-    : totalDefensivos = 0,
-      totalFabricantes = 0,
-      totalModoAcao = 0,
-      totalIngredienteAtivo = 0,
-      totalClasseAgronomica = 0;
+      : totalDefensivos = 0,
+        totalFabricantes = 0,
+        totalModoAcao = 0,
+        totalIngredienteAtivo = 0,
+        totalClasseAgronomica = 0;
 }
 
 /// View states for UI
@@ -138,8 +138,8 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
 
   @override
   Future<HomeDefensivosState> build() async {
-    _repository = di.sl<FitossanitariosRepository>();
-    _infoRepository = di.sl<FitossanitariosInfoRepository>();
+    _repository = ref.watch(fitossanitariosRepositoryProvider);
+    _infoRepository = ref.watch(fitossanitariosInfoRepositoryProvider);
     _historyService = AccessHistoryService();
     return _loadInitialData();
   }
@@ -186,7 +186,7 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
       var defensivos = await _repository.findElegiveis();
 
       if (defensivos.isEmpty) {
-        final isDataLoaded = await FitossanitariosDataLoader.isDataLoaded();
+        final isDataLoaded = await FitossanitariosDataLoader.isDataLoaded(ref);
 
         if (!isDataLoaded) {
           await Future<void>.delayed(const Duration(milliseconds: 500));
@@ -222,8 +222,7 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
 
       // Buscar até 7 itens do histórico
       for (final historyItem in historyItems.take(7)) {
-        final defensivo =
-            allDefensivos
+        final defensivo = allDefensivos
                 .where((d) => d.idDefensivo == historyItem.id)
                 .firstOrNull ??
             allDefensivos
@@ -239,11 +238,11 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
       // Se histórico < 7, completa com aleatórios excluindo os do histórico
       final recentDefensivos =
           RandomSelectionService.fillHistoryToCount<Fitossanitario>(
-            historyItems: historicDefensivos,
-            allItems: allDefensivos,
-            targetCount: 7,
-            areEqual: (a, b) => a.idDefensivo == b.idDefensivo,
-          );
+        historyItems: historicDefensivos,
+        allItems: allDefensivos,
+        targetCount: 7,
+        areEqual: (a, b) => a.idDefensivo == b.idDefensivo,
+      );
 
       final newDefensivos = ReceitaAgroRandomExtensions.selectNewDefensivos(
         allDefensivos,
@@ -306,7 +305,7 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
     try {
       var defensivos = await _repository.findElegiveis();
       if (defensivos.isEmpty) {
-        final isDataLoaded = await FitossanitariosDataLoader.isDataLoaded();
+        final isDataLoaded = await FitossanitariosDataLoader.isDataLoaded(ref);
 
         if (!isDataLoaded) {
           await Future<void>.delayed(const Duration(milliseconds: 500));
@@ -411,8 +410,7 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
 
       // Buscar até 7 itens do histórico
       for (final historyItem in historyItems.take(7)) {
-        final defensivo =
-            allDefensivos
+        final defensivo = allDefensivos
                 .where((d) => d.idDefensivo == historyItem.id)
                 .firstOrNull ??
             allDefensivos
@@ -428,11 +426,11 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
       // Se histórico < 7, completa com aleatórios excluindo os do histórico
       final recentDefensivos =
           RandomSelectionService.fillHistoryToCount<Fitossanitario>(
-            historyItems: historicDefensivos,
-            allItems: allDefensivos,
-            targetCount: 7,
-            areEqual: (a, b) => a.idDefensivo == b.idDefensivo,
-          );
+        historyItems: historicDefensivos,
+        allItems: allDefensivos,
+        targetCount: 7,
+        areEqual: (a, b) => a.idDefensivo == b.idDefensivo,
+      );
       final newDefensivos = ReceitaAgroRandomExtensions.selectNewDefensivos(
         allDefensivos,
         count: 7,
@@ -487,8 +485,7 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
     // Exclui "não especificado" da contagem
     final modosAcaoSet = <String>{};
     for (final defensivo in defensivos) {
-      final modoAcaoText =
-          infoMap?[defensivo.id] ?? defensivo.displayModoAcao;
+      final modoAcaoText = infoMap?[defensivo.id] ?? defensivo.displayModoAcao;
       final modosAcao = _extrairModosAcao(modoAcaoText);
       modosAcaoSet.addAll(
         modosAcao

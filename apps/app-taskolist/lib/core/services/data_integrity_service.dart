@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../features/tasks/data/task_local_datasource.dart';
 import '../../features/tasks/data/task_model.dart';
@@ -32,7 +31,6 @@ import '../errors/failures.dart';
 ///   (report) => print('Tasks verificadas: ${report.totalTasks}'),
 /// );
 /// ```
-@injectable
 class DataIntegrityService {
   const DataIntegrityService(this._taskLocalDataSource);
 

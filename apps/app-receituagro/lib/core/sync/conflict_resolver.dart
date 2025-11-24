@@ -7,7 +7,7 @@ import 'package:core/core.dart' hide ConflictResolutionStrategy, Column;
 
 import 'conflict_resolution_strategy.dart';
 
-@injectable
+
 class ConflictResolver {
   /// Resolve conflito baseado na estratégia definida (stub during migration)
   dynamic resolveConflict(

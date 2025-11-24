@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide test;
+import 'package:core/core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gasometer_drift/features/fuel/domain/usecases/add_fuel_record.dart';
 import 'package:gasometer_drift/features/fuel/domain/usecases/update_fuel_record.dart';
@@ -164,7 +164,8 @@ void main() {
       );
     });
 
-    test('should return ValidationFailure for mismatched total price', () async {
+    test('should return ValidationFailure for mismatched total price',
+        () async {
       // Arrange
       // liters: 40, price: 5.50 = 220.0, but total is 300.0 (way off)
       final invalidRecord = validFuelRecord.copyWith(totalPrice: 300.0);

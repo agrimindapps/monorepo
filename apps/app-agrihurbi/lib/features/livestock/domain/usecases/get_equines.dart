@@ -7,7 +7,6 @@ import '../repositories/livestock_repository.dart';
 /// 
 /// Permite buscar todos os equinos ou aplicar filtros específicos
 /// Implementa UseCase com EquineSearchParams opcionais
-@lazySingleton
 class GetEquinesUseCase implements UseCase<List<EquineEntity>, GetEquinesParams> {
   final LivestockRepository repository;
   
@@ -23,7 +22,6 @@ class GetEquinesUseCase implements UseCase<List<EquineEntity>, GetEquinesParams>
 }
 
 /// Use case simples para obter todos os equinos sem filtros
-@lazySingleton
 class GetAllEquinesUseCase implements NoParamsUseCase<List<EquineEntity>> {
   final LivestockRepository repository;
   
@@ -36,7 +34,6 @@ class GetAllEquinesUseCase implements NoParamsUseCase<List<EquineEntity>> {
 }
 
 /// Use case para obter equino por ID
-@lazySingleton
 class GetEquineByIdUseCase implements UseCase<EquineEntity, String> {
   final LivestockRepository repository;
   

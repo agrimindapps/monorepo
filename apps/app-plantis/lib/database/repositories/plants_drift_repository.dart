@@ -1,6 +1,4 @@
-import 'package:core/core.dart' hide Column;
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../features/plants/data/models/plant_model.dart';
 import '../../features/plants/domain/entities/plant.dart';
@@ -26,7 +24,6 @@ import '../plantis_database.dart' as db;
 /// - Suporte a múltiplas imagens (imageUrls JSON)
 /// ============================================================================
 
-@lazySingleton
 class PlantsDriftRepository {
   final db.PlantisDatabase _db;
 

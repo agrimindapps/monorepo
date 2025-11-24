@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../constants/calculation_constants.dart';
 import '../entities/unemployment_insurance_calculation.dart';
@@ -19,9 +18,9 @@ class CalculateUnemploymentInsuranceParams {
   });
 }
 
-@injectable
 class CalculateUnemploymentInsuranceUseCase {
-  Future<Either<Failure, UnemploymentInsuranceCalculation>> call(CalculateUnemploymentInsuranceParams params) async {
+  Future<Either<Failure, UnemploymentInsuranceCalculation>> call(
+      CalculateUnemploymentInsuranceParams params) async {
     final validationError = _validate(params);
     if (validationError != null) {
       return Left(validationError);
@@ -50,7 +49,8 @@ class CalculateUnemploymentInsuranceUseCase {
       return const ValidationFailure('Tempo de trabalho não pode ser negativo');
     }
 
-    if (params.workMonths > CalculationConstants.seguroDesempregoMaxTempoTrabalho) {
+    if (params.workMonths >
+        CalculationConstants.seguroDesempregoMaxTempoTrabalho) {
       return ValidationFailure(
         'Tempo de trabalho não pode exceder ${CalculationConstants.seguroDesempregoMaxTempoTrabalho} meses',
       );
@@ -60,7 +60,8 @@ class CalculateUnemploymentInsuranceUseCase {
       return const ValidationFailure('Vezes recebidas não pode ser negativo');
     }
 
-    if (params.timesReceived > CalculationConstants.seguroDesempregoMaxVezesRecebidas) {
+    if (params.timesReceived >
+        CalculationConstants.seguroDesempregoMaxVezesRecebidas) {
       return ValidationFailure(
         'Vezes recebidas não pode exceder ${CalculationConstants.seguroDesempregoMaxVezesRecebidas}',
       );
@@ -73,15 +74,18 @@ class CalculateUnemploymentInsuranceUseCase {
 
     final minDate = DateTime(CalculationConstants.anoMinimoAdmissao);
     if (params.dismissalDate.isBefore(minDate)) {
-      return ValidationFailure('Data de demissão não pode ser anterior a ${CalculationConstants.anoMinimoAdmissao}');
+      return ValidationFailure(
+          'Data de demissão não pode ser anterior a ${CalculationConstants.anoMinimoAdmissao}');
     }
 
     return null;
   }
 
-  UnemploymentInsuranceCalculation _performCalculation(CalculateUnemploymentInsuranceParams params) {
+  UnemploymentInsuranceCalculation _performCalculation(
+      CalculateUnemploymentInsuranceParams params) {
     // 1. Check eligibility
-    final eligibilityCheck = _checkEligibility(params.workMonths, params.timesReceived);
+    final eligibilityCheck =
+        _checkEligibility(params.workMonths, params.timesReceived);
 
     if (!eligibilityCheck['eligible']) {
       return _createIneligibleCalculation(params, eligibilityCheck);
@@ -91,7 +95,8 @@ class CalculateUnemploymentInsuranceUseCase {
     final installmentValue = _calculateInstallmentValue(params.averageSalary);
 
     // 3. Calculate number of installments
-    final numberOfInstallments = _calculateNumberOfInstallments(params.workMonths, params.timesReceived);
+    final numberOfInstallments =
+        _calculateNumberOfInstallments(params.workMonths, params.timesReceived);
 
     // 4. Calculate total value
     final totalValue = installmentValue * numberOfInstallments;
@@ -100,13 +105,17 @@ class CalculateUnemploymentInsuranceUseCase {
     final deadlineToRequest = params.dismissalDate.add(
       Duration(days: CalculationConstants.seguroDesempregoPrazoRequererDias),
     );
-    final paymentStart = params.dismissalDate.add(const Duration(days: 30)); // Approx 30 days
+    final paymentStart =
+        params.dismissalDate.add(const Duration(days: 30)); // Approx 30 days
     final paymentEnd = paymentStart.add(
-      Duration(days: (numberOfInstallments - 1) * CalculationConstants.seguroDesempregoIntervaloParcelasDias),
+      Duration(
+          days: (numberOfInstallments - 1) *
+              CalculationConstants.seguroDesempregoIntervaloParcelasDias),
     );
 
     // 6. Create payment schedule
-    final paymentSchedule = _createPaymentSchedule(paymentStart, numberOfInstallments);
+    final paymentSchedule =
+        _createPaymentSchedule(paymentStart, numberOfInstallments);
 
     return UnemploymentInsuranceCalculation(
       id: const Uuid().v4(),
@@ -134,20 +143,24 @@ class CalculateUnemploymentInsuranceUseCase {
     // Determine required carency based on times received
     switch (timesReceived) {
       case 0:
-        requiredCarency = CalculationConstants.seguroDesempregoCarenciaPrimeiraVez;
+        requiredCarency =
+            CalculationConstants.seguroDesempregoCarenciaPrimeiraVez;
         break;
       case 1:
-        requiredCarency = CalculationConstants.seguroDesempregoCarenciaSegundaVez;
+        requiredCarency =
+            CalculationConstants.seguroDesempregoCarenciaSegundaVez;
         break;
       default:
-        requiredCarency = CalculationConstants.seguroDesempregoCarenciaTerceiraVez;
+        requiredCarency =
+            CalculationConstants.seguroDesempregoCarenciaTerceiraVez;
         break;
     }
 
     if (workMonths < requiredCarency) {
       return {
         'eligible': false,
-        'reason': 'Tempo de trabalho insuficiente. Necessário: $requiredCarency meses.',
+        'reason':
+            'Tempo de trabalho insuficiente. Necessário: $requiredCarency meses.',
         'carency': requiredCarency,
       };
     }
@@ -164,7 +177,12 @@ class CalculateUnemploymentInsuranceUseCase {
     const salaryBrackets = [
       {'min': 0.0, 'max': 1968.36, 'multiplier': 0.8, 'fixed': 0.0},
       {'min': 1968.37, 'max': 3280.93, 'multiplier': 0.5, 'fixed': 1574.69},
-      {'min': 3280.94, 'max': double.infinity, 'multiplier': 0.0, 'fixed': 2230.97},
+      {
+        'min': 3280.94,
+        'max': double.infinity,
+        'multiplier': 0.0,
+        'fixed': 2230.97
+      },
     ];
 
     for (final bracket in salaryBrackets) {
@@ -244,11 +262,14 @@ class CalculateUnemploymentInsuranceUseCase {
     return 0; // Not eligible
   }
 
-  List<DateTime> _createPaymentSchedule(DateTime start, int numberOfInstallments) {
+  List<DateTime> _createPaymentSchedule(
+      DateTime start, int numberOfInstallments) {
     final List<DateTime> schedule = [];
 
     for (int i = 0; i < numberOfInstallments; i++) {
-      schedule.add(start.add(Duration(days: i * CalculationConstants.seguroDesempregoIntervaloParcelasDias)));
+      schedule.add(start.add(Duration(
+          days:
+              i * CalculationConstants.seguroDesempregoIntervaloParcelasDias)));
     }
 
     return schedule;

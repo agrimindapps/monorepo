@@ -1,22 +1,19 @@
 import 'dart:convert';
 
+import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'package:drift/drift.dart';
+import '../../database/providers/database_providers.dart';
 import '../../database/receituagro_database.dart';
 import '../../database/repositories/diagnostico_repository.dart';
-import '../../database/repositories/fitossanitarios_repository.dart';
-import '../../database/repositories/culturas_repository.dart';
-import '../../database/repositories/pragas_repository.dart';
-import '../di/injection_container.dart' as di;
 
 /// Serviço para carregar dados de diagnósticos dos assets JSON
 class DiagnosticosDataLoader {
   static bool _isLoaded = false;
 
   /// Carrega dados de diagnósticos do JSON dos assets usando repositório
-  static Future<void> loadDiagnosticosData() async {
+  static Future<void> loadDiagnosticosData(dynamic ref) async {
     if (_isLoaded) {
       return;
     }
@@ -57,15 +54,18 @@ class DiagnosticosDataLoader {
           .toList();
 
       if (diagnosticos.isNotEmpty) {
-        final repository = di.sl<DiagnosticoRepository>();
-        final fitossanitariosRepo = di.sl<FitossanitariosRepository>();
-        final culturasRepo = di.sl<CulturasRepository>();
-        final pragasRepo = di.sl<PragasRepository>();
+        final repository = ref.watch(diagnosticoRepositoryProvider);
+        final fitossanitariosRepo = ref.read(fitossanitariosRepositoryProvider);
+        final culturasRepo = ref.read(culturasRepositoryProvider);
+        final pragasRepo = ref.read(pragasRepositoryProvider);
 
         // Load lookup maps
-        final fitossanitarios = await fitossanitariosRepo.findAll();
-        final culturas = await culturasRepo.findAll();
-        final pragas = await pragasRepo.findAll();
+        final List<Fitossanitario> fitossanitarios = await (fitossanitariosRepo
+            .findAll() as Future<List<Fitossanitario>>);
+        final List<Cultura> culturas =
+            await (culturasRepo.findAll() as Future<List<Cultura>>);
+        final List<Praga> pragas =
+            await (pragasRepo.findAll() as Future<List<Praga>>);
 
         final defensivoMap = {
           for (var f in fitossanitarios) f.idDefensivo: f.id
@@ -135,16 +135,17 @@ class DiagnosticosDataLoader {
   }
 
   /// Força recarregamento dos dados (para desenvolvimento)
-  static Future<void> forceReload() async {
+  static Future<void> forceReload(dynamic ref) async {
     _isLoaded = false;
-    await loadDiagnosticosData();
+    await loadDiagnosticosData(ref);
   }
 
   /// Verifica se dados estão carregados
-  static Future<bool> isDataLoaded() async {
+  static Future<bool> isDataLoaded(dynamic ref) async {
     try {
-      final repository = di.sl<DiagnosticoRepository>();
-      final diagnosticos = await repository.getAll();
+      final repository =
+          ref.read(diagnosticoRepositoryProvider) as DiagnosticoRepository;
+      final List<Diagnostico> diagnosticos = await repository.getAll();
       final hasData = diagnosticos.isNotEmpty;
 
       return hasData;
@@ -154,16 +155,17 @@ class DiagnosticosDataLoader {
   }
 
   /// Obtém estatísticas de carregamento
-  static Future<Map<String, dynamic>> getStats() async {
+  static Future<Map<String, dynamic>> getStats(dynamic ref) async {
     try {
-      final repository = di.sl<DiagnosticoRepository>();
-      final diagnosticos = await repository.getAll();
+      final repository =
+          ref.read(diagnosticoRepositoryProvider) as DiagnosticoRepository;
+      final List<Diagnostico> diagnosticos = await repository.getAll();
 
       return {
         'total_diagnosticos': diagnosticos.length,
         'is_loaded': _isLoaded,
         'sample_diagnosticos':
-            diagnosticos.take(5).map((d) => d.idReg).toList(),
+            diagnosticos.take(5).map((Diagnostico d) => d.idReg).toList(),
       };
     } catch (e) {
       return {

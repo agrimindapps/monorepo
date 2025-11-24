@@ -1,8 +1,6 @@
-import 'package:core/core.dart' show Provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../domain/entities/animal_base_entity.dart';
 import '../../domain/entities/bovine_entity.dart';
 import '../../domain/entities/equine_entity.dart';
@@ -13,20 +11,37 @@ import '../../domain/usecases/get_bovines.dart';
 import '../../domain/usecases/get_equines.dart';
 import '../../domain/usecases/search_animals.dart' as search_use_case;
 import '../../domain/usecases/update_bovine.dart';
+import 'livestock_di_providers.dart';
 
 /// Provider Riverpod para LivestockProvider
-///
-/// Integra GetIt com Riverpod para gerenciamento de estado
-final livestockProviderProvider = Provider<LivestockProvider>((ref) {
-  return getIt<LivestockProvider>();
+final livestockProviderProvider = ChangeNotifierProvider<LivestockProvider>((ref) {
+  return LivestockProvider(
+    repository: ref.watch(livestockRepositoryProvider),
+    getAllBovines: ref.watch(getAllBovinesUseCaseProvider),
+    getEquines: ref.watch(getEquinesUseCaseProvider),
+    createBovine: ref.watch(createBovineUseCaseProvider),
+    updateBovine: ref.watch(updateBovineUseCaseProvider),
+    deleteBovine: ref.watch(deleteBovineUseCaseProvider),
+    searchAnimals: ref.watch(searchAnimalsUseCaseProvider),
+  );
 });
+
+/// Provider específico para operações de bovinos
+final bovinesProviderProvider = ChangeNotifierProvider<BovinesProvider>((ref) {
+  return BovinesProvider(ref.watch(livestockRepositoryProvider));
+});
+
+/// Provider específico para operações de equinos
+final equinesProviderProvider = ChangeNotifierProvider<EquinesProvider>((ref) {
+  return EquinesProvider(ref.watch(livestockRepositoryProvider));
+});
+
 
 /// Provider principal para gerenciamento de estado do livestock
 ///
 /// Substitui os antigos controllers GetX por ChangeNotifier
 /// Implementa padrões clean architecture com Provider pattern
 /// Gerencia bovinos, equinos e operações unificadas
-@singleton
 class LivestockProvider extends ChangeNotifier {
   final LivestockRepository _repository;
   final GetAllBovinesUseCase _getAllBovines;

@@ -1,29 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../di/injection_container.dart';
 import '../interfaces/i_premium_service.dart';
+import '../providers/premium_providers.dart';
+
+// Provider para gerenciar o estado de processamento do widget
+final _isProcessingProvider = StateProvider<bool>((ref) => false);
 
 /// Widget de controle para testar funcionalidades premium
 /// Permite ativar/desativar licença teste facilmente durante desenvolvimento
-class PremiumTestControlsWidget extends StatefulWidget {
+class PremiumTestControlsWidget extends ConsumerWidget {
   final bool showInProduction;
-  
+
   const PremiumTestControlsWidget({
     super.key,
     this.showInProduction = false,
   });
 
   @override
-  State<PremiumTestControlsWidget> createState() => _PremiumTestControlsWidgetState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final premiumService = ref.watch(premiumServiceProvider);
 
-class _PremiumTestControlsWidgetState extends State<PremiumTestControlsWidget> {
-  final IPremiumService _premiumService = sl<IPremiumService>();
-  bool _isProcessing = false;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!widget.showInProduction && const bool.fromEnvironment('dart.vm.product')) {
+    if (!showInProduction && const bool.fromEnvironment('dart.vm.product')) {
       return const SizedBox.shrink();
     }
 
@@ -53,17 +51,17 @@ class _PremiumTestControlsWidgetState extends State<PremiumTestControlsWidget> {
             ],
           ),
           const SizedBox(height: 8),
-          StreamBuilder<bool>(
-            stream: _premiumService.premiumStatusStream,
-            initialData: _premiumService.isPremium,
-            builder: (context, snapshot) {
-              final isPremium = snapshot.data ?? false;
-              
+          Consumer(
+            builder: (context, ref, child) {
+              final isProcessing = ref.watch(_isProcessingProvider);
+              final isPremium = premiumService.isPremium;
+
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: isPremium ? Colors.green : Colors.orange,
                       borderRadius: BorderRadius.circular(12),
@@ -79,8 +77,11 @@ class _PremiumTestControlsWidgetState extends State<PremiumTestControlsWidget> {
                   ),
                   if (!isPremium)
                     ElevatedButton.icon(
-                      onPressed: _isProcessing ? null : _activateTestSubscription,
-                      icon: _isProcessing 
+                      onPressed: isProcessing
+                          ? null
+                          : () => _activateTestSubscription(
+                              context, ref, premiumService),
+                      icon: isProcessing
                           ? const SizedBox(
                               width: 16,
                               height: 16,
@@ -91,13 +92,17 @@ class _PremiumTestControlsWidgetState extends State<PremiumTestControlsWidget> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                       ),
                     ),
                   if (isPremium)
                     ElevatedButton.icon(
-                      onPressed: _isProcessing ? null : _removeTestSubscription,
-                      icon: _isProcessing 
+                      onPressed: isProcessing
+                          ? null
+                          : () => _removeTestSubscription(
+                              context, ref, premiumService),
+                      icon: isProcessing
                           ? const SizedBox(
                               width: 16,
                               height: 16,
@@ -108,7 +113,8 @@ class _PremiumTestControlsWidgetState extends State<PremiumTestControlsWidget> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                       ),
                     ),
                 ],
@@ -120,79 +126,65 @@ class _PremiumTestControlsWidgetState extends State<PremiumTestControlsWidget> {
     );
   }
 
-  Future<void> _activateTestSubscription() async {
-    if (_isProcessing) return;
+  Future<void> _activateTestSubscription(BuildContext context, WidgetRef ref,
+      IPremiumService premiumService) async {
+    final isProcessingNotifier = ref.read(_isProcessingProvider.notifier);
 
-    setState(() {
-      _isProcessing = true;
-    });
+    if (ref.read(_isProcessingProvider)) return;
+
+    isProcessingNotifier.state = true;
 
     try {
-      await _premiumService.generateTestSubscription();
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Licença teste ativada com sucesso!'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
+      await premiumService.generateTestSubscription();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('✅ Licença teste ativada com sucesso!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Erro ao ativar licença teste: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Erro ao ativar licença teste: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
     } finally {
-      if (mounted) {
-        setState(() {
-          _isProcessing = false;
-        });
-      }
+      isProcessingNotifier.state = false;
     }
   }
 
-  Future<void> _removeTestSubscription() async {
-    if (_isProcessing) return;
+  Future<void> _removeTestSubscription(BuildContext context, WidgetRef ref,
+      IPremiumService premiumService) async {
+    final isProcessingNotifier = ref.read(_isProcessingProvider.notifier);
 
-    setState(() {
-      _isProcessing = true;
-    });
+    if (ref.read(_isProcessingProvider)) return;
+
+    isProcessingNotifier.state = true;
 
     try {
-      await _premiumService.removeTestSubscription();
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('🔓 Licença teste removida com sucesso!'),
-            backgroundColor: Colors.orange,
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
+      await premiumService.removeTestSubscription();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('🔓 Licença teste removida com sucesso!'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 2),
+        ),
+      );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Erro ao remover licença teste: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Erro ao remover licença teste: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
     } finally {
-      if (mounted) {
-        setState(() {
-          _isProcessing = false;
-        });
-      }
+      isProcessingNotifier.state = false;
     }
   }
 }

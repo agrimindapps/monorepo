@@ -1,9 +1,9 @@
-import 'package:injectable/injectable.dart';
+// ignore_for_file: dangling_library_doc_comments
 
 /// Service responsible for onboarding-specific error messages
 /// Centralizes error text for i18n readiness and consistency
 /// Follows SRP by managing only error message logic
-@lazySingleton
+
 class OnboardingErrorMessageService {
   OnboardingErrorMessageService();
 

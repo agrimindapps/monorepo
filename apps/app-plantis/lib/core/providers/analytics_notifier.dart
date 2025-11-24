@@ -10,13 +10,13 @@ part 'analytics_notifier.g.dart';
 /// Provider do repositório de analytics (obtido via DI)
 @riverpod
 IAnalyticsRepository analyticsRepository(AnalyticsRepositoryRef ref) {
-  return GetIt.instance<IAnalyticsRepository>();
+  return FirebaseAnalyticsService();
 }
 
 /// Provider do repositório de crashlytics (obtido via DI)
 @riverpod
 ICrashlyticsRepository crashlyticsRepository(CrashlyticsRepositoryRef ref) {
-  return GetIt.instance<ICrashlyticsRepository>();
+  return FirebaseCrashlyticsService();
 }
 
 /// Notifier principal para gerenciar analytics com @riverpod

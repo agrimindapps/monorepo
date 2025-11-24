@@ -1,19 +1,18 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/overtime_calculation.dart';
 import '../../domain/repositories/overtime_repository.dart';
 import '../datasources/overtime_local_datasource.dart';
 import '../models/overtime_calculation_model.dart';
 
-@Injectable(as: OvertimeRepository)
 class OvertimeRepositoryImpl implements OvertimeRepository {
   final OvertimeLocalDataSource _localDataSource;
   OvertimeRepositoryImpl(this._localDataSource);
 
   @override
-  Future<Either<Failure, OvertimeCalculation>> saveCalculation(OvertimeCalculation calculation) async {
+  Future<Either<Failure, OvertimeCalculation>> saveCalculation(
+      OvertimeCalculation calculation) async {
     try {
       final model = OvertimeCalculationModel.fromEntity(calculation);
       final saved = await _localDataSource.save(model);
@@ -26,7 +25,8 @@ class OvertimeRepositoryImpl implements OvertimeRepository {
   }
 
   @override
-  Future<Either<Failure, List<OvertimeCalculation>>> getCalculationHistory({int limit = 10}) async {
+  Future<Either<Failure, List<OvertimeCalculation>>> getCalculationHistory(
+      {int limit = 10}) async {
     try {
       final models = await _localDataSource.getAll(limit: limit);
       final entities = models.map((model) => model.toEntity()).toList();
@@ -39,7 +39,8 @@ class OvertimeRepositoryImpl implements OvertimeRepository {
   }
 
   @override
-  Future<Either<Failure, OvertimeCalculation>> getCalculationById(String id) async {
+  Future<Either<Failure, OvertimeCalculation>> getCalculationById(
+      String id) async {
     try {
       final model = await _localDataSource.getById(id);
       if (model == null) {

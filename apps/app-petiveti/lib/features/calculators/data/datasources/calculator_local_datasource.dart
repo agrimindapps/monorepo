@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../database/petiveti_database.dart';
@@ -28,7 +27,6 @@ abstract class CalculatorLocalDatasource {
 }
 
 /// Drift-based implementation of CalculatorLocalDatasource
-@LazySingleton(as: CalculatorLocalDatasource)
 class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
   final PetivetiDatabase _database;
   final SharedPreferences _prefs;

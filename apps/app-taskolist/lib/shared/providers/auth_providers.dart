@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:core/core.dart' as core;
-import 'package:core/core.dart' hide getIt, Column;
+import 'package:core/core.dart' hide Column;
 
 import '../../core/providers/core_providers.dart';
 import '../../infrastructure/services/auth_service.dart';

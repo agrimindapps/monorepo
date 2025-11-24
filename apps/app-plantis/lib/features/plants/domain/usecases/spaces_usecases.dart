@@ -4,7 +4,6 @@ import '../../../../core/auth/auth_state_notifier.dart';
 import '../entities/space.dart';
 import '../repositories/spaces_repository.dart';
 
-@injectable
 class GetSpacesUseCase implements UseCase<List<Space>, NoParams> {
   final SpacesRepository repository;
 
@@ -16,7 +15,6 @@ class GetSpacesUseCase implements UseCase<List<Space>, NoParams> {
   }
 }
 
-@injectable
 class GetSpaceByIdUseCase implements UseCase<Space, String> {
   final SpacesRepository repository;
 
@@ -33,7 +31,6 @@ class GetSpaceByIdUseCase implements UseCase<Space, String> {
   }
 }
 
-@injectable
 class AddSpaceUseCase implements UseCase<Space, AddSpaceParams> {
   final SpacesRepository repository;
 
@@ -106,7 +103,6 @@ class AddSpaceUseCase implements UseCase<Space, AddSpaceParams> {
   }
 }
 
-@injectable
 class UpdateSpaceUseCase implements UseCase<Space, UpdateSpaceParams> {
   const UpdateSpaceUseCase(this.repository);
 
@@ -174,7 +170,6 @@ class UpdateSpaceUseCase implements UseCase<Space, UpdateSpaceParams> {
   }
 }
 
-@injectable
 class DeleteSpaceUseCase implements UseCase<void, String> {
   const DeleteSpaceUseCase(this.repository);
 

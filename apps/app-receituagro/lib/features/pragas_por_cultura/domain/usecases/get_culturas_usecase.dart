@@ -9,7 +9,7 @@ import '../repositories/i_pragas_cultura_repository.dart';
 /// Parâmetros: Nenhum (NoParams)
 /// Retorno: Either<Failure, List<dynamic>> com as culturas disponíveis
 /// Validações: Nenhuma (apenas carrega)
-@injectable
+
 class GetCulturasUseCase {
   final IPragasCulturaRepository _repository;
   final PragasCulturaErrorMessageService errorService;

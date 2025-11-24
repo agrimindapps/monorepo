@@ -15,7 +15,11 @@ class ReceitaAgroSyncService implements ISyncService {
   bool _isInitialized = false;
   StreamSubscription<dynamic>? _connectivitySubscription;
 
-  ReceitaAgroSyncService();
+  final FavoritosRepositorySimplified? _favoritosRepository;
+
+  ReceitaAgroSyncService({
+    FavoritosRepositorySimplified? favoritosRepository,
+  }) : _favoritosRepository = favoritosRepository;
 
   @override
   String get serviceId => 'receituagro';
@@ -353,13 +357,16 @@ class ReceitaAgroSyncService implements ISyncService {
   Future<Either<Failure, int>> _syncFavoritos() async {
     try {
       try {
-        final favoritosRepo = GetIt.I<FavoritosRepositorySimplified>();
+        if (_favoritosRepository == null) {
+          if (kDebugMode) print('⚠️ FavoritosRepository not injected in ReceitaAgroSyncService');
+          return const Right(0);
+        }
 
         // Dispara sincronização dos favoritos (carrega da storage local)
-        await favoritosRepo.syncFavorites();
+        await _favoritosRepository!.syncFavorites();
 
         // Obtém estatísticas para contar
-        final statsResult = await favoritosRepo.getStats();
+        final statsResult = await _favoritosRepository!.getStats();
 
         // Unwrap Either<Failure, FavoritosStats>
         final totalFavoritos = statsResult.fold(
@@ -402,7 +409,11 @@ class ReceitaAgroSyncService implements ISyncService {
 
 /// Factory para criar instâncias do ReceitaAgroSyncService
 class ReceitaAgroSyncServiceFactory {
-  static ReceitaAgroSyncService create() {
-    return ReceitaAgroSyncService();
+  static ReceitaAgroSyncService create({
+    FavoritosRepositorySimplified? favoritosRepository,
+  }) {
+    return ReceitaAgroSyncService(
+      favoritosRepository: favoritosRepository,
+    );
   }
 }

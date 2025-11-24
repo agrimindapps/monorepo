@@ -7,7 +7,6 @@ import 'analytics_service.dart';
 import 'crashlytics_service.dart';
 
 /// Notification service específico do app Task Manager
-@lazySingleton
 class TaskManagerNotificationService {
   final INotificationRepository _notificationRepository;
   final TaskManagerAnalyticsService _analyticsService;

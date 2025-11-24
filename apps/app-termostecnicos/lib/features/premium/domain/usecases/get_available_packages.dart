@@ -3,7 +3,6 @@ import 'package:core/core.dart' hide Column;
 import '../repositories/premium_repository.dart';
 
 /// Use case for getting available subscription packages
-@injectable
 class GetAvailablePackages {
   final PremiumRepository _repository;
 

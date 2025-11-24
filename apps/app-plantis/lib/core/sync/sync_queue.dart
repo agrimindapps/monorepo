@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../database/plantis_database.dart' as db;
 import '../data/models/sync_queue_item.dart';
@@ -14,7 +13,6 @@ import 'sync_queue_drift_service.dart';
 /// toda a base de código migra para a implementação Drift nativa.
 ///
 /// ⚠️ DEPRECATED: Use SyncQueueDriftService diretamente para código novo
-@singleton
 class SyncQueue {
   final SyncQueueDriftService _driftService;
   final StreamController<List<SyncQueueItem>> _queueController =

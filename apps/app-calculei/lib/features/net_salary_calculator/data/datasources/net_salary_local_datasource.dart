@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/net_salary_calculation_model.dart';
@@ -12,7 +11,6 @@ abstract class NetSalaryLocalDataSource {
   Future<void> clearAll();
 }
 
-@Injectable(as: NetSalaryLocalDataSource)
 class NetSalaryLocalDataSourceImpl implements NetSalaryLocalDataSource {
   static const String _storagePrefix = 'net_salary_calculations';
   static const String _idsKey = '${_storagePrefix}_ids';

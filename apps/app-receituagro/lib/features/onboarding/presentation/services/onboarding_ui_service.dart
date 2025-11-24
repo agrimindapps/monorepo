@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
+
 
 /// Service responsible for onboarding UI-related mappings and configurations
 /// Follows SRP by centralizing UI presentation logic
-@lazySingleton
+
 class OnboardingUIService {
   OnboardingUIService();
 

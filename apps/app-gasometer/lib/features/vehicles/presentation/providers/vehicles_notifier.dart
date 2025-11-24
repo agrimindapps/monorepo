@@ -4,12 +4,11 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/error/error_mapper.dart';
+import '../../../../core/providers/dependency_providers.dart' as deps;
 import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../../domain/entities/vehicle_entity.dart';
-import '../../domain/repositories/vehicle_repository.dart';
 import '../../domain/usecases/add_vehicle.dart';
 import '../../domain/usecases/delete_vehicle.dart';
-import '../../domain/usecases/get_all_vehicles.dart';
 import '../../domain/usecases/get_vehicle_by_id.dart';
 import '../../domain/usecases/search_vehicles.dart';
 import '../../domain/usecases/update_vehicle.dart';
@@ -44,7 +43,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
     _logInfo('Loading initial vehicles for user: ${currentUser.id}');
 
     return await _executeOperation(() async {
-      final getAllVehicles = ref.read(getAllVehiclesProvider);
+      final getAllVehicles = ref.read(deps.getAllVehiclesProvider);
       final result = await getAllVehicles();
 
       return result.fold(
@@ -63,7 +62,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
   /// Inicia watch stream para sincronização em tempo real
   void _startWatchingVehicles() {
     try {
-      final repository = GetIt.instance<VehicleRepository>();
+      final repository = ref.read(deps.vehicleRepositoryProvider);
 
       _vehicleSubscription = repository.watchVehicles().listen(
         (result) {
@@ -114,7 +113,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
     VehicleEntity? addedVehicle;
 
     await _executeOperation(() async {
-      final addVehicleUseCase = ref.read(addVehicleProvider);
+      final addVehicleUseCase = ref.read(deps.addVehicleProvider);
       final result = await addVehicleUseCase(
         AddVehicleParams(vehicle: vehicle),
       ).timeout(const Duration(seconds: 30));
@@ -148,7 +147,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
     VehicleEntity? updatedVehicle;
 
     await _executeOperation(() async {
-      final updateVehicleUseCase = ref.read(updateVehicleProvider);
+      final updateVehicleUseCase = ref.read(deps.updateVehicleProvider);
       final result = await updateVehicleUseCase(
         UpdateVehicleParams(vehicle: vehicle),
       );
@@ -185,7 +184,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
     _logInfo('Deleting vehicle: $vehicleId');
 
     await _executeOperation(() async {
-      final deleteVehicleUseCase = ref.read(deleteVehicleProvider);
+      final deleteVehicleUseCase = ref.read(deps.deleteVehicleProvider);
       final result = await deleteVehicleUseCase(
         DeleteVehicleParams(vehicleId: vehicleId),
       );
@@ -221,7 +220,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
       VehicleEntity? foundVehicle;
 
       await _executeOperation(() async {
-        final getVehicleByIdUseCase = ref.read(getVehicleByIdProvider);
+        final getVehicleByIdUseCase = ref.read(deps.getVehicleByIdProvider);
         final result = await getVehicleByIdUseCase(
           GetVehicleByIdParams(vehicleId: vehicleId),
         );
@@ -258,7 +257,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
       List<VehicleEntity> searchResults = [];
 
       await _executeOperation(() async {
-        final searchVehiclesUseCase = ref.read(searchVehiclesProvider);
+        final searchVehiclesUseCase = ref.read(deps.searchVehiclesProvider);
         final result = await searchVehiclesUseCase(
           SearchVehiclesParams(query: query),
         );

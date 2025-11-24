@@ -2,7 +2,7 @@ import 'package:app_receituagro/features/settings/domain/entities/user_settings_
 import 'package:app_receituagro/features/settings/domain/usecases/get_user_settings_usecase.dart';
 import 'package:app_receituagro/features/settings/domain/usecases/update_user_settings_usecase.dart';
 import 'package:app_receituagro/features/settings/presentation/providers/notifiers/theme_notifier.dart';
-import 'package:core/core.dart' hide test;
+import 'package:core/core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';

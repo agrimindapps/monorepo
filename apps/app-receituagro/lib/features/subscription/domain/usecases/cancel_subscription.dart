@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 
 /// Use case para cancelar assinatura (usa core repository)
-@injectable
+
 class CancelSubscriptionUseCase implements UseCase<void, String?> {
   CancelSubscriptionUseCase(this.coreRepository);
 

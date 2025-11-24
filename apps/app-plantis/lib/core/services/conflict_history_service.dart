@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 
 import '../data/models/conflict_history_model.dart';
 import 'conflict_history_drift_service.dart';
@@ -9,7 +8,6 @@ import 'conflict_history_drift_service.dart';
 /// toda a base de código migra para a implementação Drift nativa.
 ///
 /// ⚠️ DEPRECATED: Use ConflictHistoryDriftService diretamente para código novo
-@injectable
 class ConflictHistoryService {
   final ConflictHistoryDriftService _driftService;
 

@@ -1,8 +1,10 @@
 import 'package:core/core.dart' hide Column;
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../../core/providers/repository_providers.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/usecases/delete_plant_usecase.dart';
+import '../../domain/usecases/get_plant_by_id_usecase.dart';
 import '../../domain/usecases/get_plants_usecase.dart';
 import '../../domain/usecases/update_plant_usecase.dart';
 
@@ -196,20 +198,20 @@ class PlantDetailsNotifier extends _$PlantDetailsNotifier {
   }
 }
 
-// Dependency providers using GetIt
+// Dependency providers
 @riverpod
 GetPlantByIdUseCase getPlantByIdUseCase(GetPlantByIdUseCaseRef ref) {
-  return GetIt.instance<GetPlantByIdUseCase>();
+  return GetPlantByIdUseCase(ref.watch(plantsRepositoryProvider));
 }
 
 @riverpod
 DeletePlantUseCase deletePlantUseCase(DeletePlantUseCaseRef ref) {
-  return GetIt.instance<DeletePlantUseCase>();
+  return DeletePlantUseCase(ref.watch(plantsRepositoryProvider));
 }
 
 @riverpod
 UpdatePlantUseCase updatePlantUseCase(UpdatePlantUseCaseRef ref) {
-  return GetIt.instance<UpdatePlantUseCase>();
+  return UpdatePlantUseCase(ref.watch(plantsRepositoryProvider));
 }
 
 /// Alias for backwards compatibility with existing code

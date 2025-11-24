@@ -6,7 +6,6 @@ import '../repositories/auth_repository.dart';
 /// 
 /// Implementa UseCase que retorna a entidade do usuário logado ou null
 /// Inclui validação de token, refresh automático se necessário
-@lazySingleton
 class GetCurrentUserUseCase implements UseCase<UserEntity?, GetCurrentUserParams> {
   final AuthRepository repository;
   

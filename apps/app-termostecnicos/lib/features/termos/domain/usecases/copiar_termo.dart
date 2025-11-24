@@ -1,12 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/services.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../entities/termo.dart';
 
 /// Use case for copying term content to clipboard
-@injectable
 class CopiarTermo {
   Future<Either<Failure, Unit>> call(Termo termo) async {
     try {

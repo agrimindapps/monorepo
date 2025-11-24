@@ -5,9 +5,8 @@ import 'package:app_agrihurbi/features/settings/data/datasources/settings_local_
 import 'package:app_agrihurbi/features/settings/data/models/settings_model.dart';
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
 import 'package:app_agrihurbi/features/settings/domain/repositories/settings_repository.dart';
-import 'package:core/core.dart' show Either, Right, Left, LazySingleton;
+import 'package:core/core.dart' show Either, Right, Left;
 
-@LazySingleton(as: SettingsRepository)
 class SettingsRepositoryImpl implements SettingsRepository {
   final SettingsLocalDataSource _localDataSource;
   final AuthProvider _authProvider;

@@ -23,8 +23,8 @@ class DiagnosticoGroupingService {
 
   DiagnosticoGroupingService._internal();
 
-  final DiagnosticoEntityResolver _resolver =
-      DiagnosticoEntityResolver.instance;
+  final DiagnosticoEntityResolverDrift _resolver =
+      DiagnosticoEntityResolverDrift.instance;
   final Map<String, Map<String, dynamic>> _groupingCache = {};
   DateTime? _lastCacheUpdate;
   static const Duration _cacheTTL = Duration(minutes: 15);
@@ -63,10 +63,8 @@ class DiagnosticoGroupingService {
       final idCultura = getIdCultura(item);
       String culturaNome = defaultGroupName;
       if (idCultura != null && idCultura.isNotEmpty) {
-        culturaNome = await _resolver.resolveCulturaNome(
-          idCultura: idCultura,
-          defaultValue: defaultGroupName,
-        );
+        culturaNome =
+            await _resolver.resolveCulturaNome(idCultura) ?? defaultGroupName;
       }
 
       grouped.putIfAbsent(culturaNome, () => []).add(item);
@@ -111,10 +109,8 @@ class DiagnosticoGroupingService {
       final idDefensivo = getIdDefensivo(item);
       String defensivoNome = defaultGroupName;
       if (idDefensivo != null && idDefensivo.isNotEmpty) {
-        defensivoNome = await _resolver.resolveDefensivoNome(
-          idDefensivo: idDefensivo,
-          defaultValue: defaultGroupName,
-        );
+        defensivoNome = await _resolver.resolveDefensivoNome(idDefensivo) ??
+            defaultGroupName;
       }
 
       grouped.putIfAbsent(defensivoNome, () => []).add(item);
@@ -150,10 +146,8 @@ class DiagnosticoGroupingService {
       final idPraga = getIdPraga(item);
       String pragaNome = defaultGroupName;
       if (idPraga != null && idPraga.isNotEmpty) {
-        pragaNome = await _resolver.resolvePragaNome(
-          idPraga: idPraga,
-          defaultValue: defaultGroupName,
-        );
+        pragaNome =
+            await _resolver.resolvePragaNome(idPraga) ?? defaultGroupName;
       }
 
       grouped.putIfAbsent(pragaNome, () => []).add(item);
@@ -264,14 +258,14 @@ class DiagnosticoGroupingService {
 
   /// Agrupa DiagnosticoEntity por cultura
   Future<Map<String, List<DiagnosticoEntity>>>
-  groupDiagnosticoEntitiesByCultura(
+      groupDiagnosticoEntitiesByCultura(
     List<DiagnosticoEntity> diagnosticos, {
     bool sortByRelevance = true,
   }) {
     return groupByCultura<DiagnosticoEntity>(
       diagnosticos,
       (d) => d.idCultura,
-      (d) => d.nomeCultura,
+      (d) => d.nomeCultura ?? 'Cultura ${d.idCultura}',
       sortItemsInGroup: sortByRelevance,
       itemComparator: sortByRelevance ? _compareByRelevance : null,
     );

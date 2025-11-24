@@ -13,7 +13,6 @@ import '../models/task_model.dart';
 typedef Task = task_entity.Task;
 typedef TaskStatus = task_entity.TaskStatus;
 
-@LazySingleton(as: TasksRepository)
 class TasksRepositoryImpl implements TasksRepository {
   final TasksRemoteDataSource remoteDataSource;
   final TasksLocalDataSource localDataSource;

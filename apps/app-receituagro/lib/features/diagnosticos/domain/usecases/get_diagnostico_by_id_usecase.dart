@@ -5,7 +5,7 @@ import '../repositories/i_diagnosticos_repository.dart';
 
 /// Use Case para buscar diagnóstico específico por ID
 /// Responsabilidade única: Retornar um diagnóstico ou null
-@injectable
+
 class GetDiagnosticoByIdUseCase {
   final IDiagnosticosRepository _repository;
 

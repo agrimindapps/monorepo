@@ -8,7 +8,7 @@ import '../../domain/services/i_busca_validation_service.dart';
 import '../datasources/i_busca_datasource.dart';
 
 /// Implementação do repositório de busca com datasource
-@LazySingleton(as: IBuscaRepository)
+
 class BuscaRepositoryImpl implements IBuscaRepository {
   final IBuscaDatasource _datasource;
   final IBuscaFilterService _filterService;

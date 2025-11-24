@@ -1,7 +1,5 @@
-import 'package:app_agrihurbi/core/error/exceptions.dart';
 import 'package:app_agrihurbi/features/news/data/models/commodity_price_model.dart';
 import 'package:app_agrihurbi/features/news/data/models/news_article_model.dart';
-import 'package:core/core.dart';
 
 /// News Local Data Source
 ///
@@ -90,7 +88,6 @@ abstract class NewsLocalDataSource {
   Future<Map<String, int>> getCacheStats();
 }
 
-@LazySingleton(as: NewsLocalDataSource)
 class NewsLocalDataSourceImpl implements NewsLocalDataSource {
   @override
   Future<void> cacheArticles(List<NewsArticleModel> articles) async {

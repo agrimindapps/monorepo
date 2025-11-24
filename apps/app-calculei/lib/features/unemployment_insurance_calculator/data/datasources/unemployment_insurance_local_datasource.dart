@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/unemployment_insurance_calculation_model.dart';
@@ -14,7 +13,6 @@ abstract class UnemploymentInsuranceLocalDataSource {
   Future<void> clearAll();
 }
 
-@Injectable(as: UnemploymentInsuranceLocalDataSource)
 class UnemploymentInsuranceLocalDataSourceImpl
     implements UnemploymentInsuranceLocalDataSource {
   static const String _storagePrefix = 'unemployment_insurance_calculations';

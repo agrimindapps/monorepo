@@ -33,8 +33,8 @@ dependencies:
   freezed_annotation: ^2.4.1
 
   # Drift - SQL Database
-  drift: any  # Versão do core: ^2.28.2
-  sqlite3_flutter_libs: any  # Versão do core: ^0.5.24
+  drift: ^2.28.2
+  sqlite3_flutter_libs: ^0.5.24
   equatable: any
   firebase_auth: any
   google_fonts: ^6.1.0
@@ -46,7 +46,7 @@ dev_dependencies:
   mocktail: ^1.0.0
   freezed: ^2.5.2
   json_serializable: ^6.8.0
-  drift_dev: any  # Versão do core: ^2.28.0 - Code generation Drift
+  drift_dev: ^2.28.0
 
 flutter:
   uses-material-design: true

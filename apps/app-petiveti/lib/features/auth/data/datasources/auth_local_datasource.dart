@@ -16,7 +16,6 @@ abstract class AuthLocalDataSource {
   Future<void> setFirstLaunchCompleted();
 }
 
-@LazySingleton(as: AuthLocalDataSource)
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   static const String _userKey = 'cached_user';
   static const String _tokenKey = 'auth_token';

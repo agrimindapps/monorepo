@@ -2,7 +2,8 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/plants_providers.dart';
-import '../../../../core/providers/tasks_providers.dart';
+import '../notifiers/tasks_notifier.dart';
+import '../providers/tasks_state.dart';
 import '../../../../core/theme/accessibility_tokens.dart';
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/base_page_scaffold.dart';

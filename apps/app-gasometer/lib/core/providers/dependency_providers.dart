@@ -1,12 +1,16 @@
 import 'package:core/core.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/services/analytics/gasometer_analytics_service.dart';
+import '../../core/services/connectivity/connectivity_state_manager.dart';
+import '../../core/services/platform/platform_service.dart';
+import '../../core/services/storage/firebase_storage_service.dart' as local_storage;
+import '../../core/sync/adapters/sync_adapter_registry.dart';
 import '../../database/providers/database_providers.dart' as db_providers;
+import '../../features/expenses/data/datasources/expenses_local_datasource.dart';
+import '../../features/expenses/data/sync/expense_drift_sync_adapter.dart';
 import '../../features/fuel/data/datasources/fuel_supply_local_datasource.dart';
 import '../../features/fuel/data/repositories/fuel_repository_drift_impl.dart';
+import '../../features/fuel/data/sync/fuel_supply_drift_sync_adapter.dart';
 import '../../features/fuel/domain/repositories/fuel_repository.dart';
 import '../../features/fuel/domain/usecases/add_fuel_record.dart';
 import '../../features/fuel/domain/usecases/delete_fuel_record.dart';
@@ -14,9 +18,21 @@ import '../../features/fuel/domain/usecases/get_all_fuel_records.dart';
 import '../../features/fuel/domain/usecases/get_fuel_records_by_vehicle.dart';
 import '../../features/fuel/domain/usecases/update_fuel_record.dart';
 import '../../features/image/domain/services/image_sync_service.dart';
+import '../../features/maintenance/data/datasources/maintenance_local_datasource.dart';
+import '../../features/maintenance/data/sync/maintenance_drift_sync_adapter.dart';
+import '../../features/odometer/data/datasources/odometer_reading_local_datasource.dart';
+import '../../features/odometer/data/sync/odometer_drift_sync_adapter.dart';
+import '../../features/profile/domain/services/profile_image_service.dart';
+import '../../features/sync/domain/services/auto_sync_service.dart';
+import '../../features/sync/domain/services/gasometer_sync_orchestrator.dart';
+import '../../features/sync/domain/services/gasometer_sync_service.dart';
+import '../../features/sync/domain/services/sync_checkpoint_store.dart';
+import '../../features/sync/domain/services/sync_pull_service.dart';
+import '../../features/sync/domain/services/sync_push_service.dart';
 import '../../features/sync/domain/services/sync_write_trigger.dart';
 import '../../features/vehicles/data/datasources/vehicle_local_datasource.dart';
 import '../../features/vehicles/data/repositories/vehicle_repository_drift_impl.dart';
+import '../../features/vehicles/data/sync/vehicle_drift_sync_adapter.dart';
 import '../../features/vehicles/domain/repositories/vehicle_repository.dart';
 import '../../features/vehicles/domain/usecases/add_vehicle.dart';
 import '../../features/vehicles/domain/usecases/delete_vehicle.dart';
@@ -24,21 +40,6 @@ import '../../features/vehicles/domain/usecases/get_all_vehicles.dart';
 import '../../features/vehicles/domain/usecases/get_vehicle_by_id.dart';
 import '../../features/vehicles/domain/usecases/search_vehicles.dart';
 import '../../features/vehicles/domain/usecases/update_vehicle.dart';
-import '../../core/services/connectivity/connectivity_state_manager.dart';
-import '../../features/sync/domain/services/auto_sync_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../features/sync/domain/services/sync_checkpoint_store.dart';
-import '../../features/sync/adapters/sync_adapter_registry.dart';
-import '../../features/sync/domain/services/sync_push_service.dart';
-import '../../features/sync/domain/services/sync_pull_service.dart';
-import '../../features/sync/domain/services/gasometer_sync_orchestrator.dart';
-import '../../features/sync/domain/services/gasometer_sync_service.dart';
-import '../../features/vehicles/data/sync/vehicle_drift_sync_adapter.dart';
-import '../../features/fuel/data/sync/fuel_supply_drift_sync_adapter.dart';
-import '../../features/maintenance/data/sync/maintenance_drift_sync_adapter.dart';
-import '../../features/expenses/data/sync/expense_drift_sync_adapter.dart';
-import '../../features/odometer/data/sync/odometer_drift_sync_adapter.dart';
-import '../../features/sync/domain/interfaces/i_drift_sync_adapter.dart';
 
 // Core Services
 final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
@@ -46,19 +47,38 @@ final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
 });
 
 final firebaseAnalyticsServiceProvider = Provider<FirebaseAnalyticsService>((ref) {
-  return FirebaseAnalyticsService(FirebaseAnalytics.instance);
+  return FirebaseAnalyticsService(analytics: FirebaseAnalytics.instance);
 });
 
 final firebaseCrashlyticsServiceProvider = Provider<FirebaseCrashlyticsService>((ref) {
-  return FirebaseCrashlyticsService(FirebaseCrashlytics.instance);
+  return FirebaseCrashlyticsService(crashlytics: FirebaseCrashlytics.instance);
 });
 
 final connectivityServiceProvider = Provider<ConnectivityService>((ref) {
-  return ConnectivityService();
+  return ConnectivityService.instance;
+});
+
+final platformServiceProvider = Provider<PlatformService>((ref) {
+  return const PlatformService();
+});
+
+final enhancedAnalyticsServiceProvider = Provider<EnhancedAnalyticsService>((ref) {
+  return EnhancedAnalyticsService(
+    analytics: ref.watch(firebaseAnalyticsServiceProvider),
+    crashlytics: ref.watch(firebaseCrashlyticsServiceProvider),
+  );
+});
+
+final gasometerAnalyticsServiceProvider = Provider<GasometerAnalyticsService>((ref) {
+  return GasometerAnalyticsService(ref.watch(enhancedAnalyticsServiceProvider));
+});
+
+final gasometerProfileImageServiceProvider = Provider<GasometerProfileImageService>((ref) {
+  return GasometerProfileImageService(ref.watch(gasometerAnalyticsServiceProvider));
 });
 
 final imageSyncServiceProvider = Provider<ImageSyncService>((ref) {
-  final storageService = FirebaseStorageService();
+  final storageService = local_storage.FirebaseStorageService();
   final connectivityService = ref.watch(connectivityServiceProvider);
   return ImageSyncService(storageService, connectivityService);
 });
@@ -68,7 +88,7 @@ final gasometerSharedPreferencesProvider = Provider<SharedPreferences>((ref) {
 });
 
 final appRatingRepositoryProvider = Provider<IAppRatingRepository>((ref) {
-   return AppRatingService(ref.watch(gasometerSharedPreferencesProvider));
+   return AppRatingService();
 });
 
 // Sync
@@ -87,6 +107,24 @@ final fuelSupplyLocalDataSourceProvider = Provider<FuelSupplyLocalDataSource>((r
   final driftRepo = ref.watch(db_providers.fuelSupplyRepositoryProvider);
   final syncTrigger = ref.watch(syncWriteTriggerProvider);
   return FuelSupplyLocalDataSource(driftRepo, syncTrigger);
+});
+
+final odometerReadingLocalDataSourceProvider = Provider<OdometerReadingLocalDataSource>((ref) {
+  final driftRepo = ref.watch(db_providers.odometerReadingRepositoryProvider);
+  final syncTrigger = ref.watch(syncWriteTriggerProvider);
+  return OdometerReadingLocalDataSource(driftRepo, syncTrigger);
+});
+
+final maintenanceLocalDataSourceProvider = Provider<MaintenanceLocalDataSource>((ref) {
+  final driftRepo = ref.watch(db_providers.maintenanceRepositoryProvider);
+  final syncTrigger = ref.watch(syncWriteTriggerProvider);
+  return MaintenanceLocalDataSource(driftRepo, syncTrigger);
+});
+
+final expensesLocalDataSourceProvider = Provider<ExpensesLocalDataSource>((ref) {
+  final driftRepo = ref.watch(db_providers.expenseRepositoryProvider);
+  final syncTrigger = ref.watch(syncWriteTriggerProvider);
+  return ExpensesLocalDataSource(driftRepo, syncTrigger);
 });
 
 // Repositories
@@ -174,27 +212,32 @@ final syncCheckpointStoreProvider = Provider<SyncCheckpointStore>((ref) {
 
 final vehicleDriftSyncAdapterProvider = Provider<VehicleDriftSyncAdapter>((ref) {
   final db = ref.watch(db_providers.gasometerDatabaseProvider);
-  return VehicleDriftSyncAdapter(db, FirebaseFirestore.instance);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  return VehicleDriftSyncAdapter(db, FirebaseFirestore.instance, connectivity);
 });
 
 final fuelSupplyDriftSyncAdapterProvider = Provider<FuelSupplyDriftSyncAdapter>((ref) {
   final db = ref.watch(db_providers.gasometerDatabaseProvider);
-  return FuelSupplyDriftSyncAdapter(db, FirebaseFirestore.instance);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  return FuelSupplyDriftSyncAdapter(db, FirebaseFirestore.instance, connectivity);
 });
 
 final maintenanceDriftSyncAdapterProvider = Provider<MaintenanceDriftSyncAdapter>((ref) {
   final db = ref.watch(db_providers.gasometerDatabaseProvider);
-  return MaintenanceDriftSyncAdapter(db, FirebaseFirestore.instance);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  return MaintenanceDriftSyncAdapter(db, FirebaseFirestore.instance, connectivity);
 });
 
 final expenseDriftSyncAdapterProvider = Provider<ExpenseDriftSyncAdapter>((ref) {
   final db = ref.watch(db_providers.gasometerDatabaseProvider);
-  return ExpenseDriftSyncAdapter(db, FirebaseFirestore.instance);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  return ExpenseDriftSyncAdapter(db, FirebaseFirestore.instance, connectivity);
 });
 
 final odometerDriftSyncAdapterProvider = Provider<OdometerDriftSyncAdapter>((ref) {
   final db = ref.watch(db_providers.gasometerDatabaseProvider);
-  return OdometerDriftSyncAdapter(db, FirebaseFirestore.instance);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  return OdometerDriftSyncAdapter(db, FirebaseFirestore.instance, connectivity);
 });
 
 final syncAdapterRegistryProvider = Provider<SyncAdapterRegistry>((ref) {

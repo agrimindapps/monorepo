@@ -5,7 +5,6 @@ import '../../../core/utils/typedef.dart';
 import 'task_entity.dart';
 import 'task_repository.dart';
 
-@lazySingleton
 class GetSubtasks extends UseCaseWithParams<List<TaskEntity>, GetSubtasksParams> {
   const GetSubtasks(this._repository);
 
@@ -17,7 +16,6 @@ class GetSubtasks extends UseCaseWithParams<List<TaskEntity>, GetSubtasksParams>
   }
 }
 
-@lazySingleton
 class GetSubtasksParams {
   const GetSubtasksParams({
     required this.parentTaskId,

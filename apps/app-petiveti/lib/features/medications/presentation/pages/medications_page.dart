@@ -456,10 +456,6 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
                               _navigateToEditMedication(context, medication),
                           onDelete: () =>
                               _confirmDeleteMedication(context, medication),
-                          onDiscontinue: () => _confirmDiscontinueMedication(
-                            context,
-                            medication,
-                          ),
                         ),
                       ),
                     );
@@ -557,57 +553,4 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
     }
   }
 
-  Future<void> _confirmDiscontinueMedication(
-    BuildContext context,
-    Medication medication,
-  ) async {
-    final reasonController = TextEditingController();
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Descontinuar Medicamento'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Deseja descontinuar "${medication.name}"?'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: reasonController,
-              decoration: const InputDecoration(
-                labelText: 'Motivo da descontinuação',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.orange),
-            child: const Text('Descontinuar'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true && reasonController.text.isNotEmpty) {
-      await ref
-          .read(_medicationsProvider.notifier)
-          .discontinueMedication(medication.id, reasonController.text);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Medicamento descontinuado')),
-        );
-      }
-    }
-
-    reasonController.dispose();
-  }
 }

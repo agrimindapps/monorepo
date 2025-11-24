@@ -17,7 +17,7 @@ import '../datasources/pragas_cultura_local_datasource.dart';
 /// - PragasCulturaIntegrationDataSource (integração de dados)
 /// - PragasCulturaLocalDataSource (cache local)
 /// - Repositórios base (CulturasRepository Drift, FitossanitariosRepository Drift)
-@LazySingleton(as: IPragasCulturaRepository)
+
 class PragasCulturaRepositoryImpl implements IPragasCulturaRepository {
   final PragasCulturaIntegrationDataSource integrationDataSource;
   final PragasCulturaLocalDataSource localDataSource;

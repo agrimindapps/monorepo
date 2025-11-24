@@ -1,6 +1,4 @@
-import 'package:core/core.dart' hide Column;
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../core/data/models/espaco_model.dart';
 import '../plantis_database.dart';
@@ -24,7 +22,6 @@ import '../plantis_database.dart';
 /// - Conversão via _spaceDriftToModel() e companions
 /// ============================================================================
 
-@lazySingleton
 class SpacesDriftRepository {
   final PlantisDatabase _db;
 
@@ -93,8 +90,7 @@ class SpacesDriftRepository {
 
   /// Retorna espaço pelo ID local (INTEGER)
   Future<EspacoModel?> getSpaceByLocalId(int id) async {
-    final space = await (_db.select(_db.spaces)
-          ..where((s) => s.id.equals(id)))
+    final space = await (_db.select(_db.spaces)..where((s) => s.id.equals(id)))
         .getSingleOrNull();
 
     return space != null ? _spaceDriftToModel(space) : null;

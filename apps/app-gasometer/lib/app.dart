@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide AuthProvider, Column;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -152,13 +152,14 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
     try {
       SecureLogger.info('🧪 [TEST] Attempting auto-login...');
 
-      // Use GetIt directly
-      final authRepository = di.sl<AuthRepository>();
-
       // Test credentials
       const testEmail = 'lucineiy@hotmail.com';
       const testPassword = 'QWEqwe@123';
 
+      // TODO: Use Riverpod provider for AuthRepository
+      // final authRepository = ref.read(authRepositoryProvider);
+      
+      /*
       final result = await authRepository.signInWithEmail(
         email: testEmail,
         password: testPassword,
@@ -182,6 +183,7 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
           }
         },
       );
+      */
     } catch (e, stackTrace) {
       if (mounted) {
         SecureLogger.error(

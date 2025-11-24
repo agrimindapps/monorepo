@@ -1,10 +1,10 @@
-import 'package:injectable/injectable.dart';
+
 
 import '../../domain/entities/praga_entity.dart';
 import '../../domain/services/i_pragas_query_service.dart';
 
 /// Default implementation of query service
-@LazySingleton(as: IPragasQueryService)
+
 class PragasQueryService implements IPragasQueryService {
   @override
   List<PragaEntity> getByTipo(List<PragaEntity> pragas, String tipo) {

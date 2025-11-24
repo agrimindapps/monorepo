@@ -1,10 +1,13 @@
 import 'dart:async';
 
+import 'package:core/core.dart' as core;
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection.dart' as local_di;
+import '../../../../core/providers/dependency_providers.dart';
+import '../../../../core/services/storage/firebase_storage_service.dart' as local_storage;
 import '../../../../core/validation/input_sanitizer.dart';
 import '../../../../features/receipt/domain/services/receipt_image_service.dart';
 import '../../../vehicles/domain/usecases/get_vehicle_by_id.dart';
@@ -14,6 +17,7 @@ import '../../domain/services/expense_formatter_service.dart';
 import '../../domain/services/expense_validation_service.dart';
 import '../../domain/usecases/add_expense.dart';
 import '../../domain/usecases/update_expense.dart';
+import '../providers/expenses_providers.dart';
 import 'expense_form_state.dart';
 
 part 'expense_form_notifier.g.dart';
@@ -39,6 +43,8 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
   late final ReceiptImageService _receiptImageService;
   late final GetVehicleById _getVehicleById;
   late final ImagePicker _imagePicker;
+  late final AddExpenseUseCase _addExpense;
+  late final UpdateExpenseUseCase _updateExpense;
   Timer? _amountDebounceTimer;
   Timer? _odometerDebounceTimer;
   Timer? _descriptionDebounceTimer;
@@ -52,8 +58,23 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     notesController = TextEditingController();
     _formatter = ExpenseFormatterService();
     _validator = const ExpenseValidationService();
-    _receiptImageService = getIt<ReceiptImageService>();
-    _getVehicleById = getIt<GetVehicleById>();
+    
+    // Inject dependencies
+    final compressionService = core.ImageCompressionService();
+    final storageService = local_storage.FirebaseStorageService();
+    final connectivityService = ref.watch(connectivityServiceProvider);
+    final imageSyncService = ref.watch(imageSyncServiceProvider);
+    
+    _receiptImageService = ReceiptImageService(
+      compressionService,
+      storageService,
+      connectivityService,
+      imageSyncService,
+    );
+    _getVehicleById = ref.watch(getVehicleByIdProvider);
+    _addExpense = ref.watch(addExpenseProvider);
+    _updateExpense = ref.watch(updateExpenseProvider);
+    
     _imagePicker = ImagePicker();
     _initializeControllers();
     ref.onDispose(() {
@@ -548,12 +569,10 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
 
       if (state.id.isEmpty) {
         // Criar novo
-        final addUseCase = local_di.getIt<AddExpenseUseCase>();
-        result = await addUseCase(expenseEntity);
+        result = await _addExpense(expenseEntity);
       } else {
         // Atualizar existente
-        final updateUseCase = local_di.getIt<UpdateExpenseUseCase>();
-        result = await updateUseCase(expenseEntity);
+        result = await _updateExpense(expenseEntity);
       }
 
       state = state.copyWith(isLoading: false);

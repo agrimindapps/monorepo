@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart';
+import '../providers/calculators_di_providers.dart';
 import '../../domain/entities/calculation_history.dart';
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/entities/calculator_category.dart';
@@ -30,13 +30,14 @@ class CalculatorNotifier extends _$CalculatorNotifier {
 
   @override
   CalculatorState build() {
-    // Get use cases from GetIt
-    _getCalculators = getIt<GetCalculators>();
-    _getCalculatorById = getIt<GetCalculatorById>();
-    _executeCalculation = getIt<ExecuteCalculation>();
-    _getCalculationHistory = getIt<GetCalculationHistory>();
-    _saveCalculationToHistory = getIt<SaveCalculationToHistory>();
-    _manageFavorites = getIt<ManageFavorites>();
+    // Get use cases from Riverpod providers
+    _getCalculators = ref.watch(getCalculatorsUseCaseProvider);
+    _getCalculatorById = ref.watch(getCalculatorByIdUseCaseProvider);
+    _executeCalculation = ref.watch(executeCalculationUseCaseProvider);
+    _getCalculationHistory = ref.watch(getCalculationHistoryUseCaseProvider);
+    _saveCalculationToHistory =
+        ref.watch(saveCalculationToHistoryUseCaseProvider);
+    _manageFavorites = ref.watch(manageFavoritesUseCaseProvider);
 
     return const CalculatorState();
   }
@@ -322,9 +323,8 @@ class CalculatorNotifier extends _$CalculatorNotifier {
 
   /// Removes item from history
   Future<bool> removeFromHistory(String historyId) async {
-    final updatedHistory = state.calculationHistory
-        .where((item) => item.id != historyId)
-        .toList();
+    final updatedHistory =
+        state.calculationHistory.where((item) => item.id != historyId).toList();
     state = state.copyWith(calculationHistory: updatedHistory);
     debugPrint('CalculatorNotifier: Item removido do histórico - $historyId');
     return true;

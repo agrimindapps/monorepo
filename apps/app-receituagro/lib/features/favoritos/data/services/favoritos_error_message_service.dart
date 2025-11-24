@@ -1,4 +1,4 @@
-import 'package:injectable/injectable.dart';
+
 
 /// Serviço para gerenciar mensagens de erro dos favoritos
 ///
@@ -12,7 +12,7 @@ import 'package:injectable/injectable.dart';
 /// final errorService = di.sl<FavoritosErrorMessageService>();
 /// final message = errorService.getAddErrorMessage('defensivo');
 /// ```
-@lazySingleton
+
 class FavoritosErrorMessageService {
   /// Mensagem para erro ao alterar favorito (toggle)
   String getToggleErrorMessage(String tipo) {

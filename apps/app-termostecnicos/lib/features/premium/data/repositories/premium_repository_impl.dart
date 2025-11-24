@@ -5,7 +5,6 @@ import '../../domain/repositories/premium_repository.dart';
 import '../datasources/local/premium_local_datasource.dart';
 
 /// Implementation of PremiumRepository
-@LazySingleton(as: PremiumRepository)
 class PremiumRepositoryImpl implements PremiumRepository {
   final PremiumLocalDataSource _localDataSource;
 

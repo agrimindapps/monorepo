@@ -24,7 +24,6 @@ abstract class SettingsLocalDataSource {
   Future<void> clearSettings();
 }
 
-@LazySingleton(as: SettingsLocalDataSource)
 class SettingsLocalDataSourceImpl implements SettingsLocalDataSource {
   final SharedPreferences _prefs;
 

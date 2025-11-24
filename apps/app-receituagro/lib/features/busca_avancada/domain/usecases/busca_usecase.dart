@@ -3,7 +3,7 @@ import '../entities/busca_entity.dart';
 import '../repositories/i_busca_repository.dart';
 
 /// Use case para busca com filtros
-@injectable
+
 class BuscarComFiltrosUseCase
     implements UseCase<List<BuscaResultEntity>, BuscaFiltersEntity> {
   final IBuscaRepository repository;
@@ -31,7 +31,7 @@ class BuscarComFiltrosUseCase
 }
 
 /// Use case para busca por texto
-@injectable
+
 class BuscarPorTextoUseCase
     implements UseCase<List<BuscaResultEntity>, BuscarPorTextoParams> {
   final IBuscaRepository repository;
@@ -55,7 +55,7 @@ class BuscarPorTextoUseCase
 }
 
 /// Use case para caregar metadados
-@injectable
+
 class GetBuscaMetadosUseCase implements UseCase<BuscaMetadataEntity, NoParams> {
   final IBuscaRepository repository;
 
@@ -68,7 +68,7 @@ class GetBuscaMetadosUseCase implements UseCase<BuscaMetadataEntity, NoParams> {
 }
 
 /// Use case para obter sugestões
-@injectable
+
 class GetSugestoesUseCase implements UseCase<List<BuscaResultEntity>, int?> {
   final IBuscaRepository repository;
 
@@ -81,7 +81,7 @@ class GetSugestoesUseCase implements UseCase<List<BuscaResultEntity>, int?> {
 }
 
 /// Use case para buscar diagnósticos específicos
-@injectable
+
 class BuscarDiagnosticosUseCase
     implements UseCase<List<BuscaResultEntity>, BuscarDiagnosticosParams> {
   final IBuscaRepository repository;
@@ -101,7 +101,7 @@ class BuscarDiagnosticosUseCase
 }
 
 /// Use case para obter histórico
-@injectable
+
 class GetHistoricoBuscaUseCase
     implements UseCase<List<BuscaFiltersEntity>, int?> {
   final IBuscaRepository repository;
@@ -115,7 +115,7 @@ class GetHistoricoBuscaUseCase
 }
 
 /// Use case para limpar cache
-@injectable
+
 class LimparCacheUseCase implements UseCase<void, NoParams> {
   final IBuscaRepository repository;
 

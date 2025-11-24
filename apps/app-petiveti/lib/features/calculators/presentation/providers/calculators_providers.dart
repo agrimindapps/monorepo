@@ -1,19 +1,22 @@
+import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/providers/core_services_providers.dart';
 import '../../../../core/providers/database_providers.dart';
 import '../../data/datasources/calculator_local_datasource.dart';
 import '../../data/repositories/calculator_repository_impl.dart';
 import '../../domain/repositories/calculator_repository.dart';
-import '../../domain/usecases/get_calculation_history.dart';
 import '../../domain/usecases/get_calculators.dart';
+import '../../domain/usecases/manage_calculation_history.dart';
 import '../../domain/usecases/perform_calculation.dart';
 
 part 'calculators_providers.g.dart';
 
 @riverpod
-CalculatorLocalDataSource calculatorLocalDataSource(CalculatorLocalDataSourceRef ref) {
+CalculatorLocalDatasource calculatorLocalDataSource(CalculatorLocalDataSourceRef ref) {
   final database = ref.watch(petivetiDatabaseProvider);
-  return CalculatorLocalDataSourceImpl(database);
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return CalculatorLocalDatasourceImpl(database, prefs);
 }
 
 @riverpod
@@ -33,6 +36,6 @@ GetCalculators getCalculators(GetCalculatorsRef ref) {
 }
 
 @riverpod
-GetCalculationHistory getCalculationHistory(GetCalculationHistoryRef ref) {
-  return GetCalculationHistory(ref.watch(calculatorRepositoryProvider));
+ManageCalculationHistory manageCalculationHistory(ManageCalculationHistoryRef ref) {
+  return ManageCalculationHistory(ref.watch(calculatorRepositoryProvider));
 }

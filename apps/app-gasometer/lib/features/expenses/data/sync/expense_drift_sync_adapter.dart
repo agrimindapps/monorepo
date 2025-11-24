@@ -45,8 +45,11 @@ import '../../domain/entities/expense_entity.dart';
 
 class ExpenseDriftSyncAdapter
     extends DriftSyncAdapterBase<ExpenseEntity, Expense> {
-  ExpenseDriftSyncAdapter(GasometerDatabase db, FirebaseFirestore firestore)
-      : super(db, firestore);
+  ExpenseDriftSyncAdapter(
+    GasometerDatabase db,
+    FirebaseFirestore firestore,
+    ConnectivityService connectivityService,
+  ) : super(db, firestore, connectivityService);
 
   GasometerDatabase get _db => db as GasometerDatabase;
 

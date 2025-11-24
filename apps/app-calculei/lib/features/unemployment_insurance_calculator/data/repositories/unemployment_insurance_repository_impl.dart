@@ -1,22 +1,23 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/unemployment_insurance_calculation.dart';
 import '../../domain/repositories/unemployment_insurance_repository.dart';
 import '../datasources/unemployment_insurance_local_datasource.dart';
 import '../models/unemployment_insurance_calculation_model.dart';
 
-@Injectable(as: UnemploymentInsuranceRepository)
-class UnemploymentInsuranceRepositoryImpl implements UnemploymentInsuranceRepository {
+class UnemploymentInsuranceRepositoryImpl
+    implements UnemploymentInsuranceRepository {
   final UnemploymentInsuranceLocalDataSource _localDataSource;
 
   UnemploymentInsuranceRepositoryImpl(this._localDataSource);
 
   @override
-  Future<Either<Failure, UnemploymentInsuranceCalculation>> saveCalculation(UnemploymentInsuranceCalculation calculation) async {
+  Future<Either<Failure, UnemploymentInsuranceCalculation>> saveCalculation(
+      UnemploymentInsuranceCalculation calculation) async {
     try {
-      final model = UnemploymentInsuranceCalculationModel.fromEntity(calculation);
+      final model =
+          UnemploymentInsuranceCalculationModel.fromEntity(calculation);
       final saved = await _localDataSource.save(model);
       return Right(saved.toEntity());
     } on CacheException catch (e) {
@@ -27,7 +28,8 @@ class UnemploymentInsuranceRepositoryImpl implements UnemploymentInsuranceReposi
   }
 
   @override
-  Future<Either<Failure, List<UnemploymentInsuranceCalculation>>> getCalculationHistory({int limit = 10}) async {
+  Future<Either<Failure, List<UnemploymentInsuranceCalculation>>>
+      getCalculationHistory({int limit = 10}) async {
     try {
       final models = await _localDataSource.getAll(limit: limit);
       final entities = models.map((model) => model.toEntity()).toList();
@@ -40,7 +42,8 @@ class UnemploymentInsuranceRepositoryImpl implements UnemploymentInsuranceReposi
   }
 
   @override
-  Future<Either<Failure, UnemploymentInsuranceCalculation>> getCalculationById(String id) async {
+  Future<Either<Failure, UnemploymentInsuranceCalculation>> getCalculationById(
+      String id) async {
     try {
       final model = await _localDataSource.getById(id);
       if (model == null) {

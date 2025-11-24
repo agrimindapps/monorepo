@@ -1,6 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../domain/entities/categoria.dart';
 import '../../domain/entities/termo.dart';
 import '../../domain/repositories/termos_repository.dart';
@@ -12,8 +11,37 @@ import '../../domain/usecases/get_categoria_atual.dart';
 import '../../domain/usecases/get_favoritos.dart';
 import '../../domain/usecases/set_categoria.dart';
 import '../../domain/usecases/toggle_favorito.dart';
+import '../../data/datasources/local/database_datasource.dart';
+import '../../data/datasources/local/termos_local_datasource.dart';
+import '../../data/repositories/termos_repository_impl.dart';
+import '../../../../core/services/localstorage_service.dart';
 
 part 'termos_providers.g.dart';
+
+// ============================================================================
+// Service Providers
+// ============================================================================
+
+@riverpod
+LocalStorageService localStorageService(LocalStorageServiceRef ref) {
+  return LocalStorageService();
+}
+
+// ============================================================================
+// Data Source Providers
+// ============================================================================
+
+@riverpod
+DatabaseDataSource databaseDataSource(DatabaseDataSourceRef ref) {
+  return DatabaseDataSourceImpl();
+}
+
+@riverpod
+TermosLocalDataSource termosLocalDataSource(TermosLocalDataSourceRef ref) {
+  final databaseDataSource = ref.watch(databaseDataSourceProvider);
+  final localStorageService = ref.watch(localStorageServiceProvider);
+  return TermosLocalDataSourceImpl(databaseDataSource, localStorageService);
+}
 
 // ============================================================================
 // Repository Provider
@@ -21,7 +49,8 @@ part 'termos_providers.g.dart';
 
 @riverpod
 TermosRepository termosRepository(TermosRepositoryRef ref) {
-  return getIt<TermosRepository>();
+  final dataSource = ref.watch(termosLocalDataSourceProvider);
+  return TermosRepositoryImpl(dataSource);
 }
 
 // ============================================================================
@@ -30,42 +59,47 @@ TermosRepository termosRepository(TermosRepositoryRef ref) {
 
 @riverpod
 CarregarTermos carregarTermosUseCase(CarregarTermosUseCaseRef ref) {
-  return getIt<CarregarTermos>();
+  final repository = ref.watch(termosRepositoryProvider);
+  return CarregarTermos(repository);
 }
 
 @riverpod
 ToggleFavorito toggleFavoritoUseCase(ToggleFavoritoUseCaseRef ref) {
-  return getIt<ToggleFavorito>();
+  final repository = ref.watch(termosRepositoryProvider);
+  return ToggleFavorito(repository);
 }
 
 @riverpod
 GetCategoriaAtual getCategoriaAtualUseCase(GetCategoriaAtualUseCaseRef ref) {
-  return getIt<GetCategoriaAtual>();
+  final repository = ref.watch(termosRepositoryProvider);
+  return GetCategoriaAtual(repository);
 }
 
 @riverpod
 SetCategoria setCategoriaUseCase(SetCategoriaUseCaseRef ref) {
-  return getIt<SetCategoria>();
+  final repository = ref.watch(termosRepositoryProvider);
+  return SetCategoria(repository);
 }
 
 @riverpod
 GetFavoritos getFavoritosUseCase(GetFavoritosUseCaseRef ref) {
-  return getIt<GetFavoritos>();
+  final repository = ref.watch(termosRepositoryProvider);
+  return GetFavoritos(repository);
 }
 
 @riverpod
 CompartilharTermo compartilharTermoUseCase(CompartilharTermoUseCaseRef ref) {
-  return getIt<CompartilharTermo>();
+  return CompartilharTermo();
 }
 
 @riverpod
 CopiarTermo copiarTermoUseCase(CopiarTermoUseCaseRef ref) {
-  return getIt<CopiarTermo>();
+  return CopiarTermo();
 }
 
 @riverpod
 AbrirTermoExterno abrirTermoExternoUseCase(AbrirTermoExternoUseCaseRef ref) {
-  return getIt<AbrirTermoExterno>();
+  return AbrirTermoExterno();
 }
 
 // ============================================================================

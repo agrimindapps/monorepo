@@ -8,13 +8,11 @@ import 'package:app_agrihurbi/features/markets/domain/entities/market_filter_ent
 import 'package:app_agrihurbi/features/markets/domain/failures/market_failures.dart';
 import 'package:app_agrihurbi/features/markets/domain/repositories/market_repository.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 /// Market Repository Implementation
-/// 
+///
 /// Implements the market repository following Clean Architecture principles
 /// with offline-first approach and caching strategies
-@Injectable(as: MarketRepository)
 class MarketRepositoryImpl implements MarketRepository {
   final MarketRemoteDataSource _remoteDataSource;
   final MarketLocalDataSource _localDataSource;
@@ -42,7 +40,7 @@ class MarketRepositoryImpl implements MarketRepository {
           );
           await _localDataSource.cacheMarkets(remoteMarkets);
           await _localDataSource.cacheLastUpdate(DateTime.now());
-          
+
           return Right(remoteMarkets.map((m) => m.toEntity()).toList());
         } catch (e) {
           return _getCachedMarkets();
@@ -59,11 +57,12 @@ class MarketRepositoryImpl implements MarketRepository {
   Future<Either<MarketFailure, List<MarketEntity>>> _getCachedMarkets() async {
     try {
       final cachedMarkets = await _localDataSource.getCachedMarkets();
-      
+
       if (cachedMarkets.isEmpty) {
-        return const Left(MarketCacheFailure(message: 'Nenhum dado em cache disponível'));
+        return const Left(
+            MarketCacheFailure(message: 'Nenhum dado em cache disponível'));
       }
-      
+
       return Right(cachedMarkets.map((m) => m.toEntity()).toList());
     } catch (e) {
       return Left(_mapExceptionToFailure(e));
@@ -74,7 +73,7 @@ class MarketRepositoryImpl implements MarketRepository {
   ResultFuture<MarketEntity> getMarketById(String id) async {
     try {
       final cachedMarket = await _localDataSource.getCachedMarket(id);
-      
+
       if (await _networkInfo.isConnected) {
         try {
           final remoteMarket = await _remoteDataSource.getMarketById(id);
@@ -90,7 +89,8 @@ class MarketRepositoryImpl implements MarketRepository {
         if (cachedMarket != null) {
           return Right(cachedMarket.toEntity());
         }
-        return const Left(MarketNetworkFailure(message: 'Sem conexão e dados não encontrados no cache'));
+        return const Left(MarketNetworkFailure(
+            message: 'Sem conexão e dados não encontrados no cache'));
       }
     } catch (e) {
       return Left(_mapExceptionToFailure(e));
@@ -105,7 +105,7 @@ class MarketRepositoryImpl implements MarketRepository {
   }) async {
     try {
       await _localDataSource.saveSearchQuery(query);
-      
+
       if (await _networkInfo.isConnected) {
         final remoteResults = await _remoteDataSource.searchMarkets(
           query: query,
@@ -115,18 +115,22 @@ class MarketRepositoryImpl implements MarketRepository {
         return Right(remoteResults.map((m) => m.toEntity()).toList());
       } else {
         final cachedMarkets = await _localDataSource.getCachedMarkets();
-        final filteredMarkets = cachedMarkets.where((market) {
-          final matchesQuery = market.name.toLowerCase().contains(query.toLowerCase()) ||
-                             market.symbol.toLowerCase().contains(query.toLowerCase());
-          
-          if (!matchesQuery) return false;
-          if (filter?.types?.isNotEmpty == true) {
-            if (!filter!.types!.contains(market.type)) return false;
-          }
-          
-          return true;
-        }).take(limit).toList();
-        
+        final filteredMarkets = cachedMarkets
+            .where((market) {
+              final matchesQuery =
+                  market.name.toLowerCase().contains(query.toLowerCase()) ||
+                      market.symbol.toLowerCase().contains(query.toLowerCase());
+
+              if (!matchesQuery) return false;
+              if (filter?.types?.isNotEmpty == true) {
+                if (!filter!.types!.contains(market.type)) return false;
+              }
+
+              return true;
+            })
+            .take(limit)
+            .toList();
+
         return Right(filteredMarkets.map((m) => m.toEntity()).toList());
       }
     } catch (e) {
@@ -148,11 +152,9 @@ class MarketRepositoryImpl implements MarketRepository {
         return Right(remoteMarkets.map((m) => m.toEntity()).toList());
       } else {
         final cachedMarkets = await _localDataSource.getCachedMarkets();
-        final filteredMarkets = cachedMarkets
-            .where((m) => m.type == type)
-            .take(limit)
-            .toList();
-        
+        final filteredMarkets =
+            cachedMarkets.where((m) => m.type == type).take(limit).toList();
+
         return Right(filteredMarkets.map((m) => m.toEntity()).toList());
       }
     } catch (e) {
@@ -180,7 +182,8 @@ class MarketRepositoryImpl implements MarketRepository {
         if (cachedSummary != null) {
           return Right(cachedSummary.toEntity());
         }
-        return const Left(MarketCacheFailure(message: 'Resumo do mercado não disponível offline'));
+        return const Left(MarketCacheFailure(
+            message: 'Resumo do mercado não disponível offline'));
       }
     } catch (e) {
       return Left(_mapExceptionToFailure(e));
@@ -202,11 +205,11 @@ class MarketRepositoryImpl implements MarketRepository {
       } else {
         final cachedMarkets = await _localDataSource.getCachedMarkets();
         var gainers = cachedMarkets.where((m) => m.isUp).toList();
-        
+
         if (type != null) {
           gainers = gainers.where((m) => m.type == type).toList();
         }
-        
+
         gainers.sort((a, b) => b.changePercent.compareTo(a.changePercent));
         return Right(gainers.take(limit).map((m) => m.toEntity()).toList());
       }
@@ -230,11 +233,11 @@ class MarketRepositoryImpl implements MarketRepository {
       } else {
         final cachedMarkets = await _localDataSource.getCachedMarkets();
         var losers = cachedMarkets.where((m) => m.isDown).toList();
-        
+
         if (type != null) {
           losers = losers.where((m) => m.type == type).toList();
         }
-        
+
         losers.sort((a, b) => a.changePercent.compareTo(b.changePercent));
         return Right(losers.take(limit).map((m) => m.toEntity()).toList());
       }
@@ -258,13 +261,14 @@ class MarketRepositoryImpl implements MarketRepository {
       } else {
         final cachedMarkets = await _localDataSource.getCachedMarkets();
         var activeMarkets = cachedMarkets.toList();
-        
+
         if (type != null) {
           activeMarkets = activeMarkets.where((m) => m.type == type).toList();
         }
-        
+
         activeMarkets.sort((a, b) => b.volume.compareTo(a.volume));
-        return Right(activeMarkets.take(limit).map((m) => m.toEntity()).toList());
+        return Right(
+            activeMarkets.take(limit).map((m) => m.toEntity()).toList());
       }
     } catch (e) {
       return Left(_mapExceptionToFailure(e));
@@ -288,7 +292,8 @@ class MarketRepositoryImpl implements MarketRepository {
         );
         return Right(remoteHistory.map((h) => h.toEntity()).toList());
       } else {
-        return const Left(MarketNetworkFailure(message: 'Histórico de preços requer conexão'));
+        return const Left(MarketNetworkFailure(
+            message: 'Histórico de preços requer conexão'));
       }
     } catch (e) {
       return Left(_mapExceptionToFailure(e));
@@ -300,11 +305,10 @@ class MarketRepositoryImpl implements MarketRepository {
     try {
       final favoriteIds = await _localDataSource.getFavoriteMarketIds();
       final cachedMarkets = await _localDataSource.getCachedMarkets();
-      
-      final favoriteMarkets = cachedMarkets
-          .where((m) => favoriteIds.contains(m.id))
-          .toList();
-      
+
+      final favoriteMarkets =
+          cachedMarkets.where((m) => favoriteIds.contains(m.id)).toList();
+
       return Right(favoriteMarkets.map((m) => m.toEntity()).toList());
     } catch (e) {
       return Left(_mapExceptionToFailure(e));
@@ -363,7 +367,8 @@ class MarketRepositoryImpl implements MarketRepository {
         await _localDataSource.clearMarketsCache();
         return const Right(null);
       } else {
-        return const Left(MarketNetworkFailure(message: 'Necessária conexão para atualizar dados'));
+        return const Left(MarketNetworkFailure(
+            message: 'Necessária conexão para atualizar dados'));
       }
     } catch (e) {
       return Left(_mapExceptionToFailure(e));
@@ -377,13 +382,15 @@ class MarketRepositoryImpl implements MarketRepository {
 
   @override
   ResultFuture<List<MarketTypeInfo>> getMarketTypes() async {
-    final types = MarketType.values.map((type) => MarketTypeInfo(
-      type: type,
-      description: type.description,
-      marketCount: 10, // Mock count
-      iconName: _getIconNameForType(type),
-    )).toList();
-    
+    final types = MarketType.values
+        .map((type) => MarketTypeInfo(
+              type: type,
+              description: type.description,
+              marketCount: 10, // Mock count
+              iconName: _getIconNameForType(type),
+            ))
+        .toList();
+
     return Right(types);
   }
 

@@ -1,7 +1,6 @@
 import 'package:core/core.dart';
 
 /// Performance service específico do app Task Manager
-@lazySingleton
 class TaskManagerPerformanceService {
   final IPerformanceRepository _performanceRepository;
 

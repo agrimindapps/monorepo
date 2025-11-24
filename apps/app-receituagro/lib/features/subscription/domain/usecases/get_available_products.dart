@@ -3,7 +3,7 @@ import 'package:core/core.dart' hide Column;
 import '../repositories/i_subscription_repository.dart';
 
 /// Use case para buscar produtos disponíveis do ReceitaAgro
-@injectable
+
 class GetAvailableProductsUseCase
     implements UseCase<List<ProductInfo>, NoParams> {
   GetAvailableProductsUseCase(this.repository);

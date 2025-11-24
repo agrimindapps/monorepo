@@ -14,7 +14,7 @@ import '../../../../database/repositories/pragas_repository.dart';
 /// 
 /// MIGRATION NOTE: DiagnosticoRepository temporarily removed from constructor
 /// until proper Drift repository is available
-@injectable
+
 class PragasCulturaIntegrationDataSource {
   final PragasRepository _pragasRepository;
   final DiagnosticoRepository _diagnosticoRepository;

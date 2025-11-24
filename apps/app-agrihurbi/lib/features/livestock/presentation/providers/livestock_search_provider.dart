@@ -1,31 +1,29 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/animal_base_entity.dart';
 import '../../domain/usecases/search_animals.dart' as search_use_case;
 
 /// Provider especializado para busca e filtros de animais
-/// 
+///
 /// Responsabilidade única: Gerenciar busca e filtros de animais
 /// Seguindo Single Responsibility Principle
-@singleton
 class LivestockSearchProvider extends ChangeNotifier {
   final search_use_case.SearchAnimalsUseCase _searchAnimals;
 
   LivestockSearchProvider({
     required search_use_case.SearchAnimalsUseCase searchAnimals,
   }) : _searchAnimals = searchAnimals;
-  
+
   bool _isSearching = false;
   List<AnimalBaseEntity> _searchResults = [];
   String _searchQuery = '';
   String? _errorMessage;
-  
+
   bool get isSearching => _isSearching;
   List<AnimalBaseEntity> get searchResults => _searchResults;
   String get searchQuery => _searchQuery;
   String? get errorMessage => _errorMessage;
-  
+
   bool get hasResults => _searchResults.isNotEmpty;
   int get totalResults => _searchResults.length;
 
@@ -49,15 +47,17 @@ class LivestockSearchProvider extends ChangeNotifier {
 
     final params = search_use_case.SearchAnimalsParams(query: query);
     final result = await _searchAnimals(params);
-    
+
     result.fold(
       (failure) {
         _errorMessage = failure.message;
-        debugPrint('LivestockSearchProvider: Erro ao buscar animais - ${failure.message}');
+        debugPrint(
+            'LivestockSearchProvider: Erro ao buscar animais - ${failure.message}');
       },
       (results) {
         _searchResults = results.allAnimals;
-        debugPrint('LivestockSearchProvider: Resultados da busca - ${results.totalCount}');
+        debugPrint(
+            'LivestockSearchProvider: Resultados da busca - ${results.totalCount}');
       },
     );
 

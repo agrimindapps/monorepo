@@ -10,7 +10,6 @@ import '../repositories/livestock_repository.dart' as repo;
 /// 
 /// Permite busca combinada em bovinos e equinos com filtros avançados
 /// Inclui full-text search e filtros específicos por tipo
-@lazySingleton
 class SearchAnimalsUseCase implements UseCase<SearchAnimalsResult, SearchAnimalsParams> {
   final repo.LivestockRepository repository;
   
@@ -135,7 +134,6 @@ class SearchAnimalsUseCase implements UseCase<SearchAnimalsResult, SearchAnimals
 }
 
 /// Use case para busca rápida por nome/ID
-@lazySingleton
 class QuickSearchAnimalsUseCase implements UseCase<SearchAnimalsResult, String> {
   final SearchAnimalsUseCase _searchUseCase;
   

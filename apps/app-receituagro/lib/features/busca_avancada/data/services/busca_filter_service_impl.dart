@@ -1,10 +1,10 @@
-import 'package:injectable/injectable.dart';
+
 
 import '../../domain/entities/busca_entity.dart';
 import '../../domain/services/i_busca_filter_service.dart';
 
 /// Implementação do serviço de filtragem de busca
-@LazySingleton(as: IBuscaFilterService)
+
 class BuscaFilterService implements IBuscaFilterService {
   @override
   List<BuscaResultEntity> filterByType(

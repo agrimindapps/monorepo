@@ -1,5 +1,4 @@
 import 'dart:convert';
-import '../../core/drift_exports.dart';
 
 import 'package:drift/drift.dart';
 

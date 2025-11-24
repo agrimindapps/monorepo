@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:core/core.dart';
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../database/agrihurbi_database.dart';
 import '../../domain/entities/bovine_entity.dart';
@@ -36,7 +35,6 @@ abstract class LivestockLocalDataSource {
 }
 
 /// Implementação do data source local com Drift
-@Injectable(as: LivestockLocalDataSource)
 class LivestockDriftLocalDataSource implements LivestockLocalDataSource {
   final AgrihurbiDatabase _db;
 

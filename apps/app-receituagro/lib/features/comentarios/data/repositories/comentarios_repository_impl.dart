@@ -24,7 +24,7 @@ import '../services/comentarios_mapper.dart';
 /// - IComentariosRepository (deprecated, backward compatibility)
 /// - IComentariosReadRepository (via module)
 /// - IComentariosWriteRepository (via module)
-@LazySingleton(as: IComentariosRepository)
+
 class ComentariosRepositoryImpl
     implements
         IComentariosRepository,

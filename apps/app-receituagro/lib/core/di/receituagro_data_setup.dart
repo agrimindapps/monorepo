@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:developer' as developer;
 
 import '../services/culturas_data_loader.dart';
@@ -8,7 +9,7 @@ import '../services/pragas_data_loader.dart';
 /// Configuração e inicialização dos dados estáticos do ReceitaAgro
 class ReceitaAgroDataSetup {
   /// Inicializa o sistema de dados estáticos do ReceitaAgro
-  static Future<void> initialize() async {
+  static Future<void> initialize(Ref ref) async {
     try {
       developer.log(
         '🔧 [SETUP] Inicializando dados estáticos do ReceitaAgro...',
@@ -17,13 +18,13 @@ class ReceitaAgroDataSetup {
 
       // Carregar dados usando os data loaders individuais
       await Future.wait<void>([
-        CulturasDataLoader.loadCulturasData(),
-        PragasDataLoader.loadPragasData(),
-        FitossanitariosDataLoader.loadFitossanitariosData(),
-        DiagnosticosDataLoader.loadDiagnosticosData(),
+        CulturasDataLoader.loadCulturasData(ref),
+        PragasDataLoader.loadPragasData(ref),
+        FitossanitariosDataLoader.loadFitossanitariosData(ref),
+        DiagnosticosDataLoader.loadDiagnosticosData(ref),
       ]);
 
-      await _loadTestData();
+      await _loadTestData(ref);
 
       developer.log(
         '✅ [SETUP] ReceitaAgro data setup concluído',
@@ -39,16 +40,16 @@ class ReceitaAgroDataSetup {
   }
 
   /// Carrega dados reais dos JSON assets
-  static Future<void> _loadTestData() async {
+  static Future<void> _loadTestData(Ref ref) async {
     try {
       developer.log(
         '🔄 [SETUP] Verificando se dados adicionais precisam ser carregados...',
         name: 'ReceitaAgroDataSetup',
       );
       bool fitossanitariosLoaded =
-          await FitossanitariosDataLoader.isDataLoaded();
-      bool pragasLoaded = await PragasDataLoader.isDataLoaded();
-      bool diagnosticosLoaded = await DiagnosticosDataLoader.isDataLoaded();
+          await FitossanitariosDataLoader.isDataLoaded(ref);
+      bool pragasLoaded = await PragasDataLoader.isDataLoaded(ref);
+      bool diagnosticosLoaded = await DiagnosticosDataLoader.isDataLoaded(ref);
 
       developer.log(
         '📊 [SETUP] Status: Fitossanitários=$fitossanitariosLoaded, Pragas=$pragasLoaded, Diagnósticos=$diagnosticosLoaded',
@@ -59,7 +60,7 @@ class ReceitaAgroDataSetup {
           '🛡️ [SETUP] Carregando fitossanitários...',
           name: 'ReceitaAgroDataSetup',
         );
-        await FitossanitariosDataLoader.loadFitossanitariosData();
+        await FitossanitariosDataLoader.loadFitossanitariosData(ref);
       } else {
         developer.log(
           '✅ [SETUP] Fitossanitários já carregados, pulando...',
@@ -72,7 +73,7 @@ class ReceitaAgroDataSetup {
           '🐛 [SETUP] Carregando pragas...',
           name: 'ReceitaAgroDataSetup',
         );
-        await PragasDataLoader.loadPragasData();
+        await PragasDataLoader.loadPragasData(ref);
       } else {
         developer.log(
           '✅ [SETUP] Pragas já carregadas, pulando...',
@@ -85,7 +86,7 @@ class ReceitaAgroDataSetup {
           '🩺 [SETUP] Carregando diagnósticos...',
           name: 'ReceitaAgroDataSetup',
         );
-        await DiagnosticosDataLoader.loadDiagnosticosData();
+        await DiagnosticosDataLoader.loadDiagnosticosData(ref);
       } else {
         developer.log(
           '✅ [SETUP] Diagnósticos já carregados, pulando...',
@@ -106,17 +107,17 @@ class ReceitaAgroDataSetup {
   }
 
   /// Força recarregamento dos dados (para desenvolvimento)
-  static Future<void> forceReload() async {
+  static Future<void> forceReload(Ref ref) async {
     try {
       developer.log(
         '🔄 Forçando recarregamento dos dados...',
         name: 'ReceitaAgroDataSetup',
       );
       await Future.wait<void>([
-        CulturasDataLoader.forceReload(),
-        FitossanitariosDataLoader.forceReload(),
-        PragasDataLoader.forceReload(),
-        DiagnosticosDataLoader.forceReload(),
+        CulturasDataLoader.forceReload(ref),
+        FitossanitariosDataLoader.forceReload(ref),
+        PragasDataLoader.forceReload(ref),
+        DiagnosticosDataLoader.forceReload(ref),
       ]);
 
       developer.log(
@@ -147,12 +148,12 @@ class ReceitaAgroDataSetup {
   }
 
   /// Obtém estatísticas dos dados carregados
-  static Future<Map<String, dynamic>> getDataStats() async {
+  static Future<Map<String, dynamic>> getDataStats(Ref ref) async {
     try {
-      final pragasStats = await PragasDataLoader.getStats();
-      final fitossanitariosStats = await FitossanitariosDataLoader.getStats();
-      final culturasStats = await CulturasDataLoader.getStats();
-      final diagnosticosStats = await DiagnosticosDataLoader.getStats();
+      final pragasStats = await PragasDataLoader.getStats(ref);
+      final fitossanitariosStats = await FitossanitariosDataLoader.getStats(ref);
+      final culturasStats = await CulturasDataLoader.getStats(ref);
+      final diagnosticosStats = await DiagnosticosDataLoader.getStats(ref);
 
       final int pragasCount = (pragasStats['total_pragas'] as int?) ?? 0;
       final int fitossanitariosCount =

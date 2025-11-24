@@ -7,8 +7,6 @@ import '../../domain/entities/diagnostico_entity.dart';
 class DiagnosticoMapper {
   const DiagnosticoMapper._();
 
-  /// Converts Drift Diagnostico to DiagnosticoEntity
-  /// Note: nomeDefensivo, nomeCultura, nomePraga should be resolved via extensions
   static DiagnosticoEntity fromDrift(Diagnostico drift) {
     return DiagnosticoEntity(
       id: drift.firebaseId ?? drift.id.toString(),
@@ -74,44 +72,6 @@ class DiagnosticoMapper {
       intervalo: Value(entity.aplicacao.intervaloReaplicacao),
       intervalo2: Value(entity.aplicacao.intervaloReaplicacao2),
       epocaAplicacao: Value(entity.aplicacao.epocaAplicacao),
-    );
-  }
-
-  static DiagnosticoEntity fromDrift(Diagnostico drift) {
-    return DiagnosticoEntity(
-      id: drift.firebaseId ?? drift.id.toString(),
-      idDefensivo: drift.defensivoId.toString(),
-      idCultura: drift.culturaId.toString(),
-      idPraga: drift.pragaId.toString(),
-      nomeDefensivo: '', // Resolved via extension
-      nomeCultura: '', // Resolved via extension
-      nomePraga: '', // Resolved via extension
-      dosagem: DosagemEntity(
-        dosagemMinima: double.tryParse(drift.dsMin ?? '0'),
-        dosagemMaxima: double.tryParse(drift.dsMax) ?? 0.0,
-        unidadeMedida: drift.um,
-      ),
-      aplicacao: AplicacaoEntity(
-        terrestre: drift.minAplicacaoT != null
-            ? AplicacaoTerrestrefEntity(
-                volumeMinimo: double.tryParse(drift.minAplicacaoT!),
-                volumeMaximo: double.tryParse(drift.maxAplicacaoT ?? '0'),
-                unidadeMedida: drift.umT,
-              )
-            : null,
-        aerea: drift.minAplicacaoA != null
-            ? AplicacaoAereaEntity(
-                volumeMinimo: double.tryParse(drift.minAplicacaoA!),
-                volumeMaximo: double.tryParse(drift.maxAplicacaoA ?? '0'),
-                unidadeMedida: drift.umA,
-              )
-            : null,
-        intervaloReaplicacao: drift.intervalo,
-        intervaloReaplicacao2: drift.intervalo2,
-        epocaAplicacao: drift.epocaAplicacao,
-      ),
-      createdAt: null, // Static data doesn't have user timestamps
-      updatedAt: null,
     );
   }
 

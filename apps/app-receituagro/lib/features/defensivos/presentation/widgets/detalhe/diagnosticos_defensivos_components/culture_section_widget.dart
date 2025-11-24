@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../../core/di/injection_container.dart';
 import '../../../../../../core/theme/spacing_tokens.dart';
-import '../../../../../../database/repositories/culturas_repository.dart';
+import '../../../../../../database/providers/database_providers.dart';
 
 /// Widget para seção de cultura com contador de diagnósticos e dados detalhados
-class DiagnosticoDefensivoCultureSectionWidget extends StatefulWidget {
+class DiagnosticoDefensivoCultureSectionWidget extends ConsumerStatefulWidget {
   final String cultura;
   final int diagnosticCount;
   final List<dynamic>? diagnosticos;
@@ -18,12 +18,12 @@ class DiagnosticoDefensivoCultureSectionWidget extends StatefulWidget {
   });
 
   @override
-  State<DiagnosticoDefensivoCultureSectionWidget> createState() =>
+  ConsumerState<DiagnosticoDefensivoCultureSectionWidget> createState() =>
       _DiagnosticoDefensivoCultureSectionWidgetState();
 }
 
 class _DiagnosticoDefensivoCultureSectionWidgetState
-    extends State<DiagnosticoDefensivoCultureSectionWidget> {
+    extends ConsumerState<DiagnosticoDefensivoCultureSectionWidget> {
   bool _isLoadingCultura = false;
 
   @override
@@ -42,7 +42,7 @@ class _DiagnosticoDefensivoCultureSectionWidgetState
     });
 
     try {
-      final culturaRepository = sl<CulturasRepository>();
+      final culturaRepository = ref.read(culturasRepositoryProvider);
       for (final diagnostic in widget.diagnosticos!) {
         final idCulturaStr = _getProperty(diagnostic, 'idCultura');
         if (idCulturaStr != null) {

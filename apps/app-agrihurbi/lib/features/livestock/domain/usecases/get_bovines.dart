@@ -7,8 +7,6 @@ import '../repositories/livestock_repository.dart';
 /// 
 /// Permite buscar todos os bovinos ou aplicar filtros específicos
 /// Implementa UseCase com BovineSearchParams opcionais
-@lazySingleton
-@lazySingleton
 class GetBovinesUseCase implements UseCase<List<BovineEntity>, GetBovinesParams> {
   final LivestockRepository repository;
   
@@ -24,8 +22,6 @@ class GetBovinesUseCase implements UseCase<List<BovineEntity>, GetBovinesParams>
 }
 
 /// Use case simples para obter todos os bovinos sem filtros
-@lazySingleton
-@lazySingleton
 class GetAllBovinesUseCase implements NoParamsUseCase<List<BovineEntity>> {
   final LivestockRepository repository;
   

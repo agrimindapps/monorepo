@@ -1,8 +1,8 @@
-import 'package:core/core.dart' hide Column, getIt;
+import 'package:core/core.dart' hide Column;
 
+import '../../../../core/providers/repository_providers.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/repositories/plants_repository.dart';
-import '../providers/plants_providers.dart';
 
 part 'plants_list_notifier.g.dart';
 

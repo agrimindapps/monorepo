@@ -5,6 +5,10 @@ import '../../data/datasources/expense_local_datasource.dart';
 import '../../data/repositories/expense_repository_impl.dart';
 import '../../domain/repositories/expense_repository.dart';
 import '../../domain/services/expense_processing_service.dart';
+import '../../data/services/expense_error_handling_service.dart';
+import '../../domain/services/expense_validation_service.dart';
+import '../../data/services/expense_error_handling_service.dart';
+import '../../domain/services/expense_validation_service.dart';
 import '../../domain/usecases/add_expense.dart';
 import '../../domain/usecases/delete_expense.dart';
 import '../../domain/usecases/get_expense_summary.dart';
@@ -22,9 +26,23 @@ ExpenseLocalDataSource expenseLocalDataSource(ExpenseLocalDataSourceRef ref) {
 }
 
 @riverpod
+ExpenseErrorHandlingService expenseErrorHandlingService(ExpenseErrorHandlingServiceRef ref) {
+  return ExpenseErrorHandlingService();
+}
+
+@riverpod
+ExpenseValidationService expenseValidationService(ExpenseValidationServiceRef ref) {
+  return ExpenseValidationService();
+}
+
+@riverpod
 ExpenseRepository expenseRepository(ExpenseRepositoryRef ref) {
   final localDataSource = ref.watch(expenseLocalDataSourceProvider);
-  return ExpenseRepositoryImpl(localDataSource);
+  final errorHandlingService = ref.watch(expenseErrorHandlingServiceProvider);
+  return ExpenseRepositoryImpl(
+    localDataSource: localDataSource,
+    errorHandlingService: errorHandlingService,
+  );
 }
 
 @riverpod
@@ -54,15 +72,24 @@ GetExpenseSummary getExpenseSummary(GetExpenseSummaryRef ref) {
 
 @riverpod
 AddExpense addExpense(AddExpenseRef ref) {
-  return AddExpense(ref.watch(expenseRepositoryProvider));
+  return AddExpense(
+    ref.watch(expenseRepositoryProvider),
+    ref.watch(expenseValidationServiceProvider),
+  );
 }
 
 @riverpod
 UpdateExpense updateExpense(UpdateExpenseRef ref) {
-  return UpdateExpense(ref.watch(expenseRepositoryProvider));
+  return UpdateExpense(
+    ref.watch(expenseRepositoryProvider),
+    ref.watch(expenseValidationServiceProvider),
+  );
 }
 
 @riverpod
 DeleteExpense deleteExpense(DeleteExpenseRef ref) {
-  return DeleteExpense(ref.watch(expenseRepositoryProvider));
+  return DeleteExpense(
+    ref.watch(expenseRepositoryProvider),
+    ref.watch(expenseValidationServiceProvider),
+  );
 }

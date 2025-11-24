@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide getIt, Column;
+import 'package:core/core.dart' hide Column;
 
 import '../../core/providers/core_providers.dart';
 import '../../features/account/presentation/usage_stats.dart' as local;

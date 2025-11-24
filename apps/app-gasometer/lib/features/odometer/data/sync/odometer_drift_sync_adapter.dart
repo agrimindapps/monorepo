@@ -35,8 +35,11 @@ import '../../domain/entities/odometer_entity.dart';
 
 class OdometerDriftSyncAdapter
     extends DriftSyncAdapterBase<OdometerEntity, OdometerReading> {
-  OdometerDriftSyncAdapter(GasometerDatabase db, FirebaseFirestore firestore)
-      : super(db, firestore) {
+  OdometerDriftSyncAdapter(
+    GasometerDatabase db,
+    FirebaseFirestore firestore,
+    ConnectivityService connectivityService,
+  ) : super(db, firestore, connectivityService) {
     developer.log(
       '🏗️ OdometerDriftSyncAdapter initialized with db: ${db.hashCode}, firestore: ${firestore.hashCode}',
       name: 'OdometerDriftSyncAdapter',

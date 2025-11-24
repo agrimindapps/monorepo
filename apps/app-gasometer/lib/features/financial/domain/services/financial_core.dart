@@ -5,7 +5,6 @@ library;
 import 'package:core/core.dart';
 
 import '../../../../core/data/models/audit_trail_model.dart';
-import '../../../../core/di/injection.dart' as gasometer_di;
 import '../../../audit/domain/services/audit_trail_service.dart';
 import 'financial_conflict_resolver.dart';
 import 'financial_sync_service.dart';
@@ -31,8 +30,9 @@ class FinancialModule {
   static Future<void> initialize({
     required String userId,
     required UnifiedSyncManager coreSync,
+    required FinancialAuditTrailService auditService,
   }) async {
-    _auditService = gasometer_di.getIt<FinancialAuditTrailService>();
+    _auditService = auditService;
     await _auditService!.initialize(userId: userId);
     _conflictResolver = FinancialConflictResolver(_auditService!);
     _syncService = FinancialSyncService(

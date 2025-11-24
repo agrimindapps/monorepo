@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 
 // Tables
 import 'tables/tasks_table.dart';
@@ -33,19 +32,12 @@ part 'taskolist_database.g.dart';
 /// ============================================================================
 
 @DriftDatabase(tables: [Tasks, Users], daos: [TaskDao, UserDao])
-@lazySingleton
 class TaskolistDatabase extends _$TaskolistDatabase with BaseDriftDatabase {
   TaskolistDatabase(QueryExecutor e) : super(e);
 
   /// Versão do schema do banco de dados
   @override
   int get schemaVersion => 1;
-
-  /// Factory constructor para injeção de dependência (GetIt/Injectable)
-  @factoryMethod
-  factory TaskolistDatabase.injectable() {
-    return TaskolistDatabase.production();
-  }
 
   /// Factory constructor para ambiente de produção
   factory TaskolistDatabase.production() {

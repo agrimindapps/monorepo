@@ -11,7 +11,7 @@ import 'package:core/core.dart'
 import 'package:core/core.dart'
     show StateNotifier, StateNotifierProvider, Provider;
 
-import '../../core/di/injection_container.dart' as di;
+// import '../../core/di/injection_container.dart' as di; // Commented out - migrating to Riverpod
 import '../../features/markets/domain/entities/market_entity.dart';
 import '../../features/markets/domain/entities/market_filter_entity.dart';
 import '../../features/markets/domain/repositories/market_repository.dart';
@@ -717,9 +717,11 @@ class SubscriptionStateNotifier extends StateNotifier<SubscriptionState> {
 */
 
 /// Provider para gerenciamento de configurações
+// TODO: Replace getIt calls with Riverpod providers - commented out temporarily
+/*
 final settingsProvider =
     StateNotifierProvider<SettingsStateNotifier, SettingsState>((ref) {
-      return SettingsStateNotifier(di.getIt<ManageSettings>());
+      return SettingsStateNotifier(null); // Temporarily pass null
     });
 
 /// Provider para gerenciamento de mercados
@@ -727,16 +729,16 @@ final marketProvider = StateNotifierProvider<MarketStateNotifier, MarketState>((
   ref,
 ) {
   return MarketStateNotifier(
-    di.getIt<GetMarkets>(),
-    di.getIt<market_summary.GetMarketSummary>(),
-    di.getIt<MarketRepository>(),
+    null, // Temporarily pass null
+    null, // Temporarily pass null
   );
 });
 
 /// Provider para gerenciamento de notícias
 final newsProvider = StateNotifierProvider<NewsStateNotifier, NewsState>((ref) {
-  return NewsStateNotifier(di.getIt<GetNews>(), di.getIt<GetCommodityPrices>());
+  return NewsStateNotifier(null, null); // Temporarily pass null
 });
+*/
 /*
 /// Provider para gerenciamento de assinaturas
 final subscriptionProvider = StateNotifierProvider<SubscriptionStateNotifier, SubscriptionState>((ref) {
@@ -746,6 +748,7 @@ final subscriptionProvider = StateNotifierProvider<SubscriptionStateNotifier, Su
 });
 */
 
+/*
 /// Provider para configurações atuais
 final currentSettingsProvider = Provider<SettingsEntity?>((ref) {
   final state = ref.watch(settingsProvider);
@@ -769,6 +772,7 @@ final loadedArticlesProvider = Provider<List<NewsArticleEntity>>((ref) {
   final state = ref.watch(newsProvider);
   return state.articles;
 });
+*/
 /*
 /// Provider para assinatura ativa
 final activeSubscriptionProvider = Provider<SubscriptionEntity?>((ref) {

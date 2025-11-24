@@ -3,34 +3,34 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../core/di/injection_container.dart' as di;
 import '../../../../../core/services/promotional_notification_manager.dart';
 import '../../../../../core/services/receituagro_notification_service.dart';
 import '../../../domain/entities/user_settings_entity.dart';
 import '../../../domain/usecases/get_user_settings_usecase.dart';
 import '../../../domain/usecases/update_user_settings_usecase.dart';
+import '../settings_providers.dart';
 
 part 'notifications_notifier.g.dart';
 
 /// Specialized notifier for notification-related settings
-/// 
+///
 /// ✅ SINGLE RESPONSIBILITY PRINCIPLE (SRP):
 /// - Manages ONLY notification preferences (enabled, sound, promotional)
 /// - Does NOT handle theme settings, analytics, or premium features
 /// - Delegates other concerns to specialized notifiers:
 ///   • ThemeNotifier: theme-related settings
 ///   • AnalyticsDebugNotifier: analytics & debug operations
-/// 
+///
 /// ✅ INTERFACE SEGREGATION PRINCIPLE (ISP):
 /// - Uses focused use cases (GetUserSettingsUseCase, UpdateUserSettingsUseCase)
 /// - Does NOT depend on monolithic interfaces
 /// - Integrates with focused services (ReceitaAgroNotificationService)
-/// 
+///
 /// ✅ DEPENDENCY INVERSION PRINCIPLE (DIP):
 /// - Depends on abstractions (use cases, interfaces)
 /// - Injected via service locator (di.sl)
 /// - Easy to mock and test
-/// 
+///
 /// ✅ RESOURCE MANAGEMENT:
 /// - Properly disposes notification resources via ref.onDispose()
 /// - Prevents memory leaks from unclosed services
@@ -45,9 +45,10 @@ class NotificationsNotifier extends _$NotificationsNotifier {
   Future<UserSettingsEntity?> build() async {
     // Lazy-load dependencies via DI - follows Dependency Inversion
     // All injected services are abstractions, allowing for polymorphism
-    _getUserSettingsUseCase = di.sl<GetUserSettingsUseCase>();
-    _updateUserSettingsUseCase = di.sl<UpdateUserSettingsUseCase>();
-    _notificationService = di.sl<ReceitaAgroNotificationService>();
+    _getUserSettingsUseCase = ref.watch(getUserSettingsUseCaseProvider);
+    _updateUserSettingsUseCase = ref.watch(updateUserSettingsUseCaseProvider);
+    // TODO: Implement notificationServiceProvider in core_providers.dart
+    // _notificationService = ref.watch(notificationServiceProvider);
     _promotionalManager = PromotionalNotificationManager();
 
     // ✅ RESOURCE CLEANUP: Register disposal callback for notification cleanup
@@ -94,8 +95,7 @@ class NotificationsNotifier extends _$NotificationsNotifier {
       try {
         final currentPrefs =
             await _promotionalManager.getUserNotificationPreferences();
-        final newPrefs =
-            currentPrefs.copyWith(promotionalEnabled: enabled);
+        final newPrefs = currentPrefs.copyWith(promotionalEnabled: enabled);
         await _promotionalManager.saveUserNotificationPreferences(newPrefs);
       } catch (e) {
         debugPrint('Error updating promotional preferences: $e');

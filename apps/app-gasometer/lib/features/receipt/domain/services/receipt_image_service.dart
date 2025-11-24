@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:core/core.dart' as core;
-import 'package:core/core.dart';
 import '../../../image/domain/services/image_sync_service.dart';
 import '../../../../core/services/storage/firebase_storage_service.dart'
     as app_storage;

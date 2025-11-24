@@ -1,7 +1,7 @@
-import 'package:core/core.dart' hide Column, getIt;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../../core/di/injection.dart';
+import '../../../../core/providers/core_di_providers.dart';
 import '../../../../core/services/plantis_notification_service.dart';
 
 part 'notifications_settings_notifier.g.dart';
@@ -118,16 +118,6 @@ class NotificationsSettingsState {
 }
 
 @riverpod
-PlantisNotificationService notificationService(NotificationServiceRef ref) {
-  return getIt<PlantisNotificationService>();
-}
-
-@riverpod
-Future<SharedPreferences> sharedPreferences(SharedPreferencesRef ref) async {
-  return getIt<SharedPreferences>();
-}
-
-@riverpod
 class NotificationsSettingsNotifier extends _$NotificationsSettingsNotifier {
   late final PlantisNotificationService _notificationService;
   late final SharedPreferences _prefs;
@@ -142,8 +132,8 @@ class NotificationsSettingsNotifier extends _$NotificationsSettingsNotifier {
 
   @override
   Future<NotificationsSettingsState> build() async {
-    _notificationService = ref.read(notificationServiceProvider);
-    _prefs = await ref.read(sharedPreferencesProvider.future);
+    _notificationService = ref.read(plantisNotificationServiceProvider);
+    _prefs = ref.read(sharedPreferencesProvider);
     return await _loadSettings();
   }
 

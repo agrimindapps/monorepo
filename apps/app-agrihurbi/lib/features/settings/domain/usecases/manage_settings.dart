@@ -2,12 +2,11 @@ import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:app_agrihurbi/core/utils/typedef.dart';
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
 import 'package:app_agrihurbi/features/settings/domain/repositories/settings_repository.dart';
-import 'package:core/core.dart' show injectable, Left, Right;
+import 'package:core/core.dart' hide NotificationSettings, PrivacySettings, BiometricInfo, CacheInfo;
 
 /// Manage Settings Use Case
 ///
 /// Handles all settings management operations
-@injectable
 class ManageSettings {
   final SettingsRepository _repository;
 
@@ -308,7 +307,6 @@ class ManageSettings {
 }
 
 /// Manage Theme Settings Use Case
-@injectable
 class ManageThemeSettings {
   final SettingsRepository _repository;
 
@@ -336,7 +334,6 @@ class ManageThemeSettings {
 }
 
 /// Manage Language Settings Use Case
-@injectable
 class ManageLanguageSettings {
   final SettingsRepository _repository;
 
@@ -359,7 +356,6 @@ class ManageLanguageSettings {
 }
 
 /// Manage Notification Settings Use Case
-@injectable
 class ManageNotificationSettings {
   final SettingsRepository _repository;
 
@@ -382,7 +378,6 @@ class ManageNotificationSettings {
 }
 
 /// Manage Security Settings Use Case
-@injectable
 class ManageSecuritySettings {
   final SettingsRepository _repository;
 
@@ -415,7 +410,6 @@ class ManageSecuritySettings {
 }
 
 /// Manage Backup Settings Use Case
-@injectable
 class ManageBackupSettings {
   final SettingsRepository _repository;
 
@@ -453,7 +447,6 @@ class ManageBackupSettings {
 }
 
 /// Export Data Use Case
-@injectable
 class ExportData {
   final SettingsRepository _repository;
 
@@ -490,7 +483,6 @@ class ExportData {
 }
 
 /// Manage Cache Use Case
-@injectable
 class ManageCache {
   final SettingsRepository _repository;
 
@@ -513,7 +505,6 @@ class ManageCache {
 }
 
 /// Get App Info Use Case
-@injectable
 class GetAppInfo {
   final SettingsRepository _repository;
 
@@ -547,7 +538,6 @@ class GetAppInfo {
 }
 
 /// Validate Settings Use Case
-@injectable
 class ValidateSettings {
   final SettingsRepository _repository;
 

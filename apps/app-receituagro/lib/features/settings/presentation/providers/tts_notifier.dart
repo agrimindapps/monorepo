@@ -1,6 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
+import '../../data/repositories/tts_settings_repository_impl.dart';
+import '../../data/services/tts_service_impl.dart';
 import '../../domain/entities/tts_settings_entity.dart';
 import '../../domain/repositories/i_tts_settings_repository.dart';
 import '../../domain/services/i_tts_service.dart';
@@ -9,12 +11,13 @@ part 'tts_notifier.g.dart';
 
 @riverpod
 ITTSService ttsService(TtsServiceRef ref) {
-  return di.sl<ITTSService>();
+  return TTSServiceImpl();
 }
 
 @riverpod
-ITTSSettingsRepository ttsSettingsRepository(TtsSettingsRepositoryRef ref) {
-  return di.sl<ITTSSettingsRepository>();
+Future<ITTSSettingsRepository> ttsSettingsRepository(TtsSettingsRepositoryRef ref) async {
+  final prefs = await SharedPreferences.getInstance();
+  return TTSSettingsRepositoryImpl(prefs);
 }
 
 @riverpod
@@ -25,7 +28,7 @@ class TtsNotifier extends _$TtsNotifier {
   @override
   Future<TTSSettingsEntity> build() async {
     _service = ref.read(ttsServiceProvider);
-    _repository = ref.read(ttsSettingsRepositoryProvider);
+    _repository = await ref.watch(ttsSettingsRepositoryProvider.future);
 
     // Initialize TTS service
     await _service.initialize();

@@ -1,8 +1,15 @@
 import 'package:core/core.dart' hide Column;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'failure_message_service.g.dart';
 
 /// Service specialized in mapping Failure types to user-friendly messages
 /// Principle: Single Responsibility - Only handles Failure to message mapping
-@lazySingleton
+@riverpod
+FailureMessageService failureMessageService(FailureMessageServiceRef ref) {
+  return FailureMessageService();
+}
+
 class FailureMessageService {
   /// Maps a Failure to a user-friendly error message
   String mapFailureToMessage(Failure failure) {

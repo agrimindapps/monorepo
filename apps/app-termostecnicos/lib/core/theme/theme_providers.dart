@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../features/settings/presentation/providers/settings_providers.dart';
 import '../themes/light_theme.dart' as light;
 import '../themes/dark_theme.dart' as dark;
 
@@ -20,8 +19,15 @@ ThemeData darkTheme(DarkThemeRef ref) {
 
 /// Provider for current theme mode
 @riverpod
-ThemeMode currentThemeMode(CurrentThemeModeRef ref) {
-  return ref.watch(themeModeProvider);
+ThemeMode themeMode(themeModeRef) {
+  // TODO: Read from settings - for now default to system
+  return ThemeMode.system;
+}
+
+/// Provider for current theme mode (alias for themeMode)
+@riverpod
+ThemeMode currentThemeMode(currentThemeModeRef) {
+  return currentThemeModeRef.watch(themeModeProvider);
 }
 
 /// Provider for current active theme data (convenience)

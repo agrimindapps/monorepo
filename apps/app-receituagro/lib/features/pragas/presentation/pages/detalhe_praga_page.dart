@@ -1,7 +1,6 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../../core/widgets/standard_tab_bar_widget.dart';
 import '../../../../features/navigation/navigation_providers.dart';

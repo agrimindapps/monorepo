@@ -1,4 +1,4 @@
-import 'package:injectable/injectable.dart';
+
 
 import '../../domain/entities/defensivo_entity.dart';
 
@@ -54,7 +54,7 @@ abstract class IDefensivosFilterService {
 }
 
 /// Default implementation of filter service
-@LazySingleton(as: IDefensivosFilterService)
+
 class DefensivosFilterService implements IDefensivosFilterService {
   @override
   List<DefensivoEntity> filterByToxicidade(

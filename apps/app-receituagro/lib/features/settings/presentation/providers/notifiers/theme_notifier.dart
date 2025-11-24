@@ -3,27 +3,27 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../core/di/injection_container.dart' as di;
 import '../../../domain/entities/user_settings_entity.dart';
 import '../../../domain/usecases/get_user_settings_usecase.dart';
 import '../../../domain/usecases/update_user_settings_usecase.dart';
+import '../settings_providers.dart';
 
 part 'theme_notifier.g.dart';
 
 /// Specialized notifier for theme and visual settings
-/// 
+///
 /// ✅ SINGLE RESPONSIBILITY PRINCIPLE (SRP):
 /// - Manages ONLY theme-related user settings (dark mode, language)
 /// - Does NOT handle notifications, analytics, premium features
 /// - Each responsibility is delegated to specialized notifiers:
 ///   • NotificationsNotifier: notification settings
 ///   • AnalyticsDebugNotifier: analytics & debug operations
-/// 
+///
 /// ✅ DEPENDENCY INVERSION PRINCIPLE (DIP):
 /// - Depends on use case abstractions (GetUserSettingsUseCase, UpdateUserSettingsUseCase)
 /// - Not on concrete repositories or services
 /// - Allows easy testing and implementation swapping
-/// 
+///
 /// ✅ RIVERPOD PATTERNS:
 /// - Uses AsyncValue<T> for state management
 /// - Handles loading/error/data states automatically
@@ -37,8 +37,8 @@ class ThemeNotifier extends _$ThemeNotifier {
   Future<UserSettingsEntity?> build() async {
     // Lazy-load use cases via DI container only when notifier is used
     // This follows DIP: depend on abstractions, not concrete implementations
-    _getUserSettingsUseCase = di.sl<GetUserSettingsUseCase>();
-    _updateUserSettingsUseCase = di.sl<UpdateUserSettingsUseCase>();
+    _getUserSettingsUseCase = ref.watch(getUserSettingsUseCaseProvider);
+    _updateUserSettingsUseCase = ref.watch(updateUserSettingsUseCaseProvider);
     return null;
   }
 

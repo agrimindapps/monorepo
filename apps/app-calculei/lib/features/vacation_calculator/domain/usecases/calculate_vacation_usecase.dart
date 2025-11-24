@@ -25,7 +25,6 @@ class CalculateVacationParams {
 /// - Constitutional 1/3 bonus
 /// - Sold vacation days (abono pecuniário)
 /// - INSS and IR tax calculations
-@injectable
 class CalculateVacationUseCase {
   const CalculateVacationUseCase();
 

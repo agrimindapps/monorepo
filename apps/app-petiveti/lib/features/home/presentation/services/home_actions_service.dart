@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
 
 import '../providers/home_providers.dart';
 
@@ -15,7 +14,6 @@ import '../providers/home_providers.dart';
 /// - Time formatting for status updates
 /// - Notification dialog management
 /// - Status information display
-@lazySingleton
 class HomeActionsService {
   /// Formats DateTime to human-readable relative time
   ///

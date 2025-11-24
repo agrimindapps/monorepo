@@ -17,6 +17,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
+import '../../../../core/providers/auth_state_provider.dart' as auth_provider;
 import '../../data/models/device_model.dart';
 import '../../domain/usecases/get_device_statistics_usecase.dart';
 import '../../domain/usecases/get_user_devices_usecase.dart';
@@ -107,8 +108,9 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
   late final RevokeDeviceUseCase _revokeDeviceUseCase;
   late final RevokeAllOtherDevicesUseCase _revokeAllOtherDevicesUseCase;
   late final GetDeviceStatisticsUseCase _getDeviceStatisticsUseCase;
-  
-  AuthStateNotifier get _authStateNotifier => ref.read(authStateNotifierProvider);
+
+  AuthStateNotifier get _authStateNotifier =>
+      ref.read(auth_provider.authStateNotifierProvider);
 
   StreamSubscription<UserEntity?>? _userSubscription;
 
@@ -133,11 +135,15 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
     }
 
     try {
-      _getUserDevicesUseCase = await ref.read(getUserDevicesUseCaseProvider.future);
-      _validateDeviceUseCase = await ref.read(validateDeviceUseCaseProvider.future);
+      _getUserDevicesUseCase =
+          await ref.read(getUserDevicesUseCaseProvider.future);
+      _validateDeviceUseCase =
+          await ref.read(validateDeviceUseCaseProvider.future);
       _revokeDeviceUseCase = await ref.read(revokeDeviceUseCaseProvider.future);
-      _revokeAllOtherDevicesUseCase = await ref.read(revokeAllOtherDevicesUseCaseProvider.future);
-      _getDeviceStatisticsUseCase = await ref.read(getDeviceStatisticsUseCaseProvider.future);
+      _revokeAllOtherDevicesUseCase =
+          await ref.read(revokeAllOtherDevicesUseCaseProvider.future);
+      _getDeviceStatisticsUseCase =
+          await ref.read(getDeviceStatisticsUseCaseProvider.future);
 
       _userSubscription = _authStateNotifier.userStream.listen(_onUserChanged);
 

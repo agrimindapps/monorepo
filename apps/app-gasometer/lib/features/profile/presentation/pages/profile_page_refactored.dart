@@ -1,11 +1,11 @@
 import 'package:core/core.dart'
-    show GetIt, ConsumerStatefulWidget, ConsumerState;
+    show ConsumerStatefulWidget, ConsumerState;
 import 'package:flutter/material.dart';
 
+import '../../../../core/providers/dependency_providers.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../domain/services/account_service.dart';
-import '../../domain/services/profile_image_service.dart';
 import '../controllers/profile_controller.dart';
 import '../widgets/profile_header_widget.dart';
 import '../widgets/profile_sections_widget.dart';
@@ -26,12 +26,18 @@ class _ProfilePageRefactoredState extends ConsumerState<ProfilePageRefactored> {
   @override
   void initState() {
     super.initState();
+    // Initialization moved to didChangeDependencies to access ref
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _initializeController();
   }
 
   void _initializeController() {
     final accountService = AccountServiceImpl();
-    final imageService = GetIt.instance<GasometerProfileImageService>();
+    final imageService = ref.read(gasometerProfileImageServiceProvider);
     _profileController = ProfileController(accountService, imageService);
   }
 

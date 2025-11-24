@@ -22,7 +22,7 @@ import '../mappers/praga_mapper.dart';
 ///
 /// Princípios: Single Responsibility + Dependency Inversion
 /// Segue padrão Either for error handling consistente
-@LazySingleton(as: IPragasRepository)
+
 class PragasRepositoryImpl implements IPragasRepository {
   final PragasRepository _repository;
   final IPragasQueryService _queryService;
@@ -237,7 +237,7 @@ class PragasRepositoryImpl implements IPragasRepository {
 
 /// Implementação do repositório de histórico usando LocalStorage
 /// Princípio: Single Responsibility - Apenas gerencia histórico
-@LazySingleton(as: IPragasHistoryRepository)
+
 class PragasHistoryRepositoryImpl implements IPragasHistoryRepository {
   final PragasRepository _repository;
   final IPragasErrorMessageService _errorService;
@@ -295,7 +295,7 @@ class PragasHistoryRepositoryImpl implements IPragasHistoryRepository {
 
 /// Implementação do formatador de pragas
 /// Princípio: Single Responsibility - Apenas formatação
-@LazySingleton(as: IPragasFormatter)
+
 class PragasFormatterImpl implements IPragasFormatter {
   @override
   String formatImageName(String nomeCientifico) {

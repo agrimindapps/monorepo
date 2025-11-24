@@ -8,7 +8,7 @@ import '../../domain/entities/calculator_category.dart';
 import '../../domain/entities/calculator_entity.dart';
 import '../../domain/services/calculator_template_service.dart';
 import '../providers/calculator_features_provider.dart';
-import '../providers/calculator_provider_simple.dart';
+import '../providers/calculator_provider.dart';
 import '../widgets/calculation_result_display.dart';
 import '../widgets/parameter_input_widget.dart';
 
@@ -42,8 +42,7 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
   }
 
   Future<void> _initializeServices() async {
-    try {
-    } catch (e) {
+    try {} catch (e) {
       debugPrint('Erro ao inicializar serviços: $e');
     }
   }
@@ -72,29 +71,28 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
           ),
           PopupMenuButton<String>(
             onSelected: (value) => _handleMenuAction(value),
-            itemBuilder:
-                (context) => [
-                  const PopupMenuItem(
-                    value: 'share',
-                    child: Row(
-                      children: [
-                        Icon(Icons.share),
-                        SizedBox(width: 8),
-                        Text('Compartilhar'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'save_template',
-                    child: Row(
-                      children: [
-                        Icon(Icons.bookmark),
-                        SizedBox(width: 8),
-                        Text('Salvar como modelo'),
-                      ],
-                    ),
-                  ),
-                ],
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'share',
+                child: Row(
+                  children: [
+                    Icon(Icons.share),
+                    SizedBox(width: 8),
+                    Text('Compartilhar'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'save_template',
+                child: Row(
+                  children: [
+                    Icon(Icons.bookmark),
+                    SizedBox(width: 8),
+                    Text('Salvar como modelo'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -160,18 +158,16 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
             return const SizedBox.shrink();
           }
           return FloatingActionButton.extended(
-            onPressed:
-                provider.isCalculating
-                    ? null
-                    : () => _executeCalculation(provider),
-            icon:
-                provider.isCalculating
-                    ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                    : const Icon(Icons.calculate),
+            onPressed: provider.isCalculating
+                ? null
+                : () => _executeCalculation(provider),
+            icon: provider.isCalculating
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.calculate),
             label: Text(provider.isCalculating ? 'Calculando...' : 'Calcular'),
           );
         },
@@ -237,9 +233,9 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
                   child: Text(
                     calculator.category.displayName,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: _getCategoryColor(calculator.category),
-                      fontWeight: FontWeight.w600,
-                    ),
+                          color: _getCategoryColor(calculator.category),
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ),
                 const Spacer(),
@@ -249,25 +245,20 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
                 ),
               ],
             ),
-
             const SizedBox(height: 12),
-
             Text(
               calculator.name,
               style: Theme.of(
                 context,
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
-
             const SizedBox(height: 8),
-
             Text(
               calculator.description,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
-
             if (calculator.formula != null) ...[
               const SizedBox(height: 12),
               ExpansionTile(
@@ -292,7 +283,6 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
                 ],
               ),
             ],
-
             if (calculator.references != null &&
                 calculator.references!.isNotEmpty) ...[
               const SizedBox(height: 12),
@@ -335,17 +325,15 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
-
             const SizedBox(height: 16),
-
             ...calculator.parameters.map(
               (parameter) => Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: ParameterInputWidget(
                   parameter: parameter,
                   value: provider.currentInputs[parameter.id],
-                  onChanged:
-                      (value) => provider.updateInput(parameter.id, value),
+                  onChanged: (value) =>
+                      provider.updateInput(parameter.id, value),
                 ),
               ),
             ),
@@ -367,9 +355,7 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
             child: const Text('Limpar'),
           ),
         ),
-
         const SizedBox(width: 16),
-
         Expanded(
           child: OutlinedButton(
             onPressed: () => _loadTemplate(provider),
@@ -397,8 +383,8 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
                 Text(
                   'Resultados',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const Spacer(),
                 IconButton(
@@ -413,9 +399,7 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
                 ),
               ],
             ),
-
             const SizedBox(height: 16),
-
             CalculationResultDisplay(result: result),
           ],
         ),
@@ -642,32 +626,31 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
         );
         await showDialog<void>(
           context: context,
-          builder:
-              (context) => AlertDialog(
-                title: const Text('Compartilhar Resultado'),
-                content: SingleChildScrollView(child: Text(shareText)),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Fechar'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await Clipboard.setData(ClipboardData(text: shareText));
-                      if (context.mounted) {
-                        Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Copiado novamente!'),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                      }
-                    },
-                    child: const Text('Copiar Novamente'),
-                  ),
-                ],
+          builder: (context) => AlertDialog(
+            title: const Text('Compartilhar Resultado'),
+            content: SingleChildScrollView(child: Text(shareText)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
               ),
+              ElevatedButton(
+                onPressed: () async {
+                  await Clipboard.setData(ClipboardData(text: shareText));
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Copiado novamente!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Copiar Novamente'),
+              ),
+            ],
+          ),
         );
       }
     } catch (e) {
@@ -755,26 +738,25 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
         );
         await showDialog<void>(
           context: context,
-          builder:
-              (context) => AlertDialog(
-                title: const Text('Compartilhar Calculadora'),
-                content: SingleChildScrollView(child: Text(shareText)),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Fechar'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await Clipboard.setData(ClipboardData(text: shareText));
-                      if (context.mounted) {
-                        Navigator.of(context).pop();
-                      }
-                    },
-                    child: const Text('Copiar Novamente'),
-                  ),
-                ],
+          builder: (context) => AlertDialog(
+            title: const Text('Compartilhar Calculadora'),
+            content: SingleChildScrollView(child: Text(shareText)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
               ),
+              ElevatedButton(
+                onPressed: () async {
+                  await Clipboard.setData(ClipboardData(text: shareText));
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: const Text('Copiar Novamente'),
+              ),
+            ],
+          ),
         );
       }
     } catch (e) {
@@ -918,13 +900,11 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
     Map<String, dynamic> inputs,
     List<CalculationResultValue> values,
   ) {
-    final inputsText = inputs.entries
-        .map((e) => '• ${e.key}: ${e.value}')
-        .join('\n');
+    final inputsText =
+        inputs.entries.map((e) => '• ${e.key}: ${e.value}').join('\n');
 
-    final outputsText = values
-        .map((v) => '• ${v.label}: ${v.formattedValue}')
-        .join('\n');
+    final outputsText =
+        values.map((v) => '• ${v.label}: ${v.formattedValue}').join('\n');
 
     return 'Resultado da calculadora "$calculatorName" - AgriHurbi\n\n'
         'Parâmetros:\n$inputsText\n\n'
@@ -950,31 +930,30 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
 
     await showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Exportar Resultado'),
-            content: const Text('Escolha o formato de exportação:'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _exportResult('CSV', provider, result);
-                },
-                child: const Text('Exportar CSV'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _exportResult('JSON', provider, result);
-                },
-                child: const Text('Exportar JSON'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Exportar Resultado'),
+        content: const Text('Escolha o formato de exportação:'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
           ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _exportResult('CSV', provider, result);
+            },
+            child: const Text('Exportar CSV'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _exportResult('JSON', provider, result);
+            },
+            child: const Text('Exportar JSON'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1010,38 +989,37 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
         );
         await showDialog<void>(
           context: context,
-          builder:
-              (context) => AlertDialog(
-                title: Text('Exportação $format'),
-                content: SizedBox(
-                  width: double.maxFinite,
-                  height: 400,
-                  child: SingleChildScrollView(
-                    child: Text(
-                      exportData,
-                      style: const TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 12,
-                      ),
-                    ),
+          builder: (context) => AlertDialog(
+            title: Text('Exportação $format'),
+            content: SizedBox(
+              width: double.maxFinite,
+              height: 400,
+              child: SingleChildScrollView(
+                child: Text(
+                  exportData,
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 12,
                   ),
                 ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Fechar'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await Clipboard.setData(ClipboardData(text: exportData));
-                      if (context.mounted) {
-                        Navigator.of(context).pop();
-                      }
-                    },
-                    child: const Text('Copiar Novamente'),
-                  ),
-                ],
               ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  await Clipboard.setData(ClipboardData(text: exportData));
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: const Text('Copiar Novamente'),
+              ),
+            ],
+          ),
         );
       }
     } catch (e) {
@@ -1079,27 +1057,27 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
       'calculator': calculatorName,
       'timestamp': DateTime.now().toIso8601String(),
       'inputs': result.inputs,
-      'results':
-          result.values
-              .map(
-                (v) => {
-                  'label': v.label,
-                  'value': v.value,
-                  'unit': v.unit,
-                  'description': v.description,
-                  'isPrimary': v.isPrimary,
-                },
-              )
-              .toList(),
+      'results': result.values
+          .map(
+            (v) => {
+              'label': v.label,
+              'value': v.value,
+              'unit': v.unit,
+              'description': v.description,
+              'isPrimary': v.isPrimary,
+            },
+          )
+          .toList(),
       'type': result.type.name,
       'isValid': result.isValid,
       'interpretation': result.interpretation,
       'recommendations': result.recommendations,
     };
     return data.toString().replaceAllMapped(
-      RegExp(r'(\w+): (.+?)(?=, \w+:|})'),
-      (match) => '"${match.group(1)}": ${_formatJsonValue(match.group(2)!)}',
-    );
+          RegExp(r'(\w+): (.+?)(?=, \w+:|})'),
+          (match) =>
+              '"${match.group(1)}": ${_formatJsonValue(match.group(2)!)}',
+        );
   }
 
   String _formatJsonValue(String value) {
@@ -1122,43 +1100,42 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
 
     await showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Cálculos Avançados'),
-            content: const Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Funcionalidades avançadas disponíveis:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 12),
-                Text('• Análise de sensibilidade'),
-                Text('• Cálculos em lote'),
-                Text('• Comparação de cenários'),
-                Text('• Análise estatística'),
-                Text('• Otimização de parâmetros'),
-                SizedBox(height: 12),
-                Text(
-                  'Essas funcionalidades estarão disponíveis em versões futuras do aplicativo.',
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-              ],
+      builder: (context) => AlertDialog(
+        title: const Text('Cálculos Avançados'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Funcionalidades avançadas disponíveis:',
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Fechar'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Solicitar Funcionalidade'),
-              ),
-            ],
+            SizedBox(height: 12),
+            Text('• Análise de sensibilidade'),
+            Text('• Cálculos em lote'),
+            Text('• Comparação de cenários'),
+            Text('• Análise estatística'),
+            Text('• Otimização de parâmetros'),
+            SizedBox(height: 12),
+            Text(
+              'Essas funcionalidades estarão disponíveis em versões futuras do aplicativo.',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
           ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Solicitar Funcionalidade'),
+          ),
+        ],
+      ),
     );
   }
 

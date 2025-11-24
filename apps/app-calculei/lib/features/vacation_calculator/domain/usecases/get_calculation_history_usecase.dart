@@ -4,7 +4,6 @@ import '../entities/vacation_calculation.dart';
 import '../repositories/vacation_repository.dart';
 
 /// Use case for retrieving vacation calculation history
-@injectable
 class GetCalculationHistoryUseCase {
   final VacationRepository repository;
 

@@ -1,6 +1,5 @@
-import 'package:core/core.dart' hide test;
+import 'package:core/core.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gasometer_drift/features/fuel/data/models/fuel_supply_model.dart';
 import 'package:gasometer_drift/features/fuel/domain/entities/fuel_record_entity.dart';
 import 'package:gasometer_drift/features/fuel/domain/repositories/fuel_repository.dart';
 import 'package:gasometer_drift/features/vehicles/domain/entities/vehicle_entity.dart';
@@ -112,7 +111,8 @@ void main() {
       expect(verifyResult.isLeft(), true);
     });
 
-    test('Offline to online lifecycle: create offline → sync → verify', () async {
+    test('Offline to online lifecycle: create offline → sync → verify',
+        () async {
       // Phase 1: CREATE OFFLINE (with temporary ID)
       final offlineId = 'local_fuel_${DateTime.now().millisecondsSinceEpoch}';
       final offlineFuelEntity = FuelRecordEntity(
@@ -188,7 +188,9 @@ void main() {
       );
     });
 
-    test('Multiple vehicles lifecycle: add fuels → filter by vehicle → calculate stats', () async {
+    test(
+        'Multiple vehicles lifecycle: add fuels → filter by vehicle → calculate stats',
+        () async {
       // Setup: Multiple vehicles and fuel records
       final vehicle1Id = 'vehicle-001';
       final vehicle2Id = 'vehicle-002';
@@ -317,7 +319,8 @@ void main() {
         (_) async => const Left(ValidationFailure('Invalid fuel data')),
       );
 
-      final invalidResult = await mockRepository.addFuelRecord(invalidFuelEntity);
+      final invalidResult =
+          await mockRepository.addFuelRecord(invalidFuelEntity);
 
       expect(invalidResult.isLeft(), true);
       invalidResult.fold(
@@ -350,7 +353,8 @@ void main() {
       );
     });
 
-    test('Concurrent operations lifecycle: multiple adds → batch read', () async {
+    test('Concurrent operations lifecycle: multiple adds → batch read',
+        () async {
       // Simulate multiple concurrent fuel additions
       final fuels = List.generate(
         5,

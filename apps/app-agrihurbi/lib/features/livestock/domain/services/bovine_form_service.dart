@@ -1,16 +1,13 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/bovine_entity.dart';
 import 'livestock_validation_service.dart';
 
 /// Service especializado para operações de formulário de bovinos
-/// 
+///
 /// Responsabilidades:
 /// - Gerenciar estado do formulário
 /// - Validação de campos específicos
 /// - Transformação de dados
 /// - Lógica de negócio do formulário
-@singleton
 class BovineFormService {
   final LivestockValidationService _validationService;
 
@@ -35,19 +32,19 @@ class BovineFormService {
     if (value == null || value.trim().isEmpty) {
       return null; // Válido para criação
     }
-    
+
     if (value.length < 3) {
       return 'ID deve ter pelo menos 3 caracteres';
     }
     if (value.length > 20) {
       return 'ID deve ter no máximo 20 caracteres';
     }
-    
+
     final regExp = RegExp(r'^[A-Z0-9\-_]{3,20}$');
     if (!regExp.hasMatch(value)) {
       return 'Use apenas letras maiúsculas, números, hífens e underscores';
     }
-    
+
     return null;
   }
 
@@ -123,7 +120,7 @@ class BovineFormService {
   /// Processa tags de string para lista
   List<String> processTags(String tagsString) {
     if (tagsString.trim().isEmpty) return [];
-    
+
     return tagsString
         .split(',')
         .map((tag) => tag.trim())
@@ -141,11 +138,15 @@ class BovineFormService {
   /// Gera ID automático se necessário
   String generateRegistrationId(String commonName, String breed) {
     final now = DateTime.now();
-    final namePrefix = commonName.trim().toUpperCase().substring(0, 
-        commonName.length >= 3 ? 3 : commonName.length);
-    final breedPrefix = breed.trim().toUpperCase().substring(0, 
-        breed.length >= 2 ? 2 : breed.length);
-    
+    final namePrefix = commonName
+        .trim()
+        .toUpperCase()
+        .substring(0, commonName.length >= 3 ? 3 : commonName.length);
+    final breedPrefix = breed
+        .trim()
+        .toUpperCase()
+        .substring(0, breed.length >= 2 ? 2 : breed.length);
+
     return '$namePrefix-$breedPrefix-${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
   }
 
@@ -154,28 +155,32 @@ class BovineFormService {
     final errors = <String, String>{};
     final commonNameError = validateCommonName(formData.commonName);
     if (commonNameError != null) errors['commonName'] = commonNameError;
-    
+
     final registrationIdError = validateRegistrationId(formData.registrationId);
-    if (registrationIdError != null) errors['registrationId'] = registrationIdError;
-    
+    if (registrationIdError != null)
+      errors['registrationId'] = registrationIdError;
+
     final breedError = validateBreed(formData.breed);
     if (breedError != null) errors['breed'] = breedError;
-    
+
     final originCountryError = validateOriginCountry(formData.originCountry);
-    if (originCountryError != null) errors['originCountry'] = originCountryError;
-    
+    if (originCountryError != null)
+      errors['originCountry'] = originCountryError;
+
     final animalTypeError = validateAnimalType(formData.animalType);
     if (animalTypeError != null) errors['animalType'] = animalTypeError;
-    
+
     final originError = validateOrigin(formData.origin);
     if (originError != null) errors['origin'] = originError;
-    
-    final characteristicsError = validateCharacteristics(formData.characteristics);
-    if (characteristicsError != null) errors['characteristics'] = characteristicsError;
-    
+
+    final characteristicsError =
+        validateCharacteristics(formData.characteristics);
+    if (characteristicsError != null)
+      errors['characteristics'] = characteristicsError;
+
     final purposeError = validatePurpose(formData.purpose);
     if (purposeError != null) errors['purpose'] = purposeError;
-    
+
     return FormValidationResult(
       isValid: errors.isEmpty,
       fieldErrors: errors,
@@ -198,7 +203,7 @@ class BovineFormService {
         formData.breed ?? '',
       );
     }
-    
+
     return BovineEntity(
       id: isEditing ? (existingId ?? '') : '',
       commonName: formData.commonName?.trim() ?? '',

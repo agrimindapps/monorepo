@@ -6,7 +6,6 @@ import '../datasources/vacation_local_datasource.dart';
 import '../models/vacation_calculation_model.dart';
 
 /// Implementation of VacationRepository using Hive local storage
-@Injectable(as: VacationRepository)
 class VacationRepositoryImpl implements VacationRepository {
   final VacationLocalDataSource localDataSource;
 

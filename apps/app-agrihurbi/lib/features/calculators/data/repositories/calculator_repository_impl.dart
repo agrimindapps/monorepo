@@ -12,7 +12,6 @@ import '../datasources/calculator_local_datasource.dart';
 ///
 /// Segue padrão clean architecture com local-first strategy
 /// Integra com armazenamento local de histórico e favoritos
-@LazySingleton(as: CalculatorRepository)
 class CalculatorRepositoryImpl implements CalculatorRepository {
   final CalculatorLocalDataSource _localDataSource;
   final FirebaseAnalyticsService _analyticsService;

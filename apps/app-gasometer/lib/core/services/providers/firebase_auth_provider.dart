@@ -110,7 +110,7 @@ class FirebaseAuthProvider implements IAuthProvider {
           '❌ Login returned null user',
           name: 'FirebaseAuth',
         );
-        return Left(AuthFailure('Login failed: user is null'));
+        return const Left(AuthFailure('Login failed: user is null'));
       }
 
       final userEntity = UserEntity(
@@ -213,7 +213,7 @@ class FirebaseAuthProvider implements IAuthProvider {
           'ℹ️ No user authenticated to get ID',
           name: 'FirebaseAuth',
         );
-        return Left(AuthFailure('User not authenticated'));
+        return const Left(AuthFailure('User not authenticated'));
       }
 
       developer.log(

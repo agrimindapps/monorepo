@@ -6,7 +6,6 @@ import '../repositories/auth_repository.dart';
 /// 
 /// Implementa UseCase que retorna a entidade atualizada do usuário
 /// Inclui sincronização com servidor, atualização de cache local
-@lazySingleton
 class RefreshUserUseCase implements UseCase<UserEntity, RefreshUserParams> {
   final AuthRepository repository;
   

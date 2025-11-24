@@ -1,7 +1,6 @@
 // Package imports:
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 
 // Project imports:
@@ -40,7 +39,6 @@ class CalculateThirteenthSalaryParams {
 /// 3. INSS: Progressive tax with ceiling
 /// 4. IRRF: Progressive tax with dependent deductions
 /// 5. Advance payment: 1st = 50% gross, 2nd = net - 1st
-@injectable
 class CalculateThirteenthSalaryUseCase {
   static const _uuid = Uuid();
 
@@ -102,11 +100,13 @@ class CalculateThirteenthSalaryUseCase {
 
     // Dependents validation
     if (params.dependents < 0) {
-      return const ValidationFailure('Número de dependentes não pode ser negativo');
+      return const ValidationFailure(
+          'Número de dependentes não pode ser negativo');
     }
 
     if (params.dependents > 20) {
-      return const ValidationFailure('Número de dependentes não pode exceder 20');
+      return const ValidationFailure(
+          'Número de dependentes não pode exceder 20');
     }
 
     // Date validation
@@ -157,7 +157,8 @@ class CalculateThirteenthSalaryUseCase {
     final irrfRate = irrfResult['aliquota']!;
 
     // 7. Calculate net 13th salary
-    final netThirteenthSalary = grossThirteenthSalary - inssDiscount - irrfDiscount;
+    final netThirteenthSalary =
+        grossThirteenthSalary - inssDiscount - irrfDiscount;
 
     // 8. Calculate installments if advance payment
     final firstInstallment = params.isAdvancePayment
@@ -237,8 +238,8 @@ class CalculateThirteenthSalaryUseCase {
   /// Calculates IRRF (progressive tax with dependent deductions)
   Map<String, double> _calculateIrrf(double baseCalculo, int dependents) {
     // Apply dependent deductions
-    final baseComDependentes = baseCalculo -
-        (dependents * CalculationConstants.deducaoDependenteIrrf);
+    final baseComDependentes =
+        baseCalculo - (dependents * CalculationConstants.deducaoDependenteIrrf);
 
     if (baseComDependentes <= 0) {
       return {'desconto': 0.0, 'aliquota': 0.0};

@@ -1,21 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../features/data_management/domain/services/data_cleaner_service.dart';
-import '../../../../core/di/injection.dart' as gasometer_di;
+
+// Provider for DataCleanerService
+final dataCleanerServiceProvider = Provider<DataCleanerService>((ref) {
+  // Assuming DataCleanerService implementation is available
+  // If not, we need to create it or find where it is defined
+  // For now, I'll assume it's not available and throw UnimplementedError
+  // until I can verify its existence or create it.
+  throw UnimplementedError('DataCleanerService provider not implemented');
+});
 
 /// 🏗️ REFACTORED COMPONENT: Extracted from SettingsPage monolith
 ///
 /// Handles data clearing functionality with proper state management
 /// and memory leak prevention.
-class ClearDataDialog extends StatefulWidget {
+class ClearDataDialog extends ConsumerStatefulWidget {
   const ClearDataDialog({super.key});
 
   @override
-  State<ClearDataDialog> createState() => _ClearDataDialogState();
+  ConsumerState<ClearDataDialog> createState() => _ClearDataDialogState();
 }
 
-class _ClearDataDialogState extends State<ClearDataDialog> {
-  final _dataCleaner = gasometer_di.getIt<DataCleanerService>();
+class _ClearDataDialogState extends ConsumerState<ClearDataDialog> {
+  late final DataCleanerService _dataCleaner;
 
   bool _isLoading = true;
   bool _isClearing = false;
@@ -31,6 +40,13 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
   @override
   void initState() {
     super.initState();
+    // Initialize in didChangeDependencies or build
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _dataCleaner = ref.read(dataCleanerServiceProvider);
     _loadCurrentStats();
   }
 

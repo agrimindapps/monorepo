@@ -11,7 +11,7 @@ import 'pragas_cultura_params.dart';
 /// Retorno: Either<Failure, List<dynamic>> com pragas ordenadas
 /// Validações: Lista não vazia (validação básica)
 /// Nota: Use case de lógica pura - sem chamadas de repositório
-@injectable
+
 class SortPragasUseCase {
   final PragasCulturaSortService sortService;
   final PragasCulturaErrorMessageService errorService;

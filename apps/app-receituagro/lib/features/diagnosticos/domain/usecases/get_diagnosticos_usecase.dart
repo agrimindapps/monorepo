@@ -5,7 +5,7 @@ import '../repositories/i_diagnosticos_repository.dart';
 import 'get_diagnosticos_params.dart';
 
 /// Use Case consolidado para todas as operações de diagnósticos
-@injectable
+
 class GetDiagnosticosUseCase {
   final IDiagnosticosRepository _repository;
 
@@ -288,7 +288,7 @@ class GetDiagnosticosUseCase {
 }
 
 /// Use Case para buscar diagnóstico por ID
-@injectable
+
 class GetDiagnosticoByIdUseCase {
   final IDiagnosticosRepository _repository;
 
@@ -310,7 +310,7 @@ class GetDiagnosticoByIdUseCase {
 }
 
 /// Use Case para buscar recomendações por cultura e praga
-@injectable
+
 class GetRecomendacoesUseCase {
   final IDiagnosticosRepository _repository;
 
@@ -344,7 +344,7 @@ class GetRecomendacoesUseCase {
 }
 
 /// Use Case para buscar por defensivo
-@injectable
+
 class GetDiagnosticosByDefensivoUseCase {
   final IDiagnosticosRepository _repository;
 
@@ -370,7 +370,7 @@ class GetDiagnosticosByDefensivoUseCase {
 }
 
 /// Use Case para buscar por cultura
-@injectable
+
 class GetDiagnosticosByCulturaUseCase {
   final IDiagnosticosRepository _repository;
 
@@ -394,7 +394,7 @@ class GetDiagnosticosByCulturaUseCase {
 }
 
 /// Use Case para buscar por praga
-@injectable
+
 class GetDiagnosticosByPragaUseCase {
   final IDiagnosticosRepository _repository;
 
@@ -414,7 +414,7 @@ class GetDiagnosticosByPragaUseCase {
 }
 
 /// Use Case para busca com filtros
-@injectable
+
 class SearchDiagnosticosWithFiltersUseCase {
   final IDiagnosticosRepository _repository;
 
@@ -437,7 +437,7 @@ class SearchDiagnosticosWithFiltersUseCase {
 }
 
 /// Use Case para obter estatísticas
-@injectable
+
 class GetDiagnosticoStatsUseCase {
   final IDiagnosticosRepository _repository;
 
@@ -468,7 +468,7 @@ class GetDiagnosticoStatsUseCase {
 }
 
 /// Use Case para validar compatibilidade
-@injectable
+
 class ValidateCompatibilidadeUseCase {
   final IDiagnosticosRepository _repository;
 
@@ -506,7 +506,7 @@ class ValidateCompatibilidadeUseCase {
 }
 
 /// Use Case para busca por padrão
-@injectable
+
 class SearchDiagnosticosByPatternUseCase {
   final IDiagnosticosRepository _repository;
 
@@ -532,7 +532,7 @@ class SearchDiagnosticosByPatternUseCase {
 }
 
 /// Use Case para obter dados de filtros
-@injectable
+
 class GetDiagnosticoFiltersDataUseCase {
   final IDiagnosticosRepository _repository;
 

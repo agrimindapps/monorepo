@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -11,7 +10,6 @@ import '../repositories/appointment_repository.dart';
 /// **SOLID Principles Applied:**
 /// - **Single Responsibility**: Only handles appointment retrieval flow
 /// - **Dependency Inversion**: Depends on repository abstraction
-@lazySingleton
 class GetAppointments
     implements UseCase<List<Appointment>, GetAppointmentsParams> {
   final AppointmentRepository _repository;

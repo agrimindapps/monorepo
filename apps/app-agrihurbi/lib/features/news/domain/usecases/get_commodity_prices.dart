@@ -1,12 +1,10 @@
 import 'package:app_agrihurbi/core/utils/typedef.dart';
 import 'package:app_agrihurbi/features/news/domain/entities/commodity_price_entity.dart';
 import 'package:app_agrihurbi/features/news/domain/repositories/news_repository.dart';
-import 'package:core/core.dart' show injectable;
 
 /// Get Commodity Prices Use Case
 ///
 /// Handles fetching current and historical commodity pricing data
-@injectable
 class GetCommodityPrices {
   final NewsRepository _repository;
 
@@ -19,7 +17,6 @@ class GetCommodityPrices {
 }
 
 /// Get Commodity by ID Use Case
-@injectable
 class GetCommodityById {
   final NewsRepository _repository;
 
@@ -31,7 +28,6 @@ class GetCommodityById {
 }
 
 /// Get Commodity History Use Case
-@injectable
 class GetCommodityHistory {
   final NewsRepository _repository;
 
@@ -51,7 +47,6 @@ class GetCommodityHistory {
 }
 
 /// Get Market Summary Use Case
-@injectable
 class GetMarketSummary {
   final NewsRepository _repository;
 
@@ -63,7 +58,6 @@ class GetMarketSummary {
 }
 
 /// Manage Price Alerts Use Case
-@injectable
 class ManagePriceAlerts {
   final NewsRepository _repository;
 

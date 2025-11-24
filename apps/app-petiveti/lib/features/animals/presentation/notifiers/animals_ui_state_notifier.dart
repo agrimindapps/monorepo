@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/animal.dart';
-import 'animals_notifier.dart';
+import '../providers/animals_providers.dart';
 
 part 'animals_ui_state_notifier.g.dart';
 

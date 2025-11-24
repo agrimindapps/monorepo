@@ -8,7 +8,6 @@ import '../entities/equine_entity.dart';
 ///
 /// Responsabilidade única: Calcular métricas, análises e relatórios
 /// Seguindo Single Responsibility Principle
-@singleton
 class LivestockAnalyticsService {
   /// Calcula métricas gerais do rebanho
   LivestockMetrics calculateGeneralMetrics({

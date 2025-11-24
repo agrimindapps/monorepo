@@ -12,7 +12,6 @@ import '../models/user_model.dart';
 /// 
 /// Aplica estratégia local-first com fallback para remoto
 /// Mantém consistência entre dados locais e remotos
-@LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
   final AuthLocalDataSource _localDataSource;
   final AuthRemoteDataSource _remoteDataSource;

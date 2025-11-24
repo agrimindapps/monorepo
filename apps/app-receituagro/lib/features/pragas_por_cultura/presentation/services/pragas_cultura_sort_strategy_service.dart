@@ -1,9 +1,9 @@
-import 'package:injectable/injectable.dart';
+
 
 /// Service responsible for pragas sorting logic
 /// Replaces switch statement with strategy pattern
 /// Follows OCP - extensible without modification
-@lazySingleton
+
 class PragasCulturaSortService {
   PragasCulturaSortService();
 

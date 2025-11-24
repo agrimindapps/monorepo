@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/auth/auth_providers.dart';
+import '../../../../core/providers/core_di_providers.dart';
 import '../../domain/entities/export_request.dart';
 import '../../domain/repositories/data_export_repository.dart';
 import '../../domain/usecases/check_export_availability_usecase.dart';
@@ -61,7 +61,7 @@ class DataExportNotifier extends _$DataExportNotifier {
   /// Get current authenticated user ID from auth provider
   /// Returns null if user is not authenticated
   String? get _currentUserId {
-    final user = ref.watch(currentUserProvider);
+    final user = ref.watch(authStateNotifierProvider).currentUser;
     if (user == null || user.id.isEmpty) {
       return null;
     }

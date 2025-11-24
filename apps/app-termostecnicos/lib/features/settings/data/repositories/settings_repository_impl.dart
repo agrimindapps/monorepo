@@ -6,7 +6,6 @@ import '../datasources/local/settings_local_datasource.dart';
 import '../models/app_settings_model.dart';
 
 /// Implementation of SettingsRepository
-@LazySingleton(as: SettingsRepository)
 class SettingsRepositoryImpl implements SettingsRepository {
   final SettingsLocalDataSource _localDataSource;
 

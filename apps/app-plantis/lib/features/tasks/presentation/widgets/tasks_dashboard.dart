@@ -2,7 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/localization/app_strings.dart';
-import '../../../../core/providers/tasks_providers.dart';
+import '../notifiers/tasks_notifier.dart';
 import '../../core/constants/tasks_constants.dart';
 
 class TasksDashboard extends ConsumerWidget {

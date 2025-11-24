@@ -1,8 +1,6 @@
 import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:core/core.dart' hide Failure, ValidationFailure;
 
-import 'package:injectable/injectable.dart';
-
 import '../entities/calculation_history.dart';
 import '../entities/calculation_result.dart';
 import '../repositories/calculator_repository.dart';
@@ -26,15 +24,14 @@ class ExecuteCalculationParams {
   });
 }
 
-@lazySingleton
 class ExecuteCalculation {
   final CalculatorRepository repository;
   final FirebaseAnalyticsService _analyticsService;
   final RevenueCatService _revenueCatService;
 
   ExecuteCalculation(this.repository)
-    : _analyticsService = FirebaseAnalyticsService(),
-      _revenueCatService = RevenueCatService();
+      : _analyticsService = FirebaseAnalyticsService(),
+        _revenueCatService = RevenueCatService();
 
   /// Executa cálculo simples sem parâmetros
   Future<Either<Failure, CalculationResult>> call(
@@ -47,8 +44,8 @@ class ExecuteCalculation {
       final isPremiumCalculator = _isPremiumCalculator(calculatorId);
 
       if (isPremiumCalculator) {
-        final hasAccessResult = await _revenueCatService
-            .hasActiveSubscription();
+        final hasAccessResult =
+            await _revenueCatService.hasActiveSubscription();
         final hasAccess = hasAccessResult.fold((l) => false, (r) => r);
         if (!hasAccess) {
           await _analyticsService.logEvent(
@@ -141,8 +138,8 @@ class ExecuteCalculationWithHistory {
   final RevenueCatService _revenueCatService;
 
   ExecuteCalculationWithHistory(this.repository)
-    : _analyticsService = FirebaseAnalyticsService(),
-      _revenueCatService = RevenueCatService();
+      : _analyticsService = FirebaseAnalyticsService(),
+        _revenueCatService = RevenueCatService();
 
   Future<Either<Failure, CalculationResult>> call({
     required String calculatorId,
@@ -158,8 +155,8 @@ class ExecuteCalculationWithHistory {
       final isPremiumCalculator = _isPremiumCalculator(calculatorId);
 
       if (isPremiumCalculator) {
-        final hasAccessResult = await _revenueCatService
-            .hasActiveSubscription();
+        final hasAccessResult =
+            await _revenueCatService.hasActiveSubscription();
         final hasAccess = hasAccessResult.fold((l) => false, (r) => r);
         if (!hasAccess) {
           await _analyticsService.logEvent(

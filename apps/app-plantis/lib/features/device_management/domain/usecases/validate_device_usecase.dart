@@ -1,14 +1,13 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../data/models/device_model.dart';
-import '../repositories/device_repository.dart';
 
 /// Use case para validar dispositivo no app-plantis
 /// Verifica limites, valida com servidor e gerencia cache local
 class ValidateDeviceUseCase {
-  final DeviceRepository _deviceRepository;
+  final IDeviceRepository _deviceRepository;
   final AuthStateNotifier _authStateNotifier;
 
   ValidateDeviceUseCase(this._deviceRepository, this._authStateNotifier);
@@ -76,7 +75,7 @@ class ValidateDeviceUseCase {
             (updatedDevice) => Right(
               DeviceValidationResult(
                 isValid: true,
-                device: updatedDevice,
+                device: DeviceModel.fromEntity(updatedDevice),
                 status: DeviceValidationStatus.valid,
                 message: 'Dispositivo já validado e ativo',
               ),
@@ -146,7 +145,7 @@ class ValidateDeviceUseCase {
               return Right(
                 DeviceValidationResult(
                   isValid: true,
-                  device: validatedDevice,
+                  device: DeviceModel.fromEntity(validatedDevice),
                   status: DeviceValidationStatus.valid,
                   message: 'Dispositivo validado com sucesso',
                 ),
@@ -224,10 +223,9 @@ class DeviceValidationResult {
   factory DeviceValidationResult.fromJson(Map<String, dynamic> json) {
     return DeviceValidationResult(
       isValid: json['isValid'] as bool,
-      device:
-          json['device'] != null
-              ? DeviceModel.fromJson(json['device'] as Map<String, dynamic>)
-              : null,
+      device: json['device'] != null
+          ? DeviceModel.fromJson(json['device'] as Map<String, dynamic>)
+          : null,
       status: DeviceValidationStatus.values.firstWhere(
         (s) => s.name == json['status'],
         orElse: () => DeviceValidationStatus.invalid,

@@ -277,7 +277,6 @@ class _ConfirmationDialogState extends State<ConfirmationDialog>
               actions: [
                 TextButton(
                   onPressed: () {
-                    // getIt<HapticService>().light();
                     Navigator.of(context).pop(false);
                   },
                   style: TextButton.styleFrom(
@@ -287,7 +286,6 @@ class _ConfirmationDialogState extends State<ConfirmationDialog>
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    // getIt<HapticService>().selection();
                     Navigator.of(context).pop(true);
                   },
                   style: ElevatedButton.styleFrom(
@@ -963,138 +961,5 @@ class ConfirmationColors {
 
 /// Contextos pré-definidos para confirmações
 class ConfirmationContexts {
-  // TODO: Refactor to use Riverpod provider instead of GetIt
-  /*
-  static Future<bool> deletePlant(BuildContext context, String plantName) {
-    return getIt<ConfirmationService>().showDestructiveConfirmation(
-      context: context,
-      title: 'Deletar planta',
-      message:
-          'Tem certeza que deseja remover "$plantName"? '
-          'Todas as tarefas e históricos relacionados serão perdidos.',
-      confirmLabel: 'Deletar',
-      icon: Icons.delete_forever,
-      requiresDoubleConfirmation: true,
-    );
-  }
-  static Future<bool> deleteTask(BuildContext context, String taskName) {
-    return getIt<ConfirmationService>().showConfirmation(
-      context: context,
-      title: 'Deletar tarefa',
-      message: 'Deseja remover a tarefa "$taskName"?',
-      confirmLabel: 'Deletar',
-      icon: Icons.delete,
-      type: ConfirmationType.warning,
-    );
-  }
-  static Future<bool> logout(BuildContext context) {
-    return getIt<ConfirmationService>().showBottomSheetConfirmation(
-      context: context,
-      title: 'Fazer logout',
-      message:
-          'Você será desconectado da sua conta. '
-          'Dados não sincronizados podem ser perdidos.',
-      confirmLabel: 'Sair',
-      icon: Icons.logout,
-      type: ConfirmationType.warning,
-    );
-  }
-  static Future<bool> resetData(BuildContext context) {
-    return getIt<ConfirmationService>().showDestructiveConfirmation(
-      context: context,
-      title: 'Resetar dados',
-      message:
-          'ATENÇÃO: Todos os seus dados (plantas, tarefas, configurações) '
-          'serão permanentemente removidos. Esta ação não pode ser desfeita.',
-      confirmLabel: 'RESETAR TUDO',
-      icon: Icons.warning,
-      requiresDoubleConfirmation: true,
-    );
-  }
-  static Future<bool> cancelPremium(BuildContext context) {
-    return getIt<ConfirmationService>().showConfirmation(
-      context: context,
-      title: 'Cancelar Premium',
-      message:
-          'Você perderá acesso aos recursos premium. '
-          'O plano continuará ativo até o fim do período pago.',
-      confirmLabel: 'Cancelar Premium',
-      icon: Icons.cancel,
-      type: ConfirmationType.warning,
-    );
-  }
-  static Future<bool> restoreBackup(BuildContext context) {
-    return getIt<ConfirmationService>().showConfirmation(
-      context: context,
-      title: 'Restaurar backup',
-      message:
-          'Os dados atuais serão substituídos pelo backup. '
-          'Deseja continuar?',
-      confirmLabel: 'Restaurar',
-      icon: Icons.restore,
-      type: ConfirmationType.info,
-    );
-  }
-  static Future<bool> createBackup(BuildContext context) {
-    return getIt<ConfirmationService>().showConfirmation(
-      context: context,
-      title: 'Criar backup',
-      message: 'Salvar uma cópia de segurança dos seus dados na nuvem?',
-      confirmLabel: 'Criar backup',
-      icon: Icons.backup,
-      type: ConfirmationType.info,
-    );
-  }
-  static Future<String?> plantName(BuildContext context, {String? current}) {
-    return getIt<ConfirmationService>().showInputConfirmation(
-      context: context,
-      title: 'Nome da planta',
-      message: 'Como você gostaria de chamar sua planta?',
-      initialValue: current,
-      hintText: 'Ex: Rosinha, Suculenta da sala...',
-      confirmLabel: 'Salvar',
-      validator: (value) {
-        if (value?.trim().isEmpty ?? true) {
-          return 'Nome é obrigatório';
-        }
-        return null;
-      },
-    );
-  }
-  static Future<List<String>?> backupOptions(BuildContext context) {
-    return getIt<ConfirmationService>().showChecklistConfirmation(
-      context: context,
-      title: 'Opções de backup',
-      message: 'Selecione os dados que deseja incluir no backup:',
-      items: const [
-        ChecklistItem(
-          id: 'plants',
-          title: 'Plantas',
-          subtitle: 'Lista de plantas e informações',
-          isChecked: true,
-        ),
-        ChecklistItem(
-          id: 'tasks',
-          title: 'Tarefas',
-          subtitle: 'Histórico de tarefas e lembretes',
-          isChecked: true,
-        ),
-        ChecklistItem(
-          id: 'settings',
-          title: 'Configurações',
-          subtitle: 'Preferências do aplicativo',
-          isChecked: false,
-        ),
-        ChecklistItem(
-          id: 'images',
-          title: 'Imagens',
-          subtitle: 'Fotos das plantas',
-          isChecked: false,
-        ),
-      ],
-      confirmLabel: 'Criar backup',
-      requireAllChecked: false,
-    );
-  }
-  */
+  // TODO: Refactor to use Riverpod provider
 }

@@ -15,7 +15,6 @@ abstract class PlantsRemoteDatasource {
   Future<void> syncPlants(List<PlantModel> plants, String userId);
 }
 
-@LazySingleton(as: PlantsRemoteDatasource)
 class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
   final FirebaseFirestore firestore;
   final RateLimiterService rateLimiter;

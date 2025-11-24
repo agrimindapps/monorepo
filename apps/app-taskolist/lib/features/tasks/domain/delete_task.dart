@@ -4,7 +4,6 @@ import '../../../core/usecases/usecase.dart';
 import '../../../core/utils/typedef.dart';
 import 'task_repository.dart';
 
-@lazySingleton
 class DeleteTask extends UseCaseWithParams<void, DeleteTaskParams> {
   const DeleteTask(this._repository);
 
@@ -16,7 +15,6 @@ class DeleteTask extends UseCaseWithParams<void, DeleteTaskParams> {
   }
 }
 
-@lazySingleton
 class DeleteTaskParams {
   const DeleteTaskParams({
     required this.taskId,

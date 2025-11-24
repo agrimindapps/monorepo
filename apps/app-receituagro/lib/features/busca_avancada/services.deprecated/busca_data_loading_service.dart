@@ -1,4 +1,4 @@
-import 'package:injectable/injectable.dart';
+
 
 import '../../../database/repositories/culturas_repository.dart';
 import '../../../database/repositories/fitossanitarios_repository.dart';
@@ -6,7 +6,7 @@ import '../../../database/repositories/pragas_repository.dart';
 
 /// Service specialized in loading and formatting data for search dropdowns
 /// Principle: Single Responsibility - Only handles data loading and transformation
-@lazySingleton
+
 class BuscaDataLoadingService {
   final CulturasRepository _culturaRepo;
   final PragasRepository _pragasRepo;

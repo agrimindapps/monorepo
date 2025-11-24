@@ -4,15 +4,16 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../../database/providers/database_providers.dart';
+import '../../database/receituagro_database.dart';
 import '../../database/repositories/pragas_repository.dart';
-import '../di/injection_container.dart' as di;
 
 /// Serviço para carregar dados de pragas dos assets JSON
 class PragasDataLoader {
   static bool _isLoaded = false;
 
   /// Carrega dados de pragas do JSON dos assets usando repositório
-  static Future<void> loadPragasData() async {
+  static Future<void> loadPragasData(dynamic ref) async {
     if (_isLoaded) {
       developer.log(
         'Pragas já carregadas, pulando...',
@@ -34,9 +35,8 @@ class PragasDataLoader {
 
       final dynamic decodedJson = json.decode(jsonString);
       final List<dynamic> jsonData = decodedJson is List ? decodedJson : [];
-      final List<Map<String, dynamic>> allPragas = jsonData
-          .cast<Map<String, dynamic>>()
-          .toList();
+      final List<Map<String, dynamic>> allPragas =
+          jsonData.cast<Map<String, dynamic>>().toList();
       final List<Map<String, dynamic>> pragas = allPragas
           .where(
             (item) =>
@@ -51,13 +51,14 @@ class PragasDataLoader {
         '🐛 [PRAGAS] JSON carregado: ${allPragas.length} registros totais, ${pragas.length} pragas válidas',
         name: 'PragasDataLoader',
       );
-      final repository = di.sl<PragasRepository>();
+      final repository = ref.read(pragasRepositoryProvider);
       await repository.loadFromJson(pragas, '1.0.0');
 
       developer.log('Pragas carregadas com sucesso!', name: 'PragasDataLoader');
       _isLoaded = true;
 
-      final loadedPragas = await repository.findAll();
+      final List<Praga> loadedPragas =
+          await (repository.findAll() as Future<List<Praga>>);
       developer.log(
         'Verificação: ${loadedPragas.length} pragas disponíveis',
         name: 'PragasDataLoader',
@@ -65,7 +66,7 @@ class PragasDataLoader {
 
       if (loadedPragas.isNotEmpty) {
         developer.log(
-          'Primeiras 3 pragas: ${loadedPragas.take(3).map((p) => p.nome).join(', ')}',
+          'Primeiras 3 pragas: ${loadedPragas.take(3).map((Praga p) => p.nome).join(', ')}',
           name: 'PragasDataLoader',
         );
       }
@@ -79,16 +80,16 @@ class PragasDataLoader {
   }
 
   /// Força recarregamento dos dados (para desenvolvimento)
-  static Future<void> forceReload() async {
+  static Future<void> forceReload(dynamic ref) async {
     _isLoaded = false;
-    await loadPragasData();
+    await loadPragasData(ref);
   }
 
   /// Verifica se dados estão carregados
-  static Future<bool> isDataLoaded() async {
+  static Future<bool> isDataLoaded(dynamic ref) async {
     try {
-      final repository = di.sl<PragasRepository>();
-      final pragas = await repository.findAll();
+      final repository = ref.read(pragasRepositoryProvider) as PragasRepository;
+      final List<Praga> pragas = await repository.findAll();
 
       final hasData = pragas.isNotEmpty;
       developer.log(
@@ -106,15 +107,15 @@ class PragasDataLoader {
   }
 
   /// Obtém estatísticas de carregamento
-  static Future<Map<String, dynamic>> getStats() async {
+  static Future<Map<String, dynamic>> getStats(dynamic ref) async {
     try {
-      final repository = di.sl<PragasRepository>();
-      final pragas = await repository.findAll();
+      final repository = ref.read(pragasRepositoryProvider) as PragasRepository;
+      final List<Praga> pragas = await repository.findAll();
 
       return {
         'total_pragas': pragas.length,
         'is_loaded': _isLoaded,
-        'sample_pragas': pragas.take(5).map((p) => p.nome).toList(),
+        'sample_pragas': pragas.take(5).map((Praga p) => p.nome).toList(),
       };
     } catch (e) {
       return {'total_pragas': 0, 'is_loaded': false, 'error': e.toString()};

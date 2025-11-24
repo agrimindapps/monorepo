@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+
 
 import '../models/rain_gauge_model.dart';
 import '../models/weather_measurement_model.dart';
@@ -6,7 +6,6 @@ import '../models/weather_statistics_model.dart';
 import 'weather_local_datasource.dart';
 
 /// Concrete implementation of WeatherLocalDataSource
-@LazySingleton(as: WeatherLocalDataSource)
 class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
   
   @override

@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 
 import '../entities/calculation_history.dart';
 import '../repositories/calculator_repository.dart';
@@ -8,7 +7,6 @@ import '../repositories/calculator_repository.dart';
 ///
 /// Segue padrão Clean Architecture com Either para error handling
 /// Utilizado pelo CalculatorProvider para persistir resultados
-@lazySingleton
 class SaveCalculationToHistory {
   final CalculatorRepository repository;
 

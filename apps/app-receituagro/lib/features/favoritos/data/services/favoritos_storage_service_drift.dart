@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:injectable/injectable.dart';
+
 
 import '../../../../database/repositories/favorito_repository.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
@@ -9,7 +9,7 @@ import '../../domain/repositories/i_favoritos_repository.dart';
 /// Implementação do storage local para favoritos usando Drift (Data Layer)
 ///
 /// ⚠️ NOTA: Esta classe substitui FavoritosStorageService para usar Drift
-@LazySingleton(as: IFavoritosStorage)
+
 class FavoritosStorageServiceDrift implements IFavoritosStorage {
   final FavoritoRepository _repository;
 

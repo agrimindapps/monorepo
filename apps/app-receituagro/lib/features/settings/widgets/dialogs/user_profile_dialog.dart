@@ -1,7 +1,8 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart' hide Column, AuthState;
 import 'package:flutter/material.dart';
 
-import '../../../../core/providers/receituagro_auth_notifier.dart';
+import '../../../../core/providers/auth_providers.dart';
+import '../../../../core/providers/auth_state.dart';
 import '../../presentation/providers/settings_notifier.dart';
 
 /// User Profile Dialog
@@ -31,8 +32,8 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
     _displayNameController = TextEditingController();
     _emailController = TextEditingController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authState = ref.read(receitaAgroAuthNotifierProvider).value;
-      if (authState != null && mounted) {
+      final authState = ref.read(authNotifierProvider);
+      if (mounted) {
         setState(() {
           _displayNameController.text = _getUserDisplayName(authState);
           _emailController.text = _getUserEmail(authState);
@@ -48,7 +49,7 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
     super.dispose();
   }
 
-  String _getUserDisplayName(ReceitaAgroAuthState authState) {
+  String _getUserDisplayName(AuthState authState) {
     final user = authState.currentUser;
     if (user != null && user.displayName.isNotEmpty) {
       return user.displayName;
@@ -66,7 +67,7 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
     return 'Usuário ReceitaAgro';
   }
 
-  String _getUserEmail(ReceitaAgroAuthState authState) {
+  String _getUserEmail(AuthState authState) {
     final user = authState.currentUser;
     return user?.email ?? 'usuario@receituagro.com';
   }
@@ -74,37 +75,15 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final authState = ref.watch(receitaAgroAuthNotifierProvider);
+    final authState = ref.watch(authNotifierProvider);
 
-    return authState.when(
-      data: (state) => _buildDialogContent(context, theme, state),
-      loading:
-          () => Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Padding(
-              padding: EdgeInsets.all(24),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          ),
-      error:
-          (error, _) => Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Center(child: Text('Erro ao carregar perfil: $error')),
-            ),
-          ),
-    );
+    return _buildDialogContent(context, theme, authState);
   }
 
   Widget _buildDialogContent(
     BuildContext context,
     ThemeData theme,
-    ReceitaAgroAuthState authState,
+    AuthState authState,
   ) {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -132,17 +111,14 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
                 ),
               ],
             ),
-
             const SizedBox(height: 24),
             _buildAvatar(theme, authState),
-
             const SizedBox(height: 24),
             Expanded(
               child: SingleChildScrollView(
                 child: _buildProfileForm(theme, authState),
               ),
             ),
-
             const SizedBox(height: 24),
             _buildActions(theme, authState),
           ],
@@ -152,11 +128,10 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
   }
 
   /// Build user avatar
-  Widget _buildAvatar(ThemeData theme, ReceitaAgroAuthState authState) {
-    final displayName =
-        _displayNameController.text.isEmpty
-            ? _getUserDisplayName(authState)
-            : _displayNameController.text;
+  Widget _buildAvatar(ThemeData theme, AuthState authState) {
+    final displayName = _displayNameController.text.isEmpty
+        ? _getUserDisplayName(authState)
+        : _displayNameController.text;
 
     return Stack(
       children: [
@@ -194,7 +169,7 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
   }
 
   /// Build profile form
-  Widget _buildProfileForm(ThemeData theme, ReceitaAgroAuthState authState) {
+  Widget _buildProfileForm(ThemeData theme, AuthState authState) {
     final settingsState = ref.read(settingsNotifierProvider).value;
     final currentDevice = settingsState?.currentDeviceInfo;
     final connectedDevices = settingsState?.connectedDevicesInfo ?? [];
@@ -215,21 +190,19 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
           decoration: InputDecoration(
             hintText: 'Digite seu nome de exibição',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            suffixIcon:
-                _isEditing
-                    ? IconButton(
-                      onPressed: () {
-                        _displayNameController.clear();
-                      },
-                      icon: const Icon(Icons.clear, size: 16),
-                    )
-                    : null,
+            suffixIcon: _isEditing
+                ? IconButton(
+                    onPressed: () {
+                      _displayNameController.clear();
+                    },
+                    icon: const Icon(Icons.clear, size: 16),
+                  )
+                : null,
           ),
           onChanged: (value) {
             setState(() {}); // Rebuild to update avatar initials
           },
         ),
-
         const SizedBox(height: 16),
         Text(
           'Email',
@@ -244,13 +217,11 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
           decoration: InputDecoration(
             hintText: 'Email da conta',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            suffixIcon:
-                authState.isAuthenticated
-                    ? const Icon(Icons.verified, color: Colors.green, size: 16)
-                    : null,
+            suffixIcon: authState.isAuthenticated
+                ? const Icon(Icons.verified, color: Colors.green, size: 16)
+                : null,
           ),
         ),
-
         const SizedBox(height: 24),
         Container(
           padding: const EdgeInsets.all(16),
@@ -300,9 +271,9 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
           Text(
             value,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w500,
-              color: Theme.of(context).colorScheme.primary,
-            ),
+                  fontWeight: FontWeight.w500,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
           ),
         ],
       ),
@@ -310,7 +281,7 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
   }
 
   /// Build action buttons
-  Widget _buildActions(ThemeData theme, ReceitaAgroAuthState authState) {
+  Widget _buildActions(ThemeData theme, AuthState authState) {
     if (!_isEditing) {
       return Row(
         children: [
@@ -347,14 +318,13 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
         Expanded(
           child: ElevatedButton(
             onPressed: _isSaving ? null : _saveChanges,
-            child:
-                _isSaving
-                    ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                    : const Text('Salvar'),
+            child: _isSaving
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Salvar'),
           ),
         ),
       ],
@@ -374,25 +344,24 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
   void _changeAvatar() {
     showDialog<dynamic>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Alterar Avatar'),
-            content: const Text(
-              'Funcionalidade de upload de avatar será implementada em breve.\n\n'
-              'Por enquanto, o avatar é gerado automaticamente baseado no nome.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Alterar Avatar'),
+        content: const Text(
+          'Funcionalidade de upload de avatar será implementada em breve.\n\n'
+          'Por enquanto, o avatar é gerado automaticamente baseado no nome.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
           ),
+        ],
+      ),
     );
   }
 
   /// Cancel editing
-  void _cancelEdit(ReceitaAgroAuthState authState) {
+  void _cancelEdit(AuthState authState) {
     setState(() {
       _isEditing = false;
       _displayNameController.text = _getUserDisplayName(authState);
@@ -441,17 +410,16 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
   void _showErrorDialog(String message) {
     showDialog<dynamic>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Erro'),
-            content: Text(message),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Erro'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
           ),
+        ],
+      ),
     );
   }
 }

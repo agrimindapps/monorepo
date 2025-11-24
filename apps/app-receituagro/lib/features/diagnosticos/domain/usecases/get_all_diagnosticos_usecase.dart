@@ -5,7 +5,7 @@ import '../repositories/i_diagnosticos_repository.dart';
 
 /// Use Case para buscar todos os diagnósticos com paginação
 /// Responsabilidade única: Retornar lista completa de diagnósticos
-@injectable
+
 class GetAllDiagnosticosUseCase {
   final IDiagnosticosRepository _repository;
 

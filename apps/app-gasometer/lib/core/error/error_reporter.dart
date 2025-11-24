@@ -1,9 +1,7 @@
 import 'dart:async';
 
-import 'package:core/core.dart' show injectable;
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:core/core.dart' hide AppError, NetworkError, ServerError, TimeoutError, ValidationError, UnexpectedError;
 import 'package:flutter/foundation.dart';
-import '../di/injection.dart';
 import '../services/analytics/gasometer_analytics_service.dart';
 
 import 'app_error.dart';
@@ -345,33 +343,5 @@ class ErrorReporter {
         'test_purpose': 'validation',
       },
     );
-  }
-}
-
-/// Extension for easier error reporting from anywhere in the app
-extension AppErrorReporting on AppError {
-  /// Report this error using the error reporter
-  Future<void> report({
-    StackTrace? stackTrace,
-    String? context,
-    Map<String, dynamic>? additionalData,
-    bool fatal = false,
-  }) async {
-    try {
-      // Use analytics service from DI instead of hardcoded mock
-      final analyticsService = getIt<GasometerAnalyticsService>();
-      final reporter = ErrorReporter(analyticsService);
-      await reporter.reportError(
-        this,
-        stackTrace: stackTrace,
-        context: context,
-        additionalData: additionalData,
-        fatal: fatal,
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        print('Failed to report error: $e');
-      }
-    }
   }
 }

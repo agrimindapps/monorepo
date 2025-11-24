@@ -156,7 +156,7 @@ class EnhancedDiagnosticosPragaState {
       groups: grouping.length,
       avgGroupSize: grouping.isNotEmpty
           ? grouping.values.map((list) => list.length).reduce((a, b) => a + b) /
-                grouping.length
+              grouping.length
           : 0.0,
       hasFilters: hasFilters,
       cacheHitRate: 0.0,
@@ -202,7 +202,7 @@ class EnhancedDiagnosticosPragaNotifier
     final currentState = state.value;
     if (currentState == null) return;
 
-    final pragaName = await _resolver.resolvePragaNome(idPraga: pragaId);
+    final pragaName = await _resolver.resolvePragaNome(pragaId);
 
     state = AsyncValue.data(
       currentState
@@ -288,8 +288,7 @@ class EnhancedDiagnosticosPragaNotifier
       } else {
         state = AsyncValue.data(
           currentState
-              .copyWith(isLoading: false, diagnosticos: [])
-              .clearError(),
+              .copyWith(isLoading: false, diagnosticos: []).clearError(),
         );
         updateSearchQuery(query);
       }
@@ -359,11 +358,11 @@ class EnhancedDiagnosticosPragaNotifier
     for (final diag in currentState.diagnosticos) {
       if (diag.idCultura.isNotEmpty) {
         final culturaNome = await _resolver.resolveCulturaNome(
-          idCultura: diag.idCultura,
+          diag.idCultura,
         );
-        if (culturaNome.isNotEmpty &&
+        if (culturaNome?.isNotEmpty == true &&
             culturaNome != 'Cultura não especificada') {
-          culturas.add(culturaNome);
+          culturas.add(culturaNome!);
         }
       }
     }
@@ -387,6 +386,7 @@ class EnhancedDiagnosticosPragaNotifier
 
     try {
       return await _compatibilityService.validateFullCompatibility(
+        ref,
         idDefensivo: diagnostico.idDefensivo,
         idCultura: diagnostico.idCultura,
         idPraga: currentState.currentPragaId!,

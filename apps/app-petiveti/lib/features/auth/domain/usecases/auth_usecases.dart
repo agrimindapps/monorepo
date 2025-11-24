@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
 import '../entities/user.dart';
@@ -16,7 +15,6 @@ class SignInWithEmailParams {
   });
 }
 
-@lazySingleton
 class SignInWithEmail implements UseCase<User, SignInWithEmailParams> {
   final AuthRepository repository;
   final AuthValidationService validationService;
@@ -52,7 +50,6 @@ class SignUpWithEmailParams {
   });
 }
 
-@lazySingleton
 class SignUpWithEmail implements UseCase<User, SignUpWithEmailParams> {
   final AuthRepository repository;
   final AuthValidationService validationService;
@@ -78,7 +75,6 @@ class SignUpWithEmail implements UseCase<User, SignUpWithEmailParams> {
   }
 }
 
-@lazySingleton
 class SignInWithGoogle implements UseCase<User, NoParams> {
   final AuthRepository repository;
 
@@ -90,7 +86,6 @@ class SignInWithGoogle implements UseCase<User, NoParams> {
   }
 }
 
-@lazySingleton
 class SignInWithApple implements UseCase<User, NoParams> {
   final AuthRepository repository;
 
@@ -102,7 +97,6 @@ class SignInWithApple implements UseCase<User, NoParams> {
   }
 }
 
-@lazySingleton
 class SignInWithFacebook implements UseCase<User, NoParams> {
   final AuthRepository repository;
 
@@ -114,7 +108,6 @@ class SignInWithFacebook implements UseCase<User, NoParams> {
   }
 }
 
-@lazySingleton
 class SignInAnonymously implements UseCase<User, NoParams> {
   final AuthRepository repository;
 
@@ -126,7 +119,6 @@ class SignInAnonymously implements UseCase<User, NoParams> {
   }
 }
 
-@lazySingleton
 class SignOut implements UseCase<void, NoParams> {
   final AuthRepository repository;
 
@@ -138,7 +130,6 @@ class SignOut implements UseCase<void, NoParams> {
   }
 }
 
-@lazySingleton
 class GetCurrentUser implements UseCase<User?, NoParams> {
   final AuthRepository repository;
 
@@ -150,7 +141,6 @@ class GetCurrentUser implements UseCase<User?, NoParams> {
   }
 }
 
-@lazySingleton
 class SendEmailVerification implements UseCase<void, NoParams> {
   final AuthRepository repository;
 
@@ -162,7 +152,6 @@ class SendEmailVerification implements UseCase<void, NoParams> {
   }
 }
 
-@lazySingleton
 class SendPasswordResetEmail implements UseCase<void, String> {
   final AuthRepository repository;
   final AuthValidationService validationService;
@@ -190,7 +179,6 @@ class UpdateProfileParams {
   });
 }
 
-@lazySingleton
 class UpdateProfile implements UseCase<User, UpdateProfileParams> {
   final AuthRepository repository;
   final AuthValidationService validationService;
@@ -213,7 +201,6 @@ class UpdateProfile implements UseCase<User, UpdateProfileParams> {
   }
 }
 
-@lazySingleton
 class DeleteAccount implements UseCase<void, NoParams> {
   final AuthRepository repository;
 

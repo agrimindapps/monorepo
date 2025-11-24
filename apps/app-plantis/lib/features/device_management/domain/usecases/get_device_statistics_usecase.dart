@@ -3,12 +3,11 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../data/models/device_model.dart';
-import '../repositories/device_repository.dart';
 
 /// Use case para obter estatísticas de dispositivos no app-plantis
 /// Fornece insights sobre uso de dispositivos do usuário
 class GetDeviceStatisticsUseCase {
-  final DeviceRepository _deviceRepository;
+  final IDeviceRepository _deviceRepository;
   final AuthStateNotifier _authStateNotifier;
 
   GetDeviceStatisticsUseCase(this._deviceRepository, this._authStateNotifier);
@@ -36,9 +35,17 @@ class GetDeviceStatisticsUseCase {
           }
           return Left(failure);
         },
-        (statisticsMap) {
+        (coreStatistics) {
           try {
-            final statistics = _mapToDeviceStatistics(statisticsMap);
+            // Convert core DeviceStatistics to app DeviceStatisticsModel
+            final statistics = DeviceStatisticsModel(
+              totalDevices: coreStatistics.totalDevices,
+              activeDevices: coreStatistics.activeDevices,
+              devicesByPlatform: coreStatistics.devicesByPlatform,
+              lastActiveDevice: coreStatistics.lastActiveDevice,
+              oldestDevice: coreStatistics.oldestDevice,
+              newestDevice: coreStatistics.newestDevice,
+            );
 
             if (kDebugMode) {
               debugPrint('✅ DeviceStats: Statistics retrieved successfully');
@@ -80,38 +87,14 @@ class GetDeviceStatisticsUseCase {
     }
   }
 
-  /// Converte Map&lt;String, dynamic&gt; para DeviceStatisticsModel
-  DeviceStatisticsModel _mapToDeviceStatistics(Map<String, dynamic> map) {
-    return DeviceStatisticsModel(
-      totalDevices: map['totalDevices'] as int? ?? 0,
-      activeDevices: map['activeDevices'] as int? ?? 0,
-      devicesByPlatform: Map<String, int>.from(
-        map['devicesByPlatform'] as Map? ?? {},
-      ),
-      lastActiveDevice:
-          map['lastActiveDevice'] != null
-              ? DeviceModel.fromEntity(map['lastActiveDevice'] as DeviceEntity)
-              : null,
-      oldestDevice:
-          map['oldestDevice'] != null
-              ? DeviceModel.fromEntity(map['oldestDevice'] as DeviceEntity)
-              : null,
-      newestDevice:
-          map['newestDevice'] != null
-              ? DeviceModel.fromEntity(map['newestDevice'] as DeviceEntity)
-              : null,
-    );
-  }
-
   /// Aprimora estatísticas com informações específicas do plantis
   DeviceStatisticsModel _enhanceStatistics(DeviceStatisticsModel stats) {
     try {
       final plantisMetrics = <String, dynamic>{};
       if (stats.lastActiveDevice != null) {
-        final hoursSinceLastActivity =
-            DateTime.now()
-                .difference(stats.lastActiveDevice!.lastActiveAt)
-                .inHours;
+        final hoursSinceLastActivity = DateTime.now()
+            .difference(stats.lastActiveDevice!.lastActiveAt)
+            .inHours;
 
         plantisMetrics['hoursSinceLastActivity'] = hoursSinceLastActivity;
         plantisMetrics['isActiveToday'] = hoursSinceLastActivity < 24;
@@ -125,13 +108,12 @@ class GetDeviceStatisticsUseCase {
         plantisMetrics['platformDiversity'] = stats.devicesByPlatform.length;
         plantisMetrics['isMobilePrimary'] =
             (stats.devicesByPlatform['iOS'] ?? 0) +
-                (stats.devicesByPlatform['Android'] ?? 0) >
-            stats.totalDevices / 2;
+                    (stats.devicesByPlatform['Android'] ?? 0) >
+                stats.totalDevices / 2;
       }
-      plantisMetrics['deviceUtilization'] =
-          stats.totalDevices > 0
-              ? (stats.activeDevices / stats.totalDevices * 100).round()
-              : 0;
+      plantisMetrics['deviceUtilization'] = stats.totalDevices > 0
+          ? (stats.activeDevices / stats.totalDevices * 100).round()
+          : 0;
 
       plantisMetrics['hasInactiveDevices'] =
           stats.activeDevices < stats.totalDevices;

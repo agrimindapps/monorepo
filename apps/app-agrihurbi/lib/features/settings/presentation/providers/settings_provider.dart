@@ -1,22 +1,22 @@
-import 'package:app_agrihurbi/core/di/injection.dart';
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
 import 'package:app_agrihurbi/features/settings/domain/usecases/manage_settings.dart';
-import 'package:core/core.dart' show Provider;
-import 'package:core/core.dart' show injectable;
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'settings_di_providers.dart';
 
 /// Provider Riverpod para SettingsProvider
 ///
 /// Integra GetIt com Riverpod para gerenciamento de estado
-final settingsProviderProvider = Provider<SettingsProvider>((ref) {
-  return getIt<SettingsProvider>();
+final settingsProviderProvider = ChangeNotifierProvider<SettingsProvider>((ref) {
+  final manageSettings = ref.watch(manageSettingsProvider);
+  return SettingsProvider(manageSettings);
 });
 
 /// Settings Provider for App Configuration Management
 ///
 /// Manages all user preferences and app configuration options
 /// using Provider pattern for reactive UI updates
-@injectable
 class SettingsProvider with ChangeNotifier {
   final ManageSettings _manageSettings;
 

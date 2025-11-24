@@ -1,12 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart' as core;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../database/receituagro_database.dart';
-import '../../database/providers/database_providers.dart';
+import '../../database/repositories/repositories.dart';
+import '../../database/sync/adapters/favoritos_drift_sync_adapter.dart';
+import '../../database/sync/adapters/comentarios_drift_sync_adapter.dart';
 import '../../features/analytics/analytics_service.dart';
 import '../../features/analytics/analytics_providers.dart';
-import '../di/injection_container.dart' as di;
 import '../navigation/agricultural_navigation_extension.dart';
 import '../services/app_data_manager.dart';
 import '../services/cloud_functions_service.dart';
@@ -19,9 +22,12 @@ import '../services/receituagro_navigation_service.dart';
 import '../services/receituagro_notification_service.dart';
 import '../services/remote_config_service.dart';
 import '../services/receita_agro_sync_service.dart';
+import '../services/promotional_notification_manager.dart';
 import '../sync/receituagro_drift_storage_adapter.dart';
 import '../sync/sync_operations.dart';
 import '../sync/sync_queue.dart';
+import '../../features/favoritos/presentation/providers/favoritos_providers.dart';
+import '../../features/sync/services/sync_coordinator.dart';
 
 part 'core_providers.g.dart';
 
@@ -30,7 +36,71 @@ part 'core_providers.g.dart';
 /// Provider do banco de dados Drift (Singleton)
 @Riverpod(keepAlive: true)
 ReceituagroDatabase receituagroDatabase(Ref ref) {
-  return ReceituagroDatabase.injectable();
+  final db = ReceituagroDatabase.production();
+  ref.onDispose(() => db.close());
+  return db;
+}
+
+// ========== REPOSITORY PROVIDERS (needed to avoid circular dependency) ==========
+
+/// Provider do repositório de diagnósticos
+@Riverpod(keepAlive: true)
+DiagnosticoRepository diagnosticoRepository(Ref ref) {
+  final db = ref.watch(receituagroDatabaseProvider);
+  return DiagnosticoRepository(db);
+}
+
+/// Provider do repositório de fitossanitários
+@Riverpod(keepAlive: true)
+FitossanitariosRepository fitossanitariosRepository(Ref ref) {
+  final db = ref.watch(receituagroDatabaseProvider);
+  return FitossanitariosRepository(db);
+}
+
+/// Provider do repositório de culturas
+@Riverpod(keepAlive: true)
+CulturasRepository culturasRepository(Ref ref) {
+  final db = ref.watch(receituagroDatabaseProvider);
+  return CulturasRepository(db);
+}
+
+/// Provider do repositório de pragas
+@Riverpod(keepAlive: true)
+PragasRepository pragasRepository(Ref ref) {
+  final db = ref.watch(receituagroDatabaseProvider);
+  return PragasRepository(db);
+}
+
+/// Provider do repositório de preferências do usuário
+@Riverpod(keepAlive: true)
+UserPreferencesRepository userPreferencesRepository(Ref ref) {
+  final appSettingsRepo = ref.watch(appSettingsRepositoryProvider);
+  return UserPreferencesRepository(appSettingsRepo);
+}
+
+/// Provider do repositório de configurações do app
+@Riverpod(keepAlive: true)
+AppSettingsRepository appSettingsRepository(Ref ref) {
+  final db = ref.watch(receituagroDatabaseProvider);
+  return AppSettingsRepository(db);
+}
+
+/// Provider do adapter de sincronização de favoritos
+@Riverpod(keepAlive: true)
+FavoritosDriftSyncAdapter favoritosSyncAdapter(Ref ref) {
+  final db = ref.watch(receituagroDatabaseProvider);
+  final firestore = ref.watch(firebaseFirestoreProvider);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  return FavoritosDriftSyncAdapter(db, firestore, connectivity);
+}
+
+/// Provider do adapter de sincronização de comentários
+@Riverpod(keepAlive: true)
+ComentariosDriftSyncAdapter comentariosSyncAdapter(Ref ref) {
+  final db = ref.watch(receituagroDatabaseProvider);
+  final firestore = ref.watch(firebaseFirestoreProvider);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  return ComentariosDriftSyncAdapter(db, firestore, connectivity);
 }
 
 // ========== CORE SERVICES ==========
@@ -113,13 +183,14 @@ DiagnosticoIntegrationService diagnosticoIntegrationService(Ref ref) {
 /// Provider do data cleaner
 @Riverpod(keepAlive: true)
 core.IAppDataCleaner dataCleanerService(Ref ref) {
-  return ReceitaAgroDataCleaner();
+  final db = ref.watch(receituagroDatabaseProvider);
+  return ReceitaAgroDataCleaner(db);
 }
 
 /// Provider do app data manager
 @Riverpod(keepAlive: true)
 IAppDataManager appDataManager(Ref ref) {
-  return AppDataManager();
+  return AppDataManager(ref);
 }
 
 // ========== SYNC SERVICES ==========
@@ -144,16 +215,44 @@ core.ConnectivityService connectivityService(Ref ref) {
   return core.ConnectivityService.instance;
 }
 
+/// Provider do serviço enhanced de conectividade
+@Riverpod(keepAlive: true)
+core.EnhancedConnectivityService enhancedConnectivityService(Ref ref) {
+  return core.EnhancedConnectivityService();
+}
+
 /// Provider do unified sync manager do core
 @Riverpod(keepAlive: true)
 core.UnifiedSyncManager unifiedSyncManager(Ref ref) {
   return core.UnifiedSyncManager.instance;
 }
 
+/// Provider do coordenador de sincronização
+@Riverpod(keepAlive: true)
+SyncCoordinator syncCoordinator(Ref ref) {
+  final connectivityService = ref.watch(connectivityServiceProvider);
+  final favoritosAdapter = ref.watch(favoritosSyncAdapterProvider);
+  final comentariosAdapter = ref.watch(comentariosSyncAdapterProvider);
+
+  return SyncCoordinator(
+    connectivityService,
+    favoritosAdapter,
+    comentariosAdapter,
+  );
+}
+
+/// Provider do gerenciador de notificações promocionais
+@Riverpod(keepAlive: true)
+PromotionalNotificationManager promotionalNotificationManager(Ref ref) {
+  return PromotionalNotificationManager();
+}
+
 /// Provider do serviço de sincronização do ReceitaAgro
 @Riverpod(keepAlive: true)
 ReceitaAgroSyncService receitaAgroSyncService(Ref ref) {
-  return ReceitaAgroSyncService();
+  return ReceitaAgroSyncService(
+    favoritosRepository: ref.watch(favoritosRepositorySimplifiedProvider),
+  );
 }
 
 // ========== FIREBASE SERVICES (from core) ==========
@@ -175,7 +274,12 @@ core.FirebaseAnalyticsService firebaseAnalyticsService(Ref ref) {
 /// Provider do repositório de autenticação
 @Riverpod(keepAlive: true)
 core.IAuthRepository authRepository(Ref ref) {
-  return core.FirebaseAuthRepository();
+  final firebaseAuth = ref.watch(firebaseAuthProvider);
+  // final googleSignIn = ref.watch(googleSignInProvider);
+  return core.FirebaseAuthService(
+    firebaseAuth: firebaseAuth,
+    // googleSignIn: googleSignIn,
+  );
 }
 
 /// Provider do serviço de autenticação Firebase
@@ -265,4 +369,16 @@ core.NavigationAnalyticsService navigationAnalyticsService(Ref ref) {
 @Riverpod(keepAlive: true)
 core.NavigationConfigurationService navigationConfigurationService(Ref ref) {
   return core.NavigationConfigurationService();
+}
+
+/// Firebase Firestore Provider
+@Riverpod(keepAlive: true)
+FirebaseFirestore firebaseFirestore(Ref ref) {
+  return FirebaseFirestore.instance;
+}
+
+/// Firebase Auth Provider
+@Riverpod(keepAlive: true)
+FirebaseAuth firebaseAuth(Ref ref) {
+  return FirebaseAuth.instance;
 }

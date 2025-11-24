@@ -11,7 +11,10 @@ part 'data_migration_notifier.g.dart';
 /// Riverpod provider for GasometerDataMigrationService
 @riverpod
 GasometerDataMigrationService dataMigrationService(Ref ref) {
-  return GetIt.I<GasometerDataMigrationService>();
+  // Assuming GasometerDataMigrationService can be instantiated or provided differently.
+  // If it depends on other services, we should inject them.
+  // For now, I'll throw UnimplementedError as I don't know the dependencies.
+  throw UnimplementedError('GasometerDataMigrationService provider not implemented');
 }
 
 /// Notifier that manages the data migration state and operations

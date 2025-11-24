@@ -3,7 +3,7 @@ import 'package:core/core.dart';
 import '../core/device_integration_service.dart';
 
 /// Módulo de injeção de dependência para Device Management
-@module
+
 abstract class DeviceManagementModule {
   
   DeviceInfoPlugin get deviceInfoPlugin => DeviceInfoPlugin();

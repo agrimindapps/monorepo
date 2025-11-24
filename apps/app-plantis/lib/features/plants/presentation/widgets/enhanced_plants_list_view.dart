@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/plant.dart';
-import '../providers/plant_task_provider.dart';
 import '../providers/plants_notifier.dart';
 import 'empty_plants_widget.dart';
 import 'enhanced_plant_card.dart';
@@ -11,6 +10,19 @@ import 'enhanced_plants_app_bar.dart';
 import 'plant_form_dialog.dart';
 import 'plants_error_widget.dart';
 import 'plants_loading_widget.dart';
+
+/// Simple class to represent task information
+class TaskInfo {
+  final String type;
+  final DateTime? dueDate;
+  final bool isOverdue;
+
+  const TaskInfo({
+    required this.type,
+    this.dueDate,
+    this.isOverdue = false,
+  });
+}
 
 /// Enhanced Plants List View siguiendo principios SOLID
 /// S - Responsabilidad única: Solo maneja la vista principal de plantas
@@ -23,16 +35,13 @@ class EnhancedPlantsListView extends ConsumerStatefulWidget {
   const EnhancedPlantsListView({super.key});
 
   @override
-  ConsumerState<EnhancedPlantsListView> createState() => _EnhancedPlantsListViewState();
+  ConsumerState<EnhancedPlantsListView> createState() =>
+      _EnhancedPlantsListViewState();
 }
 
 class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
     with WidgetsBindingObserver
-    implements
-        ISearchDelegate,
-        IViewModeDelegate,
-        IPlantCardActions,
-        ITaskDataProvider {
+    implements ISearchDelegate, IViewModeDelegate, IPlantCardActions {
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -59,6 +68,7 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
       ref.read(plantsNotifierProvider.notifier).refreshPlants();
     }
   }
+
   @override
   void onSearchChanged(String query) {
     final notifier = ref.read(plantsNotifierProvider.notifier);
@@ -73,15 +83,16 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
   void onClearSearch() {
     ref.read(plantsNotifierProvider.notifier).clearSearch();
   }
+
   @override
   void onViewModeChanged(AppBarViewMode mode) {
     ref.read(plantsNotifierProvider.notifier).setViewMode(
-      mode == AppBarViewMode.grid ? ViewMode.grid : ViewMode.list,
-    );
+          mode == AppBarViewMode.grid ? ViewMode.grid : ViewMode.list,
+        );
   }
+
   @override
-  void onTap(Plant plant) {
-  }
+  void onTap(Plant plant) {}
 
   @override
   void onEdit(Plant plant) {
@@ -91,42 +102,6 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
   @override
   void onRemove(Plant plant) {
     _showRemoveConfirmation(plant);
-  }
-  @override
-  Future<List<TaskInfo>> getPendingTasks(String plantId) async {
-    try {
-      // TODO: Use Riverpod provider instead of GetIt
-      // final plantTaskProvider = di.sl<PlantTaskProvider>();
-      // await plantTaskProvider.loadTasksForPlant(plantId);
-      // final overdueTasks = plantTaskProvider.getOverdueTasksForPlant(plantId);
-      // final upcomingTasks = plantTaskProvider.getUpcomingTasksForPlant(plantId);
-      final tasks = <TaskInfo>[];
-      /*
-      for (final task in overdueTasks) {
-        tasks.add(TaskInfo(
-          type: task.type.toString().split('.').last,
-          dueDate: task.scheduledDate,
-          isOverdue: true,
-        ));
-      }
-      for (final task in upcomingTasks) {
-        if (!overdueTasks.contains(task)) {
-          tasks.add(TaskInfo(
-            type: task.type.toString().split('.').last,
-            dueDate: task.scheduledDate,
-            isOverdue: false,
-          ));
-        }
-      }
-      */
-
-      return tasks;
-    } catch (e) {
-      if (kDebugMode) {
-        print('⚠️ Error loading tasks for plant $plantId: $e');
-      }
-      return [];
-    }
   }
 
   Future<void> _loadInitialData() async {
@@ -150,38 +125,39 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
   void _showRemoveConfirmation(Plant plant) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Remover Planta'),
-            content: Text(
-              'Tem certeza que deseja remover "${plant.name}"? '
-              'Esta ação não pode ser desfeita.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  await ref.read(plantsNotifierProvider.notifier).deletePlant(plant.id);
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${plant.name} foi removida'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Remover'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Remover Planta'),
+        content: Text(
+          'Tem certeza que deseja remover "${plant.name}"? '
+          'Esta ação não pode ser desfeita.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
           ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await ref
+                  .read(plantsNotifierProvider.notifier)
+                  .deletePlant(plant.id);
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${plant.name} foi removida'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Remover'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -191,10 +167,9 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
     return EnhancedPlantsAppBar(
       plantsCount: state.plants.length,
       searchQuery: state.searchQuery,
-      viewMode:
-          state.viewMode == ViewMode.grid
-              ? AppBarViewMode.grid
-              : AppBarViewMode.list,
+      viewMode: state.viewMode == ViewMode.grid
+          ? AppBarViewMode.grid
+          : AppBarViewMode.list,
       searchDelegate: this,
       viewModeDelegate: this,
       showSearchBar: true,
@@ -216,9 +191,7 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
     }
 
     final plantsToShow =
-        state.searchQuery.isNotEmpty
-            ? state.searchResults
-            : state.plants;
+        state.searchQuery.isNotEmpty ? state.searchResults : state.plants;
 
     if (plantsToShow.isEmpty) {
       return EmptyPlantsWidget(
@@ -236,7 +209,6 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
         viewMode: state.viewMode,
         scrollController: _scrollController,
         actions: this,
-        taskProvider: this,
       ),
     );
   }
@@ -246,15 +218,15 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
     final theme = Theme.of(context);
 
     return Scaffold(
-        backgroundColor: theme.colorScheme.surface,
-        body: SafeArea(
-          child: Column(
-            children: [
-              _buildAppBar(),
-              Expanded(child: _buildContent()),
-            ],
-          ),
+      backgroundColor: theme.colorScheme.surface,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildAppBar(),
+            Expanded(child: _buildContent()),
+          ],
         ),
+      ),
       floatingActionButton: _EnhancedFAB(
         onAddPlant: _showAddPlantModal,
         onScrollToTop: () {
@@ -274,14 +246,12 @@ class _EnhancedPlantsContent extends StatelessWidget {
   final ViewMode viewMode;
   final ScrollController scrollController;
   final IPlantCardActions actions;
-  final ITaskDataProvider taskProvider;
 
   const _EnhancedPlantsContent({
     required this.plants,
     required this.viewMode,
     required this.scrollController,
     required this.actions,
-    required this.taskProvider,
   });
 
   @override
@@ -303,8 +273,6 @@ class _EnhancedPlantsContent extends StatelessWidget {
             key: ValueKey('grid_plant_${plant.id}'),
             plant: plant,
             actions: actions,
-            taskProvider: taskProvider,
-            isGridView: true,
           );
         },
       );
@@ -319,8 +287,6 @@ class _EnhancedPlantsContent extends StatelessWidget {
             key: ValueKey('list_plant_${plant.id}'),
             plant: plant,
             actions: actions,
-            taskProvider: taskProvider,
-            isGridView: false,
           );
         },
       );

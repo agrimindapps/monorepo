@@ -4,7 +4,6 @@ import '../entities/app_settings.dart';
 import '../repositories/settings_repository.dart';
 
 /// Use case for getting current app settings
-@injectable
 class GetSettings {
   final SettingsRepository _repository;
 

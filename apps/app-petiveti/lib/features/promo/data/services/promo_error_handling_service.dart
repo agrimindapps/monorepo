@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 
@@ -15,7 +14,6 @@ import '../../../../core/error/failures.dart';
 /// - Consistent error logging across all operations
 /// - Centralized error message formatting
 /// - Easier to add new error handling strategies
-@lazySingleton
 class PromoErrorHandlingService {
   /// Executes an operation with automatic error handling
   ///

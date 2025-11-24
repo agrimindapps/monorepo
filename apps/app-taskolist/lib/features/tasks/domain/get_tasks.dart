@@ -5,7 +5,6 @@ import '../../../core/utils/typedef.dart';
 import 'task_entity.dart';
 import 'task_repository.dart';
 
-@lazySingleton
 class GetTasks extends UseCaseWithParams<List<TaskEntity>, GetTasksParams> {
   const GetTasks(this._repository);
 

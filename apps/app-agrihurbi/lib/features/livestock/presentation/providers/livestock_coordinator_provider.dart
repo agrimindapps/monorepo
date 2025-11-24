@@ -1,8 +1,7 @@
 import 'package:core/core.dart' show Provider;
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
-import '../../../../core/di/injection_container.dart';
+// import '../../../../core/di/injection_container.dart';
 import 'bovines_filter_provider.dart';
 import 'bovines_management_provider.dart';
 import 'equines_management_provider.dart';
@@ -14,7 +13,6 @@ import 'livestock_sync_provider.dart';
 ///
 /// Responsabilidade única: Coordenar providers especializados seguindo SRP
 /// Substitui o LivestockProvider monolítico original de 475 linhas
-@singleton
 class LivestockCoordinatorProvider extends ChangeNotifier {
   final BovinesManagementProvider _bovinesProvider;
   final EquinesManagementProvider _equinesProvider;
@@ -30,12 +28,12 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
     required LivestockSearchProvider searchProvider,
     required LivestockStatisticsProvider statisticsProvider,
     required LivestockSyncProvider syncProvider,
-  }) : _bovinesProvider = bovinesProvider,
-       _equinesProvider = equinesProvider,
-       _filtersProvider = filtersProvider,
-       _searchProvider = searchProvider,
-       _statisticsProvider = statisticsProvider,
-       _syncProvider = syncProvider {
+  })  : _bovinesProvider = bovinesProvider,
+        _equinesProvider = equinesProvider,
+        _filtersProvider = filtersProvider,
+        _searchProvider = searchProvider,
+        _statisticsProvider = statisticsProvider,
+        _syncProvider = syncProvider {
     _initializeProviders();
   }
 
@@ -204,8 +202,9 @@ extension LivestockCoordinatorProviderExtension
 }
 
 /// Riverpod provider for LivestockCoordinatorProvider
-final livestockCoordinatorProvider = Provider<LivestockCoordinatorProvider>((
-  ref,
-) {
-  return getIt<LivestockCoordinatorProvider>();
+final livestockCoordinatorProvider = Provider<LivestockCoordinatorProvider?>((ref) {
+  // TODO: Replace getIt calls with Riverpod providers
+  // return getIt<LivestockCoordinatorProvider>();
+  // Temporary null return for migration
+  return null;
 });

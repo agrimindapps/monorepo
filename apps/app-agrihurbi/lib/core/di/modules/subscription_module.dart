@@ -1,3 +1,8 @@
+// This module has been migrated to Riverpod dependency injection
+// All dependencies are now managed through providers
+// TODO: Remove this file as it's no longer used
+
+/*
 import 'package:core/core.dart';
 
 import '../../../features/subscription/data/datasources/subscription_local_datasource.dart';
@@ -33,3 +38,4 @@ void initSubscriptionModule(GetIt sl) {
     sl.registerLazySingleton(() => RestorePurchases(sl<SubscriptionRepository>()));
     sl.registerLazySingleton(() => ValidateReceipt(sl<SubscriptionRepository>()));
 }
+*/

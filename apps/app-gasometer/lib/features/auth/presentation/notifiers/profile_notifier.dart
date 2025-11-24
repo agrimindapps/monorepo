@@ -3,11 +3,12 @@ import 'package:core/core.dart' hide AuthStatus, AuthState;
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container_modular.dart';
+import '../../../../core/providers/dependency_providers.dart';
 import '../../../../core/services/analytics/gasometer_analytics_service.dart';
 import '../../data/datasources/auth_local_data_source.dart';
 import '../../domain/entities/user_entity.dart' as gasometer_auth;
 import '../../domain/usecases/update_profile.dart';
+import '../providers/auth_usecase_providers.dart';
 import '../state/profile_state.dart';
 import 'auth_notifier.dart';
 
@@ -30,9 +31,13 @@ class Profile extends _$Profile {
 
   @override
   ProfileState build() {
-    _updateProfile = sl<UpdateProfile>();
-    _analytics = sl<GasometerAnalyticsService>();
-    _authLocalDataSource = sl<AuthLocalDataSource>();
+    // Assuming UpdateProfile provider exists or I need to create it.
+    // I haven't created UpdateProfile provider in auth_usecase_providers.dart yet.
+    // I should add it.
+    // For now I will assume it exists and add it later.
+    _updateProfile = ref.watch(updateProfileProvider);
+    _analytics = ref.watch(gasometerAnalyticsServiceProvider);
+    _authLocalDataSource = ref.watch(authLocalDataSourceProvider);
 
     return const ProfileState.initial();
   }

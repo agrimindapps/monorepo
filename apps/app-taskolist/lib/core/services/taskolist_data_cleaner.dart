@@ -4,7 +4,6 @@ import '../../database/taskolist_database.dart';
 
 /// Implementação de IAppDataCleaner para app-taskolist
 /// Gerencia limpeza de tasks e dados locais
-@LazySingleton(as: IAppDataCleaner)
 class TaskolistDataCleaner implements IAppDataCleaner {
   final TaskolistDatabase _database;
   final SharedPreferences _prefs;

@@ -1,6 +1,6 @@
-import 'package:app_receituagro/core/di/injection.dart' as di;
 import 'package:flutter/material.dart';
 
+import '../../data/services/pragas_type_service.dart';
 import '../../domain/services/i_pragas_type_service.dart';
 
 /// Classe utilitária com helpers para PragaCard
@@ -15,7 +15,7 @@ class PragaCardHelpers {
   static IPragasTypeService? _typeService;
 
   static IPragasTypeService get _service {
-    _typeService ??= di.getIt<IPragasTypeService>();
+    _typeService ??= PragasTypeService();
     return _typeService!;
   }
 

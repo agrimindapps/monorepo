@@ -171,8 +171,9 @@ mixin FormNavigationMixin<T extends StatefulWidget> on State<T> {
         return hasChangesProperty;
       }
     } catch (e) {
+      // Provider doesn't have hasChanges property, ignore
     }
-    
+
     return false; // Default to no changes
   }
 }

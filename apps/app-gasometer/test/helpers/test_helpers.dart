@@ -37,7 +37,7 @@ class TestHelpers {
   static Future<void> waitForAsync({
     int milliseconds = 100,
   }) async {
-    await Future.delayed(Duration(milliseconds: milliseconds));
+    await Future<void>.delayed(Duration(milliseconds: milliseconds));
   }
 
   /// Creates a DateTime for testing (fixed date)
@@ -67,13 +67,15 @@ extension EitherTestExtension<L, R> on Either<L, R> {
   /// Asserts this Either is a Right value
   R expectRight() {
     expect(isRight(), true);
-    return fold((l) => throw Exception('Expected Right but got Left: $l'), (r) => r);
+    return fold(
+        (l) => throw Exception('Expected Right but got Left: $l'), (r) => r);
   }
 
   /// Asserts this Either is a Left value
   L expectLeft() {
     expect(isLeft(), true);
-    return fold((l) => l, (r) => throw Exception('Expected Left but got Right: $r'));
+    return fold(
+        (l) => l, (r) => throw Exception('Expected Left but got Right: $r'));
   }
 }
 

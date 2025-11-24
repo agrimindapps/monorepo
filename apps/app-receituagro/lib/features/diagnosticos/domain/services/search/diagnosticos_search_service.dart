@@ -8,7 +8,7 @@ import 'i_diagnosticos_search_service.dart';
 ///
 /// Delegates complex searches to repository and provides
 /// client-side search utilities for in-memory operations.
-@Injectable(as: IDiagnosticosSearchService)
+
 class DiagnosticosSearchService implements IDiagnosticosSearchService {
   final IDiagnosticosRepository _repository;
 

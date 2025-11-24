@@ -9,7 +9,7 @@ import '../tables/receituagro_tables.dart' as tables;
 ///
 /// Gerencia todas as operações de CRUD e queries relacionadas às configurações
 /// do aplicativo 
-@lazySingleton
+
 class AppSettingsRepository
     extends BaseDriftRepositoryImpl<models.AppSettings, AppSetting> {
   AppSettingsRepository(this._db);

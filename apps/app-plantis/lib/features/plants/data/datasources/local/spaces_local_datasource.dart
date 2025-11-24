@@ -28,7 +28,6 @@ abstract class SpacesLocalDatasource {
   Future<void> clearCache();
 }
 
-@LazySingleton(as: SpacesLocalDatasource)
 class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
   final SpacesDriftRepository _driftRepo;
 

@@ -7,22 +7,17 @@ import 'package:flutter/services.dart';
 
 import 'app.dart';
 
-import 'core/di/injection_container.dart' as di;
-import 'core/di/modules/sync_module.dart';
-import 'core/di/solid_di_factory.dart';
 import 'core/plantis_sync_config.dart';
 import 'core/services/plantis_notification_service.dart';
-import 'core/sync/sync_operations.dart' as local_sync;
-import 'core/sync/sync_queue.dart' as local_sync;
 import 'firebase_options.dart';
 
-late ICrashlyticsRepository _crashlyticsRepository;
-late IPerformanceRepository _performanceRepository;
-final plantisSharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  throw UnimplementedError(
-    'SharedPreferences must be overridden at app startup',
-  );
-});
+// late ICrashlyticsRepository _crashlyticsRepository;
+// late IPerformanceRepository _performanceRepository;
+// final plantisSharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+//   throw UnimplementedError(
+//     'SharedPreferences must be overridden at app startup',
+//   );
+// });
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,42 +47,22 @@ void main() async {
     );
   }
 
-  print('🔧 [MAIN] Iniciando DI initialization...');
-  try {
-    await di.init(firebaseEnabled: firebaseInitialized);
-    print('✅ [MAIN] DI initialization completo');
-  } catch (e) {
-    print('❌ [MAIN] ERRO no DI initialization: $e');
-    rethrow;
-  }
-
   // Initialize SyncQueue before other sync services
   print('🔧 [MAIN] Inicializando SyncQueue...');
-  // final syncQueue = di.sl<local_sync.SyncQueue>();
-  // await syncQueue.initialize();
+  // SyncQueue initialization moved to providers
   print('✅ [MAIN] SyncQueue inicializado');
 
   // Initialize SyncOperations after SyncQueue
   print('🔧 [MAIN] Inicializando SyncOperations...');
-  // final syncOperations = di.sl<local_sync.SyncOperations>();
-  // await syncOperations.initialize();
+  // SyncOperations initialization moved to providers
   print('✅ [MAIN] SyncOperations inicializado');
-
-  print('🔧 [MAIN] Configurando SolidDI...');
-  SolidDIConfigurator.configure(
-    kDebugMode ? DIMode.development : DIMode.production,
-  );
-  print('✅ [MAIN] SolidDI configurado');
 
   // Initialize UnifiedSyncManager with Plantis configuration (only if Firebase is available)
   if (firebaseInitialized) {
     await PlantisSyncConfig.configure();
 
     // Initialize the advanced subscription sync service
-    // final subscriptionSyncService = di
-    //     .sl<ISubscriptionSyncService>();
-    // await subscriptionSyncService.initialize();
-    // await SyncDIModule.initializeSyncService(di.sl);
+    // Subscription sync service initialization moved to providers
   } else {
     SecureLogger.warning(
       'Sync services not initialized - running in local-only mode',
@@ -100,8 +75,7 @@ void main() async {
     await notificationService.initialize();
   }
 
-  // final appRatingService = di.sl<IAppRatingRepository>();
-  // await appRatingService.incrementUsageCount();
+  // App rating service initialization moved to providers
 
   if (firebaseInitialized) {
     await _initializeFirebaseServices();
@@ -111,9 +85,7 @@ void main() async {
     );
   }
 
-  // Use the SharedPreferences instance already registered in GetIt
-  // to avoid duplicate registration during hot reload
-  // final prefs = di.sl<SharedPreferences>();
+  // Use the SharedPreferences instance
   final prefs = await SharedPreferences.getInstance();
 
   if (EnvironmentConfig.enableAnalytics) {
@@ -123,7 +95,7 @@ void main() async {
         runApp(
           ProviderScope(
             overrides: [
-              plantisSharedPreferencesProvider.overrideWithValue(prefs),
+              sharedPreferencesProvider.overrideWithValue(prefs),
             ],
             child: const PlantisApp(),
           ),
@@ -143,7 +115,7 @@ void main() async {
     // await _performanceRepository.markFirstFrame();
     runApp(
       ProviderScope(
-        overrides: [plantisSharedPreferencesProvider.overrideWithValue(prefs)],
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
         child: const PlantisApp(),
       ),
     );
@@ -157,9 +129,7 @@ Future<void> _initializeFirebaseServices() async {
       SecureLogger.info('Initializing Firebase services...');
     }
     /*
-    final analyticsRepository = di.sl<IAnalyticsRepository>();
-    _crashlyticsRepository = di.sl<ICrashlyticsRepository>();
-    _performanceRepository = di.sl<IPerformanceRepository>();
+    // Firebase services initialization moved to providers
     if (EnvironmentConfig.enableAnalytics) {
       FlutterError.onError = (errorDetails) {
         _crashlyticsRepository.recordError(

@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 
@@ -22,7 +21,6 @@ import '../../../../core/error/failures.dart';
 /// - Debug logging for development
 /// - Consistent Failure type wrapping
 /// - Support for both value-returning and void operations
-@lazySingleton
 class AppointmentErrorHandlingService {
   /// Executes an operation with automatic error handling
   ///

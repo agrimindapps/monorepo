@@ -2,7 +2,7 @@ import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 
 import '../../../../features/animals/domain/entities/animal.dart';
-import '../../../../features/animals/presentation/notifiers/animals_notifier.dart';
+import '../../../../features/animals/presentation/providers/animals_providers.dart';
 import '../../../../shared/widgets/form_components/form_components.dart';
 import '../../domain/entities/medication.dart';
 import '../providers/medications_provider.dart';

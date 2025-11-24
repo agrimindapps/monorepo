@@ -1,7 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:core/core.dart' show injectable;
-
 import '../entities/calculation_result.dart';
 import '../entities/calculator_parameter.dart';
 import '../interfaces/calculator_strategy.dart';
@@ -11,7 +9,6 @@ import '../repositories/calculator_data_repository.dart';
 ///
 /// Implementa Strategy Pattern focado em cálculos de nutrição NPK,
 /// seguindo Single Responsibility Principle (SRP) e Open/Closed Principle (OCP)
-@injectable
 class NPKCalculationStrategy implements INutritionCalculatorStrategy {
   final ICalculatorDataRepository _dataRepository;
 
@@ -30,120 +27,120 @@ class NPKCalculationStrategy implements INutritionCalculatorStrategy {
 
   @override
   List<CalculatorParameter> get parameters => const [
-    CalculatorParameter(
-      id: 'crop_type',
-      name: 'Tipo da Cultura',
-      description: 'Cultura a ser cultivada',
-      type: ParameterType.selection,
-      options: [
-        'Milho',
-        'Soja',
-        'Trigo',
-        'Arroz',
-        'Feijão',
-        'Café',
-        'Algodão',
-        'Cana-de-açúcar',
-        'Tomate',
-        'Batata',
-      ],
-      defaultValue: 'Milho',
-    ),
-    CalculatorParameter(
-      id: 'expected_yield',
-      name: 'Produtividade Esperada',
-      description: 'Produtividade esperada da cultura (t/ha)',
-      type: ParameterType.decimal,
-      unit: ParameterUnit.tonelada,
-      minValue: 0.5,
-      maxValue: 50.0,
-      defaultValue: 10.0,
-      validationMessage: 'Produtividade deve estar entre 0.5 e 50 t/ha',
-    ),
-    CalculatorParameter(
-      id: 'soil_n',
-      name: 'Nitrogênio no Solo',
-      description: 'Teor de nitrogênio disponível no solo (mg/dm³)',
-      type: ParameterType.decimal,
-      unit: ParameterUnit.mgdm3,
-      minValue: 0.0,
-      maxValue: 200.0,
-      defaultValue: 20.0,
-      validationMessage: 'N no solo deve estar entre 0 e 200 mg/dm³',
-    ),
-    CalculatorParameter(
-      id: 'soil_p',
-      name: 'Fósforo no Solo',
-      description: 'Teor de fósforo disponível no solo (mg/dm³)',
-      type: ParameterType.decimal,
-      unit: ParameterUnit.mgdm3,
-      minValue: 0.0,
-      maxValue: 100.0,
-      defaultValue: 10.0,
-      validationMessage: 'P no solo deve estar entre 0 e 100 mg/dm³',
-    ),
-    CalculatorParameter(
-      id: 'soil_k',
-      name: 'Potássio no Solo',
-      description: 'Teor de potássio disponível no solo (mg/dm³)',
-      type: ParameterType.decimal,
-      unit: ParameterUnit.mgdm3,
-      minValue: 0.0,
-      maxValue: 500.0,
-      defaultValue: 80.0,
-      validationMessage: 'K no solo deve estar entre 0 e 500 mg/dm³',
-    ),
-    CalculatorParameter(
-      id: 'area',
-      name: 'Área de Cultivo',
-      description: 'Área total a ser cultivada (hectares)',
-      type: ParameterType.decimal,
-      unit: ParameterUnit.hectare,
-      minValue: 0.01,
-      maxValue: 10000.0,
-      defaultValue: 1.0,
-      validationMessage: 'Área deve ser maior que 0.01 ha',
-    ),
-    CalculatorParameter(
-      id: 'soil_texture',
-      name: 'Textura do Solo',
-      description: 'Classe textural do solo',
-      type: ParameterType.selection,
-      options: [
-        'Arenoso',
-        'Franco-arenoso',
-        'Franco',
-        'Franco-argiloso',
-        'Argiloso',
-      ],
-      defaultValue: 'Franco',
-    ),
-    CalculatorParameter(
-      id: 'organic_matter',
-      name: 'Matéria Orgânica',
-      description: 'Teor de matéria orgânica do solo (%)',
-      type: ParameterType.percentage,
-      unit: ParameterUnit.percentual,
-      minValue: 0.5,
-      maxValue: 15.0,
-      defaultValue: 3.0,
-      validationMessage: 'MO deve estar entre 0.5% e 15%',
-    ),
-    CalculatorParameter(
-      id: 'previous_crop',
-      name: 'Cultura Anterior',
-      description: 'Cultura cultivada anteriormente na área',
-      type: ParameterType.selection,
-      options: [
-        'Nenhuma',
-        'Leguminosa',
-        'Gramínea',
-        'Pousio',
-        'Adubação Verde',
-      ],
-      defaultValue: 'Nenhuma',
-    ),
-  ];
+        CalculatorParameter(
+          id: 'crop_type',
+          name: 'Tipo da Cultura',
+          description: 'Cultura a ser cultivada',
+          type: ParameterType.selection,
+          options: [
+            'Milho',
+            'Soja',
+            'Trigo',
+            'Arroz',
+            'Feijão',
+            'Café',
+            'Algodão',
+            'Cana-de-açúcar',
+            'Tomate',
+            'Batata',
+          ],
+          defaultValue: 'Milho',
+        ),
+        CalculatorParameter(
+          id: 'expected_yield',
+          name: 'Produtividade Esperada',
+          description: 'Produtividade esperada da cultura (t/ha)',
+          type: ParameterType.decimal,
+          unit: ParameterUnit.tonelada,
+          minValue: 0.5,
+          maxValue: 50.0,
+          defaultValue: 10.0,
+          validationMessage: 'Produtividade deve estar entre 0.5 e 50 t/ha',
+        ),
+        CalculatorParameter(
+          id: 'soil_n',
+          name: 'Nitrogênio no Solo',
+          description: 'Teor de nitrogênio disponível no solo (mg/dm³)',
+          type: ParameterType.decimal,
+          unit: ParameterUnit.mgdm3,
+          minValue: 0.0,
+          maxValue: 200.0,
+          defaultValue: 20.0,
+          validationMessage: 'N no solo deve estar entre 0 e 200 mg/dm³',
+        ),
+        CalculatorParameter(
+          id: 'soil_p',
+          name: 'Fósforo no Solo',
+          description: 'Teor de fósforo disponível no solo (mg/dm³)',
+          type: ParameterType.decimal,
+          unit: ParameterUnit.mgdm3,
+          minValue: 0.0,
+          maxValue: 100.0,
+          defaultValue: 10.0,
+          validationMessage: 'P no solo deve estar entre 0 e 100 mg/dm³',
+        ),
+        CalculatorParameter(
+          id: 'soil_k',
+          name: 'Potássio no Solo',
+          description: 'Teor de potássio disponível no solo (mg/dm³)',
+          type: ParameterType.decimal,
+          unit: ParameterUnit.mgdm3,
+          minValue: 0.0,
+          maxValue: 500.0,
+          defaultValue: 80.0,
+          validationMessage: 'K no solo deve estar entre 0 e 500 mg/dm³',
+        ),
+        CalculatorParameter(
+          id: 'area',
+          name: 'Área de Cultivo',
+          description: 'Área total a ser cultivada (hectares)',
+          type: ParameterType.decimal,
+          unit: ParameterUnit.hectare,
+          minValue: 0.01,
+          maxValue: 10000.0,
+          defaultValue: 1.0,
+          validationMessage: 'Área deve ser maior que 0.01 ha',
+        ),
+        CalculatorParameter(
+          id: 'soil_texture',
+          name: 'Textura do Solo',
+          description: 'Classe textural do solo',
+          type: ParameterType.selection,
+          options: [
+            'Arenoso',
+            'Franco-arenoso',
+            'Franco',
+            'Franco-argiloso',
+            'Argiloso',
+          ],
+          defaultValue: 'Franco',
+        ),
+        CalculatorParameter(
+          id: 'organic_matter',
+          name: 'Matéria Orgânica',
+          description: 'Teor de matéria orgânica do solo (%)',
+          type: ParameterType.percentage,
+          unit: ParameterUnit.percentual,
+          minValue: 0.5,
+          maxValue: 15.0,
+          defaultValue: 3.0,
+          validationMessage: 'MO deve estar entre 0.5% e 15%',
+        ),
+        CalculatorParameter(
+          id: 'previous_crop',
+          name: 'Cultura Anterior',
+          description: 'Cultura cultivada anteriormente na área',
+          type: ParameterType.selection,
+          options: [
+            'Nenhuma',
+            'Leguminosa',
+            'Gramínea',
+            'Pousio',
+            'Adubação Verde',
+          ],
+          defaultValue: 'Nenhuma',
+        ),
+      ];
 
   @override
   Future<ValidationResult> validateInputs(Map<String, dynamic> inputs) async {
@@ -273,28 +270,28 @@ class NPKCalculationStrategy implements INutritionCalculatorStrategy {
 
   @override
   StrategyMetadata get metadata => StrategyMetadata(
-    version: '2.0.0',
-    supportedCrops: [
-      'Milho',
-      'Soja',
-      'Trigo',
-      'Arroz',
-      'Feijão',
-      'Café',
-      'Algodão',
-      'Cana-de-açúcar',
-      'Tomate',
-      'Batata',
-    ],
-    supportedRegions: ['Brasil', 'América do Sul'],
-    calculationMethod: 'Baseado em Raij et al. (1997) e CQFS-RS/SC (2016)',
-    references: [
-      'Raij et al. (1997) - Recomendações de adubação para o Estado de São Paulo',
-      'CQFS-RS/SC (2016) - Manual de adubação e calagem',
-      'Cantarella et al. (2007) - Adubação nitrogenada em sistemas intensivos',
-    ],
-    lastUpdated: DateTime.now(),
-  );
+        version: '2.0.0',
+        supportedCrops: [
+          'Milho',
+          'Soja',
+          'Trigo',
+          'Arroz',
+          'Feijão',
+          'Café',
+          'Algodão',
+          'Cana-de-açúcar',
+          'Tomate',
+          'Batata',
+        ],
+        supportedRegions: ['Brasil', 'América do Sul'],
+        calculationMethod: 'Baseado em Raij et al. (1997) e CQFS-RS/SC (2016)',
+        references: [
+          'Raij et al. (1997) - Recomendações de adubação para o Estado de São Paulo',
+          'CQFS-RS/SC (2016) - Manual de adubação e calagem',
+          'Cantarella et al. (2007) - Adubação nitrogenada em sistemas intensivos',
+        ],
+        lastUpdated: DateTime.now(),
+      );
 
   @override
   Future<NutritionalRequirements> calculateNutritionalNeeds(

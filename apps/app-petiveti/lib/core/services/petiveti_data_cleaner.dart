@@ -3,7 +3,6 @@ import 'package:core/core.dart';
 /// Implementação de IAppDataCleaner para app-petiveti
 /// Gerencia limpeza de dados através do Drift database e SharedPreferences
 /// Note: Hive foi removido - agora usa apenas Drift para persistência
-@LazySingleton(as: IAppDataCleaner)
 class PetivetiDataCleaner implements IAppDataCleaner {
   final SharedPreferences _prefs;
 

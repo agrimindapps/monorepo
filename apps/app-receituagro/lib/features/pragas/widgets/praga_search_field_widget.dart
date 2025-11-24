@@ -1,4 +1,4 @@
-import 'package:app_receituagro/core/di/injection.dart' as di;
+import 'package:app_receituagro/features/pragas/data/services/pragas_type_service.dart';
 import 'package:flutter/material.dart';
 
 import '../data/praga_view_mode.dart';
@@ -44,7 +44,7 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
   void initState() {
     super.initState();
 
-    _typeService = di.getIt<IPragasTypeService>();
+    _typeService = PragasTypeService();
 
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 500),
@@ -119,9 +119,8 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
                   decoration: BoxDecoration(
-                    color: widget.isDark
-                        ? const Color(0xFF1E1E22)
-                        : Colors.white,
+                    color:
+                        widget.isDark ? const Color(0xFF1E1E22) : Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
@@ -141,14 +140,14 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
                           duration: const Duration(milliseconds: 300),
                           transitionBuilder:
                               (Widget child, Animation<double> animation) {
-                                return RotationTransition(
-                                  turns: animation,
-                                  child: FadeTransition(
-                                    opacity: animation,
-                                    child: child,
-                                  ),
-                                );
-                              },
+                            return RotationTransition(
+                              turns: animation,
+                              child: FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              ),
+                            );
+                          },
                           child: widget.isSearching
                               ? SizedBox(
                                   key: const ValueKey('loading'),
@@ -170,11 +169,11 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
                                     Icons.search,
                                     color: _isFocused
                                         ? (widget.isDark
-                                              ? Colors.green.shade300
-                                              : Colors.green.shade700)
+                                            ? Colors.green.shade300
+                                            : Colors.green.shade700)
                                         : (widget.isDark
-                                              ? Colors.grey.shade500
-                                              : Colors.grey.shade400),
+                                            ? Colors.grey.shade500
+                                            : Colors.grey.shade400),
                                     size: 20,
                                   ),
                                 ),
@@ -270,8 +269,8 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
         decoration: BoxDecoration(
           color: isSelected
               ? (widget.isDark
-                    ? Colors.green.withValues(alpha: 0.15)
-                    : Colors.green.shade50)
+                  ? Colors.green.withValues(alpha: 0.15)
+                  : Colors.green.shade50)
               : Colors.transparent,
           borderRadius: BorderRadius.horizontal(
             left: Radius.circular(isFirstButton ? 20 : 0),

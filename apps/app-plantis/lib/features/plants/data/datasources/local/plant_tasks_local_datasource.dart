@@ -32,7 +32,6 @@ abstract class PlantTasksLocalDatasource {
   Future<void> clearCache();
 }
 
-@LazySingleton(as: PlantTasksLocalDatasource)
 class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   final PlantTasksDriftRepository _driftRepo;
 

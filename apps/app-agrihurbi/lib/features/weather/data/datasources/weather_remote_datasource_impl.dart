@@ -1,13 +1,11 @@
 import 'package:dio/dio.dart';
-import 'package:injectable/injectable.dart';
-import '../../domain/failures/weather_failures.dart';
+
 import '../models/rain_gauge_model.dart';
 import '../models/weather_measurement_model.dart';
 import '../models/weather_statistics_model.dart';
 import 'weather_remote_datasource.dart';
 
 /// Concrete implementation of WeatherRemoteDataSource using REST API
-@LazySingleton(as: WeatherRemoteDataSource)
 class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   final Dio _dioClient;
   static const String _baseEndpoint = '/weather';
@@ -48,7 +46,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
           )
           .toList();
     } on DioException catch (e) {
-      throw WeatherNetworkFailure('Failed to fetch measurements: ${e.message}');
+      throw Exception('Failed to fetch measurements: ${e.message}');
     } catch (e) {
       throw Exception('Unexpected error: $e');
     }
@@ -68,7 +66,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       if (e.response?.statusCode == 404) {
         throw Exception('Measurement not found: $id');
       }
-      throw WeatherNetworkFailure('Failed to fetch measurement: ${e.message}');
+      throw Exception('Failed to fetch measurement: ${e.message}');
     } catch (e) {
       throw Exception('Unexpected error: $e');
     }
@@ -127,7 +125,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         response.data!['data'] as Map<String, dynamic>,
       );
     } on DioException catch (e) {
-      throw WeatherNetworkFailure('Failed to create measurement: ${e.message}');
+      throw Exception('Failed to create measurement: ${e.message}');
     } catch (e) {
       throw Exception('Unexpected error: $e');
     }
@@ -150,7 +148,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       if (e.response?.statusCode == 404) {
         throw Exception('Measurement not found: ${measurement.id}');
       }
-      throw WeatherNetworkFailure('Failed to update measurement: ${e.message}');
+      throw Exception('Failed to update measurement: ${e.message}');
     } catch (e) {
       throw Exception('Unexpected error: $e');
     }
@@ -166,7 +164,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       if (e.response?.statusCode == 404) {
         return;
       }
-      throw WeatherNetworkFailure('Failed to delete measurement: ${e.message}');
+      throw Exception('Failed to delete measurement: ${e.message}');
     } catch (e) {
       throw Exception('Unexpected error: $e');
     }
@@ -191,7 +189,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
           )
           .toList();
     } on DioException catch (e) {
-      throw WeatherNetworkFailure(
+      throw Exception(
         'Failed to upload measurements: ${e.message}',
       );
     } catch (e) {
@@ -212,7 +210,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
           .map((json) => RainGaugeModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
-      throw WeatherNetworkFailure('Failed to fetch rain gauges: ${e.message}');
+      throw Exception('Failed to fetch rain gauges: ${e.message}');
     } catch (e) {
       throw Exception('Unexpected error: $e');
     }
@@ -231,7 +229,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       if (e.response?.statusCode == 404) {
         throw Exception('Rain gauge not found: $id');
       }
-      throw WeatherNetworkFailure('Failed to fetch rain gauge: ${e.message}');
+      throw Exception('Failed to fetch rain gauge: ${e.message}');
     } catch (e) {
       throw Exception('Unexpected error: $e');
     }
@@ -253,7 +251,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
           .map((json) => RainGaugeModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
-      throw WeatherNetworkFailure(
+      throw Exception(
         'Failed to fetch rain gauges by location: ${e.message}',
       );
     } catch (e) {
@@ -275,7 +273,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
           .map((json) => RainGaugeModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
-      throw WeatherNetworkFailure(
+      throw Exception(
         'Failed to fetch active rain gauges: ${e.message}',
       );
     } catch (e) {
@@ -295,7 +293,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         response.data!['data'] as Map<String, dynamic>,
       );
     } on DioException catch (e) {
-      throw WeatherNetworkFailure('Failed to create rain gauge: ${e.message}');
+      throw Exception('Failed to create rain gauge: ${e.message}');
     } catch (e) {
       throw Exception('Unexpected error: $e');
     }
@@ -316,7 +314,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       if (e.response?.statusCode == 404) {
         throw Exception('Rain gauge not found: ${rainGauge.id}');
       }
-      throw WeatherNetworkFailure('Failed to update rain gauge: ${e.message}');
+      throw Exception('Failed to update rain gauge: ${e.message}');
     } catch (e) {
       throw Exception('Unexpected error: $e');
     }
@@ -332,7 +330,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       if (e.response?.statusCode == 404) {
         return;
       }
-      throw WeatherNetworkFailure('Failed to delete rain gauge: ${e.message}');
+      throw Exception('Failed to delete rain gauge: ${e.message}');
     } catch (e) {
       throw Exception('Unexpected error: $e');
     }
@@ -353,7 +351,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
           .map((json) => RainGaugeModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
-      throw WeatherNetworkFailure('Failed to sync rain gauges: ${e.message}');
+      throw Exception('Failed to sync rain gauges: ${e.message}');
     } catch (e) {
       throw Exception('Unexpected error: $e');
     }
@@ -378,7 +376,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       if (e.response?.statusCode == 404) {
         throw Exception('Rain gauge not found: $gaugeId');
       }
-      throw WeatherNetworkFailure(
+      throw Exception(
         'Failed to update rain gauge measurement: ${e.message}',
       );
     } catch (e) {
@@ -419,7 +417,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
           )
           .toList();
     } on DioException catch (e) {
-      throw WeatherNetworkFailure('Failed to fetch statistics: ${e.message}');
+      throw Exception('Failed to fetch statistics: ${e.message}');
     } catch (e) {
       throw Exception('Unexpected error: $e');
     }
@@ -437,7 +435,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       if (e.response?.statusCode == 404) {
         throw Exception('Statistics not found: $id');
       }
-      throw WeatherNetworkFailure('Failed to fetch statistics: ${e.message}');
+      throw Exception('Failed to fetch statistics: ${e.message}');
     } catch (e) {
       throw Exception('Unexpected error: $e');
     }
@@ -476,7 +474,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         response.data!['data'] as Map<String, dynamic>,
       );
     } on DioException catch (e) {
-      throw WeatherNetworkFailure(
+      throw Exception(
         'Failed to generate statistics: ${e.message}',
       );
     } catch (e) {
@@ -500,7 +498,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       if (e.response?.statusCode == 404) {
         throw Exception('Statistics not found: ${statistics.id}');
       }
-      throw WeatherNetworkFailure('Failed to update statistics: ${e.message}');
+      throw Exception('Failed to update statistics: ${e.message}');
     } catch (e) {
       throw Exception('Unexpected error: $e');
     }
@@ -515,7 +513,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       if (e.response?.statusCode == 404) {
         return;
       }
-      throw WeatherNetworkFailure('Failed to delete statistics: ${e.message}');
+      throw Exception('Failed to delete statistics: ${e.message}');
     } catch (e) {
       throw Exception('Unexpected error: $e');
     }
@@ -543,7 +541,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         response.data!['data'] as Map<String, dynamic>,
       );
     } on DioException catch (e) {
-      throw WeatherNetworkFailure(
+      throw Exception(
         'Failed to calculate statistics: ${e.message}',
       );
     } catch (e) {
@@ -571,7 +569,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         response.data!['data'] as Map<String, dynamic>,
       );
     } on DioException catch (e) {
-      throw WeatherNetworkFailure(
+      throw Exception(
         'Failed to get current weather: ${e.message}',
       );
     } catch (e) {
@@ -605,7 +603,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
           )
           .toList();
     } on DioException catch (e) {
-      throw WeatherNetworkFailure(
+      throw Exception(
         'Failed to get weather forecast: ${e.message}',
       );
     } catch (e) {
@@ -636,7 +634,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
           )
           .toList();
     } on DioException catch (e) {
-      throw WeatherNetworkFailure(
+      throw Exception(
         'Failed to download measurements: ${e.message}',
       );
     } catch (e) {
@@ -660,7 +658,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
           .map((json) => RainGaugeModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
-      throw WeatherNetworkFailure(
+      throw Exception(
         'Failed to download rain gauges: ${e.message}',
       );
     } catch (e) {
@@ -675,7 +673,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
         data: syncData,
       );
     } on DioException catch (e) {
-      throw WeatherNetworkFailure('Failed to upload sync data: ${e.message}');
+      throw Exception('Failed to upload sync data: ${e.message}');
     } catch (e) {
       throw Exception('Unexpected error: $e');
     }
@@ -689,7 +687,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       );
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
-      throw WeatherNetworkFailure('Failed to get server status: ${e.message}');
+      throw Exception('Failed to get server status: ${e.message}');
     } catch (e) {
       throw Exception('Unexpected error: $e');
     }

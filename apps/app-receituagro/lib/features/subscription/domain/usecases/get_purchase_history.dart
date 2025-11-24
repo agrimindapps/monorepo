@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 
 /// Use case para buscar histórico de compras (usa core repository)
-@injectable
+
 class GetPurchaseHistoryUseCase
     implements UseCase<List<SubscriptionEntity>, NoParams> {
   GetPurchaseHistoryUseCase(this.coreRepository);

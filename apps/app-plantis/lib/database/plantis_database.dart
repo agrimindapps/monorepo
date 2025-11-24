@@ -13,7 +13,6 @@ part 'plantis_database.g.dart';
 ///
 /// **PADRÃO ESTABELECIDO (gasometer-drift):**
 /// - Usa DriftDatabaseConfig do core para configuração unificada
-/// - Injectable com @lazySingleton para DI
 /// - Factory methods: production(), development(), test()
 /// - MigrationStrategy com onCreate e beforeOpen
 /// - Extends BaseDriftDatabase do core (funcionalidades compartilhadas)
@@ -51,14 +50,6 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
   /// Incrementar quando houver mudanças estruturais nas tabelas
   @override
   int get schemaVersion => 1;
-
-  /// Factory constructor para injeção de dependência (GetIt/Injectable)
-  ///
-  /// Este é o método padrão usado pelo @lazySingleton do Injectable.
-  /// Retorna a instância de produção.
-  factory PlantisDatabase.injectable() {
-    return PlantisDatabase.production();
-  }
 
   /// Factory constructor para ambiente de produção
   ///

@@ -7,7 +7,7 @@ import '../receituagro_database.dart';
 ///
 /// Gerencia todas as operações de leitura dos dados complementares de plantas
 /// 
-@lazySingleton
+
 class PlantasInfRepository {
   PlantasInfRepository(this._db);
 

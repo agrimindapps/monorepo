@@ -1,7 +1,8 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/providers/core_providers.dart';
+import '../../../../core/providers/core_providers.dart';
 import '../../constants/settings_design_tokens.dart';
 import '../dialogs/feedback_dialog.dart';
 import '../shared/section_header.dart';
@@ -64,7 +65,7 @@ class SupportSection extends ConsumerWidget {
   Future<void> _showRateApp(BuildContext context, WidgetRef ref) async {
     try {
       // ✅ FIXED: Usar AppRatingService do core package ao invés de placeholder
-      final appRatingService = di.sl<IAppRatingRepository>();
+      final appRatingService = ref.read(appRatingRepositoryProvider);
 
       // Verificar se pode mostrar o diálogo
       final canShow = await appRatingService.canShowRatingDialog();

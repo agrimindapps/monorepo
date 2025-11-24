@@ -61,13 +61,14 @@ class _EnhancedDefensivosBottomSheetState
 
     try {
       for (final defensivo in _allDefensivos) {
-        final validation = await _compatibilityService
-            .validateFullCompatibility(
-              idDefensivo: defensivo,
-              idCultura: '', // Cultura não disponível em PragaPorCultura
-              idPraga: widget.pragaPorCultura.praga.idPraga,
-              includeAlternatives: false,
-            );
+        final validation =
+            await _compatibilityService.validateFullCompatibility(
+          context,
+          idDefensivo: defensivo,
+          idCultura: '', // Cultura não disponível em PragaPorCultura
+          idPraga: widget.pragaPorCultura.praga.idPraga,
+          includeAlternatives: false,
+        );
 
         _compatibilityCache[defensivo] = validation;
       }
@@ -88,9 +89,9 @@ class _EnhancedDefensivosBottomSheetState
     final filtered = <String>[];
     for (final defensivoId in _allDefensivos) {
       final resolvedName = await _resolver.resolveDefensivoNome(
-        idDefensivo: defensivoId,
+        defensivoId,
       );
-      if (resolvedName.toLowerCase().contains(query.toLowerCase())) {
+      if ((resolvedName ?? '').toLowerCase().contains(query.toLowerCase())) {
         filtered.add(defensivoId);
       }
     }
@@ -225,9 +226,8 @@ class _EnhancedDefensivosBottomSheetState
   }
 
   Widget _buildStatsRow(BuildContext context) {
-    final validCount = _compatibilityCache.values
-        .where((v) => v.isValid)
-        .length;
+    final validCount =
+        _compatibilityCache.values.where((v) => v.isValid).length;
     final totalCount = _filteredDefensivos.length;
 
     return Row(
@@ -323,7 +323,9 @@ class _EnhancedDefensivosBottomSheetState
     final theme = Theme.of(context);
     final compatibility = _compatibilityCache[defensivoId];
     return FutureBuilder<String>(
-      future: _resolver.resolveDefensivoNome(idDefensivo: defensivoId),
+      future: _resolver
+          .resolveDefensivoNome(defensivoId)
+          .then((name) => name ?? 'Defensivo não encontrado'),
       builder: (context, snapshot) {
         final resolvedName = snapshot.data ?? 'Defensivo não encontrado';
 
@@ -383,9 +385,7 @@ class _EnhancedDefensivosBottomSheetState
                     ),
                   ),
                   if (compatibility != null && !compatibility.isValid)
-                    ...compatibility.issues
-                        .take(1)
-                        .map(
+                    ...compatibility.issues.take(1).map(
                           (issue) => Padding(
                             padding: const EdgeInsets.only(top: 4),
                             child: Text(

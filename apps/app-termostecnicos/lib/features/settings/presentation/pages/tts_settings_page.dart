@@ -17,29 +17,13 @@ class _TTSSettingsPageState extends ConsumerState<TTSSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final settingsAsync = ref.watch(settingsNotifierProvider);
+    final settings = ref.watch(settingsProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Configurações de TTS'),
       ),
-      body: settingsAsync.when(
-        data: (settings) => _buildSettingsContent(settings),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Erro ao carregar configurações: $error'),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.invalidate(settingsNotifierProvider),
-                child: const Text('Tentar Novamente'),
-              ),
-            ],
-          ),
-        ),
-      ),
+      body: _buildSettingsContent(settings),
     );
   }
 
@@ -97,9 +81,9 @@ class _TTSSettingsPageState extends ConsumerState<TTSSettingsPage> {
                           divisions: 10,
                           label: settings.ttsSpeed.toStringAsFixed(1),
                           onChanged: (value) {
-                            ref
-                                .read(settingsNotifierProvider.notifier)
-                                .updateTTSSpeed(value);
+                            ref.read(settingsProvider.notifier).update(
+                                  (state) => state.copyWith(ttsSpeed: value),
+                                );
                           },
                         ),
 
@@ -112,9 +96,9 @@ class _TTSSettingsPageState extends ConsumerState<TTSSettingsPage> {
                           divisions: 10,
                           label: settings.ttsVolume.toStringAsFixed(1),
                           onChanged: (value) {
-                            ref
-                                .read(settingsNotifierProvider.notifier)
-                                .updateTTSVolume(value);
+                            ref.read(settingsProvider.notifier).update(
+                                  (state) => state.copyWith(ttsVolume: value),
+                                );
                           },
                         ),
 
@@ -127,9 +111,9 @@ class _TTSSettingsPageState extends ConsumerState<TTSSettingsPage> {
                           divisions: 15,
                           label: settings.ttsPitch.toStringAsFixed(1),
                           onChanged: (value) {
-                            ref
-                                .read(settingsNotifierProvider.notifier)
-                                .updateTTSPitch(value);
+                            ref.read(settingsProvider.notifier).update(
+                                  (state) => state.copyWith(ttsPitch: value),
+                                );
                           },
                         ),
 
@@ -142,7 +126,8 @@ class _TTSSettingsPageState extends ConsumerState<TTSSettingsPage> {
                                 // TODO: Integrate with TTS service from core
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('TTS test functionality - integrate with core service'),
+                                    content: Text(
+                                        'TTS test functionality - integrate with core service'),
                                   ),
                                 );
                               },
@@ -161,7 +146,8 @@ class _TTSSettingsPageState extends ConsumerState<TTSSettingsPage> {
                               onPressed: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Configurações salvas automaticamente'),
+                                    content: Text(
+                                        'Configurações salvas automaticamente'),
                                     backgroundColor: Colors.green,
                                   ),
                                 );

@@ -7,7 +7,6 @@ import 'package:core/core.dart' show injectable;
 /// Get Markets Use Case
 ///
 /// Retrieves list of markets with optional filtering and pagination
-@injectable
 class GetMarkets {
   final MarketRepository _repository;
 
@@ -28,7 +27,6 @@ class GetMarkets {
 }
 
 /// Get Markets by Type Use Case
-@injectable
 class GetMarketsByType {
   final MarketRepository _repository;
 
@@ -44,7 +42,6 @@ class GetMarketsByType {
 }
 
 /// Search Markets Use Case
-@injectable
 class SearchMarkets {
   final MarketRepository _repository;
 

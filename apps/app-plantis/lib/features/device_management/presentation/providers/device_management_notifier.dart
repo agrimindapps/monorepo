@@ -10,13 +10,13 @@ import 'package:core/core.dart'
         ValidateDeviceParams,
         GetUserDevicesParams,
         RevokeDeviceParams,
-        RevokeAllOtherDevicesParams,
-        getIt;
+        RevokeAllOtherDevicesParams;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
-import '../../../../core/di/injection.dart';
+import '../../../../core/providers/core_di_providers.dart';
+import 'device_management_providers.dart';
 import '../../data/models/device_model.dart';
 import '../../domain/usecases/get_device_statistics_usecase.dart';
 import '../../domain/usecases/get_user_devices_usecase.dart';
@@ -103,36 +103,6 @@ class DeviceManagementState {
 }
 
 @riverpod
-GetUserDevicesUseCase getUserDevicesUseCase(GetUserDevicesUseCaseRef ref) {
-  return getIt<GetUserDevicesUseCase>();
-}
-
-@riverpod
-ValidateDeviceUseCase validateDeviceUseCase(ValidateDeviceUseCaseRef ref) {
-  return getIt<ValidateDeviceUseCase>();
-}
-
-@riverpod
-RevokeDeviceUseCase revokeDeviceUseCase(RevokeDeviceUseCaseRef ref) {
-  return getIt<RevokeDeviceUseCase>();
-}
-
-@riverpod
-RevokeAllOtherDevicesUseCase revokeAllOtherDevicesUseCase(RevokeAllOtherDevicesUseCaseRef ref) {
-  return getIt<RevokeAllOtherDevicesUseCase>();
-}
-
-@riverpod
-GetDeviceStatisticsUseCase getDeviceStatisticsUseCase(GetDeviceStatisticsUseCaseRef ref) {
-  return getIt<GetDeviceStatisticsUseCase>();
-}
-
-@riverpod
-AuthStateNotifier authStateNotifier(AuthStateNotifierRef ref) {
-  return getIt<AuthStateNotifier>();
-}
-
-@riverpod
 class DeviceManagementNotifier extends _$DeviceManagementNotifier {
   late final GetUserDevicesUseCase _getUserDevicesUseCase;
   late final ValidateDeviceUseCase _validateDeviceUseCase;
@@ -145,11 +115,11 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
   @override
   Future<DeviceManagementState> build() async {
-    _getUserDevicesUseCase = ref.read(getUserDevicesUseCaseProvider);
-    _validateDeviceUseCase = ref.read(validateDeviceUseCaseProvider);
-    _revokeDeviceUseCase = ref.read(revokeDeviceUseCaseProvider);
-    _revokeAllOtherDevicesUseCase = ref.read(revokeAllOtherDevicesUseCaseProvider);
-    _getDeviceStatisticsUseCase = ref.read(getDeviceStatisticsUseCaseProvider);
+    _getUserDevicesUseCase = await ref.read(getUserDevicesUseCaseProvider.future);
+    _validateDeviceUseCase = await ref.read(validateDeviceUseCaseProvider.future);
+    _revokeDeviceUseCase = await ref.read(revokeDeviceUseCaseProvider.future);
+    _revokeAllOtherDevicesUseCase = await ref.read(revokeAllOtherDevicesUseCaseProvider.future);
+    _getDeviceStatisticsUseCase = await ref.read(getDeviceStatisticsUseCaseProvider.future);
     _authStateNotifier = ref.read(authStateNotifierProvider);
     ref.onDispose(() {
       _userSubscription?.cancel();

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/providers/receituagro_auth_notifier.dart';
+import '../../../../core/providers/auth_notifier.dart';
+import '../../../../core/providers/auth_providers.dart';
+import '../../../../core/providers/auth_state.dart';
 import '../../../auth/presentation/pages/login_page.dart';
 import '../../constants/settings_design_tokens.dart';
 import '../../pages/profile_page.dart';
@@ -13,23 +15,17 @@ class AuthSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authAsync = ref.watch(receitaAgroAuthNotifierProvider);
+    final authState = ref.watch(authNotifierProvider);
 
-    return authAsync.when(
-      data: (authState) {
-        if (authState.isLoading) {
-          return _buildLoadingSection(context);
-        }
+    if (authState.isLoading) {
+      return _buildLoadingSection(context);
+    }
 
-        if (!authState.isAuthenticated || authState.isAnonymous) {
-          return _buildGuestSummary(context);
-        }
+    if (!authState.isAuthenticated || authState.isAnonymous) {
+      return _buildGuestSummary(context);
+    }
 
-        return _buildUserSummary(context, authState);
-      },
-      loading: () => _buildLoadingSection(context),
-      error: (error, _) => _buildErrorSection(context, error),
-    );
+    return _buildUserSummary(context, authState);
   }
 
   Widget _buildLoadingSection(BuildContext context) {
@@ -191,7 +187,7 @@ class AuthSection extends ConsumerWidget {
 
   Widget _buildUserSummary(
     BuildContext context,
-    ReceitaAgroAuthState authState,
+    AuthState authState,
   ) {
     final user = authState.currentUser!;
     final theme = Theme.of(context);

@@ -29,7 +29,7 @@ part 'database_providers.g.dart';
 
 /// Provider principal do PlantisDatabase
 ///
-/// Retorna a instância singleton do banco de dados configurada via Injectable.
+/// Retorna a instância singleton do banco de dados.
 /// O Riverpod cuida automaticamente do lifecycle (não precisa dispose manual).
 ///
 /// **Características:**
@@ -38,13 +38,13 @@ part 'database_providers.g.dart';
 /// - Auto-dispose quando não mais necessário
 @riverpod
 PlantisDatabase plantisDatabase(PlantisDatabaseRef ref) {
-  // Usa factory method injectable que pega instância do GetIt
-  final db = PlantisDatabase.injectable();
+  // Usa factory method production
+  final db = PlantisDatabase.production();
 
   // Cleanup quando o provider for disposed
   ref.onDispose(() {
     print('🗑️ PlantisDatabase provider disposed');
-    // Nota: db.close() será chamado automaticamente pelo singleton do GetIt
+    db.close();
   });
 
   return db;

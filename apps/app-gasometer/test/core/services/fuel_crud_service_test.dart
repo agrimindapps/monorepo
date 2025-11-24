@@ -1,10 +1,8 @@
-import 'package:core/core.dart' hide test;
+import 'package:core/core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:gasometer_drift/features/fuel/domain/services/fuel_crud_service.dart';
-import 'package:gasometer_drift/features/fuel/domain/entities/fuel_record_entity.dart';
 import 'package:gasometer_drift/features/fuel/domain/usecases/add_fuel_record.dart';
-import 'package:gasometer_drift/features/fuel/domain/usecases/update_fuel_record.dart';
 import 'package:gasometer_drift/features/fuel/domain/usecases/delete_fuel_record.dart';
 import '../../helpers/mock_factories.dart';
 import '../../helpers/fake_data.dart';
@@ -52,7 +50,8 @@ void main() {
       verify(() => mockAddFuelRecord(any())).called(1);
     });
 
-    test('should return ValidationFailure when use case fails validation', () async {
+    test('should return ValidationFailure when use case fails validation',
+        () async {
       // Arrange
       final fuelRecord = FakeData.fuelRecord(liters: -1.0);
       final failure = FakeData.validationFailure('Liters must be positive');
@@ -70,7 +69,8 @@ void main() {
       expect(error.message, 'Liters must be positive');
     });
 
-    test('should return CacheFailure when use case fails with cache error', () async {
+    test('should return CacheFailure when use case fails with cache error',
+        () async {
       // Arrange
       final fuelRecord = FakeData.fuelRecord();
       final failure = FakeData.cacheFailure('Database not available');
@@ -135,7 +135,6 @@ void main() {
   group('FuelCrudService - updateFuel', () {
     test('should update fuel record successfully', () async {
       // Arrange
-      final originalRecord = FakeData.fuelRecord(id: 'fuel-001', liters: 40.0);
       final updatedRecord = FakeData.fuelRecord(id: 'fuel-001', liters: 42.0);
 
       when(() => mockUpdateFuelRecord(any()))
@@ -321,8 +320,7 @@ void main() {
       // Arrange
       final records = FakeData.fuelRecords(count: 3);
 
-      when(() => mockAddFuelRecord(any()))
-          .thenAnswer((invocation) async {
+      when(() => mockAddFuelRecord(any())).thenAnswer((invocation) async {
         final params = invocation.positionalArguments[0] as AddFuelRecordParams;
         await TestHelpers.waitForAsync(milliseconds: 10);
         return Right(params.fuelRecord);

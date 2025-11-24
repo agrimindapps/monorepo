@@ -9,10 +9,8 @@ import 'package:app_agrihurbi/features/news/domain/entities/commodity_price_enti
 import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
 import 'package:app_agrihurbi/features/news/domain/repositories/news_repository.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 /// News Repository Implementation
-@LazySingleton(as: NewsRepository)
 class NewsRepositoryImpl implements NewsRepository {
   final NewsRemoteDataSource _remoteDataSource;
   final NewsLocalDataSource _localDataSource;
@@ -33,18 +31,20 @@ class NewsRepositoryImpl implements NewsRepository {
     try {
       if (await _networkInfo.isConnected) {
         try {
-          final remoteArticles = await _remoteDataSource.fetchNewsFromRSS(limit: limit);
+          final remoteArticles =
+              await _remoteDataSource.fetchNewsFromRSS(limit: limit);
           await _localDataSource.cacheArticles(remoteArticles);
           if (filter != null) {
             final filterModel = NewsFilterModel.fromEntity(filter);
-            final filteredArticles = await _localDataSource.searchCachedArticles(
+            final filteredArticles =
+                await _localDataSource.searchCachedArticles(
               query: filter.searchQuery ?? '',
               filter: filterModel,
               limit: limit,
             );
             return Right(filteredArticles);
           }
-          
+
           return Right(remoteArticles);
         } catch (e) {
           final cachedArticles = await _localDataSource.getCachedArticles(
@@ -93,7 +93,8 @@ class NewsRepositoryImpl implements NewsRepository {
     try {
       if (await _networkInfo.isConnected) {
         try {
-          final filterModel = filter != null ? NewsFilterModel.fromEntity(filter) : null;
+          final filterModel =
+              filter != null ? NewsFilterModel.fromEntity(filter) : null;
           final remoteResults = await _remoteDataSource.searchNews(
             query: query,
             filter: filterModel,
@@ -101,10 +102,10 @@ class NewsRepositoryImpl implements NewsRepository {
           );
           await _localDataSource.cacheArticles(remoteResults);
           return Right(remoteResults);
-        } catch (e) {
-        }
+        } catch (e) {}
       }
-      final filterModel = filter != null ? NewsFilterModel.fromEntity(filter) : null;
+      final filterModel =
+          filter != null ? NewsFilterModel.fromEntity(filter) : null;
       final cachedResults = await _localDataSource.searchCachedArticles(
         query: query,
         filter: filterModel,
@@ -167,13 +168,17 @@ class NewsRepositoryImpl implements NewsRepository {
   }) async {
     try {
       if (await _networkInfo.isConnected) {
-        final typeModels = types?.map((t) => CommodityTypeModel.fromEntity(t)).toList();
-        final remotePrices = await _remoteDataSource.fetchCommodityPrices(types: typeModels);
+        final typeModels =
+            types?.map((t) => CommodityTypeModel.fromEntity(t)).toList();
+        final remotePrices =
+            await _remoteDataSource.fetchCommodityPrices(types: typeModels);
         await _localDataSource.cacheCommodityPrices(remotePrices);
         return Right(remotePrices);
       } else {
-        final typeModels = types?.map((t) => CommodityTypeModel.fromEntity(t)).toList();
-        final cachedPrices = await _localDataSource.getCachedCommodityPrices(types: typeModels);
+        final typeModels =
+            types?.map((t) => CommodityTypeModel.fromEntity(t)).toList();
+        final cachedPrices =
+            await _localDataSource.getCachedCommodityPrices(types: typeModels);
         return Right(cachedPrices);
       }
     } on ServerException catch (e) {
@@ -186,7 +191,8 @@ class NewsRepositoryImpl implements NewsRepository {
   }
 
   @override
-  Future<Either<Failure, CommodityPriceEntity>> getCommodityById(String id) async {
+  Future<Either<Failure, CommodityPriceEntity>> getCommodityById(
+      String id) async {
     try {
       final cachedCommodity = await _localDataSource.getCommodityById(id);
       if (cachedCommodity != null) {
@@ -215,7 +221,8 @@ class NewsRepositoryImpl implements NewsRepository {
         );
         return Right(history);
       } else {
-        return const Left(ServerFailure(message: 'No internet connection for historical data'));
+        return const Left(ServerFailure(
+            message: 'No internet connection for historical data'));
       }
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
@@ -236,7 +243,8 @@ class NewsRepositoryImpl implements NewsRepository {
         if (cachedSummary != null) {
           return Right(cachedSummary);
         }
-        return const Left(ServerFailure(message: 'No market data available offline'));
+        return const Left(
+            ServerFailure(message: 'No market data available offline'));
       }
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
@@ -304,7 +312,8 @@ class NewsRepositoryImpl implements NewsRepository {
         await _localDataSource.saveLastRSSUpdate(DateTime.now());
         return const Right(null);
       } else {
-        return const Left(ServerFailure(message: 'No internet connection to refresh RSS feeds'));
+        return const Left(ServerFailure(
+            message: 'No internet connection to refresh RSS feeds'));
       }
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
@@ -435,7 +444,8 @@ class NewsRepositoryImpl implements NewsRepository {
           commodityName: data['commodityName'] as String? ?? 'Unknown',
           targetPrice: (data['targetPrice'] as num?)?.toDouble() ?? 0.0,
           isAbove: data['isAbove'] as bool? ?? false,
-          createdAt: DateTime.parse(data['createdAt'] as String? ?? DateTime.now().toIso8601String()),
+          createdAt: DateTime.parse(
+              data['createdAt'] as String? ?? DateTime.now().toIso8601String()),
           isActive: data['isActive'] as bool? ?? true,
         );
       }).toList();

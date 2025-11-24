@@ -8,10 +8,10 @@ import 'crashlytics_service.dart';
 
 /// Serviço de sincronização do Task Manager
 /// Integra dados locais com o Firebase para usuários Premium
-@lazySingleton
 class TaskManagerSyncService {
   final TaskManagerAnalyticsService _analyticsService;
   final TaskManagerCrashlyticsService _crashlyticsService;
+  final IAuthRepository _authRepository;
   final StreamController<SyncProgress> _progressController =
       StreamController<SyncProgress>.broadcast();
   final StreamController<String> _messageController =
@@ -19,7 +19,11 @@ class TaskManagerSyncService {
   bool _isSyncing = false;
   Timer? _autoSyncTimer;
 
-  TaskManagerSyncService(this._analyticsService, this._crashlyticsService) {
+  TaskManagerSyncService(
+    this._analyticsService,
+    this._crashlyticsService,
+    this._authRepository,
+  ) {
     _initializeAutoSync();
   }
   Stream<SyncProgress> get progressStream => _progressController.stream;
@@ -192,8 +196,7 @@ class TaskManagerSyncService {
   /// Sincronização em background (silenciosa)
   Future<void> _syncInBackground() async {
     try {
-      final authService = getIt<IAuthRepository>();
-      final currentUser = await authService.currentUser.first;
+      final currentUser = await _authRepository.currentUser.first;
 
       if (currentUser == null) return;
       const isUserPremium = false;

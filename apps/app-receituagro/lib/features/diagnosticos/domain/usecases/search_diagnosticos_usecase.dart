@@ -5,7 +5,7 @@ import '../services/search/i_diagnosticos_search_service.dart';
 
 /// Use Case para buscar diagnósticos com filtros
 /// Responsabilidade única: Orquestrar busca com filtros
-@injectable
+
 class SearchDiagnosticosUseCase {
   final IDiagnosticosSearchService _searchService;
 

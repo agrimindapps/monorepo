@@ -1,13 +1,12 @@
 import 'dart:async';
 
-import 'package:core/core.dart' show injectable;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/interfaces/network_info.dart';
 
 /// Service responsible for monitoring connectivity changes
 /// Extracted from PlantsRepository to follow Single Responsibility Principle (SRP)
-@injectable
 class PlantsConnectivityMonitor {
   PlantsConnectivityMonitor({required this.networkInfo});
 

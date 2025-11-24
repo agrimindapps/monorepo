@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/thirteenth_salary_calculation_model.dart';
@@ -34,7 +33,6 @@ abstract class ThirteenthSalaryLocalDataSource {
 ///
 /// Follows Dependency Inversion Principle (DIP):
 /// - Depends on SharedPreferences abstraction
-@Injectable(as: ThirteenthSalaryLocalDataSource)
 class ThirteenthSalaryLocalDataSourceImpl
     implements ThirteenthSalaryLocalDataSource {
   static const String _storagePrefix = 'thirteenth_salary_calculations';

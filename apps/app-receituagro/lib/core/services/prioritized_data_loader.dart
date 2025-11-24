@@ -19,7 +19,7 @@ class PrioritizedDataLoader {
 
   /// Carrega dados prioritários (Culturas, Pragas, Fitossanitários)
   /// Estes dados são essenciais para navegação básica do app
-  static Future<void> loadPriorityData() async {
+  static Future<void> loadPriorityData(dynamic ref) async {
     if (_isPriorityDataLoaded) {
       developer.log(
         '✅ Dados prioritários já carregados, pulando...',
@@ -38,9 +38,9 @@ class PrioritizedDataLoader {
 
       // Carrega dados prioritários em paralelo
       await Future.wait([
-        CulturasDataLoader.loadCulturasData(),
-        PragasDataLoader.loadPragasData(),
-        FitossanitariosDataLoader.loadFitossanitariosData(),
+        CulturasDataLoader.loadCulturasData(ref),
+        PragasDataLoader.loadPragasData(ref),
+        FitossanitariosDataLoader.loadFitossanitariosData(ref),
       ]);
 
       final duration = DateTime.now().difference(startTime);
@@ -53,7 +53,7 @@ class PrioritizedDataLoader {
       );
 
       // Log estatísticas
-      await _logPriorityDataStats();
+      await _logPriorityDataStats(ref);
     } catch (e, stackTrace) {
       developer.log(
         '❌ [PRIORITY] Erro ao carregar dados prioritários: $e',
@@ -69,7 +69,7 @@ class PrioritizedDataLoader {
   /// Estes dados não bloqueiam a inicialização do app
   ///
   /// IMPORTANTE: Este método retorna imediatamente e continua carregando em background
-  static void loadBackgroundData() {
+  static void loadBackgroundData(dynamic ref) {
     if (_isBackgroundDataLoaded) {
       developer.log(
         '✅ Dados em background já carregados, pulando...',
@@ -84,11 +84,11 @@ class PrioritizedDataLoader {
     );
 
     // Carrega em background sem bloquear
-    _loadBackgroundDataAsync();
+    _loadBackgroundDataAsync(ref);
   }
 
   /// Método privado que executa o carregamento em background
-  static Future<void> _loadBackgroundDataAsync() async {
+  static Future<void> _loadBackgroundDataAsync(dynamic ref) async {
     try {
       final startTime = DateTime.now();
 
@@ -97,7 +97,7 @@ class PrioritizedDataLoader {
         name: 'PrioritizedDataLoader',
       );
 
-      await DiagnosticosDataLoader.loadDiagnosticosData();
+      await DiagnosticosDataLoader.loadDiagnosticosData(ref);
 
       final duration = DateTime.now().difference(startTime);
 
@@ -109,7 +109,7 @@ class PrioritizedDataLoader {
       );
 
       // Log estatísticas
-      await _logBackgroundDataStats();
+      await _logBackgroundDataStats(ref);
     } catch (e, stackTrace) {
       developer.log(
         '❌ [BACKGROUND] Erro ao carregar dados em background: $e',
@@ -122,7 +122,7 @@ class PrioritizedDataLoader {
   }
 
   /// Força recarregamento de todos os dados
-  static Future<void> forceReloadAll() async {
+  static Future<void> forceReloadAll(dynamic ref) async {
     developer.log(
       '🔄 Forçando recarregamento de todos os dados...',
       name: 'PrioritizedDataLoader',
@@ -131,8 +131,8 @@ class PrioritizedDataLoader {
     _isPriorityDataLoaded = false;
     _isBackgroundDataLoaded = false;
 
-    await loadPriorityData();
-    await _loadBackgroundDataAsync();
+    await loadPriorityData(ref);
+    await _loadBackgroundDataAsync(ref);
 
     developer.log(
       '✅ Recarregamento completo concluído!',
@@ -141,12 +141,12 @@ class PrioritizedDataLoader {
   }
 
   /// Verifica se dados prioritários estão carregados
-  static Future<bool> isPriorityDataReady() async {
+  static Future<bool> isPriorityDataReady(dynamic ref) async {
     try {
-      final culturasLoaded = await CulturasDataLoader.isDataLoaded();
-      final pragasLoaded = await PragasDataLoader.isDataLoaded();
+      final culturasLoaded = await CulturasDataLoader.isDataLoaded(ref);
+      final pragasLoaded = await PragasDataLoader.isDataLoaded(ref);
       final fitossanitariosLoaded =
-          await FitossanitariosDataLoader.isDataLoaded();
+          await FitossanitariosDataLoader.isDataLoaded(ref);
 
       return culturasLoaded && pragasLoaded && fitossanitariosLoaded;
     } catch (e) {
@@ -159,9 +159,9 @@ class PrioritizedDataLoader {
   }
 
   /// Verifica se dados em background estão carregados
-  static Future<bool> isBackgroundDataReady() async {
+  static Future<bool> isBackgroundDataReady(dynamic ref) async {
     try {
-      return await DiagnosticosDataLoader.isDataLoaded();
+      return await DiagnosticosDataLoader.isDataLoaded(ref);
     } catch (e) {
       developer.log(
         '❌ Erro ao verificar dados em background: $e',
@@ -172,12 +172,12 @@ class PrioritizedDataLoader {
   }
 
   /// Obtém estatísticas completas de carregamento
-  static Future<Map<String, dynamic>> getLoadingStats() async {
+  static Future<Map<String, dynamic>> getLoadingStats(dynamic ref) async {
     try {
-      final culturasStats = await CulturasDataLoader.getStats();
-      final pragasStats = await PragasDataLoader.getStats();
-      final fitossanitariosStats = await FitossanitariosDataLoader.getStats();
-      final diagnosticosStats = await DiagnosticosDataLoader.getStats();
+      final culturasStats = await CulturasDataLoader.getStats(ref);
+      final pragasStats = await PragasDataLoader.getStats(ref);
+      final fitossanitariosStats = await FitossanitariosDataLoader.getStats(ref);
+      final diagnosticosStats = await DiagnosticosDataLoader.getStats(ref);
 
       return {
         'priority_data': {
@@ -202,11 +202,11 @@ class PrioritizedDataLoader {
   }
 
   /// Log estatísticas dos dados prioritários
-  static Future<void> _logPriorityDataStats() async {
+  static Future<void> _logPriorityDataStats(dynamic ref) async {
     try {
-      final culturasStats = await CulturasDataLoader.getStats();
-      final pragasStats = await PragasDataLoader.getStats();
-      final fitossanitariosStats = await FitossanitariosDataLoader.getStats();
+      final culturasStats = await CulturasDataLoader.getStats(ref);
+      final pragasStats = await PragasDataLoader.getStats(ref);
+      final fitossanitariosStats = await FitossanitariosDataLoader.getStats(ref);
 
       final totalCulturas = culturasStats['total_culturas'] ?? 0;
       final totalPragas = pragasStats['total_pragas'] ?? 0;
@@ -226,9 +226,9 @@ class PrioritizedDataLoader {
   }
 
   /// Log estatísticas dos dados em background
-  static Future<void> _logBackgroundDataStats() async {
+  static Future<void> _logBackgroundDataStats(dynamic ref) async {
     try {
-      final diagnosticosStats = await DiagnosticosDataLoader.getStats();
+      final diagnosticosStats = await DiagnosticosDataLoader.getStats(ref);
       final totalDiagnosticos = diagnosticosStats['total_diagnosticos'] ?? 0;
 
       developer.log(

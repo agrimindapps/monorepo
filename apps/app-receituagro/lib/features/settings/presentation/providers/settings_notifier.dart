@@ -26,7 +26,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   late final GetUserSettingsUseCase _getUserSettingsUseCase;
   late final UpdateUserSettingsUseCase _updateUserSettingsUseCase;
   late final FeatureFlagsNotifier _featureFlagsNotifier;
-  DeviceManagementService? _deviceManagementService;
+  // DeviceManagementService? _deviceManagementService;
 
   @override
   Future<SettingsState> build() async {
@@ -40,11 +40,11 @@ class SettingsNotifier extends _$SettingsNotifier {
   void _initializeServices() {
     try {
       _featureFlagsNotifier = ref.read(featureFlagsNotifierProvider.notifier);
-      _deviceManagementService = ref.watch(deviceManagementServiceProvider);
+      // _deviceManagementService = ref.watch(deviceManagementServiceProvider);
       
-      if (_deviceManagementService == null) {
-        debugPrint('⚠️  DeviceManagementService not available (Web platform)');
-      }
+      // if (_deviceManagementService == null) {
+      //   debugPrint('⚠️  DeviceManagementService not available (Web platform)');
+      // }
     } catch (e) {
       debugPrint('Error initializing services: $e');
       debugPrint('Stack trace:');
@@ -260,179 +260,26 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Load device information
   Future<void> _loadDeviceInfo() async {
-    final currentState = state.value;
-    if (currentState == null) return;
-
-    try {
-      if (currentState.currentUserId.isEmpty) {
-        debugPrint('⚠️  Cannot load device info: User ID not set');
-        return;
-      }
-
-      if (_deviceManagementService == null) {
-        debugPrint(
-          '⚠️  DeviceManagementService not available - skipping device load',
-        );
-        return;
-      }
-
-      // Fetch devices from service
-      final devicesResult = await _deviceManagementService!.getUserDevices();
-
-      DeviceEntity? currentDevice;
-      List<DeviceEntity> connectedDevices = [];
-
-      devicesResult.fold(
-        (failure) {
-          debugPrint('❌ Error loading devices: ${failure.message}');
-        },
-        (devices) {
-          connectedDevices = devices;
-          // Find current device (the active one or first device)
-          try {
-            currentDevice = devices.firstWhere(
-              (device) => device.isActive,
-              orElse: () => devices.isNotEmpty ? devices.first : throw Exception('No devices'),
-            );
-            debugPrint('✅ Loaded ${devices.length} devices, current: ${currentDevice?.uuid}');
-          } catch (e) {
-            debugPrint('⚠️  No active device found');
-          }
-        },
-      );
-
-      state = AsyncValue.data(
-        currentState.copyWith(
-          currentDevice: currentDevice,
-          connectedDevices: connectedDevices,
-        ),
-      );
-    } catch (e) {
-      debugPrint('Unexpected error loading device info: $e');
-    }
+    // Device management disabled
+    return;
   }
 
   /// Revoke a device
   Future<void> revokeDevice(String deviceUuid) async {
-    final currentState = state.value;
-    if (currentState == null) return;
-
-    try {
-      if (currentState.currentUserId.isEmpty) {
-        state = AsyncValue.data(
-          currentState.copyWith(error: 'User not initialized'),
-        );
-        return;
-      }
-
-      if (_deviceManagementService == null) {
-        state = AsyncValue.data(
-          currentState.copyWith(error: 'Device management not available'),
-        );
-        return;
-      }
-
-      state = AsyncValue.data(currentState.copyWith(isLoading: true));
-      final result = await _deviceManagementService!.revokeDevice(deviceUuid);
-
-      await result.fold(
-        (failure) {
-          state = AsyncValue.data(
-            currentState.copyWith(isLoading: false, error: failure.message),
-          );
-        },
-        (_) async {
-          await _loadDeviceInfo();
-          state = AsyncValue.data(
-            currentState.copyWith(isLoading: false).clearError(),
-          );
-        },
-      );
-    } catch (e) {
-      debugPrint('Unexpected error revoking device: $e');
-      state = AsyncValue.data(
-        currentState.copyWith(isLoading: false, error: e.toString()),
-      );
-    }
+    // Device management disabled
   }
 
   /// Add a device
   Future<bool> addDevice(DeviceEntity device) async {
-    final currentState = state.value;
-    if (currentState == null) return false;
-
-    try {
-      if (currentState.currentUserId.isEmpty) {
-        state = AsyncValue.data(
-          currentState.copyWith(error: 'User not initialized'),
-        );
-        return false;
-      }
-
-      if (_deviceManagementService == null) {
-        state = AsyncValue.data(
-          currentState.copyWith(error: 'Device management not available'),
-        );
-        return false;
-      }
-
-      state = AsyncValue.data(currentState.copyWith(isLoading: true));
-
-      // Validate device with real service call
-      final result = await _deviceManagementService!.validateDevice(device);
-
-      return result.fold(
-        (Failure failure) {
-          state = AsyncValue.data(
-            currentState.copyWith(isLoading: false, error: failure.message),
-          );
-          return false;
-        },
-        (DeviceEntity registeredDevice) async {
-          await _loadDeviceInfo();
-          state = AsyncValue.data(
-            currentState.copyWith(isLoading: false).clearError(),
-          );
-          return true;
-        },
-      );
-    } catch (e) {
-      debugPrint('Unexpected error adding device: $e');
-      state = AsyncValue.data(
-        currentState.copyWith(isLoading: false, error: e.toString()),
-      );
-      return false;
-    }
+    // Device management disabled
+    return true;
   }
 
   /// Check if user can add more devices
   Future<bool> canAddMoreDevices() async {
-    final currentState = state.value;
-    if (currentState == null) return false;
-
-    try {
-      if (currentState.currentUserId.isEmpty) {
-        return false;
-      }
-
-      if (_deviceManagementService == null) {
-        debugPrint(
-          '⚠️  DeviceManagementService not available - using local fallback',
-        );
-        return currentState.connectedDevices.length < 3;
-      }
-
-      final result = await _deviceManagementService!.canAddMoreDevices();
-      return result.fold((failure) {
-        debugPrint('Error checking if can add more devices: $failure');
-        return currentState.connectedDevices.length < 3;
-      }, (canAdd) => canAdd);
-    } catch (e) {
-      debugPrint('Unexpected error checking device limit: $e');
-      return currentState.connectedDevices.length < 3;
-    }
+    // Device management disabled
+    return true;
   }
-
   /// Get device by UUID
   DeviceEntity? getDeviceByUuid(String uuid) {
     final currentState = state.value;

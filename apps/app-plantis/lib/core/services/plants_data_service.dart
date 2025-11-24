@@ -29,17 +29,6 @@ class PlantsDataService {
         _updatePlantUseCase = updatePlantUseCase,
         _deletePlantUseCase = deletePlantUseCase;
 
-  /// Factory usando dependency injection
-  factory PlantsDataService.create({IAuthStateProvider? authProvider}) {
-    return PlantsDataService(
-      authProvider: authProvider ?? AuthStateProviderAdapter.instance(),
-      getPlantsUseCase: GetIt.instance<GetPlantsUseCase>(),
-      addPlantUseCase: GetIt.instance<AddPlantUseCase>(),
-      updatePlantUseCase: GetIt.instance<UpdatePlantUseCase>(),
-      deletePlantUseCase: GetIt.instance<DeletePlantUseCase>(),
-    );
-  }
-
   /// Carrega todas as plantas do usuário
   Future<Either<Failure, List<Plant>>> loadPlants() async {
     try {

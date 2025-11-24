@@ -19,7 +19,7 @@ import '../services/culturas_search_service.dart';
 /// This follows the pattern established in diagnosticos, defensivos, pragas, and comentarios features.
 ///
 /// Segue padrões Clean Architecture + Either pattern para error handling
-@LazySingleton(as: ICulturasRepository)
+
 class CulturasRepositoryImpl implements ICulturasRepository {
   final CulturasRepository _driftRepository;
   final ICulturasQueryService _queryService;

@@ -1,4 +1,3 @@
-import 'package:gasometer_drift/core/di/injection.dart' as local_di;
 import 'package:gasometer_drift/features/auth/presentation/notifiers/auth_notifier.dart';
 import 'package:gasometer_drift/features/auth/presentation/state/auth_state.dart';
 import 'package:gasometer_drift/features/auth/domain/entities/user_entity.dart';
@@ -19,6 +18,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:get_it/get_it.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 // Manual Mocks
 class MockGetVehicleById extends GetVehicleById {
@@ -96,7 +97,11 @@ class MockAuth extends Auth {
 }
 
 void main() {
-  final getIt = local_di.getIt;
+  final getIt = GetIt.instance;
+
+  setUpAll(() async {
+    await initializeDateFormatting('pt_BR', null);
+  });
 
   setUp(() {
     getIt.reset();

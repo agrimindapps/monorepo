@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../database/petiveti_database.dart';
 import '../models/appointment_model.dart';
@@ -19,7 +18,6 @@ abstract class AppointmentLocalDataSource {
   Stream<List<AppointmentModel>> watchAppointmentsByAnimalId(int animalId);
 }
 
-@LazySingleton(as: AppointmentLocalDataSource)
 class AppointmentLocalDataSourceImpl implements AppointmentLocalDataSource {
   final PetivetiDatabase _database;
 

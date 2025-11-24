@@ -11,7 +11,7 @@ import '../../domain/repositories/profile_repository.dart';
 
 /// Composite repository implementation that provides unified access to all settings.
 /// Delegates to specialized repositories following the Composite Pattern.
-@LazySingleton(as: ISettingsCompositeRepository)
+
 class SettingsCompositeRepositoryImpl implements ISettingsCompositeRepository {
   final IUserSettingsRepository _userSettingsRepo;
   final ITTSSettingsRepository _ttsSettingsRepo;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/di/injection_container.dart';
+import '../../../../../core/providers/core_providers.dart';
 import '../../../../../core/theme/spacing_tokens.dart';
 import '../../../../../database/repositories/culturas_repository.dart';
 import '../../../../../database/repositories/pragas_repository.dart';
@@ -46,6 +46,7 @@ class DiagnosticosTabWidget extends ConsumerWidget {
             data: (state) {
               return FutureBuilder<Map<String, List<dynamic>>>(
                 future: _groupDiagnosticsByCulture(
+                  ref,
                   state.searchQuery.isNotEmpty
                       ? state.searchResults
                       : state.filteredDiagnosticos,
@@ -69,7 +70,7 @@ class DiagnosticosTabWidget extends ConsumerWidget {
               ),
               child: DiagnosticoDefensivoStateManager(
                 defensivoName: defensivoName,
-                builder: _buildDiagnosticsList,
+                builder: (diagnosticos) => _buildDiagnosticsList(context, ref, diagnosticos),
                 onRetry: () => _retryLoadDiagnostics(ref),
               ),
             ),
@@ -94,9 +95,9 @@ class DiagnosticosTabWidget extends ConsumerWidget {
   }
 
   /// Constrói lista de diagnósticos agrupados por cultura
-  Widget _buildDiagnosticsList(List<dynamic> diagnosticos) {
+  Widget _buildDiagnosticsList(BuildContext context, WidgetRef ref, List<dynamic> diagnosticos) {
     return FutureBuilder<Map<String, List<dynamic>>>(
-      future: _groupDiagnosticsByCulture(diagnosticos),
+      future: _groupDiagnosticsByCulture(ref, diagnosticos),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -110,7 +111,7 @@ class DiagnosticosTabWidget extends ConsumerWidget {
 
         // Usa FutureBuilder aninhado para ordenação assíncrona
         return FutureBuilder<Widget>(
-          future: _buildGroupedWidgets(groupedDiagnostics),
+          future: _buildGroupedWidgets(ref, groupedDiagnostics),
           builder: (context, widgetSnapshot) {
             if (widgetSnapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -131,10 +132,11 @@ class DiagnosticosTabWidget extends ConsumerWidget {
 
   /// Agrupa diagnósticos por cultura usando dados reais do repositório
   Future<Map<String, List<dynamic>>> _groupDiagnosticsByCulture(
+    WidgetRef ref,
     List<dynamic> diagnosticos,
   ) async {
     final grouped = <String, List<dynamic>>{};
-    final culturaRepository = sl<CulturasRepository>();
+    final culturaRepository = ref.read(culturasRepositoryProvider);
 
     for (final diagnostic in diagnosticos) {
       String culturaNome = 'Não especificado';
@@ -195,6 +197,7 @@ class DiagnosticosTabWidget extends ConsumerWidget {
 
   /// Constrói widgets agrupados por cultura usando ListView.separated
   Future<Widget> _buildGroupedWidgets(
+    WidgetRef ref,
     Map<String, List<dynamic>> groupedDiagnostics,
   ) async {
     // Ordena culturas alfabeticamente
@@ -209,7 +212,7 @@ class DiagnosticosTabWidget extends ConsumerWidget {
       // Ordena diagnósticos por nome comum da praga usando ordenação assíncrona
       // Precisamos buscar os nomes das pragas do repositório para ordenar corretamente
       final diagnosticsComNomes = <MapEntry<dynamic, String>>[];
-      final pragaRepository = sl<PragasRepository>();
+      final pragaRepository = ref.read(pragasRepositoryProvider);
 
       for (final diagnostic in diagnostics) {
         String nomePraga = '';
@@ -324,7 +327,7 @@ class DiagnosticosTabWidget extends ConsumerWidget {
         return Builder(
           builder: (context) => DiagnosticoDefensivoListItemWidget(
             diagnostico: item.diagnostic,
-            onTap: () => _showDiagnosticoDialog(context, item.diagnostic),
+            onTap: () => _showDiagnosticoDialog(context, ref, item.diagnostic),
             isDense: true,
             hasElevation: false,
           ),
@@ -334,8 +337,8 @@ class DiagnosticosTabWidget extends ConsumerWidget {
   }
 
   /// Mostra modal de detalhes do diagnóstico
-  void _showDiagnosticoDialog(BuildContext context, dynamic diagnostico) {
-    DiagnosticoDefensivoDialogWidget.show(context, diagnostico, defensivoName);
+  void _showDiagnosticoDialog(BuildContext context, WidgetRef ref, dynamic diagnostico) {
+    DiagnosticoDefensivoDialogWidget.show(context, ref, diagnostico, defensivoName);
   }
 }
 

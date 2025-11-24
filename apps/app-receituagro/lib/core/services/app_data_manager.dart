@@ -1,5 +1,7 @@
 import 'dart:developer' as developer;
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:core/core.dart' hide Column;
 
 import '../di/receituagro_data_setup.dart';
@@ -19,11 +21,12 @@ abstract class IAppDataManager {
 /// Responsável por inicializar o Drift, coordenar o carregamento de dados
 /// e gerenciar o sistema de controle automático de versão
 class AppDataManager implements IAppDataManager {
+  final Ref ref;
   // ✅ Keep _isInitialized for interface compliance
   bool _isInitialized = false;
 
   /// Construtor que permite injeção de dependência
-  AppDataManager();
+  AppDataManager(this.ref);
 
   /// Inicializa completamente o sistema de dados com controle automático de versão
   /// Nota: Drift é inicializado automaticamente pelo database instance
@@ -49,7 +52,7 @@ class AppDataManager implements IAppDataManager {
       );
 
       // Carregar dados estáticos (culturas, pragas, fitossanitários, diagnósticos)
-      await ReceitaAgroDataSetup.initialize();
+      await ReceitaAgroDataSetup.initialize(ref);
 
       _isInitialized = true;
 

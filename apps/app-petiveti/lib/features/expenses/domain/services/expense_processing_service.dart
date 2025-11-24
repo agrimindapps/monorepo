@@ -1,11 +1,9 @@
-import 'package:injectable/injectable.dart';
 
 import '../entities/expense.dart';
 import '../entities/expense_summary.dart';
 
 /// Service responsible for processing and organizing expense data
 /// Follows Single Responsibility Principle - only handles data processing
-@lazySingleton
 class ExpenseProcessingService {
   const ExpenseProcessingService();
 

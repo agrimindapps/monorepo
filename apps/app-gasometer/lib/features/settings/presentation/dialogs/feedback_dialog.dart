@@ -1,7 +1,8 @@
 import 'package:core/core.dart' ;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection.dart' as gasometer_di;
+import '../../../../core/providers/dependency_providers.dart';
 
 /// Dialog para envio de feedback do usuário para Firebase Analytics
 ///
@@ -268,7 +269,7 @@ class _FeedbackDialogState extends ConsumerState<FeedbackDialog> {
 
     try {
       // Obter analytics repository do core
-      final analyticsRepository = gasometer_di.getIt<IAnalyticsRepository>();
+      final analyticsRepository = ref.read(analyticsRepositoryProvider);
 
       // Enviar feedback para Firebase Analytics
       final result = await analyticsRepository.logFeedback(

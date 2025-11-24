@@ -24,7 +24,6 @@ import 'task_model.dart';
 /// **Memory Usage:**
 /// - ~50KB per 1000 tasks (acceptable for mobile)
 /// - Auto-cleared on dispose()
-@LazySingleton(as: TaskLocalDataSource)
 class TaskLocalDataSourceImpl implements TaskLocalDataSource {
   final TaskolistDatabase _database;
   late final TaskDao _taskDao;

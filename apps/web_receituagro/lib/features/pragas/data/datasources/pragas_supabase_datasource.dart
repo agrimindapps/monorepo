@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/praga_model.dart';
@@ -14,7 +13,6 @@ abstract class PragasRemoteDataSource {
 }
 
 /// Supabase implementation of pragas remote data source
-@LazySingleton(as: PragasRemoteDataSource)
 class PragasSupabaseDataSource implements PragasRemoteDataSource {
   final SupabaseClient client;
   static const String _tableName = 'pragas';

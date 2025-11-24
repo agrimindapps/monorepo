@@ -1,15 +1,13 @@
-import 'package:core/core.dart' show GetIt;
-
 import '../../../../database/repositories/maintenance_repository.dart';
 import '../../../sync/domain/services/sync_write_trigger.dart';
 
 /// DataSource local para manutenções usando Drift
 
 class MaintenanceLocalDataSource {
-  MaintenanceLocalDataSource(this._repository);
+  MaintenanceLocalDataSource(this._repository, this._syncTrigger);
 
   final MaintenanceRepository _repository;
-  SyncWriteTrigger get _syncTrigger => GetIt.instance<SyncWriteTrigger>();
+  final SyncWriteTrigger _syncTrigger;
 
   void _notifySync() {
     _syncTrigger.scheduleSync();

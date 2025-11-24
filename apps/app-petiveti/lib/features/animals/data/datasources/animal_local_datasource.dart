@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../database/petiveti_database.dart';
 import '../../domain/entities/animal_enums.dart';
@@ -27,7 +26,6 @@ abstract class AnimalLocalDataSource {
 /// - Business logic (delegated to Repository/Use Cases)
 /// - Complex transformations (Repository responsibility)
 /// - Sync logic (Sync Manager responsibility)
-@LazySingleton(as: AnimalLocalDataSource)
 class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
   final PetivetiDatabase _database;
 

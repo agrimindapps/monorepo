@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/providers/auth_providers.dart';
+import '../../../../core/providers/auth_state.dart';
 import '../../../../core/providers/feature_flags_notifier.dart';
-import '../../../../core/providers/receituagro_auth_notifier.dart';
 import '../../../../core/services/device_identity_service.dart';
 import '../../constants/settings_design_tokens.dart';
 import '../../presentation/providers/settings_notifier.dart';
@@ -25,35 +26,15 @@ class UserProfileSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(receitaAgroAuthNotifierProvider);
+    final authState = ref.watch(authNotifierProvider);
 
-    return authState.when(
-      data: (authData) => _UserProfileCard(authData: authData),
-      loading: () => const Card(
-        margin: SettingsDesignTokens.sectionMargin,
-        elevation: SettingsDesignTokens.cardElevation,
-        child: Padding(
-          padding: EdgeInsets.all(24.0),
-          child: Center(child: CircularProgressIndicator()),
-        ),
-      ),
-      error: (error, _) => Card(
-        margin: SettingsDesignTokens.sectionMargin,
-        elevation: SettingsDesignTokens.cardElevation,
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Center(
-            child: Text('Erro ao carregar perfil: $error'),
-          ),
-        ),
-      ),
-    );
+    return _UserProfileCard(authData: authState);
   }
 }
 
 /// Internal widget to handle the card with SettingsNotifier and FeatureFlagsProvider
 class _UserProfileCard extends ConsumerWidget {
-  final ReceitaAgroAuthState authData;
+  final AuthState authData;
 
   const _UserProfileCard({required this.authData});
 
@@ -71,7 +52,8 @@ class _UserProfileCard extends ConsumerWidget {
             margin: SettingsDesignTokens.sectionMargin,
             elevation: SettingsDesignTokens.cardElevation,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(SettingsDesignTokens.cardRadius),
+              borderRadius:
+                  BorderRadius.circular(SettingsDesignTokens.cardRadius),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,7 +65,6 @@ class _UserProfileCard extends ConsumerWidget {
                   _buildUserProfile(context, settingsState, authData),
                   if (featureFlags.isContentSynchronizationEnabled)
                     _buildSyncStatus(context, settingsState, featureFlags),
-
                 ],
               ],
             ),
@@ -158,7 +139,7 @@ class _UserProfileCard extends ConsumerWidget {
   }
 
   /// Section Header
-  Widget _buildSectionHeader(BuildContext context, ReceitaAgroAuthState authState) {
+  Widget _buildSectionHeader(BuildContext context, AuthState authState) {
     final theme = Theme.of(context);
 
     return Padding(
@@ -198,10 +179,11 @@ class _UserProfileCard extends ConsumerWidget {
   }
 
   /// User Profile Display
-  Widget _buildUserProfile(BuildContext context, SettingsState settingsState, ReceitaAgroAuthState authState) {
+  Widget _buildUserProfile(
+      BuildContext context, SettingsState settingsState, AuthState authState) {
     final theme = Theme.of(context);
     final currentDevice = settingsState.currentDeviceInfo;
-    
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       child: InkWell(
@@ -210,7 +192,8 @@ class _UserProfileCard extends ConsumerWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+            color: theme.colorScheme.surfaceContainerHighest
+                .withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: theme.colorScheme.outline.withValues(alpha: 0.2),
@@ -220,7 +203,6 @@ class _UserProfileCard extends ConsumerWidget {
           child: Row(
             children: [
               _buildUserAvatar(context, currentDevice),
-              
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -266,7 +248,7 @@ class _UserProfileCard extends ConsumerWidget {
   Widget _buildUserAvatar(BuildContext context, DeviceInfo? device) {
     final theme = Theme.of(context);
     final displayName = _getUserDisplayName(device);
-    
+
     return CircleAvatar(
       radius: 24,
       backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.2),
@@ -281,7 +263,8 @@ class _UserProfileCard extends ConsumerWidget {
   }
 
   /// Settings Sync Status
-  Widget _buildSyncStatus(BuildContext context, SettingsState settingsState, FeatureFlagsNotifier featureFlags) {
+  Widget _buildSyncStatus(BuildContext context, SettingsState settingsState,
+      FeatureFlagsNotifier featureFlags) {
     final theme = Theme.of(context);
 
     return Padding(
@@ -313,7 +296,8 @@ class _UserProfileCard extends ConsumerWidget {
           const SizedBox(height: 4),
           SyncStatusItem(
             label: 'Notificações',
-            value: settingsState.notificationsEnabled ? 'Ativadas' : 'Desativadas',
+            value:
+                settingsState.notificationsEnabled ? 'Ativadas' : 'Desativadas',
             isSynced: true,
             icon: Icons.notifications,
           ),
@@ -328,6 +312,7 @@ class _UserProfileCard extends ConsumerWidget {
       ),
     );
   }
+
   /// Get user display name
   String _getUserDisplayName(DeviceInfo? device) {
     if (device?.name.isNotEmpty == true) {
@@ -351,7 +336,8 @@ class _UserProfileCard extends ConsumerWidget {
     final words = displayName.split(' ');
     if (words.isEmpty) return 'U';
     if (words.length == 1) return words[0].substring(0, 1).toUpperCase();
-    return '${words[0].substring(0, 1)}${words[1].substring(0, 1)}'.toUpperCase();
+    return '${words[0].substring(0, 1)}${words[1].substring(0, 1)}'
+        .toUpperCase();
   }
 
   /// Get language display name
@@ -369,9 +355,11 @@ class _UserProfileCard extends ConsumerWidget {
   }
 
   /// Navigate to Profile Page
-  Future<void> _openUserProfileDialog(BuildContext context, SettingsState settingsState) async {
+  Future<void> _openUserProfileDialog(
+      BuildContext context, SettingsState settingsState) async {
     await Navigator.pushNamed(context, '/profile');
   }
+
   /// Show login dialog
   void _showLoginDialog(BuildContext context, WidgetRef ref) {
     final emailController = TextEditingController();
@@ -408,7 +396,8 @@ class _UserProfileCard extends ConsumerWidget {
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
-            onPressed: () => _performLogin(context, ref, emailController.text, passwordController.text),
+            onPressed: () => _performLogin(
+                context, ref, emailController.text, passwordController.text),
             child: const Text('Entrar'),
           ),
         ],
@@ -461,13 +450,8 @@ class _UserProfileCard extends ConsumerWidget {
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
-            onPressed: () => _performSignup(
-              context,
-              ref,
-              nameController.text,
-              emailController.text,
-              passwordController.text
-            ),
+            onPressed: () => _performSignup(context, ref, nameController.text,
+                emailController.text, passwordController.text),
             child: const Text('Criar'),
           ),
         ],
@@ -509,7 +493,8 @@ class _UserProfileCard extends ConsumerWidget {
   }
 
   /// Perform login
-  Future<void> _performLogin(BuildContext context, WidgetRef ref, String email, String password) async {
+  Future<void> _performLogin(BuildContext context, WidgetRef ref, String email,
+      String password) async {
     if (email.isEmpty || password.isEmpty) {
       _showSnackBar(context, 'Preencha todos os campos', Colors.red);
       return;
@@ -517,22 +502,27 @@ class _UserProfileCard extends ConsumerWidget {
 
     Navigator.pop(context);
 
-    final result = await ref.read(receitaAgroAuthNotifierProvider.notifier).signInWithEmailAndPassword(
-      email: email.trim(),
-      password: password,
-    );
+    final result = await ref
+        .read(authNotifierProvider.notifier)
+        .signInWithEmailAndPassword(
+          email: email.trim(),
+          password: password,
+        );
 
     if (context.mounted) {
       _showSnackBar(
         context,
-        result.isSuccess ? 'Login realizado com sucesso!' : 'Erro ao fazer login: ${result.errorMessage ?? "Erro desconhecido"}',
+        result.isSuccess
+            ? 'Login realizado com sucesso!'
+            : 'Erro ao fazer login: ${result.errorMessage ?? "Erro desconhecido"}',
         result.isSuccess ? Colors.green : Colors.red,
       );
     }
   }
 
   /// Perform signup
-  Future<void> _performSignup(BuildContext context, WidgetRef ref, String name, String email, String password) async {
+  Future<void> _performSignup(BuildContext context, WidgetRef ref, String name,
+      String email, String password) async {
     if (name.isEmpty || email.isEmpty || password.isEmpty) {
       _showSnackBar(context, 'Preencha todos os campos', Colors.red);
       return;
@@ -540,23 +530,28 @@ class _UserProfileCard extends ConsumerWidget {
 
     Navigator.pop(context);
 
-    final result = await ref.read(receitaAgroAuthNotifierProvider.notifier).signUpWithEmailAndPassword(
-      email: email.trim(),
-      password: password,
-      displayName: name.trim(),
-    );
+    final result = await ref
+        .read(authNotifierProvider.notifier)
+        .signUpWithEmailAndPassword(
+          email: email.trim(),
+          password: password,
+          displayName: name.trim(),
+        );
 
     if (context.mounted) {
       _showSnackBar(
         context,
-        result.isSuccess ? 'Conta criada com sucesso!' : 'Erro ao criar conta: ${result.errorMessage ?? "Erro desconhecido"}',
+        result.isSuccess
+            ? 'Conta criada com sucesso!'
+            : 'Erro ao criar conta: ${result.errorMessage ?? "Erro desconhecido"}',
         result.isSuccess ? Colors.green : Colors.red,
       );
     }
   }
 
   /// Show snackbar helper
-  void _showSnackBar(BuildContext context, String message, Color backgroundColor) {
+  void _showSnackBar(
+      BuildContext context, String message, Color backgroundColor) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),

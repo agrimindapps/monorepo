@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/categoria.dart';
@@ -10,7 +9,6 @@ import '../models/categoria_model.dart';
 
 /// Implementation of TermosRepository
 /// Handles all data operations with proper error handling
-@LazySingleton(as: TermosRepository)
 class TermosRepositoryImpl implements TermosRepository {
   final TermosLocalDataSource _localDataSource;
 

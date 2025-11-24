@@ -1,3 +1,4 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -53,7 +54,7 @@ class SubscriptionStatusWidget extends ConsumerWidget {
   }
 
   /// Header compacto com badge premium e valor do plano
-  Widget _buildCompactHeader(BuildContext context, dynamic subscription) {
+  Widget _buildCompactHeader(BuildContext context, SubscriptionEntity subscription) {
     final theme = Theme.of(context);
 
     return Card(
@@ -104,7 +105,7 @@ class SubscriptionStatusWidget extends ConsumerWidget {
                     children: [
                       Text(
                         _formatProductName(
-                          (subscription.productId as String?) ?? 'Premium',
+                          subscription.productId,
                         ),
                         style: TextStyle(
                           color: theme.colorScheme.onSurfaceVariant,
@@ -125,7 +126,7 @@ class SubscriptionStatusWidget extends ConsumerWidget {
                       const SizedBox(width: 6),
                       Text(
                         _getPlanPrice(
-                          (subscription.productId as String?) ?? '',
+                          subscription.productId,
                         ),
                         style: const TextStyle(
                           color: ReceitaAgroColors.primary,

@@ -2,7 +2,6 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart' as core;
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/interfaces/i_premium_service.dart';
 import '../../../features/comentarios/data/comentario_model.dart';
@@ -10,8 +9,6 @@ import '../constants/comentarios_design_tokens.dart';
 import '../data/services/comentarios_mapper.dart';
 import '../domain/entities/comentario_sync_entity.dart';
 import 'repositories/i_comentarios_repository.dart';
-
-part 'comentarios_service.g.dart';
 
 /// Comentarios Service - Business Logic Layer
 /// Does not manage state (no ChangeNotifier/Riverpod), just business operations
@@ -377,12 +374,4 @@ class ComentariosService {
       );
     }
   }
-}
-
-/// Riverpod Provider for ComentariosService
-/// Note: Dependencies will be injected later when we migrate premium services
-@riverpod
-ComentariosService comentariosService(ComentariosServiceRef ref) {
-  // Use GetIt to retrieve the singleton instance
-  return core.GetIt.instance<ComentariosService>();
 }

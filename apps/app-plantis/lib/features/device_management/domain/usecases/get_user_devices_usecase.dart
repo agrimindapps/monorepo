@@ -1,13 +1,12 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../data/models/device_model.dart';
-import '../repositories/device_repository.dart';
 
 /// Use case para obter dispositivos do usuário no app-plantis
 /// Adapta o use case do core para as necessidades específicas do app
 class GetUserDevicesUseCase {
-  final DeviceRepository _deviceRepository;
+  final IDeviceRepository _deviceRepository;
   final AuthStateNotifier _authStateNotifier;
 
   GetUserDevicesUseCase(this._deviceRepository, this._authStateNotifier);
@@ -27,12 +26,16 @@ class GetUserDevicesUseCase {
       final result = await _deviceRepository.getUserDevices(userId);
 
       return result.fold((failure) => Left(failure), (devices) {
+        // Convert DeviceEntity to DeviceModel
+        final deviceModels =
+            devices.map((entity) => DeviceModel.fromEntity(entity)).toList();
+
         if (activeOnly) {
           final activeDevices =
-              devices.where((device) => device.isActive).toList();
+              deviceModels.where((device) => device.isActive).toList();
           return Right(activeDevices);
         }
-        final sortedDevices = List<DeviceModel>.from(devices)
+        final sortedDevices = List<DeviceModel>.from(deviceModels)
           ..sort((a, b) => b.lastActiveAt.compareTo(a.lastActiveAt));
 
         return Right(sortedDevices);

@@ -1,7 +1,10 @@
 import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
+import '../../../../database/providers/database_providers.dart';
+import '../../../../database/repositories/comentarios_repository.dart';
+import '../../data/repositories/comentarios_repository_impl.dart';
+import '../../data/services/comentarios_mapper.dart';
 import '../../domain/entities/comentario_entity.dart';
 import '../../domain/repositories/i_comentarios_read_repository.dart';
 import '../../domain/repositories/i_comentarios_repository.dart';
@@ -46,21 +49,30 @@ part 'comentarios_providers.g.dart';
 /// Repository dependency injection
 @riverpod
 IComentariosRepository comentariosRepository(ComentariosRepositoryRef ref) {
-  return di.sl<IComentariosRepository>();
+  final driftRepo = ref.watch(comentarioRepositoryProvider);
+  final comentariosRepo = ComentariosRepository(driftRepo);
+  final mapper = ComentariosMapper();
+  return ComentariosRepositoryImpl(comentariosRepo, mapper);
 }
 
 @riverpod
 IComentariosReadRepository comentariosReadRepository(
   ComentariosReadRepositoryRef ref,
 ) {
-  return di.sl<IComentariosReadRepository>();
+  final driftRepo = ref.watch(comentarioRepositoryProvider);
+  final comentariosRepo = ComentariosRepository(driftRepo);
+  final mapper = ComentariosMapper();
+  return ComentariosRepositoryImpl(comentariosRepo, mapper);
 }
 
 @riverpod
 IComentariosWriteRepository comentariosWriteRepository(
   ComentariosWriteRepositoryRef ref,
 ) {
-  return di.sl<IComentariosWriteRepository>();
+  final driftRepo = ref.watch(comentarioRepositoryProvider);
+  final comentariosRepo = ComentariosRepository(driftRepo);
+  final mapper = ComentariosMapper();
+  return ComentariosRepositoryImpl(comentariosRepo, mapper);
 }
 
 /// Use Cases dependency injection providers
@@ -221,9 +233,8 @@ class ComentariosState extends _$ComentariosState {
     try {
       final useCase = ref.read(deleteComentariosUseCaseProvider);
       await useCase(comentarioId);
-      final updatedList = state.comentarios
-          .where((c) => c.id != comentarioId)
-          .toList();
+      final updatedList =
+          state.comentarios.where((c) => c.id != comentarioId).toList();
 
       state = state.copyWith(comentarios: updatedList, isOperating: false);
       await _refreshComentarios();
@@ -317,9 +328,8 @@ List<ComentarioEntity> comentariosFiltered(ComentariosFilteredRef ref) {
   var filtered = comentarios;
 
   if (filterContext.isNotEmpty) {
-    filtered = filtered
-        .where((c) => c.pkIdentificador == filterContext)
-        .toList();
+    filtered =
+        filtered.where((c) => c.pkIdentificador == filterContext).toList();
   }
 
   if (filterTool.isNotEmpty) {

@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
@@ -10,7 +9,6 @@ import '../../../../core/error/failures.dart';
 /// - Centralizes error handling logic for repository operations
 /// - Converts exceptions to failures consistently
 /// - Eliminates try-catch duplication across repository methods
-@lazySingleton
 class SubscriptionErrorHandlingService {
   /// Executes an operation with error handling
   ///

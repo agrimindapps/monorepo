@@ -2,7 +2,6 @@ import 'package:app_agrihurbi/core/error/exceptions.dart';
 
 import 'package:app_agrihurbi/features/news/data/models/commodity_price_model.dart';
 import 'package:app_agrihurbi/features/news/data/models/news_article_model.dart';
-import 'package:core/core.dart' show injectable;
 import 'package:dio/dio.dart';
 import 'package:xml/xml.dart';
 
@@ -10,7 +9,6 @@ import 'package:xml/xml.dart';
 ///
 /// Handles RSS feed parsing and external API calls
 /// for agriculture news and commodity prices
-@injectable
 class NewsRemoteDataSource {
   final Dio _client;
 

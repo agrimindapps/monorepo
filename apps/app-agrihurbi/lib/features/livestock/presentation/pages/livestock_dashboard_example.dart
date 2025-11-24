@@ -22,13 +22,19 @@ class _LivestockDashboardExampleState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(livestockCoordinatorProvider).initializeSystem();
+      final coordinator = ref.read(livestockCoordinatorProvider);
+      coordinator?.initializeSystem();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final coordinator = ref.watch(livestockCoordinatorProvider);
+    if (coordinator == null) {
+      return const Scaffold(
+        body: Center(child: Text('Coordinator not available')),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Livestock Dashboard'),

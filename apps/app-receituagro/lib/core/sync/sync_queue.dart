@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'package:injectable/injectable.dart';
+
 
 import '../data/models/sync_queue_item.dart' as models;
 
 /// ✅ SIMPLIFIED: In-memory sync queue (no persistence)
 /// Session-based queue for sync operations
-@lazySingleton
+
 class SyncQueue {
   // In-memory queue storage
   final Map<String, models.SyncQueueItem> _queue = {};

@@ -1,6 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection.dart';
+import '../../../../database/database_providers.dart';
+import '../../data/datasources/local/comentarios_local_datasource.dart';
+import '../../data/repositories/comentarios_repository_impl.dart';
 import '../../domain/entities/comentario.dart';
 import '../../domain/repositories/comentarios_repository.dart';
 import '../../domain/usecases/add_comentario.dart';
@@ -12,47 +14,63 @@ import '../../domain/usecases/update_comentario.dart';
 
 part 'comentarios_providers.g.dart';
 
+// ==================== Data Source Provider ====================
+
+@riverpod
+ComentariosLocalDataSource comentariosLocalDataSource(
+    ComentariosLocalDataSourceRef ref) {
+  final database = ref.watch(termosTecnicosDatabaseProvider);
+  return ComentariosLocalDataSourceImpl(database);
+}
+
 // ==================== Repository Provider ====================
 
 @riverpod
 ComentariosRepository comentariosRepository(ComentariosRepositoryRef ref) {
-  return getIt<ComentariosRepository>();
+  final dataSource = ref.watch(comentariosLocalDataSourceProvider);
+  return ComentariosRepositoryImpl(dataSource);
 }
 
 // ==================== Use Cases Providers ====================
 
 @riverpod
 GetComentarios getComentariosUseCase(GetComentariosUseCaseRef ref) {
-  return getIt<GetComentarios>();
+  final repository = ref.watch(comentariosRepositoryProvider);
+  return GetComentarios(repository);
 }
 
 @riverpod
 GetComentariosByFerramenta getComentariosByFerramentaUseCase(
   GetComentariosByFerramentaUseCaseRef ref,
 ) {
-  return getIt<GetComentariosByFerramenta>();
+  final repository = ref.watch(comentariosRepositoryProvider);
+  return GetComentariosByFerramenta(repository);
 }
 
 @riverpod
 AddComentario addComentarioUseCase(AddComentarioUseCaseRef ref) {
-  return getIt<AddComentario>();
+  final repository = ref.watch(comentariosRepositoryProvider);
+  return AddComentario(repository);
 }
 
 @riverpod
 UpdateComentario updateComentarioUseCase(UpdateComentarioUseCaseRef ref) {
-  return getIt<UpdateComentario>();
+  final repository = ref.watch(comentariosRepositoryProvider);
+  return UpdateComentario(repository);
 }
 
 @riverpod
 DeleteComentario deleteComentarioUseCase(DeleteComentarioUseCaseRef ref) {
-  return getIt<DeleteComentario>();
+  final repository = ref.watch(comentariosRepositoryProvider);
+  return DeleteComentario(repository);
 }
 
 @riverpod
 GetComentariosCount getComentariosCountUseCase(
   GetComentariosCountUseCaseRef ref,
 ) {
-  return getIt<GetComentariosCount>();
+  final repository = ref.watch(comentariosRepositoryProvider);
+  return GetComentariosCount(repository);
 }
 
 // ==================== State Notifier ====================

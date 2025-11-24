@@ -4,7 +4,7 @@ import 'package:app_receituagro/features/settings/domain/entities/user_settings_
 import 'package:app_receituagro/features/settings/domain/repositories/i_tts_settings_repository.dart';
 import 'package:app_receituagro/features/settings/domain/repositories/i_user_settings_repository.dart';
 import 'package:app_receituagro/features/settings/domain/repositories/profile_repository.dart';
-import 'package:core/core.dart' hide test;
+import 'package:core/core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

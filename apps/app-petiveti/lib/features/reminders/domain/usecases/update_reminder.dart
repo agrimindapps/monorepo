@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -12,7 +11,6 @@ import '../services/reminder_validation_service.dart';
 /// **SOLID Principles Applied:**
 /// - **Single Responsibility**: Only handles reminder update flow
 /// - **Dependency Inversion**: Depends on abstractions (repository, validation service)
-@lazySingleton
 class UpdateReminder implements UseCase<void, Reminder> {
   final ReminderRepository _repository;
   final ReminderValidationService _validationService;
@@ -41,7 +39,6 @@ class UpdateReminder implements UseCase<void, Reminder> {
 /// **SOLID Principles Applied:**
 /// - **Single Responsibility**: Only handles reminder completion flow
 /// - **Dependency Inversion**: Depends on repository abstraction
-@lazySingleton
 class CompleteReminder implements UseCase<void, String> {
   final ReminderRepository _repository;
 
@@ -68,7 +65,6 @@ class SnoozeReminderParams {
 /// **SOLID Principles Applied:**
 /// - **Single Responsibility**: Only handles reminder snooze flow
 /// - **Dependency Inversion**: Depends on abstractions (repository, validation service)
-@lazySingleton
 class SnoozeReminder implements UseCase<void, SnoozeReminderParams> {
   final ReminderRepository _repository;
   final ReminderValidationService _validationService;

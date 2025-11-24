@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../../models/subscription_status_model.dart';
@@ -13,7 +12,6 @@ abstract class PremiumLocalDataSource {
 
 /// Implementation of premium local data source using RevenueCat
 /// Note: This uses RevenueCat from core package services
-@LazySingleton(as: PremiumLocalDataSource)
 class PremiumLocalDataSourceImpl implements PremiumLocalDataSource {
   PremiumLocalDataSourceImpl();
 

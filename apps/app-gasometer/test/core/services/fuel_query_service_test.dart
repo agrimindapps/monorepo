@@ -1,10 +1,7 @@
-import 'package:core/core.dart' hide test;
+import 'package:core/core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:gasometer_drift/features/fuel/domain/services/fuel_query_service.dart';
-import 'package:gasometer_drift/features/fuel/domain/entities/fuel_record_entity.dart';
-import 'package:gasometer_drift/features/fuel/domain/usecases/get_all_fuel_records.dart';
-import 'package:gasometer_drift/features/fuel/domain/usecases/get_fuel_records_by_vehicle.dart';
 import '../../helpers/mock_factories.dart';
 import '../../helpers/fake_data.dart';
 import '../../helpers/test_helpers.dart';
@@ -257,7 +254,10 @@ void main() {
       expect(result.isRight(), true);
       final searchResults = result.expectRight();
       expect(searchResults.length, 2);
-      expect(searchResults.every((r) => r.gasStationName?.contains('Shell') ?? false), true);
+      expect(
+          searchResults
+              .every((r) => r.gasStationName?.contains('Shell') ?? false),
+          true);
     });
 
     test('should return empty list when no matches found', () async {
@@ -320,7 +320,8 @@ void main() {
           .map((r) => r.consumption!)
           .toList();
 
-      final average = consumptions.reduce((a, b) => a + b) / consumptions.length;
+      final average =
+          consumptions.reduce((a, b) => a + b) / consumptions.length;
       expect(average, closeTo(12.33, 0.1));
     });
 
@@ -342,9 +343,8 @@ void main() {
       expect(result.isRight(), true);
       final loadedRecords = result.expectRight();
 
-      final totalCost = loadedRecords
-          .map((r) => r.totalPrice)
-          .reduce((a, b) => a + b);
+      final totalCost =
+          loadedRecords.map((r) => r.totalPrice).reduce((a, b) => a + b);
 
       expect(totalCost, 600.0);
     });

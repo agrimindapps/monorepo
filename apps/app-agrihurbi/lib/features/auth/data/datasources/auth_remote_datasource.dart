@@ -61,7 +61,6 @@ abstract class AuthRemoteDataSource {
 ///
 /// Comunicação com API usando Dio Client
 /// Inclui tratamento robusto de erros e timeout
-@LazySingleton(as: AuthRemoteDataSource)
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final Dio _dioClient;
 

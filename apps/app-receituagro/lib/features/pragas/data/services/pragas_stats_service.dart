@@ -1,10 +1,10 @@
-import 'package:injectable/injectable.dart';
+
 
 import '../../domain/entities/praga_entity.dart';
 import '../../domain/services/i_pragas_stats_service.dart';
 
 /// Default implementation of stats service
-@LazySingleton(as: IPragasStatsService)
+
 class PragasStatsService implements IPragasStatsService {
   @override
   Map<String, int> calculateStats(List<PragaEntity> pragas) {

@@ -8,7 +8,7 @@ import 'i_diagnosticos_validation_service.dart';
 ///
 /// Provides comprehensive validation logic for diagnosticos
 /// including existence, compatibility, and completeness checks.
-@Injectable(as: IDiagnosticosValidationService)
+
 class DiagnosticosValidationService implements IDiagnosticosValidationService {
   final IDiagnosticosRepository _repository;
 

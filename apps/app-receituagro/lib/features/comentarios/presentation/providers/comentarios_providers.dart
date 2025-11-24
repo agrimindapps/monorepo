@@ -1,22 +1,58 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../database/providers/database_providers.dart';
+import '../../data/repositories/comentarios_repository_impl.dart';
+import '../../domain/repositories/i_comentarios_repository.dart';
 import '../../domain/usecases/add_comentario_usecase.dart';
 import '../../domain/usecases/delete_comentario_usecase.dart';
 import '../../domain/usecases/get_comentarios_usecase.dart';
 import '../../services/comentarios_filter_service.dart';
 import '../../services/comentarios_validation_service.dart';
 
+import '../../../../database/repositories/comentarios_repository.dart';
 import '../../../../core/providers/premium_providers.dart';
 import '../../domain/comentarios_service.dart';
+
 import '../providers/comentarios_mapper_provider.dart';
 
 part 'comentarios_providers.g.dart';
 
 @riverpod
+IComentariosRepository iComentariosRepository(IComentariosRepositoryRef ref) {
+  // Note: ComentarioRepository from database_providers is the Drift wrapper
+  // We need to wrap it in ComentariosRepositoryImpl which implements IComentariosRepository
+  // But ComentariosRepositoryImpl expects ComentariosRepository (Drift wrapper)
+  // Wait, database_providers provides ComentarioRepository (Drift repo)
+  // But ComentariosRepositoryImpl expects ComentariosRepository (Drift wrapper)
+  // Let's check database_providers again.
+  // It provides ComentarioRepository (Drift repo).
+  // And ComentariosRepository (Drift wrapper) wraps ComentarioRepository.
+  // We need to create ComentariosRepository (Drift wrapper) first?
+  // No, database_providers provides ComentarioRepository (Drift repo).
+  // ComentariosRepositoryImpl expects ComentariosRepository (Drift wrapper).
+  // I need to check imports in ComentariosRepositoryImpl.
+  // import '../../../../database/repositories/comentarios_repository.dart';
+  // This is the wrapper.
+  
+  // So I need to instantiate ComentariosRepository (wrapper) using ComentarioRepository (Drift repo).
+  // Or maybe database_providers provides the wrapper?
+  // @riverpod ComentarioRepository comentarioRepository(Ref ref) { ... return ComentarioRepository(db); }
+  // This returns ComentarioRepository (Drift repo).
+  
+  // I need to instantiate ComentariosRepository (wrapper) here.
+  // import '../../../../database/repositories/comentarios_repository.dart';
+  
+  final driftRepo = ref.watch(comentarioRepositoryProvider);
+  final wrapperRepo = ComentariosRepository(driftRepo);
+  final mapper = ref.watch(comentariosMapperProvider);
+  
+  return ComentariosRepositoryImpl(wrapperRepo, mapper);
+}
+
+@riverpod
 ComentariosService comentariosService(ComentariosServiceRef ref) {
   return ComentariosService(
-    repository: ref.watch(comentarioRepositoryProvider),
+    repository: ref.watch(iComentariosRepositoryProvider),
     premiumService: ref.watch(premiumServiceProvider),
     mapper: ref.watch(comentariosMapperProvider),
   );
@@ -24,17 +60,19 @@ ComentariosService comentariosService(ComentariosServiceRef ref) {
 
 @riverpod
 GetComentariosUseCase getComentariosUseCase(GetComentariosUseCaseRef ref) {
-  return GetComentariosUseCase(ref.watch(comentarioRepositoryProvider));
+  return GetComentariosUseCase(ref.watch(iComentariosRepositoryProvider));
 }
 
 @riverpod
 AddComentarioUseCase addComentarioUseCase(AddComentarioUseCaseRef ref) {
-  return AddComentarioUseCase(ref.watch(comentarioRepositoryProvider));
+  final repo = ref.watch(iComentariosRepositoryProvider);
+  return AddComentarioUseCase(repo, repo);
 }
 
 @riverpod
 DeleteComentarioUseCase deleteComentarioUseCase(DeleteComentarioUseCaseRef ref) {
-  return DeleteComentarioUseCase(ref.watch(comentarioRepositoryProvider));
+  final repo = ref.watch(iComentariosRepositoryProvider);
+  return DeleteComentarioUseCase(repo, repo);
 }
 
 @riverpod

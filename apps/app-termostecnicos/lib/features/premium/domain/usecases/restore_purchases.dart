@@ -4,7 +4,6 @@ import '../entities/subscription_status.dart';
 import '../repositories/premium_repository.dart';
 
 /// Use case for restoring purchases from app store
-@injectable
 class RestorePurchases {
   final PremiumRepository _repository;
 

@@ -1,20 +1,19 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/net_salary_calculation.dart';
 import '../../domain/repositories/net_salary_repository.dart';
 import '../datasources/net_salary_local_datasource.dart';
 import '../models/net_salary_calculation_model.dart';
 
-@Injectable(as: NetSalaryRepository)
 class NetSalaryRepositoryImpl implements NetSalaryRepository {
   final NetSalaryLocalDataSource _localDataSource;
 
   NetSalaryRepositoryImpl(this._localDataSource);
 
   @override
-  Future<Either<Failure, NetSalaryCalculation>> saveCalculation(NetSalaryCalculation calculation) async {
+  Future<Either<Failure, NetSalaryCalculation>> saveCalculation(
+      NetSalaryCalculation calculation) async {
     try {
       final model = NetSalaryCalculationModel.fromEntity(calculation);
       final saved = await _localDataSource.save(model);
@@ -27,7 +26,8 @@ class NetSalaryRepositoryImpl implements NetSalaryRepository {
   }
 
   @override
-  Future<Either<Failure, List<NetSalaryCalculation>>> getCalculationHistory({int limit = 10}) async {
+  Future<Either<Failure, List<NetSalaryCalculation>>> getCalculationHistory(
+      {int limit = 10}) async {
     try {
       final models = await _localDataSource.getAll(limit: limit);
       final entities = models.map((model) => model.toEntity()).toList();
@@ -40,7 +40,8 @@ class NetSalaryRepositoryImpl implements NetSalaryRepository {
   }
 
   @override
-  Future<Either<Failure, NetSalaryCalculation>> getCalculationById(String id) async {
+  Future<Either<Failure, NetSalaryCalculation>> getCalculationById(
+      String id) async {
     try {
       final model = await _localDataSource.getById(id);
       if (model == null) {

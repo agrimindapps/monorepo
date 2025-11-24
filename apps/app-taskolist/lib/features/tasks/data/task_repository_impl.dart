@@ -1,7 +1,6 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../core/errors/failures.dart' as local_failures;
 import '../../../core/services/data_integrity_service.dart';
@@ -25,7 +24,6 @@ import 'task_model.dart';
 /// 2. UPDATE: Atualiza local → Marca dirty → Sync em background
 /// 3. DELETE: Marca como deleted (soft delete) → Sync em background
 /// 4. READ: Sempre lê do cache local (extremamente rápido)
-@LazySingleton(as: TaskRepository)
 class TaskRepositoryImpl implements TaskRepository {
   const TaskRepositoryImpl(
     this._localDataSource,

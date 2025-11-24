@@ -1,4 +1,4 @@
-import 'package:injectable/injectable.dart';
+
 
 /// Gerenciamento de cache local para pragas por cultura
 ///
@@ -11,7 +11,7 @@ import 'package:injectable/injectable.dart';
 /// Não bloqueia operações principais se falhar
 ///
 /// Nota: Cache é armazenado em memória durante a sessão
-@injectable
+
 class PragasCulturaLocalDataSource {
   static const String _cacheBoxName = 'pragas_cultura_cache';
   static const Duration _cacheDuration = Duration(hours: 24);

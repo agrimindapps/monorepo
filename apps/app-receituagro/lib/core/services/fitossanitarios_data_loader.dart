@@ -4,15 +4,16 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../../database/providers/database_providers.dart';
+import '../../database/receituagro_database.dart';
 import '../../database/repositories/fitossanitarios_repository.dart';
-import '../di/injection_container.dart' as di;
 
 /// Serviço para carregar dados de fitossanitários dos assets JSON
 class FitossanitariosDataLoader {
   static bool _isLoaded = false;
 
   /// Carrega dados de fitossanitários do JSON dos assets usando repositório
-  static Future<void> loadFitossanitariosData() async {
+  static Future<void> loadFitossanitariosData(dynamic ref) async {
     if (_isLoaded) {
       developer.log(
         'Fitossanitários já carregados, pulando...',
@@ -41,9 +42,8 @@ class FitossanitariosDataLoader {
 
           final dynamic decodedJson = json.decode(jsonString);
           final List<dynamic> jsonData = decodedJson is List ? decodedJson : [];
-          final List<Map<String, dynamic>> fitossanitarios = jsonData
-              .cast<Map<String, dynamic>>()
-              .toList();
+          final List<Map<String, dynamic>> fitossanitarios =
+              jsonData.cast<Map<String, dynamic>>().toList();
 
           allFitossanitarios.addAll(fitossanitarios);
 
@@ -75,7 +75,7 @@ class FitossanitariosDataLoader {
       print(
         '🛡️ [FITOSSANITARIOS] JSON carregado: ${allFitossanitarios.length} registros totais, ${fitossanitarios.length} fitossanitários válidos',
       );
-      final repository = di.sl<FitossanitariosRepository>();
+      final repository = ref.watch(fitossanitariosRepositoryProvider);
       await repository.loadFromJson(fitossanitarios, '1.0.0');
 
       developer.log(
@@ -84,7 +84,8 @@ class FitossanitariosDataLoader {
       );
       _isLoaded = true;
 
-      final loadedFitossanitarios = await repository.findAll();
+      final List<Fitossanitario> loadedFitossanitarios =
+          await (repository.findAll() as Future<List<Fitossanitario>>);
       developer.log(
         'Verificação: ${loadedFitossanitarios.length} fitossanitários disponíveis',
         name: 'FitossanitariosDataLoader',
@@ -92,7 +93,7 @@ class FitossanitariosDataLoader {
 
       if (loadedFitossanitarios.isNotEmpty) {
         developer.log(
-          'Primeiros 3 fitossanitários: ${loadedFitossanitarios.take(3).map((f) => f.nome).join(', ')}',
+          'Primeiros 3 fitossanitários: ${loadedFitossanitarios.take(3).map((Fitossanitario f) => f.nome).join(', ')}',
           name: 'FitossanitariosDataLoader',
         );
       }
@@ -109,16 +110,17 @@ class FitossanitariosDataLoader {
   }
 
   /// Força recarregamento dos dados (para desenvolvimento)
-  static Future<void> forceReload() async {
+  static Future<void> forceReload(dynamic ref) async {
     _isLoaded = false;
-    await loadFitossanitariosData();
+    await loadFitossanitariosData(ref);
   }
 
   /// Verifica se dados estão carregados
-  static Future<bool> isDataLoaded() async {
+  static Future<bool> isDataLoaded(dynamic ref) async {
     try {
-      final repository = di.sl<FitossanitariosRepository>();
-      final fitossanitarios = await repository.findAll();
+      final repository = ref.read(fitossanitariosRepositoryProvider)
+          as FitossanitariosRepository;
+      final List<Fitossanitario> fitossanitarios = await repository.findAll();
       final hasData = fitossanitarios.isNotEmpty;
 
       developer.log(
@@ -137,18 +139,17 @@ class FitossanitariosDataLoader {
   }
 
   /// Obtém estatísticas de carregamento
-  static Future<Map<String, dynamic>> getStats() async {
+  static Future<Map<String, dynamic>> getStats(dynamic ref) async {
     try {
-      final repository = di.sl<FitossanitariosRepository>();
-      final fitossanitarios = await repository.findAll();
+      final repository = ref.read(fitossanitariosRepositoryProvider)
+          as FitossanitariosRepository;
+      final List<Fitossanitario> fitossanitarios = await repository.findAll();
 
       return {
         'total_fitossanitarios': fitossanitarios.length,
         'is_loaded': _isLoaded,
-        'sample_fitossanitarios': fitossanitarios
-            .take(5)
-            .map((f) => f.nome)
-            .toList(),
+        'sample_fitossanitarios':
+            fitossanitarios.take(5).map((Fitossanitario f) => f.nome).toList(),
       };
     } catch (e) {
       return {

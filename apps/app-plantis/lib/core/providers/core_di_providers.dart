@@ -1,12 +1,4 @@
 import 'package:core/core.dart' hide Column;
-import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_functions/firebase_functions.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../config/security_config.dart';
 import '../constants/app_constants.dart';
@@ -28,6 +20,9 @@ import '../services/interfaces/i_plant_notification_manager.dart';
 import '../services/interfaces/i_task_notification_manager.dart';
 import '../services/interfaces/i_task_notification_scheduler.dart';
 import '../auth/auth_state_notifier.dart';
+import 'repository_providers.dart';
+import '../../features/plants/presentation/providers/plants_providers.dart';
+import '../../features/tasks/presentation/providers/tasks_providers.dart';
 
 part 'core_di_providers.g.dart';
 
@@ -35,29 +30,12 @@ part 'core_di_providers.g.dart';
 // EXTERNAL DEPENDENCIES (Firebase, SharedPreferences, etc.)
 // ============================================================================
 
-/// SharedPreferences instance provider
-/// Used for local storage and offline caching
-@riverpod
-Future<SharedPreferences> sharedPreferences(SharedPreferencesRef ref) async {
-  return SharedPreferences.getInstance();
-}
+// Duplicates removed
 
 /// Firebase Storage instance
 @riverpod
 FirebaseStorage firebaseStorage(FirebaseStorageRef ref) {
   return FirebaseStorage.instance;
-}
-
-/// Firebase Firestore instance
-@riverpod
-FirebaseFirestore firebaseFirestore(FirebaseFirestoreRef ref) {
-  return FirebaseFirestore.instance;
-}
-
-/// Firebase Auth instance
-@riverpod
-FirebaseAuth firebaseAuth(FirebaseAuthRef ref) {
-  return FirebaseAuth.instance;
 }
 
 /// Firebase Functions instance
@@ -66,32 +44,200 @@ FirebaseFunctions firebaseFunctions(FirebaseFunctionsRef ref) {
   return FirebaseFunctions.instance;
 }
 
-/// Connectivity plugin instance
+/// Firebase Performance Service (No-op implementation for now)
 @riverpod
-Connectivity connectivity(ConnectivityRef ref) {
-  return Connectivity();
+IPerformanceRepository performanceRepository(PerformanceRepositoryRef ref) {
+  // TODO: Implement proper performance monitoring when available
+  return _StubPerformanceRepository();
 }
 
-/// Connectivity service (singleton wrapper)
-@riverpod
-ConnectivityService connectivityService(ConnectivityServiceRef ref) {
-  return ConnectivityService.instance;
-}
-
-// ============================================================================
-// CORE REPOSITORIES (from core package + local implementations)
-// ============================================================================
-
-/// IAuthRepository provider - Firebase Auth implementation
-@riverpod
-IAuthRepository authRepository(AuthRepositoryRef ref) {
-  return PlantisSecurityConfig.createEnhancedAuthService();
-}
-
-/// ISubscriptionRepository provider - RevenueCat implementation
-@riverpod
-ISubscriptionRepository subscriptionRepository(SubscriptionRepositoryRef ref) {
-  return RevenueCatService();
+class _StubPerformanceRepository implements IPerformanceRepository {
+  @override
+  Future<bool> startPerformanceTracking({PerformanceConfig? config}) async => true;
+  
+  @override
+  Future<bool> stopPerformanceTracking() async => true;
+  
+  @override
+  Future<bool> pausePerformanceTracking() async => true;
+  
+  @override
+  Future<bool> resumePerformanceTracking() async => true;
+  
+  @override
+  PerformanceMonitoringState getMonitoringState() => PerformanceMonitoringState.stopped;
+  
+  @override
+  Future<void> setPerformanceThresholds(PerformanceThresholds thresholds) async {}
+  
+  @override
+  Stream<double> getFpsStream() => Stream.value(60.0);
+  
+  @override
+  Future<double> getCurrentFps() async => 60.0;
+  
+  @override
+  Future<FpsMetrics> getFpsMetrics({Duration? period}) async => const FpsMetrics(
+    currentFps: 60,
+    averageFps: 60,
+    minFps: 60,
+    maxFps: 60,
+    frameDrops: 0,
+    jankFrames: 0,
+    measurementDuration: Duration(seconds: 1),
+  );
+  
+  @override
+  Future<bool> isFpsHealthy() async => true;
+  
+  @override
+  Stream<MemoryUsage> getMemoryStream() => Stream.value(const MemoryUsage(
+    usedMemory: 0,
+    totalMemory: 0,
+    availableMemory: 0,
+  ));
+  
+  @override
+  Future<MemoryUsage> getMemoryUsage() async => const MemoryUsage(
+    usedMemory: 0,
+    totalMemory: 0,
+    availableMemory: 0,
+  );
+  
+  @override
+  Future<bool> isMemoryHealthy() async => true;
+  
+  @override
+  Future<void> forceGarbageCollection() async {}
+  
+  @override
+  Future<double> getCpuUsage() async => 0.0;
+  
+  @override
+  Stream<double> getCpuStream() => Stream.value(0.0);
+  
+  @override
+  Future<bool> isCpuHealthy() async => true;
+  
+  @override
+  Future<AppStartupMetrics> getStartupMetrics() async => const AppStartupMetrics(
+    coldStartTime: Duration(seconds: 1),
+    warmStartTime: Duration(milliseconds: 500),
+    firstFrameTime: Duration(milliseconds: 100),
+    timeToInteractive: Duration(milliseconds: 500),
+  );
+  
+  @override
+  Future<void> markAppStarted() async {}
+  
+  @override
+  Future<void> markFirstFrame() async {}
+  
+  @override
+  Future<void> markAppInteractive() async {}
+  
+  @override
+  Future<void> startTrace(String traceName, {Map<String, String>? attributes}) async {}
+  
+  @override
+  Future<TraceResult?> stopTrace(String traceName, {Map<String, double>? metrics}) async => null;
+  
+  @override
+  Future<Duration> measureOperationTime<T>(
+    String operationName,
+    Future<T> Function() operation, {
+    Map<String, String>? attributes,
+  }) async {
+    final stopwatch = Stopwatch()..start();
+    await operation();
+    stopwatch.stop();
+    return stopwatch.elapsed;
+  }
+  
+  @override
+  List<String> getActiveTraces() => [];
+  
+  @override
+  Future<void> recordCustomMetric({
+    required String name,
+    required double value,
+    required MetricType type,
+    String? unit,
+    Map<String, String>? tags,
+  }) async {}
+  
+  @override
+  Future<void> incrementCounter(String name, {Map<String, String>? tags}) async {}
+  
+  @override
+  Future<void> recordGauge(String name, double value, {Map<String, String>? tags}) async {}
+  
+  @override
+  Future<void> recordTiming(String name, Duration duration, {Map<String, String>? tags}) async {}
+  
+  @override
+  Future<PerformanceMetrics> getCurrentMetrics() async => PerformanceMetrics(
+    timestamp: DateTime.now(),
+    fps: 60,
+    memoryUsage: const MemoryUsage(
+      usedMemory: 0,
+      totalMemory: 0,
+      availableMemory: 0,
+    ),
+    cpuUsage: 0,
+  );
+  
+  @override
+  Future<List<PerformanceMetrics>> getPerformanceHistory({
+    DateTime? since,
+    int? limit,
+    Duration? period,
+  }) async => [];
+  
+  @override
+  Future<Map<String, dynamic>> getPerformanceReport({
+    DateTime? startTime,
+    DateTime? endTime,
+  }) async => {};
+  
+  @override
+  Future<String> exportPerformanceData({
+    required String format,
+    DateTime? startTime,
+    DateTime? endTime,
+  }) async => '';
+  
+  @override
+  Stream<Map<String, dynamic>> getPerformanceAlertsStream() => Stream.value({});
+  
+  @override
+  Future<List<String>> checkPerformanceIssues() async => [];
+  
+  @override
+  Future<void> setPerformanceAlertCallback(
+    void Function(String alertType, Map<String, dynamic> data) callback,
+  ) async {}
+  
+  @override
+  Future<bool> syncWithFirebase() async => true;
+  
+  @override
+  Future<void> enableFirebaseSync({Duration? interval}) async {}
+  
+  @override
+  Future<void> disableFirebaseSync() async {}
+  
+  @override
+  Future<void> clearOldPerformanceData({Duration? olderThan}) async {}
+  
+  @override
+  Future<Map<String, dynamic>> getDevicePerformanceInfo() async => {};
+  
+  @override
+  Future<Map<String, bool>> getFeatureSupport() async => {};
+  
+  @override
+  Future<void> resetAllMetrics() async {}
 }
 
 /// IAnalyticsRepository provider - Firebase Analytics implementation
@@ -119,21 +265,9 @@ IAppRatingRepository appRatingRepository(AppRatingRepositoryRef ref) {
   );
 }
 
-/// IPerformanceRepository provider
-@riverpod
-IPerformanceRepository performanceRepository(PerformanceRepositoryRef ref) {
-  // TODO: Implement proper performance repository
-  // For now, return a stub that delegates to core package
-  return FirebasePerformanceService();
-}
 
-/// ILocalStorageRepository provider - Drift-based implementation
-@riverpod
-ILocalStorageRepository localStorageRepository(LocalStorageRepositoryRef ref) {
-  // TODO: Implement proper local storage with Drift
-  // For now, return a stub implementation
-  return _StubLocalStorageRepository();
-}
+// localStorageRepository removed (duplicate)
+
 
 /// IFileRepository provider - File manager service
 @riverpod
@@ -199,7 +333,17 @@ UrlLauncherService urlLauncherService(UrlLauncherServiceRef ref) {
 /// Data Cleaner Service
 @riverpod
 DataCleanerService dataCleanerService(DataCleanerServiceRef ref) {
-  return DataCleanerService();
+  final plantsRepository = ref.watch(plantsRepositoryProvider);
+  final tasksRepository = ref.watch(tasksRepositoryProvider);
+  final spacesRepository = ref.watch(spacesRepositoryProvider);
+  final deletePlantUseCase = ref.watch(deletePlantUseCaseProvider);
+
+  return DataCleanerService(
+    plantsRepository: plantsRepository,
+    tasksRepository: tasksRepository,
+    spacesRepository: spacesRepository,
+    deletePlantUseCase: deletePlantUseCase,
+  );
 }
 
 // ============================================================================
@@ -270,7 +414,7 @@ IPlantNotificationManager plantNotificationManager(
 INotificationPermissionManager notificationPermissionManager(
   NotificationPermissionManagerRef ref,
 ) {
-  return ref.watch(notificationManagerProvider);
+  return ref.watch(notificationManagerProvider) as INotificationPermissionManager;
 }
 
 /// INotificationScheduleManager implementation
@@ -285,28 +429,11 @@ INotificationScheduleManager notificationScheduleManager(
 // AUTH & STATE MANAGEMENT
 // ============================================================================
 
-/// Auth State Notifier (singleton for app-wide auth state)
-@riverpod
-AuthStateNotifier authStateNotifier(AuthStateNotifierRef ref) {
-  return AuthStateNotifier.instance;
-}
+// AuthStateNotifier provider is defined in auth_state_provider.dart
+// to avoid circular dependencies and conflicts
 
 // ============================================================================
 // STUB IMPLEMENTATIONS (Temporary placeholders for TODO items)
 // ============================================================================
 
 /// Temporary stub for local storage repository
-/// TODO: Implement proper Drift-based storage
-class _StubLocalStorageRepository implements ILocalStorageRepository {
-  @override
-  Future<void> saveData(String key, String value) async {}
-
-  @override
-  Future<String?> getData(String key) async => null;
-
-  @override
-  Future<void> deleteData(String key) async {}
-
-  @override
-  Future<void> clearAllData() async {}
-}

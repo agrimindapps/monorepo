@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import '../interfaces/calculator_strategy.dart';
 import '../strategies/npk_calculation_strategy.dart';
 
@@ -7,7 +5,6 @@ import '../strategies/npk_calculation_strategy.dart';
 /// 
 /// Implementa registro automático via DI, seguindo Open/Closed Principle (OCP)
 /// e Dependency Inversion Principle (DIP). Elimina hardcoding de estratégias.
-@LazySingleton()
 class CalculatorStrategyRegistry {
   final List<ICalculatorStrategy> _strategies;
   final Map<String, ICalculatorStrategy> _strategyMap = {};
@@ -268,16 +265,4 @@ class RegistryValidationReport {
   }
 }
 
-/// Módulo DI para configurar automaticamente as estratégias
-@module
-abstract class CalculatorStrategyModule {
-  /// Registra automaticamente todas as estratégias disponíveis
-  /// 
-  /// Esta função será chamada pelo sistema de DI para criar uma lista
-  /// de todas as estratégias implementadas no sistema
-  List<ICalculatorStrategy> strategies(
-    NPKCalculationStrategy npkStrategy,
-  ) => [
-    npkStrategy,
-  ];
-}
+

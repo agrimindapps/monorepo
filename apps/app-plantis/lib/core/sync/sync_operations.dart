@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import '../data/models/sync_queue_item.dart' as local;
 import 'sync_queue.dart' as local;
 
-@singleton
 class SyncOperations {
   final local.SyncQueue _syncQueue;
   final ConnectivityService _connectivityService;

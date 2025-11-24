@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart' as local_failures;
 
@@ -26,7 +25,6 @@ import '../../../../core/error/failures.dart' as local_failures;
 ///   isCache: true,
 /// );
 /// ```
-@lazySingleton
 class MedicationErrorHandlingService {
   /// Executes an operation that returns data, handling errors automatically
   ///

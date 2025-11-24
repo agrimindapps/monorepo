@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/cash_vs_installment_calculation_model.dart';
@@ -14,7 +13,6 @@ abstract class CashVsInstallmentLocalDataSource {
   Future<void> clearAll();
 }
 
-@Injectable(as: CashVsInstallmentLocalDataSource)
 class CashVsInstallmentLocalDataSourceImpl
     implements CashVsInstallmentLocalDataSource {
   static const String _storagePrefix = 'cash_vs_installment_calculations';

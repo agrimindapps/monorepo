@@ -1,4 +1,4 @@
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 import '../../domain/entities/rain_gauge_entity.dart';
 import '../../domain/entities/weather_measurement_entity.dart';
 import '../../domain/entities/weather_statistics_entity.dart';
@@ -8,7 +8,7 @@ import '../datasources/weather_local_datasource.dart';
 import '../datasources/weather_remote_datasource.dart';
 import '../models/rain_gauge_model.dart';
 import '../models/weather_measurement_model.dart';
-import '../models/weather_statistics_model.dart';
+
 
 /// Implementation of weather repository following Clean Architecture
 /// Implements offline-first strategy with automatic sync when online

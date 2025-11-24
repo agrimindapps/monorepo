@@ -3,31 +3,33 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../core/di/injection_container.dart' as di;
 import '../../../../../core/interfaces/i_premium_service.dart';
+import '../../../../../core/providers/core_providers.dart';
+import '../../../../../core/services/riverpod_premium_service.dart';
+import '../../../../../features/analytics/analytics_providers.dart';
 
 part 'analytics_debug_notifier.g.dart';
 
 /// Specialized notifier for analytics and debug operations
-/// 
+///
 /// ✅ SINGLE RESPONSIBILITY PRINCIPLE (SRP):
 /// - Manages ONLY analytics, crashes, and debug-only operations
 /// - Does NOT handle user settings, notifications, or theme preferences
 /// - Delegates other concerns to specialized notifiers:
 ///   • ThemeNotifier: theme-related settings
 ///   • NotificationsNotifier: notification preferences
-/// 
+///
 /// ✅ DEPENDENCY INVERSION PRINCIPLE (DIP):
 /// - Depends on repository abstractions (IAnalyticsRepository, ICrashlyticsRepository, etc.)
 /// - Not on concrete implementations
 /// - Allows for easy mocking and testing
-/// 
+///
 /// ✅ DEBUG-ONLY FUNCTIONALITY:
 /// - testAnalytics(): Logs test events for analytics validation
 /// - testCrashlytics(): Tests crash reporting functionality
 /// - generateTestLicense() / removeTestLicense(): For premium testing only
 /// - showRateAppDialog(): Triggers app rating flow
-/// 
+///
 /// ⚠️ NOTE: Debug-only methods should be gated by kDebugMode in UI layer
 /// This notifier contains debug functionality and should only be used in development/testing
 @riverpod
@@ -41,10 +43,10 @@ class AnalyticsDebugNotifier extends _$AnalyticsDebugNotifier {
   Future<void> build() async {
     // Lazy-load dependencies via DI - follows Dependency Inversion
     // All dependencies are abstractions (interfaces), enabling polymorphism
-    _analyticsRepository = di.sl<IAnalyticsRepository>();
-    _crashlyticsRepository = di.sl<ICrashlyticsRepository>();
-    _appRatingRepository = di.sl<IAppRatingRepository>();
-    _premiumService = di.sl<IPremiumService>();
+    _analyticsRepository = ref.watch(analyticsRepositoryProvider);
+    _crashlyticsRepository = ref.watch(crashlyticsRepositoryProvider);
+    _appRatingRepository = ref.watch(appRatingRepositoryProvider);
+    _premiumService = ref.watch(premiumServiceAdapterProvider);
   }
 
   /// Test analytics functionality
@@ -134,4 +136,10 @@ class AnalyticsDebugNotifier extends _$AnalyticsDebugNotifier {
       return false;
     }
   }
+}
+
+/// Provider for IPremiumService
+@riverpod
+IPremiumService premiumServiceAdapter(Ref ref) {
+  return RiverpodPremiumService(ref.container);
 }

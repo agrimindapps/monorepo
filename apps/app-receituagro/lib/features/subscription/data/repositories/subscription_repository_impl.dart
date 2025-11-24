@@ -5,7 +5,7 @@ import '../../presentation/services/subscription_error_message_service.dart';
 
 /// Implementação do repositório de subscription específico do ReceitaAgro
 /// Utiliza o core ISubscriptionRepository e adiciona funcionalidades específicas do app
-@LazySingleton(as: IAppSubscriptionRepository)
+
 class SubscriptionRepositoryImpl implements IAppSubscriptionRepository {
   SubscriptionRepositoryImpl(
     this._coreRepository,

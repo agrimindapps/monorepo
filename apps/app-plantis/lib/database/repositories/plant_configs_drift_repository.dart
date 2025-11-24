@@ -5,7 +5,6 @@ import '../../core/data/models/planta_config_model.dart';
 import '../plantis_database.dart' as db;
 
 /// Repository Drift para PlantConfigs (configurações de cuidados - 1:1 com Plants)
-@lazySingleton
 class PlantConfigsDriftRepository {
   final db.PlantisDatabase _db;
 

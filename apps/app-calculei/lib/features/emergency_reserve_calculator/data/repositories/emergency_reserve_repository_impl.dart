@@ -1,20 +1,19 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/emergency_reserve_calculation.dart';
 import '../../domain/repositories/emergency_reserve_repository.dart';
 import '../datasources/emergency_reserve_local_datasource.dart';
 import '../models/emergency_reserve_calculation_model.dart';
 
-@Injectable(as: EmergencyReserveRepository)
 class EmergencyReserveRepositoryImpl implements EmergencyReserveRepository {
   final EmergencyReserveLocalDataSource _localDataSource;
 
   EmergencyReserveRepositoryImpl(this._localDataSource);
 
   @override
-  Future<Either<Failure, EmergencyReserveCalculation>> saveCalculation(EmergencyReserveCalculation calculation) async {
+  Future<Either<Failure, EmergencyReserveCalculation>> saveCalculation(
+      EmergencyReserveCalculation calculation) async {
     try {
       final model = EmergencyReserveCalculationModel.fromEntity(calculation);
       final saved = await _localDataSource.save(model);
@@ -27,7 +26,8 @@ class EmergencyReserveRepositoryImpl implements EmergencyReserveRepository {
   }
 
   @override
-  Future<Either<Failure, List<EmergencyReserveCalculation>>> getCalculationHistory({int limit = 10}) async {
+  Future<Either<Failure, List<EmergencyReserveCalculation>>>
+      getCalculationHistory({int limit = 10}) async {
     try {
       final models = await _localDataSource.getAll(limit: limit);
       final entities = models.map((model) => model.toEntity()).toList();
@@ -40,7 +40,8 @@ class EmergencyReserveRepositoryImpl implements EmergencyReserveRepository {
   }
 
   @override
-  Future<Either<Failure, EmergencyReserveCalculation>> getCalculationById(String id) async {
+  Future<Either<Failure, EmergencyReserveCalculation>> getCalculationById(
+      String id) async {
     try {
       final model = await _localDataSource.getById(id);
       if (model == null) {

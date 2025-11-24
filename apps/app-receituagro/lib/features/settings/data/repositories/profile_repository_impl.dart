@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/providers/receituagro_auth_notifier.dart';
+import '../../../../core/providers/auth_providers.dart';
+import '../../../../core/providers/auth_state.dart' as local;
 import '../../domain/repositories/profile_repository.dart';
 
 /// Conversão de Result<T> para Either<Failure, T>
@@ -47,16 +48,16 @@ Future<Either<Failure, Unit>> _resultToEitherUnitAsync(
 
 /// Implementação do ProfileRepository para ReceitaAgro
 /// Utiliza o ProfileImageService do core package
-/// NOTE: Cannot use @injectable due to function type dependency
+/// NOTE: Cannot use  due to function type dependency
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileImageService _profileImageService;
-  final ReceitaAgroAuthState? Function() _getAuthState;
+  final local.AuthState? Function() _getAuthState;
 
   ProfileRepositoryImpl({
     required ProfileImageService profileImageService,
-    required ReceitaAgroAuthState? Function() getAuthState,
-  }) : _profileImageService = profileImageService,
-       _getAuthState = getAuthState;
+    required local.AuthState? Function() getAuthState,
+  })  : _profileImageService = profileImageService,
+        _getAuthState = getAuthState;
 
   @override
   Future<Either<Failure, ProfileImageResult>> uploadProfileImage(

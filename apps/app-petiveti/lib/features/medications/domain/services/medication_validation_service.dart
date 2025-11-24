@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../entities/medication.dart';
@@ -17,7 +16,6 @@ import '../entities/medication.dart';
 /// final validationResult = _validationService.validateForAdd(medication);
 /// if (validationResult.isLeft()) return validationResult;
 /// ```
-@lazySingleton
 class MedicationValidationService {
   /// Validates medication name
   ///

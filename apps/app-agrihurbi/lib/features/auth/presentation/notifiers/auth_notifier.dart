@@ -3,7 +3,6 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
@@ -11,6 +10,7 @@ import '../../domain/usecases/login_usecase.dart' as local_login;
 import '../../domain/usecases/logout_usecase.dart' as local_logout;
 import '../../domain/usecases/refresh_user_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
+import '../providers/auth_di_providers.dart';
 import 'auth_state.dart';
 
 part 'auth_notifier.g.dart';
@@ -30,16 +30,17 @@ class AuthNotifier extends _$AuthNotifier {
 
   @override
   AuthState build() {
-    // Get use cases from GetIt
-    _loginUseCase = getIt<local_login.LoginUseCase>();
-    _registerUseCase = getIt<RegisterUseCase>();
-    _logoutUseCase = getIt<local_logout.LogoutUseCase>();
-    _getCurrentUserUseCase = getIt<GetCurrentUserUseCase>();
-    _refreshUserUseCase = getIt<RefreshUserUseCase>();
+    // Get use cases from Riverpod providers
+    _loginUseCase = ref.watch(loginUseCaseProvider);
+    _registerUseCase = ref.watch(registerUseCaseProvider);
+    _logoutUseCase = ref.watch(logoutUseCaseProvider);
+    _getCurrentUserUseCase = ref.watch(getCurrentUserUseCaseProvider);
+    _refreshUserUseCase = ref.watch(refreshUserUseCaseProvider);
 
     // Try to get optional service
     try {
-      _enhancedDeletionService = getIt<EnhancedAccountDeletionService>();
+      _enhancedDeletionService =
+          ref.watch(enhancedAccountDeletionServiceProvider);
     } catch (e) {
       _enhancedDeletionService = null;
       debugPrint('AuthNotifier: EnhancedAccountDeletionService not available');
@@ -426,7 +427,8 @@ class AuthNotifier extends _$AuthNotifier {
         );
         state = state.copyWith(
           isLoading: false,
-          errorMessage: 'Funcionalidade de exclusão de conta não está disponível',
+          errorMessage:
+              'Funcionalidade de exclusão de conta não está disponível',
         );
         return false;
       }

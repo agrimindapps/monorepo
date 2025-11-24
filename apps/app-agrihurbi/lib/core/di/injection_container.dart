@@ -1,11 +1,6 @@
-import 'package:core/core.dart' as core_lib;
-import 'package:core/core.dart' show GetIt;
-import 'package:flutter/foundation.dart';
-
-import '../network/auth_interceptor.dart';
-import '../services/premium_service.dart';
-
-final getIt = GetIt.instance;
+// This file has been migrated to Riverpod dependency injection
+// All dependencies are now managed through providers in lib/core/providers/
+// See: lib/core/providers/app_providers.dart and feature-specific provider files
 
 /// Placeholder for injectable configuration
 /// Run 'flutter packages pub run build_runner build' to generate
@@ -16,14 +11,19 @@ void configureDependencies() {
 }
 
 /// Legacy initialization function for backward compatibility
+/// TODO: Remove this function as it's no longer used - migrated to Riverpod
+/*
 Future<void> init({bool firebaseEnabled = false}) async {
   await configureAppDependencies(firebaseEnabled: firebaseEnabled);
 }
+*/
 
 /// Configure dependencies using @injectable + code generation
 ///
 /// MASSIVE REDUCTION: from 400+ lines to <50 lines!
 /// All @injectable classes are auto-registered by code generation
+/// TODO: Remove this function as it's no longer used - migrated to Riverpod
+/*
 Future<void> configureAppDependencies({bool firebaseEnabled = false}) async {
   // Register Firebase services only if Firebase is initialized
   if (firebaseEnabled) {
@@ -74,3 +74,4 @@ Future<void> configureAppDependencies({bool firebaseEnabled = false}) async {
     '   - Injectable dependencies: Auto-registered by code generation',
   );
 }
+*/

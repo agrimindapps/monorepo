@@ -48,16 +48,6 @@ class CulturaMapper {
     return drifts.map((drift) => fromDriftToEntity(drift)).toList();
   }
 
-  /// Converte Cultura Drift para Entity (alias for consistency)
-  static CulturaEntity fromDriftToEntity(Cultura drift) {
-    return fromDriftToEntity(drift);
-  }
-
-  /// Converte lista de Cultura Drift para Entities (alias for consistency)
-  static List<CulturaEntity> fromDriftToEntityList(List<Cultura> drifts) {
-    return fromDriftToEntityList(drifts);
-  }
-
   /// Converte lista de Entities para Models
   static List<CulturaModel> toModelList(List<CulturaEntity> entities) {
     return entities.map((entity) => toModel(entity)).toList();

@@ -4,7 +4,6 @@ import 'package:core/core.dart';
 /// Gerencia limpeza de farms, fields, crops, activities, harvests e cache local
 /// 
 /// NOTE: Drift support temporarily disabled - using SharedPreferences only
-@LazySingleton(as: IAppDataCleaner)
 class AgrihurbiDataCleaner implements IAppDataCleaner {
   // final IDriftManager _driftManager;
   final SharedPreferences _prefs;

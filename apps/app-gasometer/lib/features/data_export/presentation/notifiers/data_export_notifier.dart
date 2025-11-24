@@ -1,20 +1,32 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/services/analytics/gasometer_analytics_service.dart';
+import '../../../../core/providers/dependency_providers.dart';
+import '../../../../database/providers/database_providers.dart';
 import '../../data/repositories/data_export_repository_impl.dart';
 import '../../domain/entities/export_progress.dart';
 import '../../domain/entities/export_request.dart';
 import '../../domain/repositories/data_export_repository.dart';
+import '../../domain/services/data_export_service.dart';
 import '../../domain/services/platform_export_service.dart';
 import '../state/data_export_state.dart';
+import '../../../../core/services/analytics/gasometer_analytics_service.dart';
 
 part 'data_export_notifier.g.dart';
+
+/// Provider para o serviço de exportação
+@riverpod
+DataExportService dataExportService(Ref ref) {
+  final db = ref.watch(gasometerDatabaseProvider);
+  final authService = ref.watch(firebaseAuthServiceProvider);
+  return DataExportService(db, authService);
+}
 
 /// Provider para o repository de exportação
 @riverpod
 DataExportRepository dataExportRepository(Ref ref) {
-  return DataExportRepositoryImpl();
+  final exportService = ref.watch(dataExportServiceProvider);
+  return DataExportRepositoryImpl(exportService);
 }
 
 /// Provider para o serviço de plataforma
@@ -23,12 +35,12 @@ PlatformExportService platformExportService(Ref ref) {
   return PlatformExportServiceFactory.create();
 }
 
-/// Provider para o analytics service (GetIt)
+/// Provider para o analytics service
 @riverpod
 GasometerAnalyticsService? gasometerAnalyticsService(
   Ref ref,
 ) {
-  return null;
+  return ref.watch(gasometerAnalyticsServiceProvider);
 }
 
 /// Notifier para gerenciar o estado da exportação de dados LGPD

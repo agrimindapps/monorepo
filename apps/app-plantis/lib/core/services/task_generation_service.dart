@@ -4,7 +4,6 @@ import '../../features/tasks/domain/entities/task.dart' as task_entity;
 import '../data/models/planta_config_model.dart';
 
 /// Serviço central para geração automática de tarefas baseado na configuração das plantas
-@injectable
 class TaskGenerationService {
   /// Mapeia tipos de cuidado para informações de exibição
   static const Map<String, Map<String, dynamic>> careTypeInfo = {

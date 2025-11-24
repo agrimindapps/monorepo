@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
@@ -10,7 +9,6 @@ import '../models/comentario_model.dart';
 
 /// Implementation of ComentariosRepository
 /// Following Repository Pattern and Clean Architecture
-@LazySingleton(as: ComentariosRepository)
 class ComentariosRepositoryImpl implements ComentariosRepository {
   final ComentariosLocalDataSource _localDataSource;
 

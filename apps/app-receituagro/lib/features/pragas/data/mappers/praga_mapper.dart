@@ -74,14 +74,4 @@ class PragaMapper {
   static List<PragasCompanion> fromEntityToDriftList(List<PragaEntity> entities) {
     return entities.map((entity) => fromEntityToDrift(entity)).toList();
   }
-
-  /// Converte Drift Praga para Entity (alias for consistency)
-  static PragaEntity fromDriftToEntity(Praga drift) {
-    return fromDriftToEntity(drift);
-  }
-
-  /// Converte lista de Drift Praga para Entities (alias for consistency)
-  static List<PragaEntity> fromDriftToEntityList(List<Praga> drifts) {
-    return fromDriftToEntityList(drifts);
-  }
 }

@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/di/injection_container.dart';
+// import '../../../../core/di/injection_container.dart';
 import '../../domain/services/bovine_form_service.dart';
+import '../../domain/services/livestock_validation_service.dart';
 import '../providers/bovine_form_provider.dart';
 import '../providers/bovines_provider.dart';
 import '../widgets/bovine_additional_info_section.dart';
@@ -13,7 +14,11 @@ import '../widgets/bovine_form_action_buttons.dart';
 import '../widgets/bovine_status_section.dart';
 
 final bovineFormProvider = ChangeNotifierProvider<BovineFormProvider>((ref) {
-  final formService = getIt<BovineFormService>();
+  // TODO: Replace getIt calls with Riverpod providers
+  // final formService = getIt<BovineFormService>();
+  // Temporary mock service for migration
+  final validationService = LivestockValidationService();
+  final formService = BovineFormService(validationService);
   return BovineFormProvider(formService);
 });
 

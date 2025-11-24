@@ -2,7 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/providers/receituagro_auth_notifier.dart';
+import '../../../../core/providers/auth_notifier.dart';
+import '../../../../core/providers/auth_providers.dart';
 import '../../services/auth_validation_service.dart';
 import '../state/login_state.dart';
 
@@ -40,8 +41,8 @@ class LoginNotifier extends _$LoginNotifier {
   }
 
   /// Helper para acessar o auth notifier via Riverpod
-  ReceitaAgroAuthNotifier get _authNotifier =>
-      ref.read(receitaAgroAuthNotifierProvider.notifier);
+  AuthNotifier get _authNotifier =>
+      ref.read(authNotifierProvider.notifier);
 
   TextEditingController get emailController => _emailController;
   TextEditingController get passwordController => _passwordController;

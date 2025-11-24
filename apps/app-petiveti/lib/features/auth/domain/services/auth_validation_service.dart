@@ -1,11 +1,9 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 
 /// Service responsible for authentication-related validations
 /// Follows Single Responsibility Principle - only handles validation logic
-@lazySingleton
 class AuthValidationService {
   const AuthValidationService();
 

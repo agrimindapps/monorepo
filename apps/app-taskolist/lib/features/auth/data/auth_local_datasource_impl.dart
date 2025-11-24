@@ -6,7 +6,6 @@ import '../../../database/taskolist_database.dart';
 import 'auth_local_datasource.dart';
 import 'user_model.dart';
 
-@LazySingleton(as: AuthLocalDataSource)
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   final TaskolistDatabase _database;
   late final UserDao _userDao;

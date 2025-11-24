@@ -5,7 +5,7 @@ import '../services/recommendation/i_diagnosticos_recommendation_service.dart';
 
 /// Use Case para obter recomendações de diagnósticos
 /// Responsabilidade única: Retornar diagnósticos recomendados
-@injectable
+
 class GetRecommendationsUseCase {
   final IDiagnosticosRecommendationService _recommendationService;
 

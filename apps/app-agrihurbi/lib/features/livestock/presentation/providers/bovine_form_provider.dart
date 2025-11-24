@@ -29,6 +29,7 @@ class BovineFormProvider extends ChangeNotifier {
     final controller = _controllerPool[key];
     controller?.clear();
   }
+
   late final TextEditingController _commonNameController = _getController(
     'commonName',
   );
@@ -160,8 +161,7 @@ class BovineFormProvider extends ChangeNotifier {
 
   void _onFormChanged() {
     final currentData = _getCurrentFormData();
-    final hasChanges =
-        _originalData != null &&
+    final hasChanges = _originalData != null &&
         _formService.hasFormChanged(currentData, _originalData!);
 
     if (hasChanges != _hasUnsavedChanges) {

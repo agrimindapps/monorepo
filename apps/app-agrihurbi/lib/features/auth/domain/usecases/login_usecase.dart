@@ -7,7 +7,6 @@ import '../repositories/auth_repository.dart';
 /// 
 /// Implementa UseCase que retorna a entidade do usuário em caso de sucesso
 /// Inclui validações de email, senha e segurança
-@lazySingleton
 class LoginUseCase implements UseCase<local_user.UserEntity, LoginParams> {
   final AuthRepository repository;
   final FirebaseAnalyticsService _analyticsService;

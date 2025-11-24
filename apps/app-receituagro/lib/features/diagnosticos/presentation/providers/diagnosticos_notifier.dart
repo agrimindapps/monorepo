@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/services/failure_message_service.dart';
+import '../../../../core/services/failure_message_service.dart' as core_failure;
 import '../../../../core/services/i_recommendation_service.dart';
+import '../../../../core/providers/core_providers.dart';
+import '../../../../core/providers/recommendation_provider.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/services/filtering/i_diagnosticos_filter_service.dart';
 import '../../domain/services/metadata/i_diagnosticos_metadata_service.dart';
@@ -48,7 +50,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   late final IDiagnosticosMetadataService _metadataService;
   late final IDiagnosticosStatsService _statsService;
   late final IRecommendationService _recommendationService;
-  late final FailureMessageService _failureMessageService;
+  late final core_failure.FailureMessageService _failureMessageService;
 
   // ========== Use Cases (Kept for backward compatibility) ==========
   late final GetDiagnosticosUseCase _getDiagnosticosUseCase;
@@ -57,12 +59,12 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   @override
   Future<DiagnosticosState> build() async {
     // ========== Inject Specialized Services (New Architecture) ==========
-    _filterService = ref.read(iDiagnosticosFilterServiceProvider);
-    _searchService = ref.read(iDiagnosticosSearchServiceProvider);
-    _metadataService = ref.read(iDiagnosticosMetadataServiceProvider);
-    _statsService = ref.read(iDiagnosticosStatsServiceProvider);
-    _recommendationService = ref.read(iRecommendationServiceProvider);
-    _failureMessageService = ref.read(failureMessageServiceProvider);
+    _filterService = ref.read(diagnosticosFilterServiceProvider);
+    _searchService = ref.read(diagnosticosSearchServiceProvider);
+    _metadataService = ref.read(diagnosticosMetadataServiceProvider);
+    _statsService = ref.read(diagnosticosStatsServiceProvider);
+    _recommendationService = ref.read(recommendationServiceProvider);
+    _failureMessageService = ref.read(core_failure.failureMessageServiceProvider);
 
     // ========== Inject Use Cases (Kept for backward compatibility) ==========
     _getDiagnosticosUseCase = ref.read(getDiagnosticosUseCaseProvider);

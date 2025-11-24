@@ -11,15 +11,10 @@ import '../entities/export_request.dart';
 
 /// Serviço principal para coleta e exportação de dados LGPD
 class DataExportService {
-  DataExportService._internal();
-  static DataExportService? _instance;
-  static DataExportService get instance {
-    _instance ??= DataExportService._internal();
-    return _instance!;
-  }
-
-  final _db = GetIt.I<GasometerDatabase>();
-  final _authService = GetIt.I<FirebaseAuthService>();
+  DataExportService(this._db, this._authService);
+  
+  final GasometerDatabase _db;
+  final FirebaseAuthService _authService;
 
   /// Coleta todos os dados do usuário de acordo com as categorias especificadas
   Future<Map<String, dynamic>> collectUserData(

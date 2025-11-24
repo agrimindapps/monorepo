@@ -1,12 +1,9 @@
-import 'package:core/core.dart' hide Column;
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../core/data/models/comentario_model.dart';
 import '../plantis_database.dart' as db;
 
 /// Repository Drift para Comments (comentários sobre plantas)
-@lazySingleton
 class CommentsDriftRepository {
   final db.PlantisDatabase _db;
 
@@ -38,16 +35,14 @@ class CommentsDriftRepository {
     final localPlantId = await _resolvePlantId(plantFirebaseId);
     if (localPlantId == null) return [];
 
-    final comments =
-        await (_db.select(_db.comments)
-              ..where(
-                (c) =>
-                    c.plantId.equals(localPlantId) & c.isDeleted.equals(false),
-              )
-              ..orderBy([
-                (c) => OrderingTerm.desc(c.createdAt),
-              ]))
-            .get();
+    final comments = await (_db.select(_db.comments)
+          ..where(
+            (c) => c.plantId.equals(localPlantId) & c.isDeleted.equals(false),
+          )
+          ..orderBy([
+            (c) => OrderingTerm.desc(c.createdAt),
+          ]))
+        .get();
 
     return comments.map(_commentDriftToModel).toList();
   }
@@ -93,7 +88,8 @@ class CommentsDriftRepository {
 
     final plant = await (_db.select(
       _db.plants,
-    )..where((p) => p.firebaseId.equals(plantFirebaseId))).getSingleOrNull();
+    )..where((p) => p.firebaseId.equals(plantFirebaseId)))
+        .getSingleOrNull();
     return plant?.id;
   }
 }

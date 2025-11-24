@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../providers/solid_providers.dart';
+import '../providers/repository_providers.dart';
 import '../services/plantis_sync_service.dart';
 
 /// Widget que exibe o status atual da sincronização

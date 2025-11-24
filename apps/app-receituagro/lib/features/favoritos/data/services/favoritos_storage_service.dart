@@ -2,7 +2,6 @@ import 'dart:developer' as developer;
 
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../../../core/di/injection_container.dart';
 import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../database/repositories/diagnostico_repository.dart';
 import '../../../../database/repositories/favorito_repository.dart';
@@ -16,10 +15,9 @@ import '../../domain/repositories/i_favoritos_repository.dart';
 /// ⚠️ NOTA: Esta classe é mantida por compatibilidade com IFavoritosStorage
 /// mas a implementação atual usa FavoritosService consolidado
 class FavoritosStorageService implements IFavoritosStorage {
-  // Lazy loading para evitar circular dependencies (DIP)
-  late final FavoritoRepository _repository;
+  final FavoritoRepository _repository;
 
-  bool _repositoryInitialized = false;
+  FavoritosStorageService(this._repository);
 
   static const Map<String, String> _storageKeys = {
     'defensivo': 'defensivos',
@@ -28,17 +26,9 @@ class FavoritosStorageService implements IFavoritosStorage {
     'cultura': 'culturas',
   };
 
-  /// Inicializa as dependências lazy (chamado na primeira vez que são acessadas)
-  void _initializeRepository() {
-    if (_repositoryInitialized) return;
-    _repository = sl<FavoritoRepository>();
-    _repositoryInitialized = true;
-  }
-
   @override
   Future<List<String>> getFavoriteIds(String tipo) async {
     try {
-      _initializeRepository();
       final boxName = _getBoxName(tipo);
       if (boxName == null) return [];
 
@@ -207,9 +197,8 @@ class FavoritosCacheService implements IFavoritosCache {
   @override
   Future<void> clearByPrefix(String prefix) async {
     try {
-      final keysToRemove = _memoryCache.keys
-          .where((key) => key.startsWith(prefix))
-          .toList();
+      final keysToRemove =
+          _memoryCache.keys.where((key) => key.startsWith(prefix)).toList();
 
       for (final key in keysToRemove) {
         await remove(key);
@@ -247,12 +236,17 @@ class FavoritosCacheService implements IFavoritosCache {
 /// Implementação do resolvedor de dados
 /// Princípio: Single Responsibility - Apenas resolução de dados
 class FavoritosDataResolverService implements IFavoritosDataResolver {
-  final FitossanitariosRepository _fitossanitarioRepository =
-      sl<FitossanitariosRepository>();
-  final PragasRepository _pragasRepository = sl<PragasRepository>();
-  final DiagnosticoRepository _diagnosticoRepository =
-      sl<DiagnosticoRepository>();
-  final CulturasRepository _culturaRepository = sl<CulturasRepository>();
+  final FitossanitariosRepository _fitossanitarioRepository;
+  final PragasRepository _pragasRepository;
+  final DiagnosticoRepository _diagnosticoRepository;
+  final CulturasRepository _culturaRepository;
+
+  FavoritosDataResolverService(
+    this._fitossanitarioRepository,
+    this._pragasRepository,
+    this._diagnosticoRepository,
+    this._culturaRepository,
+  );
 
   @override
   Future<Map<String, dynamic>?> resolveDefensivo(String id) async {
@@ -441,12 +435,17 @@ class FavoritosEntityFactoryService implements IFavoritosEntityFactory {
 /// Validador para favoritos
 /// Princípio: Single Responsibility - Apenas validação
 class FavoritosValidatorService implements IFavoritosValidator {
-  final FitossanitariosRepository _fitossanitarioRepository =
-      sl<FitossanitariosRepository>();
-  final PragasRepository _pragasRepository = sl<PragasRepository>();
-  final DiagnosticoRepository _diagnosticoRepository =
-      sl<DiagnosticoRepository>();
-  final CulturasRepository _culturaRepository = sl<CulturasRepository>();
+  final FitossanitariosRepository _fitossanitarioRepository;
+  final PragasRepository _pragasRepository;
+  final DiagnosticoRepository _diagnosticoRepository;
+  final CulturasRepository _culturaRepository;
+
+  FavoritosValidatorService(
+    this._fitossanitarioRepository,
+    this._pragasRepository,
+    this._diagnosticoRepository,
+    this._culturaRepository,
+  );
 
   @override
   Future<bool> canAddToFavorites(String tipo, String id) async {

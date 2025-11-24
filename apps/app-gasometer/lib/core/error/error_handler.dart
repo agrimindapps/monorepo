@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:core/core.dart' show injectable;
 import 'app_error.dart';
 import 'error_logger.dart';
 

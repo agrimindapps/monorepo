@@ -159,7 +159,7 @@ class WebExportService implements PlatformExportService {
 }
 
 /// Factory para criar serviço de plataforma apropriado
-@module
+
 abstract class PlatformExportServiceModule {
   
   PlatformExportService get platformExportService {

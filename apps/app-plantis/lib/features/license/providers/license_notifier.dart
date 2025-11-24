@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide Column, getIt;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 part 'license_notifier.g.dart';
@@ -341,7 +341,8 @@ class LicenseNotifier extends _$LicenseNotifier {
 
 @riverpod
 LicenseService licenseService(Ref ref) {
-  return GetIt.instance<LicenseService>();
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return LicenseService(prefs);
 }
 
 @riverpod

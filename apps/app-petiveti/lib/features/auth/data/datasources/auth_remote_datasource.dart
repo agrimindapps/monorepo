@@ -23,7 +23,6 @@ abstract class AuthRemoteDataSource {
   Stream<UserModel?> watchAuthState();
 }
 
-@LazySingleton(as: AuthRemoteDataSource)
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final firebase_auth.FirebaseAuth firebaseAuth;
   final FirebaseFirestore firestore;

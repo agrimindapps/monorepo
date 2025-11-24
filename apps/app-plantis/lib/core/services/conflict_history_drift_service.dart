@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
 
 import '../../database/repositories/conflict_history_drift_repository.dart';
 import '../data/models/conflict_history_model.dart';
@@ -9,7 +8,6 @@ import '../data/models/conflict_history_model.dart';
 ///
 /// Responsável por registrar conflitos de sincronização, rastrear
 /// resoluções e fornecer análise de conflitos.
-@lazySingleton
 class ConflictHistoryDriftService {
   final ConflictHistoryDriftRepository _repository;
 

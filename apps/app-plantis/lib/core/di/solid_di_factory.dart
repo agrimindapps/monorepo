@@ -1,4 +1,3 @@
-import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 import '../../features/plants/domain/usecases/add_plant_usecase.dart';
@@ -35,7 +34,10 @@ class SolidDIFactory {
   PlantsDataService createPlantsDataService({
     IAuthStateProvider? authProvider,
   }) {
-    return PlantsDataService.create(authProvider: authProvider);
+    // TODO: Implement proper dependency injection
+    // For now, return a stub implementation
+    throw UnimplementedError(
+        'PlantsDataService creation not implemented in DI factory');
   }
 
   PlantsFilterService createPlantsFilterService() {
@@ -75,17 +77,16 @@ class SolidDIFactory {
   PlantFormStateManager createPlantFormStateManager({
     FormValidationService? validationService,
     ImageManagementService? imageService,
-    GetPlantsUseCase? getPlantsUseCase,
-    AddPlantUseCase? addPlantUseCase,
-    UpdatePlantUseCase? updatePlantUseCase,
+    required GetPlantsUseCase getPlantsUseCase,
+    required AddPlantUseCase addPlantUseCase,
+    required UpdatePlantUseCase updatePlantUseCase,
   }) {
     return PlantFormStateManager(
       validationService: validationService ?? createFormValidationService(),
       imageService: imageService ?? createImageManagementService(),
-      getPlantsUseCase: getPlantsUseCase ?? GetIt.instance<GetPlantsUseCase>(),
-      addPlantUseCase: addPlantUseCase ?? GetIt.instance<AddPlantUseCase>(),
-      updatePlantUseCase:
-          updatePlantUseCase ?? GetIt.instance<UpdatePlantUseCase>(),
+      getPlantsUseCase: getPlantsUseCase,
+      addPlantUseCase: addPlantUseCase,
+      updatePlantUseCase: updatePlantUseCase,
     );
   }
 
@@ -106,121 +107,23 @@ class SolidDIFactory {
     );
   }
 
-  /// Cria PlantFormStateManager com configuração otimizada
-  PlantFormStateManager createOptimizedPlantFormStateManager() {
-    final validationService = createFormValidationService();
-    final imageService = createImageManagementService();
-
-    return PlantFormStateManager(
-      validationService: validationService,
-      imageService: imageService,
-      getPlantsUseCase: GetIt.instance<GetPlantsUseCase>(),
-      addPlantUseCase: GetIt.instance<AddPlantUseCase>(),
-      updatePlantUseCase: GetIt.instance<UpdatePlantUseCase>(),
-    );
-  }
-
   /// ==== REGISTRO NO CONTAINER DI ====
 
   /// Registra todas as dependências SOLID no GetIt
   void registerSolidDependencies() {
-    final getIt = GetIt.instance;
-    if (!getIt.isRegistered<IAuthStateProvider>()) {
-      getIt.registerSingleton<IAuthStateProvider>(createAuthStateProvider());
-    }
-
-    if (!getIt.isRegistered<FormValidationService>()) {
-      getIt.registerSingleton<FormValidationService>(
-        createFormValidationService(),
-      );
-    }
-
-    if (!getIt.isRegistered<ImageManagementService>()) {
-      getIt.registerSingleton<ImageManagementService>(
-        createImageManagementService(),
-      );
-    }
-
-    if (!getIt.isRegistered<PlantsDataService>()) {
-      getIt.registerSingleton<PlantsDataService>(
-        createPlantsDataService(authProvider: getIt<IAuthStateProvider>()),
-      );
-    }
-
-    if (!getIt.isRegistered<PlantsFilterService>()) {
-      getIt.registerSingleton<PlantsFilterService>(createPlantsFilterService());
-    }
-
-    if (!getIt.isRegistered<PlantsCareCalculator>()) {
-      getIt.registerSingleton<PlantsCareCalculator>(
-        createPlantsCareCalculator(),
-      );
-    }
-    if (!getIt.isRegistered<PlantsStateManager>()) {
-      getIt.registerFactory<PlantsStateManager>(
-        () => createPlantsStateManager(
-          dataService: getIt<PlantsDataService>(),
-          filterService: getIt<PlantsFilterService>(),
-          careCalculator: getIt<PlantsCareCalculator>(),
-          authProvider: getIt<IAuthStateProvider>(),
-        ),
-      );
-    }
-
-    if (!getIt.isRegistered<PlantFormStateManager>()) {
-      getIt.registerFactory<PlantFormStateManager>(
-        () => createPlantFormStateManager(
-          validationService: getIt<FormValidationService>(),
-          imageService: getIt<ImageManagementService>(),
-        ),
-      );
-    }
+    // GetIt usage removed
   }
 
   /// ==== HELPERS DE CONFIGURAÇÃO ====
 
   /// Verifica se todas as dependências SOLID estão registradas
   bool areSolidDependenciesRegistered() {
-    final getIt = GetIt.instance;
-
-    return getIt.isRegistered<IAuthStateProvider>() &&
-        getIt.isRegistered<FormValidationService>() &&
-        getIt.isRegistered<ImageManagementService>() &&
-        getIt.isRegistered<PlantsDataService>() &&
-        getIt.isRegistered<PlantsFilterService>() &&
-        getIt.isRegistered<PlantsCareCalculator>() &&
-        getIt.isRegistered<PlantsStateManager>() &&
-        getIt.isRegistered<PlantFormStateManager>();
+    return false;
   }
 
   /// Limpa todas as dependências SOLID registradas (para testes)
   void clearSolidDependencies() {
-    final getIt = GetIt.instance;
-
-    if (getIt.isRegistered<PlantFormStateManager>()) {
-      getIt.unregister<PlantFormStateManager>();
-    }
-    if (getIt.isRegistered<PlantsStateManager>()) {
-      getIt.unregister<PlantsStateManager>();
-    }
-    if (getIt.isRegistered<PlantsCareCalculator>()) {
-      getIt.unregister<PlantsCareCalculator>();
-    }
-    if (getIt.isRegistered<PlantsFilterService>()) {
-      getIt.unregister<PlantsFilterService>();
-    }
-    if (getIt.isRegistered<PlantsDataService>()) {
-      getIt.unregister<PlantsDataService>();
-    }
-    if (getIt.isRegistered<ImageManagementService>()) {
-      getIt.unregister<ImageManagementService>();
-    }
-    if (getIt.isRegistered<FormValidationService>()) {
-      getIt.unregister<FormValidationService>();
-    }
-    if (getIt.isRegistered<IAuthStateProvider>()) {
-      getIt.unregister<IAuthStateProvider>();
-    }
+    // GetIt usage removed
   }
 }
 

@@ -1,8 +1,12 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../core/providers/core_providers.dart';
 import '../receituagro_database.dart';
 import '../repositories/repositories.dart';
+import '../sync/adapters/comentarios_drift_sync_adapter.dart';
+import '../sync/adapters/favoritos_drift_sync_adapter.dart';
 
 part 'database_providers.g.dart';
 
@@ -14,10 +18,18 @@ part 'database_providers.g.dart';
 /// toda a vida do app. Quando o ref for disposed, fecha o banco.
 ///
 /// MIGRATED: Removida dependência de GetIt - cria instância diretamente
+///
+/// IMPORTANTE: keepAlive: true garante que apenas UMA instância seja criada
+/// durante toda a vida da aplicação, evitando race conditions
 @Riverpod(keepAlive: true)
 ReceituagroDatabase database(Ref ref) {
+  debugPrint('🔵 [DATABASE] Criando instância do ReceituagroDatabase');
   final db = ReceituagroDatabase.production();
-  ref.onDispose(() => db.close());
+  ref.onDispose(() {
+    debugPrint('🔴 [DATABASE] Fechando ReceituagroDatabase');
+    db.close();
+  });
+  debugPrint('✅ [DATABASE] ReceituagroDatabase criado e pronto');
   return db;
 }
 
@@ -49,6 +61,13 @@ ComentarioRepository comentarioRepository(Ref ref) {
 FitossanitariosRepository fitossanitariosRepository(Ref ref) {
   final db = ref.watch(databaseProvider);
   return FitossanitariosRepository(db);
+}
+
+/// Provider do repositório de informações de fitossanitários
+@riverpod
+FitossanitariosInfoRepository fitossanitariosInfoRepository(Ref ref) {
+  final db = ref.watch(databaseProvider);
+  return FitossanitariosInfoRepository(db);
 }
 
 /// Provider do repositório de culturas
@@ -132,4 +151,24 @@ Future<int> comentariosCount(Ref ref, String itemId) async {
 Future<Map<String, int>> favoritosCountByType(Ref ref, String userId) async {
   final repo = ref.watch(favoritoRepositoryProvider);
   return repo.countByType(userId);
+}
+
+// ========== SYNC ADAPTER PROVIDERS ==========
+
+/// Provider do adapter de sincronização de favoritos
+@Riverpod(keepAlive: true)
+FavoritosDriftSyncAdapter favoritosSyncAdapter(Ref ref) {
+  final db = ref.watch(databaseProvider);
+  final firestore = ref.watch(firebaseFirestoreProvider);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  return FavoritosDriftSyncAdapter(db, firestore, connectivity);
+}
+
+/// Provider do adapter de sincronização de comentários
+@Riverpod(keepAlive: true)
+ComentariosDriftSyncAdapter comentariosSyncAdapter(Ref ref) {
+  final db = ref.watch(databaseProvider);
+  final firestore = ref.watch(firebaseFirestoreProvider);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  return ComentariosDriftSyncAdapter(db, firestore, connectivity);
 }

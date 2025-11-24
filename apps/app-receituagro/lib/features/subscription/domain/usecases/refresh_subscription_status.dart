@@ -3,7 +3,7 @@ import 'package:core/core.dart' hide Column;
 import '../repositories/i_subscription_repository.dart';
 
 /// Use case para atualizar status da assinatura
-@injectable
+
 class RefreshSubscriptionStatusUseCase implements UseCase<bool, NoParams> {
   RefreshSubscriptionStatusUseCase(this.repository);
 

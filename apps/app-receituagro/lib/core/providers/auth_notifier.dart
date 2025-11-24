@@ -1,16 +1,17 @@
 import 'dart:async';
 
-import 'package:core/core.dart' as core;
-import 'package:core/core.dart' hide AuthState, Column;
+import 'package:core/core.dart' hide AuthState, Column, analyticsServiceProvider;
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/analytics/analytics_service.dart';
+import '../../features/analytics/analytics_providers.dart';
 import '../data/models/user_session_data.dart';
 import '../extensions/user_entity_receituagro_extension.dart';
 import '../services/device_identity_service.dart';
 import '../services/receituagro_data_cleaner.dart';
 import 'auth_state.dart' as local;
-import 'core_providers.dart' as core_providers;
+import 'core_providers.dart';
 
 /// AuthNotifier using StateNotifier pattern
 /// Manages authentication state
@@ -29,11 +30,11 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
 
   Future<void> _initializeAuthNotifier() async {
     // Initialize dependencies from Riverpod providers
-    _authRepository = ref.read(core_providers.authRepositoryProvider);
-    _deviceService = ref.read(core_providers.deviceIdentityServiceProvider);
-    _analytics = ref.read(core_providers.analyticsServiceProvider);
+    _authRepository = ref.read(authRepositoryProvider);
+    _deviceService = ref.read(deviceIdentityServiceProvider);
+    _analytics = ref.read(analyticsServiceProvider);
     _enhancedDeletionService = ref.read(
-      core_providers.enhancedAccountDeletionServiceProvider,
+      enhancedAccountDeletionServiceProvider,
     );
 
     try {
@@ -562,7 +563,7 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
                 id: 'deleted',
                 email: 'deleted@account.com',
                 displayName: 'Conta excluída',
-                provider: core.AuthProvider.anonymous,
+                provider: AuthProvider.anonymous,
               ),
             );
           } else {
@@ -607,7 +608,7 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
         debugPrint('📊 AuthNotifier: Obtendo preview de exclusão');
       }
 
-      final dataCleaner = ReceitaAgroDataCleaner();
+      final dataCleaner = ref.read(dataCleanerServiceProvider);
       final accountDeletionService = AccountDeletionService(
         authRepository: _authRepository,
         appDataCleaner: dataCleaner,
@@ -692,7 +693,7 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
       );
 
       await updateResult.fold(
-        (core.Failure failure) async {
+        (Failure failure) async {
           if (kDebugMode) {
             print(
               'Auth Notifier: Update falhou, tentando criar: ${failure.message}',
@@ -701,7 +702,7 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
           final createResult = await UnifiedSyncManager.instance
               .create<UserEntity>('receituagro', profileEntity);
           createResult.fold(
-            (core.Failure createFailure) {
+            (Failure createFailure) {
               if (kDebugMode) {
                 print(
                   '❌ Auth Notifier: Erro na sincronização de perfil (create): ${createFailure.message}',
@@ -751,7 +752,7 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
         debugPrint('🧹 Auth Notifier: Limpando dados premium no logout...');
       }
 
-      final dataCleaner = ReceitaAgroDataCleaner();
+      final dataCleaner = ref.read(dataCleanerServiceProvider);
 
       // Limpar categorias sensíveis que contêm dados do usuário
       final categoriesToClear = ['premium', 'favoritos', 'comentarios'];

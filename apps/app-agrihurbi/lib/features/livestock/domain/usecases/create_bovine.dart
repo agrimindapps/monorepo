@@ -7,7 +7,6 @@ import '../repositories/livestock_repository.dart';
 /// 
 /// Implementa UseCase que retorna a entidade criada em caso de sucesso
 /// Inclui validações de business rules e geração de ID único
-@lazySingleton
 class CreateBovineUseCase implements UseCase<BovineEntity, CreateBovineParams> {
   final LivestockRepository repository;
   

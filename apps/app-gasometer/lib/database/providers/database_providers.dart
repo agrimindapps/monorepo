@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../gasometer_database.dart';
 import '../repositories/repositories.dart';
+import '../repositories/audit_trail_repository.dart';
 
 /// Provider do banco de dados principal
 ///
@@ -72,6 +73,12 @@ final odometerReadingRepositoryProvider = Provider<OdometerReadingRepository>((
 ) {
   final db = ref.watch(gasometerDatabaseProvider);
   return OdometerReadingRepository(db);
+});
+
+/// Provider do repositório de auditoria
+final auditTrailRepositoryProvider = Provider<AuditTrailRepository>((ref) {
+  final db = ref.watch(gasometerDatabaseProvider);
+  return AuditTrailRepository(db);
 });
 
 // ========== STREAM PROVIDERS ==========

@@ -13,7 +13,7 @@ import 'i_recommendation_service.dart';
 /// - DiagnosticosNotifier (for recommendations in presentation)
 /// - DiagnosticosRecommendationsNotifier (dedicated notifier)
 /// - Other features needing recommendations
-@Injectable(as: IRecommendationService)
+
 class RecommendationService implements IRecommendationService {
   final IDiagnosticosQueryRepository _queryRepository;
 

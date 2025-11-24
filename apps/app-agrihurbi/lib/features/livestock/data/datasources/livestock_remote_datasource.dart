@@ -19,7 +19,6 @@ abstract class LivestockRemoteDataSource {
 }
 
 /// Implementação do data source remoto usando HTTP API
-@LazySingleton(as: LivestockRemoteDataSource)
 class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
   LivestockRemoteDataSourceImpl();
 

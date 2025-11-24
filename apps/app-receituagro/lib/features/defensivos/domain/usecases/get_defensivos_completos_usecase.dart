@@ -5,7 +5,7 @@ import '../repositories/i_defensivos_repository.dart';
 
 /// Use case para obter defensivos completos para comparação e análise detalhada
 /// Aplica princípio de responsabilidade única (SRP)
-@injectable
+
 class GetDefensivosCompletosUseCase {
   final IDefensivosRepository _repository;
 

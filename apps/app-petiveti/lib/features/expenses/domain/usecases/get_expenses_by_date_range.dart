@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -18,7 +17,6 @@ class GetExpensesByDateRangeParams {
   });
 }
 
-@lazySingleton
 class GetExpensesByDateRange
     implements UseCase<List<Expense>, GetExpensesByDateRangeParams> {
   final ExpenseRepository repository;

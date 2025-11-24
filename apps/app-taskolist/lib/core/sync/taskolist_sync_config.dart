@@ -1,7 +1,9 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/tasks/domain/task_entity.dart';
+import '../storage/shared_preferences_local_storage.dart';
 
 /// Configuração de sincronização específica do app-taskolist
 /// Gerencia sincronização offline-first de tarefas, listas e tags
@@ -46,8 +48,12 @@ abstract final class TaskolistSyncConfig {
   ///
   /// Todos os conflitos serão registrados por ConflictAuditService para auditoria.
   static Future<void> configure() async {
+    final prefs = await SharedPreferences.getInstance();
+    final localStorage = TaskolistSharedPreferencesLocalStorage(prefs);
+
     await UnifiedSyncManager.instance.initializeApp(
       appName: 'taskolist',
+      localStorage: localStorage,
       config: AppSyncConfig.advanced(
         appName: 'taskolist',
         syncInterval: const Duration(

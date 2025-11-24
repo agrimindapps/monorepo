@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -14,7 +13,6 @@ import 'check_medication_conflicts.dart';
 /// - **Single Responsibility**: Only handles adding medications
 /// - **Dependency Inversion**: Depends on abstractions (repository, services)
 /// - **Open/Closed**: Validation logic extracted to service
-@lazySingleton
 class AddMedication implements UseCase<void, Medication> {
   final MedicationRepository repository;
   final CheckMedicationConflicts checkConflicts;

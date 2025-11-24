@@ -5,10 +5,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/providers/premium_notifier.dart';
 import '../../../../database/receituagro_database.dart';
 import '../../../comentarios/data/comentario_model.dart';
-import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
 import '../../domain/entities/praga_entity.dart';
 import 'pragas_providers.dart';
-import 'pragas_state.dart';
 
 part 'detalhe_praga_notifier.g.dart';
 
@@ -199,7 +197,8 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
           id: 0, // Will be set by database
           idPraga: pragaData!.idReg, // Map idReg to idPraga
           nome: pragaData!.nomeComum, // Map nomeComum to nome
-          nomeLatino: pragaData!.nomeCientifico, // Map nomeCientifico to nomeLatino
+          nomeLatino:
+              pragaData!.nomeCientifico, // Map nomeCientifico to nomeLatino
           tipo: pragaData!.tipoPraga, // Map tipoPraga to tipo
           // imagemUrl and descricao not available in PragaEntity
         );
@@ -256,7 +255,8 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     final itemId = pragaData?.idReg ?? currentState.pragaName;
 
     try {
-      final favoritosRepository = ref.read(favoritosRepositorySimplifiedProvider);
+      final favoritosRepository =
+          ref.read(favoritosRepositorySimplifiedProvider);
       final result = await favoritosRepository.isFavorito(
         'praga',
         itemId,
@@ -299,7 +299,8 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     final itemId = pragaData?.idReg ?? currentState.pragaName;
 
     try {
-      final favoritosRepository = ref.read(favoritosRepositorySimplifiedProvider);
+      final favoritosRepository =
+          ref.read(favoritosRepositorySimplifiedProvider);
       final result = await favoritosRepository.isFavorito(
         'praga',
         itemId,
@@ -345,7 +346,7 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     // } catch (e) {
     //   // Error handling
     // }
-    
+
     // For now, just skip loading specific info
     return;
   }
@@ -441,9 +442,9 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
         updatedAt: DateTime.now(),
         ferramenta: 'Pragas - ${currentState.pragaName}',
         pkIdentificador: currentState.pragaName.toLowerCase().replaceAll(
-          ' ',
-          '_',
-        ),
+              ' ',
+              '_',
+            ),
         status: true,
       );
 
@@ -472,9 +473,8 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
       final comentariosService = ref.read(comentariosServiceProvider);
       await comentariosService.deleteComentario(commentId);
 
-      final updatedComentarios = currentState.comentarios
-          .where((c) => c.id != commentId)
-          .toList();
+      final updatedComentarios =
+          currentState.comentarios.where((c) => c.id != commentId).toList();
 
       state = AsyncValue.data(
         currentState.copyWith(comentarios: updatedComentarios).clearError(),
@@ -500,7 +500,8 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     );
 
     try {
-      final favoritosRepository = ref.read(favoritosRepositorySimplifiedProvider);
+      final favoritosRepository =
+          ref.read(favoritosRepositorySimplifiedProvider);
       final result = await favoritosRepository.toggleFavorito(
         'praga',
         itemId,
@@ -532,7 +533,9 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
           }
 
           state = AsyncValue.data(
-            currentState.copyWith(isFavorited: !wasAlreadyFavorited).clearError(),
+            currentState
+                .copyWith(isFavorited: !wasAlreadyFavorited)
+                .clearError(),
           );
           return true;
         },

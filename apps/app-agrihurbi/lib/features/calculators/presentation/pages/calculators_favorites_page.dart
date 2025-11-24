@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/calculator_category.dart';
 import '../../domain/entities/calculator_entity.dart';
 import '../../domain/services/calculator_favorites_service.dart';
-import '../providers/calculator_provider_simple.dart';
+import '../providers/calculator_provider.dart';
 import '../widgets/calculator_card_widget.dart';
 
 /// Página de calculadoras favoritas
@@ -240,9 +240,9 @@ class _CalculatorsFavoritesPageState
                   Text(
                     category.displayName,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                   ),
                   const Spacer(),
                   Chip(
@@ -292,9 +292,9 @@ class _CalculatorsFavoritesPageState
               Text(
                 'Suas Calculadoras Favoritas',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
               ),
             ],
           ),
@@ -302,8 +302,8 @@ class _CalculatorsFavoritesPageState
           Text(
             '${_favoriteCalculators.length} ${_favoriteCalculators.length == 1 ? "calculadora" : "calculadoras"} favorita${_favoriteCalculators.length == 1 ? "" : "s"}',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
-            ),
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
           ),
         ],
       ),
@@ -327,8 +327,8 @@ class _CalculatorsFavoritesPageState
                 Text(
                   'Estatísticas Gerais',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 16),
                 _buildStatRow(
@@ -349,7 +349,6 @@ class _CalculatorsFavoritesPageState
             ),
           ),
         ),
-
         const SizedBox(height: 16),
         Card(
           child: Padding(
@@ -360,8 +359,8 @@ class _CalculatorsFavoritesPageState
                 Text(
                   'Distribuição por Categoria',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 16),
                 ..._buildCategoryDistribution(),
@@ -369,7 +368,6 @@ class _CalculatorsFavoritesPageState
             ),
           ),
         ),
-
         const SizedBox(height: 16),
         Card(
           child: Padding(
@@ -380,8 +378,8 @@ class _CalculatorsFavoritesPageState
                 Text(
                   'Manutenção',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 16),
                 ListTile(

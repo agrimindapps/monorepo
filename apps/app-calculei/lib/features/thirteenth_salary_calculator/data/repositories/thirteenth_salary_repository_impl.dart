@@ -1,7 +1,6 @@
 // Package imports:
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 // Project imports:
 import '../../../../core/error/exceptions.dart';
@@ -20,7 +19,6 @@ import '../models/thirteenth_salary_calculation_model.dart';
 /// - Only responsible for coordinating data operations
 /// - Converts between entities and models
 /// - Handles error mapping to domain failures
-@Injectable(as: ThirteenthSalaryRepository)
 class ThirteenthSalaryRepositoryImpl implements ThirteenthSalaryRepository {
   final ThirteenthSalaryLocalDataSource _localDataSource;
 

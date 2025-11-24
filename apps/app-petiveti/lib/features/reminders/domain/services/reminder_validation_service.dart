@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../entities/reminder.dart';
@@ -18,7 +17,6 @@ import '../entities/reminder.dart';
 /// - Validates snooze date
 /// - Validates reminder ID
 /// - Composite validation for add/update operations
-@lazySingleton
 class ReminderValidationService {
   /// Validates reminder title
   ///

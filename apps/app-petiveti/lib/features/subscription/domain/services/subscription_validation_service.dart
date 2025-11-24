@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 
@@ -9,7 +8,6 @@ import '../../../../core/error/failures.dart';
 /// - Centralizes all validation logic for subscription operations
 /// - Prevents validation duplication across use cases
 /// - Provides consistent validation rules across the feature
-@lazySingleton
 class SubscriptionValidationService {
   /// Validates user ID
   ///

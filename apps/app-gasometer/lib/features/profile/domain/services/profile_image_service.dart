@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:core/core.dart' show injectable;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 

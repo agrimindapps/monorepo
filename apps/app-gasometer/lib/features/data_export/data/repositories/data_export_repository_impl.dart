@@ -14,7 +14,7 @@ import '../../domain/services/data_export_service.dart';
 /// Implementação do repositório de exportação de dados LGPD
 
 class DataExportRepositoryImpl implements DataExportRepository {
-  DataExportRepositoryImpl() : _exportService = DataExportService.instance;
+  DataExportRepositoryImpl(this._exportService);
   final DataExportService _exportService;
 
   @override

@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'auth_remote_datasource.dart';
 import 'user_model.dart';
 
-@LazySingleton(as: AuthRemoteDataSource)
 class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
   UserModel? _currentUser;
   final StreamController<UserModel?> _authStateController =

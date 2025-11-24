@@ -1,12 +1,11 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../di/injection_container.dart';
-import 'interfaces/i_notification_permission_manager.dart';
+import 'plantis_notification_service.dart';
 import 'interfaces/i_notification_schedule_manager.dart';
 import 'interfaces/i_plant_notification_manager.dart';
 import 'interfaces/i_task_notification_manager.dart';
-import 'plantis_notification_service.dart';
+import 'interfaces/i_notification_permission_manager.dart';
 
 /// Gerenciador centralizado de notificações do Plantis
 /// Implementa interfaces segregadas seguindo o princípio ISP
@@ -30,7 +29,7 @@ class NotificationManager
     if (_isInitialized) return true;
 
     try {
-      _notificationService = sl<PlantisNotificationService>();
+      _notificationService = PlantisNotificationService();
       final result = await _notificationService!.initialize();
 
       if (result) {

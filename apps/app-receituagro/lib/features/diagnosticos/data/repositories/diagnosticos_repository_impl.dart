@@ -32,9 +32,6 @@ import '../mappers/diagnostico_mapper.dart';
 ///
 /// Implementation class provides all 7 interfaces.
 /// Services inject only the interfaces they need, reducing coupling.
-@LazySingleton(
-  as: IDiagnosticosRepository,
-)
 class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   final DiagnosticosRepository _repository;
   final FitossanitariosRepository _fitossanitariosRepository;

@@ -2,7 +2,6 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/state/plant_form_state_notifier.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../providers/plant_details_provider.dart';
@@ -445,25 +444,11 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
             }
 
             try {
-              final plantDetailsProvider = di.sl<PlantDetailsProvider>();
+              await ref.read(plantDetailsNotifierProvider.notifier).reloadPlant(widget.plantId!);
 
               if (kDebugMode) {
                 print(
-                  '✅ PlantFormDialog._handleSave() - PlantDetailsProvider encontrado via DI',
-                );
-                print(
-                  '   - Planta atual no provider: ${plantDetailsProvider.plant?.name} (${plantDetailsProvider.plant?.id})',
-                );
-              }
-
-              await plantDetailsProvider.reloadPlant(widget.plantId!);
-
-              if (kDebugMode) {
-                print(
-                  '✅ PlantFormDialog._handleSave() - PlantDetailsProvider (DI) recarregado com sucesso',
-                );
-                print(
-                  '   - Nova planta no provider: ${plantDetailsProvider.plant?.name} (${plantDetailsProvider.plant?.id})',
+                  '✅ PlantFormDialog._handleSave() - PlantDetailsProvider (Riverpod) recarregado com sucesso',
                 );
               }
             } catch (e2) {

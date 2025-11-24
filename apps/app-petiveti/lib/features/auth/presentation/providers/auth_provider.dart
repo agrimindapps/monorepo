@@ -1,8 +1,12 @@
-import 'package:core/core.dart' hide User;
-import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/interfaces/usecase.dart' as local;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart' show EnhancedAccountDeletionService;
+import 'package:core/core.dart' show EnhancedAccountDeletionService;
+import 'auth_providers.dart';
 import '../../domain/entities/user.dart';
+import '../../domain/services/pet_data_sync_service.dart';
 import '../../domain/usecases/auth_usecases.dart' as auth_usecases;
+import '../../../../core/interfaces/usecase.dart' as local;
 
 enum AuthStatus {
   initial,
@@ -505,18 +509,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier(
-    di.getIt<auth_usecases.SignInWithEmail>(),
-    di.getIt<auth_usecases.SignUpWithEmail>(),
-    di.getIt<auth_usecases.SignInWithGoogle>(),
-    di.getIt<auth_usecases.SignInWithApple>(),
-    di.getIt<auth_usecases.SignInWithFacebook>(),
-    di.getIt<auth_usecases.SignInAnonymously>(),
-    di.getIt<auth_usecases.SignOut>(),
-    di.getIt<auth_usecases.GetCurrentUser>(),
-    di.getIt<auth_usecases.SendEmailVerification>(),
-    di.getIt<auth_usecases.SendPasswordResetEmail>(),
-    di.getIt<auth_usecases.UpdateProfile>(),
-    di.getIt<EnhancedAccountDeletionService>(),
+    ref.watch(signInWithEmailProvider),
+    ref.watch(signUpWithEmailProvider),
+    ref.watch(signInWithGoogleProvider),
+    ref.watch(signInWithAppleProvider),
+    ref.watch(signInWithFacebookProvider),
+    ref.watch(signInAnonymouslyProvider),
+    ref.watch(signOutProvider),
+    ref.watch(getCurrentUserProvider),
+    ref.watch(sendEmailVerificationProvider),
+    ref.watch(sendPasswordResetEmailProvider),
+    ref.watch(updateProfileProvider),
+    ref.watch(enhancedAccountDeletionServiceProvider),
   );
 });
 final authStateProvider = Provider<AuthState>((ref) {

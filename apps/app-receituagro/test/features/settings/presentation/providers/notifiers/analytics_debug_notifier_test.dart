@@ -1,5 +1,5 @@
 import 'package:app_receituagro/core/interfaces/i_premium_service.dart';
-import 'package:core/core.dart' hide test;
+import 'package:core/core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

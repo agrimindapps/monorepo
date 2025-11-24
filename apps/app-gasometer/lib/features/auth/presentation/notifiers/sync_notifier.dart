@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container_modular.dart';
+import '../../../../core/providers/dependency_providers.dart';
 import '../../../../core/services/analytics/gasometer_analytics_service.dart';
 import '../state/auth_state.dart' as gasometer_auth;
 import '../state/sync_state.dart';
@@ -25,7 +25,7 @@ class Sync extends _$Sync {
 
   @override
   GasometerSyncState build() {
-    _analytics = sl<GasometerAnalyticsService>();
+    _analytics = ref.watch(gasometerAnalyticsServiceProvider);
 
     // Setup reactive listener para auth state changes
     _setupAuthListener();

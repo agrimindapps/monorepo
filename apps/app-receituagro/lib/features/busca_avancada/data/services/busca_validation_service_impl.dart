@@ -4,7 +4,7 @@ import '../../domain/entities/busca_entity.dart';
 import '../../domain/services/i_busca_validation_service.dart';
 
 /// Implementação do serviço de validação de busca
-@LazySingleton(as: IBuscaValidationService)
+
 class BuscaValidationService implements IBuscaValidationService {
   static const List<String> _validTypes = [
     'diagnostico',

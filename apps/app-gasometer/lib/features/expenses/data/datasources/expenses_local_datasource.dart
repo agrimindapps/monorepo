@@ -1,15 +1,13 @@
-import 'package:core/core.dart' show GetIt;
-
 import '../../../../database/repositories/expense_repository.dart';
 import '../../../sync/domain/services/sync_write_trigger.dart';
 
 /// DataSource local para despesas usando Drift
 
 class ExpensesLocalDataSource {
-  ExpensesLocalDataSource(this._repository);
+  ExpensesLocalDataSource(this._repository, this._syncTrigger);
 
   final ExpenseRepository _repository;
-  SyncWriteTrigger get _syncTrigger => GetIt.instance<SyncWriteTrigger>();
+  final SyncWriteTrigger _syncTrigger;
 
   void _notifySync() {
     _syncTrigger.scheduleSync();

@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -15,7 +14,6 @@ import '../services/appointment_validation_service.dart';
 /// **Dependencies:**
 /// - AppointmentRepository: For data persistence
 /// - AppointmentValidationService: For ID validation
-@lazySingleton
 class DeleteAppointment implements UseCase<void, DeleteAppointmentParams> {
   final AppointmentRepository _repository;
   final AppointmentValidationService _validationService;

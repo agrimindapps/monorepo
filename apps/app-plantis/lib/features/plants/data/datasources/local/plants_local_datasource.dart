@@ -30,7 +30,6 @@ abstract class PlantsLocalDatasource {
   Future<void> clearCache();
 }
 
-@LazySingleton(as: PlantsLocalDatasource)
 class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   final PlantsDriftRepository _driftRepo;
   final PlantsSearchService _searchService = PlantsSearchService.instance;

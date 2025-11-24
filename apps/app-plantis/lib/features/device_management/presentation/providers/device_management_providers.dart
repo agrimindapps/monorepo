@@ -8,7 +8,7 @@ import 'package:core/core.dart'
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/repository_providers.dart';
-import '../../../../core/providers/auth_state_provider.dart' as auth_provider;
+import '../../../../core/providers/core_di_providers.dart';
 import '../../../settings/data/datasources/device_local_datasource.dart';
 import '../../../settings/data/datasources/device_remote_datasource.dart';
 import '../../../settings/data/repositories/device_repository_impl.dart';
@@ -49,7 +49,7 @@ Future<IDeviceRepository> deviceRepository(DeviceRepositoryRef ref) async {
 Future<GetUserDevicesUseCase> getUserDevicesUseCase(
     GetUserDevicesUseCaseRef ref) async {
   final repository = await ref.watch(deviceRepositoryProvider.future);
-  final authStateNotifier = ref.watch(auth_provider.authStateNotifierProvider);
+  final authStateNotifier = ref.watch(authStateNotifierProvider);
   return GetUserDevicesUseCase(repository, authStateNotifier);
 }
 
@@ -57,7 +57,7 @@ Future<GetUserDevicesUseCase> getUserDevicesUseCase(
 Future<ValidateDeviceUseCase> validateDeviceUseCase(
     ValidateDeviceUseCaseRef ref) async {
   final repository = await ref.watch(deviceRepositoryProvider.future);
-  final authStateNotifier = ref.watch(auth_provider.authStateNotifierProvider);
+  final authStateNotifier = ref.watch(authStateNotifierProvider);
   return ValidateDeviceUseCase(repository, authStateNotifier);
 }
 
@@ -65,7 +65,7 @@ Future<ValidateDeviceUseCase> validateDeviceUseCase(
 Future<RevokeDeviceUseCase> revokeDeviceUseCase(
     RevokeDeviceUseCaseRef ref) async {
   final repository = await ref.watch(deviceRepositoryProvider.future);
-  final authStateNotifier = ref.watch(auth_provider.authStateNotifierProvider);
+  final authStateNotifier = ref.watch(authStateNotifierProvider);
   return RevokeDeviceUseCase(repository, authStateNotifier);
 }
 
@@ -73,7 +73,7 @@ Future<RevokeDeviceUseCase> revokeDeviceUseCase(
 Future<RevokeAllOtherDevicesUseCase> revokeAllOtherDevicesUseCase(
     RevokeAllOtherDevicesUseCaseRef ref) async {
   final repository = await ref.watch(deviceRepositoryProvider.future);
-  final authStateNotifier = ref.watch(auth_provider.authStateNotifierProvider);
+  final authStateNotifier = ref.watch(authStateNotifierProvider);
   return RevokeAllOtherDevicesUseCase(repository, authStateNotifier);
 }
 
@@ -81,6 +81,6 @@ Future<RevokeAllOtherDevicesUseCase> revokeAllOtherDevicesUseCase(
 Future<GetDeviceStatisticsUseCase> getDeviceStatisticsUseCase(
     GetDeviceStatisticsUseCaseRef ref) async {
   final repository = await ref.watch(deviceRepositoryProvider.future);
-  final authStateNotifier = ref.watch(auth_provider.authStateNotifierProvider);
+  final authStateNotifier = ref.watch(authStateNotifierProvider);
   return GetDeviceStatisticsUseCase(repository, authStateNotifier);
 }

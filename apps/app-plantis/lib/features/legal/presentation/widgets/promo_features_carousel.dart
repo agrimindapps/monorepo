@@ -79,7 +79,7 @@ class _PromoFeaturesCarouselState extends State<PromoFeaturesCarousel> {
                 crossAxisSpacing: 24,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                childAspectRatio: 0.85,
+                childAspectRatio: isMobile ? 0.7 : 0.85,
                 children: _features.asMap().entries.map((entry) {
                   return _buildFeatureCard(entry.value, entry.key, isMobile);
                 }).toList(),

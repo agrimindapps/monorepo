@@ -114,7 +114,7 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
 
     // Carregar defensivos completos automaticamente na inicialização
     debugPrint('🔄 [NOTIFIER BUILD] Carregando defensivos completos...');
-    final useCase = ref.watch(getDefensivosCompletosUseCaseProvider);
+    final useCase = ref.read(getDefensivosCompletosUseCaseProvider);
     final result = await useCase();
 
     return result.fold(

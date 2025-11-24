@@ -432,6 +432,12 @@ INotificationScheduleManager notificationScheduleManager(
 // AuthStateNotifier provider is defined in auth_state_provider.dart
 // to avoid circular dependencies and conflicts
 
+/// Auth State Notifier (singleton for app-wide auth state)
+@riverpod
+AuthStateNotifier authStateNotifier(AuthStateNotifierRef ref) {
+  return AuthStateNotifier.instance;
+}
+
 // ============================================================================
 // STUB IMPLEMENTATIONS (Temporary placeholders for TODO items)
 // ============================================================================

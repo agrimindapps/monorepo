@@ -1,9 +1,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+export 'medications_providers.dart';
+
 import 'medications_providers.dart';
 
 part 'medications_provider.g.dart';
-
-export 'medications_providers.dart';
 
 // Aliases for backward compatibility
 final medicationsProviderAlias = medicationsProvider;

@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import 'package:core/core.dart';
 
 import '../../database/petiveti_database.dart';
 
@@ -14,7 +15,8 @@ part 'database_providers.g.dart';
 /// - **Web**: WASM + IndexedDB via Drift
 ///
 /// Usa DriftDatabaseConfig que automaticamente escolhe o executor correto.
-final petivetiDatabaseProvider = Provider<PetivetiDatabase>((ref) {
+@riverpod
+PetivetiDatabase petivetiDatabase(Ref ref) {
   // Instancia o banco diretamente usando o factory de produção
   final db = PetivetiDatabase.production();
 
@@ -27,26 +29,16 @@ final petivetiDatabaseProvider = Provider<PetivetiDatabase>((ref) {
   ref.keepAlive();
 
   return db;
-});
+}
 
-// /// Provider legado (mantido para compatibilidade)
-// ///
-// /// **DEPRECADO:** Use petivetiDatabaseProvider ao invés deste.
-// // @Deprecated('Use petivetiDatabaseProvider (Provider) ao invés de @riverpod')
-// // @riverpod
-// // PetivetiDatabase petivetiDatabase(PetivetiDatabaseRef ref) {
-// //   // Redireciona para o provider correto
-// //   return ref.watch(petivetiDatabaseProvider);
-// // }
-
-/// Provider for Firestore instance
+/// Provider for Firestore instance (local version - prefer using core_services_providers.dart)
 @riverpod
-FirebaseFirestore firebaseFirestore(FirebaseFirestoreRef ref) {
+FirebaseFirestore petivetiFirestore(Ref ref) {
   return FirebaseFirestore.instance;
 }
 
 /// Provider for Connectivity
 @riverpod
-Connectivity connectivity(ConnectivityRef ref) {
+Connectivity connectivity(Ref ref) {
   return Connectivity();
 }

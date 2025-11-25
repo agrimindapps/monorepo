@@ -115,7 +115,7 @@ class AnimalsUIStateNotifier extends _$AnimalsUIStateNotifier {
 @riverpod
 List<Animal> filteredAnimals(Ref ref) {
   final animalsState = ref.watch(animalsProvider);
-  final uiState = ref.watch(animalsUIStateNotifierProvider);
+  final uiState = ref.watch(animalsUIStateProvider);
   List<Animal> filteredAnimals = animalsState.animals;
   final maxItems = uiState.displayItemCount;
   final paginatedAnimals = filteredAnimals.take(maxItems).toList();

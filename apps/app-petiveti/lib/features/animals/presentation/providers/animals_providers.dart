@@ -1,5 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'package:core/core.dart';
+
 import '../../../../core/providers/database_providers.dart';
 import '../../data/datasources/animal_local_datasource.dart';
 import '../../data/repositories/animal_repository_impl.dart';
@@ -28,16 +30,12 @@ part 'animals_providers.g.dart';
 // ============================================================================
 
 @riverpod
-AnimalValidationService animalValidationService(
-  AnimalValidationServiceRef ref,
-) {
+AnimalValidationService animalValidationService(Ref ref) {
   return AnimalValidationService();
 }
 
 @riverpod
-AnimalErrorHandlingService animalErrorHandlingService(
-  AnimalErrorHandlingServiceRef ref,
-) {
+AnimalErrorHandlingService animalErrorHandlingService(Ref ref) {
   return AnimalErrorHandlingService();
 }
 
@@ -46,7 +44,7 @@ AnimalErrorHandlingService animalErrorHandlingService(
 // ============================================================================
 
 @riverpod
-AnimalLocalDataSource animalLocalDataSource(AnimalLocalDataSourceRef ref) {
+AnimalLocalDataSource animalLocalDataSource(Ref ref) {
   return AnimalLocalDataSourceImpl(ref.watch(petivetiDatabaseProvider));
 }
 
@@ -55,7 +53,7 @@ AnimalLocalDataSource animalLocalDataSource(AnimalLocalDataSourceRef ref) {
 // ============================================================================
 
 @riverpod
-AnimalRepository animalRepository(AnimalRepositoryRef ref) {
+AnimalRepository animalRepository(Ref ref) {
   return AnimalRepositoryImpl(
     ref.watch(animalLocalDataSourceProvider),
     const NoOpSyncManager(), // TODO: Implement proper sync manager
@@ -68,12 +66,12 @@ AnimalRepository animalRepository(AnimalRepositoryRef ref) {
 // ============================================================================
 
 @riverpod
-GetAnimals getAnimals(GetAnimalsRef ref) {
+GetAnimals getAnimals(Ref ref) {
   return GetAnimals(ref.watch(animalRepositoryProvider));
 }
 
 @riverpod
-GetAnimalById getAnimalById(GetAnimalByIdRef ref) {
+GetAnimalById getAnimalById(Ref ref) {
   return GetAnimalById(
     ref.watch(animalRepositoryProvider),
     ref.watch(animalValidationServiceProvider),
@@ -81,7 +79,7 @@ GetAnimalById getAnimalById(GetAnimalByIdRef ref) {
 }
 
 @riverpod
-AddAnimal addAnimal(AddAnimalRef ref) {
+AddAnimal addAnimal(Ref ref) {
   return AddAnimal(
     ref.watch(animalRepositoryProvider),
     ref.watch(animalValidationServiceProvider),
@@ -89,7 +87,7 @@ AddAnimal addAnimal(AddAnimalRef ref) {
 }
 
 @riverpod
-UpdateAnimal updateAnimal(UpdateAnimalRef ref) {
+UpdateAnimal updateAnimal(Ref ref) {
   return UpdateAnimal(
     ref.watch(animalRepositoryProvider),
     ref.watch(animalValidationServiceProvider),
@@ -97,7 +95,7 @@ UpdateAnimal updateAnimal(UpdateAnimalRef ref) {
 }
 
 @riverpod
-DeleteAnimal deleteAnimal(DeleteAnimalRef ref) {
+DeleteAnimal deleteAnimal(Ref ref) {
   return DeleteAnimal(
     ref.watch(animalRepositoryProvider),
     ref.watch(animalValidationServiceProvider),
@@ -276,13 +274,13 @@ class AnimalsNotifier extends _$AnimalsNotifier {
 
 // Derived providers
 @riverpod
-Future<Animal?> animalById(AnimalByIdRef ref, String id) async {
+Future<Animal?> animalById(Ref ref, String id) async {
   final notifier = ref.read(animalsProvider.notifier);
   return await notifier.getAnimalById(id);
 }
 
 @riverpod
-Stream<List<Animal>> animalsStream(AnimalsStreamRef ref) {
+Stream<List<Animal>> animalsStream(Ref ref) {
   final repository = ref.watch(animalRepositoryProvider);
   return repository.watchAnimals();
 }

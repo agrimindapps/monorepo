@@ -52,10 +52,10 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
   void _onScroll() {
     if (_isBottom) {
       final animalsState = ref.read(animalsProvider);
-      final uiState = ref.read(animalsUIStateNotifierProvider);
+      final uiState = ref.read(animalsUIStateProvider);
       
       if (!uiState.isLoadingMore && !uiState.hasReachedMax) {
-        ref.read(animalsUIStateNotifierProvider.notifier)
+        ref.read(animalsUIStateProvider.notifier)
           .loadMoreItems(animalsState.animals.length);
       }
     }
@@ -71,7 +71,7 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
   @override
   Widget build(BuildContext context) {
     final animalsState = ref.watch(animalsProvider);
-    final uiState = ref.watch(animalsUIStateNotifierProvider);
+    final uiState = ref.watch(animalsUIStateProvider);
     final filteredAnimals = ref.watch(filteredAnimalsProvider);
     
     if (animalsState.isLoading && animalsState.animals.isEmpty) {
@@ -100,7 +100,7 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
       hint: 'Arraste para baixo para atualizar a lista',
       child: RefreshIndicator(
         onRefresh: () async {
-          ref.read(animalsUIStateNotifierProvider.notifier).resetPagination();
+          ref.read(animalsUIStateProvider.notifier).resetPagination();
           await ref.read(animalsProvider.notifier).loadAnimals();
         },
         child: ListView.builder(

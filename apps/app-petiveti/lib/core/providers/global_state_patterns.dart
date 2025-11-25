@@ -1,10 +1,3 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-import 'package:core/core.dart';
-
-part 'global_state_patterns.g.dart';
-
-
 /// **Global State Patterns for Riverpod**
 /// 
 /// Standardized patterns and utilities for consistent state management

@@ -84,7 +84,7 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
 
   /// Load comments for a specific plant
   Future<void> loadComments(String plantId) async {
-    final currentState = state.valueOrNull ?? const PlantCommentsState();
+    final currentState = state.value ?? const PlantCommentsState();
     if (currentState.currentPlantId == plantId &&
         currentState.comments.isNotEmpty) {
       return;
@@ -121,14 +121,14 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
   /// Add a new comment
   Future<bool> addComment(String plantId, String content) async {
     if (content.trim().isEmpty) {
-      final currentState = state.valueOrNull ?? const PlantCommentsState();
+      final currentState = state.value ?? const PlantCommentsState();
       state = AsyncValue.data(
         currentState.copyWith(error: 'Comentário não pode estar vazio'),
       );
       return false;
     }
 
-    final currentState = state.valueOrNull ?? const PlantCommentsState();
+    final currentState = state.value ?? const PlantCommentsState();
     state = AsyncValue.data(
       currentState.copyWith(isLoading: true, clearError: true),
     );
@@ -137,14 +137,14 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
 
     return result.fold(
       (failure) {
-        final newState = state.valueOrNull ?? const PlantCommentsState();
+        final newState = state.value ?? const PlantCommentsState();
         state = AsyncValue.data(
           newState.copyWith(error: failure.message, isLoading: false),
         );
         return false;
       },
       (comment) {
-        final newState = state.valueOrNull ?? const PlantCommentsState();
+        final newState = state.value ?? const PlantCommentsState();
         final updatedComments = [comment, ...newState.comments];
         state = AsyncValue.data(
           newState.copyWith(
@@ -161,14 +161,14 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
   /// Update an existing comment
   Future<bool> updateComment(String commentId, String newContent) async {
     if (newContent.trim().isEmpty) {
-      final currentState = state.valueOrNull ?? const PlantCommentsState();
+      final currentState = state.value ?? const PlantCommentsState();
       state = AsyncValue.data(
         currentState.copyWith(error: 'Comentário não pode estar vazio'),
       );
       return false;
     }
 
-    final currentState = state.valueOrNull ?? const PlantCommentsState();
+    final currentState = state.value ?? const PlantCommentsState();
     final commentIndex =
         currentState.comments.indexWhere((c) => c.id == commentId);
 
@@ -192,14 +192,14 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
 
     return result.fold(
       (failure) {
-        final newState = state.valueOrNull ?? const PlantCommentsState();
+        final newState = state.value ?? const PlantCommentsState();
         state = AsyncValue.data(
           newState.copyWith(error: failure.message, isLoading: false),
         );
         return false;
       },
       (comment) {
-        final newState = state.valueOrNull ?? const PlantCommentsState();
+        final newState = state.value ?? const PlantCommentsState();
         final updatedComments = List<ComentarioModel>.from(newState.comments);
         updatedComments[commentIndex] = comment;
 
@@ -217,7 +217,7 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
 
   /// Delete a comment
   Future<bool> deleteComment(String commentId) async {
-    final currentState = state.valueOrNull ?? const PlantCommentsState();
+    final currentState = state.value ?? const PlantCommentsState();
     final commentIndex =
         currentState.comments.indexWhere((c) => c.id == commentId);
 
@@ -236,14 +236,14 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
 
     return result.fold(
       (failure) {
-        final newState = state.valueOrNull ?? const PlantCommentsState();
+        final newState = state.value ?? const PlantCommentsState();
         state = AsyncValue.data(
           newState.copyWith(error: failure.message, isLoading: false),
         );
         return false;
       },
       (_) {
-        final newState = state.valueOrNull ?? const PlantCommentsState();
+        final newState = state.value ?? const PlantCommentsState();
         final updatedComments =
             newState.comments.where((c) => c.id != commentId).toList();
 
@@ -266,7 +266,7 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
 
   /// Clear error message
   void clearError() {
-    final currentState = state.valueOrNull ?? const PlantCommentsState();
+    final currentState = state.value ?? const PlantCommentsState();
     if (currentState.hasError) {
       state = AsyncValue.data(currentState.copyWith(clearError: true));
     }
@@ -274,7 +274,7 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
 }
 
 @riverpod
-List<ComentarioModel> plantComments(PlantCommentsRef ref) {
+List<ComentarioModel> plantComments(Ref ref) {
   final commentsState = ref.watch(plantCommentsNotifierProvider);
   return commentsState.when(
     data: (state) => state.comments,
@@ -284,7 +284,7 @@ List<ComentarioModel> plantComments(PlantCommentsRef ref) {
 }
 
 @riverpod
-bool plantCommentsIsLoading(PlantCommentsIsLoadingRef ref) {
+bool plantCommentsIsLoading(Ref ref) {
   final commentsState = ref.watch(plantCommentsNotifierProvider);
   return commentsState.when(
     data: (state) => state.isLoading,
@@ -294,7 +294,7 @@ bool plantCommentsIsLoading(PlantCommentsIsLoadingRef ref) {
 }
 
 @riverpod
-String? plantCommentsError(PlantCommentsErrorRef ref) {
+String? plantCommentsError(Ref ref) {
   final commentsState = ref.watch(plantCommentsNotifierProvider);
   return commentsState.when(
     data: (state) => state.error,
@@ -302,3 +302,7 @@ String? plantCommentsError(PlantCommentsErrorRef ref) {
     error: (error, _) => error.toString(),
   );
 }
+
+// LEGACY ALIAS
+// ignore: deprecated_member_use_from_same_package
+final plantCommentsNotifierProvider = plantCommentsProvider;

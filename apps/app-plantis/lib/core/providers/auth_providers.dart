@@ -154,7 +154,7 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> _initializeAuthState() async {
     _userSubscription = _authRepository.currentUser.listen(
       (user) async {
-        final currentState = state.valueOrNull ?? const AuthState();
+        final currentState = state.value ?? const AuthState();
         state = AsyncData(currentState.copyWith(currentUser: user));
 
         if (user == null && await shouldUseAnonymousMode()) {
@@ -170,7 +170,7 @@ class AuthNotifier extends _$AuthNotifier {
         await _completeAuthInitialization(user);
       },
       onError: (Object error) {
-        final currentState = state.valueOrNull ?? const AuthState();
+        final currentState = state.value ?? const AuthState();
         state = AsyncData(
           currentState.copyWith(
             errorMessage: error.toString(),
@@ -191,7 +191,7 @@ class AuthNotifier extends _$AuthNotifier {
       _subscriptionStream = _subscriptionRepository.subscriptionStatus.listen((
         subscription,
       ) {
-        final currentState = state.valueOrNull ?? const AuthState();
+        final currentState = state.value ?? const AuthState();
         final isPremium = subscription?.isActive ?? false;
         state = AsyncData(currentState.copyWith(isPremium: isPremium));
         _authStateNotifier.updatePremiumStatus(isPremium);
@@ -201,7 +201,7 @@ class AuthNotifier extends _$AuthNotifier {
 
   Future<void> _completeAuthInitialization(UserEntity? user) async {
     try {
-      final currentState = state.valueOrNull ?? const AuthState();
+      final currentState = state.value ?? const AuthState();
       _authStateNotifier.updateUser(user);
 
       bool isPremium = false;
@@ -235,7 +235,7 @@ class AuthNotifier extends _$AuthNotifier {
         debugPrint('❌ AuthProvider: Error during initialization: $e');
       }
 
-      final currentState = state.valueOrNull ?? const AuthState();
+      final currentState = state.value ?? const AuthState();
       state = AsyncData(
         currentState.copyWith(
           errorMessage: 'Erro na inicialização da autenticação: $e',
@@ -269,12 +269,12 @@ class AuthNotifier extends _$AuthNotifier {
             'Erro verificar premium: ${DataSanitizationService.sanitizeForLogging(failure.message)}',
           );
         }
-        final currentState = state.valueOrNull ?? const AuthState();
+        final currentState = state.value ?? const AuthState();
         state = AsyncData(currentState.copyWith(isPremium: false));
         _authStateNotifier.updatePremiumStatus(false);
       },
       (hasPremium) {
-        final currentState = state.valueOrNull ?? const AuthState();
+        final currentState = state.value ?? const AuthState();
         state = AsyncData(currentState.copyWith(isPremium: hasPremium));
         _authStateNotifier.updatePremiumStatus(hasPremium);
       },
@@ -291,7 +291,7 @@ class AuthNotifier extends _$AuthNotifier {
       state.value?.currentUser?.provider.name == 'anonymous';
 
   Future<void> login(String email, String password) async {
-    final currentState = state.valueOrNull ?? const AuthState();
+    final currentState = state.value ?? const AuthState();
     state = AsyncData(
       currentState.copyWith(
         isLoading: true,
@@ -306,7 +306,7 @@ class AuthNotifier extends _$AuthNotifier {
 
     result.fold(
       (failure) {
-        final newState = state.valueOrNull ?? const AuthState();
+        final newState = state.value ?? const AuthState();
         state = AsyncData(
           newState.copyWith(
             errorMessage: failure.message,
@@ -316,7 +316,7 @@ class AuthNotifier extends _$AuthNotifier {
         );
       },
       (user) {
-        final newState = state.valueOrNull ?? const AuthState();
+        final newState = state.value ?? const AuthState();
         state = AsyncData(
           newState.copyWith(
             currentUser: user,
@@ -334,7 +334,7 @@ class AuthNotifier extends _$AuthNotifier {
     try {
       await login(email, password);
 
-      final currentState = state.valueOrNull;
+      final currentState = state.value;
       if (currentState?.isAuthenticated == true &&
           !isAnonymous &&
           currentState?.errorMessage == null) {
@@ -359,7 +359,7 @@ class AuthNotifier extends _$AuthNotifier {
       return;
     }
 
-    final currentState = state.valueOrNull ?? const AuthState();
+    final currentState = state.value ?? const AuthState();
     state = AsyncData(
       currentState.copyWith(
         isValidatingDevice: true,
@@ -381,7 +381,7 @@ class AuthNotifier extends _$AuthNotifier {
             debugPrint('❌ Device validation falhou: ${failure.message}');
           }
 
-          final newState = state.valueOrNull ?? const AuthState();
+          final newState = state.value ?? const AuthState();
           state = AsyncData(
             newState.copyWith(
               deviceValidationError: failure.message,
@@ -390,7 +390,7 @@ class AuthNotifier extends _$AuthNotifier {
           );
 
           if (failure.code == 'DEVICE_LIMIT_EXCEEDED') {
-            final updatedState = state.valueOrNull ?? const AuthState();
+            final updatedState = state.value ?? const AuthState();
             state = AsyncData(updatedState.copyWith(deviceLimitExceeded: true));
             _handleDeviceLimitExceeded();
           }
@@ -407,7 +407,7 @@ class AuthNotifier extends _$AuthNotifier {
               );
             }
 
-            final newState = state.valueOrNull ?? const AuthState();
+            final newState = state.value ?? const AuthState();
             state = AsyncData(
               newState.copyWith(
                 deviceValidationError: validationResult.message,
@@ -415,7 +415,7 @@ class AuthNotifier extends _$AuthNotifier {
             );
 
             if (validationResult.status == DeviceValidationStatus.exceeded) {
-              final updatedState = state.valueOrNull ?? const AuthState();
+              final updatedState = state.value ?? const AuthState();
               state = AsyncData(
                 updatedState.copyWith(deviceLimitExceeded: true),
               );
@@ -423,7 +423,7 @@ class AuthNotifier extends _$AuthNotifier {
             }
           }
 
-          final finalState = state.valueOrNull ?? const AuthState();
+          final finalState = state.value ?? const AuthState();
           state = AsyncData(finalState.copyWith(isValidatingDevice: false));
         },
       );
@@ -432,7 +432,7 @@ class AuthNotifier extends _$AuthNotifier {
         debugPrint('❌ Erro inesperado na validação do dispositivo: $e');
       }
 
-      final newState = state.valueOrNull ?? const AuthState();
+      final newState = state.value ?? const AuthState();
       state = AsyncData(
         newState.copyWith(
           deviceValidationError: 'Erro na validação do dispositivo',
@@ -450,7 +450,7 @@ class AuthNotifier extends _$AuthNotifier {
     }
 
     Future.delayed(const Duration(milliseconds: 1500), () {
-      final currentState = state.valueOrNull;
+      final currentState = state.value;
       if (currentState?.deviceLimitExceeded == true) {
         logout();
       }
@@ -458,7 +458,7 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   Future<void> logout() async {
-    final currentState = state.valueOrNull ?? const AuthState();
+    final currentState = state.value ?? const AuthState();
     state = AsyncData(
       currentState.copyWith(
         isLoading: true,
@@ -476,7 +476,7 @@ class AuthNotifier extends _$AuthNotifier {
 
     result.fold(
       (failure) {
-        final newState = state.valueOrNull ?? const AuthState();
+        final newState = state.value ?? const AuthState();
         state = AsyncData(
           newState.copyWith(
             errorMessage: failure.message,
@@ -495,7 +495,7 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   Future<void> register(String email, String password, String name) async {
-    final currentState = state.valueOrNull ?? const AuthState();
+    final currentState = state.value ?? const AuthState();
     state = AsyncData(
       currentState.copyWith(
         isLoading: true,
@@ -512,7 +512,7 @@ class AuthNotifier extends _$AuthNotifier {
 
     result.fold(
       (failure) {
-        final newState = state.valueOrNull ?? const AuthState();
+        final newState = state.value ?? const AuthState();
         state = AsyncData(
           newState.copyWith(
             errorMessage: failure.message,
@@ -522,7 +522,7 @@ class AuthNotifier extends _$AuthNotifier {
         );
       },
       (user) {
-        final newState = state.valueOrNull ?? const AuthState();
+        final newState = state.value ?? const AuthState();
         state = AsyncData(
           newState.copyWith(
             currentUser: user,
@@ -536,7 +536,7 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   Future<void> signInAnonymously() async {
-    final currentState = state.valueOrNull ?? const AuthState();
+    final currentState = state.value ?? const AuthState();
     state = AsyncData(
       currentState.copyWith(
         isLoading: true,
@@ -549,7 +549,7 @@ class AuthNotifier extends _$AuthNotifier {
 
     result.fold(
       (failure) {
-        final newState = state.valueOrNull ?? const AuthState();
+        final newState = state.value ?? const AuthState();
         state = AsyncData(
           newState.copyWith(
             errorMessage: failure.message,
@@ -559,7 +559,7 @@ class AuthNotifier extends _$AuthNotifier {
         );
       },
       (user) {
-        final newState = state.valueOrNull ?? const AuthState();
+        final newState = state.value ?? const AuthState();
         state = AsyncData(
           newState.copyWith(
             currentUser: user,
@@ -596,14 +596,14 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   Future<bool> resetPassword(String email) async {
-    final currentState = state.valueOrNull ?? const AuthState();
+    final currentState = state.value ?? const AuthState();
     state = AsyncData(currentState.copyWith(clearError: true));
 
     final result = await _resetPasswordUseCase(email);
 
     return result.fold(
       (failure) {
-        final newState = state.valueOrNull ?? const AuthState();
+        final newState = state.value ?? const AuthState();
         state = AsyncData(newState.copyWith(errorMessage: failure.message));
         return false;
       },
@@ -615,12 +615,12 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   void clearError() {
-    final currentState = state.valueOrNull ?? const AuthState();
+    final currentState = state.value ?? const AuthState();
     state = AsyncData(currentState.copyWith(clearError: true));
   }
 
   void clearDeviceValidationError() {
-    final currentState = state.valueOrNull ?? const AuthState();
+    final currentState = state.value ?? const AuthState();
     state = AsyncData(
       currentState.copyWith(
         deviceValidationError: null,
@@ -702,8 +702,8 @@ class AuthNotifier extends _$AuthNotifier {
 
 /// Legacy compatibility providers
 @riverpod
-UserEntity? currentUser(CurrentUserRef ref) {
-  final authState = ref.watch(authNotifierProvider);
+UserEntity? currentUser(Ref ref) {
+  final authState = ref.watch(authProvider);
   return authState.maybeWhen(
     data: (state) => state.currentUser,
     orElse: () => null,
@@ -711,8 +711,8 @@ UserEntity? currentUser(CurrentUserRef ref) {
 }
 
 @riverpod
-bool isAuthenticated(IsAuthenticatedRef ref) {
-  final authState = ref.watch(authNotifierProvider);
+bool isAuthenticated(Ref ref) {
+  final authState = ref.watch(authProvider);
   return authState.maybeWhen(
     data: (state) => state.isAuthenticated,
     orElse: () => false,
@@ -720,8 +720,8 @@ bool isAuthenticated(IsAuthenticatedRef ref) {
 }
 
 @riverpod
-bool isLoading(IsLoadingRef ref) {
-  final authState = ref.watch(authNotifierProvider);
+bool isLoading(Ref ref) {
+  final authState = ref.watch(authProvider);
   return authState.maybeWhen(
     data: (state) => state.isLoading,
     orElse: () => false,
@@ -729,8 +729,8 @@ bool isLoading(IsLoadingRef ref) {
 }
 
 @riverpod
-bool isPremium(IsPremiumRef ref) {
-  final authState = ref.watch(authNotifierProvider);
+bool isPremium(Ref ref) {
+  final authState = ref.watch(authProvider);
   return authState.maybeWhen(
     data: (state) => state.isPremium,
     orElse: () => false,
@@ -738,8 +738,8 @@ bool isPremium(IsPremiumRef ref) {
 }
 
 @riverpod
-bool isInitialized(IsInitializedRef ref) {
-  final authState = ref.watch(authNotifierProvider);
+bool isInitialized(Ref ref) {
+  final authState = ref.watch(authProvider);
   return authState.maybeWhen(
     data: (state) => state.isInitialized,
     orElse: () => false,
@@ -747,20 +747,20 @@ bool isInitialized(IsInitializedRef ref) {
 }
 
 /// Alias for backwards compatibility with existing code
-/// Use authNotifierProvider instead in new code
-final authProvider = authNotifierProvider;
+/// Use authProvider instead in new code
+const authNotifierProvider = authProvider;
 
 /// Device management use case providers aliases
 @riverpod
-Future<device_validation.ValidateDeviceUseCase> validateDeviceUseCaseProvider(
-  ValidateDeviceUseCaseProviderRef ref,
+Future<device_validation.ValidateDeviceUseCase> validateDeviceUseCaseProviderFn(
+  Ref ref,
 ) async {
   return ref.watch(device_management_providers.validateDeviceUseCaseProvider.future);
 }
 
 @riverpod
-Future<device_revocation.RevokeDeviceUseCase> revokeDeviceUseCaseProvider(
-  RevokeDeviceUseCaseProviderRef ref,
+Future<device_revocation.RevokeDeviceUseCase> revokeDeviceUseCaseProviderFn(
+  Ref ref,
 ) async {
   return ref.watch(device_management_providers.revokeDeviceUseCaseProvider.future);
 }

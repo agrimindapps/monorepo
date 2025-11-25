@@ -1,5 +1,6 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Ref;
 
 import '../../../../database/providers/database_providers.dart';
 import '../../../../database/repositories/culturas_repository.dart';
@@ -19,25 +20,25 @@ part 'favoritos_services_providers.g.dart';
 
 // --- Error Message Service ---
 @riverpod
-FavoritosErrorMessageService favoritosErrorMessageService(FavoritosErrorMessageServiceRef ref) {
+FavoritosErrorMessageService favoritosErrorMessageService(Ref ref) {
   return FavoritosErrorMessageService();
 }
 
 // --- Cache Service ---
 @Riverpod(keepAlive: true)
-FavoritosCacheServiceInline favoritosCacheService(FavoritosCacheServiceRef ref) {
+FavoritosCacheServiceInline favoritosCacheService(Ref ref) {
   return FavoritosCacheServiceInline();
 }
 
 // --- Entity Factory Registry ---
 @riverpod
-IFavoritoEntityFactoryRegistry favoritoEntityFactoryRegistry(FavoritoEntityFactoryRegistryRef ref) {
+IFavoritoEntityFactoryRegistry favoritoEntityFactoryRegistry(Ref ref) {
   return FavoritoEntityFactoryRegistry();
 }
 
 // --- Data Resolver Strategy Registry ---
 @riverpod
-FavoritosDataResolverStrategyRegistry favoritosDataResolverStrategyRegistry(FavoritosDataResolverStrategyRegistryRef ref) {
+FavoritosDataResolverStrategyRegistry favoritosDataResolverStrategyRegistry(Ref ref) {
   return FavoritosDataResolverStrategyRegistry(
     defensivoStrategy: DefensivoResolverStrategy(ref.watch(fitossanitariosRepositoryProvider)),
     pragaStrategy: PragaResolverStrategy(ref.watch(pragasRepositoryProvider)),
@@ -53,7 +54,7 @@ FavoritosDataResolverStrategyRegistry favoritosDataResolverStrategyRegistry(Favo
 
 // --- Data Resolver Service ---
 @riverpod
-FavoritosDataResolverService favoritosDataResolverService(FavoritosDataResolverServiceRef ref) {
+FavoritosDataResolverService favoritosDataResolverService(Ref ref) {
   return FavoritosDataResolverService(
     registry: ref.watch(favoritosDataResolverStrategyRegistryProvider),
   );
@@ -61,7 +62,7 @@ FavoritosDataResolverService favoritosDataResolverService(FavoritosDataResolverS
 
 // --- Validator Service ---
 @riverpod
-FavoritosValidatorService favoritosValidatorService(FavoritosValidatorServiceRef ref) {
+FavoritosValidatorService favoritosValidatorService(Ref ref) {
   return FavoritosValidatorService(
     dataResolver: ref.watch(favoritosDataResolverServiceProvider),
   );
@@ -69,7 +70,7 @@ FavoritosValidatorService favoritosValidatorService(FavoritosValidatorServiceRef
 
 // --- Sync Service ---
 @riverpod
-FavoritosSyncService favoritosSyncService(FavoritosSyncServiceRef ref) {
+FavoritosSyncService favoritosSyncService(Ref ref) {
   return FavoritosSyncService(
     dataResolver: ref.watch(favoritosDataResolverServiceProvider),
   );
@@ -77,7 +78,7 @@ FavoritosSyncService favoritosSyncService(FavoritosSyncServiceRef ref) {
 
 // --- Main Favoritos Service ---
 @Riverpod(keepAlive: true)
-FavoritosService favoritosService(FavoritosServiceRef ref) {
+FavoritosService favoritosService(Ref ref) {
   return FavoritosService(
     dataResolver: ref.watch(favoritosDataResolverServiceProvider),
     validator: ref.watch(favoritosValidatorServiceProvider),

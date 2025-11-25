@@ -50,7 +50,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 
   /// Get tasks for a specific plant
   List<PlantTask> getTasksForPlant(String plantId) {
-    final currentState = state.valueOrNull ?? const PlantTaskState();
+    final currentState = state.value ?? const PlantTaskState();
     return currentState.plantTasks[plantId] ?? [];
   }
 
@@ -63,7 +63,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       return;
     }
 
-    final currentState = state.valueOrNull ?? const PlantTaskState();
+    final currentState = state.value ?? const PlantTaskState();
     state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
     try {
@@ -143,7 +143,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 
   /// Generate tasks for a plant
   Future<void> generateTasksForPlant(Plant plant) async {
-    final currentState = state.valueOrNull ?? const PlantTaskState();
+    final currentState = state.value ?? const PlantTaskState();
     state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
     try {
@@ -206,7 +206,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       final taskIndex = tasks.indexWhere((t) => t.id == taskId);
 
       if (taskIndex == -1) {
-        final currentState = state.valueOrNull ?? const PlantTaskState();
+        final currentState = state.value ?? const PlantTaskState();
         state = AsyncValue.data(
           currentState.copyWith(errorMessage: 'Tarefa não encontrada'),
         );
@@ -243,7 +243,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
         }
       }
 
-      final currentState = state.valueOrNull ?? const PlantTaskState();
+      final currentState = state.value ?? const PlantTaskState();
       final updatedTasks = Map<String, List<PlantTask>>.from(
         currentState.plantTasks,
       );
@@ -253,7 +253,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 
       await _updateTaskStatuses(plantId);
     } catch (e) {
-      final currentState = state.valueOrNull ?? const PlantTaskState();
+      final currentState = state.value ?? const PlantTaskState();
       state = AsyncValue.data(
         currentState.copyWith(errorMessage: 'Erro ao alterar status: $e'),
       );
@@ -272,7 +272,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       final taskIndex = tasks.indexWhere((t) => t.id == taskId);
 
       if (taskIndex == -1) {
-        final currentState = state.valueOrNull ?? const PlantTaskState();
+        final currentState = state.value ?? const PlantTaskState();
         state = AsyncValue.data(
           currentState.copyWith(errorMessage: 'Tarefa não encontrada'),
         );
@@ -300,7 +300,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
         await _repository.addPlantTask(nextTask);
       }
 
-      final currentState = state.valueOrNull ?? const PlantTaskState();
+      final currentState = state.value ?? const PlantTaskState();
       final updatedTasks = Map<String, List<PlantTask>>.from(
         currentState.plantTasks,
       );
@@ -314,7 +314,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
         print('✅ PlantTaskNotifier: Task $taskId completed on $completionDate');
       }
     } catch (e) {
-      final currentState = state.valueOrNull ?? const PlantTaskState();
+      final currentState = state.value ?? const PlantTaskState();
       state = AsyncValue.data(
         currentState.copyWith(errorMessage: 'Erro ao completar tarefa: $e'),
       );
@@ -328,7 +328,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       final taskIndex = tasks.indexWhere((t) => t.id == taskId);
 
       if (taskIndex == -1) {
-        final currentState = state.valueOrNull ?? const PlantTaskState();
+        final currentState = state.value ?? const PlantTaskState();
         state = AsyncValue.data(
           currentState.copyWith(errorMessage: 'Tarefa não encontrada'),
         );
@@ -337,7 +337,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 
       tasks.removeAt(taskIndex);
 
-      final currentState = state.valueOrNull ?? const PlantTaskState();
+      final currentState = state.value ?? const PlantTaskState();
       final updatedTasks = Map<String, List<PlantTask>>.from(
         currentState.plantTasks,
       );
@@ -347,7 +347,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 
       await _updateTaskStatuses(plantId);
     } catch (e) {
-      final currentState = state.valueOrNull ?? const PlantTaskState();
+      final currentState = state.value ?? const PlantTaskState();
       state = AsyncValue.data(
         currentState.copyWith(errorMessage: 'Erro ao deletar tarefa: $e'),
       );
@@ -361,7 +361,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
         await _repository.deletePlantTasksByPlantId(plantId);
       }
 
-      final currentState = state.valueOrNull ?? const PlantTaskState();
+      final currentState = state.value ?? const PlantTaskState();
       final updatedTasks = Map<String, List<PlantTask>>.from(
         currentState.plantTasks,
       );
@@ -369,7 +369,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 
       state = AsyncValue.data(currentState.copyWith(plantTasks: updatedTasks));
     } catch (e) {
-      final currentState = state.valueOrNull ?? const PlantTaskState();
+      final currentState = state.value ?? const PlantTaskState();
       state = AsyncValue.data(
         currentState.copyWith(errorMessage: 'Erro ao remover tarefas: $e'),
       );
@@ -379,7 +379,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
   /// Update tasks when plant config changes
   Future<void> updateTasksForPlantConfig(Plant plant) async {
     try {
-      final currentState = state.valueOrNull ?? const PlantTaskState();
+      final currentState = state.value ?? const PlantTaskState();
       state = AsyncValue.data(currentState.copyWith(isLoading: true));
       if (_repository != null) {
         await _repository.deletePlantTasksByPlantId(plant.id);
@@ -392,7 +392,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       state = AsyncValue.data(currentState.copyWith(plantTasks: updatedTasks));
       await generateTasksForPlant(plant);
     } catch (e) {
-      final currentState = state.valueOrNull ?? const PlantTaskState();
+      final currentState = state.value ?? const PlantTaskState();
       state = AsyncValue.data(
         currentState.copyWith(
           errorMessage: 'Erro ao atualizar tarefas: $e',
@@ -404,7 +404,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 
   /// Get all upcoming tasks across all plants
   List<PlantTask> getAllUpcomingTasks() {
-    final currentState = state.valueOrNull ?? const PlantTaskState();
+    final currentState = state.value ?? const PlantTaskState();
     final allTasks = <PlantTask>[];
 
     for (final tasks in currentState.plantTasks.values) {
@@ -416,7 +416,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 
   /// Get all overdue tasks across all plants
   List<PlantTask> getAllOverdueTasks() {
-    final currentState = state.valueOrNull ?? const PlantTaskState();
+    final currentState = state.value ?? const PlantTaskState();
     final allTasks = <PlantTask>[];
 
     for (final tasks in currentState.plantTasks.values) {
@@ -431,7 +431,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
     final tasks = getTasksForPlant(plantId);
     final updatedTasks = _taskGenerationService.updateTaskStatuses(tasks);
 
-    final currentState = state.valueOrNull ?? const PlantTaskState();
+    final currentState = state.value ?? const PlantTaskState();
     final newTasks = Map<String, List<PlantTask>>.from(currentState.plantTasks);
     newTasks[plantId] = updatedTasks;
 
@@ -440,7 +440,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 
   /// Clear error
   void clearError() {
-    final currentState = state.valueOrNull ?? const PlantTaskState();
+    final currentState = state.value ?? const PlantTaskState();
     state = AsyncValue.data(currentState.copyWith(errorMessage: null));
   }
 }

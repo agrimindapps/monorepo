@@ -43,9 +43,9 @@ class _CampoMinadoPageState extends ConsumerState<CampoMinadoPage>
     // Auto-pause when app goes to background
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive) {
-      final gameState = ref.read(campoMinadoGameNotifierProvider);
+      final gameState = ref.read(campoMinadoGameProvider);
       if (gameState.isPlaying && !gameState.isPaused) {
-        ref.read(campoMinadoGameNotifierProvider.notifier).togglePause();
+        ref.read(campoMinadoGameProvider.notifier).togglePause();
       }
     }
   }
@@ -54,7 +54,7 @@ class _CampoMinadoPageState extends ConsumerState<CampoMinadoPage>
   Widget build(BuildContext context) {
     // Listen to game state for game over dialog
     ref.listen<GameStatus>(
-      campoMinadoGameNotifierProvider.select((state) => state.status),
+      campoMinadoGameProvider.select((state) => state.status),
       (previous, next) {
         if (next.isGameOver && previous != next) {
           _showGameOverDialog(context, next);
@@ -195,7 +195,7 @@ class _CampoMinadoPageState extends ConsumerState<CampoMinadoPage>
                 ),
                 onTap: () {
                   ref
-                      .read(campoMinadoGameNotifierProvider.notifier)
+                      .read(campoMinadoGameProvider.notifier)
                       .changeDifficulty(difficulty);
                   Navigator.of(context).pop();
                 },

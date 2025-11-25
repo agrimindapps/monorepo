@@ -15,7 +15,7 @@ extension DiagnosticoDriftExtension on Diagnostico {
   /// Retorna o nome do defensivo com warnings
   /// TODO: Implementar com injeção de dependências
   Future<DataWithWarnings<String>> getDisplayNomeDefensivoWithWarnings() async {
-    return DataWithWarnings(data: 'N/A');
+    return const DataWithWarnings(data: 'N/A');
   }
 
   /// Retorna o nome da cultura
@@ -27,7 +27,7 @@ extension DiagnosticoDriftExtension on Diagnostico {
   /// Retorna o nome da cultura com warnings
   /// TODO: Implementar com injeção de dependências
   Future<DataWithWarnings<String>> getDisplayNomeCulturaWithWarnings() async {
-    return DataWithWarnings(data: 'N/A');
+    return const DataWithWarnings(data: 'N/A');
   }
 
   /// Retorna o nome da praga
@@ -39,7 +39,7 @@ extension DiagnosticoDriftExtension on Diagnostico {
   /// Retorna o nome da praga com warnings
   /// TODO: Implementar com injeção de dependências
   Future<DataWithWarnings<String>> getDisplayNomePragaWithWarnings() async {
-    return DataWithWarnings(data: 'N/A');
+    return const DataWithWarnings(data: 'N/A');
   }
 
   String get displayDosagem {

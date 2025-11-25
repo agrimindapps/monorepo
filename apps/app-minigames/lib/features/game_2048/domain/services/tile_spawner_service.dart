@@ -1,7 +1,5 @@
 import 'dart:math';
 
-import 'package:injectable/injectable.dart';
-
 import '../entities/grid_entity.dart';
 import '../entities/position_entity.dart';
 import '../entities/tile_entity.dart';
@@ -12,7 +10,6 @@ import '../entities/tile_entity.dart';
 /// - Random position selection
 /// - Tile value determination (2 or 4)
 /// - Probability distribution (90% = 2, 10% = 4)
-@lazySingleton
 class TileSpawnerService {
   final Random _random;
 

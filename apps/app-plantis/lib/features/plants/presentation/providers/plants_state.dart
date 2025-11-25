@@ -8,9 +8,7 @@ part 'plants_state.freezed.dart';
 /// Immutable state for Plants feature
 /// Contains all UI state needed for plants management
 @freezed
-class PlantsState with _$PlantsState {
-  const PlantsState._();
-
+sealed class PlantsState with _$PlantsState {
   const factory PlantsState({
     /// All plants loaded from repository
     @Default([]) List<Plant> plants,
@@ -42,9 +40,12 @@ class PlantsState with _$PlantsState {
     /// Filter by space ID (null = show all)
     String? filterBySpace,
   }) = _PlantsState;
+}
 
+/// Extension providing factory constructors and computed properties for PlantsState
+extension PlantsStateX on PlantsState {
   /// Initial state factory
-  factory PlantsState.initial() => const PlantsState();
+  static PlantsState initial() => const PlantsState();
 
   // Computed properties
 

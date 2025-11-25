@@ -70,12 +70,12 @@ class _DefensivosUnificadoPageState
     });
     if (widget.isAgrupados && widget.tipoAgrupamento != null) {
       ref
-          .read(defensivosDrillDownNotifierProvider.notifier)
+          .read(defensivosDrillDownProvider.notifier)
           .updateSearchFilter(_searchText);
     } else {
       // Apply text filter to unified notifier for regular list mode
       ref
-          .read(defensivosUnificadoNotifierProvider.notifier)
+          .read(defensivosUnificadoProvider.notifier)
           .aplicarFiltroTexto(_searchText);
     }
   }
@@ -87,12 +87,12 @@ class _DefensivosUnificadoPageState
     });
     if (widget.isAgrupados && widget.tipoAgrupamento != null) {
       ref
-          .read(defensivosDrillDownNotifierProvider.notifier)
+          .read(defensivosDrillDownProvider.notifier)
           .clearSearchFilter();
     } else {
       // Clear text filter in unified notifier for regular list mode
       ref
-          .read(defensivosUnificadoNotifierProvider.notifier)
+          .read(defensivosUnificadoProvider.notifier)
           .aplicarFiltroTexto('');
     }
   }
@@ -108,7 +108,7 @@ class _DefensivosUnificadoPageState
       _isAscending = !_isAscending;
     });
     if (widget.isAgrupados && widget.tipoAgrupamento != null) {
-      ref.read(defensivosDrillDownNotifierProvider.notifier).toggleSort();
+      ref.read(defensivosDrillDownProvider.notifier).toggleSort();
     }
   }
 
@@ -116,7 +116,7 @@ class _DefensivosUnificadoPageState
     debugPrint(
       '🚀 [PAGE] _carregarDefensivos chamado - isAgrupados: ${widget.isAgrupados}, tipoAgrupamento: ${widget.tipoAgrupamento}, modoCompleto: ${widget.modoCompleto}',
     );
-    final notifier = ref.read(defensivosUnificadoNotifierProvider.notifier);
+    final notifier = ref.read(defensivosUnificadoProvider.notifier);
     debugPrint('🔍 [PAGE] Notifier obtido: $notifier');
 
     if (widget.isAgrupados && widget.tipoAgrupamento != null) {
@@ -163,7 +163,7 @@ class _DefensivosUnificadoPageState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final unificadoState = ref.watch(defensivosUnificadoNotifierProvider);
+    final unificadoState = ref.watch(defensivosUnificadoProvider);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -187,7 +187,7 @@ class _DefensivosUnificadoPageState
                     Future.delayed(Duration.zero, () {
                       if (mounted && !_drillDownInitialized) {
                         ref
-                            .read(defensivosDrillDownNotifierProvider.notifier)
+                            .read(defensivosDrillDownProvider.notifier)
                             .initializeWithDefensivos(
                               defensivos: state.defensivos,
                               tipoAgrupamento: widget.tipoAgrupamento!,
@@ -254,7 +254,7 @@ class _DefensivosUnificadoPageState
     String subtitulo;
 
     if (widget.isAgrupados && widget.tipoAgrupamento != null) {
-      final drillDownState = ref.watch(defensivosDrillDownNotifierProvider);
+      final drillDownState = ref.watch(defensivosDrillDownProvider);
 
       drillDownState.whenData((drillDown) {
         titulo = drillDown.pageTitle;
@@ -283,7 +283,7 @@ class _DefensivosUnificadoPageState
           '${state.defensivosFiltrados.length} defensivo(s) encontrado(s)';
     }
 
-    final drillDownState = ref.watch(defensivosDrillDownNotifierProvider);
+    final drillDownState = ref.watch(defensivosDrillDownProvider);
     final canGoBack = drillDownState.value?.canGoBack ?? false;
 
     return ModernHeaderWidget(
@@ -326,13 +326,13 @@ class _DefensivosUnificadoPageState
             onSelecaoChanged:
                 state.modoComparacao
                     ? (defensivo) => ref
-                        .read(defensivosUnificadoNotifierProvider.notifier)
+                        .read(defensivosUnificadoProvider.notifier)
                         .toggleSelecaoDefensivo(defensivo)
                     : null,
             onClearFilters:
                 () =>
                     ref
-                        .read(defensivosUnificadoNotifierProvider.notifier)
+                        .read(defensivosUnificadoProvider.notifier)
                         .limparFiltros(),
             hasActiveSearch: _searchText.isNotEmpty,
             viewMode: _viewMode,
@@ -382,7 +382,7 @@ class _DefensivosUnificadoPageState
               onPressed:
                   () =>
                       ref
-                          .read(defensivosUnificadoNotifierProvider.notifier)
+                          .read(defensivosUnificadoProvider.notifier)
                           .reload(),
               icon: const Icon(Icons.refresh),
               label: const Text('Tentar Novamente'),
@@ -395,7 +395,7 @@ class _DefensivosUnificadoPageState
 
   /// Constrói conteúdo para drill-down navigation
   Widget _buildDrillDownContent(DefensivosUnificadoState state) {
-    final drillDownState = ref.watch(defensivosDrillDownNotifierProvider);
+    final drillDownState = ref.watch(defensivosDrillDownProvider);
 
     return drillDownState.when(
       data: (drillDown) {
@@ -474,7 +474,7 @@ class _DefensivosUnificadoPageState
       onSelecaoChanged:
           state.modoComparacao
               ? (defensivo) => ref
-                  .read(defensivosUnificadoNotifierProvider.notifier)
+                  .read(defensivosUnificadoProvider.notifier)
                   .toggleSelecaoDefensivo(defensivo)
               : null,
       onClearFilters: _clearSearch,
@@ -518,16 +518,16 @@ class _DefensivosUnificadoPageState
 
   void _onGroupTap(DefensivoGroupEntity group) {
     ref
-        .read(defensivosDrillDownNotifierProvider.notifier)
+        .read(defensivosDrillDownProvider.notifier)
         .drillDownToGroup(group);
   }
 
   void _onDrillDownBack() {
-    ref.read(defensivosDrillDownNotifierProvider.notifier).goBackToGroups();
+    ref.read(defensivosDrillDownProvider.notifier).goBackToGroups();
   }
 
   void _reloadDrillDownData() {
-    ref.read(defensivosDrillDownNotifierProvider.notifier).clearError();
+    ref.read(defensivosDrillDownProvider.notifier).clearError();
     _carregarDefensivos();
   }
 
@@ -556,7 +556,7 @@ class _DefensivosUnificadoPageState
               onFechar: () {
                 Navigator.of(context).pop();
                 ref
-                    .read(defensivosUnificadoNotifierProvider.notifier)
+                    .read(defensivosUnificadoProvider.notifier)
                     .limparSelecao();
               },
             ),

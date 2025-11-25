@@ -45,7 +45,7 @@ class _EnhancedDiagnosticosPragaWidgetState
 
   Future<void> _initializeProvider() async {
     final notifier = ref.read(
-      enhancedDiagnosticosPragaNotifierProvider.notifier,
+      enhancedDiagnosticosPragaProvider.notifier,
     );
     await notifier.initialize();
     if (widget.pragaId?.isNotEmpty == true) {
@@ -65,7 +65,7 @@ class _EnhancedDiagnosticosPragaWidgetState
 
   @override
   Widget build(BuildContext context) {
-    final asyncState = ref.watch(enhancedDiagnosticosPragaNotifierProvider);
+    final asyncState = ref.watch(enhancedDiagnosticosPragaProvider);
 
     return RepaintBoundary(
       child: asyncState.when(
@@ -136,7 +136,7 @@ class _EnhancedDiagnosticosPragaWidgetState
                   ? null
                   : () => ref
                       .read(
-                        enhancedDiagnosticosPragaNotifierProvider.notifier,
+                        enhancedDiagnosticosPragaProvider.notifier,
                       )
                       .refresh(),
               tooltip: 'Atualizar dados',
@@ -207,7 +207,7 @@ class _EnhancedDiagnosticosPragaWidgetState
                               _searchController.clear();
                               ref
                                   .read(
-                                    enhancedDiagnosticosPragaNotifierProvider
+                                    enhancedDiagnosticosPragaProvider
                                         .notifier,
                                   )
                                   .updateSearchQuery('');
@@ -228,7 +228,7 @@ class _EnhancedDiagnosticosPragaWidgetState
                   onChanged: (value) {
                     ref
                         .read(
-                          enhancedDiagnosticosPragaNotifierProvider.notifier,
+                          enhancedDiagnosticosPragaProvider.notifier,
                         )
                         .updateSearchQuery(value);
                   },
@@ -241,7 +241,7 @@ class _EnhancedDiagnosticosPragaWidgetState
                     _searchController.clear();
                     ref
                         .read(
-                          enhancedDiagnosticosPragaNotifierProvider.notifier,
+                          enhancedDiagnosticosPragaProvider.notifier,
                         )
                         .clearFilters();
                   },
@@ -277,7 +277,7 @@ class _EnhancedDiagnosticosPragaWidgetState
               onChanged: (value) {
                 if (value != null) {
                   ref
-                      .read(enhancedDiagnosticosPragaNotifierProvider.notifier)
+                      .read(enhancedDiagnosticosPragaProvider.notifier)
                       .updateSelectedCultura(value);
                 }
               },
@@ -352,7 +352,7 @@ class _EnhancedDiagnosticosPragaWidgetState
             const SizedBox(height: SpacingTokens.md),
             ElevatedButton.icon(
               onPressed: () => ref
-                  .read(enhancedDiagnosticosPragaNotifierProvider.notifier)
+                  .read(enhancedDiagnosticosPragaProvider.notifier)
                   .refresh(),
               icon: const Icon(Icons.refresh),
               label: const Text('Tentar novamente'),

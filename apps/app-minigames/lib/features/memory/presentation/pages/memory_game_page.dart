@@ -19,7 +19,7 @@ class _MemoryGamePageState extends ConsumerState<MemoryGamePage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(memoryGameNotifierProvider.notifier).startGame(
+      ref.read(memoryGameProvider.notifier).startGame(
             GameDifficulty.medium,
           );
     });
@@ -27,8 +27,8 @@ class _MemoryGamePageState extends ConsumerState<MemoryGamePage> {
 
   @override
   Widget build(BuildContext context) {
-    final gameState = ref.watch(memoryGameNotifierProvider);
-    final notifier = ref.read(memoryGameNotifierProvider.notifier);
+    final gameState = ref.watch(memoryGameProvider);
+    final notifier = ref.read(memoryGameProvider.notifier);
 
     if (gameState.status == GameStatus.completed) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -150,8 +150,8 @@ class _MemoryGamePageState extends ConsumerState<MemoryGamePage> {
   }
 
   void _showVictoryDialog(BuildContext context) {
-    final gameState = ref.read(memoryGameNotifierProvider);
-    final notifier = ref.read(memoryGameNotifierProvider.notifier);
+    final gameState = ref.read(memoryGameProvider);
+    final notifier = ref.read(memoryGameProvider.notifier);
 
     showDialog(
       context: context,
@@ -185,7 +185,7 @@ class _MemoryGamePageState extends ConsumerState<MemoryGamePage> {
               onTap: () {
                 Navigator.of(context).pop();
                 ref
-                    .read(memoryGameNotifierProvider.notifier)
+                    .read(memoryGameProvider.notifier)
                     .changeDifficulty(GameDifficulty.easy);
               },
             ),
@@ -194,7 +194,7 @@ class _MemoryGamePageState extends ConsumerState<MemoryGamePage> {
               onTap: () {
                 Navigator.of(context).pop();
                 ref
-                    .read(memoryGameNotifierProvider.notifier)
+                    .read(memoryGameProvider.notifier)
                     .changeDifficulty(GameDifficulty.medium);
               },
             ),
@@ -203,7 +203,7 @@ class _MemoryGamePageState extends ConsumerState<MemoryGamePage> {
               onTap: () {
                 Navigator.of(context).pop();
                 ref
-                    .read(memoryGameNotifierProvider.notifier)
+                    .read(memoryGameProvider.notifier)
                     .changeDifficulty(GameDifficulty.hard);
               },
             ),

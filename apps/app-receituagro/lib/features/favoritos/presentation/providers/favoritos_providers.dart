@@ -6,7 +6,7 @@ part 'favoritos_providers.g.dart';
 
 /// Bridge provider for FavoritosRepositorySimplified
 @riverpod
-FavoritosRepositorySimplified favoritosRepositorySimplified(FavoritosRepositorySimplifiedRef ref) {
+FavoritosRepositorySimplified favoritosRepositorySimplified(Ref ref) {
   return FavoritosRepositorySimplified(
     service: ref.watch(favoritosServiceProvider),
   );

@@ -11,7 +11,7 @@ class ResultadosBuscaWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final buscaState = ref.watch(buscaAvancadaNotifierProvider);
+    final buscaState = ref.watch(buscaAvancadaProvider);
 
     return buscaState.when(
       data: (state) {
@@ -107,7 +107,7 @@ class ResultadosBuscaWidget extends ConsumerWidget {
     WidgetRef ref,
   ) {
     final theme = Theme.of(context);
-    final notifier = ref.read(buscaAvancadaNotifierProvider.notifier);
+    final notifier = ref.read(buscaAvancadaProvider.notifier);
 
     return Container(
       margin: const EdgeInsets.all(16.0),
@@ -334,7 +334,7 @@ class ResultadosBuscaWidget extends ConsumerWidget {
 
   Widget _buildEstadoSemResultados(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final notifier = ref.read(buscaAvancadaNotifierProvider.notifier);
+    final notifier = ref.read(buscaAvancadaProvider.notifier);
 
     return Container(
       padding: const EdgeInsets.all(32.0),

@@ -61,12 +61,12 @@ class DiagnosticosPragaWidget extends ConsumerWidget {
 
   /// Callback para retry quando houver erro
   void _retryLoadDiagnostics(BuildContext context, WidgetRef ref) {
-    final pragaState = ref.read(detalhePragaNotifierProvider).value;
+    final pragaState = ref.read(detalhePragaProvider).value;
 
-    ref.read(diagnosticosPragaNotifierProvider.notifier).clearError();
+    ref.read(diagnosticosPragaProvider.notifier).clearError();
     // MIGRATION NOTE: Drift Praga uses idPraga instead of idReg
     if (pragaState?.pragaData != null && pragaState!.pragaData!.idPraga.isNotEmpty) {
-      ref.read(diagnosticosPragaNotifierProvider.notifier).loadDiagnosticos(
+      ref.read(diagnosticosPragaProvider.notifier).loadDiagnosticos(
         pragaState.pragaData!.idPraga,
         pragaName: pragaName,
       );

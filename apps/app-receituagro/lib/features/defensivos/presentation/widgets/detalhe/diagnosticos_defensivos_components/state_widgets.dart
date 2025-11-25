@@ -19,7 +19,7 @@ class DiagnosticoDefensivoStateManager extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final diagnosticosAsync = ref.watch(diagnosticosNotifierProvider);
+    final diagnosticosAsync = ref.watch(diagnosticosProvider);
 
     return diagnosticosAsync.when(
       data: (diagnosticosState) {

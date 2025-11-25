@@ -15,8 +15,8 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final favoritosState = ref.watch(favoritosNotifierProvider);
-    final premiumAsync = ref.watch(premiumNotifierProvider);
+    final favoritosState = ref.watch(favoritosProvider);
+    final premiumAsync = ref.watch(premiumProvider);
     final isPremium = premiumAsync.value?.isPremium ?? false;
 
     if (!isPremium) {
@@ -67,7 +67,7 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
         return RefreshIndicator(
           onRefresh: () async {
             await ref
-                .read(favoritosNotifierProvider.notifier)
+                .read(favoritosProvider.notifier)
                 .loadAllFavoritos();
           },
           child: Padding(
@@ -259,7 +259,7 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
   ) async {
     try {
       await ref
-          .read(favoritosNotifierProvider.notifier)
+          .read(favoritosProvider.notifier)
           .toggleFavorito(TipoFavorito.diagnostico, diagnostico.id);
     } catch (e) {}
   }
@@ -278,7 +278,7 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
   }
 
   Widget _buildErrorState(BuildContext context, WidgetRef ref, bool isDark) {
-    final favoritosState = ref.watch(favoritosNotifierProvider);
+    final favoritosState = ref.watch(favoritosProvider);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

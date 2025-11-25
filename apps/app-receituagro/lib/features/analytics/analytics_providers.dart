@@ -1,19 +1,19 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Ref;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'analytics_providers.g.dart';
 
 @riverpod
-IAnalyticsRepository analyticsRepository(AnalyticsRepositoryRef ref) {
+IAnalyticsRepository analyticsRepository(Ref ref) {
   return FirebaseAnalyticsService();
 }
 
 @riverpod
-ICrashlyticsRepository crashlyticsRepository(CrashlyticsRepositoryRef ref) {
+ICrashlyticsRepository crashlyticsRepository(Ref ref) {
   return FirebaseCrashlyticsService();
 }
 
 @riverpod
-IPerformanceRepository performanceRepository(PerformanceRepositoryRef ref) {
+IPerformanceRepository performanceRepository(Ref ref) {
   return PerformanceService();
 }

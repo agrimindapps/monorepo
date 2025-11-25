@@ -1,5 +1,8 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import '../../domain/entities/index.dart';
+
+part 'purchase_notifier.g.dart';
 
 /// Estado do histórico de compras
 class PurchaseState {
@@ -117,8 +120,12 @@ class PurchaseState {
 /// - Restaurar compras anteriores
 /// - Gerenciar compras falhadas
 /// - Sincronizar com backend
-class PurchaseNotifier extends StateNotifier<PurchaseState> {
-  PurchaseNotifier() : super(PurchaseState.initial());
+@riverpod
+class PurchaseNotifier extends _$PurchaseNotifier {
+  @override
+  Future<PurchaseState> build() async {
+    return PurchaseState.initial();
+  }
 
   /// Carrega o histórico de compras do usuário
   ///
@@ -126,7 +133,10 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
   /// - API remota
   /// - Sistema de compras (App Store, Play Store)
   Future<void> loadPurchaseHistory() async {
-    state = state.copyWith(isLoading: true, error: null);
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    state = AsyncValue.data(currentState.copyWith(isLoading: true, error: null));
 
     try {
       await Future<void>.delayed(const Duration(milliseconds: 800));
@@ -158,16 +168,20 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
         ),
       ];
 
-      state = state.copyWith(
-        purchases: examplePurchases,
-        isLoading: false,
-        lastSynced: DateTime.now(),
-        totalPurchaseCount: examplePurchases.length,
+      state = AsyncValue.data(
+        currentState.copyWith(
+          purchases: examplePurchases,
+          isLoading: false,
+          lastSynced: DateTime.now(),
+          totalPurchaseCount: examplePurchases.length,
+        ),
       );
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Erro ao carregar histórico: ${error.toString()}',
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isLoading: false,
+          error: 'Erro ao carregar histórico: ${error.toString()}',
+        ),
       );
     }
   }
@@ -183,7 +197,10 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
     required double amount,
     required PurchaseType purchaseType,
   }) async {
-    state = state.copyWith(isLoading: true, error: null);
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    state = AsyncValue.data(currentState.copyWith(isLoading: true, error: null));
 
     try {
       await Future<void>.delayed(const Duration(milliseconds: 1500));
@@ -213,14 +230,16 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
         invoiceUrl: null,
       );
 
-      final newPurchases = [...state.purchases, newPurchase];
-      final newTotal = (state.totalPurchaseCount ?? 0) + 1;
+      final newPurchases = [...currentState.purchases, newPurchase];
+      final newTotal = (currentState.totalPurchaseCount ?? 0) + 1;
 
-      state = state.copyWith(
-        purchases: newPurchases,
-        isLoading: false,
-        lastSynced: DateTime.now(),
-        totalPurchaseCount: newTotal,
+      state = AsyncValue.data(
+        currentState.copyWith(
+          purchases: newPurchases,
+          isLoading: false,
+          lastSynced: DateTime.now(),
+          totalPurchaseCount: newTotal,
+        ),
       );
 
       // TODO: Log event de compra
@@ -230,9 +249,11 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
       //   'type': purchaseType.toString(),
       // });
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Erro ao processar compra: ${error.toString()}',
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isLoading: false,
+          error: 'Erro ao processar compra: ${error.toString()}',
+        ),
       );
     }
   }
@@ -243,7 +264,10 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
   /// Parâmetros:
   /// - [includeExpired]: Se deve incluir compras expiradas
   Future<void> restorePurchases({bool includeExpired = true}) async {
-    state = state.copyWith(isLoading: true, error: null);
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    state = AsyncValue.data(currentState.copyWith(isLoading: true, error: null));
 
     try {
       await Future<void>.delayed(const Duration(milliseconds: 1200));
@@ -256,16 +280,20 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
       // Combinar com histórico existente
       // (em produção, seria necessário deduplicar)
 
-      state = state.copyWith(isLoading: false, lastSynced: DateTime.now());
+      state = AsyncValue.data(
+        currentState.copyWith(isLoading: false, lastSynced: DateTime.now()),
+      );
 
       // TODO: Log event de restauração
       // _analyticsService.logEvent('purchases_restored', {
       //   'include_expired': includeExpired,
       // });
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Erro ao restaurar compras: ${error.toString()}',
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isLoading: false,
+          error: 'Erro ao restaurar compras: ${error.toString()}',
+        ),
       );
     }
   }
@@ -275,19 +303,24 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
   /// Parâmetros:
   /// - [purchaseId]: ID da compra a reprocessar
   Future<void> retryFailedPurchase({required String purchaseId}) async {
-    final purchase = state.purchases.firstWhere(
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final purchase = currentState.purchases.firstWhere(
       (p) => p.id == purchaseId,
       orElse: () => throw Exception('Compra não encontrada'),
     );
 
     if (!purchase.isFailed) {
-      state = state.copyWith(
-        error: 'Apenas compras falhadas podem ser reprocessadas',
+      state = AsyncValue.data(
+        currentState.copyWith(
+          error: 'Apenas compras falhadas podem ser reprocessadas',
+        ),
       );
       return;
     }
 
-    state = state.copyWith(isLoading: true, error: null);
+    state = AsyncValue.data(currentState.copyWith(isLoading: true, error: null));
 
     try {
       await Future<void>.delayed(const Duration(milliseconds: 1000));
@@ -302,14 +335,16 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
         lastUpdated: DateTime.now(),
       );
 
-      final newPurchases = state.purchases
+      final newPurchases = currentState.purchases
           .map((p) => p.id == purchaseId ? updated : p)
           .toList();
 
-      state = state.copyWith(
-        purchases: newPurchases,
-        isLoading: false,
-        lastSynced: DateTime.now(),
+      state = AsyncValue.data(
+        currentState.copyWith(
+          purchases: newPurchases,
+          isLoading: false,
+          lastSynced: DateTime.now(),
+        ),
       );
 
       // TODO: Log event de retry
@@ -318,9 +353,11 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
       //   'product_id': purchase.productId,
       // });
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Erro ao fazer retry: ${error.toString()}',
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isLoading: false,
+          error: 'Erro ao fazer retry: ${error.toString()}',
+        ),
       );
     }
   }
@@ -328,34 +365,42 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
   /// Sincroniza compras locais com servidor
   /// Verifica se há compras que precisam de confirmação/atualização
   Future<void> syncPurchasesWithServer() async {
-    if (state.purchases.isEmpty) return;
+    final currentState = state.value;
+    if (currentState == null || currentState.purchases.isEmpty) return;
 
-    state = state.copyWith(isLoading: true, error: null);
+    state = AsyncValue.data(currentState.copyWith(isLoading: true, error: null));
 
     try {
       await Future<void>.delayed(const Duration(milliseconds: 900));
 
       // TODO: Sincronizar com backend
-      // await _purchaseRepository.syncPurchases(state.purchases);
+      // await _purchaseRepository.syncPurchases(currentState.purchases);
 
-      state = state.copyWith(isLoading: false, lastSynced: DateTime.now());
+      state = AsyncValue.data(
+        currentState.copyWith(isLoading: false, lastSynced: DateTime.now()),
+      );
 
       // TODO: Log event de sincronização
       // _analyticsService.logEvent('purchases_synced', {
-      //   'count': state.purchases.length,
+      //   'count': currentState.purchases.length,
       // });
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Erro ao sincronizar: ${error.toString()}',
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isLoading: false,
+          error: 'Erro ao sincronizar: ${error.toString()}',
+        ),
       );
     }
   }
 
   /// Obtém uma compra específica pelo ID
   PurchaseHistoryEntity? getPurchaseById(String purchaseId) {
+    final currentState = state.value;
+    if (currentState == null) return null;
+
     try {
-      return state.purchases.firstWhere((p) => p.id == purchaseId);
+      return currentState.purchases.firstWhere((p) => p.id == purchaseId);
     } catch (_) {
       return null;
     }
@@ -363,7 +408,10 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
 
   /// Obtém compras de um produto específico
   List<PurchaseHistoryEntity> getPurchasesForProduct(String productId) {
-    return state.purchases.where((p) => p.productId == productId).toList();
+    final currentState = state.value;
+    if (currentState == null) return [];
+
+    return currentState.purchases.where((p) => p.productId == productId).toList();
   }
 
   /// Obtém compras de um período específico
@@ -375,7 +423,10 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
     required DateTime startDate,
     required DateTime endDate,
   }) {
-    return state.purchases.where((p) {
+    final currentState = state.value;
+    if (currentState == null) return [];
+
+    return currentState.purchases.where((p) {
       return p.purchaseDate.isAfter(startDate) &&
           p.purchaseDate.isBefore(endDate);
     }).toList();
@@ -396,16 +447,21 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
   /// Adiciona uma nova compra ao histórico
   /// Usado quando nova compra é processada via callback
   void addPurchase(PurchaseHistoryEntity purchase) {
-    final exists = state.purchases.any((p) => p.id == purchase.id);
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final exists = currentState.purchases.any((p) => p.id == purchase.id);
     if (exists) return;
 
-    final newPurchases = [...state.purchases, purchase];
-    final newTotal = (state.totalPurchaseCount ?? 0) + 1;
+    final newPurchases = [...currentState.purchases, purchase];
+    final newTotal = (currentState.totalPurchaseCount ?? 0) + 1;
 
-    state = state.copyWith(
-      purchases: newPurchases,
-      totalPurchaseCount: newTotal,
-      lastSynced: DateTime.now(),
+    state = AsyncValue.data(
+      currentState.copyWith(
+        purchases: newPurchases,
+        totalPurchaseCount: newTotal,
+        lastSynced: DateTime.now(),
+      ),
     );
   }
 
@@ -416,7 +472,10 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
     required PurchaseStatus newStatus,
     String? failureReason,
   }) {
-    final purchase = state.purchases.firstWhere(
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final purchase = currentState.purchases.firstWhere(
       (p) => p.id == purchaseId,
       orElse: () => throw Exception('Compra não encontrada'),
     );
@@ -427,15 +486,28 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
       lastUpdated: DateTime.now(),
     );
 
-    final newPurchases = state.purchases
+    final newPurchases = currentState.purchases
         .map((p) => p.id == purchaseId ? updated : p)
         .toList();
 
-    state = state.copyWith(purchases: newPurchases, lastSynced: DateTime.now());
+    state = AsyncValue.data(
+      currentState.copyWith(purchases: newPurchases, lastSynced: DateTime.now()),
+    );
   }
 
   /// Obtém resumo de compras do mês atual
   Map<String, dynamic> getMonthlyPurchaseSummary() {
+    final currentState = state.value;
+    if (currentState == null) {
+      return {
+        'totalAmount': 0.0,
+        'count': 0,
+        'successful': 0,
+        'pending': 0,
+        'failed': 0,
+      };
+    }
+
     final now = DateTime.now();
     final startOfMonth = DateTime(now.year, now.month, 1);
     final endOfMonth = DateTime(now.year, now.month + 1, 0);
@@ -460,7 +532,10 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
   /// Sincroniza com backend
   /// Chamado periodicamente ou quando volta para foreground
   Future<void> syncWithBackend() async {
-    if (state.needsRefresh) {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    if (currentState.needsRefresh) {
       await loadPurchaseHistory();
     }
     await syncPurchasesWithServer();
@@ -468,6 +543,6 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
 
   /// Limpa o estado e dados em cache
   void clearState() {
-    state = PurchaseState.initial();
+    state = AsyncValue.data(PurchaseState.initial());
   }
 }

@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/card_entity.dart';
 import '../entities/enums.dart';
 
@@ -10,7 +8,6 @@ import '../entities/enums.dart';
 /// - Match state updates
 /// - Victory condition checking
 /// - Match statistics
-@lazySingleton
 class CardMatcherService {
   // ============================================================================
   // Core Methods

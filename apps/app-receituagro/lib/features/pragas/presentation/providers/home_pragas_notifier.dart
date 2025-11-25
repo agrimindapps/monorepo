@@ -128,7 +128,7 @@ class HomePragasNotifier extends _$HomePragasNotifier {
   Future<HomePragasState> _initialize() async {
     try {
       final totalCulturas = await _loadCulturaData();
-      final pragasState = await ref.watch(pragasNotifierProvider.future);
+      final pragasState = await ref.watch(pragasProvider.future);
 
       // Criar objeto de estatísticas com contagens por tipo
       final stats = {
@@ -189,11 +189,11 @@ class HomePragasNotifier extends _$HomePragasNotifier {
 
   /// Força atualização dos dados de pragas
   Future<void> refreshPragasData() async {
-    await ref.read(pragasNotifierProvider.notifier).initialize();
+    await ref.read(pragasProvider.notifier).initialize();
 
     final currentState = state.value;
     if (currentState == null) return;
-    final pragasState = ref.read(pragasNotifierProvider).value;
+    final pragasState = ref.read(pragasProvider).value;
 
     // Atualizar estatísticas com contagens por tipo
     final stats = pragasState != null
@@ -219,7 +219,7 @@ class HomePragasNotifier extends _$HomePragasNotifier {
 
   /// Registra acesso a uma praga
   void recordPragaAccess(PragaEntity praga) {
-    ref.read(pragasNotifierProvider.notifier).recordPragaAccess(praga);
+    ref.read(pragasProvider.notifier).recordPragaAccess(praga);
   }
 
   /// Força recarregamento completo de todos os dados

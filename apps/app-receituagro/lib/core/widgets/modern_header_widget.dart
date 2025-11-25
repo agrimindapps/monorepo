@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/navigation/navigation_providers.dart';
-import '../services/receituagro_navigation_service.dart';
 
 class ModernHeaderWidget extends ConsumerWidget {
   final String title;

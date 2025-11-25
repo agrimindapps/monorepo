@@ -1,8 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../features/analytics/analytics_providers.dart';
 import '../providers/core_providers.dart' as core_providers;
 import '../services/prioritized_data_loader.dart';
 import '../sync/receituagro_sync_config.dart';

@@ -10,18 +10,18 @@ import '../../domain/services/i_busca_validation_service.dart';
 part 'busca_avancada_providers.g.dart';
 
 @riverpod
-IBuscaMetadataService buscaMetadataService(BuscaMetadataServiceRef ref) {
+IBuscaMetadataService buscaMetadataService(Ref ref) {
   final datasource = ref.watch(buscaDatasourceProvider);
   return BuscaMetadataService(datasource);
 }
 
 @riverpod
-IBuscaValidationService buscaValidationService(BuscaValidationServiceRef ref) {
+IBuscaValidationService buscaValidationService(Ref ref) {
   return BuscaValidationService();
 }
 
 @riverpod
-BuscaDatasourceImpl buscaDatasource(BuscaDatasourceRef ref) {
+BuscaDatasourceImpl buscaDatasource(Ref ref) {
   final culturaRepo = ref.watch(culturasRepositoryProvider);
   final pragasRepo = ref.watch(pragasRepositoryProvider);
   final fitossanitarioRepo = ref.watch(fitossanitariosRepositoryProvider);

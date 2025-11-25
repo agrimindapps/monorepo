@@ -24,7 +24,7 @@ dependencies:
     sdk: flutter
   collection: any
   rxdart: any
-  freezed_annotation: ^2.4.1
+  freezed_annotation: any
   riverpod_annotation: any
   flutter_riverpod: any
   intl: any

@@ -41,16 +41,16 @@ class QuizImageNotifier extends _$QuizImageNotifier {
 
   @override
   Future<QuizGameState> build(GameDifficulty difficulty) async {
-    // Inject use cases from GetIt
-    _generateQuestionsUseCase = ref.read(GenerateGameQuestionsUseCase>();
-    _startGameUseCase = ref.read(StartGameUseCase>();
-    _selectAnswerUseCase = ref.read(SelectAnswerUseCase>();
-    _handleTimeoutUseCase = ref.read(HandleTimeoutUseCase>();
-    _nextQuestionUseCase = ref.read(NextQuestionUseCase>();
-    _updateTimerUseCase = ref.read(UpdateTimerUseCase>();
-    _restartGameUseCase = ref.read(RestartGameUseCase>();
-    _loadHighScoreUseCase = ref.read(LoadHighScoreUseCase>();
-    _saveHighScoreUseCase = ref.read(SaveHighScoreUseCase>();
+    // Inject use cases from providers
+    _generateQuestionsUseCase = ref.read(quizImageGenerateGameQuestionsUseCaseProvider);
+    _startGameUseCase = ref.read(quizImageStartGameUseCaseProvider);
+    _selectAnswerUseCase = ref.read(quizImageSelectAnswerUseCaseProvider);
+    _handleTimeoutUseCase = ref.read(quizImageHandleTimeoutUseCaseProvider);
+    _nextQuestionUseCase = ref.read(quizImageNextQuestionUseCaseProvider);
+    _updateTimerUseCase = ref.read(quizImageUpdateTimerUseCaseProvider);
+    _restartGameUseCase = ref.read(quizImageRestartGameUseCaseProvider);
+    _loadHighScoreUseCase = ref.read(quizImageLoadHighScoreUseCaseProvider);
+    _saveHighScoreUseCase = ref.read(quizImageSaveHighScoreUseCaseProvider);
 
     // Cleanup on dispose
     ref.onDispose(() {
@@ -78,7 +78,7 @@ class QuizImageNotifier extends _$QuizImageNotifier {
 
   /// Starts the quiz game
   void startGame() {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     final startResult = _startGameUseCase(currentState);
@@ -101,7 +101,7 @@ class QuizImageNotifier extends _$QuizImageNotifier {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!_isMounted) return;
 
-      final currentState = state.valueOrNull;
+      final currentState = state.value;
       if (currentState == null || !currentState.isPlaying) {
         return;
       }
@@ -129,7 +129,7 @@ class QuizImageNotifier extends _$QuizImageNotifier {
 
   /// Handles timeout for current question
   void _handleTimeout() {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     final timeoutResult = _handleTimeoutUseCase(currentState);
@@ -149,7 +149,7 @@ class QuizImageNotifier extends _$QuizImageNotifier {
 
   /// Selects an answer for the current question
   Future<void> selectAnswer(String answer) async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     final selectResult = _selectAnswerUseCase(
@@ -172,7 +172,7 @@ class QuizImageNotifier extends _$QuizImageNotifier {
 
   /// Advances to next question or ends game
   void _nextQuestion() {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     final nextResult = _nextQuestionUseCase(currentState);
@@ -196,7 +196,7 @@ class QuizImageNotifier extends _$QuizImageNotifier {
 
   /// Ends the game and saves high score if needed
   Future<void> _endGame() async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     _timer?.cancel();
@@ -218,7 +218,7 @@ class QuizImageNotifier extends _$QuizImageNotifier {
 
   /// Restarts the game with same difficulty
   void restartGame() {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     _timer?.cancel();

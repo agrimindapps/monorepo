@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
 
 import '../entities/card_entity.dart';
 import '../entities/enums.dart';
@@ -13,7 +12,6 @@ import '../entities/enums.dart';
 /// - Theme selection (colors and icons)
 /// - Card shuffling
 /// - Position assignment
-@lazySingleton
 class CardGeneratorService {
   final Random _random;
 

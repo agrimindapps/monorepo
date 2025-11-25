@@ -19,6 +19,7 @@ import 'plants_state.dart';
 export '../../domain/services/plants_care_service.dart' show CareStatus;
 export '../../domain/services/plants_sort_service.dart' show SortBy, ViewMode;
 export 'plants_state.dart';
+export '../../../../core/providers/plants_providers.dart' show plantsNotifierProvider, plantsProvider, PlantsState;
 
 import 'plants_providers.dart';
 

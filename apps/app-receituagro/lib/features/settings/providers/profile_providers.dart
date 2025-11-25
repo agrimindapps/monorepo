@@ -18,7 +18,7 @@ ProfileRepository profileRepository(Ref ref) {
   return ProfileRepositoryImpl(
     profileImageService: ref.watch(profileImageServiceProvider),
     getAuthState: () {
-      return ref.read(authNotifierProvider);
+      return ref.read(authProvider);
     },
   );
 }

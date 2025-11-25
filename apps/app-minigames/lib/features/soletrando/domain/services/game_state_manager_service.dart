@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/enums.dart';
 import '../entities/game_state_entity.dart';
 
@@ -11,7 +9,6 @@ import '../entities/game_state_entity.dart';
 /// - Word completion detection
 /// - Game validation
 /// - Statistics
-@lazySingleton
 class GameStateManagerService {
   GameStateManagerService();
 

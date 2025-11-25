@@ -46,7 +46,7 @@ class _DiagnosticoDefensivoFilterWidgetState
 
   @override
   Widget build(BuildContext context) {
-    final diagnosticosAsync = ref.watch(diagnosticosNotifierProvider);
+    final diagnosticosAsync = ref.watch(diagnosticosProvider);
 
     return RepaintBoundary(
       child: diagnosticosAsync.when(
@@ -89,7 +89,7 @@ class _DiagnosticoDefensivoFilterWidgetState
                     focusNode: _searchFocusNode,
                     onChanged: (query) {
                       ref
-                          .read(diagnosticosNotifierProvider.notifier)
+                          .read(diagnosticosProvider.notifier)
                           .searchByPattern(query);
                     },
                   ),
@@ -104,11 +104,11 @@ class _DiagnosticoDefensivoFilterWidgetState
                       onChanged: (cultura) {
                         if (cultura == 'Todas') {
                           ref
-                              .read(diagnosticosNotifierProvider.notifier)
+                              .read(diagnosticosProvider.notifier)
                               .filterByCultura(null);
                         } else {
                           ref
-                              .read(diagnosticosNotifierProvider.notifier)
+                              .read(diagnosticosProvider.notifier)
                               .filterByCultura(cultura);
                         }
                       },

@@ -22,15 +22,13 @@ Complete implementation of Google Mobile Ads for the monorepo following Clean Ar
 This service provides a complete, production-ready implementation of Google Mobile Ads with:
 
 - ✅ Clean Architecture (Domain/Infrastructure/Presentation)
-- ✅ SOLID Principles (9 specialized services following SRP)
+- ✅ SOLID Principles (specialized services following SRP)
 - ✅ Riverpod state management
 - ✅ Either<Failure, T> error handling
-- ✅ Hive persistence for configs and frequency tracking
-- ✅ Firebase Analytics integration
-- ✅ Automatic frequency capping
+- ✅ Built-in frequency capping (configurable interval between ads)
 - ✅ Premium user support (no ads for subscribers)
-- ✅ Ad preloading for better UX
 - ✅ Complete lifecycle management
+- ✅ Compatible with google_mobile_ads ^6.0.0
 
 ---
 
@@ -45,8 +43,7 @@ lib/src/
 │   └── repositories/           # Repository interfaces
 ├── infrastructure/
 │   └── services/ads/
-│       ├── specialized_services/  # 9 SRP-compliant services
-│       ├── models/                # Hive persistence models
+│       ├── specialized_services/  # SRP-compliant services
 │       ├── helpers/               # Analytics helpers
 │       └── google_mobile_ads_service.dart  # Main facade
 ├── riverpod/domain/ads/        # Riverpod providers
@@ -55,15 +52,12 @@ lib/src/
 
 ### Specialized Services (SRP)
 
-1. **AdConfigService** - Configuration management
-2. **AdFrequencyManager** - Frequency capping logic
-3. **AdLifecycleManager** - Ad lifecycle tracking
-4. **BannerAdService** - Banner ad operations
-5. **InterstitialAdService** - Interstitial ad operations
-6. **RewardedAdService** - Rewarded ad operations
-7. **RewardedInterstitialAdService** - Rewarded interstitial operations
-8. **AppOpenAdService** - App open ad operations
-9. **AdPreloaderService** - Background ad preloading
+1. **AdLifecycleManager** - Ad lifecycle tracking
+2. **BannerAdService** - Banner ad operations
+3. **InterstitialAdService** - Interstitial ad operations
+4. **RewardedAdService** - Rewarded ad operations
+5. **RewardedInterstitialAdService** - Rewarded interstitial operations
+6. **AppOpenAdService** - App open ad operations
 
 ---
 
@@ -324,68 +318,35 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
 ### Banner Ads
 - **Sizes**: banner (320x50), largeBanner (320x100), mediumRectangle (300x250)
 - **Use case**: Bottom of screen, between content
-- **Frequency**: No strict limits
 
 ### Interstitial Ads
 - **Size**: Fullscreen
 - **Use case**: Between levels, after actions
-- **Frequency**: Max 10/day, 5/session, 5min between
+- **Default interval**: 60 seconds between ads
 
 ### Rewarded Ads
 - **Size**: Fullscreen
 - **Use case**: User-initiated (watch for rewards)
-- **Frequency**: Max 20/day, 10/session, 1min between
 
 ### Rewarded Interstitial Ads
 - **Size**: Fullscreen with reward
 - **Use case**: Before premium features
-- **Frequency**: Similar to interstitials
 
 ### App Open Ads
 - **Size**: Fullscreen
 - **Use case**: App launch, resume from background
-- **Frequency**: Max 5/day, 1/session, 4h between
 
 ---
 
 ## Frequency Capping
 
-### Default Configurations
+The service includes built-in frequency capping with configurable minimum interval between ads (default: 60 seconds).
 
 ```dart
-// Interstitial
-AdFrequencyConfig(
-  maxAdsPerDay: 10,
-  maxAdsPerSession: 5,
-  minIntervalSeconds: 300, // 5 minutes
-  maxAdsPerHour: 3,
-)
-
-// Rewarded
-AdFrequencyConfig(
-  maxAdsPerDay: 20,
-  maxAdsPerSession: 10,
-  minIntervalSeconds: 60, // 1 minute
-  maxAdsPerHour: 5,
-)
-
-// App Open
-AdFrequencyConfig(
-  maxAdsPerDay: 5,
-  maxAdsPerSession: 1,
-  minIntervalSeconds: 14400, // 4 hours
-  maxAdsPerHour: 1,
-)
-```
-
-### Custom Frequency Config
-
-```dart
-final configService = ref.read(adConfigServiceProvider);
-final customConfig = AdFrequencyConfig(
-  maxAdsPerDay: 15,
-  maxAdsPerSession: 8,
-  minIntervalSeconds: 180, // 3 minutes
+// Custom interval (e.g., 2 minutes)
+final service = GoogleMobileAdsService(
+  // ... other services
+  minAdInterval: Duration(minutes: 2),
 );
 ```
 
@@ -437,68 +398,26 @@ if (!shouldShow) {
 - Rewarded: `ca-app-pub-3940256099942544/1712485313`
 - App Open: `ca-app-pub-3940256099942544/5662855259`
 
-### Enable Test Mode
+### Set Test Devices
 
 ```dart
-final configService = ref.read(adConfigServiceProvider);
-await configService.setDevelopmentConfig();
-```
-
----
-
-## Analytics
-
-### Track Ad Events
-
-```dart
-final analytics = FirebaseAnalytics.instance;
-final adsAnalytics = AdsAnalyticsHelper(analytics);
-
-// Log ad impression
-await adsAnalytics.logAdImpression(
-  adType: AdType.interstitial,
-  placement: 'home_screen',
-  adUnitId: 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY',
-);
-
-// Log ad clicked
-await adsAnalytics.logAdClicked(
-  adType: AdType.rewarded,
-  placement: 'after_level',
-);
-
-// Log rewarded ad
-await adsAnalytics.logAdRewarded(
-  placement: 'watch_for_coins',
-  rewardAmount: 100,
-  rewardType: 'coins',
-);
+final adsRepository = ref.read(adsRepositoryProvider);
+await adsRepository.setTestDevices(deviceIds: ['YOUR_DEVICE_ID']);
 ```
 
 ---
 
 ## Best Practices
 
-### 1. Preload Ads
+### 1. Check Ad Readiness
 
 ```dart
-// Ads are automatically preloaded on initialization
-// Manual preload:
-final preloader = ref.read(adPreloaderServiceProvider);
-await preloader.preloadInterstitial();
-```
-
-### 2. Check Ad Readiness
-
-```dart
-final isReady = ref.watch(isAdReadyProvider(AdType.interstitial));
-
-if (isReady) {
-  // Show ad
+if (repository.isInterstitialReady) {
+  await repository.showInterstitialAd();
 }
 ```
 
-### 3. Handle Errors Gracefully
+### 2. Handle Errors Gracefully
 
 ```dart
 result.fold(
@@ -514,14 +433,7 @@ result.fold(
 );
 ```
 
-### 4. Respect Frequency Caps
-
-```dart
-// Service automatically enforces frequency caps
-// No manual checking needed!
-```
-
-### 5. Premium Users
+### 3. Premium Users
 
 ```dart
 // Set premium status checker on initialization
@@ -535,10 +447,9 @@ result.fold(
 For issues or questions:
 1. Check Google Mobile Ads documentation
 2. Review error logs in Firebase Crashlytics
-3. Check frequency capping settings
-4. Verify ad unit IDs are correct
+3. Verify ad unit IDs are correct
 
 ---
 
-**Last Updated:** 2025-10-10
-**Version:** 1.0.0
+**Last Updated:** 2025-11-24
+**Version:** 2.0.0 (google_mobile_ads ^6.0.0)

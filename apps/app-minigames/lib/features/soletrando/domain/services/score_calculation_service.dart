@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/enums.dart';
 
 /// Service responsible for score calculation and management
@@ -11,7 +9,6 @@ import '../entities/enums.dart';
 /// - Difficulty multiplier application
 /// - Skip penalty calculation
 /// - Score statistics
-@lazySingleton
 class ScoreCalculationService {
   ScoreCalculationService();
 

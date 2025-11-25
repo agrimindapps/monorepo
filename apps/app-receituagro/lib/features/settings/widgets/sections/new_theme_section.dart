@@ -12,7 +12,7 @@ class NewThemeSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeState = ref.watch(themeSettingsNotifierProvider);
+    final themeState = ref.watch(themeSettingsProvider);
 
     return Column(
       children: [
@@ -59,7 +59,7 @@ class NewThemeSection extends ConsumerWidget {
           Switch(
             value: themeState.settings.isDarkTheme,
             onChanged: (value) {
-              ref.read(themeSettingsNotifierProvider.notifier).toggleDarkMode();
+              ref.read(themeSettingsProvider.notifier).toggleDarkMode();
             },
           ),
         ],

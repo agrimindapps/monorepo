@@ -74,7 +74,7 @@ class _FavoritosPageState extends ConsumerState<FavoritosPage>
   }
 
   void _reloadFavoritos() {
-    ref.read(favoritosNotifierProvider.notifier).loadAllFavoritos();
+    ref.read(favoritosProvider.notifier).loadAllFavoritos();
   }
 
   @override
@@ -83,11 +83,11 @@ class _FavoritosPageState extends ConsumerState<FavoritosPage>
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
-    final state = ref.watch(favoritosNotifierProvider);
+    final state = ref.watch(favoritosProvider);
     if (!_hasInitialized) {
       _hasInitialized = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(favoritosNotifierProvider.notifier).initialize();
+        ref.read(favoritosProvider.notifier).initialize();
       });
     }
 

@@ -59,8 +59,8 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
 
   @override
   Widget build(BuildContext context) {
-    final subscriptionState = ref.watch(subscriptionNotifierProvider);
-    final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
+    final subscriptionState = ref.watch(subscriptionManagementProvider);
+    final featureFlagsAsync = ref.watch(featureFlagsProvider);
 
     return subscriptionState.when(
       data: (state) => featureFlagsAsync.when(
@@ -100,7 +100,7 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
   ) {
     final theme = Theme.of(context);
     final hasActiveSubscription = subscriptionState.hasActiveSubscription;
-    final notifier = ref.read(featureFlagsNotifierProvider.notifier);
+    final notifier = ref.read(featureFlagsProvider.notifier);
     final isValidationEnabled = notifier.isSubscriptionValidationEnabled;
 
     return Container(
@@ -302,7 +302,7 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
     FeatureFlagsState featureFlagsState,
   ) {
     final theme = Theme.of(context);
-    final notifier = ref.read(featureFlagsNotifierProvider.notifier);
+    final notifier = ref.read(featureFlagsProvider.notifier);
     final isSyncEnabled = notifier.isContentSynchronizationEnabled;
     final isIOSPremiumActive = subscriptionState.hasActiveSubscription;
     final isAndroidPremiumActive = subscriptionState.hasActiveSubscription;
@@ -519,7 +519,7 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
     if (widget.onRestorePressed != null) {
       widget.onRestorePressed!();
     } else {
-      await ref.read(subscriptionNotifierProvider.notifier).restorePurchases();
+      await ref.read(subscriptionManagementProvider.notifier).restorePurchases();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -541,7 +541,7 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
       if (widget.onSyncPressed != null) {
         widget.onSyncPressed!();
       } else {
-        final notifier = ref.read(subscriptionNotifierProvider.notifier);
+        final notifier = ref.read(subscriptionManagementProvider.notifier);
         await notifier.validatePremiumStatus();
         await notifier.syncPremiumStatus();
       }

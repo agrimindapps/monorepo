@@ -7,6 +7,6 @@ import '../repository/meditacao_repository.dart';
 part 'meditacao_repository_provider.g.dart';
 
 @riverpod
-MeditacaoRepository meditacaoRepository(MeditacaoRepositoryRef ref) {
+MeditacaoRepository meditacaoRepository(Ref ref) {
   return MeditacaoRepository();
 }

@@ -14,7 +14,7 @@ class TtsSettingsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ttsSettingsAsync = ref.watch(ttsNotifierProvider);
+    final ttsSettingsAsync = ref.watch(ttsProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -67,18 +67,18 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
 
   @override
   Widget build(BuildContext context) {
-    final subscriptionAsync = ref.watch(subscriptionNotifierProvider);
-    final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
+    final subscriptionAsync = ref.watch(subscriptionManagementProvider);
+    final featureFlagsAsync = ref.watch(featureFlagsProvider);
 
     return subscriptionAsync.when(
       data: (subscriptionState) {
         return featureFlagsAsync.when(
           data: (featureFlagsState) {
             final subscriptionNotifier = ref.read(
-              subscriptionNotifierProvider.notifier,
+              subscriptionManagementProvider.notifier,
             );
             final featureFlagsNotifier = ref.read(
-              featureFlagsNotifierProvider.notifier,
+              featureFlagsProvider.notifier,
             );
 
             return Column(
@@ -167,7 +167,7 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
   /// Step 1: Plan Selection
   Widget _buildPlanSelectionStep(
     BuildContext context,
-    SubscriptionNotifier subscriptionNotifier,
+    SubscriptionManagementNotifier subscriptionNotifier,
     SubscriptionState subscriptionState,
     FeatureFlagsNotifier featureFlagsNotifier,
   ) {
@@ -218,7 +218,7 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
   /// Step 2: Purchase Confirmation
   Widget _buildConfirmationStep(
     BuildContext context,
-    SubscriptionNotifier subscriptionNotifier,
+    SubscriptionManagementNotifier subscriptionNotifier,
     SubscriptionState subscriptionState,
   ) {
     final selectedPlan = subscriptionNotifier.availablePlans.firstWhere(
@@ -411,7 +411,7 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
   /// Trial Offer Card
   Widget _buildTrialOfferCard(
     BuildContext context,
-    SubscriptionNotifier subscriptionNotifier,
+    SubscriptionManagementNotifier subscriptionNotifier,
   ) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -473,7 +473,7 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
   Widget _buildPlanCard(
     BuildContext context,
     dynamic plan,
-    SubscriptionNotifier subscriptionNotifier,
+    SubscriptionManagementNotifier subscriptionNotifier,
   ) {
     final isSelected = _selectedPlanId == plan.id;
     final theme = Theme.of(context);
@@ -623,7 +623,7 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
   }
 
   /// Start Trial
-  Future<void> _startTrial(SubscriptionNotifier subscriptionNotifier) async {
+  Future<void> _startTrial(SubscriptionManagementNotifier subscriptionNotifier) async {
     try {
       setState(() {
         _isPurchasing = true;
@@ -672,7 +672,7 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
 
       if (!mounted) return;
       final subscriptionNotifier = ref.read(
-        subscriptionNotifierProvider.notifier,
+        subscriptionManagementProvider.notifier,
       );
       await subscriptionNotifier.purchasePlan(_selectedPlanId!);
 

@@ -50,7 +50,7 @@ class _ABTestingWidgetState extends ConsumerState<ABTestingWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
+    final featureFlagsAsync = ref.watch(featureFlagsProvider);
 
     return featureFlagsAsync.when(
       data: (featureFlagsState) {
@@ -58,7 +58,7 @@ class _ABTestingWidgetState extends ConsumerState<ABTestingWidget> {
           return widget.fallbackWidget ?? widget.controlWidget;
         }
 
-        final featureFlagsNotifier = ref.read(featureFlagsNotifierProvider.notifier);
+        final featureFlagsNotifier = ref.read(featureFlagsProvider.notifier);
         final isVariantActive = featureFlagsNotifier.isFeatureEnabled(widget.featureFlag);
         if (!_hasTrackedExposure && widget.analyticsEventName != null) {
           _trackVariantExposure(isVariantActive);
@@ -194,7 +194,7 @@ class FeatureFlagGuard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
+    final featureFlagsAsync = ref.watch(featureFlagsProvider);
 
     return featureFlagsAsync.when(
       data: (featureFlagsState) {
@@ -202,7 +202,7 @@ class FeatureFlagGuard extends ConsumerWidget {
           return fallbackWidget ?? const SizedBox.shrink();
         }
 
-        final featureFlagsNotifier = ref.read(featureFlagsNotifierProvider.notifier);
+        final featureFlagsNotifier = ref.read(featureFlagsProvider.notifier);
         final isEnabled = featureFlagsNotifier.isFeatureEnabled(featureFlag);
         return isEnabled ? child : (fallbackWidget ?? const SizedBox.shrink());
       },

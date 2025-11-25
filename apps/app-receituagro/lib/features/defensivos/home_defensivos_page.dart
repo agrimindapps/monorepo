@@ -37,7 +37,7 @@ class _HomeDefensivosPageState extends ConsumerState<HomeDefensivosPage> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
-    final state = ref.watch(homeDefensivosNotifierProvider);
+    final state = ref.watch(homeDefensivosProvider);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -54,10 +54,10 @@ class _HomeDefensivosPageState extends ConsumerState<HomeDefensivosPage> {
                       return DefensivosErrorState(
                         onRetry: () {
                           ref
-                              .read(homeDefensivosNotifierProvider.notifier)
+                              .read(homeDefensivosProvider.notifier)
                               .clearError();
                           ref
-                              .read(homeDefensivosNotifierProvider.notifier)
+                              .read(homeDefensivosProvider.notifier)
                               .loadData();
                         },
                       );
@@ -65,7 +65,7 @@ class _HomeDefensivosPageState extends ConsumerState<HomeDefensivosPage> {
 
                     return RefreshIndicator(
                       onRefresh: () => ref
-                          .read(homeDefensivosNotifierProvider.notifier)
+                          .read(homeDefensivosProvider.notifier)
                           .refreshData(),
                       child: CustomScrollView(
                         slivers: [
@@ -101,10 +101,10 @@ class _HomeDefensivosPageState extends ConsumerState<HomeDefensivosPage> {
                   error: (error, _) => DefensivosErrorState(
                     onRetry: () {
                       ref
-                          .read(homeDefensivosNotifierProvider.notifier)
+                          .read(homeDefensivosProvider.notifier)
                           .clearError();
                       ref
-                          .read(homeDefensivosNotifierProvider.notifier)
+                          .read(homeDefensivosProvider.notifier)
                           .loadData();
                     },
                   ),
@@ -123,7 +123,7 @@ class _HomeDefensivosPageState extends ConsumerState<HomeDefensivosPage> {
     Fitossanitario defensivo,
   ) {
     ref
-        .read(homeDefensivosNotifierProvider.notifier)
+        .read(homeDefensivosProvider.notifier)
         .recordDefensivoAccess(defensivo);
 
     final navigationService = ref.read(receitaAgroNavigationServiceProvider);

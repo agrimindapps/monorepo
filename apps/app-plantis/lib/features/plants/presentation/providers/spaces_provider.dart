@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide Column;
+import '../../../../core/providers/spaces_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/space.dart';
@@ -19,31 +20,31 @@ part 'spaces_provider.g.dart';
 // ============================================================================
 
 @riverpod
-GetSpacesUseCase getSpacesUseCase(GetSpacesUseCaseRef ref) {
+GetSpacesUseCase getSpacesUseCase(Ref ref) {
   final repository = ref.watch(spacesRepositoryProvider);
   return GetSpacesUseCase(repository);
 }
 
 @riverpod
-GetSpaceByIdUseCase getSpaceByIdUseCase(GetSpaceByIdUseCaseRef ref) {
+GetSpaceByIdUseCase getSpaceByIdUseCase(Ref ref) {
   final repository = ref.watch(spacesRepositoryProvider);
   return GetSpaceByIdUseCase(repository);
 }
 
 @riverpod
-AddSpaceUseCase addSpaceUseCase(AddSpaceUseCaseRef ref) {
+AddSpaceUseCase addSpaceUseCase(Ref ref) {
   final repository = ref.watch(spacesRepositoryProvider);
   return AddSpaceUseCase(repository);
 }
 
 @riverpod
-UpdateSpaceUseCase updateSpaceUseCase(UpdateSpaceUseCaseRef ref) {
+UpdateSpaceUseCase updateSpaceUseCase(Ref ref) {
   final repository = ref.watch(spacesRepositoryProvider);
   return UpdateSpaceUseCase(repository);
 }
 
 @riverpod
-DeleteSpaceUseCase deleteSpaceUseCase(DeleteSpaceUseCaseRef ref) {
+DeleteSpaceUseCase deleteSpaceUseCase(Ref ref) {
   final repository = ref.watch(spacesRepositoryProvider);
   return DeleteSpaceUseCase(repository);
 }
@@ -149,7 +150,7 @@ class SpacesNotifier extends _$SpacesNotifier {
   /// Load all spaces
   Future<void> loadSpaces() async {
     state = AsyncValue.data(
-      (state.valueOrNull ?? const SpacesState()).copyWith(
+      (state.value ?? const SpacesState()).copyWith(
         isLoading: true,
         clearError: true,
       ),
@@ -159,7 +160,7 @@ class SpacesNotifier extends _$SpacesNotifier {
 
     result.fold(
       (failure) {
-        final currentState = state.valueOrNull ?? const SpacesState();
+        final currentState = state.value ?? const SpacesState();
         state = AsyncValue.data(
           currentState.copyWith(
             error: _getErrorMessage(failure),
@@ -175,7 +176,7 @@ class SpacesNotifier extends _$SpacesNotifier {
           ),
         );
 
-        final currentState = state.valueOrNull ?? const SpacesState();
+        final currentState = state.value ?? const SpacesState();
         state = AsyncValue.data(
           currentState.copyWith(
             spaces: sortedSpaces,
@@ -193,14 +194,14 @@ class SpacesNotifier extends _$SpacesNotifier {
 
     return result.fold(
       (failure) {
-        final currentState = state.valueOrNull ?? const SpacesState();
+        final currentState = state.value ?? const SpacesState();
         state = AsyncValue.data(
           currentState.copyWith(error: _getErrorMessage(failure)),
         );
         return null;
       },
       (space) {
-        final currentState = state.valueOrNull ?? const SpacesState();
+        final currentState = state.value ?? const SpacesState();
         state = AsyncValue.data(
           currentState.copyWith(selectedSpace: space),
         );
@@ -211,7 +212,7 @@ class SpacesNotifier extends _$SpacesNotifier {
 
   /// Add new space
   Future<bool> addSpace(AddSpaceParams params) async {
-    final currentState = state.valueOrNull ?? const SpacesState();
+    final currentState = state.value ?? const SpacesState();
     state = AsyncValue.data(
       currentState.copyWith(isLoading: true, clearError: true),
     );
@@ -220,7 +221,7 @@ class SpacesNotifier extends _$SpacesNotifier {
 
     return result.fold(
       (failure) {
-        final newState = state.valueOrNull ?? const SpacesState();
+        final newState = state.value ?? const SpacesState();
         state = AsyncValue.data(
           newState.copyWith(
             error: _getErrorMessage(failure),
@@ -230,7 +231,7 @@ class SpacesNotifier extends _$SpacesNotifier {
         return false;
       },
       (space) {
-        final newState = state.valueOrNull ?? const SpacesState();
+        final newState = state.value ?? const SpacesState();
         final updatedSpaces = [space, ...newState.spaces];
         state = AsyncValue.data(
           newState.copyWith(
@@ -246,7 +247,7 @@ class SpacesNotifier extends _$SpacesNotifier {
 
   /// Update existing space
   Future<bool> updateSpace(UpdateSpaceParams params) async {
-    final currentState = state.valueOrNull ?? const SpacesState();
+    final currentState = state.value ?? const SpacesState();
     state = AsyncValue.data(
       currentState.copyWith(isLoading: true, clearError: true),
     );
@@ -255,7 +256,7 @@ class SpacesNotifier extends _$SpacesNotifier {
 
     return result.fold(
       (failure) {
-        final newState = state.valueOrNull ?? const SpacesState();
+        final newState = state.value ?? const SpacesState();
         state = AsyncValue.data(
           newState.copyWith(
             error: _getErrorMessage(failure),
@@ -265,7 +266,7 @@ class SpacesNotifier extends _$SpacesNotifier {
         return false;
       },
       (updatedSpace) {
-        final newState = state.valueOrNull ?? const SpacesState();
+        final newState = state.value ?? const SpacesState();
         final updatedSpaces =
             newState.spaces.map((s) {
               return s.id == updatedSpace.id ? updatedSpace : s;
@@ -289,7 +290,7 @@ class SpacesNotifier extends _$SpacesNotifier {
 
   /// Delete space
   Future<bool> deleteSpace(String id) async {
-    final currentState = state.valueOrNull ?? const SpacesState();
+    final currentState = state.value ?? const SpacesState();
     state = AsyncValue.data(
       currentState.copyWith(isLoading: true, clearError: true),
     );
@@ -298,7 +299,7 @@ class SpacesNotifier extends _$SpacesNotifier {
 
     return result.fold(
       (failure) {
-        final newState = state.valueOrNull ?? const SpacesState();
+        final newState = state.value ?? const SpacesState();
         state = AsyncValue.data(
           newState.copyWith(
             error: _getErrorMessage(failure),
@@ -308,7 +309,7 @@ class SpacesNotifier extends _$SpacesNotifier {
         return false;
       },
       (_) {
-        final newState = state.valueOrNull ?? const SpacesState();
+        final newState = state.value ?? const SpacesState();
         final updatedSpaces =
             newState.spaces.where((space) => space.id != id).toList();
 
@@ -327,7 +328,7 @@ class SpacesNotifier extends _$SpacesNotifier {
 
   /// Clear selected space
   void clearSelectedSpace() {
-    final currentState = state.valueOrNull ?? const SpacesState();
+    final currentState = state.value ?? const SpacesState();
     if (currentState.selectedSpace != null) {
       state = AsyncValue.data(
         currentState.copyWith(clearSelectedSpace: true),
@@ -337,7 +338,7 @@ class SpacesNotifier extends _$SpacesNotifier {
 
   /// Clear error
   void clearError() {
-    final currentState = state.valueOrNull ?? const SpacesState();
+    final currentState = state.value ?? const SpacesState();
     if (currentState.hasError) {
       state = AsyncValue.data(currentState.copyWith(clearError: true));
     }
@@ -368,7 +369,7 @@ class SpacesNotifier extends _$SpacesNotifier {
 }
 
 @riverpod
-List<Space> spaces(SpacesRef ref) {
+List<Space> spaces(Ref ref) {
   final spacesState = ref.watch(spacesNotifierProvider);
   return spacesState.when(
     data: (state) => state.spaces,
@@ -378,7 +379,7 @@ List<Space> spaces(SpacesRef ref) {
 }
 
 @riverpod
-bool spacesIsLoading(SpacesIsLoadingRef ref) {
+bool spacesIsLoading(Ref ref) {
   final spacesState = ref.watch(spacesNotifierProvider);
   return spacesState.when(
     data: (state) => state.isLoading,
@@ -388,7 +389,7 @@ bool spacesIsLoading(SpacesIsLoadingRef ref) {
 }
 
 @riverpod
-String? spacesError(SpacesErrorRef ref) {
+String? spacesError(Ref ref) {
   final spacesState = ref.watch(spacesNotifierProvider);
   return spacesState.when(
     data: (state) => state.error,

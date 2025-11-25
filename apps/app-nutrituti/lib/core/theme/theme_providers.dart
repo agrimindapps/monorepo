@@ -31,9 +31,10 @@ final darkThemeProvider = Provider<ThemeData>((ref) {
   );
 });
 
-// Theme mode notifier for managing theme state
-class ThemeNotifier extends StateNotifier<bool> {
-  ThemeNotifier() : super(false); // false = light, true = dark
+// Theme mode notifier for managing theme state - Riverpod 3.0
+class ThemeNotifier extends Notifier<bool> {
+  @override
+  bool build() => false; // false = light, true = dark
 
   void toggleTheme() {
     state = !state;
@@ -44,10 +45,10 @@ class ThemeNotifier extends StateNotifier<bool> {
   }
 }
 
-// Theme mode provider
-final themeNotifierProvider = StateNotifierProvider<ThemeNotifier, bool>((ref) {
-  return ThemeNotifier();
-});
+// Theme mode provider - Riverpod 3.0
+final themeNotifierProvider = NotifierProvider<ThemeNotifier, bool>(
+  ThemeNotifier.new,
+);
 
 // Current theme mode provider
 final currentThemeModeProvider = Provider<ThemeMode>((ref) {

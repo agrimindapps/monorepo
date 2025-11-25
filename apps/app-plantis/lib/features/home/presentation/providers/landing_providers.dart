@@ -20,7 +20,7 @@ part 'landing_providers.g.dart';
 /// Provider for LandingContentDataSource
 @riverpod
 LandingContentDataSource landingContentDataSource(
-  LandingContentDataSourceRef ref,
+  Ref ref,
 ) {
   return LandingContentDataSource();
 }
@@ -33,7 +33,7 @@ LandingContentDataSource landingContentDataSource(
 ///
 /// Bridges the core auth system with the landing feature
 @riverpod
-LandingAuthRepository landingAuthRepository(LandingAuthRepositoryRef ref) {
+LandingAuthRepository landingAuthRepository(Ref ref) {
   final coreAuthRepository = ref.watch(authRepositoryProvider);
   return LandingAuthRepositoryImpl(coreAuthRepository: coreAuthRepository);
 }
@@ -41,7 +41,7 @@ LandingAuthRepository landingAuthRepository(LandingAuthRepositoryRef ref) {
 /// Provider for LandingContentRepository
 @riverpod
 LandingContentRepository landingContentRepository(
-  LandingContentRepositoryRef ref,
+  Ref ref,
 ) {
   final dataSource = ref.watch(landingContentDataSourceProvider);
   return LandingContentRepositoryImpl(dataSource: dataSource);
@@ -53,7 +53,7 @@ LandingContentRepository landingContentRepository(
 
 /// Provider for CheckAuthStatusUseCase
 @riverpod
-CheckAuthStatusUseCase checkAuthStatusUseCase(CheckAuthStatusUseCaseRef ref) {
+CheckAuthStatusUseCase checkAuthStatusUseCase(Ref ref) {
   final repository = ref.watch(landingAuthRepositoryProvider);
   return CheckAuthStatusUseCase(repository);
 }
@@ -61,7 +61,7 @@ CheckAuthStatusUseCase checkAuthStatusUseCase(CheckAuthStatusUseCaseRef ref) {
 /// Provider for GetLandingContentUseCase
 @riverpod
 GetLandingContentUseCase getLandingContentUseCase(
-  GetLandingContentUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(landingContentRepositoryProvider);
   return GetLandingContentUseCase(repository);
@@ -75,7 +75,7 @@ GetLandingContentUseCase getLandingContentUseCase(
 ///
 /// Returns current auth status as [LandingAuthStatus]
 @riverpod
-Future<LandingAuthStatus> landingAuthStatus(LandingAuthStatusRef ref) async {
+Future<LandingAuthStatus> landingAuthStatus(Ref ref) async {
   final useCase = ref.watch(checkAuthStatusUseCaseProvider);
   final result = await useCase();
 
@@ -90,7 +90,7 @@ Future<LandingAuthStatus> landingAuthStatus(LandingAuthStatusRef ref) async {
 /// Watches for changes in authentication status
 @riverpod
 Stream<LandingAuthStatus> landingAuthStatusStream(
-  LandingAuthStatusStreamRef ref,
+  Ref ref,
 ) {
   final useCase = ref.watch(checkAuthStatusUseCaseProvider);
   return useCase.watch();
@@ -100,7 +100,7 @@ Stream<LandingAuthStatus> landingAuthStatusStream(
 ///
 /// Returns [LandingContent] with hero, features, and CTA sections
 @riverpod
-Future<LandingContent> landingContent(LandingContentRef ref) async {
+Future<LandingContent> landingContent(Ref ref) async {
   final useCase = ref.watch(getLandingContentUseCaseProvider);
   final result = await useCase();
 

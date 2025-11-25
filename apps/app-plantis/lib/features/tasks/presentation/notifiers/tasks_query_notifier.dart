@@ -167,3 +167,7 @@ class TasksQueryNotifier extends _$TasksQueryNotifier {
     state = update(state);
   }
 }
+
+// LEGACY ALIAS
+// ignore: deprecated_member_use_from_same_package
+final tasksQueryNotifierProvider = tasksQueryProvider;

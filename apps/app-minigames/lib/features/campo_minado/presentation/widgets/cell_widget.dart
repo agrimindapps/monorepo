@@ -25,7 +25,7 @@ class _CellWidgetState extends ConsumerState<CellWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final notifier = ref.read(campoMinadoGameNotifierProvider.notifier);
+    final notifier = ref.read(campoMinadoGameProvider.notifier);
 
     return GestureDetector(
       // Single tap: reveal cell

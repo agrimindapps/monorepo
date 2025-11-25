@@ -13,10 +13,10 @@ class MeditacaoNotificationWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notificacoesHabilitadas = ref.watch(
-      meditacaoNotifierProvider.select((state) => state.notificacoesHabilitadas),
+      meditacaoProvider.select((state) => state.notificacoesHabilitadas),
     );
     final horarioNotificacao = ref.watch(
-      meditacaoNotifierProvider.select((state) => state.horarioNotificacao),
+      meditacaoProvider.select((state) => state.horarioNotificacao),
     );
 
     return Card(
@@ -38,7 +38,7 @@ class MeditacaoNotificationWidget extends ConsumerWidget {
                   value: notificacoesHabilitadas,
                   onChanged: (value) {
                     ref
-                        .read(meditacaoNotifierProvider.notifier)
+                        .read(meditacaoProvider.notifier)
                         .alternarNotificacoes(value);
                   },
                 ),
@@ -70,7 +70,7 @@ class MeditacaoNotificationWidget extends ConsumerWidget {
   // Open time picker
   Future<void> _selecionarHorario(BuildContext context, WidgetRef ref) async {
     final horarioAtual = ref.read(
-      meditacaoNotifierProvider.select((state) => state.horarioNotificacao),
+      meditacaoProvider.select((state) => state.horarioNotificacao),
     );
 
     final horarioSelecionado = await showTimePicker(
@@ -80,7 +80,7 @@ class MeditacaoNotificationWidget extends ConsumerWidget {
 
     if (horarioSelecionado != null) {
       ref
-          .read(meditacaoNotifierProvider.notifier)
+          .read(meditacaoProvider.notifier)
           .definirHorarioNotificacao(horarioSelecionado);
     }
   }

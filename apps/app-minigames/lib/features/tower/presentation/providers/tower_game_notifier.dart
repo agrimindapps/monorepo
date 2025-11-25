@@ -38,14 +38,14 @@ class TowerGameNotifier extends _$TowerGameNotifier {
 
   @override
   Future<GameState> build(double screenWidth) async {
-    // Inject use cases from GetIt
-    _updateMovingBlockUseCase = ref.read(UpdateMovingBlockUseCase>();
-    _dropBlockUseCase = ref.read(DropBlockUseCase>();
-    _startNewGameUseCase = ref.read(StartNewGameUseCase>();
-    _togglePauseUseCase = ref.read(TogglePauseUseCase>();
-    _changeDifficultyUseCase = ref.read(ChangeDifficultyUseCase>();
-    _loadHighScoreUseCase = ref.read(LoadHighScoreUseCase>();
-    _saveHighScoreUseCase = ref.read(SaveHighScoreUseCase>();
+    // Inject use cases from providers
+    _updateMovingBlockUseCase = ref.read(updateMovingBlockUseCaseProvider);
+    _dropBlockUseCase = ref.read(dropBlockUseCaseProvider);
+    _startNewGameUseCase = ref.read(startNewGameUseCaseProvider);
+    _togglePauseUseCase = ref.read(togglePauseUseCaseProvider);
+    _changeDifficultyUseCase = ref.read(changeDifficultyUseCaseProvider);
+    _loadHighScoreUseCase = ref.read(loadHighScoreUseCaseProvider);
+    _saveHighScoreUseCase = ref.read(saveHighScoreUseCaseProvider);
 
     // Cleanup on dispose
     ref.onDispose(() {
@@ -76,7 +76,7 @@ class TowerGameNotifier extends _$TowerGameNotifier {
     _gameTimer = Timer.periodic(const Duration(milliseconds: 16), (_) {
       if (!_isMounted) return;
 
-      final currentState = state.valueOrNull;
+      final currentState = state.value;
       if (currentState == null || currentState.isPaused || currentState.isGameOver) {
         return;
       }
@@ -98,7 +98,7 @@ class TowerGameNotifier extends _$TowerGameNotifier {
 
   /// Drops the current block and handles game logic
   Future<void> dropBlock() async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     // Execute drop block use case
@@ -145,7 +145,7 @@ class TowerGameNotifier extends _$TowerGameNotifier {
 
   /// Toggles pause state
   void togglePause() {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     final pauseResult = _togglePauseUseCase(currentState);
@@ -162,7 +162,7 @@ class TowerGameNotifier extends _$TowerGameNotifier {
 
   /// Restarts the game with same settings
   void restartGame() {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     final restartResult = _startNewGameUseCase(
@@ -183,7 +183,7 @@ class TowerGameNotifier extends _$TowerGameNotifier {
 
   /// Changes game difficulty
   void changeDifficulty(GameDifficulty difficulty) {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     final changeResult = _changeDifficultyUseCase(

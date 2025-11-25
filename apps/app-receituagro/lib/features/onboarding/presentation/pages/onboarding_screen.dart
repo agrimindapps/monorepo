@@ -37,7 +37,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
 
     // Start onboarding when screen is first built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(onboardingNotifierProvider.notifier).start();
+      ref.read(onboardingProvider.notifier).start();
       _animationController.forward();
     });
   }
@@ -51,7 +51,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
 
   @override
   Widget build(BuildContext context) {
-    final progressAsync = ref.watch(onboardingNotifierProvider);
+    final progressAsync = ref.watch(onboardingProvider);
     final steps = ref.watch(onboardingStepsProvider);
     final currentIndex = ref.watch(currentStepIndexProvider);
 
@@ -73,7 +73,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () =>
-                    ref.read(onboardingNotifierProvider.notifier).start(),
+                    ref.read(onboardingProvider.notifier).start(),
                 child: const Text('Tentar novamente'),
               ),
             ],
@@ -269,7 +269,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
 
   Future<void> _completeStep(String stepId) async {
     try {
-      await ref.read(onboardingNotifierProvider.notifier).completeStep(stepId);
+      await ref.read(onboardingProvider.notifier).completeStep(stepId);
       final steps = ref.read(onboardingStepsProvider);
       final currentIndex = steps.indexWhere((s) => s.id == stepId);
       if (currentIndex < steps.length - 1) {
@@ -292,7 +292,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
 
   Future<void> _skipStep(String stepId) async {
     try {
-      await ref.read(onboardingNotifierProvider.notifier).skipStep(stepId);
+      await ref.read(onboardingProvider.notifier).skipStep(stepId);
       await _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,

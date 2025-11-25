@@ -9,7 +9,7 @@ part 'plants_list_provider.freezed.dart';
 part 'plants_list_provider.g.dart';
 
 @freezed
-class PlantsListState with _$PlantsListState {
+sealed class PlantsListState with _$PlantsListState {
   const factory PlantsListState({
     @Default([]) List<Plant> plants,
     @Default([]) List<Plant> filteredPlants,
@@ -17,9 +17,10 @@ class PlantsListState with _$PlantsListState {
     @Default('') String searchQuery,
     String? errorMessage,
   }) = _PlantsListState;
+}
 
-  const PlantsListState._();
-
+/// Extension providing computed properties for PlantsListState
+extension PlantsListStateX on PlantsListState {
   List<Plant> get displayPlants =>
       filteredPlants.isEmpty && searchQuery.isEmpty ? plants : filteredPlants;
 

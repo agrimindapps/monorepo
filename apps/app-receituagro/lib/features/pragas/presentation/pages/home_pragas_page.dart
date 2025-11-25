@@ -24,7 +24,7 @@ class HomePragasPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final asyncState = ref.watch(homePragasNotifierProvider);
+    final asyncState = ref.watch(homePragasProvider);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -44,7 +44,7 @@ class HomePragasPage extends ConsumerWidget {
               loading: () => _buildLoadingState(context),
               error: (error, stack) => HomePragasErrorWidget(
                 errorMessage: error.toString(),
-                onRetry: () => ref.refresh(homePragasNotifierProvider),
+                onRetry: () => ref.refresh(homePragasProvider),
               ),
             ),
           ),
@@ -84,7 +84,7 @@ class HomePragasPage extends ConsumerWidget {
     if (state.initializationFailed) {
       return HomePragasErrorWidget(
         errorMessage: state.initializationError ?? 'Erro desconhecido',
-        onRetry: () => ref.read(homePragasNotifierProvider.notifier).forceRefresh(),
+        onRetry: () => ref.read(homePragasProvider.notifier).forceRefresh(),
       );
     }
     return CustomScrollView(

@@ -15,7 +15,7 @@ class MeditacaoProgressChartWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Get chart data using notifier method
     final dadosGrafico = ref
-        .read(meditacaoNotifierProvider.notifier)
+        .read(meditacaoProvider.notifier)
         .getDadosGrafico();
 
     // If not enough data, show message

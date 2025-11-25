@@ -10,7 +10,7 @@ class NotificationSettingsBuilder {
   /// Constrói card de status de notificações
   static Widget buildNotificationStatusCard(
     BuildContext context,
-    WidgetRef ref,
+    Ref ref,
     SettingsState settingsData,
   ) {
     final theme = Theme.of(context);

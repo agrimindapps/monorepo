@@ -2,8 +2,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 // Project imports:
+import '../../../core/providers/dependency_providers.dart';
 import '../models/achievement_model.dart';
 import '../models/exercicio_model.dart';
+import '../repository/exercicio_repository.dart';
 import '../services/exercicio_achievement_service.dart';
 import '../services/exercicio_business_service.dart';
 import '../services/exercicio_cache_service.dart';
@@ -54,22 +56,21 @@ class ExercicioState {
 
 /// Provider for ExercicioBusinessService
 @riverpod
-ExercicioBusinessService exercicioBusinessService(
-    ExercicioBusinessServiceRef ref) {
-  return ExercicioBusinessService();
+ExercicioBusinessService exercicioBusinessService(Ref ref) {
+  final database = ref.watch(nutritutiDatabaseProvider);
+  final repository = ExercicioRepository();
+  return ExercicioBusinessService(database, repository);
 }
 
 /// Provider for ExercicioStatisticsService
 @riverpod
-ExercicioStatisticsService exercicioStatisticsService(
-    ExercicioStatisticsServiceRef ref) {
+ExercicioStatisticsService exercicioStatisticsService(Ref ref) {
   return ExercicioStatisticsService();
 }
 
 /// Provider for ExercicioAchievementService
 @riverpod
-ExercicioAchievementService exercicioAchievementService(
-    ExercicioAchievementServiceRef ref) {
+ExercicioAchievementService exercicioAchievementService(Ref ref) {
   return ExercicioAchievementService();
 }
 
@@ -205,17 +206,15 @@ class ExercicioNotifier extends _$ExercicioNotifier {
         final businessService = ref.read(exercicioBusinessServiceProvider);
         await businessService.excluirExercicio(exercicio.id!);
 
-        final updatedRegistros = currentState.registros
-            .where((r) => r.id != exercicio.id)
-            .toList();
+        final updatedRegistros =
+            currentState.registros.where((r) => r.id != exercicio.id).toList();
 
         // Invalidate cache when data changes
         ExercicioCacheService.invalidateOnDataChange();
 
         // Update calculations
         final statisticsService = ref.read(exercicioStatisticsServiceProvider);
-        final totais =
-            statisticsService.calcularTotaisSemana(updatedRegistros);
+        final totais = statisticsService.calcularTotaisSemana(updatedRegistros);
 
         final achievementService =
             ref.read(exercicioAchievementServiceProvider);

@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/enums.dart';
 import '../entities/letter_entity.dart';
 
@@ -11,7 +9,6 @@ import '../entities/letter_entity.dart';
 /// - Letter position finding
 /// - Guessed letter tracking
 /// - Unique letter analysis
-@lazySingleton
 class LetterValidationService {
   LetterValidationService();
 

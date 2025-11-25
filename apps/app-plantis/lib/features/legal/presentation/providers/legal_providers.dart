@@ -19,21 +19,21 @@ part 'legal_providers.g.dart';
 
 @riverpod
 PrivacyPolicyDataSource privacyPolicyDataSource(
-  PrivacyPolicyDataSourceRef ref,
+  Ref ref,
 ) {
   return PrivacyPolicyDataSource();
 }
 
 @riverpod
 TermsOfServiceDataSource termsOfServiceDataSource(
-  TermsOfServiceDataSourceRef ref,
+  Ref ref,
 ) {
   return TermsOfServiceDataSource();
 }
 
 @riverpod
 AccountDeletionDataSource accountDeletionDataSource(
-  AccountDeletionDataSourceRef ref,
+  Ref ref,
 ) {
   return AccountDeletionDataSource();
 }
@@ -43,7 +43,7 @@ AccountDeletionDataSource accountDeletionDataSource(
 // ===================================================================
 
 @riverpod
-LegalRepository legalRepository(LegalRepositoryRef ref) {
+LegalRepository legalRepository(Ref ref) {
   return LegalRepositoryImpl(
     privacyPolicyDataSource: ref.watch(privacyPolicyDataSourceProvider),
     termsOfServiceDataSource: ref.watch(termsOfServiceDataSourceProvider),
@@ -57,14 +57,14 @@ LegalRepository legalRepository(LegalRepositoryRef ref) {
 
 @riverpod
 GetLegalDocumentUseCase getLegalDocumentUseCase(
-  GetLegalDocumentUseCaseRef ref,
+  Ref ref,
 ) {
   return GetLegalDocumentUseCase(ref.watch(legalRepositoryProvider));
 }
 
 @riverpod
 GetAllLegalDocumentsUseCase getAllLegalDocumentsUseCase(
-  GetAllLegalDocumentsUseCaseRef ref,
+  Ref ref,
 ) {
   return GetAllLegalDocumentsUseCase(ref.watch(legalRepositoryProvider));
 }
@@ -76,7 +76,7 @@ GetAllLegalDocumentsUseCase getAllLegalDocumentsUseCase(
 /// State for a legal document
 @riverpod
 Future<LegalDocument> legalDocument(
-  LegalDocumentRef ref,
+  Ref ref,
   DocumentType documentType,
 ) async {
   final useCase = ref.watch(getLegalDocumentUseCaseProvider);
@@ -90,7 +90,7 @@ Future<LegalDocument> legalDocument(
 
 /// State for all legal documents
 @riverpod
-Future<List<LegalDocument>> allLegalDocuments(AllLegalDocumentsRef ref) async {
+Future<List<LegalDocument>> allLegalDocuments(Ref ref) async {
   final useCase = ref.watch(getAllLegalDocumentsUseCaseProvider);
   final result = await useCase();
 

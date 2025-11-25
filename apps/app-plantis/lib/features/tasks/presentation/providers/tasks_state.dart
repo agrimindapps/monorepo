@@ -99,9 +99,7 @@ enum TaskLoadingOperation {
 /// );
 /// ```
 @freezed
-class TasksState with _$TasksState {
-  const TasksState._(); // Private constructor for custom getters
-
+sealed class TasksState with _$TasksState {
   const factory TasksState({
     @Default([]) List<task_entity.Task> allTasks,
     @Default([]) List<task_entity.Task> filteredTasks,
@@ -116,15 +114,18 @@ class TasksState with _$TasksState {
     @Default({}) Set<TaskLoadingOperation> activeOperations,
     String? currentOperationMessage,
   }) = _TasksState;
+}
 
+/// Extension providing computed properties and methods for TasksState
+extension TasksStateX on TasksState {
   /// Factory constructor for the initial state
-  factory TasksState.initial() => const TasksState();
+  static TasksState initial() => const TasksState();
 
   /// Factory constructor for loading state
-  factory TasksState.loading() => const TasksState(isLoading: true);
+  static TasksState loading() => const TasksState(isLoading: true);
 
   /// Factory constructor for error state
-  factory TasksState.error(String message, {TasksState? previousState}) {
+  static TasksState error(String message, {TasksState? previousState}) {
     if (previousState != null) {
       return previousState.copyWith(isLoading: false, errorMessage: message);
     }

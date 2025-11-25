@@ -15,7 +15,7 @@ class AuthSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
 
     if (authState.isLoading) {
       return _buildLoadingSection(context);

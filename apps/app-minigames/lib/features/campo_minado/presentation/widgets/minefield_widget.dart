@@ -9,7 +9,7 @@ class MinefieldWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final gameState = ref.watch(campoMinadoGameNotifierProvider);
+    final gameState = ref.watch(campoMinadoGameProvider);
 
     // Calculate cell size based on grid dimensions
     final screenWidth = MediaQuery.of(context).size.width;

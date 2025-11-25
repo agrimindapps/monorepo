@@ -23,9 +23,9 @@ dependencies:
   # UI
   cupertino_icons: ^1.0.8
 
-  # State Management (Riverpod - replacing GetX)
-  flutter_riverpod: ^2.6.1
-  riverpod_annotation: ^2.6.1
+  # State Management (Riverpod 3.0)
+  flutter_riverpod: any
+  riverpod_annotation: any
 
   # Utils
   logger: ^2.4.0
@@ -81,7 +81,7 @@ dev_dependencies:
   # Code Generation
   drift_dev: any  # Versão do core: ^2.28.0
   build_runner: ^2.4.12
-  riverpod_generator: ^2.4.0
+  riverpod_generator: ^3.0.3
 
   # Testing
   mocktail: ^1.0.0

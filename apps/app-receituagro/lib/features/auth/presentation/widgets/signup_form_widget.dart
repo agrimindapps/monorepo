@@ -19,8 +19,8 @@ class SignupFormWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final loginState = ref.watch(loginNotifierProvider);
-    final loginNotifier = ref.read(loginNotifierProvider.notifier);
+    final loginState = ref.watch(loginProvider);
+    final loginNotifier = ref.read(loginProvider.notifier);
 
     return Form(
       child: Column(
@@ -185,12 +185,12 @@ class SignupFormWidget extends ConsumerWidget {
       print('🎯 SignupFormWidget: Iniciando cadastro no ReceitaAgro');
     }
 
-    final loginNotifier = ref.read(loginNotifierProvider.notifier);
+    final loginNotifier = ref.read(loginProvider.notifier);
     await loginNotifier.signUpWithEmailAndSync();
 
     if (!context.mounted) return;
 
-    final loginState = ref.read(loginNotifierProvider);
+    final loginState = ref.read(loginProvider);
 
     if (kDebugMode) {
       print(

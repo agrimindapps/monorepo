@@ -8,16 +8,17 @@ part 'license_provider.freezed.dart';
 part 'license_provider.g.dart';
 
 @freezed
-class LicenseState with _$LicenseState {
+sealed class LicenseState with _$LicenseState {
   const factory LicenseState({
     @Default(LicenseInfo(isActive: false, type: 'none', isExpired: false))
     LicenseInfo licenseInfo,
     @Default(false) bool isLoading,
     String? error,
   }) = _LicenseState;
+}
 
-  const LicenseState._();
-
+/// Extension providing computed properties for LicenseState
+extension LicenseStateX on LicenseState {
   bool get hasValidLicense => licenseInfo.hasValidLicense;
   bool get isTrialActive => licenseInfo.isTrialActive;
   bool get isPremiumActive => licenseInfo.isPremiumActive;
@@ -271,3 +272,7 @@ extension LicenseNotifierFeatures on LicenseNotifier {
   Future<bool> get canUseExpertSupport async =>
       await canAccessFeature(PremiumFeature.expertSupport);
 }
+
+// LEGACY ALIAS
+// ignore: deprecated_member_use_from_same_package
+final licenseNotifierProvider = licenseProvider;

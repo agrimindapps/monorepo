@@ -34,19 +34,19 @@ part 'core_di_providers.g.dart';
 
 /// Firebase Storage instance
 @riverpod
-FirebaseStorage firebaseStorage(FirebaseStorageRef ref) {
+FirebaseStorage firebaseStorage(Ref ref) {
   return FirebaseStorage.instance;
 }
 
 /// Firebase Functions instance
 @riverpod
-FirebaseFunctions firebaseFunctions(FirebaseFunctionsRef ref) {
+FirebaseFunctions firebaseFunctions(Ref ref) {
   return FirebaseFunctions.instance;
 }
 
 /// Firebase Performance Service (No-op implementation for now)
 @riverpod
-IPerformanceRepository performanceRepository(PerformanceRepositoryRef ref) {
+IPerformanceRepository performanceRepository(Ref ref) {
   // TODO: Implement proper performance monitoring when available
   return _StubPerformanceRepository();
 }
@@ -242,19 +242,19 @@ class _StubPerformanceRepository implements IPerformanceRepository {
 
 /// IAnalyticsRepository provider - Firebase Analytics implementation
 @riverpod
-IAnalyticsRepository analyticsRepository(AnalyticsRepositoryRef ref) {
+IAnalyticsRepository analyticsRepository(Ref ref) {
   return FirebaseAnalyticsService();
 }
 
 /// ICrashlyticsRepository provider - Firebase Crashlytics implementation
 @riverpod
-ICrashlyticsRepository crashlyticsRepository(CrashlyticsRepositoryRef ref) {
+ICrashlyticsRepository crashlyticsRepository(Ref ref) {
   return FirebaseCrashlyticsService();
 }
 
 /// IAppRatingRepository provider
 @riverpod
-IAppRatingRepository appRatingRepository(AppRatingRepositoryRef ref) {
+IAppRatingRepository appRatingRepository(Ref ref) {
   return AppRatingService(
     appStoreId: AppConstants.appStoreId,
     googlePlayId: AppConstants.googlePlayId,
@@ -271,7 +271,7 @@ IAppRatingRepository appRatingRepository(AppRatingRepositoryRef ref) {
 
 /// IFileRepository provider - File manager service
 @riverpod
-IFileRepository fileRepository(FileRepositoryRef ref) {
+IFileRepository fileRepository(Ref ref) {
   return FileManagerService();
 }
 
@@ -282,7 +282,7 @@ IFileRepository fileRepository(FileRepositoryRef ref) {
 /// Enhanced Secure Storage Service
 @riverpod
 EnhancedSecureStorageService enhancedSecureStorageService(
-  EnhancedSecureStorageServiceRef ref,
+  Ref ref,
 ) {
   return EnhancedSecureStorageService(
     appIdentifier: AppConstants.appId,
@@ -292,13 +292,13 @@ EnhancedSecureStorageService enhancedSecureStorageService(
 
 /// Secure Storage Service (singleton instance)
 @riverpod
-SecureStorageService secureStorageService(SecureStorageServiceRef ref) {
+SecureStorageService secureStorageService(Ref ref) {
   return SecureStorageService.instance;
 }
 
 /// Image Service
 @riverpod
-ImageService imageService(ImageServiceRef ref) {
+ImageService imageService(Ref ref) {
   return ImageService(
     config: const ImageServiceConfig(
       maxWidth: 1200,
@@ -319,20 +319,20 @@ ImageService imageService(ImageServiceRef ref) {
 /// Plantis Image Service Adapter
 @riverpod
 PlantisImageServiceAdapter plantisImageServiceAdapter(
-  PlantisImageServiceAdapterRef ref,
+  Ref ref,
 ) {
   return PlantisImageServiceAdapterFactory.createForPlantis();
 }
 
 /// URL Launcher Service
 @riverpod
-UrlLauncherService urlLauncherService(UrlLauncherServiceRef ref) {
+UrlLauncherService urlLauncherService(Ref ref) {
   return UrlLauncherService();
 }
 
 /// Data Cleaner Service
 @riverpod
-DataCleanerService dataCleanerService(DataCleanerServiceRef ref) {
+DataCleanerService dataCleanerService(Ref ref) {
   final plantsRepository = ref.watch(plantsRepositoryProvider);
   final tasksRepository = ref.watch(tasksRepositoryProvider);
   final spacesRepository = ref.watch(spacesRepositoryProvider);
@@ -353,7 +353,7 @@ DataCleanerService dataCleanerService(DataCleanerServiceRef ref) {
 /// Plantis Notification Service
 @riverpod
 PlantisNotificationService plantisNotificationService(
-  PlantisNotificationServiceRef ref,
+  Ref ref,
 ) {
   return PlantisNotificationService();
 }
@@ -361,7 +361,7 @@ PlantisNotificationService plantisNotificationService(
 /// Task Notification Scheduler
 @riverpod
 ITaskNotificationScheduler taskNotificationScheduler(
-  TaskNotificationSchedulerRef ref,
+  Ref ref,
 ) {
   final notificationService = ref.watch(plantisNotificationServiceProvider);
   return TaskNotificationScheduler(notificationService);
@@ -369,34 +369,34 @@ ITaskNotificationScheduler taskNotificationScheduler(
 
 /// Overdue Task Monitor
 @riverpod
-IOverdueTaskMonitor overdueTaskMonitor(OverdueTaskMonitorRef ref) {
+IOverdueTaskMonitor overdueTaskMonitor(Ref ref) {
   final scheduler = ref.watch(taskNotificationSchedulerProvider);
   return OverdueTaskMonitor(scheduler);
 }
 
 /// Permission Manager
 @riverpod
-IPermissionManager permissionManager(PermissionManagerRef ref) {
+IPermissionManager permissionManager(Ref ref) {
   final notificationService = ref.watch(plantisNotificationServiceProvider);
   return NotificationPermissionManager(notificationService);
 }
 
 /// Task Notification Service (orchestrator)
 @riverpod
-TaskNotificationService taskNotificationService(TaskNotificationServiceRef ref) {
+TaskNotificationService taskNotificationService(Ref ref) {
   return TaskNotificationService();
 }
 
 /// Notification Manager (for backward compatibility)
 @riverpod
-NotificationManager notificationManager(NotificationManagerRef ref) {
+NotificationManager notificationManager(Ref ref) {
   return NotificationManager();
 }
 
 /// ITaskNotificationManager implementation
 @riverpod
 ITaskNotificationManager taskNotificationManager(
-  TaskNotificationManagerRef ref,
+  Ref ref,
 ) {
   return ref.watch(notificationManagerProvider);
 }
@@ -404,7 +404,7 @@ ITaskNotificationManager taskNotificationManager(
 /// IPlantNotificationManager implementation
 @riverpod
 IPlantNotificationManager plantNotificationManager(
-  PlantNotificationManagerRef ref,
+  Ref ref,
 ) {
   return ref.watch(notificationManagerProvider);
 }
@@ -412,7 +412,7 @@ IPlantNotificationManager plantNotificationManager(
 /// INotificationPermissionManager implementation
 @riverpod
 INotificationPermissionManager notificationPermissionManager(
-  NotificationPermissionManagerRef ref,
+  Ref ref,
 ) {
   return ref.watch(notificationManagerProvider) as INotificationPermissionManager;
 }
@@ -420,7 +420,7 @@ INotificationPermissionManager notificationPermissionManager(
 /// INotificationScheduleManager implementation
 @riverpod
 INotificationScheduleManager notificationScheduleManager(
-  NotificationScheduleManagerRef ref,
+  Ref ref,
 ) {
   return ref.watch(notificationManagerProvider);
 }
@@ -434,7 +434,7 @@ INotificationScheduleManager notificationScheduleManager(
 
 /// Auth State Notifier (singleton for app-wide auth state)
 @riverpod
-AuthStateNotifier authStateNotifier(AuthStateNotifierRef ref) {
+AuthStateNotifier authStateNotifier(Ref ref) {
   return AuthStateNotifier.instance;
 }
 
@@ -443,3 +443,7 @@ AuthStateNotifier authStateNotifier(AuthStateNotifierRef ref) {
 // ============================================================================
 
 /// Temporary stub for local storage repository
+
+/// Alias for backwards compatibility with legacy code
+/// Use authStateProvider instead in new code
+const authStateNotifierProvider = authStateProvider;

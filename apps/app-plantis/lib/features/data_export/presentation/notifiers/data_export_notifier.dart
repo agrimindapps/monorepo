@@ -102,7 +102,7 @@ class DataExportNotifier extends _$DataExportNotifier {
     final userId = _currentUserId;
     if (userId == null) {
       state = AsyncValue.data(
-        (state.valueOrNull ?? const DataExportState()).copyWith(
+        (state.value ?? const DataExportState()).copyWith(
           error: 'Usuário não autenticado',
           isLoading: false,
         ),
@@ -111,7 +111,7 @@ class DataExportNotifier extends _$DataExportNotifier {
     }
 
     state = AsyncValue.data(
-      (state.valueOrNull ?? const DataExportState()).copyWith(
+      (state.value ?? const DataExportState()).copyWith(
         isLoading: true,
         error: null,
       ),
@@ -136,7 +136,7 @@ class DataExportNotifier extends _$DataExportNotifier {
     result.fold(
       (failure) {
         state = AsyncValue.data(
-          (state.valueOrNull ?? const DataExportState()).copyWith(
+          (state.value ?? const DataExportState()).copyWith(
             error: 'Erro ao verificar disponibilidade: ${failure.message}',
             availabilityResult: const ExportAvailabilityResult.unavailable(
               reason: 'Erro interno do sistema',
@@ -147,7 +147,7 @@ class DataExportNotifier extends _$DataExportNotifier {
       },
       (availabilityResult) {
         state = AsyncValue.data(
-          (state.valueOrNull ?? const DataExportState()).copyWith(
+          (state.value ?? const DataExportState()).copyWith(
             availabilityResult: availabilityResult,
             isLoading: false,
           ),
@@ -164,7 +164,7 @@ class DataExportNotifier extends _$DataExportNotifier {
     final userId = _currentUserId;
     if (userId == null) {
       state = AsyncValue.data(
-        (state.valueOrNull ?? const DataExportState()).copyWith(
+        (state.value ?? const DataExportState()).copyWith(
           error: 'Usuário não autenticado',
           isLoading: false,
         ),
@@ -173,7 +173,7 @@ class DataExportNotifier extends _$DataExportNotifier {
     }
 
     state = AsyncValue.data(
-      (state.valueOrNull ?? const DataExportState()).copyWith(
+      (state.value ?? const DataExportState()).copyWith(
         isLoading: true,
         error: null,
       ),
@@ -188,7 +188,7 @@ class DataExportNotifier extends _$DataExportNotifier {
     return result.fold(
       (failure) {
         state = AsyncValue.data(
-          (state.valueOrNull ?? const DataExportState()).copyWith(
+          (state.value ?? const DataExportState()).copyWith(
             error: 'Erro ao solicitar exportação: ${failure.message}',
             isLoading: false,
           ),
@@ -196,7 +196,7 @@ class DataExportNotifier extends _$DataExportNotifier {
         return null;
       },
       (request) async {
-        final currentState = state.valueOrNull ?? const DataExportState();
+        final currentState = state.value ?? const DataExportState();
         final updatedHistory = [request, ...currentState.exportHistory];
 
         state = AsyncValue.data(
@@ -226,7 +226,7 @@ class DataExportNotifier extends _$DataExportNotifier {
 
     for (int i = 0; i < progressSteps.length; i++) {
       final (percentage, task) = progressSteps[i];
-      final currentState = state.valueOrNull ?? const DataExportState();
+      final currentState = state.value ?? const DataExportState();
 
       state = AsyncValue.data(
         currentState.copyWith(
@@ -295,7 +295,7 @@ class DataExportNotifier extends _$DataExportNotifier {
       );
     }
 
-    final currentState = state.valueOrNull ?? const DataExportState();
+    final currentState = state.value ?? const DataExportState();
     state = AsyncValue.data(
       currentState.copyWith(currentProgress: const ExportProgress.completed()),
     );
@@ -303,7 +303,7 @@ class DataExportNotifier extends _$DataExportNotifier {
 
   /// Update request in history
   void _updateRequestInHistory(ExportRequest updatedRequest) {
-    final currentState = state.valueOrNull ?? const DataExportState();
+    final currentState = state.value ?? const DataExportState();
     final index = currentState.exportHistory.indexWhere(
       (req) => req.id == updatedRequest.id,
     );
@@ -323,7 +323,7 @@ class DataExportNotifier extends _$DataExportNotifier {
     final userId = _currentUserId;
     if (userId == null) {
       state = AsyncValue.data(
-        (state.valueOrNull ?? const DataExportState()).copyWith(
+        (state.value ?? const DataExportState()).copyWith(
           error: 'Usuário não autenticado',
           isLoading: false,
         ),
@@ -332,7 +332,7 @@ class DataExportNotifier extends _$DataExportNotifier {
     }
 
     state = AsyncValue.data(
-      (state.valueOrNull ?? const DataExportState()).copyWith(
+      (state.value ?? const DataExportState()).copyWith(
         isLoading: true,
         error: null,
       ),
@@ -343,7 +343,7 @@ class DataExportNotifier extends _$DataExportNotifier {
     historyResult.fold(
       (failure) {
         state = AsyncValue.data(
-          (state.valueOrNull ?? const DataExportState()).copyWith(
+          (state.value ?? const DataExportState()).copyWith(
             error: 'Erro ao carregar histórico: ${failure.message}',
             isLoading: false,
           ),
@@ -351,7 +351,7 @@ class DataExportNotifier extends _$DataExportNotifier {
       },
       (history) {
         state = AsyncValue.data(
-          (state.valueOrNull ?? const DataExportState()).copyWith(
+          (state.value ?? const DataExportState()).copyWith(
             exportHistory: history,
             isLoading: false,
           ),
@@ -365,7 +365,7 @@ class DataExportNotifier extends _$DataExportNotifier {
     final result = await _downloadUseCase(exportId);
 
     return result.fold((failure) {
-      final currentState = state.valueOrNull ?? const DataExportState();
+      final currentState = state.value ?? const DataExportState();
       state = AsyncValue.data(
         currentState.copyWith(
           error: 'Erro ao baixar arquivo: ${failure.message}',
@@ -381,7 +381,7 @@ class DataExportNotifier extends _$DataExportNotifier {
 
     return result.fold(
       (failure) {
-        final currentState = state.valueOrNull ?? const DataExportState();
+        final currentState = state.value ?? const DataExportState();
         state = AsyncValue.data(
           currentState.copyWith(
             error: 'Erro ao deletar exportação: ${failure.message}',
@@ -391,7 +391,7 @@ class DataExportNotifier extends _$DataExportNotifier {
       },
       (success) {
         if (success) {
-          final currentState = state.valueOrNull ?? const DataExportState();
+          final currentState = state.value ?? const DataExportState();
           final updatedHistory = currentState.exportHistory
               .where((req) => req.id != exportId)
               .toList();
@@ -479,7 +479,7 @@ class DataExportNotifier extends _$DataExportNotifier {
 
   /// Reset current progress
   void resetProgress() {
-    final currentState = state.valueOrNull ?? const DataExportState();
+    final currentState = state.value ?? const DataExportState();
     state = AsyncValue.data(
       currentState.copyWith(currentProgress: const ExportProgress.initial()),
     );
@@ -487,7 +487,7 @@ class DataExportNotifier extends _$DataExportNotifier {
 
   /// Clear availability result
   void clearAvailability() {
-    final currentState = state.valueOrNull ?? const DataExportState();
+    final currentState = state.value ?? const DataExportState();
     state = AsyncValue.data(currentState.copyWith(availabilityResult: null));
   }
 
@@ -498,7 +498,7 @@ class DataExportNotifier extends _$DataExportNotifier {
 
   /// Check if user can request new export (rate limiting)
   bool canRequestExport() {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return true;
 
     final oneHourAgo = DateTime.now().subtract(const Duration(hours: 1));
@@ -513,7 +513,7 @@ class DataExportNotifier extends _$DataExportNotifier {
   Duration? getTimeUntilNextExportAllowed() {
     if (canRequestExport()) return null;
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return null;
 
     final oneHourAgo = DateTime.now().subtract(const Duration(hours: 1));
@@ -535,3 +535,7 @@ class DataExportNotifier extends _$DataExportNotifier {
     return nextAllowedTime.difference(DateTime.now());
   }
 }
+
+// LEGACY ALIAS
+// ignore: deprecated_member_use_from_same_package
+final dataExportNotifierProvider = dataExportProvider;

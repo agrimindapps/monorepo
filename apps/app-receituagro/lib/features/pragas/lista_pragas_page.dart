@@ -39,7 +39,7 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
     _currentPragaType = widget.pragaType ?? '1';
     _searchController.addListener(_onSearchChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final notifier = ref.read(pragasNotifierProvider.notifier);
+      final notifier = ref.read(pragasProvider.notifier);
       try {
         await notifier.loadStats();
         await notifier.loadPragasByTipo(_currentPragaType);
@@ -72,7 +72,7 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
   }
 
   void _performDebouncedSearch(String searchText) async {
-    final notifier = ref.read(pragasNotifierProvider.notifier);
+    final notifier = ref.read(pragasProvider.notifier);
     if (searchText.trim().isEmpty) {
       await notifier.loadPragasByTipo(_currentPragaType);
     } else {
@@ -88,7 +88,7 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
       _searchText = '';
     });
 
-    final notifier = ref.read(pragasNotifierProvider.notifier);
+    final notifier = ref.read(pragasProvider.notifier);
     await notifier.loadPragasByTipo(_currentPragaType);
   }
 
@@ -102,7 +102,7 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
     setState(() {
       _isAscending = !_isAscending;
     });
-    final notifier = ref.read(pragasNotifierProvider.notifier);
+    final notifier = ref.read(pragasProvider.notifier);
     notifier.sortPragas(_isAscending);
   }
 
@@ -123,7 +123,7 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final pragasState = ref.watch(pragasNotifierProvider);
+    final pragasState = ref.watch(pragasProvider);
 
     return PopScope(
       canPop: true,

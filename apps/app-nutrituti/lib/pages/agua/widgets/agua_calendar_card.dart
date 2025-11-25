@@ -30,7 +30,7 @@ class _AguaCalendarCardState extends ConsumerState<AguaCalendarCard> {
 
   Map<DateTime, List<String>> _loadEvents() {
     // Método para carregar eventos no calendário com base nos registros
-    final aguaAsync = ref.read(aguaNotifierProvider);
+    final aguaAsync = ref.read(aguaProvider);
     final Map<DateTime, List<String>> eventSource = {};
 
     aguaAsync.whenData((state) {

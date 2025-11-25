@@ -8,13 +8,12 @@ import '../../common_providers.dart';
 
 /// Providers de domínio unificados para autenticação
 /// Consolidam lógica de auth comum entre todos os apps do monorepo
+/// Migrado para Riverpod 3.0 - sem legacy imports
 
-/// Provider principal para estado de autenticação
-/// Unifica auth state entre gasometer, plantis, receituagro, etc.
-final unifiedAuthProvider =
-    StateNotifierProvider<UnifiedAuthNotifier, AuthState>((ref) {
-      return UnifiedAuthNotifier();
-    });
+/// Provider principal para estado de autenticação - Riverpod 3.0
+final unifiedAuthProvider = NotifierProvider<UnifiedAuthNotifier, AuthState>(
+  UnifiedAuthNotifier.new,
+);
 
 /// Provider para usuário atual unificado
 final domainCurrentUserProvider = Provider<UserEntity?>((ref) {
@@ -327,7 +326,8 @@ class AuthActions {
   });
 }
 
-/// Notifier unificado para autenticação
+/// Notifier unificado para autenticação - Riverpod 3.0
+/// Extende BaseAuthNotifier que já é um Notifier<AuthState>
 class UnifiedAuthNotifier extends BaseAuthNotifier {
   @override
   Future<void> login(String email, String password) async {
@@ -344,7 +344,7 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
         (user) => setAuthenticated(user.toMap()),
       );
     } catch (e) {
-      setError('Erro inesperado: $e');
+      setError('Erro inesperado: \$e');
     }
   }
 
@@ -355,7 +355,7 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
       await FirebaseAuth.instance.signOut();
       setUnauthenticated();
     } catch (e) {
-      setError('Erro ao fazer logout: $e');
+      setError('Erro ao fazer logout: \$e');
     }
   }
 
@@ -379,7 +379,7 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
         setAuthenticated(user.toJson());
       });
     } catch (e) {
-      setError('Erro no registro: $e');
+      setError('Erro no registro: \$e');
     }
   }
 
@@ -388,7 +388,7 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
     } catch (e) {
-      setError('Erro ao enviar email: $e');
+      setError('Erro ao enviar email: \$e');
     }
   }
 
@@ -416,7 +416,7 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
     try {
       setError('Google Sign-In não implementado ainda');
     } catch (e) {
-      setError('Erro no login com Google: $e');
+      setError('Erro no login com Google: \$e');
     }
   }
 
@@ -425,7 +425,7 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
     try {
       setError('Apple Sign-In não implementado ainda');
     } catch (e) {
-      setError('Erro no login com Apple: $e');
+      setError('Erro no login com Apple: \$e');
     }
   }
 
@@ -441,7 +441,7 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
         setError('Falha no login anônimo');
       }
     } catch (e) {
-      setError('Erro no login anônimo: $e');
+      setError('Erro no login anônimo: \$e');
     }
   }
 
@@ -454,7 +454,7 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
         setUnauthenticated();
       }
     } catch (e) {
-      setError('Erro ao deletar conta: $e');
+      setError('Erro ao deletar conta: \$e');
     }
   }
 
@@ -476,7 +476,7 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
         );
       }
     } catch (e) {
-      setError('Erro ao atualizar perfil: $e');
+      setError('Erro ao atualizar perfil: \$e');
     }
   }
 }

@@ -57,15 +57,15 @@ class _PremiumFeaturesShowcaseWidgetState
 
   @override
   Widget build(BuildContext context) {
-    final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
-    final subscriptionAsync = ref.watch(subscriptionNotifierProvider);
+    final featureFlagsAsync = ref.watch(featureFlagsProvider);
+    final subscriptionAsync = ref.watch(subscriptionManagementProvider);
 
     return subscriptionAsync.when(
       data: (subscriptionState) {
         return featureFlagsAsync.when(
           data: (featureFlagsState) {
             final featureFlags = ref.read(
-              featureFlagsNotifierProvider.notifier,
+              featureFlagsProvider.notifier,
             );
 
             return FadeTransition(

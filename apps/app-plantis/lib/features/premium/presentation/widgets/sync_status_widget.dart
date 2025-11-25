@@ -42,7 +42,7 @@ class SyncStatusWidget extends ConsumerWidget {
 
   Widget _buildContent(
     BuildContext context,
-    WidgetRef ref,
+    Ref ref,
     PremiumState premiumState,
   ) {
     final premiumProvider = premiumState;

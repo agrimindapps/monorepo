@@ -25,7 +25,7 @@ class _ComentariosPragaWidgetState extends ConsumerState<ComentariosPragaWidget>
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(detalhePragaNotifierProvider);
+    final state = ref.watch(detalhePragaProvider);
 
     return state.when(
       data: (data) {
@@ -165,7 +165,7 @@ class _ComentariosPragaWidgetState extends ConsumerState<ComentariosPragaWidget>
                     IconButton(
                       icon: Icon(Icons.close, color: Colors.red.shade700, size: 16),
                       onPressed: () {
-                        ref.read(detalhePragaNotifierProvider.notifier).clearError();
+                        ref.read(detalhePragaProvider.notifier).clearError();
                       },
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -212,7 +212,7 @@ class _ComentariosPragaWidgetState extends ConsumerState<ComentariosPragaWidget>
       ),
       confirmDismiss: (direction) => _showDeleteConfirmation(context),
       onDismissed: (direction) {
-        ref.read(detalhePragaNotifierProvider.notifier).deleteComentario(comentario.id);
+        ref.read(detalhePragaProvider.notifier).deleteComentario(comentario.id);
       },
       child: Card(
         margin: const EdgeInsets.only(bottom: 8),
@@ -283,7 +283,7 @@ class _ComentariosPragaWidgetState extends ConsumerState<ComentariosPragaWidget>
   Future<void> _addComment() async {
     final content = _commentController.text.trim();
 
-    final success = await ref.read(detalhePragaNotifierProvider.notifier).addComentario(content);
+    final success = await ref.read(detalhePragaProvider.notifier).addComentario(content);
     if (success) {
       _commentController.clear();
       if (mounted) {
@@ -296,7 +296,7 @@ class _ComentariosPragaWidgetState extends ConsumerState<ComentariosPragaWidget>
       }
     } else {
       if (mounted) {
-        final state = ref.read(detalhePragaNotifierProvider).value;
+        final state = ref.read(detalhePragaProvider).value;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(state?.errorMessage ?? 'Erro ao adicionar comentário'),

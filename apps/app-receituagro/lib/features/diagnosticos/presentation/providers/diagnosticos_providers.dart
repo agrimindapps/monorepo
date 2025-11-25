@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/services/failure_message_service.dart';
@@ -44,7 +45,7 @@ IDiagnosticosStatsService diagnosticosStatsService(
 }
 
 @Riverpod(keepAlive: true)
-FailureMessageService failureMessageService(FailureMessageServiceRef ref) {
+FailureMessageService failureMessageService(Ref ref) {
   return FailureMessageService();
 }
 
@@ -65,7 +66,7 @@ IDiagnosticosRepository iDiagnosticosRepository(
 
 // UseCases
 @Riverpod(keepAlive: true)
-GetDiagnosticosUseCase getDiagnosticosUseCase(GetDiagnosticosUseCaseRef ref) {
+GetDiagnosticosUseCase getDiagnosticosUseCase(Ref ref) {
   return GetDiagnosticosUseCase(ref.watch(iDiagnosticosRepositoryProvider));
 }
 

@@ -49,55 +49,55 @@ part 'repository_providers.g.dart';
 /// === EXTERNAL SERVICES ===
 
 @riverpod
-FirebaseFirestore firebaseFirestore(FirebaseFirestoreRef ref) {
+FirebaseFirestore firebaseFirestore(Ref ref) {
   return FirebaseFirestore.instance;
 }
 
 @riverpod
-FirebaseAuth firebaseAuth(FirebaseAuthRef ref) {
+FirebaseAuth firebaseAuth(Ref ref) {
   return FirebaseAuth.instance;
 }
 
 @riverpod
-Connectivity connectivity(ConnectivityRef ref) {
+Connectivity connectivity(Ref ref) {
   return Connectivity();
 }
 
 @riverpod
-ConnectivityService connectivityService(ConnectivityServiceRef ref) {
+ConnectivityService connectivityService(Ref ref) {
   return ConnectivityService.instance;
 }
 
 /// === CORE REPOSITORIES ===
 
 @riverpod
-IAuthRepository authRepository(AuthRepositoryRef ref) {
+IAuthRepository authRepository(Ref ref) {
   return PlantisSecurityConfig.createEnhancedAuthService();
 }
 
 @riverpod
-ISubscriptionRepository subscriptionRepository(SubscriptionRepositoryRef ref) {
+ISubscriptionRepository subscriptionRepository(Ref ref) {
   return RevenueCatService();
 }
 
 @riverpod
-NetworkInfo networkInfo(NetworkInfoRef ref) {
+NetworkInfo networkInfo(Ref ref) {
   return NetworkInfoImpl(ref.watch(connectivityProvider));
 }
 
 @riverpod
-RateLimiterService rateLimiterService(RateLimiterServiceRef ref) {
+RateLimiterService rateLimiterService(Ref ref) {
   return RateLimiterService();
 }
 
 @riverpod
-ILocalStorageRepository localStorageRepository(LocalStorageRepositoryRef ref) {
+ILocalStorageRepository localStorageRepository(Ref ref) {
   final db = ref.watch(plantisDatabaseProvider);
   return DriftStorageService(db);
 }
 
 @riverpod
-FirebaseDeviceService firebaseDeviceService(FirebaseDeviceServiceRef ref) {
+FirebaseDeviceService firebaseDeviceService(Ref ref) {
   return FirebaseDeviceService(
     firestore: ref.watch(firebaseFirestoreProvider),
   );
@@ -106,13 +106,13 @@ FirebaseDeviceService firebaseDeviceService(FirebaseDeviceServiceRef ref) {
 /// === DATASOURCES ===
 
 @riverpod
-PlantsLocalDatasource plantsLocalDatasource(PlantsLocalDatasourceRef ref) {
+PlantsLocalDatasource plantsLocalDatasource(Ref ref) {
   final driftRepo = ref.watch(plantsDriftRepositoryProvider);
   return PlantsLocalDatasourceImpl(driftRepo);
 }
 
 @riverpod
-PlantsRemoteDatasource plantsRemoteDatasource(PlantsRemoteDatasourceRef ref) {
+PlantsRemoteDatasource plantsRemoteDatasource(Ref ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
   final rateLimiter = ref.watch(rateLimiterServiceProvider);
   return PlantsRemoteDatasourceImpl(
@@ -122,13 +122,13 @@ PlantsRemoteDatasource plantsRemoteDatasource(PlantsRemoteDatasourceRef ref) {
 }
 
 @riverpod
-SpacesLocalDatasource spacesLocalDatasource(SpacesLocalDatasourceRef ref) {
+SpacesLocalDatasource spacesLocalDatasource(Ref ref) {
   final driftRepo = ref.watch(spacesDriftRepositoryProvider);
   return SpacesLocalDatasourceImpl(driftRepo);
 }
 
 @riverpod
-SpacesRemoteDatasource spacesRemoteDatasource(SpacesRemoteDatasourceRef ref) {
+SpacesRemoteDatasource spacesRemoteDatasource(Ref ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
   final rateLimiter = ref.watch(rateLimiterServiceProvider);
   return SpacesRemoteDatasourceImpl(
@@ -139,27 +139,27 @@ SpacesRemoteDatasource spacesRemoteDatasource(SpacesRemoteDatasourceRef ref) {
 
 @riverpod
 PlantTasksLocalDatasource plantTasksLocalDatasource(
-    PlantTasksLocalDatasourceRef ref) {
+    Ref ref) {
   final driftRepo = ref.watch(plantTasksDriftRepositoryProvider);
   return PlantTasksLocalDatasourceImpl(driftRepo);
 }
 
 @riverpod
 PlantTasksRemoteDatasource plantTasksRemoteDatasource(
-    PlantTasksRemoteDatasourceRef ref) {
+    Ref ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
   return PlantTasksRemoteDatasourceImpl(firestore);
 }
 
 @riverpod
-DeviceLocalDataSource deviceLocalDataSource(DeviceLocalDataSourceRef ref) {
+DeviceLocalDataSource deviceLocalDataSource(Ref ref) {
   return DeviceLocalDataSourceImpl(
     storageService: ref.watch(localStorageRepositoryProvider),
   );
 }
 
 @riverpod
-DeviceRemoteDataSource deviceRemoteDataSource(DeviceRemoteDataSourceRef ref) {
+DeviceRemoteDataSource deviceRemoteDataSource(Ref ref) {
   return DeviceRemoteDataSourceImpl(
     firebaseDeviceService: ref.watch(firebaseDeviceServiceProvider),
   );
@@ -169,14 +169,14 @@ DeviceRemoteDataSource deviceRemoteDataSource(DeviceRemoteDataSourceRef ref) {
 
 @riverpod
 PlantsConnectivityService plantsConnectivityService(
-    PlantsConnectivityServiceRef ref) {
+    Ref ref) {
   return PlantsConnectivityServiceImpl(
     networkInfo: ref.watch(networkInfoProvider),
   );
 }
 
 @riverpod
-PlantSyncService plantSyncService(PlantSyncServiceRef ref) {
+PlantSyncService plantSyncService(Ref ref) {
   return PlantSyncServiceImpl(
     localDatasource: ref.watch(plantsLocalDatasourceProvider),
     remoteDatasource: ref.watch(plantsRemoteDatasourceProvider),
@@ -187,12 +187,12 @@ PlantSyncService plantSyncService(PlantSyncServiceRef ref) {
 
 @riverpod
 PlantCommentsRepository plantCommentsRepository(
-    PlantCommentsRepositoryRef ref) {
+    Ref ref) {
   return PlantCommentsRepositoryImpl();
 }
 
 @riverpod
-PlantTasksRepository plantTasksRepository(PlantTasksRepositoryRef ref) {
+PlantTasksRepository plantTasksRepository(Ref ref) {
   return PlantTasksRepositoryImpl(
     localDatasource: ref.watch(plantTasksLocalDatasourceProvider),
     remoteDatasource: ref.watch(plantTasksRemoteDatasourceProvider),
@@ -202,7 +202,7 @@ PlantTasksRepository plantTasksRepository(PlantTasksRepositoryRef ref) {
 }
 
 @riverpod
-SpacesRepository spacesRepository(SpacesRepositoryRef ref) {
+SpacesRepository spacesRepository(Ref ref) {
   return SpacesRepositoryImpl(
     localDatasource: ref.watch(spacesLocalDatasourceProvider),
     remoteDatasource: ref.watch(spacesRemoteDatasourceProvider),
@@ -212,7 +212,7 @@ SpacesRepository spacesRepository(SpacesRepositoryRef ref) {
 }
 
 @riverpod
-PlantsRepository plantsRepository(PlantsRepositoryRef ref) {
+PlantsRepository plantsRepository(Ref ref) {
   return PlantsRepositoryImpl(
     localDatasource: ref.watch(plantsLocalDatasourceProvider),
     remoteDatasource: ref.watch(plantsRemoteDatasourceProvider),
@@ -226,7 +226,7 @@ PlantsRepository plantsRepository(PlantsRepositoryRef ref) {
 }
 
 @riverpod
-DeviceRepository deviceRepository(DeviceRepositoryRef ref) {
+DeviceRepository deviceRepository(Ref ref) {
   return DeviceRepositoryImpl(
     localDataSource: ref.watch(deviceLocalDataSourceProvider),
     remoteDataSource: ref.watch(deviceRemoteDataSourceProvider),
@@ -236,7 +236,7 @@ DeviceRepository deviceRepository(DeviceRepositoryRef ref) {
 /// === APP SERVICES ===
 
 @riverpod
-PlantisSyncService plantisSyncService(PlantisSyncServiceRef ref) {
+PlantisSyncService plantisSyncService(Ref ref) {
   return PlantisSyncService(
     plantsRepository: ref.watch(plantsRepositoryProvider),
     spacesRepository: ref.watch(spacesRepositoryProvider),
@@ -248,7 +248,7 @@ PlantisSyncService plantisSyncService(PlantisSyncServiceRef ref) {
 /// === USECASES ===
 
 @riverpod
-LoginUseCase loginUseCase(LoginUseCaseRef ref) {
+LoginUseCase loginUseCase(Ref ref) {
   return LoginUseCase(
     ref.watch(authRepositoryProvider),
     ref.watch(analyticsRepositoryProvider),
@@ -256,7 +256,7 @@ LoginUseCase loginUseCase(LoginUseCaseRef ref) {
 }
 
 @riverpod
-LogoutUseCase logoutUseCase(LogoutUseCaseRef ref) {
+LogoutUseCase logoutUseCase(Ref ref) {
   return LogoutUseCase(
     ref.watch(authRepositoryProvider),
     ref.watch(analyticsRepositoryProvider),
@@ -264,7 +264,7 @@ LogoutUseCase logoutUseCase(LogoutUseCaseRef ref) {
 }
 
 @riverpod
-ResetPasswordUseCase resetPasswordUseCase(ResetPasswordUseCaseRef ref) {
+ResetPasswordUseCase resetPasswordUseCase(Ref ref) {
   return ResetPasswordUseCase(ref.watch(authRepositoryProvider));
 }
 
@@ -272,19 +272,19 @@ ResetPasswordUseCase resetPasswordUseCase(ResetPasswordUseCaseRef ref) {
 
 @riverpod
 SettingsLocalDataSource settingsLocalDataSource(
-    SettingsLocalDataSourceRef ref) {
+    Ref ref) {
   return SettingsLocalDataSource(prefs: ref.watch(sharedPreferencesProvider));
 }
 
 @riverpod
-ISettingsRepository settingsRepository(SettingsRepositoryRef ref) {
+ISettingsRepository settingsRepository(Ref ref) {
   return SettingsRepository(
     localDataSource: ref.watch(settingsLocalDataSourceProvider),
   );
 }
 
 @riverpod
-SyncSettingsUseCase syncSettingsUseCase(SyncSettingsUseCaseRef ref) {
+SyncSettingsUseCase syncSettingsUseCase(Ref ref) {
   return SyncSettingsUseCase(ref.watch(settingsRepositoryProvider));
 }
 
@@ -292,17 +292,17 @@ SyncSettingsUseCase syncSettingsUseCase(SyncSettingsUseCaseRef ref) {
 
 @riverpod
 SyncQueueDriftRepository syncQueueDriftRepository(
-    SyncQueueDriftRepositoryRef ref) {
+    Ref ref) {
   final db = ref.watch(plantisDatabaseProvider);
   return SyncQueueDriftRepository(db);
 }
 
 @riverpod
-SyncQueueDriftService syncQueueDriftService(SyncQueueDriftServiceRef ref) {
+SyncQueueDriftService syncQueueDriftService(Ref ref) {
   return SyncQueueDriftService(ref.watch(syncQueueDriftRepositoryProvider));
 }
 
 @riverpod
-app_sync_queue.SyncQueue syncQueue(SyncQueueRef ref) {
+app_sync_queue.SyncQueue syncQueue(Ref ref) {
   return app_sync_queue.SyncQueue(ref.watch(syncQueueDriftServiceProvider));
 }

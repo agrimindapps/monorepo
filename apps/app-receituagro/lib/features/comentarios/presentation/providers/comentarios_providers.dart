@@ -18,7 +18,7 @@ import '../providers/comentarios_mapper_provider.dart';
 part 'comentarios_providers.g.dart';
 
 @riverpod
-IComentariosRepository iComentariosRepository(IComentariosRepositoryRef ref) {
+IComentariosRepository iComentariosRepository(Ref ref) {
   // Note: ComentarioRepository from database_providers is the Drift wrapper
   // We need to wrap it in ComentariosRepositoryImpl which implements IComentariosRepository
   // But ComentariosRepositoryImpl expects ComentariosRepository (Drift wrapper)
@@ -50,7 +50,7 @@ IComentariosRepository iComentariosRepository(IComentariosRepositoryRef ref) {
 }
 
 @riverpod
-ComentariosService comentariosService(ComentariosServiceRef ref) {
+ComentariosService comentariosService(Ref ref) {
   return ComentariosService(
     repository: ref.watch(iComentariosRepositoryProvider),
     premiumService: ref.watch(premiumServiceProvider),
@@ -59,28 +59,28 @@ ComentariosService comentariosService(ComentariosServiceRef ref) {
 }
 
 @riverpod
-GetComentariosUseCase getComentariosUseCase(GetComentariosUseCaseRef ref) {
+GetComentariosUseCase getComentariosUseCase(Ref ref) {
   return GetComentariosUseCase(ref.watch(iComentariosRepositoryProvider));
 }
 
 @riverpod
-AddComentarioUseCase addComentarioUseCase(AddComentarioUseCaseRef ref) {
+AddComentarioUseCase addComentarioUseCase(Ref ref) {
   final repo = ref.watch(iComentariosRepositoryProvider);
   return AddComentarioUseCase(repo, repo);
 }
 
 @riverpod
-DeleteComentarioUseCase deleteComentarioUseCase(DeleteComentarioUseCaseRef ref) {
+DeleteComentarioUseCase deleteComentarioUseCase(Ref ref) {
   final repo = ref.watch(iComentariosRepositoryProvider);
   return DeleteComentarioUseCase(repo, repo);
 }
 
 @riverpod
-ComentariosFilterService comentariosFilterService(ComentariosFilterServiceRef ref) {
+ComentariosFilterService comentariosFilterService(Ref ref) {
   return ComentariosFilterService();
 }
 
 @riverpod
-ComentariosValidationService comentariosValidationService(ComentariosValidationServiceRef ref) {
+ComentariosValidationService comentariosValidationService(Ref ref) {
   return ComentariosValidationService();
 }

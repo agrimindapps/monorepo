@@ -14,15 +14,16 @@ part 'plant_task_provider.g.dart';
 
 /// State for Plant Tasks
 @freezed
-class PlantTaskState with _$PlantTaskState {
+sealed class PlantTaskState with _$PlantTaskState {
   const factory PlantTaskState({
     @Default({}) Map<String, List<PlantTask>> plantTasks,
     @Default(false) bool isLoading,
     String? errorMessage,
   }) = _PlantTaskState;
+}
 
-  const PlantTaskState._();
-
+/// Extension providing computed properties for PlantTaskState
+extension PlantTaskStateX on PlantTaskState {
   bool get hasError => errorMessage != null;
 }
 
@@ -492,3 +493,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 /// Use PlantTaskNotifier instead in new code for type annotations
 /// Use plantTaskNotifierProvider for accessing the provider
 typedef PlantTaskProvider = PlantTaskNotifier;
+
+// LEGACY ALIAS
+// ignore: deprecated_member_use_from_same_package
+final plantTaskNotifierProvider = plantTaskProvider;

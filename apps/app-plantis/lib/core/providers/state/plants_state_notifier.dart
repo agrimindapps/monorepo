@@ -146,7 +146,7 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
     if (user != null) {
       loadPlants();
     } else {
-      final currentState = state.valueOrNull ?? const PlantsState();
+      final currentState = state.value ?? const PlantsState();
       state = AsyncValue.data(
         currentState.copyWith(
           allPlants: [],
@@ -172,7 +172,7 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
   }
 
   Future<void> loadPlants() async {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
 
     if (currentState.isLoading) return;
 
@@ -221,14 +221,14 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
 
     return result.fold(
       (failure) {
-        final currentState = state.valueOrNull ?? const PlantsState();
+        final currentState = state.value ?? const PlantsState();
         state = AsyncValue.data(
           currentState.copyWith(error: failure.message),
         );
         return false;
       },
       (plant) {
-        final currentState = state.valueOrNull ?? const PlantsState();
+        final currentState = state.value ?? const PlantsState();
         final updatedPlants = [...currentState.allPlants, plant];
         final newState = currentState.copyWith(allPlants: updatedPlants);
         state = AsyncValue.data(newState);
@@ -243,14 +243,14 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
 
     return result.fold(
       (failure) {
-        final currentState = state.valueOrNull ?? const PlantsState();
+        final currentState = state.value ?? const PlantsState();
         state = AsyncValue.data(
           currentState.copyWith(error: failure.message),
         );
         return false;
       },
       (updatedPlant) {
-        final currentState = state.valueOrNull ?? const PlantsState();
+        final currentState = state.value ?? const PlantsState();
         final updatedPlants = currentState.allPlants.map((plant) {
           return plant.id == updatedPlant.id ? updatedPlant : plant;
         }).toList();
@@ -268,14 +268,14 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
 
     return result.fold(
       (failure) {
-        final currentState = state.valueOrNull ?? const PlantsState();
+        final currentState = state.value ?? const PlantsState();
         state = AsyncValue.data(
           currentState.copyWith(error: failure.message),
         );
         return false;
       },
       (_) {
-        final currentState = state.valueOrNull ?? const PlantsState();
+        final currentState = state.value ?? const PlantsState();
         final updatedPlants = currentState.allPlants
             .where((plant) => plant.id != plantId)
             .toList();
@@ -291,12 +291,12 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
   }
 
   void selectPlant(Plant? plant) {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     state = AsyncValue.data(currentState.copyWith(selectedPlant: plant));
   }
 
   Future<void> searchPlants(String query) async {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     final newState = currentState.copyWith(
       searchQuery: query,
       isSearching: query.isNotEmpty,
@@ -306,21 +306,21 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
   }
 
   Future<void> setSpaceFilter(String? spaceId) async {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     final newState = currentState.copyWith(filterBySpace: spaceId);
     state = AsyncValue.data(newState);
     await _applyFiltersToState(newState);
   }
 
   Future<void> setCareStatusFilter(PlantCareStatus? status) async {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     final newState = currentState.copyWith(filterByCareStatus: status);
     state = AsyncValue.data(newState);
     await _applyFiltersToState(newState);
   }
 
   Future<void> setFavoritesFilter(bool showOnlyFavorites) async {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     final newState =
         currentState.copyWith(showOnlyFavorites: showOnlyFavorites);
     state = AsyncValue.data(newState);
@@ -328,7 +328,7 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
   }
 
   Future<void> setNeedingWaterFilter(bool showOnlyNeedingWater) async {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     final newState =
         currentState.copyWith(showOnlyNeedingWater: showOnlyNeedingWater);
     state = AsyncValue.data(newState);
@@ -336,19 +336,19 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
   }
 
   Future<void> setSortBy(PlantSortOption sortBy) async {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     final newState = currentState.copyWith(sortBy: sortBy);
     state = AsyncValue.data(newState);
     await _applyFiltersToState(newState);
   }
 
   void setViewMode(ViewMode viewMode) {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     state = AsyncValue.data(currentState.copyWith(viewMode: viewMode));
   }
 
   Future<void> clearFilters() async {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     final newState = currentState.copyWith(
       searchQuery: '',
       filterBySpace: null,
@@ -377,12 +377,12 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
   }
 
   care_service.PlantCareStatistics getCareStatistics() {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     return _careCalculator.calculateCareStatistics(currentState.allPlants);
   }
 
   List<Plant> getPlantsNeedingWaterSoon(int days) {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     return _careCalculator.getPlantsNeedingWaterSoon(
       currentState.allPlants,
       days,
@@ -449,29 +449,29 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
   }
 
   void clearError() {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     state = AsyncValue.data(currentState.copyWith(clearError: true));
   }
 }
 
 @riverpod
-PlantsDataService plantsDataServiceLegacy(PlantsDataServiceLegacyRef ref) {
+PlantsDataService plantsDataServiceLegacy(Ref ref) {
   return ref.watch(plantsDataServiceProvider);
 }
 
 @riverpod
 filter_service.PlantsFilterService plantsFilterServiceLegacy(
-    PlantsFilterServiceLegacyRef ref) {
+    Ref ref) {
   return ref.watch(plantsFilterServiceProvider);
 }
 
 @riverpod
 care_service.PlantsCareCalculator plantsCareCalculatorLegacy(
-    PlantsCareCalculatorLegacyRef ref) {
+    Ref ref) {
   return ref.watch(plantsCareCalculatorProvider);
 }
 
 @riverpod
-IAuthStateProvider authStateProviderLegacy(AuthStateProviderLegacyRef ref) {
+IAuthStateProvider authStateProviderLegacy(Ref ref) {
   return ref.watch(authStateProviderProvider);
 }

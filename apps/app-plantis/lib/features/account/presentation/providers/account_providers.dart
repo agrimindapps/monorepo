@@ -28,7 +28,7 @@ part 'account_providers.g.dart';
 
 @riverpod
 AccountRemoteDataSource accountRemoteDataSource(
-  AccountRemoteDataSourceRef ref,
+  Ref ref,
 ) {
   final firebaseAuth = fb.FirebaseAuth.instance;
   final firebaseFirestore = FirebaseFirestore.instance;
@@ -39,7 +39,7 @@ AccountRemoteDataSource accountRemoteDataSource(
 }
 
 @riverpod
-AccountLocalDataSource accountLocalDataSource(AccountLocalDataSourceRef ref) {
+AccountLocalDataSource accountLocalDataSource(Ref ref) {
   final plantsRepo = ref.watch(plantsDriftRepositoryProvider);
   final spacesRepo = ref.watch(spacesDriftRepositoryProvider);
   final tasksRepo = ref.watch(tasksDriftRepositoryProvider);
@@ -73,7 +73,7 @@ EnhancedAccountDeletionService enhancedAccountDeletionService(Ref ref) {
 // ============================================================================
 
 @riverpod
-AccountRepository accountRepository(AccountRepositoryRef ref) {
+AccountRepository accountRepository(Ref ref) {
   final remoteDataSource = ref.watch(accountRemoteDataSourceProvider);
   final localDataSource = ref.watch(accountLocalDataSourceProvider);
   final firebaseAuth = fb.FirebaseAuth.instance;
@@ -94,25 +94,25 @@ AccountRepository accountRepository(AccountRepositoryRef ref) {
 // ============================================================================
 
 @riverpod
-GetAccountInfoUseCase getAccountInfoUseCase(GetAccountInfoUseCaseRef ref) {
+GetAccountInfoUseCase getAccountInfoUseCase(Ref ref) {
   final repository = ref.watch(accountRepositoryProvider);
   return GetAccountInfoUseCase(repository);
 }
 
 @riverpod
-account_logout.LogoutUseCase logoutUseCase(LogoutUseCaseRef ref) {
+account_logout.LogoutUseCase logoutUseCase(Ref ref) {
   final repository = ref.watch(accountRepositoryProvider);
   return account_logout.LogoutUseCase(repository);
 }
 
 @riverpod
-ClearDataUseCase clearDataUseCase(ClearDataUseCaseRef ref) {
+ClearDataUseCase clearDataUseCase(Ref ref) {
   final repository = ref.watch(accountRepositoryProvider);
   return ClearDataUseCase(repository);
 }
 
 @riverpod
-DeleteAccountUseCase deleteAccountUseCase(DeleteAccountUseCaseRef ref) {
+DeleteAccountUseCase deleteAccountUseCase(Ref ref) {
   final repository = ref.watch(accountRepositoryProvider);
   return DeleteAccountUseCase(repository);
 }
@@ -123,7 +123,7 @@ DeleteAccountUseCase deleteAccountUseCase(DeleteAccountUseCaseRef ref) {
 
 /// Provider para obter informações da conta do usuário
 @riverpod
-Future<AccountInfo> accountInfo(AccountInfoRef ref) async {
+Future<AccountInfo> accountInfo(Ref ref) async {
   final useCase = ref.watch(getAccountInfoUseCaseProvider);
   final result = await useCase(const NoParams());
 
@@ -135,7 +135,7 @@ Future<AccountInfo> accountInfo(AccountInfoRef ref) async {
 
 /// Provider para stream de mudanças na conta
 @riverpod
-Stream<AccountInfo?> accountInfoStream(AccountInfoStreamRef ref) {
+Stream<AccountInfo?> accountInfoStream(Ref ref) {
   final repository = ref.watch(accountRepositoryProvider);
   return repository.watchAccountInfo();
 }

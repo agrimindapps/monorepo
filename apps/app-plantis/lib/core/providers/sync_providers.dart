@@ -7,16 +7,17 @@ part 'sync_providers.g.dart';
 
 /// State class for sync status with freezed immutability
 @freezed
-class SyncState with _$SyncState {
+sealed class SyncState with _$SyncState {
   const factory SyncState({
     @Default(false) bool isSyncing,
     String? lastSyncMessage,
     DateTime? lastSyncTime,
     String? error,
   }) = _SyncState;
+}
 
-  const SyncState._();
-
+/// Extension providing computed properties for SyncState
+extension SyncStateX on SyncState {
   /// Returns a user-friendly status message
   String get statusMessage {
     if (isSyncing) {

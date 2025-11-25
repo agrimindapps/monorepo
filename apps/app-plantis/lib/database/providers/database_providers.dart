@@ -1,23 +1,20 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../plantis_database.dart';
 import '../repositories/tasks_drift_repository.dart';
 import '../repositories/plants_drift_repository.dart';
 import '../repositories/plant_tasks_drift_repository.dart';
 import '../repositories/spaces_drift_repository.dart';
 
-part 'database_providers.g.dart';
-
 /// ============================================================================
-/// DATABASE PROVIDERS - Riverpod
+/// DATABASE PROVIDERS - Riverpod 3.0 (Manual Providers)
 /// ============================================================================
 ///
 /// Providers Riverpod para acesso ao PlantisDatabase em toda aplicação.
 ///
 /// **PADRÃO ESTABELECIDO:**
-/// - @riverpod annotation para code generation
+/// - Manual providers (sem @riverpod) para evitar problemas com tipos Drift
 /// - Provider único para database instance
 /// - Lifecycle gerenciado automaticamente pelo Riverpod
-/// - Injectable no GetIt, exposto via Riverpod
 ///
 /// **USO:**
 /// ```dart
@@ -36,8 +33,7 @@ part 'database_providers.g.dart';
 /// - Lazy initialization (criado apenas quando usado)
 /// - Singleton (mesma instância em toda aplicação)
 /// - Auto-dispose quando não mais necessário
-@riverpod
-PlantisDatabase plantisDatabase(PlantisDatabaseRef ref) {
+final plantisDatabaseProvider = Provider<PlantisDatabase>((ref) {
   // Usa factory method production
   final db = PlantisDatabase.production();
 
@@ -48,7 +44,7 @@ PlantisDatabase plantisDatabase(PlantisDatabaseRef ref) {
   });
 
   return db;
-}
+});
 
 // ============================================================================
 // PROVIDERS DERIVADOS (QUERIES COMUNS)
@@ -57,25 +53,22 @@ PlantisDatabase plantisDatabase(PlantisDatabaseRef ref) {
 /// Provider para contagem de plantas ativas
 ///
 /// Atualiza automaticamente quando o database muda (via ref.watch)
-@riverpod
-Future<int> activePlantsCount(ActivePlantsCountRef ref) async {
+final activePlantsCountProvider = FutureProvider<int>((ref) async {
   final db = ref.watch(plantisDatabaseProvider);
   return db.countActivePlants();
-}
+});
 
 /// Provider para contagem de tarefas pendentes
-@riverpod
-Future<int> pendingTasksCount(PendingTasksCountRef ref) async {
+final pendingTasksCountProvider = FutureProvider<int>((ref) async {
   final db = ref.watch(plantisDatabaseProvider);
   return db.countPendingTasks();
-}
+});
 
 /// Provider para contagem de registros sujos (precisando sync)
-@riverpod
-Future<int> dirtyRecordsCount(DirtyRecordsCountRef ref) async {
+final dirtyRecordsCountProvider = FutureProvider<int>((ref) async {
   final db = ref.watch(plantisDatabaseProvider);
   return db.countDirtyRecords();
-}
+});
 
 /// Provider para lista de plantas ativas
 ///
@@ -88,25 +81,22 @@ Future<int> dirtyRecordsCount(DirtyRecordsCountRef ref) async {
 ///   error: (e, s) => ErrorWidget(e),
 /// );
 /// ```
-@riverpod
-Future<List<Plant>> activePlants(ActivePlantsRef ref) async {
+final activePlantsProvider = FutureProvider<List<Plant>>((ref) async {
   final db = ref.watch(plantisDatabaseProvider);
   return db.getActivePlants();
-}
+});
 
 /// Provider para lista de tarefas pendentes
-@riverpod
-Future<List<Task>> pendingTasks(PendingTasksRef ref) async {
+final pendingTasksProvider = FutureProvider<List<Task>>((ref) async {
   final db = ref.watch(plantisDatabaseProvider);
   return db.getPendingTasks();
-}
+});
 
 /// Provider para itens pendentes de sincronização
-@riverpod
-Future<List<PlantsSyncQueueData>> pendingSyncItems(PendingSyncItemsRef ref) async {
+final pendingSyncItemsProvider = FutureProvider<List<PlantsSyncQueueData>>((ref) async {
   final db = ref.watch(plantisDatabaseProvider);
   return db.getPendingSyncItems();
-}
+});
 
 // ============================================================================
 // PROVIDERS PARAMETRIZADOS
@@ -118,14 +108,10 @@ Future<List<PlantsSyncQueueData>> pendingSyncItems(PendingSyncItemsRef ref) asyn
 /// ```dart
 /// final spacePlantsAsync = ref.watch(plantsBySpaceProvider(spaceId: 1));
 /// ```
-@riverpod
-Future<List<Plant>> plantsBySpace(
-  PlantsBySpaceRef ref, {
-  required int spaceId,
-}) async {
+final plantsBySpaceProvider = FutureProvider.family<List<Plant>, int>((ref, spaceId) async {
   final db = ref.watch(plantisDatabaseProvider);
   return db.getPlantsBySpace(spaceId);
-}
+});
 
 /// Provider para configuração de uma planta específica
 ///
@@ -133,39 +119,31 @@ Future<List<Plant>> plantsBySpace(
 /// ```dart
 /// final configAsync = ref.watch(plantConfigProvider(plantId: 1));
 /// ```
-@riverpod
-Future<PlantConfig?> plantConfig(
-  PlantConfigRef ref, {
-  required int plantId,
-}) async {
+final plantConfigProvider = FutureProvider.family<PlantConfig?, int>((ref, plantId) async {
   final db = ref.watch(plantisDatabaseProvider);
   return db.getPlantConfig(plantId);
-}
+});
 
 // ============================================================================
 // REPOSITORY PROVIDERS
 // ============================================================================
 
-@riverpod
-TasksDriftRepository tasksDriftRepository(TasksDriftRepositoryRef ref) {
+final tasksDriftRepositoryProvider = Provider<TasksDriftRepository>((ref) {
   final db = ref.watch(plantisDatabaseProvider);
   return TasksDriftRepository(db);
-}
+});
 
-@riverpod
-PlantsDriftRepository plantsDriftRepository(PlantsDriftRepositoryRef ref) {
+final plantsDriftRepositoryProvider = Provider<PlantsDriftRepository>((ref) {
   final db = ref.watch(plantisDatabaseProvider);
   return PlantsDriftRepository(db);
-}
+});
 
-@riverpod
-PlantTasksDriftRepository plantTasksDriftRepository(PlantTasksDriftRepositoryRef ref) {
+final plantTasksDriftRepositoryProvider = Provider<PlantTasksDriftRepository>((ref) {
   final db = ref.watch(plantisDatabaseProvider);
   return PlantTasksDriftRepository(db);
-}
+});
 
-@riverpod
-SpacesDriftRepository spacesDriftRepository(SpacesDriftRepositoryRef ref) {
+final spacesDriftRepositoryProvider = Provider<SpacesDriftRepository>((ref) {
   final db = ref.watch(plantisDatabaseProvider);
   return SpacesDriftRepository(db);
-}
+});

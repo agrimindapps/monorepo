@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_providers.dart';
@@ -20,9 +21,7 @@ part 'flappbird_providers.g.dart';
 // Data Sources
 
 @riverpod
-FlappbirdLocalDataSource flappbirdLocalDataSource(
-  FlappbirdLocalDataSourceRef ref,
-) {
+FlappbirdLocalDataSource flappbirdLocalDataSource(Ref ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return FlappbirdLocalDataSource(prefs);
 }
@@ -30,7 +29,7 @@ FlappbirdLocalDataSource flappbirdLocalDataSource(
 // Repositories
 
 @Riverpod(keepAlive: true)
-FlappbirdRepository flappbirdRepository(FlappbirdRepositoryRef ref) {
+FlappbirdRepository flappbirdRepository(Ref ref) {
   final dataSource = ref.watch(flappbirdLocalDataSourceProvider);
   return FlappbirdRepositoryImpl(dataSource);
 }
@@ -38,60 +37,60 @@ FlappbirdRepository flappbirdRepository(FlappbirdRepositoryRef ref) {
 // Services
 
 @riverpod
-PhysicsService physicsService(PhysicsServiceRef ref) {
+PhysicsService physicsService(Ref ref) {
   return PhysicsService();
 }
 
 @riverpod
-PipeGeneratorService pipeGeneratorService(PipeGeneratorServiceRef ref) {
+PipeGeneratorService pipeGeneratorService(Ref ref) {
   return PipeGeneratorService();
 }
 
 @riverpod
-CollisionService collisionService(CollisionServiceRef ref) {
+CollisionService collisionService(Ref ref) {
   return CollisionService();
 }
 
 // Use Cases
 
 @riverpod
-StartGameUseCase startGameUseCase(StartGameUseCaseRef ref) {
+StartGameUseCase startGameUseCase(Ref ref) {
   final physicsService = ref.watch(physicsServiceProvider);
   final pipeGeneratorService = ref.watch(pipeGeneratorServiceProvider);
   return StartGameUseCase(physicsService, pipeGeneratorService);
 }
 
 @riverpod
-FlapBirdUseCase flapBirdUseCase(FlapBirdUseCaseRef ref) {
+FlapBirdUseCase flapBirdUseCase(Ref ref) {
   return FlapBirdUseCase();
 }
 
 @riverpod
-UpdatePhysicsUseCase updatePhysicsUseCase(UpdatePhysicsUseCaseRef ref) {
+UpdatePhysicsUseCase updatePhysicsUseCase(Ref ref) {
   final physicsService = ref.watch(physicsServiceProvider);
   final collisionService = ref.watch(collisionServiceProvider);
   return UpdatePhysicsUseCase(physicsService, collisionService);
 }
 
 @riverpod
-UpdatePipesUseCase updatePipesUseCase(UpdatePipesUseCaseRef ref) {
+UpdatePipesUseCase updatePipesUseCase(Ref ref) {
   return UpdatePipesUseCase();
 }
 
 @riverpod
-CheckCollisionUseCase checkCollisionUseCase(CheckCollisionUseCaseRef ref) {
+CheckCollisionUseCase checkCollisionUseCase(Ref ref) {
   final collisionService = ref.watch(collisionServiceProvider);
   return CheckCollisionUseCase(collisionService);
 }
 
 @riverpod
-LoadHighScoreUseCase loadHighScoreUseCase(LoadHighScoreUseCaseRef ref) {
+LoadHighScoreUseCase loadHighScoreUseCase(Ref ref) {
   final repository = ref.watch(flappbirdRepositoryProvider);
   return LoadHighScoreUseCase(repository);
 }
 
 @riverpod
-SaveHighScoreUseCase saveHighScoreUseCase(SaveHighScoreUseCaseRef ref) {
+SaveHighScoreUseCase saveHighScoreUseCase(Ref ref) {
   final repository = ref.watch(flappbirdRepositoryProvider);
   return SaveHighScoreUseCase(repository);
 }

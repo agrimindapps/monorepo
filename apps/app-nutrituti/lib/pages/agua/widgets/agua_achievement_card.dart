@@ -12,7 +12,7 @@ class AguaAchievementCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final aguaAsync = ref.watch(aguaNotifierProvider);
+    final aguaAsync = ref.watch(aguaProvider);
 
     return Card(
       child: Padding(

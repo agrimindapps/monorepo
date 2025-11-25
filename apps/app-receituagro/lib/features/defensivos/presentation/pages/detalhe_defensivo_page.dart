@@ -92,9 +92,9 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
       final startTime = DateTime.now();
 
       await ref
-          .read(detalheDefensivoNotifierProvider.notifier)
+          .read(detalheDefensivoProvider.notifier)
           .initializeData(widget.defensivoName, widget.fabricante);
-      final state = ref.read(detalheDefensivoNotifierProvider);
+      final state = ref.read(detalheDefensivoProvider);
       state.whenData((data) async {
         if (data.defensivoData != null) {
           final defensivoData = data.defensivoData!;
@@ -114,7 +114,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
             '🔍 [DETALHE_DEFENSIVO_PAGE] nomeDefensivo: ${defensivoData.nomeComum}',
           );
 
-          final notifier = ref.read(diagnosticosNotifierProvider.notifier);
+          final notifier = ref.read(diagnosticosProvider.notifier);
           debugPrint(
             '🔍 [DETALHE_DEFENSIVO_PAGE] Notifier obtido: ${notifier.runtimeType}',
           );
@@ -129,7 +129,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
           );
 
           // Verificar estado após chamada
-          final stateAfter = ref.read(diagnosticosNotifierProvider);
+          final stateAfter = ref.read(diagnosticosProvider);
           stateAfter.whenData((stateData) {
             debugPrint('📊 [DETALHE_DEFENSIVO_PAGE] Estado após chamada:');
             debugPrint(
@@ -229,7 +229,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
     List<dynamic> allDiagnosticos,
   ) async {
     try {
-      final state = ref.read(detalheDefensivoNotifierProvider);
+      final state = ref.read(detalheDefensivoProvider);
       Fitossanitario? defensivoData;
       state.whenData((data) {
         defensivoData = data.defensivoData;
@@ -320,7 +320,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(detalheDefensivoNotifierProvider);
+    ref.watch(detalheDefensivoProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -344,7 +344,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
   }
 
   Widget _buildHeader() {
-    final state = ref.watch(detalheDefensivoNotifierProvider);
+    final state = ref.watch(detalheDefensivoProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return state.when(
@@ -386,7 +386,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
   }
 
   Widget _buildBody() {
-    final state = ref.watch(detalheDefensivoNotifierProvider);
+    final state = ref.watch(detalheDefensivoProvider);
 
     return state.when(
       data: (data) {
@@ -473,7 +473,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
   }
 
   Widget _buildInformacoesTab() {
-    final state = ref.watch(detalheDefensivoNotifierProvider);
+    final state = ref.watch(detalheDefensivoProvider);
 
     return state.when(
       data: (data) {
@@ -511,11 +511,11 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
     );
 
     final success = await ref
-        .read(detalheDefensivoNotifierProvider.notifier)
+        .read(detalheDefensivoProvider.notifier)
         .toggleFavorito(widget.defensivoName, widget.fabricante);
 
     if (!mounted) return;
-    final state = ref.read(detalheDefensivoNotifierProvider);
+    final state = ref.read(detalheDefensivoProvider);
     state.whenData((data) {
       if (success) {
         // Feedback tátil silencioso - sem mensagem visual

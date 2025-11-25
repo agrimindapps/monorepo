@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_providers.dart';
@@ -19,75 +20,68 @@ import '../../domain/usecases/update_snake_position_usecase.dart';
 part 'snake_providers.g.dart';
 
 @riverpod
-SnakeLocalDataSource snakeLocalDataSource(SnakeLocalDataSourceRef ref) {
+SnakeLocalDataSource snakeLocalDataSource(Ref ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return SnakeLocalDataSourceImpl(prefs);
 }
 
 @Riverpod(keepAlive: true)
-SnakeRepository snakeRepository(SnakeRepositoryRef ref) {
+SnakeRepository snakeRepository(Ref ref) {
   final dataSource = ref.watch(snakeLocalDataSourceProvider);
   return SnakeRepositoryImpl(dataSource);
 }
 
 @riverpod
-CollisionDetectionService collisionDetectionService(
-        CollisionDetectionServiceRef ref) =>
+CollisionDetectionService collisionDetectionService(Ref ref) =>
     CollisionDetectionService();
 
 @riverpod
-FoodGeneratorService foodGeneratorService(FoodGeneratorServiceRef ref) =>
+FoodGeneratorService foodGeneratorService(Ref ref) =>
     FoodGeneratorService();
 
 @riverpod
-GameStateManagerService gameStateManagerService(
-        GameStateManagerServiceRef ref) =>
+GameStateManagerService gameStateManagerService(Ref ref) =>
     GameStateManagerService();
 
 @riverpod
-SnakeMovementService snakeMovementService(SnakeMovementServiceRef ref) =>
+SnakeMovementService snakeMovementService(Ref ref) =>
     SnakeMovementService();
 
 @riverpod
-ChangeDifficultyUseCase changeDifficultyUseCase(
-    ChangeDifficultyUseCaseRef ref) {
-  final repository = ref.watch(snakeRepositoryProvider);
-  return ChangeDifficultyUseCase(repository);
+ChangeDifficultyUseCase changeDifficultyUseCase(Ref ref) {
+  return ChangeDifficultyUseCase();
 }
 
 @riverpod
-ChangeDirectionUseCase changeDirectionUseCase(ChangeDirectionUseCaseRef ref) =>
+ChangeDirectionUseCase changeDirectionUseCase(Ref ref) =>
     ChangeDirectionUseCase();
 
 @riverpod
-LoadHighScoreUseCase loadHighScoreUseCase(LoadHighScoreUseCaseRef ref) {
+LoadHighScoreUseCase loadHighScoreUseCase(Ref ref) {
   final repository = ref.watch(snakeRepositoryProvider);
   return LoadHighScoreUseCase(repository);
 }
 
 @riverpod
-SaveHighScoreUseCase saveHighScoreUseCase(SaveHighScoreUseCaseRef ref) {
+SaveHighScoreUseCase saveHighScoreUseCase(Ref ref) {
   final repository = ref.watch(snakeRepositoryProvider);
   return SaveHighScoreUseCase(repository);
 }
 
 @riverpod
-StartNewGameUseCase startNewGameUseCase(StartNewGameUseCaseRef ref) {
-  final foodGenerator = ref.watch(foodGeneratorServiceProvider);
-  return StartNewGameUseCase(foodGenerator);
+StartNewGameUseCase startNewGameUseCase(Ref ref) {
+  return StartNewGameUseCase();
 }
 
 @riverpod
-TogglePauseUseCase togglePauseUseCase(TogglePauseUseCaseRef ref) =>
+TogglePauseUseCase togglePauseUseCase(Ref ref) =>
     TogglePauseUseCase();
 
 @riverpod
-UpdateSnakePositionUseCase updateSnakePositionUseCase(
-    UpdateSnakePositionUseCaseRef ref) {
+UpdateSnakePositionUseCase updateSnakePositionUseCase(Ref ref) {
   final movement = ref.watch(snakeMovementServiceProvider);
   final collision = ref.watch(collisionDetectionServiceProvider);
   final foodGenerator = ref.watch(foodGeneratorServiceProvider);
-  final gameState = ref.watch(gameStateManagerServiceProvider);
   return UpdateSnakePositionUseCase(
-      movement, collision, foodGenerator, gameState);
+      foodGenerator, movement, collision);
 }

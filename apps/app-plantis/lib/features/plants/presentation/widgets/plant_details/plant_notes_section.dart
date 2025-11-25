@@ -375,7 +375,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
         }
       } else {
         if (mounted) {
-          final commentsState = ref.read(commentsNotifierProvider).valueOrNull;
+          final commentsState = ref.read(commentsNotifierProvider).value;
           final errorMsg = commentsState?.errorMessage ?? 'Erro desconhecido ao adicionar observação';
 
           if (kDebugMode) {

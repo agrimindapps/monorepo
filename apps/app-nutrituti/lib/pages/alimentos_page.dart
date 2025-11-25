@@ -73,7 +73,7 @@ class AlimentosPageState extends ConsumerState<AlimentosPage> {
   }
 
   void pesquisar() {
-    final alimentosAsync = ref.read(alimentosNotifierProvider(widget.categoria));
+    final alimentosAsync = ref.read(alimentosProvider(widget.categoria));
 
     alimentosAsync.whenData((alimentos) {
       final String pesquisa = _pesquisaController.text;
@@ -163,11 +163,11 @@ class AlimentosPageState extends ConsumerState<AlimentosPage> {
 
   @override
   Widget build(BuildContext context) {
-    final alimentosAsync = ref.watch(alimentosNotifierProvider(widget.categoria));
+    final alimentosAsync = ref.watch(alimentosProvider(widget.categoria));
     final listProperties = ref.watch(alimentosPropertiesProvider);
 
     // Initialize search list when data loads
-    ref.listen(alimentosNotifierProvider(widget.categoria), (previous, next) {
+    ref.listen(alimentosProvider(widget.categoria), (previous, next) {
       next.whenData((alimentos) {
         if (_listaAlimentosSearch.isEmpty || previous?.value != next.value) {
           _listaAlimentosSearch = alimentos;
@@ -244,7 +244,7 @@ class AlimentosPageState extends ConsumerState<AlimentosPage> {
                               const SizedBox(height: 16),
                               ElevatedButton(
                                 onPressed: () {
-                                  ref.invalidate(alimentosNotifierProvider(widget.categoria));
+                                  ref.invalidate(alimentosProvider(widget.categoria));
                                 },
                                 child: const Text('Tentar novamente'),
                               ),

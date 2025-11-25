@@ -15,13 +15,13 @@ class _TowerPageState extends ConsumerState<TowerPage> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final gameStateAsync = ref.watch(towerGameNotifierProvider(screenWidth));
+    final gameStateAsync = ref.watch(towerGameProvider(screenWidth));
 
     return Scaffold(
       body: gameStateAsync.when(
         data: (gameState) {
           final notifier =
-              ref.read(towerGameNotifierProvider(screenWidth).notifier);
+              ref.read(towerGameProvider(screenWidth).notifier);
 
           return GameBoardWidget(
             gameState: gameState,

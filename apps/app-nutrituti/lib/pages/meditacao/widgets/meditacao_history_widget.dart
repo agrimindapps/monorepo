@@ -15,7 +15,7 @@ class MeditacaoHistoryWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sessoes = ref.watch(
-      meditacaoNotifierProvider.select((state) => state.sessoes),
+      meditacaoProvider.select((state) => state.sessoes),
     );
 
     if (sessoes.isEmpty) {

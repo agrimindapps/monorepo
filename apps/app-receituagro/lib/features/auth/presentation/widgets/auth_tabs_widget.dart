@@ -11,8 +11,8 @@ class AuthTabsWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final loginState = ref.watch(loginNotifierProvider);
-    final loginNotifier = ref.read(loginNotifierProvider.notifier);
+    final loginState = ref.watch(loginProvider);
+    final loginNotifier = ref.read(loginProvider.notifier);
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = _getReceitaAgroPrimaryColor(isDark);

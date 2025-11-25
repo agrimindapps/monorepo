@@ -22,7 +22,7 @@ part 'flappbird_notifier.g.dart';
 
 @riverpod
 class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
-  // Use cases injected via GetIt
+  // Use cases
   late final StartGameUseCase _startGameUseCase;
   late final FlapBirdUseCase _flapBirdUseCase;
   late final UpdatePhysicsUseCase _updatePhysicsUseCase;
@@ -49,13 +49,13 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
     const double screenWidth = 400.0;
     const double screenHeight = 800.0;
     // Inject use cases
-    _startGameUseCase = ref.read(StartGameUseCase>();
-    _flapBirdUseCase = ref.read(FlapBirdUseCase>();
-    _updatePhysicsUseCase = ref.read(UpdatePhysicsUseCase>();
-    _updatePipesUseCase = ref.read(UpdatePipesUseCase>();
-    _checkCollisionUseCase = ref.read(CheckCollisionUseCase>();
-    _loadHighScoreUseCase = ref.read(LoadHighScoreUseCase>();
-    _saveHighScoreUseCase = ref.read(SaveHighScoreUseCase>();
+    _startGameUseCase = ref.read(startGameUseCaseProvider);
+    _flapBirdUseCase = ref.read(flapBirdUseCaseProvider);
+    _updatePhysicsUseCase = ref.read(updatePhysicsUseCaseProvider);
+    _updatePipesUseCase = ref.read(updatePipesUseCaseProvider);
+    _checkCollisionUseCase = ref.read(checkCollisionUseCaseProvider);
+    _loadHighScoreUseCase = ref.read(loadHighScoreUseCaseProvider);
+    _saveHighScoreUseCase = ref.read(saveHighScoreUseCaseProvider);
 
     // Cleanup on dispose
     ref.onDispose(() {
@@ -88,7 +88,7 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
 
   /// Save high score if current score is higher
   Future<void> _saveHighScore() async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     if (currentState.score > _highScore) {
@@ -104,7 +104,7 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
   Future<void> startGame() async {
     if (!_isMounted) return;
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     final result = await _startGameUseCase(currentState: currentState);
@@ -139,7 +139,7 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
   Future<void> _updateGame() async {
     if (!_isMounted) return;
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null || !currentState.isPlaying) {
       _gameTimer?.cancel();
       return;
@@ -226,7 +226,7 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
   Future<void> flap() async {
     if (!_isMounted) return;
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     // Auto-start if not started
@@ -266,7 +266,7 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
 
     _gameTimer?.cancel();
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     final newState = currentState.copyWith(
@@ -283,7 +283,7 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
   void updateScreenDimensions(double width, double height) {
     if (!_isMounted) return;
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     final groundHeight = height * 0.15;

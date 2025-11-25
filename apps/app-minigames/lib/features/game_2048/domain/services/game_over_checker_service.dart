@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/grid_entity.dart';
 import '../entities/position_entity.dart';
 
@@ -10,7 +8,6 @@ import '../entities/position_entity.dart';
 /// - Horizontal merge checking
 /// - Vertical merge checking
 /// - Game over state determination
-@lazySingleton
 class GameOverCheckerService {
   // ============================================================================
   // Core Methods

@@ -1,5 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/datasources/game_2048_local_datasource.dart';
 import '../../data/repositories/game_2048_repository_impl.dart';
@@ -19,8 +19,7 @@ part 'game_2048_providers.g.dart';
 // =========================================================================
 
 @riverpod
-Game2048LocalDataSource game2048LocalDataSource(
-    Game2048LocalDataSourceRef ref) {
+Game2048LocalDataSource game2048LocalDataSource(Ref ref) {
   final sharedPrefs = ref.watch(sharedPreferencesProvider);
   return Game2048LocalDataSource(sharedPrefs);
 }
@@ -30,7 +29,7 @@ Game2048LocalDataSource game2048LocalDataSource(
 // =========================================================================
 
 @riverpod
-Game2048Repository game2048Repository(Game2048RepositoryRef ref) {
+Game2048Repository game2048Repository(Ref ref) {
   final dataSource = ref.watch(game2048LocalDataSourceProvider);
   return Game2048RepositoryImpl(dataSource);
 }
@@ -40,34 +39,34 @@ Game2048Repository game2048Repository(Game2048RepositoryRef ref) {
 // =========================================================================
 
 @riverpod
-MoveTilesUseCase moveTilesUseCase(MoveTilesUseCaseRef ref) {
+MoveTilesUseCase moveTilesUseCase(Ref ref) {
   return MoveTilesUseCase();
 }
 
 @riverpod
-SpawnTileUseCase spawnTileUseCase(SpawnTileUseCaseRef ref) {
+SpawnTileUseCase spawnTileUseCase(Ref ref) {
   return SpawnTileUseCase();
 }
 
 @riverpod
-CheckGameOverUseCase checkGameOverUseCase(CheckGameOverUseCaseRef ref) {
+CheckGameOverUseCase checkGameOverUseCase(Ref ref) {
   return CheckGameOverUseCase();
 }
 
 @riverpod
-RestartGameUseCase restartGameUseCase(RestartGameUseCaseRef ref) {
+RestartGameUseCase restartGameUseCase(Ref ref) {
   final spawnTile = ref.watch(spawnTileUseCaseProvider);
   return RestartGameUseCase(spawnTile);
 }
 
 @riverpod
-LoadHighScoreUseCase loadHighScoreUseCase(LoadHighScoreUseCaseRef ref) {
+LoadHighScoreUseCase loadHighScoreUseCase(Ref ref) {
   final repository = ref.watch(game2048RepositoryProvider);
   return LoadHighScoreUseCase(repository);
 }
 
 @riverpod
-SaveHighScoreUseCase saveHighScoreUseCase(SaveHighScoreUseCaseRef ref) {
+SaveHighScoreUseCase saveHighScoreUseCase(Ref ref) {
   final repository = ref.watch(game2048RepositoryProvider);
   return SaveHighScoreUseCase(repository);
 }

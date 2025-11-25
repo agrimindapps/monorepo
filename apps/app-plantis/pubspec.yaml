@@ -30,7 +30,7 @@ dependencies:
   flutter_riverpod: any
   cloud_firestore: any
   go_router: any
-  freezed_annotation: ^2.4.1
+  freezed_annotation: ^3.0.0
 
   # Drift - SQL Database
   drift: ^2.28.0
@@ -44,7 +44,7 @@ dev_dependencies:
   build_runner: ^2.4.6
   riverpod_generator: any
   mocktail: ^1.0.0
-  freezed: ^2.5.2
+  freezed: ^3.0.0
   json_serializable: ^6.8.0
   drift_dev: ^2.28.0
 

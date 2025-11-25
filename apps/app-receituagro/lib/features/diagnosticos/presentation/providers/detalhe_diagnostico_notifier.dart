@@ -219,7 +219,7 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     if (currentState == null) return;
 
     try {
-      final premiumState = ref.read(premiumNotifierProvider).value;
+      final premiumState = ref.read(premiumProvider).value;
       state = AsyncValue.data(
         currentState.copyWith(isPremium: premiumState?.isPremium ?? false),
       );
@@ -230,7 +230,7 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
 
   /// Setup premium status listener
   void _setupPremiumStatusListener() {
-    ref.listen(premiumNotifierProvider, (previous, next) {
+    ref.listen(premiumProvider, (previous, next) {
       // Usar whenData para garantir que o estado está pronto
       state.whenData((currentState) {
         next.whenData((premiumState) {

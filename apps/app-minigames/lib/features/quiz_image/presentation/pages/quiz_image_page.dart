@@ -19,7 +19,7 @@ class QuizImagePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final gameStateAsync = ref.watch(quizImageNotifierProvider(difficulty));
+    final gameStateAsync = ref.watch(quizImageProvider(difficulty));
 
     return Scaffold(
       appBar: AppBar(
@@ -36,7 +36,7 @@ class QuizImagePage extends ConsumerWidget {
           // Game over state - show results
           if (gameState.gameState == GameStateEnum.gameOver) {
             final notifier =
-                ref.read(quizImageNotifierProvider(difficulty).notifier);
+                ref.read(quizImageProvider(difficulty).notifier);
             return Center(
               child: ResultsWidget(
                 score: gameState.correctAnswers,
@@ -76,7 +76,7 @@ class QuizImagePage extends ConsumerWidget {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  ref.invalidate(quizImageNotifierProvider(difficulty));
+                  ref.invalidate(quizImageProvider(difficulty));
                 },
                 child: const Text('Tentar Novamente'),
               ),
@@ -118,7 +118,7 @@ class QuizImagePage extends ConsumerWidget {
           ElevatedButton(
             onPressed: () {
               ref
-                  .read(quizImageNotifierProvider(difficulty).notifier)
+                  .read(quizImageProvider(difficulty).notifier)
                   .startGame();
             },
             style: ElevatedButton.styleFrom(
@@ -222,7 +222,7 @@ class QuizImagePage extends ConsumerWidget {
                                   AnswerState.unanswered
                               ? () {
                                   ref
-                                      .read(quizImageNotifierProvider(difficulty)
+                                      .read(quizImageProvider(difficulty)
                                           .notifier)
                                       .selectAnswer(option);
                                 }

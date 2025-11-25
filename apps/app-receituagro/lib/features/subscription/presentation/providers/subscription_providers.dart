@@ -1,4 +1,5 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Ref;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_providers.dart';
@@ -19,7 +20,7 @@ part 'subscription_providers.g.dart';
 // Error Message Service Provider
 @Riverpod(keepAlive: true)
 SubscriptionErrorMessageService subscriptionErrorMessageService(
-  SubscriptionErrorMessageServiceRef ref,
+  Ref ref,
 ) {
   return SubscriptionErrorMessageService();
 }
@@ -27,7 +28,7 @@ SubscriptionErrorMessageService subscriptionErrorMessageService(
 // Repository Provider
 @Riverpod(keepAlive: true)
 IAppSubscriptionRepository appSubscriptionRepository(
-  AppSubscriptionRepositoryRef ref,
+  Ref ref,
 ) {
   return SubscriptionRepositoryImpl(
     ref.watch(subscriptionRepositoryProvider),
@@ -39,7 +40,7 @@ IAppSubscriptionRepository appSubscriptionRepository(
 // Use Cases Providers
 @Riverpod(keepAlive: true)
 GetCurrentSubscriptionUseCase getCurrentSubscriptionUseCase(
-  GetCurrentSubscriptionUseCaseRef ref,
+  Ref ref,
 ) {
   return GetCurrentSubscriptionUseCase(
     ref.watch(subscriptionRepositoryProvider),
@@ -48,7 +49,7 @@ GetCurrentSubscriptionUseCase getCurrentSubscriptionUseCase(
 
 @Riverpod(keepAlive: true)
 ManageSubscriptionUseCase manageSubscriptionUseCase(
-  ManageSubscriptionUseCaseRef ref,
+  Ref ref,
 ) {
   return ManageSubscriptionUseCase(
     ref.watch(subscriptionRepositoryProvider),
@@ -57,7 +58,7 @@ ManageSubscriptionUseCase manageSubscriptionUseCase(
 
 @Riverpod(keepAlive: true)
 CancelSubscriptionUseCase cancelSubscriptionUseCase(
-  CancelSubscriptionUseCaseRef ref,
+  Ref ref,
 ) {
   return CancelSubscriptionUseCase(
     ref.watch(subscriptionRepositoryProvider),
@@ -66,7 +67,7 @@ CancelSubscriptionUseCase cancelSubscriptionUseCase(
 
 @Riverpod(keepAlive: true)
 RefreshSubscriptionStatusUseCase refreshSubscriptionStatusUseCase(
-  RefreshSubscriptionStatusUseCaseRef ref,
+  Ref ref,
 ) {
   return RefreshSubscriptionStatusUseCase(
     ref.watch(appSubscriptionRepositoryProvider),
@@ -75,7 +76,7 @@ RefreshSubscriptionStatusUseCase refreshSubscriptionStatusUseCase(
 
 @Riverpod(keepAlive: true)
 GetUserPremiumStatusUseCase getUserPremiumStatusUseCase(
-  GetUserPremiumStatusUseCaseRef ref,
+  Ref ref,
 ) {
   return GetUserPremiumStatusUseCase(
     ref.watch(appSubscriptionRepositoryProvider),
@@ -84,7 +85,7 @@ GetUserPremiumStatusUseCase getUserPremiumStatusUseCase(
 
 @Riverpod(keepAlive: true)
 GetAvailableProductsUseCase getAvailableProductsUseCase(
-  GetAvailableProductsUseCaseRef ref,
+  Ref ref,
 ) {
   return GetAvailableProductsUseCase(
     ref.watch(appSubscriptionRepositoryProvider),
@@ -93,7 +94,7 @@ GetAvailableProductsUseCase getAvailableProductsUseCase(
 
 @Riverpod(keepAlive: true)
 PurchaseProductUseCase purchaseProductUseCase(
-  PurchaseProductUseCaseRef ref,
+  Ref ref,
 ) {
   return PurchaseProductUseCase(
     ref.watch(subscriptionRepositoryProvider),
@@ -103,7 +104,7 @@ PurchaseProductUseCase purchaseProductUseCase(
 
 @Riverpod(keepAlive: true)
 RestorePurchasesUseCase restorePurchasesUseCase(
-  RestorePurchasesUseCaseRef ref,
+  Ref ref,
 ) {
   return RestorePurchasesUseCase(
     ref.watch(subscriptionRepositoryProvider),

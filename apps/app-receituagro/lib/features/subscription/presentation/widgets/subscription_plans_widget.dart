@@ -24,11 +24,11 @@ class SubscriptionPlansWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final subscriptionAsync = ref.watch(subscriptionNotifierProvider);
+    final subscriptionAsync = ref.watch(subscriptionManagementProvider);
 
     return subscriptionAsync.when(
       data: (subscriptionState) {
-        final notifier = ref.read(subscriptionNotifierProvider.notifier);
+        final notifier = ref.read(subscriptionManagementProvider.notifier);
         final products = subscriptionState.availableProducts;
 
         debugPrint('🎨 [SubscriptionPlansWidget] Renderizando widget');
@@ -151,7 +151,7 @@ class SubscriptionPlansWidget extends ConsumerWidget {
   /// Constrói um card de opção de plano com produto real do RevenueCat
   Widget _buildPlanOption({
     required WidgetRef ref,
-    required SubscriptionNotifier notifier,
+    required SubscriptionManagementNotifier notifier,
     required ProductInfo product,
     required String planType,
     required bool isSelected,

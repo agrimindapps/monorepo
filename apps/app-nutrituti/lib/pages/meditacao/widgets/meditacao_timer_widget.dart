@@ -67,7 +67,7 @@ class _DurationButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final duracaoSelecionada = ref.watch(
-      meditacaoNotifierProvider.select((state) => state.duracaoSelecionada),
+      meditacaoProvider.select((state) => state.duracaoSelecionada),
     );
 
     return Padding(
@@ -80,7 +80,7 @@ class _DurationButton extends ConsumerWidget {
           fixedSize: const Size.fromHeight(MeditacaoConstants.alturaBot),
         ),
         onPressed: () {
-          ref.read(meditacaoNotifierProvider.notifier).selecionarDuracao(duration);
+          ref.read(meditacaoProvider.notifier).selecionarDuracao(duration);
         },
         child: Text('$duration min'),
       ),
@@ -94,13 +94,13 @@ class _TimerDisplay extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tempoRestante = ref.watch(
-      meditacaoNotifierProvider.select((state) => state.tempoRestante),
+      meditacaoProvider.select((state) => state.tempoRestante),
     );
     final duracaoSelecionada = ref.watch(
-      meditacaoNotifierProvider.select((state) => state.duracaoSelecionada),
+      meditacaoProvider.select((state) => state.duracaoSelecionada),
     );
     final emMeditacao = ref.watch(
-      meditacaoNotifierProvider.select((state) => state.emMeditacao),
+      meditacaoProvider.select((state) => state.emMeditacao),
     );
 
     final duracaoTotal = duracaoSelecionada * 60;
@@ -136,12 +136,12 @@ class _TimerControlButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final emMeditacao = ref.watch(
-      meditacaoNotifierProvider.select((state) => state.emMeditacao),
+      meditacaoProvider.select((state) => state.emMeditacao),
     );
 
     return ElevatedButton.icon(
       onPressed: () {
-        ref.read(meditacaoNotifierProvider.notifier).alternarTimer(context);
+        ref.read(meditacaoProvider.notifier).alternarTimer(context);
       },
       style: ElevatedButton.styleFrom(
         fixedSize: const Size.fromHeight(MeditacaoConstants.alturaBot),

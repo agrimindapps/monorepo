@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart' hide Column, themeProvider;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -170,7 +170,7 @@ class _ReceitaAgroAppState extends ConsumerState<ReceitaAgroApp> {
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = ref.watch(themeNotifierProvider);
+    final themeMode = ref.watch(themeProvider);
 
     return MaterialApp(
       title: 'Pragas Soja',

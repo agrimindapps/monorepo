@@ -12,7 +12,7 @@ class NotificationsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settingsState = ref.watch(settingsNotifierProvider);
+    final settingsState = ref.watch(settingsProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,13 +32,13 @@ class NotificationsSection extends ConsumerWidget {
                 value: state.notificationsEnabled,
                 onChanged: (bool value) async {
                   await ref
-                      .read(settingsNotifierProvider.notifier)
+                      .read(settingsProvider.notifier)
                       .setNotificationsEnabled(value);
                 },
               ),
               onTap: () async {
                 await ref
-                    .read(settingsNotifierProvider.notifier)
+                    .read(settingsProvider.notifier)
                     .setNotificationsEnabled(!state.notificationsEnabled);
               },
             ),

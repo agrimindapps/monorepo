@@ -4,11 +4,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Notifiers comuns que podem ser reutilizados entre todos os apps
 /// Implementam padrões comuns de state management
+/// Migrado para Riverpod 3.0 - Notifier API
 
 /// Notifier base para estado de autenticação
 /// Apps podem estender este notifier para implementação específica
-abstract class BaseAuthNotifier extends StateNotifier<AuthState> {
-  BaseAuthNotifier() : super(const AuthState.unauthenticated());
+abstract class BaseAuthNotifier extends Notifier<AuthState> {
+  @override
+  AuthState build() => const AuthState.unauthenticated();
 
   Future<void> login(String email, String password);
 
@@ -64,7 +66,7 @@ class AuthState {
     }
     if (this is _Unauthenticated) return unauthenticated();
     if (this is _Error) return error((this as _Error).message);
-    throw StateError('Unknown state: $this');
+    throw StateError('Unknown state: \$this');
   }
 
   T maybeWhen<T>({
@@ -105,10 +107,19 @@ class _Error extends AuthState {
 }
 
 /// Notifier para gerenciar preferências do usuário
-class PreferencesNotifier extends StateNotifier<Map<String, dynamic>> {
-  PreferencesNotifier(this._prefs) : super({});
+class PreferencesNotifier extends Notifier<Map<String, dynamic>> {
+  late SharedPreferences _prefs;
 
-  final SharedPreferences _prefs;
+  @override
+  Map<String, dynamic> build() {
+    return <String, dynamic>{};
+  }
+
+  /// Inicializa com SharedPreferences
+  void initialize(SharedPreferences prefs) {
+    _prefs = prefs;
+    loadPreferences();
+  }
 
   /// Carrega todas as preferências
   void loadPreferences() {
@@ -166,7 +177,7 @@ class PreferencesNotifier extends StateNotifier<Map<String, dynamic>> {
   /// Limpa todas as preferências
   Future<void> clear() async {
     await _prefs.clear();
-    state = {};
+    state = <String, dynamic>{};
   }
 
   /// Getters helpers
@@ -178,16 +189,29 @@ class PreferencesNotifier extends StateNotifier<Map<String, dynamic>> {
 }
 
 /// Notifier para gerenciar tema da aplicação
-class ThemeNotifier extends StateNotifier<ThemeData> {
-  ThemeNotifier(this._prefs, this._lightTheme, this._darkTheme)
-    : super(_lightTheme) {
-    _loadTheme();
+class ThemeNotifier extends Notifier<ThemeData> {
+  late SharedPreferences _prefs;
+  late ThemeData _lightTheme;
+  late ThemeData _darkTheme;
+  static const String _themeKey = 'app_theme_mode';
+
+  @override
+  ThemeData build() {
+    // Retorna tema padrão - deve ser inicializado com initialize()
+    return ThemeData.light();
   }
 
-  final SharedPreferences _prefs;
-  final ThemeData _lightTheme;
-  final ThemeData _darkTheme;
-  static const String _themeKey = 'app_theme_mode';
+  /// Inicializa com as dependências necessárias
+  void initialize(
+    SharedPreferences prefs,
+    ThemeData lightTheme,
+    ThemeData darkTheme,
+  ) {
+    _prefs = prefs;
+    _lightTheme = lightTheme;
+    _darkTheme = darkTheme;
+    _loadTheme();
+  }
 
   void _loadTheme() {
     final isDark = _prefs.getBool(_themeKey) ?? false;
@@ -214,8 +238,9 @@ class ThemeNotifier extends StateNotifier<ThemeData> {
 }
 
 /// Notifier para gerenciar estado de conectividade
-class ConnectivityNotifier extends StateNotifier<ConnectivityState> {
-  ConnectivityNotifier() : super(ConnectivityState.unknown);
+class ConnectivityNotifier extends Notifier<ConnectivityState> {
+  @override
+  ConnectivityState build() => ConnectivityState.unknown;
 
   void updateConnectivity(bool isConnected) {
     state =
@@ -232,8 +257,9 @@ class ConnectivityNotifier extends StateNotifier<ConnectivityState> {
 enum ConnectivityState { connected, disconnected, unknown }
 
 /// Notifier para gerenciar estado de sincronização
-class SyncNotifier extends StateNotifier<SyncState> {
-  SyncNotifier() : super(const SyncState.idle());
+class SyncNotifier extends Notifier<SyncState> {
+  @override
+  SyncState build() => const SyncState.idle();
 
   void startSync() {
     state = const SyncState.syncing(0.0);
@@ -284,7 +310,7 @@ class SyncState {
       return completed(completedState.itemsSynced, completedState.timestamp);
     }
     if (this is _SyncError) return error((this as _SyncError).message);
-    throw StateError('Unknown state: $this');
+    throw StateError('Unknown state: \$this');
   }
 }
 
@@ -311,8 +337,9 @@ class _SyncError extends SyncState {
 }
 
 /// Notifier base para formulários
-abstract class BaseFormNotifier<T> extends StateNotifier<FormState<T>> {
-  BaseFormNotifier() : super(const FormState.initial());
+abstract class BaseFormNotifier<T> extends Notifier<FormState<T>> {
+  @override
+  FormState<T> build() => const FormState.initial();
 
   String? validateData(T data);
 
@@ -378,7 +405,7 @@ class FormState<T> {
     }
     if (this is _FormCompleted<T>) return completed();
     if (this is _FormError<T>) return error((this as _FormError<T>).message);
-    throw StateError('Unknown state: $this');
+    throw StateError('Unknown state: \$this');
   }
 }
 
@@ -406,8 +433,9 @@ class _FormError<T> extends FormState<T> {
 }
 
 /// Notifier para gerenciar cache local
-class CacheNotifier extends StateNotifier<Map<String, CacheItem>> {
-  CacheNotifier() : super({});
+class CacheNotifier extends Notifier<Map<String, CacheItem>> {
+  @override
+  Map<String, CacheItem> build() => <String, CacheItem>{};
 
   /// Adiciona item ao cache
   void put(String key, dynamic value, {Duration? ttl}) {
@@ -457,7 +485,7 @@ class CacheNotifier extends StateNotifier<Map<String, CacheItem>> {
   }
 
   void clear() {
-    state = {};
+    state = <String, CacheItem>{};
   }
 
   /// Verifica se tem item

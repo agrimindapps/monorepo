@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_providers.dart';
@@ -21,101 +22,79 @@ part 'quiz_image_providers.g.dart';
 
 // Data Layer
 @riverpod
-QuizImageLocalDatasource quizImageLocalDatasource(
-    QuizImageLocalDatasourceRef ref) {
+QuizImageLocalDataSource quizImageLocalDatasource(Ref ref) {
   final sharedPreferences = ref.watch(sharedPreferencesProvider);
-  return QuizImageLocalDatasource(sharedPreferences);
+  return QuizImageLocalDataSourceImpl(sharedPreferences);
 }
 
 @riverpod
-QuizImageRepository quizImageRepository(QuizImageRepositoryRef ref) {
+QuizImageRepository quizImageRepository(Ref ref) {
   final datasource = ref.watch(quizImageLocalDatasourceProvider);
   return QuizImageRepositoryImpl(datasource);
 }
 
 // Services
 @riverpod
-QuizImageAnswerValidationService quizImageAnswerValidationService(
-    QuizImageAnswerValidationServiceRef ref) {
+AnswerValidationService quizImageAnswerValidationService(Ref ref) {
   return AnswerValidationService();
 }
 
 @riverpod
-GameStateManagerService gameStateManagerService(
-    GameStateManagerServiceRef ref) {
+GameStateManagerService gameStateManagerService(Ref ref) {
   return GameStateManagerService();
 }
 
 @riverpod
-QuizImageQuestionManagerService quizImageQuestionManagerService(
-    QuizImageQuestionManagerServiceRef ref) {
+QuestionManagerService quizImageQuestionManagerService(Ref ref) {
   final random = ref.watch(randomProvider);
   return QuestionManagerService(random: random);
 }
 
 // Use Cases
 @riverpod
-QuizImageGenerateGameQuestionsUseCase quizImageGenerateGameQuestionsUseCase(
-    QuizImageGenerateGameQuestionsUseCaseRef ref) {
-  final questionManager = ref.watch(quizImageQuestionManagerServiceProvider);
-  return GenerateGameQuestionsUseCase(questionManager);
+GenerateGameQuestionsUseCase quizImageGenerateGameQuestionsUseCase(Ref ref) {
+  final repository = ref.watch(quizImageRepositoryProvider);
+  return GenerateGameQuestionsUseCase(repository);
 }
 
 @riverpod
-QuizImageHandleTimeoutUseCase quizImageHandleTimeoutUseCase(
-    QuizImageHandleTimeoutUseCaseRef ref) {
-  final gameStateManager = ref.watch(gameStateManagerServiceProvider);
-  return HandleTimeoutUseCase(gameStateManager);
+HandleTimeoutUseCase quizImageHandleTimeoutUseCase(Ref ref) {
+  return HandleTimeoutUseCase();
 }
 
 @riverpod
-QuizImageLoadHighScoreUseCase quizImageLoadHighScoreUseCase(
-    QuizImageLoadHighScoreUseCaseRef ref) {
+LoadHighScoreUseCase quizImageLoadHighScoreUseCase(Ref ref) {
   final repository = ref.watch(quizImageRepositoryProvider);
   return LoadHighScoreUseCase(repository);
 }
 
 @riverpod
-QuizImageNextQuestionUseCase quizImageNextQuestionUseCase(
-    QuizImageNextQuestionUseCaseRef ref) {
-  final questionManager = ref.watch(quizImageQuestionManagerServiceProvider);
-  return NextQuestionUseCase(questionManager);
+NextQuestionUseCase quizImageNextQuestionUseCase(Ref ref) {
+  return NextQuestionUseCase();
 }
 
 @riverpod
-QuizImageRestartGameUseCase quizImageRestartGameUseCase(
-    QuizImageRestartGameUseCaseRef ref) {
-  final questionManager = ref.watch(quizImageQuestionManagerServiceProvider);
-  final gameStateManager = ref.watch(gameStateManagerServiceProvider);
-  return RestartGameUseCase(questionManager, gameStateManager);
+RestartGameUseCase quizImageRestartGameUseCase(Ref ref) {
+  return RestartGameUseCase();
 }
 
 @riverpod
-QuizImageSaveHighScoreUseCase quizImageSaveHighScoreUseCase(
-    QuizImageSaveHighScoreUseCaseRef ref) {
+SaveHighScoreUseCase quizImageSaveHighScoreUseCase(Ref ref) {
   final repository = ref.watch(quizImageRepositoryProvider);
   return SaveHighScoreUseCase(repository);
 }
 
 @riverpod
-QuizImageSelectAnswerUseCase quizImageSelectAnswerUseCase(
-    QuizImageSelectAnswerUseCaseRef ref) {
-  final answerValidator = ref.watch(quizImageAnswerValidationServiceProvider);
-  final gameStateManager = ref.watch(gameStateManagerServiceProvider);
-  return SelectAnswerUseCase(answerValidator, gameStateManager);
+SelectAnswerUseCase quizImageSelectAnswerUseCase(Ref ref) {
+  return SelectAnswerUseCase();
 }
 
 @riverpod
-QuizImageStartGameUseCase quizImageStartGameUseCase(
-    QuizImageStartGameUseCaseRef ref) {
-  final generateQuestions =
-      ref.watch(quizImageGenerateGameQuestionsUseCaseProvider);
-  final gameStateManager = ref.watch(gameStateManagerServiceProvider);
-  return StartGameUseCase(generateQuestions, gameStateManager);
+StartGameUseCase quizImageStartGameUseCase(Ref ref) {
+  return StartGameUseCase();
 }
 
 @riverpod
-QuizImageUpdateTimerUseCase quizImageUpdateTimerUseCase(
-    QuizImageUpdateTimerUseCaseRef ref) {
+UpdateTimerUseCase quizImageUpdateTimerUseCase(Ref ref) {
   return UpdateTimerUseCase();
 }

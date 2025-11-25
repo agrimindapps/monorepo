@@ -24,7 +24,7 @@ part 'quiz_game_notifier.g.dart';
 
 @riverpod
 class QuizGameNotifier extends _$QuizGameNotifier {
-  // Use cases injected via GetIt
+  // Use cases
   late final GenerateGameQuestionsUseCase _generateGameQuestionsUseCase;
   late final SelectAnswerUseCase _selectAnswerUseCase;
   late final HandleTimeoutUseCase _handleTimeoutUseCase;
@@ -47,15 +47,15 @@ class QuizGameNotifier extends _$QuizGameNotifier {
   @override
   FutureOr<QuizGameState> build() async {
     // Inject use cases
-    _generateGameQuestionsUseCase = ref.read(GenerateGameQuestionsUseCase>();
-    _selectAnswerUseCase = ref.read(SelectAnswerUseCase>();
-    _handleTimeoutUseCase = ref.read(HandleTimeoutUseCase>();
-    _nextQuestionUseCase = ref.read(NextQuestionUseCase>();
-    _updateTimerUseCase = ref.read(UpdateTimerUseCase>();
-    _startGameUseCase = ref.read(StartGameUseCase>();
-    _restartGameUseCase = ref.read(RestartGameUseCase>();
-    _loadHighScoreUseCase = ref.read(LoadHighScoreUseCase>();
-    _saveHighScoreUseCase = ref.read(SaveHighScoreUseCase>();
+    _generateGameQuestionsUseCase = ref.read(generateGameQuestionsUseCaseProvider);
+    _selectAnswerUseCase = ref.read(selectAnswerUseCaseProvider);
+    _handleTimeoutUseCase = ref.read(handleTimeoutUseCaseProvider);
+    _nextQuestionUseCase = ref.read(nextQuestionUseCaseProvider);
+    _updateTimerUseCase = ref.read(updateTimerUseCaseProvider);
+    _startGameUseCase = ref.read(quizStartGameUseCaseProvider);
+    _restartGameUseCase = ref.read(quizRestartGameUseCaseProvider);
+    _loadHighScoreUseCase = ref.read(quizLoadHighScoreUseCaseProvider);
+    _saveHighScoreUseCase = ref.read(quizSaveHighScoreUseCaseProvider);
 
     // Cleanup on dispose
     ref.onDispose(() {
@@ -86,7 +86,7 @@ class QuizGameNotifier extends _$QuizGameNotifier {
 
   /// Save high score if current score is higher
   Future<void> _saveHighScore() async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     if (currentState.score > _highScore) {
@@ -120,7 +120,7 @@ class QuizGameNotifier extends _$QuizGameNotifier {
         // Start game with questions
         final result = await _startGameUseCase(
           questions: questions,
-          difficulty: state.valueOrNull?.difficulty ?? QuizDifficulty.medium,
+          difficulty: state.value?.difficulty ?? QuizDifficulty.medium,
         );
         if (!_isMounted) return;
 
@@ -145,7 +145,7 @@ class QuizGameNotifier extends _$QuizGameNotifier {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
       if (!_isMounted) return;
 
-      final currentState = state.valueOrNull;
+      final currentState = state.value;
       if (currentState == null || !currentState.gameStatus.isPlaying) {
         _timer?.cancel();
         return;
@@ -174,7 +174,7 @@ class QuizGameNotifier extends _$QuizGameNotifier {
   Future<void> selectAnswer(String answer) async {
     if (!_isMounted) return;
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     // Cancel timer
@@ -214,7 +214,7 @@ class QuizGameNotifier extends _$QuizGameNotifier {
   Future<void> _handleTimeout() async {
     if (!_isMounted) return;
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     _timer?.cancel();
@@ -249,7 +249,7 @@ class QuizGameNotifier extends _$QuizGameNotifier {
   Future<void> _advanceToNextQuestion() async {
     if (!_isMounted) return;
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     final result = await _nextQuestionUseCase(currentState: currentState);
@@ -286,7 +286,7 @@ class QuizGameNotifier extends _$QuizGameNotifier {
     _timer?.cancel();
 
     final result = await _restartGameUseCase(
-      difficulty: state.valueOrNull?.difficulty ?? QuizDifficulty.medium,
+      difficulty: state.value?.difficulty ?? QuizDifficulty.medium,
     );
     if (!_isMounted) return;
 
@@ -307,7 +307,7 @@ class QuizGameNotifier extends _$QuizGameNotifier {
   Future<void> changeDifficulty(QuizDifficulty newDifficulty) async {
     if (!_isMounted) return;
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     if (currentState.difficulty != newDifficulty) {

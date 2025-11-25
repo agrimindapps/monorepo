@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_providers.dart';
@@ -19,72 +20,69 @@ import '../../domain/usecases/update_moving_block_usecase.dart';
 part 'tower_providers.g.dart';
 
 @riverpod
-TowerLocalDataSource towerLocalDataSource(TowerLocalDataSourceRef ref) {
+TowerLocalDataSource towerLocalDataSource(Ref ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return TowerLocalDataSourceImpl(prefs);
 }
 
 @Riverpod(keepAlive: true)
-TowerRepository towerRepository(TowerRepositoryRef ref) {
+TowerRepository towerRepository(Ref ref) {
   final dataSource = ref.watch(towerLocalDataSourceProvider);
   return TowerRepositoryImpl(dataSource);
 }
 
 @riverpod
-BlockGenerationService blockGenerationService(BlockGenerationServiceRef ref) =>
+BlockGenerationService blockGenerationService(Ref ref) =>
     BlockGenerationService();
 
 @riverpod
-OverlapCalculationService overlapCalculationService(
-        OverlapCalculationServiceRef ref) =>
+OverlapCalculationService overlapCalculationService(Ref ref) =>
     OverlapCalculationService();
 
 @riverpod
-PhysicsService physicsService(PhysicsServiceRef ref) => PhysicsService();
+PhysicsService physicsService(Ref ref) => PhysicsService();
 
 @riverpod
-ScoringService scoringService(ScoringServiceRef ref) => ScoringService();
+ScoringService scoringService(Ref ref) => ScoringService();
 
 @riverpod
-ChangeDifficultyUseCase changeDifficultyUseCase(
-    ChangeDifficultyUseCaseRef ref) {
-  final repository = ref.watch(towerRepositoryProvider);
-  return ChangeDifficultyUseCase(repository);
+ChangeDifficultyUseCase changeDifficultyUseCase(Ref ref) {
+  final physics = ref.watch(physicsServiceProvider);
+  return ChangeDifficultyUseCase(physics);
 }
 
 @riverpod
-DropBlockUseCase dropBlockUseCase(DropBlockUseCaseRef ref) {
-  final physics = ref.watch(physicsServiceProvider);
+DropBlockUseCase dropBlockUseCase(Ref ref) {
   final overlap = ref.watch(overlapCalculationServiceProvider);
   final scoring = ref.watch(scoringServiceProvider);
-  return DropBlockUseCase(physics, overlap, scoring);
+  final physics = ref.watch(physicsServiceProvider);
+  final blockGen = ref.watch(blockGenerationServiceProvider);
+  return DropBlockUseCase(overlap, scoring, physics, blockGen);
 }
 
 @riverpod
-LoadHighScoreUseCase loadHighScoreUseCase(LoadHighScoreUseCaseRef ref) {
+LoadHighScoreUseCase loadHighScoreUseCase(Ref ref) {
   final repository = ref.watch(towerRepositoryProvider);
   return LoadHighScoreUseCase(repository);
 }
 
 @riverpod
-SaveHighScoreUseCase saveHighScoreUseCase(SaveHighScoreUseCaseRef ref) {
+SaveHighScoreUseCase saveHighScoreUseCase(Ref ref) {
   final repository = ref.watch(towerRepositoryProvider);
   return SaveHighScoreUseCase(repository);
 }
 
 @riverpod
-StartNewGameUseCase startNewGameUseCase(StartNewGameUseCaseRef ref) {
-  final blockGen = ref.watch(blockGenerationServiceProvider);
-  return StartNewGameUseCase(blockGen);
+StartNewGameUseCase startNewGameUseCase(Ref ref) {
+  return StartNewGameUseCase();
 }
 
 @riverpod
-TogglePauseUseCase togglePauseUseCase(TogglePauseUseCaseRef ref) =>
+TogglePauseUseCase togglePauseUseCase(Ref ref) =>
     TogglePauseUseCase();
 
 @riverpod
-UpdateMovingBlockUseCase updateMovingBlockUseCase(
-    UpdateMovingBlockUseCaseRef ref) {
+UpdateMovingBlockUseCase updateMovingBlockUseCase(Ref ref) {
   final physics = ref.watch(physicsServiceProvider);
   return UpdateMovingBlockUseCase(physics);
 }

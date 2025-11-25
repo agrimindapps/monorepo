@@ -20,7 +20,7 @@ enum SyncIndicatorColor {
 
 /// State class for realtime sync with freezed immutability
 @freezed
-class RealtimeSyncState with _$RealtimeSyncState {
+sealed class RealtimeSyncState with _$RealtimeSyncState {
   const factory RealtimeSyncState({
     @Default(false) bool isRealtimeActive,
     @Default(true) bool isOnline,
@@ -32,9 +32,10 @@ class RealtimeSyncState with _$RealtimeSyncState {
     @Default(true) bool showSyncNotifications,
     @Default(true) bool enableBackgroundSync,
   }) = _RealtimeSyncState;
+}
 
-  const RealtimeSyncState._();
-
+/// Extension providing computed properties for RealtimeSyncState
+extension RealtimeSyncStateX on RealtimeSyncState {
   /// Status readable para UI
   String get statusMessage {
     if (!isOnline) {
@@ -88,13 +89,13 @@ class RealtimeSyncState with _$RealtimeSyncState {
 
 /// Provider for PlantisRealtimeService
 @riverpod
-PlantisRealtimeService plantisRealtimeService(PlantisRealtimeServiceRef ref) {
+PlantisRealtimeService plantisRealtimeService(Ref ref) {
   return PlantisRealtimeService.instance;
 }
 
 /// Provider for ConnectivityService
 @riverpod
-ConnectivityService connectivityService(ConnectivityServiceRef ref) {
+ConnectivityService connectivityService(Ref ref) {
   return ConnectivityService.instance;
 }
 

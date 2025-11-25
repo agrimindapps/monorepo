@@ -36,7 +36,7 @@ class _PesoPageState extends ConsumerState<PesoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final pesoAsync = ref.watch(pesoNotifierProvider);
+    final pesoAsync = ref.watch(pesoProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -55,7 +55,7 @@ class _PesoPageState extends ConsumerState<PesoPage> {
                     children: [
                       TipCardWidget(
                         tip: ref
-                            .read(pesoNotifierProvider.notifier)
+                            .read(pesoProvider.notifier)
                             .getTipOfTheDay(),
                       ),
                       const SizedBox(height: 8),
@@ -93,7 +93,7 @@ class _PesoPageState extends ConsumerState<PesoPage> {
               Text('Erro ao carregar dados: $error'),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => ref.invalidate(pesoNotifierProvider),
+                onPressed: () => ref.invalidate(pesoProvider),
                 child: const Text('Tentar Novamente'),
               ),
             ],
@@ -167,7 +167,7 @@ class _PesoPageState extends ConsumerState<PesoPage> {
           ),
           TextButton(
             onPressed: () async {
-              await ref.read(pesoNotifierProvider.notifier).deleteRegistro(peso);
+              await ref.read(pesoProvider.notifier).deleteRegistro(peso);
               if (context.mounted) {
                 Navigator.of(context).pop();
               }
@@ -180,7 +180,7 @@ class _PesoPageState extends ConsumerState<PesoPage> {
   }
 
   Future<void> _showMetaDialog() async {
-    final pesoState = await ref.read(pesoNotifierProvider.future);
+    final pesoState = await ref.read(pesoProvider.future);
     final controller = TextEditingController(
         text: pesoState.pesoMeta > 0 ? pesoState.pesoMeta.toString() : '');
 
@@ -211,7 +211,7 @@ class _PesoPageState extends ConsumerState<PesoPage> {
                 final newMeta = double.tryParse(controller.text);
                 if (newMeta != null && newMeta > 0) {
                   await ref
-                      .read(pesoNotifierProvider.notifier)
+                      .read(pesoProvider.notifier)
                       .saveMetaPeso(newMeta);
                 }
               }
@@ -239,10 +239,10 @@ class _PesoPageState extends ConsumerState<PesoPage> {
             registro: peso,
             onSave: (registro) async {
               if (peso == null) {
-                await ref.read(pesoNotifierProvider.notifier).addRegistro(registro);
+                await ref.read(pesoProvider.notifier).addRegistro(registro);
               } else {
                 await ref
-                    .read(pesoNotifierProvider.notifier)
+                    .read(pesoProvider.notifier)
                     .updateRegistro(registro);
               }
             },

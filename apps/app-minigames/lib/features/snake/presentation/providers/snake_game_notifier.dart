@@ -90,7 +90,7 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
 
   /// Save high score if current score is higher
   Future<void> _saveHighScore() async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     if (currentState.score > _highScore) {
@@ -107,7 +107,7 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
     if (!_isMounted) return;
 
     final currentDifficulty =
-        state.valueOrNull?.difficulty ?? SnakeDifficulty.medium;
+        state.value?.difficulty ?? SnakeDifficulty.medium;
 
     final result = await _startNewGameUseCase(difficulty: currentDifficulty);
     if (!_isMounted) return;
@@ -131,7 +131,7 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
     _gameTimer?.cancel();
     _directionQueue.clear();
 
-    final initialState = state.valueOrNull;
+    final initialState = state.value;
     if (initialState == null) return;
 
     // Calculate initial game speed with dynamic difficulty
@@ -144,7 +144,7 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
         Timer.periodic(Duration(milliseconds: dynamicGameSpeed), (_) async {
       if (!_isMounted) return;
 
-      var currentState = state.valueOrNull;
+      var currentState = state.value;
       if (currentState == null || !currentState.gameStatus.isRunning) {
         _gameTimer?.cancel();
         return;
@@ -215,7 +215,7 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
   Future<void> changeDirection(Direction newDirection) async {
     if (!_isMounted) return;
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     // Auto-start game if not started
@@ -224,7 +224,7 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
       if (!_isMounted) return;
 
       // Change direction after starting
-      final startedState = state.valueOrNull;
+      final startedState = state.value;
       if (startedState != null) {
         final result = await _changeDirectionUseCase(
           currentState: startedState,
@@ -272,7 +272,7 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
   Future<void> togglePause() async {
     if (!_isMounted) return;
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     final result = await _togglePauseUseCase(currentState: currentState);
@@ -306,7 +306,7 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
   Future<void> changeDifficulty(SnakeDifficulty newDifficulty) async {
     if (!_isMounted) return;
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     _gameTimer?.cancel();
@@ -334,7 +334,7 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
   Future<void> toggleWalls() async {
     if (!_isMounted) return;
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     // Toggle hasWalls

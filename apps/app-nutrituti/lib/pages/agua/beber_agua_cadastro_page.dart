@@ -92,14 +92,14 @@ class _BeberAguaFormWidgetState extends ConsumerState<BeberAguaFormWidget> {
         // Salvar o registro usando o Riverpod controller
         if (widget.registro != null) {
           await ref
-              .read(aguaNotifierProvider.notifier)
+              .read(aguaProvider.notifier)
               .updateRegistro(_registro);
         } else {
-          await ref.read(aguaNotifierProvider.notifier).addRegistro(_registro);
+          await ref.read(aguaProvider.notifier).addRegistro(_registro);
         }
 
         // Verificar se atingiu a meta diária
-        final aguaState = await ref.read(aguaNotifierProvider.future);
+        final aguaState = await ref.read(aguaProvider.future);
         if (aguaState.todayProgress >= aguaState.dailyWaterGoal) {
           if (context.mounted) {
             _showCongratulations(context);

@@ -55,7 +55,7 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog> {
     if (_hasStarted) return;
     _hasStarted = true;
 
-    final request = await ref.read(dataExportNotifierProvider.notifier).requestExport(
+    final request = await ref.read(dataExportProvider.notifier).requestExport(
       userId: widget.userId,
       dataTypes: widget.dataTypes,
       format: widget.format,
@@ -74,7 +74,7 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final exportStateAsync = ref.watch(dataExportNotifierProvider);
+    final exportStateAsync = ref.watch(dataExportProvider);
 
     return exportStateAsync.when(
       data: (exportState) {
@@ -235,7 +235,7 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog> {
         ),
         ElevatedButton(
           onPressed: () {
-            ref.read(dataExportNotifierProvider.notifier).resetProgress();
+            ref.read(dataExportProvider.notifier).resetProgress();
             _hasStarted = false;
             _completedRequest = null;
             _startExport();
@@ -250,7 +250,7 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog> {
         if (_completedRequest?.downloadUrl != null)
           TextButton(
             onPressed: () async {
-              final success = await ref.read(dataExportNotifierProvider.notifier).downloadExport(_completedRequest!.id);
+              final success = await ref.read(dataExportProvider.notifier).downloadExport(_completedRequest!.id);
 
               if (!success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -303,7 +303,7 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog> {
     );
 
     if (shouldCancel == true && context.mounted) {
-      ref.read(dataExportNotifierProvider.notifier).resetProgress();
+      ref.read(dataExportProvider.notifier).resetProgress();
       _closeDialog();
     }
   }
@@ -345,7 +345,7 @@ class ExportProgressSnackBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final exportStateAsync = ref.watch(dataExportNotifierProvider);
+    final exportStateAsync = ref.watch(dataExportProvider);
 
     return exportStateAsync.when(
       data: (exportState) {

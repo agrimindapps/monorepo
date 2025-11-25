@@ -13,8 +13,8 @@ class QuizPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final gameState = ref.watch(quizGameNotifierProvider);
-    final notifier = ref.read(quizGameNotifierProvider.notifier);
+    final gameState = ref.watch(quizGameProvider);
+    final notifier = ref.read(quizGameProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(

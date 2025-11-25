@@ -52,7 +52,7 @@ class PesoState {
 
 /// Provider for PesoRepository
 @riverpod
-PesoRepository pesoRepository(PesoRepositoryRef ref) {
+PesoRepository pesoRepository(Ref ref) {
   final firestoreService = ref.watch(firestoreServiceProvider);
   final database = ref.watch(nutritutiDatabaseProvider);
   return PesoRepository(firestoreService, database);

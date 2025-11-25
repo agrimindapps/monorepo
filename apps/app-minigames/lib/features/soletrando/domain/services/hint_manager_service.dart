@@ -1,7 +1,5 @@
 import 'dart:math';
 
-import 'package:injectable/injectable.dart';
-
 import '../entities/enums.dart';
 import '../entities/letter_entity.dart';
 
@@ -12,7 +10,6 @@ import '../entities/letter_entity.dart';
 /// - Hint availability checking
 /// - Strategic hint selection
 /// - Hint statistics
-@lazySingleton
 class HintManagerService {
   final Random _random;
 

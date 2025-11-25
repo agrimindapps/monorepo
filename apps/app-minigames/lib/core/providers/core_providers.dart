@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,7 +27,7 @@ part 'core_providers.g.dart';
 /// );
 /// ```
 @Riverpod(keepAlive: true)
-SharedPreferences sharedPreferences(SharedPreferencesRef ref) {
+SharedPreferences sharedPreferences(Ref ref) {
   throw UnimplementedError(
     'sharedPreferencesProvider must be overridden in ProviderScope',
   );
@@ -37,7 +38,7 @@ SharedPreferences sharedPreferences(SharedPreferencesRef ref) {
 /// Provides access to Firestore instance.
 /// KeepAlive ensures singleton behavior across app lifecycle.
 @Riverpod(keepAlive: true)
-FirebaseFirestore firebaseFirestore(FirebaseFirestoreRef ref) {
+FirebaseFirestore firebaseFirestore(Ref ref) {
   return FirebaseFirestore.instance;
 }
 
@@ -46,7 +47,7 @@ FirebaseFirestore firebaseFirestore(FirebaseFirestoreRef ref) {
 /// Provides access to Firebase Authentication.
 /// KeepAlive ensures singleton behavior across app lifecycle.
 @Riverpod(keepAlive: true)
-FirebaseAuth firebaseAuth(FirebaseAuthRef ref) {
+FirebaseAuth firebaseAuth(Ref ref) {
   return FirebaseAuth.instance;
 }
 
@@ -55,7 +56,7 @@ FirebaseAuth firebaseAuth(FirebaseAuthRef ref) {
 /// Provides a singleton Logger instance for app-wide logging.
 /// KeepAlive ensures same logger instance used throughout app.
 @Riverpod(keepAlive: true)
-Logger logger(LoggerRef ref) {
+Logger logger(Ref ref) {
   return Logger(
     printer: PrettyPrinter(
       methodCount: 2,
@@ -73,6 +74,6 @@ Logger logger(LoggerRef ref) {
 /// Provides a Random instance for game logic.
 /// KeepAlive ensures consistent random seed during app lifecycle.
 @Riverpod(keepAlive: true)
-Random random(RandomRef ref) {
+Random random(Ref ref) {
   return Random();
 }

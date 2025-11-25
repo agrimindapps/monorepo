@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_providers.dart';
@@ -20,75 +21,73 @@ import '../../domain/usecases/update_player_paddle_usecase.dart';
 part 'pingpong_providers.g.dart';
 
 @riverpod
-PingpongLocalDataSource pingpongLocalDataSource(
-    PingpongLocalDataSourceRef ref) {
+PingpongLocalDataSource pingpongLocalDataSource(Ref ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return PingpongLocalDataSourceImpl(prefs);
 }
 
 @Riverpod(keepAlive: true)
-PingpongRepository pingpongRepository(PingpongRepositoryRef ref) {
+PingpongRepository pingpongRepository(Ref ref) {
   final dataSource = ref.watch(pingpongLocalDataSourceProvider);
   return PingpongRepositoryImpl(dataSource);
 }
 
 @riverpod
-AiPaddleService aiPaddleService(AiPaddleServiceRef ref) => AiPaddleService();
+AiPaddleService aiPaddleService(Ref ref) => AiPaddleService();
 
 @riverpod
-BallPhysicsService ballPhysicsService(BallPhysicsServiceRef ref) =>
+BallPhysicsService ballPhysicsService(Ref ref) =>
     BallPhysicsService();
 
 @riverpod
-CollisionDetectionService collisionDetectionService(
-        CollisionDetectionServiceRef ref) =>
+CollisionDetectionService collisionDetectionService(Ref ref) =>
     CollisionDetectionService();
 
 @riverpod
-ScoreManagerService scoreManagerService(ScoreManagerServiceRef ref) =>
+ScoreManagerService scoreManagerService(Ref ref) =>
     ScoreManagerService();
 
 @riverpod
-CheckCollisionUseCase checkCollisionUseCase(CheckCollisionUseCaseRef ref) {
+CheckCollisionUseCase checkCollisionUseCase(Ref ref) {
   final service = ref.watch(collisionDetectionServiceProvider);
-  return CheckCollisionUseCase(service);
+  final physics = ref.watch(ballPhysicsServiceProvider);
+  return CheckCollisionUseCase(service, physics);
 }
 
 @riverpod
-CheckScoreUseCase checkScoreUseCase(CheckScoreUseCaseRef ref) {
+CheckScoreUseCase checkScoreUseCase(Ref ref) {
   final service = ref.watch(scoreManagerServiceProvider);
   return CheckScoreUseCase(service);
 }
 
 @riverpod
-LoadHighScoreUseCase loadHighScoreUseCase(LoadHighScoreUseCaseRef ref) {
+LoadHighScoreUseCase loadHighScoreUseCase(Ref ref) {
   final repository = ref.watch(pingpongRepositoryProvider);
   return LoadHighScoreUseCase(repository);
 }
 
 @riverpod
-SaveHighScoreUseCase saveHighScoreUseCase(SaveHighScoreUseCaseRef ref) {
+SaveHighScoreUseCase saveHighScoreUseCase(Ref ref) {
   final repository = ref.watch(pingpongRepositoryProvider);
   return SaveHighScoreUseCase(repository);
 }
 
 @riverpod
-StartGameUseCase startGameUseCase(StartGameUseCaseRef ref) =>
+StartGameUseCase startGameUseCase(Ref ref) =>
     StartGameUseCase();
 
 @riverpod
-UpdateAiPaddleUseCase updateAiPaddleUseCase(UpdateAiPaddleUseCaseRef ref) {
+UpdateAiPaddleUseCase updateAiPaddleUseCase(Ref ref) {
   final service = ref.watch(aiPaddleServiceProvider);
   return UpdateAiPaddleUseCase(service);
 }
 
 @riverpod
-UpdateBallUseCase updateBallUseCase(UpdateBallUseCaseRef ref) {
+UpdateBallUseCase updateBallUseCase(Ref ref) {
   final service = ref.watch(ballPhysicsServiceProvider);
   return UpdateBallUseCase(service);
 }
 
 @riverpod
-UpdatePlayerPaddleUseCase updatePlayerPaddleUseCase(
-        UpdatePlayerPaddleUseCaseRef ref) =>
+UpdatePlayerPaddleUseCase updatePlayerPaddleUseCase(Ref ref) =>
     UpdatePlayerPaddleUseCase();

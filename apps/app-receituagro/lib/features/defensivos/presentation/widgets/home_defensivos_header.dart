@@ -22,7 +22,7 @@ class HomeDefensivosHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(homeDefensivosNotifierProvider);
+    final state = ref.watch(homeDefensivosProvider);
 
     return state.when(
       data: (data) => ModernHeaderWidget(

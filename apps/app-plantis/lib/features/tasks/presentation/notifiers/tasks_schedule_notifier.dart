@@ -127,3 +127,7 @@ class TasksScheduleNotifier extends _$TasksScheduleNotifier {
         date1.day == date2.day;
   }
 }
+
+// LEGACY ALIAS
+// ignore: deprecated_member_use_from_same_package
+final tasksScheduleNotifierProvider = tasksScheduleProvider;

@@ -30,7 +30,7 @@ class PaymentActionsWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final subscriptionAsync = ref.watch(subscriptionNotifierProvider);
+    final subscriptionAsync = ref.watch(subscriptionManagementProvider);
 
     return subscriptionAsync.when(
       data: (subscriptionState) {
@@ -58,7 +58,7 @@ class PaymentActionsWidget extends ConsumerWidget {
         onPressed: isLoading
             ? null
             : () => ref
-                  .read(subscriptionNotifierProvider.notifier)
+                  .read(subscriptionManagementProvider.notifier)
                   .purchaseSelectedPlan(),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
@@ -95,7 +95,7 @@ class PaymentActionsWidget extends ConsumerWidget {
         onPressed: isLoading
             ? null
             : () => ref
-                  .read(subscriptionNotifierProvider.notifier)
+                  .read(subscriptionManagementProvider.notifier)
                   .openManagementUrl(),
         icon: const Icon(Icons.settings),
         label: const Text('Gerenciar Assinatura'),
@@ -122,7 +122,7 @@ class PaymentActionsWidget extends ConsumerWidget {
             child: _buildFooterLink(
               'Termos de Uso',
               () => ref
-                  .read(subscriptionNotifierProvider.notifier)
+                  .read(subscriptionManagementProvider.notifier)
                   .openTermsOfUse(),
               isLoading,
             ),
@@ -132,7 +132,7 @@ class PaymentActionsWidget extends ConsumerWidget {
             child: _buildFooterLink(
               'Política de Privacidade',
               () => ref
-                  .read(subscriptionNotifierProvider.notifier)
+                  .read(subscriptionManagementProvider.notifier)
                   .openPrivacyPolicy(),
               isLoading,
             ),
@@ -142,7 +142,7 @@ class PaymentActionsWidget extends ConsumerWidget {
             child: _buildFooterLink(
               'Restaurar',
               () => ref
-                  .read(subscriptionNotifierProvider.notifier)
+                  .read(subscriptionManagementProvider.notifier)
                   .restorePurchases(),
               isLoading,
             ),

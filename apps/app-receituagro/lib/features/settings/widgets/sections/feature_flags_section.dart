@@ -18,11 +18,11 @@ class FeatureFlagsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
+    final featureFlagsAsync = ref.watch(featureFlagsProvider);
 
     return featureFlagsAsync.when(
       data: (featureFlagsState) {
-        final notifier = ref.read(featureFlagsNotifierProvider.notifier);
+        final notifier = ref.read(featureFlagsProvider.notifier);
         if (!_shouldShowInProduction(notifier)) {
           return const SizedBox.shrink();
         }
@@ -319,7 +319,7 @@ class FeatureFlagsSection extends ConsumerWidget {
   /// Refresh Remote Config
   Future<void> _refreshRemoteConfig(BuildContext context, WidgetRef ref) async {
     try {
-      await ref.read(featureFlagsNotifierProvider.notifier).refresh();
+      await ref.read(featureFlagsProvider.notifier).refresh();
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

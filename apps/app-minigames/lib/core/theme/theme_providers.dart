@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'theme_providers.g.dart';
 
 // Light theme provider - Tema colorido para jogos
 final lightThemeProvider = Provider<ThemeData>((ref) {
@@ -25,9 +28,11 @@ final darkThemeProvider = Provider<ThemeData>((ref) {
   );
 });
 
-// Theme mode notifier
-class ThemeNotifier extends StateNotifier<bool> {
-  ThemeNotifier() : super(false); // false = light, true = dark
+// Theme mode notifier using Riverpod 3.0
+@riverpod
+class ThemeNotifier extends _$ThemeNotifier {
+  @override
+  bool build() => false; // false = light, true = dark
 
   void toggleTheme() {
     state = !state;
@@ -38,11 +43,7 @@ class ThemeNotifier extends StateNotifier<bool> {
   }
 }
 
-final themeNotifierProvider = StateNotifierProvider<ThemeNotifier, bool>((ref) {
-  return ThemeNotifier();
-});
-
 final currentThemeModeProvider = Provider<ThemeMode>((ref) {
-  final isDark = ref.watch(themeNotifierProvider);
+  final isDark = ref.watch(themeProvider);
   return isDark ? ThemeMode.dark : ThemeMode.light;
 });

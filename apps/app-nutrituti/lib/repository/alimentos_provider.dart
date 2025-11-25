@@ -8,7 +8,7 @@ part 'alimentos_provider.g.dart';
 
 /// Provider for AlimentosRepository instance
 @riverpod
-AlimentosRepository alimentosRepository(AlimentosRepositoryRef ref) {
+AlimentosRepository alimentosRepository(Ref ref) {
   final repository = AlimentosRepository();
   ref.onDispose(() {
     repository.dispose();
@@ -51,14 +51,14 @@ class AlimentosNotifier extends _$AlimentosNotifier {
 
 /// Provider for alimentos properties
 @riverpod
-List<dynamic> alimentosProperties(AlimentosPropertiesRef ref) {
+List<dynamic> alimentosProperties(Ref ref) {
   final repository = ref.watch(alimentosRepositoryProvider);
   return repository.getAlimentosProperties();
 }
 
 /// Provider for categorias
 @riverpod
-List<Map<String, dynamic>> alimentosCategorias(AlimentosCategoriasRef ref) {
+List<Map<String, dynamic>> alimentosCategorias(Ref ref) {
   final repository = ref.watch(alimentosRepositoryProvider);
   return repository.getCategorias();
 }

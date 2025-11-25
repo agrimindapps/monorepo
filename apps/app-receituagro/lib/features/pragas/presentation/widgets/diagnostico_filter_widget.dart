@@ -14,7 +14,7 @@ class DiagnosticoFilterWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(diagnosticosPragaNotifierProvider);
+    final state = ref.watch(diagnosticosPragaProvider);
 
     return RepaintBoundary(
       child: state.when(
@@ -26,7 +26,7 @@ class DiagnosticoFilterWidget extends ConsumerWidget {
                 flex: 1,
                 child: _SearchField(
                   onChanged: (value) {
-                    ref.read(diagnosticosPragaNotifierProvider.notifier).updateSearchQuery(value);
+                    ref.read(diagnosticosPragaProvider.notifier).updateSearchQuery(value);
                   },
                 ),
               ),
@@ -37,7 +37,7 @@ class DiagnosticoFilterWidget extends ConsumerWidget {
                   value: data.selectedCultura,
                   cultures: data.culturas,
                   onChanged: (value) {
-                    ref.read(diagnosticosPragaNotifierProvider.notifier).updateSelectedCultura(value);
+                    ref.read(diagnosticosPragaProvider.notifier).updateSelectedCultura(value);
                   },
                 ),
               ),

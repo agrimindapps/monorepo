@@ -60,7 +60,7 @@ class _MeditacaoCalendarWidgetState
   @override
   Widget build(BuildContext context) {
     final sessoes = ref.watch(
-      meditacaoNotifierProvider.select((state) => state.sessoes),
+      meditacaoProvider.select((state) => state.sessoes),
     );
 
     final events = _buildEvents(sessoes);

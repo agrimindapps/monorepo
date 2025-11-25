@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -48,7 +49,7 @@ part 'comentarios_providers.g.dart';
 
 /// Repository dependency injection
 @riverpod
-IComentariosRepository comentariosRepository(ComentariosRepositoryRef ref) {
+IComentariosRepository comentariosRepository(Ref ref) {
   final driftRepo = ref.watch(comentarioRepositoryProvider);
   final comentariosRepo = ComentariosRepository(driftRepo);
   final mapper = ComentariosMapper();
@@ -77,12 +78,12 @@ IComentariosWriteRepository comentariosWriteRepository(
 
 /// Use Cases dependency injection providers
 @riverpod
-GetComentariosUseCase getComentariosUseCase(GetComentariosUseCaseRef ref) {
+GetComentariosUseCase getComentariosUseCase(Ref ref) {
   return GetComentariosUseCase(ref.watch(comentariosReadRepositoryProvider));
 }
 
 @riverpod
-AddComentarioUseCase addComentariosUseCase(AddComentariosUseCaseRef ref) {
+AddComentarioUseCase addComentariosUseCase(Ref ref) {
   return AddComentarioUseCase(
     ref.watch(comentariosReadRepositoryProvider),
     ref.watch(comentariosWriteRepositoryProvider),
@@ -318,7 +319,7 @@ class ComentariosState extends _$ComentariosState {
 
 /// Filtered comentarios based on current context and search
 @riverpod
-List<ComentarioEntity> comentariosFiltered(ComentariosFilteredRef ref) {
+List<ComentarioEntity> comentariosFiltered(Ref ref) {
   final state = ref.watch(comentariosStateProvider);
   final comentarios = state.comentarios;
   final searchText = state.searchText;
@@ -353,7 +354,7 @@ List<ComentarioEntity> comentariosFiltered(ComentariosFilteredRef ref) {
 
 /// Statistics computed from current comentarios
 @riverpod
-ComentariosStats comentariosStats(ComentariosStatsRef ref) {
+ComentariosStats comentariosStats(Ref ref) {
   final comentarios = ref.watch(comentariosStateProvider).comentarios;
 
   final total = comentarios.length;
@@ -380,13 +381,13 @@ ComentariosStats comentariosStats(ComentariosStatsRef ref) {
 
 /// Loading state provider for UI reactivity
 @riverpod
-bool comentariosLoading(ComentariosLoadingRef ref) {
+bool comentariosLoading(Ref ref) {
   return ref.watch(comentariosStateProvider).isLoading;
 }
 
 /// Error state provider for UI error handling
 @riverpod
-String? comentariosError(ComentariosErrorRef ref) {
+String? comentariosError(Ref ref) {
   return ref.watch(comentariosStateProvider).error;
 }
 

@@ -22,7 +22,7 @@ part 'data_export_providers.g.dart';
 
 
 @riverpod
-PlantsExportDataSource plantsExportDataSource(PlantsExportDataSourceRef ref) {
+PlantsExportDataSource plantsExportDataSource(Ref ref) {
   final plantsRepo = ref.watch(plantsRepositoryProvider);
   final commentsRepo = ref.watch(plantCommentsRepositoryProvider);
   final tasksRepo = ref.watch(tasksRepositoryProvider);
@@ -37,18 +37,18 @@ PlantsExportDataSource plantsExportDataSource(PlantsExportDataSourceRef ref) {
 }
 
 @riverpod
-SettingsExportDataSource settingsExportDataSource(SettingsExportDataSourceRef ref) {
+SettingsExportDataSource settingsExportDataSource(Ref ref) {
   return SettingsExportLocalDataSource();
 }
 
 @riverpod
-ExportFileGenerator exportFileGenerator(ExportFileGeneratorRef ref) {
+ExportFileGenerator exportFileGenerator(Ref ref) {
   final fileRepo = ref.watch(fileRepositoryProvider);
   return ExportFileGenerator(fileRepository: fileRepo);
 }
 
 @riverpod
-DataExportRepository dataExportRepository(DataExportRepositoryRef ref) {
+DataExportRepository dataExportRepository(Ref ref) {
   final plantsDataSource = ref.watch(plantsExportDataSourceProvider);
   final settingsDataSource = ref.watch(settingsExportDataSourceProvider);
   final fileGenerator = ref.watch(exportFileGeneratorProvider);
@@ -63,31 +63,31 @@ DataExportRepository dataExportRepository(DataExportRepositoryRef ref) {
 }
 
 @riverpod
-CheckExportAvailabilityUseCase checkExportAvailabilityUseCase(CheckExportAvailabilityUseCaseRef ref) {
+CheckExportAvailabilityUseCase checkExportAvailabilityUseCase(Ref ref) {
   final repository = ref.watch(dataExportRepositoryProvider);
   return CheckExportAvailabilityUseCase(repository);
 }
 
 @riverpod
-RequestExportUseCase requestExportUseCase(RequestExportUseCaseRef ref) {
+RequestExportUseCase requestExportUseCase(Ref ref) {
   final repository = ref.watch(dataExportRepositoryProvider);
   return RequestExportUseCase(repository);
 }
 
 @riverpod
-GetExportHistoryUseCase getExportHistoryUseCase(GetExportHistoryUseCaseRef ref) {
+GetExportHistoryUseCase getExportHistoryUseCase(Ref ref) {
   final repository = ref.watch(dataExportRepositoryProvider);
   return GetExportHistoryUseCase(repository);
 }
 
 @riverpod
-DownloadExportUseCase downloadExportUseCase(DownloadExportUseCaseRef ref) {
+DownloadExportUseCase downloadExportUseCase(Ref ref) {
   final repository = ref.watch(dataExportRepositoryProvider);
   return DownloadExportUseCase(repository);
 }
 
 @riverpod
-DeleteExportUseCase deleteExportUseCase(DeleteExportUseCaseRef ref) {
+DeleteExportUseCase deleteExportUseCase(Ref ref) {
   final repository = ref.watch(dataExportRepositoryProvider);
   return DeleteExportUseCase(repository);
 }

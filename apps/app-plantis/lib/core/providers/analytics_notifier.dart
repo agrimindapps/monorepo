@@ -9,13 +9,13 @@ part 'analytics_notifier.g.dart';
 
 /// Provider do repositório de analytics (obtido via DI)
 @riverpod
-IAnalyticsRepository analyticsRepository(AnalyticsRepositoryRef ref) {
+IAnalyticsRepository analyticsRepository(Ref ref) {
   return FirebaseAnalyticsService();
 }
 
 /// Provider do repositório de crashlytics (obtido via DI)
 @riverpod
-ICrashlyticsRepository crashlyticsRepository(CrashlyticsRepositoryRef ref) {
+ICrashlyticsRepository crashlyticsRepository(Ref ref) {
   return FirebaseCrashlyticsService();
 }
 
@@ -40,7 +40,7 @@ class Analytics extends _$Analytics {
       ),
     );
 
-    return PlantisAnalyticsState.initial().copyWith(isInitialized: true);
+    return PlantisAnalyticsStateX.initial().copyWith(isInitialized: true);
   }
 
   /// Direct access to enhanced service para funcionalidades avançadas
@@ -440,37 +440,37 @@ class Analytics extends _$Analytics {
 
 /// Provider para verificar se analytics está inicializado
 @riverpod
-bool analyticsInitialized(AnalyticsInitializedRef ref) {
+bool analyticsInitialized(Ref ref) {
   return ref.watch(analyticsProvider).isInitialized;
 }
 
 /// Provider para verificar se analytics está habilitado
 @riverpod
-bool analyticsEnabled(AnalyticsEnabledRef ref) {
+bool analyticsEnabled(Ref ref) {
   return ref.watch(analyticsProvider).isAnalyticsEnabled;
 }
 
 /// Provider para mensagem de erro do analytics
 @riverpod
-String? analyticsError(AnalyticsErrorRef ref) {
+String? analyticsError(Ref ref) {
   return ref.watch(analyticsProvider).errorMessage;
 }
 
 /// Provider para verificar se está em modo debug
 @riverpod
-bool isDebugMode(IsDebugModeRef ref) {
+bool isDebugMode(Ref ref) {
   return kDebugMode;
 }
 
 /// Provider para acesso direto ao Analytics para métodos específicos
 @riverpod
-Analytics analyticsService(AnalyticsServiceRef ref) {
+Analytics analyticsService(Ref ref) {
   return ref.watch(analyticsProvider.notifier);
 }
 
 /// Provider para verificar se deve mostrar configurações de analytics
 @riverpod
-bool shouldShowAnalyticsSettings(ShouldShowAnalyticsSettingsRef ref) {
+bool shouldShowAnalyticsSettings(Ref ref) {
   final isDebug = ref.watch(isDebugModeProvider);
   final isEnabled = ref.watch(analyticsEnabledProvider);
   return isDebug || isEnabled;
@@ -478,7 +478,7 @@ bool shouldShowAnalyticsSettings(ShouldShowAnalyticsSettingsRef ref) {
 
 /// Provider para status text do analytics
 @riverpod
-String analyticsStatusText(AnalyticsStatusTextRef ref) {
+String analyticsStatusText(Ref ref) {
   final isEnabled = ref.watch(analyticsEnabledProvider);
   final isDebug = ref.watch(isDebugModeProvider);
 
@@ -495,7 +495,7 @@ String analyticsStatusText(AnalyticsStatusTextRef ref) {
 
 /// Provider para ícone do status de analytics
 @riverpod
-IconData analyticsStatusIcon(AnalyticsStatusIconRef ref) {
+IconData analyticsStatusIcon(Ref ref) {
   final isEnabled = ref.watch(analyticsEnabledProvider);
   final hasError = ref.watch(analyticsErrorProvider) != null;
 

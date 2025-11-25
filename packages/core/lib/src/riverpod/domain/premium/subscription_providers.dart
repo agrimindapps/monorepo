@@ -5,12 +5,13 @@ import '../../../infrastructure/services/revenue_cat_service.dart';
 
 /// Providers unificados para gerenciamento de assinaturas Premium
 /// Consolida RevenueCat integration entre todos os apps do monorepo
+/// Migrado para Riverpod 3.0 - sem legacy imports
 
-/// Provider principal para estado de assinatura
+/// Provider principal para estado de assinatura - Riverpod 3.0
 final subscriptionProvider =
-    StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
-      return SubscriptionNotifier();
-    });
+    NotifierProvider<SubscriptionNotifier, SubscriptionState>(
+      SubscriptionNotifier.new,
+    );
 
 /// Provider para verificar se usuário tem premium ativo
 final isPremiumProvider = Provider<bool>((ref) {
@@ -46,7 +47,7 @@ final currentOfferingsProvider = FutureProvider<Offerings?>((ref) async {
 /// Provider para verificar acesso a features específicas por app
 final featureGateProvider = Provider.family<bool, String>((ref, featureName) {
   final isPremium = ref.watch(isPremiumProvider);
-  final appId = ref.watch(currentAppIdProvider); // Será criado
+  final appId = ref.watch(currentAppIdProvider);
 
   return _hasFeatureAccess(appId, featureName, isPremium);
 });
@@ -60,10 +61,32 @@ final featureLimitsProvider = Provider.family<FeatureLimits, String>((
   return FeatureLimits.forApp(appId, isPremium);
 });
 
-/// Provider para contagem de uso de features
-final featureUsageProvider = StateProvider.family<int, String>(
-  (ref, feature) => 0,
-);
+/// Notifier para contagem de uso de features - Riverpod 3.0
+class _FeatureUsageNotifier extends Notifier<Map<String, int>> {
+  @override
+  Map<String, int> build() => {};
+
+  void setUsage(String feature, int count) {
+    state = {...state, feature: count};
+  }
+
+  void incrementUsage(String feature) {
+    final current = state[feature] ?? 0;
+    state = {...state, feature: current + 1};
+  }
+
+  int getUsage(String feature) => state[feature] ?? 0;
+}
+
+final _featureUsageNotifierProvider =
+    NotifierProvider<_FeatureUsageNotifier, Map<String, int>>(
+      _FeatureUsageNotifier.new,
+    );
+
+/// Provider derivado para uso de feature específica
+final featureUsageProvider = Provider.family<int, String>((ref, feature) {
+  return ref.watch(_featureUsageNotifierProvider)[feature] ?? 0;
+});
 
 /// Provider para verificar se atingiu limite de uso
 final hasReachedLimitProvider = Provider.family<bool, String>((ref, feature) {
@@ -193,7 +216,7 @@ extension SubscriptionStateExtension on SubscriptionState {
     if (this is SubscriptionError) {
       return error((this as SubscriptionError).message);
     }
-    throw StateError('Unknown state: $this');
+    throw StateError('Unknown state: \$this');
   }
 
   T maybeWhen<T>({
@@ -375,21 +398,16 @@ class PurchaseActions {
   });
 }
 
-/// Notifier para gerenciamento de assinaturas
-class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
-  SubscriptionNotifier() : super(const SubscriptionLoading()) {
-    _initialize();
-  }
-
+/// Notifier para gerenciamento de assinaturas - Riverpod 3.0
+class SubscriptionNotifier extends Notifier<SubscriptionState> {
   late final RevenueCatService _revenueCatService;
 
-  Future<void> _initialize() async {
-    try {
-      _revenueCatService = RevenueCatService();
-      await checkSubscriptionStatus();
-    } catch (e) {
-      state = SubscriptionError('Erro na inicialização: $e');
-    }
+  @override
+  SubscriptionState build() {
+    _revenueCatService = RevenueCatService();
+    // Dispara verificação inicial em background
+    Future.microtask(() => checkSubscriptionStatus());
+    return const SubscriptionLoading();
   }
 
   Future<void> checkSubscriptionStatus() async {
@@ -416,11 +434,11 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
         state = const SubscriptionInactive();
       }
     } catch (e) {
-      state = SubscriptionError('Erro ao verificar assinatura: $e');
+      state = SubscriptionError('Erro ao verificar assinatura: \$e');
     }
   }
 
-  Future<bool> purchasePackage(dynamic package) async {
+  Future<bool> purchasePackage(Package package) async {
     try {
       state = const SubscriptionLoading();
       await Future<void>.delayed(const Duration(seconds: 2));
@@ -431,13 +449,13 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
         purchaseDate: DateTime.now(),
         expirationDate: DateTime.now().add(const Duration(days: 30)),
         originalTransactionId:
-            'mock_transaction_${DateTime.now().millisecondsSinceEpoch}',
+            'mock_transaction_\${DateTime.now().millisecondsSinceEpoch}',
       );
 
       state = SubscriptionActive(info);
       return true;
     } catch (e) {
-      state = SubscriptionError('Erro na compra: $e');
+      state = SubscriptionError('Erro na compra: \$e');
       return false;
     }
   }
@@ -451,17 +469,15 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
       result.fold(
         (failure) {
           state = SubscriptionError(failure.message);
-          return false;
         },
         (customerInfo) {
           checkSubscriptionStatus();
-          return true;
         },
       );
 
-      return false;
+      return state is SubscriptionActive;
     } catch (e) {
-      state = SubscriptionError('Erro ao restaurar compras: $e');
+      state = SubscriptionError('Erro ao restaurar compras: \$e');
       return false;
     }
   }

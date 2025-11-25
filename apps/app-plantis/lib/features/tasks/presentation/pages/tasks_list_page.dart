@@ -525,7 +525,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     String? plantImageUrl,
     bool isLoading,
     ThemeData theme,
-    WidgetRef ref,
+    Ref ref,
   ) {
     return Semantics(
       label: 'Tarefa: ${task.title} para $plantName',
@@ -661,7 +661,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     BuildContext context,
     task_entity.Task task,
     String plantName,
-    WidgetRef ref,
+    Ref ref,
   ) async {
     final result = await TaskCompletionDialog.show(
       context: context,
@@ -739,7 +739,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
   Widget _buildViewAllButtonContent(
     int remainingTasks,
     ThemeData theme,
-    WidgetRef ref,
+    Ref ref,
   ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 16),

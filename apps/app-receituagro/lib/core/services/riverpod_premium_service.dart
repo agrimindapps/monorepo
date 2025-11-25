@@ -17,7 +17,7 @@ class RiverpodPremiumService implements IPremiumService {
   RiverpodPremiumService(this._container) {
     // Listen to PremiumNotifier changes and update local state
     _subscription = _container.listen<AsyncValue<PremiumState>>(
-      premiumNotifierProvider,
+      premiumProvider,
       (_, next) {
         next.whenData((state) {
           _statusController.add(state.isPremium);
@@ -28,13 +28,13 @@ class RiverpodPremiumService implements IPremiumService {
 
   @override
   bool get isPremium {
-    final state = _container.read(premiumNotifierProvider).value;
+    final state = _container.read(premiumProvider).value;
     return state?.isPremium ?? false;
   }
 
   @override
   PremiumStatus get status {
-    final state = _container.read(premiumNotifierProvider).value;
+    final state = _container.read(premiumProvider).value;
     if (state == null || !state.isPremium) {
       return const PremiumStatus(isActive: false);
     }
@@ -60,7 +60,7 @@ class RiverpodPremiumService implements IPremiumService {
   Future<void> checkPremiumStatus() async {
     // Premium status is automatically updated via Riverpod stream
     // Force refresh if needed
-    final currentState = _container.read(premiumNotifierProvider).value;
+    final currentState = _container.read(premiumProvider).value;
 
     if (currentState != null) {
       // Trigger a rebuild
@@ -75,25 +75,25 @@ class RiverpodPremiumService implements IPremiumService {
 
   @override
   Future<String?> getSubscriptionType() async {
-    final state = _container.read(premiumNotifierProvider).value;
+    final state = _container.read(premiumProvider).value;
     return state?.status.productId;
   }
 
   @override
   Future<DateTime?> getSubscriptionExpiry() async {
-    final state = _container.read(premiumNotifierProvider).value;
+    final state = _container.read(premiumProvider).value;
     return state?.status.expirationDate;
   }
 
   @override
   Future<bool> isSubscriptionActive() async {
-    final state = _container.read(premiumNotifierProvider).value;
+    final state = _container.read(premiumProvider).value;
     return state?.isActive ?? false;
   }
 
   @override
   Future<int> getRemainingDays() async {
-    final state = _container.read(premiumNotifierProvider).value;
+    final state = _container.read(premiumProvider).value;
     final expiryDate = state?.status.expirationDate;
 
     if (expiryDate == null) return 0;
@@ -159,7 +159,7 @@ class RiverpodPremiumService implements IPremiumService {
 
   @override
   Future<bool> isTrialAvailable() async {
-    final state = _container.read(premiumNotifierProvider).value;
+    final state = _container.read(premiumProvider).value;
     return state?.status.isTrialActive ?? false;
   }
 

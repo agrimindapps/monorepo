@@ -21,13 +21,13 @@ class DeviceManagementSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final settingsAsync = ref.watch(settingsNotifierProvider);
+    final settingsAsync = ref.watch(settingsProvider);
 
     return settingsAsync.when(
       data: (settingsState) {
         final devices = settingsState.connectedDevicesInfo;
         final currentDevice = settingsState.currentDeviceInfo;
-        final hasDeviceManagement = ref.read(settingsNotifierProvider.notifier).isDeviceManagementEnabled;
+        final hasDeviceManagement = ref.read(settingsProvider.notifier).isDeviceManagementEnabled;
         if (settingsState.currentUserId.isEmpty) {
           return const SizedBox.shrink();
         }
@@ -128,7 +128,7 @@ class DeviceManagementSection extends ConsumerWidget {
 
   /// Open device management dialog
   Future<void> _openDeviceManagementDialog(BuildContext context, WidgetRef ref) async {
-    final settingsAsync = ref.read(settingsNotifierProvider);
+    final settingsAsync = ref.read(settingsProvider);
 
     // Get current settings state
     final settingsState = settingsAsync.value;

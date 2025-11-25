@@ -35,7 +35,7 @@ class PageHeaderWidget extends ConsumerWidget {
     final padding = outerPadding ?? EdgeInsets.zero;
 
     // Watch theme state from Riverpod
-    final isDark = ref.watch(themeNotifierProvider);
+    final isDark = ref.watch(themeProvider);
 
     return Padding(
       padding: padding,
@@ -210,7 +210,7 @@ class ContentCardWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Watch theme state from Riverpod
-    final isDark = ref.watch(themeNotifierProvider);
+    final isDark = ref.watch(themeProvider);
 
       return Container(
         width: double.infinity,

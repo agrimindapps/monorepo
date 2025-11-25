@@ -44,24 +44,12 @@ final _appOpenAdServiceProvider = Provider<AppOpenAdService>((ref) {
   return service;
 });
 
-// TODO: AdPreloaderService requires AdConfigService which was deleted
-// Commenting out for now - will need to implement simplified preloader
-// final _adPreloaderServiceProvider = Provider<AdPreloaderService>((ref) {
-//   return AdPreloaderService(
-//     configService: // REMOVED: AdConfigService deleted
-//     interstitialService: ref.watch(_interstitialAdServiceProvider),
-//     rewardedService: ref.watch(_rewardedAdServiceProvider),
-//     rewardedInterstitialService: ref.watch(
-//       _rewardedInterstitialAdServiceProvider,
-//     ),
-//     appOpenService: ref.watch(_appOpenAdServiceProvider),
-//   );
-// });
-
 // ===== Main Repository Provider =====
 
 /// Main Ads Repository provider
 /// This is the primary provider that apps should use
+/// 
+/// Compatible with google_mobile_ads ^6.0.0
 final adsRepositoryProvider = Provider<IAdsRepository>((ref) {
   final service = GoogleMobileAdsService(
     lifecycleManager: ref.watch(_adLifecycleManagerProvider),
@@ -72,8 +60,6 @@ final adsRepositoryProvider = Provider<IAdsRepository>((ref) {
       _rewardedInterstitialAdServiceProvider,
     ),
     appOpenService: ref.watch(_appOpenAdServiceProvider),
-    // preloaderService: REMOVED: AdPreloaderService requires AdConfigService
-    // ref.watch(_adPreloaderServiceProvider),
   );
   ref.onDispose(() => service.dispose());
   return service;

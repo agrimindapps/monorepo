@@ -32,7 +32,7 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
     _displayNameController = TextEditingController();
     _emailController = TextEditingController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authState = ref.read(authNotifierProvider);
+      final authState = ref.read(authProvider);
       if (mounted) {
         setState(() {
           _displayNameController.text = _getUserDisplayName(authState);
@@ -54,7 +54,7 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
     if (user != null && user.displayName.isNotEmpty) {
       return user.displayName;
     }
-    final settingsState = ref.read(settingsNotifierProvider).value;
+    final settingsState = ref.read(settingsProvider).value;
     final device = settingsState?.currentDeviceInfo;
     if (device?.name.isNotEmpty == true) {
       final name = device!.name;
@@ -75,7 +75,7 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
 
     return _buildDialogContent(context, theme, authState);
   }
@@ -170,7 +170,7 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
 
   /// Build profile form
   Widget _buildProfileForm(ThemeData theme, AuthState authState) {
-    final settingsState = ref.read(settingsNotifierProvider).value;
+    final settingsState = ref.read(settingsProvider).value;
     final currentDevice = settingsState?.currentDeviceInfo;
     final connectedDevices = settingsState?.connectedDevicesInfo ?? [];
 

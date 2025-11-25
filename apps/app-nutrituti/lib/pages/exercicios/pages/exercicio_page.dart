@@ -81,7 +81,7 @@ class _ExercicioPageState extends ConsumerState<ExercicioPage> {
 
   @override
   Widget build(BuildContext context) {
-    final exercicioAsync = ref.watch(exercicioListNotifierProvider);
+    final exercicioAsync = ref.watch(exercicioListProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -98,7 +98,7 @@ class _ExercicioPageState extends ConsumerState<ExercicioPage> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              ref.invalidate(exercicioListNotifierProvider);
+              ref.invalidate(exercicioListProvider);
             },
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -135,7 +135,7 @@ class _ExercicioPageState extends ConsumerState<ExercicioPage> {
               Text('Erro ao carregar exercícios: $error'),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => ref.invalidate(exercicioListNotifierProvider),
+                onPressed: () => ref.invalidate(exercicioListProvider),
                 child: const Text('Tentar Novamente'),
               ),
             ],
@@ -153,7 +153,7 @@ class _ExercicioPageState extends ConsumerState<ExercicioPage> {
 
   Widget _buildTipCard(ExercicioListState state) {
     // Get tip of the day from controller
-    final tipOfDay = ref.read(exercicioListNotifierProvider.notifier).getTipOfTheDay();
+    final tipOfDay = ref.read(exercicioListProvider.notifier).getTipOfTheDay();
 
     return Card(
       child: Padding(
@@ -542,7 +542,7 @@ class _ExercicioPageState extends ConsumerState<ExercicioPage> {
               }
 
               if (minutos > 0 || calorias > 0) {
-                ref.read(exercicioListNotifierProvider.notifier)
+                ref.read(exercicioListProvider.notifier)
                     .saveMetaExercicios(minutos, calorias);
               }
 
@@ -597,7 +597,7 @@ class _ExercicioPageState extends ConsumerState<ExercicioPage> {
 
     if (confirm == true && exercicio.id != null) {
       try {
-        await ref.read(exercicioListNotifierProvider.notifier)
+        await ref.read(exercicioListProvider.notifier)
             .excluirExercicio(exercicio.id!);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

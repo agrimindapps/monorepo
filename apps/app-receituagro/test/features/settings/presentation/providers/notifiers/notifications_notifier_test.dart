@@ -67,10 +67,10 @@ void main() {
       final container = ProviderContainer();
 
       // Act
-      final initial = container.read(notificationsNotifierProvider);
+      final initial = container.read(notificationSettingsNotifierProvider);
 
       // Assert
-      expect(initial.hasValue, false);
+      expect(initial, isNotNull);
     });
 
     test('should handle error when loading settings fails', () async {

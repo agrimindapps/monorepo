@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/services/pragas_cultura_data_service.dart';
 import '../../data/services/pragas_cultura_query_service.dart';
@@ -7,6 +7,9 @@ import '../../data/services/pragas_cultura_statistics_service.dart';
 import '../../domain/entities/pragas_cultura_filter.dart';
 import '../../domain/entities/pragas_cultura_statistics.dart';
 import '../services/pragas_cultura_error_message_service.dart';
+import 'pragas_cultura_providers.dart';
+
+part 'pragas_cultura_page_view_model.g.dart';
 
 /// State class para o ViewModel
 class PragasCulturaPageState {
@@ -51,32 +54,38 @@ class PragasCulturaPageState {
 }
 
 /// ViewModel para gerenciar estado e lógica da página de Pragas por Cultura
-class PragasCulturaPageViewModel extends StateNotifier<PragasCulturaPageState> {
-  final IPragasCulturaDataService dataService;
-  final IPragasCulturaQueryService queryService;
-  final IPragasCulturaSortService sortService;
-  final IPragasCulturaStatisticsService statisticsService;
-  final PragasCulturaErrorMessageService errorService;
+@riverpod
+class PragasCulturaPageViewModel extends _$PragasCulturaPageViewModel {
+  late final IPragasCulturaDataService dataService;
+  late final IPragasCulturaQueryService queryService;
+  late final IPragasCulturaSortService sortService;
+  late final IPragasCulturaStatisticsService statisticsService;
+  late final PragasCulturaErrorMessageService errorService;
 
-  PragasCulturaPageViewModel({
-    required this.dataService,
-    required this.queryService,
-    required this.sortService,
-    required this.statisticsService,
-    required this.errorService,
-  }) : super(const PragasCulturaPageState());
+  @override
+  Future<PragasCulturaPageState> build() async {
+    dataService = ref.watch(pragasCulturaDataServiceProvider);
+    queryService = ref.watch(pragasCulturaQueryServiceProvider);
+    sortService = ref.watch(pragasCulturaSortServiceProvider);
+    statisticsService = ref.watch(pragasCulturaStatisticsServiceProvider);
+    errorService = ref.watch(pragasCulturaErrorServiceProvider);
+
+    return const PragasCulturaPageState();
+  }
 
   /// Carrega pragas para uma cultura
   Future<void> loadPragasForCultura(String culturaId) async {
-    state = state.copyWith(isLoading: true, erro: null);
+    state = AsyncValue.data(state.value!.copyWith(isLoading: true, erro: null));
 
     try {
       final pragas = await dataService.getPragasForCultura(culturaId);
       _applyFiltersAndSort(pragas);
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        erro: errorService.getLoadPragasError(e.toString()),
+      state = AsyncValue.data(
+        state.value!.copyWith(
+          isLoading: false,
+          erro: errorService.getLoadPragasError(e.toString()),
+        ),
       );
     }
   }
@@ -85,17 +94,22 @@ class PragasCulturaPageViewModel extends StateNotifier<PragasCulturaPageState> {
   Future<void> loadCulturas() async {
     try {
       final culturas = await dataService.getAllCulturas();
-      state = state.copyWith(culturas: culturas);
+      state = AsyncValue.data(state.value!.copyWith(culturas: culturas));
     } catch (e) {
-      state = state.copyWith(
-        erro: errorService.getLoadCulturasError(e.toString()),
+      state = AsyncValue.data(
+        state.value!.copyWith(
+          erro: errorService.getLoadCulturasError(e.toString()),
+        ),
       );
     }
   }
 
   /// Aplica filtro de criticidade
   void filterByCriticidade({required bool? onlyCriticas}) {
-    final novoFiltro = state.filtroAtual.copyWith(
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final novoFiltro = currentState.filtroAtual.copyWith(
       onlyCriticas: onlyCriticas ?? false,
       onlyNormais: onlyCriticas == false,
     );
@@ -104,13 +118,19 @@ class PragasCulturaPageViewModel extends StateNotifier<PragasCulturaPageState> {
 
   /// Aplica filtro de tipo
   void filterByTipo(String? tipoPraga) {
-    final novoFiltro = state.filtroAtual.copyWith(tipoPraga: tipoPraga);
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final novoFiltro = currentState.filtroAtual.copyWith(tipoPraga: tipoPraga);
     _applyFilter(novoFiltro);
   }
 
   /// Aplica ordenação
   void sortPragas(String sortBy) {
-    final novoFiltro = state.filtroAtual.copyWith(sortBy: sortBy);
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final novoFiltro = currentState.filtroAtual.copyWith(sortBy: sortBy);
     _applyFilter(novoFiltro);
   }
 
@@ -120,7 +140,10 @@ class PragasCulturaPageViewModel extends StateNotifier<PragasCulturaPageState> {
 
   /// Aplica filtro e atualiza estado
   void _applyFilter(PragasCulturaFilter novoFiltro) {
-    var pragasFiltradasOrdenadas = state.pragasOriginais;
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    var pragasFiltradasOrdenadas = currentState.pragasOriginais;
 
     // Apply filters
     pragasFiltradasOrdenadas = queryService.applyFilters(
@@ -140,39 +163,46 @@ class PragasCulturaPageViewModel extends StateNotifier<PragasCulturaPageState> {
       pragasFiltradasOrdenadas,
     );
 
-    state = state.copyWith(
-      filtroAtual: novoFiltro,
-      pragasFiltradasOrdenadas: pragasFiltradasOrdenadas,
-      estatisticas: estatisticas,
-      isLoading: false,
+    state = AsyncValue.data(
+      currentState.copyWith(
+        filtroAtual: novoFiltro,
+        pragasFiltradasOrdenadas: pragasFiltradasOrdenadas,
+        estatisticas: estatisticas,
+        isLoading: false,
+      ),
     );
   }
 
   /// Aplica filtros e ordenação às pragas carregadas
   void _applyFiltersAndSort(List<Map<String, dynamic>> pragas) {
+    final currentState = state.value;
+    if (currentState == null) return;
+
     var pragasFiltradasOrdenadas = pragas;
 
     // Apply filters
     pragasFiltradasOrdenadas = queryService.applyFilters(
       pragasFiltradasOrdenadas,
-      state.filtroAtual,
+      currentState.filtroAtual,
     );
 
     // Apply sorting
     pragasFiltradasOrdenadas = sortService.sortBy(
       pragasFiltradasOrdenadas,
-      state.filtroAtual.sortBy,
+      currentState.filtroAtual.sortBy,
       ascending: true,
     );
 
     // Calculate statistics
     final estatisticas = statisticsService.calculateStatistics(pragas);
 
-    state = state.copyWith(
-      pragasOriginais: pragas,
-      pragasFiltradasOrdenadas: pragasFiltradasOrdenadas,
-      estatisticas: estatisticas,
-      isLoading: false,
+    state = AsyncValue.data(
+      currentState.copyWith(
+        pragasOriginais: pragas,
+        pragasFiltradasOrdenadas: pragasFiltradasOrdenadas,
+        estatisticas: estatisticas,
+        isLoading: false,
+      ),
     );
   }
 

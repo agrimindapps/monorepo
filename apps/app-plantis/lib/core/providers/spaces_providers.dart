@@ -115,7 +115,7 @@ class SpacesNotifier extends _$SpacesNotifier {
           ),
         );
 
-        final currentState = state.valueOrNull ?? SpacesState.initial();
+        final currentState = state.value ?? SpacesState.initial();
         return currentState.copyWith(
           allSpaces: sortedSpaces,
           clearError: true,
@@ -130,14 +130,14 @@ class SpacesNotifier extends _$SpacesNotifier {
 
     return result.fold(
       (failure) {
-        final currentState = state.valueOrNull ?? SpacesState.initial();
+        final currentState = state.value ?? SpacesState.initial();
         state = AsyncValue.data(
           currentState.copyWith(error: _getErrorMessage(failure)),
         );
         return null;
       },
       (space) {
-        final currentState = state.valueOrNull ?? SpacesState.initial();
+        final currentState = state.value ?? SpacesState.initial();
         state = AsyncValue.data(
           currentState.copyWith(
             selectedSpace: space,
@@ -159,7 +159,7 @@ class SpacesNotifier extends _$SpacesNotifier {
       return result.fold(
         (failure) => throw _getErrorMessage(failure),
         (space) {
-          final currentState = state.valueOrNull ?? SpacesState.initial();
+          final currentState = state.value ?? SpacesState.initial();
           final updatedSpaces = [space, ...currentState.allSpaces];
 
           return currentState.copyWith(
@@ -183,7 +183,7 @@ class SpacesNotifier extends _$SpacesNotifier {
       return result.fold(
         (failure) => throw _getErrorMessage(failure),
         (updatedSpace) {
-          final currentState = state.valueOrNull ?? SpacesState.initial();
+          final currentState = state.value ?? SpacesState.initial();
           final updatedSpaces = currentState.allSpaces.map((space) {
             return space.id == updatedSpace.id ? updatedSpace : space;
           }).toList();
@@ -213,7 +213,7 @@ class SpacesNotifier extends _$SpacesNotifier {
       return result.fold(
         (failure) => throw _getErrorMessage(failure),
         (_) {
-          final currentState = state.valueOrNull ?? SpacesState.initial();
+          final currentState = state.value ?? SpacesState.initial();
           final updatedSpaces = currentState.allSpaces
               .where((space) => space.id != id)
               .toList();
@@ -233,13 +233,13 @@ class SpacesNotifier extends _$SpacesNotifier {
 
   /// Clear selected space
   void clearSelectedSpace() {
-    final currentState = state.valueOrNull ?? SpacesState.initial();
+    final currentState = state.value ?? SpacesState.initial();
     state = AsyncValue.data(currentState.copyWith(clearSelectedSpace: true));
   }
 
   /// Clear error state
   void clearError() {
-    final currentState = state.valueOrNull ?? SpacesState.initial();
+    final currentState = state.value ?? SpacesState.initial();
     state = AsyncValue.data(currentState.copyWith(clearError: true));
   }
 
@@ -268,26 +268,33 @@ class SpacesNotifier extends _$SpacesNotifier {
 }
 
 @riverpod
-GetSpacesUseCase getSpacesUseCase(GetSpacesUseCaseRef ref) {
+GetSpacesUseCase getSpacesUseCase(Ref ref) {
   return GetSpacesUseCase(ref.watch(spacesRepositoryProvider));
 }
 
 @riverpod
-GetSpaceByIdUseCase getSpaceByIdUseCase(GetSpaceByIdUseCaseRef ref) {
+GetSpaceByIdUseCase getSpaceByIdUseCase(Ref ref) {
   return GetSpaceByIdUseCase(ref.watch(spacesRepositoryProvider));
 }
 
 @riverpod
-AddSpaceUseCase addSpaceUseCase(AddSpaceUseCaseRef ref) {
+AddSpaceUseCase addSpaceUseCase(Ref ref) {
   return AddSpaceUseCase(ref.watch(spacesRepositoryProvider));
 }
 
 @riverpod
-UpdateSpaceUseCase updateSpaceUseCase(UpdateSpaceUseCaseRef ref) {
+UpdateSpaceUseCase updateSpaceUseCase(Ref ref) {
   return UpdateSpaceUseCase(ref.watch(spacesRepositoryProvider));
 }
 
 @riverpod
-DeleteSpaceUseCase deleteSpaceUseCase(DeleteSpaceUseCaseRef ref) {
+DeleteSpaceUseCase deleteSpaceUseCase(Ref ref) {
   return DeleteSpaceUseCase(ref.watch(spacesRepositoryProvider));
 }
+
+/// Alias for backwards compatibility with legacy code
+/// Use spacesProvider instead in new code
+
+// LEGACY ALIAS
+// ignore: deprecated_member_use_from_same_package
+final spacesNotifierProvider = spacesProvider;

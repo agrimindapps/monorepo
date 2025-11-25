@@ -26,7 +26,7 @@ class UserProfileSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
 
     return _UserProfileCard(authData: authState);
   }
@@ -40,13 +40,13 @@ class _UserProfileCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settingsAsync = ref.watch(settingsNotifierProvider);
-    final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
+    final settingsAsync = ref.watch(settingsProvider);
+    final featureFlagsAsync = ref.watch(featureFlagsProvider);
 
     return settingsAsync.when(
       data: (settingsState) => featureFlagsAsync.when(
         data: (featureFlagsState) {
-          final featureFlags = ref.read(featureFlagsNotifierProvider.notifier);
+          final featureFlags = ref.read(featureFlagsProvider.notifier);
 
           return Card(
             margin: SettingsDesignTokens.sectionMargin,
@@ -503,7 +503,7 @@ class _UserProfileCard extends ConsumerWidget {
     Navigator.pop(context);
 
     final result = await ref
-        .read(authNotifierProvider.notifier)
+        .read(authProvider.notifier)
         .signInWithEmailAndPassword(
           email: email.trim(),
           password: password,
@@ -531,7 +531,7 @@ class _UserProfileCard extends ConsumerWidget {
     Navigator.pop(context);
 
     final result = await ref
-        .read(authNotifierProvider.notifier)
+        .read(authProvider.notifier)
         .signUpWithEmailAndPassword(
           email: email.trim(),
           password: password,

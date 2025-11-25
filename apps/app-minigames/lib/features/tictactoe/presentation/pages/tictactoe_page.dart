@@ -12,7 +12,7 @@ class TicTacToePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final gameState = ref.watch(ticTacToeGameNotifierProvider);
+    final gameState = ref.watch(ticTacToeGameProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -36,17 +36,17 @@ class TicTacToePage extends ConsumerWidget {
                   gameState: state,
                   onGameModeChanged: (mode) {
                     ref
-                        .read(ticTacToeGameNotifierProvider.notifier)
+                        .read(ticTacToeGameProvider.notifier)
                         .changeGameMode(mode);
                   },
                   onDifficultyChanged: (difficulty) {
                     ref
-                        .read(ticTacToeGameNotifierProvider.notifier)
+                        .read(ticTacToeGameProvider.notifier)
                         .changeDifficulty(difficulty);
                   },
                   onRestart: () {
                     ref
-                        .read(ticTacToeGameNotifierProvider.notifier)
+                        .read(ticTacToeGameProvider.notifier)
                         .restartGame();
                   },
                 ),
@@ -83,7 +83,7 @@ class TicTacToePage extends ConsumerWidget {
                       ElevatedButton.icon(
                         onPressed: () {
                           ref
-                              .read(ticTacToeGameNotifierProvider.notifier)
+                              .read(ticTacToeGameProvider.notifier)
                               .restartGame();
                         },
                         icon: const Icon(Icons.refresh),
@@ -104,7 +104,7 @@ class TicTacToePage extends ConsumerWidget {
                         gameState: state,
                         onCellTapped: (row, col) {
                           ref
-                              .read(ticTacToeGameNotifierProvider.notifier)
+                              .read(ticTacToeGameProvider.notifier)
                               .makeMove(row, col);
                         },
                       ),
@@ -134,7 +134,7 @@ class TicTacToePage extends ConsumerWidget {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  ref.invalidate(ticTacToeGameNotifierProvider);
+                  ref.invalidate(ticTacToeGameProvider);
                 },
                 child: const Text('Tentar Novamente'),
               ),
@@ -164,7 +164,7 @@ class TicTacToePage extends ConsumerWidget {
               GameStatsWidget(
                 onResetStats: () {
                   ref
-                      .read(ticTacToeStatsNotifierProvider.notifier)
+                      .read(ticTacToeStatsProvider.notifier)
                       .resetStats();
                   Navigator.of(context).pop();
                 },

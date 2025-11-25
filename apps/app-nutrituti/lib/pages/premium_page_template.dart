@@ -10,7 +10,6 @@ import '../../core/premium_template/index.dart';
 // Exemplo de implementação usando o novo sistema de templates premium
 // Este arquivo demonstra como criar uma página premium em minutos usando os templates
 
-
 class NutritutiPremiumPageTemplate extends ConsumerWidget {
   const NutritutiPremiumPageTemplate({super.key});
 
@@ -59,8 +58,9 @@ class NutritutiPremiumPageCustom extends ConsumerWidget {
 }
 
 // Controller personalizado se necessário (usando Riverpod)
-class NutritutiPremiumController extends StateNotifier<PremiumState> {
-  NutritutiPremiumController() : super(PremiumState.initial());
+class NutritutiPremiumController extends Notifier<PremiumState> {
+  @override
+  PremiumState build() => PremiumState.initial();
 
   void navigateToPremium(BuildContext context) {
     // Opção A: Navegação simples
@@ -109,8 +109,8 @@ class PremiumState {
 
 // Provider for premium controller
 final premiumControllerProvider =
-    StateNotifierProvider<NutritutiPremiumController, PremiumState>(
-  (ref) => NutritutiPremiumController(),
+    NotifierProvider<NutritutiPremiumController, PremiumState>(
+  NutritutiPremiumController.new,
 );
 
 // Exemplo de integração em outra página (ex: configurações)

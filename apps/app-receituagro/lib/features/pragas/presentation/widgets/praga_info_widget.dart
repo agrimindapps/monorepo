@@ -22,7 +22,7 @@ class PragaInfoWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(detalhePragaNotifierProvider);
+    final state = ref.watch(detalhePragaProvider);
 
     return state.when(
       data: (data) => SingleChildScrollView(

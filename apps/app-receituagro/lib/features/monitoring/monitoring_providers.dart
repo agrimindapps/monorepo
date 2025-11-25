@@ -7,18 +7,16 @@ import 'domain/services/monitoring_ui_mapper_service.dart';
 part 'monitoring_providers.g.dart';
 
 @riverpod
-MonitoringFormatterService monitoringFormatterService(
-    MonitoringFormatterServiceRef ref) {
+MonitoringFormatterService monitoringFormatterService(Ref ref) {
   return MonitoringFormatterService();
 }
 
 @riverpod
-MonitoringUIMapperService monitoringUIMapperService(
-    MonitoringUIMapperServiceRef ref) {
+MonitoringUIMapperService monitoringUIMapperService(Ref ref) {
   return MonitoringUIMapperService();
 }
 
 @riverpod
-MonitoringAlertService monitoringAlertService(MonitoringAlertServiceRef ref) {
+MonitoringAlertService monitoringAlertService(Ref ref) {
   return MonitoringAlertService();
 }

@@ -1,4 +1,3 @@
-import 'package:core/core.dart';
 import 'comentario_repository.dart';
 
 /// Repositório de Comentários usando Drift

@@ -9,8 +9,8 @@ class GameHeaderWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final gameState = ref.watch(campoMinadoGameNotifierProvider);
-    final notifier = ref.read(campoMinadoGameNotifierProvider.notifier);
+    final gameState = ref.watch(campoMinadoGameProvider);
+    final notifier = ref.read(campoMinadoGameProvider.notifier);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

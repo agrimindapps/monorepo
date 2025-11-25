@@ -1,5 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/datasources/memory_local_datasource.dart';
 import '../../data/repositories/memory_repository_impl.dart';
@@ -19,7 +19,7 @@ part 'memory_providers.g.dart';
 // =========================================================================
 
 @riverpod
-MemoryLocalDataSource memoryLocalDataSource(MemoryLocalDataSourceRef ref) {
+MemoryLocalDataSource memoryLocalDataSource(Ref ref) {
   final sharedPrefs = ref.watch(sharedPreferencesProvider);
   return MemoryLocalDataSourceImpl(sharedPrefs);
 }
@@ -29,7 +29,7 @@ MemoryLocalDataSource memoryLocalDataSource(MemoryLocalDataSourceRef ref) {
 // =========================================================================
 
 @riverpod
-MemoryRepository memoryRepository(MemoryRepositoryRef ref) {
+MemoryRepository memoryRepository(Ref ref) {
   final dataSource = ref.watch(memoryLocalDataSourceProvider);
   return MemoryRepositoryImpl(dataSource);
 }
@@ -39,34 +39,34 @@ MemoryRepository memoryRepository(MemoryRepositoryRef ref) {
 // =========================================================================
 
 @riverpod
-GenerateCardsUseCase generateCardsUseCase(GenerateCardsUseCaseRef ref) {
+GenerateCardsUseCase generateCardsUseCase(Ref ref) {
   return GenerateCardsUseCase();
 }
 
 @riverpod
-FlipCardUseCase flipCardUseCase(FlipCardUseCaseRef ref) {
+FlipCardUseCase flipCardUseCase(Ref ref) {
   return FlipCardUseCase();
 }
 
 @riverpod
-CheckMatchUseCase checkMatchUseCase(CheckMatchUseCaseRef ref) {
+CheckMatchUseCase checkMatchUseCase(Ref ref) {
   return CheckMatchUseCase();
 }
 
 @riverpod
-RestartGameUseCase restartGameUseCase(RestartGameUseCaseRef ref) {
+RestartGameUseCase restartGameUseCase(Ref ref) {
   final generateCards = ref.watch(generateCardsUseCaseProvider);
   return RestartGameUseCase(generateCards);
 }
 
 @riverpod
-LoadHighScoreUseCase loadHighScoreUseCase(LoadHighScoreUseCaseRef ref) {
+LoadHighScoreUseCase loadHighScoreUseCase(Ref ref) {
   final repository = ref.watch(memoryRepositoryProvider);
   return LoadHighScoreUseCase(repository);
 }
 
 @riverpod
-SaveHighScoreUseCase saveHighScoreUseCase(SaveHighScoreUseCaseRef ref) {
+SaveHighScoreUseCase saveHighScoreUseCase(Ref ref) {
   final repository = ref.watch(memoryRepositoryProvider);
   return SaveHighScoreUseCase(repository);
 }

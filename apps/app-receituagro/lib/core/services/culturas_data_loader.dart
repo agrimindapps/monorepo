@@ -4,7 +4,6 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import '../../database/repositories/culturas_repository.dart';
 import '../../database/providers/database_providers.dart';
 import '../../database/receituagro_database.dart';
 

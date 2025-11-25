@@ -13,7 +13,7 @@ class MeditacaoAchievementWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final conquistas = ref.watch(
-      meditacaoNotifierProvider.select((state) => state.conquistas),
+      meditacaoProvider.select((state) => state.conquistas),
     );
 
     return Card(

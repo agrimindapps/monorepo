@@ -10,19 +10,19 @@ part 'realtime_sync_notifier.g.dart';
 
 /// Provider do PlantisRealtimeService (singleton)
 @riverpod
-PlantisRealtimeService plantisRealtimeService(PlantisRealtimeServiceRef ref) {
+PlantisRealtimeService plantisRealtimeService(Ref ref) {
   return PlantisRealtimeService.instance;
 }
 
 /// Provider do ConnectivityService (singleton from core)
 @riverpod
-ConnectivityService connectivityService(ConnectivityServiceRef ref) {
+ConnectivityService connectivityService(Ref ref) {
   return ConnectivityService.instance;
 }
 
 /// Provider do UnifiedSyncManager (singleton from core)
 @riverpod
-UnifiedSyncManager unifiedSyncManager(UnifiedSyncManagerRef ref) {
+UnifiedSyncManager unifiedSyncManager(Ref ref) {
   return UnifiedSyncManager.instance;
 }
 
@@ -256,7 +256,7 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
   void _setupRealtimeStatusListener() {
     _realtimeStatusSubscription = _realtimeService.realtimeStatusStream.listen(
       (isActive) {
-        final currentState = state.valueOrNull;
+        final currentState = state.value;
         if (currentState == null) return;
 
         final newState = currentState.copyWith(isRealtimeActive: isActive);
@@ -280,7 +280,7 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
   void _setupSyncEventListener() {
     _syncEventSubscription = _realtimeService.syncEventStream.listen(
       (event) {
-        final currentState = state.valueOrNull;
+        final currentState = state.value;
         if (currentState == null) return;
 
         final newState = currentState.copyWith(lastSyncEvent: event);
@@ -301,7 +301,7 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
   void _setupGlobalSyncListener() {
     _globalSyncSubscription = _syncManager.globalSyncStatusStream.listen(
       (statusMap) {
-        final currentState = state.valueOrNull;
+        final currentState = state.value;
         if (currentState == null) return;
 
         final plantisStatus = statusMap['plantis'];
@@ -333,7 +333,7 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
   void _setupSyncEventsListener() {
     _syncEventsSubscription = _syncManager.syncEventStream.listen(
       (event) {
-        final currentState = state.valueOrNull;
+        final currentState = state.value;
         if (currentState == null || event.appName != 'plantis') return;
 
         final pendingChanges = _getPendingChangesCount();
@@ -359,7 +359,7 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
   void _setupConnectivityListener() {
     _connectivitySubscription = _connectivityService.networkStatusStream.listen(
       (status) {
-        final currentState = state.valueOrNull;
+        final currentState = state.value;
         if (currentState == null) return;
 
         final isOnline = status != ConnectivityType.offline &&
@@ -390,7 +390,7 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
     try {
       await _realtimeService.forceSync();
 
-      final currentState = state.valueOrNull;
+      final currentState = state.value;
       if (currentState != null) {
         final updatedState = _addRecentEvent(
           currentState,
@@ -404,7 +404,7 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
         name: 'RealtimeSyncNotifier',
       );
 
-      final currentState = state.valueOrNull;
+      final currentState = state.value;
       if (currentState != null) {
         final updatedState = _addRecentEvent(
           currentState,
@@ -418,7 +418,7 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
   /// Ativa/desativa real-time sync
   Future<void> toggleRealtimeSync() async {
     try {
-      final currentState = state.valueOrNull;
+      final currentState = state.value;
       if (currentState == null) return;
 
       if (currentState.isRealtimeActive) {
@@ -432,7 +432,7 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
         name: 'RealtimeSyncNotifier',
       );
 
-      final currentState = state.valueOrNull;
+      final currentState = state.value;
       if (currentState != null) {
         final updatedState = _addRecentEvent(
           currentState,
@@ -445,7 +445,7 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
 
   /// Configura notificações de sync
   void setSyncNotifications(bool enabled) {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null ||
         currentState.showSyncNotifications == enabled) {
       return;
@@ -464,7 +464,7 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
 
   /// Configura sync em background
   void setBackgroundSync(bool enabled) {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null || currentState.enableBackgroundSync == enabled) {
       return;
     }
@@ -482,7 +482,7 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
 
   /// Limpa histórico de eventos
   void clearRecentEvents() {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     final newState = currentState.copyWith(recentEvents: const []);
@@ -491,7 +491,7 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
 
   /// Obtém informações de debug
   Map<String, dynamic> getDebugInfo() {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) {
       return {'error': 'State not initialized'};
     }
@@ -589,7 +589,7 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
 
 /// Provider para verificar se realtime está ativo
 @riverpod
-bool isRealtimeActive(IsRealtimeActiveRef ref) {
+bool isRealtimeActive(Ref ref) {
   final stateAsync = ref.watch(realtimeSyncNotifierProvider);
   return stateAsync.when(
     data: (state) => state.isRealtimeActive,
@@ -600,7 +600,7 @@ bool isRealtimeActive(IsRealtimeActiveRef ref) {
 
 /// Provider para verificar se está online
 @riverpod
-bool isSyncOnline(IsSyncOnlineRef ref) {
+bool isSyncOnline(Ref ref) {
   final stateAsync = ref.watch(realtimeSyncNotifierProvider);
   return stateAsync.when(
     data: (state) => state.isOnline,
@@ -611,7 +611,7 @@ bool isSyncOnline(IsSyncOnlineRef ref) {
 
 /// Provider para status atual de sync
 @riverpod
-SyncStatus currentSyncStatus(CurrentSyncStatusRef ref) {
+SyncStatus currentSyncStatus(Ref ref) {
   final stateAsync = ref.watch(realtimeSyncNotifierProvider);
   return stateAsync.when(
     data: (state) => state.currentSyncStatus,
@@ -622,7 +622,7 @@ SyncStatus currentSyncStatus(CurrentSyncStatusRef ref) {
 
 /// Provider para mensagem de status
 @riverpod
-String syncStatusMessage(SyncStatusMessageRef ref) {
+String syncStatusMessage(Ref ref) {
   final stateAsync = ref.watch(realtimeSyncNotifierProvider);
   return stateAsync.when(
     data: (state) => state.statusMessage,
@@ -633,7 +633,7 @@ String syncStatusMessage(SyncStatusMessageRef ref) {
 
 /// Provider para cor do indicador
 @riverpod
-SyncIndicatorColor syncStatusColor(SyncStatusColorRef ref) {
+SyncIndicatorColor syncStatusColor(Ref ref) {
   final stateAsync = ref.watch(realtimeSyncNotifierProvider);
   return stateAsync.when(
     data: (state) => state.statusColor,
@@ -644,7 +644,7 @@ SyncIndicatorColor syncStatusColor(SyncStatusColorRef ref) {
 
 /// Provider para mudanças pendentes
 @riverpod
-int pendingChangesCount(PendingChangesCountRef ref) {
+int pendingChangesCount(Ref ref) {
   final stateAsync = ref.watch(realtimeSyncNotifierProvider);
   return stateAsync.when(
     data: (state) => state.pendingChanges,
@@ -655,7 +655,7 @@ int pendingChangesCount(PendingChangesCountRef ref) {
 
 /// Provider para eventos recentes
 @riverpod
-List<String> recentSyncEvents(RecentSyncEventsRef ref) {
+List<String> recentSyncEvents(Ref ref) {
   final stateAsync = ref.watch(realtimeSyncNotifierProvider);
   return stateAsync.when(
     data: (state) => state.recentEvents,
@@ -672,3 +672,7 @@ enum SyncIndicatorColor {
   warning, // Amarelo - offline mas funcionando
   error, // Vermelho - erro
 }
+
+/// Alias for backwards compatibility with legacy code
+/// Use realtimeSyncProvider instead in new code
+const realtimeSyncNotifierProvider = realtimeSyncProvider;

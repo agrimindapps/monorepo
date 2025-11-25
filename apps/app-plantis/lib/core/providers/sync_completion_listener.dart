@@ -73,7 +73,7 @@ class SyncCompletionListener extends _$SyncCompletionListener {
 /// Provider simples para inicializar o listener
 /// Use em um widget raiz ou no app initialization
 @riverpod
-void syncCompletionListenerInitializer(SyncCompletionListenerInitializerRef ref) {
+void syncCompletionListenerInitializer(Ref ref) {
   // Apenas lê o provider para inicializá-lo
   ref.watch(syncCompletionListenerProvider);
 }

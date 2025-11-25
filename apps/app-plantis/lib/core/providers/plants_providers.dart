@@ -374,12 +374,12 @@ enum CareStatus {
 // ============================================================================
 
 @riverpod
-IAuthStateProvider authStateProvider(AuthStateProviderRef ref) {
+IAuthStateProvider authStateProvider(Ref ref) {
   return AuthStateProviderAdapter.instance();
 }
 
 @riverpod
-PlantsDataService plantsDataService(PlantsDataServiceRef ref) {
+PlantsDataService plantsDataService(Ref ref) {
   return PlantsDataService(
     authProvider: ref.watch(authStateProviderProvider),
     getPlantsUseCase: ref.watch(getPlantsUseCaseProvider),
@@ -390,12 +390,12 @@ PlantsDataService plantsDataService(PlantsDataServiceRef ref) {
 }
 
 @riverpod
-PlantsFilterService plantsFilterService(PlantsFilterServiceRef ref) {
+PlantsFilterService plantsFilterService(Ref ref) {
   return PlantsFilterService();
 }
 
 @riverpod
-PlantsCareCalculator plantsCareCalculator(PlantsCareCalculatorRef ref) {
+PlantsCareCalculator plantsCareCalculator(Ref ref) {
   return PlantsCareCalculator();
 }
 
@@ -462,7 +462,7 @@ class PlantsNotifier extends _$PlantsNotifier {
       if (_authStateNotifier.isInitialized && user != null) {
         loadInitialData();
       } else if (_authStateNotifier.isInitialized && user == null) {
-        final currentState = state.valueOrNull ?? const PlantsState();
+        final currentState = state.value ?? const PlantsState();
         state = AsyncData(
           currentState.copyWith(
             allPlants: [],
@@ -488,7 +488,7 @@ class PlantsNotifier extends _$PlantsNotifier {
                 .cast<Plant>()
                 .toList();
             if (_hasDataChanged(domainPlants)) {
-              final currentState = state.valueOrNull ?? const PlantsState();
+              final currentState = state.value ?? const PlantsState();
               final sortedPlants = _sortPlants(
                 domainPlants,
                 currentState.sortBy,
@@ -547,7 +547,7 @@ class PlantsNotifier extends _$PlantsNotifier {
 
   /// Checks if data really changed to avoid unnecessary rebuilds
   bool _hasDataChanged(List<Plant> newPlants) {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     if (currentState.allPlants.length != newPlants.length) {
       return true;
     }
@@ -607,7 +607,7 @@ class PlantsNotifier extends _$PlantsNotifier {
       );
     }
     if (!await _waitForAuthenticationWithTimeout()) {
-      final currentState = state.valueOrNull ?? const PlantsState();
+      final currentState = state.value ?? const PlantsState();
       state = AsyncData(
         currentState.copyWith(error: 'Aguardando autenticação...'),
       );
@@ -623,7 +623,7 @@ class PlantsNotifier extends _$PlantsNotifier {
         print('📦 PlantsProvider: Carregando dados...');
       }
 
-      final currentState = state.valueOrNull ?? const PlantsState();
+      final currentState = state.value ?? const PlantsState();
       final shouldShowLoading = currentState.allPlants.isEmpty;
       if (shouldShowLoading) {
         state = AsyncData(
@@ -639,7 +639,7 @@ class PlantsNotifier extends _$PlantsNotifier {
               '⚠️ PlantsProvider: Falha ao carregar dados: ${_getErrorMessage(failure)}',
             );
           }
-          final currentState = state.valueOrNull ?? const PlantsState();
+          final currentState = state.value ?? const PlantsState();
           state = AsyncData(
             currentState.copyWith(
               isLoading: false,
@@ -661,7 +661,7 @@ class PlantsNotifier extends _$PlantsNotifier {
       if (kDebugMode) {
         print('❌ PlantsProvider: Erro ao carregar dados: $e');
       }
-      final currentState = state.valueOrNull ?? const PlantsState();
+      final currentState = state.value ?? const PlantsState();
       state = AsyncData(
         currentState.copyWith(
           isLoading: false,
@@ -674,7 +674,7 @@ class PlantsNotifier extends _$PlantsNotifier {
 
   /// Updates plants data and notifies listeners
   void _updatePlantsData(List<Plant> plants) {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     final sortedPlants = _sortPlants(plants, currentState.sortBy);
 
     if (kDebugMode) {
@@ -709,14 +709,14 @@ class PlantsNotifier extends _$PlantsNotifier {
 
     return result.fold(
       (failure) {
-        final currentState = state.valueOrNull ?? const PlantsState();
+        final currentState = state.value ?? const PlantsState();
         state = AsyncData(
           currentState.copyWith(error: _getErrorMessage(failure)),
         );
         return null;
       },
       (plant) {
-        final currentState = state.valueOrNull ?? const PlantsState();
+        final currentState = state.value ?? const PlantsState();
         state = AsyncData(currentState.copyWith(selectedPlant: plant));
         return plant;
       },
@@ -724,7 +724,7 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 
   Future<void> searchPlants(String query) async {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
 
     if (query.trim().isEmpty) {
       state = AsyncData(
@@ -748,7 +748,7 @@ class PlantsNotifier extends _$PlantsNotifier {
       );
 
       // Simulate async search completion
-      final newState = state.valueOrNull ?? const PlantsState();
+      final newState = state.value ?? const PlantsState();
       state = AsyncData(
         newState.copyWith(isSearching: false),
       );
@@ -764,7 +764,7 @@ class PlantsNotifier extends _$PlantsNotifier {
 
     result.fold(
       (failure) {
-        final newState = state.valueOrNull ?? const PlantsState();
+        final newState = state.value ?? const PlantsState();
         state = AsyncData(
           newState.copyWith(
             error: _getErrorMessage(failure),
@@ -774,7 +774,7 @@ class PlantsNotifier extends _$PlantsNotifier {
       },
       (results) {
         // Load results into allPlants so they can be filtered/searched
-        final newState = state.valueOrNull ?? const PlantsState();
+        final newState = state.value ?? const PlantsState();
         state = AsyncData(
           newState.copyWith(
             allPlants: _sortPlants(results, newState.sortBy),
@@ -786,21 +786,21 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 
   Future<bool> addPlant(AddPlantParams params) async {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     state = AsyncData(currentState.copyWith(isLoading: true, error: null));
 
     final result = await _addPlantUseCase.call(params);
 
     return result.fold(
       (failure) {
-        final newState = state.valueOrNull ?? const PlantsState();
+        final newState = state.value ?? const PlantsState();
         state = AsyncData(
           newState.copyWith(error: _getErrorMessage(failure), isLoading: false),
         );
         return false;
       },
       (plant) {
-        final newState = state.valueOrNull ?? const PlantsState();
+        final newState = state.value ?? const PlantsState();
         final updatedPlants = [plant, ...newState.allPlants];
 
         state = AsyncData(
@@ -816,21 +816,21 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 
   Future<bool> updatePlant(UpdatePlantParams params) async {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     state = AsyncData(currentState.copyWith(isLoading: true, error: null));
 
     final result = await _updatePlantUseCase.call(params);
 
     return result.fold(
       (failure) {
-        final newState = state.valueOrNull ?? const PlantsState();
+        final newState = state.value ?? const PlantsState();
         state = AsyncData(
           newState.copyWith(error: _getErrorMessage(failure), isLoading: false),
         );
         return false;
       },
       (updatedPlant) {
-        final newState = state.valueOrNull ?? const PlantsState();
+        final newState = state.value ?? const PlantsState();
         final updatedPlants = newState.allPlants.map((p) {
           return p.id == updatedPlant.id ? updatedPlant : p;
         }).toList();
@@ -853,21 +853,21 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 
   Future<bool> deletePlant(String id) async {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     state = AsyncData(currentState.copyWith(isLoading: true, error: null));
 
     final result = await _deletePlantUseCase.call(id);
 
     return result.fold(
       (failure) {
-        final newState = state.valueOrNull ?? const PlantsState();
+        final newState = state.value ?? const PlantsState();
         state = AsyncData(
           newState.copyWith(error: _getErrorMessage(failure), isLoading: false),
         );
         return false;
       },
       (_) {
-        final newState = state.valueOrNull ?? const PlantsState();
+        final newState = state.value ?? const PlantsState();
         final updatedPlants =
             newState.allPlants.where((plant) => plant.id != id).toList();
 
@@ -887,14 +887,14 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 
   void setViewMode(ViewMode mode) {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     if (currentState.viewMode != mode) {
       state = AsyncData(currentState.copyWith(viewMode: mode));
     }
   }
 
   void setSortBy(SortBy sort) {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     if (currentState.sortBy != sort) {
       final sortedPlants = _sortPlants(currentState.allPlants, sort);
 
@@ -908,7 +908,7 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 
   void setSpaceFilter(String? spaceId) {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     if (currentState.filterBySpace != spaceId) {
       state = AsyncData(
         currentState.copyWith(
@@ -920,7 +920,7 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 
   void clearSearch() {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     if (currentState.searchQuery.isNotEmpty || currentState.isSearching) {
       if (kDebugMode) {
         print('🧹 PlantsProvider.clearSearch():');
@@ -962,7 +962,7 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 
   void toggleGroupedView() {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     ViewMode newMode;
     if (currentState.viewMode == ViewMode.groupedBySpaces) {
       newMode = ViewMode.list; // Return to normal list
@@ -973,14 +973,14 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 
   void clearSelectedPlant() {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     if (currentState.selectedPlant != null) {
       state = AsyncData(currentState.copyWith(selectedPlant: null));
     }
   }
 
   void clearError() {
-    final currentState = state.valueOrNull ?? const PlantsState();
+    final currentState = state.value ?? const PlantsState();
     if (currentState.hasError) {
       state = AsyncData(currentState.copyWith(error: null));
     }
@@ -993,7 +993,7 @@ class PlantsNotifier extends _$PlantsNotifier {
   Future<void> refreshPlants() async {
     if (kDebugMode) {
       print('🔄 PlantsProvider.refreshPlants() - Iniciando refresh');
-      final currentState = state.valueOrNull ?? const PlantsState();
+      final currentState = state.value ?? const PlantsState();
       print(
         '🔄 PlantsProvider.refreshPlants() - Plantas antes: ${currentState.allPlants.length}',
       );
@@ -1004,7 +1004,7 @@ class PlantsNotifier extends _$PlantsNotifier {
 
     if (kDebugMode) {
       print('✅ PlantsProvider.refreshPlants() - Refresh completo');
-      final currentState = state.valueOrNull ?? const PlantsState();
+      final currentState = state.value ?? const PlantsState();
       print(
         '🔄 PlantsProvider.refreshPlants() - Plantas depois: ${currentState.allPlants.length}',
       );
@@ -1109,7 +1109,7 @@ class PlantsNotifier extends _$PlantsNotifier {
 // ============================================================================
 
 @riverpod
-List<Plant> allPlants(AllPlantsRef ref) {
+List<Plant> allPlants(Ref ref) {
   final plantsAsync = ref.watch(plantsNotifierProvider);
   return plantsAsync.maybeWhen(
     data: (state) => state.allPlants,
@@ -1118,7 +1118,7 @@ List<Plant> allPlants(AllPlantsRef ref) {
 }
 
 @riverpod
-List<Plant> filteredPlants(FilteredPlantsRef ref) {
+List<Plant> filteredPlants(Ref ref) {
   final plantsAsync = ref.watch(plantsNotifierProvider);
   return plantsAsync.maybeWhen(
     data: (state) => state.filteredPlants,
@@ -1127,7 +1127,7 @@ List<Plant> filteredPlants(FilteredPlantsRef ref) {
 }
 
 @riverpod
-bool plantsIsLoading(PlantsIsLoadingRef ref) {
+bool plantsIsLoading(Ref ref) {
   final plantsAsync = ref.watch(plantsNotifierProvider);
   return plantsAsync.maybeWhen(
     data: (state) => state.isLoading,
@@ -1137,7 +1137,7 @@ bool plantsIsLoading(PlantsIsLoadingRef ref) {
 }
 
 @riverpod
-String? plantsError(PlantsErrorRef ref) {
+String? plantsError(Ref ref) {
   final plantsAsync = ref.watch(plantsNotifierProvider);
   return plantsAsync.maybeWhen(
     data: (state) => state.error,
@@ -1145,3 +1145,12 @@ String? plantsError(PlantsErrorRef ref) {
     orElse: () => null,
   );
 }
+
+/// Alias for backwards compatibility with legacy code
+/// Use plantsProvider instead in new code
+
+// ============================================================================
+// LEGACY PROVIDER ALIASES - For backward compatibility
+// ============================================================================
+// ignore: deprecated_member_use_from_same_package
+final plantsNotifierProvider = plantsProvider;

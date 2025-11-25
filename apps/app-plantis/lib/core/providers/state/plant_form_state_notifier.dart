@@ -889,21 +889,25 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
 
 // Providers for use cases
 @riverpod
-FormValidationService formValidationService(FormValidationServiceRef ref) {
+FormValidationService formValidationService(Ref ref) {
   return FormValidationService();
 }
 
 @riverpod
-GetPlantsUseCase getPlantsUseCaseForForm(GetPlantsUseCaseForFormRef ref) {
+GetPlantsUseCase getPlantsUseCaseForForm(Ref ref) {
   return ref.watch(getPlantsUseCaseProvider);
 }
 
 @riverpod
-AddPlantUseCase addPlantUseCaseForForm(AddPlantUseCaseForFormRef ref) {
+AddPlantUseCase addPlantUseCaseForForm(Ref ref) {
   return ref.watch(addPlantUseCaseProvider);
 }
 
 @riverpod
-UpdatePlantUseCase updatePlantUseCaseForForm(UpdatePlantUseCaseForFormRef ref) {
+UpdatePlantUseCase updatePlantUseCaseForForm(Ref ref) {
   return ref.watch(updatePlantUseCaseProvider);
 }
+
+// LEGACY ALIAS
+// ignore: deprecated_member_use_from_same_package
+final plantFormStateNotifierProvider = plantFormStateProvider;

@@ -79,7 +79,7 @@ class _MeditationTypeCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tipoMeditacaoAtual = ref.watch(
-      meditacaoNotifierProvider.select((state) => state.tipoMeditacaoAtual),
+      meditacaoProvider.select((state) => state.tipoMeditacaoAtual),
     );
 
     final isSelected = tipoMeditacaoAtual == title;
@@ -88,7 +88,7 @@ class _MeditationTypeCard extends ConsumerWidget {
       color: isSelected ? Colors.blue.withValues(alpha: 0.1) : null,
       child: InkWell(
         onTap: () {
-          ref.read(meditacaoNotifierProvider.notifier).iniciarTipoMeditacao(title);
+          ref.read(meditacaoProvider.notifier).iniciarTipoMeditacao(title);
         },
         child: Padding(
           padding: const EdgeInsets.all(16.0),

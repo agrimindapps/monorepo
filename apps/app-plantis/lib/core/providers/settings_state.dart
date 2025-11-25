@@ -6,9 +6,7 @@ part 'settings_state.freezed.dart';
 
 /// Estado imutável das configurações usando freezed
 @freezed
-class SettingsState with _$SettingsState {
-  const SettingsState._();
-
+sealed class SettingsState with _$SettingsState {
   const factory SettingsState({
     required SettingsEntity settings,
     @Default(false) bool isLoading,
@@ -16,9 +14,12 @@ class SettingsState with _$SettingsState {
     String? errorMessage,
     String? successMessage,
   }) = _SettingsState;
+}
 
+/// Extension providing factory constructors and methods for SettingsState
+extension SettingsStateX on SettingsState {
   /// Estado inicial padrão
-  factory SettingsState.initial() {
+  static SettingsState initial() {
     return SettingsState(settings: SettingsEntity.defaults());
   }
 

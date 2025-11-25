@@ -2,14 +2,12 @@ import 'dart:async';
 
 import 'package:core/core.dart' hide AuthState, Column, analyticsServiceProvider;
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../features/analytics/analytics_service.dart';
-import '../../features/analytics/analytics_providers.dart';
 import '../data/models/user_session_data.dart';
 import '../extensions/user_entity_receituagro_extension.dart';
 import '../services/device_identity_service.dart';
-import '../services/receituagro_data_cleaner.dart';
 import 'auth_state.dart' as local;
 import 'core_providers.dart';
 

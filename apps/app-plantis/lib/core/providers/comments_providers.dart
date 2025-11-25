@@ -8,7 +8,7 @@ import '../data/models/comentario_model.dart';
 part 'comments_providers.g.dart';
 
 @riverpod
-PlantCommentsRepository plantCommentsRepository(PlantCommentsRepositoryRef ref) {
+PlantCommentsRepository plantCommentsRepository(Ref ref) {
   return PlantCommentsRepositoryImpl();
 }
 @immutable
@@ -73,7 +73,7 @@ class CommentsNotifier extends _$CommentsNotifier {
 
   /// Load comments for a specific plant
   Future<void> loadComments(String plantId) async {
-    final currentState = state.valueOrNull ?? CommentsState.initial();
+    final currentState = state.value ?? CommentsState.initial();
     if (currentState.currentPlantId == plantId &&
         currentState.hasComments &&
         !currentState.isLoading) {
@@ -123,14 +123,14 @@ class CommentsNotifier extends _$CommentsNotifier {
   Future<bool> addComment(String plantId, String content) async {
     if (content.trim().isEmpty) {
       state = AsyncData(
-        (state.valueOrNull ?? CommentsState.initial()).copyWith(
+        (state.value ?? CommentsState.initial()).copyWith(
           errorMessage: 'Comentário não pode estar vazio',
         ),
       );
       return false;
     }
 
-    final currentState = state.valueOrNull ?? CommentsState.initial();
+    final currentState = state.value ?? CommentsState.initial();
     state = AsyncData(currentState.copyWith(isLoading: true, clearError: true));
 
     final result = await _repository.addComment(plantId, content.trim());
@@ -169,14 +169,14 @@ class CommentsNotifier extends _$CommentsNotifier {
   Future<bool> updateComment(String commentId, String newContent) async {
     if (newContent.trim().isEmpty) {
       state = AsyncData(
-        (state.valueOrNull ?? CommentsState.initial()).copyWith(
+        (state.value ?? CommentsState.initial()).copyWith(
           errorMessage: 'Comentário não pode estar vazio',
         ),
       );
       return false;
     }
 
-    final currentState = state.valueOrNull ?? CommentsState.initial();
+    final currentState = state.value ?? CommentsState.initial();
 
     final commentIndex =
         currentState.comments.indexWhere((c) => c.id == commentId);
@@ -229,7 +229,7 @@ class CommentsNotifier extends _$CommentsNotifier {
 
   /// Delete a comment
   Future<bool> deleteComment(String commentId) async {
-    final currentState = state.valueOrNull ?? CommentsState.initial();
+    final currentState = state.value ?? CommentsState.initial();
 
     final commentIndex =
         currentState.comments.indexWhere((c) => c.id == commentId);
@@ -282,13 +282,13 @@ class CommentsNotifier extends _$CommentsNotifier {
 
   /// Clear error message
   void clearError() {
-    final currentState = state.valueOrNull ?? CommentsState.initial();
+    final currentState = state.value ?? CommentsState.initial();
     state = AsyncData(currentState.copyWith(clearError: true));
   }
 
   /// Get comment by ID
   ComentarioModel? getCommentById(String commentId) {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return null;
 
     try {
@@ -300,7 +300,7 @@ class CommentsNotifier extends _$CommentsNotifier {
 
   /// Check if comments are loaded for current plant
   bool isLoadedForPlant(String plantId) {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return false;
     return currentState.currentPlantId == plantId && !currentState.isLoading;
   }
@@ -309,7 +309,7 @@ class CommentsNotifier extends _$CommentsNotifier {
 /// Provider for comments for a specific plant (family modifier for better performance)
 @riverpod
 AsyncValue<List<ComentarioModel>> plantComments(
-  PlantCommentsRef ref,
+  Ref ref,
   String plantId,
 ) {
   final commentsState = ref.watch(commentsNotifierProvider);
@@ -338,3 +338,7 @@ AsyncValue<List<ComentarioModel>> plantComments(
     error: (error, stack) => AsyncError(error, stack),
   );
 }
+
+/// Alias for backwards compatibility with legacy code
+/// Use commentsProvider instead in new code
+const commentsNotifierProvider = commentsProvider;

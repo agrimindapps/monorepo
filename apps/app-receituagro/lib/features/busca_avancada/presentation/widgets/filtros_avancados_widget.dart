@@ -17,7 +17,7 @@ class FiltrosAvancadosWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final buscaState = ref.watch(buscaAvancadaNotifierProvider);
+    final buscaState = ref.watch(buscaAvancadaProvider);
 
     return buscaState.when(
       data: (state) => _buildContent(context, theme, state, ref),
@@ -32,7 +32,7 @@ class FiltrosAvancadosWidget extends ConsumerWidget {
     BuscaAvancadaState state,
     WidgetRef ref,
   ) {
-    final notifier = ref.read(buscaAvancadaNotifierProvider.notifier);
+    final notifier = ref.read(buscaAvancadaProvider.notifier);
 
     return Container(
       padding: const EdgeInsets.all(16),

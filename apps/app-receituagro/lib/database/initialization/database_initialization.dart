@@ -1,6 +1,5 @@
 import 'dart:developer' as developer;
 
-import 'package:core/core.dart';
 import 'package:drift/drift.dart';
 import '../receituagro_database.dart';
 

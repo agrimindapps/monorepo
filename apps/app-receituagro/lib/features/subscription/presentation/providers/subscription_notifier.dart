@@ -1,6 +1,5 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/premium_notifier.dart';
 import '../../domain/usecases/get_available_products.dart';
@@ -94,8 +93,10 @@ class SubscriptionState {
 }
 
 /// Notifier responsável por gerenciar o estado e lógica de negócio de subscription
+/// Renomeado para SubscriptionManagementNotifier para evitar conflito
+/// com subscriptionProvider do core package
 @riverpod
-class SubscriptionNotifier extends _$SubscriptionNotifier {
+class SubscriptionManagementNotifier extends _$SubscriptionManagementNotifier {
   late final GetUserPremiumStatusUseCase _getUserPremiumStatusUseCase;
   late final GetAvailableProductsUseCase _getAvailableProductsUseCase;
   late final GetCurrentSubscriptionUseCase _getCurrentSubscriptionUseCase;
@@ -257,7 +258,7 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
 
           // Force PremiumNotifier to refresh
           try {
-            ref.invalidate(premiumNotifierProvider);
+            ref.invalidate(premiumProvider);
           } catch (e) {
             if (kDebugMode) {
               print('Warning: Could not invalidate PremiumNotifier: $e');
@@ -340,7 +341,7 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
 
             // Force PremiumNotifier to refresh
             try {
-              ref.invalidate(premiumNotifierProvider);
+              ref.invalidate(premiumProvider);
             } catch (e) {
               if (kDebugMode) {
                 print('Warning: Could not invalidate PremiumNotifier: $e');

@@ -20,9 +20,7 @@ part 'caca_palavra_providers.g.dart';
 // Data Sources
 
 @riverpod
-CacaPalavraLocalDataSource cacaPalavraLocalDataSource(
-  CacaPalavraLocalDataSourceRef ref,
-) {
+CacaPalavraLocalDataSource cacaPalavraLocalDataSource(Ref ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return CacaPalavraLocalDataSource(prefs);
 }
@@ -30,7 +28,7 @@ CacaPalavraLocalDataSource cacaPalavraLocalDataSource(
 // Repositories
 
 @Riverpod(keepAlive: true)
-CacaPalavraRepository cacaPalavraRepository(CacaPalavraRepositoryRef ref) {
+CacaPalavraRepository cacaPalavraRepository(Ref ref) {
   final dataSource = ref.watch(cacaPalavraLocalDataSourceProvider);
   return CacaPalavraRepositoryImpl(dataSource);
 }
@@ -38,60 +36,58 @@ CacaPalavraRepository cacaPalavraRepository(CacaPalavraRepositoryRef ref) {
 // Services
 
 @riverpod
-WordDictionaryService wordDictionaryService(WordDictionaryServiceRef ref) {
+WordDictionaryService wordDictionaryService(Ref ref) {
   return WordDictionaryService();
 }
 
 @riverpod
-WordSelectionService wordSelectionService(WordSelectionServiceRef ref) {
+WordSelectionService wordSelectionService(Ref ref) {
   return WordSelectionService();
 }
 
 @riverpod
-GridGeneratorService gridGeneratorService(GridGeneratorServiceRef ref) {
+GridGeneratorService gridGeneratorService(Ref ref) {
   return GridGeneratorService();
 }
 
 // Use Cases
 
 @riverpod
-GenerateGridUseCase generateGridUseCase(GenerateGridUseCaseRef ref) {
+GenerateGridUseCase generateGridUseCase(Ref ref) {
   final repository = ref.watch(cacaPalavraRepositoryProvider);
   return GenerateGridUseCase(repository);
 }
 
 @riverpod
-SelectCellUseCase selectCellUseCase(SelectCellUseCaseRef ref) {
+SelectCellUseCase selectCellUseCase(Ref ref) {
   return SelectCellUseCase();
 }
 
 @riverpod
-CheckWordMatchUseCase checkWordMatchUseCase(CheckWordMatchUseCaseRef ref) {
+CheckWordMatchUseCase checkWordMatchUseCase(Ref ref) {
   return CheckWordMatchUseCase();
 }
 
 @riverpod
-ToggleWordHighlightUseCase toggleWordHighlightUseCase(
-  ToggleWordHighlightUseCaseRef ref,
-) {
+ToggleWordHighlightUseCase toggleWordHighlightUseCase(Ref ref) {
   return ToggleWordHighlightUseCase();
 }
 
 @riverpod
-RestartGameUseCase restartGameUseCase(RestartGameUseCaseRef ref) {
+RestartGameUseCase restartGameUseCase(Ref ref) {
   final repository = ref.watch(cacaPalavraRepositoryProvider);
   final generateGridUseCase = ref.watch(generateGridUseCaseProvider);
   return RestartGameUseCase(repository, generateGridUseCase);
 }
 
 @riverpod
-LoadHighScoreUseCase loadHighScoreUseCase(LoadHighScoreUseCaseRef ref) {
+LoadHighScoreUseCase loadHighScoreUseCase(Ref ref) {
   final repository = ref.watch(cacaPalavraRepositoryProvider);
   return LoadHighScoreUseCase(repository);
 }
 
 @riverpod
-SaveHighScoreUseCase saveHighScoreUseCase(SaveHighScoreUseCaseRef ref) {
+SaveHighScoreUseCase saveHighScoreUseCase(Ref ref) {
   final repository = ref.watch(cacaPalavraRepositoryProvider);
   return SaveHighScoreUseCase(repository);
 }

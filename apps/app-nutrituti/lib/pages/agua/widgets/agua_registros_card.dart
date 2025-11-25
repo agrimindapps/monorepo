@@ -13,7 +13,7 @@ class AguaRegistrosCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final aguaAsync = ref.watch(aguaNotifierProvider);
+    final aguaAsync = ref.watch(aguaProvider);
 
     return Card(
       child: Padding(
@@ -105,7 +105,7 @@ class AguaRegistrosCard extends ConsumerWidget {
     );
 
     if (confirm == true) {
-      await ref.read(aguaNotifierProvider.notifier).deleteRegistro(registro);
+      await ref.read(aguaProvider.notifier).deleteRegistro(registro);
     }
   }
 

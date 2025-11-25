@@ -116,20 +116,20 @@ class SettingsState {
 }
 
 @riverpod
-Future<SettingsLocalDataSource> settingsLocalDataSource(SettingsLocalDataSourceRef ref) async {
+Future<SettingsLocalDataSource> settingsLocalDataSource(Ref ref) async {
   final prefs = ref.watch(sharedPreferencesProvider);
   return SettingsLocalDataSource(prefs: prefs);
 }
 
 @riverpod
-Future<ISettingsRepository> settingsRepository(SettingsRepositoryRef ref) async {
+Future<ISettingsRepository> settingsRepository(Ref ref) async {
   final localDataSource = await ref.watch(settingsLocalDataSourceProvider.future);
   return SettingsRepository(localDataSource: localDataSource);
 }
 
 @riverpod
 PlantisNotificationService plantisNotificationService(
-  PlantisNotificationServiceRef ref,
+  Ref ref,
 ) {
   return PlantisNotificationService();
 }
@@ -153,7 +153,7 @@ class SettingsNotifier extends _$SettingsNotifier {
       await _syncWithServices();
       await _loadDeviceInfo();
 
-      final currentState = state.valueOrNull ?? SettingsState.initial();
+      final currentState = state.value ?? SettingsState.initial();
       return currentState.copyWith(isInitialized: true);
     } catch (e) {
       return SettingsState.initial().copyWith(
@@ -170,14 +170,14 @@ class SettingsNotifier extends _$SettingsNotifier {
     result.fold(
       (Failure failure) {
         state = AsyncValue.data(
-          (state.valueOrNull ?? SettingsState.initial()).copyWith(
+          (state.value ?? SettingsState.initial()).copyWith(
             errorMessage: 'Erro ao carregar configurações: ${failure.message}',
           ),
         );
       },
       (SettingsEntity settings) {
         state = AsyncValue.data(
-          (state.valueOrNull ?? SettingsState.initial()).copyWith(
+          (state.value ?? SettingsState.initial()).copyWith(
             settings: settings,
             clearError: true,
           ),
@@ -189,7 +189,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   /// Sincroniza com services externos
   Future<void> _syncWithServices() async {
     try {
-      final currentState = state.valueOrNull ?? SettingsState.initial();
+      final currentState = state.value ?? SettingsState.initial();
       final hasPermissions =
           await _notificationService.areNotificationsEnabled();
 
@@ -211,7 +211,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   Future<void> _syncAccountSettings() async {
     try {
       final accountSettings = AccountSettingsEntity.defaults();
-      final currentState = state.valueOrNull ?? SettingsState.initial();
+      final currentState = state.value ?? SettingsState.initial();
 
       if (currentState.settings.account != accountSettings) {
         await updateAccountSettings(accountSettings);
@@ -224,7 +224,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   /// Atualiza configurações completas
   Future<void> updateSettings(SettingsEntity newSettings) async {
     state = AsyncValue.data(
-      (state.valueOrNull ?? SettingsState.initial()).copyWith(
+      (state.value ?? SettingsState.initial()).copyWith(
         isLoading: true,
         clearError: true,
         clearSuccess: true,
@@ -237,7 +237,7 @@ class SettingsNotifier extends _$SettingsNotifier {
       result.fold(
         (Failure failure) {
           state = AsyncValue.data(
-            (state.valueOrNull ?? SettingsState.initial()).copyWith(
+            (state.value ?? SettingsState.initial()).copyWith(
               errorMessage: 'Erro ao salvar configurações: ${failure.message}',
               isLoading: false,
             ),
@@ -245,7 +245,7 @@ class SettingsNotifier extends _$SettingsNotifier {
         },
         (void _) {
           state = AsyncValue.data(
-            (state.valueOrNull ?? SettingsState.initial()).copyWith(
+            (state.value ?? SettingsState.initial()).copyWith(
               settings: newSettings,
               successMessage: 'Configurações salvas com sucesso',
               isLoading: false,
@@ -256,7 +256,7 @@ class SettingsNotifier extends _$SettingsNotifier {
       );
     } catch (e) {
       state = AsyncValue.data(
-        (state.valueOrNull ?? SettingsState.initial()).copyWith(
+        (state.value ?? SettingsState.initial()).copyWith(
           errorMessage: 'Erro inesperado: $e',
           isLoading: false,
         ),
@@ -268,7 +268,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   Future<void> updateNotificationSettings(
     NotificationSettingsEntity newSettings,
   ) async {
-    final currentState = state.valueOrNull ?? SettingsState.initial();
+    final currentState = state.value ?? SettingsState.initial();
     final updatedSettings = currentState.settings.copyWith(
       notifications: newSettings,
     );
@@ -277,14 +277,14 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Atualiza configurações específicas de backup
   Future<void> updateBackupSettings(BackupSettingsEntity newSettings) async {
-    final currentState = state.valueOrNull ?? SettingsState.initial();
+    final currentState = state.value ?? SettingsState.initial();
     final updatedSettings = currentState.settings.copyWith(backup: newSettings);
     await updateSettings(updatedSettings);
   }
 
   /// Atualiza configurações específicas de tema
   Future<void> updateThemeSettings(ThemeSettingsEntity newSettings) async {
-    final currentState = state.valueOrNull ?? SettingsState.initial();
+    final currentState = state.value ?? SettingsState.initial();
     final updatedSettings = currentState.settings.copyWith(theme: newSettings);
     await updateSettings(updatedSettings);
     _applyThemeChanges(newSettings);
@@ -292,7 +292,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Atualiza configurações específicas de conta
   Future<void> updateAccountSettings(AccountSettingsEntity newSettings) async {
-    final currentState = state.valueOrNull ?? SettingsState.initial();
+    final currentState = state.value ?? SettingsState.initial();
     final updatedSettings = currentState.settings.copyWith(
       account: newSettings,
     );
@@ -301,14 +301,14 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Atualiza configurações específicas do app
   Future<void> updateAppSettings(AppSettingsEntity newSettings) async {
-    final currentState = state.valueOrNull ?? SettingsState.initial();
+    final currentState = state.value ?? SettingsState.initial();
     final updatedSettings = currentState.settings.copyWith(app: newSettings);
     await updateSettings(updatedSettings);
   }
 
   /// Toggle para lembretes de tarefas
   Future<void> toggleTaskReminders(bool enabled) async {
-    final currentState = state.valueOrNull ?? SettingsState.initial();
+    final currentState = state.value ?? SettingsState.initial();
     final newSettings = currentState.settings.notifications.copyWith(
       taskRemindersEnabled: enabled,
     );
@@ -317,7 +317,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Toggle para notificações de atraso
   Future<void> toggleOverdueNotifications(bool enabled) async {
-    final currentState = state.valueOrNull ?? SettingsState.initial();
+    final currentState = state.value ?? SettingsState.initial();
     final newSettings = currentState.settings.notifications.copyWith(
       overdueNotificationsEnabled: enabled,
     );
@@ -326,7 +326,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Toggle para resumo diário
   Future<void> toggleDailySummary(bool enabled) async {
-    final currentState = state.valueOrNull ?? SettingsState.initial();
+    final currentState = state.value ?? SettingsState.initial();
     final newSettings = currentState.settings.notifications.copyWith(
       dailySummaryEnabled: enabled,
     );
@@ -335,7 +335,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Define minutos de antecedência para lembretes
   Future<void> setReminderMinutesBefore(int minutes) async {
-    final currentState = state.valueOrNull ?? SettingsState.initial();
+    final currentState = state.value ?? SettingsState.initial();
     final newSettings = currentState.settings.notifications.copyWith(
       reminderMinutesBefore: minutes,
     );
@@ -344,7 +344,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Define horário do resumo diário
   Future<void> setDailySummaryTime(TimeOfDay time) async {
-    final currentState = state.valueOrNull ?? SettingsState.initial();
+    final currentState = state.value ?? SettingsState.initial();
     final newSettings = currentState.settings.notifications.copyWith(
       dailySummaryTime: time,
     );
@@ -353,7 +353,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Toggle para tipo específico de tarefa
   Future<void> toggleTaskType(String taskType, bool enabled) async {
-    final currentState = state.valueOrNull ?? SettingsState.initial();
+    final currentState = state.value ?? SettingsState.initial();
     final updatedTaskTypes = Map<String, bool>.from(
       currentState.settings.notifications.taskTypeSettings,
     );
@@ -367,7 +367,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Define modo de tema
   Future<void> setThemeMode(ThemeMode themeMode) async {
-    final currentState = state.valueOrNull ?? SettingsState.initial();
+    final currentState = state.value ?? SettingsState.initial();
     final newSettings = currentState.settings.theme.copyWith(
       themeMode: themeMode,
       followSystemTheme: themeMode == ThemeMode.system,
@@ -392,7 +392,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Aplica efeitos cascata quando configurações mudam
   void _applyCascadeEffects(SettingsEntity newSettings) {
-    final currentState = state.valueOrNull ?? SettingsState.initial();
+    final currentState = state.value ?? SettingsState.initial();
     if (currentState.settings.theme != newSettings.theme) {
       _applyThemeChanges(newSettings.theme);
     }
@@ -407,7 +407,7 @@ class SettingsNotifier extends _$SettingsNotifier {
       await _notificationService.openNotificationSettings();
     } catch (e) {
       state = AsyncValue.data(
-        (state.valueOrNull ?? SettingsState.initial()).copyWith(
+        (state.value ?? SettingsState.initial()).copyWith(
           errorMessage: 'Erro ao abrir configurações: $e',
         ),
       );
@@ -424,13 +424,13 @@ class SettingsNotifier extends _$SettingsNotifier {
       );
 
       state = AsyncValue.data(
-        (state.valueOrNull ?? SettingsState.initial()).copyWith(
+        (state.value ?? SettingsState.initial()).copyWith(
           successMessage: 'Notificação de teste enviada!',
         ),
       );
     } catch (e) {
       state = AsyncValue.data(
-        (state.valueOrNull ?? SettingsState.initial()).copyWith(
+        (state.value ?? SettingsState.initial()).copyWith(
           errorMessage: 'Erro ao enviar notificação: $e',
         ),
       );
@@ -443,13 +443,13 @@ class SettingsNotifier extends _$SettingsNotifier {
       await _notificationService.cancelAllNotifications();
 
       state = AsyncValue.data(
-        (state.valueOrNull ?? SettingsState.initial()).copyWith(
+        (state.value ?? SettingsState.initial()).copyWith(
           successMessage: 'Todas as notificações foram canceladas',
         ),
       );
     } catch (e) {
       state = AsyncValue.data(
-        (state.valueOrNull ?? SettingsState.initial()).copyWith(
+        (state.value ?? SettingsState.initial()).copyWith(
           errorMessage: 'Erro ao limpar notificações: $e',
         ),
       );
@@ -458,7 +458,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Verifica se deve mostrar notificação
   bool shouldShowNotification(String notificationType, {String? taskType}) {
-    final currentState = state.valueOrNull ?? SettingsState.initial();
+    final currentState = state.value ?? SettingsState.initial();
     return currentState.settings.notifications.shouldShowNotification(
       notificationType,
       taskType: taskType,
@@ -467,7 +467,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Verifica se tipo de tarefa está habilitado
   bool isTaskTypeEnabled(String taskType) {
-    final currentState = state.valueOrNull ?? SettingsState.initial();
+    final currentState = state.value ?? SettingsState.initial();
     return currentState.settings.notifications.isTaskTypeEnabled(taskType);
   }
 
@@ -479,7 +479,7 @@ class SettingsNotifier extends _$SettingsNotifier {
       exportResult.fold(
         (Failure failure) {
           state = AsyncValue.data(
-            (state.valueOrNull ?? SettingsState.initial()).copyWith(
+            (state.value ?? SettingsState.initial()).copyWith(
               errorMessage:
                   'Erro ao exportar configurações: ${failure.message}',
             ),
@@ -487,7 +487,7 @@ class SettingsNotifier extends _$SettingsNotifier {
         },
         (Map<String, dynamic> data) {
           state = AsyncValue.data(
-            (state.valueOrNull ?? SettingsState.initial()).copyWith(
+            (state.value ?? SettingsState.initial()).copyWith(
               successMessage: 'Configurações incluídas no próximo backup',
             ),
           );
@@ -495,7 +495,7 @@ class SettingsNotifier extends _$SettingsNotifier {
       );
     } catch (e) {
       state = AsyncValue.data(
-        (state.valueOrNull ?? SettingsState.initial()).copyWith(
+        (state.value ?? SettingsState.initial()).copyWith(
           errorMessage: 'Erro ao preparar backup: $e',
         ),
       );
@@ -505,7 +505,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   /// Reseta todas as configurações
   Future<void> resetAllSettings() async {
     state = AsyncValue.data(
-      (state.valueOrNull ?? SettingsState.initial()).copyWith(
+      (state.value ?? SettingsState.initial()).copyWith(
         isLoading: true,
         clearError: true,
         clearSuccess: true,
@@ -518,7 +518,7 @@ class SettingsNotifier extends _$SettingsNotifier {
       await result.fold(
         (Failure failure) async {
           state = AsyncValue.data(
-            (state.valueOrNull ?? SettingsState.initial()).copyWith(
+            (state.value ?? SettingsState.initial()).copyWith(
               errorMessage: 'Erro ao resetar configurações: ${failure.message}',
               isLoading: false,
             ),
@@ -537,7 +537,7 @@ class SettingsNotifier extends _$SettingsNotifier {
       );
     } catch (e) {
       state = AsyncValue.data(
-        (state.valueOrNull ?? SettingsState.initial()).copyWith(
+        (state.value ?? SettingsState.initial()).copyWith(
           errorMessage: 'Erro inesperado: $e',
           isLoading: false,
         ),
@@ -555,7 +555,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   /// Limpa mensagens de erro/sucesso
   void clearMessages() {
     state = AsyncValue.data(
-      (state.valueOrNull ?? SettingsState.initial()).copyWith(
+      (state.value ?? SettingsState.initial()).copyWith(
         clearError: true,
         clearSuccess: true,
       ),
@@ -606,7 +606,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 }
 
 @riverpod
-SettingsEntity settings(SettingsRef ref) {
+SettingsEntity settings(Ref ref) {
   return ref
       .watch(settingsNotifierProvider)
       .when(
@@ -617,7 +617,7 @@ SettingsEntity settings(SettingsRef ref) {
 }
 
 @riverpod
-NotificationSettingsEntity notificationSettings(NotificationSettingsRef ref) {
+NotificationSettingsEntity notificationSettings(Ref ref) {
   return ref
       .watch(settingsNotifierProvider)
       .when(
@@ -628,7 +628,7 @@ NotificationSettingsEntity notificationSettings(NotificationSettingsRef ref) {
 }
 
 @riverpod
-BackupSettingsEntity backupSettings(BackupSettingsRef ref) {
+BackupSettingsEntity backupSettings(Ref ref) {
   return ref
       .watch(settingsNotifierProvider)
       .when(
@@ -639,7 +639,7 @@ BackupSettingsEntity backupSettings(BackupSettingsRef ref) {
 }
 
 @riverpod
-ThemeSettingsEntity themeSettings(ThemeSettingsRef ref) {
+ThemeSettingsEntity themeSettings(Ref ref) {
   return ref
       .watch(settingsNotifierProvider)
       .when(
@@ -650,7 +650,7 @@ ThemeSettingsEntity themeSettings(ThemeSettingsRef ref) {
 }
 
 @riverpod
-AccountSettingsEntity accountSettings(AccountSettingsRef ref) {
+AccountSettingsEntity accountSettings(Ref ref) {
   return ref
       .watch(settingsNotifierProvider)
       .when(
@@ -661,7 +661,7 @@ AccountSettingsEntity accountSettings(AccountSettingsRef ref) {
 }
 
 @riverpod
-bool notificationsEnabled(NotificationsEnabledRef ref) {
+bool notificationsEnabled(Ref ref) {
   return ref
       .watch(settingsNotifierProvider)
       .when(
@@ -672,7 +672,7 @@ bool notificationsEnabled(NotificationsEnabledRef ref) {
 }
 
 @riverpod
-bool isDarkMode(IsDarkModeRef ref) {
+bool isDarkMode(Ref ref) {
   return ref
       .watch(settingsNotifierProvider)
       .when(
@@ -724,3 +724,6 @@ extension SettingsStateExtensions on SettingsState {
     }
   }
 }
+
+// LEGACY ALIAS
+final settingsNotifierProvider = settingsProvider;

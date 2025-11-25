@@ -7,14 +7,14 @@ part 'specialized_tasks_providers.g.dart';
 
 /// ScheduleService Provider (DIP)
 @riverpod
-IScheduleService scheduleService(ScheduleServiceRef ref) {
+IScheduleService scheduleService(Ref ref) {
   return ScheduleService();
 }
 
 /// TaskRecommendationService Provider (DIP)
 @riverpod
 ITaskRecommendationService taskRecommendationService(
-  TaskRecommendationServiceRef ref,
+  Ref ref,
 ) {
   return TaskRecommendationService();
 }

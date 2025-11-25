@@ -308,7 +308,7 @@ class _DeviceManagementDialogState
   }
 
   Future<void> _revokeAllOthers(BuildContext context) async {
-    final settingsState = ref.read(settingsNotifierProvider).valueOrNull;
+    final settingsState = ref.read(settingsNotifierProvider).value;
     final otherDevicesCount = settingsState?.connectedDevices
             .where((DeviceEntity d) =>
                 d.uuid != settingsState.currentDevice?.uuid && d.isActive)

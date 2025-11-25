@@ -58,7 +58,7 @@ class AppRouter {
       navigatorKey: NavigationService.navigatorKey,
       initialLocation: initialLocation,
       redirect: (context, state) {
-        final authStateValue = authState.valueOrNull;
+        final authStateValue = authState.value;
         final isAuthenticated = authStateValue?.isAuthenticated ?? false;
         final isAnonymous = authStateValue?.isAnonymous ?? false;
         final isInitialized = authState.hasValue;

@@ -1,7 +1,9 @@
 import 'package:core/core.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Providers unificados para sincronização e conectividade
 /// Consolidam offline/online sync entre todos os apps do monorepo
+/// Migrado para Riverpod 3.0 - sem legacy imports
 
 /// Provider para stream de conectividade
 final connectivityStreamProvider = StreamProvider<ConnectivityResult>((ref) {
@@ -39,11 +41,11 @@ final connectionTypeProvider = Provider<ConnectionType>((ref) {
   }
 });
 
-/// Provider principal para estado de sincronização
+/// Provider principal para estado de sincronização - Riverpod 3.0
 final syncStateProvider =
-    StateNotifierProvider<OfflineSyncStateNotifier, OfflineSyncState>((ref) {
-      return OfflineSyncStateNotifier();
-    });
+    NotifierProvider<OfflineSyncStateNotifier, OfflineSyncState>(
+      OfflineSyncStateNotifier.new,
+    );
 
 /// Provider para verificar se está sincronizando
 final isSyncingProvider = Provider<bool>((ref) {
@@ -74,14 +76,25 @@ final pendingItemsCountProvider = Provider<int>((ref) {
   );
 });
 
-/// Provider para sincronização específica por app
-final appSyncProvider =
-    StateNotifierProvider.family<AppSyncNotifier, AppOfflineSyncState, String>((
-      ref,
-      appId,
-    ) {
-      return AppSyncNotifier(appId);
-    });
+/// Provider para sincronização específica por app - Riverpod 3.0 usando Map interno
+final _appSyncNotifierProvider =
+    NotifierProvider<_AppSyncMapNotifier, Map<String, AppOfflineSyncState>>(
+      _AppSyncMapNotifier.new,
+    );
+
+/// Provider derivado para estado de sync de um app específico
+final appSyncProvider = Provider.family<AppOfflineSyncState, String>((ref, appId) {
+  return ref.watch(_appSyncNotifierProvider)[appId] ?? const AppSyncIdle();
+});
+
+/// Provider para ações de sync de um app específico
+final appSyncActionsProvider = Provider.family<AppSyncActions, String>((ref, appId) {
+  final notifier = ref.read(_appSyncNotifierProvider.notifier);
+  return AppSyncActions(
+    startSync: () => notifier.startSync(appId),
+    markNeedsSync: () => notifier.markNeedsSync(appId),
+  );
+});
 
 /// Provider para verificar se app específico precisa sincronizar
 final needsSyncProvider = Provider.family<bool, String>((ref, appId) {
@@ -141,12 +154,32 @@ final syncActionsProvider = Provider<SyncActions>((ref) {
     forcSync: syncNotifier.forceSync,
     clearOfflineData: syncNotifier.clearOfflineData,
     syncSpecificApp:
-        (appId) => ref.read(appSyncProvider(appId).notifier).startSync(),
+        (appId) => ref.read(appSyncActionsProvider(appId)).startSync(),
   );
 });
 
-/// Provider para conflitos de sincronização
-final syncConflictsProvider = StateProvider<List<SyncConflict>>((ref) => []);
+/// Notifier para conflitos de sincronização - Riverpod 3.0
+class SyncConflictsNotifier extends Notifier<List<SyncConflict>> {
+  @override
+  List<SyncConflict> build() => [];
+
+  void addConflict(SyncConflict conflict) {
+    state = [...state, conflict];
+  }
+
+  void removeConflict(String conflictId) {
+    state = state.where((c) => c.id != conflictId).toList();
+  }
+
+  void clearAll() {
+    state = [];
+  }
+}
+
+final syncConflictsProvider =
+    NotifierProvider<SyncConflictsNotifier, List<SyncConflict>>(
+      SyncConflictsNotifier.new,
+    );
 
 /// Provider para verificar se há conflitos
 final hasSyncConflictsProvider = Provider<bool>((ref) {
@@ -173,11 +206,23 @@ final conflictResolutionProvider = Provider<ConflictResolution>((ref) {
   );
 });
 
-/// Provider para configurações de bandwidth
-final bandwidthConfigProvider = StateProvider<BandwidthConfig>((ref) {
-  final connectionType = ref.watch(connectionTypeProvider);
-  return BandwidthConfig.optimal(connectionType);
-});
+/// Notifier para configurações de bandwidth - Riverpod 3.0
+class BandwidthConfigNotifier extends Notifier<BandwidthConfig> {
+  @override
+  BandwidthConfig build() {
+    final connectionType = ref.watch(connectionTypeProvider);
+    return BandwidthConfig.optimal(connectionType);
+  }
+
+  void setConfig(BandwidthConfig config) {
+    state = config;
+  }
+}
+
+final bandwidthConfigProvider =
+    NotifierProvider<BandwidthConfigNotifier, BandwidthConfig>(
+      BandwidthConfigNotifier.new,
+    );
 
 /// Provider para verificar se deve usar modo econômico
 final dataEconomyModeProvider = Provider<bool>((ref) {
@@ -234,7 +279,7 @@ extension OfflineSyncStateExtension on OfflineSyncState {
     if (this is SyncSuccess) return success((this as SyncSuccess).info);
     if (this is SyncPartial) return partial((this as SyncPartial).info);
     if (this is SyncFailed) return failed((this as SyncFailed).info);
-    throw StateError('Unknown state: $this');
+    throw StateError('Unknown state: \$this');
   }
 
   T maybeWhen<T>({
@@ -367,8 +412,6 @@ class SyncLimits {
     required this.allowLargeFileSync,
   });
 
-  /// Factory constructor using centralized configuration registry
-  /// Apps should register their sync limits at startup via SyncConfigRegistry
   factory SyncLimits.forApp(String appId, bool isPremium) {
     final config = SyncConfigRegistry.getSyncLimits(appId, isPremium);
     return SyncLimits(
@@ -407,8 +450,6 @@ class OfflineCapabilities {
     required this.offlineFeatures,
   });
 
-  /// Factory constructor using centralized configuration registry
-  /// Apps should register their offline capabilities at startup via SyncConfigRegistry
   factory OfflineCapabilities.forApp(String appId) {
     final config = SyncConfigRegistry.getOfflineCapabilities(appId);
     return OfflineCapabilities(
@@ -545,6 +586,17 @@ class SyncActions {
   });
 }
 
+/// Ações de sync por app
+class AppSyncActions {
+  final Future<void> Function() startSync;
+  final void Function() markNeedsSync;
+
+  const AppSyncActions({
+    required this.startSync,
+    required this.markNeedsSync,
+  });
+}
+
 /// Resolução de conflitos
 class ConflictResolution {
   final Future<void> Function(String conflictId) resolveWithLocal;
@@ -566,33 +618,27 @@ class ConflictResolution {
   });
 }
 
-/// Notifier para estado de sincronização
-class OfflineSyncStateNotifier extends StateNotifier<OfflineSyncState> {
-  OfflineSyncStateNotifier() : super(const SyncIdle());
-
-  /// Initialize sync operations (placeholder for future implementation)
-  /// Currently no initialization is required
-  void _initialize() {
-    // Reserved for future initialization logic (e.g., loading sync config)
-  }
+/// Notifier para estado de sincronização - Riverpod 3.0
+class OfflineSyncStateNotifier extends Notifier<OfflineSyncState> {
+  @override
+  OfflineSyncState build() => const SyncIdle();
 
   Future<void> startSync() async {
     if (state is SyncSyncing) return;
 
     try {
       state = const SyncSyncing();
-      _initialize();
       for (int i = 0; i <= 100; i += 25) {
         state = SyncSyncing(
           progress: i.toDouble(),
-          currentItem: 'Sincronizando item $i%',
+          currentItem: 'Sincronizando item \$i%',
         );
         await Future<void>.delayed(const Duration(milliseconds: 500));
       }
       state = SyncSuccess(SyncInfo(lastSync: DateTime.now(), errors: []));
     } catch (e) {
       state = SyncFailed(
-        SyncInfo(lastSync: DateTime.now(), errors: ['Erro inesperado: $e']),
+        SyncInfo(lastSync: DateTime.now(), errors: ['Erro inesperado: \$e']),
       );
     }
   }
@@ -606,36 +652,32 @@ class OfflineSyncStateNotifier extends StateNotifier<OfflineSyncState> {
     await startSync();
   }
 
-  /// Clear offline data for a specific app
-  /// TODO: Implement actual data clearing logic with Hive/Storage service
   Future<void> clearOfflineData(String appId) async {
-    // Placeholder: should clear app-specific offline data from Hive boxes
-    // Implementation depends on app-specific storage structure
+    // Placeholder: should clear app-specific offline data
   }
 }
 
-/// Notifier para sincronização por app
-class AppSyncNotifier extends StateNotifier<AppOfflineSyncState> {
-  final String appId;
+/// Notifier interno para gerenciar map de sincronização por app - Riverpod 3.0
+class _AppSyncMapNotifier extends Notifier<Map<String, AppOfflineSyncState>> {
+  @override
+  Map<String, AppOfflineSyncState> build() => {};
 
-  AppSyncNotifier(this.appId) : super(const AppSyncIdle());
+  Future<void> startSync(String appId) async {
+    if (state[appId] is AppSyncSyncing) return;
 
-  Future<void> startSync() async {
-    if (state is AppSyncSyncing) return;
-
-    state = const AppSyncSyncing();
+    state = {...state, appId: const AppSyncSyncing()};
 
     try {
       await Future<void>.delayed(const Duration(seconds: 2));
-      state = const AppSyncComplete();
+      state = {...state, appId: const AppSyncComplete()};
     } catch (e) {
-      state = const AppSyncNeedsSync();
+      state = {...state, appId: const AppSyncNeedsSync()};
     }
   }
 
-  void markNeedsSync() {
-    if (state is! AppSyncSyncing) {
-      state = const AppSyncNeedsSync();
+  void markNeedsSync(String appId) {
+    if (state[appId] is! AppSyncSyncing) {
+      state = {...state, appId: const AppSyncNeedsSync()};
     }
   }
 }
@@ -644,7 +686,7 @@ bool _shouldSync(DateTime? lastSync) {
   if (lastSync == null) return true;
   final now = DateTime.now();
   final hoursSinceLastSync = now.difference(lastSync).inHours;
-  return hoursSinceLastSync >= 1; // Sync if more than 1 hour
+  return hoursSinceLastSync >= 1;
 }
 
 Future<void> _resolveConflict(
@@ -652,9 +694,7 @@ Future<void> _resolveConflict(
   String conflictId,
   ResolutionType type,
 ) async {
-  final conflicts = ref.read(syncConflictsProvider);
-  final updatedConflicts = conflicts.where((c) => c.id != conflictId).toList();
-  ref.read(syncConflictsProvider.notifier).state = updatedConflicts;
+  ref.read(syncConflictsProvider.notifier).removeConflict(conflictId);
 }
 
 Future<void> _resolveConflictWithMerge(
@@ -662,11 +702,9 @@ Future<void> _resolveConflictWithMerge(
   String conflictId,
   Map<String, dynamic> mergedData,
 ) async {
-  final conflicts = ref.read(syncConflictsProvider);
-  final updatedConflicts = conflicts.where((c) => c.id != conflictId).toList();
-  ref.read(syncConflictsProvider.notifier).state = updatedConflicts;
+  ref.read(syncConflictsProvider.notifier).removeConflict(conflictId);
 }
 
 Future<void> _resolveAllConflicts(Ref ref, ResolutionType type) async {
-  ref.read(syncConflictsProvider.notifier).state = [];
+  ref.read(syncConflictsProvider.notifier).clearAll();
 }

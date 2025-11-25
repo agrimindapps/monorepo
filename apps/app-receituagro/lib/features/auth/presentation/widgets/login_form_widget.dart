@@ -19,8 +19,8 @@ class LoginFormWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final loginState = ref.watch(loginNotifierProvider);
-    final loginNotifier = ref.read(loginNotifierProvider.notifier);
+    final loginState = ref.watch(loginProvider);
+    final loginNotifier = ref.read(loginProvider.notifier);
 
     return Form(
       child: Column(
@@ -101,7 +101,7 @@ class LoginFormWidget extends ConsumerWidget {
   }
 
   Widget _buildForgotPassword(BuildContext context, WidgetRef ref) {
-    final loginNotifier = ref.read(loginNotifierProvider.notifier);
+    final loginNotifier = ref.read(loginProvider.notifier);
     final primaryColor = _uiService.getReceitaAgroPrimaryColor(
       Theme.of(context).brightness == Brightness.dark,
     );
@@ -127,12 +127,12 @@ class LoginFormWidget extends ConsumerWidget {
       print('🎯 LoginFormWidget: Iniciando login no ReceitaAgro');
     }
 
-    final loginNotifier = ref.read(loginNotifierProvider.notifier);
+    final loginNotifier = ref.read(loginProvider.notifier);
     await loginNotifier.signInWithEmailAndSync();
 
     if (!context.mounted) return;
 
-    final loginState = ref.read(loginNotifierProvider);
+    final loginState = ref.read(loginProvider);
 
     if (kDebugMode) {
       print(

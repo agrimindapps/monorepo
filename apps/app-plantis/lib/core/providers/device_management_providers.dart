@@ -247,7 +247,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      final currentState = state.valueOrNull ?? DeviceManagementState.initial();
+      final currentState = state.value ?? DeviceManagementState.initial();
 
       final result =
           await _getUserDevicesUseCase.call(const GetUserDevicesParams());
@@ -266,7 +266,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
   /// Revoke a specific device
   Future<bool> revokeDevice(String deviceUuid, {String? reason}) async {
-    final currentState = state.valueOrNull ?? DeviceManagementState.initial();
+    final currentState = state.value ?? DeviceManagementState.initial();
 
     state = AsyncValue.data(currentState.copyWith(
       isRevoking: true,
@@ -281,7 +281,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
     final success = result.fold(
       (Failure failure) {
-        final updatedState = (state.valueOrNull ?? currentState).copyWith(
+        final updatedState = (state.value ?? currentState).copyWith(
           isRevoking: false,
           revokingDeviceUuid: null,
           errorMessage: failure.message,
@@ -297,7 +297,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
     if (success) {
       await loadDevices();
 
-      final updatedState = (state.valueOrNull ?? currentState).copyWith(
+      final updatedState = (state.value ?? currentState).copyWith(
         isRevoking: false,
         revokingDeviceUuid: null,
         successMessage: 'Dispositivo revogado com sucesso',
@@ -311,7 +311,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
   /// Revoke all other devices
   Future<bool> revokeAllOtherDevices({String? reason}) async {
-    final currentState = state.valueOrNull ?? DeviceManagementState.initial();
+    final currentState = state.value ?? DeviceManagementState.initial();
 
     state = AsyncValue.data(currentState.copyWith(
       isRevoking: true,
@@ -336,7 +336,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
     if (resultData['success'] as bool) {
       await loadDevices();
 
-      final updatedState = (state.valueOrNull ?? currentState).copyWith(
+      final updatedState = (state.value ?? currentState).copyWith(
         isRevoking: false,
         successMessage:
             '${resultData['count']} dispositivos revogados com sucesso',
@@ -344,7 +344,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
       );
       state = AsyncValue.data(updatedState);
     } else {
-      final updatedState = (state.valueOrNull ?? currentState).copyWith(
+      final updatedState = (state.value ?? currentState).copyWith(
         isRevoking: false,
         errorMessage: resultData['message'] as String,
       );
@@ -356,7 +356,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
   /// Validate current device
   Future<DeviceValidationResult?> validateCurrentDevice() async {
-    final currentState = state.valueOrNull ?? DeviceManagementState.initial();
+    final currentState = state.value ?? DeviceManagementState.initial();
     if (currentState.isValidating) return null;
 
     state = AsyncValue.data(currentState.copyWith(
@@ -372,7 +372,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
       final currentDevice = currentState.currentDevice;
       if (currentDevice == null) {
-        final updatedState = (state.valueOrNull ?? currentState).copyWith(
+        final updatedState = (state.value ?? currentState).copyWith(
           isValidating: false,
           errorMessage: 'Nenhum dispositivo atual identificado',
         );
@@ -386,7 +386,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
       return result.fold(
         (Failure failure) {
-          final updatedState = (state.valueOrNull ?? currentState).copyWith(
+          final updatedState = (state.value ?? currentState).copyWith(
             isValidating: false,
             errorMessage: 'Erro ao validar dispositivo: ${failure.message}',
           );
@@ -397,14 +397,14 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
           if (validationResult.isValid) {
             await loadDevices();
 
-            final updatedState = (state.valueOrNull ?? currentState).copyWith(
+            final updatedState = (state.value ?? currentState).copyWith(
               isValidating: false,
               successMessage: 'Dispositivo validado com sucesso',
               clearError: true,
             );
             state = AsyncValue.data(updatedState);
           } else {
-            final updatedState = (state.valueOrNull ?? currentState).copyWith(
+            final updatedState = (state.value ?? currentState).copyWith(
               isValidating: false,
               errorMessage: validationResult.message ??
                   'Falha na validação do dispositivo',
@@ -419,7 +419,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
       if (kDebugMode) {
         debugPrint('❌ DeviceManagementNotifier: Error validating device: $e');
       }
-      final updatedState = (state.valueOrNull ?? currentState).copyWith(
+      final updatedState = (state.value ?? currentState).copyWith(
         isValidating: false,
         errorMessage: 'Erro inesperado na validação',
       );
@@ -435,7 +435,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
   /// Load device statistics
   Future<void> loadStatistics({bool refresh = false}) async {
-    final currentState = state.valueOrNull ?? DeviceManagementState.initial();
+    final currentState = state.value ?? DeviceManagementState.initial();
 
     try {
       final result = await _getDeviceStatisticsUseCase
@@ -463,13 +463,13 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
   /// Clear error message
   void clearError() {
-    final currentState = state.valueOrNull ?? DeviceManagementState.initial();
+    final currentState = state.value ?? DeviceManagementState.initial();
     state = AsyncValue.data(currentState.copyWith(clearError: true));
   }
 
   /// Clear success message
   void clearSuccess() {
-    final currentState = state.valueOrNull ?? DeviceManagementState.initial();
+    final currentState = state.value ?? DeviceManagementState.initial();
     state = AsyncValue.data(currentState.copyWith(clearSuccess: true));
   }
 
@@ -478,3 +478,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
     state = AsyncValue.data(DeviceManagementState.initial());
   }
 }
+
+/// Alias for backwards compatibility with legacy code
+/// Use deviceManagementProvider instead in new code
+const deviceManagementNotifierProvider = deviceManagementProvider;

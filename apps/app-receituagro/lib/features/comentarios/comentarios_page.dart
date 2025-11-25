@@ -68,7 +68,7 @@ class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent
   Future<void> _initializeData() async {
     if (_dataInitialized) return;
 
-    final commentNotifier = ref.read(comentariosNotifierProvider.notifier);
+    final commentNotifier = ref.read(comentariosProvider.notifier);
     await commentNotifier.ensureDataLoaded(
       context: widget.pkIdentificador,
       tool: widget.ferramenta,
@@ -106,7 +106,7 @@ class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent
   Widget _buildModernHeader(BuildContext context, bool isDark) {
     return Consumer(
       builder: (context, ref, child) {
-        final comentariosAsync = ref.watch(comentariosNotifierProvider);
+        final comentariosAsync = ref.watch(comentariosProvider);
 
         return comentariosAsync.when(
           data: (comentariosState) {
@@ -167,8 +167,8 @@ class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent
   Widget _buildBody() {
     return Consumer(
       builder: (context, ref, child) {
-        final comentariosAsync = ref.watch(comentariosNotifierProvider);
-        final premiumAsync = ref.watch(premiumNotifierProvider);
+        final comentariosAsync = ref.watch(comentariosProvider);
+        final premiumAsync = ref.watch(premiumProvider);
 
         final isPremium = premiumAsync.value?.isPremium ?? false;
 
@@ -232,8 +232,8 @@ class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent
   Widget _buildFAB() {
     return Consumer(
       builder: (context, ref, child) {
-        final comentariosAsync = ref.watch(comentariosNotifierProvider);
-        final premiumAsync = ref.watch(premiumNotifierProvider);
+        final comentariosAsync = ref.watch(comentariosProvider);
+        final premiumAsync = ref.watch(premiumProvider);
 
         final isPremium = premiumAsync.value?.isPremium ?? false;
 
@@ -264,7 +264,7 @@ class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent
         ferramenta: widget.ferramenta,
         onSave: (content) async {
           final comentario = _createComentarioFromContent(content);
-          await ref.read(comentariosNotifierProvider.notifier).addComentario(comentario);
+          await ref.read(comentariosProvider.notifier).addComentario(comentario);
         },
         onCancel: () {
         },
@@ -286,7 +286,7 @@ class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent
           TextButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
-              ref.read(comentariosNotifierProvider.notifier).deleteComentario(comentario.id);
+              ref.read(comentariosProvider.notifier).deleteComentario(comentario.id);
             },
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,

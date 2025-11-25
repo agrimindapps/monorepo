@@ -5,7 +5,3 @@ targets:
         options:
           # Enable code generation for Riverpod
           enabled: true
-      injectable_generator:injectable_builder:
-        options:
-          # Enable dependency injection generation
-          auto_register: true

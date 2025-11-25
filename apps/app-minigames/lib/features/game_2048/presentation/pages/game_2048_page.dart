@@ -21,14 +21,14 @@ class _Game2048PageState extends ConsumerState<Game2048Page> {
     super.initState();
     // Initialize game after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(game2048NotifierProvider.notifier).initializeGame();
+      ref.read(game2048Provider.notifier).initializeGame();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final gameState = ref.watch(game2048NotifierProvider);
-    final notifier = ref.read(game2048NotifierProvider.notifier);
+    final gameState = ref.watch(game2048Provider);
+    final notifier = ref.read(game2048Provider.notifier);
 
     // Show game over dialog when game ends
     if (gameState.status == GameStatus.won ||
@@ -153,8 +153,8 @@ class _Game2048PageState extends ConsumerState<Game2048Page> {
 
   /// Shows game over/win dialog
   void _showGameOverDialog(BuildContext context) {
-    final gameState = ref.read(game2048NotifierProvider);
-    final notifier = ref.read(game2048NotifierProvider.notifier);
+    final gameState = ref.read(game2048Provider);
+    final notifier = ref.read(game2048Provider.notifier);
 
     showDialog(
       context: context,
@@ -175,7 +175,7 @@ class _Game2048PageState extends ConsumerState<Game2048Page> {
 
   /// Shows restart confirmation dialog
   void _showRestartConfirmation(BuildContext context) {
-    final notifier = ref.read(game2048NotifierProvider.notifier);
+    final notifier = ref.read(game2048Provider.notifier);
 
     showDialog(
       context: context,

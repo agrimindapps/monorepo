@@ -12,45 +12,45 @@ part 'export_managers_providers.g.dart';
 
 /// Provides access to export dialog manager
 @riverpod
-ExportDialogManager exportDialogManager(ExportDialogManagerRef ref) {
+ExportDialogManager exportDialogManager(Ref ref) {
   return ExportDialogManager();
 }
 
 /// Provides access to export status mapper
 @riverpod
-ExportStatusMapper exportStatusMapper(ExportStatusMapperRef ref) {
+ExportStatusMapper exportStatusMapper(Ref ref) {
   return ExportStatusMapper();
 }
 
 /// Provides access to export action handler
 @riverpod
-ExportActionHandler exportActionHandler(ExportActionHandlerRef ref) {
+ExportActionHandler exportActionHandler(Ref ref) {
   return ExportActionHandler();
 }
 
 /// Provides access to export progress monitor
 @riverpod
-ExportProgressMonitor exportProgressMonitor(ExportProgressMonitorRef ref) {
+ExportProgressMonitor exportProgressMonitor(Ref ref) {
   return ExportProgressMonitor();
 }
 
 /// Provides access to export rate limiter
 @riverpod
-ExportRateLimiter exportRateLimiter(ExportRateLimiterRef ref) {
+ExportRateLimiter exportRateLimiter(Ref ref) {
   return ExportRateLimiter();
 }
 
 /// Provides access to export statistics calculator
 @riverpod
 ExportStatisticsCalculator exportStatisticsCalculator(
-  ExportStatisticsCalculatorRef ref,
+  Ref ref,
 ) {
   return ExportStatisticsCalculator();
 }
 
 /// Provides access to export action service
 @riverpod
-ExportActionService exportActionService(ExportActionServiceRef ref) {
+ExportActionService exportActionService(Ref ref) {
   // These would normally be injected from the repository
   // For now, returning a placeholder - actual implementation depends on setup
   throw UnimplementedError(

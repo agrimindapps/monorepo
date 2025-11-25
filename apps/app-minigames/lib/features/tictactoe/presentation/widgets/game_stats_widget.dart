@@ -13,7 +13,7 @@ class GameStatsWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final statsAsync = ref.watch(ticTacToeStatsNotifierProvider);
+    final statsAsync = ref.watch(ticTacToeStatsProvider);
 
     return statsAsync.when(
       data: (stats) => Column(

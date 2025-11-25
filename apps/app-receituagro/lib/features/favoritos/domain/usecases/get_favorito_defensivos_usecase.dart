@@ -17,7 +17,7 @@ import '../repositories/i_favoritos_repository.dart';
 /// final defensivos = await repository.getByTipo(TipoFavorito.defensivo);
 ///
 /// // Ou via Riverpod notifier:
-/// final favoritos = ref.watch(favoritosNotifierProvider);
+/// final favoritos = ref.watch(favoritosProvider);
 /// final defensivos = favoritos.getFavoritosByTipo<FavoritoDefensivoEntity>(
 ///   TipoFavorito.defensivo
 /// );

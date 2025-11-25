@@ -23,22 +23,15 @@ import '../services/firebase_firestore_service.dart';
 part 'dependency_providers.g.dart';
 
 /// ============================================================================
-/// DEPENDENCY PROVIDERS - Riverpod Implementation
+/// DEPENDENCY PROVIDERS - Riverpod 3.0 Implementation
 /// ============================================================================
 ///
 /// Providers centralizados para substituir GetIt/Injectable.
 ///
-/// **PADRÃO ESTABELECIDO:**
+/// **PADRÃO RIVERPOD 3.0:**
 /// - Usa @riverpod para code generation
+/// - Funções usam Ref genérico (não mais *Ref específicos)
 /// - Singletons implementados via keepAlive: true
-/// - Database e DAOs como providers Riverpod
-/// - Firebase e External dependencies expostos via providers
-///
-/// **ORGANIZAÇÃO:**
-/// 1. External Dependencies (Firebase, SharedPreferences, Logger)
-/// 2. Database (NutritutiDatabase)
-/// 3. DAOs (Perfil, Peso, Agua, Water, Exercicio, Comentario)
-/// 4. Services (FirestoreService)
 ///
 /// ============================================================================
 
@@ -48,25 +41,25 @@ part 'dependency_providers.g.dart';
 
 /// Firebase Firestore singleton
 @Riverpod(keepAlive: true)
-FirebaseFirestore firebaseFirestore(FirebaseFirestoreRef ref) {
+FirebaseFirestore firebaseFirestore(Ref ref) {
   return FirebaseFirestore.instance;
 }
 
 /// Firebase Auth singleton
 @Riverpod(keepAlive: true)
-FirebaseAuth firebaseAuth(FirebaseAuthRef ref) {
+FirebaseAuth firebaseAuth(Ref ref) {
   return FirebaseAuth.instance;
 }
 
 /// Logger singleton
 @Riverpod(keepAlive: true)
-Logger logger(LoggerRef ref) {
+Logger logger(Ref ref) {
   return Logger();
 }
 
 /// SharedPreferences singleton (async initialization)
 @Riverpod(keepAlive: true)
-Future<SharedPreferences> sharedPreferences(SharedPreferencesRef ref) async {
+Future<SharedPreferences> sharedPreferences(Ref ref) async {
   return SharedPreferences.getInstance();
 }
 
@@ -76,7 +69,7 @@ Future<SharedPreferences> sharedPreferences(SharedPreferencesRef ref) async {
 
 /// NutritutiDatabase singleton
 @Riverpod(keepAlive: true)
-NutritutiDatabase nutritutiDatabase(NutritutiDatabaseRef ref) {
+NutritutiDatabase nutritutiDatabase(Ref ref) {
   final db = NutritutiDatabase.production();
   // Dispose database when provider is disposed
   ref.onDispose(() => db.close());
@@ -89,42 +82,42 @@ NutritutiDatabase nutritutiDatabase(NutritutiDatabaseRef ref) {
 
 /// AguaDao provider
 @Riverpod(keepAlive: true)
-AguaDao aguaDao(AguaDaoRef ref) {
+AguaDao aguaDao(Ref ref) {
   final db = ref.watch(nutritutiDatabaseProvider);
   return db.aguaDao;
 }
 
 /// ComentarioDao provider
 @Riverpod(keepAlive: true)
-ComentarioDao comentarioDao(ComentarioDaoRef ref) {
+ComentarioDao comentarioDao(Ref ref) {
   final db = ref.watch(nutritutiDatabaseProvider);
   return db.comentarioDao;
 }
 
 /// ExercicioDao provider
 @Riverpod(keepAlive: true)
-ExercicioDao exercicioDao(ExercicioDaoRef ref) {
+ExercicioDao exercicioDao(Ref ref) {
   final db = ref.watch(nutritutiDatabaseProvider);
   return db.exercicioDao;
 }
 
 /// PerfilDao provider
 @Riverpod(keepAlive: true)
-PerfilDao perfilDao(PerfilDaoRef ref) {
+PerfilDao perfilDao(Ref ref) {
   final db = ref.watch(nutritutiDatabaseProvider);
   return db.perfilDao;
 }
 
 /// PesoDao provider
 @Riverpod(keepAlive: true)
-PesoDao pesoDao(PesoDaoRef ref) {
+PesoDao pesoDao(Ref ref) {
   final db = ref.watch(nutritutiDatabaseProvider);
   return db.pesoDao;
 }
 
 /// WaterDao provider
 @Riverpod(keepAlive: true)
-WaterDao waterDao(WaterDaoRef ref) {
+WaterDao waterDao(Ref ref) {
   final db = ref.watch(nutritutiDatabaseProvider);
   return db.waterDao;
 }
@@ -135,7 +128,7 @@ WaterDao waterDao(WaterDaoRef ref) {
 
 /// FirestoreService provider
 @riverpod
-FirestoreService firestoreService(FirestoreServiceRef ref) {
+FirestoreService firestoreService(Ref ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
   return FirestoreService(firestore);
 }
@@ -146,34 +139,34 @@ FirestoreService firestoreService(FirestoreServiceRef ref) {
 
 /// PerfilRepository provider
 @riverpod
-PerfilRepository perfilRepository(PerfilRepositoryRef ref) {
+PerfilRepository perfilRepository(Ref ref) {
   final database = ref.watch(nutritutiDatabaseProvider);
   return PerfilRepository(database);
 }
 
 /// AlimentosRepository provider
 @riverpod
-AlimentosRepository alimentosRepository(AlimentosRepositoryRef ref) {
+AlimentosRepository alimentosRepository(Ref ref) {
   return AlimentosRepository();
 }
 
 /// ComentariosRepository provider
 @riverpod
-ComentariosRepository comentariosRepository(ComentariosRepositoryRef ref) {
+ComentariosRepository comentariosRepository(Ref ref) {
   final database = ref.watch(nutritutiDatabaseProvider);
   return ComentariosRepository(database);
 }
 
 /// AguaRepository provider
 @riverpod
-AguaRepository aguaRepository(AguaRepositoryRef ref) {
+AguaRepository aguaRepository(Ref ref) {
   final aguaDao = ref.watch(aguaDaoProvider);
   return AguaRepository(aguaDao);
 }
 
 /// PesoRepository provider
 @riverpod
-PesoRepository pesoRepository(PesoRepositoryRef ref) {
+PesoRepository pesoRepository(Ref ref) {
   final firestoreService = ref.watch(firestoreServiceProvider);
   final database = ref.watch(nutritutiDatabaseProvider);
   return PesoRepository(firestoreService, database);
@@ -181,14 +174,13 @@ PesoRepository pesoRepository(PesoRepositoryRef ref) {
 
 /// ExercicioRepository provider
 @riverpod
-ExercicioRepository exercicioRepository(ExercicioRepositoryRef ref) {
+ExercicioRepository exercicioRepository(Ref ref) {
   return ExercicioRepository();
 }
 
 /// ExercicioBusinessService provider
 @riverpod
-ExercicioBusinessService exercicioBusinessService(
-    ExercicioBusinessServiceRef ref) {
+ExercicioBusinessService exercicioBusinessService(Ref ref) {
   final database = ref.watch(nutritutiDatabaseProvider);
   final repository = ref.watch(exercicioRepositoryProvider);
   return ExercicioBusinessService(database, repository);

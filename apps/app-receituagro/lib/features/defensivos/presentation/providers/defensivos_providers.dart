@@ -1,5 +1,6 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide Ref;
 import '../../../../database/providers/database_providers.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../comentarios/domain/comentarios_service.dart';
@@ -31,7 +32,7 @@ FitossanitariosRepository fitossanitariosRepository(
 
 /// Bridge Provider for ComentariosService
 @Riverpod(keepAlive: true)
-ComentariosService comentariosService(ComentariosServiceRef ref) {
+ComentariosService comentariosService(Ref ref) {
   return ComentariosService(
     repository: ref.watch(iComentariosRepositoryProvider),
     premiumService: ref.watch(premiumServiceProvider),
@@ -57,7 +58,7 @@ DefensivosGroupingService defensivosGroupingService(
 }
 
 @Riverpod(keepAlive: true)
-IDefensivosQueryService defensivosQueryService(DefensivosQueryServiceRef ref) {
+IDefensivosQueryService defensivosQueryService(Ref ref) {
   return DefensivosQueryService();
 }
 
@@ -68,7 +69,7 @@ IDefensivosSearchService defensivosSearchService(
 }
 
 @Riverpod(keepAlive: true)
-IDefensivosStatsService defensivosStatsService(DefensivosStatsServiceRef ref) {
+IDefensivosStatsService defensivosStatsService(Ref ref) {
   return DefensivosStatsService();
 }
 
@@ -81,7 +82,7 @@ IDefensivosFilterService defensivosFilterService(
 // --- Repository ---
 
 @Riverpod(keepAlive: true)
-IDefensivosRepository defensivosRepository(DefensivosRepositoryRef ref) {
+IDefensivosRepository defensivosRepository(Ref ref) {
   return DefensivosRepositoryImpl(
     ref.watch(fitossanitariosRepositoryProvider),
     ref.watch(fitossanitariosInfoRepositoryProvider),
@@ -95,7 +96,7 @@ IDefensivosRepository defensivosRepository(DefensivosRepositoryRef ref) {
 // --- Use Cases ---
 
 @Riverpod(keepAlive: true)
-GetDefensivosUseCase getDefensivosUseCase(GetDefensivosUseCaseRef ref) {
+GetDefensivosUseCase getDefensivosUseCase(Ref ref) {
   return GetDefensivosUseCase(ref.watch(defensivosRepositoryProvider));
 }
 
@@ -130,7 +131,7 @@ GetClassesAgronomicasUseCase getClassesAgronomicasUseCase(
 }
 
 @Riverpod(keepAlive: true)
-GetFabricantesUseCase getFabricantesUseCase(GetFabricantesUseCaseRef ref) {
+GetFabricantesUseCase getFabricantesUseCase(Ref ref) {
   return GetFabricantesUseCase(ref.watch(defensivosRepositoryProvider));
 }
 

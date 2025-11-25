@@ -23,7 +23,7 @@ class FlappbirdPage extends ConsumerStatefulWidget {
 class _FlappbirdPageState extends ConsumerState<FlappbirdPage> {
   @override
   Widget build(BuildContext context) {
-    final gameStateAsync = ref.watch(flappbirdGameNotifierProvider);
+    final gameStateAsync = ref.watch(flappbirdGameProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFF87CEEB), // Sky blue
@@ -32,7 +32,7 @@ class _FlappbirdPageState extends ConsumerState<FlappbirdPage> {
           // Update screen dimensions when layout changes
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ref
-                .read(flappbirdGameNotifierProvider.notifier)
+                .read(flappbirdGameProvider.notifier)
                 .updateScreenDimensions(
                   constraints.maxWidth,
                   constraints.maxHeight,
@@ -43,7 +43,7 @@ class _FlappbirdPageState extends ConsumerState<FlappbirdPage> {
             data: (gameState) {
               return GestureDetector(
                 onTap: () {
-                  ref.read(flappbirdGameNotifierProvider.notifier).flap();
+                  ref.read(flappbirdGameProvider.notifier).flap();
                 },
                 child: Stack(
                   children: [
@@ -88,17 +88,17 @@ class _FlappbirdPageState extends ConsumerState<FlappbirdPage> {
                     // Score display
                     ScoreDisplayWidget(
                       score: gameState.score,
-                      highScore: ref.read(flappbirdGameNotifierProvider.notifier).highScore,
+                      highScore: ref.read(flappbirdGameProvider.notifier).highScore,
                     ),
 
                     // Game over dialog
                     if (gameState.isGameOver)
                       GameOverDialog(
                         score: gameState.score,
-                        highScore: ref.read(flappbirdGameNotifierProvider.notifier).highScore,
+                        highScore: ref.read(flappbirdGameProvider.notifier).highScore,
                         onRestart: () {
                           ref
-                              .read(flappbirdGameNotifierProvider.notifier)
+                              .read(flappbirdGameProvider.notifier)
                               .restartGame();
                         },
                       ),
@@ -139,7 +139,7 @@ class _FlappbirdPageState extends ConsumerState<FlappbirdPage> {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      ref.invalidate(flappbirdGameNotifierProvider);
+                      ref.invalidate(flappbirdGameProvider);
                     },
                     child: const Text('Retry'),
                   ),

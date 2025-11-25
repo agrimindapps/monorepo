@@ -1,4 +1,3 @@
-import 'package:core/core.dart';
 import '../receituagro_database.dart';
 import 'diagnostico_repository.dart';
 

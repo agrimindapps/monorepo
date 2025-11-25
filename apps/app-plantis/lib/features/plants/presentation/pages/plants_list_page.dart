@@ -214,7 +214,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
           },
           error: (_, __) {
             // Se houve erro e não há plantas, tenta recarregar uma vez
-            final state = plantsAsync.valueOrNull;
+            final state = plantsAsync.value;
             if (state != null &&
                 state.allPlants.isEmpty &&
                 !state.isLoading &&

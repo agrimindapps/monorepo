@@ -67,7 +67,7 @@ class _PesoFormWidgetState extends ConsumerState<PesoFormWidget> {
       try {
         if (widget.registro != null) {
           await ref
-              .read(pesoNotifierProvider.notifier)
+              .read(pesoProvider.notifier)
               .updateRegistro(_localRegistro);
 
           if (context.mounted) {
@@ -81,7 +81,7 @@ class _PesoFormWidgetState extends ConsumerState<PesoFormWidget> {
           }
         } else {
           await ref
-              .read(pesoNotifierProvider.notifier)
+              .read(pesoProvider.notifier)
               .addRegistro(_localRegistro);
 
           if (context.mounted) {

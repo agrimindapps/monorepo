@@ -67,9 +67,9 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
   /// Carrega dados iniciais - operações locais sem timeout necessário
   Future<void> _loadInitialData() async {
     try {
-      final pragaNotifier = ref.read(detalhePragaNotifierProvider.notifier);
+      final pragaNotifier = ref.read(detalhePragaProvider.notifier);
       final diagnosticosNotifier = ref.read(
-        diagnosticosPragaNotifierProvider.notifier,
+        diagnosticosPragaProvider.notifier,
       );
 
       if (widget.pragaId != null && widget.pragaId!.isNotEmpty) {
@@ -81,7 +81,7 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
         );
       }
 
-      final pragaState = await ref.read(detalhePragaNotifierProvider.future);
+      final pragaState = await ref.read(detalhePragaProvider.future);
 
       if (pragaState.pragaData != null &&
           pragaState.pragaData!.idPraga.isNotEmpty) {
@@ -97,7 +97,7 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
 
   @override
   Widget build(BuildContext context) {
-    final pragaAsyncState = ref.watch(detalhePragaNotifierProvider);
+    final pragaAsyncState = ref.watch(detalhePragaProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -171,11 +171,11 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
 
   /// Alterna estado de favorito
   Future<void> _toggleFavorito() async {
-    final notifier = ref.read(detalhePragaNotifierProvider.notifier);
+    final notifier = ref.read(detalhePragaProvider.notifier);
     final success = await notifier.toggleFavorito();
 
     if (mounted) {
-      final state = ref.read(detalhePragaNotifierProvider).value;
+      final state = ref.read(detalhePragaProvider).value;
 
       if (success) {
         FavoritosPage.reloadIfActive();

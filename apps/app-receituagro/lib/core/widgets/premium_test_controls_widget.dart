@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../interfaces/i_premium_service.dart';
 import '../providers/premium_providers.dart';
 
+part 'premium_test_controls_widget.g.dart';
+
 // Provider para gerenciar o estado de processamento do widget
-final _isProcessingProvider = StateProvider<bool>((ref) => false);
+@riverpod
+class IsProcessing extends _$IsProcessing {
+  @override
+  bool build() => false;
+
+  void setProcessing(bool value) {
+    state = value;
+  }
+}
 
 /// Widget de controle para testar funcionalidades premium
 /// Permite ativar/desativar licença teste facilmente durante desenvolvimento
@@ -53,7 +64,7 @@ class PremiumTestControlsWidget extends ConsumerWidget {
           const SizedBox(height: 8),
           Consumer(
             builder: (context, ref, child) {
-              final isProcessing = ref.watch(_isProcessingProvider);
+              final isProcessing = ref.watch(isProcessingProvider);
               final isPremium = premiumService.isPremium;
 
               return Row(
@@ -128,11 +139,11 @@ class PremiumTestControlsWidget extends ConsumerWidget {
 
   Future<void> _activateTestSubscription(BuildContext context, WidgetRef ref,
       IPremiumService premiumService) async {
-    final isProcessingNotifier = ref.read(_isProcessingProvider.notifier);
+    final isProcessingNotifier = ref.read(isProcessingProvider.notifier);
 
-    if (ref.read(_isProcessingProvider)) return;
+    if (ref.read(isProcessingProvider)) return;
 
-    isProcessingNotifier.state = true;
+    isProcessingNotifier.setProcessing(true);
 
     try {
       await premiumService.generateTestSubscription();
@@ -153,17 +164,17 @@ class PremiumTestControlsWidget extends ConsumerWidget {
         ),
       );
     } finally {
-      isProcessingNotifier.state = false;
+      isProcessingNotifier.setProcessing(false);
     }
   }
 
   Future<void> _removeTestSubscription(BuildContext context, WidgetRef ref,
       IPremiumService premiumService) async {
-    final isProcessingNotifier = ref.read(_isProcessingProvider.notifier);
+    final isProcessingNotifier = ref.read(isProcessingProvider.notifier);
 
-    if (ref.read(_isProcessingProvider)) return;
+    if (ref.read(isProcessingProvider)) return;
 
-    isProcessingNotifier.state = true;
+    isProcessingNotifier.setProcessing(true);
 
     try {
       await premiumService.removeTestSubscription();
@@ -184,7 +195,7 @@ class PremiumTestControlsWidget extends ConsumerWidget {
         ),
       );
     } finally {
-      isProcessingNotifier.state = false;
+      isProcessingNotifier.setProcessing(false);
     }
   }
 }

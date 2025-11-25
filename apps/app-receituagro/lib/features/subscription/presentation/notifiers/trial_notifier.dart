@@ -1,5 +1,8 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import '../../domain/entities/index.dart';
+
+part 'trial_notifier.g.dart';
 
 /// Estado das informações de período experimental
 class TrialState {
@@ -79,8 +82,12 @@ class TrialState {
 /// - Iniciar novo período experimental
 /// - Cancelar período experimental
 /// - Rastrear progresso do período
-class TrialNotifier extends StateNotifier<TrialState> {
-  TrialNotifier() : super(TrialState.initial());
+@riverpod
+class TrialNotifier extends _$TrialNotifier {
+  @override
+  Future<TrialState> build() async {
+    return TrialState.initial();
+  }
 
   /// Carrega informações do período experimental ativo
   ///
@@ -88,7 +95,10 @@ class TrialNotifier extends StateNotifier<TrialState> {
   /// - API remota
   /// - Sistema de assinatura
   Future<void> loadTrialInfo() async {
-    state = state.copyWith(isLoading: true, error: null);
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    state = AsyncValue.data(currentState.copyWith(isLoading: true, error: null));
 
     try {
       // Simula latência de rede
@@ -109,15 +119,19 @@ class TrialNotifier extends StateNotifier<TrialState> {
         lastUpdated: DateTime.now(),
       );
 
-      state = state.copyWith(
-        trial: exampleTrial,
-        isLoading: false,
-        lastUpdated: DateTime.now(),
+      state = AsyncValue.data(
+        currentState.copyWith(
+          trial: exampleTrial,
+          isLoading: false,
+          lastUpdated: DateTime.now(),
+        ),
       );
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Erro ao carregar trial: ${error.toString()}',
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isLoading: false,
+          error: 'Erro ao carregar trial: ${error.toString()}',
+        ),
       );
     }
   }
@@ -125,12 +139,15 @@ class TrialNotifier extends StateNotifier<TrialState> {
   /// Atualiza as informações do período experimental
   /// Chamado periodicamente para sincronizar com backend
   Future<void> refreshTrialInfo() async {
-    if (state.trial == null) {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    if (currentState.trial == null) {
       await loadTrialInfo();
       return;
     }
 
-    state = state.copyWith(isLoading: true, error: null);
+    state = AsyncValue.data(currentState.copyWith(isLoading: true, error: null));
 
     try {
       await Future<void>.delayed(const Duration(milliseconds: 400));
@@ -138,11 +155,15 @@ class TrialNotifier extends StateNotifier<TrialState> {
       // TODO: Fazer refresh real contra backend
       // final updated = await _trialRepository.refreshTrialInfo();
 
-      state = state.copyWith(isLoading: false, lastUpdated: DateTime.now());
+      state = AsyncValue.data(
+        currentState.copyWith(isLoading: false, lastUpdated: DateTime.now()),
+      );
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Erro ao atualizar trial: ${error.toString()}',
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isLoading: false,
+          error: 'Erro ao atualizar trial: ${error.toString()}',
+        ),
       );
     }
   }
@@ -156,13 +177,18 @@ class TrialNotifier extends StateNotifier<TrialState> {
     required String productId,
     int durationInDays = 14,
   }) async {
+    final currentState = state.value;
+    if (currentState == null) return;
+
     // Validar se já existe trial ativo
-    if (state.trial != null && state.trial!.isActive) {
-      state = state.copyWith(error: 'Já existe um período experimental ativo');
+    if (currentState.trial != null && currentState.trial!.isActive) {
+      state = AsyncValue.data(
+        currentState.copyWith(error: 'Já existe um período experimental ativo'),
+      );
       return;
     }
 
-    state = state.copyWith(isLoading: true, error: null);
+    state = AsyncValue.data(currentState.copyWith(isLoading: true, error: null));
 
     try {
       await Future<void>.delayed(const Duration(milliseconds: 900));
@@ -185,10 +211,12 @@ class TrialNotifier extends StateNotifier<TrialState> {
         lastUpdated: now,
       );
 
-      state = state.copyWith(
-        trial: newTrial,
-        isLoading: false,
-        lastUpdated: DateTime.now(),
+      state = AsyncValue.data(
+        currentState.copyWith(
+          trial: newTrial,
+          isLoading: false,
+          lastUpdated: DateTime.now(),
+        ),
       );
 
       // TODO: Log event de novo trial
@@ -197,9 +225,11 @@ class TrialNotifier extends StateNotifier<TrialState> {
       //   'duration_days': durationInDays,
       // });
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Erro ao iniciar período experimental: ${error.toString()}',
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isLoading: false,
+          error: 'Erro ao iniciar período experimental: ${error.toString()}',
+        ),
       );
     }
   }
@@ -209,15 +239,20 @@ class TrialNotifier extends StateNotifier<TrialState> {
   /// Parâmetros:
   /// - [reason]: Motivo do cancelamento (para analytics)
   Future<void> cancelTrial({required String reason}) async {
-    final currentTrial = state.trial;
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final currentTrial = currentState.trial;
     if (currentTrial == null || !currentTrial.isActive) {
-      state = state.copyWith(
-        error: 'Nenhum período experimental ativo para cancelar',
+      state = AsyncValue.data(
+        currentState.copyWith(
+          error: 'Nenhum período experimental ativo para cancelar',
+        ),
       );
       return;
     }
 
-    state = state.copyWith(isLoading: true, error: null);
+    state = AsyncValue.data(currentState.copyWith(isLoading: true, error: null));
 
     try {
       await Future<void>.delayed(const Duration(milliseconds: 700));
@@ -231,10 +266,12 @@ class TrialNotifier extends StateNotifier<TrialState> {
         lastUpdated: DateTime.now(),
       );
 
-      state = state.copyWith(
-        trial: cancelled,
-        isLoading: false,
-        lastUpdated: DateTime.now(),
+      state = AsyncValue.data(
+        currentState.copyWith(
+          trial: cancelled,
+          isLoading: false,
+          lastUpdated: DateTime.now(),
+        ),
       );
 
       // TODO: Log event de cancelamento
@@ -243,9 +280,11 @@ class TrialNotifier extends StateNotifier<TrialState> {
       //   'days_used': currentTrial.daysUsed.inDays,
       // });
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Erro ao cancelar período experimental: ${error.toString()}',
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isLoading: false,
+          error: 'Erro ao cancelar período experimental: ${error.toString()}',
+        ),
       );
     }
   }
@@ -253,7 +292,10 @@ class TrialNotifier extends StateNotifier<TrialState> {
   /// Verifica e atualiza o status de expiração do trial
   /// Chamado periodicamente para detectar expiração
   Future<void> checkTrialExpiry() async {
-    final trial = state.trial;
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final trial = currentState.trial;
     if (trial == null || !trial.isActive) return;
 
     // Se trial expirou
@@ -274,10 +316,13 @@ class TrialNotifier extends StateNotifier<TrialState> {
   /// Manipula a expiração do período experimental
   /// Chamado automaticamente quando trial expira
   Future<void> handleTrialExpired() async {
-    final currentTrial = state.trial;
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final currentTrial = currentState.trial;
     if (currentTrial == null) return;
 
-    state = state.copyWith(isLoading: true);
+    state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
     try {
       await Future<void>.delayed(const Duration(milliseconds: 500));
@@ -291,10 +336,12 @@ class TrialNotifier extends StateNotifier<TrialState> {
         lastUpdated: DateTime.now(),
       );
 
-      state = state.copyWith(
-        trial: expired,
-        isLoading: false,
-        lastUpdated: DateTime.now(),
+      state = AsyncValue.data(
+        currentState.copyWith(
+          trial: expired,
+          isLoading: false,
+          lastUpdated: DateTime.now(),
+        ),
       );
 
       // TODO: Disparar actions pós-expiração
@@ -308,9 +355,11 @@ class TrialNotifier extends StateNotifier<TrialState> {
       //   'days_used': currentTrial.daysUsed.inDays,
       // });
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Erro ao processar expiração do trial: ${error.toString()}',
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isLoading: false,
+          error: 'Erro ao processar expiração do trial: ${error.toString()}',
+        ),
       );
     }
   }
@@ -318,7 +367,10 @@ class TrialNotifier extends StateNotifier<TrialState> {
   /// Obtém o progresso visual do período experimental
   /// Retorna um valor de 0.0 a 1.0
   double getTrialProgressPercentage() {
-    final trial = state.trial;
+    final currentState = state.value;
+    if (currentState == null) return 0.0;
+
+    final trial = currentState.trial;
     if (trial == null) return 0.0;
     return trial.progressPercentage / 100.0;
   }
@@ -326,7 +378,10 @@ class TrialNotifier extends StateNotifier<TrialState> {
   /// Obtém representação textual dos dias restantes
   /// Exemplo: "5 dias restantes", "Expira amanhã", "Expirado"
   String getTrialRemainingText() {
-    final trial = state.trial;
+    final currentState = state.value;
+    if (currentState == null) return 'Sem período experimental';
+
+    final trial = currentState.trial;
     if (trial == null) return 'Sem período experimental';
 
     if (!trial.isActive) {
@@ -356,7 +411,10 @@ class TrialNotifier extends StateNotifier<TrialState> {
   /// Sincroniza status com backend
   /// Chamado periodicamente ou quando volta para foreground
   Future<void> syncWithBackend() async {
-    if (state.needsRefresh) {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    if (currentState.needsRefresh) {
       await refreshTrialInfo();
     }
 
@@ -366,6 +424,6 @@ class TrialNotifier extends StateNotifier<TrialState> {
 
   /// Limpa o estado e dados em cache
   void clearState() {
-    state = TrialState.initial();
+    state = AsyncValue.data(TrialState.initial());
   }
 }

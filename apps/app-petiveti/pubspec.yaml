@@ -19,9 +19,9 @@ dependencies:
   firebase_auth: any
   flutter_local_notifications: any
   timezone: any
-  riverpod_annotation: ^2.6.0
+  riverpod_annotation: any
   intl: any
-  flutter_riverpod: ^2.6.0
+  flutter_riverpod: any
   url_launcher: any
   firebase_core: any
   package_info_plus: any

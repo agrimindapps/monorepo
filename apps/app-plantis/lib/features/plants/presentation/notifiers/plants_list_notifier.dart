@@ -69,14 +69,14 @@ class PlantsListNotifier extends _$PlantsListNotifier {
   /// Load plants from repository
   Future<void> loadPlants() async {
     state = AsyncValue.data(
-      (state.valueOrNull ?? const PlantsListState()).copyWith(isLoading: true),
+      (state.value ?? const PlantsListState()).copyWith(isLoading: true),
     );
 
     final result = await _plantsRepository.getPlants();
 
     result.fold(
       (failure) {
-        final currentState = state.valueOrNull ?? const PlantsListState();
+        final currentState = state.value ?? const PlantsListState();
         state = AsyncValue.data(
           currentState.copyWith(
             errorMessage: failure.message,
@@ -85,7 +85,7 @@ class PlantsListNotifier extends _$PlantsListNotifier {
         );
       },
       (plants) {
-        final currentState = state.valueOrNull ?? const PlantsListState();
+        final currentState = state.value ?? const PlantsListState();
         state = AsyncValue.data(
           currentState.copyWith(
             plants: plants,
@@ -105,13 +105,13 @@ class PlantsListNotifier extends _$PlantsListNotifier {
 
     result.fold(
       (failure) {
-        final currentState = state.valueOrNull ?? const PlantsListState();
+        final currentState = state.value ?? const PlantsListState();
         state = AsyncValue.data(
           currentState.copyWith(errorMessage: failure.message),
         );
       },
       (addedPlant) {
-        final currentState = state.valueOrNull ?? const PlantsListState();
+        final currentState = state.value ?? const PlantsListState();
         final updatedPlants = [...currentState.plants, addedPlant];
 
         state = AsyncValue.data(
@@ -128,13 +128,13 @@ class PlantsListNotifier extends _$PlantsListNotifier {
 
     result.fold(
       (failure) {
-        final currentState = state.valueOrNull ?? const PlantsListState();
+        final currentState = state.value ?? const PlantsListState();
         state = AsyncValue.data(
           currentState.copyWith(errorMessage: failure.message),
         );
       },
       (updatedPlant) {
-        final currentState = state.valueOrNull ?? const PlantsListState();
+        final currentState = state.value ?? const PlantsListState();
         final updatedPlants = currentState.plants.map((p) {
           return p.id == updatedPlant.id ? updatedPlant : p;
         }).toList();
@@ -153,13 +153,13 @@ class PlantsListNotifier extends _$PlantsListNotifier {
 
     result.fold(
       (failure) {
-        final currentState = state.valueOrNull ?? const PlantsListState();
+        final currentState = state.value ?? const PlantsListState();
         state = AsyncValue.data(
           currentState.copyWith(errorMessage: failure.message),
         );
       },
       (_) {
-        final currentState = state.valueOrNull ?? const PlantsListState();
+        final currentState = state.value ?? const PlantsListState();
         final updatedPlants =
             currentState.plants.where((plant) => plant.id != id).toList();
         final updatedFilteredPlants = currentState.filteredPlants
@@ -178,7 +178,7 @@ class PlantsListNotifier extends _$PlantsListNotifier {
 
   /// Search plants locally
   void searchPlants(String query) {
-    final currentState = state.valueOrNull ?? const PlantsListState();
+    final currentState = state.value ?? const PlantsListState();
     state = AsyncValue.data(
       currentState.copyWith(searchQuery: query.trim().toLowerCase()),
     );
@@ -188,7 +188,7 @@ class PlantsListNotifier extends _$PlantsListNotifier {
 
   /// Clear search
   void clearSearch() {
-    final currentState = state.valueOrNull ?? const PlantsListState();
+    final currentState = state.value ?? const PlantsListState();
     state = AsyncValue.data(
       currentState.copyWith(
         searchQuery: '',
@@ -204,7 +204,7 @@ class PlantsListNotifier extends _$PlantsListNotifier {
       return;
     }
 
-    final currentState = state.valueOrNull ?? const PlantsListState();
+    final currentState = state.value ?? const PlantsListState();
     state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
     final result = await _plantsRepository.searchPlants(query);
@@ -232,7 +232,7 @@ class PlantsListNotifier extends _$PlantsListNotifier {
 
   /// Get plants by space
   List<Plant> getPlantsBySpace(String spaceId) {
-    final currentState = state.valueOrNull ?? const PlantsListState();
+    final currentState = state.value ?? const PlantsListState();
     final plantsToFilter = currentState.displayPlants;
 
     return plantsToFilter.where((plant) => plant.spaceId == spaceId).toList();
@@ -240,7 +240,7 @@ class PlantsListNotifier extends _$PlantsListNotifier {
 
   /// Get plants with images
   List<Plant> getPlantsWithImages() {
-    final currentState = state.valueOrNull ?? const PlantsListState();
+    final currentState = state.value ?? const PlantsListState();
     final plantsToFilter = currentState.displayPlants;
 
     return plantsToFilter.where((plant) => plant.hasImage).toList();
@@ -248,7 +248,7 @@ class PlantsListNotifier extends _$PlantsListNotifier {
 
   /// Get recent plants
   List<Plant> getRecentPlants({int days = 7}) {
-    final currentState = state.valueOrNull ?? const PlantsListState();
+    final currentState = state.value ?? const PlantsListState();
     final cutoffDate = DateTime.now().subtract(Duration(days: days));
     final plantsToFilter = currentState.displayPlants;
 
@@ -259,7 +259,7 @@ class PlantsListNotifier extends _$PlantsListNotifier {
 
   /// Get plant by ID
   Plant? getPlantById(String id) {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return null;
 
     try {
@@ -276,7 +276,7 @@ class PlantsListNotifier extends _$PlantsListNotifier {
 
   /// Apply local search filtering
   void _applySearch() {
-    final currentState = state.valueOrNull ?? const PlantsListState();
+    final currentState = state.value ?? const PlantsListState();
 
     if (currentState.searchQuery.isEmpty) {
       state = AsyncValue.data(currentState.copyWith(filteredPlants: []));
@@ -298,7 +298,7 @@ class PlantsListNotifier extends _$PlantsListNotifier {
 
   /// Clear error message
   void clearError() {
-    final currentState = state.valueOrNull ?? const PlantsListState();
+    final currentState = state.value ?? const PlantsListState();
     state = AsyncValue.data(currentState.copyWith(errorMessage: null));
   }
 }

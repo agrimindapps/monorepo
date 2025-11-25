@@ -1,15 +1,17 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Providers unificados para gerenciamento de dispositivos
 /// Consolida lógica de device management entre todos os apps do monorepo
+/// Migrado para Riverpod 3.0 - sem legacy imports
 
 /// Provider principal para informações do dispositivo atual
 final currentDeviceProvider = FutureProvider<DeviceEntity>((ref) async {
   final now = DateTime.now();
   return DeviceEntity(
-    id: 'current_device_${now.millisecondsSinceEpoch}',
-    uuid: 'uuid_${now.millisecondsSinceEpoch}',
+    id: 'current_device_\${now.millisecondsSinceEpoch}',
+    uuid: 'uuid_\${now.millisecondsSinceEpoch}',
     name: 'Dispositivo Atual',
     model: 'Modelo Desconhecido',
     platform: defaultTargetPlatform.name,
@@ -34,13 +36,11 @@ final userDevicesProvider = FutureProvider<List<DeviceEntity>>((ref) async {
   return [currentDevice];
 });
 
-/// Provider para estado de gerenciamento de dispositivos
+/// Provider para estado de gerenciamento de dispositivos - Riverpod 3.0
 final deviceManagementProvider =
-    StateNotifierProvider<DeviceManagementNotifier, DeviceManagementState>((
-      ref,
-    ) {
-      return DeviceManagementNotifier();
-    });
+    NotifierProvider<DeviceManagementNotifier, DeviceManagementState>(
+      DeviceManagementNotifier.new,
+    );
 
 /// Provider para sessão ativa do dispositivo atual
 final currentDeviceSessionProvider = Provider<DeviceSession?>((ref) {
@@ -52,7 +52,7 @@ final currentDeviceSessionProvider = Provider<DeviceSession?>((ref) {
   return DeviceSession(
     userId: user.id,
     deviceId: device.id,
-    sessionStart: DateTime.now(), // Será persistido
+    sessionStart: DateTime.now(),
     isActive: true,
     lastActivity: DateTime.now(),
     appId: ref.watch(currentAppIdProvider),
@@ -154,7 +154,7 @@ final recentActiveDevicesProvider = Provider<List<DeviceEntity>>((ref) {
 
   return devices.where((device) {
     final daysSinceAccess = now.difference(device.lastActiveAt).inDays;
-    return daysSinceAccess <= 30; // Ativo nos últimos 30 dias
+    return daysSinceAccess <= 30;
   }).toList();
 });
 
@@ -165,7 +165,7 @@ final inactiveDevicesProvider = Provider<List<DeviceEntity>>((ref) {
 
   return devices.where((device) {
     final daysSinceAccess = now.difference(device.lastActiveAt).inDays;
-    return daysSinceAccess > 90; // Inativo por mais de 90 dias
+    return daysSinceAccess > 90;
   }).toList();
 });
 
@@ -360,9 +360,10 @@ class DeviceActions {
   });
 }
 
-/// Notifier para gerenciamento de dispositivos
-class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
-  DeviceManagementNotifier() : super(const DeviceManagementIdle());
+/// Notifier para gerenciamento de dispositivos - Riverpod 3.0
+class DeviceManagementNotifier extends Notifier<DeviceManagementState> {
+  @override
+  DeviceManagementState build() => const DeviceManagementIdle();
 
   Future<bool> registerCurrentDevice() async {
     try {
@@ -374,7 +375,7 @@ class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
       );
       return true;
     } catch (e) {
-      state = DeviceManagementError('Erro ao registrar dispositivo: $e');
+      state = DeviceManagementError('Erro ao registrar dispositivo: \$e');
       return false;
     }
   }
@@ -387,7 +388,7 @@ class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
       state = const DeviceManagementSuccess('Dispositivo revogado com sucesso');
       return true;
     } catch (e) {
-      state = DeviceManagementError('Erro ao revogar dispositivo: $e');
+      state = DeviceManagementError('Erro ao revogar dispositivo: \$e');
       return false;
     }
   }
@@ -402,7 +403,7 @@ class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
       );
       return true;
     } catch (e) {
-      state = DeviceManagementError('Erro ao revogar outros dispositivos: $e');
+      state = DeviceManagementError('Erro ao revogar outros dispositivos: \$e');
       return false;
     }
   }
@@ -417,7 +418,7 @@ class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
       );
       return true;
     } catch (e) {
-      state = DeviceManagementError('Erro ao atualizar informações: $e');
+      state = DeviceManagementError('Erro ao atualizar informações: \$e');
       return false;
     }
   }
@@ -425,10 +426,9 @@ class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
   Future<void> refreshDevicesList() async {
     try {
       state = const DeviceManagementLoading();
-
       state = const DeviceManagementIdle();
     } catch (e) {
-      state = DeviceManagementError('Erro ao atualizar lista: $e');
+      state = DeviceManagementError('Erro ao atualizar lista: \$e');
     }
   }
 

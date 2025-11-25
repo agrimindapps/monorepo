@@ -85,7 +85,7 @@ class DiagnosticoEmptyWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(diagnosticosPragaNotifierProvider);
+    final state = ref.watch(diagnosticosPragaProvider);
 
     return RepaintBoundary(
       child: state.when(
@@ -123,7 +123,7 @@ class DiagnosticoEmptyWidget extends ConsumerWidget {
                       OutlinedButton(
                         onPressed: () {
                           ref
-                              .read(diagnosticosPragaNotifierProvider.notifier)
+                              .read(diagnosticosPragaProvider.notifier)
                               .clearFilters();
                         },
                         child: const Text('Limpar Filtros'),
@@ -153,7 +153,7 @@ class DiagnosticoStateManager extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(diagnosticosPragaNotifierProvider);
+    final state = ref.watch(diagnosticosPragaProvider);
 
     return state.when(
       data: (data) {

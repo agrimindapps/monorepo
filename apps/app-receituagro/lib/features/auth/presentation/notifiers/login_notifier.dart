@@ -42,7 +42,7 @@ class LoginNotifier extends _$LoginNotifier {
 
   /// Helper para acessar o auth notifier via Riverpod
   AuthNotifier get _authNotifier =>
-      ref.read(authNotifierProvider.notifier);
+      ref.read(authProvider.notifier);
 
   TextEditingController get emailController => _emailController;
   TextEditingController get passwordController => _passwordController;

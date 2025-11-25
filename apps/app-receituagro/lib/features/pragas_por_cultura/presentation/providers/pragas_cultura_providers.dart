@@ -17,13 +17,13 @@ part 'pragas_cultura_providers.g.dart';
 
 /// Provider para o Local DataSource
 @riverpod
-PragasCulturaLocalDataSource pragasCulturaLocalDataSource(PragasCulturaLocalDataSourceRef ref) {
+PragasCulturaLocalDataSource pragasCulturaLocalDataSource(Ref ref) {
   return PragasCulturaLocalDataSource();
 }
 
 /// Provider para o Integration DataSource
 @riverpod
-PragasCulturaIntegrationDataSource pragasCulturaIntegrationDataSource(PragasCulturaIntegrationDataSourceRef ref) {
+PragasCulturaIntegrationDataSource pragasCulturaIntegrationDataSource(Ref ref) {
   return PragasCulturaIntegrationDataSource(
     ref.watch(pragasRepositoryProvider),
     ref.watch(diagnosticoRepositoryProvider),
@@ -33,7 +33,7 @@ PragasCulturaIntegrationDataSource pragasCulturaIntegrationDataSource(PragasCult
 
 /// Provider para o Repository
 @riverpod
-IPragasCulturaRepository iPragasCulturaRepository(IPragasCulturaRepositoryRef ref) {
+IPragasCulturaRepository iPragasCulturaRepository(Ref ref) {
   return PragasCulturaRepositoryImpl(
     integrationDataSource: ref.watch(pragasCulturaIntegrationDataSourceProvider),
     localDataSource: ref.watch(pragasCulturaLocalDataSourceProvider),
@@ -45,25 +45,25 @@ IPragasCulturaRepository iPragasCulturaRepository(IPragasCulturaRepositoryRef re
 
 /// Provider para o Query Service
 @riverpod
-IPragasCulturaQueryService pragasCulturaQueryService(PragasCulturaQueryServiceRef ref) {
+IPragasCulturaQueryService pragasCulturaQueryService(Ref ref) {
   return PragasCulturaQueryService();
 }
 
 /// Provider para o Sort Service
 @riverpod
-IPragasCulturaSortService pragasCulturaSortService(PragasCulturaSortServiceRef ref) {
+IPragasCulturaSortService pragasCulturaSortService(Ref ref) {
   return PragasCulturaSortService();
 }
 
 /// Provider para o Statistics Service
 @riverpod
-IPragasCulturaStatisticsService pragasCulturaStatisticsService(PragasCulturaStatisticsServiceRef ref) {
+IPragasCulturaStatisticsService pragasCulturaStatisticsService(Ref ref) {
   return PragasCulturaStatisticsService();
 }
 
 /// Provider para o Data Service
 @riverpod
-IPragasCulturaDataService pragasCulturaDataService(PragasCulturaDataServiceRef ref) {
+IPragasCulturaDataService pragasCulturaDataService(Ref ref) {
   return PragasCulturaDataService(
     repository: ref.watch(iPragasCulturaRepositoryProvider),
   );
@@ -71,7 +71,7 @@ IPragasCulturaDataService pragasCulturaDataService(PragasCulturaDataServiceRef r
 
 /// Provider para o Error Message Service
 @riverpod
-PragasCulturaErrorMessageService pragasCulturaErrorService(PragasCulturaErrorServiceRef ref) {
+PragasCulturaErrorMessageService pragasCulturaErrorService(Ref ref) {
   return PragasCulturaErrorMessageService();
 }
 

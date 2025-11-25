@@ -16,7 +16,7 @@ class TtsSettingsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ttsSettingsAsync = ref.watch(ttsNotifierProvider);
+    final ttsSettingsAsync = ref.watch(ttsProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -105,7 +105,7 @@ class TtsSettingsPage extends ConsumerWidget {
                   trailing: Switch.adaptive(
                     value: settings.enabled,
                     onChanged: (_) =>
-                        ref.read(ttsNotifierProvider.notifier).toggleEnabled(),
+                        ref.read(ttsProvider.notifier).toggleEnabled(),
                   ),
                 ),
               ],
@@ -149,7 +149,7 @@ class TtsSettingsPage extends ConsumerWidget {
                   max: 2.0,
                   divisions: 15,
                   onChanged: (value) =>
-                      ref.read(ttsNotifierProvider.notifier).updateRate(value),
+                      ref.read(ttsProvider.notifier).updateRate(value),
                 ),
 
                 Divider(
@@ -172,7 +172,7 @@ class TtsSettingsPage extends ConsumerWidget {
                   max: 2.0,
                   divisions: 15,
                   onChanged: (value) =>
-                      ref.read(ttsNotifierProvider.notifier).updatePitch(value),
+                      ref.read(ttsProvider.notifier).updatePitch(value),
                 ),
 
                 Divider(
@@ -195,7 +195,7 @@ class TtsSettingsPage extends ConsumerWidget {
                   max: 1.0,
                   divisions: 10,
                   onChanged: (value) => ref
-                      .read(ttsNotifierProvider.notifier)
+                      .read(ttsProvider.notifier)
                       .updateVolume(value),
                 ),
               ],
@@ -339,7 +339,7 @@ class TtsSettingsPage extends ConsumerWidget {
         'Use este recurso para ouvir informações sobre pragas e defensivos agrícolas.';
 
     try {
-      await ref.read(ttsNotifierProvider.notifier).speak(testText);
+      await ref.read(ttsProvider.notifier).speak(testText);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

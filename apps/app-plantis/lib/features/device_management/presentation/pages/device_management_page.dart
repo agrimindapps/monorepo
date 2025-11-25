@@ -389,7 +389,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
   }
 
   Future<void> _showRevokeAllDialog(BuildContext context) async {
-    final deviceState = ref.read(deviceManagementNotifierProvider).valueOrNull;
+    final deviceState = ref.read(deviceManagementNotifierProvider).value;
     if (deviceState == null) return;
 
     final confirmed = await showDialog<bool>(

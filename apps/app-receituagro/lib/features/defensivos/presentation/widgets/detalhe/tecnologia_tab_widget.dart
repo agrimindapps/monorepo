@@ -17,7 +17,7 @@ class TecnologiaTabWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(detalheDefensivoNotifierProvider);
+    final state = ref.watch(detalheDefensivoProvider);
 
     return state.when(
       data: (data) => data.isPremium ? _buildPremiumContent(context) : _buildFreeContent(context),

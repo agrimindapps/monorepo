@@ -14,7 +14,7 @@ class GameOverDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final gameState = ref.watch(campoMinadoGameNotifierProvider);
+    final gameState = ref.watch(campoMinadoGameProvider);
     final statsAsync = ref.watch(
       campoMinadoStatsProvider(gameState.difficulty),
     );
@@ -119,7 +119,7 @@ class GameOverDialog extends ConsumerWidget {
         ),
         ElevatedButton(
           onPressed: () {
-            ref.read(campoMinadoGameNotifierProvider.notifier).restartGame();
+            ref.read(campoMinadoGameProvider.notifier).restartGame();
             Navigator.of(context).pop();
           },
           child: const Text('Jogar Novamente'),

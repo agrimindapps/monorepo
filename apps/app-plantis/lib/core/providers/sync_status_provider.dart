@@ -20,14 +20,15 @@ enum SyncStatusState {
 
 /// State class for sync status with freezed immutability
 @freezed
-class SyncStatusModel with _$SyncStatusModel {
+sealed class SyncStatusModel with _$SyncStatusModel {
   const factory SyncStatusModel({
     @Default(SyncStatusState.idle) SyncStatusState currentState,
     @Default([]) List<SyncQueueItem> pendingItems,
   }) = _SyncStatusModel;
+}
 
-  const SyncStatusModel._();
-
+/// Extension providing computed properties for SyncStatusModel
+extension SyncStatusModelX on SyncStatusModel {
   /// Convenience getter for pending items count
   int get pendingItemsCount => pendingItems.length;
 
@@ -53,7 +54,7 @@ class SyncStatusModel with _$SyncStatusModel {
 /// Provider for ConnectivityService
 @riverpod
 core.ConnectivityService syncConnectivityService(
-    SyncConnectivityServiceRef ref) {
+    Ref ref) {
   return ref.watch(connectivityServiceProvider);
 }
 

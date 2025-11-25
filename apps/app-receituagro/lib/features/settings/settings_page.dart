@@ -35,7 +35,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final settingsState = ref.watch(settingsNotifierProvider);
+    final settingsState = ref.watch(settingsProvider);
     if (!_initialized) {
       _initialized = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -82,7 +82,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           const SizedBox(height: 24),
                           ElevatedButton(
                             onPressed: () => ref
-                                .read(settingsNotifierProvider.notifier)
+                                .read(settingsProvider.notifier)
                                 .refresh(),
                             child: const Text('Tentar Novamente'),
                           ),
@@ -138,11 +138,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     try {
       final deviceService = ref.read(deviceIdentityServiceProvider);
       final deviceId = await deviceService.getDeviceUuid();
-      await ref.read(settingsNotifierProvider.notifier).initialize(deviceId);
+      await ref.read(settingsProvider.notifier).initialize(deviceId);
     } catch (e) {
       debugPrint('Error initializing settings: $e');
       await ref
-          .read(settingsNotifierProvider.notifier)
+          .read(settingsProvider.notifier)
           .initialize('anonymous-${DateTime.now().millisecondsSinceEpoch}');
     }
   }

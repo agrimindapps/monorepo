@@ -14,7 +14,7 @@ class ThemeSelectionDialog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final currentThemeMode = ref.watch(themeNotifierProvider);
+    final currentThemeMode = ref.watch(themeProvider);
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -180,7 +180,7 @@ class ThemeSelectionDialog extends ConsumerWidget {
     ThemeMode themeMode,
     String themeName,
   ) async {
-    await ref.read(themeNotifierProvider.notifier).setThemeMode(themeMode);
+    await ref.read(themeProvider.notifier).setThemeMode(themeMode);
 
     if (context.mounted) {
       Navigator.of(context).pop();

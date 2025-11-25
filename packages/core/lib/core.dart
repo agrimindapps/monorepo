@@ -25,24 +25,8 @@ export 'package:intl/intl.dart';
 export 'package:json_annotation/json_annotation.dart';
 export 'package:package_info_plus/package_info_plus.dart';
 export 'package:purchases_flutter/purchases_flutter.dart' hide LogLevel, Store;
-export 'package:riverpod/riverpod.dart'
-    hide Locator, AsyncValueX, StreamProvider;
-export 'package:riverpod_annotation/riverpod_annotation.dart'
-    hide
-        BuildlessAutoDisposeAsyncNotifier,
-        AutoDisposeAsyncNotifierProviderImpl,
-        BuildlessAsyncNotifier,
-        AsyncNotifierProviderImpl,
-        BuildlessAutoDisposeStreamNotifier,
-        AutoDisposeStreamNotifierProviderImpl,
-        BuildlessStreamNotifier,
-        StreamNotifierProviderImpl,
-        ProviderOverride,
-        FamilyOverride,
-        BuildlessAutoDisposeNotifier,
-        AutoDisposeNotifierProviderImpl,
-        BuildlessNotifier,
-        NotifierProviderImpl;
+export 'package:riverpod/riverpod.dart' hide StreamProvider;
+export 'package:riverpod_annotation/riverpod_annotation.dart';
 export 'package:share_plus/share_plus.dart';
 export 'package:shared_preferences/shared_preferences.dart';
 export 'package:shimmer/shimmer.dart';
@@ -180,7 +164,9 @@ export 'src/riverpod/common_providers.dart'
         isConnectedProvider,
         syncStateProvider,
         lastSyncProvider,
-        SyncState;
+        SyncState,
+        ThemeNotifier,
+        AuthStateNotifier;
 export 'src/riverpod/domain/analytics/analytics_providers.dart';
 export 'src/riverpod/domain/auth/auth_domain_providers.dart';
 export 'src/riverpod/domain/device/device_management_providers.dart';

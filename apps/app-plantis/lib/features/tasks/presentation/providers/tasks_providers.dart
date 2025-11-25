@@ -20,13 +20,13 @@ part 'tasks_providers.g.dart';
 
 // Datasources
 @riverpod
-TasksLocalDataSource tasksLocalDataSource(TasksLocalDataSourceRef ref) {
+TasksLocalDataSource tasksLocalDataSource(Ref ref) {
   final driftRepo = ref.watch(tasksDriftRepositoryProvider);
   return TasksLocalDataSourceImpl(driftRepo);
 }
 
 @riverpod
-TasksRemoteDataSource tasksRemoteDataSource(TasksRemoteDataSourceRef ref) {
+TasksRemoteDataSource tasksRemoteDataSource(Ref ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
   final rateLimiter = ref.watch(rateLimiterServiceProvider);
   return TasksRemoteDataSourceImpl(firestore, rateLimiter: rateLimiter);
@@ -34,7 +34,7 @@ TasksRemoteDataSource tasksRemoteDataSource(TasksRemoteDataSourceRef ref) {
 
 /// Provider for TasksRepository
 @riverpod
-TasksRepository tasksRepository(TasksRepositoryRef ref) {
+TasksRepository tasksRepository(Ref ref) {
   final localDataSource = ref.watch(tasksLocalDataSourceProvider);
   final remoteDataSource = ref.watch(tasksRemoteDataSourceProvider);
   final networkInfo = ref.watch(networkInfoProvider);
@@ -52,36 +52,36 @@ TasksRepository tasksRepository(TasksRepositoryRef ref) {
 
 /// Provider for GetTasksUseCase
 @riverpod
-GetTasksUseCase getTasksUseCase(GetTasksUseCaseRef ref) {
+GetTasksUseCase getTasksUseCase(Ref ref) {
   return GetTasksUseCase(ref.watch(tasksRepositoryProvider));
 }
 
 /// Provider for GetTaskByIdUseCase
 @riverpod
-GetTaskByIdUseCase getTaskByIdUseCase(GetTaskByIdUseCaseRef ref) {
+GetTaskByIdUseCase getTaskByIdUseCase(Ref ref) {
   return GetTaskByIdUseCase(ref.watch(tasksRepositoryProvider));
 }
 
 /// Provider for AddTaskUseCase
 @riverpod
-AddTaskUseCase addTaskUseCase(AddTaskUseCaseRef ref) {
+AddTaskUseCase addTaskUseCase(Ref ref) {
   return AddTaskUseCase(ref.watch(tasksRepositoryProvider));
 }
 
 /// Provider for CompleteTaskUseCase
 @riverpod
-CompleteTaskUseCase completeTaskUseCase(CompleteTaskUseCaseRef ref) {
+CompleteTaskUseCase completeTaskUseCase(Ref ref) {
   return CompleteTaskUseCase(ref.watch(tasksRepositoryProvider));
 }
 
 /// Provider for TaskFilterService
 @riverpod
-ITaskFilterService taskFilterService(TaskFilterServiceRef ref) {
+ITaskFilterService taskFilterService(Ref ref) {
   return TaskFilterService();
 }
 
 /// Provider for TaskOwnershipValidator
 @riverpod
-ITaskOwnershipValidator taskOwnershipValidator(TaskOwnershipValidatorRef ref) {
+ITaskOwnershipValidator taskOwnershipValidator(Ref ref) {
   return TaskOwnershipValidator(AuthStateNotifier.instance);
 }

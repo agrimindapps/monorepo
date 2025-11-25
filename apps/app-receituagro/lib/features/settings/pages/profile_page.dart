@@ -47,8 +47,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final authState = ref.watch(authNotifierProvider);
-    final settingsState = ref.watch(settingsNotifierProvider);
+    final authState = ref.watch(authProvider);
+    final settingsState = ref.watch(settingsProvider);
 
     if (authState.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -67,7 +67,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       final userId = user?.id;
       if (userId != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.read(settingsNotifierProvider.notifier).initialize(userId);
+          ref.read(settingsProvider.notifier).initialize(userId);
         });
       }
     }
@@ -294,7 +294,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     if (shouldLogout == true && context.mounted) {
       try {
         // Realizar logout
-        await ref.read(authNotifierProvider.notifier).signOut();
+        await ref.read(authProvider.notifier).signOut();
 
         if (context.mounted) {
           // Mostrar mensagem de sucesso
@@ -337,7 +337,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final shouldClear = await ClearDataDialog.show(context);
 
     if (shouldClear == true && context.mounted) {
-      final authState = ref.read(authNotifierProvider);
+      final authState = ref.read(authProvider);
       final userId = authState?.currentUser?.id ?? 'unknown';
 
       try {
@@ -545,7 +545,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     if (shouldDelete == true && context.mounted) {
       try {
         final result = await ref
-            .read(authNotifierProvider.notifier)
+            .read(authProvider.notifier)
             .deleteAccount();
         if (context.mounted) {
           if (result.isSuccess) {
@@ -727,7 +727,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             child: Consumer(
               builder: (context, ref, child) {
                 final subscriptionAsync = ref.watch(
-                  subscriptionNotifierProvider,
+                  subscriptionProvider,
                 );
 
                 return subscriptionAsync.when(

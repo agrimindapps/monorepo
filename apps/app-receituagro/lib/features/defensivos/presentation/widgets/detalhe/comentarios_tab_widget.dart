@@ -27,7 +27,7 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(detalheDefensivoNotifierProvider);
+    final state = ref.watch(detalheDefensivoProvider);
 
     return state.when(
       data: (data) => SingleChildScrollView(
@@ -190,7 +190,7 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
       confirmDismiss: (direction) => _showDeleteConfirmation(context),
       onDismissed: (direction) {
         ref
-            .read(detalheDefensivoNotifierProvider.notifier)
+            .read(detalheDefensivoProvider.notifier)
             .deleteComment((comentario.id ?? '').toString());
       },
       child: Card(
@@ -331,7 +331,7 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
     }
 
     final success = await ref
-        .read(detalheDefensivoNotifierProvider.notifier)
+        .read(detalheDefensivoProvider.notifier)
         .addComment(content);
     if (success) {
       _commentController.clear();
@@ -345,7 +345,7 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
       }
     } else {
       if (mounted) {
-        final state = ref.read(detalheDefensivoNotifierProvider);
+        final state = ref.read(detalheDefensivoProvider);
         state.whenData((data) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

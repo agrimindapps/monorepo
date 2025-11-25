@@ -10,17 +10,18 @@ part 'theme_providers.g.dart';
 
 /// State class for theme with freezed immutability
 @freezed
-class ThemeState with _$ThemeState {
+sealed class ThemeState with _$ThemeState {
   const factory ThemeState({
     required ThemeSettingsEntity settings,
     @Default(false) bool isLoading,
     String? errorMessage,
   }) = _ThemeState;
+}
 
-  const ThemeState._();
-
+/// Extension providing factory constructors for ThemeState
+extension ThemeStateX on ThemeState {
   /// Configuração inicial padrão
-  factory ThemeState.initial() {
+  static ThemeState initial() {
     return ThemeState(settings: ThemeSettingsEntity.defaults());
   }
 }
@@ -35,7 +36,7 @@ class Theme extends _$Theme {
   ThemeState build() {
     // Carrega o tema de forma assíncrona após inicialização
     _initializeTheme();
-    return ThemeState.initial();
+    return ThemeStateX.initial();
   }
 
   /// Inicializa o tema de forma segura durante build
@@ -173,49 +174,49 @@ class Theme extends _$Theme {
 
 /// Provider para o ThemeSettingsEntity atual
 @riverpod
-ThemeSettingsEntity themeSettings(ThemeSettingsRef ref) {
+ThemeSettingsEntity themeSettings(Ref ref) {
   return ref.watch(themeProvider).settings;
 }
 
 /// Provider para o ThemeMode do Flutter
 @riverpod
-ThemeMode themeMode(ThemeModeRef ref) {
+ThemeMode themeMode(Ref ref) {
   return ref.watch(themeSettingsProvider).themeMode;
 }
 
 /// Provider para verificar se está carregando
 @riverpod
-bool themeLoading(ThemeLoadingRef ref) {
+bool themeLoading(Ref ref) {
   return ref.watch(themeProvider).isLoading;
 }
 
 /// Provider para mensagem de erro
 @riverpod
-String? themeError(ThemeErrorRef ref) {
+String? themeError(Ref ref) {
   return ref.watch(themeProvider).errorMessage;
 }
 
 /// Provider para verificar se é modo escuro (Plantis específico)
 @riverpod
-bool plantisIsDarkMode(PlantisIsDarkModeRef ref) {
+bool plantisIsDarkMode(Ref ref) {
   return ref.watch(themeSettingsProvider).isDarkMode;
 }
 
 /// Provider para verificar se é modo claro (Plantis específico)
 @riverpod
-bool plantisIsLightMode(PlantisIsLightModeRef ref) {
+bool plantisIsLightMode(Ref ref) {
   return ref.watch(themeSettingsProvider).isLightMode;
 }
 
 /// Provider para verificar se segue o sistema (Plantis específico)
 @riverpod
-bool plantisFollowSystemTheme(PlantisFollowSystemThemeRef ref) {
+bool plantisFollowSystemTheme(Ref ref) {
   return ref.watch(themeSettingsProvider).followSystemTheme;
 }
 
 /// Provider auxiliar para verificar se está no modo escuro considerando o contexto
 @riverpod
-bool contextAwareDarkMode(ContextAwareDarkModeRef ref, BuildContext context) {
+bool contextAwareDarkMode(Ref ref, BuildContext context) {
   final themeSettings = ref.watch(themeSettingsProvider);
 
   if (themeSettings.themeMode == ThemeMode.system) {
@@ -227,7 +228,7 @@ bool contextAwareDarkMode(ContextAwareDarkModeRef ref, BuildContext context) {
 
 /// Provider para o texto de status do tema
 @riverpod
-String themeStatusText(ThemeStatusTextRef ref) {
+String themeStatusText(Ref ref) {
   final themeSettings = ref.watch(themeSettingsProvider);
 
   if (themeSettings.isDarkMode) {
@@ -241,7 +242,7 @@ String themeStatusText(ThemeStatusTextRef ref) {
 
 /// Provider para ícone do tema atual
 @riverpod
-IconData themeIcon(ThemeIconRef ref) {
+IconData themeIcon(Ref ref) {
   final themeSettings = ref.watch(themeSettingsProvider);
 
   if (themeSettings.isDarkMode) {
@@ -252,3 +253,7 @@ IconData themeIcon(ThemeIconRef ref) {
     return Icons.settings_brightness;
   }
 }
+
+// LEGACY ALIAS
+// ignore: deprecated_member_use_from_same_package  
+final themeNotifierProvider = themeProvider;

@@ -132,7 +132,7 @@ class TasksNotifier extends _$TasksNotifier {
   }
 
   Future<void> _loadTasksOperation() async {
-    final currentState = state.valueOrNull ?? TasksState.initial();
+    final currentState = state.value ?? TasksState.initial();
     final shouldShowLoading = currentState.allTasks.isEmpty;
 
     if (shouldShowLoading) {
@@ -266,7 +266,7 @@ class TasksNotifier extends _$TasksNotifier {
   /// Helper: Get task with ownership validation
   Future<task_entity.Task> _getTaskWithOwnershipValidation(
       String taskId) async {
-    final currentState = state.valueOrNull ?? TasksState.initial();
+    final currentState = state.value ?? TasksState.initial();
 
     // 1. Try to find in local state first (fastest)
     final localTask = currentState.allTasks
@@ -305,7 +305,7 @@ class TasksNotifier extends _$TasksNotifier {
 
   /// Helper: Add task to current state
   void _addTaskToState(task_entity.Task task) {
-    final currentState = state.valueOrNull ?? TasksState.initial();
+    final currentState = state.value ?? TasksState.initial();
     final updatedTasks = List<task_entity.Task>.from(currentState.allTasks)
       ..add(task);
     final filteredTasks = _applyCurrentFilters(updatedTasks);
@@ -321,7 +321,7 @@ class TasksNotifier extends _$TasksNotifier {
 
   /// Helper: Update task in state
   void _updateTaskInState(task_entity.Task task) {
-    final currentState = state.valueOrNull ?? TasksState.initial();
+    final currentState = state.value ?? TasksState.initial();
     final updatedTasks = currentState.allTasks
         .whereType<task_entity.Task>()
         .map((t) => t.id == task.id ? task : t)
@@ -355,7 +355,7 @@ class TasksNotifier extends _$TasksNotifier {
   List<task_entity.Task> _applyCurrentFilters(
     List<task_entity.Task> tasks,
   ) {
-    final currentState = state.valueOrNull ?? TasksState.initial();
+    final currentState = state.value ?? TasksState.initial();
     return _filterService.applyFilters(
       tasks,
       currentState.currentFilter,
@@ -374,7 +374,7 @@ class TasksNotifier extends _$TasksNotifier {
 
   /// Searches tasks by query string
   void searchTasks(String query) {
-    final currentState = state.valueOrNull ?? TasksState.initial();
+    final currentState = state.value ?? TasksState.initial();
     if (currentState.allTasks.isEmpty) return;
 
     _updateState(
@@ -397,7 +397,7 @@ class TasksNotifier extends _$TasksNotifier {
     TasksFilterType filter, {
     String? plantId,
   }) {
-    final currentState = state.valueOrNull ?? TasksState.initial();
+    final currentState = state.value ?? TasksState.initial();
     if (currentState.allTasks.isEmpty) return;
 
     _updateState(
@@ -422,7 +422,7 @@ class TasksNotifier extends _$TasksNotifier {
     List<task_entity.TaskPriority>? priorities,
     String? plantId,
   }) {
-    final currentState = state.valueOrNull ?? TasksState.initial();
+    final currentState = state.value ?? TasksState.initial();
     if (currentState.allTasks.isEmpty) return;
 
     final newTaskTypes = taskTypes ?? currentState.selectedTaskTypes;
@@ -532,7 +532,7 @@ class TasksNotifier extends _$TasksNotifier {
 
   /// Helper: Update state
   void _updateState(TasksState Function(TasksState current) update) {
-    final currentState = state.valueOrNull ?? TasksState.initial();
+    final currentState = state.value ?? TasksState.initial();
     state = AsyncValue.data(update(currentState));
   }
 
@@ -541,3 +541,7 @@ class TasksNotifier extends _$TasksNotifier {
     setFilter(filter, plantId: plantId);
   }
 }
+
+/// Alias for backwards compatibility with legacy code
+/// Use tasksProvider instead in new code
+const tasksNotifierProvider = tasksProvider;

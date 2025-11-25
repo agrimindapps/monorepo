@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_providers.dart';
@@ -21,89 +22,82 @@ part 'quiz_providers.g.dart';
 
 // Data Layer
 @riverpod
-QuizLocalDatasource quizLocalDatasource(QuizLocalDatasourceRef ref) {
+QuizLocalDataSource quizLocalDatasource(Ref ref) {
   final sharedPreferences = ref.watch(sharedPreferencesProvider);
-  return QuizLocalDatasource(sharedPreferences);
+  return QuizLocalDataSourceImpl(sharedPreferences);
 }
 
 @riverpod
-QuizRepository quizRepository(QuizRepositoryRef ref) {
+QuizRepository quizRepository(Ref ref) {
   final datasource = ref.watch(quizLocalDatasourceProvider);
   return QuizRepositoryImpl(datasource);
 }
 
 // Services
 @riverpod
-AnswerValidationService answerValidationService(
-    AnswerValidationServiceRef ref) {
+AnswerValidationService answerValidationService(Ref ref) {
   return AnswerValidationService();
 }
 
 @riverpod
-LifeManagementService lifeManagementService(LifeManagementServiceRef ref) {
+LifeManagementService lifeManagementService(Ref ref) {
   return LifeManagementService();
 }
 
 @riverpod
-QuestionManagerService questionManagerService(QuestionManagerServiceRef ref) {
+QuestionManagerService questionManagerService(Ref ref) {
   final random = ref.watch(randomProvider);
   return QuestionManagerService(random: random);
 }
 
 // Use Cases
 @riverpod
-GenerateGameQuestionsUseCase generateGameQuestionsUseCase(
-    GenerateGameQuestionsUseCaseRef ref) {
-  final questionManager = ref.watch(questionManagerServiceProvider);
-  return GenerateGameQuestionsUseCase(questionManager);
+GenerateGameQuestionsUseCase generateGameQuestionsUseCase(Ref ref) {
+  final repository = ref.watch(quizRepositoryProvider);
+  return GenerateGameQuestionsUseCase(repository);
 }
 
 @riverpod
-HandleTimeoutUseCase handleTimeoutUseCase(HandleTimeoutUseCaseRef ref) {
+HandleTimeoutUseCase handleTimeoutUseCase(Ref ref) {
   final lifeManager = ref.watch(lifeManagementServiceProvider);
   return HandleTimeoutUseCase(lifeManager);
 }
 
 @riverpod
-LoadHighScoreUseCase quizLoadHighScoreUseCase(QuizLoadHighScoreUseCaseRef ref) {
+LoadHighScoreUseCase quizLoadHighScoreUseCase(Ref ref) {
   final repository = ref.watch(quizRepositoryProvider);
   return LoadHighScoreUseCase(repository);
 }
 
 @riverpod
-NextQuestionUseCase nextQuestionUseCase(NextQuestionUseCaseRef ref) {
-  final questionManager = ref.watch(questionManagerServiceProvider);
-  return NextQuestionUseCase(questionManager);
+NextQuestionUseCase nextQuestionUseCase(Ref ref) {
+  return NextQuestionUseCase();
 }
 
 @riverpod
-RestartGameUseCase quizRestartGameUseCase(QuizRestartGameUseCaseRef ref) {
-  final questionManager = ref.watch(questionManagerServiceProvider);
-  final lifeManager = ref.watch(lifeManagementServiceProvider);
-  return RestartGameUseCase(questionManager, lifeManager);
+RestartGameUseCase quizRestartGameUseCase(Ref ref) {
+  return RestartGameUseCase();
 }
 
 @riverpod
-SaveHighScoreUseCase quizSaveHighScoreUseCase(QuizSaveHighScoreUseCaseRef ref) {
+SaveHighScoreUseCase quizSaveHighScoreUseCase(Ref ref) {
   final repository = ref.watch(quizRepositoryProvider);
   return SaveHighScoreUseCase(repository);
 }
 
 @riverpod
-SelectAnswerUseCase selectAnswerUseCase(SelectAnswerUseCaseRef ref) {
+SelectAnswerUseCase selectAnswerUseCase(Ref ref) {
   final answerValidator = ref.watch(answerValidationServiceProvider);
   final lifeManager = ref.watch(lifeManagementServiceProvider);
   return SelectAnswerUseCase(answerValidator, lifeManager);
 }
 
 @riverpod
-StartGameUseCase quizStartGameUseCase(QuizStartGameUseCaseRef ref) {
-  final generateQuestions = ref.watch(generateGameQuestionsUseCaseProvider);
-  final lifeManager = ref.watch(lifeManagementServiceProvider);
-  return StartGameUseCase(generateQuestions, lifeManager);
+StartGameUseCase quizStartGameUseCase(Ref ref) {
+  return StartGameUseCase();
 }
 
 @riverpod
-UpdateTimerUseCase updateTimerUseCase(UpdateTimerUseCaseRef ref) {
+UpdateTimerUseCase updateTimerUseCase(Ref ref) {
   return UpdateTimerUseCase();
 }

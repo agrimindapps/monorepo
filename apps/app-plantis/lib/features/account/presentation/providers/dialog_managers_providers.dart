@@ -19,13 +19,13 @@ part 'dialog_managers_providers.g.dart';
 /// ✅ Type-Safe: Riverpod garante tipos
 
 @riverpod
-ClearDataDialogManager clearDataDialogManager(ClearDataDialogManagerRef ref) {
+ClearDataDialogManager clearDataDialogManager(Ref ref) {
   final clearDataUseCase = ref.watch(clearDataUseCaseProvider);
   return ClearDataDialogManager(clearDataUseCase: clearDataUseCase);
 }
 
 @riverpod
-LogoutDialogManager logoutDialogManager(LogoutDialogManagerRef ref) {
+LogoutDialogManager logoutDialogManager(Ref ref) {
   final logoutUseCase = ref.watch(logoutUseCaseProvider);
   return LogoutDialogManager(logoutUseCase: logoutUseCase);
 }

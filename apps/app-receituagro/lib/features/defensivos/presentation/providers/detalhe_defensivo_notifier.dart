@@ -338,7 +338,7 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    final premiumState = ref.read(premiumNotifierProvider).value;
+    final premiumState = ref.read(premiumProvider).value;
     state = AsyncValue.data(
       currentState.copyWith(isPremium: premiumState?.isPremium ?? false),
     );
@@ -346,7 +346,7 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
 
   /// Setup premium status listener
   void _setupPremiumStatusListener() {
-    ref.listen(premiumNotifierProvider, (previous, next) {
+    ref.listen(premiumProvider, (previous, next) {
       final currentState = state.value;
       if (currentState != null) {
         next.whenData((premiumState) {

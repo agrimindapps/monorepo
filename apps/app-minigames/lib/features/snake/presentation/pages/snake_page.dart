@@ -20,8 +20,8 @@ class SnakePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final gameState = ref.watch(snakeGameNotifierProvider);
-    final notifier = ref.read(snakeGameNotifierProvider.notifier);
+    final gameState = ref.watch(snakeGameProvider);
+    final notifier = ref.read(snakeGameProvider.notifier);
 
     return Scaffold(
       backgroundColor: const Color(0xFF121212), // Dark background
@@ -56,7 +56,7 @@ class SnakePage extends ConsumerWidget {
           ),
           IconButton(
             icon: Icon(
-              gameState.valueOrNull?.gameStatus.isPaused == true
+              gameState.value?.gameStatus.isPaused == true
                   ? Icons.play_arrow
                   : Icons.pause,
               color: Colors.white,

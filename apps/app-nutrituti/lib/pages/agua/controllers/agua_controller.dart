@@ -45,9 +45,9 @@ class AguaState {
   }
 }
 
-/// Provider for AguaRepository
+/// Provider for AguaRepository - Riverpod 3.0
 @riverpod
-AguaRepository aguaRepository(AguaRepositoryRef ref) {
+AguaRepository aguaRepository(Ref ref) {
   final aguaDao = ref.watch(aguaDaoProvider);
   return AguaRepository(aguaDao);
 }

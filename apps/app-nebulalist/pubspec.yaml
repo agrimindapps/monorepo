@@ -23,7 +23,7 @@ dependencies:
   sqlite3_flutter_libs: any
   path_provider: any
   path: any
-  freezed_annotation: ^2.4.1
+  freezed_annotation: any
   riverpod_annotation: any
   hive: ^2.2.3
   hive_flutter: ^1.1.0

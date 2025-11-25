@@ -35,28 +35,28 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(subscriptionNotifierProvider.notifier).loadSubscriptionData();
+      ref.read(subscriptionManagementProvider.notifier).loadSubscriptionData();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final subscriptionState = ref.watch(subscriptionNotifierProvider);
+    final subscriptionState = ref.watch(subscriptionManagementProvider);
 
     // Listen to state changes and show messages only when they change
     ref.listen<AsyncValue<SubscriptionState>>(
-      subscriptionNotifierProvider,
+      subscriptionManagementProvider,
       (previous, next) {
         next.whenData((state) {
           if (state.errorMessage != null) {
             _showSnackBar(context, state.errorMessage!, Colors.red);
-            ref.read(subscriptionNotifierProvider.notifier).clearMessages();
+            ref.read(subscriptionManagementProvider.notifier).clearMessages();
           } else if (state.successMessage != null) {
             _showSnackBar(context, state.successMessage!, Colors.green);
-            ref.read(subscriptionNotifierProvider.notifier).clearMessages();
+            ref.read(subscriptionManagementProvider.notifier).clearMessages();
           } else if (state.infoMessage != null) {
             _showSnackBar(context, state.infoMessage!, Colors.blue);
-            ref.read(subscriptionNotifierProvider.notifier).clearMessages();
+            ref.read(subscriptionManagementProvider.notifier).clearMessages();
           }
         });
       },

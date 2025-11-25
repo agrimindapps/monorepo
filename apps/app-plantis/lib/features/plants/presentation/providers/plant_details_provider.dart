@@ -13,15 +13,16 @@ part 'plant_details_provider.g.dart';
 
 /// State for Plant Details
 @freezed
-class PlantDetailsState with _$PlantDetailsState {
+sealed class PlantDetailsState with _$PlantDetailsState {
   const factory PlantDetailsState({
     Plant? plant,
     @Default(false) bool isLoading,
     String? errorMessage,
   }) = _PlantDetailsState;
+}
 
-  const PlantDetailsState._();
-
+/// Extension providing computed properties for PlantDetailsState
+extension PlantDetailsStateX on PlantDetailsState {
   bool get hasError => errorMessage != null;
 }
 
@@ -200,17 +201,17 @@ class PlantDetailsNotifier extends _$PlantDetailsNotifier {
 
 // Dependency providers
 @riverpod
-GetPlantByIdUseCase getPlantByIdUseCase(GetPlantByIdUseCaseRef ref) {
+GetPlantByIdUseCase getPlantByIdUseCase(Ref ref) {
   return GetPlantByIdUseCase(ref.watch(plantsRepositoryProvider));
 }
 
 @riverpod
-DeletePlantUseCase deletePlantUseCase(DeletePlantUseCaseRef ref) {
+DeletePlantUseCase deletePlantUseCase(Ref ref) {
   return DeletePlantUseCase(ref.watch(plantsRepositoryProvider));
 }
 
 @riverpod
-UpdatePlantUseCase updatePlantUseCase(UpdatePlantUseCaseRef ref) {
+UpdatePlantUseCase updatePlantUseCase(Ref ref) {
   return UpdatePlantUseCase(ref.watch(plantsRepositoryProvider));
 }
 
@@ -237,3 +238,7 @@ class PlantDetailsProvider {
   Future<bool> deletePlant() => _notifier.deletePlant();
   void clearError() => _notifier.clearError();
 }
+
+// LEGACY ALIAS
+// ignore: deprecated_member_use_from_same_package
+final plantDetailsNotifierProvider = plantDetailsProvider;

@@ -13,7 +13,7 @@ class PremiumSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settingsState = ref.watch(settingsNotifierProvider);
+    final settingsState = ref.watch(settingsProvider);
 
     return settingsState.when(
       data: (state) {
@@ -149,7 +149,7 @@ class PremiumSection extends ConsumerWidget {
                         const SizedBox(height: 6),
                         Consumer(
                           builder: (context, ref, child) {
-                            final subscriptionAsync = ref.watch(subscriptionNotifierProvider);
+                            final subscriptionAsync = ref.watch(subscriptionProvider);
 
                             return subscriptionAsync.when(
                               data: (subscriptionState) {

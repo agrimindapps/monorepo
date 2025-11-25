@@ -144,7 +144,7 @@ class _SyncStatusIndicatorWidgetState
 
   @override
   Widget build(BuildContext context) {
-    final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
+    final featureFlagsAsync = ref.watch(featureFlagsProvider);
 
     return featureFlagsAsync.when(
       data: (featureFlagsState) {
@@ -153,7 +153,7 @@ class _SyncStatusIndicatorWidgetState
         }
 
         final featureFlagsNotifier = ref.read(
-          featureFlagsNotifierProvider.notifier,
+          featureFlagsProvider.notifier,
         );
         if (!featureFlagsNotifier.isContentSynchronizationEnabled) {
           return const SizedBox.shrink();

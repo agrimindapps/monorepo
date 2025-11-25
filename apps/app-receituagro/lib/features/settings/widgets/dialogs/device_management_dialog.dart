@@ -264,7 +264,7 @@ class DeviceManagementDialog extends ConsumerWidget {
 
     if (confirmed == true) {
       try {
-        await ref.read(settingsNotifierProvider.notifier).revokeDevice(device.uuid);
+        await ref.read(settingsProvider.notifier).revokeDevice(device.uuid);
 
         if (context.mounted) {
           Navigator.of(context).pop();

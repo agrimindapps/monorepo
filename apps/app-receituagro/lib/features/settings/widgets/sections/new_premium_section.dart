@@ -12,7 +12,7 @@ class NewPremiumSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final premiumState = ref.watch(premiumNotifierProvider);
+    final premiumState = ref.watch(premiumProvider);
 
     return Column(
       children: [
@@ -196,7 +196,7 @@ class NewPremiumSection extends ConsumerWidget {
             value: premiumState.settings.isDevelopmentMode,
             onChanged: (value) {
               ref
-                  .read(premiumNotifierProvider.notifier)
+                  .read(premiumProvider.notifier)
                   .setDevelopmentMode(value);
             },
           ),
@@ -236,7 +236,7 @@ class NewPremiumSection extends ConsumerWidget {
           Switch(
             value: premiumState.settings.analyticsEnabled,
             onChanged: (value) {
-              ref.read(premiumNotifierProvider.notifier).toggleAnalytics();
+              ref.read(premiumProvider.notifier).toggleAnalytics();
             },
           ),
         ],

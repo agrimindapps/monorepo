@@ -20,8 +20,8 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
 
   @override
   Widget build(BuildContext context) {
-    final gameStateAsync = ref.watch(cacaPalavraGameNotifierProvider);
-    final highScoreAsync = ref.watch(cacaPalavraHighScoreNotifierProvider);
+    final gameStateAsync = ref.watch(cacaPalavraGameProvider);
+    final highScoreAsync = ref.watch(cacaPalavraHighScoreProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -66,7 +66,7 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
-                    ref.invalidate(cacaPalavraGameNotifierProvider);
+                    ref.invalidate(cacaPalavraGameProvider);
                   },
                   child: const Text('Tentar Novamente'),
                 ),
@@ -157,7 +157,7 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
               gameState: gameState,
               onCellTap: (row, col) {
                 ref
-                    .read(cacaPalavraGameNotifierProvider.notifier)
+                    .read(cacaPalavraGameProvider.notifier)
                     .handleCellTap(row, col);
               },
             ),
@@ -175,7 +175,7 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
               words: gameState.words,
               onWordTap: (index) {
                 ref
-                    .read(cacaPalavraGameNotifierProvider.notifier)
+                    .read(cacaPalavraGameProvider.notifier)
                     .handleWordTap(index);
               },
             ),
@@ -189,7 +189,7 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
             onPressed: () {
               _hasShownVictoryDialog = false;
               ref
-                  .read(cacaPalavraGameNotifierProvider.notifier)
+                  .read(cacaPalavraGameProvider.notifier)
                   .restartGame();
             },
             icon: const Icon(Icons.refresh),
@@ -281,7 +281,7 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
                     gameState: gameState,
                     onCellTap: (row, col) {
                       ref
-                          .read(cacaPalavraGameNotifierProvider.notifier)
+                          .read(cacaPalavraGameProvider.notifier)
                           .handleCellTap(row, col);
                     },
                   ),
@@ -300,7 +300,7 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
                           words: gameState.words,
                           onWordTap: (index) {
                             ref
-                                .read(cacaPalavraGameNotifierProvider.notifier)
+                                .read(cacaPalavraGameProvider.notifier)
                                 .handleWordTap(index);
                           },
                         ),
@@ -312,7 +312,7 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
                           onPressed: () {
                             _hasShownVictoryDialog = false;
                             ref
-                                .read(cacaPalavraGameNotifierProvider.notifier)
+                                .read(cacaPalavraGameProvider.notifier)
                                 .restartGame();
                           },
                           icon: const Icon(Icons.refresh),
@@ -333,7 +333,7 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
   void _showVictoryDialog(BuildContext context, gameState) {
     _hasShownVictoryDialog = true;
 
-    final notifier = ref.read(cacaPalavraGameNotifierProvider.notifier);
+    final notifier = ref.read(cacaPalavraGameProvider.notifier);
     final completionTime = notifier.getCompletionTime();
     final bestTime = notifier.highScore.getFastest(gameState.difficulty);
 
@@ -401,7 +401,7 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
   }
 
   void _changeDifficulty(GameDifficulty difficulty) {
-    final currentState = ref.read(cacaPalavraGameNotifierProvider).valueOrNull;
+    final currentState = ref.read(cacaPalavraGameProvider).value;
 
     if (currentState != null && currentState.foundWordsCount > 0) {
       // Show confirmation dialog if game in progress
@@ -422,7 +422,7 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
                 Navigator.pop(context);
                 _hasShownVictoryDialog = false;
                 ref
-                    .read(cacaPalavraGameNotifierProvider.notifier)
+                    .read(cacaPalavraGameProvider.notifier)
                     .changeDifficulty(difficulty);
               },
               child: const Text('Confirmar'),
@@ -433,7 +433,7 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
     } else {
       _hasShownVictoryDialog = false;
       ref
-          .read(cacaPalavraGameNotifierProvider.notifier)
+          .read(cacaPalavraGameProvider.notifier)
           .changeDifficulty(difficulty);
     }
   }

@@ -31,7 +31,7 @@ part 'device_management_provider.g.dart';
 
 /// State for Device Management
 @freezed
-class DeviceManagementState with _$DeviceManagementState {
+sealed class DeviceManagementState with _$DeviceManagementState {
   const factory DeviceManagementState({
     @Default([]) List<DeviceModel> devices,
     DeviceModel? currentDevice,
@@ -44,9 +44,10 @@ class DeviceManagementState with _$DeviceManagementState {
     @Default(false) bool isRevoking,
     String? revokingDeviceUuid,
   }) = _DeviceManagementState;
+}
 
-  const DeviceManagementState._();
-
+/// Extension providing computed properties for DeviceManagementState
+extension DeviceManagementStateX on DeviceManagementState {
   List<DeviceModel> get activeDevices =>
       devices.where((d) => d.isActive).toList();
 

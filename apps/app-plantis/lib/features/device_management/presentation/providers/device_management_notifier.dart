@@ -224,7 +224,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
   /// Carrega lista de dispositivos (public method)
   Future<void> loadDevices({bool refresh = false}) async {
-    final currentState = state.valueOrNull ?? DeviceManagementState.initial();
+    final currentState = state.value ?? DeviceManagementState.initial();
 
     state = AsyncValue.data(currentState.copyWith(
       isLoading: true,
@@ -248,7 +248,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
   /// Valida dispositivo atual
   Future<DeviceValidationResult?> validateCurrentDevice() async {
-    final currentState = state.valueOrNull ?? DeviceManagementState.initial();
+    final currentState = state.value ?? DeviceManagementState.initial();
 
     if (currentState.isValidating) return null;
 
@@ -319,7 +319,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
   /// Revoga um dispositivo específico
   Future<bool> revokeDevice(String deviceUuid, {String? reason}) async {
-    final currentState = state.valueOrNull ?? DeviceManagementState.initial();
+    final currentState = state.value ?? DeviceManagementState.initial();
 
     if (currentState.isRevoking) return false;
     if (currentState.currentDevice?.uuid == deviceUuid) {
@@ -393,7 +393,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
   /// Revoga todos os outros dispositivos exceto o atual
   Future<bool> revokeAllOtherDevices({String? reason}) async {
-    final currentState = state.valueOrNull ?? DeviceManagementState.initial();
+    final currentState = state.value ?? DeviceManagementState.initial();
 
     if (currentState.isRevoking) return false;
 
@@ -469,7 +469,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
   /// Obtém dispositivo por UUID
   DeviceModel? getDeviceByUuid(String uuid) {
-    final currentState = state.valueOrNull ?? DeviceManagementState.initial();
+    final currentState = state.value ?? DeviceManagementState.initial();
     try {
       return currentState.devices.firstWhere((device) => device.uuid == uuid);
     } catch (e) {
@@ -479,14 +479,14 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
   /// Verifica se dispositivo está sendo revogado
   bool isDeviceBeingRevoked(String uuid) {
-    final currentState = state.valueOrNull ?? DeviceManagementState.initial();
+    final currentState = state.value ?? DeviceManagementState.initial();
     return currentState.isRevoking && currentState.revokingDeviceUuid == uuid;
   }
 
   /// Limpa mensagens de erro/sucesso
   void clearMessages() {
     state = AsyncValue.data(
-      (state.valueOrNull ?? DeviceManagementState.initial()).copyWith(
+      (state.value ?? DeviceManagementState.initial()).copyWith(
         clearError: true,
         clearSuccess: true,
       ),
@@ -495,7 +495,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
   /// Carrega estatísticas de dispositivos
   Future<void> loadStatistics({bool refresh = false}) async {
-    final currentState = state.valueOrNull ?? DeviceManagementState.initial();
+    final currentState = state.value ?? DeviceManagementState.initial();
 
     if (currentState.isLoading) return;
 
@@ -599,3 +599,7 @@ extension DeviceManagementStateExtensions on DeviceManagementState {
   /// Se atingiu o limite
   bool get hasReachedDeviceLimit => activeDeviceCount >= 3;
 }
+
+/// Alias for backwards compatibility with legacy code
+/// Use deviceManagementProvider instead in new code
+const deviceManagementNotifierProvider = deviceManagementProvider;

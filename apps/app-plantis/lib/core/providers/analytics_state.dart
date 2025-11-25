@@ -5,17 +5,18 @@ part 'analytics_state.freezed.dart';
 
 /// Estado imutável do analytics usando freezed (Plantis-specific)
 @freezed
-class PlantisAnalyticsState with _$PlantisAnalyticsState {
-  const PlantisAnalyticsState._();
-
+sealed class PlantisAnalyticsState with _$PlantisAnalyticsState {
   const factory PlantisAnalyticsState({
     @Default(false) bool isInitialized,
     required bool isAnalyticsEnabled,
     String? errorMessage,
   }) = _PlantisAnalyticsState;
+}
 
+/// Extension providing factory constructors and methods for PlantisAnalyticsState
+extension PlantisAnalyticsStateX on PlantisAnalyticsState {
   /// Estado inicial padrão
-  factory PlantisAnalyticsState.initial() {
+  static PlantisAnalyticsState initial() {
     return PlantisAnalyticsState(
       isAnalyticsEnabled: EnvironmentConfig.enableAnalytics,
     );

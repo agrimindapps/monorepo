@@ -14,7 +14,7 @@ import '../../../tasks/domain/entities/task.dart' as task_entity;
 /// - Geração de texto apropriado
 class PlantTasksHelper {
   /// Calcula o número de tarefas pendentes para uma planta específica
-  static int getPendingTasksCount(WidgetRef ref, String plantId) {
+  static int getPendingTasksCount(Ref ref, String plantId) {
     try {
       final tasksAsync = ref.watch(tasksNotifierProvider);
       if (!tasksAsync.hasValue) return 0;
@@ -38,7 +38,7 @@ class PlantTasksHelper {
   }
 
   /// Calcula o número de tarefas atrasadas para uma planta específica
-  static int getOverdueTasksCount(WidgetRef ref, String plantId) {
+  static int getOverdueTasksCount(Ref ref, String plantId) {
     try {
       final tasksAsync = ref.watch(tasksNotifierProvider);
       if (!tasksAsync.hasValue) return 0;
@@ -63,7 +63,7 @@ class PlantTasksHelper {
   }
 
   /// Obtém informações de status das tarefas para exibição no badge
-  static TaskBadgeInfo getTaskBadgeInfo(WidgetRef ref, String plantId) {
+  static TaskBadgeInfo getTaskBadgeInfo(Ref ref, String plantId) {
     final pendingCount = getPendingTasksCount(ref, plantId);
     final overdueCount = getOverdueTasksCount(ref, plantId);
 
@@ -107,7 +107,7 @@ class PlantTasksHelper {
 
   /// Verifica se deve mostrar o badge (oculta quando tem 0 tarefas)
   static bool shouldShowBadge(
-    WidgetRef ref,
+    Ref ref,
     String plantId, {
     bool hideWhenEmpty = false,
   }) {
@@ -122,7 +122,7 @@ class PlantTasksHelper {
 
   /// Widget builder para o badge unificado
   static Widget buildTaskBadge(
-    WidgetRef ref,
+    Ref ref,
     String plantId, {
     bool hideWhenEmpty = false,
   }) {

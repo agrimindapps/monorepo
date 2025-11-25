@@ -61,13 +61,13 @@ class ExercicioListState {
 
 /// Provider for ExercicioRepository
 @riverpod
-ExercicioRepository exercicioRepository(ExercicioRepositoryRef ref) {
+ExercicioRepository exercicioRepository(Ref ref) {
   return ExercicioRepository();
 }
 
 /// Provider for ExercicioEventService
 @riverpod
-ExercicioEventService exercicioEventService(ExercicioEventServiceRef ref) {
+ExercicioEventService exercicioEventService(Ref ref) {
   return ExercicioEventService();
 }
 
@@ -303,7 +303,7 @@ class ExercicioListNotifier extends _$ExercicioListNotifier {
 
   /// Get exercicios for a specific date
   List<ExercicioModel> getExerciciosParaData(DateTime data) {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return [];
 
     final day = DateTime(data.year, data.month, data.day);
@@ -405,7 +405,7 @@ class ExercicioListNotifier extends _$ExercicioListNotifier {
 
   /// Handler for exercicio created via events
   void _handleExercicioCreated(ExercicioModel exercicio) async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     // Add new exercicio to list
@@ -420,7 +420,7 @@ class ExercicioListNotifier extends _$ExercicioListNotifier {
 
   /// Handler for exercicio updated via events
   void _handleExercicioUpdated(ExercicioModel exercicio) async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     // Update existing exercicio in list
@@ -437,7 +437,7 @@ class ExercicioListNotifier extends _$ExercicioListNotifier {
 
   /// Handler for exercicio deleted via events
   void _handleExercicioDeleted(String exercicioId) async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     // Remove exercicio from list
@@ -453,7 +453,7 @@ class ExercicioListNotifier extends _$ExercicioListNotifier {
 
   /// Handler for metas updated via events
   void _handleMetasUpdated(Map<String, dynamic> metas) async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     final metaMinutos = (metas['metaMinutos'] ?? 0.0).toDouble();

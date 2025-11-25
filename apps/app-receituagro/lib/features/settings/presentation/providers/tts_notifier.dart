@@ -10,12 +10,12 @@ import '../../domain/services/i_tts_service.dart';
 part 'tts_notifier.g.dart';
 
 @riverpod
-ITTSService ttsService(TtsServiceRef ref) {
+ITTSService ttsService(Ref ref) {
   return TTSServiceImpl();
 }
 
 @riverpod
-Future<ITTSSettingsRepository> ttsSettingsRepository(TtsSettingsRepositoryRef ref) async {
+Future<ITTSSettingsRepository> ttsSettingsRepository(Ref ref) async {
   final prefs = await SharedPreferences.getInstance();
   return TTSSettingsRepositoryImpl(prefs);
 }
@@ -161,7 +161,7 @@ class TtsNotifier extends _$TtsNotifier {
 }
 
 @riverpod
-Stream<TTSSpeechState> ttsStateStream(TtsStateStreamRef ref) {
+Stream<TTSSpeechState> ttsStateStream(Ref ref) {
   final service = ref.watch(ttsServiceProvider);
   return service.speechStateStream;
 }

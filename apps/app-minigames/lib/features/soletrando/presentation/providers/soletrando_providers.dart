@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,16 +18,12 @@ part 'soletrando_providers.g.dart';
 // =========================================================================
 
 @riverpod
-SoletrandoWordsDataSource soletrandoWordsDataSource(
-  SoletrandoWordsDataSourceRef ref,
-) {
+SoletrandoWordsDataSource soletrandoWordsDataSource(Ref ref) {
   return SoletrandoWordsDataSource();
 }
 
 @riverpod
-Future<SoletrandoLocalDataSource> soletrandoLocalDataSource(
-  SoletrandoLocalDataSourceRef ref,
-) async {
+Future<SoletrandoLocalDataSource> soletrandoLocalDataSource(Ref ref) async {
   final sharedPrefs = await SharedPreferences.getInstance();
   return SoletrandoLocalDataSource(sharedPrefs);
 }
@@ -36,9 +33,7 @@ Future<SoletrandoLocalDataSource> soletrandoLocalDataSource(
 // =========================================================================
 
 @riverpod
-Future<SoletrandoRepository> soletrandoRepository(
-  SoletrandoRepositoryRef ref,
-) async {
+Future<SoletrandoRepository> soletrandoRepository(Ref ref) async {
   final localDataSource =
       await ref.watch(soletrandoLocalDataSourceProvider.future);
   final wordsDataSource = ref.watch(soletrandoWordsDataSourceProvider);
@@ -54,25 +49,19 @@ Future<SoletrandoRepository> soletrandoRepository(
 // =========================================================================
 
 @riverpod
-Future<GenerateWordUseCase> generateWordUseCase(
-  GenerateWordUseCaseRef ref,
-) async {
+Future<GenerateWordUseCase> generateWordUseCase(Ref ref) async {
   final repository = await ref.watch(soletrandoRepositoryProvider.future);
   return GenerateWordUseCase(repository);
 }
 
 @riverpod
-Future<SkipWordUseCase> skipWordUseCase(
-  SkipWordUseCaseRef ref,
-) async {
+Future<SkipWordUseCase> skipWordUseCase(Ref ref) async {
   final repository = await ref.watch(soletrandoRepositoryProvider.future);
   return SkipWordUseCase(repository);
 }
 
 @riverpod
-Future<RestartGameUseCase> restartGameUseCase(
-  RestartGameUseCaseRef ref,
-) async {
+Future<RestartGameUseCase> restartGameUseCase(Ref ref) async {
   final repository = await ref.watch(soletrandoRepositoryProvider.future);
   return RestartGameUseCase(repository);
 }

@@ -1,6 +1,6 @@
 import 'dart:async';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/game_state.dart';
 import '../../domain/entities/game_stats.dart';
 import '../../domain/entities/enums.dart';
@@ -17,94 +17,84 @@ import '../../data/repositories/campo_minado_repository_impl.dart';
 import '../../domain/services/flood_fill_service.dart';
 import '../../domain/services/mine_generator_service.dart';
 import '../../domain/services/neighbor_calculator_service.dart';
+import '../../../../core/providers/core_providers.dart';
 
 part 'campo_minado_game_notifier.g.dart';
 
 // Dependencies providers
 
 @riverpod
-Future<SharedPreferences> sharedPreferences(SharedPreferencesRef ref) async {
-  return await SharedPreferences.getInstance();
-}
-
-@riverpod
-Future<CampoMinadoLocalDataSource> campoMinadoLocalDataSource(
-  CampoMinadoLocalDataSourceRef ref,
-) async {
-  final prefs = await ref.watch(sharedPreferencesProvider.future);
+CampoMinadoLocalDataSource campoMinadoLocalDataSource(Ref ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
   return CampoMinadoLocalDataSource(prefs);
 }
 
 @riverpod
-Future<CampoMinadoRepositoryImpl> campoMinadoRepository(
-  CampoMinadoRepositoryRef ref,
-) async {
-  final dataSource = await ref.watch(campoMinadoLocalDataSourceProvider.future);
+CampoMinadoRepositoryImpl campoMinadoRepository(Ref ref) {
+  final dataSource = ref.watch(campoMinadoLocalDataSourceProvider);
   return CampoMinadoRepositoryImpl(dataSource);
 }
 
 // Services providers
 
 @riverpod
-FloodFillService floodFillService(FloodFillServiceRef ref) {
+FloodFillService floodFillService(Ref ref) {
   return FloodFillService();
 }
 
 @riverpod
-MineGeneratorService mineGeneratorService(MineGeneratorServiceRef ref) {
+MineGeneratorService mineGeneratorService(Ref ref) {
   return MineGeneratorService();
 }
 
 @riverpod
-NeighborCalculatorService neighborCalculatorService(
-  NeighborCalculatorServiceRef ref,
-) {
+NeighborCalculatorService neighborCalculatorService(Ref ref) {
   return NeighborCalculatorService();
 }
 
 // Use cases providers
 
 @riverpod
-RevealCellUseCase revealCellUseCase(RevealCellUseCaseRef ref) {
+RevealCellUseCase revealCellUseCase(Ref ref) {
   return const RevealCellUseCase();
 }
 
 @riverpod
-ToggleFlagUseCase toggleFlagUseCase(ToggleFlagUseCaseRef ref) {
+ToggleFlagUseCase toggleFlagUseCase(Ref ref) {
   return const ToggleFlagUseCase();
 }
 
 @riverpod
-ChordClickUseCase chordClickUseCase(ChordClickUseCaseRef ref) {
+ChordClickUseCase chordClickUseCase(Ref ref) {
   return ChordClickUseCase(
     ref.watch(revealCellUseCaseProvider),
   );
 }
 
 @riverpod
-StartNewGameUseCase startNewGameUseCase(StartNewGameUseCaseRef ref) {
+StartNewGameUseCase startNewGameUseCase(Ref ref) {
   return const StartNewGameUseCase();
 }
 
 @riverpod
-TogglePauseUseCase togglePauseUseCase(TogglePauseUseCaseRef ref) {
+TogglePauseUseCase togglePauseUseCase(Ref ref) {
   return const TogglePauseUseCase();
 }
 
 @riverpod
-UpdateTimerUseCase updateTimerUseCase(UpdateTimerUseCaseRef ref) {
+UpdateTimerUseCase updateTimerUseCase(Ref ref) {
   return const UpdateTimerUseCase();
 }
 
 @riverpod
-Future<LoadStatsUseCase> loadStatsUseCase(LoadStatsUseCaseRef ref) async {
-  final repository = await ref.watch(campoMinadoRepositoryProvider.future);
+LoadStatsUseCase loadStatsUseCase(Ref ref) {
+  final repository = ref.watch(campoMinadoRepositoryProvider);
   return LoadStatsUseCase(repository);
 }
 
 @riverpod
-Future<UpdateStatsUseCase> updateStatsUseCase(UpdateStatsUseCaseRef ref) async {
-  final repository = await ref.watch(campoMinadoRepositoryProvider.future);
+UpdateStatsUseCase updateStatsUseCase(Ref ref) {
+  final repository = ref.watch(campoMinadoRepositoryProvider);
   return UpdateStatsUseCase(repository);
 }
 
@@ -291,7 +281,7 @@ class CampoMinadoGameNotifier extends _$CampoMinadoGameNotifier {
   // Statistics
 
   Future<void> _updateStatistics({required bool won}) async {
-    final useCase = await ref.read(updateStatsUseCaseProvider.future);
+    final useCase = ref.read(updateStatsUseCaseProvider);
     final result = await useCase(
       gameState: state,
       won: won,
@@ -316,7 +306,7 @@ class CampoMinadoGameNotifier extends _$CampoMinadoGameNotifier {
 class CampoMinadoStats extends _$CampoMinadoStats {
   @override
   Future<GameStats> build(Difficulty difficulty) async {
-    final useCase = await ref.read(loadStatsUseCaseProvider.future);
+    final useCase = ref.read(loadStatsUseCaseProvider);
     final result = await useCase(difficulty: difficulty);
 
     return result.fold(
@@ -328,7 +318,7 @@ class CampoMinadoStats extends _$CampoMinadoStats {
   Future<void> refresh() async {
     state = const AsyncValue.loading();
 
-    final useCase = await ref.read(loadStatsUseCaseProvider.future);
+    final useCase = ref.read(loadStatsUseCaseProvider);
     final result = await useCase(difficulty: difficulty);
 
     state = result.fold(
@@ -341,25 +331,25 @@ class CampoMinadoStats extends _$CampoMinadoStats {
 // Computed/derived providers
 
 @riverpod
-bool isGameActive(IsGameActiveRef ref) {
-  final gameState = ref.watch(campoMinadoGameNotifierProvider);
+bool isGameActive(Ref ref) {
+  final gameState = ref.watch(campoMinadoGameProvider);
   return gameState.isPlaying && !gameState.isPaused;
 }
 
 @riverpod
-bool canInteract(CanInteractRef ref) {
-  final gameState = ref.watch(campoMinadoGameNotifierProvider);
+bool canInteract(Ref ref) {
+  final gameState = ref.watch(campoMinadoGameProvider);
   return gameState.canInteract;
 }
 
 @riverpod
-String formattedTime(FormattedTimeRef ref) {
-  final gameState = ref.watch(campoMinadoGameNotifierProvider);
+String formattedTime(Ref ref) {
+  final gameState = ref.watch(campoMinadoGameProvider);
   return gameState.formattedTime;
 }
 
 @riverpod
-int remainingMines(RemainingMinesRef ref) {
-  final gameState = ref.watch(campoMinadoGameNotifierProvider);
+int remainingMines(Ref ref) {
+  final gameState = ref.watch(campoMinadoGameProvider);
   return gameState.remainingMines;
 }

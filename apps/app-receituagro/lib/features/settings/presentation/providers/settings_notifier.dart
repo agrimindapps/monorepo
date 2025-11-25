@@ -39,7 +39,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   void _initializeServices() {
     try {
-      _featureFlagsNotifier = ref.read(featureFlagsNotifierProvider.notifier);
+      _featureFlagsNotifier = ref.read(featureFlagsProvider.notifier);
       // _deviceManagementService = ref.watch(deviceManagementServiceProvider);
       
       // if (_deviceManagementService == null) {
@@ -134,41 +134,41 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Generate test license (development only)
   Future<bool> generateTestLicense() async {
-    // TODO: Implement analyticsDebugNotifierProvider
-    // final debugNotifier = ref.read(analyticsDebugNotifierProvider.notifier);
+    // TODO: Implement analyticsDebugProvider
+    // final debugNotifier = ref.read(analyticsDebugProvider.notifier);
     // return await debugNotifier.generateTestLicense();
     return false;
   }
 
   /// Remove test license (development only)
   Future<bool> removeTestLicense() async {
-    // TODO: Implement analyticsDebugNotifierProvider
-    // final debugNotifier = ref.read(analyticsDebugNotifierProvider.notifier);
+    // TODO: Implement analyticsDebugProvider
+    // final debugNotifier = ref.read(analyticsDebugProvider.notifier);
     // return await debugNotifier.removeTestLicense();
     return false;
   }
 
   /// Test notification functionality
   Future<bool> testNotification() async {
-    // TODO: Implement notificationsNotifierProvider
+    // TODO: Implement notificationsProvider
     // final notificationNotifier =
-    //     ref.read(notificationsNotifierProvider.notifier);
+    //     ref.read(notificationsProvider.notifier);
     // return await notificationNotifier.testNotification();
     return false;
   }
 
   /// Open notification settings
   Future<void> openNotificationSettings() async {
-    // TODO: Implement notificationsNotifierProvider
+    // TODO: Implement notificationsProvider
     // final notificationNotifier =
-    //     ref.read(notificationsNotifierProvider.notifier);
+    //     ref.read(notificationsProvider.notifier);
     // await notificationNotifier.openNotificationSettings();
   }
 
   /// Test analytics functionality
   Future<bool> testAnalytics() async {
     // TODO: Implement analytics testing
-    // final debugNotifier = ref.read(analyticsDebugNotifierProvider.notifier);
+    // final debugNotifier = ref.read(analyticsDebugProvider.notifier);
     // return await debugNotifier.testAnalytics();
     return false;
   }
@@ -176,7 +176,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   /// Test crashlytics functionality
   Future<bool> testCrashlytics() async {
     // TODO: Implement crashlytics testing
-    // final debugNotifier = ref.read(analyticsDebugNotifierProvider.notifier);
+    // final debugNotifier = ref.read(analyticsDebugProvider.notifier);
     // return await debugNotifier.testCrashlytics();
     return false;
   }
@@ -184,7 +184,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   /// Show rate app dialog
   Future<bool> showRateAppDialog(BuildContext context) async {
     // TODO: Implement rate app dialog
-    // final debugNotifier = ref.read(analyticsDebugNotifierProvider.notifier);
+    // final debugNotifier = ref.read(analyticsDebugProvider.notifier);
     // return await debugNotifier.showRateAppDialog();
     return false;
   }

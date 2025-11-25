@@ -36,7 +36,7 @@ class _BeberAguaPageState extends ConsumerState<BeberAguaPage> {
   }
 
   Widget _buildProgressCard() {
-    final aguaAsync = ref.watch(aguaNotifierProvider);
+    final aguaAsync = ref.watch(aguaProvider);
 
     return aguaAsync.when(
       data: (aguaState) {
@@ -128,7 +128,7 @@ class _BeberAguaPageState extends ConsumerState<BeberAguaPage> {
   }
 
   Widget _buildHealthTips() {
-    final tipOfTheDay = ref.read(aguaNotifierProvider.notifier).getTipOfTheDay();
+    final tipOfTheDay = ref.read(aguaProvider.notifier).getTipOfTheDay();
 
     return Card(
       child: Padding(
@@ -157,7 +157,7 @@ class _BeberAguaPageState extends ConsumerState<BeberAguaPage> {
   }
 
   Widget _buildAchievements() {
-    final aguaAsync = ref.watch(aguaNotifierProvider);
+    final aguaAsync = ref.watch(aguaProvider);
 
     return aguaAsync.when(
       data: (aguaState) {
@@ -209,7 +209,7 @@ class _BeberAguaPageState extends ConsumerState<BeberAguaPage> {
   }
 
   Future<void> _showGoalDialog() async {
-    final aguaState = await ref.read(aguaNotifierProvider.future);
+    final aguaState = await ref.read(aguaProvider.future);
     final controller = TextEditingController(
       text: aguaState.dailyWaterGoal.toInt().toString(),
     );
@@ -240,7 +240,7 @@ class _BeberAguaPageState extends ConsumerState<BeberAguaPage> {
                 final newGoal = double.tryParse(value);
                 if (newGoal != null && newGoal > 0) {
                   await ref
-                      .read(aguaNotifierProvider.notifier)
+                      .read(aguaProvider.notifier)
                       .updateDailyGoal(newGoal);
                 }
               }
@@ -347,7 +347,7 @@ class _BeberAguaPageState extends ConsumerState<BeberAguaPage> {
   }
 
   Widget _buildRegistrosCard() {
-    final aguaAsync = ref.watch(aguaNotifierProvider);
+    final aguaAsync = ref.watch(aguaProvider);
 
     return aguaAsync.when(
       data: (aguaState) {
@@ -387,7 +387,7 @@ class _BeberAguaPageState extends ConsumerState<BeberAguaPage> {
                                 icon: const Icon(Icons.delete),
                                 onPressed: () {
                                   ref
-                                      .read(aguaNotifierProvider.notifier)
+                                      .read(aguaProvider.notifier)
                                       .deleteRegistro(registro);
                                 },
                               ),

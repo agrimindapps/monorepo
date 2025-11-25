@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/enums.dart';
 import '../entities/grid_entity.dart';
 import '../entities/position_entity.dart';
@@ -12,7 +10,6 @@ import '../entities/tile_entity.dart';
 /// - Movement along rows/columns
 /// - Score calculation from merges
 /// - Animation type determination
-@lazySingleton
 class LineMoverService {
   // ============================================================================
   // Core Methods

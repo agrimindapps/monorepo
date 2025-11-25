@@ -44,8 +44,8 @@ class ThemeNotifier extends _$ThemeNotifier {
 
 /// Derived provider for theme icon
 @riverpod
-IconData themeIcon(ThemeIconRef ref) {
-  final themeMode = ref.watch(themeNotifierProvider);
+IconData themeIcon(Ref ref) {
+  final themeMode = ref.watch(themeProvider);
 
   switch (themeMode) {
     case ThemeMode.dark:
@@ -59,8 +59,8 @@ IconData themeIcon(ThemeIconRef ref) {
 
 /// Derived provider for isDark check
 @riverpod
-bool isDarkTheme(IsDarkThemeRef ref) {
-  final themeMode = ref.watch(themeNotifierProvider);
+bool isDarkTheme(Ref ref) {
+  final themeMode = ref.watch(themeProvider);
 
   switch (themeMode) {
     case ThemeMode.dark:

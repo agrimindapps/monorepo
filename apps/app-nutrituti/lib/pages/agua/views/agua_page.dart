@@ -20,7 +20,7 @@ class AguaPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final aguaAsync = ref.watch(aguaNotifierProvider);
+    final aguaAsync = ref.watch(aguaProvider);
 
     return Scaffold(
       appBar: const NutriAppBar(),
@@ -70,7 +70,7 @@ class AguaPage extends ConsumerWidget {
             children: [
               Text('Erro: $error'),
               ElevatedButton(
-                onPressed: () => ref.invalidate(aguaNotifierProvider),
+                onPressed: () => ref.invalidate(aguaProvider),
                 child: const Text('Tentar Novamente'),
               ),
             ],
@@ -122,7 +122,7 @@ class AguaPage extends ConsumerWidget {
             onPressed: () {
               if (textController.text.isNotEmpty) {
                 final double newGoal = double.parse(textController.text);
-                ref.read(aguaNotifierProvider.notifier).updateDailyGoal(newGoal);
+                ref.read(aguaProvider.notifier).updateDailyGoal(newGoal);
               }
               Navigator.pop(context);
             },
@@ -147,9 +147,9 @@ class AguaPage extends ConsumerWidget {
             registro: registro,
             onSave: (newRegistro) async {
               if (registro == null) {
-                await ref.read(aguaNotifierProvider.notifier).addRegistro(newRegistro);
+                await ref.read(aguaProvider.notifier).addRegistro(newRegistro);
               } else {
-                await ref.read(aguaNotifierProvider.notifier).updateRegistro(newRegistro);
+                await ref.read(aguaProvider.notifier).updateRegistro(newRegistro);
               }
             },
           ),
@@ -179,7 +179,7 @@ class AguaPage extends ConsumerWidget {
     );
 
     if (confirm == true) {
-      await ref.read(aguaNotifierProvider.notifier).deleteRegistro(registro);
+      await ref.read(aguaProvider.notifier).deleteRegistro(registro);
     }
   }
 }

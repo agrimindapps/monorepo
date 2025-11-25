@@ -33,7 +33,7 @@ class TTSButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settingsAsync = ref.watch(ttsNotifierProvider);
+    final settingsAsync = ref.watch(ttsProvider);
     final stateAsync = ref.watch(ttsStateStreamProvider);
 
     final settings = settingsAsync.value;
@@ -100,7 +100,7 @@ class TTSButton extends ConsumerWidget {
   }
 
   void _handleTap(WidgetRef ref, TTSSpeechState state) {
-    final notifier = ref.read(ttsNotifierProvider.notifier);
+    final notifier = ref.read(ttsProvider.notifier);
 
     switch (state) {
       case TTSSpeechState.idle:

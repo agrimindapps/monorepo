@@ -12,7 +12,7 @@ part 'recommendation_provider.g.dart';
 /// Used by notifiers and other services that need recommendations
 @riverpod
 IRecommendationService recommendationService(
-  RecommendationServiceRef ref,
+  Ref ref,
 ) {
   final queryRepository = ref.watch(iDiagnosticosRepositoryProvider);
   return RecommendationService(queryRepository);

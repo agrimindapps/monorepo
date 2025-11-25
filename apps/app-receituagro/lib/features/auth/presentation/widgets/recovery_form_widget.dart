@@ -14,8 +14,8 @@ class RecoveryFormWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final loginState = ref.watch(loginNotifierProvider);
-    final loginNotifier = ref.read(loginNotifierProvider.notifier);
+    final loginState = ref.watch(loginProvider);
+    final loginNotifier = ref.read(loginProvider.notifier);
 
     final primaryColor = _getReceitaAgroPrimaryColor(
       Theme.of(context).brightness == Brightness.dark
@@ -93,7 +93,7 @@ class RecoveryFormWidget extends ConsumerWidget {
   }
 
   Widget _buildErrorMessage(BuildContext context, WidgetRef ref, String message) {
-    final loginNotifier = ref.read(loginNotifierProvider.notifier);
+    final loginNotifier = ref.read(loginProvider.notifier);
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -141,12 +141,12 @@ class RecoveryFormWidget extends ConsumerWidget {
       print('🎯 RecoveryFormWidget: Enviando email de recuperação');
     }
 
-    final loginNotifier = ref.read(loginNotifierProvider.notifier);
+    final loginNotifier = ref.read(loginProvider.notifier);
     await loginNotifier.sendPasswordReset();
 
     if (!context.mounted) return;
 
-    final loginState = ref.read(loginNotifierProvider);
+    final loginState = ref.read(loginProvider);
     if (loginState.errorMessage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

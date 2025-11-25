@@ -73,15 +73,6 @@ class SyncQueueItem {
   String get status => syncIsSynced ? 'synced' : 'pending';
   DateTime get createdAt => syncTimestamp;
 
-  // ✅ Compatibility getters for legacy code
-  String get sync_id => syncId;
-  String get sync_operation => syncOperation;
-  DateTime get sync_timestamp => syncTimestamp;
-  int get sync_retryCount => syncRetryCount;
-  bool get sync_isSynced => syncIsSynced;
-  String? get sync_errorMessage => syncErrorMessage;
-  DateTime? get sync_lastRetryAt => syncLastRetryAt;
-
   SyncQueueItem copyWith({
     String? syncId,
     String? modelType,
@@ -93,32 +84,22 @@ class SyncQueueItem {
     String? syncErrorMessage,
     DateTime? syncLastRetryAt,
     String? status, // ✅ Compatibility parameter
-    // Legacy parameters
-    String? sync_id,
-    String? sync_operation,
-    DateTime? sync_timestamp,
-    int? sync_retryCount,
-    bool? sync_isSynced,
-    String? sync_errorMessage,
-    DateTime? sync_lastRetryAt,
   }) {
     // ✅ Handle status parameter
     final bool isSynced = status != null
         ? (status == 'synced' || status == 'completed')
-        : (syncIsSynced ?? sync_isSynced ?? this.syncIsSynced);
+        : (syncIsSynced ?? this.syncIsSynced);
 
     return SyncQueueItem(
-      syncId: syncId ?? sync_id ?? this.syncId,
+      syncId: syncId ?? this.syncId,
       modelType: modelType ?? this.modelType,
-      syncOperation: syncOperation ?? sync_operation ?? this.syncOperation,
+      syncOperation: syncOperation ?? this.syncOperation,
       data: data ?? this.data,
-      syncTimestamp: syncTimestamp ?? sync_timestamp ?? this.syncTimestamp,
-      syncRetryCount: syncRetryCount ?? sync_retryCount ?? this.syncRetryCount,
+      syncTimestamp: syncTimestamp ?? this.syncTimestamp,
+      syncRetryCount: syncRetryCount ?? this.syncRetryCount,
       syncIsSynced: isSynced,
-      syncErrorMessage:
-          syncErrorMessage ?? sync_errorMessage ?? this.syncErrorMessage,
-      syncLastRetryAt:
-          syncLastRetryAt ?? sync_lastRetryAt ?? this.syncLastRetryAt,
+      syncErrorMessage: syncErrorMessage ?? this.syncErrorMessage,
+      syncLastRetryAt: syncLastRetryAt ?? this.syncLastRetryAt,
     );
   }
 

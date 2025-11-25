@@ -1,8 +1,6 @@
 import 'package:core/core.dart' hide AuthState, Column;
+import 'package:flutter_riverpod/legacy.dart';
 
-import 'core_providers.dart';
-import 'package:app_receituagro/features/sync/services/sync_coordinator.dart';
-import '../../features/analytics/analytics_providers.dart';
 import 'auth_notifier.dart';
 import 'auth_state.dart' as local;
 
@@ -20,7 +18,7 @@ import 'auth_state.dart' as local;
 /// ## Usage:
 /// ```dart
 /// // Watch auth state
-/// final authState = ref.watch(authNotifierProvider);
+/// final authState = ref.watch(authProvider);
 ///
 /// // Access current user
 /// final user = ref.watch(currentUserProvider);
@@ -38,7 +36,7 @@ import 'auth_state.dart' as local;
 ///
 /// This uses the traditional StateNotifierProvider pattern which automatically
 /// exposes the state without needing to access the protected .state property.
-final authNotifierProvider =
+final authProvider =
     StateNotifierProvider<AuthNotifier, local.AuthState>((ref) {
   return AuthNotifier(ref);
 });
@@ -49,20 +47,20 @@ final authNotifierProvider =
 
 /// Computed provider: Current authenticated user
 final currentUserProvider = Provider<UserEntity?>((ref) {
-  return ref.watch(authNotifierProvider).currentUser;
+  return ref.watch(authProvider).currentUser;
 });
 
 /// Computed provider: Authentication status
 final isAuthenticatedProvider = Provider<bool>((ref) {
-  return ref.watch(authNotifierProvider).isAuthenticated;
+  return ref.watch(authProvider).isAuthenticated;
 });
 
 /// Computed provider: Loading state
 final isLoadingProvider = Provider<bool>((ref) {
-  return ref.watch(authNotifierProvider).isLoading;
+  return ref.watch(authProvider).isLoading;
 });
 
 /// Computed provider: Error message
 final errorMessageProvider = Provider<String?>((ref) {
-  return ref.watch(authNotifierProvider).errorMessage;
+  return ref.watch(authProvider).errorMessage;
 });

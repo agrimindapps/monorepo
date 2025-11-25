@@ -1,9 +1,6 @@
-
-
 /// Service responsible for centralized error message management
 /// Follows SRP - single source of truth for all error messages
 /// Makes testing and localization easier
-
 class SubscriptionErrorMessageService {
   /// Repository error messages
   static const Map<String, String> _repositoryErrors = {

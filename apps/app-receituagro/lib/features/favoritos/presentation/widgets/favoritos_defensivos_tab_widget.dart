@@ -15,7 +15,7 @@ class FavoritosDefensivosTabWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final favoritosState = ref.watch(favoritosNotifierProvider);
+    final favoritosState = ref.watch(favoritosProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Usar novo padrão com getFavoritosByTipo
@@ -60,7 +60,7 @@ class FavoritosDefensivosTabWidget extends ConsumerWidget {
         return RefreshIndicator(
           onRefresh: () async {
             await ref
-                .read(favoritosNotifierProvider.notifier)
+                .read(favoritosProvider.notifier)
                 .loadAllFavoritos();
           },
           child: Padding(
@@ -250,7 +250,7 @@ class FavoritosDefensivosTabWidget extends ConsumerWidget {
   ) async {
     try {
       await ref
-          .read(favoritosNotifierProvider.notifier)
+          .read(favoritosProvider.notifier)
           .toggleFavorito(TipoFavorito.defensivo, defensivo.id);
     } catch (e) {}
   }

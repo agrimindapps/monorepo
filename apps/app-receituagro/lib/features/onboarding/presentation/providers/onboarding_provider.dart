@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_receituagro/core/providers/core_providers.dart';
 import 'package:app_receituagro/core/providers/domain_providers.dart'
     as domain_providers;
@@ -33,7 +34,7 @@ OnboardingConfigDataSource onboardingConfigDataSource(
 
 /// Provides [IOnboardingRepository] instance
 @riverpod
-IOnboardingRepository onboardingRepository(OnboardingRepositoryRef ref) {
+IOnboardingRepository onboardingRepository(Ref ref) {
   final localDataSource = ref.watch(onboardingLocalDataSourceProvider);
   final configDataSource = ref.watch(onboardingConfigDataSourceProvider);
   return OnboardingRepositoryImpl(localDataSource, configDataSource);
@@ -43,7 +44,7 @@ IOnboardingRepository onboardingRepository(OnboardingRepositoryRef ref) {
 
 /// Provides [StartOnboardingUseCase] instance
 @riverpod
-StartOnboardingUseCase startOnboardingUseCase(StartOnboardingUseCaseRef ref) {
+StartOnboardingUseCase startOnboardingUseCase(Ref ref) {
   final repository = ref.watch(onboardingRepositoryProvider);
   final analytics = ref.watch(analyticsRepositoryProvider);
   return StartOnboardingUseCase(repository, analytics);
@@ -51,7 +52,7 @@ StartOnboardingUseCase startOnboardingUseCase(StartOnboardingUseCaseRef ref) {
 
 /// Provides [CompleteStepUseCase] instance
 @riverpod
-CompleteStepUseCase completeStepUseCase(CompleteStepUseCaseRef ref) {
+CompleteStepUseCase completeStepUseCase(Ref ref) {
   final repository = ref.watch(onboardingRepositoryProvider);
   final analytics = ref.watch(analyticsRepositoryProvider);
   return CompleteStepUseCase(repository, analytics);
@@ -59,7 +60,7 @@ CompleteStepUseCase completeStepUseCase(CompleteStepUseCaseRef ref) {
 
 /// Provides [SkipStepUseCase] instance
 @riverpod
-SkipStepUseCase skipStepUseCase(SkipStepUseCaseRef ref) {
+SkipStepUseCase skipStepUseCase(Ref ref) {
   final repository = ref.watch(onboardingRepositoryProvider);
   final analytics = ref.watch(analyticsRepositoryProvider);
   final completeStepUseCase = ref.watch(completeStepUseCaseProvider);
@@ -87,7 +88,7 @@ ShowFeatureTooltipUseCase showFeatureTooltipUseCase(
 
 /// Provides [ResetOnboardingUseCase] instance
 @riverpod
-ResetOnboardingUseCase resetOnboardingUseCase(ResetOnboardingUseCaseRef ref) {
+ResetOnboardingUseCase resetOnboardingUseCase(Ref ref) {
   final repository = ref.watch(onboardingRepositoryProvider);
   final analytics = ref.watch(analyticsRepositoryProvider);
   return ResetOnboardingUseCase(repository, analytics);
@@ -97,7 +98,7 @@ ResetOnboardingUseCase resetOnboardingUseCase(ResetOnboardingUseCaseRef ref) {
 
 /// Provides [OnboardingUIService] instance
 @riverpod
-OnboardingUIService onboardingUIService(OnboardingUIServiceRef ref) {
+OnboardingUIService onboardingUIService(Ref ref) {
   return OnboardingUIService();
 }
 
@@ -110,7 +111,7 @@ OnboardingErrorMessageService onboardingErrorMessageService(
 
 /// Provides list of all onboarding steps configuration
 @riverpod
-List<OnboardingStep> onboardingSteps(OnboardingStepsRef ref) {
+List<OnboardingStep> onboardingSteps(Ref ref) {
   final repository = ref.watch(onboardingRepositoryProvider);
   final result = repository.getOnboardingSteps();
 
@@ -119,7 +120,7 @@ List<OnboardingStep> onboardingSteps(OnboardingStepsRef ref) {
 
 /// Provides list of all feature discovery tooltips
 @riverpod
-List<FeatureTooltip> featureTooltips(FeatureTooltipsRef ref) {
+List<FeatureTooltip> featureTooltips(Ref ref) {
   final repository = ref.watch(onboardingRepositoryProvider);
   final result = repository.getFeatureTooltips();
 
@@ -236,8 +237,8 @@ class OnboardingNotifier extends _$OnboardingNotifier {
 /// Completion percentage (0-100)
 /// Calculated from current progress and required steps
 @riverpod
-double completionPercentage(CompletionPercentageRef ref) {
-  final progressAsync = ref.watch(onboardingNotifierProvider);
+double completionPercentage(Ref ref) {
+  final progressAsync = ref.watch(onboardingProvider);
   final steps = ref.watch(onboardingStepsProvider);
 
   return progressAsync.when(
@@ -259,8 +260,8 @@ double completionPercentage(CompletionPercentageRef ref) {
 
 /// Check if onboarding is completed
 @riverpod
-bool isOnboardingCompleted(IsOnboardingCompletedRef ref) {
-  final progressAsync = ref.watch(onboardingNotifierProvider);
+bool isOnboardingCompleted(Ref ref) {
+  final progressAsync = ref.watch(onboardingProvider);
 
   return progressAsync.when(
     data: (progress) => progress?.isCompleted ?? false,
@@ -271,8 +272,8 @@ bool isOnboardingCompleted(IsOnboardingCompletedRef ref) {
 
 /// Get current step (for navigation/display)
 @riverpod
-OnboardingStep? currentStep(CurrentStepRef ref) {
-  final progressAsync = ref.watch(onboardingNotifierProvider);
+OnboardingStep? currentStep(Ref ref) {
+  final progressAsync = ref.watch(onboardingProvider);
   final steps = ref.watch(onboardingStepsProvider);
 
   return progressAsync.when(
@@ -291,7 +292,7 @@ OnboardingStep? currentStep(CurrentStepRef ref) {
 
 /// Get current step index for UI display
 @riverpod
-int currentStepIndex(CurrentStepIndexRef ref) {
+int currentStepIndex(Ref ref) {
   final current = ref.watch(currentStepProvider);
   final steps = ref.watch(onboardingStepsProvider);
 

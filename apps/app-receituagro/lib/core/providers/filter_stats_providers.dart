@@ -8,13 +8,13 @@ part 'filter_stats_providers.g.dart';
 /// Provider for FilterService
 /// Single Responsibility: Provides filtering operations without persistence
 @riverpod
-FilterService filterService(FilterServiceRef ref) {
+FilterService filterService(Ref ref) {
   return FilterService();
 }
 
 /// Provider for StatsService
 /// Single Responsibility: Provides statistics calculations
 @riverpod
-StatsService statsService(StatsServiceRef ref) {
+StatsService statsService(Ref ref) {
   return StatsService();
 }

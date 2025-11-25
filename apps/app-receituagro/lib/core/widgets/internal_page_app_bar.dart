@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/core_providers.dart';
-import '../services/receituagro_navigation_service.dart';
 
 /// AppBar customizado para páginas internas que preserva o bottomNavigation
 ///

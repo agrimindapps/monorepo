@@ -62,13 +62,13 @@ class PremiumStatusNotifier extends _$PremiumStatusNotifier {
 
 /// Derived provider for isPremium
 @riverpod
-bool isPremiumStatus(IsPremiumStatusRef ref) {
-  return ref.watch(premiumStatusNotifierProvider).isPremium;
+bool isPremiumStatus(Ref ref) {
+  return ref.watch(premiumStatusProvider).isPremium;
 }
 
 /// Singleton-style accessor for backward compatibility
 /// DEPRECATED: Use Riverpod provider directly instead
-@Deprecated('Use premiumStatusNotifierProvider via Riverpod instead')
+@Deprecated('Use premiumStatusProvider via Riverpod instead')
 class PremiumStatusNotifierCompat {
   static final PremiumStatusNotifierCompat _instance = PremiumStatusNotifierCompat._();
   static PremiumStatusNotifierCompat get instance => _instance;

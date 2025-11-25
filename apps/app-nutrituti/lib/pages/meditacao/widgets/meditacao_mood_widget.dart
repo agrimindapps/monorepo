@@ -59,14 +59,14 @@ class _MoodButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final humorSelecionado = ref.watch(
-      meditacaoNotifierProvider.select((state) => state.humorSelecionado),
+      meditacaoProvider.select((state) => state.humorSelecionado),
     );
 
     final isSelected = humorSelecionado == mood;
 
     return InkWell(
       onTap: () {
-        ref.read(meditacaoNotifierProvider.notifier).selecionarHumor(mood);
+        ref.read(meditacaoProvider.notifier).selecionarHumor(mood);
       },
       child: Column(
         children: [

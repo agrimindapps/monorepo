@@ -73,7 +73,7 @@ class TicTacToeGameNotifier extends _$TicTacToeGameNotifier {
 
   /// Makes a player move at the specified position
   Future<void> makeMove(int row, int col) async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null || !currentState.isInProgress) return;
 
     // Track move timing (for future analytics)
@@ -154,7 +154,7 @@ class TicTacToeGameNotifier extends _$TicTacToeGameNotifier {
     if (!_isMounted) return;
     if (_isProcessingAIMove) return;
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null || !currentState.isInProgress) return;
 
     _isProcessingAIMove = true;
@@ -240,7 +240,7 @@ class TicTacToeGameNotifier extends _$TicTacToeGameNotifier {
         await _saveStatsUseCase(updatedStats);
 
         // Invalidate stats provider to refresh UI
-        ref.invalidate(ticTacToeStatsNotifierProvider);
+        ref.invalidate(ticTacToeStatsProvider);
       },
     );
   }
@@ -250,7 +250,7 @@ class TicTacToeGameNotifier extends _$TicTacToeGameNotifier {
     _aiTimer?.cancel();
     _isProcessingAIMove = false;
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     // Start new game tracking (for future analytics)
@@ -277,7 +277,7 @@ class TicTacToeGameNotifier extends _$TicTacToeGameNotifier {
   Future<void> changeGameMode(GameMode mode) async {
     _aiTimer?.cancel();
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     final newSettings = GameSettings(
@@ -300,7 +300,7 @@ class TicTacToeGameNotifier extends _$TicTacToeGameNotifier {
   Future<void> changeDifficulty(Difficulty difficulty) async {
     _aiTimer?.cancel();
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     final newSettings = GameSettings(

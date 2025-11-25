@@ -57,7 +57,7 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
   Future<GameState> _startNewGame() async {
     _gameStartTime = DateTime.now();
 
-    final difficulty = state.valueOrNull?.difficulty ?? GameDifficulty.medium;
+    final difficulty = state.value?.difficulty ?? GameDifficulty.medium;
     final generateGridUseCase = ref.read(generateGridUseCaseProvider);
     final result = await generateGridUseCase(difficulty: difficulty);
 
@@ -82,7 +82,7 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
   Future<void> _executeCellTap(int row, int col) async {
     if (!_isMounted) return;
 
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null || !currentState.isPlaying) return;
 
     // Haptic feedback for selection
@@ -145,7 +145,7 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
 
   /// Handles word tap from word list (toggles highlight)
   Future<void> handleWordTap(int wordIndex) async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     final toggleWordHighlightUseCase =
@@ -180,7 +180,7 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
       (updatedScore) {
         _highScore = updatedScore;
         // Invalidate high score provider
-        ref.invalidate(cacaPalavraHighScoreNotifierProvider);
+        ref.invalidate(cacaPalavraHighScoreProvider);
       },
     );
   }
@@ -215,7 +215,7 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
 
   /// Gets completion time in seconds (if game completed)
   int? getCompletionTime() {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null ||
         !currentState.isCompleted ||
         _gameStartTime == null) {

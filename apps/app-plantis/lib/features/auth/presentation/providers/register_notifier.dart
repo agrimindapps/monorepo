@@ -260,3 +260,7 @@ class RegisterNotifier extends _$RegisterNotifier {
     state = state.copyWith(clearError: true);
   }
 }
+
+// LEGACY ALIAS
+// ignore: deprecated_member_use_from_same_package
+final registerNotifierProvider = registerProvider;

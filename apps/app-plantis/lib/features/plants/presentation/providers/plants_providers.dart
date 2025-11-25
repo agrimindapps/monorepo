@@ -20,19 +20,19 @@ part 'plants_providers.g.dart';
 
 // Services
 @riverpod
-TaskGenerationService taskGenerationService(TaskGenerationServiceRef ref) {
+TaskGenerationService taskGenerationService(Ref ref) {
   return TaskGenerationService();
 }
 
 @riverpod
-PlantTaskGenerator plantTaskGenerator(PlantTaskGeneratorRef ref) {
+PlantTaskGenerator plantTaskGenerator(Ref ref) {
   return PlantTaskGenerator();
 }
 
 // UseCases
 @riverpod
 GenerateInitialTasksUseCase generateInitialTasksUseCase(
-    GenerateInitialTasksUseCaseRef ref) {
+    Ref ref) {
   return GenerateInitialTasksUseCase(
     tasksRepository: ref.watch(tasksRepositoryProvider),
     taskGenerationService: ref.watch(taskGenerationServiceProvider),
@@ -40,25 +40,25 @@ GenerateInitialTasksUseCase generateInitialTasksUseCase(
 }
 
 @riverpod
-GetPlantsUseCase getPlantsUseCase(GetPlantsUseCaseRef ref) {
+GetPlantsUseCase getPlantsUseCase(Ref ref) {
   final repository = ref.watch(plantsRepositoryProvider);
   return GetPlantsUseCase(repository);
 }
 
 @riverpod
-GetPlantByIdUseCase getPlantByIdUseCase(GetPlantByIdUseCaseRef ref) {
+GetPlantByIdUseCase getPlantByIdUseCase(Ref ref) {
   final repository = ref.watch(plantsRepositoryProvider);
   return GetPlantByIdUseCase(repository);
 }
 
 @riverpod
-SearchPlantsUseCase searchPlantsUseCase(SearchPlantsUseCaseRef ref) {
+SearchPlantsUseCase searchPlantsUseCase(Ref ref) {
   final repository = ref.watch(plantsRepositoryProvider);
   return SearchPlantsUseCase(repository);
 }
 
 @riverpod
-AddPlantUseCase addPlantUseCase(AddPlantUseCaseRef ref) {
+AddPlantUseCase addPlantUseCase(Ref ref) {
   final repository = ref.watch(plantsRepositoryProvider);
   final generateInitialTasks = ref.watch(generateInitialTasksUseCaseProvider);
   final plantTaskGenerator = ref.watch(plantTaskGeneratorProvider);
@@ -73,13 +73,13 @@ AddPlantUseCase addPlantUseCase(AddPlantUseCaseRef ref) {
 }
 
 @riverpod
-UpdatePlantUseCase updatePlantUseCase(UpdatePlantUseCaseRef ref) {
+UpdatePlantUseCase updatePlantUseCase(Ref ref) {
   final repository = ref.watch(plantsRepositoryProvider);
   return UpdatePlantUseCase(repository);
 }
 
 @riverpod
-DeletePlantUseCase deletePlantUseCase(DeletePlantUseCaseRef ref) {
+DeletePlantUseCase deletePlantUseCase(Ref ref) {
   final repository = ref.watch(plantsRepositoryProvider);
   return DeletePlantUseCase(repository);
 }

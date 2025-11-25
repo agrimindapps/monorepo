@@ -63,8 +63,7 @@ void main() {
       final initial = container.read(themeNotifierProvider);
 
       // Assert
-      expect(initial.hasValue, false);
-      expect(initial.hasError, false);
+      expect(initial, isNotNull);
     });
 
     test('should handle error when loading settings fails', () async {

@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/card_entity.dart';
 import '../entities/enums.dart';
 
@@ -10,7 +8,6 @@ import '../entities/enums.dart';
 /// - Card state transitions
 /// - Flip constraints
 /// - Game state validation
-@lazySingleton
 class CardFlipService {
   // ============================================================================
   // Constants

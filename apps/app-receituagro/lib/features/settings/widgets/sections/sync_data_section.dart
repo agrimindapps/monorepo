@@ -20,7 +20,7 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
   /// Executa sincronização manual
   Future<void> _performManualSync() async {
     if (_isSyncing) return;
-    final authState = ref.read(authNotifierProvider);
+    final authState = ref.read(authProvider);
 
     if (!authState.isAuthenticated) {
       _showMessage('Faça login para sincronizar seus dados', isError: true);
@@ -33,7 +33,7 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
 
     try {
       final success =
-          await ref.read(authNotifierProvider.notifier).forceSyncUserData();
+          await ref.read(authProvider.notifier).forceSyncUserData();
 
       if (mounted) {
         setState(() {
@@ -74,7 +74,7 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
 
     if (!authState.isAuthenticated || authState.isAnonymous) {
       return const SizedBox.shrink();

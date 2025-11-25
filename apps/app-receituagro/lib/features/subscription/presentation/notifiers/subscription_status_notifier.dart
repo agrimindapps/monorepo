@@ -3,6 +3,8 @@ import 'package:core/core.dart';
 import '../../domain/usecases/get_current_subscription.dart';
 import '../services/subscription_error_message_service.dart';
 
+part 'subscription_status_notifier.g.dart';
+
 /// Estado da assinatura do usuário com indicadores de progresso
 class SubscriptionStatusState {
   final SubscriptionEntity? subscription;
@@ -82,13 +84,20 @@ class SubscriptionStatusState {
 /// - Atualizar automaticamente
 /// - Gerenciar operações de upgrade/downgrade
 /// - Rastrear histórico de mudanças
-class SubscriptionStatusNotifier
-    extends StateNotifier<SubscriptionStatusState> {
-  final SubscriptionErrorMessageService _errorService;
-  final GetCurrentSubscriptionUseCase _getCurrentSubscription;
+@riverpod
+class SubscriptionStatusNotifier extends _$SubscriptionStatusNotifier {
+  late final SubscriptionErrorMessageService _errorService;
+  late final GetCurrentSubscriptionUseCase _getCurrentSubscription;
 
-  SubscriptionStatusNotifier(this._errorService, this._getCurrentSubscription)
-    : super(SubscriptionStatusState.initial());
+  @override
+  Future<SubscriptionStatusState> build(
+    SubscriptionErrorMessageService errorService,
+    GetCurrentSubscriptionUseCase getCurrentSubscription,
+  ) async {
+    _errorService = errorService;
+    _getCurrentSubscription = getCurrentSubscription;
+    return SubscriptionStatusState.initial();
+  }
 
   /// Carrega o status da assinatura do usuário
   ///
@@ -97,26 +106,35 @@ class SubscriptionStatusNotifier
   /// - API remota
   /// - Sistema de assinatura (App Store, Play Store)
   Future<void> loadSubscriptionStatus() async {
-    state = state.copyWith(isLoading: true, error: null);
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    state = AsyncValue.data(currentState.copyWith(isLoading: true, error: null));
 
     try {
       final result = await _getCurrentSubscription(const NoParams());
 
       result.fold(
-        (failure) => state = state.copyWith(
-          isLoading: false,
-          error: _errorService.getLoadStatusError(failure.message),
+        (failure) => state = AsyncValue.data(
+          currentState.copyWith(
+            isLoading: false,
+            error: _errorService.getLoadStatusError(failure.message),
+          ),
         ),
-        (subscription) => state = state.copyWith(
-          subscription: subscription,
-          isLoading: false,
-          lastUpdated: DateTime.now(),
+        (subscription) => state = AsyncValue.data(
+          currentState.copyWith(
+            subscription: subscription,
+            isLoading: false,
+            lastUpdated: DateTime.now(),
+          ),
         ),
       );
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        error: _errorService.getLoadStatusError(error.toString()),
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isLoading: false,
+          error: _errorService.getLoadStatusError(error.toString()),
+        ),
       );
     }
   }
@@ -130,7 +148,10 @@ class SubscriptionStatusNotifier
   /// Valida a validade da assinatura atual
   /// Retorna true se a assinatura é válida e ativa
   bool validateSubscriptionValidity() {
-    final subscription = state.subscription;
+    final currentState = state.value;
+    if (currentState == null) return false;
+
+    final subscription = currentState.subscription;
     if (subscription == null) return false;
 
     // Validação básica
@@ -147,7 +168,10 @@ class SubscriptionStatusNotifier
   /// Verifica se a assinatura está prestes a expirar
   /// e realiza ações automatizadas
   Future<void> checkExpirationStatus() async {
-    final subscription = state.subscription;
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final subscription = currentState.subscription;
     if (subscription == null) return;
 
     // Se está expirando em menos de 7 dias
@@ -178,21 +202,28 @@ class SubscriptionStatusNotifier
     required SubscriptionTier newTier,
     required String billingCycle,
   }) async {
-    final currentSubscription = state.subscription;
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final currentSubscription = currentState.subscription;
     if (currentSubscription == null) {
-      state = state.copyWith(
-        error: 'Nenhuma assinatura ativa para fazer upgrade',
+      state = AsyncValue.data(
+        currentState.copyWith(
+          error: 'Nenhuma assinatura ativa para fazer upgrade',
+        ),
       );
       return;
     }
 
     // Validar upgrade (não fazer downgrade)
     if (newTier.index <= currentSubscription.tier.index) {
-      state = state.copyWith(error: 'Novo tier deve ser superior ao atual');
+      state = AsyncValue.data(
+        currentState.copyWith(error: 'Novo tier deve ser superior ao atual'),
+      );
       return;
     }
 
-    state = state.copyWith(isLoading: true, error: null);
+    state = AsyncValue.data(currentState.copyWith(isLoading: true, error: null));
 
     try {
       await Future<void>.delayed(const Duration(milliseconds: 1200));
@@ -208,10 +239,12 @@ class SubscriptionStatusNotifier
         updatedAt: DateTime.now(),
       );
 
-      state = state.copyWith(
-        subscription: updated,
-        isLoading: false,
-        lastUpdated: DateTime.now(),
+      state = AsyncValue.data(
+        currentState.copyWith(
+          subscription: updated,
+          isLoading: false,
+          lastUpdated: DateTime.now(),
+        ),
       );
 
       // TODO: Log event de upgrade
@@ -221,9 +254,11 @@ class SubscriptionStatusNotifier
       //   'billing_cycle': billingCycle,
       // });
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        error: _errorService.getUpgradeSubscriptionError(error.toString()),
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isLoading: false,
+          error: _errorService.getUpgradeSubscriptionError(error.toString()),
+        ),
       );
     }
   }
@@ -237,21 +272,28 @@ class SubscriptionStatusNotifier
     required SubscriptionTier newTier,
     required DateTime? effectiveDate,
   }) async {
-    final currentSubscription = state.subscription;
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final currentSubscription = currentState.subscription;
     if (currentSubscription == null) {
-      state = state.copyWith(
-        error: 'Nenhuma assinatura ativa para fazer downgrade',
+      state = AsyncValue.data(
+        currentState.copyWith(
+          error: 'Nenhuma assinatura ativa para fazer downgrade',
+        ),
       );
       return;
     }
 
     // Validar downgrade (não fazer upgrade)
     if (newTier.index >= currentSubscription.tier.index) {
-      state = state.copyWith(error: 'Novo tier deve ser inferior ao atual');
+      state = AsyncValue.data(
+        currentState.copyWith(error: 'Novo tier deve ser inferior ao atual'),
+      );
       return;
     }
 
-    state = state.copyWith(isLoading: true, error: null);
+    state = AsyncValue.data(currentState.copyWith(isLoading: true, error: null));
 
     try {
       await Future<void>.delayed(const Duration(milliseconds: 1200));
@@ -267,10 +309,12 @@ class SubscriptionStatusNotifier
         updatedAt: DateTime.now(),
       );
 
-      state = state.copyWith(
-        subscription: updated,
-        isLoading: false,
-        lastUpdated: DateTime.now(),
+      state = AsyncValue.data(
+        currentState.copyWith(
+          subscription: updated,
+          isLoading: false,
+          lastUpdated: DateTime.now(),
+        ),
       );
 
       // TODO: Log event de downgrade
@@ -279,9 +323,11 @@ class SubscriptionStatusNotifier
       //   'to_tier': newTier.toString(),
       // });
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        error: _errorService.getDowngradeSubscriptionError(error.toString()),
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isLoading: false,
+          error: _errorService.getDowngradeSubscriptionError(error.toString()),
+        ),
       );
     }
   }
@@ -297,13 +343,18 @@ class SubscriptionStatusNotifier
     String? feedback,
     bool immediateEffect = false,
   }) async {
-    final currentSubscription = state.subscription;
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final currentSubscription = currentState.subscription;
     if (currentSubscription == null) {
-      state = state.copyWith(error: 'Nenhuma assinatura ativa para cancelar');
+      state = AsyncValue.data(
+        currentState.copyWith(error: 'Nenhuma assinatura ativa para cancelar'),
+      );
       return;
     }
 
-    state = state.copyWith(isLoading: true, error: null);
+    state = AsyncValue.data(currentState.copyWith(isLoading: true, error: null));
 
     try {
       await Future<void>.delayed(const Duration(milliseconds: 1500));
@@ -318,10 +369,12 @@ class SubscriptionStatusNotifier
         updatedAt: DateTime.now(),
       );
 
-      state = state.copyWith(
-        subscription: updated,
-        isLoading: false,
-        lastUpdated: DateTime.now(),
+      state = AsyncValue.data(
+        currentState.copyWith(
+          subscription: updated,
+          isLoading: false,
+          lastUpdated: DateTime.now(),
+        ),
       );
 
       // TODO: Log event de cancelamento
@@ -332,29 +385,38 @@ class SubscriptionStatusNotifier
       //   'immediate': immediateEffect,
       // });
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        error: _errorService.getCancelSubscriptionError(error.toString()),
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isLoading: false,
+          error: _errorService.getCancelSubscriptionError(error.toString()),
+        ),
       );
     }
   }
 
   /// Reativa uma assinatura cancelada
   Future<void> reactiveSubscription() async {
-    final currentSubscription = state.subscription;
-    if (currentSubscription == null) {
-      state = state.copyWith(error: 'Nenhuma assinatura para reativar');
-      return;
-    }
+    final currentState = state.value;
+    if (currentState == null) return;
 
-    if (currentSubscription.status != SubscriptionStatus.cancelled) {
-      state = state.copyWith(
-        error: 'Apenas assinaturas canceladas podem ser reativadas',
+    final currentSubscription = currentState.subscription;
+    if (currentSubscription == null) {
+      state = AsyncValue.data(
+        currentState.copyWith(error: 'Nenhuma assinatura para reativar'),
       );
       return;
     }
 
-    state = state.copyWith(isLoading: true, error: null);
+    if (currentSubscription.status != SubscriptionStatus.cancelled) {
+      state = AsyncValue.data(
+        currentState.copyWith(
+          error: 'Apenas assinaturas canceladas podem ser reativadas',
+        ),
+      );
+      return;
+    }
+
+    state = AsyncValue.data(currentState.copyWith(isLoading: true, error: null));
 
     try {
       await Future<void>.delayed(const Duration(milliseconds: 1000));
@@ -367,18 +429,22 @@ class SubscriptionStatusNotifier
         updatedAt: DateTime.now(),
       );
 
-      state = state.copyWith(
-        subscription: updated,
-        isLoading: false,
-        lastUpdated: DateTime.now(),
+      state = AsyncValue.data(
+        currentState.copyWith(
+          subscription: updated,
+          isLoading: false,
+          lastUpdated: DateTime.now(),
+        ),
       );
 
       // TODO: Log event de reativação
       // _analyticsService.logEvent('subscription_reactivated');
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        error: _errorService.getReactivateSubscriptionError(error.toString()),
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isLoading: false,
+          error: _errorService.getReactivateSubscriptionError(error.toString()),
+        ),
       );
     }
   }
@@ -386,13 +452,16 @@ class SubscriptionStatusNotifier
   /// Sincroniza status com backend
   /// Chamado periodicamente ou quando volta para foreground
   Future<void> syncWithBackend() async {
-    if (state.needsRefresh) {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    if (currentState.needsRefresh) {
       await refreshStatus();
     }
   }
 
   /// Limpa o estado e dados em cache
   void clearState() {
-    state = SubscriptionStatusState.initial();
+    state = AsyncValue.data(SubscriptionStatusState.initial());
   }
 }

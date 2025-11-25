@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_providers.dart';
@@ -19,76 +20,74 @@ import '../../domain/usecases/save_stats_usecase.dart';
 part 'tictactoe_providers.g.dart';
 
 @riverpod
-TicTacToeLocalDataSource ticTacToeLocalDataSource(
-    TicTacToeLocalDataSourceRef ref) {
+TicTacToeLocalDataSource ticTacToeLocalDataSource(Ref ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return TicTacToeLocalDataSourceImpl(prefs);
 }
 
 @Riverpod(keepAlive: true)
-TicTacToeRepository ticTacToeRepository(TicTacToeRepositoryRef ref) {
+TicTacToeRepository ticTacToeRepository(Ref ref) {
   final dataSource = ref.watch(ticTacToeLocalDataSourceProvider);
   return TicTacToeRepositoryImpl(dataSource);
 }
 
 @riverpod
-AiMoveStrategyService aiMoveStrategyService(AiMoveStrategyServiceRef ref) =>
-    AiMoveStrategyService();
+AIMoveStrategyService aiMoveStrategyService(Ref ref) {
+  final validation = ref.watch(gameResultValidationServiceProvider);
+  return AIMoveStrategyService(validation);
+}
 
 @riverpod
-GameResultValidationService gameResultValidationService(
-        GameResultValidationServiceRef ref) =>
+GameResultValidationService gameResultValidationService(Ref ref) =>
     GameResultValidationService();
 
 @riverpod
-MoveCacheService moveCacheService(MoveCacheServiceRef ref) =>
+MoveCacheService moveCacheService(Ref ref) =>
     MoveCacheService();
 
 @riverpod
-CheckGameResultUseCase checkGameResultUseCase(CheckGameResultUseCaseRef ref) {
+CheckGameResultUseCase checkGameResultUseCase(Ref ref) {
   final service = ref.watch(gameResultValidationServiceProvider);
   return CheckGameResultUseCase(service);
 }
 
 @riverpod
-LoadSettingsUseCase loadSettingsUseCase(LoadSettingsUseCaseRef ref) {
+LoadSettingsUseCase loadSettingsUseCase(Ref ref) {
   final repository = ref.watch(ticTacToeRepositoryProvider);
   return LoadSettingsUseCase(repository);
 }
 
 @riverpod
-LoadStatsUseCase loadStatsUseCase(LoadStatsUseCaseRef ref) {
+LoadStatsUseCase loadStatsUseCase(Ref ref) {
   final repository = ref.watch(ticTacToeRepositoryProvider);
   return LoadStatsUseCase(repository);
 }
 
 @riverpod
-MakeAiMoveUseCase makeAiMoveUseCase(MakeAiMoveUseCaseRef ref) {
+MakeAIMoveUseCase makeAiMoveUseCase(Ref ref) {
   final aiStrategy = ref.watch(aiMoveStrategyServiceProvider);
-  final moveCache = ref.watch(moveCacheServiceProvider);
-  return MakeAiMoveUseCase(aiStrategy, moveCache);
+  return MakeAIMoveUseCase(aiStrategy);
 }
 
 @riverpod
-MakeMoveUseCase makeMoveUseCase(MakeMoveUseCaseRef ref) {
-  final validation = ref.watch(gameResultValidationServiceProvider);
-  return MakeMoveUseCase(validation);
+MakeMoveUseCase makeMoveUseCase(Ref ref) {
+  return MakeMoveUseCase();
 }
 
 @riverpod
-ResetStatsUseCase resetStatsUseCase(ResetStatsUseCaseRef ref) {
+ResetStatsUseCase resetStatsUseCase(Ref ref) {
   final repository = ref.watch(ticTacToeRepositoryProvider);
   return ResetStatsUseCase(repository);
 }
 
 @riverpod
-SaveSettingsUseCase saveSettingsUseCase(SaveSettingsUseCaseRef ref) {
+SaveSettingsUseCase saveSettingsUseCase(Ref ref) {
   final repository = ref.watch(ticTacToeRepositoryProvider);
   return SaveSettingsUseCase(repository);
 }
 
 @riverpod
-SaveStatsUseCase saveStatsUseCase(SaveStatsUseCaseRef ref) {
+SaveStatsUseCase saveStatsUseCase(Ref ref) {
   final repository = ref.watch(ticTacToeRepositoryProvider);
   return SaveStatsUseCase(repository);
 }

@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_providers.dart';
@@ -23,7 +24,7 @@ part 'sudoku_providers.g.dart';
 // Data Sources
 
 @riverpod
-SudokuLocalDataSource sudokuLocalDataSource(SudokuLocalDataSourceRef ref) {
+SudokuLocalDataSource sudokuLocalDataSource(Ref ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return SudokuLocalDataSource(prefs);
 }
@@ -31,7 +32,7 @@ SudokuLocalDataSource sudokuLocalDataSource(SudokuLocalDataSourceRef ref) {
 // Repositories
 
 @Riverpod(keepAlive: true)
-SudokuRepository sudokuRepository(SudokuRepositoryRef ref) {
+SudokuRepository sudokuRepository(Ref ref) {
   final dataSource = ref.watch(sudokuLocalDataSourceProvider);
   return SudokuRepositoryImpl(dataSource);
 }
@@ -39,27 +40,23 @@ SudokuRepository sudokuRepository(SudokuRepositoryRef ref) {
 // Services
 
 @riverpod
-PuzzleGeneratorService puzzleGeneratorService(
-  PuzzleGeneratorServiceRef ref,
-) {
+PuzzleGeneratorService puzzleGeneratorService(Ref ref) {
   return PuzzleGeneratorService();
 }
 
 @riverpod
-GridValidationService gridValidationService(GridValidationServiceRef ref) {
+GridValidationService gridValidationService(Ref ref) {
   return GridValidationService();
 }
 
 @riverpod
-ConflictManagerService conflictManagerService(
-  ConflictManagerServiceRef ref,
-) {
+ConflictManagerService conflictManagerService(Ref ref) {
   final gridValidation = ref.watch(gridValidationServiceProvider);
   return ConflictManagerService(gridValidation);
 }
 
 @riverpod
-HintGeneratorService hintGeneratorService(HintGeneratorServiceRef ref) {
+HintGeneratorService hintGeneratorService(Ref ref) {
   final gridValidation = ref.watch(gridValidationServiceProvider);
   return HintGeneratorService(gridValidation);
 }
@@ -67,58 +64,54 @@ HintGeneratorService hintGeneratorService(HintGeneratorServiceRef ref) {
 // Use Cases - Pure logic
 
 @riverpod
-UpdateConflictsUseCase updateConflictsUseCase(
-  UpdateConflictsUseCaseRef ref,
-) {
+UpdateConflictsUseCase updateConflictsUseCase(Ref ref) {
   return UpdateConflictsUseCase();
 }
 
 @riverpod
-ToggleNotesUseCase toggleNotesUseCase(ToggleNotesUseCaseRef ref) {
+ToggleNotesUseCase toggleNotesUseCase(Ref ref) {
   return ToggleNotesUseCase();
 }
 
 @riverpod
-GetHintUseCase getHintUseCase(GetHintUseCaseRef ref) {
+GetHintUseCase getHintUseCase(Ref ref) {
   return GetHintUseCase();
 }
 
 @riverpod
-CheckCompletionUseCase checkCompletionUseCase(
-  CheckCompletionUseCaseRef ref,
-) {
+CheckCompletionUseCase checkCompletionUseCase(Ref ref) {
   return CheckCompletionUseCase();
 }
 
 // Use Cases - With dependencies
 
 @riverpod
-GeneratePuzzleUseCase generatePuzzleUseCase(GeneratePuzzleUseCaseRef ref) {
+GeneratePuzzleUseCase generatePuzzleUseCase(Ref ref) {
   final service = ref.watch(puzzleGeneratorServiceProvider);
   return GeneratePuzzleUseCase(service);
 }
 
 @riverpod
-ValidateMoveUseCase validateMoveUseCase(ValidateMoveUseCaseRef ref) {
+ValidateMoveUseCase validateMoveUseCase(Ref ref) {
   final service = ref.watch(gridValidationServiceProvider);
   return ValidateMoveUseCase(service);
 }
 
 @riverpod
-PlaceNumberUseCase placeNumberUseCase(PlaceNumberUseCaseRef ref) {
+PlaceNumberUseCase placeNumberUseCase(Ref ref) {
   final validateMoveUseCase = ref.watch(validateMoveUseCaseProvider);
   final updateConflictsUseCase = ref.watch(updateConflictsUseCaseProvider);
   return PlaceNumberUseCase(validateMoveUseCase, updateConflictsUseCase);
 }
 
 @riverpod
-LoadHighScoreUseCase loadHighScoreUseCase(LoadHighScoreUseCaseRef ref) {
+LoadHighScoreUseCase loadHighScoreUseCase(Ref ref) {
   final repository = ref.watch(sudokuRepositoryProvider);
   return LoadHighScoreUseCase(repository);
 }
 
 @riverpod
-SaveHighScoreUseCase saveHighScoreUseCase(SaveHighScoreUseCaseRef ref) {
+SaveHighScoreUseCase saveHighScoreUseCase(Ref ref) {
   final repository = ref.watch(sudokuRepositoryProvider);
   return SaveHighScoreUseCase(repository);
 }

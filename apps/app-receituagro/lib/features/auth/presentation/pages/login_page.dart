@@ -290,7 +290,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Widget _buildAuthContent() {
-    final loginState = ref.watch(loginNotifierProvider);
+    final loginState = ref.watch(loginProvider);
 
     if (loginState.isShowingRecoveryForm) {
       return const RecoveryFormWidget();

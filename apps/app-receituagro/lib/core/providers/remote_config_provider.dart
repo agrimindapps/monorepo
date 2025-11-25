@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart' hide Column, Ref;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../services/remote_config_service.dart';
@@ -47,7 +47,7 @@ class RemoteConfigState {
 
 /// Remote Config Service Provider
 @riverpod
-ReceitaAgroRemoteConfigService remoteConfigService(RemoteConfigServiceRef ref) {
+ReceitaAgroRemoteConfigService remoteConfigService(Ref ref) {
   return ReceitaAgroRemoteConfigService.instance;
 }
 
@@ -212,8 +212,8 @@ class RemoteConfigNotifier extends _$RemoteConfigNotifier {
 
 /// Feature Flag Providers (Derived state)
 @riverpod
-bool isFeatureEnabled(IsFeatureEnabledRef ref, ReceitaAgroFeatureFlag feature) {
-  final state = ref.watch(remoteConfigNotifierProvider);
+bool isFeatureEnabled(Ref ref, ReceitaAgroFeatureFlag feature) {
+  final state = ref.watch(remoteConfigProvider);
 
   if (!state.isInitialized) {
     return ref.read(remoteConfigServiceProvider).isFeatureEnabled(feature);
@@ -224,8 +224,8 @@ bool isFeatureEnabled(IsFeatureEnabledRef ref, ReceitaAgroFeatureFlag feature) {
 
 /// Configuration Providers (Derived state)
 @riverpod
-String getStringConfig(GetStringConfigRef ref, ReceitaAgroConfigKey key) {
-  final state = ref.watch(remoteConfigNotifierProvider);
+String getStringConfig(Ref ref, ReceitaAgroConfigKey key) {
+  final state = ref.watch(remoteConfigProvider);
 
   if (!state.isInitialized) {
     return ref.read(remoteConfigServiceProvider).getStringConfig(key);
@@ -235,8 +235,8 @@ String getStringConfig(GetStringConfigRef ref, ReceitaAgroConfigKey key) {
 }
 
 @riverpod
-int getIntConfig(GetIntConfigRef ref, ReceitaAgroConfigKey key) {
-  final state = ref.watch(remoteConfigNotifierProvider);
+int getIntConfig(Ref ref, ReceitaAgroConfigKey key) {
+  final state = ref.watch(remoteConfigProvider);
 
   if (!state.isInitialized) {
     return ref.read(remoteConfigServiceProvider).getIntConfig(key);
@@ -249,8 +249,8 @@ int getIntConfig(GetIntConfigRef ref, ReceitaAgroConfigKey key) {
 }
 
 @riverpod
-double getDoubleConfig(GetDoubleConfigRef ref, ReceitaAgroConfigKey key) {
-  final state = ref.watch(remoteConfigNotifierProvider);
+double getDoubleConfig(Ref ref, ReceitaAgroConfigKey key) {
+  final state = ref.watch(remoteConfigProvider);
 
   if (!state.isInitialized) {
     return ref.read(remoteConfigServiceProvider).getDoubleConfig(key);
@@ -264,8 +264,8 @@ double getDoubleConfig(GetDoubleConfigRef ref, ReceitaAgroConfigKey key) {
 }
 
 @riverpod
-Map<String, dynamic> getJsonConfig(GetJsonConfigRef ref, ReceitaAgroConfigKey key) {
-  final state = ref.watch(remoteConfigNotifierProvider);
+Map<String, dynamic> getJsonConfig(Ref ref, ReceitaAgroConfigKey key) {
+  final state = ref.watch(remoteConfigProvider);
 
   if (!state.isInitialized) {
     return ref.read(remoteConfigServiceProvider).getJsonConfig(key);
@@ -278,96 +278,96 @@ Map<String, dynamic> getJsonConfig(GetJsonConfigRef ref, ReceitaAgroConfigKey ke
 
 /// Helper Providers
 @riverpod
-List<String> supportedLanguages(SupportedLanguagesRef ref) {
+List<String> supportedLanguages(Ref ref) {
   return ref.read(remoteConfigServiceProvider).getSupportedLanguages();
 }
 
 @riverpod
-Map<String, dynamic> themeConfiguration(ThemeConfigurationRef ref) {
+Map<String, dynamic> themeConfiguration(Ref ref) {
   return ref.watch(getJsonConfigProvider(ReceitaAgroConfigKey.themeConfiguration));
 }
 
 /// Premium feature helpers
 @riverpod
-bool isPremiumEnabled(IsPremiumEnabledRef ref) {
+bool isPremiumEnabled(Ref ref) {
   return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enablePremiumFeatures));
 }
 
 @riverpod
-bool isAdvancedDiagnosticsEnabled(IsAdvancedDiagnosticsEnabledRef ref) {
+bool isAdvancedDiagnosticsEnabled(Ref ref) {
   return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enableAdvancedDiagnostics));
 }
 
 @riverpod
-bool isOfflineModeEnabled(IsOfflineModeEnabledRef ref) {
+bool isOfflineModeEnabled(Ref ref) {
   return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enableOfflineMode));
 }
 
 /// Performance feature helpers
 @riverpod
-bool isImageOptimizationEnabled(IsImageOptimizationEnabledRef ref) {
+bool isImageOptimizationEnabled(Ref ref) {
   return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enableImageOptimization));
 }
 
 @riverpod
-bool isDataCachingEnabled(IsDataCachingEnabledRef ref) {
+bool isDataCachingEnabled(Ref ref) {
   return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enableDataCaching));
 }
 
 @riverpod
-bool isPreloadContentEnabled(IsPreloadContentEnabledRef ref) {
+bool isPreloadContentEnabled(Ref ref) {
   return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enablePreloadContent));
 }
 
 /// Analytics feature helpers
 @riverpod
-bool isDetailedAnalyticsEnabled(IsDetailedAnalyticsEnabledRef ref) {
+bool isDetailedAnalyticsEnabled(Ref ref) {
   return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enableDetailedAnalytics));
 }
 
 @riverpod
-bool isPerformanceMonitoringEnabled(IsPerformanceMonitoringEnabledRef ref) {
+bool isPerformanceMonitoringEnabled(Ref ref) {
   return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enablePerformanceMonitoring));
 }
 
 /// Business logic helpers
 @riverpod
-bool isSubscriptionValidationEnabled(IsSubscriptionValidationEnabledRef ref) {
+bool isSubscriptionValidationEnabled(Ref ref) {
   return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enableSubscriptionValidation));
 }
 
 @riverpod
-bool isDeviceManagementEnabled(IsDeviceManagementEnabledRef ref) {
+bool isDeviceManagementEnabled(Ref ref) {
   return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enableDeviceManagement));
 }
 
 /// Configuration helpers
 @riverpod
-int maxDevicesPerSubscription(MaxDevicesPerSubscriptionRef ref) {
+int maxDevicesPerSubscription(Ref ref) {
   return ref.watch(getIntConfigProvider(ReceitaAgroConfigKey.maxDevicesPerSubscription));
 }
 
 @riverpod
-int subscriptionGracePeriodHours(SubscriptionGracePeriodHoursRef ref) {
+int subscriptionGracePeriodHours(Ref ref) {
   return ref.watch(getIntConfigProvider(ReceitaAgroConfigKey.subscriptionGracePeriodHours));
 }
 
 @riverpod
-double imageQualityLevel(ImageQualityLevelRef ref) {
+double imageQualityLevel(Ref ref) {
   return ref.watch(getDoubleConfigProvider(ReceitaAgroConfigKey.imageQualityLevel));
 }
 
 @riverpod
-int maxCacheSize(MaxCacheSizeRef ref) {
+int maxCacheSize(Ref ref) {
   return ref.watch(getIntConfigProvider(ReceitaAgroConfigKey.maxCacheSize));
 }
 
 /// Debug information provider
 @riverpod
-Map<String, dynamic> remoteConfigDebugInfo(RemoteConfigDebugInfoRef ref) {
+Map<String, dynamic> remoteConfigDebugInfo(Ref ref) {
   if (!EnvironmentConfig.enableLogging) return {};
 
-  final state = ref.watch(remoteConfigNotifierProvider);
+  final state = ref.watch(remoteConfigProvider);
 
   return {
     'isInitialized': state.isInitialized,

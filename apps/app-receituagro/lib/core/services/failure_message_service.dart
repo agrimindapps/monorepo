@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart' hide Column, Ref;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'failure_message_service.g.dart';
@@ -6,7 +6,7 @@ part 'failure_message_service.g.dart';
 /// Service specialized in mapping Failure types to user-friendly messages
 /// Principle: Single Responsibility - Only handles Failure to message mapping
 @riverpod
-FailureMessageService failureMessageService(FailureMessageServiceRef ref) {
+FailureMessageService failureMessageService(Ref ref) {
   return FailureMessageService();
 }
 

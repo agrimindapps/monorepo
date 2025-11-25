@@ -16,7 +16,7 @@ class FavoritosPragasTabWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final favoritosState = ref.watch(favoritosNotifierProvider);
+    final favoritosState = ref.watch(favoritosProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final pragas = favoritosState.getFavoritosByTipo<FavoritoPragaEntity>(
@@ -59,7 +59,7 @@ class FavoritosPragasTabWidget extends ConsumerWidget {
         return RefreshIndicator(
           onRefresh: () async {
             await ref
-                .read(favoritosNotifierProvider.notifier)
+                .read(favoritosProvider.notifier)
                 .loadAllFavoritos();
           },
           child: Padding(
@@ -247,7 +247,7 @@ class FavoritosPragasTabWidget extends ConsumerWidget {
   ) async {
     try {
       await ref
-          .read(favoritosNotifierProvider.notifier)
+          .read(favoritosProvider.notifier)
           .toggleFavorito(TipoFavorito.praga, praga.id);
     } catch (e) {}
   }

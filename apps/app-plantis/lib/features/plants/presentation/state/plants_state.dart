@@ -28,9 +28,7 @@ enum PlantsViewFilter {
 ///
 /// Usa @freezed para type-safety, imutabilidade e código gerado
 @freezed
-class PlantsState with _$PlantsState {
-  const PlantsState._();
-
+sealed class PlantsState with _$PlantsState {
   const factory PlantsState({
     /// Lista de plantas
     @Default([]) List<Plant> plants,
@@ -62,15 +60,18 @@ class PlantsState with _$PlantsState {
     /// Lista de espaços (para filtros)
     @Default([]) List<Space> spaces,
   }) = _PlantsState;
+}
 
+/// Extension para métodos de transformação e computed properties do PlantsState
+extension PlantsStateX on PlantsState {
   /// Factory para estado inicial
-  factory PlantsState.initial() => const PlantsState();
+  static PlantsState initial() => const PlantsState();
 
   // ========== Computed Properties ==========
 
   /// Plantas filtradas
   List<Plant> get filteredPlants {
-    var filtered = plants;
+    var filtered = plants.toList();
 
     // Filtrar por tipo de visualização
     switch (viewFilter) {
@@ -193,10 +194,7 @@ class PlantsState with _$PlantsState {
     }
     return map;
   }
-}
 
-/// Extension para métodos de transformação do state
-extension PlantsStateX on PlantsState {
   /// Limpa mensagem de erro
   PlantsState clearError() => copyWith(error: null);
 

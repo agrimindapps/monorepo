@@ -13,7 +13,7 @@ part 'auth_dialog_managers_providers.g.dart';
 
 /// Provides AuthDialogManager instance
 @riverpod
-AuthDialogManager authDialogManager(AuthDialogManagerRef ref) {
+AuthDialogManager authDialogManager(Ref ref) {
   return AuthDialogManager();
 }
 
@@ -21,7 +21,7 @@ AuthDialogManager authDialogManager(AuthDialogManagerRef ref) {
 /// Injects SharedPreferences to ensure singleton pattern
 @riverpod
 CredentialsPersistenceManager credentialsPersistenceManager(
-  CredentialsPersistenceManagerRef ref,
+  Ref ref,
 ) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return CredentialsPersistenceManager(prefs: prefs);
@@ -29,14 +29,14 @@ CredentialsPersistenceManager credentialsPersistenceManager(
 
 /// Provides AuthSubmissionManager instance
 @riverpod
-AuthSubmissionManager authSubmissionManager(AuthSubmissionManagerRef ref) {
+AuthSubmissionManager authSubmissionManager(Ref ref) {
   return AuthSubmissionManager(ref: ref);
 }
 
 /// Provides ForgotPasswordDialogManager instance
 @riverpod
 ForgotPasswordDialogManager forgotPasswordDialogManager(
-  ForgotPasswordDialogManagerRef ref,
+  Ref ref,
 ) {
   return ForgotPasswordDialogManager(
     onError: (message) {
@@ -50,6 +50,6 @@ ForgotPasswordDialogManager forgotPasswordDialogManager(
 
 /// Provides EmailCheckerManager instance
 @riverpod
-EmailCheckerManager emailCheckerManager(EmailCheckerManagerRef ref) {
+EmailCheckerManager emailCheckerManager(Ref ref) {
   return EmailCheckerManager();
 }

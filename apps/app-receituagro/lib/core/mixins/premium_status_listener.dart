@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// Stub mixin for PremiumStatusListener - deprecated
 /// DEPRECATED: Use ConsumerStatefulWidget with Riverpod instead
 /// This stub provides basic compatibility but does not function
-@Deprecated('Use ConsumerStatefulWidget with Riverpod premiumStatusNotifierProvider instead')
+@Deprecated('Use ConsumerStatefulWidget with Riverpod premiumStatusProvider instead')
 mixin PremiumStatusListener<T extends StatefulWidget> on State<T> {
   final bool _isPremium = false;
 
@@ -13,7 +13,7 @@ mixin PremiumStatusListener<T extends StatefulWidget> on State<T> {
   void initState() {
     super.initState();
     // Stub - no longer functional
-    // Migrate to Riverpod: ConsumerStatefulWidget + ref.watch(premiumStatusNotifierProvider)
+    // Migrate to Riverpod: ConsumerStatefulWidget + ref.watch(premiumStatusProvider)
   }
 
   /// Override this method to handle premium status changes

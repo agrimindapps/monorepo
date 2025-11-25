@@ -18,9 +18,7 @@ enum SpacesViewState {
 ///
 /// Usa @freezed para type-safety, imutabilidade e código gerado
 @freezed
-class SpacesState with _$SpacesState {
-  const SpacesState._();
-
+sealed class SpacesState with _$SpacesState {
   const factory SpacesState({
     /// Lista de espaços
     @Default([]) List<Space> spaces,
@@ -46,15 +44,18 @@ class SpacesState with _$SpacesState {
     /// Plantas por espaço (cache)
     @Default({}) Map<String, List<Plant>> plantsBySpace,
   }) = _SpacesState;
+}
 
+/// Extension para métodos de transformação do state
+extension SpacesStateX on SpacesState {
   /// Factory para estado inicial
-  factory SpacesState.initial() => const SpacesState();
+  static SpacesState initial() => const SpacesState();
 
   // ========== Computed Properties ==========
 
   /// Espaços filtrados
   List<Space> get filteredSpaces {
-    var filtered = spaces;
+    var filtered = spaces.toList();
 
     // Filtrar por busca
     if (searchQuery.isNotEmpty) {
@@ -173,10 +174,7 @@ class SpacesState with _$SpacesState {
     if (spaces.isEmpty) return 0.0;
     return totalPlantsCount / spaces.length;
   }
-}
 
-/// Extension para métodos de transformação do state
-extension SpacesStateX on SpacesState {
   /// Limpa mensagem de erro
   SpacesState clearError() => copyWith(error: null);
 

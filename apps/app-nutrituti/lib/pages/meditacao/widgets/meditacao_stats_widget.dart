@@ -47,7 +47,7 @@ class _StatsRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(
-      meditacaoNotifierProvider.select((state) => state.stats),
+      meditacaoProvider.select((state) => state.stats),
     );
 
     return Row(

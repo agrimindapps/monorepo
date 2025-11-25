@@ -12,14 +12,14 @@ part 'settings_notifier.g.dart';
 
 /// Provider do repositório de configurações (obtido via DI)
 @riverpod
-ISettingsRepository settingsRepository(SettingsRepositoryRef ref) {
+ISettingsRepository settingsRepository(Ref ref) {
   return ref.watch(settingsRepositoryProvider);
 }
 
 /// Provider do serviço de notificações
 @riverpod
 PlantisNotificationService plantisNotificationService(
-  PlantisNotificationServiceRef ref,
+  Ref ref,
 ) {
   return PlantisNotificationService();
 }
@@ -38,7 +38,7 @@ class Settings extends _$Settings {
     // Inicializa automaticamente
     _initialize();
 
-    return SettingsState.initial();
+    return SettingsStateX.initial();
   }
 
   /// Inicializa o notifier carregando configurações
@@ -343,91 +343,91 @@ class Settings extends _$Settings {
 
 /// Provider para SettingsEntity atual
 @riverpod
-SettingsEntity currentSettings(CurrentSettingsRef ref) {
+SettingsEntity currentSettings(Ref ref) {
   return ref.watch(settingsProvider).settings;
 }
 
 /// Provider para estado de carregamento
 @riverpod
-bool settingsLoading(SettingsLoadingRef ref) {
+bool settingsLoading(Ref ref) {
   return ref.watch(settingsProvider).isLoading;
 }
 
 /// Provider para verificar se está inicializado
 @riverpod
-bool settingsInitialized(SettingsInitializedRef ref) {
+bool settingsInitialized(Ref ref) {
   return ref.watch(settingsProvider).isInitialized;
 }
 
 /// Provider para mensagem de erro
 @riverpod
-String? settingsError(SettingsErrorRef ref) {
+String? settingsError(Ref ref) {
   return ref.watch(settingsProvider).errorMessage;
 }
 
 /// Provider para mensagem de sucesso
 @riverpod
-String? settingsSuccess(SettingsSuccessRef ref) {
+String? settingsSuccess(Ref ref) {
   return ref.watch(settingsProvider).successMessage;
 }
 
 /// Provider para configurações de notificação
 @riverpod
-NotificationSettingsEntity notificationSettings(NotificationSettingsRef ref) {
+NotificationSettingsEntity notificationSettings(Ref ref) {
   return ref.watch(currentSettingsProvider).notifications;
 }
 
 /// Provider para configurações de backup
 @riverpod
-BackupSettingsEntity backupSettings(BackupSettingsRef ref) {
+BackupSettingsEntity backupSettings(Ref ref) {
   return ref.watch(currentSettingsProvider).backup;
 }
 
 /// Provider para configurações de tema
 @riverpod
-ThemeSettingsEntity themeSettings(ThemeSettingsRef ref) {
+ThemeSettingsEntity themeSettings(Ref ref) {
   return ref.watch(currentSettingsProvider).theme;
 }
 
 /// Provider para configurações de conta
 @riverpod
-AccountSettingsEntity accountSettings(AccountSettingsRef ref) {
+AccountSettingsEntity accountSettings(Ref ref) {
   return ref.watch(currentSettingsProvider).account;
 }
 
 /// Provider para configurações do app
 @riverpod
-AppSettingsEntity appSettings(AppSettingsRef ref) {
+AppSettingsEntity appSettings(Ref ref) {
   return ref.watch(currentSettingsProvider).app;
 }
 
 /// Provider para verificar se tem permissões de notificação
 @riverpod
-bool hasNotificationPermissions(HasNotificationPermissionsRef ref) {
+bool hasNotificationPermissions(Ref ref) {
   return ref.watch(notificationSettingsProvider).permissionsGranted;
 }
 
 /// Provider para verificar se está em modo escuro
 @riverpod
-bool isDarkMode(IsDarkModeRef ref) {
+bool isDarkMode(Ref ref) {
   return ref.watch(themeSettingsProvider).isDarkMode;
 }
 
 /// Provider para verificar se notificações estão habilitadas
 @riverpod
-bool notificationsEnabled(NotificationsEnabledRef ref) {
+bool notificationsEnabled(Ref ref) {
   return ref.watch(notificationSettingsProvider).taskRemindersEnabled;
 }
 
 /// Provider para verificar se é plataforma web
 @riverpod
-bool isWebPlatform(IsWebPlatformRef ref) {
+bool isWebPlatform(Ref ref) {
   return kIsWeb;
 }
 
 /// Provider para texto de status das notificações
 @riverpod
-String notificationStatusText(NotificationStatusTextRef ref) {
+String notificationStatusText(Ref ref) {
   final isWeb = ref.watch(isWebPlatformProvider);
   final hasPermissions = ref.watch(hasNotificationPermissionsProvider);
 
@@ -442,7 +442,7 @@ String notificationStatusText(NotificationStatusTextRef ref) {
 
 /// Provider para cor de status das notificações
 @riverpod
-Color notificationStatusColor(NotificationStatusColorRef ref) {
+Color notificationStatusColor(Ref ref) {
   final isWeb = ref.watch(isWebPlatformProvider);
   final hasPermissions = ref.watch(hasNotificationPermissionsProvider);
 
@@ -454,7 +454,7 @@ Color notificationStatusColor(NotificationStatusColorRef ref) {
 
 /// Provider para ícone de status das notificações
 @riverpod
-IconData notificationStatusIcon(NotificationStatusIconRef ref) {
+IconData notificationStatusIcon(Ref ref) {
   final isWeb = ref.watch(isWebPlatformProvider);
   final hasPermissions = ref.watch(hasNotificationPermissionsProvider);
 
@@ -466,7 +466,7 @@ IconData notificationStatusIcon(NotificationStatusIconRef ref) {
 
 /// Provider para subtitle do tema
 @riverpod
-String themeSubtitle(ThemeSubtitleRef ref) {
+String themeSubtitle(Ref ref) {
   final themeSettings = ref.watch(themeSettingsProvider);
 
   if (themeSettings.isDarkMode) {
@@ -477,3 +477,7 @@ String themeSubtitle(ThemeSubtitleRef ref) {
     return 'Seguir sistema';
   }
 }
+
+// LEGACY ALIAS
+// ignore: deprecated_member_use_from_same_package
+final settingsNotifierProvider = settingsProvider;

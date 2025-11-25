@@ -4,6 +4,6 @@ import '../../data/services/comentarios_mapper.dart';
 part 'comentarios_mapper_provider.g.dart';
 
 @riverpod
-IComentariosMapper comentariosMapper(ComentariosMapperRef ref) {
+IComentariosMapper comentariosMapper(Ref ref) {
   return ComentariosMapper();
 }

@@ -35,7 +35,7 @@ class DiagnosticosTabWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final diagnosticosAsync = ref.watch(diagnosticosNotifierProvider);
+    final diagnosticosAsync = ref.watch(diagnosticosProvider);
 
     return RepaintBoundary(
       child: Column(
@@ -82,13 +82,13 @@ class DiagnosticosTabWidget extends ConsumerWidget {
 
   /// Callback para retry quando houver erro
   void _retryLoadDiagnostics(WidgetRef ref) {
-    final defensivoState = ref.read(detalheDefensivoNotifierProvider);
+    final defensivoState = ref.read(detalheDefensivoProvider);
     defensivoState.whenData((data) {
       final idReg = data.defensivoData?.idDefensivo;
       final nomeDefensivo = data.defensivoData?.nomeComum;
       if (idReg != null) {
         ref
-            .read(diagnosticosNotifierProvider.notifier)
+            .read(diagnosticosProvider.notifier)
             .getDiagnosticosByDefensivo(idReg, nomeDefensivo: nomeDefensivo);
       }
     });

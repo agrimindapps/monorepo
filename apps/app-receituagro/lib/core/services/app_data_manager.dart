@@ -1,6 +1,5 @@
 import 'dart:developer' as developer;
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:core/core.dart' hide Column;
 

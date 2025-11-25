@@ -38,9 +38,9 @@ class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialo
   }
 
   void _loadDebugInfo() {
-    final featureFlagsState = ref.read(featureFlagsNotifierProvider);
+    final featureFlagsState = ref.read(featureFlagsProvider);
     featureFlagsState.whenData((state) {
-      _debugInfo = ref.read(featureFlagsNotifierProvider.notifier).getDebugInfo();
+      _debugInfo = ref.read(featureFlagsProvider.notifier).getDebugInfo();
       if (mounted) {
         setState(() {});
       }
@@ -50,7 +50,7 @@ class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialo
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final featureFlagsState = ref.watch(featureFlagsNotifierProvider);
+    final featureFlagsState = ref.watch(featureFlagsProvider);
 
     return featureFlagsState.when(
       data: (state) => Dialog(
@@ -162,10 +162,10 @@ class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialo
 
   /// Feature Flags Tab
   Widget _buildFeatureFlagsTab() {
-    final state = ref.read(featureFlagsNotifierProvider).value;
+    final state = ref.read(featureFlagsProvider).value;
     if (state == null) return const SizedBox.shrink();
 
-    final notifier = ref.read(featureFlagsNotifierProvider.notifier);
+    final notifier = ref.read(featureFlagsProvider.notifier);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -208,10 +208,10 @@ class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialo
 
   /// A/B Testing Tab
   Widget _buildABTestingTab() {
-    final state = ref.read(featureFlagsNotifierProvider).value;
+    final state = ref.read(featureFlagsProvider).value;
     if (state == null) return const SizedBox.shrink();
 
-    final notifier = ref.read(featureFlagsNotifierProvider.notifier);
+    final notifier = ref.read(featureFlagsProvider.notifier);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -286,7 +286,7 @@ class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialo
 
   /// Remote Config Tab
   Widget _buildRemoteConfigTab() {
-    final state = ref.read(featureFlagsNotifierProvider).value;
+    final state = ref.read(featureFlagsProvider).value;
     final isInitialized = state?.isInitialized ?? false;
 
     return SingleChildScrollView(
@@ -612,7 +612,7 @@ class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialo
   /// Refresh All
   Future<void> _refreshAll() async {
     try {
-      await ref.read(featureFlagsNotifierProvider.notifier).refresh();
+      await ref.read(featureFlagsProvider.notifier).refresh();
       _loadDebugInfo();
 
       if (mounted) {

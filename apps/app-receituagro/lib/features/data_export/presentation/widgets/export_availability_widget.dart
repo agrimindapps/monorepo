@@ -31,7 +31,7 @@ class _ExportAvailabilityWidgetState extends ConsumerState<ExportAvailabilityWid
   }
 
   Future<void> _checkAvailability() async {
-    await ref.read(dataExportNotifierProvider.notifier).checkExportAvailability(
+    await ref.read(dataExportProvider.notifier).checkExportAvailability(
       userId: widget.userId,
       requestedDataTypes: widget.requestedDataTypes,
     );
@@ -43,7 +43,7 @@ class _ExportAvailabilityWidgetState extends ConsumerState<ExportAvailabilityWid
 
   @override
   Widget build(BuildContext context) {
-    final exportStateAsync = ref.watch(dataExportNotifierProvider);
+    final exportStateAsync = ref.watch(dataExportProvider);
 
     return exportStateAsync.when(
       data: (exportState) {

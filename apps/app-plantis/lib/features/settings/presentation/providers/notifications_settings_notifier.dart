@@ -186,7 +186,7 @@ class NotificationsSettingsNotifier extends _$NotificationsSettingsNotifier {
   /// Alternar lembretes de tarefas
   Future<void> toggleTaskReminders(bool value) async {
     final currentState =
-        state.valueOrNull ?? NotificationsSettingsState.initial();
+        state.value ?? NotificationsSettingsState.initial();
 
     state = AsyncValue.data(currentState.copyWith(taskRemindersEnabled: value));
 
@@ -196,7 +196,7 @@ class NotificationsSettingsNotifier extends _$NotificationsSettingsNotifier {
   /// Alternar notificações de atraso
   Future<void> toggleOverdueNotifications(bool value) async {
     final currentState =
-        state.valueOrNull ?? NotificationsSettingsState.initial();
+        state.value ?? NotificationsSettingsState.initial();
 
     state = AsyncValue.data(
       currentState.copyWith(overdueNotificationsEnabled: value),
@@ -208,7 +208,7 @@ class NotificationsSettingsNotifier extends _$NotificationsSettingsNotifier {
   /// Alternar resumo diário
   Future<void> toggleDailySummary(bool value) async {
     final currentState =
-        state.valueOrNull ?? NotificationsSettingsState.initial();
+        state.value ?? NotificationsSettingsState.initial();
 
     state = AsyncValue.data(currentState.copyWith(dailySummaryEnabled: value));
 
@@ -218,7 +218,7 @@ class NotificationsSettingsNotifier extends _$NotificationsSettingsNotifier {
   /// Definir minutos de antecedência
   Future<void> setReminderMinutesBefore(int minutes) async {
     final currentState =
-        state.valueOrNull ?? NotificationsSettingsState.initial();
+        state.value ?? NotificationsSettingsState.initial();
 
     state = AsyncValue.data(
       currentState.copyWith(reminderMinutesBefore: minutes),
@@ -230,7 +230,7 @@ class NotificationsSettingsNotifier extends _$NotificationsSettingsNotifier {
   /// Definir horário do resumo diário
   Future<void> setDailySummaryTime(TimeOfDay time) async {
     final currentState =
-        state.valueOrNull ?? NotificationsSettingsState.initial();
+        state.value ?? NotificationsSettingsState.initial();
 
     state = AsyncValue.data(currentState.copyWith(dailySummaryTime: time));
 
@@ -241,7 +241,7 @@ class NotificationsSettingsNotifier extends _$NotificationsSettingsNotifier {
   /// Alternar configuração por tipo de tarefa
   Future<void> toggleTaskType(String taskType, bool value) async {
     final currentState =
-        state.valueOrNull ?? NotificationsSettingsState.initial();
+        state.value ?? NotificationsSettingsState.initial();
     final updatedTaskTypes = Map<String, bool>.from(
       currentState.taskTypeSettings,
     );
@@ -276,14 +276,14 @@ class NotificationsSettingsNotifier extends _$NotificationsSettingsNotifier {
   /// Verificar se um tipo de tarefa está habilitado
   bool isTaskTypeEnabled(String taskType) {
     final currentState =
-        state.valueOrNull ?? NotificationsSettingsState.initial();
+        state.value ?? NotificationsSettingsState.initial();
     return currentState.isTaskTypeEnabled(taskType);
   }
 
   /// Verificar se deve mostrar notificação baseado nas configurações
   bool shouldShowNotification(String notificationType, {String? taskType}) {
     final currentState =
-        state.valueOrNull ?? NotificationsSettingsState.initial();
+        state.value ?? NotificationsSettingsState.initial();
     return currentState.shouldShowNotification(
       notificationType,
       taskType: taskType,

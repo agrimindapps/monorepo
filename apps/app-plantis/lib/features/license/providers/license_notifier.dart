@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'license_provider.dart';
 
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
@@ -110,14 +111,14 @@ class LicenseNotifier extends _$LicenseNotifier {
       result.fold(
         (failure) {
           state = AsyncValue.data(
-            (state.valueOrNull ?? _defaultState()).copyWith(
+            (state.value ?? _defaultState()).copyWith(
               error: failure.toString(),
             ),
           );
         },
         (info) {
           state = AsyncValue.data(
-            (state.valueOrNull ?? _defaultState()).copyWith(
+            (state.value ?? _defaultState()).copyWith(
               licenseInfo: info,
               clearError: true,
             ),
@@ -126,7 +127,7 @@ class LicenseNotifier extends _$LicenseNotifier {
       );
     } catch (e) {
       state = AsyncValue.data(
-        (state.valueOrNull ?? _defaultState()).copyWith(
+        (state.value ?? _defaultState()).copyWith(
           error: 'Erro ao obter informações da licença: $e',
         ),
       );
@@ -146,7 +147,7 @@ class LicenseNotifier extends _$LicenseNotifier {
   /// Extend trial license (for development/testing)
   Future<bool> extendTrial(int days) async {
     state = AsyncValue.data(
-      (state.valueOrNull ?? _defaultState()).copyWith(
+      (state.value ?? _defaultState()).copyWith(
         isLoading: true,
         clearError: true,
       ),
@@ -158,7 +159,7 @@ class LicenseNotifier extends _$LicenseNotifier {
       return result.fold(
         (failure) {
           state = AsyncValue.data(
-            (state.valueOrNull ?? _defaultState()).copyWith(
+            (state.value ?? _defaultState()).copyWith(
               isLoading: false,
               error: 'Erro ao estender trial: ${failure.toString()}',
             ),
@@ -168,14 +169,14 @@ class LicenseNotifier extends _$LicenseNotifier {
         (license) async {
           await refreshLicenseInfo();
           state = AsyncValue.data(
-            (state.valueOrNull ?? _defaultState()).copyWith(isLoading: false),
+            (state.value ?? _defaultState()).copyWith(isLoading: false),
           );
           return true;
         },
       );
     } catch (e) {
       state = AsyncValue.data(
-        (state.valueOrNull ?? _defaultState()).copyWith(
+        (state.value ?? _defaultState()).copyWith(
           isLoading: false,
           error: 'Erro ao estender trial: $e',
         ),
@@ -187,7 +188,7 @@ class LicenseNotifier extends _$LicenseNotifier {
   /// Activate premium subscription
   Future<bool> activatePremium(String subscriptionId) async {
     state = AsyncValue.data(
-      (state.valueOrNull ?? _defaultState()).copyWith(
+      (state.value ?? _defaultState()).copyWith(
         isLoading: true,
         clearError: true,
       ),
@@ -201,7 +202,7 @@ class LicenseNotifier extends _$LicenseNotifier {
       return result.fold(
         (failure) {
           state = AsyncValue.data(
-            (state.valueOrNull ?? _defaultState()).copyWith(
+            (state.value ?? _defaultState()).copyWith(
               isLoading: false,
               error: 'Erro ao ativar premium: ${failure.toString()}',
             ),
@@ -211,14 +212,14 @@ class LicenseNotifier extends _$LicenseNotifier {
         (license) async {
           await refreshLicenseInfo();
           state = AsyncValue.data(
-            (state.valueOrNull ?? _defaultState()).copyWith(isLoading: false),
+            (state.value ?? _defaultState()).copyWith(isLoading: false),
           );
           return true;
         },
       );
     } catch (e) {
       state = AsyncValue.data(
-        (state.valueOrNull ?? _defaultState()).copyWith(
+        (state.value ?? _defaultState()).copyWith(
           isLoading: false,
           error: 'Erro ao ativar premium: $e',
         ),
@@ -230,7 +231,7 @@ class LicenseNotifier extends _$LicenseNotifier {
   /// Deactivate current license
   Future<bool> deactivateLicense() async {
     state = AsyncValue.data(
-      (state.valueOrNull ?? _defaultState()).copyWith(
+      (state.value ?? _defaultState()).copyWith(
         isLoading: true,
         clearError: true,
       ),
@@ -242,7 +243,7 @@ class LicenseNotifier extends _$LicenseNotifier {
       return result.fold(
         (failure) {
           state = AsyncValue.data(
-            (state.valueOrNull ?? _defaultState()).copyWith(
+            (state.value ?? _defaultState()).copyWith(
               isLoading: false,
               error: 'Erro ao desativar licença: ${failure.toString()}',
             ),
@@ -252,14 +253,14 @@ class LicenseNotifier extends _$LicenseNotifier {
         (_) async {
           await refreshLicenseInfo();
           state = AsyncValue.data(
-            (state.valueOrNull ?? _defaultState()).copyWith(isLoading: false),
+            (state.value ?? _defaultState()).copyWith(isLoading: false),
           );
           return true;
         },
       );
     } catch (e) {
       state = AsyncValue.data(
-        (state.valueOrNull ?? _defaultState()).copyWith(
+        (state.value ?? _defaultState()).copyWith(
           isLoading: false,
           error: 'Erro ao desativar licença: $e',
         ),
@@ -271,7 +272,7 @@ class LicenseNotifier extends _$LicenseNotifier {
   /// Reset license system (for development/testing)
   Future<bool> resetLicense() async {
     state = AsyncValue.data(
-      (state.valueOrNull ?? _defaultState()).copyWith(
+      (state.value ?? _defaultState()).copyWith(
         isLoading: true,
         clearError: true,
       ),
@@ -283,7 +284,7 @@ class LicenseNotifier extends _$LicenseNotifier {
       return result.fold(
         (failure) {
           state = AsyncValue.data(
-            (state.valueOrNull ?? _defaultState()).copyWith(
+            (state.value ?? _defaultState()).copyWith(
               isLoading: false,
               error: 'Erro ao resetar licença: ${failure.toString()}',
             ),
@@ -299,7 +300,7 @@ class LicenseNotifier extends _$LicenseNotifier {
       );
     } catch (e) {
       state = AsyncValue.data(
-        (state.valueOrNull ?? _defaultState()).copyWith(
+        (state.value ?? _defaultState()).copyWith(
           isLoading: false,
           error: 'Erro ao resetar licença: $e',
         ),
@@ -330,7 +331,7 @@ class LicenseNotifier extends _$LicenseNotifier {
   /// Clear error state
   void clearError() {
     state = AsyncValue.data(
-      (state.valueOrNull ?? _defaultState()).copyWith(clearError: true),
+      (state.value ?? _defaultState()).copyWith(clearError: true),
     );
   }
 

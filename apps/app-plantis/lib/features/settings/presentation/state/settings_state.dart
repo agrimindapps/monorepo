@@ -15,9 +15,7 @@ enum SettingsViewState {
 ///
 /// Usa @freezed para type-safety, imutabilidade e código gerado
 @freezed
-class SettingsState with _$SettingsState {
-  const SettingsState._();
-
+sealed class SettingsState with _$SettingsState {
   const factory SettingsState({
     /// Configurações do usuário (composto por sub-entities)
     SettingsEntity? settings,
@@ -40,9 +38,12 @@ class SettingsState with _$SettingsState {
     /// Build number
     String? buildNumber,
   }) = _SettingsState;
+}
 
+/// Extension para computed properties e métodos de transformação do state
+extension SettingsStateX on SettingsState {
   /// Factory para estado inicial
-  factory SettingsState.initial() => const SettingsState();
+  static SettingsState initial() => const SettingsState();
 
   // ========== Computed Properties ==========
 
@@ -185,15 +186,12 @@ class SettingsState with _$SettingsState {
 
     return '${(difference.inDays / 7).floor()}sem atrás';
   }
-}
 
-/// Extension para métodos de transformação do state
-extension SettingsStateX on SettingsState {
   /// Limpa mensagem de erro
   SettingsState clearError() => copyWith(error: null);
 
   /// Reseta ao padrão
-  SettingsState resetToDefaults() => SettingsState.initial().copyWith(
+  SettingsState resetToDefaults() => SettingsStateX.initial().copyWith(
         settings: SettingsEntity.defaults(),
         appVersion: appVersion,
         buildNumber: buildNumber,

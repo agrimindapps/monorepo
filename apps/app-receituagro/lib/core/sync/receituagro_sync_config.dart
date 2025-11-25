@@ -4,7 +4,6 @@ import '../../features/comentarios/domain/entities/comentario_sync_entity.dart';
 import '../../features/favoritos/domain/entities/favorito_sync_entity.dart';
 import '../../features/settings/domain/entities/user_history_sync_entity.dart';
 import '../../features/settings/domain/entities/user_settings_sync_entity.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/core_providers.dart';
 import '../extensions/user_entity_receituagro_extension.dart';
 

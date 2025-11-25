@@ -14,6 +14,7 @@ import 'package:core/src/shared/utils/logger.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../domain/entities/user_entity.dart';
 import '../../../infrastructure/services/firebase_analytics_service.dart';

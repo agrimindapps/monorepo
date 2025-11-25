@@ -34,7 +34,7 @@ class _SubscriptionBenefitsWidgetState
 
   @override
   Widget build(BuildContext context) {
-    final subscriptionNotifier = ref.read(subscriptionNotifierProvider.notifier);
+    final subscriptionNotifier = ref.read(subscriptionManagementProvider.notifier);
 
     return widget.showModernStyle
         ? _buildModernFeaturesList(subscriptionNotifier)
@@ -42,7 +42,7 @@ class _SubscriptionBenefitsWidgetState
   }
 
   /// Estilo moderno para marketing/conversão
-  Widget _buildModernFeaturesList(SubscriptionNotifier notifier) {
+  Widget _buildModernFeaturesList(SubscriptionManagementNotifier notifier) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -66,7 +66,7 @@ class _SubscriptionBenefitsWidgetState
   }
 
   /// Card colapsável para usuários ativos (NOVO - UX Melhorado)
-  Widget _buildCollapsibleCard(SubscriptionNotifier notifier) {
+  Widget _buildCollapsibleCard(SubscriptionManagementNotifier notifier) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(

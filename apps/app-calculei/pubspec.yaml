@@ -23,8 +23,8 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   # State Management (Riverpod - padrão monorepo)
-  flutter_riverpod: ^2.6.1
-  riverpod_annotation: ^2.6.1
+  flutter_riverpod: any
+  riverpod_annotation: any
 
   # Functional Programming
   dartz: ^0.10.1

@@ -24,10 +24,10 @@ class ExercicioFormPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Initialize form with existing data if editing
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(exercicioFormNotifierProvider.notifier).initializeForm(registro);
+      ref.read(exercicioFormProvider.notifier).initializeForm(registro);
     });
 
-    final formNotifier = ref.read(exercicioFormNotifierProvider.notifier);
+    final formNotifier = ref.read(exercicioFormProvider.notifier);
 
     return Card(
       child: Padding(
@@ -81,7 +81,6 @@ class ExercicioFormPage extends ConsumerWidget {
       ),
     );
   }
-
 }
 
 // ============================================================================
@@ -94,7 +93,7 @@ class _FormTitle extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final formTitle = ref.read(exercicioFormNotifierProvider.notifier).formTitle;
+    final formTitle = ref.read(exercicioFormProvider.notifier).formTitle;
 
     return Text(
       formTitle,
@@ -112,8 +111,8 @@ class _CategoriaDropdown extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(exercicioFormNotifierProvider);
-    final notifier = ref.read(exercicioFormNotifierProvider.notifier);
+    final state = ref.watch(exercicioFormProvider);
+    final notifier = ref.read(exercicioFormProvider.notifier);
 
     return DropdownButtonFormField<String>(
       initialValue: state.selectedCategoria,
@@ -141,8 +140,8 @@ class _ExercicioDropdown extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(exercicioFormNotifierProvider);
-    final notifier = ref.read(exercicioFormNotifierProvider.notifier);
+    final state = ref.watch(exercicioFormProvider);
+    final notifier = ref.read(exercicioFormProvider.notifier);
 
     return DropdownButtonFormField<Map<String, dynamic>>(
       initialValue: state.exercicioSelecionado,
@@ -173,7 +172,7 @@ class _NomeTextField extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(exercicioFormNotifierProvider.notifier);
+    final notifier = ref.read(exercicioFormProvider.notifier);
 
     return TextFormField(
       controller: notifier.nomeController,
@@ -192,7 +191,7 @@ class _DuracaoCaloriasRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(exercicioFormNotifierProvider.notifier);
+    final notifier = ref.read(exercicioFormProvider.notifier);
 
     return Row(
       children: [
@@ -232,7 +231,7 @@ class _ObservacoesTextField extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(exercicioFormNotifierProvider.notifier);
+    final notifier = ref.read(exercicioFormProvider.notifier);
 
     return TextFormField(
       controller: notifier.observacoesController,
@@ -252,7 +251,7 @@ class _DataSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(exercicioFormNotifierProvider);
+    final state = ref.watch(exercicioFormProvider);
 
     return Row(
       children: [
@@ -272,8 +271,8 @@ class _DataSelector extends ConsumerWidget {
   }
 
   Future<void> _selecionarData(BuildContext context, WidgetRef ref) async {
-    final state = ref.read(exercicioFormNotifierProvider);
-    final notifier = ref.read(exercicioFormNotifierProvider.notifier);
+    final state = ref.read(exercicioFormProvider);
+    final notifier = ref.read(exercicioFormProvider.notifier);
 
     final date = await showDatePicker(
       context: context,
@@ -294,7 +293,7 @@ class _ActionButtons extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(exercicioFormNotifierProvider);
+    final state = ref.watch(exercicioFormProvider);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -307,9 +306,8 @@ class _ActionButtons extends ConsumerWidget {
         ),
         const SizedBox(width: ExercicioConstants.defaultPadding),
         ElevatedButton(
-          onPressed: state.isLoading
-              ? null
-              : () => _salvarExercicio(context, ref),
+          onPressed:
+              state.isLoading ? null : () => _salvarExercicio(context, ref),
           child: state.isLoading
               ? const SizedBox(
                   width: 16,
@@ -323,7 +321,7 @@ class _ActionButtons extends ConsumerWidget {
   }
 
   Future<void> _salvarExercicio(BuildContext context, WidgetRef ref) async {
-    final notifier = ref.read(exercicioFormNotifierProvider.notifier);
+    final notifier = ref.read(exercicioFormProvider.notifier);
 
     if (notifier.formKey.currentState?.validate() == true) {
       final success = await notifier.salvarFormulario();

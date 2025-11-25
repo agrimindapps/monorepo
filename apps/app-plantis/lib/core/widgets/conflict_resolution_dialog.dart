@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../features/plants/domain/entities/plant.dart';
+
+part 'conflict_resolution_dialog.g.dart';
 
 /// Dialog for resolving sync conflicts between local and remote versions
 class ConflictResolutionDialog extends StatefulWidget {
@@ -283,12 +286,29 @@ class _ConflictResolutionDialogState extends State<ConflictResolutionDialog> {
 }
 
 /// Provider for managing conflict resolution state
-final conflictResolutionProvider =
-    StateNotifierProvider<ConflictResolutionNotifier, ConflictResolutionState>((
-      ref,
-    ) {
-      return ConflictResolutionNotifier();
-    });
+@riverpod
+class ConflictResolution extends _$ConflictResolution {
+  @override
+  ConflictResolutionState build() {
+    return const ConflictResolutionState();
+  }
+
+  void showConflict(Plant localVersion, Plant remoteVersion) {
+    state = state.copyWith(
+      hasPendingConflict: true,
+      localVersion: localVersion,
+      remoteVersion: remoteVersion,
+    );
+  }
+
+  void resolveConflict() {
+    state = const ConflictResolutionState();
+  }
+
+  void dismissConflict() {
+    state = const ConflictResolutionState();
+  }
+}
 
 class ConflictResolutionState {
   final bool hasPendingConflict;
@@ -311,26 +331,5 @@ class ConflictResolutionState {
       localVersion: localVersion ?? this.localVersion,
       remoteVersion: remoteVersion ?? this.remoteVersion,
     );
-  }
-}
-
-class ConflictResolutionNotifier
-    extends StateNotifier<ConflictResolutionState> {
-  ConflictResolutionNotifier() : super(const ConflictResolutionState());
-
-  void showConflict(Plant localVersion, Plant remoteVersion) {
-    state = state.copyWith(
-      hasPendingConflict: true,
-      localVersion: localVersion,
-      remoteVersion: remoteVersion,
-    );
-  }
-
-  void resolveConflict() {
-    state = const ConflictResolutionState();
-  }
-
-  void dismissConflict() {
-    state = const ConflictResolutionState();
   }
 }

@@ -15,7 +15,7 @@ part 'background_sync_provider.g.dart';
 
 /// Dependency provider for BackgroundSyncService
 @riverpod
-BackgroundSyncService backgroundSyncService(BackgroundSyncServiceRef ref) {
+BackgroundSyncService backgroundSyncService(Ref ref) {
   return BackgroundSyncService(
     getPlantsUseCase: ref.watch(getPlantsUseCaseProvider),
     getTasksUseCase: ref.watch(getTasksUseCaseProvider),
@@ -181,7 +181,7 @@ class BackgroundSync extends _$BackgroundSync {
 
 /// Helper provider to check if sync is needed
 @riverpod
-bool shouldStartInitialSync(ShouldStartInitialSyncRef ref, String? userId) {
+bool shouldStartInitialSync(Ref ref, String? userId) {
   final syncState = ref.watch(backgroundSyncProvider);
 
   return userId != null &&
@@ -192,7 +192,7 @@ bool shouldStartInitialSync(ShouldStartInitialSyncRef ref, String? userId) {
 
 /// Helper provider to get sync progress percentage
 @riverpod
-double syncProgress(SyncProgressRef ref) {
+double syncProgress(Ref ref) {
   final syncState = ref.watch(backgroundSyncProvider);
   final operations = syncState.operationStatus;
 
@@ -205,7 +205,7 @@ double syncProgress(SyncProgressRef ref) {
 
 /// Helper provider to get human-readable sync status
 @riverpod
-String syncStatusMessage(SyncStatusMessageRef ref) {
+String syncStatusMessage(Ref ref) {
   final syncState = ref.watch(backgroundSyncProvider);
 
   switch (syncState.syncStatus) {
@@ -224,7 +224,7 @@ String syncStatusMessage(SyncStatusMessageRef ref) {
 
 /// Helper provider to determine if sync indicator should be shown
 @riverpod
-bool shouldShowSyncIndicator(ShouldShowSyncIndicatorRef ref) {
+bool shouldShowSyncIndicator(Ref ref) {
   final syncState = ref.watch(backgroundSyncProvider);
   return syncState.isSyncInProgress ||
       syncState.syncStatus == BackgroundSyncStatus.error;
@@ -232,7 +232,7 @@ bool shouldShowSyncIndicator(ShouldShowSyncIndicatorRef ref) {
 
 /// Helper provider to determine sync indicator color
 @riverpod
-String syncIndicatorColor(SyncIndicatorColorRef ref) {
+String syncIndicatorColor(Ref ref) {
   final syncState = ref.watch(backgroundSyncProvider);
 
   switch (syncState.syncStatus) {
@@ -255,21 +255,21 @@ String syncIndicatorColor(SyncIndicatorColorRef ref) {
 
 /// Stream provider for sync status changes
 @riverpod
-Stream<BackgroundSyncStatus> syncStatusStream(SyncStatusStreamRef ref) {
+Stream<BackgroundSyncStatus> syncStatusStream(Ref ref) {
   final service = ref.watch(backgroundSyncServiceProvider);
   return service.syncStatusStream;
 }
 
 /// Stream provider for sync messages
 @riverpod
-Stream<String> syncMessageStream(SyncMessageStreamRef ref) {
+Stream<String> syncMessageStream(Ref ref) {
   final service = ref.watch(backgroundSyncServiceProvider);
   return service.syncMessageStream;
 }
 
 /// Stream provider for sync progress
 @riverpod
-Stream<bool> syncProgressStream(SyncProgressStreamRef ref) {
+Stream<bool> syncProgressStream(Ref ref) {
   final service = ref.watch(backgroundSyncServiceProvider);
   return service.syncProgressStream;
 }

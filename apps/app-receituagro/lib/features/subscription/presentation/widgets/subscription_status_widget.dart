@@ -23,7 +23,7 @@ class SubscriptionStatusWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final subscriptionAsync = ref.watch(subscriptionNotifierProvider);
+    final subscriptionAsync = ref.watch(subscriptionManagementProvider);
 
     return subscriptionAsync.when(
       data: (subscriptionState) {

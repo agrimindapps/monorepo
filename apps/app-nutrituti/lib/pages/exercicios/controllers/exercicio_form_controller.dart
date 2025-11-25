@@ -64,20 +64,20 @@ class _DefaultDateTime {
 
 /// Provider for ExercicioDataService
 @riverpod
-ExercicioDataService exercicioDataService(ExercicioDataServiceRef ref) {
+ExercicioDataService exercicioDataService(Ref ref) {
   return ExercicioDataService();
 }
 
 /// Provider for form repository
 @riverpod
-ExercicioRepository exercicioFormRepository(ExercicioFormRepositoryRef ref) {
+ExercicioRepository exercicioFormRepository(Ref ref) {
   return ExercicioRepository();
 }
 
 /// Provider for event service
 @riverpod
 ExercicioEventService exercicioFormEventService(
-    ExercicioFormEventServiceRef ref) {
+    Ref ref) {
   return ExercicioEventService();
 }
 

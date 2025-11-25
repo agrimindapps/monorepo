@@ -5,6 +5,6 @@ import '../services/profile_actions_service.dart';
 part 'profile_providers.g.dart';
 
 @riverpod
-ProfileActionsService profileActionsService(ProfileActionsServiceRef ref) {
+ProfileActionsService profileActionsService(Ref ref) {
   return ProfileActionsService();
 }

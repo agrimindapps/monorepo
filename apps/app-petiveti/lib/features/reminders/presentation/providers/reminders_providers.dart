@@ -15,23 +15,23 @@ import '../../domain/usecases/update_reminder.dart';
 part 'reminders_providers.g.dart';
 
 @riverpod
-ReminderLocalDataSource reminderLocalDataSource(ReminderLocalDataSourceRef ref) {
+ReminderLocalDataSource reminderLocalDataSource(Ref ref) {
   final database = ref.watch(petivetiDatabaseProvider);
   return ReminderLocalDataSourceImpl(database);
 }
 
 @riverpod
-ReminderErrorHandlingService reminderErrorHandlingService(ReminderErrorHandlingServiceRef ref) {
+ReminderErrorHandlingService reminderErrorHandlingService(Ref ref) {
   return ReminderErrorHandlingService();
 }
 
 @riverpod
-ReminderValidationService reminderValidationService(ReminderValidationServiceRef ref) {
+ReminderValidationService reminderValidationService(Ref ref) {
   return ReminderValidationService();
 }
 
 @riverpod
-ReminderRepository reminderRepository(ReminderRepositoryRef ref) {
+ReminderRepository reminderRepository(Ref ref) {
   final localDataSource = ref.watch(reminderLocalDataSourceProvider);
   final errorHandlingService = ref.watch(reminderErrorHandlingServiceProvider);
   return ReminderRepositoryImpl(
@@ -41,22 +41,22 @@ ReminderRepository reminderRepository(ReminderRepositoryRef ref) {
 }
 
 @riverpod
-GetReminders getReminders(GetRemindersRef ref) {
+GetReminders getReminders(Ref ref) {
   return GetReminders(ref.watch(reminderRepositoryProvider));
 }
 
 @riverpod
-GetTodayReminders getTodayReminders(GetTodayRemindersRef ref) {
+GetTodayReminders getTodayReminders(Ref ref) {
   return GetTodayReminders(ref.watch(reminderRepositoryProvider));
 }
 
 @riverpod
-GetOverdueReminders getOverdueReminders(GetOverdueRemindersRef ref) {
+GetOverdueReminders getOverdueReminders(Ref ref) {
   return GetOverdueReminders(ref.watch(reminderRepositoryProvider));
 }
 
 @riverpod
-AddReminder addReminder(AddReminderRef ref) {
+AddReminder addReminder(Ref ref) {
   return AddReminder(
     ref.watch(reminderRepositoryProvider),
     ref.watch(reminderValidationServiceProvider),
@@ -64,7 +64,7 @@ AddReminder addReminder(AddReminderRef ref) {
 }
 
 @riverpod
-UpdateReminder updateReminder(UpdateReminderRef ref) {
+UpdateReminder updateReminder(Ref ref) {
   return UpdateReminder(
     ref.watch(reminderRepositoryProvider),
     ref.watch(reminderValidationServiceProvider),
@@ -72,12 +72,12 @@ UpdateReminder updateReminder(UpdateReminderRef ref) {
 }
 
 @riverpod
-CompleteReminder completeReminder(CompleteReminderRef ref) {
+CompleteReminder completeReminder(Ref ref) {
   return CompleteReminder(ref.watch(reminderRepositoryProvider));
 }
 
 @riverpod
-SnoozeReminder snoozeReminder(SnoozeReminderRef ref) {
+SnoozeReminder snoozeReminder(Ref ref) {
   return SnoozeReminder(
     ref.watch(reminderRepositoryProvider),
     ref.watch(reminderValidationServiceProvider),
@@ -85,7 +85,7 @@ SnoozeReminder snoozeReminder(SnoozeReminderRef ref) {
 }
 
 @riverpod
-DeleteReminder deleteReminder(DeleteReminderRef ref) {
+DeleteReminder deleteReminder(Ref ref) {
   return DeleteReminder(
     ref.watch(reminderRepositoryProvider),
     ref.watch(reminderValidationServiceProvider),

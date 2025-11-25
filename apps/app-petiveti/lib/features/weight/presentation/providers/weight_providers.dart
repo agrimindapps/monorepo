@@ -24,14 +24,14 @@ part 'weight_providers.g.dart';
 
 @riverpod
 WeightValidationService weightValidationService(
-  WeightValidationServiceRef ref,
+  Ref ref,
 ) {
   return WeightValidationService();
 }
 
 @riverpod
 WeightErrorHandlingService weightErrorHandlingService(
-  WeightErrorHandlingServiceRef ref,
+  Ref ref,
 ) {
   return WeightErrorHandlingService();
 }
@@ -41,7 +41,7 @@ WeightErrorHandlingService weightErrorHandlingService(
 // ============================================================================
 
 @riverpod
-WeightLocalDataSource weightLocalDataSource(WeightLocalDataSourceRef ref) {
+WeightLocalDataSource weightLocalDataSource(Ref ref) {
   return WeightLocalDataSourceImpl(ref.watch(petivetiDatabaseProvider));
 }
 
@@ -50,7 +50,7 @@ WeightLocalDataSource weightLocalDataSource(WeightLocalDataSourceRef ref) {
 // ============================================================================
 
 @riverpod
-WeightRepository weightRepository(WeightRepositoryRef ref) {
+WeightRepository weightRepository(Ref ref) {
   return WeightRepositoryImpl(ref.watch(weightLocalDataSourceProvider));
 }
 
@@ -59,37 +59,37 @@ WeightRepository weightRepository(WeightRepositoryRef ref) {
 // ============================================================================
 
 @riverpod
-GetWeights getWeights(GetWeightsRef ref) {
+GetWeights getWeights(Ref ref) {
   return GetWeights(ref.watch(weightRepositoryProvider));
 }
 
 @riverpod
-GetWeightsByAnimalId getWeightsByAnimalId(GetWeightsByAnimalIdRef ref) {
+GetWeightsByAnimalId getWeightsByAnimalId(Ref ref) {
   return GetWeightsByAnimalId(ref.watch(weightRepositoryProvider));
 }
 
 @riverpod
-GetWeightStatistics getWeightStatistics(GetWeightStatisticsRef ref) {
+GetWeightStatistics getWeightStatistics(Ref ref) {
   return GetWeightStatistics(ref.watch(weightRepositoryProvider));
 }
 
 @riverpod
-getWeight.GetWeightById getWeightById(GetWeightByIdRef ref) {
+getWeight.GetWeightById getWeightById(Ref ref) {
   return getWeight.GetWeightById(ref.watch(weightRepositoryProvider));
 }
 
 @riverpod
-AddWeight addWeight(AddWeightRef ref) {
+AddWeight addWeight(Ref ref) {
   return AddWeight(ref.watch(weightRepositoryProvider));
 }
 
 @riverpod
-UpdateWeight updateWeight(UpdateWeightRef ref) {
+UpdateWeight updateWeight(Ref ref) {
   return UpdateWeight(ref.watch(weightRepositoryProvider));
 }
 
 @riverpod
-del.DeleteWeight deleteWeight(DeleteWeightRef ref) {
+del.DeleteWeight deleteWeight(Ref ref) {
   return del.DeleteWeight(ref.watch(weightRepositoryProvider));
 }
 
@@ -299,7 +299,7 @@ class WeightsNotifier extends _$WeightsNotifier {
 // ============================================================================
 
 @riverpod
-Stream<List<Weight>> weightsStream(WeightsStreamRef ref, String? animalId) {
+Stream<List<Weight>> weightsStream(Ref ref, String? animalId) {
   final repository = ref.watch(weightRepositoryProvider);
   if (animalId != null) {
     return repository.watchWeightsByAnimalId(animalId);
@@ -309,7 +309,7 @@ Stream<List<Weight>> weightsStream(WeightsStreamRef ref, String? animalId) {
 
 @riverpod
 Future<WeightStatistics> weightStatistics(
-  WeightStatisticsRef ref,
+  Ref ref,
   String animalId,
 ) async {
   final getWeightStatistics = ref.watch(getWeightStatisticsProvider);

@@ -2,4 +2,5 @@ import '../notifiers/expenses_notifier.dart';
 
 export '../notifiers/expenses_notifier.dart';
 
-final expensesProvider = expensesProvider;
+// Re-export the provider from expenses_notifier.dart
+// The provider is named 'expensesProvider' in the generated code

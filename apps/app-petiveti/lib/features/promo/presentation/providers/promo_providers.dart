@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/repositories/promo_repository_impl.dart';
@@ -11,28 +12,28 @@ import '../../domain/usecases/track_analytics.dart';
 part 'promo_providers.g.dart';
 
 @riverpod
-PromoErrorHandlingService promoErrorHandlingService(PromoErrorHandlingServiceRef ref) {
+PromoErrorHandlingService promoErrorHandlingService(Ref ref) {
   return PromoErrorHandlingService();
 }
 
 @riverpod
-PromoRepository promoRepository(PromoRepositoryRef ref) {
+PromoRepository promoRepository(Ref ref) {
   final errorHandlingService = ref.watch(promoErrorHandlingServiceProvider);
   return PromoRepositoryImpl(errorHandlingService);
 }
 
 @riverpod
-PromoValidationService promoValidationService(PromoValidationServiceRef ref) {
+PromoValidationService promoValidationService(Ref ref) {
   return PromoValidationService();
 }
 
 @riverpod
-GetPromoContent getPromoContent(GetPromoContentRef ref) {
+GetPromoContent getPromoContent(Ref ref) {
   return GetPromoContent(ref.watch(promoRepositoryProvider));
 }
 
 @riverpod
-SubmitPreRegistration submitPreRegistration(SubmitPreRegistrationRef ref) {
+SubmitPreRegistration submitPreRegistration(Ref ref) {
   return SubmitPreRegistration(
     ref.watch(promoRepositoryProvider),
     ref.watch(promoValidationServiceProvider),
@@ -40,7 +41,7 @@ SubmitPreRegistration submitPreRegistration(SubmitPreRegistrationRef ref) {
 }
 
 @riverpod
-TrackAnalytics trackAnalytics(TrackAnalyticsRef ref) {
+TrackAnalytics trackAnalytics(Ref ref) {
   return TrackAnalytics(
     ref.watch(promoRepositoryProvider),
     ref.watch(promoValidationServiceProvider),

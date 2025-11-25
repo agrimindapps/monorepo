@@ -41,12 +41,12 @@ part 'vaccines_providers.g.dart';
 // ============================================================================
 
 @riverpod
-VaccineLocalDataSource vaccineLocalDataSource(VaccineLocalDataSourceRef ref) {
+VaccineLocalDataSource vaccineLocalDataSource(Ref ref) {
   return VaccineLocalDataSourceImpl(ref.watch(petivetiDatabaseProvider));
 }
 
 @riverpod
-VaccineRemoteDataSource vaccineRemoteDataSource(VaccineRemoteDataSourceRef ref) {
+VaccineRemoteDataSource vaccineRemoteDataSource(Ref ref) {
   final firestore = FirebaseFirestore.instance;
   // TODO: Get actual user ID from auth provider
   final userId = 'temp_user_id'; 
@@ -58,7 +58,7 @@ VaccineRemoteDataSource vaccineRemoteDataSource(VaccineRemoteDataSourceRef ref) 
 // ============================================================================
 
 @riverpod
-VaccineRepository vaccineRepository(VaccineRepositoryRef ref) {
+VaccineRepository vaccineRepository(Ref ref) {
   return VaccineRepositoryImpl(
     localDataSource: ref.watch(vaccineLocalDataSourceProvider),
     remoteDataSource: ref.watch(vaccineRemoteDataSourceProvider),
@@ -70,67 +70,67 @@ VaccineRepository vaccineRepository(VaccineRepositoryRef ref) {
 // ============================================================================
 
 @riverpod
-GetVaccines getVaccines(GetVaccinesRef ref) {
+GetVaccines getVaccines(Ref ref) {
   return GetVaccines(ref.watch(vaccineRepositoryProvider));
 }
 
 @riverpod
-GetVaccineById getVaccineById(GetVaccineByIdRef ref) {
+GetVaccineById getVaccineById(Ref ref) {
   return GetVaccineById(ref.watch(vaccineRepositoryProvider));
 }
 
 @riverpod
-GetVaccinesByAnimal getVaccinesByAnimal(GetVaccinesByAnimalRef ref) {
+GetVaccinesByAnimal getVaccinesByAnimal(Ref ref) {
   return GetVaccinesByAnimal(ref.watch(vaccineRepositoryProvider));
 }
 
 @riverpod
-GetOverdueVaccines getOverdueVaccines(GetOverdueVaccinesRef ref) {
+GetOverdueVaccines getOverdueVaccines(Ref ref) {
   return GetOverdueVaccines(ref.watch(vaccineRepositoryProvider));
 }
 
 @riverpod
-GetUpcomingVaccines getUpcomingVaccines(GetUpcomingVaccinesRef ref) {
+GetUpcomingVaccines getUpcomingVaccines(Ref ref) {
   return GetUpcomingVaccines(ref.watch(vaccineRepositoryProvider));
 }
 
 @riverpod
-SearchVaccines searchVaccines(SearchVaccinesRef ref) {
+SearchVaccines searchVaccines(Ref ref) {
   return SearchVaccines(ref.watch(vaccineRepositoryProvider));
 }
 
 @riverpod
-AddVaccine addVaccine(AddVaccineRef ref) {
+AddVaccine addVaccine(Ref ref) {
   return AddVaccine(ref.watch(vaccineRepositoryProvider));
 }
 
 @riverpod
-UpdateVaccine updateVaccine(UpdateVaccineRef ref) {
+UpdateVaccine updateVaccine(Ref ref) {
   return UpdateVaccine(ref.watch(vaccineRepositoryProvider));
 }
 
 @riverpod
-DeleteVaccine deleteVaccine(DeleteVaccineRef ref) {
+DeleteVaccine deleteVaccine(Ref ref) {
   return DeleteVaccine(ref.watch(vaccineRepositoryProvider));
 }
 
 @riverpod
-MarkVaccineCompleted markVaccineCompleted(MarkVaccineCompletedRef ref) {
+MarkVaccineCompleted markVaccineCompleted(Ref ref) {
   return MarkVaccineCompleted(ref.watch(vaccineRepositoryProvider));
 }
 
 @riverpod
-ScheduleVaccineReminder scheduleVaccineReminder(ScheduleVaccineReminderRef ref) {
+ScheduleVaccineReminder scheduleVaccineReminder(Ref ref) {
   return ScheduleVaccineReminder(ref.watch(vaccineRepositoryProvider));
 }
 
 @riverpod
-GetVaccineCalendar getVaccineCalendar(GetVaccineCalendarRef ref) {
+GetVaccineCalendar getVaccineCalendar(Ref ref) {
   return GetVaccineCalendar(ref.watch(vaccineRepositoryProvider));
 }
 
 @riverpod
-GetVaccineStatistics getVaccineStatistics(GetVaccineStatisticsRef ref) {
+GetVaccineStatistics getVaccineStatistics(Ref ref) {
   return GetVaccineStatistics(ref.watch(vaccineRepositoryProvider));
 }
 
@@ -447,14 +447,14 @@ class VaccinesNotifier extends _$VaccinesNotifier {
 
 // Derived providers
 @riverpod
-Future<Vaccine?> vaccineById(VaccineByIdRef ref, String id) async {
+Future<Vaccine?> vaccineById(Ref ref, String id) async {
   final notifier = ref.read(vaccinesProvider.notifier);
   return await notifier.getVaccineById(id);
 }
 
 @riverpod
 Future<Map<DateTime, List<Vaccine>>> vaccineCalendar(
-  VaccineCalendarRef ref,
+  Ref ref,
   DateTime startDate,
 ) async {
   final useCase = ref.watch(getVaccineCalendarProvider);
@@ -468,13 +468,13 @@ Future<Map<DateTime, List<Vaccine>>> vaccineCalendar(
 }
 
 @riverpod
-VaccinesFilter vaccinesFilter(VaccinesFilterRef ref) {
+VaccinesFilter vaccinesFilter(Ref ref) {
   final state = ref.watch(vaccinesProvider);
   return state.filter;
 }
 
 @riverpod
-Future<Map<String, int>> vaccineStatistics(VaccineStatisticsRef ref) async {
+Future<Map<String, int>> vaccineStatistics(Ref ref) async {
   final useCase = ref.watch(getVaccineStatisticsProvider);
   final result = await useCase(GetVaccineStatisticsParams.all());
 
@@ -484,5 +484,4 @@ Future<Map<String, int>> vaccineStatistics(VaccineStatisticsRef ref) async {
   );
 }
 
-// Alias for compatibility
-final vaccinesProvider = vaccinesProvider;
+// No alias needed - vaccinesProvider is already the correct name from generated code

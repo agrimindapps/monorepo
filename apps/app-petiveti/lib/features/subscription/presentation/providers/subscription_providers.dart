@@ -19,14 +19,14 @@ part 'subscription_providers.g.dart';
 
 @riverpod
 SubscriptionValidationService subscriptionValidationService(
-  SubscriptionValidationServiceRef ref,
+  Ref ref,
 ) {
   return SubscriptionValidationService();
 }
 
 @riverpod
 SubscriptionErrorHandlingService subscriptionErrorHandlingService(
-  SubscriptionErrorHandlingServiceRef ref,
+  Ref ref,
 ) {
   return SubscriptionErrorHandlingService();
 }
@@ -37,14 +37,14 @@ SubscriptionErrorHandlingService subscriptionErrorHandlingService(
 
 @riverpod
 SubscriptionLocalDataSource subscriptionLocalDataSource(
-  SubscriptionLocalDataSourceRef ref,
+  Ref ref,
 ) {
   return SubscriptionLocalDataSourceImpl();
 }
 
 @riverpod
 SubscriptionRemoteDataSource subscriptionRemoteDataSource(
-  SubscriptionRemoteDataSourceRef ref,
+  Ref ref,
 ) {
   return SubscriptionRemoteDataSourceImpl(
     firestore: ref.watch(firebaseFirestoreProvider),
@@ -58,7 +58,7 @@ SubscriptionRemoteDataSource subscriptionRemoteDataSource(
 // ============================================================================
 
 @riverpod
-SubscriptionRepository subscriptionRepository(SubscriptionRepositoryRef ref) {
+SubscriptionRepository subscriptionRepository(Ref ref) {
   return SubscriptionRepositoryImpl(
     localDataSource: ref.watch(subscriptionLocalDataSourceProvider),
     remoteDataSource: ref.watch(subscriptionRemoteDataSourceProvider),
@@ -71,13 +71,13 @@ SubscriptionRepository subscriptionRepository(SubscriptionRepositoryRef ref) {
 // ============================================================================
 
 @riverpod
-GetAvailablePlans getAvailablePlans(GetAvailablePlansRef ref) {
+GetAvailablePlans getAvailablePlans(Ref ref) {
   return GetAvailablePlans(ref.watch(subscriptionRepositoryProvider));
 }
 
 @riverpod
 GetCurrentSubscription getCurrentSubscription(
-  GetCurrentSubscriptionRef ref,
+  Ref ref,
 ) {
   return GetCurrentSubscription(
     ref.watch(subscriptionRepositoryProvider),
@@ -90,7 +90,7 @@ GetCurrentSubscription getCurrentSubscription(
 // ============================================================================
 
 @riverpod
-SubscribeToPlan subscribeToPlan(SubscribeToPlanRef ref) {
+SubscribeToPlan subscribeToPlan(Ref ref) {
   return SubscribeToPlan(
     ref.watch(subscriptionRepositoryProvider),
     ref.watch(subscriptionValidationServiceProvider),
@@ -98,7 +98,7 @@ SubscribeToPlan subscribeToPlan(SubscribeToPlanRef ref) {
 }
 
 @riverpod
-CancelSubscription cancelSubscription(CancelSubscriptionRef ref) {
+CancelSubscription cancelSubscription(Ref ref) {
   return CancelSubscription(
     ref.watch(subscriptionRepositoryProvider),
     ref.watch(subscriptionValidationServiceProvider),
@@ -106,7 +106,7 @@ CancelSubscription cancelSubscription(CancelSubscriptionRef ref) {
 }
 
 @riverpod
-PauseSubscription pauseSubscription(PauseSubscriptionRef ref) {
+PauseSubscription pauseSubscription(Ref ref) {
   return PauseSubscription(
     ref.watch(subscriptionRepositoryProvider),
     ref.watch(subscriptionValidationServiceProvider),
@@ -114,7 +114,7 @@ PauseSubscription pauseSubscription(PauseSubscriptionRef ref) {
 }
 
 @riverpod
-ResumeSubscription resumeSubscription(ResumeSubscriptionRef ref) {
+ResumeSubscription resumeSubscription(Ref ref) {
   return ResumeSubscription(
     ref.watch(subscriptionRepositoryProvider),
     ref.watch(subscriptionValidationServiceProvider),
@@ -122,7 +122,7 @@ ResumeSubscription resumeSubscription(ResumeSubscriptionRef ref) {
 }
 
 @riverpod
-UpgradePlan upgradePlan(UpgradePlanRef ref) {
+UpgradePlan upgradePlan(Ref ref) {
   return UpgradePlan(
     ref.watch(subscriptionRepositoryProvider),
     ref.watch(subscriptionValidationServiceProvider),
@@ -130,7 +130,7 @@ UpgradePlan upgradePlan(UpgradePlanRef ref) {
 }
 
 @riverpod
-RestorePurchases restorePurchases(RestorePurchasesRef ref) {
+RestorePurchases restorePurchases(Ref ref) {
   return RestorePurchases(
     ref.watch(subscriptionRepositoryProvider),
     ref.watch(subscriptionValidationServiceProvider),

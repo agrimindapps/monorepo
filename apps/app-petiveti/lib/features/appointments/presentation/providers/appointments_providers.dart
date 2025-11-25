@@ -32,14 +32,14 @@ part 'appointments_providers.g.dart';
 
 @riverpod
 AppointmentValidationService appointmentValidationService(
-  AppointmentValidationServiceRef ref,
+  Ref ref,
 ) {
   return AppointmentValidationService();
 }
 
 @riverpod
 AppointmentErrorHandlingService appointmentErrorHandlingService(
-  AppointmentErrorHandlingServiceRef ref,
+  Ref ref,
 ) {
   return AppointmentErrorHandlingService();
 }
@@ -50,7 +50,7 @@ AppointmentErrorHandlingService appointmentErrorHandlingService(
 
 @riverpod
 AppointmentLocalDataSource appointmentLocalDataSource(
-  AppointmentLocalDataSourceRef ref,
+  Ref ref,
 ) {
   return AppointmentLocalDataSourceImpl(ref.watch(petivetiDatabaseProvider));
 }
@@ -60,7 +60,7 @@ AppointmentLocalDataSource appointmentLocalDataSource(
 // ============================================================================
 
 @riverpod
-AppointmentRepository appointmentRepository(AppointmentRepositoryRef ref) {
+AppointmentRepository appointmentRepository(Ref ref) {
   return AppointmentRepositoryImpl(
     ref.watch(appointmentLocalDataSourceProvider),
     ref.watch(appointmentErrorHandlingServiceProvider),
@@ -72,19 +72,19 @@ AppointmentRepository appointmentRepository(AppointmentRepositoryRef ref) {
 // ============================================================================
 
 @riverpod
-GetAppointments getAppointments(GetAppointmentsRef ref) {
+GetAppointments getAppointments(Ref ref) {
   return GetAppointments(ref.watch(appointmentRepositoryProvider));
 }
 
 @riverpod
 GetUpcomingAppointments getUpcomingAppointments(
-  GetUpcomingAppointmentsRef ref,
+  Ref ref,
 ) {
   return GetUpcomingAppointments(ref.watch(appointmentRepositoryProvider));
 }
 
 @riverpod
-GetAppointmentById getAppointmentById(GetAppointmentByIdRef ref) {
+GetAppointmentById getAppointmentById(Ref ref) {
   return GetAppointmentById(
     ref.watch(appointmentRepositoryProvider),
     ref.watch(appointmentValidationServiceProvider),
@@ -92,7 +92,7 @@ GetAppointmentById getAppointmentById(GetAppointmentByIdRef ref) {
 }
 
 @riverpod
-AddAppointment addAppointment(AddAppointmentRef ref) {
+AddAppointment addAppointment(Ref ref) {
   return AddAppointment(
     ref.watch(appointmentRepositoryProvider),
     ref.watch(appointmentValidationServiceProvider),
@@ -100,7 +100,7 @@ AddAppointment addAppointment(AddAppointmentRef ref) {
 }
 
 @riverpod
-UpdateAppointment updateAppointment(UpdateAppointmentRef ref) {
+UpdateAppointment updateAppointment(Ref ref) {
   return UpdateAppointment(
     ref.watch(appointmentRepositoryProvider),
     ref.watch(appointmentValidationServiceProvider),
@@ -108,7 +108,7 @@ UpdateAppointment updateAppointment(UpdateAppointmentRef ref) {
 }
 
 @riverpod
-DeleteAppointment deleteAppointment(DeleteAppointmentRef ref) {
+DeleteAppointment deleteAppointment(Ref ref) {
   return DeleteAppointment(
     ref.watch(appointmentRepositoryProvider),
     ref.watch(appointmentValidationServiceProvider),

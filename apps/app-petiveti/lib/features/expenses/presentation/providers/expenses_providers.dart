@@ -20,23 +20,23 @@ import '../../domain/usecases/update_expense.dart';
 part 'expenses_providers.g.dart';
 
 @riverpod
-ExpenseLocalDataSource expenseLocalDataSource(ExpenseLocalDataSourceRef ref) {
+ExpenseLocalDataSource expenseLocalDataSource(Ref ref) {
   final database = ref.watch(petivetiDatabaseProvider);
   return ExpenseLocalDataSourceImpl(database);
 }
 
 @riverpod
-ExpenseErrorHandlingService expenseErrorHandlingService(ExpenseErrorHandlingServiceRef ref) {
+ExpenseErrorHandlingService expenseErrorHandlingService(Ref ref) {
   return ExpenseErrorHandlingService();
 }
 
 @riverpod
-ExpenseValidationService expenseValidationService(ExpenseValidationServiceRef ref) {
+ExpenseValidationService expenseValidationService(Ref ref) {
   return ExpenseValidationService();
 }
 
 @riverpod
-ExpenseRepository expenseRepository(ExpenseRepositoryRef ref) {
+ExpenseRepository expenseRepository(Ref ref) {
   final localDataSource = ref.watch(expenseLocalDataSourceProvider);
   final errorHandlingService = ref.watch(expenseErrorHandlingServiceProvider);
   return ExpenseRepositoryImpl(
@@ -46,32 +46,32 @@ ExpenseRepository expenseRepository(ExpenseRepositoryRef ref) {
 }
 
 @riverpod
-ExpenseProcessingService expenseProcessingService(ExpenseProcessingServiceRef ref) {
+ExpenseProcessingService expenseProcessingService(Ref ref) {
   return ExpenseProcessingService();
 }
 
 @riverpod
-GetExpenses getExpenses(GetExpensesRef ref) {
+GetExpenses getExpenses(Ref ref) {
   return GetExpenses(ref.watch(expenseRepositoryProvider));
 }
 
 @riverpod
-GetExpensesByDateRange getExpensesByDateRange(GetExpensesByDateRangeRef ref) {
+GetExpensesByDateRange getExpensesByDateRange(Ref ref) {
   return GetExpensesByDateRange(ref.watch(expenseRepositoryProvider));
 }
 
 @riverpod
-GetExpensesByCategory getExpensesByCategory(GetExpensesByCategoryRef ref) {
+GetExpensesByCategory getExpensesByCategory(Ref ref) {
   return GetExpensesByCategory(ref.watch(expenseRepositoryProvider));
 }
 
 @riverpod
-GetExpenseSummary getExpenseSummary(GetExpenseSummaryRef ref) {
+GetExpenseSummary getExpenseSummary(Ref ref) {
   return GetExpenseSummary(ref.watch(expenseRepositoryProvider));
 }
 
 @riverpod
-AddExpense addExpense(AddExpenseRef ref) {
+AddExpense addExpense(Ref ref) {
   return AddExpense(
     ref.watch(expenseRepositoryProvider),
     ref.watch(expenseValidationServiceProvider),
@@ -79,7 +79,7 @@ AddExpense addExpense(AddExpenseRef ref) {
 }
 
 @riverpod
-UpdateExpense updateExpense(UpdateExpenseRef ref) {
+UpdateExpense updateExpense(Ref ref) {
   return UpdateExpense(
     ref.watch(expenseRepositoryProvider),
     ref.watch(expenseValidationServiceProvider),
@@ -87,7 +87,7 @@ UpdateExpense updateExpense(UpdateExpenseRef ref) {
 }
 
 @riverpod
-DeleteExpense deleteExpense(DeleteExpenseRef ref) {
+DeleteExpense deleteExpense(Ref ref) {
   return DeleteExpense(
     ref.watch(expenseRepositoryProvider),
     ref.watch(expenseValidationServiceProvider),

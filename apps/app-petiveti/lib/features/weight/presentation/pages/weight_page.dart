@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../animals/presentation/providers/animals_providers.dart';
 import '../../domain/entities/weight.dart';
 import '../providers/weights_provider.dart';
+import '../states/weight_sort_order.dart';
 import '../widgets/add_weight_form.dart';
 import '../widgets/body_condition_correlation.dart';
 import '../widgets/weight_card.dart';

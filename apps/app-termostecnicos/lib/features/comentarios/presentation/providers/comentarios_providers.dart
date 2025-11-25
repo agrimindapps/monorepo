@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../database/database_providers.dart';
@@ -17,8 +18,7 @@ part 'comentarios_providers.g.dart';
 // ==================== Data Source Provider ====================
 
 @riverpod
-ComentariosLocalDataSource comentariosLocalDataSource(
-    ComentariosLocalDataSourceRef ref) {
+ComentariosLocalDataSource comentariosLocalDataSource(Ref ref) {
   final database = ref.watch(termosTecnicosDatabaseProvider);
   return ComentariosLocalDataSourceImpl(database);
 }
@@ -26,7 +26,7 @@ ComentariosLocalDataSource comentariosLocalDataSource(
 // ==================== Repository Provider ====================
 
 @riverpod
-ComentariosRepository comentariosRepository(ComentariosRepositoryRef ref) {
+ComentariosRepository comentariosRepository(Ref ref) {
   final dataSource = ref.watch(comentariosLocalDataSourceProvider);
   return ComentariosRepositoryImpl(dataSource);
 }
@@ -34,41 +34,37 @@ ComentariosRepository comentariosRepository(ComentariosRepositoryRef ref) {
 // ==================== Use Cases Providers ====================
 
 @riverpod
-GetComentarios getComentariosUseCase(GetComentariosUseCaseRef ref) {
+GetComentarios getComentariosUseCase(Ref ref) {
   final repository = ref.watch(comentariosRepositoryProvider);
   return GetComentarios(repository);
 }
 
 @riverpod
-GetComentariosByFerramenta getComentariosByFerramentaUseCase(
-  GetComentariosByFerramentaUseCaseRef ref,
-) {
+GetComentariosByFerramenta getComentariosByFerramentaUseCase(Ref ref) {
   final repository = ref.watch(comentariosRepositoryProvider);
   return GetComentariosByFerramenta(repository);
 }
 
 @riverpod
-AddComentario addComentarioUseCase(AddComentarioUseCaseRef ref) {
+AddComentario addComentarioUseCase(Ref ref) {
   final repository = ref.watch(comentariosRepositoryProvider);
   return AddComentario(repository);
 }
 
 @riverpod
-UpdateComentario updateComentarioUseCase(UpdateComentarioUseCaseRef ref) {
+UpdateComentario updateComentarioUseCase(Ref ref) {
   final repository = ref.watch(comentariosRepositoryProvider);
   return UpdateComentario(repository);
 }
 
 @riverpod
-DeleteComentario deleteComentarioUseCase(DeleteComentarioUseCaseRef ref) {
+DeleteComentario deleteComentarioUseCase(Ref ref) {
   final repository = ref.watch(comentariosRepositoryProvider);
   return DeleteComentario(repository);
 }
 
 @riverpod
-GetComentariosCount getComentariosCountUseCase(
-  GetComentariosCountUseCaseRef ref,
-) {
+GetComentariosCount getComentariosCountUseCase(Ref ref) {
   final repository = ref.watch(comentariosRepositoryProvider);
   return GetComentariosCount(repository);
 }
@@ -153,7 +149,7 @@ class ComentariosNotifier extends _$ComentariosNotifier {
 /// Get comentarios by ferramenta
 @riverpod
 Future<List<Comentario>> comentariosByFerramenta(
-  ComentariosByFerramentaRef ref,
+  Ref ref,
   String ferramenta,
 ) async {
   final useCase = ref.watch(getComentariosByFerramentaUseCaseProvider);
@@ -169,7 +165,7 @@ Future<List<Comentario>> comentariosByFerramenta(
 
 /// Get count of comentarios
 @riverpod
-Future<int> comentariosCount(ComentariosCountRef ref) async {
+Future<int> comentariosCount(Ref ref) async {
   final useCase = ref.watch(getComentariosCountUseCaseProvider);
   final result = await useCase();
 
@@ -181,13 +177,13 @@ Future<int> comentariosCount(ComentariosCountRef ref) async {
 
 /// Get max comentarios limit (for free tier)
 @riverpod
-int maxComentarios(MaxComentariosRef ref) {
+int maxComentarios(Ref ref) {
   return 10; // TODO: Get from premium service
 }
 
 /// Check if can add more comentarios
 @riverpod
-Future<bool> canAddComentario(CanAddComentarioRef ref) async {
+Future<bool> canAddComentario(Ref ref) async {
   final count = await ref.watch(comentariosCountProvider.future);
   final maxLimit = ref.watch(maxComentariosProvider);
 

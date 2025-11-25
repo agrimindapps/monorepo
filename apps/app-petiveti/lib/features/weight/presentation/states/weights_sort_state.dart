@@ -1,7 +1,10 @@
 /// **OCP Pattern**: Segregated sort state
 /// Open for extension: features can extend with additional sort criteria
 /// Closed for modification: base design remains stable
-enum WeightSortOrder { dateAsc, dateDesc, weightAsc, weightDesc }
+
+// Import enum from dedicated file to avoid circular dependencies
+import 'weight_sort_order.dart';
+export 'weight_sort_order.dart';
 
 /// **OCP Pattern**: State class extending implicit base behavior
 /// - Immutable value object

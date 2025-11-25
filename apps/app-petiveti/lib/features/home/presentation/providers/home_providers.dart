@@ -17,18 +17,18 @@ part 'home_providers.g.dart';
 
 @riverpod
 HomeAggregationRepository homeAggregationRepository(
-  HomeAggregationRepositoryRef ref,
+  Ref ref,
 ) {
   return HomeAggregationRepositoryImpl();
 }
 
 @riverpod
-NotificationRepository notificationRepository(NotificationRepositoryRef ref) {
+NotificationRepository notificationRepository(Ref ref) {
   return NotificationRepositoryImpl();
 }
 
 @riverpod
-DashboardRepository dashboardRepository(DashboardRepositoryRef ref) {
+DashboardRepository dashboardRepository(Ref ref) {
   return DashboardRepositoryImpl();
 }
 
@@ -300,21 +300,21 @@ class HomeStatusNotifier extends _$HomeStatusNotifier {
 // ============================================================================
 
 @riverpod
-bool hasUnreadNotifications(HasUnreadNotificationsRef ref) {
+bool hasUnreadNotifications(Ref ref) {
   return ref.watch(homeNotificationsProvider).unreadCount > 0;
 }
 
 @riverpod
-bool hasUrgentAlerts(HasUrgentAlertsRef ref) {
+bool hasUrgentAlerts(Ref ref) {
   return ref.watch(homeNotificationsProvider).hasUrgentAlerts;
 }
 
 @riverpod
-bool isHomeLoading(IsHomeLoadingRef ref) {
+bool isHomeLoading(Ref ref) {
   return ref.watch(homeStatusProvider).isLoading;
 }
 
 @riverpod
-String? homeError(HomeErrorRef ref) {
+String? homeError(Ref ref) {
   return ref.watch(homeStatusProvider).errorMessage;
 }

@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/categoria.dart';
@@ -23,7 +24,7 @@ part 'termos_providers.g.dart';
 // ============================================================================
 
 @riverpod
-LocalStorageService localStorageService(LocalStorageServiceRef ref) {
+LocalStorageService localStorageService(Ref ref) {
   return LocalStorageService();
 }
 
@@ -32,12 +33,12 @@ LocalStorageService localStorageService(LocalStorageServiceRef ref) {
 // ============================================================================
 
 @riverpod
-DatabaseDataSource databaseDataSource(DatabaseDataSourceRef ref) {
+DatabaseDataSource databaseDataSource(Ref ref) {
   return DatabaseDataSourceImpl();
 }
 
 @riverpod
-TermosLocalDataSource termosLocalDataSource(TermosLocalDataSourceRef ref) {
+TermosLocalDataSource termosLocalDataSource(Ref ref) {
   final databaseDataSource = ref.watch(databaseDataSourceProvider);
   final localStorageService = ref.watch(localStorageServiceProvider);
   return TermosLocalDataSourceImpl(databaseDataSource, localStorageService);
@@ -48,7 +49,7 @@ TermosLocalDataSource termosLocalDataSource(TermosLocalDataSourceRef ref) {
 // ============================================================================
 
 @riverpod
-TermosRepository termosRepository(TermosRepositoryRef ref) {
+TermosRepository termosRepository(Ref ref) {
   final dataSource = ref.watch(termosLocalDataSourceProvider);
   return TermosRepositoryImpl(dataSource);
 }
@@ -58,47 +59,47 @@ TermosRepository termosRepository(TermosRepositoryRef ref) {
 // ============================================================================
 
 @riverpod
-CarregarTermos carregarTermosUseCase(CarregarTermosUseCaseRef ref) {
+CarregarTermos carregarTermosUseCase(Ref ref) {
   final repository = ref.watch(termosRepositoryProvider);
   return CarregarTermos(repository);
 }
 
 @riverpod
-ToggleFavorito toggleFavoritoUseCase(ToggleFavoritoUseCaseRef ref) {
+ToggleFavorito toggleFavoritoUseCase(Ref ref) {
   final repository = ref.watch(termosRepositoryProvider);
   return ToggleFavorito(repository);
 }
 
 @riverpod
-GetCategoriaAtual getCategoriaAtualUseCase(GetCategoriaAtualUseCaseRef ref) {
+GetCategoriaAtual getCategoriaAtualUseCase(Ref ref) {
   final repository = ref.watch(termosRepositoryProvider);
   return GetCategoriaAtual(repository);
 }
 
 @riverpod
-SetCategoria setCategoriaUseCase(SetCategoriaUseCaseRef ref) {
+SetCategoria setCategoriaUseCase(Ref ref) {
   final repository = ref.watch(termosRepositoryProvider);
   return SetCategoria(repository);
 }
 
 @riverpod
-GetFavoritos getFavoritosUseCase(GetFavoritosUseCaseRef ref) {
+GetFavoritos getFavoritosUseCase(Ref ref) {
   final repository = ref.watch(termosRepositoryProvider);
   return GetFavoritos(repository);
 }
 
 @riverpod
-CompartilharTermo compartilharTermoUseCase(CompartilharTermoUseCaseRef ref) {
+CompartilharTermo compartilharTermoUseCase(Ref ref) {
   return CompartilharTermo();
 }
 
 @riverpod
-CopiarTermo copiarTermoUseCase(CopiarTermoUseCaseRef ref) {
+CopiarTermo copiarTermoUseCase(Ref ref) {
   return CopiarTermo();
 }
 
 @riverpod
-AbrirTermoExterno abrirTermoExternoUseCase(AbrirTermoExternoUseCaseRef ref) {
+AbrirTermoExterno abrirTermoExternoUseCase(Ref ref) {
   return AbrirTermoExterno();
 }
 
@@ -235,7 +236,7 @@ class CategoriaAtualNotifier extends _$CategoriaAtualNotifier {
 // ============================================================================
 
 @riverpod
-Future<List<Termo>> favoritosTermos(FavoritosTermosRef ref) async {
+Future<List<Termo>> favoritosTermos(Ref ref) async {
   final termosAsync = ref.watch(termosNotifierProvider);
 
   return termosAsync.when(
@@ -250,7 +251,7 @@ Future<List<Termo>> favoritosTermos(FavoritosTermosRef ref) async {
 // ============================================================================
 
 @riverpod
-Future<List<Categoria>> categoriasList(CategoriasListRef ref) async {
+Future<List<Categoria>> categoriasList(Ref ref) async {
   final repository = ref.watch(termosRepositoryProvider);
   final result = await repository.getCategorias();
 
@@ -265,7 +266,7 @@ Future<List<Categoria>> categoriasList(CategoriasListRef ref) async {
 // ============================================================================
 
 @riverpod
-List<Termo> termosPorCategoria(TermosPorCategoriaRef ref, String categoria) {
+List<Termo> termosPorCategoria(Ref ref, String categoria) {
   final termosAsync = ref.watch(termosNotifierProvider);
 
   return termosAsync.when(
@@ -281,7 +282,7 @@ List<Termo> termosPorCategoria(TermosPorCategoriaRef ref, String categoria) {
 // ============================================================================
 
 @riverpod
-List<Termo> searchTermos(SearchTermosRef ref, String query) {
+List<Termo> searchTermos(Ref ref, String query) {
   final termosAsync = ref.watch(termosNotifierProvider);
 
   if (query.trim().isEmpty) {

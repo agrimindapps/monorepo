@@ -82,17 +82,9 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
   /// Handles search input for real-time medication filtering
   final TextEditingController _searchController = TextEditingController();
 
-  /// Cached provider references for better performance
-  /// Avoids repeated provider lookups which can impact performance in large lists
-  late final AutoDisposeNotifierProvider<MedicationsNotifier, MedicationsState>
-  _medicationsProvider;
-  late final AutoDisposeProvider<List<Medication>> _filteredProvider;
-
   @override
   void initState() {
     super.initState();
-    _medicationsProvider = medicationsProvider;
-    _filteredProvider = filteredMedicationsProvider;
 
     _tabController = TabController(
       length: MedicationsConstants.tabCount,
@@ -133,7 +125,7 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
   /// @throws Exception when primary data load fails or times out
   Future<void> _loadInitialData() async {
     try {
-      final notifier = ref.read(_medicationsProvider.notifier);
+      final notifier = ref.read(medicationsProvider.notifier);
       final primaryLoad = widget.animalId != null
           ? notifier.loadMedicationsByAnimalId(widget.animalId!)
           : notifier.loadMedications();
@@ -175,8 +167,8 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
-    final medicationsState = ref.watch(_medicationsProvider);
-    final filteredMedications = ref.watch(_filteredProvider);
+    final medicationsState = ref.watch(medicationsProvider);
+    final filteredMedications = ref.watch(filteredMedicationsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -476,7 +468,7 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
 
   Future<void> _refreshMedications() async {
     try {
-      final notifier = ref.read(_medicationsProvider.notifier);
+      final notifier = ref.read(medicationsProvider.notifier);
       final primaryRefresh = widget.animalId != null
           ? notifier.loadMedicationsByAnimalId(widget.animalId!)
           : notifier.loadMedications();
@@ -542,7 +534,7 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
 
     if (confirmed == true) {
       await ref
-          .read(_medicationsProvider.notifier)
+          .read(medicationsProvider.notifier)
           .deleteMedication(medication.id);
 
       if (mounted) {

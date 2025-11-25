@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' hide Column;
 
@@ -17,9 +18,7 @@ part 'settings_providers.g.dart';
 // ============================================================================
 
 @riverpod
-SettingsLocalDataSource settingsLocalDataSource(
-  SettingsLocalDataSourceRef ref,
-) {
+SettingsLocalDataSource settingsLocalDataSource(Ref ref) {
   // TODO: Properly inject SharedPreferences
   // For now, we'll create it directly in the repository
   throw UnimplementedError('Settings data source needs SharedPreferences');
@@ -30,7 +29,7 @@ SettingsLocalDataSource settingsLocalDataSource(
 // ============================================================================
 
 @riverpod
-SettingsRepository settingsRepository(SettingsRepositoryRef ref) {
+SettingsRepository settingsRepository(Ref ref) {
   // Create data source with SharedPreferences directly
   // This is a temporary solution - in production you'd inject it properly
   return SettingsRepositoryImpl(SettingsLocalDataSourceImpl(null as dynamic));
@@ -41,19 +40,19 @@ SettingsRepository settingsRepository(SettingsRepositoryRef ref) {
 // ============================================================================
 
 @riverpod
-GetSettings getSettingsUseCase(GetSettingsUseCaseRef ref) {
+GetSettings getSettingsUseCase(Ref ref) {
   final repository = ref.watch(settingsRepositoryProvider);
   return GetSettings(repository);
 }
 
 @riverpod
-UpdateTheme updateThemeUseCase(UpdateThemeUseCaseRef ref) {
+UpdateTheme updateThemeUseCase(Ref ref) {
   final repository = ref.watch(settingsRepositoryProvider);
   return UpdateTheme(repository);
 }
 
 @riverpod
-UpdateTTSSettings updateTTSSettingsUseCase(UpdateTTSSettingsUseCaseRef ref) {
+UpdateTTSSettings updateTTSSettingsUseCase(Ref ref) {
   final repository = ref.watch(settingsRepositoryProvider);
   return UpdateTTSSettings(repository);
 }

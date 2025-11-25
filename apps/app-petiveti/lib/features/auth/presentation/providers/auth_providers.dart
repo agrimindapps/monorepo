@@ -17,12 +17,12 @@ import '../../domain/usecases/auth_usecases.dart';
 part 'auth_providers.g.dart';
 
 @riverpod
-AuthLocalDataSource authLocalDataSource(AuthLocalDataSourceRef ref) {
+AuthLocalDataSource authLocalDataSource(Ref ref) {
   return AuthLocalDataSourceImpl(sharedPreferences: ref.watch(sharedPreferencesProvider));
 }
 
 @riverpod
-AuthRemoteDataSource authRemoteDataSource(AuthRemoteDataSourceRef ref) {
+AuthRemoteDataSource authRemoteDataSource(Ref ref) {
   return AuthRemoteDataSourceImpl(
     firebaseAuth: ref.watch(core_providers.firebaseAuthProvider),
     firestore: ref.watch(core_providers.firebaseFirestoreProvider),
@@ -31,7 +31,7 @@ AuthRemoteDataSource authRemoteDataSource(AuthRemoteDataSourceRef ref) {
 }
 
 @riverpod
-AuthErrorHandlingService authErrorHandlingService(AuthErrorHandlingServiceRef ref) {
+AuthErrorHandlingService authErrorHandlingService(Ref ref) {
   return AuthErrorHandlingService(
     localDataSource: ref.watch(authLocalDataSourceProvider),
     remoteDataSource: ref.watch(authRemoteDataSourceProvider),
@@ -39,12 +39,12 @@ AuthErrorHandlingService authErrorHandlingService(AuthErrorHandlingServiceRef re
 }
 
 @riverpod
-AuthValidationService authValidationService(AuthValidationServiceRef ref) {
+AuthValidationService authValidationService(Ref ref) {
   return AuthValidationService();
 }
 
 @riverpod
-AuthRepository authRepository(AuthRepositoryRef ref) {
+AuthRepository authRepository(Ref ref) {
   return AuthRepositoryImpl(
     localDataSource: ref.watch(authLocalDataSourceProvider),
     remoteDataSource: ref.watch(authRemoteDataSourceProvider),
@@ -55,7 +55,7 @@ AuthRepository authRepository(AuthRepositoryRef ref) {
 
 // Use Cases
 @riverpod
-SignInWithEmail signInWithEmail(SignInWithEmailRef ref) {
+SignInWithEmail signInWithEmail(Ref ref) {
   return SignInWithEmail(
     ref.watch(authRepositoryProvider),
     ref.watch(authValidationServiceProvider),
@@ -63,7 +63,7 @@ SignInWithEmail signInWithEmail(SignInWithEmailRef ref) {
 }
 
 @riverpod
-SignUpWithEmail signUpWithEmail(SignUpWithEmailRef ref) {
+SignUpWithEmail signUpWithEmail(Ref ref) {
   return SignUpWithEmail(
     ref.watch(authRepositoryProvider),
     ref.watch(authValidationServiceProvider),
@@ -71,42 +71,42 @@ SignUpWithEmail signUpWithEmail(SignUpWithEmailRef ref) {
 }
 
 @riverpod
-SignInWithGoogle signInWithGoogle(SignInWithGoogleRef ref) {
+SignInWithGoogle signInWithGoogle(Ref ref) {
   return SignInWithGoogle(ref.watch(authRepositoryProvider));
 }
 
 @riverpod
-SignInWithApple signInWithApple(SignInWithAppleRef ref) {
+SignInWithApple signInWithApple(Ref ref) {
   return SignInWithApple(ref.watch(authRepositoryProvider));
 }
 
 @riverpod
-SignInWithFacebook signInWithFacebook(SignInWithFacebookRef ref) {
+SignInWithFacebook signInWithFacebook(Ref ref) {
   return SignInWithFacebook(ref.watch(authRepositoryProvider));
 }
 
 @riverpod
-SignInAnonymously signInAnonymously(SignInAnonymouslyRef ref) {
+SignInAnonymously signInAnonymously(Ref ref) {
   return SignInAnonymously(ref.watch(authRepositoryProvider));
 }
 
 @riverpod
-SignOut signOut(SignOutRef ref) {
+SignOut signOut(Ref ref) {
   return SignOut(ref.watch(authRepositoryProvider));
 }
 
 @riverpod
-GetCurrentUser getCurrentUser(GetCurrentUserRef ref) {
+GetCurrentUser getCurrentUser(Ref ref) {
   return GetCurrentUser(ref.watch(authRepositoryProvider));
 }
 
 @riverpod
-SendEmailVerification sendEmailVerification(SendEmailVerificationRef ref) {
+SendEmailVerification sendEmailVerification(Ref ref) {
   return SendEmailVerification(ref.watch(authRepositoryProvider));
 }
 
 @riverpod
-SendPasswordResetEmail sendPasswordResetEmail(SendPasswordResetEmailRef ref) {
+SendPasswordResetEmail sendPasswordResetEmail(Ref ref) {
   return SendPasswordResetEmail(
     ref.watch(authRepositoryProvider),
     ref.watch(authValidationServiceProvider),
@@ -114,7 +114,7 @@ SendPasswordResetEmail sendPasswordResetEmail(SendPasswordResetEmailRef ref) {
 }
 
 @riverpod
-UpdateProfile updateProfile(UpdateProfileRef ref) {
+UpdateProfile updateProfile(Ref ref) {
   return UpdateProfile(
     ref.watch(authRepositoryProvider),
     ref.watch(authValidationServiceProvider),
@@ -123,17 +123,17 @@ UpdateProfile updateProfile(UpdateProfileRef ref) {
 
 // Services
 @riverpod
-RateLimitService rateLimitService(RateLimitServiceRef ref) {
+RateLimitService rateLimitService(Ref ref) {
   return RateLimitService();
 }
 
 @riverpod
-PetDataSyncService petDataSyncService(PetDataSyncServiceRef ref) {
+PetDataSyncService petDataSyncService(Ref ref) {
   return PetDataSyncService();
 }
 
 @riverpod
-EnhancedAccountDeletionService enhancedAccountDeletionService(EnhancedAccountDeletionServiceRef ref) {
+EnhancedAccountDeletionService enhancedAccountDeletionService(Ref ref) {
   return EnhancedAccountDeletionService(
     authRepository: ref.watch(core_providers.externalAuthRepositoryProvider),
   );

@@ -27,14 +27,14 @@ part 'medications_providers.g.dart';
 
 @riverpod
 MedicationValidationService medicationValidationService(
-  MedicationValidationServiceRef ref,
+  Ref ref,
 ) {
   return MedicationValidationService();
 }
 
 @riverpod
 MedicationErrorHandlingService medicationErrorHandlingService(
-  MedicationErrorHandlingServiceRef ref,
+  Ref ref,
 ) {
   return MedicationErrorHandlingService();
 }
@@ -45,7 +45,7 @@ MedicationErrorHandlingService medicationErrorHandlingService(
 
 @riverpod
 MedicationLocalDataSource medicationLocalDataSource(
-  MedicationLocalDataSourceRef ref,
+  Ref ref,
 ) {
   return MedicationLocalDataSourceImpl(ref.watch(petivetiDatabaseProvider));
 }
@@ -55,7 +55,7 @@ MedicationLocalDataSource medicationLocalDataSource(
 // ============================================================================
 
 @riverpod
-MedicationRepository medicationRepository(MedicationRepositoryRef ref) {
+MedicationRepository medicationRepository(Ref ref) {
   return MedicationRepositoryImpl(
     ref.watch(medicationLocalDataSourceProvider),
     ref.watch(medicationErrorHandlingServiceProvider),
@@ -67,24 +67,24 @@ MedicationRepository medicationRepository(MedicationRepositoryRef ref) {
 // ============================================================================
 
 @riverpod
-GetMedications getMedications(GetMedicationsRef ref) {
+GetMedications getMedications(Ref ref) {
   return GetMedications(ref.watch(medicationRepositoryProvider));
 }
 
 @riverpod
 GetMedicationsByAnimalId getMedicationsByAnimalId(
-  GetMedicationsByAnimalIdRef ref,
+  Ref ref,
 ) {
   return GetMedicationsByAnimalId(ref.watch(medicationRepositoryProvider));
 }
 
 @riverpod
-GetActiveMedications getActiveMedications(GetActiveMedicationsRef ref) {
+GetActiveMedications getActiveMedications(Ref ref) {
   return GetActiveMedications(ref.watch(medicationRepositoryProvider));
 }
 
 @riverpod
-GetMedicationById getMedicationById(GetMedicationByIdRef ref) {
+GetMedicationById getMedicationById(Ref ref) {
   return GetMedicationById(
     ref.watch(medicationRepositoryProvider),
     ref.watch(medicationValidationServiceProvider),
@@ -92,12 +92,12 @@ GetMedicationById getMedicationById(GetMedicationByIdRef ref) {
 }
 
 @riverpod
-CheckMedicationConflicts checkMedicationConflicts(CheckMedicationConflictsRef ref) {
+CheckMedicationConflicts checkMedicationConflicts(Ref ref) {
   return CheckMedicationConflicts(ref.watch(medicationRepositoryProvider));
 }
 
 @riverpod
-AddMedication addMedication(AddMedicationRef ref) {
+AddMedication addMedication(Ref ref) {
   return AddMedication(
     ref.watch(medicationRepositoryProvider),
     ref.watch(checkMedicationConflictsProvider),
@@ -106,7 +106,7 @@ AddMedication addMedication(AddMedicationRef ref) {
 }
 
 @riverpod
-UpdateMedication updateMedication(UpdateMedicationRef ref) {
+UpdateMedication updateMedication(Ref ref) {
   return UpdateMedication(
     ref.watch(medicationRepositoryProvider),
     ref.watch(medicationValidationServiceProvider),
@@ -114,7 +114,7 @@ UpdateMedication updateMedication(UpdateMedicationRef ref) {
 }
 
 @riverpod
-DeleteMedication deleteMedication(DeleteMedicationRef ref) {
+DeleteMedication deleteMedication(Ref ref) {
   return DeleteMedication(
     ref.watch(medicationRepositoryProvider),
     ref.watch(medicationValidationServiceProvider),
@@ -123,7 +123,7 @@ DeleteMedication deleteMedication(DeleteMedicationRef ref) {
 
 @riverpod
 GetExpiringSoonMedications getExpiringSoonMedications(
-  GetExpiringSoonMedicationsRef ref,
+  Ref ref,
 ) {
   return GetExpiringSoonMedications(ref.watch(medicationRepositoryProvider));
 }
@@ -353,20 +353,20 @@ class MedicationsNotifier extends _$MedicationsNotifier with PerformanceMonitori
 
 // Derived providers
 @riverpod
-Future<Medication?> medicationById(MedicationByIdRef ref, String id) async {
+Future<Medication?> medicationById(Ref ref, String id) async {
   final notifier = ref.read(medicationsProvider.notifier);
   return await notifier.getMedicationById(id);
 }
 
 @riverpod
-Stream<List<Medication>> medicationsStream(MedicationsStreamRef ref) {
+Stream<List<Medication>> medicationsStream(Ref ref) {
   final repository = ref.watch(medicationRepositoryProvider);
   return repository.watchMedications();
 }
 
 @riverpod
 Stream<List<Medication>> medicationsByAnimalStream(
-  MedicationsByAnimalStreamRef ref,
+  Ref ref,
   String animalId,
 ) {
   final repository = ref.watch(medicationRepositoryProvider);
@@ -374,7 +374,7 @@ Stream<List<Medication>> medicationsByAnimalStream(
 }
 
 @riverpod
-Stream<List<Medication>> activeMedicationsStream(ActiveMedicationsStreamRef ref) {
+Stream<List<Medication>> activeMedicationsStream(Ref ref) {
   final repository = ref.watch(medicationRepositoryProvider);
   return repository.watchActiveMedications();
 }
@@ -404,7 +404,7 @@ class MedicationSearchQuery extends _$MedicationSearchQuery {
 }
 
 @riverpod
-List<Medication> filteredMedications(FilteredMedicationsRef ref) {
+List<Medication> filteredMedications(Ref ref) {
   final medications = ref.watch(medicationsProvider).medications;
   final typeFilter = ref.watch(medicationTypeFilterProvider);
   final statusFilter = ref.watch(medicationStatusFilterProvider);

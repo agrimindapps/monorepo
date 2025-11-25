@@ -1,7 +1,6 @@
-import 'package:core/core.dart' hide Column, SubscriptionState;
+import 'package:core/core.dart' hide Column, SubscriptionState, subscriptionProvider;
 import 'package:flutter/material.dart';
 
-import '../providers/subscription_providers.dart';
 import '../providers/subscription_providers.dart';
 import '../widgets/current_subscription_card.dart';
 import '../widgets/subscription_empty_state.dart';

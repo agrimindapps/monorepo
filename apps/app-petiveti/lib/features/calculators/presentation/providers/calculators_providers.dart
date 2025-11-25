@@ -14,29 +14,29 @@ part 'calculators_providers.g.dart';
 
 
 @riverpod
-CalculatorLocalDatasource calculatorLocalDataSource(CalculatorLocalDataSourceRef ref) {
+CalculatorLocalDatasource calculatorLocalDataSource(Ref ref) {
   final database = ref.watch(petivetiDatabaseProvider);
   final prefs = ref.watch(sharedPreferencesProvider);
   return CalculatorLocalDatasourceImpl(database, prefs);
 }
 
 @riverpod
-CalculatorRepository calculatorRepository(CalculatorRepositoryRef ref) {
+CalculatorRepository calculatorRepository(Ref ref) {
   final localDataSource = ref.watch(calculatorLocalDataSourceProvider);
   return CalculatorRepositoryImpl(localDataSource);
 }
 
 @riverpod
-PerformCalculation performCalculation(PerformCalculationRef ref) {
+PerformCalculation performCalculation(Ref ref) {
   return PerformCalculation(ref.watch(calculatorRepositoryProvider));
 }
 
 @riverpod
-GetCalculators getCalculators(GetCalculatorsRef ref) {
+GetCalculators getCalculators(Ref ref) {
   return GetCalculators(ref.watch(calculatorRepositoryProvider));
 }
 
 @riverpod
-ManageCalculationHistory manageCalculationHistory(ManageCalculationHistoryRef ref) {
+ManageCalculationHistory manageCalculationHistory(Ref ref) {
   return ManageCalculationHistory(ref.watch(calculatorRepositoryProvider));
 }

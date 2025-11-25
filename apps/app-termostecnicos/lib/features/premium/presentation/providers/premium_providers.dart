@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' hide SubscriptionStatus, Column;
 
 import '../../domain/entities/subscription_status.dart';
@@ -15,9 +17,7 @@ part 'premium_providers.g.dart';
 // ============================================================================
 
 @riverpod
-PremiumLocalDataSource premiumLocalDataSource(
-  PremiumLocalDataSourceRef ref,
-) {
+PremiumLocalDataSource premiumLocalDataSource(Ref ref) {
   return PremiumLocalDataSourceImpl();
 }
 
@@ -26,7 +26,7 @@ PremiumLocalDataSource premiumLocalDataSource(
 // ============================================================================
 
 @riverpod
-PremiumRepository premiumRepository(PremiumRepositoryRef ref) {
+PremiumRepository premiumRepository(Ref ref) {
   final dataSource = ref.watch(premiumLocalDataSourceProvider);
   return PremiumRepositoryImpl(dataSource);
 }
@@ -36,23 +36,19 @@ PremiumRepository premiumRepository(PremiumRepositoryRef ref) {
 // ============================================================================
 
 @riverpod
-CheckSubscriptionStatus checkSubscriptionStatusUseCase(
-  CheckSubscriptionStatusUseCaseRef ref,
-) {
+CheckSubscriptionStatus checkSubscriptionStatusUseCase(Ref ref) {
   final repository = ref.watch(premiumRepositoryProvider);
   return CheckSubscriptionStatus(repository);
 }
 
 @riverpod
-RestorePurchases restorePurchasesUseCase(RestorePurchasesUseCaseRef ref) {
+RestorePurchases restorePurchasesUseCase(Ref ref) {
   final repository = ref.watch(premiumRepositoryProvider);
   return RestorePurchases(repository);
 }
 
 @riverpod
-GetAvailablePackages getAvailablePackagesUseCase(
-  GetAvailablePackagesUseCaseRef ref,
-) {
+GetAvailablePackages getAvailablePackagesUseCase(Ref ref) {
   final repository = ref.watch(premiumRepositoryProvider);
   return GetAvailablePackages(repository);
 }
@@ -144,7 +140,7 @@ class AvailablePackagesNotifier extends _$AvailablePackagesNotifier {
 
 /// Provider for checking if user is premium
 @riverpod
-bool isPremium(IsPremiumRef ref) {
+bool isPremium(Ref ref) {
   final statusAsync = ref.watch(premiumStatusNotifierProvider);
 
   return statusAsync.maybeWhen(
@@ -155,7 +151,7 @@ bool isPremium(IsPremiumRef ref) {
 
 /// Provider for subscription type
 @riverpod
-String? subscriptionType(SubscriptionTypeRef ref) {
+String? subscriptionType(Ref ref) {
   final statusAsync = ref.watch(premiumStatusNotifierProvider);
 
   return statusAsync.maybeWhen(
@@ -166,7 +162,7 @@ String? subscriptionType(SubscriptionTypeRef ref) {
 
 /// Provider for days remaining
 @riverpod
-int? daysRemaining(DaysRemainingRef ref) {
+int? daysRemaining(Ref ref) {
   final statusAsync = ref.watch(premiumStatusNotifierProvider);
 
   return statusAsync.maybeWhen(
@@ -177,7 +173,7 @@ int? daysRemaining(DaysRemainingRef ref) {
 
 /// Provider for checking if subscription is about to expire
 @riverpod
-bool isAboutToExpire(IsAboutToExpireRef ref) {
+bool isAboutToExpire(Ref ref) {
   final statusAsync = ref.watch(premiumStatusNotifierProvider);
 
   return statusAsync.maybeWhen(

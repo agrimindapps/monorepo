@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -279,46 +280,46 @@ class AdMobService extends _$AdMobService {
 
 // Convenience providers for backward compatibility
 @riverpod
-NativeAd? altBannerAd(AltBannerAdRef ref) {
+NativeAd? altBannerAd(Ref ref) {
   return ref.watch(adMobServiceProvider).altBannerAd;
 }
 
 @riverpod
-bool altBannerAdIsLoaded(AltBannerAdIsLoadedRef ref) {
+bool altBannerAdIsLoaded(Ref ref) {
   return ref.watch(adMobServiceProvider).altBannerAdIsLoaded;
 }
 
 @riverpod
-NativeAd? onOpenAppAd(OnOpenAppAdRef ref) {
+NativeAd? onOpenAppAd(Ref ref) {
   return ref.watch(adMobServiceProvider).onOpenAppAd;
 }
 
 @riverpod
-bool onOpenAppAdIsLoaded(OnOpenAppAdIsLoadedRef ref) {
+bool onOpenAppAdIsLoaded(Ref ref) {
   return ref.watch(adMobServiceProvider).onOpenAppAdIsLoaded;
 }
 
 @riverpod
-RewardedAd? rewardedAd(RewardedAdRef ref) {
+RewardedAd? rewardedAd(Ref ref) {
   return ref.watch(adMobServiceProvider).rewardedAd;
 }
 
 @riverpod
-bool rewardedAdIsLoaded(RewardedAdIsLoadedRef ref) {
+bool rewardedAdIsLoaded(Ref ref) {
   return ref.watch(adMobServiceProvider).rewardedAdIsLoaded;
 }
 
 @riverpod
-bool openAdsActive(OpenAdsActiveRef ref) {
+bool openAdsActive(Ref ref) {
   return ref.watch(adMobServiceProvider).openAdsActive;
 }
 
 @riverpod
-bool isPremiumAd(IsPremiumAdRef ref) {
+bool isPremiumAd(Ref ref) {
   return ref.watch(adMobServiceProvider).isPremiumAd;
 }
 
 @riverpod
-int premiumAdHours(PremiumAdHoursRef ref) {
+int premiumAdHours(Ref ref) {
   return ref.watch(adMobServiceProvider).premiumAdHours;
 }

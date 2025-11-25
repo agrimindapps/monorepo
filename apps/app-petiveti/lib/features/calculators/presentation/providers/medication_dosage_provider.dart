@@ -1,5 +1,6 @@
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/repositories/medication_database.dart';
 import '../../data/repositories/versioned_medication_database.dart';
@@ -8,12 +9,31 @@ import '../../domain/entities/medication_dosage_input.dart';
 import '../../domain/entities/medication_dosage_output.dart';
 import '../../domain/strategies/medication_dosage_strategy.dart';
 
-/// Provider Riverpod para MedicationDosageProvider
+part 'medication_dosage_provider.g.dart';
+
+/// Provider Riverpod para MedicationDosageProvider (Riverpod 3.0)
 ///
 /// Gerencia estado da calculadora de dosagem de medicamentos
-final medicationDosageProviderProvider = ChangeNotifierProvider<MedicationDosageProvider>((ref) {
-  return MedicationDosageProvider();
-});
+/// Uses Notifier pattern with ChangeNotifier for state management
+@Riverpod(keepAlive: true)
+class MedicationDosageProviderNotifier extends _$MedicationDosageProviderNotifier {
+  @override
+  MedicationDosageProvider build() {
+    final provider = MedicationDosageProvider();
+    // Ensure provider triggers rebuilds when notifyListeners is called
+    provider.addListener(_onProviderChanged);
+    ref.onDispose(() => provider.removeListener(_onProviderChanged));
+    return provider;
+  }
+  
+  void _onProviderChanged() {
+    // Trigger a rebuild by re-assigning the same instance
+    // This is necessary because ChangeNotifier mutations don't trigger Riverpod rebuilds
+    state = state;
+  }
+}
+
+// Note: medicationDosageProviderProvider is auto-generated from the @riverpod annotation
 
 /// Provider para gerenciamento de state da calculadora de dosagem de medicamentos
 class MedicationDosageProvider with ChangeNotifier {

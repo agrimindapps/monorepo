@@ -310,44 +310,44 @@ BodyConditionStrategy bodyConditionStrategy(Ref ref) {
 /// Provider do estado de entrada
 @riverpod
 BodyConditionInput bodyConditionInput(Ref ref) {
-  return ref.watch(bodyConditionNotifierProvider).input;
+  return ref.watch(bodyConditionProvider).input;
 }
 
 /// Provider do resultado
 @riverpod
 BodyConditionOutput? bodyConditionOutput(Ref ref) {
-  return ref.watch(bodyConditionNotifierProvider).output;
+  return ref.watch(bodyConditionProvider).output;
 }
 
 /// Provider do status de loading
 @riverpod
 bool bodyConditionLoading(Ref ref) {
-  return ref.watch(bodyConditionNotifierProvider).isLoading;
+  return ref.watch(bodyConditionProvider).isLoading;
 }
 
 /// Provider de erros
 @riverpod
 String? bodyConditionError(Ref ref) {
-  final state = ref.watch(bodyConditionNotifierProvider);
+  final state = ref.watch(bodyConditionProvider);
   return state.hasError ? state.error : null;
 }
 
 /// Provider de erros de validação
 @riverpod
 List<String> bodyConditionValidationErrors(Ref ref) {
-  return ref.watch(bodyConditionNotifierProvider).validationErrors;
+  return ref.watch(bodyConditionProvider).validationErrors;
 }
 
 /// Provider indicando se pode calcular
 @riverpod
 bool bodyConditionCanCalculate(Ref ref) {
-  return ref.watch(bodyConditionNotifierProvider).canCalculate;
+  return ref.watch(bodyConditionProvider).canCalculate;
 }
 
 /// Provider do histórico
 @riverpod
 List<BodyConditionOutput> bodyConditionHistory(Ref ref) {
-  return ref.watch(bodyConditionNotifierProvider).history;
+  return ref.watch(bodyConditionProvider).history;
 }
 
 /// Provider de sugestões baseadas na entrada atual

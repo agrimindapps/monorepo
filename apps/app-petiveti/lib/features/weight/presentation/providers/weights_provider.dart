@@ -43,38 +43,10 @@ part 'weights_provider.g.dart';
 
 
 // ============================================================================
-// ENUMS AND EXTENSIONS
+// ENUMS AND EXTENSIONS - exported from weights_sort_state.dart
 // ============================================================================
-
-enum WeightSortOrder { dateAsc, dateDesc, weightAsc, weightDesc }
-
-extension WeightSortOrderExtension on WeightSortOrder {
-  String get displayName {
-    switch (this) {
-      case WeightSortOrder.dateAsc:
-        return 'Data (Antiga → Recente)';
-      case WeightSortOrder.dateDesc:
-        return 'Data (Recente → Antiga)';
-      case WeightSortOrder.weightAsc:
-        return 'Peso (Menor → Maior)';
-      case WeightSortOrder.weightDesc:
-        return 'Peso (Maior → Menor)';
-    }
-  }
-
-  IconData get icon {
-    switch (this) {
-      case WeightSortOrder.dateAsc:
-        return Icons.arrow_upward;
-      case WeightSortOrder.dateDesc:
-        return Icons.arrow_downward;
-      case WeightSortOrder.weightAsc:
-        return Icons.arrow_upward;
-      case WeightSortOrder.weightDesc:
-        return Icons.arrow_downward;
-    }
-  }
-}
+// WeightSortOrder is defined in states/weight_sort_order.dart and 
+// re-exported through weights_sort_state.dart
 
 // ============================================================================
 // LEGACY STATE CLASS (Maintained for backward compatibility)
@@ -404,14 +376,33 @@ class WeightsNotifier extends _$WeightsNotifier {
 
 /// Provider for CRUD operations (Add, Update, Delete)
 /// Single Responsibility: Weight creation, modification, and deletion
+/// NOTE: Use weightsCrudNotifierProvider from weights_crud_notifier.dart instead
 @riverpod
 class WeightsCrud extends _$WeightsCrud {
   @override
   WeightsCrudState build() {
-    return WeightsCrudNotifier(
-      addWeight: ref.watch(addWeightProvider),
-      updateWeight: ref.watch(updateWeightProvider),
-    ).state;
+    // Initialize with use cases
+    return const WeightsCrudState();
+  }
+  
+  Future<void> addWeight(Weight weight) async {
+    final addWeightUseCase = ref.read(addWeightProvider);
+    state = state.copyWith(isLoading: true, error: null);
+    final result = await addWeightUseCase(weight);
+    result.fold(
+      (failure) => state = state.copyWith(isLoading: false, error: failure.message),
+      (_) => state = state.copyWith(isLoading: false, error: null),
+    );
+  }
+  
+  Future<void> updateWeight(Weight weight) async {
+    final updateWeightUseCase = ref.read(updateWeightProvider);
+    state = state.copyWith(isLoading: true, error: null);
+    final result = await updateWeightUseCase(weight);
+    result.fold(
+      (failure) => state = state.copyWith(isLoading: false, error: failure.message),
+      (_) => state = state.copyWith(isLoading: false, error: null),
+    );
   }
 }
 
@@ -421,10 +412,31 @@ class WeightsCrud extends _$WeightsCrud {
 class WeightsQuery extends _$WeightsQuery {
   @override
   WeightsQueryState build() {
-    return WeightsQueryNotifier(
-      getWeights: ref.watch(getWeightsProvider),
-      getWeightsByAnimalId: ref.watch(getWeightsByAnimalIdProvider),
-    ).state;
+    return const WeightsQueryState();
+  }
+  
+  Future<void> getWeights() async {
+    final getWeightsUseCase = ref.read(getWeightsProvider);
+    state = state.copyWith(isLoading: true, error: null);
+    final result = await getWeightsUseCase(const local.NoParams());
+    result.fold(
+      (failure) => state = state.copyWith(isLoading: false, error: failure.message),
+      (weights) => state = state.copyWith(isLoading: false, weights: weights),
+    );
+  }
+  
+  Future<void> getWeightsByAnimalId(String animalId) async {
+    final getWeightsByAnimalIdUseCase = ref.read(getWeightsByAnimalIdProvider);
+    state = state.copyWith(isLoading: true, error: null);
+    final result = await getWeightsByAnimalIdUseCase(animalId);
+    result.fold(
+      (failure) => state = state.copyWith(isLoading: false, error: failure.message),
+      (weights) {
+        final newMap = Map<String, List<Weight>>.from(state.weightsByAnimal);
+        newMap[animalId] = weights;
+        state = state.copyWith(isLoading: false, weightsByAnimal: newMap);
+      },
+    );
   }
 }
 
@@ -435,6 +447,25 @@ class WeightsSort extends _$WeightsSort {
   @override
   WeightsSortState build() {
     return const WeightsSortState();
+  }
+  
+  void setSortOrder(WeightSortOrder order) {
+    state = state.copyWith(sortOrder: order);
+  }
+  
+  List<Weight> sortWeights(List<Weight> weights) {
+    final sorted = List<Weight>.from(weights);
+    switch (state.sortOrder) {
+      case WeightSortOrder.dateAsc:
+        sorted.sort((a, b) => a.date.compareTo(b.date));
+      case WeightSortOrder.dateDesc:
+        sorted.sort((a, b) => b.date.compareTo(a.date));
+      case WeightSortOrder.weightAsc:
+        sorted.sort((a, b) => a.weight.compareTo(b.weight));
+      case WeightSortOrder.weightDesc:
+        sorted.sort((a, b) => b.weight.compareTo(a.weight));
+    }
+    return sorted;
   }
 }
 
@@ -473,9 +504,9 @@ List<Weight> sortedAndFilteredWeights(Ref ref) {
 // Provider generated by @riverpod
 @riverpod
 Future<List<Weight>> weightsByAnimal(Ref ref, String animalId) async {
-  final notifier = ref.read(weightsNotifierProvider.notifier);
+  final notifier = ref.read(weightsProvider.notifier);
   await notifier.loadWeightsByAnimal(animalId);
-  return ref.read(weightsNotifierProvider).weightsByAnimal[animalId] ?? [];
+  return ref.read(weightsProvider).weightsByAnimal[animalId] ?? [];
 }
 
 @riverpod
@@ -500,7 +531,7 @@ Stream<List<Weight>> weightsStream(Ref ref, String? animalId) {
 
 @riverpod
 WeightSortOrder weightSortOrder(Ref ref) {
-  final state = ref.watch(weightsNotifierProvider);
+  final state = ref.watch(weightsProvider);
   return state.sortOrder;
 }
 
@@ -515,7 +546,7 @@ class SelectedAnimalForWeight extends _$SelectedAnimalForWeight {
 
 @riverpod
 WeightTrend? weightTrend(Ref ref, String animalId) {
-  final weights = ref.watch(weightsNotifierProvider).weightsByAnimal[animalId] ?? [];
+  final weights = ref.watch(weightsProvider).weightsByAnimal[animalId] ?? [];
 
   if (weights.length < 2) return null;
 
@@ -530,7 +561,7 @@ WeightTrend? weightTrend(Ref ref, String animalId) {
 
 @riverpod
 Weight? latestWeight(Ref ref, String animalId) {
-  final weights = ref.watch(weightsNotifierProvider).weightsByAnimal[animalId] ?? [];
+  final weights = ref.watch(weightsProvider).weightsByAnimal[animalId] ?? [];
 
   if (weights.isEmpty) return null;
 

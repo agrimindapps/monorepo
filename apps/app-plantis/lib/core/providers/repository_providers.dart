@@ -302,7 +302,4 @@ SyncQueueDriftService syncQueueDriftService(Ref ref) {
   return SyncQueueDriftService(ref.watch(syncQueueDriftRepositoryProvider));
 }
 
-@riverpod
-app_sync_queue.SyncQueue syncQueue(Ref ref) {
-  return app_sync_queue.SyncQueue(ref.watch(syncQueueDriftServiceProvider));
-}
+// syncQueue provider removed - uses local SyncQueue which conflicts with core's SyncQueue

@@ -24,7 +24,7 @@ void main() {
       final container = ProviderContainer();
       final state = container.read(tasksScheduleNotifierProvider);
 
-      expect(state, equals(TasksState.initial()));
+      expect(state, equals(TasksStateX.initial()));
     });
 
     test('updateTasksState updates internal state', () {

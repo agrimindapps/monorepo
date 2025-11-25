@@ -27,7 +27,7 @@ void main() {
       final container = ProviderContainer();
       final state = container.read(tasksQueryNotifierProvider);
 
-      expect(state, equals(TasksState.initial()));
+      expect(state, equals(TasksStateX.initial()));
     });
 
     test('searchTasks filters by query string', () {

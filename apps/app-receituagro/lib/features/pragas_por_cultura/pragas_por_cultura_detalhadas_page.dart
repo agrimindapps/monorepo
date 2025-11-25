@@ -6,7 +6,6 @@ import '../../core/widgets/modern_header_widget.dart';
 import '../../database/receituagro_database.dart';
 import '../pragas/widgets/praga_cultura_tab_bar_widget.dart';
 import 'presentation/providers/pragas_cultura_page_view_model.dart';
-import 'presentation/providers/pragas_cultura_providers.dart';
 import 'widgets/cultura_selector_widget.dart';
 import 'widgets/defensivos_bottom_sheet.dart';
 import 'widgets/estatisticas_cultura_widget.dart';
@@ -55,7 +54,7 @@ class _PragasPorCulturaDetalhadasPageState
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(pragasCulturaPageViewModelProvider);
+    final asyncState = ref.watch(pragasCulturaPageViewModelProvider);
     final viewModel = ref.read(pragasCulturaPageViewModelProvider.notifier);
     final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -68,11 +67,12 @@ class _PragasPorCulturaDetalhadasPageState
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1120),
-              child: Column(
-                children: [
-                  _buildModernHeader(state, isDark, viewModel),
-                  Expanded(
-                    child: CustomScrollView(
+              child: asyncState.when(
+                data: (state) => Column(
+                  children: [
+                    _buildModernHeader(state, isDark, viewModel),
+                    Expanded(
+                      child: CustomScrollView(
                       slivers: [
                         // Cultura Selector
                         SliverToBoxAdapter(
@@ -199,6 +199,40 @@ class _PragasPorCulturaDetalhadasPageState
                     ),
                   ),
                 ],
+              ),
+                loading: () => Column(
+                  children: [
+                    _buildModernHeader(
+                      const PragasCulturaPageState(),
+                      isDark,
+                      viewModel,
+                    ),
+                    const Expanded(
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                  ],
+                ),
+                error: (Object error, StackTrace stack) => Column(
+                  children: [
+                    _buildModernHeader(
+                      const PragasCulturaPageState(),
+                      isDark,
+                      viewModel,
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          'Erro: $error',
+                          style: TextStyle(
+                            color: theme.colorScheme.error,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

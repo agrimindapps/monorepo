@@ -69,3 +69,6 @@ class ThemeNotifier extends _$ThemeNotifier {
     }
   }
 }
+
+/// Alias for backwards compatibility
+const themeNotifierProvider = themeProvider;

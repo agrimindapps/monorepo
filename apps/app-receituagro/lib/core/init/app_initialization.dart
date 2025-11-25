@@ -37,7 +37,7 @@ class AppInitialization {
     } catch (e) {
       debugPrint('❌ [MAIN] Connectivity services initialization failed: $e');
       if (EnvironmentConfig.enableAnalytics) {
-        final crashlytics = container.read(crashlyticsRepositoryProvider);
+        final crashlytics = container.read(core.crashlyticsRepositoryProvider);
         await crashlytics.recordError(
           exception: e,
           stackTrace: StackTrace.current,
@@ -111,7 +111,7 @@ class AppInitialization {
     dataResult.fold(
       (error) {
         if (EnvironmentConfig.enableAnalytics) {
-          final crashlytics = container.read(crashlyticsRepositoryProvider);
+          final crashlytics = container.read(core.crashlyticsRepositoryProvider);
           crashlytics.recordError(
             exception: error,
             stackTrace: StackTrace.current,
@@ -168,7 +168,7 @@ class AppInitialization {
       );
       DiagnosticoLogger.debug('Stack trace do erro: ${StackTrace.current}');
       if (EnvironmentConfig.enableAnalytics) {
-        final crashlytics = container.read(crashlyticsRepositoryProvider);
+        final crashlytics = container.read(core.crashlyticsRepositoryProvider);
         await crashlytics.recordError(
           exception: e,
           stackTrace: StackTrace.current,
@@ -193,9 +193,9 @@ class AppInitialization {
   ) async {
     try {
       debugPrint('🚀 Initializing Firebase services...');
-      final analyticsRepository = container.read(analyticsRepositoryProvider);
-      final crashlyticsRepository = container.read(crashlyticsRepositoryProvider);
-      final performanceRepository = container.read(performanceRepositoryProvider);
+      final analyticsRepository = container.read(core.analyticsRepositoryProvider);
+      final crashlyticsRepository = container.read(core.crashlyticsRepositoryProvider);
+      final performanceRepository = container.read(core.performanceRepositoryProvider);
 
       if (EnvironmentConfig.enableAnalytics && !kIsWeb) {
         // Error handlers will be set in main.dart after this initialization
@@ -241,7 +241,7 @@ class AppInitialization {
     } catch (e, stackTrace) {
       debugPrint('❌ Error initializing Firebase services: $e');
       try {
-        final crashlyticsRepository = container.read(crashlyticsRepositoryProvider);
+        final crashlyticsRepository = container.read(core.crashlyticsRepositoryProvider);
         await crashlyticsRepository.recordError(
           exception: e,
           stackTrace: stackTrace,

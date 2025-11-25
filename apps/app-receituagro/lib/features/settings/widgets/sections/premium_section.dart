@@ -149,7 +149,7 @@ class PremiumSection extends ConsumerWidget {
                         const SizedBox(height: 6),
                         Consumer(
                           builder: (context, ref, child) {
-                            final subscriptionAsync = ref.watch(subscriptionProvider);
+                            final subscriptionAsync = ref.watch(subscriptionManagementProvider);
 
                             return subscriptionAsync.when(
                               data: (subscriptionState) {

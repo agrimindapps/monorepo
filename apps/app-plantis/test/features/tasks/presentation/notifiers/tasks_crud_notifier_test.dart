@@ -65,7 +65,7 @@ void main() {
       );
       final state = container.read(tasksCrudNotifierProvider);
 
-      expect(state, equals(TasksState.initial()));
+      expect(state, equals(TasksStateX.initial()));
     });
 
     test('addTask should add task successfully', () async {

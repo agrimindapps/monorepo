@@ -369,7 +369,7 @@ class SpacesNotifier extends _$SpacesNotifier {
 }
 
 @riverpod
-List<Space> spaces(Ref ref) {
+List<Space> allSpacesList(Ref ref) {
   final spacesState = ref.watch(spacesNotifierProvider);
   return spacesState.when(
     data: (state) => state.spaces,

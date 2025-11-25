@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart' hide Column, SyncQueue, SyncQueueItem;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../data/models/sync_queue_item.dart' as local;
-import '../sync/sync_queue.dart' as local;
-import 'repository_providers.dart';
+import '../data/models/sync_queue_item.dart';
+import '../sync/sync_queue.dart';
 
 part 'sync_status_notifier.g.dart';
 
@@ -18,7 +18,7 @@ enum SyncState {
 /// Sync Status State model for Riverpod
 class SyncStatusState {
   final SyncState currentState;
-  final List<local.SyncQueueItem> pendingItems;
+  final List<SyncQueueItem> pendingItems;
 
   const SyncStatusState({
     this.currentState = SyncState.idle,
@@ -27,7 +27,7 @@ class SyncStatusState {
 
   SyncStatusState copyWith({
     SyncState? currentState,
-    List<local.SyncQueueItem>? pendingItems,
+    List<SyncQueueItem>? pendingItems,
   }) {
     return SyncStatusState(
       currentState: currentState ?? this.currentState,
@@ -60,14 +60,13 @@ class SyncStatusState {
 @riverpod
 class SyncStatusNotifier extends _$SyncStatusNotifier {
   late final ConnectivityService _connectivityService;
-  late final local.SyncQueue _syncQueue;
+  SyncQueue? _syncQueue;
   StreamSubscription<ConnectivityType>? _networkSubscription;
-  StreamSubscription<List<local.SyncQueueItem>>? _queueSubscription;
+  StreamSubscription<List<SyncQueueItem>>? _queueSubscription;
 
   @override
   SyncStatusState build() {
-    _connectivityService = ref.read(connectivityServiceProvider);
-    _syncQueue = ref.read(syncQueueProvider);
+    _connectivityService = ConnectivityService.instance;
     ref.onDispose(() {
       _networkSubscription?.cancel();
       _queueSubscription?.cancel();
@@ -96,9 +95,14 @@ class SyncStatusNotifier extends _$SyncStatusNotifier {
         }
       },
     );
-    _queueSubscription = _syncQueue.queueStream.listen((items) {
-      final newState = items.isEmpty ? SyncState.idle : SyncState.syncing;
+  }
 
+  /// Set the sync queue (called from outside with proper type)
+  void setSyncQueue(SyncQueue queue) {
+    _syncQueue = queue;
+    _queueSubscription?.cancel();
+    _queueSubscription = queue.queueStream.listen((List<SyncQueueItem> items) {
+      final newState = items.isEmpty ? SyncState.idle : SyncState.syncing;
       state = state.copyWith(
         pendingItems: items,
         currentState: newState,
@@ -119,12 +123,12 @@ class SyncStatusNotifier extends _$SyncStatusNotifier {
 
     networkStatusResult.fold(
       (failure) => _updateSyncState(SyncState.error),
-      (networkStatus) {
+      (networkStatus) async {
         if (networkStatus == ConnectivityType.offline ||
             networkStatus == ConnectivityType.none) {
           _updateSyncState(SyncState.offline);
-        } else {
-          final pendingItems = _syncQueue.getPendingItems();
+        } else if (_syncQueue != null) {
+          final pendingItems = await _syncQueue!.getPendingItemsAsync();
 
           final newState =
               pendingItems.isEmpty ? SyncState.idle : SyncState.syncing;
@@ -149,14 +153,4 @@ class SyncStatusNotifier extends _$SyncStatusNotifier {
       _updateSyncState(SyncState.idle);
     }
   }
-}
-
-@riverpod
-ConnectivityService connectivityService(Ref ref) {
-  return ref.watch(connectivityServiceProvider);
-}
-
-@riverpod
-local.SyncQueue syncQueue(Ref ref) {
-  return ref.watch(syncQueueProvider);
 }

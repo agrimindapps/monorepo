@@ -3,7 +3,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/cultura_entity.dart';
 
 part 'culturas_state.freezed.dart';
-part 'culturas_state.g.dart';
 
 /// Estados da view de culturas
 enum CulturasViewState {

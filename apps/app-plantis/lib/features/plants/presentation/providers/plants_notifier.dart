@@ -14,12 +14,12 @@ import '../../domain/usecases/get_plant_by_id_usecase.dart';
 import '../../domain/usecases/get_plants_usecase.dart';
 import '../../domain/usecases/search_plants_usecase.dart';
 import '../../domain/usecases/update_plant_usecase.dart';
+// Use plants_state.dart PlantsState which is @freezed and preferred
 import 'plants_state.dart';
 
 export '../../domain/services/plants_care_service.dart' show CareStatus;
 export '../../domain/services/plants_sort_service.dart' show SortBy, ViewMode;
 export 'plants_state.dart';
-export '../../../../core/providers/plants_providers.dart' show plantsNotifierProvider, plantsProvider, PlantsState;
 
 import 'plants_providers.dart';
 
@@ -527,3 +527,6 @@ class PlantsNotifier extends _$PlantsNotifier {
     return filtered;
   }
 }
+
+/// Alias for backwards compatibility - use plantsProvider for new code
+const plantsNotifierProvider = plantsProvider;

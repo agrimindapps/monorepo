@@ -65,13 +65,13 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
-      ref.read(plantsNotifierProvider.notifier).refreshPlants();
+      ref.read(plantsProvider.notifier).refreshPlants();
     }
   }
 
   @override
   void onSearchChanged(String query) {
-    final notifier = ref.read(plantsNotifierProvider.notifier);
+    final notifier = ref.read(plantsProvider.notifier);
     if (query.trim().isEmpty) {
       notifier.clearSearch();
     } else {
@@ -81,12 +81,12 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
 
   @override
   void onClearSearch() {
-    ref.read(plantsNotifierProvider.notifier).clearSearch();
+    ref.read(plantsProvider.notifier).clearSearch();
   }
 
   @override
   void onViewModeChanged(AppBarViewMode mode) {
-    ref.read(plantsNotifierProvider.notifier).setViewMode(
+    ref.read(plantsProvider.notifier).setViewMode(
           mode == AppBarViewMode.grid ? ViewMode.grid : ViewMode.list,
         );
   }
@@ -105,11 +105,11 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
   }
 
   Future<void> _loadInitialData() async {
-    await ref.read(plantsNotifierProvider.notifier).loadPlants();
+    await ref.read(plantsProvider.notifier).loadPlants();
   }
 
   Future<void> _onRefresh() async {
-    final notifier = ref.read(plantsNotifierProvider.notifier);
+    final notifier = ref.read(plantsProvider.notifier);
     notifier.clearError();
     await _loadInitialData();
   }
@@ -140,7 +140,7 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
             onPressed: () async {
               Navigator.of(context).pop();
               await ref
-                  .read(plantsNotifierProvider.notifier)
+                  .read(plantsProvider.notifier)
                   .deletePlant(plant.id);
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
@@ -162,7 +162,7 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
   }
 
   Widget _buildAppBar() {
-    final state = ref.watch(plantsNotifierProvider);
+    final state = ref.watch(plantsProvider);
 
     return EnhancedPlantsAppBar(
       plantsCount: state.plants.length,
@@ -177,7 +177,7 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
   }
 
   Widget _buildContent() {
-    final state = ref.watch(plantsNotifierProvider);
+    final state = ref.watch(plantsProvider);
 
     if (state.isLoading && state.plants.isEmpty) {
       return const PlantsLoadingWidget();

@@ -24,7 +24,6 @@ import '../services/receita_agro_sync_service.dart';
 import '../services/promotional_notification_manager.dart';
 import '../sync/receituagro_drift_storage_adapter.dart';
 import '../sync/sync_operations.dart';
-import '../sync/sync_queue.dart';
 import '../../features/favoritos/presentation/providers/favoritos_providers.dart';
 import '../../features/sync/services/sync_coordinator.dart';
 
@@ -317,67 +316,70 @@ core.EnhancedAccountDeletionService enhancedAccountDeletionService(Ref ref) {
 
 // ========== SUBSCRIPTION/PREMIUM SERVICES ==========
 
-/// Provider do repositório de subscription
-@Riverpod(keepAlive: true)
-core.ISubscriptionRepository subscriptionRepository(Ref ref) {
-  return core.RevenueCatService();
-}
+// Temporarily disabled during riverpod_generator fix
+// /// Provider do repositório de subscription
+// @Riverpod(keepAlive: true)
+// core.ISubscriptionRepository subscriptionRepository(Ref ref) {
+//   return core.RevenueCatService();
+// }
 
-/// Provider do serviço de rating
-@Riverpod(keepAlive: true)
-core.IAppRatingRepository appRatingRepository(Ref ref) {
-  return core.AppRatingService(
-    appStoreId: '967785485', // ReceitaAgro iOS App Store ID
-    googlePlayId: 'br.com.agrimind.pragassoja', // Android Package ID
-    minDays: 3,
-    minLaunches: 5,
-    remindDays: 7,
-    remindLaunches: 10,
-  );
-}
+// /// Provider do serviço de rating
+// @Riverpod(keepAlive: true)
+// core.IAppRatingRepository appRatingRepository(Ref ref) {
+//   return core.AppRatingService(
+//     appStoreId: '967785485', // ReceitaAgro iOS App Store ID
+//     googlePlayId: 'br.com.agrimind.pragassoja', // Android Package ID
+//     minDays: 3,
+//     minLaunches: 5,
+//     remindDays: 7,
+//     remindLaunches: 10,
+//   );
+// }
 
-/// Provider do serviço de premium
-@Riverpod(keepAlive: true)
-ReceitaAgroPremiumService premiumService(Ref ref) {
-  final analytics = ref.watch(analyticsServiceProvider);
-  final cloudFunctions = ref.watch(cloudFunctionsServiceProvider);
-  final remoteConfig = ref.watch(remoteConfigServiceProvider);
-  final subscriptionRepo = ref.watch(subscriptionRepositoryProvider);
-
-  final service = ReceitaAgroPremiumService(
-    analytics: analytics,
-    cloudFunctions: cloudFunctions,
-    remoteConfig: remoteConfig,
-    subscriptionRepository: subscriptionRepo,
-  );
-
-  ReceitaAgroPremiumService.setInstance(service);
-  return service;
-}
+// Temporarily disabled during riverpod_generator fix
+// /// Provider do serviço de premium
+// @Riverpod(keepAlive: true)
+// ReceitaAgroPremiumService premiumService(Ref ref) {
+//   final analytics = ref.watch(analyticsServiceProvider);
+//   final cloudFunctions = ref.watch(cloudFunctionsServiceProvider);
+//   final remoteConfig = ref.watch(remoteConfigServiceProvider);
+//   final subscriptionRepo = ref.watch(subscriptionRepositoryProvider);
+//
+//   final service = ReceitaAgroPremiumService(
+//     analytics: analytics,
+//     cloudFunctions: cloudFunctions,
+//     remoteConfig: remoteConfig,
+//     subscriptionRepository: subscriptionRepo,
+//   );
+//
+//   ReceitaAgroPremiumService.setInstance(service);
+//   return service;
+// }
 
 // ========== NAVIGATION ANALYTICS ==========
 
-/// Provider do serviço de analytics de navegação
-@Riverpod(keepAlive: true)
-core.NavigationAnalyticsService navigationAnalyticsService(Ref ref) {
-  final firebaseAnalytics = ref.watch(firebaseAnalyticsServiceProvider);
-  return core.NavigationAnalyticsService(firebaseAnalytics);
-}
+// Temporarily disabled during riverpod_generator fix
+// /// Provider do serviço de analytics de navegação
+// @Riverpod(keepAlive: true)
+// core.NavigationAnalyticsService navigationAnalyticsService(Ref ref) {
+//   final firebaseAnalytics = ref.watch(firebaseAnalyticsServiceProvider);
+//   return core.NavigationAnalyticsService(firebaseAnalytics);
+// }
 
-/// Provider do serviço de configuração de navegação
-@Riverpod(keepAlive: true)
-core.NavigationConfigurationService navigationConfigurationService(Ref ref) {
-  return core.NavigationConfigurationService();
-}
+// /// Provider do serviço de configuração de navegação
+// @Riverpod(keepAlive: true)
+// core.NavigationConfigurationService navigationConfigurationService(Ref ref) {
+//   return core.NavigationConfigurationService();
+// }
 
-/// Firebase Firestore Provider
-@Riverpod(keepAlive: true)
-FirebaseFirestore firebaseFirestore(Ref ref) {
-  return FirebaseFirestore.instance;
-}
+// /// Firebase Firestore Provider
+// @Riverpod(keepAlive: true)
+// FirebaseFirestore firebaseFirestore(Ref ref) {
+//   return FirebaseFirestore.instance;
+// }
 
-/// Firebase Auth Provider
-@Riverpod(keepAlive: true)
-FirebaseAuth firebaseAuth(Ref ref) {
-  return FirebaseAuth.instance;
-}
+// /// Firebase Auth Provider
+// @Riverpod(keepAlive: true)
+// FirebaseAuth firebaseAuth(Ref ref) {
+//   return FirebaseAuth.instance;
+// }

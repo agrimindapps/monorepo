@@ -357,7 +357,7 @@ class NotificationsSettingsPage extends ConsumerWidget {
 
   void _showReminderTimeDialog(
     BuildContext context,
-    Ref ref,
+    WidgetRef ref,
   ) {
     final currentValue = ref.read(settingsNotifierProvider).maybeWhen(
           data: (state) => state.notificationSettings.reminderMinutesBefore,
@@ -391,7 +391,7 @@ class NotificationsSettingsPage extends ConsumerWidget {
 
   void _showDailySummaryTimeDialog(
     BuildContext context,
-    Ref ref,
+    WidgetRef ref,
   ) async {
     final TimeOfDay? time = await showTimePicker(
       context: context,
@@ -407,14 +407,14 @@ class NotificationsSettingsPage extends ConsumerWidget {
 
   Future<void> _showTestNotification(
     BuildContext context,
-    Ref ref,
+    WidgetRef ref,
   ) async {
     await ref.read(settingsNotifierProvider.notifier).sendTestNotification();
   }
 
   void _showClearNotificationsDialog(
     BuildContext context,
-    Ref ref,
+    WidgetRef ref,
   ) {
     showDialog<void>(
       context: context,

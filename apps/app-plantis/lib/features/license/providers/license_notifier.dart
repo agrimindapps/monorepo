@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'license_provider.dart';
 
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
@@ -349,41 +348,44 @@ LicenseService licenseService(Ref ref) {
 @riverpod
 Future<bool> canAddUnlimitedPlants(Ref ref) async {
   return ref
-      .read(licenseNotifierProvider.notifier)
+      .read(licenseProvider.notifier)
       .canAccessFeature(PremiumFeature.unlimitedPlants);
 }
 
 @riverpod
 Future<bool> canUseCustomReminders(Ref ref) async {
   return ref
-      .read(licenseNotifierProvider.notifier)
+      .read(licenseProvider.notifier)
       .canAccessFeature(PremiumFeature.customReminders);
 }
 
 @riverpod
 Future<bool> canUseAdvancedAnalytics(Ref ref) async {
   return ref
-      .read(licenseNotifierProvider.notifier)
+      .read(licenseProvider.notifier)
       .canAccessFeature(PremiumFeature.advancedAnalytics);
 }
 
 @riverpod
 Future<bool> canUseWeatherIntegration(Ref ref) async {
   return ref
-      .read(licenseNotifierProvider.notifier)
+      .read(licenseProvider.notifier)
       .canAccessFeature(PremiumFeature.weatherIntegration);
 }
 
 @riverpod
 Future<bool> canUsePlantIdentification(Ref ref) async {
   return ref
-      .read(licenseNotifierProvider.notifier)
+      .read(licenseProvider.notifier)
       .canAccessFeature(PremiumFeature.plantIdentification);
 }
 
 @riverpod
 Future<bool> canUseExpertSupport(Ref ref) async {
   return ref
-      .read(licenseNotifierProvider.notifier)
+      .read(licenseProvider.notifier)
       .canAccessFeature(PremiumFeature.expertSupport);
 }
+
+/// Alias for backward compatibility
+const licenseNotifierProvider = licenseProvider;

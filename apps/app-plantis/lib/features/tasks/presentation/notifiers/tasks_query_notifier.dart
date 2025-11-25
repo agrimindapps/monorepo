@@ -28,7 +28,7 @@ class TasksQueryNotifier extends _$TasksQueryNotifier {
   @override
   TasksState build() {
     _filterService = ref.read(taskFilterServiceProvider);
-    return TasksState.initial();
+    return TasksStateX.initial();
   }
 
   /// Loads tasks from parent notifier (delegated from TasksNotifier)

@@ -3,7 +3,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/defensivo_entity.dart';
 
 part 'defensivos_state.freezed.dart';
-part 'defensivos_state.g.dart';
 
 /// Estados da view de defensivos
 enum DefensivosViewState {

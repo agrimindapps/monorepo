@@ -22,7 +22,7 @@ part 'tasks_schedule_notifier.g.dart';
 class TasksScheduleNotifier extends _$TasksScheduleNotifier {
   @override
   TasksState build() {
-    return TasksState.initial();
+    return TasksStateX.initial();
   }
 
   /// Updates state with new tasks (called from parent notifier)

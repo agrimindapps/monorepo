@@ -727,7 +727,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             child: Consumer(
               builder: (context, ref, child) {
                 final subscriptionAsync = ref.watch(
-                  subscriptionProvider,
+                  subscriptionManagementProvider,
                 );
 
                 return subscriptionAsync.when(

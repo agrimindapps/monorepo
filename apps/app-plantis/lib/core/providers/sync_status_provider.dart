@@ -5,7 +5,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../data/models/sync_queue_item.dart';
-import 'repository_providers.dart';
 
 part 'sync_status_provider.freezed.dart';
 part 'sync_status_provider.g.dart';
@@ -48,25 +47,13 @@ extension SyncStatusModelX on SyncStatusModel {
 }
 
 // =============================================================================
-// DEPENDENCY PROVIDERS
-// =============================================================================
-
-/// Provider for ConnectivityService
-@riverpod
-core.ConnectivityService syncConnectivityService(
-    Ref ref) {
-  return ref.watch(connectivityServiceProvider);
-}
-
-// =============================================================================
 // MAIN SYNC STATUS NOTIFIER
 // =============================================================================
 
 /// Riverpod notifier for sync status state management
 @riverpod
-class SyncStatusNotifier extends _$SyncStatusNotifier {
+class SyncStatus extends _$SyncStatus {
   StreamSubscription<core.ConnectivityType>? _networkSubscription;
-  StreamSubscription<List<SyncQueueItem>>? _queueSubscription;
 
   @override
   SyncStatusModel build() {
@@ -75,16 +62,14 @@ class SyncStatusNotifier extends _$SyncStatusNotifier {
     // Cleanup on dispose
     ref.onDispose(() {
       _networkSubscription?.cancel();
-      _queueSubscription?.cancel();
     });
 
     return const SyncStatusModel();
   }
 
-  /// Initializes network and queue listeners
+  /// Initializes network listeners
   void _initializeListeners() {
-    final connectivityService = ref.read(syncConnectivityServiceProvider);
-    final queue = ref.read(syncQueueProvider);
+    final connectivityService = core.ConnectivityService.instance;
 
     // Listen to network changes
     _networkSubscription = connectivityService.networkStatusStream.listen(
@@ -106,18 +91,6 @@ class SyncStatusNotifier extends _$SyncStatusNotifier {
         }
       },
     );
-
-    // Listen to queue changes
-    _queueSubscription = queue.queueStream.listen((List<SyncQueueItem> items) {
-      final pendingItems = items.where((item) => !item.isSynced).toList();
-      state = state.copyWith(pendingItems: pendingItems);
-
-      if (pendingItems.isEmpty) {
-        _updateSyncState(SyncStatusState.idle);
-      } else {
-        _updateSyncState(SyncStatusState.syncing);
-      }
-    });
   }
 
   /// Updates sync state if different from current
@@ -129,7 +102,7 @@ class SyncStatusNotifier extends _$SyncStatusNotifier {
 
   /// Manually checks current sync status
   Future<void> checkSyncStatus() async {
-    final connectivityService = ref.read(syncConnectivityServiceProvider);
+    final connectivityService = core.ConnectivityService.instance;
 
     final networkStatusResult =
         await connectivityService.getCurrentNetworkStatus();
@@ -141,8 +114,6 @@ class SyncStatusNotifier extends _$SyncStatusNotifier {
             networkStatus == core.ConnectivityType.none) {
           _updateSyncState(SyncStatusState.offline);
         } else {
-          // For manual check, we can't easily get pending items without async
-          // Just update to idle for now
           _updateSyncState(SyncStatusState.idle);
         }
       },

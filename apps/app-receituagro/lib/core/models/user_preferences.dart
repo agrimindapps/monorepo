@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'user_preferences.freezed.dart';
+part 'user_preferences.g.dart';
 
 /// Modelo de dados para preferências simples do usuário
 ///

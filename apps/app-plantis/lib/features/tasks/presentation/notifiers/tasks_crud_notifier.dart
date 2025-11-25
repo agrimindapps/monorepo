@@ -45,7 +45,7 @@ class TasksCrudNotifier extends _$TasksCrudNotifier {
     _ownershipValidator = ref.read(taskOwnershipValidatorProvider);
     _filterService = ref.read(taskFilterServiceProvider);
 
-    return TasksState.initial();
+    return TasksStateX.initial();
   }
 
   /// Adds a new task with offline support

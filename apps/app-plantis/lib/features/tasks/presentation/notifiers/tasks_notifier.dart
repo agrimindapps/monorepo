@@ -76,7 +76,7 @@ class TasksNotifier extends _$TasksNotifier {
           debugPrint(
             '❌ TasksNotifier: Failed to load initial tasks: ${failure.message}',
           );
-          return TasksState.error(failure.userMessage);
+          return TasksStateX.error(failure.userMessage);
         },
         (tasks) {
           debugPrint('✅ TasksNotifier: Loaded ${tasks.length} tasks');
@@ -92,7 +92,7 @@ class TasksNotifier extends _$TasksNotifier {
       );
     } catch (e) {
       debugPrint('❌ TasksNotifier: Error loading initial tasks: $e');
-      return TasksState.error('Erro ao carregar tarefas: $e');
+      return TasksStateX.error('Erro ao carregar tarefas: $e');
     }
   }
 
@@ -110,7 +110,7 @@ class TasksNotifier extends _$TasksNotifier {
           '🔄 TasksNotifier: No user but auth initialized - clearing tasks',
         );
         state = AsyncValue.data(
-          TasksState.initial().copyWith(
+          TasksStateX.initial().copyWith(
             allTasks: <task_entity.Task>[],
             filteredTasks: <task_entity.Task>[],
             errorMessage: null,
@@ -132,7 +132,7 @@ class TasksNotifier extends _$TasksNotifier {
   }
 
   Future<void> _loadTasksOperation() async {
-    final currentState = state.value ?? TasksState.initial();
+    final currentState = state.value ?? TasksStateX.initial();
     final shouldShowLoading = currentState.allTasks.isEmpty;
 
     if (shouldShowLoading) {
@@ -266,7 +266,7 @@ class TasksNotifier extends _$TasksNotifier {
   /// Helper: Get task with ownership validation
   Future<task_entity.Task> _getTaskWithOwnershipValidation(
       String taskId) async {
-    final currentState = state.value ?? TasksState.initial();
+    final currentState = state.value ?? TasksStateX.initial();
 
     // 1. Try to find in local state first (fastest)
     final localTask = currentState.allTasks
@@ -305,7 +305,7 @@ class TasksNotifier extends _$TasksNotifier {
 
   /// Helper: Add task to current state
   void _addTaskToState(task_entity.Task task) {
-    final currentState = state.value ?? TasksState.initial();
+    final currentState = state.value ?? TasksStateX.initial();
     final updatedTasks = List<task_entity.Task>.from(currentState.allTasks)
       ..add(task);
     final filteredTasks = _applyCurrentFilters(updatedTasks);
@@ -321,7 +321,7 @@ class TasksNotifier extends _$TasksNotifier {
 
   /// Helper: Update task in state
   void _updateTaskInState(task_entity.Task task) {
-    final currentState = state.value ?? TasksState.initial();
+    final currentState = state.value ?? TasksStateX.initial();
     final updatedTasks = currentState.allTasks
         .whereType<task_entity.Task>()
         .map((t) => t.id == task.id ? task : t)
@@ -355,7 +355,7 @@ class TasksNotifier extends _$TasksNotifier {
   List<task_entity.Task> _applyCurrentFilters(
     List<task_entity.Task> tasks,
   ) {
-    final currentState = state.value ?? TasksState.initial();
+    final currentState = state.value ?? TasksStateX.initial();
     return _filterService.applyFilters(
       tasks,
       currentState.currentFilter,
@@ -374,7 +374,7 @@ class TasksNotifier extends _$TasksNotifier {
 
   /// Searches tasks by query string
   void searchTasks(String query) {
-    final currentState = state.value ?? TasksState.initial();
+    final currentState = state.value ?? TasksStateX.initial();
     if (currentState.allTasks.isEmpty) return;
 
     _updateState(
@@ -397,7 +397,7 @@ class TasksNotifier extends _$TasksNotifier {
     TasksFilterType filter, {
     String? plantId,
   }) {
-    final currentState = state.value ?? TasksState.initial();
+    final currentState = state.value ?? TasksStateX.initial();
     if (currentState.allTasks.isEmpty) return;
 
     _updateState(
@@ -422,7 +422,7 @@ class TasksNotifier extends _$TasksNotifier {
     List<task_entity.TaskPriority>? priorities,
     String? plantId,
   }) {
-    final currentState = state.value ?? TasksState.initial();
+    final currentState = state.value ?? TasksStateX.initial();
     if (currentState.allTasks.isEmpty) return;
 
     final newTaskTypes = taskTypes ?? currentState.selectedTaskTypes;
@@ -532,7 +532,7 @@ class TasksNotifier extends _$TasksNotifier {
 
   /// Helper: Update state
   void _updateState(TasksState Function(TasksState current) update) {
-    final currentState = state.value ?? TasksState.initial();
+    final currentState = state.value ?? TasksStateX.initial();
     state = AsyncValue.data(update(currentState));
   }
 

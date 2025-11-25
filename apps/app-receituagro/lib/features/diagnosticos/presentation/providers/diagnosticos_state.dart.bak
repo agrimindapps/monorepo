@@ -3,7 +3,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 
 part 'diagnosticos_state.freezed.dart';
-part 'diagnosticos_state.g.dart';
 
 /// Estados da view de diagnósticos
 enum DiagnosticosViewState { initial, loading, loaded, empty, error }

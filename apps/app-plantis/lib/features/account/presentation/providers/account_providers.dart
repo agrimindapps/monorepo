@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Column, DeleteAccountUseCase;
+import 'package:core/core.dart' hide Column, DeleteAccountUseCase, LogoutUseCase;
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 
 import '../../../../core/services/data_cleaner_service.dart';
@@ -14,7 +14,7 @@ import '../../domain/repositories/account_repository.dart';
 import '../../domain/usecases/clear_data_usecase.dart';
 import '../../domain/usecases/delete_account_usecase.dart';
 import '../../domain/usecases/get_account_info_usecase.dart';
-import '../../domain/usecases/logout_usecase.dart' as account_logout;
+import '../../domain/usecases/logout_usecase.dart';
 
 import '../../../../core/providers/repository_providers.dart';
 import '../../../../core/providers/core_di_providers.dart';
@@ -100,9 +100,9 @@ GetAccountInfoUseCase getAccountInfoUseCase(Ref ref) {
 }
 
 @riverpod
-account_logout.LogoutUseCase logoutUseCase(Ref ref) {
+LogoutUseCase accountLogoutUseCase(Ref ref) {
   final repository = ref.watch(accountRepositoryProvider);
-  return account_logout.LogoutUseCase(repository);
+  return LogoutUseCase(repository);
 }
 
 @riverpod
@@ -155,7 +155,7 @@ class LogoutNotifier extends _$LogoutNotifier {
   Future<Either<Failure, void>> logout() async {
     state = const AsyncLoading();
 
-    final useCase = ref.read(logoutUseCaseProvider);
+    final useCase = ref.read(accountLogoutUseCaseProvider);
     final result = await useCase(const NoParams());
 
     if (result.isRight()) {

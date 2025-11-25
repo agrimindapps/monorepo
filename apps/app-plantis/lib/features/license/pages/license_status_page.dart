@@ -6,7 +6,6 @@ import '../../../core/theme/plantis_colors.dart';
 import '../../../shared/widgets/base_page_scaffold.dart';
 import '../../../shared/widgets/responsive_layout.dart';
 import '../providers/license_notifier.dart';
-import '../providers/license_provider.dart';
 
 /// Page to display license status and management options
 class LicenseStatusPage extends ConsumerWidget {

@@ -74,25 +74,3 @@ IPragasCulturaDataService pragasCulturaDataService(Ref ref) {
 PragasCulturaErrorMessageService pragasCulturaErrorService(Ref ref) {
   return PragasCulturaErrorMessageService();
 }
-
-/// StateNotifierProvider para o ViewModel
-final pragasCulturaPageViewModelProvider =
-    StateNotifierProvider<PragasCulturaPageViewModel, PragasCulturaPageState>((
-      ref,
-    ) {
-      final queryService = ref.watch(pragasCulturaQueryServiceProvider);
-      final sortService = ref.watch(pragasCulturaSortServiceProvider);
-      final statisticsService = ref.watch(
-        pragasCulturaStatisticsServiceProvider,
-      );
-      final dataService = ref.watch(pragasCulturaDataServiceProvider);
-      final errorService = ref.watch(pragasCulturaErrorServiceProvider);
-
-      return PragasCulturaPageViewModel(
-        dataService: dataService,
-        queryService: queryService,
-        sortService: sortService,
-        statisticsService: statisticsService,
-        errorService: errorService,
-      );
-    });

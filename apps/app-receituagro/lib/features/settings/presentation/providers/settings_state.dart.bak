@@ -5,7 +5,6 @@ import '../../../../core/services/device_identity_service.dart';
 import '../../domain/entities/user_settings_entity.dart';
 
 part 'settings_state.freezed.dart';
-part 'settings_state.g.dart';
 
 /// Settings view states
 enum SettingsViewState {

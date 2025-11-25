@@ -749,18 +749,3 @@ bool isInitialized(Ref ref) {
 /// Alias for backwards compatibility with existing code
 /// Use authProvider instead in new code
 const authNotifierProvider = authProvider;
-
-/// Device management use case providers aliases
-@riverpod
-Future<device_validation.ValidateDeviceUseCase> validateDeviceUseCaseProviderFn(
-  Ref ref,
-) async {
-  return ref.watch(device_management_providers.validateDeviceUseCaseProvider.future);
-}
-
-@riverpod
-Future<device_revocation.RevokeDeviceUseCase> revokeDeviceUseCaseProviderFn(
-  Ref ref,
-) async {
-  return ref.watch(device_management_providers.revokeDeviceUseCaseProvider.future);
-}

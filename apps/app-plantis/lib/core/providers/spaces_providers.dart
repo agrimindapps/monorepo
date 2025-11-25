@@ -39,6 +39,12 @@ class SpacesState {
   }
   int get spacesCount => allSpaces.length;
 
+  /// Alias for backwards compatibility
+  List<Space> get spaces => allSpaces;
+
+  /// Always false since AsyncNotifier handles loading state
+  bool get isLoading => false;
+
   bool get hasSpaces => allSpaces.isNotEmpty;
   Space? findSpaceByName(String name) {
     try {

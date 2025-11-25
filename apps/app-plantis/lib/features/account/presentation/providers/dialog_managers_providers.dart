@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../managers/clear_data_dialog_manager.dart';
 import '../managers/logout_dialog_manager.dart';
+import '../../domain/usecases/logout_usecase.dart';
 import 'account_providers.dart';
 
 part 'dialog_managers_providers.g.dart';
@@ -26,6 +27,7 @@ ClearDataDialogManager clearDataDialogManager(Ref ref) {
 
 @riverpod
 LogoutDialogManager logoutDialogManager(Ref ref) {
-  final logoutUseCase = ref.watch(logoutUseCaseProvider);
+  final repository = ref.watch(accountRepositoryProvider);
+  final logoutUseCase = LogoutUseCase(repository);
   return LogoutDialogManager(logoutUseCase: logoutUseCase);
 }

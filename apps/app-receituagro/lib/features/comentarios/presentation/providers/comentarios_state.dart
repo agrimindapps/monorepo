@@ -4,6 +4,7 @@ import '../../../../core/services/error_handler_service.dart';
 import '../../domain/entities/comentario_entity.dart';
 
 part 'comentarios_state.freezed.dart';
+part 'comentarios_state.g.dart';
 
 /// Represents different types of loading operations
 enum LoadingType {

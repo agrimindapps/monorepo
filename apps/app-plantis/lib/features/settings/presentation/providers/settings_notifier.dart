@@ -606,7 +606,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 }
 
 @riverpod
-SettingsEntity settings(Ref ref) {
+SettingsEntity currentSettingsValue(Ref ref) {
   return ref
       .watch(settingsNotifierProvider)
       .when(

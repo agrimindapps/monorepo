@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'app_settings.freezed.dart';
+part 'app_settings.g.dart';
 
 /// Modelo de dados para configurações do aplicativo
 ///

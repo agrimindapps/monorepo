@@ -3,9 +3,7 @@
 // ignore_for_file: unused_field, cancel_subscriptions
 import 'dart:async';
 
-import 'package:core/core.dart' hide SyncQueue, SyncQueueItem, Column;
-
-import 'sync_queue.dart';
+import 'package:core/core.dart' hide SyncQueueItem, Column;
 
 /// Stub implementation of SyncOperations during Drift migration
 /// Full implementation will be restored after migration is complete

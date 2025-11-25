@@ -36,15 +36,16 @@ class AppInitialization {
       );
     } catch (e) {
       debugPrint('❌ [MAIN] Connectivity services initialization failed: $e');
-      if (EnvironmentConfig.enableAnalytics) {
-        final crashlytics = container.read(core.crashlyticsRepositoryProvider);
-        await crashlytics.recordError(
-          exception: e,
-          stackTrace: StackTrace.current,
-          reason: 'Failed to initialize connectivity services',
-          fatal: false,
-        );
-      }
+      // if (EnvironmentConfig.enableAnalytics) {
+      //   // TODO: Get crashlyticsRepositoryProvider from core package
+      //   // final crashlytics = container.read(core.crashlyticsRepositoryProvider);
+      //   await crashlytics.recordError(
+      //     exception: e,
+      //     stackTrace: StackTrace.current,
+      //     reason: 'Failed to initialize connectivity services',
+      //     fatal: false,
+      //   );
+      // }
     }
   }
 
@@ -111,7 +112,8 @@ class AppInitialization {
     dataResult.fold(
       (error) {
         if (EnvironmentConfig.enableAnalytics) {
-          final crashlytics = container.read(core.crashlyticsRepositoryProvider);
+          // TODO: Get crashlyticsRepositoryProvider from core package
+        // final crashlytics = container.read(core.crashlyticsRepositoryProvider);
           crashlytics.recordError(
             exception: error,
             stackTrace: StackTrace.current,
@@ -168,7 +170,8 @@ class AppInitialization {
       );
       DiagnosticoLogger.debug('Stack trace do erro: ${StackTrace.current}');
       if (EnvironmentConfig.enableAnalytics) {
-        final crashlytics = container.read(core.crashlyticsRepositoryProvider);
+        // TODO: Get crashlyticsRepositoryProvider from core package
+        // final crashlytics = container.read(core.crashlyticsRepositoryProvider);
         await crashlytics.recordError(
           exception: e,
           stackTrace: StackTrace.current,
@@ -188,66 +191,68 @@ class AppInitialization {
   }
 
   /// Initialize Firebase services
+  /// TODO: Migrate to use core package providers
   static Future<void> initializeFirebaseServices(
     ProviderContainer container,
   ) async {
-    try {
-      debugPrint('🚀 Initializing Firebase services...');
-      final analyticsRepository = container.read(core.analyticsRepositoryProvider);
-      final crashlyticsRepository = container.read(core.crashlyticsRepositoryProvider);
-      final performanceRepository = container.read(core.performanceRepositoryProvider);
-
-      if (EnvironmentConfig.enableAnalytics && !kIsWeb) {
-        // Error handlers will be set in main.dart after this initialization
-      }
-
-      await crashlyticsRepository.setCustomKey(
-        key: 'app_name',
-        value: 'ReceitaAgro',
-      );
-      await crashlyticsRepository.setCustomKey(
-        key: 'environment',
-        value: EnvironmentConfig.enableAnalytics ? 'production' : 'development',
-      );
-
-      if (!kIsWeb) {
-        await performanceRepository.startPerformanceTracking(
-          config: const PerformanceConfig(
-            enableFpsMonitoring: true,
-            enableMemoryMonitoring: true,
-            enableCpuMonitoring: false,
-            enableFirebaseIntegration: true,
-          ),
-        );
-        await performanceRepository.markAppStarted();
-      }
-
-      await analyticsRepository.logEvent(
-        'app_initialized',
-        parameters: {
-          'platform': kIsWeb ? 'web' : 'mobile',
-          'environment': EnvironmentConfig.enableAnalytics
-              ? 'production'
-              : 'development',
-          'timestamp': DateTime.now().millisecondsSinceEpoch,
-        },
-      );
-
-      await crashlyticsRepository.log(
-        'ReceitaAgro app initialized successfully',
-      );
-
-      debugPrint('✅ Firebase services initialized successfully');
-    } catch (e, stackTrace) {
-      debugPrint('❌ Error initializing Firebase services: $e');
-      try {
-        final crashlyticsRepository = container.read(core.crashlyticsRepositoryProvider);
-        await crashlyticsRepository.recordError(
-          exception: e,
-          stackTrace: stackTrace,
-          reason: 'Firebase services initialization failed',
-        );
-      } catch (_) {}
-    }
+    // Temporarily disabled - requires migration to core package providers
+    // try {
+    //   debugPrint('🚀 Initializing Firebase services...');
+    //   final analyticsRepository = container.read(core.analyticsRepositoryProvider);
+    //   final crashlyticsRepository = container.read(core.crashlyticsRepositoryProvider);
+    //   final performanceRepository = container.read(core.performanceRepositoryProvider);
+    //
+    //   if (EnvironmentConfig.enableAnalytics && !kIsWeb) {
+    //     // Error handlers will be set in main.dart after this initialization
+    //   }
+    //
+    //   await crashlyticsRepository.setCustomKey(
+    //     key: 'app_name',
+    //     value: 'ReceitaAgro',
+    //   );
+    //   await crashlyticsRepository.setCustomKey(
+    //     key: 'environment',
+    //     value: EnvironmentConfig.enableAnalytics ? 'production' : 'development',
+    //   );
+    //
+    //   if (!kIsWeb) {
+    //     await performanceRepository.startPerformanceTracking(
+    //       config: const PerformanceConfig(
+    //         enableFpsMonitoring: true,
+    //         enableMemoryMonitoring: true,
+    //         enableCpuMonitoring: false,
+    //         enableFirebaseIntegration: true,
+    //       ),
+    //     );
+    //     await performanceRepository.markAppStarted();
+    //   }
+    //
+    //   await analyticsRepository.logEvent(
+    //     'app_initialized',
+    //     parameters: {
+    //       'platform': kIsWeb ? 'web' : 'mobile',
+    //       'environment': EnvironmentConfig.enableAnalytics
+    //           ? 'production'
+    //           : 'development',
+    //       'timestamp': DateTime.now().millisecondsSinceEpoch,
+    //     },
+    //   );
+    //
+    //   await crashlyticsRepository.log(
+    //     'ReceitaAgro app initialized successfully',
+    //   );
+    //
+    //   debugPrint('✅ Firebase services initialized successfully');
+    // } catch (e, stackTrace) {
+    //   debugPrint('❌ Error initializing Firebase services: $e');
+    //   try {
+    //     final crashlyticsRepository = container.read(core.crashlyticsRepositoryProvider);
+    //     await crashlyticsRepository.recordError(
+    //       exception: e,
+    //       stackTrace: stackTrace,
+    //       reason: 'Firebase services initialization failed',
+    //     );
+    //   } catch (_) {}
+    // }
   }
 }

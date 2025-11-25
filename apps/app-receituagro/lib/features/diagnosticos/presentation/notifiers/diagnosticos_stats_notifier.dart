@@ -1,27 +1,29 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/services/failure_message_service.dart';
 import '../../domain/services/metadata/i_diagnosticos_metadata_service.dart';
 import '../../domain/services/stats/i_diagnosticos_stats_service.dart';
-import '../providers/diagnosticos_providers.dart' as diagnosticosProviders;
+import '../providers/diagnosticos_providers.dart' as providers;
 import '../state/diagnosticos_stats_state.dart';
+
+part 'diagnosticos_stats_notifier.g.dart';
 
 /// Notifier para gerenciamento de estatísticas de diagnósticos
 /// Responsabilidade: Handle statistics
 /// Métodos: loadStatistics(), refresh(), getStatistics()
-class DiagnosticosStatsNotifier extends StateNotifier<DiagnosticosStatsState> {
-  DiagnosticosStatsNotifier({
-    required IDiagnosticosStatsService statsService,
-    required IDiagnosticosMetadataService metadataService,
-    required FailureMessageService failureMessageService,
-  })  : _statsService = statsService,
-        _metadataService = metadataService,
-        _failureMessageService = failureMessageService,
-        super(DiagnosticosStatsState.initial());
+@riverpod
+class DiagnosticosStatsNotifier extends _$DiagnosticosStatsNotifier {
+  late final IDiagnosticosStatsService _statsService;
+  late final IDiagnosticosMetadataService _metadataService;
+  late final FailureMessageService _failureMessageService;
 
-  final IDiagnosticosStatsService _statsService;
-  final IDiagnosticosMetadataService _metadataService;
-  final FailureMessageService _failureMessageService;
+  @override
+  DiagnosticosStatsState build() {
+    _statsService = ref.watch(providers.diagnosticosStatsServiceProvider);
+    _metadataService = ref.watch(providers.diagnosticosMetadataServiceProvider);
+    _failureMessageService = ref.watch(providers.failureMessageServiceProvider);
+    return DiagnosticosStatsState.initial();
+  }
 
   /// Carrega estatísticas dos diagnósticos
   Future<void> loadStatistics() async {
@@ -90,16 +92,3 @@ class DiagnosticosStatsNotifier extends StateNotifier<DiagnosticosStatsState> {
     ]);
   }
 }
-
-/// Provider para DiagnosticosStatsNotifier
-final diagnosticosStatsNotifierProvider =
-    StateNotifierProvider<DiagnosticosStatsNotifier, DiagnosticosStatsState>(
-  (ref) => DiagnosticosStatsNotifier(
-    statsService:
-        ref.watch(diagnosticosProviders.diagnosticosStatsServiceProvider),
-    metadataService:
-        ref.watch(diagnosticosProviders.diagnosticosMetadataServiceProvider),
-    failureMessageService:
-        ref.watch(diagnosticosProviders.failureMessageServiceProvider),
-  ),
-);

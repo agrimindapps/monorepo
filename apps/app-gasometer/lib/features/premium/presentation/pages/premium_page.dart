@@ -65,7 +65,7 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
 
   @override
   Widget build(BuildContext context) {
-    final premiumAsync = ref.watch(premiumNotifierProvider);
+    final premiumAsync = ref.watch(premiumProvider);
     final bool isPremium = premiumAsync.when(
       data: (premiumState) => premiumState.isPremium,
       loading: () => false,

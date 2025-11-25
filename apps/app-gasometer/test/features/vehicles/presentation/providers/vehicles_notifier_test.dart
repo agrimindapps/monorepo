@@ -112,7 +112,7 @@ void main() {
       final container = createContainer();
 
       // Act
-      final result = await container.read(vehiclesNotifierProvider.future);
+      final result = await container.read(vehiclesProvider.future);
 
       // Assert
       expect(result, [tVehicle]);
@@ -128,15 +128,15 @@ void main() {
 
       final container = createContainer();
       // Initialize
-      await container.read(vehiclesNotifierProvider.future);
+      await container.read(vehiclesProvider.future);
 
       // Act
       await container
-          .read(vehiclesNotifierProvider.notifier)
+          .read(vehiclesProvider.notifier)
           .addVehicle(tVehicle);
 
       // Assert
-      final state = await container.read(vehiclesNotifierProvider.future);
+      final state = await container.read(vehiclesProvider.future);
       expect(state, contains(tVehicle));
       verify(() => mockAddVehicle.call(any())).called(1);
     });
@@ -150,15 +150,15 @@ void main() {
 
       final container = createContainer();
       // Initialize
-      await container.read(vehiclesNotifierProvider.future);
+      await container.read(vehiclesProvider.future);
 
       // Act
       await container
-          .read(vehiclesNotifierProvider.notifier)
+          .read(vehiclesProvider.notifier)
           .deleteVehicle(tVehicle.id);
 
       // Assert
-      final state = await container.read(vehiclesNotifierProvider.future);
+      final state = await container.read(vehiclesProvider.future);
       expect(state, isEmpty);
       verify(() => mockDeleteVehicle.call(any())).called(1);
     });

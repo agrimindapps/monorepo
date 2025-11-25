@@ -3,11 +3,10 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 
 part 'diagnosticos_search_state.freezed.dart';
-part 'diagnosticos_search_state.g.dart';
 
 /// State para gerenciamento de busca de diagnósticos
 @freezed
-class DiagnosticosSearchState with _$DiagnosticosSearchState {
+sealed class DiagnosticosSearchState with _$DiagnosticosSearchState {
   const DiagnosticosSearchState._();
 
   const factory DiagnosticosSearchState({

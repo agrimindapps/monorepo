@@ -1,11 +1,20 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'bottom_navigation.g.dart';
 
 /// Enum para as tabs da navegação principal
 enum MainTab { home, animals, calculators, reminders, profile }
 
 /// Provider para gerenciar o estado da tab atual
-final currentTabProvider = StateProvider<MainTab>((ref) => MainTab.home);
+@riverpod
+class CurrentTab extends _$CurrentTab {
+  @override
+  MainTab build() => MainTab.home;
+
+  void set(MainTab tab) => state = tab;
+}
 
 /// Widget de navegação inferior principal do app
 class MainBottomNavigation extends ConsumerWidget {
@@ -51,7 +60,7 @@ class MainBottomNavigation extends ConsumerWidget {
                         tab: tab,
                         isSelected: isSelected,
                         onTap: () {
-                          ref.read(currentTabProvider.notifier).state = tab;
+                          ref.read(currentTabProvider.notifier).set(tab);
                           _navigateToTab(context, tab);
                         },
                       ),

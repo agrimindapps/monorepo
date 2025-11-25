@@ -15,7 +15,7 @@ class PremiumDevControls extends core.ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    final premiumAsync = ref.watch(premiumNotifierProvider);
+    final premiumAsync = ref.watch(premiumProvider);
 
     return premiumAsync.when(
       data: (state) {
@@ -232,7 +232,7 @@ class PremiumDevControls extends core.ConsumerWidget {
     int days,
   ) async {
     try {
-      final notifier = ref.read(premiumNotifierProvider.notifier);
+      final notifier = ref.read(premiumProvider.notifier);
       await notifier.generateLocalLicense(days: days);
       if (!context.mounted) return;
       
@@ -285,7 +285,7 @@ class PremiumDevControls extends core.ConsumerWidget {
     if (confirmed != true) return;
 
     try {
-      final notifier = ref.read(premiumNotifierProvider.notifier);
+      final notifier = ref.read(premiumProvider.notifier);
       await notifier.revokeLocalLicense();
       if (!context.mounted) return;
       
@@ -312,7 +312,7 @@ class PremiumDevControls extends core.ConsumerWidget {
     core.WidgetRef ref,
   ) async {
     try {
-      final notifier = ref.read(premiumNotifierProvider.notifier);
+      final notifier = ref.read(premiumProvider.notifier);
       await notifier.refreshPremiumStatus();
       if (!context.mounted) return;
       
@@ -339,7 +339,7 @@ class PremiumDevControls extends core.ConsumerWidget {
     core.WidgetRef ref,
   ) async {
     try {
-      final notifier = ref.read(premiumNotifierProvider.notifier);
+      final notifier = ref.read(premiumProvider.notifier);
       final success = await notifier.restorePurchases();
       if (!context.mounted) return;
       

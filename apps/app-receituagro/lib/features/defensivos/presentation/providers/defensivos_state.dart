@@ -3,7 +3,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/defensivo_entity.dart';
 
 part 'defensivos_state.freezed.dart';
-part 'defensivos_state.g.dart';
 
 /// Estados da view de defensivos
 enum DefensivosViewState {
@@ -18,7 +17,7 @@ enum DefensivosViewState {
 ///
 /// Migrado para @freezed para type-safety, imutabilidade e código gerado
 @freezed
-class DefensivosState with _$DefensivosState {
+sealed class DefensivosState with _$DefensivosState {
   const DefensivosState._();
 
   const factory DefensivosState({

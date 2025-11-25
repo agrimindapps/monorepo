@@ -21,7 +21,7 @@ class PremiumSyncStatusWidget extends core.ConsumerWidget {
 
   @override
   Widget build(BuildContext context, core.WidgetRef ref) {
-    final premiumAsync = ref.watch(premiumNotifierProvider);
+    final premiumAsync = ref.watch(premiumProvider);
 
     return premiumAsync.when(
       data: (state) {
@@ -168,7 +168,7 @@ class PremiumSyncStatusWidget extends core.ConsumerWidget {
   }
 
   Widget _buildSyncStatusStream(BuildContext context, core.WidgetRef ref) {
-    final notifier = ref.read(premiumNotifierProvider.notifier);
+    final notifier = ref.read(premiumProvider.notifier);
     return StreamBuilder<String>(
       stream: notifier.syncStatus,
       builder: (context, snapshot) {
@@ -213,7 +213,7 @@ class PremiumSyncStatusWidget extends core.ConsumerWidget {
     core.WidgetRef ref,
     PremiumNotifierState state,
   ) {
-    final notifier = ref.read(premiumNotifierProvider.notifier);
+    final notifier = ref.read(premiumProvider.notifier);
     final isLoading = state.isLoadingProducts || state.isProcessingPurchase;
 
     return SizedBox(
@@ -263,11 +263,11 @@ class PremiumSyncIndicator extends core.ConsumerWidget {
 
   @override
   Widget build(BuildContext context, core.WidgetRef ref) {
-    final premiumAsync = ref.watch(premiumNotifierProvider);
+    final premiumAsync = ref.watch(premiumProvider);
 
     return premiumAsync.when(
       data: (state) {
-        final notifier = ref.read(premiumNotifierProvider.notifier);
+        final notifier = ref.read(premiumProvider.notifier);
 
         return GestureDetector(
           onTap: () {
@@ -317,7 +317,7 @@ class PremiumSyncIndicator extends core.ConsumerWidget {
   }
 
   void _showSyncDialog(BuildContext context, core.WidgetRef ref) {
-    final notifier = ref.read(premiumNotifierProvider.notifier);
+    final notifier = ref.read(premiumProvider.notifier);
 
     showDialog<void>(
       context: context,

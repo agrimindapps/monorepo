@@ -71,7 +71,7 @@ class _EnhancedVehiclesPageState extends ConsumerState<EnhancedVehiclesPage> {
     );
 
     if (result == true && mounted) {
-      await ref.read(vehiclesNotifierProvider.notifier).refresh();
+      await ref.read(vehiclesProvider.notifier).refresh();
     }
   }
 }
@@ -163,7 +163,7 @@ class _AddVehicleButton extends ConsumerWidget {
     );
 
     if (result == true && context.mounted) {
-      await ref.read(vehiclesNotifierProvider.notifier).refresh();
+      await ref.read(vehiclesProvider.notifier).refresh();
     }
   }
 }
@@ -172,7 +172,7 @@ class _AddVehicleButton extends ConsumerWidget {
 class _ResponsiveVehiclesList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+    final vehiclesAsync = ref.watch(vehiclesProvider);
 
     return vehiclesAsync.when(
       data: (vehicles) {
@@ -196,7 +196,7 @@ class _ResponsiveVehiclesList extends ConsumerWidget {
       ),
       error: (error, stack) => _ErrorState(
         errorMessage: error.toString(),
-        onRetry: () => ref.read(vehiclesNotifierProvider.notifier).refresh(),
+        onRetry: () => ref.read(vehiclesProvider.notifier).refresh(),
       ),
     );
   }
@@ -208,7 +208,7 @@ class _ResponsiveVehiclesList extends ConsumerWidget {
     );
 
     if (result == true && context.mounted) {
-      await ref.read(vehiclesNotifierProvider.notifier).refresh();
+      await ref.read(vehiclesProvider.notifier).refresh();
     }
   }
 }
@@ -394,7 +394,7 @@ class _ResponsiveVehicleCard extends ConsumerWidget {
     );
 
     if (result == true && context.mounted) {
-      await ref.read(vehiclesNotifierProvider.notifier).refresh();
+      await ref.read(vehiclesProvider.notifier).refresh();
     }
   }
 
@@ -420,7 +420,7 @@ class _ResponsiveVehicleCard extends ConsumerWidget {
               Navigator.of(dialogContext).pop();
               try {
                 await ref
-                    .read(vehiclesNotifierProvider.notifier)
+                    .read(vehiclesProvider.notifier)
                     .deleteVehicle(vehicle.id);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(

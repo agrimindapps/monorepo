@@ -1,9 +1,18 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'package:core/core.dart';
 
+
 import '../../domain/calculators/hydration_calculator.dart';
+
 import '../../domain/entities/calculation_result.dart';
+
 import '../../domain/usecases/perform_calculation.dart';
+
 import 'calculators_providers.dart';
+
+part 'hydration_provider.g.dart';
+
 
 /// Estado da calculadora de hidratação
 class HydrationState {
@@ -31,11 +40,13 @@ class HydrationState {
 }
 
 /// Notifier para gerenciar estado da calculadora de hidratação
-class HydrationNotifier extends StateNotifier<HydrationState> {
-  HydrationNotifier(this._performCalculation) : super(const HydrationState());
-
+/// Migrated to Riverpod 3.0 Notifier pattern
+@riverpod
+class HydrationNotifier extends _$HydrationNotifier {
   final _calculator = const HydrationCalculator();
-  final PerformCalculation _performCalculation;
+
+  @override
+  HydrationState build() => const HydrationState();
 
   /// Realiza o cálculo de hidratação
   Future<void> calculate(Map<String, dynamic> inputs) async {
@@ -58,7 +69,8 @@ class HydrationNotifier extends StateNotifier<HydrationState> {
       }
       final result = _calculator.performCalculation(hydrationInput);
       try {
-        await _performCalculation(
+        final performCalculation = ref.read(performCalculationProvider);
+        await performCalculation(
           calculatorId: _calculator.id,
           inputs: inputs,
         );
@@ -92,10 +104,6 @@ class HydrationNotifier extends StateNotifier<HydrationState> {
   }
 }
 
-/// Provider para a calculadora de hidratação
-final hydrationProvider = StateNotifierProvider<HydrationNotifier, HydrationState>((ref) {
-  return HydrationNotifier(ref.watch(performCalculationProvider));
-});
-
 /// Provider para obter informações sobre a calculadora de hidratação
-final hydrationCalculatorInfoProvider = Provider((ref) => const HydrationCalculator());
+@riverpod
+HydrationCalculator hydrationCalculatorInfo(Ref ref) => const HydrationCalculator();

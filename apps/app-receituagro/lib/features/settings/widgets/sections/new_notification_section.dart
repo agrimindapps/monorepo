@@ -12,7 +12,7 @@ class NewNotificationSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notificationState = ref.watch(notificationSettingsNotifierProvider);
+    final notificationState = ref.watch(notificationSettingsProvider);
 
     return Column(
       children: [
@@ -66,7 +66,7 @@ class NewNotificationSection extends ConsumerWidget {
             value: notificationState.settings.notificationsEnabled,
             onChanged: (value) {
               ref
-                  .read(notificationSettingsNotifierProvider.notifier)
+                  .read(notificationSettingsProvider.notifier)
                   .toggleNotifications();
             },
           ),

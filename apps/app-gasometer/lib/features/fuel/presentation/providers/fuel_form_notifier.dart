@@ -4,6 +4,7 @@ import 'package:core/core.dart' hide FormState;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
 import '../../../../core/services/storage/firebase_storage_service.dart' as local_storage;
@@ -19,6 +20,8 @@ import '../../domain/services/fuel_formatter_service.dart';
 import '../../domain/services/fuel_validator_service.dart';
 import '../models/fuel_form_model.dart';
 import 'fuel_riverpod_notifier.dart';
+
+part 'fuel_form_notifier.g.dart';
 
 /// Form state for fuel record creation/editing
 class FuelFormState {
@@ -90,32 +93,12 @@ class FuelFormState {
 }
 
 /// FuelFormNotifier - Manages fuel record form state
-class FuelFormNotifier extends StateNotifier<FuelFormState> {
-  FuelFormNotifier({
-    required String? initialVehicleId,
-    required String? userId,
-    required ReceiptImageService receiptImageService,
-    required Ref ref,
-  })  : _receiptImageService = receiptImageService,
-        _ref = ref,
-        super(
-          FuelFormState(
-            formModel: FuelFormModel.initial(
-              initialVehicleId ?? '',
-              userId ?? '',
-            ),
-          ),
-        ) {
-    _formatter = FuelFormatterService();
-    _validator = FuelValidatorService();
-    _imagePicker = ImagePicker();
-  }
-
-  final ReceiptImageService _receiptImageService;
-  final Ref _ref;
-  late final FuelFormatterService _formatter;
-  late final FuelValidatorService _validator;
-  late final ImagePicker _imagePicker;
+@riverpod
+class FuelFormNotifier extends _$FuelFormNotifier {
+  late ReceiptImageService _receiptImageService;
+  late FuelFormatterService _formatter;
+  late FuelValidatorService _validator;
+  late ImagePicker _imagePicker;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final TextEditingController litersController = TextEditingController();
   final TextEditingController pricePerLiterController = TextEditingController();
@@ -146,6 +129,50 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
         'gasStationBrand': gasStationBrandFocusNode,
         'notes': notesFocusNode,
       };
+
+  @override
+  FuelFormState build(String vehicleId) {
+    final userId = ref.watch(userIdProvider);
+    final compressionService = core.ImageCompressionService();
+    final storageService = local_storage.FirebaseStorageService();
+    final connectivityService = ref.watch(connectivityServiceProvider);
+    final imageSyncService = ref.watch(imageSyncServiceProvider);
+
+    _receiptImageService = ReceiptImageService(
+      compressionService,
+      storageService,
+      connectivityService,
+      imageSyncService,
+    );
+    _formatter = FuelFormatterService();
+    _validator = FuelValidatorService();
+    _imagePicker = ImagePicker();
+
+    ref.onDispose(() {
+      _litersDebounceTimer?.cancel();
+      _priceDebounceTimer?.cancel();
+      _odometerDebounceTimer?.cancel();
+      litersController.dispose();
+      pricePerLiterController.dispose();
+      odometerController.dispose();
+      gasStationController.dispose();
+      gasStationBrandController.dispose();
+      notesController.dispose();
+      litersFocusNode.dispose();
+      pricePerLiterFocusNode.dispose();
+      odometerFocusNode.dispose();
+      gasStationFocusNode.dispose();
+      gasStationBrandFocusNode.dispose();
+      notesFocusNode.dispose();
+    });
+
+    return FuelFormState(
+      formModel: FuelFormModel.initial(
+        vehicleId,
+        userId ?? '',
+      ),
+    );
+  }
 
   Future<void> initialize({String? vehicleId, String? userId}) async {
     try {
@@ -201,7 +228,7 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
 
   Future<void> _loadVehicleData(String vehicleId) async {
     try {
-      final vehiclesNotifier = _ref.read(vehiclesNotifierProvider.notifier);
+      final vehiclesNotifier = ref.read(vehiclesProvider.notifier);
       final vehicle = await vehiclesNotifier.getVehicleById(vehicleId);
 
       if (vehicle != null) {
@@ -538,12 +565,12 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
 
       if (state.formModel.id.isEmpty) {
         // Criar novo via Riverpod Notifier para manter estado sincronizado
-        success = await _ref
+        success = await ref
             .read(fuelRiverpodProvider.notifier)
             .addFuelRecord(fuelEntity);
       } else {
         // Atualizar existente via Riverpod Notifier
-        success = await _ref
+        success = await ref
             .read(fuelRiverpodProvider.notifier)
             .updateFuelRecord(fuelEntity);
       }
@@ -553,7 +580,7 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
       if (success) {
         return Right(fuelEntity);
       } else {
-        final error = _ref.read(fuelRiverpodProvider).value?.errorMessage ??
+        final error = ref.read(fuelRiverpodProvider).value?.errorMessage ??
             'Erro desconhecido ao salvar';
         return Left(UnexpectedFailure(error));
       }
@@ -748,82 +775,25 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
   String _generateTemporaryId() {
     return 'temp_${DateTime.now().millisecondsSinceEpoch}';
   }
-
-  @override
-  void dispose() {
-    _litersDebounceTimer?.cancel();
-    _priceDebounceTimer?.cancel();
-    _odometerDebounceTimer?.cancel();
-
-    litersController.dispose();
-    pricePerLiterController.dispose();
-    odometerController.dispose();
-    gasStationController.dispose();
-    gasStationBrandController.dispose();
-    notesController.dispose();
-
-    // Dispose FocusNodes
-    litersFocusNode.dispose();
-    pricePerLiterFocusNode.dispose();
-    odometerFocusNode.dispose();
-    gasStationFocusNode.dispose();
-    gasStationBrandFocusNode.dispose();
-    notesFocusNode.dispose();
-
-    super.dispose();
-  }
 }
 
-/// Fuel form notifier provider factory
-final fuelFormNotifierProvider =
-    StateNotifierProvider.family<FuelFormNotifier, FuelFormState, String>((
-  ref,
-  vehicleId,
-) {
-  final userId = ref.watch(userIdProvider);
-  final compressionService = core.ImageCompressionService();
-  final storageService = local_storage.FirebaseStorageService();
-  final connectivityService = ref.watch(connectivityServiceProvider);
-  final imageSyncService = ref.watch(imageSyncServiceProvider);
-
-  return FuelFormNotifier(
-    initialVehicleId: vehicleId,
-    userId: userId,
-    receiptImageService: ReceiptImageService(
-      compressionService,
-      storageService,
-      connectivityService,
-      imageSyncService,
-    ),
-    ref: ref,
-  );
-});
-
 /// Derived providers for form state
-final fuelFormCanSubmitProvider = Provider.family<bool, String>((
-  ref,
-  vehicleId,
-) {
-  return ref.watch(fuelFormNotifierProvider(vehicleId)).canSubmit;
-});
+@riverpod
+bool fuelFormCanSubmit(Ref ref, String vehicleId) {
+  return ref.watch(fuelFormProvider(vehicleId)).canSubmit;
+}
 
-final fuelFormHasChangesProvider = Provider.family<bool, String>((
-  ref,
-  vehicleId,
-) {
-  return ref.watch(fuelFormNotifierProvider(vehicleId)).hasChanges;
-});
+@riverpod
+bool fuelFormHasChanges(Ref ref, String vehicleId) {
+  return ref.watch(fuelFormProvider(vehicleId)).hasChanges;
+}
 
-final fuelFormHasErrorsProvider = Provider.family<bool, String>((
-  ref,
-  vehicleId,
-) {
-  return ref.watch(fuelFormNotifierProvider(vehicleId)).hasErrors;
-});
+@riverpod
+bool fuelFormHasErrors(Ref ref, String vehicleId) {
+  return ref.watch(fuelFormProvider(vehicleId)).hasErrors;
+}
 
-final fuelFormImageStateProvider = Provider.family<bool, String>((
-  ref,
-  vehicleId,
-) {
-  return ref.watch(fuelFormNotifierProvider(vehicleId)).hasReceiptImage;
-});
+@riverpod
+bool fuelFormImageState(Ref ref, String vehicleId) {
+  return ref.watch(fuelFormProvider(vehicleId)).hasReceiptImage;
+}

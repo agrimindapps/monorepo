@@ -44,12 +44,9 @@ dev_dependencies:
     sdk: flutter
   build_runner: ^2.4.6
   json_serializable: ^6.7.1
-  riverpod_generator: ^2.3.9
+  riverpod_generator: any
   drift_dev: ^2.28.0
-
-dependency_overrides:
-  analyzer: 5.13.0
-  _fe_analyzer_shared: 61.0.0
+  freezed: ^3.0.0
 
 flutter:
   uses-material-design: true

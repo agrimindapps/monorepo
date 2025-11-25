@@ -18,8 +18,8 @@ class SignupFormWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(loginFormNotifierProvider);
-    final notifier = ref.read(loginFormNotifierProvider.notifier);
+    final state = ref.watch(loginFormProvider);
+    final notifier = ref.read(loginFormProvider.notifier);
 
     return Form(
       child: SingleChildScrollView(
@@ -164,7 +164,7 @@ class SignupFormWidget extends ConsumerWidget {
           const SizedBox(width: 8),
           GestureDetector(
             onTap: () {
-              ref.read(loginFormNotifierProvider.notifier).clearError();
+              ref.read(loginFormProvider.notifier).clearError();
             },
             child: Container(
               padding: const EdgeInsets.all(4),
@@ -181,7 +181,7 @@ class SignupFormWidget extends ConsumerWidget {
   }
 
   Future<void> _handleSignup(WidgetRef ref) async {
-    final notifier = ref.read(loginFormNotifierProvider.notifier);
+    final notifier = ref.read(loginFormProvider.notifier);
     final success = await notifier.signUpWithEmail();
 
     if (success && onSignupSuccess != null) {

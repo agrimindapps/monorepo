@@ -37,7 +37,7 @@ class _DetalheDiagnosticoPageState extends ConsumerState<DetalheDiagnosticoPage>
         return;
       }
 
-      final notifier = ref.read(detalheDiagnosticoNotifierProvider.notifier);
+      final notifier = ref.read(detalheDiagnosticoProvider.notifier);
       await notifier.loadDiagnosticoData(widget.diagnosticoId);
       await notifier.loadFavoritoState(widget.diagnosticoId);
       await notifier.loadPremiumStatus();
@@ -63,7 +63,7 @@ class _DetalheDiagnosticoPageState extends ConsumerState<DetalheDiagnosticoPage>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final asyncState = ref.watch(detalheDiagnosticoNotifierProvider);
+    final asyncState = ref.watch(detalheDiagnosticoProvider);
 
     return asyncState.when(
       data: (state) => BottomNavWrapper(
@@ -224,7 +224,7 @@ class _DetalheDiagnosticoPageState extends ConsumerState<DetalheDiagnosticoPage>
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => ref.read(detalheDiagnosticoNotifierProvider.notifier).loadDiagnosticoData(widget.diagnosticoId),
+              onPressed: () => ref.read(detalheDiagnosticoProvider.notifier).loadDiagnosticoData(widget.diagnosticoId),
               icon: const Icon(Icons.refresh),
               label: const Text('Tentar Novamente'),
               style: ElevatedButton.styleFrom(
@@ -289,11 +289,11 @@ class _DetalheDiagnosticoPageState extends ConsumerState<DetalheDiagnosticoPage>
       'cultura': widget.cultura,
     };
 
-    final notifier = ref.read(detalheDiagnosticoNotifierProvider.notifier);
+    final notifier = ref.read(detalheDiagnosticoProvider.notifier);
     final success = await notifier.toggleFavorito(widget.diagnosticoId, itemData);
 
     if (!success && mounted) {
-      final state = ref.read(detalheDiagnosticoNotifierProvider).value;
+      final state = ref.read(detalheDiagnosticoProvider).value;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Erro ao ${state?.isFavorited == true ? 'adicionar' : 'remover'} favorito'),

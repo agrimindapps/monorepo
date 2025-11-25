@@ -1,7 +1,11 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../domain/entities/weight.dart';
+
 import '../../states/weights_filter_state.dart';
+
+part 'weights_filter_notifier.g.dart';
+
 
 /// **SRP Pattern**: Notifier specialized for FILTERING operations ONLY
 /// 
@@ -15,8 +19,12 @@ import '../../states/weights_filter_state.dart';
 /// - Easy to test (mock one behavior)
 /// - Reusable across features
 /// - Maintainable (changes isolated)
-class WeightsFilterNotifier extends StateNotifier<WeightsFilterState> {
-  WeightsFilterNotifier() : super(const WeightsFilterState());
+/// 
+/// Migrated to Riverpod 3.0 Notifier pattern
+@riverpod
+class WeightsFilterNotifier extends _$WeightsFilterNotifier {
+  @override
+  WeightsFilterState build() => const WeightsFilterState();
 
   /// Sets the selected animal for filtering
   void setSelectedAnimal(String? animalId) {

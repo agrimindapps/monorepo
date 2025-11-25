@@ -487,7 +487,7 @@ class UnifiedMaintenanceNotifier extends _$UnifiedMaintenanceNotifier {
 /// Provider for completed maintenances
 @riverpod
 List<MaintenanceEntity> completedMaintenances(Ref ref) {
-  final stateAsync = ref.watch(unifiedMaintenanceNotifierProvider);
+  final stateAsync = ref.watch(unifiedMaintenanceProvider);
 
   return stateAsync.when(
     data: (state) {
@@ -505,7 +505,7 @@ List<MaintenanceEntity> completedMaintenances(Ref ref) {
 /// Provider for pending maintenances
 @riverpod
 List<MaintenanceEntity> pendingMaintenances(Ref ref) {
-  final stateAsync = ref.watch(unifiedMaintenanceNotifierProvider);
+  final stateAsync = ref.watch(unifiedMaintenanceProvider);
 
   return stateAsync.when(
     data: (state) {
@@ -523,7 +523,7 @@ List<MaintenanceEntity> pendingMaintenances(Ref ref) {
 /// Provider for overdue maintenances
 @riverpod
 List<MaintenanceEntity> overdueMaintenances(Ref ref) {
-  final stateAsync = ref.watch(unifiedMaintenanceNotifierProvider);
+  final stateAsync = ref.watch(unifiedMaintenanceProvider);
 
   return stateAsync.when(
     data: (state) {
@@ -538,7 +538,7 @@ List<MaintenanceEntity> overdueMaintenances(Ref ref) {
 /// Provider for upcoming maintenances
 @riverpod
 List<MaintenanceEntity> upcomingMaintenances(Ref ref) {
-  final stateAsync = ref.watch(unifiedMaintenanceNotifierProvider);
+  final stateAsync = ref.watch(unifiedMaintenanceProvider);
 
   return stateAsync.when(
     data: (state) {
@@ -553,7 +553,7 @@ List<MaintenanceEntity> upcomingMaintenances(Ref ref) {
 /// Provider for high cost maintenances
 @riverpod
 List<MaintenanceEntity> highCostMaintenances(Ref ref) {
-  final stateAsync = ref.watch(unifiedMaintenanceNotifierProvider);
+  final stateAsync = ref.watch(unifiedMaintenanceProvider);
 
   return stateAsync.when(
     data: (state) {
@@ -571,7 +571,7 @@ List<MaintenanceEntity> maintenancesByType(
   Ref ref,
   MaintenanceType type,
 ) {
-  final stateAsync = ref.watch(unifiedMaintenanceNotifierProvider);
+  final stateAsync = ref.watch(unifiedMaintenanceProvider);
 
   return stateAsync.when(
     data: (state) {
@@ -589,7 +589,7 @@ List<MaintenanceEntity> maintenancesByUrgency(
   Ref ref,
   String urgencyLevel,
 ) {
-  final stateAsync = ref.watch(unifiedMaintenanceNotifierProvider);
+  final stateAsync = ref.watch(unifiedMaintenanceProvider);
 
   return stateAsync.when(
     data: (state) {
@@ -610,7 +610,7 @@ List<MaintenanceEntity> recentMaintenances(
   Ref ref, {
   int days = 30,
 }) {
-  final stateAsync = ref.watch(unifiedMaintenanceNotifierProvider);
+  final stateAsync = ref.watch(unifiedMaintenanceProvider);
 
   return stateAsync.when(
     data: (state) {
@@ -628,7 +628,7 @@ List<MaintenanceEntity> recentMaintenances(
 /// Provider for maintenance counts by type
 @riverpod
 Map<MaintenanceType, int> maintenanceCountsByType(Ref ref) {
-  final stateAsync = ref.watch(unifiedMaintenanceNotifierProvider);
+  final stateAsync = ref.watch(unifiedMaintenanceProvider);
 
   return stateAsync.when(
     data: (state) {
@@ -650,7 +650,7 @@ Map<String, dynamic> statisticsForPeriod(
   DateTime start,
   DateTime end,
 ) {
-  final stateAsync = ref.watch(unifiedMaintenanceNotifierProvider);
+  final stateAsync = ref.watch(unifiedMaintenanceProvider);
 
   return stateAsync.when(
     data: (state) {

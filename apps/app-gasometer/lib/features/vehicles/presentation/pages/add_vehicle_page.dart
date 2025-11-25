@@ -36,7 +36,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
   void _initializeFormNotifier() {
     if (_isInitialized) return;
 
-    final notifier = ref.read(vehicleFormNotifierProvider.notifier);
+    final notifier = ref.read(vehicleFormProvider.notifier);
 
     if (widget.vehicle != null) {
       notifier.initializeForEdit(widget.vehicle!);
@@ -49,7 +49,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
 
   void _initializeFormValidator() {
     _formValidator = FormValidator();
-    final notifier = ref.read(vehicleFormNotifierProvider.notifier);
+    final notifier = ref.read(vehicleFormProvider.notifier);
     
     // Initialize keys and focus nodes
     final fields = ['marca', 'modelo', 'ano', 'cor', 'odometro', 'placa', 'chassi', 'renavam', 'observacoes', 'combustivel'];
@@ -179,8 +179,8 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
   Widget build(BuildContext context) {
     final isEditing = widget.vehicle != null;
     final authState = ref.watch(authProvider);
-    final formState = ref.watch(vehicleFormNotifierProvider);
-    final notifier = ref.read(vehicleFormNotifierProvider.notifier);
+    final formState = ref.watch(vehicleFormProvider);
+    final notifier = ref.read(vehicleFormProvider.notifier);
 
     if (authState.status == AuthStatus.authenticating ||
         !authState.isInitialized) {
@@ -264,8 +264,8 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
   }
 
   Future<void> _submitForm() async {
-    final notifier = ref.read(vehicleFormNotifierProvider.notifier);
-    final formState = ref.read(vehicleFormNotifierProvider);
+    final notifier = ref.read(vehicleFormProvider.notifier);
+    final formState = ref.read(vehicleFormProvider);
     clearFormError();
     final validationResult = await _formValidator.validateAll();
     if (formState.selectedFuel.isEmpty) {
@@ -283,7 +283,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
 
     try {
       if (!mounted) return;
-      final vehiclesNotifier = ref.read(vehiclesNotifierProvider.notifier);
+      final vehiclesNotifier = ref.read(vehiclesProvider.notifier);
       final vehicleEntity = notifier.createVehicleEntity();
       final updatedMetadata = Map<String, dynamic>.from(vehicleEntity.metadata);
       updatedMetadata['observacoes'] = _observacoesController.text.trim();

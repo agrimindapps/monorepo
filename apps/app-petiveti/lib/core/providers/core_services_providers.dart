@@ -24,48 +24,42 @@ part 'core_services_providers.g.dart';
 // ============================================================================
 
 @riverpod
-core.IAuthRepository externalAuthRepository(ExternalAuthRepositoryRef ref) {
+core.IAuthRepository externalAuthRepository(Ref ref) {
   return core.FirebaseAuthService();
 }
 
 @riverpod
-core.IAnalyticsRepository analyticsRepository(AnalyticsRepositoryRef ref) {
+core.IAnalyticsRepository analyticsRepository(Ref ref) {
   return kDebugMode ? MockAnalyticsService() : core.FirebaseAnalyticsService();
 }
 
 @riverpod
-core.ICrashlyticsRepository crashlyticsRepository(
-  CrashlyticsRepositoryRef ref,
-) {
+core.ICrashlyticsRepository crashlyticsRepository(Ref ref) {
   return core.FirebaseCrashlyticsService();
 }
 
 @riverpod
-core.IPerformanceRepository performanceRepository(
-  PerformanceRepositoryRef ref,
-) {
+core.IPerformanceRepository performanceRepository(Ref ref) {
   return core.PerformanceService();
 }
 
 @riverpod
-core.ISubscriptionRepository subscriptionRepository(
-  SubscriptionRepositoryRef ref,
-) {
+core.ISubscriptionRepository subscriptionRepository(Ref ref) {
   return core.RevenueCatService();
 }
 
 @riverpod
-FirebaseFirestore firebaseFirestore(FirebaseFirestoreRef ref) {
+FirebaseFirestore firebaseFirestore(Ref ref) {
   return FirebaseFirestore.instance;
 }
 
 @riverpod
-FirebaseAuth firebaseAuth(FirebaseAuthRef ref) {
+FirebaseAuth firebaseAuth(Ref ref) {
   return FirebaseAuth.instance;
 }
 
 @riverpod
-GoogleSignIn googleSignIn(GoogleSignInRef ref) {
+GoogleSignIn googleSignIn(Ref ref) {
   if (kIsWeb) {
     return GoogleSignIn(clientId: '');
   }
@@ -78,26 +72,24 @@ GoogleSignIn googleSignIn(GoogleSignInRef ref) {
 // ============================================================================
 
 @riverpod
-CacheService cacheService(CacheServiceRef ref) {
+CacheService cacheService(Ref ref) {
   return CacheService();
 }
 
 @riverpod
-NotificationService? notificationService(NotificationServiceRef ref) {
+NotificationService? notificationService(Ref ref) {
   // Only on mobile platforms
   if (kIsWeb) return null;
   return NotificationService();
 }
 
 @riverpod
-local_perf.PerformanceService localPerformanceService(
-  LocalPerformanceServiceRef ref,
-) {
+local_perf.PerformanceService localPerformanceService(Ref ref) {
   return local_perf.PerformanceService();
 }
 
 @riverpod
-LazyLoader lazyLoader(LazyLoaderRef ref) {
+LazyLoader lazyLoader(Ref ref) {
   return LazyLoader();
 }
 
@@ -106,19 +98,19 @@ LazyLoader lazyLoader(LazyLoaderRef ref) {
 // ============================================================================
 
 @riverpod
-LogLocalDataSource logLocalDataSource(LogLocalDataSourceRef ref) {
+LogLocalDataSource logLocalDataSource(Ref ref) {
   return LogLocalDataSourceSimpleImpl();
 }
 
 @riverpod
-LogRepository logRepository(LogRepositoryRef ref) {
+LogRepository logRepository(Ref ref) {
   return LogRepositoryImpl(
     localDataSource: ref.watch(logLocalDataSourceProvider),
   );
 }
 
 @riverpod
-ILoggingService loggingService(LoggingServiceRef ref) {
+ILoggingService loggingService(Ref ref) {
   return LoggingServiceImpl(
     logRepository: ref.watch(logRepositoryProvider),
     analyticsRepository: ref.watch(analyticsRepositoryProvider),

@@ -24,8 +24,8 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
-    final expensesState = ref.watch(expensesNotifierProvider);
+    final vehiclesAsync = ref.watch(vehiclesProvider);
+    final expensesState = ref.watch(expensesProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -54,7 +54,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
                   icon: Icons.error_outline,
                   actionLabel: 'Tentar novamente',
                   onAction: () {
-                    ref.read(vehiclesNotifierProvider.notifier).refresh();
+                    ref.read(vehiclesProvider.notifier).refresh();
                   },
                 ),
               ),
@@ -148,7 +148,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
           });
           if (vehicleId != null) {
             ref
-                .read(expensesNotifierProvider.notifier)
+                .read(expensesProvider.notifier)
                 .loadExpensesByVehicle(vehicleId);
           }
         },
@@ -184,9 +184,9 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
           return GestureDetector(
             onTap: () {
               if (isSelected) {
-                ref.read(expensesNotifierProvider.notifier).clearMonthFilter();
+                ref.read(expensesProvider.notifier).clearMonthFilter();
               } else {
-                ref.read(expensesNotifierProvider.notifier).selectMonth(month);
+                ref.read(expensesProvider.notifier).selectMonth(month);
               }
             },
             child: Container(
@@ -239,7 +239,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
         onAction: () {
           if (_selectedVehicleId != null) {
             ref
-                .read(expensesNotifierProvider.notifier)
+                .read(expensesProvider.notifier)
                 .loadExpensesByVehicle(_selectedVehicleId!);
           }
         },
@@ -257,7 +257,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
         icon: Icons.attach_money_outlined,
         actionLabel: state.hasActiveFilters ? 'Limpar filtros' : null,
         onAction: state.hasActiveFilters
-            ? () => ref.read(expensesNotifierProvider.notifier).clearFilters()
+            ? () => ref.read(expensesProvider.notifier).clearFilters()
             : null,
       );
     }
@@ -270,7 +270,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
       onRefresh: () async {
         if (_selectedVehicleId != null) {
           await ref
-              .read(expensesNotifierProvider.notifier)
+              .read(expensesProvider.notifier)
               .loadExpensesByVehicle(_selectedVehicleId!);
         }
       },
@@ -385,7 +385,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
-    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+    final vehiclesAsync = ref.watch(vehiclesProvider);
     final hasVehicles = vehiclesAsync.value?.isNotEmpty ?? false;
     final isEnabled = hasVehicles && _selectedVehicleId != null;
 
@@ -406,7 +406,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
         ).then((result) {
           if (result == true && _selectedVehicleId != null) {
             ref
-                .read(expensesNotifierProvider.notifier)
+                .read(expensesProvider.notifier)
                 .loadExpensesByVehicle(_selectedVehicleId!);
           }
         });

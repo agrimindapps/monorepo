@@ -1,13 +1,12 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'app_settings.freezed.dart';
-part 'app_settings.g.dart';
 
 /// Modelo de dados para configurações do aplicativo
 ///
 /// Representa as configurações específicas do usuário armazenadas no Drift
 @freezed
-class AppSettings with _$AppSettings {
+sealed class AppSettings with _$AppSettings {
   const factory AppSettings({
     /// ID único da configuração
     required int id,

@@ -61,17 +61,17 @@ class _ExpensesPaginatedListState extends ConsumerState<ExpensesPaginatedList> {
 
   void _onScroll() {
     if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-      final asyncState = ref.read(expensesPaginatedNotifierProvider);
-      final state = asyncState.valueOrNull;
+      final asyncState = ref.read(expensesPaginatedProvider);
+      final state = asyncState.value;
       if (state != null && state.hasNextPage && !state.isLoadingMore) {
-        ref.read(expensesPaginatedNotifierProvider.notifier).loadNextPage();
+        ref.read(expensesPaginatedProvider.notifier).loadNextPage();
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final asyncState = ref.watch(expensesPaginatedNotifierProvider);
+    final asyncState = ref.watch(expensesPaginatedProvider);
 
     return asyncState.when(
       data: (state) {
@@ -110,7 +110,7 @@ class _ExpensesPaginatedListState extends ConsumerState<ExpensesPaginatedList> {
     return ErrorStateWidget(
       title: 'Erro ao carregar despesas',
       message: error.toString(),
-      onRetry: () => ref.read(expensesPaginatedNotifierProvider.notifier).refresh(),
+      onRetry: () => ref.read(expensesPaginatedProvider.notifier).refresh(),
     );
   }
 
@@ -119,8 +119,8 @@ class _ExpensesPaginatedListState extends ConsumerState<ExpensesPaginatedList> {
       return widget.emptyBuilder!;
     }
 
-    final asyncState = ref.read(expensesPaginatedNotifierProvider);
-    final hasFilters = asyncState.valueOrNull?.hasActiveFilters ?? false;
+    final asyncState = ref.read(expensesPaginatedProvider);
+    final hasFilters = asyncState.value?.hasActiveFilters ?? false;
 
     return EmptyStateWidget(
       icon: Icons.receipt_long,
@@ -129,7 +129,7 @@ class _ExpensesPaginatedListState extends ConsumerState<ExpensesPaginatedList> {
           ? 'Tente ajustar os filtros para encontrar despesas'
           : 'Adicione sua primeira despesa para começar a acompanhar os gastos',
       onAction: hasFilters
-          ? () => ref.read(expensesPaginatedNotifierProvider.notifier).clearFilters()
+          ? () => ref.read(expensesPaginatedProvider.notifier).clearFilters()
           : null,
     );
   }
@@ -138,7 +138,7 @@ class _ExpensesPaginatedListState extends ConsumerState<ExpensesPaginatedList> {
     final itemCount = state.itemCount + (state.hasNextPage ? 1 : 0);
 
     return RefreshIndicator(
-      onRefresh: () => ref.read(expensesPaginatedNotifierProvider.notifier).refresh(),
+      onRefresh: () => ref.read(expensesPaginatedProvider.notifier).refresh(),
       child: ListView.builder(
         controller: _scrollController,
         padding: widget.padding ?? const EdgeInsets.all(16),
@@ -207,7 +207,7 @@ class ExpensesPaginatedFilters extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncState = ref.watch(expensesPaginatedNotifierProvider);
+    final asyncState = ref.watch(expensesPaginatedProvider);
 
     return asyncState.when(
       data: (state) {
@@ -248,7 +248,7 @@ class ExpensesPaginatedFilters extends ConsumerWidget {
                   return FilterChip(
                     label: Text(_getSortLabel(sortBy)),
                     selected: isActive,
-                    onSelected: (_) => ref.read(expensesPaginatedNotifierProvider.notifier).toggleSortOrder(sortBy),
+                    onSelected: (_) => ref.read(expensesPaginatedProvider.notifier).toggleSortOrder(sortBy),
                     avatar: isActive && state.sortOrder == SortOrder.ascending
                         ? const Icon(Icons.keyboard_arrow_up, size: 16)
                         : isActive && state.sortOrder == SortOrder.descending
@@ -336,7 +336,7 @@ class ExpensesPaginatedFilters extends ConsumerWidget {
             ),
             TextButton(
               onPressed: () {
-                ref.read(expensesPaginatedNotifierProvider.notifier).clearFilters();
+                ref.read(expensesPaginatedProvider.notifier).clearFilters();
                 onFiltersChanged?.call();
               },
               child: Text(

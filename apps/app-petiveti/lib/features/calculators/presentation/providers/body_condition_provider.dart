@@ -1,11 +1,22 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'package:core/core.dart';
 
+
 import '../../../../core/error/exceptions.dart';
+
 import '../../domain/entities/body_condition_input.dart';
+
 import '../../domain/entities/body_condition_output.dart';
+
 import '../../domain/entities/calculation_result.dart';
+
 import '../../domain/strategies/body_condition_strategy.dart';
+
 import '../../domain/strategies/calculator_strategy.dart';
+
+part 'body_condition_provider.g.dart';
+
 
 /// Estados para o provider de condição corporal
 enum BodyConditionCalculatorStatus { initial, loading, success, error }
@@ -63,10 +74,15 @@ class BodyConditionState {
 }
 
 /// Notifier para gerenciar estado da calculadora BCS
-class BodyConditionNotifier extends StateNotifier<BodyConditionState> {
-  BodyConditionNotifier(this._strategy) : super(const BodyConditionState());
+@riverpod
+class BodyConditionNotifier extends _$BodyConditionNotifier {
+  late final BodyConditionStrategy _strategy;
 
-  final BodyConditionStrategy _strategy;
+  @override
+  BodyConditionState build() {
+    _strategy = ref.watch(bodyConditionStrategyProvider);
+    return const BodyConditionState();
+  }
 
   /// Atualiza entrada da calculadora
   void updateInput(BodyConditionInput input) {
@@ -284,57 +300,59 @@ class BodyConditionNotifier extends StateNotifier<BodyConditionState> {
 }
 
 /// Provider da estratégia BCS
-final bodyConditionStrategyProvider = Provider<BodyConditionStrategy>((ref) {
+@riverpod
+BodyConditionStrategy bodyConditionStrategy(Ref ref) {
   return const BodyConditionStrategy();
-});
-
-/// Provider principal da calculadora de condição corporal
-final bodyConditionProvider =
-    StateNotifierProvider<BodyConditionNotifier, BodyConditionState>((ref) {
-      final strategy = ref.watch(bodyConditionStrategyProvider);
-      return BodyConditionNotifier(strategy);
-    });
+}
 
 /// Providers de conveniência para componentes específicos
 
 /// Provider do estado de entrada
-final bodyConditionInputProvider = Provider<BodyConditionInput>((ref) {
-  return ref.watch(bodyConditionProvider).input;
-});
+@riverpod
+BodyConditionInput bodyConditionInput(Ref ref) {
+  return ref.watch(bodyConditionNotifierProvider).input;
+}
 
 /// Provider do resultado
-final bodyConditionOutputProvider = Provider<BodyConditionOutput?>((ref) {
-  return ref.watch(bodyConditionProvider).output;
-});
+@riverpod
+BodyConditionOutput? bodyConditionOutput(Ref ref) {
+  return ref.watch(bodyConditionNotifierProvider).output;
+}
 
 /// Provider do status de loading
-final bodyConditionLoadingProvider = Provider<bool>((ref) {
-  return ref.watch(bodyConditionProvider).isLoading;
-});
+@riverpod
+bool bodyConditionLoading(Ref ref) {
+  return ref.watch(bodyConditionNotifierProvider).isLoading;
+}
 
 /// Provider de erros
-final bodyConditionErrorProvider = Provider<String?>((ref) {
-  final state = ref.watch(bodyConditionProvider);
+@riverpod
+String? bodyConditionError(Ref ref) {
+  final state = ref.watch(bodyConditionNotifierProvider);
   return state.hasError ? state.error : null;
-});
+}
 
 /// Provider de erros de validação
-final bodyConditionValidationErrorsProvider = Provider<List<String>>((ref) {
-  return ref.watch(bodyConditionProvider).validationErrors;
-});
+@riverpod
+List<String> bodyConditionValidationErrors(Ref ref) {
+  return ref.watch(bodyConditionNotifierProvider).validationErrors;
+}
 
 /// Provider indicando se pode calcular
-final bodyConditionCanCalculateProvider = Provider<bool>((ref) {
-  return ref.watch(bodyConditionProvider).canCalculate;
-});
+@riverpod
+bool bodyConditionCanCalculate(Ref ref) {
+  return ref.watch(bodyConditionNotifierProvider).canCalculate;
+}
 
 /// Provider do histórico
-final bodyConditionHistoryProvider = Provider<List<BodyConditionOutput>>((ref) {
-  return ref.watch(bodyConditionProvider).history;
-});
+@riverpod
+List<BodyConditionOutput> bodyConditionHistory(Ref ref) {
+  return ref.watch(bodyConditionNotifierProvider).history;
+}
 
 /// Provider de sugestões baseadas na entrada atual
-final bodyConditionSuggestionsProvider = Provider<List<String>>((ref) {
+@riverpod
+List<String> bodyConditionSuggestions(Ref ref) {
   final input = ref.watch(bodyConditionInputProvider);
   final suggestions = <String>[];
   if (input.currentWeight > 0) {
@@ -364,10 +382,11 @@ final bodyConditionSuggestionsProvider = Provider<List<String>>((ref) {
   }
 
   return suggestions;
-});
+}
 
 /// Provider com estatísticas do histórico
-final bodyConditionHistoryStatsProvider = Provider<Map<String, dynamic>>((ref) {
+@riverpod
+Map<String, dynamic> bodyConditionHistoryStats(Ref ref) {
   final history = ref.watch(bodyConditionHistoryProvider);
 
   if (history.isEmpty) {
@@ -389,4 +408,4 @@ final bodyConditionHistoryStatsProvider = Provider<Map<String, dynamic>>((ref) {
     'latestScore': scores.last,
     'trend': scores.length > 1 ? scores.last - scores[scores.length - 2] : 0,
   };
-});
+}

@@ -22,8 +22,8 @@ class ExpenseFormView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(expenseFormNotifierProvider);
-    final notifier = ref.read(expenseFormNotifierProvider.notifier);
+    final state = ref.watch(expenseFormProvider);
+    final notifier = ref.read(expenseFormProvider.notifier);
 
     return Form(
       child: Column(

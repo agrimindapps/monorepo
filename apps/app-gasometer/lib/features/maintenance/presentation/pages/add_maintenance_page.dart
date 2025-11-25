@@ -66,7 +66,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
   }
 
   Future<void> _initializeNotifier() async {
-    final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
+    final notifier = ref.read(maintenanceFormProvider.notifier);
     final authState = ref.read(authProvider);
 
     await notifier.initialize(
@@ -96,7 +96,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
 
   @override
   Widget build(BuildContext context) {
-    final formState = ref.watch(maintenanceFormNotifierProvider);
+    final formState = ref.watch(maintenanceFormProvider);
     String subtitle = 'Registre a manutenção do seu veículo';
     if (formState.isInitialized && formState.vehicle != null) {
       final vehicle = formState.vehicle!;
@@ -112,7 +112,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
       isLoading: formState.isLoading || _isSubmitting,
       confirmButtonText: 'Salvar',
       onCancel: () {
-        final formNotifier = ref.read(maintenanceFormNotifierProvider.notifier);
+        final formNotifier = ref.read(maintenanceFormProvider.notifier);
         formNotifier.clearForm();
         Navigator.of(context).pop();
       },
@@ -150,8 +150,8 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
   }
 
   Widget _buildServiceInfoSection() {
-    final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
-    final formState = ref.watch(maintenanceFormNotifierProvider);
+    final notifier = ref.read(maintenanceFormProvider.notifier);
+    final formState = ref.watch(maintenanceFormProvider);
     final theme = Theme.of(context);
 
     return FormSectionHeader(
@@ -229,7 +229,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
   }
 
   Widget _buildServiceDetailsSection() {
-    final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
+    final notifier = ref.read(maintenanceFormProvider.notifier);
     return FormSectionHeader(
       title: 'Detalhes do Serviço',
       icon: Icons.description_outlined,
@@ -261,8 +261,8 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
   }
 
   Widget _buildFinancialInfoSection() {
-    final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
-    final formState = ref.watch(maintenanceFormNotifierProvider);
+    final notifier = ref.read(maintenanceFormProvider.notifier);
+    final formState = ref.watch(maintenanceFormProvider);
     return FormSectionHeader(
       title: 'Informações Financeiras e Técnicas',
       icon: Icons.monetization_on_outlined,
@@ -291,8 +291,8 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
   }
 
   Widget _buildReceiptImageSection() {
-    final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
-    final formState = ref.watch(maintenanceFormNotifierProvider);
+    final notifier = ref.read(maintenanceFormProvider.notifier);
+    final formState = ref.watch(maintenanceFormProvider);
     return OptionalReceiptSection(
       imagePath: formState.receiptImagePath,
       hasImage: formState.hasReceiptImage,
@@ -307,8 +307,8 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
   }
 
   Widget _buildNextServiceDate() {
-    final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
-    final formState = ref.watch(maintenanceFormNotifierProvider);
+    final notifier = ref.read(maintenanceFormProvider.notifier);
+    final formState = ref.watch(maintenanceFormProvider);
     final theme = Theme.of(context);
 
     return FormSectionHeader(
@@ -385,7 +385,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
       '[MAINTENANCE DEBUG] _submitForm() called - Starting validation',
     );
 
-    final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
+    final notifier = ref.read(maintenanceFormProvider.notifier);
     clearFormError();
 
     if (!notifier.validateForm()) {
@@ -393,7 +393,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
         '[MAINTENANCE DEBUG] Form validation FAILED - submission aborted',
       );
       // Pega o primeiro erro para exibir
-      final formState = ref.read(maintenanceFormNotifierProvider);
+      final formState = ref.read(maintenanceFormProvider);
       if (formState.fieldErrors.isNotEmpty) {
         final firstErrorField = formState.fieldErrors.keys.first;
         _focusNodes[firstErrorField]?.requestFocus();

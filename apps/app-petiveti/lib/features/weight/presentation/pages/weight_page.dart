@@ -25,7 +25,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(weightsProvider.notifier).loadWeights();
-      ref.read(animalsNotifierProvider.notifier).loadAnimals();
+      ref.read(animalsProvider.notifier).loadAnimals();
     });
   }
 
@@ -33,7 +33,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final weightsState = ref.watch(weightsProvider);
-    final animalsState = ref.watch(animalsNotifierProvider);
+    final animalsState = ref.watch(animalsProvider);
 
     return Scaffold(
       appBar: AppBar(

@@ -137,9 +137,9 @@ class _AppointmentsAutoReloadManagerState
     try {
       _isReloading = true;
       widget.onReloadStart?.call();
-      await ref.read(appointmentsNotifierProvider.notifier).loadAppointments(animalId);
+      await ref.read(appointmentsProvider.notifier).loadAppointments(animalId);
       _lastLoadTimes[animalId] = DateTime.now();
-      final state = ref.read(appointmentsNotifierProvider);
+      final state = ref.read(appointmentsProvider);
       if (state.errorMessage != null) {
         widget.onReloadError?.call(state.errorMessage!);
       } else {
@@ -156,7 +156,7 @@ class _AppointmentsAutoReloadManagerState
   /// 
   /// Clears the current appointments when no animal is selected.
   void _clearAppointments() {
-    ref.read(appointmentsNotifierProvider.notifier).clearAppointments();
+    ref.read(appointmentsProvider.notifier).clearAppointments();
   }
 
   /// **Manual Reload Trigger**

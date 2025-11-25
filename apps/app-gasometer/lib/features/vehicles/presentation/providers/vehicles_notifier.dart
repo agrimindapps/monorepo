@@ -337,7 +337,7 @@ VehicleEntity? selectedVehicle(Ref ref) {
   final selectedId = ref.watch(selectedVehicleIdProvider);
   if (selectedId == null) return null;
 
-  final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+  final vehiclesAsync = ref.watch(vehiclesProvider);
   return vehiclesAsync.when(
     data: (vehicles) {
       try {
@@ -365,7 +365,7 @@ class VehicleSearchQuery extends _$VehicleSearchQuery {
 @riverpod
 AsyncValue<List<VehicleEntity>> filteredVehicles(Ref ref) {
   final query = ref.watch(vehicleSearchQueryProvider).toLowerCase().trim();
-  final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+  final vehiclesAsync = ref.watch(vehiclesProvider);
 
   if (query.isEmpty) {
     return vehiclesAsync;
@@ -387,7 +387,7 @@ AsyncValue<List<VehicleEntity>> filteredVehicles(Ref ref) {
 /// Provider para veículos ativos apenas
 @riverpod
 AsyncValue<List<VehicleEntity>> activeVehicles(Ref ref) {
-  final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+  final vehiclesAsync = ref.watch(vehiclesProvider);
 
   return vehiclesAsync.when(
     data: (vehicles) =>
@@ -400,7 +400,7 @@ AsyncValue<List<VehicleEntity>> activeVehicles(Ref ref) {
 /// Provider para contagem de veículos
 @riverpod
 int vehicleCount(Ref ref) {
-  final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+  final vehiclesAsync = ref.watch(vehiclesProvider);
   return vehiclesAsync.when(
     data: (vehicles) => vehicles.length,
     loading: () => 0,

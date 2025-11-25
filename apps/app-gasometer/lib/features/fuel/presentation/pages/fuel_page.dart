@@ -27,7 +27,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
     final isOnline = ref.watch(fuelIsOnlineProvider);
     final pendingCount = ref.watch(fuelPendingCountProvider);
     final isSyncing = ref.watch(fuelIsSyncingProvider);
-    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+    final vehiclesAsync = ref.watch(vehiclesProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -79,7 +79,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                   icon: Icons.error_outline,
                   actionLabel: 'Tentar novamente',
                   onAction: () {
-                    ref.read(vehiclesNotifierProvider.notifier).refresh();
+                    ref.read(vehiclesProvider.notifier).refresh();
                   },
                 ),
               ),
@@ -439,7 +439,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
-    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+    final vehiclesAsync = ref.watch(vehiclesProvider);
     final hasVehicles = vehiclesAsync.value?.isNotEmpty ?? false;
     final isEnabled = hasVehicles && _selectedVehicleId != null;
 

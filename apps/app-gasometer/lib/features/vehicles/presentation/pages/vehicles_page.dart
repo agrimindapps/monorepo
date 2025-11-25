@@ -120,7 +120,7 @@ class _VehiclesPageState extends ConsumerState<VehiclesPage> {
     ).then((result) {
       if (result == true) {
         // Refresh vehicles list after adding
-        ref.read(vehiclesNotifierProvider.notifier).refresh();
+        ref.read(vehiclesProvider.notifier).refresh();
       }
     });
   }
@@ -131,7 +131,7 @@ class _OptimizedVehiclesContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+    final vehiclesAsync = ref.watch(vehiclesProvider);
 
     return vehiclesAsync.when(
       data: (vehicles) {
@@ -150,7 +150,7 @@ class _OptimizedVehiclesContent extends ConsumerWidget {
         icon: Icons.error_outline,
         actionLabel: 'Tentar novamente',
         onAction: () {
-          ref.read(vehiclesNotifierProvider.notifier).refresh();
+          ref.read(vehiclesProvider.notifier).refresh();
         },
       ),
     );
@@ -169,7 +169,7 @@ class _OptimizedVehiclesContent extends ConsumerWidget {
           builder: (context) => const AddVehiclePage(),
         ).then((result) {
           if (result == true) {
-            ref.read(vehiclesNotifierProvider.notifier).refresh();
+            ref.read(vehiclesProvider.notifier).refresh();
           }
         });
       },
@@ -183,7 +183,7 @@ class _OptimizedVehiclesContent extends ConsumerWidget {
   ) {
     return RefreshIndicator(
       onRefresh: () async {
-        await ref.read(vehiclesNotifierProvider.notifier).refresh();
+        await ref.read(vehiclesProvider.notifier).refresh();
       },
       child: _buildStaggeredGrid(vehicles),
     );

@@ -24,12 +24,12 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage> {
   }
 
   void _loadDevices() {
-    ref.read(vehicleDeviceNotifierProvider.notifier).loadUserDevices();
+    ref.read(vehicleDeviceProvider.notifier).loadUserDevices();
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(vehicleDeviceNotifierProvider);
+    final state = ref.watch(vehicleDeviceProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -340,7 +340,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage> {
   }
 
   Future<void> _handleRefresh() async {
-    await ref.read(vehicleDeviceNotifierProvider.notifier).refresh();
+    await ref.read(vehicleDeviceProvider.notifier).refresh();
   }
 
   void _handleMenuAction(String action) {
@@ -355,7 +355,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage> {
   }
 
   void _handleDeviceAction(String deviceUuid, String action) {
-    final notifier = ref.read(vehicleDeviceNotifierProvider.notifier);
+    final notifier = ref.read(vehicleDeviceProvider.notifier);
     final device = notifier.getDeviceByUuid(deviceUuid);
 
     if (device == null) return;
@@ -371,7 +371,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage> {
   }
 
   Future<void> _executeDeviceAction(String deviceUuid, String action) async {
-    final notifier = ref.read(vehicleDeviceNotifierProvider.notifier);
+    final notifier = ref.read(vehicleDeviceProvider.notifier);
 
     switch (action) {
       case 'revoke':
@@ -407,7 +407,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage> {
           ElevatedButton(
             onPressed: () async {
               Navigator.of(dialogContext).pop();
-              final notifier = ref.read(vehicleDeviceNotifierProvider.notifier);
+              final notifier = ref.read(vehicleDeviceProvider.notifier);
               final success = await notifier.revokeAllOtherDevices();
               if (success && mounted) {
                 if (context.mounted) {

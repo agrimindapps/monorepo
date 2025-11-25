@@ -346,9 +346,9 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
         updatedAt: now,
       );
       if (_isEditing) {
-        await ref.read(animalsNotifierProvider.notifier).updateAnimal(animal);
+        await ref.read(animalsProvider.notifier).updateAnimal(animal);
       } else {
-        await ref.read(animalsNotifierProvider.notifier).addAnimal(animal);
+        await ref.read(animalsProvider.notifier).addAnimal(animal);
       }
 
       if (mounted) {

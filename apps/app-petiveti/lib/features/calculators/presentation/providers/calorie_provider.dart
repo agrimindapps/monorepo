@@ -1,9 +1,14 @@
 import 'package:core/core.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/calorie_input.dart';
 import '../../domain/entities/calorie_output.dart';
 import '../../domain/strategies/calculator_strategy.dart';
 import '../../domain/strategies/calorie_calculator_strategy.dart';
+
+part 'calorie_provider.g.dart';
+
 
 /// Estados para o provider de cálculo calórico
 enum CalorieCalculatorStatus { initial, loading, success, error }
@@ -85,10 +90,15 @@ class CalorieState {
 }
 
 /// Notifier para gerenciar estado da calculadora calórica
-class CalorieNotifier extends StateNotifier<CalorieState> {
-  CalorieNotifier(this._strategy) : super(const CalorieState());
+@riverpod
+class CalorieNotifier extends _$CalorieNotifier {
+  late final CalorieCalculatorStrategy _strategy;
 
-  final CalorieCalculatorStrategy _strategy;
+  @override
+  CalorieState build() {
+    _strategy = ref.watch(calorieCalculatorStrategyProvider);
+    return const CalorieState();
+  }
 
   /// Atualiza entrada da calculadora
   void updateInput(CalorieInput input) {
@@ -393,14 +403,6 @@ final calorieCalculatorStrategyProvider = Provider<CalorieCalculatorStrategy>((
   ref,
 ) {
   return CalorieCalculatorStrategy();
-});
-
-/// Provider principal da calculadora de necessidades calóricas
-final calorieProvider = StateNotifierProvider<CalorieNotifier, CalorieState>((
-  ref,
-) {
-  final strategy = ref.watch(calorieCalculatorStrategyProvider);
-  return CalorieNotifier(strategy);
 });
 
 /// Providers de conveniência para componentes específicos

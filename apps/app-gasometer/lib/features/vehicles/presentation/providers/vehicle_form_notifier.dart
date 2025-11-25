@@ -4,6 +4,7 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as flutter show FormState;
 import 'package:flutter/material.dart' hide FormState;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/app_error.dart' as local_error;
 import '../../../../core/validation/input_sanitizer.dart';
@@ -11,6 +12,8 @@ import '../../../auth/presentation/notifiers/auth_notifier.dart';
 import '../../domain/entities/fuel_type_mapper.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import 'vehicles_notifier.dart';
+
+part 'vehicle_form_notifier.g.dart';
 
 /// Estado do formulário de veículo
 class VehicleFormState {
@@ -63,10 +66,8 @@ class VehicleFormState {
 }
 
 /// Notifier para gerenciar estado do formulário de veículos
-class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
-  VehicleFormNotifier(this.ref) : super(const VehicleFormState.initial());
-
-  final Ref ref;
+@riverpod
+class VehicleFormNotifier extends _$VehicleFormNotifier {
   final GlobalKey<flutter.FormState> formKey = GlobalKey<flutter.FormState>();
   final TextEditingController brandController = TextEditingController();
   final TextEditingController modelController = TextEditingController();
@@ -78,16 +79,18 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
   final TextEditingController odometerController = TextEditingController();
 
   @override
-  void dispose() {
-    brandController.dispose();
-    modelController.dispose();
-    yearController.dispose();
-    colorController.dispose();
-    plateController.dispose();
-    chassisController.dispose();
-    renavamController.dispose();
-    odometerController.dispose();
-    super.dispose();
+  VehicleFormState build() {
+    ref.onDispose(() {
+      brandController.dispose();
+      modelController.dispose();
+      yearController.dispose();
+      colorController.dispose();
+      plateController.dispose();
+      chassisController.dispose();
+      renavamController.dispose();
+      odometerController.dispose();
+    });
+    return const VehicleFormState.initial();
   }
 
   /// Inicializa formulário para edição
@@ -374,7 +377,7 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
 
     try {
       final vehicle = buildVehicleEntity();
-      final notifier = ref.read(vehiclesNotifierProvider.notifier);
+      final notifier = ref.read(vehiclesProvider.notifier);
 
       if (state.isEditing) {
         await notifier.updateVehicle(vehicle);
@@ -410,13 +413,8 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
   }
 }
 
-/// Provider principal do formulário de veículos
-final vehicleFormNotifierProvider =
-    StateNotifierProvider<VehicleFormNotifier, VehicleFormState>((ref) {
-      return VehicleFormNotifier(ref);
-    });
-
 /// Provider para verificar se pode submeter
-final canSubmitVehicleFormProvider = Provider<bool>((ref) {
-  return ref.watch(vehicleFormNotifierProvider.notifier).canSubmit;
-});
+@riverpod
+bool canSubmitVehicleForm(Ref ref) {
+  return ref.watch(vehicleFormProvider.notifier).canSubmit;
+}

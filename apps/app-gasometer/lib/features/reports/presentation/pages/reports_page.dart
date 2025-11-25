@@ -17,7 +17,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+    final vehiclesAsync = ref.watch(vehiclesProvider);
 
     return Scaffold(
       body: SafeArea(

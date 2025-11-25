@@ -1,26 +1,28 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/services/failure_message_service.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/usecases/get_diagnosticos_params.dart';
 import '../../domain/usecases/get_diagnosticos_usecase.dart';
-import '../providers/diagnosticos_providers.dart' as diagnosticosProviders;
+import '../providers/diagnosticos_providers.dart' as providers;
 import '../state/diagnosticos_recommendations_state.dart';
+
+part 'diagnosticos_recommendations_notifier.g.dart';
 
 /// Notifier para gerenciamento de recomendações de diagnósticos
 /// Responsabilidade: Handle recommendations
 /// Métodos: getRecommendations(), clearRecommendations()
-class DiagnosticosRecommendationsNotifier
-    extends StateNotifier<DiagnosticosRecommendationsState> {
-  DiagnosticosRecommendationsNotifier({
-    required GetDiagnosticosUseCase getDiagnosticosUseCase,
-    required FailureMessageService failureMessageService,
-  })  : _getDiagnosticosUseCase = getDiagnosticosUseCase,
-        _failureMessageService = failureMessageService,
-        super(DiagnosticosRecommendationsState.initial());
+@riverpod
+class DiagnosticosRecommendationsNotifier extends _$DiagnosticosRecommendationsNotifier {
+  late final GetDiagnosticosUseCase _getDiagnosticosUseCase;
+  late final FailureMessageService _failureMessageService;
 
-  final GetDiagnosticosUseCase _getDiagnosticosUseCase;
-  final FailureMessageService _failureMessageService;
+  @override
+  DiagnosticosRecommendationsState build() {
+    _getDiagnosticosUseCase = ref.watch(providers.getDiagnosticosUseCaseProvider);
+    _failureMessageService = ref.watch(providers.failureMessageServiceProvider);
+    return DiagnosticosRecommendationsState.initial();
+  }
 
   /// Obtém recomendações por cultura e praga
   Future<void> getRecommendations({
@@ -97,14 +99,3 @@ class DiagnosticosRecommendationsNotifier
     state = state.clear();
   }
 }
-
-/// Provider para DiagnosticosRecommendationsNotifier
-final diagnosticosRecommendationsNotifierProvider = StateNotifierProvider<
-    DiagnosticosRecommendationsNotifier, DiagnosticosRecommendationsState>(
-  (ref) => DiagnosticosRecommendationsNotifier(
-    getDiagnosticosUseCase:
-        ref.watch(diagnosticosProviders.getDiagnosticosUseCaseProvider),
-    failureMessageService:
-        ref.watch(diagnosticosProviders.failureMessageServiceProvider),
-  ),
-);

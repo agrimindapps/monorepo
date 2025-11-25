@@ -12,6 +12,7 @@ import '../../domain/usecases/perform_calculation.dart';
 
 part 'calculators_providers.g.dart';
 
+
 @riverpod
 CalculatorLocalDatasource calculatorLocalDataSource(CalculatorLocalDataSourceRef ref) {
   final database = ref.watch(petivetiDatabaseProvider);

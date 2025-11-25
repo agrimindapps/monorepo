@@ -27,7 +27,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
       vsync: this,
     );
     Future.microtask(() => _loadReminders());
-    ref.listenManual<RemindersState>(remindersNotifierProvider, (
+    ref.listenManual<RemindersState>(remindersProvider, (
       RemindersState? previous,
       RemindersState next,
     ) {
@@ -45,7 +45,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(remindersNotifierProvider);
+    final state = ref.watch(remindersProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -383,7 +383,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
         case 'complete':
           setState(() => _isProcessing = true);
           final success = await ref
-              .read(remindersNotifierProvider.notifier)
+              .read(remindersProvider.notifier)
               .completeReminder(reminder.id, widget.userId);
           _showResultSnackBar(success, 'lembrete marcado como concluído');
           break;
@@ -405,7 +405,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
   }
 
   void _loadReminders() {
-    ref.read(remindersNotifierProvider.notifier).loadReminders(widget.userId);
+    ref.read(remindersProvider.notifier).loadReminders(widget.userId);
   }
 
   void _showError(String message) {
@@ -453,7 +453,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
     try {
       final snoozeUntil = DateTime.now().add(duration);
       final success = await ref
-          .read(remindersNotifierProvider.notifier)
+          .read(remindersProvider.notifier)
           .snoozeReminder(reminder.id, snoozeUntil, widget.userId);
       _showResultSnackBar(success, 'lembrete adiado');
     } finally {
@@ -522,7 +522,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
 
               try {
                 final success = await ref
-                    .read(remindersNotifierProvider.notifier)
+                    .read(remindersProvider.notifier)
                     .deleteReminder(reminder.id, widget.userId);
                 _showResultSnackBar(success, 'lembrete excluído');
               } finally {

@@ -69,7 +69,7 @@ class _AddMedicationFormState extends ConsumerState<AddMedicationForm> {
 
   @override
   Widget build(BuildContext context) {
-    final animalsState = ref.watch(animalsNotifierProvider);
+    final animalsState = ref.watch(animalsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -91,7 +91,7 @@ class _AddMedicationFormState extends ConsumerState<AddMedicationForm> {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => ref
-                        .read(animalsNotifierProvider.notifier)
+                        .read(animalsProvider.notifier)
                         .loadAnimals(),
                     child: const Text('Tentar novamente'),
                   ),

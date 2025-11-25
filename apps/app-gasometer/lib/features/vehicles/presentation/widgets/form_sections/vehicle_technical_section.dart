@@ -24,8 +24,8 @@ class VehicleTechnicalSection extends ConsumerWidget {
   }
 
   Widget _buildFuelTypeSelector(BuildContext context, WidgetRef ref) {
-    final formState = ref.watch(vehicleFormNotifierProvider);
-    final notifier = ref.read(vehicleFormNotifierProvider.notifier);
+    final formState = ref.watch(vehicleFormProvider);
+    final notifier = ref.read(vehicleFormProvider.notifier);
 
     final fuelOptions = FuelTypeMapper.availableFuelStrings.map((fuelName) {
       IconData icon;

@@ -13,7 +13,7 @@ AsyncValue<List<VehicleEntity>> vehiclesByType(
   Ref ref,
   VehicleType type,
 ) {
-  final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+  final vehiclesAsync = ref.watch(vehiclesProvider);
   final filterService = ref.watch(vehicleFilterServiceProvider);
 
   return vehiclesAsync.when(
@@ -30,7 +30,7 @@ AsyncValue<List<VehicleEntity>> vehiclesByFuelType(
   Ref ref,
   FuelType fuelType,
 ) {
-  final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+  final vehiclesAsync = ref.watch(vehiclesProvider);
   final filterService = ref.watch(vehicleFilterServiceProvider);
 
   return vehiclesAsync.when(

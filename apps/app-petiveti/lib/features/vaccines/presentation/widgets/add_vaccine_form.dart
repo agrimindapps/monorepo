@@ -68,7 +68,7 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
       _status = vaccine.status;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(animalsNotifierProvider.notifier).loadAnimals();
+      ref.read(animalsProvider.notifier).loadAnimals();
     });
   }
 
@@ -86,7 +86,7 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final animalsState = ref.watch(animalsNotifierProvider);
+    final animalsState = ref.watch(animalsProvider);
 
     return Scaffold(
       appBar: AppBar(

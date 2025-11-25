@@ -1,9 +1,18 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'package:core/core.dart';
 
+
 import '../../domain/calculators/fluid_therapy_calculator.dart';
+
 import '../../domain/entities/calculation_result.dart';
+
 import '../../domain/usecases/perform_calculation.dart';
+
 import 'calculators_providers.dart';
+
+part 'fluid_therapy_provider.g.dart';
+
 
 /// Estado da calculadora de fluidoterapia
 class FluidTherapyState {
@@ -31,11 +40,13 @@ class FluidTherapyState {
 }
 
 /// Notifier para gerenciar estado da calculadora de fluidoterapia
-class FluidTherapyNotifier extends StateNotifier<FluidTherapyState> {
-  FluidTherapyNotifier(this._performCalculation) : super(const FluidTherapyState());
-
+/// Migrated to Riverpod 3.0 Notifier pattern
+@riverpod
+class FluidTherapyNotifier extends _$FluidTherapyNotifier {
   final _calculator = const FluidTherapyCalculator();
-  final PerformCalculation _performCalculation;
+
+  @override
+  FluidTherapyState build() => const FluidTherapyState();
 
   /// Realiza o cálculo de fluidoterapia
   Future<void> calculate(Map<String, dynamic> inputs) async {
@@ -57,7 +68,8 @@ class FluidTherapyNotifier extends StateNotifier<FluidTherapyState> {
       }
       final result = _calculator.calculate(inputs);
       try {
-        await _performCalculation(
+        final performCalculation = ref.read(performCalculationProvider);
+        await performCalculation(
           calculatorId: _calculator.id,
           inputs: inputs,
         );
@@ -91,10 +103,6 @@ class FluidTherapyNotifier extends StateNotifier<FluidTherapyState> {
   }
 }
 
-/// Provider para a calculadora de fluidoterapia
-final fluidTherapyProvider = StateNotifierProvider<FluidTherapyNotifier, FluidTherapyState>((ref) {
-  return FluidTherapyNotifier(ref.watch(performCalculationProvider));
-});
-
 /// Provider para obter informações sobre a calculadora de fluidoterapia
-final fluidTherapyCalculatorInfoProvider = Provider((ref) => const FluidTherapyCalculator());
+@riverpod
+FluidTherapyCalculator fluidTherapyCalculatorInfo(Ref ref) => const FluidTherapyCalculator();

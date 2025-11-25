@@ -1,23 +1,36 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../../core/interfaces/usecase.dart' as local;
+
 import '../../../domain/entities/weight.dart';
+
 import '../../../domain/usecases/get_weights.dart';
+
 import '../../../domain/usecases/get_weights_by_animal_id.dart';
+
 import '../../states/weights_query_state.dart';
+
+part 'weights_query_notifier.g.dart';
+
 
 /// Notifier specialized for READ and LIST operations (Query, Search, Fetch)
 /// Single Responsibility: Handles weight retrieval and loading
-class WeightsQueryNotifier extends StateNotifier<WeightsQueryState> {
-  final GetWeights _getWeights;
-  final GetWeightsByAnimalId _getWeightsByAnimalId;
+/// 
+/// Migrated to Riverpod 3.0 Notifier pattern
+@riverpod
+class WeightsQueryNotifier extends _$WeightsQueryNotifier {
+  late final GetWeights _getWeights;
+  late final GetWeightsByAnimalId _getWeightsByAnimalId;
 
-  WeightsQueryNotifier({
-    required GetWeights getWeights,
-    required GetWeightsByAnimalId getWeightsByAnimalId,
-  }) : _getWeights = getWeights,
-       _getWeightsByAnimalId = getWeightsByAnimalId,
-       super(const WeightsQueryState());
+  @override
+  WeightsQueryState build() {
+    return const WeightsQueryState();
+  }
+
+  void setUseCases(GetWeights getWeights, GetWeightsByAnimalId getWeightsByAnimalId) {
+    _getWeights = getWeights;
+    _getWeightsByAnimalId = getWeightsByAnimalId;
+  }
 
   /// Loads all weights globally
   Future<void> loadWeights() async {

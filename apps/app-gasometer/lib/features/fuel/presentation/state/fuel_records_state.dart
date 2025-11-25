@@ -24,7 +24,7 @@ enum FuelRecordsPeriod {
 ///
 /// Usa @freezed para type-safety, imutabilidade e código gerado
 @freezed
-class FuelRecordsState with _$FuelRecordsState {
+sealed class FuelRecordsState with _$FuelRecordsState {
   const factory FuelRecordsState({
     /// Lista de registros de abastecimento
     @Default([]) List<FuelRecordEntity> records,

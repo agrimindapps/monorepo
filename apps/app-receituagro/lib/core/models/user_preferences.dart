@@ -1,14 +1,13 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'user_preferences.freezed.dart';
-part 'user_preferences.g.dart';
 
 /// Modelo de dados para preferências simples do usuário
 ///
 /// Representa apenas as configurações básicas de notificações
 /// que são gerenciadas pelo PreferencesNotifier
 @freezed
-class UserPreferences with _$UserPreferences {
+sealed class UserPreferences with _$UserPreferences {
   const factory UserPreferences({
     /// Notificações de pragas detectadas habilitadas
     @Default(true) bool pragasDetectadasEnabled,

@@ -42,7 +42,7 @@ enum ReportPeriod {
 ///
 /// Usa @freezed para type-safety, imutabilidade e código gerado
 @freezed
-class ReportsState with _$ReportsState {
+sealed class ReportsState with _$ReportsState {
   const ReportsState._();
 
   const factory ReportsState({

@@ -24,8 +24,8 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
 
   @override
   Widget build(BuildContext context) {
-    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
-    final maintenanceState = ref.watch(maintenancesNotifierProvider);
+    final vehiclesAsync = ref.watch(vehiclesProvider);
+    final maintenanceState = ref.watch(maintenancesProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -54,7 +54,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
                   icon: Icons.error_outline,
                   actionLabel: 'Tentar novamente',
                   onAction: () {
-                    ref.read(vehiclesNotifierProvider.notifier).refresh();
+                    ref.read(vehiclesProvider.notifier).refresh();
                   },
                 ),
               ),
@@ -144,7 +144,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
           });
           if (vehicleId != null) {
             ref
-                .read(maintenancesNotifierProvider.notifier)
+                .read(maintenancesProvider.notifier)
                 .loadMaintenancesByVehicle(vehicleId);
           }
         },
@@ -182,11 +182,11 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
             onTap: () {
               if (isSelected) {
                 ref
-                    .read(maintenancesNotifierProvider.notifier)
+                    .read(maintenancesProvider.notifier)
                     .clearMonthFilter();
               } else {
                 ref
-                    .read(maintenancesNotifierProvider.notifier)
+                    .read(maintenancesProvider.notifier)
                     .selectMonth(month);
               }
             },
@@ -240,7 +240,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
         onAction: () {
           if (_selectedVehicleId != null) {
             ref
-                .read(maintenancesNotifierProvider.notifier)
+                .read(maintenancesProvider.notifier)
                 .loadMaintenancesByVehicle(_selectedVehicleId!);
           }
         },
@@ -259,7 +259,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
         actionLabel: state.hasActiveFilters ? 'Limpar filtros' : null,
         onAction: state.hasActiveFilters
             ? () =>
-                ref.read(maintenancesNotifierProvider.notifier).clearFilters()
+                ref.read(maintenancesProvider.notifier).clearFilters()
             : null,
       );
     }
@@ -272,7 +272,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
       onRefresh: () async {
         if (_selectedVehicleId != null) {
           await ref
-              .read(maintenancesNotifierProvider.notifier)
+              .read(maintenancesProvider.notifier)
               .loadMaintenancesByVehicle(_selectedVehicleId!);
         }
       },
@@ -394,7 +394,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
-    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+    final vehiclesAsync = ref.watch(vehiclesProvider);
     final hasVehicles = vehiclesAsync.value?.isNotEmpty ?? false;
     final isEnabled = hasVehicles && _selectedVehicleId != null;
 
@@ -416,7 +416,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
         ).then((result) {
           if (result == true && _selectedVehicleId != null) {
             ref
-                .read(maintenancesNotifierProvider.notifier)
+                .read(maintenancesProvider.notifier)
                 .loadMaintenancesByVehicle(_selectedVehicleId!);
           }
         });

@@ -28,7 +28,7 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
 
   void _loadInitialData() {
     final authState = ref.read(authProvider);
-    final exportNotifier = ref.read(dataExportNotifierProvider.notifier);
+    final exportNotifier = ref.read(dataExportProvider.notifier);
 
     final userId = authState.currentUser?.id;
     if (userId != null) {
@@ -40,7 +40,7 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
-    final exportState = ref.watch(dataExportNotifierProvider);
+    final exportState = ref.watch(dataExportProvider);
 
     final user = authState.currentUser;
     final isAnonymous = authState.isAnonymous;
@@ -260,7 +260,7 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
     }
 
     try {
-      final exportNotifier = ref.read(dataExportNotifierProvider.notifier);
+      final exportNotifier = ref.read(dataExportProvider.notifier);
       final success = await exportNotifier.startExport(
         userId: userId,
         categories: ['all'], // Exportar todas as categorias
@@ -279,7 +279,7 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
               label: 'Compartilhar',
               textColor: Colors.white,
               onPressed: () {
-                final result = ref.read(dataExportNotifierProvider).lastResult;
+                final result = ref.read(dataExportProvider).lastResult;
                 if (result?.filePath != null) {
                   _shareFile(result!.filePath!, 'dados_json');
                 }
@@ -338,7 +338,7 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
   }
 
   Future<void> _shareFile(String filePath, String fileName) async {
-    final exportNotifier = ref.read(dataExportNotifierProvider.notifier);
+    final exportNotifier = ref.read(dataExportProvider.notifier);
     await exportNotifier.shareExportFile(filePath, '$fileName.json');
   }
 }

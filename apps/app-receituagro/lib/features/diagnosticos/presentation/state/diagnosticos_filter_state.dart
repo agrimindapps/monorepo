@@ -3,11 +3,10 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 
 part 'diagnosticos_filter_state.freezed.dart';
-part 'diagnosticos_filter_state.g.dart';
 
 /// State para gerenciamento de filtros de diagnósticos
 @freezed
-class DiagnosticosFilterState with _$DiagnosticosFilterState {
+sealed class DiagnosticosFilterState with _$DiagnosticosFilterState {
   const DiagnosticosFilterState._();
 
   const factory DiagnosticosFilterState({

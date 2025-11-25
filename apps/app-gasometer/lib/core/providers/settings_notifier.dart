@@ -127,7 +127,7 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
 
   Future<void> _saveSettings() async {
     try {
-      final currentState = state.valueOrNull;
+      final currentState = state.value;
       if (currentState == null) return;
 
       final settingsJson = jsonEncode(currentState.toJson());
@@ -137,7 +137,7 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
         state = AsyncValue.data(currentState.copyWith(errorMessage: null));
       }
     } catch (e) {
-      final currentState = state.valueOrNull;
+      final currentState = state.value;
       if (currentState != null) {
         state = AsyncValue.data(
           currentState.copyWith(
@@ -149,7 +149,7 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
   }
 
   Future<void> toggleDarkMode() async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     state = AsyncValue.data(
@@ -159,7 +159,7 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
   }
 
   Future<void> setLanguage(String language) async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     state = AsyncValue.data(currentState.copyWith(selectedLanguage: language));
@@ -167,7 +167,7 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
   }
 
   Future<void> setCurrency(String currency) async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     state = AsyncValue.data(currentState.copyWith(selectedCurrency: currency));
@@ -175,7 +175,7 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
   }
 
   Future<void> toggleNotifications() async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     state = AsyncValue.data(
@@ -187,7 +187,7 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
   }
 
   Future<void> toggleAnalytics() async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     state = AsyncValue.data(
@@ -197,7 +197,7 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
   }
 
   Future<void> toggleAutoBackup() async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     state = AsyncValue.data(
@@ -212,7 +212,7 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
   }
 
   void clearError() {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState != null && currentState.errorMessage != null) {
       state = AsyncValue.data(currentState.copyWith(errorMessage: null));
     }
@@ -227,42 +227,42 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
 
 /// Provider para acessar isDarkMode diretamente
 @riverpod
-bool isDarkMode(IsDarkModeRef ref) {
-  final settingsAsync = ref.watch(coreSettingsNotifierProvider);
-  return settingsAsync.valueOrNull?.isDarkMode ?? false;
+bool isDarkMode(Ref ref) {
+  final settingsAsync = ref.watch(coreSettingsProvider);
+  return settingsAsync.value?.isDarkMode ?? false;
 }
 
 /// Provider para acessar selectedLanguage diretamente
 @riverpod
-String selectedLanguage(SelectedLanguageRef ref) {
-  final settingsAsync = ref.watch(coreSettingsNotifierProvider);
-  return settingsAsync.valueOrNull?.selectedLanguage ?? 'pt';
+String selectedLanguage(Ref ref) {
+  final settingsAsync = ref.watch(coreSettingsProvider);
+  return settingsAsync.value?.selectedLanguage ?? 'pt';
 }
 
 /// Provider para acessar selectedCurrency diretamente
 @riverpod
-String selectedCurrency(SelectedCurrencyRef ref) {
-  final settingsAsync = ref.watch(coreSettingsNotifierProvider);
-  return settingsAsync.valueOrNull?.selectedCurrency ?? 'BRL';
+String selectedCurrency(Ref ref) {
+  final settingsAsync = ref.watch(coreSettingsProvider);
+  return settingsAsync.value?.selectedCurrency ?? 'BRL';
 }
 
 /// Provider para acessar notificationsEnabled diretamente
 @riverpod
-bool coreNotificationsEnabled(CoreNotificationsEnabledRef ref) {
-  final settingsAsync = ref.watch(coreSettingsNotifierProvider);
-  return settingsAsync.valueOrNull?.notificationsEnabled ?? true;
+bool coreNotificationsEnabled(Ref ref) {
+  final settingsAsync = ref.watch(coreSettingsProvider);
+  return settingsAsync.value?.notificationsEnabled ?? true;
 }
 
 /// Provider para acessar analyticsEnabled diretamente
 @riverpod
-bool analyticsEnabled(AnalyticsEnabledRef ref) {
-  final settingsAsync = ref.watch(coreSettingsNotifierProvider);
-  return settingsAsync.valueOrNull?.analyticsEnabled ?? true;
+bool analyticsEnabled(Ref ref) {
+  final settingsAsync = ref.watch(coreSettingsProvider);
+  return settingsAsync.value?.analyticsEnabled ?? true;
 }
 
 /// Provider para acessar autoBackupEnabled diretamente
 @riverpod
-bool autoBackupEnabled(AutoBackupEnabledRef ref) {
-  final settingsAsync = ref.watch(coreSettingsNotifierProvider);
-  return settingsAsync.valueOrNull?.autoBackupEnabled ?? true;
+bool autoBackupEnabled(Ref ref) {
+  final settingsAsync = ref.watch(coreSettingsProvider);
+  return settingsAsync.value?.autoBackupEnabled ?? true;
 }

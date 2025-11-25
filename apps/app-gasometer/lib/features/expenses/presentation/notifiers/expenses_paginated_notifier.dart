@@ -32,7 +32,7 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
 
   /// Implementação interna do carregamento da primeira página
   Future<ExpensesPaginatedState> _loadFirstPageInternal() async {
-    final currentState = state.valueOrNull ?? const ExpensesPaginatedState();
+    final currentState = state.value ?? const ExpensesPaginatedState();
 
     final result = await _repository.getExpensesPaginated(
       page: 0,
@@ -71,7 +71,7 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
 
   /// Carrega próxima página
   Future<void> loadNextPage() async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null ||
         !currentState.hasNextPage ||
         currentState.isLoadingMore) {
@@ -116,7 +116,7 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
 
   /// Aplica filtros e recarrega dados
   Future<void> applyFilters(ExpenseFiltersConfig newFilters) async {
-    final currentState = state.valueOrNull ?? const ExpensesPaginatedState();
+    final currentState = state.value ?? const ExpensesPaginatedState();
 
     if (currentState.filtersConfig == newFilters) return;
     state = AsyncValue.data(
@@ -131,7 +131,7 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
 
   /// Atualiza ordenação
   Future<void> setSortBy(ExpenseSortBy sortBy, SortOrder sortOrder) async {
-    final currentState = state.valueOrNull ?? const ExpensesPaginatedState();
+    final currentState = state.value ?? const ExpensesPaginatedState();
 
     if (currentState.sortBy == sortBy && currentState.sortOrder == sortOrder) {
       return;
@@ -148,7 +148,7 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
 
   /// Toggle sort order para o mesmo campo
   Future<void> toggleSortOrder(ExpenseSortBy sortBy) async {
-    final currentState = state.valueOrNull ?? const ExpensesPaginatedState();
+    final currentState = state.value ?? const ExpensesPaginatedState();
 
     SortOrder newOrder;
     if (currentState.sortBy == sortBy) {
@@ -164,7 +164,7 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
 
   /// Aplica filtro por veículo
   Future<void> filterByVehicle(String? vehicleId) async {
-    final currentState = state.valueOrNull ?? const ExpensesPaginatedState();
+    final currentState = state.value ?? const ExpensesPaginatedState();
 
     final newFilters = currentState.filtersConfig.copyWith(
       vehicleId: vehicleId,
@@ -175,7 +175,7 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
 
   /// Aplica filtro por tipo
   Future<void> filterByType(ExpenseType? type) async {
-    final currentState = state.valueOrNull ?? const ExpensesPaginatedState();
+    final currentState = state.value ?? const ExpensesPaginatedState();
 
     final newFilters = currentState.filtersConfig.copyWith(
       type: type,
@@ -186,7 +186,7 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
 
   /// Aplica filtro por período
   Future<void> filterByPeriod(DateTime? start, DateTime? end) async {
-    final currentState = state.valueOrNull ?? const ExpensesPaginatedState();
+    final currentState = state.value ?? const ExpensesPaginatedState();
 
     final newFilters = currentState.filtersConfig.copyWith(
       startDate: start,
@@ -198,7 +198,7 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
 
   /// Aplica busca por texto
   Future<void> search(String query) async {
-    final currentState = state.valueOrNull ?? const ExpensesPaginatedState();
+    final currentState = state.value ?? const ExpensesPaginatedState();
 
     final newFilters = currentState.filtersConfig.copyWith(searchQuery: query);
     await applyFilters(newFilters);
@@ -211,7 +211,7 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
 
   /// Busca despesa específica na lista paginada atual
   ExpenseEntity? findInCurrentPage(String expenseId) {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return null;
 
     try {
@@ -223,13 +223,13 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
 
   /// Recarrega mantendo página atual (best effort)
   Future<void> reloadCurrentPage() async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
 
     final currentPageBackup = currentState.currentPage;
     await refresh();
     if (currentPageBackup > 0) {
-      final newState = state.valueOrNull;
+      final newState = state.value;
       if (newState != null && newState.hasNextPage) {
         for (int i = 0; i < currentPageBackup && newState.hasNextPage; i++) {
           await loadNextPage();

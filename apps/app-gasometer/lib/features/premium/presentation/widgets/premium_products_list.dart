@@ -20,7 +20,7 @@ class _PremiumProductsListState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        final notifier = ref.read(premiumNotifierProvider.notifier);
+        final notifier = ref.read(premiumProvider.notifier);
         notifier.loadAvailableProducts();
       }
     });
@@ -28,7 +28,7 @@ class _PremiumProductsListState
 
   @override
   Widget build(BuildContext context) {
-    final premiumAsync = ref.watch(premiumNotifierProvider);
+    final premiumAsync = ref.watch(premiumProvider);
 
     return premiumAsync.when(
       data: (state) {
@@ -74,7 +74,7 @@ class _PremiumProductsListState
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
-                    final notifier = ref.read(premiumNotifierProvider.notifier);
+                    final notifier = ref.read(premiumProvider.notifier);
                     notifier.loadAvailableProducts();
                   },
                   style: ElevatedButton.styleFrom(
@@ -355,12 +355,12 @@ class _PremiumProductsListState
 
     final confirmed = await _showPurchaseConfirmation(context, product);
     if (!confirmed) return;
-    final notifier = ref.read(premiumNotifierProvider.notifier);
+    final notifier = ref.read(premiumProvider.notifier);
     final success = await notifier.purchaseProduct(product.productId);
 
     if (!mounted) return;
 
-    final state = ref.read(premiumNotifierProvider).valueOrNull;
+    final state = ref.read(premiumProvider).value;
 
     if (success) {
       messenger.showSnackBar(

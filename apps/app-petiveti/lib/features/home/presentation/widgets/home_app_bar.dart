@@ -22,8 +22,8 @@ class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notificationsState = ref.watch(homeNotificationsNotifierProvider);
-    final statusState = ref.watch(homeStatusNotifierProvider);
+    final notificationsState = ref.watch(homeNotificationsProvider);
+    final statusState = ref.watch(homeStatusProvider);
     final hasUnreadNotifications = ref.watch(hasUnreadNotificationsProvider);
     final hasUrgentAlerts = ref.watch(hasUrgentAlertsProvider);
 

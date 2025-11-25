@@ -19,7 +19,7 @@ import '../../../../core/providers/core_services_providers.dart';
 import '../../domain/entities/animal.dart';
 
 // Export state classes and providers for use in other modules
-// export '../notifiers/animals_notifier.dart' show AnimalsState, AnimalsNotifier, animalsNotifierProvider;
+// export '../notifiers/animals_notifier.dart' show AnimalsState, AnimalsNotifier, animalsProvider;
 
 part 'animals_providers.g.dart';
 
@@ -277,7 +277,7 @@ class AnimalsNotifier extends _$AnimalsNotifier {
 // Derived providers
 @riverpod
 Future<Animal?> animalById(AnimalByIdRef ref, String id) async {
-  final notifier = ref.read(animalsNotifierProvider.notifier);
+  final notifier = ref.read(animalsProvider.notifier);
   return await notifier.getAnimalById(id);
 }
 

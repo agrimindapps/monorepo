@@ -1,9 +1,18 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'package:core/core.dart';
 
+
 import '../../domain/calculators/pregnancy_gestacao_calculator.dart';
+
 import '../../domain/entities/calculation_result.dart';
+
 import '../../domain/usecases/perform_calculation.dart';
+
 import 'calculators_providers.dart';
+
+part 'pregnancy_provider.g.dart';
+
 
 /// Estado da calculadora de gestação
 class PregnancyState {
@@ -31,11 +40,13 @@ class PregnancyState {
 }
 
 /// Notifier para gerenciar o estado da calculadora de gestação
-class PregnancyNotifier extends StateNotifier<PregnancyState> {
-  PregnancyNotifier(this._performCalculation) : super(const PregnancyState());
-
+/// Migrated to Riverpod 3.0 Notifier pattern
+@riverpod
+class PregnancyNotifier extends _$PregnancyNotifier {
   final _calculator = const PregnancyGestacaoCalculator();
-  final PerformCalculation _performCalculation;
+
+  @override
+  PregnancyState build() => const PregnancyState();
 
   /// Calcula a gestação baseado nos inputs
   Future<void> calculate(Map<String, dynamic> inputs) async {
@@ -53,7 +64,8 @@ class PregnancyNotifier extends StateNotifier<PregnancyState> {
         );
         return;
       }
-      final result = await _performCalculation(
+      final performCalculation = ref.read(performCalculationProvider);
+      final result = await performCalculation(
         calculatorId: _calculator.id,
         inputs: inputs,
       );
@@ -99,23 +111,21 @@ class PregnancyNotifier extends StateNotifier<PregnancyState> {
   }
 }
 
-/// Provider para a calculadora de gestação
-final pregnancyProvider = StateNotifierProvider<PregnancyNotifier, PregnancyState>(
-  (ref) => PregnancyNotifier(ref.watch(performCalculationProvider)),
-);
-
 /// Provider para obter histórico de cálculos de gestação
-final pregnancyHistoryProvider = FutureProvider<List<CalculationResult>>((ref) async {
+@riverpod
+Future<List<CalculationResult>> pregnancyHistory(Ref ref) async {
   return <CalculationResult>[];
-});
+}
 
 /// Provider para verificar se a calculadora é favorita
-final pregnancyIsFavoriteProvider = FutureProvider<bool>((ref) async {
+@riverpod
+Future<bool> pregnancyIsFavorite(Ref ref) async {
   return false;
-});
+}
 
 /// Provider para cálculos rápidos de gestação (sem persistir histórico)
-final quickPregnancyCalculationProvider = FutureProvider.family<CalculationResult, Map<String, dynamic>>((ref, inputs) async {
+@riverpod
+Future<CalculationResult> quickPregnancyCalculation(Ref ref, Map<String, dynamic> inputs) async {
   const calculator = PregnancyGestacaoCalculator();
   return calculator.calculate(inputs);
-});
+}

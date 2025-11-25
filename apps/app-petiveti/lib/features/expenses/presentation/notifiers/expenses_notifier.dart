@@ -246,7 +246,7 @@ Future<List<Expense>> categoryExpenses(
   CategoryExpensesRef ref,
   CategoryExpenseParams params,
 ) async {
-  final notifier = ref.read(expensesNotifierProvider.notifier);
+  final notifier = ref.read(expensesProvider.notifier);
   await notifier.loadExpensesByCategory(params.userId, params.category);
   return notifier.getExpensesByCategory(params.category);
 }
@@ -263,15 +263,15 @@ Stream<List<Expense>> expensesStream(ExpensesStreamRef ref, String userId) {
 @riverpod
 Future<List<Expense>> monthlyExpenses(
     MonthlyExpensesRef ref, String userId) async {
-  final notifier = ref.read(expensesNotifierProvider.notifier);
+  final notifier = ref.read(expensesProvider.notifier);
   await notifier.loadMonthlyExpenses(userId);
-  return ref.read(expensesNotifierProvider).monthlyExpenses;
+  return ref.read(expensesProvider).monthlyExpenses;
 }
 
 @riverpod
 Future<ExpenseSummary?> expenseSummary(
     ExpenseSummaryRef ref, String userId) async {
-  final notifier = ref.read(expensesNotifierProvider.notifier);
+  final notifier = ref.read(expensesProvider.notifier);
   await notifier.loadExpenseSummary(userId);
-  return ref.read(expensesNotifierProvider).summary;
+  return ref.read(expensesProvider).summary;
 }

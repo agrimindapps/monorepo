@@ -1,9 +1,18 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'package:core/core.dart';
 
+
 import '../../domain/calculators/diabetes_insulin_calculator.dart';
+
 import '../../domain/entities/calculation_result.dart';
+
 import '../../domain/usecases/perform_calculation.dart';
+
 import 'calculators_providers.dart';
+
+part 'diabetes_insulin_provider.g.dart';
+
 
 /// Estado da calculadora de diabetes insulina
 class DiabetesInsulinState {
@@ -31,11 +40,13 @@ class DiabetesInsulinState {
 }
 
 /// Notifier para gerenciar estado da calculadora de diabetes insulina
-class DiabetesInsulinNotifier extends StateNotifier<DiabetesInsulinState> {
-  DiabetesInsulinNotifier(this._performCalculation) : super(const DiabetesInsulinState());
-
+/// Migrated to Riverpod 3.0 Notifier pattern
+@riverpod
+class DiabetesInsulinNotifier extends _$DiabetesInsulinNotifier {
   final _calculator = const DiabetesInsulinCalculator();
-  final PerformCalculation _performCalculation;
+
+  @override
+  DiabetesInsulinState build() => const DiabetesInsulinState();
 
   /// Realiza o cálculo de insulina para diabetes
   Future<void> calculate(Map<String, dynamic> inputs) async {
@@ -66,7 +77,8 @@ class DiabetesInsulinNotifier extends StateNotifier<DiabetesInsulinState> {
       }
       final result = _calculator.calculate(inputs);
       try {
-        await _performCalculation(
+        final performCalculation = ref.read(performCalculationProvider);
+        await performCalculation(
           calculatorId: _calculator.id,
           inputs: inputs,
         );
@@ -100,10 +112,6 @@ class DiabetesInsulinNotifier extends StateNotifier<DiabetesInsulinState> {
   }
 }
 
-/// Provider para a calculadora de diabetes insulina
-final diabetesInsulinProvider = StateNotifierProvider<DiabetesInsulinNotifier, DiabetesInsulinState>((ref) {
-  return DiabetesInsulinNotifier(ref.watch(performCalculationProvider));
-});
-
 /// Provider para obter informações sobre a calculadora de diabetes insulina
-final diabetesInsulinCalculatorInfoProvider = Provider((ref) => const DiabetesInsulinCalculator());
+@riverpod
+DiabetesInsulinCalculator diabetesInsulinCalculatorInfo(Ref ref) => const DiabetesInsulinCalculator();

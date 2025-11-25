@@ -1,4 +1,9 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'package:core/core.dart';
+
+part 'global_state_patterns.g.dart';
+
 
 /// **Global State Patterns for Riverpod**
 /// 
@@ -77,8 +82,36 @@ class AsyncState<T> extends BaseState<T> {
 /// **Base Notifier Pattern**
 /// 
 /// Standardized notifier with common patterns and lifecycle management.
-abstract class BaseAsyncNotifier<T> extends StateNotifier<AsyncState<T>> {
-  BaseAsyncNotifier() : super(const AsyncState());
+/// 
+/// In Riverpod 3.0, use `extends Notifier<AsyncState<T>>` or `extends AsyncNotifier<T>` instead.
+/// This base class is deprecated and kept only for reference.
+/// 
+/// Migration guide:
+/// ```dart
+/// // OLD (Riverpod 2.x)
+/// class MyNotifier extends BaseAsyncNotifier<MyType> { ... }
+/// 
+/// // NEW (Riverpod 3.0)
+/// @riverpod
+/// class MyNotifier extends _$MyNotifier {
+///   @override
+///   AsyncValue<MyType> build() => const AsyncValue.loading();
+///   
+///   Future<void> loadData() async {
+///     state = const AsyncValue.loading();
+///     try {
+///       final data = await _fetchData();
+///       state = AsyncValue.data(data);
+///     } catch (e, st) {
+///       state = AsyncValue.error(e, st);
+///     }
+///   }
+/// }
+/// ```
+@Deprecated('Use Notifier<AsyncState<T>> or AsyncNotifier<T> with @riverpod annotation instead')
+mixin BaseAsyncNotifierMixin<T> {
+  AsyncState<T> get state;
+  set state(AsyncState<T> newState);
 
   /// Execute async operation with standard error handling
   Future<void> executeAsync<R>(
@@ -117,7 +150,7 @@ abstract class BaseAsyncNotifier<T> extends StateNotifier<AsyncState<T>> {
   }
 
   void _logError(dynamic error, StackTrace stackTrace) {
-    print('Error in $runtimeType: $error');
+    print('Error: $error');
     print('StackTrace: $stackTrace');
   }
 }

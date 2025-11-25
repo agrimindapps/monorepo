@@ -3,7 +3,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/cultura_entity.dart';
 
 part 'culturas_state.freezed.dart';
-part 'culturas_state.g.dart';
 
 /// Estados da view de culturas
 enum CulturasViewState {
@@ -18,7 +17,7 @@ enum CulturasViewState {
 ///
 /// Migrado para @freezed para type-safety, imutabilidade e código gerado
 @freezed
-class CulturasState with _$CulturasState {
+sealed class CulturasState with _$CulturasState {
   const CulturasState._();
 
   const factory CulturasState({

@@ -1,12 +1,14 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:core/core.dart' show EnhancedAccountDeletionService;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' show EnhancedAccountDeletionService;
 import 'auth_providers.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/services/pet_data_sync_service.dart';
 import '../../domain/usecases/auth_usecases.dart' as auth_usecases;
 import '../../../../core/interfaces/usecase.dart' as local;
+
+part 'auth_provider.g.dart';
 
 enum AuthStatus {
   initial,
@@ -48,19 +50,20 @@ class AuthState {
   bool get hasError => status == AuthStatus.error && error != null;
 }
 
-class AuthNotifier extends StateNotifier<AuthState> {
-  final auth_usecases.SignInWithEmail _signInWithEmail;
-  final auth_usecases.SignUpWithEmail _signUpWithEmail;
-  final auth_usecases.SignInWithGoogle _signInWithGoogle;
-  final auth_usecases.SignInWithApple _signInWithApple;
-  final auth_usecases.SignInWithFacebook _signInWithFacebook;
-  final auth_usecases.SignInAnonymously _signInAnonymously;
-  final auth_usecases.SignOut _signOut;
-  final auth_usecases.GetCurrentUser _getCurrentUser;
-  final auth_usecases.SendEmailVerification _sendEmailVerification;
-  final auth_usecases.SendPasswordResetEmail _sendPasswordResetEmail;
-  final auth_usecases.UpdateProfile _updateProfile;
-  final EnhancedAccountDeletionService _enhancedDeletionService;
+@Riverpod(keepAlive: true)
+class AuthNotifier extends _$AuthNotifier {
+  late final auth_usecases.SignInWithEmail _signInWithEmail;
+  late final auth_usecases.SignUpWithEmail _signUpWithEmail;
+  late final auth_usecases.SignInWithGoogle _signInWithGoogle;
+  late final auth_usecases.SignInWithApple _signInWithApple;
+  late final auth_usecases.SignInWithFacebook _signInWithFacebook;
+  late final auth_usecases.SignInAnonymously _signInAnonymously;
+  late final auth_usecases.SignOut _signOut;
+  late final auth_usecases.GetCurrentUser _getCurrentUser;
+  late final auth_usecases.SendEmailVerification _sendEmailVerification;
+  late final auth_usecases.SendPasswordResetEmail _sendPasswordResetEmail;
+  late final auth_usecases.UpdateProfile _updateProfile;
+  late final EnhancedAccountDeletionService _enhancedDeletionService;
   DateTime? _lastLoginAttempt;
   DateTime? _lastRegisterAttempt;
   int _loginAttempts = 0;
@@ -68,21 +71,25 @@ class AuthNotifier extends StateNotifier<AuthState> {
   static const int _maxAttempts = 5;
   static const Duration _cooldownPeriod = Duration(minutes: 2);
 
-  AuthNotifier(
-    this._signInWithEmail,
-    this._signUpWithEmail,
-    this._signInWithGoogle,
-    this._signInWithApple,
-    this._signInWithFacebook,
-    this._signInAnonymously,
-    this._signOut,
-    this._getCurrentUser,
-    this._sendEmailVerification,
-    this._sendPasswordResetEmail,
-    this._updateProfile,
-    this._enhancedDeletionService,
-  ) : super(const AuthState()) {
-    _checkAuthState();
+  @override
+  AuthState build() {
+    _signInWithEmail = ref.watch(signInWithEmailProvider);
+    _signUpWithEmail = ref.watch(signUpWithEmailProvider);
+    _signInWithGoogle = ref.watch(signInWithGoogleProvider);
+    _signInWithApple = ref.watch(signInWithAppleProvider);
+    _signInWithFacebook = ref.watch(signInWithFacebookProvider);
+    _signInAnonymously = ref.watch(signInAnonymouslyProvider);
+    _signOut = ref.watch(signOutProvider);
+    _getCurrentUser = ref.watch(getCurrentUserProvider);
+    _sendEmailVerification = ref.watch(sendEmailVerificationProvider);
+    _sendPasswordResetEmail = ref.watch(sendPasswordResetEmailProvider);
+    _updateProfile = ref.watch(updateProfileProvider);
+    _enhancedDeletionService = ref.watch(enhancedAccountDeletionServiceProvider);
+    
+    // Check auth state after build
+    Future.microtask(() => _checkAuthState());
+    
+    return const AuthState();
   }
 
   Future<void> _checkAuthState() async {
@@ -507,22 +514,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 }
 
-final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  return AuthNotifier(
-    ref.watch(signInWithEmailProvider),
-    ref.watch(signUpWithEmailProvider),
-    ref.watch(signInWithGoogleProvider),
-    ref.watch(signInWithAppleProvider),
-    ref.watch(signInWithFacebookProvider),
-    ref.watch(signInAnonymouslyProvider),
-    ref.watch(signOutProvider),
-    ref.watch(getCurrentUserProvider),
-    ref.watch(sendEmailVerificationProvider),
-    ref.watch(sendPasswordResetEmailProvider),
-    ref.watch(updateProfileProvider),
-    ref.watch(enhancedAccountDeletionServiceProvider),
-  );
-});
+// Derived providers (now use authProvider from code generation)
 final authStateProvider = Provider<AuthState>((ref) {
   return ref.watch(authProvider);
 });

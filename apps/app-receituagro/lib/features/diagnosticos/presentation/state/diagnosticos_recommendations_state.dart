@@ -3,11 +3,10 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 
 part 'diagnosticos_recommendations_state.freezed.dart';
-part 'diagnosticos_recommendations_state.g.dart';
 
 /// State para gerenciamento de recomendações de diagnósticos
 @freezed
-class DiagnosticosRecommendationsState with _$DiagnosticosRecommendationsState {
+sealed class DiagnosticosRecommendationsState with _$DiagnosticosRecommendationsState {
   const DiagnosticosRecommendationsState._();
 
   const factory DiagnosticosRecommendationsState({

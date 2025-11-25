@@ -10,7 +10,7 @@ class PremiumUpgradeButton extends core.ConsumerWidget {
 
   @override
   Widget build(BuildContext context, core.WidgetRef ref) {
-    final premiumAsync = ref.watch(premiumNotifierProvider);
+    final premiumAsync = ref.watch(premiumProvider);
 
     return premiumAsync.when(
       data: (state) {
@@ -188,7 +188,7 @@ class PremiumUpgradeButton extends core.ConsumerWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.pop(context);
-                        final notifier = ref.read(premiumNotifierProvider.notifier);
+                        final notifier = ref.read(premiumProvider.notifier);
                         notifier.loadAvailableProducts();
                       },
                       style: ElevatedButton.styleFrom(

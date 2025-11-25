@@ -14,8 +14,8 @@ class VehiclePhotoSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final formState = ref.watch(vehicleFormNotifierProvider);
-    final notifier = ref.read(vehicleFormNotifierProvider.notifier);
+    final formState = ref.watch(vehicleFormProvider);
+    final notifier = ref.read(vehicleFormProvider.notifier);
 
     // Check if file exists only on mobile/desktop platforms
     // Web doesn't support dart:io File operations

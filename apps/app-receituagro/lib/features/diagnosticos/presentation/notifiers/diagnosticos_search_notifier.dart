@@ -1,25 +1,27 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/services/failure_message_service.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/services/search/i_diagnosticos_search_service.dart';
-import '../providers/diagnosticos_providers.dart' as diagnosticosProviders;
+import '../providers/diagnosticos_providers.dart' as providers;
 import '../state/diagnosticos_search_state.dart';
+
+part 'diagnosticos_search_notifier.g.dart';
 
 /// Notifier para gerenciamento de busca de diagnósticos
 /// Responsabilidade: Handle search operations
 /// Métodos: search(), findSimilar(), clearSearch()
-class DiagnosticosSearchNotifier
-    extends StateNotifier<DiagnosticosSearchState> {
-  DiagnosticosSearchNotifier({
-    required IDiagnosticosSearchService searchService,
-    required FailureMessageService failureMessageService,
-  })  : _searchService = searchService,
-        _failureMessageService = failureMessageService,
-        super(DiagnosticosSearchState.initial());
+@riverpod
+class DiagnosticosSearchNotifier extends _$DiagnosticosSearchNotifier {
+  late final IDiagnosticosSearchService _searchService;
+  late final FailureMessageService _failureMessageService;
 
-  final IDiagnosticosSearchService _searchService;
-  final FailureMessageService _failureMessageService;
+  @override
+  DiagnosticosSearchState build() {
+    _searchService = ref.watch(providers.diagnosticosSearchServiceProvider);
+    _failureMessageService = ref.watch(providers.failureMessageServiceProvider);
+    return DiagnosticosSearchState.initial();
+  }
 
   /// Busca diagnósticos por padrão de texto
   Future<void> search(
@@ -115,14 +117,3 @@ class DiagnosticosSearchNotifier
     state = state.clearSearch();
   }
 }
-
-/// Provider para DiagnosticosSearchNotifier
-final diagnosticosSearchNotifierProvider =
-    StateNotifierProvider<DiagnosticosSearchNotifier, DiagnosticosSearchState>(
-  (ref) => DiagnosticosSearchNotifier(
-    searchService:
-        ref.watch(diagnosticosProviders.diagnosticosSearchServiceProvider),
-    failureMessageService:
-        ref.watch(diagnosticosProviders.failureMessageServiceProvider),
-  ),
-);

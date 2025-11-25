@@ -53,7 +53,7 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage>
       debugPrint('[FUEL DEBUG] No vehicle selected');
       return;
     }
-    final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+    final notifier = ref.read(fuelFormProvider(vehicleId).notifier);
     await notifier.initialize(vehicleId: vehicleId, userId: authState.userId);
 
     if (widget.editFuelRecordId != null) {
@@ -73,7 +73,7 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage>
 
       if (record != null) {
         final formNotifier = ref.read(
-          fuelFormNotifierProvider(vehicleId).notifier,
+          fuelFormProvider(vehicleId).notifier,
         );
         await formNotifier.loadFromFuelRecord(record);
       } else {
@@ -101,7 +101,7 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage>
       );
     }
 
-    final formState = ref.watch(fuelFormNotifierProvider(vehicleId));
+    final formState = ref.watch(fuelFormProvider(vehicleId));
     String subtitle = 'Registre o abastecimento do seu veículo';
     if (formState.isInitialized && formState.formModel.vehicle != null) {
       final vehicle = formState.formModel.vehicle!;
@@ -118,7 +118,7 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage>
       confirmButtonText: 'Salvar',
       onCancel: () {
         final formNotifier = ref.read(
-          fuelFormNotifierProvider(vehicleId).notifier,
+          fuelFormProvider(vehicleId).notifier,
         );
         formNotifier.clearForm();
         Navigator.of(context).pop();
@@ -175,7 +175,7 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage>
       return;
     }
 
-    final formNotifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+    final formNotifier = ref.read(fuelFormProvider(vehicleId).notifier);
     clearFormError();
 
     final (isValid, firstErrorField) = formNotifier.validateForm();
@@ -187,7 +187,7 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage>
 
       // Get specific error message for the field
       if (firstErrorField != null) {
-        final formState = ref.read(fuelFormNotifierProvider(vehicleId));
+        final formState = ref.read(fuelFormProvider(vehicleId));
         final errorMessage = formState.formModel.errors[firstErrorField];
         setFormError(errorMessage ?? 'Por favor, corrija os campos destacados');
 

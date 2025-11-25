@@ -10,7 +10,7 @@ class PremiumStatusCard extends core.ConsumerWidget {
 
   @override
   Widget build(BuildContext context, core.WidgetRef ref) {
-    final premiumAsync = ref.watch(premiumNotifierProvider);
+    final premiumAsync = ref.watch(premiumProvider);
 
     return premiumAsync.when(
       data: (state) {

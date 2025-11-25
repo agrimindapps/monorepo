@@ -18,7 +18,7 @@ part 'onboarding_provider.g.dart';
 /// Provides [OnboardingLocalDataSource] instance
 @riverpod
 OnboardingLocalDataSource onboardingLocalDataSource(
-    OnboardingLocalDataSourceRef ref) {
+    Ref ref) {
   final localStorage = ref.watch(localStorageRepositoryProvider);
   return OnboardingLocalDataSource(localStorage);
 }
@@ -26,7 +26,7 @@ OnboardingLocalDataSource onboardingLocalDataSource(
 /// Provides [OnboardingConfigDataSource] instance
 @riverpod
 OnboardingConfigDataSource onboardingConfigDataSource(
-    OnboardingConfigDataSourceRef ref) {
+    Ref ref) {
   return OnboardingConfigDataSource();
 }
 
@@ -70,7 +70,7 @@ SkipStepUseCase skipStepUseCase(Ref ref) {
 /// Provides [GetOnboardingProgressUseCase] instance
 @riverpod
 GetOnboardingProgressUseCase getOnboardingProgressUseCase(
-  GetOnboardingProgressUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(onboardingRepositoryProvider);
   return GetOnboardingProgressUseCase(repository);
@@ -79,7 +79,7 @@ GetOnboardingProgressUseCase getOnboardingProgressUseCase(
 /// Provides [ShowFeatureTooltipUseCase] instance
 @riverpod
 ShowFeatureTooltipUseCase showFeatureTooltipUseCase(
-  ShowFeatureTooltipUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(onboardingRepositoryProvider);
   final analytics = ref.watch(analyticsRepositoryProvider);
@@ -105,7 +105,7 @@ OnboardingUIService onboardingUIService(Ref ref) {
 /// Provides [OnboardingErrorMessageService] instance
 @riverpod
 OnboardingErrorMessageService onboardingErrorMessageService(
-    OnboardingErrorMessageServiceRef ref) {
+    Ref ref) {
   return OnboardingErrorMessageService();
 }
 

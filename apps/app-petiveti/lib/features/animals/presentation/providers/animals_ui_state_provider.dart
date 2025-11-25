@@ -1,7 +1,14 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'package:core/core.dart';
 
+
 import '../../domain/entities/animal.dart';
+
 import 'animals_providers.dart';
+
+part 'animals_ui_state_provider.g.dart';
+
 
 /// Local UI state for the Animals page
 /// 
@@ -46,8 +53,11 @@ class AnimalsUIState {
   int get displayItemCount => (currentPage + 1) * itemsPerPage;
 }
 
-class AnimalsUIStateNotifier extends StateNotifier<AnimalsUIState> {
-  AnimalsUIStateNotifier() : super(const AnimalsUIState());
+/// UI state provider for Animals page using Riverpod 3.0 Notifier
+@riverpod
+class AnimalsUIStateNotifier extends _$AnimalsUIStateNotifier {
+  @override
+  AnimalsUIState build() => const AnimalsUIState();
 
   /// Toggle search mode
   void toggleSearchMode() {
@@ -101,19 +111,14 @@ class AnimalsUIStateNotifier extends StateNotifier<AnimalsUIState> {
   }
 }
 
-/// UI state provider for Animals page
-final animalsUIStateProvider = 
-    StateNotifierProvider<AnimalsUIStateNotifier, AnimalsUIState>((ref) {
-  return AnimalsUIStateNotifier();
-});
-
 /// Computed provider for filtered and paginated animals
-final filteredAnimalsProvider = Provider<List<Animal>>((ref) {
-  final animalsState = ref.watch(animalsNotifierProvider);
-  final uiState = ref.watch(animalsUIStateProvider);
+@riverpod
+List<Animal> filteredAnimals(Ref ref) {
+  final animalsState = ref.watch(animalsProvider);
+  final uiState = ref.watch(animalsUIStateNotifierProvider);
   List<Animal> filteredAnimals = animalsState.animals;
   final maxItems = uiState.displayItemCount;
   final paginatedAnimals = filteredAnimals.take(maxItems).toList();
 
   return paginatedAnimals;
-});
+}

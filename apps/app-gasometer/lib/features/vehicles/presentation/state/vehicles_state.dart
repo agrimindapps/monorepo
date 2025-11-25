@@ -10,7 +10,7 @@ enum VehiclesViewState { initial, loading, loaded, error, empty }
 ///
 /// Usa @freezed para type-safety, imutabilidade e código gerado
 @freezed
-class VehiclesState with _$VehiclesState {
+sealed class VehiclesState with _$VehiclesState {
   const factory VehiclesState({
     /// Lista de veículos
     @Default([]) List<VehicleEntity> vehicles,

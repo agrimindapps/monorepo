@@ -1,5 +1,18 @@
 import 'package:core/core.dart' ;
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'auth_tabs_widget.g.dart';
+
+/// Provider para gerenciar o estado do modo de autenticação (login/cadastro)
+@riverpod
+class AuthMode extends _$AuthMode {
+  @override
+  bool build() => false; // false = login, true = signup
+
+  void setSignUpMode(bool value) => state = value;
+  void toggle() => state = !state;
+}
 
 /// Widget para tabs de autenticação (Login/Cadastro)
 class AuthTabsWidget extends ConsumerWidget {
@@ -7,7 +20,7 @@ class AuthTabsWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isSignUpMode = ref.watch(_authModeProvider);
+    final isSignUpMode = ref.watch(authModeProvider);
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).primaryColor;
@@ -22,7 +35,7 @@ class AuthTabsWidget extends ConsumerWidget {
             isActive: !isSignUpMode,
             onTap: () {
               if (isSignUpMode) {
-                ref.read(_authModeProvider.notifier).state = false;
+                ref.read(authModeProvider.notifier).setSignUpMode(false);
               }
             },
             isDark: isDark,
@@ -35,7 +48,7 @@ class AuthTabsWidget extends ConsumerWidget {
             isActive: isSignUpMode,
             onTap: () {
               if (!isSignUpMode) {
-                ref.read(_authModeProvider.notifier).state = true;
+                ref.read(authModeProvider.notifier).setSignUpMode(true);
               }
             },
             isDark: isDark,
@@ -86,8 +99,3 @@ class AuthTabsWidget extends ConsumerWidget {
     );
   }
 }
-
-/// Provider para gerenciar o estado do modo de autenticação (login/cadastro)
-final _authModeProvider = StateProvider<bool>(
-  (ref) => false,
-); // false = login, true = signup

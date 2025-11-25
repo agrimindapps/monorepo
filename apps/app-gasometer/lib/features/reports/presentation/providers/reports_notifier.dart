@@ -432,31 +432,31 @@ class ReportsNotifier extends _$ReportsNotifier {
 
 @riverpod
 bool hasError(Ref ref) {
-  final state = ref.watch(reportsNotifierProvider);
+  final state = ref.watch(reportsProvider);
   return state.errorMessage != null;
 }
 
 @riverpod
 bool hasCurrentMonthData(Ref ref) {
-  final state = ref.watch(reportsNotifierProvider);
+  final state = ref.watch(reportsProvider);
   return state.currentMonthReport?.hasData == true;
 }
 
 @riverpod
 bool hasCurrentYearData(Ref ref) {
-  final state = ref.watch(reportsNotifierProvider);
+  final state = ref.watch(reportsProvider);
   return state.currentYearReport?.hasData == true;
 }
 
 @riverpod
 bool hasCustomData(Ref ref) {
-  final state = ref.watch(reportsNotifierProvider);
+  final state = ref.watch(reportsProvider);
   return state.customReport?.hasData == true;
 }
 
 @riverpod
 bool hasAnalytics(Ref ref) {
-  final state = ref.watch(reportsNotifierProvider);
+  final state = ref.watch(reportsProvider);
   return state.efficiencyTrends != null ||
       state.costAnalysis != null ||
       state.usagePatterns != null;
@@ -465,7 +465,7 @@ bool hasAnalytics(Ref ref) {
 @riverpod
 Map<String, String> currentMonthStats(Ref ref) {
   final report = ref.watch(
-    reportsNotifierProvider.select((s) => s.currentMonthReport),
+    reportsProvider.select((s) => s.currentMonthReport),
   );
 
   if (report == null || !report.hasData) {
@@ -488,7 +488,7 @@ Map<String, String> currentMonthStats(Ref ref) {
 @riverpod
 Map<String, String> currentYearStats(Ref ref) {
   final report = ref.watch(
-    reportsNotifierProvider.select((s) => s.currentYearReport),
+    reportsProvider.select((s) => s.currentYearReport),
   );
 
   if (report == null || !report.hasData) {
@@ -511,7 +511,7 @@ Map<String, String> currentYearStats(Ref ref) {
 @riverpod
 Map<String, String> monthlyComparisons(Ref ref) {
   final comparison = ref.watch(
-    reportsNotifierProvider.select((s) => s.monthlyComparison),
+    reportsProvider.select((s) => s.monthlyComparison),
   );
 
   if (comparison == null) {
@@ -536,7 +536,7 @@ Map<String, String> monthlyComparisons(Ref ref) {
 @riverpod
 Map<String, String> yearlyComparisons(Ref ref) {
   final comparison = ref.watch(
-    reportsNotifierProvider.select((s) => s.yearlyComparison),
+    reportsProvider.select((s) => s.yearlyComparison),
   );
 
   if (comparison == null) {

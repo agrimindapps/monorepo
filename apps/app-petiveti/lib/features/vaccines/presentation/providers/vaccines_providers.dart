@@ -448,7 +448,7 @@ class VaccinesNotifier extends _$VaccinesNotifier {
 // Derived providers
 @riverpod
 Future<Vaccine?> vaccineById(VaccineByIdRef ref, String id) async {
-  final notifier = ref.read(vaccinesNotifierProvider.notifier);
+  final notifier = ref.read(vaccinesProvider.notifier);
   return await notifier.getVaccineById(id);
 }
 
@@ -469,7 +469,7 @@ Future<Map<DateTime, List<Vaccine>>> vaccineCalendar(
 
 @riverpod
 VaccinesFilter vaccinesFilter(VaccinesFilterRef ref) {
-  final state = ref.watch(vaccinesNotifierProvider);
+  final state = ref.watch(vaccinesProvider);
   return state.filter;
 }
 
@@ -485,4 +485,4 @@ Future<Map<String, int>> vaccineStatistics(VaccineStatisticsRef ref) async {
 }
 
 // Alias for compatibility
-final vaccinesProvider = vaccinesNotifierProvider;
+final vaccinesProvider = vaccinesProvider;

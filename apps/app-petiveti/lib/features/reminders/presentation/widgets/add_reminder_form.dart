@@ -42,7 +42,7 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
     super.initState();
     _initializeForm();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(animalsNotifierProvider.notifier).loadAnimals();
+      ref.read(animalsProvider.notifier).loadAnimals();
     });
   }
 
@@ -75,7 +75,7 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
 
   @override
   Widget build(BuildContext context) {
-    final animalsState = ref.watch(animalsNotifierProvider);
+    final animalsState = ref.watch(animalsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -97,7 +97,7 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => ref
-                        .read(animalsNotifierProvider.notifier)
+                        .read(animalsProvider.notifier)
                         .loadAnimals(),
                     child: const Text('Tentar novamente'),
                   ),
@@ -331,11 +331,11 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
       bool success;
       if (widget.reminder != null) {
         success = await ref
-            .read(remindersNotifierProvider.notifier)
+            .read(remindersProvider.notifier)
             .updateReminder(reminder);
       } else {
         success = await ref
-            .read(remindersNotifierProvider.notifier)
+            .read(remindersProvider.notifier)
             .addReminder(reminder);
       }
 

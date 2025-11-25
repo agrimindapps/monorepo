@@ -3,7 +3,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/praga_entity.dart';
 
 part 'pragas_state.freezed.dart';
-part 'pragas_state.g.dart';
 
 /// Estados específicos para UI
 enum PragasViewState { initial, loading, loaded, error, empty }
@@ -12,7 +11,7 @@ enum PragasViewState { initial, loading, loaded, error, empty }
 ///
 /// Migrado para @freezed para type-safety, imutabilidade e código gerado
 @freezed
-class PragasState with _$PragasState {
+sealed class PragasState with _$PragasState {
   const PragasState._();
 
   const factory PragasState({

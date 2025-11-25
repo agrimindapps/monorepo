@@ -1,9 +1,18 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'package:core/core.dart';
 
+
 import '../../domain/calculators/anesthesia_calculator.dart';
+
 import '../../domain/entities/calculation_result.dart';
+
 import '../../domain/usecases/perform_calculation.dart';
+
 import 'calculators_providers.dart';
+
+part 'anesthesia_provider.g.dart';
+
 
 /// Estado da calculadora de anestesia
 class AnesthesiaState {
@@ -31,11 +40,13 @@ class AnesthesiaState {
 }
 
 /// Notifier para gerenciar estado da calculadora de anestesia
-class AnesthesiaNotifier extends StateNotifier<AnesthesiaState> {
-  AnesthesiaNotifier(this._performCalculation) : super(const AnesthesiaState());
-
+/// Migrated to Riverpod 3.0 Notifier pattern
+@riverpod
+class AnesthesiaNotifier extends _$AnesthesiaNotifier {
   final _calculator = const AnesthesiaCalculator();
-  final PerformCalculation _performCalculation;
+
+  @override
+  AnesthesiaState build() => const AnesthesiaState();
 
   /// Realiza o cálculo de anestesia
   Future<void> calculate(Map<String, dynamic> inputs) async {
@@ -57,7 +68,8 @@ class AnesthesiaNotifier extends StateNotifier<AnesthesiaState> {
       }
       final result = _calculator.calculate(inputs);
       try {
-        await _performCalculation(
+        final performCalculation = ref.read(performCalculationProvider);
+        await performCalculation(
           calculatorId: _calculator.id,
           inputs: inputs,
         );
@@ -91,10 +103,6 @@ class AnesthesiaNotifier extends StateNotifier<AnesthesiaState> {
   }
 }
 
-/// Provider para a calculadora de anestesia
-final anesthesiaProvider = StateNotifierProvider<AnesthesiaNotifier, AnesthesiaState>((ref) {
-  return AnesthesiaNotifier(ref.watch(performCalculationProvider));
-});
-
 /// Provider para obter informações sobre a calculadora de anestesia
-final anesthesiaCalculatorInfoProvider = Provider((ref) => const AnesthesiaCalculator());
+@riverpod
+AnesthesiaCalculator anesthesiaCalculatorInfo(Ref ref) => const AnesthesiaCalculator();

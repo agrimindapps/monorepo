@@ -10,7 +10,7 @@ class PremiumFeaturesList extends core.ConsumerWidget {
 
   @override
   Widget build(BuildContext context, core.WidgetRef ref) {
-    final premiumAsync = ref.watch(premiumNotifierProvider);
+    final premiumAsync = ref.watch(premiumProvider);
 
     return premiumAsync.when(
       data: (state) {
@@ -184,8 +184,8 @@ class PremiumFeaturesList extends core.ConsumerWidget {
   }
 
   Future<bool> _checkFeatureAccess(core.WidgetRef ref, String featureId) async {
-    final notifier = ref.read(premiumNotifierProvider.notifier);
-    final state = ref.read(premiumNotifierProvider).valueOrNull;
+    final notifier = ref.read(premiumProvider.notifier);
+    final state = ref.read(premiumProvider).value;
 
     switch (featureId) {
       case 'unlimited_vehicles':

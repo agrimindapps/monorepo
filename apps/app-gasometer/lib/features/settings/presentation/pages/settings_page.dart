@@ -22,8 +22,8 @@ class SettingsPage extends ConsumerStatefulWidget {
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   Widget build(BuildContext context) {
-    ref.watch(vehiclesNotifierProvider);
-    ref.watch(settingsNotifierProvider);
+    ref.watch(vehiclesProvider);
+    ref.watch(settingsProvider);
     ref.watch(themeModeProvider);
 
     return Scaffold(
@@ -204,7 +204,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   void _changeTheme(ThemeMode mode) {
-    ref.read(settingsNotifierProvider.notifier).changeTheme(mode);
+    ref.read(settingsProvider.notifier).changeTheme(mode);
   }
 
   Widget _buildThemeOption(
@@ -290,7 +290,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Future<void> _showRateAppDialog() async {
-    final notifier = ref.read(settingsNotifierProvider.notifier);
+    final notifier = ref.read(settingsProvider.notifier);
     final canShow = await notifier.canShowRating();
 
     if (!canShow) {

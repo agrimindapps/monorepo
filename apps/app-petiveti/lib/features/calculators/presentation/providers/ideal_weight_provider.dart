@@ -1,9 +1,18 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'package:core/core.dart';
 
+
 import '../../domain/calculators/ideal_weight_calculator.dart';
+
 import '../../domain/entities/calculation_result.dart';
+
 import '../../domain/usecases/perform_calculation.dart';
+
 import 'calculators_providers.dart';
+
+part 'ideal_weight_provider.g.dart';
+
 
 /// Estado da calculadora de peso ideal
 class IdealWeightState {
@@ -31,11 +40,13 @@ class IdealWeightState {
 }
 
 /// Notifier para gerenciar o estado da calculadora de peso ideal
-class IdealWeightNotifier extends StateNotifier<IdealWeightState> {
-  IdealWeightNotifier(this._performCalculation) : super(const IdealWeightState());
-
+/// Migrated to Riverpod 3.0 Notifier pattern
+@riverpod
+class IdealWeightNotifier extends _$IdealWeightNotifier {
   final _calculator = const IdealWeightCalculator();
-  final PerformCalculation _performCalculation;
+
+  @override
+  IdealWeightState build() => const IdealWeightState();
 
   /// Calcula o peso ideal baseado nos inputs
   Future<void> calculate(Map<String, dynamic> inputs) async {
@@ -53,7 +64,8 @@ class IdealWeightNotifier extends StateNotifier<IdealWeightState> {
         );
         return;
       }
-      final result = await _performCalculation(
+      final performCalculation = ref.read(performCalculationProvider);
+      final result = await performCalculation(
         calculatorId: _calculator.id,
         inputs: inputs,
       );
@@ -85,17 +97,14 @@ class IdealWeightNotifier extends StateNotifier<IdealWeightState> {
   }
 }
 
-/// Provider para a calculadora de peso ideal
-final idealWeightProvider = StateNotifierProvider<IdealWeightNotifier, IdealWeightState>(
-  (ref) => IdealWeightNotifier(ref.watch(performCalculationProvider)),
-);
-
 /// Provider para obter histórico de cálculos de peso ideal
-final idealWeightHistoryProvider = FutureProvider<List<CalculationResult>>((ref) async {
+@riverpod
+Future<List<CalculationResult>> idealWeightHistory(Ref ref) async {
   return <CalculationResult>[];
-});
+}
 
 /// Provider para verificar se a calculadora é favorita
-final idealWeightIsFavoriteProvider = FutureProvider<bool>((ref) async {
+@riverpod
+Future<bool> idealWeightIsFavorite(Ref ref) async {
   return false;
-});
+}

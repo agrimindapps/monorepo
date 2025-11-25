@@ -52,7 +52,7 @@ class _AnimalsErrorHandlerState extends ConsumerState<AnimalsErrorHandler> {
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        ref.read(animalsNotifierProvider.notifier).clearError();
+        ref.read(animalsProvider.notifier).clearError();
       }
     });
   }
@@ -63,7 +63,7 @@ class _AnimalsErrorHandlerState extends ConsumerState<AnimalsErrorHandler> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AnimalsState>(animalsNotifierProvider, (previous, next) {
+    ref.listen<AnimalsState>(animalsProvider, (previous, next) {
       _handleError(previous, next);
     });
     return const SizedBox.shrink();

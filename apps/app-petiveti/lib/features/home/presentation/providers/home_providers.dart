@@ -198,7 +198,7 @@ class HomeStatsNotifier extends _$HomeStatsNotifier {
 
     try {
       await Future<void>.delayed(const Duration(milliseconds: 800));
-      final animalsState = ref.read(animalsNotifierProvider);
+      final animalsState = ref.read(animalsProvider);
       final animals = animalsState.animals;
       final Map<String, int> speciesBreakdown = {};
       double totalAge = 0;
@@ -301,20 +301,20 @@ class HomeStatusNotifier extends _$HomeStatusNotifier {
 
 @riverpod
 bool hasUnreadNotifications(HasUnreadNotificationsRef ref) {
-  return ref.watch(homeNotificationsNotifierProvider).unreadCount > 0;
+  return ref.watch(homeNotificationsProvider).unreadCount > 0;
 }
 
 @riverpod
 bool hasUrgentAlerts(HasUrgentAlertsRef ref) {
-  return ref.watch(homeNotificationsNotifierProvider).hasUrgentAlerts;
+  return ref.watch(homeNotificationsProvider).hasUrgentAlerts;
 }
 
 @riverpod
 bool isHomeLoading(IsHomeLoadingRef ref) {
-  return ref.watch(homeStatusNotifierProvider).isLoading;
+  return ref.watch(homeStatusProvider).isLoading;
 }
 
 @riverpod
 String? homeError(HomeErrorRef ref) {
-  return ref.watch(homeStatusNotifierProvider).errorMessage;
+  return ref.watch(homeStatusProvider).errorMessage;
 }

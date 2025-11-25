@@ -64,13 +64,13 @@ class _EnhancedVehicleSelectorState
       final savedVehicleId = prefs.getString(_selectedVehicleKey);
 
       if (mounted) {
-        final vehiclesAsync = ref.read(vehiclesNotifierProvider);
+        final vehiclesAsync = ref.read(vehiclesProvider);
         final vehicles = await vehiclesAsync.when<Future<List<VehicleEntity>>>(
           data: (data) async => data,
           loading: () async {
             debugPrint('⏳ Aguardando carregamento de veículos...');
             await Future<void>.delayed(const Duration(milliseconds: 100));
-            return ref.read(vehiclesNotifierProvider).value ?? [];
+            return ref.read(vehiclesProvider).value ?? [];
           },
           error: (_, __) async => <VehicleEntity>[],
         );
@@ -175,7 +175,7 @@ class _EnhancedVehicleSelectorState
 
   @override
   Widget build(BuildContext context) {
-    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+    final vehiclesAsync = ref.watch(vehiclesProvider);
 
     return vehiclesAsync.when(
       data: (vehicles) {

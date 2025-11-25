@@ -410,7 +410,7 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
 /// Provider conveniente para acessar o state
 @riverpod
 VehicleDeviceState vehicleDeviceState(Ref ref) {
-  return ref.watch(vehicleDeviceNotifierProvider);
+  return ref.watch(vehicleDeviceProvider);
 }
 
 /// Provider para dispositivos ativos
@@ -444,6 +444,6 @@ VehicleDeviceStatistics? deviceStatistics(Ref ref) {
 /// Provider para verificar se pode adicionar mais dispositivos
 @riverpod
 bool canAddMoreDevices(Ref ref) {
-  final notifier = ref.watch(vehicleDeviceNotifierProvider.notifier);
+  final notifier = ref.watch(vehicleDeviceProvider.notifier);
   return notifier.canAddMoreDevices;
 }

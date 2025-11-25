@@ -20,8 +20,8 @@ class OptimizedReportsContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final reportsState = ref.watch(reportsNotifierProvider);
-    final reportsNotifier = ref.read(reportsNotifierProvider.notifier);
+    final reportsState = ref.watch(reportsProvider);
+    final reportsNotifier = ref.read(reportsProvider.notifier);
 
     return Column(
       children: [

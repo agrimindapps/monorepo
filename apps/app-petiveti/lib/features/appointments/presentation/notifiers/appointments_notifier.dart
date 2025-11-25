@@ -219,25 +219,25 @@ class AppointmentsNotifier extends _$AppointmentsNotifier {
 // Derived providers
 @riverpod
 List<Appointment> appointmentsList(AppointmentsListRef ref) {
-  return ref.watch(appointmentsNotifierProvider).appointments;
+  return ref.watch(appointmentsProvider).appointments;
 }
 
 @riverpod
 List<Appointment> upcomingAppointmentsList(UpcomingAppointmentsListRef ref) {
-  return ref.watch(appointmentsNotifierProvider).upcomingAppointments;
+  return ref.watch(appointmentsProvider).upcomingAppointments;
 }
 
 @riverpod
 bool appointmentsLoading(AppointmentsLoadingRef ref) {
-  return ref.watch(appointmentsNotifierProvider).isLoading;
+  return ref.watch(appointmentsProvider).isLoading;
 }
 
 @riverpod
 String? appointmentsError(AppointmentsErrorRef ref) {
-  return ref.watch(appointmentsNotifierProvider).errorMessage;
+  return ref.watch(appointmentsProvider).errorMessage;
 }
 
 @riverpod
 Appointment? selectedAppointment(SelectedAppointmentRef ref) {
-  return ref.watch(appointmentsNotifierProvider).selectedAppointment;
+  return ref.watch(appointmentsProvider).selectedAppointment;
 }

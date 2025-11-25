@@ -17,7 +17,7 @@ import '../../domain/usecases/update_appointment.dart';
 export '../notifiers/appointments_notifier.dart' show 
   AppointmentState,
   AppointmentsNotifier,
-  appointmentsNotifierProvider,
+  appointmentsProvider,
   appointmentsListProvider,
   upcomingAppointmentsListProvider,
   appointmentsLoadingProvider,

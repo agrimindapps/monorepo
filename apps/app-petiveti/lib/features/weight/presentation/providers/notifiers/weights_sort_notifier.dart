@@ -1,7 +1,11 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../domain/entities/weight.dart';
+
 import '../../states/weights_sort_state.dart';
+
+part 'weights_sort_notifier.g.dart';
+
 
 /// **SRP Pattern**: Notifier specialized for SORTING operations ONLY
 /// 
@@ -15,8 +19,12 @@ import '../../states/weights_sort_state.dart';
 /// - Easy to test (mock one behavior)
 /// - Reusable across features
 /// - Maintainable (changes isolated)
-class WeightsSortNotifier extends StateNotifier<WeightsSortState> {
-  WeightsSortNotifier() : super(const WeightsSortState());
+/// 
+/// Migrated to Riverpod 3.0 Notifier pattern
+@riverpod
+class WeightsSortNotifier extends _$WeightsSortNotifier {
+  @override
+  WeightsSortState build() => const WeightsSortState();
 
   /// Sets the sort order for weights
   void setSortOrder(WeightSortOrder order) {

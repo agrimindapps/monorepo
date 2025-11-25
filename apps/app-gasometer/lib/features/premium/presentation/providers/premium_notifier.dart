@@ -135,7 +135,7 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
     );
     _statusSubscription = _premiumRepository!.premiumStatus.listen((status) {
       state = core.AsyncValue.data(
-        state.valueOrNull?.copyWith(premiumStatus: status) ??
+        state.value?.copyWith(premiumStatus: status) ??
             PremiumNotifierState(premiumStatus: status),
       );
     });
@@ -180,7 +180,7 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
     if (_getAvailableProducts == null) return;
 
     state = core.AsyncValue.data(
-      state.valueOrNull?.copyWith(isLoadingProducts: true, clearError: true) ??
+      state.value?.copyWith(isLoadingProducts: true, clearError: true) ??
           const PremiumNotifierState(isLoadingProducts: true),
     );
 
@@ -189,7 +189,7 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
     result.fold(
       (failure) {
         state = core.AsyncValue.data(
-          state.valueOrNull?.copyWith(
+          state.value?.copyWith(
                 isLoadingProducts: false,
                 errorMessage: 'Erro ao carregar produtos: ${failure.message}',
                 availableProducts: [],
@@ -202,7 +202,7 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
       },
       (products) {
         state = core.AsyncValue.data(
-          state.valueOrNull?.copyWith(
+          state.value?.copyWith(
                 availableProducts: products,
                 isLoadingProducts: false,
                 clearError: true,
@@ -221,7 +221,7 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
     if (_purchasePremium == null) return false;
 
     state = core.AsyncValue.data(
-      state.valueOrNull?.copyWith(
+      state.value?.copyWith(
             isProcessingPurchase: true,
             clearError: true,
           ) ??
@@ -236,7 +236,7 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
       return result.fold(
         (failure) {
           state = core.AsyncValue.data(
-            state.valueOrNull?.copyWith(
+            state.value?.copyWith(
                   isProcessingPurchase: false,
                   errorMessage: 'Erro na compra: ${failure.message}',
                 ) ??
@@ -249,7 +249,7 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
         },
         (subscription) {
           state = core.AsyncValue.data(
-            state.valueOrNull?.copyWith(
+            state.value?.copyWith(
                   isProcessingPurchase: false,
                   clearError: true,
                 ) ??
@@ -261,7 +261,7 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
       );
     } catch (e) {
       state = core.AsyncValue.data(
-        state.valueOrNull?.copyWith(
+        state.value?.copyWith(
               isProcessingPurchase: false,
               errorMessage: 'Erro na compra: ${e.toString()}',
             ) ??
@@ -279,7 +279,7 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
     if (_restorePurchases == null) return false;
 
     state = core.AsyncValue.data(
-      state.valueOrNull?.copyWith(
+      state.value?.copyWith(
             isProcessingPurchase: true,
             clearError: true,
           ) ??
@@ -292,7 +292,7 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
       return result.fold(
         (failure) {
           state = core.AsyncValue.data(
-            state.valueOrNull?.copyWith(
+            state.value?.copyWith(
                   isProcessingPurchase: false,
                   errorMessage: 'Erro ao restaurar compras: ${failure.message}',
                 ) ??
@@ -305,7 +305,7 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
         },
         (success) {
           state = core.AsyncValue.data(
-            state.valueOrNull?.copyWith(
+            state.value?.copyWith(
                   isProcessingPurchase: false,
                   clearError: true,
                 ) ??
@@ -317,7 +317,7 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
       );
     } catch (e) {
       state = core.AsyncValue.data(
-        state.valueOrNull?.copyWith(
+        state.value?.copyWith(
               isProcessingPurchase: false,
               errorMessage: 'Erro ao restaurar compras: ${e.toString()}',
             ) ??
@@ -405,7 +405,7 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
   }
 
   Future<bool> canAddUnlimitedVehicles() async =>
-      state.valueOrNull?.isPremium ?? false;
+      state.value?.isPremium ?? false;
   Future<bool> canAccessAdvancedReports() async =>
       await _canUseFeatureById('advanced_reports');
   Future<bool> canExportData() async => await _canUseFeatureById('export_data');
@@ -453,7 +453,7 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
 
   /// Limpa mensagem de erro
   void clearError() {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState != null && currentState.errorMessage != null) {
       state = core.AsyncValue.data(currentState.copyWith(clearError: true));
     }
@@ -461,7 +461,7 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
 
   /// Atualiza erro
   void _updateError(String message) {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState != null) {
       state = core.AsyncValue.data(
         currentState.copyWith(errorMessage: message),
@@ -473,25 +473,25 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
 }
 
 /// Provider para PremiumNotifier
-final premiumNotifierProvider =
+final premiumProvider =
     core.AsyncNotifierProvider<PremiumNotifier, PremiumNotifierState>(
       PremiumNotifier.new,
     );
 
 /// Provider para status premium direto (renomeado para evitar conflito com core)
 final gasometerIsPremiumProvider = core.Provider<bool>((ref) {
-  final premiumAsync = ref.watch(premiumNotifierProvider);
-  return premiumAsync.valueOrNull?.isPremium ?? false;
+  final premiumAsync = ref.watch(premiumProvider);
+  return premiumAsync.value?.isPremium ?? false;
 });
 
 /// Provider para produtos disponíveis
 final availableProductsProvider = core.Provider<List<core.ProductInfo>>((ref) {
-  final premiumAsync = ref.watch(premiumNotifierProvider);
-  return premiumAsync.valueOrNull?.availableProducts ?? [];
+  final premiumAsync = ref.watch(premiumProvider);
+  return premiumAsync.value?.availableProducts ?? [];
 });
 
 /// Provider para verificar se pode comprar premium
 final canPurchasePremiumProvider = core.Provider<bool>((ref) {
-  final premiumAsync = ref.watch(premiumNotifierProvider);
-  return premiumAsync.valueOrNull?.canPurchasePremium ?? true;
+  final premiumAsync = ref.watch(premiumProvider);
+  return premiumAsync.value?.canPurchasePremium ?? true;
 });

@@ -20,7 +20,7 @@ class _RecoveryFormWidgetState extends ConsumerState<RecoveryFormWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final formNotifier = ref.read(loginFormNotifierProvider.notifier);
+    final formNotifier = ref.read(loginFormProvider.notifier);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,7 +130,7 @@ class _RecoveryFormWidgetState extends ConsumerState<RecoveryFormWidget> {
   }
 
   Future<void> _handleResetPassword() async {
-    final formNotifier = ref.read(loginFormNotifierProvider.notifier);
+    final formNotifier = ref.read(loginFormProvider.notifier);
     final email = formNotifier.emailController.text.trim();
     if (email.isEmpty) {
       setState(() {

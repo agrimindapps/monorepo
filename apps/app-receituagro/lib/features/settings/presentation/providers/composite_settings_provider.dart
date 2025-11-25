@@ -254,7 +254,7 @@ final compositeSettingsProvider = Provider.autoDispose<UserSettingsModel>((
 ) {
   // Watch all 4 individual notifiers
   final themeState = ref.watch(themeSettingsProvider);
-  final notificationState = ref.watch(notificationSettingsNotifierProvider);
+  final notificationState = ref.watch(notificationSettingsProvider);
   final deviceState = ref.watch(deviceProvider(initialDeviceId: null));
   final premiumState = ref.watch(premiumProvider);
 

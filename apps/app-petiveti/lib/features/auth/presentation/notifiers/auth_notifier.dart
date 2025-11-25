@@ -483,26 +483,26 @@ class AuthNotifier extends _$AuthNotifier {
 // Derived providers
 @riverpod
 AuthState authState(AuthStateRef ref) {
-  return ref.watch(authNotifierProvider);
+  return ref.watch(authProvider);
 }
 
 @riverpod
 User? currentUser(CurrentUserRef ref) {
-  return ref.watch(authNotifierProvider).user;
+  return ref.watch(authProvider).user;
 }
 
 @riverpod
 bool isAuthenticated(IsAuthenticatedRef ref) {
-  return ref.watch(authNotifierProvider).isAuthenticated;
+  return ref.watch(authProvider).isAuthenticated;
 }
 
 @riverpod
 bool authLoading(AuthLoadingRef ref) {
-  return ref.watch(authNotifierProvider).isLoading;
+  return ref.watch(authProvider).isLoading;
 }
 
 @riverpod
 String? authError(AuthErrorRef ref) {
-  final authState = ref.watch(authNotifierProvider);
+  final authState = ref.watch(authProvider);
   return authState.hasError ? authState.error : null;
 }

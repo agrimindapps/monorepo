@@ -1,6 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import '../repositories/repositories.dart';
 import 'database_providers.dart';
+
+part 'sync_providers.g.dart';
 
 /// Provider para buscar registros sujos (precisam sync) de todos os repositórios
 final dirtyRecordsProvider = FutureProvider.autoDispose<DirtyRecordsData>((
@@ -31,13 +35,6 @@ final dirtyRecordsProvider = FutureProvider.autoDispose<DirtyRecordsData>((
 final dirtyRecordsCountProvider = FutureProvider.autoDispose<int>((ref) async {
   final dirtyRecords = await ref.watch(dirtyRecordsProvider.future);
   return dirtyRecords.totalCount;
-});
-
-/// Provider notifier para controlar processo de sincronização
-final syncStateProvider = StateNotifierProvider<SyncStateNotifier, SyncState>((
-  ref,
-) {
-  return SyncStateNotifier(ref);
 });
 
 /// Estados possíveis da sincronização
@@ -80,10 +77,10 @@ class SyncState {
 }
 
 /// Notifier para gerenciar estado de sincronização
-class SyncStateNotifier extends StateNotifier<SyncState> {
-  SyncStateNotifier(this.ref) : super(const SyncState(status: SyncStatus.idle));
-
-  final Ref ref;
+@riverpod
+class SyncStateNotifier extends _$SyncStateNotifier {
+  @override
+  SyncState build() => const SyncState(status: SyncStatus.idle);
 
   /// Inicia processo de sincronização
   Future<void> startSync() async {

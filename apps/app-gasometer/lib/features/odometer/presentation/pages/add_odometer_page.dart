@@ -60,7 +60,7 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
     final authState = ref.read(authProvider);
     final userId = authState.userId;
     if (widget.odometer != null) {
-      final notifier = ref.read(odometerFormNotifierProvider.notifier);
+      final notifier = ref.read(odometerFormProvider.notifier);
       await notifier.initializeWithOdometer(widget.odometer!);
     } else {
       final selectedVehicleId = widget.vehicleId ?? '';
@@ -68,7 +68,7 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
         'Initializing odometer form with vehicleId: "$selectedVehicleId"',
       );
       if (selectedVehicleId.isNotEmpty) {
-        final notifier = ref.read(odometerFormNotifierProvider.notifier);
+        final notifier = ref.read(odometerFormProvider.notifier);
         // Limpar o formulário antes de inicializar com novo veículo
         notifier.clearForm();
         await notifier.initialize(vehicleId: selectedVehicleId, userId: userId);
@@ -99,7 +99,7 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
 
   @override
   Widget build(BuildContext context) {
-    final formState = ref.watch(odometerFormNotifierProvider);
+    final formState = ref.watch(odometerFormProvider);
     String subtitle = 'Gerencie seus registros de quilometragem';
     if (formState.hasVehicle) {
       final vehicle = formState.vehicle!;
@@ -118,7 +118,7 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
         onCancel: () => Navigator.of(context).pop(),
         onConfirm: () {
           final selectedVehicleId = ref
-              .read(odometerFormNotifierProvider)
+              .read(odometerFormProvider)
               .vehicleId;
           if (selectedVehicleId.isNotEmpty) {
             // Reabrir o formulário com o veículo selecionado
@@ -141,7 +141,7 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
       isLoading: formState.isLoading || _isSubmitting,
       confirmButtonText: 'Salvar',
       onCancel: () {
-        final formNotifier = ref.read(odometerFormNotifierProvider.notifier);
+        final formNotifier = ref.read(odometerFormProvider.notifier);
         formNotifier.clearForm();
         Navigator.of(context).pop();
       },
@@ -204,8 +204,8 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
   }
 
   Widget _buildDateTimeField() {
-    final formState = ref.watch(odometerFormNotifierProvider);
-    final notifier = ref.read(odometerFormNotifierProvider.notifier);
+    final formState = ref.watch(odometerFormProvider);
+    final notifier = ref.read(odometerFormProvider.notifier);
 
     return CustomRangeDateTimeField(
       value: formState.registrationDate ?? DateTime.now(),
@@ -229,8 +229,8 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
   }
 
   Widget _buildOdometerField() {
-    final formState = ref.watch(odometerFormNotifierProvider);
-    final notifier = ref.read(odometerFormNotifierProvider.notifier);
+    final formState = ref.watch(odometerFormProvider);
+    final notifier = ref.read(odometerFormProvider.notifier);
 
     return OdometerField(
       controller: notifier.odometerController,
@@ -248,8 +248,8 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
   }
 
   Widget _buildRegistrationTypeField() {
-    final formState = ref.watch(odometerFormNotifierProvider);
-    final notifier = ref.read(odometerFormNotifierProvider.notifier);
+    final formState = ref.watch(odometerFormProvider);
+    final notifier = ref.read(odometerFormProvider.notifier);
 
     return DropdownButtonFormField<OdometerType>(
       initialValue: formState.registrationType,
@@ -291,7 +291,7 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
   }
 
   Widget _buildDescriptionField() {
-    final notifier = ref.read(odometerFormNotifierProvider.notifier);
+    final notifier = ref.read(odometerFormProvider.notifier);
 
     return ObservationsField(
       controller: notifier.descriptionController,
@@ -325,10 +325,10 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
       return;
     }
 
-    final formNotifier = ref.read(odometerFormNotifierProvider.notifier);
+    final formNotifier = ref.read(odometerFormProvider.notifier);
     if (!formNotifier.validateForm()) {
       debugPrint('Form validation FAILED');
-      final formState = ref.read(odometerFormNotifierProvider);
+      final formState = ref.read(odometerFormProvider);
       if (formState.fieldErrors.isNotEmpty) {
         // Mapeamento de erros do estado para chaves de focus node
         // OdometerFormNotifier usa chaves como 'odometerValue', 'registrationType', 'description'

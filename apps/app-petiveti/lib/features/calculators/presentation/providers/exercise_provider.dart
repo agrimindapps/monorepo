@@ -1,9 +1,18 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'package:core/core.dart';
 
+
 import '../../domain/calculators/exercise_calculator.dart';
+
 import '../../domain/entities/calculation_result.dart';
+
 import '../../domain/usecases/perform_calculation.dart';
+
 import 'calculators_providers.dart';
+
+part 'exercise_provider.g.dart';
+
 
 /// Estado da calculadora de exercícios
 class ExerciseState {
@@ -31,11 +40,13 @@ class ExerciseState {
 }
 
 /// Notifier para gerenciar o estado da calculadora de exercícios
-class ExerciseNotifier extends StateNotifier<ExerciseState> {
-  ExerciseNotifier(this._performCalculation) : super(const ExerciseState());
-
+/// Migrated to Riverpod 3.0 Notifier pattern
+@riverpod
+class ExerciseNotifier extends _$ExerciseNotifier {
   final _calculator = const ExerciseCalculator();
-  final PerformCalculation _performCalculation;
+
+  @override
+  ExerciseState build() => const ExerciseState();
 
   /// Calcula o plano de exercícios baseado nos inputs
   Future<void> calculate(Map<String, dynamic> inputs) async {
@@ -53,7 +64,8 @@ class ExerciseNotifier extends StateNotifier<ExerciseState> {
         );
         return;
       }
-      final result = await _performCalculation(
+      final performCalculation = ref.read(performCalculationProvider);
+      final result = await performCalculation(
         calculatorId: _calculator.id,
         inputs: inputs,
       );
@@ -106,29 +118,28 @@ class ExerciseNotifier extends StateNotifier<ExerciseState> {
   }
 }
 
-/// Provider para a calculadora de exercícios
-final exerciseProvider = StateNotifierProvider<ExerciseNotifier, ExerciseState>(
-  (ref) => ExerciseNotifier(ref.watch(performCalculationProvider)),
-);
-
 /// Provider para obter histórico de cálculos de exercício
-final exerciseHistoryProvider = FutureProvider<List<CalculationResult>>((ref) async {
+@riverpod
+Future<List<CalculationResult>> exerciseHistory(Ref ref) async {
   return <CalculationResult>[];
-});
+}
 
 /// Provider para verificar se a calculadora é favorita
-final exerciseIsFavoriteProvider = FutureProvider<bool>((ref) async {
+@riverpod
+Future<bool> exerciseIsFavorite(Ref ref) async {
   return false;
-});
+}
 
 /// Provider para cálculos rápidos de exercício (sem persistir histórico)
-final quickExerciseCalculationProvider = FutureProvider.family<CalculationResult, Map<String, dynamic>>((ref, inputs) async {
+@riverpod
+Future<CalculationResult> quickExerciseCalculation(Ref ref, Map<String, dynamic> inputs) async {
   const calculator = ExerciseCalculator();
   return calculator.calculate(inputs);
-});
+}
 
 /// Provider para sugestões de exercício baseadas na raça
-final exerciseSuggestionsByBreedProvider = Provider.family<List<String>, String>((ref, breedGroup) {
+@riverpod
+List<String> exerciseSuggestionsByBreed(Ref ref, String breedGroup) {
   final suggestions = <String>[];
 
   if (breedGroup.contains('Trabalho')) {
@@ -176,4 +187,4 @@ final exerciseSuggestionsByBreedProvider = Provider.family<List<String>, String>
   }
 
   return suggestions;
-});
+}

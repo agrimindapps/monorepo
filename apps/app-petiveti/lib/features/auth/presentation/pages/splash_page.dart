@@ -60,7 +60,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
       if (!mounted) return; // Check if widget is still mounted
 
       try {
-        final authState = ref.read(authNotifierProvider);
+        final authState = ref.read(authProvider);
 
         if (authState.isAuthenticated) {
           context.go(SplashConstants.homeRoute);
@@ -73,7 +73,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
         if (!mounted) return;
 
         try {
-          final authState = ref.read(authNotifierProvider);
+          final authState = ref.read(authProvider);
           if (authState.isAuthenticated) {
             context.go(SplashConstants.homeRoute);
           } else {

@@ -113,12 +113,12 @@ class AppInitialization {
       (error) {
         if (EnvironmentConfig.enableAnalytics) {
           // TODO: Get crashlyticsRepositoryProvider from core package
-        // final crashlytics = container.read(core.crashlyticsRepositoryProvider);
-          crashlytics.recordError(
-            exception: error,
-            stackTrace: StackTrace.current,
-            fatal: false,
-          );
+          // final crashlytics = container.read(core.crashlyticsRepositoryProvider);
+          // crashlytics.recordError(
+          //   exception: error,
+          //   stackTrace: StackTrace.current,
+          //   fatal: false,
+          // );
         }
       },
       (_) {
@@ -172,12 +172,12 @@ class AppInitialization {
       if (EnvironmentConfig.enableAnalytics) {
         // TODO: Get crashlyticsRepositoryProvider from core package
         // final crashlytics = container.read(core.crashlyticsRepositoryProvider);
-        await crashlytics.recordError(
-          exception: e,
-          stackTrace: StackTrace.current,
-          reason: 'Priority data loading failed',
-          fatal: false,
-        );
+        // await crashlytics.recordError(
+        //   exception: e,
+        //   stackTrace: StackTrace.current,
+        //   reason: 'Priority data loading failed',
+        //   fatal: false,
+        // );
       }
     }
   }

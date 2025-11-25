@@ -15,8 +15,8 @@ class LoginFormWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final formState = ref.watch(loginFormNotifierProvider);
-    final formNotifier = ref.watch(loginFormNotifierProvider.notifier);
+    final formState = ref.watch(loginFormProvider);
+    final formNotifier = ref.watch(loginFormProvider.notifier);
 
     return Form(
       child: Column(
@@ -101,8 +101,8 @@ class LoginFormWidget extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
   ) {
-    final formState = ref.watch(loginFormNotifierProvider);
-    final formNotifier = ref.watch(loginFormNotifierProvider.notifier);
+    final formState = ref.watch(loginFormProvider);
+    final formNotifier = ref.watch(loginFormProvider.notifier);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -147,7 +147,7 @@ class LoginFormWidget extends ConsumerWidget {
     WidgetRef ref,
     String message,
   ) {
-    final formNotifier = ref.watch(loginFormNotifierProvider.notifier);
+    final formNotifier = ref.watch(loginFormProvider.notifier);
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -184,7 +184,7 @@ class LoginFormWidget extends ConsumerWidget {
       print('🎯 LoginFormWidget: Chamando login com Riverpod');
     }
 
-    final formNotifier = ref.watch(loginFormNotifierProvider.notifier);
+    final formNotifier = ref.watch(loginFormProvider.notifier);
     final success = await formNotifier.signInWithEmail();
 
     if (kDebugMode) {

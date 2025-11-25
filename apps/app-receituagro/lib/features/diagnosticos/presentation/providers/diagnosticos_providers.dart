@@ -21,26 +21,26 @@ part 'diagnosticos_providers.g.dart';
 // Services
 @Riverpod(keepAlive: true)
 IDiagnosticosFilterService diagnosticosFilterService(
-    DiagnosticosFilterServiceRef ref) {
+    Ref ref) {
   return DiagnosticosFilterService(ref.watch(iDiagnosticosRepositoryProvider));
 }
 
 @Riverpod(keepAlive: true)
 IDiagnosticosSearchService diagnosticosSearchService(
-    DiagnosticosSearchServiceRef ref) {
+    Ref ref) {
   return DiagnosticosSearchService(ref.watch(iDiagnosticosRepositoryProvider));
 }
 
 @Riverpod(keepAlive: true)
 IDiagnosticosMetadataService diagnosticosMetadataService(
-    DiagnosticosMetadataServiceRef ref) {
+    Ref ref) {
   return DiagnosticosMetadataService(
       ref.watch(iDiagnosticosRepositoryProvider));
 }
 
 @Riverpod(keepAlive: true)
 IDiagnosticosStatsService diagnosticosStatsService(
-    DiagnosticosStatsServiceRef ref) {
+    Ref ref) {
   return DiagnosticosStatsService(ref.watch(iDiagnosticosRepositoryProvider));
 }
 
@@ -52,7 +52,7 @@ FailureMessageService failureMessageService(Ref ref) {
 // Repository
 @Riverpod(keepAlive: true)
 IDiagnosticosRepository iDiagnosticosRepository(
-    IDiagnosticosRepositoryRef ref) {
+    Ref ref) {
   final baseRepo = ref.watch(diagnosticoRepositoryProvider);
   final wrapperRepo = DiagnosticosRepository(baseRepo);
 
@@ -72,6 +72,6 @@ GetDiagnosticosUseCase getDiagnosticosUseCase(Ref ref) {
 
 @Riverpod(keepAlive: true)
 GetDiagnosticoByIdUseCase getDiagnosticoByIdUseCase(
-    GetDiagnosticoByIdUseCaseRef ref) {
+    Ref ref) {
   return GetDiagnosticoByIdUseCase(ref.watch(iDiagnosticosRepositoryProvider));
 }

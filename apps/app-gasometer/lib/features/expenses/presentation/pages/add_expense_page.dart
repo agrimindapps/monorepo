@@ -52,7 +52,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage>
 
   void _initializeProviders() {
     final authState = ref.read(authProvider);
-    final formNotifier = ref.read(expenseFormNotifierProvider.notifier);
+    final formNotifier = ref.read(expenseFormProvider.notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await formNotifier.initialize(
         vehicleId: widget.vehicleId ?? '',
@@ -69,7 +69,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage>
   // TODO: Implementar carga de despesa para edição
   // Future<void> _loadExpenseForEdit() async {
   //   try {
-  //     final formNotifier = ref.read(expenseFormNotifierProvider.notifier);
+  //     final formNotifier = ref.read(expenseFormProvider.notifier);
   //     // Carregar despesa aqui
   //     // await formNotifier.initializeWithExpense(expense);
   //   } catch (e) {
@@ -89,7 +89,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage>
 
   @override
   Widget build(BuildContext context) {
-    final formState = ref.watch(expenseFormNotifierProvider);
+    final formState = ref.watch(expenseFormProvider);
     final isInitialized = formState.vehicle != null;
     String subtitle = 'Registre uma despesa do seu veículo';
     if (isInitialized && formState.vehicle != null) {
@@ -106,7 +106,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage>
       isLoading: formState.isLoading || _isSubmitting,
       confirmButtonText: 'Salvar',
       onCancel: () {
-        final formNotifier = ref.read(expenseFormNotifierProvider.notifier);
+        final formNotifier = ref.read(expenseFormProvider.notifier);
         formNotifier.clearForm();
         Navigator.of(context).pop();
       },
@@ -141,12 +141,12 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage>
 
   /// Internal submit method with enhanced protection and timeout handling
   Future<void> _submitForm() async {
-    final formNotifier = ref.read(expenseFormNotifierProvider.notifier);
+    final formNotifier = ref.read(expenseFormProvider.notifier);
     clearFormError();
 
     if (!formNotifier.validateForm()) {
       // Pega o primeiro erro para exibir
-      final formState = ref.read(expenseFormNotifierProvider);
+      final formState = ref.read(expenseFormProvider);
       if (formState.fieldErrors.isNotEmpty) {
         final firstErrorField = formState.fieldErrors.keys.first;
         _focusNodes[firstErrorField]?.requestFocus();

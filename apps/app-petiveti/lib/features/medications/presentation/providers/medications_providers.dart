@@ -354,7 +354,7 @@ class MedicationsNotifier extends _$MedicationsNotifier with PerformanceMonitori
 // Derived providers
 @riverpod
 Future<Medication?> medicationById(MedicationByIdRef ref, String id) async {
-  final notifier = ref.read(medicationsNotifierProvider.notifier);
+  final notifier = ref.read(medicationsProvider.notifier);
   return await notifier.getMedicationById(id);
 }
 
@@ -405,7 +405,7 @@ class MedicationSearchQuery extends _$MedicationSearchQuery {
 
 @riverpod
 List<Medication> filteredMedications(FilteredMedicationsRef ref) {
-  final medications = ref.watch(medicationsNotifierProvider).medications;
+  final medications = ref.watch(medicationsProvider).medications;
   final typeFilter = ref.watch(medicationTypeFilterProvider);
   final statusFilter = ref.watch(medicationStatusFilterProvider);
   final searchQuery = ref.watch(medicationSearchQueryProvider);

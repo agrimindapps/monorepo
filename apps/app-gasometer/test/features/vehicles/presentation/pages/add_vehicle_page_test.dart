@@ -63,7 +63,7 @@ void main() {
   testWidgets('AddVehiclePage renders correctly', (tester) async {
     final container = ProviderContainer(
       overrides: [
-        vehiclesNotifierProvider.overrideWith(() => MockVehiclesNotifier()),
+        vehiclesProvider.overrideWith(() => MockVehiclesNotifier()),
         authProvider.overrideWith(() => MockAuth()),
       ],
     );
@@ -82,7 +82,7 @@ void main() {
       (tester) async {
     final container = ProviderContainer(
       overrides: [
-        vehiclesNotifierProvider.overrideWith(() => MockVehiclesNotifier()),
+        vehiclesProvider.overrideWith(() => MockVehiclesNotifier()),
         authProvider.overrideWith(() => MockAuth()),
       ],
     );

@@ -1,13 +1,12 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../../../core/providers/app_state_providers.dart';
 import '../../domain/entities/appointment.dart';
 import '../providers/appointments_providers.dart';
 import '../widgets/appointment_card.dart';
 import '../widgets/appointments_auto_reload_manager.dart';
 import '../widgets/empty_appointments_state.dart';
-
-final selectedAnimalIdProvider = StateProvider<String?>((ref) => null);
 
 class AppointmentsPage extends ConsumerStatefulWidget {
   const AppointmentsPage({super.key});
@@ -43,7 +42,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
     final selectedAnimalId = ref.read(selectedAnimalIdProvider);
     if (selectedAnimalId != null) {
       ref
-          .read(appointmentsNotifierProvider.notifier)
+          .read(appointmentsProvider.notifier)
           .loadAppointments(selectedAnimalId);
     }
   }
@@ -70,7 +69,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
 
   @override
   Widget build(BuildContext context) {
-    final appointmentState = ref.watch(appointmentsNotifierProvider);
+    final appointmentState = ref.watch(appointmentsProvider);
     final selectedAnimalId = ref.watch(selectedAnimalIdProvider);
     final appointments = ref.watch(appointmentsListProvider);
 
@@ -456,7 +455,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
                         this.setState(() => _itemBeingDeleted = appointment.id);
 
                         final success = await ref
-                            .read(appointmentsNotifierProvider.notifier)
+                            .read(appointmentsProvider.notifier)
                             .deleteAppointment(appointment.id);
 
                         if (context.mounted) {

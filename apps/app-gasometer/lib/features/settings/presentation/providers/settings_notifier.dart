@@ -101,7 +101,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
 
   /// Toggle error boundary setting
   Future<void> toggleErrorBoundary(bool enabled) async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
     if (currentState.globalErrorBoundaryEnabled == enabled) return;
 
@@ -118,7 +118,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
 
   /// Toggle notifications setting
   Future<void> toggleNotifications(bool enabled) async {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
     if (currentState.notificationsEnabled == enabled) return;
 
@@ -135,7 +135,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
 
   /// Change theme mode (synchronous to avoid dialog rebuild issues)
   void changeTheme(ThemeMode newTheme) {
-    final currentState = state.valueOrNull;
+    final currentState = state.value;
     if (currentState == null) return;
     if (currentState.themeMode == newTheme) return;
 
@@ -193,7 +193,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
 
 /// Provider para SettingsNotifier
 /// Gerencia configurações do app de forma reativa
-final settingsNotifierProvider =
+final settingsProvider =
     AsyncNotifierProvider<SettingsNotifier, SettingsState>(
   SettingsNotifier.new,
 );
@@ -201,18 +201,18 @@ final settingsNotifierProvider =
 /// Provider para acessar o themeMode diretamente
 /// Útil para MaterialApp
 final themeModeProvider = Provider<ThemeMode>((ref) {
-  final settingsAsync = ref.watch(settingsNotifierProvider);
-  return settingsAsync.valueOrNull?.themeMode ?? ThemeMode.system;
+  final settingsAsync = ref.watch(settingsProvider);
+  return settingsAsync.value?.themeMode ?? ThemeMode.system;
 });
 
 /// Provider para acessar notificações enabled
 final notificationsEnabledProvider = Provider<bool>((ref) {
-  final settingsAsync = ref.watch(settingsNotifierProvider);
-  return settingsAsync.valueOrNull?.notificationsEnabled ?? true;
+  final settingsAsync = ref.watch(settingsProvider);
+  return settingsAsync.value?.notificationsEnabled ?? true;
 });
 
 /// Provider para acessar error boundary enabled
 final errorBoundaryEnabledProvider = Provider<bool>((ref) {
-  final settingsAsync = ref.watch(settingsNotifierProvider);
-  return settingsAsync.valueOrNull?.globalErrorBoundaryEnabled ?? true;
+  final settingsAsync = ref.watch(settingsProvider);
+  return settingsAsync.value?.globalErrorBoundaryEnabled ?? true;
 });

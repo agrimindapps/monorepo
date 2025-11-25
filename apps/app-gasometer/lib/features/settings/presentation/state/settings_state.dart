@@ -15,7 +15,7 @@ enum SettingsViewState {
 ///
 /// Usa @freezed para type-safety, imutabilidade e código gerado
 @freezed
-class SettingsState with _$SettingsState {
+sealed class SettingsState with _$SettingsState {
   const SettingsState._();
 
   const factory SettingsState({

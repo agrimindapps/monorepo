@@ -49,7 +49,7 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final weightsState = ref.watch(weightsProvider);
-    final animalsState = ref.watch(animalsNotifierProvider);
+    final animalsState = ref.watch(animalsProvider);
 
     return Scaffold(
       appBar: AppBar(

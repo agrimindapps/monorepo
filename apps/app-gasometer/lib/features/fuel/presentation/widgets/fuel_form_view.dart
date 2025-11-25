@@ -26,7 +26,7 @@ class FuelFormView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(fuelFormNotifierProvider(vehicleId));
+    final state = ref.watch(fuelFormProvider(vehicleId));
 
     if (!state.isInitialized) {
       return const CentralizedLoadingWidget(
@@ -86,8 +86,8 @@ class FuelFormView extends ConsumerWidget {
   }
 
   Widget _buildFuelInfoSection(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(fuelFormNotifierProvider(vehicleId));
-    final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+    final state = ref.watch(fuelFormProvider(vehicleId));
+    final notifier = ref.read(fuelFormProvider(vehicleId).notifier);
 
     return FormSectionHeader(
       title: 'Informações Básicas',
@@ -132,8 +132,8 @@ class FuelFormView extends ConsumerWidget {
   }
 
   Widget _buildFuelTypeDropdown(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(fuelFormNotifierProvider(vehicleId));
-    final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+    final state = ref.watch(fuelFormProvider(vehicleId));
+    final notifier = ref.read(fuelFormProvider(vehicleId).notifier);
     final vehicle = state.formModel.vehicle!;
     final supportedFuels = vehicle.supportedFuels;
 
@@ -159,8 +159,8 @@ class FuelFormView extends ConsumerWidget {
   }
 
   Widget _buildFullTankSwitch(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(fuelFormNotifierProvider(vehicleId));
-    final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+    final state = ref.watch(fuelFormProvider(vehicleId));
+    final notifier = ref.read(fuelFormProvider(vehicleId).notifier);
 
     return ValidatedSwitchField(
       value: state.formModel.fullTank,
@@ -176,8 +176,8 @@ class FuelFormView extends ConsumerWidget {
 
   Widget _buildLitersField(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final state = ref.watch(fuelFormNotifierProvider(vehicleId));
-    final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+    final state = ref.watch(fuelFormProvider(vehicleId));
+    final notifier = ref.read(fuelFormProvider(vehicleId).notifier);
 
     return ValidatedFormField(
       controller: notifier.litersController,
@@ -199,7 +199,7 @@ class FuelFormView extends ConsumerWidget {
   }
 
   Widget _buildPricePerLiterField(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+    final notifier = ref.read(fuelFormProvider(vehicleId).notifier);
 
     return PriceFormField(
       controller: notifier.pricePerLiterController,
@@ -211,7 +211,7 @@ class FuelFormView extends ConsumerWidget {
   }
 
   Widget _buildTotalPriceField(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(fuelFormNotifierProvider(vehicleId));
+    final state = ref.watch(fuelFormProvider(vehicleId));
     final formatter = FuelFormatterService();
     final totalPrice = state.formModel.totalPrice;
     final formattedTotal = totalPrice > 0 ? formatter.formatTotalPrice(totalPrice) : '';
@@ -238,8 +238,8 @@ class FuelFormView extends ConsumerWidget {
   }
 
   Widget _buildOdometerField(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(fuelFormNotifierProvider(vehicleId));
-    final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+    final state = ref.watch(fuelFormProvider(vehicleId));
+    final notifier = ref.read(fuelFormProvider(vehicleId).notifier);
     final vehicle = state.formModel.vehicle;
 
     return OdometerField(
@@ -254,7 +254,7 @@ class FuelFormView extends ConsumerWidget {
   }
 
   Widget _buildNotesField(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+    final notifier = ref.read(fuelFormProvider(vehicleId).notifier);
 
     return ObservationsField(
       controller: notifier.notesController,
@@ -267,8 +267,8 @@ class FuelFormView extends ConsumerWidget {
   }
 
   Widget _buildReceiptImageSection(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(fuelFormNotifierProvider(vehicleId));
-    final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
+    final state = ref.watch(fuelFormProvider(vehicleId));
+    final notifier = ref.read(fuelFormProvider(vehicleId).notifier);
 
     return OptionalReceiptSection(
       imagePath: state.receiptImagePath,

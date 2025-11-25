@@ -58,7 +58,7 @@ IComentariosRepository comentariosRepository(Ref ref) {
 
 @riverpod
 IComentariosReadRepository comentariosReadRepository(
-  ComentariosReadRepositoryRef ref,
+  Ref ref,
 ) {
   final driftRepo = ref.watch(comentarioRepositoryProvider);
   final comentariosRepo = ComentariosRepository(driftRepo);
@@ -68,7 +68,7 @@ IComentariosReadRepository comentariosReadRepository(
 
 @riverpod
 IComentariosWriteRepository comentariosWriteRepository(
-  ComentariosWriteRepositoryRef ref,
+  Ref ref,
 ) {
   final driftRepo = ref.watch(comentarioRepositoryProvider);
   final comentariosRepo = ComentariosRepository(driftRepo);
@@ -92,7 +92,7 @@ AddComentarioUseCase addComentariosUseCase(Ref ref) {
 
 @riverpod
 DeleteComentarioUseCase deleteComentariosUseCase(
-  DeleteComentariosUseCaseRef ref,
+  Ref ref,
 ) {
   return DeleteComentarioUseCase(
     ref.watch(comentariosReadRepositoryProvider),

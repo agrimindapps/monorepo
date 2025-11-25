@@ -13,6 +13,6 @@ ExportProgressService exportProgressService(Ref ref) {
 
 @riverpod
 ExportValidationService exportValidationService(
-    ExportValidationServiceRef ref) {
+    Ref ref) {
   return ExportValidationService();
 }

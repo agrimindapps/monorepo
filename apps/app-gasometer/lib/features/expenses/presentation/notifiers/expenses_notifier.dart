@@ -478,7 +478,7 @@ class ExpensesNotifier extends _$ExpensesNotifier {
   /// Obtém veículo por ID (via VehiclesNotifier)
   Future<VehicleEntity?> _getVehicleById(String vehicleId) async {
     try {
-      final vehiclesNotifier = ref.read(vehiclesNotifierProvider.notifier);
+      final vehiclesNotifier = ref.read(vehiclesProvider.notifier);
       return await vehiclesNotifier.getVehicleById(vehicleId);
     } catch (e) {
       debugPrint('[ExpensesNotifier] Error getting vehicle: $e');

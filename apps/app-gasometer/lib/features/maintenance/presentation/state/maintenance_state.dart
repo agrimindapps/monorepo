@@ -27,7 +27,7 @@ enum MaintenanceStatusFilter {
 ///
 /// Usa @freezed para type-safety, imutabilidade e código gerado
 @freezed
-class MaintenanceState with _$MaintenanceState {
+sealed class MaintenanceState with _$MaintenanceState {
   const MaintenanceState._();
 
   const factory MaintenanceState({

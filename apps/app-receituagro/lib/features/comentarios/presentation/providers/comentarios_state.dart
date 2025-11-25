@@ -4,7 +4,6 @@ import '../../../../core/services/error_handler_service.dart';
 import '../../domain/entities/comentario_entity.dart';
 
 part 'comentarios_state.freezed.dart';
-part 'comentarios_state.g.dart';
 
 /// Represents different types of loading operations
 enum LoadingType {
@@ -17,7 +16,7 @@ enum LoadingType {
 
 /// Immutable class to manage granular loading states
 @freezed
-class LoadingStates with _$LoadingStates {
+sealed class LoadingStates with _$LoadingStates {
   const LoadingStates._();
 
   const factory LoadingStates({
@@ -56,7 +55,7 @@ extension LoadingStatesX on LoadingStates {
 ///
 /// Migrado para @freezed para type-safety, imutabilidade e código gerado
 @freezed
-class ComentariosState with _$ComentariosState {
+sealed class ComentariosState with _$ComentariosState {
   const ComentariosState._();
 
   const factory ComentariosState({

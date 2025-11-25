@@ -51,11 +51,11 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
 
   void _onScroll() {
     if (_isBottom) {
-      final animalsState = ref.read(animalsNotifierProvider);
-      final uiState = ref.read(animalsUIStateProvider);
+      final animalsState = ref.read(animalsProvider);
+      final uiState = ref.read(animalsUIStateNotifierProvider);
       
       if (!uiState.isLoadingMore && !uiState.hasReachedMax) {
-        ref.read(animalsUIStateProvider.notifier)
+        ref.read(animalsUIStateNotifierProvider.notifier)
           .loadMoreItems(animalsState.animals.length);
       }
     }
@@ -70,8 +70,8 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
 
   @override
   Widget build(BuildContext context) {
-    final animalsState = ref.watch(animalsNotifierProvider);
-    final uiState = ref.watch(animalsUIStateProvider);
+    final animalsState = ref.watch(animalsProvider);
+    final uiState = ref.watch(animalsUIStateNotifierProvider);
     final filteredAnimals = ref.watch(filteredAnimalsProvider);
     
     if (animalsState.isLoading && animalsState.animals.isEmpty) {
@@ -90,7 +90,7 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
       return UIComponents.searchEmptyState(
         onClearFilters: () {
           // TODO: Re-implement clear filters with new filter strategy
-          // ref.read(animalsNotifierProvider.notifier).clearFilters();
+          // ref.read(animalsProvider.notifier).clearFilters();
         },
       );
     }
@@ -100,8 +100,8 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
       hint: 'Arraste para baixo para atualizar a lista',
       child: RefreshIndicator(
         onRefresh: () async {
-          ref.read(animalsUIStateProvider.notifier).resetPagination();
-          await ref.read(animalsNotifierProvider.notifier).loadAnimals();
+          ref.read(animalsUIStateNotifierProvider.notifier).resetPagination();
+          await ref.read(animalsProvider.notifier).loadAnimals();
         },
         child: ListView.builder(
         controller: _scrollController,

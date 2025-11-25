@@ -24,8 +24,8 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
 
   @override
   Widget build(BuildContext context) {
-    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
-    final odometerState = ref.watch(odometerNotifierProvider);
+    final vehiclesAsync = ref.watch(vehiclesProvider);
+    final odometerState = ref.watch(odometerProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -54,7 +54,7 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
                   icon: Icons.error_outline,
                   actionLabel: 'Tentar novamente',
                   onAction: () {
-                    ref.read(vehiclesNotifierProvider.notifier).refresh();
+                    ref.read(vehiclesProvider.notifier).refresh();
                   },
                 ),
               ),
@@ -145,7 +145,7 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
           });
           if (vehicleId != null) {
             ref
-                .read(odometerNotifierProvider.notifier)
+                .read(odometerProvider.notifier)
                 .loadByVehicle(vehicleId);
           }
         },
@@ -180,9 +180,9 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
           return GestureDetector(
             onTap: () {
               if (isSelected) {
-                ref.read(odometerNotifierProvider.notifier).clearMonthFilter();
+                ref.read(odometerProvider.notifier).clearMonthFilter();
               } else {
-                ref.read(odometerNotifierProvider.notifier).selectMonth(month);
+                ref.read(odometerProvider.notifier).selectMonth(month);
               }
             },
             child: Container(
@@ -235,7 +235,7 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
         onAction: () {
           if (_selectedVehicleId != null) {
             ref
-                .read(odometerNotifierProvider.notifier)
+                .read(odometerProvider.notifier)
                 .loadByVehicle(_selectedVehicleId!);
           }
         },
@@ -254,7 +254,7 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
         actionLabel: state.hasActiveFilters ? 'Limpar filtros' : null,
         onAction: state.hasActiveFilters
             ? () =>
-                ref.read(odometerNotifierProvider.notifier).clearMonthFilter()
+                ref.read(odometerProvider.notifier).clearMonthFilter()
             : null,
       );
     }
@@ -267,7 +267,7 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
       onRefresh: () async {
         if (_selectedVehicleId != null) {
           await ref
-              .read(odometerNotifierProvider.notifier)
+              .read(odometerProvider.notifier)
               .loadByVehicle(_selectedVehicleId!);
         }
       },
@@ -319,7 +319,7 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
-    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+    final vehiclesAsync = ref.watch(vehiclesProvider);
     final hasVehicles = vehiclesAsync.value?.isNotEmpty ?? false;
     final isEnabled = hasVehicles && _selectedVehicleId != null;
 
@@ -341,7 +341,7 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
           if (result == true && _selectedVehicleId != null) {
             // Reload odometer list after adding
             ref
-                .read(odometerNotifierProvider.notifier)
+                .read(odometerProvider.notifier)
                 .loadByVehicle(_selectedVehicleId!);
           }
         });

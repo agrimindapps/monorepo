@@ -19,12 +19,12 @@ class SubscriptionPageCoordinator extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(subscriptionNotifierProvider);
-    ref.listen<SubscriptionState>(subscriptionNotifierProvider, (previous, next) {
+    final state = ref.watch(subscriptionProvider);
+    ref.listen<SubscriptionState>(subscriptionProvider, (previous, next) {
       if (next.errorMessage != null) {
         _showErrorMessage(context, next.errorMessage!);
         // TODO: Add clearError method to SubscriptionNotifier
-        // ref.read(subscriptionNotifierProvider.notifier).clearError();
+        // ref.read(subscriptionProvider.notifier).clearError();
       }
     });
 
@@ -46,8 +46,8 @@ class SubscriptionPageCoordinator extends ConsumerWidget {
   static void initializeData(WidgetRef ref, String userId) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // TODO: Implement loadAvailablePlans and loadCurrentSubscription in SubscriptionNotifier
-      // ref.read(subscriptionNotifierProvider.notifier).loadAvailablePlans();
-      // ref.read(subscriptionNotifierProvider.notifier).loadCurrentSubscription(userId);
+      // ref.read(subscriptionProvider.notifier).loadAvailablePlans();
+      // ref.read(subscriptionProvider.notifier).loadCurrentSubscription(userId);
     });
   }
 
@@ -59,7 +59,7 @@ class SubscriptionPageCoordinator extends ConsumerWidget {
     SubscriptionPlan plan,
   ) async {
     // TODO: Implement subscribeToPlan in SubscriptionNotifier
-    // final success = await ref.read(subscriptionNotifierProvider.notifier).subscribeToPlan(
+    // final success = await ref.read(subscriptionProvider.notifier).subscribeToPlan(
     //       userId,
     //       plan.id,
     //     );
@@ -80,7 +80,7 @@ class SubscriptionPageCoordinator extends ConsumerWidget {
     String userId,
   ) async {
     // TODO: Implement cancelSubscription in SubscriptionNotifier
-    // final success = await ref.read(subscriptionNotifierProvider.notifier).cancelSubscription(userId);
+    // final success = await ref.read(subscriptionProvider.notifier).cancelSubscription(userId);
     const success = false;
 
     if (success && context.mounted) {
@@ -98,7 +98,7 @@ class SubscriptionPageCoordinator extends ConsumerWidget {
     String userId,
   ) async {
     // TODO: Implement resumeSubscription in SubscriptionNotifier
-    // final success = await ref.read(subscriptionNotifierProvider.notifier).resumeSubscription(userId);
+    // final success = await ref.read(subscriptionProvider.notifier).resumeSubscription(userId);
     const success = false;
 
     if (success && context.mounted) {
@@ -116,7 +116,7 @@ class SubscriptionPageCoordinator extends ConsumerWidget {
     String userId,
   ) async {
     // TODO: Implement restorePurchases in SubscriptionNotifier
-    // final success = await ref.read(subscriptionNotifierProvider.notifier).restorePurchases(userId);
+    // final success = await ref.read(subscriptionProvider.notifier).restorePurchases(userId);
     const success = false;
 
     if (success && context.mounted) {
@@ -130,7 +130,7 @@ class SubscriptionPageCoordinator extends ConsumerWidget {
   /// Reload subscription plans
   static void reloadPlans(WidgetRef ref) {
     // TODO: Implement loadAvailablePlans in SubscriptionNotifier
-    // ref.read(subscriptionNotifierProvider.notifier).loadAvailablePlans();
+    // ref.read(subscriptionProvider.notifier).loadAvailablePlans();
   }
 
   static void _showSuccessMessage(BuildContext context, String message) {

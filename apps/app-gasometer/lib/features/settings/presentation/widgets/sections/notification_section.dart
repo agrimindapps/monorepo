@@ -11,9 +11,9 @@ class NotificationSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settingsAsync = ref.watch(settingsNotifierProvider);
+    final settingsAsync = ref.watch(settingsProvider);
     final notificationsEnabled =
-        settingsAsync.valueOrNull?.notificationsEnabled ?? true;
+        settingsAsync.value?.notificationsEnabled ?? true;
 
     return SettingsCard(
       title: 'Notificações',
@@ -29,7 +29,7 @@ class NotificationSection extends ConsumerWidget {
                 ? null
                 : (value) {
                     ref
-                        .read(settingsNotifierProvider.notifier)
+                        .read(settingsProvider.notifier)
                         .toggleNotifications(value);
                   },
           ),

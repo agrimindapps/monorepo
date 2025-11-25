@@ -3,7 +3,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 
 part 'diagnosticos_state.freezed.dart';
-part 'diagnosticos_state.g.dart';
 
 /// Estados da view de diagnósticos
 enum DiagnosticosViewState { initial, loading, loaded, empty, error }
@@ -12,7 +11,7 @@ enum DiagnosticosViewState { initial, loading, loaded, empty, error }
 ///
 /// Migrado para @freezed para type-safety, imutabilidade e código gerado
 @freezed
-class DiagnosticosState with _$DiagnosticosState {
+sealed class DiagnosticosState with _$DiagnosticosState {
   const DiagnosticosState._();
 
   const factory DiagnosticosState({

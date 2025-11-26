@@ -12,8 +12,8 @@ class CulturasListPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final culturasAsync = ref.watch(culturasNotifierProvider);
-    final authState = ref.watch(authNotifierProvider);
+    final culturasAsync = ref.watch(culturasProvider);
+    final authState = ref.watch(authProvider);
 
     return InternalPageLayout(
       title: 'Culturas',
@@ -76,7 +76,7 @@ class CulturasListPage extends ConsumerWidget {
 
     return RefreshIndicator(
       onRefresh: () async {
-        await ref.read(culturasNotifierProvider.notifier).refresh();
+        await ref.read(culturasProvider.notifier).refresh();
       },
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -121,7 +121,7 @@ class CulturasListPage extends ConsumerWidget {
           const SizedBox(height: 16),
           ElevatedButton.icon(
             onPressed: () {
-              ref.read(culturasNotifierProvider.notifier).refresh();
+              ref.read(culturasProvider.notifier).refresh();
             },
             icon: const Icon(Icons.refresh),
             label: const Text('Tentar novamente'),
@@ -182,7 +182,7 @@ class _CulturaCard extends ConsumerWidget {
                   ),
                   const Spacer(),
                   // Edit button (visible for Editor/Admin)
-                  ref.watch(authNotifierProvider).whenOrNull(
+                  ref.watch(authProvider).whenOrNull(
                     data: (user) {
                       if (user?.canWrite == true) {
                         return IconButton(

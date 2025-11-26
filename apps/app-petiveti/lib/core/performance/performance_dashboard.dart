@@ -23,7 +23,7 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
   late TabController _tabController;
   Timer? _refreshTimer;
 
-  final PerformanceService _performanceService = PerformanceService();
+  final LocalPerformanceService _performanceService = LocalPerformanceService();
   final MemoryManager _memoryManager = MemoryManager();
   // final DatabaseOptimizer _dbOptimizer = DatabaseOptimizer(); // REMOVED
   final NavigationOptimizer _navOptimizer = NavigationOptimizer();

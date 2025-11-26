@@ -41,5 +41,5 @@ class CulturasNotifier extends _$CulturasNotifier {
 /// Alias provider for easier access (matches naming convention)
 @riverpod
 Future<List<Cultura>> culturasList(Ref ref) async {
-  return ref.watch(culturasNotifierProvider.future);
+  return ref.watch(culturasProvider.future);
 }

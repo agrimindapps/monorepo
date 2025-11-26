@@ -30,7 +30,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
 
     setState(() => _isLoading = true);
 
-    final success = await ref.read(authNotifierProvider.notifier).login(
+    final success = await ref.read(authProvider.notifier).login(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
@@ -50,7 +50,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
       );
     } else {
       // Show error from auth state
-      final authState = ref.read(authNotifierProvider);
+      final authState = ref.read(authProvider);
       authState.whenOrNull(
         error: (error, _) {
           ScaffoldMessenger.of(context).showSnackBar(

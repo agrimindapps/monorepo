@@ -20,7 +20,7 @@ class WebInternalLayout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Use drawer on mobile, fixed sidebar on web
@@ -192,7 +192,7 @@ class WebInternalLayout extends ConsumerWidget {
                 );
 
                 if (confirmed == true && context.mounted) {
-                  await ref.read(authNotifierProvider.notifier).logout();
+                  await ref.read(authProvider.notifier).logout();
                   if (context.mounted) {
                     Navigator.of(context)
                         .pushNamedAndRemoveUntil('/', (route) => false);

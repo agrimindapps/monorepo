@@ -10,7 +10,7 @@ class DashboardPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
 
     return WebInternalLayout(
       title: 'Dashboard',
@@ -167,7 +167,7 @@ class DashboardPage extends ConsumerWidget {
   }
 
   Widget _buildInfoSection(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
 
     return Card(
       elevation: 2,

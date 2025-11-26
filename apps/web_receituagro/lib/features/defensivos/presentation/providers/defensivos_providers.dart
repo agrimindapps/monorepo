@@ -153,7 +153,7 @@ class CurrentPage extends _$CurrentPage {
 /// Paginated defensivos (current page items)
 @riverpod
 List<Defensivo> paginatedDefensivos(Ref ref) {
-  final defensivosAsync = ref.watch(defensivosNotifierProvider);
+  final defensivosAsync = ref.watch(defensivosProvider);
   final currentPage = ref.watch(currentPageProvider);
   final paginationService = ref.watch(defensivosPaginationServiceProvider);
 
@@ -169,7 +169,7 @@ List<Defensivo> paginatedDefensivos(Ref ref) {
 /// Total pages
 @riverpod
 int totalPages(Ref ref) {
-  final defensivosAsync = ref.watch(defensivosNotifierProvider);
+  final defensivosAsync = ref.watch(defensivosProvider);
   final paginationService = ref.watch(defensivosPaginationServiceProvider);
 
   return defensivosAsync.when(

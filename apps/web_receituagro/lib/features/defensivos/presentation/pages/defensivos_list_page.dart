@@ -24,8 +24,8 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final defensivosAsync = ref.watch(defensivosNotifierProvider);
-    final authState = ref.watch(authNotifierProvider);
+    final defensivosAsync = ref.watch(defensivosProvider);
+    final authState = ref.watch(authProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -35,7 +35,7 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              ref.read(defensivosNotifierProvider.notifier).refresh();
+              ref.read(defensivosProvider.notifier).refresh();
             },
             tooltip: 'Atualizar',
           ),
@@ -207,7 +207,7 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
 
                           if (confirmed == true && context.mounted) {
                             await ref
-                                .read(authNotifierProvider.notifier)
+                                .read(authProvider.notifier)
                                 .logout();
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -278,7 +278,7 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
                         onPressed: () {
                           _searchController.clear();
                           ref
-                              .read(defensivosNotifierProvider.notifier)
+                              .read(defensivosProvider.notifier)
                               .showAll();
                         },
                       )
@@ -286,7 +286,7 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
               ),
               onSubmitted: (value) {
                 if (value.trim().isNotEmpty) {
-                  ref.read(defensivosNotifierProvider.notifier).search(value);
+                  ref.read(defensivosProvider.notifier).search(value);
                 }
               },
             ),
@@ -296,7 +296,7 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
             onPressed: () {
               final query = _searchController.text.trim();
               if (query.isNotEmpty) {
-                ref.read(defensivosNotifierProvider.notifier).search(query);
+                ref.read(defensivosProvider.notifier).search(query);
               }
             },
             icon: const Icon(Icons.search),
@@ -306,7 +306,7 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
           TextButton(
             onPressed: () {
               _searchController.clear();
-              ref.read(defensivosNotifierProvider.notifier).showAll();
+              ref.read(defensivosProvider.notifier).showAll();
             },
             child: const Text('Todos'),
           ),
@@ -458,7 +458,7 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
           const SizedBox(height: 16),
           ElevatedButton.icon(
             onPressed: () {
-              ref.read(defensivosNotifierProvider.notifier).refresh();
+              ref.read(defensivosProvider.notifier).refresh();
             },
             icon: const Icon(Icons.refresh),
             label: const Text('Tentar novamente'),
@@ -519,7 +519,7 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
 
     if (confirmed == true && context.mounted) {
       final success = await ref
-          .read(defensivosNotifierProvider.notifier)
+          .read(defensivosProvider.notifier)
           .deleteDefensivo(defensivo.id);
 
       if (context.mounted) {
@@ -657,7 +657,7 @@ class _DefensivosGrid extends ConsumerWidget {
                         // Edit button (only for writers)
                         Consumer(
                           builder: (context, ref, _) {
-                            final authState = ref.watch(authNotifierProvider);
+                            final authState = ref.watch(authProvider);
                             return authState.when(
                               data: (user) {
                                 if (user?.canWrite == true) {
@@ -690,7 +690,7 @@ class _DefensivosGrid extends ConsumerWidget {
                         // Delete button (only for admin)
                         Consumer(
                           builder: (context, ref, _) {
-                            final authState = ref.watch(authNotifierProvider);
+                            final authState = ref.watch(authProvider);
                             return authState.when(
                               data: (user) {
                                 if (user?.isAdmin == true) {
@@ -730,7 +730,7 @@ class _DefensivosGrid extends ConsumerWidget {
 class _TotalCount extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final defensivosAsync = ref.watch(defensivosNotifierProvider);
+    final defensivosAsync = ref.watch(defensivosProvider);
 
     return defensivosAsync.when(
       data: (defensivos) => Padding(

@@ -23,7 +23,7 @@ class InternalPageLayout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -148,7 +148,7 @@ class InternalPageLayout extends ConsumerWidget {
 
                         if (confirmed == true && context.mounted) {
                           await ref
-                              .read(authNotifierProvider.notifier)
+                              .read(authProvider.notifier)
                               .logout();
                           if (context.mounted) {
                             Navigator.of(context)

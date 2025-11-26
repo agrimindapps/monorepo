@@ -12,8 +12,8 @@ class PragasListPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pragasAsync = ref.watch(pragasNotifierProvider);
-    final authState = ref.watch(authNotifierProvider);
+    final pragasAsync = ref.watch(pragasProvider);
+    final authState = ref.watch(authProvider);
 
     return InternalPageLayout(
       title: 'Pragas',
@@ -76,7 +76,7 @@ class PragasListPage extends ConsumerWidget {
 
     return RefreshIndicator(
       onRefresh: () async {
-        await ref.read(pragasNotifierProvider.notifier).refresh();
+        await ref.read(pragasProvider.notifier).refresh();
       },
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -121,7 +121,7 @@ class PragasListPage extends ConsumerWidget {
           const SizedBox(height: 16),
           ElevatedButton.icon(
             onPressed: () {
-              ref.read(pragasNotifierProvider.notifier).refresh();
+              ref.read(pragasProvider.notifier).refresh();
             },
             icon: const Icon(Icons.refresh),
             label: const Text('Tentar novamente'),
@@ -182,7 +182,7 @@ class _PragaCard extends ConsumerWidget {
                   ),
                   const Spacer(),
                   // Edit button (visible for Editor/Admin)
-                  ref.watch(authNotifierProvider).whenOrNull(
+                  ref.watch(authProvider).whenOrNull(
                     data: (user) {
                       if (user?.canWrite == true) {
                         return IconButton(

@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 /// Serviço de otimização e monitoramento de performance
-class PerformanceService {
-  static final PerformanceService _instance = PerformanceService._internal();
-  factory PerformanceService() => _instance;
-  PerformanceService._internal();
+class LocalPerformanceService {
+  static final LocalPerformanceService _instance = LocalPerformanceService._internal();
+  factory LocalPerformanceService() => _instance;
+  LocalPerformanceService._internal();
 
   final Map<String, PerformanceMetric> _metrics = {};
   final List<PerformanceEvent> _events = [];
@@ -262,7 +262,7 @@ class PerformanceTracker {
     final endTime = DateTime.now();
     final duration = endTime.difference(_startTime);
 
-    final performanceService = PerformanceService();
+    final performanceService = LocalPerformanceService();
     performanceService.recordExecutionTime(
       operationName,
       duration,
@@ -451,7 +451,7 @@ extension PerformanceExtensions on Future<dynamic> {
     String operationName, {
     Map<String, dynamic>? metadata,
   }) {
-    return PerformanceService().monitorAsync(
+    return LocalPerformanceService().monitorAsync(
       operationName,
       () => this as Future<T>,
       metadata: metadata,
@@ -461,7 +461,7 @@ extension PerformanceExtensions on Future<dynamic> {
 
 /// Mixin para classes que querem monitoramento de performance automático
 mixin PerformanceMonitoring {
-  final PerformanceService _performanceService = PerformanceService();
+  final LocalPerformanceService _performanceService = LocalPerformanceService();
 
   Future<T> trackAsync<T>(String methodName, Future<T> Function() operation) {
     return _performanceService.monitorAsync(

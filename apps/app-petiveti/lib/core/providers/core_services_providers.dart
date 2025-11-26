@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:core/core.dart' as core;
+import 'package:core/core.dart' as core hide CacheService;
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -13,7 +13,7 @@ import '../logging/repositories/log_repository.dart';
 import '../logging/repositories/log_repository_impl.dart';
 import '../notifications/notification_service.dart';
 import '../performance/lazy_loader.dart';
-import '../performance/performance_service.dart' as local_perf;
+import '../performance/performance_service.dart';
 import '../services/logging_service_impl.dart';
 import '../services/mock_analytics_service.dart';
 
@@ -84,8 +84,8 @@ NotificationService? notificationService(Ref ref) {
 }
 
 @riverpod
-local_perf.PerformanceService localPerformanceService(Ref ref) {
-  return local_perf.PerformanceService();
+LocalPerformanceService localPerformanceService(Ref ref) {
+  return LocalPerformanceService();
 }
 
 @riverpod

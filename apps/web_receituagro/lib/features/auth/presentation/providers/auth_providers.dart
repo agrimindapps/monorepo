@@ -95,14 +95,14 @@ class AuthNotifier extends _$AuthNotifier {
 /// Is user authenticated
 @riverpod
 bool isAuthenticated(Ref ref) {
-  final authState = ref.watch(authNotifierProvider);
+  final authState = ref.watch(authProvider);
   return authState.value != null;
 }
 
 /// Current user
 @riverpod
 User? currentUser(Ref ref) {
-  final authState = ref.watch(authNotifierProvider);
+  final authState = ref.watch(authProvider);
   return authState.value;
 }
 

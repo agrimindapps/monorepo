@@ -41,5 +41,5 @@ class PragasNotifier extends _$PragasNotifier {
 /// Alias provider for easier access (matches naming convention)
 @riverpod
 Future<List<Praga>> pragasList(Ref ref) async {
-  return ref.watch(pragasNotifierProvider.future);
+  return ref.watch(pragasProvider.future);
 }

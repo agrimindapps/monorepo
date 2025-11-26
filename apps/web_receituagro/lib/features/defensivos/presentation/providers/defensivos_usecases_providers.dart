@@ -47,7 +47,8 @@ DeleteDefensivoUseCase deleteDefensivoUseCase(Ref ref) {
 // ============================================================================
 
 @riverpod
-GetDiagnosticosByDefensivoIdUseCase getDiagnosticosByDefensivoIdUseCase(Ref ref) {
+GetDiagnosticosByDefensivoIdUseCase getDiagnosticosByDefensivoIdUseCase(
+    Ref ref) {
   return getIt<GetDiagnosticosByDefensivoIdUseCase>();
 }
 
@@ -61,7 +62,8 @@ CreateDiagnosticoUseCase createDiagnosticoUseCase(Ref ref) {
 // ============================================================================
 
 @riverpod
-GetDefensivoInfoByDefensivoIdUseCase getDefensivoInfoByDefensivoIdUseCase(Ref ref) {
+GetDefensivoInfoByDefensivoIdUseCase getDefensivoInfoByDefensivoIdUseCase(
+    Ref ref) {
   return getIt<GetDefensivoInfoByDefensivoIdUseCase>();
 }
 

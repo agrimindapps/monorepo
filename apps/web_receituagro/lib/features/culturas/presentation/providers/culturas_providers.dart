@@ -1,17 +1,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../../../core/interfaces/usecase.dart';
+import '../../../../core/providers/dependency_providers.dart';
 import '../../domain/entities/cultura.dart';
-import '../../domain/usecases/get_all_culturas_usecase.dart';
 
 part 'culturas_providers.g.dart';
-
-/// Provider for GetAllCulturasUseCase
-@riverpod
-GetAllCulturasUseCase getAllCulturasUseCase(Ref ref) {
-  return getIt<GetAllCulturasUseCase>();
-}
 
 /// Provider for culturas list with state management
 @riverpod

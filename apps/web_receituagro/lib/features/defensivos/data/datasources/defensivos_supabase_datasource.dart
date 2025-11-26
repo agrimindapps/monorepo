@@ -1,11 +1,9 @@
-import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/defensivo_model.dart';
 import 'defensivos_remote_datasource.dart';
 
 /// Supabase implementation of defensivos remote data source
-@LazySingleton(as: DefensivosRemoteDataSource)
 class DefensivosSupabaseDataSource implements DefensivosRemoteDataSource {
   final SupabaseClient client;
 

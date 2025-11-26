@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/cultura.dart';
@@ -7,7 +6,6 @@ import '../../domain/repositories/culturas_repository.dart';
 import '../datasources/culturas_supabase_datasource.dart';
 
 /// Implementation of culturas repository
-@LazySingleton(as: CulturasRepository)
 class CulturasRepositoryImpl implements CulturasRepository {
   final CulturasRemoteDataSource remoteDataSource;
 

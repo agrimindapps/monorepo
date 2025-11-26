@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../repositories/defensivos_info_repository.dart';
@@ -8,7 +7,6 @@ import '../repositories/diagnosticos_repository.dart';
 
 /// Use case for deleting a defensivo
 /// Handles cascade deletion of related data (diagnosticos and defensivo_info)
-@lazySingleton
 class DeleteDefensivoUseCase {
   final DefensivosRepository defensivosRepository;
   final DiagnosticosRepository diagnosticosRepository;

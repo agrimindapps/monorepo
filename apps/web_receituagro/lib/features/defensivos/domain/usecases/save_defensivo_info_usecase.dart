@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../entities/defensivo_info.dart';
@@ -7,7 +6,6 @@ import '../repositories/defensivos_info_repository.dart';
 
 /// Use case for saving (create or update) defensivo complementary information
 /// Performs an "upsert" operation
-@lazySingleton
 class SaveDefensivoInfoUseCase {
   final DefensivosInfoRepository repository;
 

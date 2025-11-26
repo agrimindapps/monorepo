@@ -13,7 +13,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  # Core Package - Shared services (Firebase, Riverpod, Hive, GetIt, Injectable, dartz, equatable)
+  # Core Package - Shared services (Firebase, Riverpod, Hive, dartz, equatable)
   core:
     path: ../../packages/core
 
@@ -24,13 +24,8 @@ dependencies:
   path_provider: any
   path: any
   freezed_annotation: any
-  riverpod_annotation: any
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  
-  # DI (used locally for injectable)
-  get_it: any
-  injectable: any
   
   # Firebase (re-exported from core but needed for direct imports)
   cloud_firestore: any
@@ -48,9 +43,7 @@ dev_dependencies:
   build_runner: any
   freezed: any
   json_serializable: any
-  riverpod_generator: any
   drift_dev: any
-  injectable_generator: any
 
 flutter:
   uses-material-design: true

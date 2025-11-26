@@ -1,30 +1,11 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../../../core/interfaces/usecase.dart';
+import '../../../../core/providers/dependency_providers.dart';
 import '../../domain/entities/user.dart';
-import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/login_usecase.dart';
-import '../../domain/usecases/logout_usecase.dart';
 
 part 'auth_providers.g.dart';
-
-// ========== Use Cases Providers ==========
-
-@riverpod
-LoginUseCase loginUseCase(Ref ref) {
-  return getIt<LoginUseCase>();
-}
-
-@riverpod
-LogoutUseCase logoutUseCase(Ref ref) {
-  return getIt<LogoutUseCase>();
-}
-
-@riverpod
-GetCurrentUserUseCase getCurrentUserUseCase(Ref ref) {
-  return getIt<GetCurrentUserUseCase>();
-}
 
 // ========== Auth State Provider ==========
 

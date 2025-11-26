@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/error/exceptions.dart';
@@ -23,7 +22,6 @@ abstract class CulturasLocalDataSource {
   Future<void> clearCache();
 }
 
-@LazySingleton(as: CulturasLocalDataSource)
 class CulturasLocalDataSourceImpl implements CulturasLocalDataSource {
   static const String _cachedCulturasKey = 'cached_culturas';
   static const String _cacheTimestampKey = 'culturas_cache_timestamp';

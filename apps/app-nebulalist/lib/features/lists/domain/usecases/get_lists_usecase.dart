@@ -1,11 +1,9 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../entities/list_entity.dart';
 import '../repositories/i_list_repository.dart';
 
 /// Use case for retrieving user lists
 /// Returns only non-archived lists by default
-@injectable
 class GetListsUseCase {
   final IListRepository _repository;
 

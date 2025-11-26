@@ -1,47 +1,11 @@
-import 'package:core/core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../../core/di/injection.dart' as di;
-import '../../../../core/providers/services_providers.dart';
+
+import '../../../../core/providers/dependency_providers.dart';
 import '../../domain/entities/list_entity.dart';
-import '../../domain/usecases/check_list_limit_usecase.dart';
-import '../../domain/usecases/create_list_usecase.dart';
-import '../../domain/usecases/delete_list_usecase.dart';
-import '../../domain/usecases/get_lists_usecase.dart';
-import '../../domain/usecases/update_list_usecase.dart';
 
-part 'lists_provider.g.dart';
-
-/// Provider for use cases (dependencies)
-@riverpod
-GetListsUseCase getListsUseCase(Ref ref) {
-  return di.getIt<GetListsUseCase>();
-}
-
-@riverpod
-CreateListUseCase createListUseCase(Ref ref) {
-  return di.getIt<CreateListUseCase>();
-}
-
-@riverpod
-UpdateListUseCase updateListUseCase(Ref ref) {
-  return di.getIt<UpdateListUseCase>();
-}
-
-@riverpod
-DeleteListUseCase deleteListUseCase(Ref ref) {
-  return di.getIt<DeleteListUseCase>();
-}
-
-@riverpod
-CheckListLimitUseCase checkListLimitUseCase(Ref ref) {
-  return di.getIt<CheckListLimitUseCase>();
-}
-
-/// Main Lists Notifier with Riverpod code generation
+/// Main Lists Notifier with pure Riverpod
 /// Manages lists state with AsyncValue for loading/error/data states
-@riverpod
-class ListsNotifier extends _$ListsNotifier {
+class ListsNotifier extends AutoDisposeAsyncNotifier<List<ListEntity>> {
   @override
   Future<List<ListEntity>> build() async {
     // Load initial lists
@@ -176,9 +140,14 @@ class ListsNotifier extends _$ListsNotifier {
   }
 }
 
+/// Main lists provider
+final listsProvider =
+    AutoDisposeAsyncNotifierProvider<ListsNotifier, List<ListEntity>>(
+  ListsNotifier.new,
+);
+
 /// Provider for filtered lists (favorites only)
-@riverpod
-List<ListEntity> favoriteLists(Ref ref) {
+final favoriteListsProvider = Provider.autoDispose<List<ListEntity>>((ref) {
   final listsAsync = ref.watch(listsProvider);
 
   return listsAsync.when(
@@ -186,11 +155,10 @@ List<ListEntity> favoriteLists(Ref ref) {
     loading: () => [],
     error: (_, __) => [],
   );
-}
+});
 
 /// Provider for lists count
-@riverpod
-int listsCount(Ref ref) {
+final listsCountProvider = Provider.autoDispose<int>((ref) {
   final listsAsync = ref.watch(listsProvider);
 
   return listsAsync.when(
@@ -198,15 +166,14 @@ int listsCount(Ref ref) {
     loading: () => 0,
     error: (_, __) => 0,
   );
-}
+});
 
 /// Provider to check if can create list (free tier limit)
-@riverpod
-Future<bool> canCreateList(Ref ref) async {
+final canCreateListProvider = FutureProvider.autoDispose<bool>((ref) async {
   final result = await ref.read(checkListLimitUseCaseProvider).call();
 
   return result.fold(
     (failure) => false,
     (canCreate) => canCreate,
   );
-}
+});

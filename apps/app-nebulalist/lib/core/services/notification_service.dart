@@ -1,10 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 /// Service for managing local notifications in NebulaList
 /// Uses EnhancedNotificationService from core package
-@lazySingleton
 class NotificationService {
   final IEnhancedNotificationRepository _notificationRepo;
 

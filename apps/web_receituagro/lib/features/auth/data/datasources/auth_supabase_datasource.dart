@@ -1,13 +1,11 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/user_model.dart';
 import 'auth_remote_datasource.dart';
 
 /// Supabase implementation of auth remote data source
-@LazySingleton(as: AuthRemoteDataSource)
 class AuthSupabaseDataSource implements AuthRemoteDataSource {
   final SupabaseClient client;
   final StreamController<UserModel?> _authStateController =

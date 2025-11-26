@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/error/exceptions.dart';
@@ -15,7 +14,6 @@ abstract class DefensivosRemoteDataSource {
   Future<DefensivoModel> getDefensivoById(String id);
 }
 
-@LazySingleton(as: DefensivosRemoteDataSource)
 class DefensivosRemoteDataSourceImpl implements DefensivosRemoteDataSource {
   final SupabaseClient _supabaseClient;
 

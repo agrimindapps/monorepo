@@ -1,12 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../entities/cultura.dart';
 import '../repositories/culturas_repository.dart';
 
 /// Use case for creating a new cultura
-@lazySingleton
 class CreateCulturaUseCase {
   final CulturasRepository repository;
 

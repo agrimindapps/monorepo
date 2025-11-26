@@ -1,11 +1,9 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../entities/list_item_entity.dart';
 import '../repositories/i_list_item_repository.dart';
 
 /// Use case for updating a ListItem
 /// Can update quantity, priority, notes, etc.
-@injectable
 class UpdateListItemUseCase {
   final IListItemRepository _repository;
 

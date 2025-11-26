@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/error/exceptions.dart';
@@ -15,7 +14,6 @@ abstract class CulturasRemoteDataSource {
   Future<CulturaModel> getCulturaById(String id);
 }
 
-@LazySingleton(as: CulturasRemoteDataSource)
 class CulturasRemoteDataSourceImpl implements CulturasRemoteDataSource {
   final SupabaseClient _supabaseClient;
 

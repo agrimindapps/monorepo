@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -9,7 +8,6 @@ import '../repositories/defensivos_repository.dart';
 /// Use case to get all defensivos
 ///
 /// Retrieves all available defensivos from the repository
-@injectable
 class GetDefensivosUseCase
     implements UseCase<List<DefensivoEntity>, NoParams> {
   final IDefensivosRepository _repository;

@@ -1,11 +1,9 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../entities/list_entity.dart';
 import '../repositories/i_list_repository.dart';
 
 /// Use case for updating an existing list
 /// Implements validation rules from RN-L001 (BUSINESS_RULES.md)
-@injectable
 class UpdateListUseCase {
   final IListRepository _repository;
 

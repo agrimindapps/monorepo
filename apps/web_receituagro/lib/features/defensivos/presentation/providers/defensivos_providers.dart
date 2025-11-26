@@ -1,32 +1,13 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../../../core/interfaces/usecase.dart';
+import '../../../../core/providers/dependency_providers.dart';
 import '../../domain/entities/defensivo.dart';
 import '../../domain/services/defensivos_filter_service.dart';
 import '../../domain/services/defensivos_pagination_service.dart';
-import '../../domain/usecases/delete_defensivo_usecase.dart';
-import '../../domain/usecases/get_all_defensivos_usecase.dart';
 import '../../domain/usecases/search_defensivos_usecase.dart';
 
 part 'defensivos_providers.g.dart';
-
-// ========== Use Cases Providers ==========
-
-@riverpod
-GetAllDefensivosUseCase getAllDefensivosUseCase(Ref ref) {
-  return getIt<GetAllDefensivosUseCase>();
-}
-
-@riverpod
-SearchDefensivosUseCase searchDefensivosUseCase(Ref ref) {
-  return getIt<SearchDefensivosUseCase>();
-}
-
-@riverpod
-DeleteDefensivoUseCase deleteDefensivoUseCase(Ref ref) {
-  return getIt<DeleteDefensivoUseCase>();
-}
 
 // ========== Services Providers ==========
 

@@ -1,7 +1,6 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../analytics/analytics_providers.dart';
 import '../../constants/settings_design_tokens.dart';
 

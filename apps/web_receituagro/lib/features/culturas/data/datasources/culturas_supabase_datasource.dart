@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/cultura_model.dart';
@@ -14,7 +13,6 @@ abstract class CulturasRemoteDataSource {
 }
 
 /// Supabase implementation of culturas remote data source
-@LazySingleton(as: CulturasRemoteDataSource)
 class CulturasSupabaseDataSource implements CulturasRemoteDataSource {
   final SupabaseClient client;
   static const String _tableName = 'culturas';

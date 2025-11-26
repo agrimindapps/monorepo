@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -7,7 +6,6 @@ import '../entities/cultura.dart';
 import '../repositories/culturas_repository.dart';
 
 /// Use case to get all culturas
-@injectable
 class GetAllCulturasUseCase implements UseCase<List<Cultura>, NoParams> {
   final CulturasRepository repository;
 

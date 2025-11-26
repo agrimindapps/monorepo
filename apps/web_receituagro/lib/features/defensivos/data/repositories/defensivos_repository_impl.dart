@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/error/failures.dart';
@@ -9,7 +8,6 @@ import '../datasources/defensivos_remote_datasource.dart';
 import '../models/defensivo_model.dart';
 
 /// Implementation of DefensivosRepository
-@LazySingleton(as: DefensivosRepository)
 class DefensivosRepositoryImpl implements DefensivosRepository {
   final DefensivosRemoteDataSource remoteDataSource;
 

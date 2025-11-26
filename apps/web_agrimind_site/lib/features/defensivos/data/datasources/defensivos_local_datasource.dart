@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/error/exceptions.dart';
@@ -23,7 +22,6 @@ abstract class DefensivosLocalDataSource {
   Future<void> clearCache();
 }
 
-@LazySingleton(as: DefensivosLocalDataSource)
 class DefensivosLocalDataSourceImpl implements DefensivosLocalDataSource {
   static const String _cachedDefensivosKey = 'cached_defensivos';
   static const String _cacheTimestampKey = 'defensivos_cache_timestamp';

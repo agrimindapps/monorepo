@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -10,7 +9,6 @@ import '../repositories/defensivos_repository.dart';
 /// Use case to get a defensivo by id
 ///
 /// Retrieves a specific defensivo by its id
-@injectable
 class GetDefensivoByIdUseCase
     implements UseCase<DefensivoEntity, GetDefensivoByIdParams> {
   final IDefensivosRepository _repository;

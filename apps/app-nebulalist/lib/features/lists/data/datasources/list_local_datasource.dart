@@ -1,5 +1,4 @@
 import 'package:hive/hive.dart';
-import 'package:injectable/injectable.dart';
 import '../models/list_model.dart';
 
 /// Interface for local data source
@@ -15,7 +14,6 @@ abstract class IListLocalDataSource {
 
 /// Local data source implementation using Hive
 /// Stores lists offline for offline-first functionality
-@LazySingleton(as: IListLocalDataSource)
 class ListLocalDataSourceImpl implements IListLocalDataSource {
   static const String _boxName = 'lists';
 

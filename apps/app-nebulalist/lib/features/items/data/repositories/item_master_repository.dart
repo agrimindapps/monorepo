@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../domain/entities/item_master_entity.dart';
@@ -10,7 +9,6 @@ import '../models/item_master_model.dart';
 
 /// Implementation of ItemMaster repository
 /// Offline-first: Hive is primary, Firestore is optional sync
-@Injectable(as: IItemMasterRepository)
 class ItemMasterRepository implements IItemMasterRepository {
   final ItemMasterLocalDataSource _localDataSource;
   final ItemMasterRemoteDataSource _remoteDataSource;

@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../lists/domain/repositories/i_list_repository.dart';
@@ -12,7 +11,6 @@ import '../models/list_item_model.dart';
 /// Implementation of ListItem repository
 /// Offline-first: Hive is primary, Firestore is optional sync
 /// Updates list counts when items change
-@Injectable(as: IListItemRepository)
 class ListItemRepository implements IListItemRepository {
   final ListItemLocalDataSource _localDataSource;
   final ListItemRemoteDataSource _remoteDataSource;

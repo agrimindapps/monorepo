@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:drift/drift.dart';
-import 'package:injectable/injectable.dart';
 
 import 'daos/item_dao.dart';
 import 'daos/list_dao.dart';
@@ -17,7 +16,6 @@ part 'nebulalist_database.g.dart';
 ///
 /// **PADRÃO ESTABELECIDO (gasometer-drift):**
 /// - Usa DriftDatabaseConfig do core para configuração unificada
-/// - Injectable com @lazySingleton para DI
 /// - Factory methods: production(), development(), test()
 /// - MigrationStrategy com onCreate e beforeOpen
 /// - Extends BaseDriftDatabase do core (funcionalidades compartilhadas)
@@ -30,19 +28,12 @@ part 'nebulalist_database.g.dart';
 /// ============================================================================
 
 @DriftDatabase(tables: [Lists, Items], daos: [ListDao, ItemDao])
-@lazySingleton
 class NebulalistDatabase extends _$NebulalistDatabase with BaseDriftDatabase {
   NebulalistDatabase(QueryExecutor e) : super(e);
 
   /// Versão do schema do banco de dados
   @override
   int get schemaVersion => 1;
-
-  /// Factory constructor para injeção de dependência (GetIt/Injectable)
-  @factoryMethod
-  factory NebulalistDatabase.injectable() {
-    return NebulalistDatabase.production();
-  }
 
   /// Factory constructor para ambiente de produção
   factory NebulalistDatabase.production() {

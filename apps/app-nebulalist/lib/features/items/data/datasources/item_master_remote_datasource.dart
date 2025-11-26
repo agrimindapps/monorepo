@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:injectable/injectable.dart';
 import '../models/item_master_model.dart';
 
 /// Remote data source for ItemMaster using Firestore
 /// Optional sync - offline-first with Hive is primary
-@injectable
 class ItemMasterRemoteDataSource {
   final FirebaseFirestore _firestore;
 

@@ -1,9 +1,7 @@
 import 'package:hive/hive.dart';
-import 'package:injectable/injectable.dart';
 import '../models/list_item_model.dart';
 
 /// Local data source for ListItem using Hive
-@injectable
 class ListItemLocalDataSource {
   static const String _boxName = 'list_items';
 

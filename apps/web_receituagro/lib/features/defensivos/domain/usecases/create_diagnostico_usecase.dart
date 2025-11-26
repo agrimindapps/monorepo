@@ -1,12 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../entities/diagnostico.dart';
 import '../repositories/diagnosticos_repository.dart';
 
 /// Use case for creating a new diagnostico entry
-@lazySingleton
 class CreateDiagnosticoUseCase {
   final DiagnosticosRepository repository;
 

@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../../../../core/di/injection.dart';
+import '../../../../core/providers/dependency_providers.dart';
 import '../../domain/usecases/create_defensivo_usecase.dart';
 import '../../domain/usecases/create_diagnostico_usecase.dart';
 import '../../domain/usecases/delete_defensivo_usecase.dart';
@@ -14,32 +14,32 @@ import '../../domain/usecases/update_defensivo_usecase.dart';
 part 'defensivos_usecases_providers.g.dart';
 
 // ============================================================================
-// DEFENSIVOS USE CASES
+// DEFENSIVOS USE CASES (using dependency_providers.dart)
 // ============================================================================
 
 @riverpod
-GetAllDefensivosUseCase getAllDefensivosUseCase(Ref ref) {
-  return getIt<GetAllDefensivosUseCase>();
+GetAllDefensivosUseCase getAllDefensivosUseCaseLocal(Ref ref) {
+  return ref.watch(getAllDefensivosUseCaseProvider);
 }
 
 @riverpod
-SearchDefensivosUseCase searchDefensivosUseCase(Ref ref) {
-  return getIt<SearchDefensivosUseCase>();
+SearchDefensivosUseCase searchDefensivosUseCaseLocal(Ref ref) {
+  return ref.watch(searchDefensivosUseCaseProvider);
 }
 
 @riverpod
-CreateDefensivoUseCase createDefensivoUseCase(Ref ref) {
-  return getIt<CreateDefensivoUseCase>();
+CreateDefensivoUseCase createDefensivoUseCaseLocal(Ref ref) {
+  return ref.watch(createDefensivoUseCaseProvider);
 }
 
 @riverpod
-UpdateDefensivoUseCase updateDefensivoUseCase(Ref ref) {
-  return getIt<UpdateDefensivoUseCase>();
+UpdateDefensivoUseCase updateDefensivoUseCaseLocal(Ref ref) {
+  return ref.watch(updateDefensivoUseCaseProvider);
 }
 
 @riverpod
-DeleteDefensivoUseCase deleteDefensivoUseCase(Ref ref) {
-  return getIt<DeleteDefensivoUseCase>();
+DeleteDefensivoUseCase deleteDefensivoUseCaseLocal(Ref ref) {
+  return ref.watch(deleteDefensivoUseCaseProvider);
 }
 
 // ============================================================================
@@ -47,14 +47,14 @@ DeleteDefensivoUseCase deleteDefensivoUseCase(Ref ref) {
 // ============================================================================
 
 @riverpod
-GetDiagnosticosByDefensivoIdUseCase getDiagnosticosByDefensivoIdUseCase(
+GetDiagnosticosByDefensivoIdUseCase getDiagnosticosByDefensivoIdUseCaseLocal(
     Ref ref) {
-  return getIt<GetDiagnosticosByDefensivoIdUseCase>();
+  return ref.watch(getDiagnosticosByDefensivoIdUseCaseProvider);
 }
 
 @riverpod
-CreateDiagnosticoUseCase createDiagnosticoUseCase(Ref ref) {
-  return getIt<CreateDiagnosticoUseCase>();
+CreateDiagnosticoUseCase createDiagnosticoUseCaseLocal(Ref ref) {
+  return ref.watch(createDiagnosticoUseCaseProvider);
 }
 
 // ============================================================================
@@ -62,12 +62,12 @@ CreateDiagnosticoUseCase createDiagnosticoUseCase(Ref ref) {
 // ============================================================================
 
 @riverpod
-GetDefensivoInfoByDefensivoIdUseCase getDefensivoInfoByDefensivoIdUseCase(
+GetDefensivoInfoByDefensivoIdUseCase getDefensivoInfoByDefensivoIdUseCaseLocal(
     Ref ref) {
-  return getIt<GetDefensivoInfoByDefensivoIdUseCase>();
+  return ref.watch(getDefensivoInfoByDefensivoIdUseCaseProvider);
 }
 
 @riverpod
-SaveDefensivoInfoUseCase saveDefensivoInfoUseCase(Ref ref) {
-  return getIt<SaveDefensivoInfoUseCase>();
+SaveDefensivoInfoUseCase saveDefensivoInfoUseCaseLocal(Ref ref) {
+  return ref.watch(saveDefensivoInfoUseCaseProvider);
 }

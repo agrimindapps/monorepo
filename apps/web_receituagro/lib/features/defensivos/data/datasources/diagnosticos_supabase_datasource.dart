@@ -1,11 +1,9 @@
-import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/diagnostico_model.dart';
 import 'diagnosticos_remote_datasource.dart';
 
 /// Supabase implementation of diagnosticos remote data source
-@LazySingleton(as: DiagnosticosRemoteDataSource)
 class DiagnosticosSupabaseDataSource implements DiagnosticosRemoteDataSource {
   final SupabaseClient client;
 

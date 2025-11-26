@@ -1,21 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../../../core/interfaces/usecase.dart';
+import '../../../../core/providers/dependency_providers.dart';
 import '../../domain/entities/defensivo_entity.dart';
 import '../../domain/usecases/get_defensivo_by_id_usecase.dart';
-import '../../domain/usecases/get_defensivos_usecase.dart';
-
-/// Provider for GetDefensivosUseCase
-final getDefensivosUseCaseProvider = Provider<GetDefensivosUseCase>((ref) {
-  return getIt<GetDefensivosUseCase>();
-});
-
-/// Provider for GetDefensivoByIdUseCase
-final getDefensivoByIdUseCaseProvider =
-    Provider<GetDefensivoByIdUseCase>((ref) {
-  return getIt<GetDefensivoByIdUseCase>();
-});
 
 /// Provider for defensivos list
 ///

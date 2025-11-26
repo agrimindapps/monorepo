@@ -2,9 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'app.dart';
-import 'core/di/injection.dart';
-
+import 'core/providers/dependency_providers.dart';
 import 'core/config/environment_config.dart';
 
 void main() async {
@@ -16,15 +16,16 @@ void main() async {
   // Set environment (change for production)
   EnvironmentConfig.setEnvironment(Environment.development);
 
-
-
-  // Initialize dependency injection
-  await configureDependencies();
+  // Initialize SharedPreferences for provider override
+  final sharedPreferences = await SharedPreferences.getInstance();
 
   // Run app with Riverpod
   runApp(
-    const ProviderScope(
-      child: AppNebulalistApp(),
+    ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+      ],
+      child: const AppNebulalistApp(),
     ),
   );
 }

@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/error/failures.dart';
@@ -9,7 +8,6 @@ import '../datasources/diagnosticos_remote_datasource.dart';
 import '../models/diagnostico_model.dart';
 
 /// Implementation of DiagnosticosRepository
-@LazySingleton(as: DiagnosticosRepository)
 class DiagnosticosRepositoryImpl implements DiagnosticosRepository {
   final DiagnosticosRemoteDataSource remoteDataSource;
 

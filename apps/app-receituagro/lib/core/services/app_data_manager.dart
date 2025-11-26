@@ -3,7 +3,7 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart' hide Column;
 
-import '../di/receituagro_data_setup.dart';
+import 'receituagro_data_setup.dart';
 
 /// Interface para o gerenciador de dados da aplicação
 abstract class IAppDataManager {

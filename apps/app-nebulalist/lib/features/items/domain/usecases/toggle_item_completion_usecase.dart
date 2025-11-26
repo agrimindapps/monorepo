@@ -1,11 +1,9 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../entities/list_item_entity.dart';
 import '../repositories/i_list_item_repository.dart';
 
 /// Use case for toggling item completion status
 /// Implements business rules from RN-I006 (BUSINESS_RULES.md)
-@injectable
 class ToggleItemCompletionUseCase {
   final IListItemRepository _repository;
 

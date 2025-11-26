@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -19,7 +18,6 @@ class SearchDefensivosParams extends Equatable {
 }
 
 /// Use case to search defensivos by query
-@injectable
 class SearchDefensivosUseCase
     implements UseCase<List<Defensivo>, SearchDefensivosParams> {
   final DefensivosRepository repository;

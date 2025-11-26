@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../domain/entities/list_entity.dart';
@@ -11,7 +10,6 @@ import '../models/list_model.dart';
 
 /// Repository implementation for Lists
 /// Implements offline-first pattern: local storage is primary, remote is backup
-@LazySingleton(as: IListRepository)
 class ListRepository implements IListRepository {
   final IListLocalDataSource _localDataSource;
   final IListRemoteDataSource _remoteDataSource;

@@ -1,20 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../../../core/interfaces/usecase.dart';
+import '../../../../core/providers/dependency_providers.dart';
 import '../../domain/entities/cultura_entity.dart';
 import '../../domain/usecases/get_cultura_by_id_usecase.dart';
-import '../../domain/usecases/get_culturas_usecase.dart';
-
-/// Provider for GetCulturasUseCase
-final getCulturasUseCaseProvider = Provider<GetCulturasUseCase>((ref) {
-  return getIt<GetCulturasUseCase>();
-});
-
-/// Provider for GetCulturaByIdUseCase
-final getCulturaByIdUseCaseProvider = Provider<GetCulturaByIdUseCase>((ref) {
-  return getIt<GetCulturaByIdUseCase>();
-});
 
 /// Provider for culturas list
 ///

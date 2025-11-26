@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../repositories/i_list_repository.dart';
 
 /// Use case for checking free tier list limits
@@ -7,7 +6,6 @@ import '../repositories/i_list_repository.dart';
 ///
 /// Free tier: Max 10 active (non-archived) lists
 /// Premium: Unlimited lists
-@injectable
 class CheckListLimitUseCase {
   final IListRepository _repository;
 

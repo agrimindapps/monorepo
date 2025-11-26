@@ -1,9 +1,7 @@
 import 'package:core/src/services/optimized_analytics_wrapper.dart';
-import 'package:injectable/injectable.dart';
 
 /// Service for tracking analytics events in NebulaList
 /// Uses OptimizedAnalyticsWrapper from core package for efficient event logging
-@lazySingleton
 class AnalyticsService {
   final OptimizedAnalyticsWrapper _analytics;
 

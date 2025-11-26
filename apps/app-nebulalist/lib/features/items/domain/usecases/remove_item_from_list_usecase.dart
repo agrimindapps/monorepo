@@ -1,10 +1,8 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../repositories/i_list_item_repository.dart';
 
 /// Use case for removing an item from a list
 /// NOTE: This only removes the ListItem, not the ItemMaster
-@injectable
 class RemoveItemFromListUseCase {
   final IListItemRepository _repository;
 

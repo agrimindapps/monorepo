@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -10,7 +9,6 @@ import '../repositories/culturas_repository.dart';
 /// Use case to get a cultura by id
 ///
 /// Retrieves a specific cultura by its id
-@injectable
 class GetCulturaByIdUseCase
     implements UseCase<CulturaEntity, GetCulturaByIdParams> {
   final ICulturasRepository _repository;

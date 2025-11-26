@@ -1,11 +1,9 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../repositories/i_list_repository.dart';
 
 /// Use case for deleting a list
 /// Implements soft delete (archive) by default
 /// Follows RN-L003 and RN-L004 (BUSINESS_RULES.md)
-@injectable
 class DeleteListUseCase {
   final IListRepository _repository;
 

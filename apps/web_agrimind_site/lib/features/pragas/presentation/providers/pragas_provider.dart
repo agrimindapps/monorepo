@@ -1,14 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/di/injection.dart';
-import '../../../../core/interfaces/usecase.dart';
-import '../../domain/entities/praga_entity.dart';
-import '../../domain/usecases/get_praga_by_id_usecase.dart';
-import '../../domain/usecases/get_pragas_usecase.dart';
 
-/// Get pragas use case provider
-final getPragasUseCaseProvider = Provider<GetPragasUseCase>((ref) {
-  return getIt<GetPragasUseCase>();
-});
+import '../../../../core/interfaces/usecase.dart';
+import '../../../../core/providers/dependency_providers.dart';
+import '../../domain/entities/praga_entity.dart';
 
 /// Pragas provider
 ///
@@ -27,7 +21,7 @@ final pragaByIdProvider = FutureProvider.family<PragaEntity, String>((
   ref,
   id,
 ) async {
-  final usecase = getIt<GetPragaByIdUseCase>();
+  final usecase = ref.watch(getPragaByIdUseCaseProvider);
   final result = await usecase(id);
 
   return result.fold((failure) => throw failure, (praga) => praga);

@@ -1,11 +1,9 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../entities/list_item_entity.dart';
 import '../repositories/i_list_item_repository.dart';
 
 /// Use case for retrieving all items in a list
 /// Items are sorted by order field
-@injectable
 class GetListItemsUseCase {
   final IListItemRepository _repository;
 

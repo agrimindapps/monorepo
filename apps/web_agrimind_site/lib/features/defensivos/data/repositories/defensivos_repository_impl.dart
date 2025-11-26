@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
@@ -11,7 +10,6 @@ import '../datasources/defensivos_remote_datasource.dart';
 /// Defensivos repository implementation
 ///
 /// Implements offline-first pattern with local cache fallback
-@LazySingleton(as: IDefensivosRepository)
 class DefensivosRepositoryImpl implements IDefensivosRepository {
   final DefensivosRemoteDataSource _remoteDataSource;
   final DefensivosLocalDataSource _localDataSource;

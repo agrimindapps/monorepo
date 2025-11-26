@@ -2,12 +2,9 @@ import 'package:dartz/dartz.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/providers/dependency_providers.dart';
 import '../../domain/entities/praga.dart';
-import '../../domain/repositories/pragas_repository.dart';
-import '../../domain/usecases/create_praga_usecase.dart';
-import '../../domain/usecases/update_praga_usecase.dart';
 
 part 'praga_cadastro_provider.g.dart';
 
@@ -21,7 +18,7 @@ class PragaCadastro extends _$PragaCadastro {
 
   /// Load existing praga for editing
   Future<Either<Failure, Praga>> loadPraga(String pragaId) async {
-    final repository = getIt<PragasRepository>();
+    final repository = ref.read(pragasRepositoryProvider);
     return repository.getPragaById(pragaId);
   }
 
@@ -60,11 +57,11 @@ class PragaCadastro extends _$PragaCadastro {
 
       if (id == null) {
         // Create
-        final createUseCase = getIt<CreatePragaUseCase>();
+        final createUseCase = ref.read(createPragaUseCaseProvider);
         result = await createUseCase(praga);
       } else {
         // Update
-        final updateUseCase = getIt<UpdatePragaUseCase>();
+        final updateUseCase = ref.read(updatePragaUseCaseProvider);
         result = await updateUseCase(praga);
       }
 

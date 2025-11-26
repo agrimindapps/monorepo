@@ -1,9 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/providers/dependency_providers.dart';
 import '../../domain/entities/defensivo.dart';
 import '../../domain/entities/defensivo_info.dart';
 import '../../domain/entities/diagnostico.dart';
-import 'defensivos_usecases_providers.dart';
 
 part 'defensivo_cadastro_provider.g.dart';
 

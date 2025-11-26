@@ -1,9 +1,7 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 
 /// Service for sharing lists and items
 /// Uses share_plus package from core
-@lazySingleton
 class ShareService {
   /// Share list details as formatted text
   ///

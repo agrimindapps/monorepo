@@ -1,12 +1,10 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../entities/list_item_entity.dart';
 import '../repositories/i_item_master_repository.dart';
 import '../repositories/i_list_item_repository.dart';
 
 /// Use case for adding an item to a list
 /// Implements business rules from RN-I002 and RN-I003 (BUSINESS_RULES.md)
-@injectable
 class AddItemToListUseCase {
   final IListItemRepository _listItemRepository;
   final IItemMasterRepository _itemMasterRepository;

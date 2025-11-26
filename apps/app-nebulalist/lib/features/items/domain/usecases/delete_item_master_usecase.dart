@@ -1,10 +1,8 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../repositories/i_item_master_repository.dart';
 
 /// Use case for deleting an ItemMaster
 /// NOTE: Deleting an ItemMaster does NOT delete ListItems that reference it
-@injectable
 class DeleteItemMasterUseCase {
   final IItemMasterRepository _repository;
 

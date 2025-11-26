@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
@@ -11,7 +10,6 @@ import '../datasources/culturas_remote_datasource.dart';
 /// Culturas repository implementation
 ///
 /// Implements offline-first pattern with local cache fallback
-@LazySingleton(as: ICulturasRepository)
 class CulturasRepositoryImpl implements ICulturasRepository {
   final CulturasRemoteDataSource _remoteDataSource;
   final CulturasLocalDataSource _localDataSource;

@@ -1,47 +1,12 @@
-import 'package:core/core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../../core/di/injection.dart' as di;
-import '../../../../core/providers/services_providers.dart';
+
+import '../../../../core/providers/dependency_providers.dart';
 import '../../domain/entities/item_master_entity.dart';
-import '../../domain/usecases/check_item_limit_usecase.dart';
-import '../../domain/usecases/create_item_master_usecase.dart';
-import '../../domain/usecases/delete_item_master_usecase.dart';
-import '../../domain/usecases/get_item_masters_usecase.dart';
-import '../../domain/usecases/update_item_master_usecase.dart';
 
-part 'item_masters_provider.g.dart';
-
-/// Provider for use cases (dependencies)
-@riverpod
-GetItemMastersUseCase getItemMastersUseCase(Ref ref) {
-  return di.getIt<GetItemMastersUseCase>();
-}
-
-@riverpod
-CreateItemMasterUseCase createItemMasterUseCase(Ref ref) {
-  return di.getIt<CreateItemMasterUseCase>();
-}
-
-@riverpod
-UpdateItemMasterUseCase updateItemMasterUseCase(Ref ref) {
-  return di.getIt<UpdateItemMasterUseCase>();
-}
-
-@riverpod
-DeleteItemMasterUseCase deleteItemMasterUseCase(Ref ref) {
-  return di.getIt<DeleteItemMasterUseCase>();
-}
-
-@riverpod
-CheckItemLimitUseCase checkItemLimitUseCase(Ref ref) {
-  return di.getIt<CheckItemLimitUseCase>();
-}
-
-/// Main ItemMasters Notifier with Riverpod code generation
+/// Main ItemMasters Notifier with pure Riverpod
 /// Manages ItemMaster bank state with AsyncValue
-@riverpod
-class ItemMastersNotifier extends _$ItemMastersNotifier {
+class ItemMastersNotifier
+    extends AutoDisposeAsyncNotifier<List<ItemMasterEntity>> {
   @override
   Future<List<ItemMasterEntity>> build() async {
     // Load initial ItemMasters (sorted by usage count)
@@ -108,9 +73,8 @@ class ItemMastersNotifier extends _$ItemMastersNotifier {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      final result = await ref
-          .read(updateItemMasterUseCaseProvider)
-          .call(itemMaster);
+      final result =
+          await ref.read(updateItemMasterUseCaseProvider).call(itemMaster);
 
       return result.fold(
         (failure) => throw Exception(failure.message),
@@ -159,9 +123,14 @@ class ItemMastersNotifier extends _$ItemMastersNotifier {
   }
 }
 
+/// Main item masters provider
+final itemMastersProvider =
+    AutoDisposeAsyncNotifierProvider<ItemMastersNotifier, List<ItemMasterEntity>>(
+  ItemMastersNotifier.new,
+);
+
 /// Provider for ItemMasters count
-@riverpod
-int itemMastersCount(Ref ref) {
+final itemMastersCountProvider = Provider.autoDispose<int>((ref) {
   final itemsAsync = ref.watch(itemMastersProvider);
 
   return itemsAsync.when(
@@ -169,25 +138,21 @@ int itemMastersCount(Ref ref) {
     loading: () => 0,
     error: (_, __) => 0,
   );
-}
+});
 
 /// Provider to check if can create ItemMaster (free tier limit)
-@riverpod
-Future<bool> canCreateItemMaster(Ref ref) async {
+final canCreateItemMasterProvider = FutureProvider.autoDispose<bool>((ref) async {
   final result = await ref.read(checkItemLimitUseCaseProvider).call();
 
   return result.fold(
     (failure) => false,
     (canCreate) => canCreate,
   );
-}
+});
 
 /// Provider for ItemMasters by category
-@riverpod
-List<ItemMasterEntity> itemMastersByCategory(
-  Ref ref,
-  String category,
-) {
+final itemMastersByCategoryProvider = Provider.autoDispose
+    .family<List<ItemMasterEntity>, String>((ref, category) {
   final itemsAsync = ref.watch(itemMastersProvider);
 
   return itemsAsync.when(
@@ -195,4 +160,4 @@ List<ItemMasterEntity> itemMastersByCategory(
     loading: () => [],
     error: (_, __) => [],
   );
-}
+});

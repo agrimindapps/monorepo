@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../models/list_model.dart';
 
 /// Interface for remote data source
@@ -13,7 +12,6 @@ abstract class IListRemoteDataSource {
 
 /// Remote data source implementation using Firestore
 /// Handles cloud synchronization (optional for MVP)
-@LazySingleton(as: IListRemoteDataSource)
 class ListRemoteDataSourceImpl implements IListRemoteDataSource {
   final FirebaseFirestore _firestore;
 

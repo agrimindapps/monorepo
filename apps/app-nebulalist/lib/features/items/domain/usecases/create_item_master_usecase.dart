@@ -1,11 +1,9 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 import '../entities/item_master_entity.dart';
 import '../repositories/i_item_master_repository.dart';
 
 /// Use case for creating a new ItemMaster
 /// Implements business rules from RN-I001 (BUSINESS_RULES.md)
-@injectable
 class CreateItemMasterUseCase {
   final IItemMasterRepository _repository;
 

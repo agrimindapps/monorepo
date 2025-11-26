@@ -1,9 +1,7 @@
 import 'package:hive/hive.dart';
-import 'package:injectable/injectable.dart';
 import '../models/item_master_model.dart';
 
 /// Local data source for ItemMaster using Hive
-@injectable
 class ItemMasterLocalDataSource {
   static const String _boxName = 'item_masters';
 

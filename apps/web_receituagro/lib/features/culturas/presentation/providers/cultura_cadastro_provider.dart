@@ -2,12 +2,9 @@ import 'package:dartz/dartz.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/providers/dependency_providers.dart';
 import '../../domain/entities/cultura.dart';
-import '../../domain/repositories/culturas_repository.dart';
-import '../../domain/usecases/create_cultura_usecase.dart';
-import '../../domain/usecases/update_cultura_usecase.dart';
 
 part 'cultura_cadastro_provider.g.dart';
 
@@ -21,7 +18,7 @@ class CulturaCadastro extends _$CulturaCadastro {
 
   /// Load existing cultura for editing
   Future<Either<Failure, Cultura>> loadCultura(String culturaId) async {
-    final repository = getIt<CulturasRepository>();
+    final repository = ref.read(culturasRepositoryProvider);
     return repository.getCulturaById(culturaId);
   }
 
@@ -54,11 +51,11 @@ class CulturaCadastro extends _$CulturaCadastro {
 
       if (id == null) {
         // Create
-        final createUseCase = getIt<CreateCulturaUseCase>();
+        final createUseCase = ref.read(createCulturaUseCaseProvider);
         result = await createUseCase(cultura);
       } else {
         // Update
-        final updateUseCase = getIt<UpdateCulturaUseCase>();
+        final updateUseCase = ref.read(updateCulturaUseCaseProvider);
         result = await updateUseCase(cultura);
       }
 

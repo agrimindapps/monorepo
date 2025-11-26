@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/di/injection.dart' as di;
 import '../../../../core/providers/services_providers.dart';
@@ -13,27 +14,27 @@ part 'lists_provider.g.dart';
 
 /// Provider for use cases (dependencies)
 @riverpod
-GetListsUseCase getListsUseCase(GetListsUseCaseRef ref) {
+GetListsUseCase getListsUseCase(Ref ref) {
   return di.getIt<GetListsUseCase>();
 }
 
 @riverpod
-CreateListUseCase createListUseCase(CreateListUseCaseRef ref) {
+CreateListUseCase createListUseCase(Ref ref) {
   return di.getIt<CreateListUseCase>();
 }
 
 @riverpod
-UpdateListUseCase updateListUseCase(UpdateListUseCaseRef ref) {
+UpdateListUseCase updateListUseCase(Ref ref) {
   return di.getIt<UpdateListUseCase>();
 }
 
 @riverpod
-DeleteListUseCase deleteListUseCase(DeleteListUseCaseRef ref) {
+DeleteListUseCase deleteListUseCase(Ref ref) {
   return di.getIt<DeleteListUseCase>();
 }
 
 @riverpod
-CheckListLimitUseCase checkListLimitUseCase(CheckListLimitUseCaseRef ref) {
+CheckListLimitUseCase checkListLimitUseCase(Ref ref) {
   return di.getIt<CheckListLimitUseCase>();
 }
 
@@ -177,8 +178,8 @@ class ListsNotifier extends _$ListsNotifier {
 
 /// Provider for filtered lists (favorites only)
 @riverpod
-List<ListEntity> favoriteLists(FavoriteListsRef ref) {
-  final listsAsync = ref.watch(listsNotifierProvider);
+List<ListEntity> favoriteLists(Ref ref) {
+  final listsAsync = ref.watch(listsProvider);
 
   return listsAsync.when(
     data: (lists) => lists.where((l) => l.isFavorite).toList(),
@@ -189,8 +190,8 @@ List<ListEntity> favoriteLists(FavoriteListsRef ref) {
 
 /// Provider for lists count
 @riverpod
-int listsCount(ListsCountRef ref) {
-  final listsAsync = ref.watch(listsNotifierProvider);
+int listsCount(Ref ref) {
+  final listsAsync = ref.watch(listsProvider);
 
   return listsAsync.when(
     data: (lists) => lists.length,
@@ -201,7 +202,7 @@ int listsCount(ListsCountRef ref) {
 
 /// Provider to check if can create list (free tier limit)
 @riverpod
-Future<bool> canCreateList(CanCreateListRef ref) async {
+Future<bool> canCreateList(Ref ref) async {
   final result = await ref.read(checkListLimitUseCaseProvider).call();
 
   return result.fold(

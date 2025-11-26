@@ -129,7 +129,7 @@ class NetSalaryCalculatorNotifier extends _$NetSalaryCalculatorNotifier {
 /// Provider for NetSalaryLocalDataSource
 @riverpod
 NetSalaryLocalDataSource netSalaryLocalDataSource(
-  NetSalaryLocalDataSourceRef ref,
+  Ref ref,
 ) {
   final sharedPrefs = ref.watch(sharedPreferencesProvider).requireValue;
   return NetSalaryLocalDataSourceImpl(sharedPrefs);
@@ -137,7 +137,7 @@ NetSalaryLocalDataSource netSalaryLocalDataSource(
 
 /// Provider for NetSalaryRepository
 @riverpod
-NetSalaryRepository netSalaryRepository(NetSalaryRepositoryRef ref) {
+NetSalaryRepository netSalaryRepository(Ref ref) {
   final localDataSource = ref.watch(netSalaryLocalDataSourceProvider);
   return NetSalaryRepositoryImpl(localDataSource);
 }
@@ -147,7 +147,7 @@ NetSalaryRepository netSalaryRepository(NetSalaryRepositoryRef ref) {
 /// Provider for CalculateNetSalaryUseCase
 @riverpod
 CalculateNetSalaryUseCase calculateNetSalaryUseCase(
-  CalculateNetSalaryUseCaseRef ref,
+  Ref ref,
 ) {
   return CalculateNetSalaryUseCase();
 }
@@ -155,7 +155,7 @@ CalculateNetSalaryUseCase calculateNetSalaryUseCase(
 /// Provider for SaveNetSalaryCalculationUseCase
 @riverpod
 SaveNetSalaryCalculationUseCase saveNetSalaryCalculationUseCase(
-  SaveNetSalaryCalculationUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(netSalaryRepositoryProvider);
   return SaveNetSalaryCalculationUseCase(repository);
@@ -164,7 +164,7 @@ SaveNetSalaryCalculationUseCase saveNetSalaryCalculationUseCase(
 /// Provider for GetNetSalaryCalculationHistoryUseCase
 @riverpod
 GetNetSalaryCalculationHistoryUseCase getNetSalaryCalculationHistoryUseCase(
-  GetNetSalaryCalculationHistoryUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(netSalaryRepositoryProvider);
   return GetNetSalaryCalculationHistoryUseCase(repository);

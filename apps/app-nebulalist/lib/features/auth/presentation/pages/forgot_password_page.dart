@@ -29,12 +29,12 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
 
   Future<void> _handleResetPassword() async {
     if (_formKey.currentState!.validate()) {
-      await ref.read(authNotifierProvider.notifier).resetPassword(
+      await ref.read(authProvider.notifier).resetPassword(
             email: _emailController.text,
           );
 
       if (mounted) {
-        final authState = ref.read(authNotifierProvider);
+        final authState = ref.read(authProvider);
         if (authState.errorMessage == null) {
           setState(() {
             _emailSent = true;
@@ -46,7 +46,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -175,7 +175,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             AuthErrorMessage(
               message: authState.errorMessage!,
               onDismiss: () {
-                ref.read(authNotifierProvider.notifier).clearError();
+                ref.read(authProvider.notifier).clearError();
               },
             ),
             const SizedBox(height: 16),

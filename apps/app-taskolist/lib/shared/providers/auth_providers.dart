@@ -1,12 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' as core;
 import 'package:core/core.dart' hide Column;
 
 import '../../core/providers/core_providers.dart';
 import '../../infrastructure/services/auth_service.dart';
 import '../../infrastructure/services/sync_service.dart';
+
+part 'auth_providers.g.dart';
 
 final authStateStreamProvider = StreamProvider<core.UserEntity?>((ref) async* {
   final authService = await ref.watch(taskManagerAuthServiceProvider.future);
@@ -129,67 +132,34 @@ final signOutProvider = FutureProvider<void>((ref) async {
   );
 });
 
-class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
-  AuthNotifier(this._authService, this._syncService)
-      : super(const AsyncValue.loading()) {
-    _init();
-  }
-
-  final TaskManagerAuthService _authService;
-  final TaskManagerSyncService _syncService;
+/// Notifier para gerenciar autenticação
+@riverpod
+class AuthNotifier extends _$AuthNotifier {
+  late TaskManagerAuthService _authService;
+  late TaskManagerSyncService _syncService;
   StreamSubscription<core.UserEntity?>? _subscription;
   bool _isSyncInProgress = false;
   bool _hasPerformedInitialSync = false;
-  String _syncMessage = 'Sincronizando dados...';
-  bool get isSyncInProgress => _isSyncInProgress;
-  bool get hasPerformedInitialSync => _hasPerformedInitialSync;
-  String get syncMessage => _syncMessage;
 
-  void _init() {
+  @override
+  Future<core.UserEntity?> build() async {
+    _authService = ref.watch(taskManagerAuthServiceProvider).requireValue;
+    _syncService = ref.watch(taskManagerSyncServiceProvider);
+
+    // Cleanup subscription ao descartar notifier
+    ref.onDispose(() {
+      _subscription?.cancel();
+    });
+
+    // Inicializar subscription para manter estado sincronizado
     _subscription = _authService.currentUser.listen(
       (user) => state = AsyncValue.data(user),
-      onError: (Object error, StackTrace stackTrace) =>
-          state = AsyncValue.error(error, stackTrace),
-    );
-  }
-
-  Future<void> signIn(String email, String password) async {
-    state = const AsyncValue.loading();
-
-    final result = await _authService.signInWithEmailAndPassword(
-      email: email,
-      password: password,
+      onError: (Object error, StackTrace stackTrace) {
+        state = AsyncValue.error(error, stackTrace);
+      },
     );
 
-    result.fold(
-      (failure) => state = AsyncValue.error(failure, StackTrace.current),
-      (user) => state = AsyncValue.data(user),
-    );
-  }
-
-  Future<void> signUp(String email, String password, String displayName) async {
-    state = const AsyncValue.loading();
-
-    final result = await _authService.signUpWithEmailAndPassword(
-      email: email,
-      password: password,
-      displayName: displayName,
-    );
-
-    result.fold(
-      (failure) => state = AsyncValue.error(failure, StackTrace.current),
-      (user) => state = AsyncValue.data(user),
-    );
-  }
-
-  Future<void> signOut() async {
-    state = const AsyncValue.loading();
-
-    final result = await _authService.signOut();
-    result.fold(
-      (failure) => state = AsyncValue.error(failure, StackTrace.current),
-      (_) => state = const AsyncValue.data(null),
-    );
+    return _authService.currentUser.first;
   }
 
   Future<void> signInWithEmailAndPassword(String email, String password) async {
@@ -200,9 +170,42 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
       password: password,
     );
 
+    state = await AsyncValue.guard(() async {
+      return result.fold(
+        (failure) => throw Exception(failure.message),
+        (user) => user,
+      );
+    });
+  }
+
+  Future<void> signUpWithEmailAndPassword(
+    String email,
+    String password,
+    String displayName,
+  ) async {
+    state = const AsyncValue.loading();
+
+    final result = await _authService.signUpWithEmailAndPassword(
+      email: email,
+      password: password,
+      displayName: displayName,
+    );
+
+    state = await AsyncValue.guard(() async {
+      return result.fold(
+        (failure) => throw Exception(failure.message),
+        (user) => user,
+      );
+    });
+  }
+
+  Future<void> signOut() async {
+    state = const AsyncValue.loading();
+
+    final result = await _authService.signOut();
     result.fold(
       (failure) => state = AsyncValue.error(failure, StackTrace.current),
-      (user) => state = AsyncValue.data(user),
+      (_) => state = const AsyncValue.data(null),
     );
   }
 
@@ -216,7 +219,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
       (failure) {
         debugPrint('❌ AuthNotifier: Erro no login anônimo: $failure');
         state = AsyncValue.error(failure, StackTrace.current);
-        throw Exception(failure.message); // Propagar o erro para quem chamou
       },
       (user) {
         debugPrint('✅ AuthNotifier: Login anônimo bem-sucedido: ${user.id}');
@@ -230,10 +232,12 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
 
     final result = await _authService.signInWithGoogle();
 
-    result.fold(
-      (failure) => state = AsyncValue.error(failure, StackTrace.current),
-      (user) => state = AsyncValue.data(user),
-    );
+    state = await AsyncValue.guard(() async {
+      return result.fold(
+        (failure) => throw Exception(failure.message),
+        (user) => user,
+      );
+    });
   }
 
   Future<void> loginAndSync(String email, String password) async {
@@ -262,7 +266,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
     }
 
     _isSyncInProgress = true;
-    _syncMessage = 'Sincronizando dados...';
 
     try {
       const isUserPremium = false;
@@ -296,34 +299,22 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
 
     result.fold((failure) => throw Exception(failure.message), (_) => null);
   }
-
-  @override
-  void dispose() {
-    _subscription?.cancel();
-    super.dispose();
-  }
 }
 
-final authNotifierProvider =
-    StateNotifierProvider<AuthNotifier, AsyncValue<core.UserEntity?>>((ref) {
-  final authService = ref.watch(taskManagerAuthServiceProvider).requireValue;
-  final syncService = ref.watch(taskManagerSyncServiceProvider);
-  return AuthNotifier(authService, syncService);
-});
+/// Provider que retorna se o usuário está autenticado
 final isAuthenticatedProvider = Provider<bool>((ref) {
-  final authState = ref.watch(authNotifierProvider);
-  return authState.when(
+  final authState = ref.watch(authProvider);
+  return authState.maybeWhen(
     data: (user) => user != null,
-    loading: () => false,
-    error: (_, __) => false,
+    orElse: () => false,
   );
 });
 
+/// Provider que retorna o usuário autenticado atual
 final currentAuthenticatedUserProvider = Provider<core.UserEntity?>((ref) {
-  final authState = ref.watch(authNotifierProvider);
-  return authState.when(
+  final authState = ref.watch(authProvider);
+  return authState.maybeWhen(
     data: (user) => user,
-    loading: () => null,
-    error: (_, __) => null,
+    orElse: () => null,
   );
 });

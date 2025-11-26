@@ -487,26 +487,26 @@ class LivestockSearchNotifier extends _$LivestockSearchNotifier {
 /// Provider derivado para bovinos filtrados
 @riverpod
 List<BovineEntity> filteredBovines(Ref ref) {
-  final bovines = ref.watch(bovinesNotifierProvider).bovines;
+  final bovines = ref.watch(bovinesProvider).bovines;
   return ref
-      .read(livestockFiltersNotifierProvider.notifier)
+      .read(livestockFiltersProvider.notifier)
       .applyFilters(bovines);
 }
 
 /// Provider derivado para total de animais
 @riverpod
 int totalAnimals(Ref ref) {
-  final bovinesCount = ref.watch(bovinesNotifierProvider).totalBovines;
-  final equinesCount = ref.watch(equinesNotifierProvider).totalEquines;
+  final bovinesCount = ref.watch(bovinesProvider).totalBovines;
+  final equinesCount = ref.watch(equinesProvider).totalEquines;
   return bovinesCount + equinesCount;
 }
 
 /// Provider para verificar se há operações em andamento
 @riverpod
 bool isAnyLivestockOperationInProgress(Ref ref) {
-  final bovinesState = ref.watch(bovinesNotifierProvider);
-  final equinesState = ref.watch(equinesNotifierProvider);
-  final searchState = ref.watch(livestockSearchNotifierProvider);
+  final bovinesState = ref.watch(bovinesProvider);
+  final equinesState = ref.watch(equinesProvider);
+  final searchState = ref.watch(livestockSearchProvider);
 
   return bovinesState.isAnyOperationInProgress ||
       equinesState.isLoading ||
@@ -516,9 +516,9 @@ bool isAnyLivestockOperationInProgress(Ref ref) {
 /// Provider para erros consolidados
 @riverpod
 String? consolidatedLivestockError(Ref ref) {
-  final bovinesError = ref.watch(bovinesNotifierProvider).errorMessage;
-  final equinesError = ref.watch(equinesNotifierProvider).errorMessage;
-  final searchError = ref.watch(livestockSearchNotifierProvider).errorMessage;
+  final bovinesError = ref.watch(bovinesProvider).errorMessage;
+  final equinesError = ref.watch(equinesProvider).errorMessage;
+  final searchError = ref.watch(livestockSearchProvider).errorMessage;
 
   final errors = <String>[];
 
@@ -672,11 +672,11 @@ class LivestockSyncNotifier extends _$LivestockSyncNotifier {
 /// Provider atualizado para verificar se há operações em andamento (incluindo stats e sync)
 @riverpod
 bool isAnyLivestockOperationInProgressComplete(Ref ref) {
-  final bovinesState = ref.watch(bovinesNotifierProvider);
-  final equinesState = ref.watch(equinesNotifierProvider);
-  final searchState = ref.watch(livestockSearchNotifierProvider);
-  final statsState = ref.watch(livestockStatisticsNotifierProvider);
-  final syncState = ref.watch(livestockSyncNotifierProvider);
+  final bovinesState = ref.watch(bovinesProvider);
+  final equinesState = ref.watch(equinesProvider);
+  final searchState = ref.watch(livestockSearchProvider);
+  final statsState = ref.watch(livestockStatisticsProvider);
+  final syncState = ref.watch(livestockSyncProvider);
 
   return bovinesState.isAnyOperationInProgress ||
       equinesState.isLoading ||
@@ -688,12 +688,12 @@ bool isAnyLivestockOperationInProgressComplete(Ref ref) {
 /// Provider atualizado para erros consolidados (incluindo stats e sync)
 @riverpod
 String? consolidatedLivestockErrorComplete(Ref ref) {
-  final bovinesError = ref.watch(bovinesNotifierProvider).errorMessage;
-  final equinesError = ref.watch(equinesNotifierProvider).errorMessage;
-  final searchError = ref.watch(livestockSearchNotifierProvider).errorMessage;
+  final bovinesError = ref.watch(bovinesProvider).errorMessage;
+  final equinesError = ref.watch(equinesProvider).errorMessage;
+  final searchError = ref.watch(livestockSearchProvider).errorMessage;
   final statsError =
-      ref.watch(livestockStatisticsNotifierProvider).errorMessage;
-  final syncError = ref.watch(livestockSyncNotifierProvider).errorMessage;
+      ref.watch(livestockStatisticsProvider).errorMessage;
+  final syncError = ref.watch(livestockSyncProvider).errorMessage;
 
   final errors = <String>[];
 
@@ -715,25 +715,25 @@ class LivestockCoordinatorActions {
   /// Inicialização completa do sistema livestock
   Future<void> initializeSystem() async {
     await Future.wait([
-      ref.read(bovinesNotifierProvider.notifier).loadBovines(),
-      ref.read(equinesNotifierProvider.notifier).loadEquines(),
-      ref.read(livestockStatisticsNotifierProvider.notifier).loadStatistics(),
+      ref.read(bovinesProvider.notifier).loadBovines(),
+      ref.read(equinesProvider.notifier).loadEquines(),
+      ref.read(livestockStatisticsProvider.notifier).loadStatistics(),
     ]);
   }
 
   /// Refresh completo de todos os dados
   Future<void> refreshAllData() async {
     await Future.wait([
-      ref.read(bovinesNotifierProvider.notifier).loadBovines(),
-      ref.read(equinesNotifierProvider.notifier).loadEquines(),
-      ref.read(livestockStatisticsNotifierProvider.notifier).loadStatistics(),
+      ref.read(bovinesProvider.notifier).loadBovines(),
+      ref.read(equinesProvider.notifier).loadEquines(),
+      ref.read(livestockStatisticsProvider.notifier).loadStatistics(),
     ]);
   }
 
   /// Sincronização completa com callback de progresso
   Future<bool> performCompleteSync({void Function(double)? onProgress}) async {
     final syncSuccess = await ref
-        .read(livestockSyncNotifierProvider.notifier)
+        .read(livestockSyncProvider.notifier)
         .forceSyncNow(onProgress: onProgress);
 
     if (syncSuccess) {
@@ -745,21 +745,21 @@ class LivestockCoordinatorActions {
 
   /// Limpa todos os erros dos providers especializados
   void clearAllErrors() {
-    ref.read(bovinesNotifierProvider.notifier).clearError();
-    ref.read(equinesNotifierProvider.notifier).clearError();
-    ref.read(livestockSearchNotifierProvider.notifier).clearError();
-    ref.read(livestockStatisticsNotifierProvider.notifier).clearError();
-    ref.read(livestockSyncNotifierProvider.notifier).clearError();
+    ref.read(bovinesProvider.notifier).clearError();
+    ref.read(equinesProvider.notifier).clearError();
+    ref.read(livestockSearchProvider.notifier).clearError();
+    ref.read(livestockStatisticsProvider.notifier).clearError();
+    ref.read(livestockSyncProvider.notifier).clearError();
   }
 
   /// Reset completo do sistema
   void resetSystem() {
-    ref.read(bovinesNotifierProvider.notifier).clearSelection();
-    ref.read(equinesNotifierProvider.notifier).clearError();
-    ref.read(livestockFiltersNotifierProvider.notifier).clearFilters();
-    ref.read(livestockSearchNotifierProvider.notifier).clearSearchResults();
-    ref.read(livestockStatisticsNotifierProvider.notifier).clearStatistics();
-    ref.read(livestockSyncNotifierProvider.notifier).resetSyncState();
+    ref.read(bovinesProvider.notifier).clearSelection();
+    ref.read(equinesProvider.notifier).clearError();
+    ref.read(livestockFiltersProvider.notifier).clearFilters();
+    ref.read(livestockSearchProvider.notifier).clearSearchResults();
+    ref.read(livestockStatisticsProvider.notifier).clearStatistics();
+    ref.read(livestockSyncProvider.notifier).resetSyncState();
   }
 }
 

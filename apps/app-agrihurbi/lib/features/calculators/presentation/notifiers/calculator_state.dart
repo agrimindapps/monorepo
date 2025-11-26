@@ -9,7 +9,8 @@ part 'calculator_state.freezed.dart';
 
 /// Immutable state for calculator management
 @freezed
-class CalculatorState with _$CalculatorState {
+abstract class CalculatorState with _$CalculatorState {
+  const CalculatorState._();
   const factory CalculatorState({
     // Loading states
     @Default(false) bool isLoading,

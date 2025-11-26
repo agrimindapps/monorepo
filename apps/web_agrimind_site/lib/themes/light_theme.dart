@@ -174,8 +174,8 @@ ThemeData lightTheme = ThemeData(
     backgroundColor: Colors.white,
     scrimColor: Colors.black12,
   ),
-  dialogBackgroundColor: Colors.white,
   dialogTheme: const DialogThemeData(
+    backgroundColor: Colors.white,
     surfaceTintColor: Colors.white,
     shadowColor: Colors.black,
     elevation: 4,
@@ -195,7 +195,7 @@ ThemeData lightTheme = ThemeData(
     ),
     indicator: BoxDecoration(
       borderRadius: BorderRadius.circular(8.0),
-      color: Colors.green.withOpacity(0.4),
+      color: Colors.green.withValues(alpha: 0.4),
     ),
     dividerColor: Colors.transparent,
   ),

@@ -9,7 +9,7 @@ part 'culturas_providers.g.dart';
 
 /// Provider for GetAllCulturasUseCase
 @riverpod
-GetAllCulturasUseCase getAllCulturasUseCase(GetAllCulturasUseCaseRef ref) {
+GetAllCulturasUseCase getAllCulturasUseCase(Ref ref) {
   return getIt<GetAllCulturasUseCase>();
 }
 
@@ -40,6 +40,6 @@ class CulturasNotifier extends _$CulturasNotifier {
 
 /// Alias provider for easier access (matches naming convention)
 @riverpod
-Future<List<Cultura>> culturasList(CulturasListRef ref) async {
+Future<List<Cultura>> culturasList(Ref ref) async {
   return ref.watch(culturasNotifierProvider.future);
 }

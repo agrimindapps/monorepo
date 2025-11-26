@@ -170,11 +170,11 @@ class AuthNotifier extends _$AuthNotifier {
 /// Provider derivado para verificar se o usuário está autenticado
 @riverpod
 bool isAuthenticated(Ref ref) {
-  return ref.watch(authNotifierProvider).isAuthenticated;
+  return ref.watch(authProvider).isAuthenticated;
 }
 
 /// Provider derivado para obter o usuário atual
 @riverpod
 UserEntity? currentUser(Ref ref) {
-  return ref.watch(authNotifierProvider).user;
+  return ref.watch(authProvider).user;
 }

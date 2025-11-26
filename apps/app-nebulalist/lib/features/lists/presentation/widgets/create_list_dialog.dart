@@ -138,7 +138,7 @@ class _CreateListDialogState extends ConsumerState<CreateListDialog> {
     setState(() => _isLoading = true);
 
     try {
-      final notifier = ref.read(listsNotifierProvider.notifier);
+      final notifier = ref.read(listsProvider.notifier);
 
       if (widget.existingList != null) {
         // Update existing list

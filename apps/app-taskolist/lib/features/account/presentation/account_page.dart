@@ -8,7 +8,6 @@ import '../../../shared/providers/subscription_providers.dart';
 import '../../../shared/widgets/delete_account_confirmation_dialog.dart';
 import '../../notifications/presentation/notification_settings_page.dart';
 import '../../premium/presentation/premium_page.dart';
-import '../../premium/presentation/subscription_status.dart' as local_sub;
 
 class AccountPage extends ConsumerStatefulWidget {
   const AccountPage({super.key});
@@ -28,9 +27,9 @@ class _AccountPageState extends ConsumerState<AccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
     final subscriptionState = ref.watch(
-      Subscription.subscriptionStatusProvider,
+      subscriptionStatusProvider,
     );
 
     return Scaffold(
@@ -54,7 +53,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   Widget _buildAccountContent(
     BuildContext context,
     UserEntity user,
-    AsyncValue<local_sub.SubscriptionStatus> subscriptionState,
+    AsyncValue<SubscriptionStatus> subscriptionState,
   ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -168,7 +167,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   Widget _buildSubscriptionSection(
-    AsyncValue<local_sub.SubscriptionStatus> subscriptionState,
+    AsyncValue<SubscriptionStatus> subscriptionState,
   ) {
     return Card(
       child: Padding(
@@ -203,23 +202,16 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    status.isActive ? 'Premium' : 'Gratuito',
+                    status == SubscriptionStatus.active ? 'Premium' : 'Gratuito',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: status.isActive
+                      color: status == SubscriptionStatus.active
                           ? AppColors.success
                           : AppColors.textSecondary,
                     ),
                   ),
-                  if (status.isActive && status.expirationDate != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      'Válido até ${_formatDate(status.expirationDate!)}',
-                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                    ),
-                  ],
-                  if (!status.isActive) ...[
+                  if (status != SubscriptionStatus.active) ...[
                     const SizedBox(height: 8),
                     Text(
                       'Limite: 50 tarefas, 10 subtarefas por tarefa',
@@ -448,7 +440,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              await ref.read(authNotifierProvider.notifier).signOut();
+              await ref.read(authProvider.notifier).signOut();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.error,
@@ -462,7 +454,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   void _showDeleteAccountDialog() {
-    final authState = ref.read(authNotifierProvider);
+    final authState = ref.read(authProvider);
 
     authState.when(
       data: (user) async {

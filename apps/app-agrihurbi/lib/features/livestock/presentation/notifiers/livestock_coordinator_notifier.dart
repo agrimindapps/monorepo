@@ -25,30 +25,30 @@ class LivestockCoordinatorNotifier extends _$LivestockCoordinatorNotifier {
 
   /// Access to specialized notifiers via ref.read/ref.watch
   BovinesManagementNotifier get bovinesNotifier =>
-      ref.read(bovinesManagementNotifierProvider.notifier);
+      ref.read(bovinesManagementProvider.notifier);
 
   EquinesManagementNotifier get equinesNotifier =>
-      ref.read(equinesManagementNotifierProvider.notifier);
+      ref.read(equinesManagementProvider.notifier);
 
   BovinesFilterNotifier get filtersNotifier =>
-      ref.read(bovinesFilterNotifierProvider.notifier);
+      ref.read(bovinesFilterProvider.notifier);
 
   LivestockSearchNotifier get searchNotifier =>
-      ref.read(livestockSearchNotifierProvider.notifier);
+      ref.read(livestockSearchProvider.notifier);
 
   LivestockStatisticsNotifier get statisticsNotifier =>
-      ref.read(livestockStatisticsNotifierProvider.notifier);
+      ref.read(livestockStatisticsProvider.notifier);
 
   LivestockSyncNotifier get syncNotifier =>
-      ref.read(livestockSyncNotifierProvider.notifier);
+      ref.read(livestockSyncProvider.notifier);
 
   /// Aggregated states from specialized notifiers
   bool get isAnyOperationInProgress {
-    final bovinesState = ref.watch(bovinesManagementNotifierProvider);
-    final equinesState = ref.watch(equinesManagementNotifierProvider);
-    final searchState = ref.watch(livestockSearchNotifierProvider);
-    final statsState = ref.watch(livestockStatisticsNotifierProvider);
-    final syncState = ref.watch(livestockSyncNotifierProvider);
+    final bovinesState = ref.watch(bovinesManagementProvider);
+    final equinesState = ref.watch(equinesManagementProvider);
+    final searchState = ref.watch(livestockSearchProvider);
+    final statsState = ref.watch(livestockStatisticsProvider);
+    final syncState = ref.watch(livestockSyncProvider);
 
     return (bovinesState.isLoadingBovines ||
         bovinesState.isCreating ||
@@ -67,11 +67,11 @@ class LivestockCoordinatorNotifier extends _$LivestockCoordinatorNotifier {
   String? get consolidatedErrorMessage {
     final errors = <String>[];
 
-    final bovinesState = ref.watch(bovinesManagementNotifierProvider);
-    final equinesState = ref.watch(equinesManagementNotifierProvider);
-    final searchState = ref.watch(livestockSearchNotifierProvider);
-    final statsState = ref.watch(livestockStatisticsNotifierProvider);
-    final syncState = ref.watch(livestockSyncNotifierProvider);
+    final bovinesState = ref.watch(bovinesManagementProvider);
+    final equinesState = ref.watch(equinesManagementProvider);
+    final searchState = ref.watch(livestockSearchProvider);
+    final statsState = ref.watch(livestockStatisticsProvider);
+    final syncState = ref.watch(livestockSyncProvider);
 
     if (bovinesState.errorMessage != null) {
       errors.add('Bovinos: ${bovinesState.errorMessage}');
@@ -94,14 +94,14 @@ class LivestockCoordinatorNotifier extends _$LivestockCoordinatorNotifier {
 
   /// Filtered bovines list
   List<BovineEntity> get filteredBovines {
-    final bovinesState = ref.watch(bovinesManagementNotifierProvider);
+    final bovinesState = ref.watch(bovinesManagementProvider);
     return filtersNotifier.applyFilters(bovinesState.bovines);
   }
 
   /// Total animals across all types
   int get totalAnimals {
-    final bovinesState = ref.watch(bovinesManagementNotifierProvider);
-    final equinesState = ref.watch(equinesManagementNotifierProvider);
+    final bovinesState = ref.watch(bovinesManagementProvider);
+    final equinesState = ref.watch(equinesManagementProvider);
     return bovinesState.bovines.length + equinesState.equines.length;
   }
 
@@ -119,7 +119,7 @@ class LivestockCoordinatorNotifier extends _$LivestockCoordinatorNotifier {
       statisticsNotifier.loadStatistics(),
     ]);
 
-    final bovinesState = ref.read(bovinesManagementNotifierProvider);
+    final bovinesState = ref.read(bovinesManagementProvider);
     filtersNotifier.updateAvailableValues(bovinesState.bovines);
 
     state = state.copyWith(isInitializing: false);
@@ -139,7 +139,7 @@ class LivestockCoordinatorNotifier extends _$LivestockCoordinatorNotifier {
       statisticsNotifier.refreshStatistics(),
     ]);
 
-    final bovinesState = ref.read(bovinesManagementNotifierProvider);
+    final bovinesState = ref.read(bovinesManagementProvider);
     filtersNotifier.updateAvailableValues(bovinesState.bovines);
 
     debugPrint('LivestockCoordinatorNotifier: Todos os dados atualizados');
@@ -202,7 +202,7 @@ class LivestockCoordinatorNotifier extends _$LivestockCoordinatorNotifier {
 
   /// Shortcut for applying bovine filters
   void applyBovineFilters() {
-    final bovinesState = ref.read(bovinesManagementNotifierProvider);
+    final bovinesState = ref.read(bovinesManagementProvider);
     filtersNotifier.updateAvailableValues(bovinesState.bovines);
   }
 }

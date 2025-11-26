@@ -4,12 +4,10 @@ import 'package:core/core.dart'
         SubscriptionEntity,
         SubscriptionTier,
         Provider,
-        StateNotifier,
         Consumer,
         ProviderContainer,
         PrivacySettings;
-import 'package:core/core.dart'
-    show StateNotifier, StateNotifierProvider, Provider;
+import 'package:flutter_riverpod/legacy.dart';
 
 // import '../../core/di/injection_container.dart' as di; // Commented out - migrating to Riverpod
 import '../../features/markets/domain/entities/market_entity.dart';

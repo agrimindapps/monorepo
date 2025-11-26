@@ -1,5 +1,3 @@
-import 'package:core/core.dart';
-
 import '../entities/animal_base_entity.dart';
 import '../entities/bovine_entity.dart';
 import '../entities/equine_entity.dart';

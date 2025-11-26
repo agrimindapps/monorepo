@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/services/fitossanitarios_data_loader.dart';
+import '../../../../core/providers/core_providers.dart' as core_providers;
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import 'defensivos_providers.dart';
@@ -126,7 +127,7 @@ class DefensivosStatisticsNotifier extends _$DefensivosStatisticsNotifier {
 
   @override
   Future<DefensivosStatisticsState> build() async {
-    _repository = ref.watch(fitossanitariosRepositoryProvider);
+    _repository = ref.watch(core_providers.fitossanitariosRepositoryProvider);
     return await _loadStatistics();
   }
 

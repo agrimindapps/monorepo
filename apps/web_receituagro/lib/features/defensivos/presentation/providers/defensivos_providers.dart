@@ -14,37 +14,29 @@ part 'defensivos_providers.g.dart';
 // ========== Use Cases Providers ==========
 
 @riverpod
-GetAllDefensivosUseCase getAllDefensivosUseCase(
-  GetAllDefensivosUseCaseRef ref,
-) {
+GetAllDefensivosUseCase getAllDefensivosUseCase(Ref ref) {
   return getIt<GetAllDefensivosUseCase>();
 }
 
 @riverpod
-SearchDefensivosUseCase searchDefensivosUseCase(
-  SearchDefensivosUseCaseRef ref,
-) {
+SearchDefensivosUseCase searchDefensivosUseCase(Ref ref) {
   return getIt<SearchDefensivosUseCase>();
 }
 
 @riverpod
-DeleteDefensivoUseCase deleteDefensivoUseCase(DeleteDefensivoUseCaseRef ref) {
+DeleteDefensivoUseCase deleteDefensivoUseCase(Ref ref) {
   return getIt<DeleteDefensivoUseCase>();
 }
 
 // ========== Services Providers ==========
 
 @riverpod
-DefensivosFilterService defensivosFilterService(
-  DefensivosFilterServiceRef ref,
-) {
+DefensivosFilterService defensivosFilterService(Ref ref) {
   return DefensivosFilterService();
 }
 
 @riverpod
-DefensivosPaginationService defensivosPaginationService(
-  DefensivosPaginationServiceRef ref,
-) {
+DefensivosPaginationService defensivosPaginationService(Ref ref) {
   return DefensivosPaginationService();
 }
 
@@ -160,7 +152,7 @@ class CurrentPage extends _$CurrentPage {
 
 /// Paginated defensivos (current page items)
 @riverpod
-List<Defensivo> paginatedDefensivos(PaginatedDefensivosRef ref) {
+List<Defensivo> paginatedDefensivos(Ref ref) {
   final defensivosAsync = ref.watch(defensivosNotifierProvider);
   final currentPage = ref.watch(currentPageProvider);
   final paginationService = ref.watch(defensivosPaginationServiceProvider);
@@ -176,7 +168,7 @@ List<Defensivo> paginatedDefensivos(PaginatedDefensivosRef ref) {
 
 /// Total pages
 @riverpod
-int totalPages(TotalPagesRef ref) {
+int totalPages(Ref ref) {
   final defensivosAsync = ref.watch(defensivosNotifierProvider);
   final paginationService = ref.watch(defensivosPaginationServiceProvider);
 
@@ -191,7 +183,7 @@ int totalPages(TotalPagesRef ref) {
 
 /// Page numbers to display in pagination UI
 @riverpod
-List<int> pageNumbers(PageNumbersRef ref) {
+List<int> pageNumbers(Ref ref) {
   final currentPage = ref.watch(currentPageProvider);
   final totalPagesCount = ref.watch(totalPagesProvider);
   final paginationService = ref.watch(defensivosPaginationServiceProvider);

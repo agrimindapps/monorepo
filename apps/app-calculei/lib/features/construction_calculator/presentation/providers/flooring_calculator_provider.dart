@@ -33,7 +33,7 @@ class FlooringCalculatorState {
 /// Provider for calculate flooring use case
 @riverpod
 CalculateFlooringUseCase calculateFlooringUseCase(
-  CalculateFlooringUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(constructionCalculatorRepositoryProvider);
   return CalculateFlooringUseCase(repository: repository);

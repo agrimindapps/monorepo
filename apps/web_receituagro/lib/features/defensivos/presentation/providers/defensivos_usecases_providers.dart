@@ -18,37 +18,27 @@ part 'defensivos_usecases_providers.g.dart';
 // ============================================================================
 
 @riverpod
-GetAllDefensivosUseCase getAllDefensivosUseCase(
-  GetAllDefensivosUseCaseRef ref,
-) {
+GetAllDefensivosUseCase getAllDefensivosUseCase(Ref ref) {
   return getIt<GetAllDefensivosUseCase>();
 }
 
 @riverpod
-SearchDefensivosUseCase searchDefensivosUseCase(
-  SearchDefensivosUseCaseRef ref,
-) {
+SearchDefensivosUseCase searchDefensivosUseCase(Ref ref) {
   return getIt<SearchDefensivosUseCase>();
 }
 
 @riverpod
-CreateDefensivoUseCase createDefensivoUseCase(
-  CreateDefensivoUseCaseRef ref,
-) {
+CreateDefensivoUseCase createDefensivoUseCase(Ref ref) {
   return getIt<CreateDefensivoUseCase>();
 }
 
 @riverpod
-UpdateDefensivoUseCase updateDefensivoUseCase(
-  UpdateDefensivoUseCaseRef ref,
-) {
+UpdateDefensivoUseCase updateDefensivoUseCase(Ref ref) {
   return getIt<UpdateDefensivoUseCase>();
 }
 
 @riverpod
-DeleteDefensivoUseCase deleteDefensivoUseCase(
-  DeleteDefensivoUseCaseRef ref,
-) {
+DeleteDefensivoUseCase deleteDefensivoUseCase(Ref ref) {
   return getIt<DeleteDefensivoUseCase>();
 }
 
@@ -57,16 +47,12 @@ DeleteDefensivoUseCase deleteDefensivoUseCase(
 // ============================================================================
 
 @riverpod
-GetDiagnosticosByDefensivoIdUseCase getDiagnosticosByDefensivoIdUseCase(
-  GetDiagnosticosByDefensivoIdUseCaseRef ref,
-) {
+GetDiagnosticosByDefensivoIdUseCase getDiagnosticosByDefensivoIdUseCase(Ref ref) {
   return getIt<GetDiagnosticosByDefensivoIdUseCase>();
 }
 
 @riverpod
-CreateDiagnosticoUseCase createDiagnosticoUseCase(
-  CreateDiagnosticoUseCaseRef ref,
-) {
+CreateDiagnosticoUseCase createDiagnosticoUseCase(Ref ref) {
   return getIt<CreateDiagnosticoUseCase>();
 }
 
@@ -75,15 +61,11 @@ CreateDiagnosticoUseCase createDiagnosticoUseCase(
 // ============================================================================
 
 @riverpod
-GetDefensivoInfoByDefensivoIdUseCase getDefensivoInfoByDefensivoIdUseCase(
-  GetDefensivoInfoByDefensivoIdUseCaseRef ref,
-) {
+GetDefensivoInfoByDefensivoIdUseCase getDefensivoInfoByDefensivoIdUseCase(Ref ref) {
   return getIt<GetDefensivoInfoByDefensivoIdUseCase>();
 }
 
 @riverpod
-SaveDefensivoInfoUseCase saveDefensivoInfoUseCase(
-  SaveDefensivoInfoUseCaseRef ref,
-) {
+SaveDefensivoInfoUseCase saveDefensivoInfoUseCase(Ref ref) {
   return getIt<SaveDefensivoInfoUseCase>();
 }

@@ -132,7 +132,7 @@ class EmergencyReserveCalculatorNotifier
 /// Provider for EmergencyReserveLocalDataSource
 @riverpod
 EmergencyReserveLocalDataSource emergencyReserveLocalDataSource(
-  EmergencyReserveLocalDataSourceRef ref,
+  Ref ref,
 ) {
   final sharedPrefs = ref.watch(sharedPreferencesProvider).requireValue;
   return EmergencyReserveLocalDataSourceImpl(sharedPrefs);
@@ -141,7 +141,7 @@ EmergencyReserveLocalDataSource emergencyReserveLocalDataSource(
 /// Provider for EmergencyReserveRepository
 @riverpod
 EmergencyReserveRepository emergencyReserveRepository(
-  EmergencyReserveRepositoryRef ref,
+  Ref ref,
 ) {
   final localDataSource = ref.watch(emergencyReserveLocalDataSourceProvider);
   return EmergencyReserveRepositoryImpl(localDataSource);
@@ -152,7 +152,7 @@ EmergencyReserveRepository emergencyReserveRepository(
 /// Provider for CalculateEmergencyReserveUseCase
 @riverpod
 CalculateEmergencyReserveUseCase calculateEmergencyReserveUseCase(
-  CalculateEmergencyReserveUseCaseRef ref,
+  Ref ref,
 ) {
   return CalculateEmergencyReserveUseCase();
 }
@@ -160,7 +160,7 @@ CalculateEmergencyReserveUseCase calculateEmergencyReserveUseCase(
 /// Provider for SaveEmergencyReserveCalculationUseCase
 @riverpod
 SaveEmergencyReserveCalculationUseCase saveEmergencyReserveCalculationUseCase(
-  SaveEmergencyReserveCalculationUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(emergencyReserveRepositoryProvider);
   return SaveEmergencyReserveCalculationUseCase(repository);
@@ -170,7 +170,7 @@ SaveEmergencyReserveCalculationUseCase saveEmergencyReserveCalculationUseCase(
 @riverpod
 GetEmergencyReserveCalculationHistoryUseCase
     getEmergencyReserveCalculationHistoryUseCase(
-  GetEmergencyReserveCalculationHistoryUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(emergencyReserveRepositoryProvider);
   return GetEmergencyReserveCalculationHistoryUseCase(repository);

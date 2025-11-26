@@ -5,8 +5,10 @@ import '../repository/pragas_repository.dart';
 import 'pragas_dialog.dart';
 
 class PragasListPage extends StatefulWidget {
+  const PragasListPage({super.key});
+
   @override
-  _PragasListPageState createState() => _PragasListPageState();
+  State<PragasListPage> createState() => _PragasListPageState();
 }
 
 class _PragasListPageState extends State<PragasListPage> {

@@ -11,7 +11,7 @@ class ProfilePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
     final user = authState.currentUser;
     final theme = Theme.of(context);
 
@@ -254,7 +254,7 @@ class ProfilePage extends ConsumerWidget {
           ElevatedButton(
             onPressed: () async {
               Navigator.of(context).pop();
-              await ref.read(authNotifierProvider.notifier).signOut();
+              await ref.read(authProvider.notifier).signOut();
               if (context.mounted) {
                 context.go(AppConstants.loginRoute);
               }

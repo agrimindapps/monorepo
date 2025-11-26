@@ -55,7 +55,7 @@ class _AddItemToListDialogState extends ConsumerState<AddItemToListDialog> {
 
   /// Build item selection dialog (step 1)
   Widget _buildItemSelectionDialog(ThemeData theme) {
-    final itemsAsync = ref.watch(itemMastersNotifierProvider);
+    final itemsAsync = ref.watch(itemMastersProvider);
 
     return Dialog(
       child: Container(
@@ -402,7 +402,7 @@ class _AddItemToListDialogState extends ConsumerState<AddItemToListDialog> {
     setState(() => _isLoading = true);
 
     try {
-      await ref.read(listItemsNotifierProvider(widget.listId).notifier).addItemToList(
+      await ref.read(listItemsProvider(widget.listId).notifier).addItemToList(
             itemMasterId: _selectedItem!.id,
             quantity: _quantityController.text.trim(),
             priority: _selectedPriority,

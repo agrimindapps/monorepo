@@ -32,7 +32,7 @@ class _CashVsInstallmentCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(cashVsInstallmentCalculatorNotifierProvider);
+    final state = ref.watch(cashVsInstallmentCalculatorProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -184,14 +184,14 @@ class _CashVsInstallmentCalculatorPageState
   void _handleCalculate(CalculateCashVsInstallmentParams params) {
     // Execute the calculation through the notifier
     ref
-        .read(cashVsInstallmentCalculatorNotifierProvider.notifier)
+        .read(cashVsInstallmentCalculatorProvider.notifier)
         .calculate(params);
   }
 
   void _handleClear() {
     _formKey.currentState?.reset();
     ref
-        .read(cashVsInstallmentCalculatorNotifierProvider.notifier)
+        .read(cashVsInstallmentCalculatorProvider.notifier)
         .clearCalculation();
   }
 

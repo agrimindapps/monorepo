@@ -23,8 +23,8 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   # State Management (Riverpod - padrão monorepo)
-  flutter_riverpod: any
-  riverpod_annotation: any
+  flutter_riverpod: ^3.0.3
+  riverpod_annotation: ^3.0.3
 
   # Functional Programming
   dartz: ^0.10.1
@@ -64,7 +64,7 @@ dev_dependencies:
 
   # Code Generation
   build_runner: ^2.4.13
-  riverpod_generator: ^2.6.1
+  riverpod_generator: ^3.0.3
   drift_dev: any  # Desabilitado temporariamente por incompatibilidade analyzer
 
   # Custom Linting (desabilitados temporariamente por incompatibilidade)

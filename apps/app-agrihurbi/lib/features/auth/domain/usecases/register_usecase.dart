@@ -1,5 +1,5 @@
 import 'package:core/core.dart' as core_lib;
-import 'package:core/core.dart' show Equatable, Left, lazySingleton;
+import 'package:core/core.dart' show Equatable, Left;
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/utils/typedef.dart';

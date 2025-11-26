@@ -29,7 +29,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     debugLogDiagnostics: true,
     redirect: (context, state) {
       try {
-        final authState = ref.read(authNotifierProvider);
+        final authState = ref.read(authProvider);
         final isAuthenticated = authState.isAuthenticated;
         final isOnAuthPage =
             state.matchedLocation.startsWith('/login') ||

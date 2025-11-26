@@ -10,8 +10,8 @@ class PremiumPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final statusAsync = ref.watch(premiumStatusNotifierProvider);
-    final packagesAsync = ref.watch(availablePackagesNotifierProvider);
+    final statusAsync = ref.watch(premiumStatusProvider);
+    final packagesAsync = ref.watch(availablePackagesProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -209,7 +209,7 @@ class PremiumPage extends ConsumerWidget {
           const SizedBox(width: 8),
           GestureDetector(
             onTap: () async {
-              await ref.read(premiumStatusNotifierProvider.notifier).restorePurchases();
+              await ref.read(premiumStatusProvider.notifier).restorePurchases();
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Compras restauradas'), backgroundColor: Colors.green),
@@ -282,7 +282,7 @@ class PremiumPage extends ConsumerWidget {
     try {
       final dataSource = ref.read(premiumLocalDataSourceProvider);
       await dataSource.purchasePackage(package);
-      await ref.read(premiumStatusNotifierProvider.notifier).refresh();
+      await ref.read(premiumStatusProvider.notifier).refresh();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Compra realizada!'), backgroundColor: Colors.green),

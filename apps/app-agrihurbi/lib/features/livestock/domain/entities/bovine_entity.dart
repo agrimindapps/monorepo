@@ -1,5 +1,3 @@
-import 'package:core/core.dart';
-
 import 'animal_base_entity.dart';
 
 

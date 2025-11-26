@@ -1,7 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:core/core.dart';
-
 import '../entities/calculation_result.dart';
 import '../interfaces/calculator_strategy.dart';
 

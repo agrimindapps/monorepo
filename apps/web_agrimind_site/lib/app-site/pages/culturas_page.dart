@@ -5,8 +5,10 @@ import '../repository/culturas_repository.dart';
 import 'culturas_dialog.dart';
 
 class CulturaListPage extends StatefulWidget {
+  const CulturaListPage({super.key});
+
   @override
-  _CulturaListPageState createState() => _CulturaListPageState();
+  State<CulturaListPage> createState() => _CulturaListPageState();
 }
 
 class _CulturaListPageState extends State<CulturaListPage> {

@@ -13,7 +13,8 @@ enum SyncStatus {
 
 /// Immutable state for livestock synchronization
 @freezed
-class LivestockSyncState with _$LivestockSyncState {
+abstract class LivestockSyncState with _$LivestockSyncState {
+  const LivestockSyncState._();
   const factory LivestockSyncState({
     @Default(false) bool isSyncing,
     @Default(null) DateTime? lastSyncTime,

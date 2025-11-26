@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/services/access_history_service.dart';
+import '../../../../core/providers/core_providers.dart' as core_providers;
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import 'defensivos_providers.dart';
@@ -63,7 +64,7 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
 
   @override
   Future<DefensivosHistoryState> build() async {
-    _repository = ref.watch(fitossanitariosRepositoryProvider);
+    _repository = ref.watch(core_providers.fitossanitariosRepositoryProvider);
     _historyService = AccessHistoryService();
     return await _loadHistory();
   }

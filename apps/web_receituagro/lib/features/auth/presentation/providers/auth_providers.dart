@@ -12,17 +12,17 @@ part 'auth_providers.g.dart';
 // ========== Use Cases Providers ==========
 
 @riverpod
-LoginUseCase loginUseCase(LoginUseCaseRef ref) {
+LoginUseCase loginUseCase(Ref ref) {
   return getIt<LoginUseCase>();
 }
 
 @riverpod
-LogoutUseCase logoutUseCase(LogoutUseCaseRef ref) {
+LogoutUseCase logoutUseCase(Ref ref) {
   return getIt<LogoutUseCase>();
 }
 
 @riverpod
-GetCurrentUserUseCase getCurrentUserUseCase(GetCurrentUserUseCaseRef ref) {
+GetCurrentUserUseCase getCurrentUserUseCase(Ref ref) {
   return getIt<GetCurrentUserUseCase>();
 }
 
@@ -81,12 +81,12 @@ class AuthNotifier extends _$AuthNotifier {
 
   /// Check if user is authenticated
   bool get isAuthenticated {
-    return state.valueOrNull != null;
+    return state.value != null;
   }
 
   /// Get current user
   User? get currentUser {
-    return state.valueOrNull;
+    return state.value;
   }
 }
 
@@ -94,35 +94,35 @@ class AuthNotifier extends _$AuthNotifier {
 
 /// Is user authenticated
 @riverpod
-bool isAuthenticated(IsAuthenticatedRef ref) {
+bool isAuthenticated(Ref ref) {
   final authState = ref.watch(authNotifierProvider);
-  return authState.valueOrNull != null;
+  return authState.value != null;
 }
 
 /// Current user
 @riverpod
-User? currentUser(CurrentUserRef ref) {
+User? currentUser(Ref ref) {
   final authState = ref.watch(authNotifierProvider);
-  return authState.valueOrNull;
+  return authState.value;
 }
 
 /// Can user write (edit/create)
 @riverpod
-bool canWrite(CanWriteRef ref) {
+bool canWrite(Ref ref) {
   final user = ref.watch(currentUserProvider);
   return user?.canWrite ?? false;
 }
 
 /// Can user delete
 @riverpod
-bool canDelete(CanDeleteRef ref) {
+bool canDelete(Ref ref) {
   final user = ref.watch(currentUserProvider);
   return user?.canDelete ?? false;
 }
 
 /// Is user admin
 @riverpod
-bool isAdmin(IsAdminRef ref) {
+bool isAdmin(Ref ref) {
   final user = ref.watch(currentUserProvider);
   return user?.isAdmin ?? false;
 }

@@ -75,7 +75,7 @@ class _HomePageState extends ConsumerState<HomePage>
   }
 
   void _loadTasks() {
-    ref.read(taskNotifierProvider.notifier).getTasks(status: _selectedFilter);
+    ref.read(taskProvider.notifier).getTasks(status: _selectedFilter);
   }
 
   Future<void> _loadSampleDataIfEmpty() async {
@@ -85,13 +85,13 @@ class _HomePageState extends ConsumerState<HomePage>
       if (tasks.isEmpty) {
         final sampleTasks = SampleData.getSampleTasks();
         for (final task in sampleTasks) {
-          await ref.read<TaskNotifier>(taskNotifierProvider.notifier).createTask(task);
+          await ref.read<TaskNotifier>(taskProvider.notifier).createTask(task);
         }
       }
     } catch (e) {
       final sampleTasks = SampleData.getSampleTasks();
       for (final task in sampleTasks) {
-        await ref.read<TaskNotifier>(taskNotifierProvider.notifier).createTask(task);
+        await ref.read<TaskNotifier>(taskProvider.notifier).createTask(task);
       }
     }
   }

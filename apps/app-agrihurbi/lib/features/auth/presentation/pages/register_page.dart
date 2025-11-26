@@ -158,7 +158,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 const SizedBox(height: 32),
                 Consumer(
                   builder: (context, ref, child) {
-                    final authState = ref.watch(authNotifierProvider);
+                    final authState = ref.watch(authProvider);
                     return ElevatedButton(
                       onPressed: authState.isLoading || authState.isRegistering
                           ? null
@@ -195,7 +195,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 const SizedBox(height: 24),
                 Consumer(
                   builder: (context, ref, child) {
-                    final authState = ref.watch(authNotifierProvider);
+                    final authState = ref.watch(authProvider);
                     if (authState.errorMessage != null) {
                       return Container(
                         padding: const EdgeInsets.all(12),
@@ -230,7 +230,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                 size: 18,
                               ),
                               onPressed: () => ref
-                                  .read(authNotifierProvider.notifier)
+                                  .read(authProvider.notifier)
                                   .clearError(),
                             ),
                           ],
@@ -250,7 +250,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   void _handleRegister(BuildContext context, WidgetRef ref) async {
     if (_formKey.currentState!.validate()) {
-      final result = await ref.read(authNotifierProvider.notifier).register(
+      final result = await ref.read(authProvider.notifier).register(
             name: _nameController.text.trim(),
             email: _emailController.text.trim(),
             password: _passwordController.text,

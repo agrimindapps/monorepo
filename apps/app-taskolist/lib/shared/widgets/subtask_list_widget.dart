@@ -94,7 +94,7 @@ class SubtaskListWidget extends ConsumerWidget {
                               updatedAt: DateTime.now(),
                             );
                             ref
-                                .read(taskNotifierProvider.notifier)
+                                .read(taskProvider.notifier)
                                 .updateSubtask(updatedSubtask);
                           },
                         ),
@@ -213,7 +213,7 @@ class SubtaskListWidget extends ConsumerWidget {
     if (confirmed == true && context.mounted) {
       try {
         await ref
-            .read(taskNotifierProvider.notifier)
+            .read(taskProvider.notifier)
             .deleteSubtask(subtask.id);
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

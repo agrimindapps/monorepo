@@ -6,7 +6,9 @@ part 'item_master_entity.freezed.dart';
 /// ItemMasters are stored in the user's personal item bank
 /// They can be reused across multiple lists
 @freezed
-class ItemMasterEntity with _$ItemMasterEntity {
+abstract class ItemMasterEntity with _$ItemMasterEntity {
+  const ItemMasterEntity._();
+
   const factory ItemMasterEntity({
     required String id,
     required String ownerId,
@@ -22,8 +24,6 @@ class ItemMasterEntity with _$ItemMasterEntity {
     required DateTime createdAt,
     required DateTime updatedAt,
   }) = _ItemMasterEntity;
-
-  const ItemMasterEntity._();
 
   /// Check if item has been used before
   bool get hasBeenUsed => usageCount > 0;

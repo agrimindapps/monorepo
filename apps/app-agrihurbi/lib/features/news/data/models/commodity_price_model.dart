@@ -1,6 +1,5 @@
 
 import 'package:app_agrihurbi/features/news/domain/entities/commodity_price_entity.dart';
-import 'package:core/core.dart';
 
 
 /// Commodity Price Model

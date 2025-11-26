@@ -9,10 +9,10 @@ import '../services/feedback_service.dart';
 class PragasDialog extends StatefulWidget {
   final Pragas? praga;
 
-  const PragasDialog({Key? key, this.praga}) : super(key: key);
+  const PragasDialog({super.key, this.praga});
 
   @override
-  _PragasDialogState createState() => _PragasDialogState();
+  State<PragasDialog> createState() => _PragasDialogState();
 }
 
 class _PragasDialogState extends State<PragasDialog> {

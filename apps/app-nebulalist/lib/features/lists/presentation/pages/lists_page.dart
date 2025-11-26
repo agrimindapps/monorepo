@@ -14,7 +14,7 @@ class ListsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final listsAsync = ref.watch(listsNotifierProvider);
+    final listsAsync = ref.watch(listsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -23,7 +23,7 @@ class ListsPage extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              ref.invalidate(listsNotifierProvider);
+              ref.invalidate(listsProvider);
             },
             tooltip: 'Atualizar',
           ),
@@ -37,7 +37,7 @@ class ListsPage extends ConsumerWidget {
 
           return RefreshIndicator(
             onRefresh: () async {
-              ref.invalidate(listsNotifierProvider);
+              ref.invalidate(listsProvider);
             },
             child: GridView.builder(
               padding: const EdgeInsets.all(16),
@@ -84,7 +84,7 @@ class ListsPage extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
-                onPressed: () => ref.invalidate(listsNotifierProvider),
+                onPressed: () => ref.invalidate(listsProvider),
                 icon: const Icon(Icons.refresh),
                 label: const Text('Tentar Novamente'),
               ),
@@ -149,7 +149,7 @@ class ListsPage extends ConsumerWidget {
     );
 
     if (confirmed == true) {
-      await ref.read(listsNotifierProvider.notifier).deleteList(listId);
+      await ref.read(listsProvider.notifier).deleteList(listId);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -160,7 +160,7 @@ class ListsPage extends ConsumerWidget {
   }
 
   Future<void> _toggleFavorite(WidgetRef ref, dynamic list) async {
-    await ref.read(listsNotifierProvider.notifier).toggleFavorite(list);
+    await ref.read(listsProvider.notifier).toggleFavorite(list);
   }
 
   Future<void> _showReminderDialog(

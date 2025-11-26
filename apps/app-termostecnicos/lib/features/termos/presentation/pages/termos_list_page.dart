@@ -43,7 +43,7 @@ class _TermosPageState extends ConsumerState<TermosPage> {
   @override
   Widget build(BuildContext context) {
     // Watch termos based on whether it's favorites page or all termos
-    final termosAsync = ref.watch(termosNotifierProvider);
+    final termosAsync = ref.watch(termosProvider);
 
     // Filter based on search query
     final filteredTermos = termosAsync.whenData((termos) {
@@ -186,7 +186,7 @@ class _TermosPageState extends ConsumerState<TermosPage> {
           onPressed: () async {
             await ref.read(toggleFavoritoUseCaseProvider).call(termo.id);
             // Refresh termos list to update favorite status
-            ref.invalidate(termosNotifierProvider);
+            ref.invalidate(termosProvider);
           },
         ),
         children: [

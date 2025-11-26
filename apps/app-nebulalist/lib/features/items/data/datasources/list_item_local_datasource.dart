@@ -1,4 +1,3 @@
-import 'package:core/core.dart';
 import 'package:hive/hive.dart';
 import 'package:injectable/injectable.dart';
 import '../models/list_item_model.dart';

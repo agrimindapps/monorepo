@@ -1,5 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' hide SubscriptionStatus, Column;
 
 import '../../domain/entities/subscription_status.dart';
@@ -141,7 +139,7 @@ class AvailablePackagesNotifier extends _$AvailablePackagesNotifier {
 /// Provider for checking if user is premium
 @riverpod
 bool isPremium(Ref ref) {
-  final statusAsync = ref.watch(premiumStatusNotifierProvider);
+  final statusAsync = ref.watch(premiumStatusProvider);
 
   return statusAsync.maybeWhen(
     data: (status) => status.isPremium,
@@ -152,7 +150,7 @@ bool isPremium(Ref ref) {
 /// Provider for subscription type
 @riverpod
 String? subscriptionType(Ref ref) {
-  final statusAsync = ref.watch(premiumStatusNotifierProvider);
+  final statusAsync = ref.watch(premiumStatusProvider);
 
   return statusAsync.maybeWhen(
     data: (status) => status.subscriptionType,
@@ -163,7 +161,7 @@ String? subscriptionType(Ref ref) {
 /// Provider for days remaining
 @riverpod
 int? daysRemaining(Ref ref) {
-  final statusAsync = ref.watch(premiumStatusNotifierProvider);
+  final statusAsync = ref.watch(premiumStatusProvider);
 
   return statusAsync.maybeWhen(
     data: (status) => status.daysRemaining,
@@ -174,7 +172,7 @@ int? daysRemaining(Ref ref) {
 /// Provider for checking if subscription is about to expire
 @riverpod
 bool isAboutToExpire(Ref ref) {
-  final statusAsync = ref.watch(premiumStatusNotifierProvider);
+  final statusAsync = ref.watch(premiumStatusProvider);
 
   return statusAsync.maybeWhen(
     data: (status) => status.isAboutToExpire,

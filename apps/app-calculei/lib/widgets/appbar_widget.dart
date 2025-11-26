@@ -33,7 +33,7 @@ class PageHeaderWidget extends ConsumerWidget {
 
     // Use zero padding to eliminate any extra space contributing to overflow
     final padding = outerPadding ?? EdgeInsets.zero;
-    final isDark = ref.watch(themeModeNotifierProvider);
+    final isDark = ref.watch(themeModeProvider);
 
     return Padding(
       padding: padding,
@@ -201,7 +201,7 @@ class ContentCardWidget extends ConsumerWidget {
   });
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = ref.watch(themeModeNotifierProvider);
+    final isDark = ref.watch(themeModeProvider);
 
     return Container(
       width: double.infinity,

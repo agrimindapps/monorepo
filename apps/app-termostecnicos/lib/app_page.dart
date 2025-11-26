@@ -63,7 +63,7 @@ class _AppState extends ConsumerState<App> {
 
   void checkPremium() async {
     // Premium status is now handled by the Premium feature
-    ref.read(premiumStatusNotifierProvider.notifier).refresh();
+    ref.read(premiumStatusProvider.notifier).refresh();
   }
 
   @override

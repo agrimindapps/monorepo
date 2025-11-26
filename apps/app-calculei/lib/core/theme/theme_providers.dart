@@ -6,13 +6,13 @@ part 'theme_providers.g.dart';
 
 /// Light theme provider
 @riverpod
-ThemeData lightTheme(LightThemeRef ref) {
+ThemeData lightTheme(Ref ref) {
   return AppTheme.lightTheme;
 }
 
 /// Dark theme provider
 @riverpod
-ThemeData darkTheme(DarkThemeRef ref) {
+ThemeData darkTheme(Ref ref) {
   return AppTheme.darkTheme;
 }
 
@@ -35,7 +35,7 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
 
 /// Current theme mode provider
 @riverpod
-ThemeMode currentThemeMode(CurrentThemeModeRef ref) {
-  final isDark = ref.watch(themeModeNotifierProvider);
+ThemeMode currentThemeMode(Ref ref) {
+  final isDark = ref.watch(themeModeProvider);
   return isDark ? ThemeMode.dark : ThemeMode.light;
 }

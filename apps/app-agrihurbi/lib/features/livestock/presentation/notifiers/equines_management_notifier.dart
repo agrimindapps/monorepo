@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/equine_entity.dart';
 import '../../domain/usecases/get_equines.dart';
 import 'equines_management_state.dart';

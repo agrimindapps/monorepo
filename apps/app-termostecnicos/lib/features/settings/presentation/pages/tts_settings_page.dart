@@ -17,13 +17,19 @@ class _TTSSettingsPageState extends ConsumerState<TTSSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final settings = ref.watch(settingsProvider);
+    final settingsAsync = ref.watch(settingsProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Configurações de TTS'),
       ),
-      body: _buildSettingsContent(settings),
+      body: settingsAsync.when(
+        data: (settings) => _buildSettingsContent(settings),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Text('Erro ao carregar configurações: $error'),
+        ),
+      ),
     );
   }
 
@@ -80,10 +86,8 @@ class _TTSSettingsPageState extends ConsumerState<TTSSettingsPage> {
                           max: 1.0,
                           divisions: 10,
                           label: settings.ttsSpeed.toStringAsFixed(1),
-                          onChanged: (value) {
-                            ref.read(settingsProvider.notifier).update(
-                                  (state) => state.copyWith(ttsSpeed: value),
-                                );
+                          onChanged: (value) async {
+                            await ref.read(settingsProvider.notifier).updateTTSSettings(speed: value);
                           },
                         ),
 
@@ -95,10 +99,8 @@ class _TTSSettingsPageState extends ConsumerState<TTSSettingsPage> {
                           max: 1.0,
                           divisions: 10,
                           label: settings.ttsVolume.toStringAsFixed(1),
-                          onChanged: (value) {
-                            ref.read(settingsProvider.notifier).update(
-                                  (state) => state.copyWith(ttsVolume: value),
-                                );
+                          onChanged: (value) async {
+                            await ref.read(settingsProvider.notifier).updateTTSSettings(volume: value);
                           },
                         ),
 
@@ -110,10 +112,8 @@ class _TTSSettingsPageState extends ConsumerState<TTSSettingsPage> {
                           max: 2.0,
                           divisions: 15,
                           label: settings.ttsPitch.toStringAsFixed(1),
-                          onChanged: (value) {
-                            ref.read(settingsProvider.notifier).update(
-                                  (state) => state.copyWith(ttsPitch: value),
-                                );
+                          onChanged: (value) async {
+                            await ref.read(settingsProvider.notifier).updateTTSSettings(pitch: value);
                           },
                         ),
 

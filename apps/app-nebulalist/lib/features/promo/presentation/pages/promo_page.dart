@@ -44,7 +44,7 @@ class _PromoPageState extends ConsumerState<PromoPage> {
   void _checkAuthenticationAndRedirect() {
     if (!mounted) return;
 
-    final authState = ref.read(authNotifierProvider);
+    final authState = ref.read(authProvider);
     if (authState.currentUser != null) {
       debugPrint(
         'Usuário autenticado na página promocional, redirecionando para página interna',

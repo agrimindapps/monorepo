@@ -97,7 +97,7 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
                           ),
                           onPressed: () {
                             ref
-                                .read(themeModeNotifierProvider.notifier)
+                                .read(themeModeProvider.notifier)
                                 .toggleTheme();
                           },
                         ),

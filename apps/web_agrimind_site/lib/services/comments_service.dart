@@ -393,7 +393,7 @@ class FeedBackService {
   }
 }
 
-Widget ConfigOptionFeedback(BuildContext context) {
+Widget configOptionFeedback(BuildContext context) {
   return ListTile(
     title: const Text('FeedBack'),
     subtitle: const Text(

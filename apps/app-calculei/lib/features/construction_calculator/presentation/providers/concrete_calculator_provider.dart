@@ -33,7 +33,7 @@ class ConcreteCalculatorState {
 /// Provider for calculate concrete use case
 @riverpod
 CalculateConcreteUseCase calculateConcreteUseCase(
-  CalculateConcreteUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(constructionCalculatorRepositoryProvider);
   return CalculateConcreteUseCase(repository: repository);

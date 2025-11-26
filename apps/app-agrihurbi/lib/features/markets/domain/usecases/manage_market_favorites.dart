@@ -1,7 +1,6 @@
 import 'package:app_agrihurbi/core/utils/typedef.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
 import 'package:app_agrihurbi/features/markets/domain/repositories/market_repository.dart';
-import 'package:core/core.dart' show injectable;
 import 'package:dartz/dartz.dart';
 
 /// Manage Market Favorites Use Case

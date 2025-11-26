@@ -17,7 +17,7 @@ PreferencesLocalDataSource preferencesDataSource(Ref ref) {
 
 /// AsyncNotifier para gerenciar tema do app
 @riverpod
-class ThemeNotifier extends _$ThemeNotifier {
+class AppThemeNotifier extends _$AppThemeNotifier {
   late final PreferencesLocalDataSource _preferencesDataSource;
 
   @override
@@ -78,21 +78,21 @@ class ThemeNotifier extends _$ThemeNotifier {
 /// Provider para tema atual
 @riverpod
 AppThemeMode currentTheme(Ref ref) {
-  final asyncTheme = ref.watch(themeNotifierProvider);
+  final asyncTheme = ref.watch(appThemeProvider);
   return asyncTheme.value ?? AppThemeMode.system;
 }
 
 /// Provider para estado de loading do tema
 @riverpod
 bool themeLoading(Ref ref) {
-  final asyncTheme = ref.watch(themeNotifierProvider);
+  final asyncTheme = ref.watch(appThemeProvider);
   return asyncTheme.isLoading;
 }
 
 /// Provider para erro do tema
 @riverpod
 String? themeError(Ref ref) {
-  final asyncTheme = ref.watch(themeNotifierProvider);
+  final asyncTheme = ref.watch(appThemeProvider);
   return asyncTheme.hasError ? asyncTheme.error.toString() : null;
 }
 

@@ -1,7 +1,6 @@
 import 'package:app_agrihurbi/features/markets/data/models/market_model.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
 import 'package:app_agrihurbi/features/markets/domain/entities/market_filter_entity.dart';
-import 'package:core/core.dart';
 import 'package:dio/dio.dart';
 
 /// Abstract Market Remote DataSource

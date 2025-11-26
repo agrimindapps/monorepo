@@ -156,7 +156,7 @@ class SobrePageState extends State<SobrePage> {
   }
 }
 
-Widget ConfigOptionSobre(BuildContext context) {
+Widget configOptionSobre(BuildContext context) {
   return ListTile(
     title: const Text('Sobre'),
     subtitle: const Text('Informações sobre o aplicativo'),

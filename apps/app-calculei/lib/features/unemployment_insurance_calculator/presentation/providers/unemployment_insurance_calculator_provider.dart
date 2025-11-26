@@ -133,7 +133,7 @@ class UnemploymentInsuranceCalculatorNotifier
 /// Provider for UnemploymentInsuranceLocalDataSource
 @riverpod
 UnemploymentInsuranceLocalDataSource unemploymentInsuranceLocalDataSource(
-  UnemploymentInsuranceLocalDataSourceRef ref,
+  Ref ref,
 ) {
   final sharedPrefs = ref.watch(sharedPreferencesProvider).requireValue;
   return UnemploymentInsuranceLocalDataSourceImpl(sharedPrefs);
@@ -142,7 +142,7 @@ UnemploymentInsuranceLocalDataSource unemploymentInsuranceLocalDataSource(
 /// Provider for UnemploymentInsuranceRepository
 @riverpod
 UnemploymentInsuranceRepository unemploymentInsuranceRepository(
-  UnemploymentInsuranceRepositoryRef ref,
+  Ref ref,
 ) {
   final localDataSource =
       ref.watch(unemploymentInsuranceLocalDataSourceProvider);
@@ -154,7 +154,7 @@ UnemploymentInsuranceRepository unemploymentInsuranceRepository(
 /// Provider for CalculateUnemploymentInsuranceUseCase
 @riverpod
 CalculateUnemploymentInsuranceUseCase calculateUnemploymentInsuranceUseCase(
-  CalculateUnemploymentInsuranceUseCaseRef ref,
+  Ref ref,
 ) {
   return CalculateUnemploymentInsuranceUseCase();
 }
@@ -163,7 +163,7 @@ CalculateUnemploymentInsuranceUseCase calculateUnemploymentInsuranceUseCase(
 @riverpod
 SaveUnemploymentInsuranceCalculationUseCase
     saveUnemploymentInsuranceCalculationUseCase(
-  SaveUnemploymentInsuranceCalculationUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(unemploymentInsuranceRepositoryProvider);
   return SaveUnemploymentInsuranceCalculationUseCase(repository);
@@ -173,7 +173,7 @@ SaveUnemploymentInsuranceCalculationUseCase
 @riverpod
 GetUnemploymentInsuranceCalculationHistoryUseCase
     getUnemploymentInsuranceCalculationHistoryUseCase(
-  GetUnemploymentInsuranceCalculationHistoryUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(unemploymentInsuranceRepositoryProvider);
   return GetUnemploymentInsuranceCalculationHistoryUseCase(repository);

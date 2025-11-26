@@ -1,4 +1,3 @@
-import 'package:core/core.dart';
 import 'package:core/src/services/optimized_analytics_wrapper.dart';
 import 'package:injectable/injectable.dart';
 

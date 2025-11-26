@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
@@ -62,7 +60,7 @@ class _DefenivosListarPageState extends State<DefenivosListarPage> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 70,
-        backgroundColor: Colors.white.withOpacity(0.7), // Cor com transparência
+        backgroundColor: Colors.white.withValues(alpha: 0.7), // Cor com transparência
         title: SizedBox(width: 1120, child: rowOpcoesMenuSuperior()),
       ),
       body: SingleChildScrollView(

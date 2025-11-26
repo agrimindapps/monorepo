@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -12,7 +13,7 @@ part 'auth_provider.g.dart';
 
 /// Auth state model using Freezed for immutability
 @freezed
-class AuthState with _$AuthState {
+abstract class AuthState with _$AuthState {
   const factory AuthState({
     UserEntity? currentUser,
     @Default(false) bool isLoading,
@@ -34,19 +35,19 @@ enum AuthOperation {
 
 // Provider for FirebaseAuthService (from core package)
 @riverpod
-IAuthRepository authRepository(AuthRepositoryRef ref) {
+IAuthRepository authRepository(Ref ref) {
   return FirebaseAuthService();
 }
 
 // Provider for FirebaseAnalyticsService (from core package)
 @riverpod
-IAnalyticsRepository analyticsRepository(AnalyticsRepositoryRef ref) {
+IAnalyticsRepository analyticsRepository(Ref ref) {
   return FirebaseAnalyticsService();
 }
 
 // Provider for use cases
 @riverpod
-LoginUseCase loginUseCase(LoginUseCaseRef ref) {
+LoginUseCase loginUseCase(Ref ref) {
   return LoginUseCase(
     ref.watch(authRepositoryProvider),
     ref.watch(analyticsRepositoryProvider),
@@ -54,7 +55,7 @@ LoginUseCase loginUseCase(LoginUseCaseRef ref) {
 }
 
 @riverpod
-LogoutUseCase logoutUseCase(LogoutUseCaseRef ref) {
+LogoutUseCase logoutUseCase(Ref ref) {
   return LogoutUseCase(
     ref.watch(authRepositoryProvider),
     ref.watch(analyticsRepositoryProvider),
@@ -62,7 +63,7 @@ LogoutUseCase logoutUseCase(LogoutUseCaseRef ref) {
 }
 
 @riverpod
-SignUpUseCase signUpUseCase(SignUpUseCaseRef ref) {
+SignUpUseCase signUpUseCase(Ref ref) {
   return SignUpUseCase(
     ref.watch(authRepositoryProvider),
     ref.watch(analyticsRepositoryProvider),
@@ -70,7 +71,7 @@ SignUpUseCase signUpUseCase(SignUpUseCaseRef ref) {
 }
 
 @riverpod
-ResetPasswordUseCase resetPasswordUseCase(ResetPasswordUseCaseRef ref) {
+ResetPasswordUseCase resetPasswordUseCase(Ref ref) {
   return ResetPasswordUseCase(ref.watch(authRepositoryProvider));
 }
 

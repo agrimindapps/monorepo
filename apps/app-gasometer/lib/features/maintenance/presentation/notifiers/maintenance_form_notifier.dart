@@ -84,8 +84,6 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     _getVehicleById = ref.watch(getVehicleByIdProvider);
     _addMaintenanceRecord = ref.watch(addMaintenanceRecordProvider);
     _updateMaintenanceRecord = ref.watch(updateMaintenanceRecordProvider);
-    _addMaintenanceRecord = ref.watch(addMaintenanceRecordProvider); // Need to ensure this provider exists
-    _updateMaintenanceRecord = ref.watch(updateMaintenanceRecordProvider); // Need to ensure this provider exists
     
     _imagePicker = ImagePicker();
     _initializeControllers();

@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:core/core.dart';
 
 /// Auth interceptor to add authorization headers
 class AuthInterceptor extends Interceptor {

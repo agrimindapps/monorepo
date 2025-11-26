@@ -35,14 +35,6 @@ PlatformExportService platformExportService(Ref ref) {
   return PlatformExportServiceFactory.create();
 }
 
-/// Provider para o analytics service
-@riverpod
-GasometerAnalyticsService? gasometerAnalyticsService(
-  Ref ref,
-) {
-  return ref.watch(gasometerAnalyticsServiceProvider);
-}
-
 /// Notifier para gerenciar o estado da exportação de dados LGPD
 @riverpod
 class DataExportNotifier extends _$DataExportNotifier {

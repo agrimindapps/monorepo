@@ -279,7 +279,7 @@ class _CreateItemMasterDialogState
     setState(() => _isLoading = true);
 
     try {
-      final notifier = ref.read(itemMastersNotifierProvider.notifier);
+      final notifier = ref.read(itemMastersProvider.notifier);
 
       // Parse tags
       final tags = _tagsController.text

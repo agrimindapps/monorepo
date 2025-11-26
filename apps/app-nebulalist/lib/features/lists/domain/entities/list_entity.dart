@@ -5,7 +5,9 @@ part 'list_entity.freezed.dart';
 /// Entity representing a user list in the app
 /// Used in domain layer for business logic
 @freezed
-class ListEntity with _$ListEntity {
+abstract class ListEntity with _$ListEntity {
+  const ListEntity._();
+
   const factory ListEntity({
     required String id,
     required String name,
@@ -23,8 +25,6 @@ class ListEntity with _$ListEntity {
     @Default(0) int itemCount,
     @Default(0) int completedCount,
   }) = _ListEntity;
-
-  const ListEntity._();
 
   /// Calculate completion percentage
   double get completionPercentage {

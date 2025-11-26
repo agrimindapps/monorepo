@@ -8,7 +8,7 @@ part 'construction_calculator_providers.g.dart';
 /// Provider for construction local datasource
 @riverpod
 ConstructionLocalDataSource constructionLocalDataSource(
-  ConstructionLocalDataSourceRef ref,
+  Ref ref,
 ) {
   return ConstructionLocalDataSourceImpl();
 }
@@ -16,7 +16,7 @@ ConstructionLocalDataSource constructionLocalDataSource(
 /// Provider for construction calculator repository
 @riverpod
 ConstructionCalculatorRepository constructionCalculatorRepository(
-  ConstructionCalculatorRepositoryRef ref,
+  Ref ref,
 ) {
   final localDataSource = ref.watch(constructionLocalDataSourceProvider);
   return ConstructionCalculatorRepositoryImpl(

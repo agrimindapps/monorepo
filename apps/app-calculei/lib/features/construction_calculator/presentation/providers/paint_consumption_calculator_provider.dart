@@ -33,7 +33,7 @@ class PaintConsumptionCalculatorState {
 /// Provider for calculate paint consumption use case
 @riverpod
 CalculatePaintConsumptionUseCase calculatePaintConsumptionUseCase(
-  CalculatePaintConsumptionUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(constructionCalculatorRepositoryProvider);
   return CalculatePaintConsumptionUseCase(repository: repository);

@@ -21,9 +21,9 @@ class ListDetailPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final listsAsync = ref.watch(listsNotifierProvider);
-    final listItemsAsync = ref.watch(listItemsNotifierProvider(listId));
-    final itemMastersAsync = ref.watch(itemMastersNotifierProvider);
+    final listsAsync = ref.watch(listsProvider);
+    final listItemsAsync = ref.watch(listItemsProvider(listId));
+    final itemMastersAsync = ref.watch(itemMastersProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -47,8 +47,8 @@ class ListDetailPage extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              ref.invalidate(listItemsNotifierProvider(listId));
-              ref.invalidate(listsNotifierProvider);
+              ref.invalidate(listItemsProvider(listId));
+              ref.invalidate(listsProvider);
             },
             tooltip: 'Atualizar',
           ),
@@ -162,7 +162,7 @@ class ListDetailPage extends ConsumerWidget {
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async {
-                ref.invalidate(listItemsNotifierProvider(listId));
+                ref.invalidate(listItemsProvider(listId));
               },
               child: listItemsAsync.when(
                 data: (listItems) {
@@ -194,13 +194,13 @@ class ListDetailPage extends ConsumerWidget {
                             onToggleComplete: () {
                               ref
                                   .read(
-                                      listItemsNotifierProvider(listId).notifier)
+                                      listItemsProvider(listId).notifier)
                                   .toggleCompletion(listItem.id);
                             },
                             onDelete: () {
                               ref
                                   .read(
-                                      listItemsNotifierProvider(listId).notifier)
+                                      listItemsProvider(listId).notifier)
                                   .removeItem(listItem.id);
                             },
                           );
@@ -245,7 +245,7 @@ class ListDetailPage extends ConsumerWidget {
                       const SizedBox(height: 24),
                       ElevatedButton.icon(
                         onPressed: () {
-                          ref.invalidate(listItemsNotifierProvider(listId));
+                          ref.invalidate(listItemsProvider(listId));
                         },
                         icon: const Icon(Icons.refresh),
                         label: const Text('Tentar Novamente'),
@@ -280,9 +280,9 @@ class ListDetailPage extends ConsumerWidget {
   /// Share list with formatted text
   Future<void> _shareList(BuildContext context, WidgetRef ref) async {
     try {
-      final listsAsync = ref.read(listsNotifierProvider);
-      final listItemsAsync = ref.read(listItemsNotifierProvider(listId));
-      final itemMastersAsync = ref.read(itemMastersNotifierProvider);
+      final listsAsync = ref.read(listsProvider);
+      final listItemsAsync = ref.read(listItemsProvider(listId));
+      final itemMastersAsync = ref.read(itemMastersProvider);
 
       await listsAsync.when(
         data: (lists) async {

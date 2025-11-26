@@ -31,7 +31,7 @@ class _ThirteenthSalaryCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(thirteenthSalaryCalculatorNotifierProvider);
+    final state = ref.watch(thirteenthSalaryCalculatorProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -178,14 +178,14 @@ class _ThirteenthSalaryCalculatorPageState
 
   void _handleCalculate(CalculateThirteenthSalaryParams params) {
     ref
-        .read(thirteenthSalaryCalculatorNotifierProvider.notifier)
+        .read(thirteenthSalaryCalculatorProvider.notifier)
         .calculate(params);
   }
 
   void _handleClear() {
     _formKey.currentState?.reset();
     ref
-        .read(thirteenthSalaryCalculatorNotifierProvider.notifier)
+        .read(thirteenthSalaryCalculatorProvider.notifier)
         .clearCalculation();
   }
 

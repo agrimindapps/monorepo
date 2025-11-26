@@ -30,14 +30,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
-      await ref.read(authNotifierProvider.notifier).signIn(
+      await ref.read(authProvider.notifier).signIn(
             email: _emailController.text,
             password: _passwordController.text,
           );
 
       // Navigate to home on success
       if (mounted) {
-        final authState = ref.read(authNotifierProvider);
+        final authState = ref.read(authProvider);
         if (authState.currentUser != null && authState.errorMessage == null) {
           context.go(AppConstants.homeRoute);
         }
@@ -47,7 +47,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -89,7 +89,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     AuthErrorMessage(
                       message: authState.errorMessage!,
                       onDismiss: () {
-                        ref.read(authNotifierProvider.notifier).clearError();
+                        ref.read(authProvider.notifier).clearError();
                       },
                     ),
                     const SizedBox(height: 16),

@@ -31,7 +31,7 @@ class _EmergencyReserveCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(emergencyReserveCalculatorNotifierProvider);
+    final state = ref.watch(emergencyReserveCalculatorProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -178,14 +178,14 @@ class _EmergencyReserveCalculatorPageState
 
   void _handleCalculate(CalculateEmergencyReserveParams params) {
     ref
-        .read(emergencyReserveCalculatorNotifierProvider.notifier)
+        .read(emergencyReserveCalculatorProvider.notifier)
         .calculate(params);
   }
 
   void _handleClear() {
     _formKey.currentState?.reset();
     ref
-        .read(emergencyReserveCalculatorNotifierProvider.notifier)
+        .read(emergencyReserveCalculatorProvider.notifier)
         .clearCalculation();
   }
 

@@ -47,26 +47,18 @@ class ProfilePage extends ConsumerStatefulWidget {
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
   final _scrollController = ScrollController();
-  late final ProfileController _profileController;
+  ProfileController? _profileController;
+
+  ProfileController get profileController {
+    return _profileController ??= ProfileController(
+      ref.read(accountServiceProvider),
+      ref.read(profileImageServiceProvider),
+    );
+  }
 
   @override
   void initState() {
     super.initState();
-    // We can't access ref in initState directly for reading providers if they depend on other providers
-    // But we can use ref.read in initState if we are careful.
-    // Better to initialize in didChangeDependencies or build if possible,
-    // but ProfileController might be needed early.
-    // However, ProfileController seems to be a simple controller class, not a Riverpod notifier.
-    // Let's initialize it in build or use a provider for it.
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _profileController = ProfileController(
-      ref.read(accountServiceProvider),
-      ref.read(profileImageServiceProvider),
-    );
   }
 
   @override
@@ -129,7 +121,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           user: user,
           isAnonymous: isAnonymous,
           isPremium: isPremium,
-          profileController: _profileController,
+          profileController: profileController,
         ),
         if (!isAnonymous) ...[
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),

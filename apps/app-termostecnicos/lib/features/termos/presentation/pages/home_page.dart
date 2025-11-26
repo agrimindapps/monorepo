@@ -26,7 +26,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   void initState() {
     super.initState();
     // Trigger initial load of termos
-    Future.microtask(() => ref.read(termosNotifierProvider));
+    Future.microtask(() => ref.read(termosProvider));
   }
 
   @override
@@ -139,7 +139,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       onTap: () async {
         // Set categoria using Riverpod provider
         await ref
-            .read(categoriaAtualNotifierProvider.notifier)
+            .read(categoriaAtualProvider.notifier)
             .setCategoria(categoria);
 
         // Navigate to termos page

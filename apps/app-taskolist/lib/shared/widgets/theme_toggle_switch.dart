@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide ThemeNotifier, Column;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -17,9 +17,9 @@ class ThemeToggleSwitch extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncTheme = ref.watch(themeNotifierProvider);
+    final asyncTheme = ref.watch(appThemeProvider);
     final currentTheme = ref.watch(currentThemeProvider);
-    final themeNotifier = ref.read(themeNotifierProvider.notifier);
+    final themeNotifier = ref.read(appThemeProvider.notifier);
 
     return asyncTheme.when(
       loading: () => _buildLoadingState(),
@@ -31,7 +31,7 @@ class ThemeToggleSwitch extends ConsumerWidget {
   Widget _buildContent(
     BuildContext context,
     AppThemeMode currentTheme,
-    ThemeNotifier themeNotifier,
+    AppThemeNotifier themeNotifier,
   ) {
     return Row(
       mainAxisAlignment: alignment,
@@ -144,7 +144,7 @@ class ThemeToggleIcon extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentTheme = ref.watch(currentThemeProvider);
-    final themeNotifier = ref.read(themeNotifierProvider.notifier);
+    final themeNotifier = ref.read(appThemeProvider.notifier);
 
     return IconButton(
       onPressed: () => themeNotifier.toggleTheme(),
@@ -170,7 +170,7 @@ class ThemeSelectionList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentTheme = ref.watch(currentThemeProvider);
-    final themeNotifier = ref.read(themeNotifierProvider.notifier);
+    final themeNotifier = ref.read(appThemeProvider.notifier);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

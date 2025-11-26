@@ -10,7 +10,7 @@ class ModernDrawer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
     final user = authState.value;
     final userDisplayName = user?.displayName ?? 'Usuário';
     final userEmail = user?.email ?? 'usuario@exemplo.com';
@@ -291,7 +291,7 @@ class ModernDrawer extends ConsumerWidget {
 
     if (confirmed == true) {
       try {
-        await ref.read(authNotifierProvider.notifier).signOut();
+        await ref.read(authProvider.notifier).signOut();
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

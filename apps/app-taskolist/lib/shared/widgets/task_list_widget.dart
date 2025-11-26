@@ -21,7 +21,7 @@ class TaskListWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tasksState = ref.watch<AsyncValue<List<TaskEntity>>>(taskNotifierProvider);
+    final tasksState = ref.watch<AsyncValue<List<TaskEntity>>>(taskProvider);
 
     return tasksState.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -37,7 +37,7 @@ class TaskListWidget extends ConsumerWidget {
                 Text(error.toString(), style: const TextStyle(fontSize: 12)),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => ref.refresh(taskNotifierProvider),
+                  onPressed: () => ref.refresh(taskProvider),
                   child: const Text('Tentar novamente'),
                 ),
               ],
@@ -139,7 +139,7 @@ class TaskListWidget extends ConsumerWidget {
                   status: newStatus,
                   updatedAt: DateTime.now(),
                 );
-                ref.read<TaskNotifier>(taskNotifierProvider.notifier).updateTask(updatedTask);
+                ref.read<TaskNotifier>(taskProvider.notifier).updateTask(updatedTask);
               },
             ),
           ],
@@ -164,7 +164,7 @@ class TaskListWidget extends ConsumerWidget {
               isStarred: !task.isStarred,
               updatedAt: DateTime.now(),
             );
-            ref.read<TaskNotifier>(taskNotifierProvider.notifier).updateTask(updatedTask);
+            ref.read<TaskNotifier>(taskProvider.notifier).updateTask(updatedTask);
           },
         ),
         onTap: () {
@@ -189,6 +189,6 @@ class TaskListWidget extends ConsumerWidget {
     final movedTask = reorderedTasks.removeAt(oldIndex);
     reorderedTasks.insert(newIndex, movedTask);
     final taskIds = reorderedTasks.map((task) => task.id).toList();
-    ref.read<TaskNotifier>(taskNotifierProvider.notifier).reorderTasks(taskIds);
+    ref.read<TaskNotifier>(taskProvider.notifier).reorderTasks(taskIds);
   }
 }

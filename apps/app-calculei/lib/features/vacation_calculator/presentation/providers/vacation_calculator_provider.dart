@@ -14,7 +14,7 @@ part 'vacation_calculator_provider.g.dart';
 /// Provider for VacationLocalDataSource
 @riverpod
 VacationLocalDataSource vacationLocalDataSource(
-  VacationLocalDataSourceRef ref,
+  Ref ref,
 ) {
   final sharedPrefs = ref.watch(sharedPreferencesProvider).requireValue;
   return VacationLocalDataSourceImpl(sharedPrefs);
@@ -22,7 +22,7 @@ VacationLocalDataSource vacationLocalDataSource(
 
 /// Provider for VacationRepository
 @riverpod
-VacationRepository vacationRepository(VacationRepositoryRef ref) {
+VacationRepository vacationRepository(Ref ref) {
   final localDataSource = ref.watch(vacationLocalDataSourceProvider);
   return VacationRepositoryImpl(localDataSource);
 }
@@ -30,14 +30,14 @@ VacationRepository vacationRepository(VacationRepositoryRef ref) {
 /// Provider for CalculateVacationUseCase
 @riverpod
 CalculateVacationUseCase calculateVacationUseCase(
-  CalculateVacationUseCaseRef ref,
+  Ref ref,
 ) {
   return const CalculateVacationUseCase();
 }
 
 /// Provider for SaveCalculationUseCase
 @riverpod
-SaveCalculationUseCase saveCalculationUseCase(SaveCalculationUseCaseRef ref) {
+SaveCalculationUseCase saveCalculationUseCase(Ref ref) {
   final repository = ref.watch(vacationRepositoryProvider);
   return SaveCalculationUseCase(repository);
 }
@@ -45,7 +45,7 @@ SaveCalculationUseCase saveCalculationUseCase(SaveCalculationUseCaseRef ref) {
 /// Provider for GetCalculationHistoryUseCase
 @riverpod
 GetCalculationHistoryUseCase getCalculationHistoryUseCase(
-  GetCalculationHistoryUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(vacationRepositoryProvider);
   return GetCalculationHistoryUseCase(repository);

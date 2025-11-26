@@ -1,37 +1,20 @@
 import 'package:core/core.dart' hide Column;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/providers/core_providers.dart';
 import '../../features/account/presentation/usage_stats.dart' as local;
 import '../../features/auth/domain/user_limits.dart' as local;
-import '../../features/premium/presentation/subscription_status.dart'
-    as local_sub;
 import '../../infrastructure/services/subscription_service.dart';
 
-class Subscription {
-  static final subscriptionStatusProvider = StateNotifierProvider<
-    SubscriptionStatusNotifier,
-    AsyncValue<local_sub.SubscriptionStatus>
-  >((ref) {
-    return SubscriptionStatusNotifier();
-  });
-}
+part 'subscription_providers.g.dart';
 
-class SubscriptionStatusNotifier
-    extends StateNotifier<AsyncValue<local_sub.SubscriptionStatus>> {
-  SubscriptionStatusNotifier() : super(const AsyncValue.loading()) {
-    _fetchSubscriptionStatus();
-  }
-
-  Future<void> _fetchSubscriptionStatus() async {
-    try {
-      const status = local_sub.SubscriptionStatus(
-        isActive: false,
-        expirationDate: null,
-      );
-      state = const AsyncValue.data(status);
-    } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
-    }
+/// Notifier para gerenciar status da subscription
+@riverpod
+class SubscriptionStatusNotifier extends _$SubscriptionStatusNotifier {
+  @override
+  FutureOr<SubscriptionStatus> build() {
+    // Retorna status padrão (inativo)
+    return SubscriptionStatus.active;
   }
 }
 // subscriptionServiceProvider is now defined in core_providers.dart as taskManagerSubscriptionServiceProvider

@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' hide Column;
 
@@ -58,43 +56,27 @@ UpdateTTSSettings updateTTSSettingsUseCase(Ref ref) {
 }
 
 // ============================================================================
-// Settings State Provider (Simple version for now)
+// Settings State Notifier (Riverpod 3.x with @riverpod)
 // ============================================================================
 
-final settingsProvider = StateProvider<AppSettings>((ref) {
-  return const AppSettings(); // Default settings
-});
-
-// ============================================================================
-// Settings Notifier Provider (will be implemented later)
-// ============================================================================
-
-final settingsNotifierProvider =
-    StateNotifierProvider<SettingsNotifier, AsyncValue<AppSettings>>((ref) {
-  final repository = ref.watch(settingsRepositoryProvider);
-  return SettingsNotifier(repository);
-});
-
-class SettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
-  final SettingsRepository _repository;
-
-  SettingsNotifier(this._repository) : super(const AsyncValue.loading()) {
-    _loadSettings();
+@riverpod
+class Settings extends _$Settings {
+  @override
+  Future<AppSettings> build() async {
+    return _loadSettings();
   }
 
-  Future<void> _loadSettings() async {
-    state = const AsyncValue.loading();
-    try {
-      final result = await _repository.getSettings();
-      result.fold(
-        (failure) => state = AsyncValue.error(failure, StackTrace.current),
-        (settings) => state = AsyncValue.data(settings),
-      );
-    } catch (error, stackTrace) {
-      state = AsyncValue.error(error, stackTrace);
-    }
+  Future<AppSettings> _loadSettings() async {
+    final repository = ref.read(settingsRepositoryProvider);
+    final result = await repository.getSettings();
+
+    return result.fold(
+      (failure) => throw Exception(failure.message),
+      (settings) => settings,
+    );
   }
 
+  /// Toggle dark/light theme
   Future<void> toggleTheme() async {
     final currentSettings = state.value;
     if (currentSettings == null) return;
@@ -103,29 +85,31 @@ class SettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
       isDarkMode: !currentSettings.isDarkMode,
     );
 
-    // Optimistically update UI
+    // Optimistic update
     state = AsyncValue.data(newSettings);
 
     try {
-      final result = await _repository.updateTheme(newSettings.isDarkMode);
+      final repository = ref.read(settingsRepositoryProvider);
+      final result = await repository.updateTheme(newSettings.isDarkMode);
+
       result.fold(
         (failure) {
           // Revert on error
           state = AsyncValue.data(currentSettings);
-          state = AsyncValue.error(failure, StackTrace.current);
+          throw Exception(failure.message);
         },
         (_) {
-          // Success - keep the new state
-          state = AsyncValue.data(newSettings);
+          // Success - state already updated
         },
       );
-    } catch (error, stackTrace) {
+    } catch (error) {
       // Revert on error
       state = AsyncValue.data(currentSettings);
-      state = AsyncValue.error(error, stackTrace);
+      rethrow;
     }
   }
 
+  /// Update TTS (Text-to-Speech) settings
   Future<void> updateTTSSettings({
     double? speed,
     double? pitch,
@@ -142,31 +126,38 @@ class SettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
       ttsLanguage: language ?? currentSettings.ttsLanguage,
     );
 
-    // Optimistically update UI
+    // Optimistic update
     state = AsyncValue.data(newSettings);
 
     try {
-      final result = await _repository.updateTTSSettings(
+      final repository = ref.read(settingsRepositoryProvider);
+      final result = await repository.updateTTSSettings(
         speed: speed,
         pitch: pitch,
         volume: volume,
         language: language,
       );
+
       result.fold(
         (failure) {
           // Revert on error
           state = AsyncValue.data(currentSettings);
-          state = AsyncValue.error(failure, StackTrace.current);
+          throw Exception(failure.message);
         },
         (_) {
-          // Success - keep the new state
-          state = AsyncValue.data(newSettings);
+          // Success - state already updated
         },
       );
-    } catch (error, stackTrace) {
+    } catch (error) {
       // Revert on error
       state = AsyncValue.data(currentSettings);
-      state = AsyncValue.error(error, stackTrace);
+      rethrow;
     }
+  }
+
+  /// Refresh settings from repository
+  Future<void> refresh() async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() => _loadSettings());
   }
 }

@@ -1,7 +1,5 @@
 import 'package:app_agrihurbi/core/error/exceptions.dart';
-import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-
 import 'package:dio/dio.dart';
 import '../models/user_model.dart';
 

@@ -34,7 +34,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
 
   Future<void> _handleSignUp() async {
     if (_formKey.currentState!.validate()) {
-      await ref.read(authNotifierProvider.notifier).signUp(
+      await ref.read(authProvider.notifier).signUp(
             email: _emailController.text,
             password: _passwordController.text,
             displayName: _nameController.text,
@@ -42,7 +42,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
 
       // Navigate to home on success
       if (mounted) {
-        final authState = ref.read(authNotifierProvider);
+        final authState = ref.read(authProvider);
         if (authState.currentUser != null && authState.errorMessage == null) {
           context.go(AppConstants.homeRoute);
         }
@@ -52,7 +52,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -93,7 +93,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                     AuthErrorMessage(
                       message: authState.errorMessage!,
                       onDismiss: () {
-                        ref.read(authNotifierProvider.notifier).clearError();
+                        ref.read(authProvider.notifier).clearError();
                       },
                     ),
                     const SizedBox(height: 16),

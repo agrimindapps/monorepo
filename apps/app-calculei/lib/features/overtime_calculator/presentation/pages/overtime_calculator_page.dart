@@ -31,7 +31,7 @@ class _OvertimeCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(overtimeCalculatorNotifierProvider);
+    final state = ref.watch(overtimeCalculatorProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -178,14 +178,14 @@ class _OvertimeCalculatorPageState
 
   void _handleCalculate(CalculateOvertimeParams params) {
     ref
-        .read(overtimeCalculatorNotifierProvider.notifier)
+        .read(overtimeCalculatorProvider.notifier)
         .calculate(params);
   }
 
   void _handleClear() {
     _formKey.currentState?.reset();
     ref
-        .read(overtimeCalculatorNotifierProvider.notifier)
+        .read(overtimeCalculatorProvider.notifier)
         .clearCalculation();
   }
 

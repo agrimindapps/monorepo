@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart' as core;
 
 import '../../../../core/error/exceptions.dart';
@@ -25,7 +24,7 @@ abstract class SubscriptionRemoteDataSource {
 }
 
 class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
-  final FirebaseFirestore firestore;
+  final core.FirebaseFirestore firestore;
   final core.ISubscriptionRepository subscriptionRepository;
 
   SubscriptionRemoteDataSourceImpl({

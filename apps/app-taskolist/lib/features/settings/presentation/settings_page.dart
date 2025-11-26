@@ -12,7 +12,7 @@ class SettingsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
     final userDisplayName = authState.value?.displayName ?? 'Usuário';
 
     return Scaffold(
@@ -247,7 +247,7 @@ class SettingsPage extends ConsumerWidget {
               Navigator.pop(context); // Voltar para tela anterior
 
               try {
-                await ref.read(authNotifierProvider.notifier).signOut();
+                await ref.read(authProvider.notifier).signOut();
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(

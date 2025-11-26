@@ -1,5 +1,4 @@
 import 'package:app_agrihurbi/features/markets/data/models/market_model.dart';
-import 'package:core/core.dart';
 
 /// Abstract Market Local DataSource
 abstract class MarketLocalDataSource {

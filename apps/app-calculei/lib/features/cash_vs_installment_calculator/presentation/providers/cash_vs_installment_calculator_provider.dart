@@ -133,7 +133,7 @@ class CashVsInstallmentCalculatorNotifier
 /// Provider for CashVsInstallmentLocalDataSource
 @riverpod
 CashVsInstallmentLocalDataSource cashVsInstallmentLocalDataSource(
-  CashVsInstallmentLocalDataSourceRef ref,
+  Ref ref,
 ) {
   final sharedPrefs = ref.watch(sharedPreferencesProvider).requireValue;
   return CashVsInstallmentLocalDataSourceImpl(sharedPrefs);
@@ -142,7 +142,7 @@ CashVsInstallmentLocalDataSource cashVsInstallmentLocalDataSource(
 /// Provider for CashVsInstallmentRepository
 @riverpod
 CashVsInstallmentRepository cashVsInstallmentRepository(
-  CashVsInstallmentRepositoryRef ref,
+  Ref ref,
 ) {
   final localDataSource = ref.watch(cashVsInstallmentLocalDataSourceProvider);
   return CashVsInstallmentRepositoryImpl(localDataSource);
@@ -153,7 +153,7 @@ CashVsInstallmentRepository cashVsInstallmentRepository(
 /// Provider for CalculateCashVsInstallmentUseCase
 @riverpod
 CalculateCashVsInstallmentUseCase calculateCashVsInstallmentUseCase(
-  CalculateCashVsInstallmentUseCaseRef ref,
+  Ref ref,
 ) {
   return CalculateCashVsInstallmentUseCase();
 }
@@ -162,7 +162,7 @@ CalculateCashVsInstallmentUseCase calculateCashVsInstallmentUseCase(
 @riverpod
 SaveCashVsInstallmentCalculationUseCase
     saveCashVsInstallmentCalculationUseCase(
-  SaveCashVsInstallmentCalculationUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(cashVsInstallmentRepositoryProvider);
   return SaveCashVsInstallmentCalculationUseCase(repository);
@@ -172,7 +172,7 @@ SaveCashVsInstallmentCalculationUseCase
 @riverpod
 GetCashVsInstallmentCalculationHistoryUseCase
     getCashVsInstallmentCalculationHistoryUseCase(
-  GetCashVsInstallmentCalculationHistoryUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(cashVsInstallmentRepositoryProvider);
   return GetCashVsInstallmentCalculationHistoryUseCase(repository);

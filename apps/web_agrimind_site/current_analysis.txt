@@ -1,0 +1,8 @@
+Resolving dependencies...
+Because receituagro depends on core from path which depends on riverpod_annotation ^3.0.3, riverpod_annotation ^3.0.3 is required.
+So, because receituagro depends on riverpod_annotation ^2.3.5, version solving failed.
+
+
+You can try the following suggestion to make the pubspec resolve:
+* Try an upgrade of your constraints: flutter pub upgrade --major-versions
+Failed to update packages.

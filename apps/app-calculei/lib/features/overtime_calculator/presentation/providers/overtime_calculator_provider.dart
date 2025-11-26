@@ -128,14 +128,14 @@ class OvertimeCalculatorNotifier extends _$OvertimeCalculatorNotifier {
 
 /// Provider for OvertimeLocalDataSource
 @riverpod
-OvertimeLocalDataSource overtimeLocalDataSource(OvertimeLocalDataSourceRef ref) {
+OvertimeLocalDataSource overtimeLocalDataSource(Ref ref) {
   final sharedPrefs = ref.watch(sharedPreferencesProvider).requireValue;
   return OvertimeLocalDataSourceImpl(sharedPrefs);
 }
 
 /// Provider for OvertimeRepository
 @riverpod
-OvertimeRepository overtimeRepository(OvertimeRepositoryRef ref) {
+OvertimeRepository overtimeRepository(Ref ref) {
   final localDataSource = ref.watch(overtimeLocalDataSourceProvider);
   return OvertimeRepositoryImpl(localDataSource);
 }
@@ -145,7 +145,7 @@ OvertimeRepository overtimeRepository(OvertimeRepositoryRef ref) {
 /// Provider for CalculateOvertimeUseCase
 @riverpod
 CalculateOvertimeUseCase calculateOvertimeUseCase(
-  CalculateOvertimeUseCaseRef ref,
+  Ref ref,
 ) {
   return CalculateOvertimeUseCase();
 }
@@ -153,7 +153,7 @@ CalculateOvertimeUseCase calculateOvertimeUseCase(
 /// Provider for SaveOvertimeCalculationUseCase
 @riverpod
 SaveOvertimeCalculationUseCase saveOvertimeCalculationUseCase(
-  SaveOvertimeCalculationUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(overtimeRepositoryProvider);
   return SaveOvertimeCalculationUseCase(repository);
@@ -162,7 +162,7 @@ SaveOvertimeCalculationUseCase saveOvertimeCalculationUseCase(
 /// Provider for GetOvertimeCalculationHistoryUseCase
 @riverpod
 GetOvertimeCalculationHistoryUseCase getOvertimeCalculationHistoryUseCase(
-  GetOvertimeCalculationHistoryUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(overtimeRepositoryProvider);
   return GetOvertimeCalculationHistoryUseCase(repository);

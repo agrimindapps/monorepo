@@ -130,7 +130,7 @@ class ThirteenthSalaryCalculatorNotifier
 /// Provider for ThirteenthSalaryLocalDataSource
 @riverpod
 ThirteenthSalaryLocalDataSource thirteenthSalaryLocalDataSource(
-  ThirteenthSalaryLocalDataSourceRef ref,
+  Ref ref,
 ) {
   final sharedPrefs = ref.watch(sharedPreferencesProvider).requireValue;
   return ThirteenthSalaryLocalDataSourceImpl(sharedPrefs);
@@ -139,7 +139,7 @@ ThirteenthSalaryLocalDataSource thirteenthSalaryLocalDataSource(
 /// Provider for ThirteenthSalaryRepository
 @riverpod
 ThirteenthSalaryRepository thirteenthSalaryRepository(
-  ThirteenthSalaryRepositoryRef ref,
+  Ref ref,
 ) {
   final localDataSource = ref.watch(thirteenthSalaryLocalDataSourceProvider);
   return ThirteenthSalaryRepositoryImpl(localDataSource);
@@ -150,7 +150,7 @@ ThirteenthSalaryRepository thirteenthSalaryRepository(
 /// Provider for CalculateThirteenthSalaryUseCase
 @riverpod
 CalculateThirteenthSalaryUseCase calculateThirteenthSalaryUseCase(
-  CalculateThirteenthSalaryUseCaseRef ref,
+  Ref ref,
 ) {
   return CalculateThirteenthSalaryUseCase();
 }
@@ -158,7 +158,7 @@ CalculateThirteenthSalaryUseCase calculateThirteenthSalaryUseCase(
 /// Provider for SaveThirteenthSalaryCalculationUseCase
 @riverpod
 SaveThirteenthSalaryCalculationUseCase saveThirteenthSalaryCalculationUseCase(
-  SaveThirteenthSalaryCalculationUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(thirteenthSalaryRepositoryProvider);
   return SaveThirteenthSalaryCalculationUseCase(repository);
@@ -168,7 +168,7 @@ SaveThirteenthSalaryCalculationUseCase saveThirteenthSalaryCalculationUseCase(
 @riverpod
 GetThirteenthSalaryCalculationHistoryUseCase
     getThirteenthSalaryCalculationHistoryUseCase(
-  GetThirteenthSalaryCalculationHistoryUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(thirteenthSalaryRepositoryProvider);
   return GetThirteenthSalaryCalculationHistoryUseCase(repository);

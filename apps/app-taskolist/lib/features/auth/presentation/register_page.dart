@@ -37,8 +37,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     try {
       await ref
-          .read(authNotifierProvider.notifier)
-          .signUp(
+          .read(authProvider.notifier)
+          .signUpWithEmailAndPassword(
             _emailController.text.trim(),
             _passwordController.text,
             _nameController.text.trim(),

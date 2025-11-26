@@ -6,7 +6,8 @@ part 'bovines_management_state.freezed.dart';
 
 /// Immutable state for bovines management
 @freezed
-class BovinesManagementState with _$BovinesManagementState {
+abstract class BovinesManagementState with _$BovinesManagementState {
+  const BovinesManagementState._();
   const factory BovinesManagementState({
     @Default([]) List<BovineEntity> bovines,
     @Default(null) BovineEntity? selectedBovine,

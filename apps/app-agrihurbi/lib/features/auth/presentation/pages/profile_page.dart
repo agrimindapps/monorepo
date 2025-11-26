@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide AuthProvider, getIt;
+import 'package:core/core.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -36,7 +36,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       ),
       body: Consumer(
         builder: (context, ref, child) {
-          final authState = ref.watch(authNotifierProvider);
+          final authState = ref.watch(authProvider);
           if (authState.isInitializing) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -203,7 +203,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget _buildUserActions() {
     return Consumer(
       builder: (context, ref, child) {
-        final authState = ref.watch(authNotifierProvider);
+        final authState = ref.watch(authProvider);
         return Card(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -290,7 +290,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   /// Atualiza dados do usuário
   Future<void> _refreshUserData(WidgetRef ref) async {
-    final authNotifier = ref.read(authNotifierProvider.notifier);
+    final authNotifier = ref.read(authProvider.notifier);
 
     try {
       await authNotifier.refreshUser();
@@ -317,7 +317,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   /// Executa logout
   Future<void> _performLogout(WidgetRef ref) async {
-    final authNotifier = ref.read(authNotifierProvider.notifier);
+    final authNotifier = ref.read(authProvider.notifier);
 
     try {
       await authNotifier.logout();

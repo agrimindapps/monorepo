@@ -5,6 +5,7 @@ import '../../../../database/providers/database_providers.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../comentarios/domain/comentarios_service.dart';
 import '../../../../core/providers/premium_providers.dart';
+import '../../../../core/providers/core_providers.dart' as core_providers;
 import '../../../comentarios/presentation/providers/comentarios_mapper_provider.dart';
 import '../../../comentarios/presentation/providers/comentarios_providers.dart';
 import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
@@ -22,13 +23,6 @@ import '../../domain/usecases/get_defensivos_usecase.dart';
 import '../../data/services/defensivos_grouping_service.dart';
 
 part 'defensivos_providers.g.dart';
-
-/// Bridge Provider for FitossanitariosRepository
-@Riverpod(keepAlive: true)
-FitossanitariosRepository fitossanitariosRepository(
-    Ref ref) {
-  return ref.watch(fitossanitariosRepositoryProvider);
-}
 
 /// Bridge Provider for ComentariosService
 @Riverpod(keepAlive: true)
@@ -84,7 +78,7 @@ IDefensivosFilterService defensivosFilterService(
 @Riverpod(keepAlive: true)
 IDefensivosRepository defensivosRepository(Ref ref) {
   return DefensivosRepositoryImpl(
-    ref.watch(fitossanitariosRepositoryProvider),
+    ref.watch(core_providers.fitossanitariosRepositoryProvider),
     ref.watch(fitossanitariosInfoRepositoryProvider),
     ref.watch(defensivosQueryServiceProvider),
     ref.watch(defensivosSearchServiceProvider),

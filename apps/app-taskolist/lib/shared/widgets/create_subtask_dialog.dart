@@ -50,7 +50,7 @@ class _CreateSubtaskDialogState extends ConsumerState<CreateSubtaskDialog> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final currentUser = ref.read(authNotifierProvider).value;
+    final currentUser = ref.read(authProvider).value;
     if (currentUser == null) {
       _showError('Usuário não autenticado');
       return;
@@ -70,7 +70,7 @@ class _CreateSubtaskDialogState extends ConsumerState<CreateSubtaskDialog> {
         );
 
         await ref
-            .read<TaskNotifier>(taskNotifierProvider.notifier)
+            .read<TaskNotifier>(taskProvider.notifier)
             .updateSubtask(updatedSubtask);
 
         if (mounted) {
@@ -95,7 +95,7 @@ class _CreateSubtaskDialogState extends ConsumerState<CreateSubtaskDialog> {
         );
 
         await ref
-            .read<TaskNotifier>(taskNotifierProvider.notifier)
+            .read<TaskNotifier>(taskProvider.notifier)
             .createSubtask(newSubtask);
 
         if (mounted) {

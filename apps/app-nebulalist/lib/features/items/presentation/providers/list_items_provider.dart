@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/di/injection.dart' as di;
 import '../../domain/entities/list_item_entity.dart' as entities;
@@ -12,31 +13,27 @@ part 'list_items_provider.g.dart';
 
 /// Provider for use cases (dependencies)
 @riverpod
-GetListItemsUseCase getListItemsUseCase(GetListItemsUseCaseRef ref) {
+GetListItemsUseCase getListItemsUseCase(Ref ref) {
   return di.getIt<GetListItemsUseCase>();
 }
 
 @riverpod
-AddItemToListUseCase addItemToListUseCase(AddItemToListUseCaseRef ref) {
+AddItemToListUseCase addItemToListUseCase(Ref ref) {
   return di.getIt<AddItemToListUseCase>();
 }
 
 @riverpod
-UpdateListItemUseCase updateListItemUseCase(UpdateListItemUseCaseRef ref) {
+UpdateListItemUseCase updateListItemUseCase(Ref ref) {
   return di.getIt<UpdateListItemUseCase>();
 }
 
 @riverpod
-RemoveItemFromListUseCase removeItemFromListUseCase(
-  RemoveItemFromListUseCaseRef ref,
-) {
+RemoveItemFromListUseCase removeItemFromListUseCase(Ref ref) {
   return di.getIt<RemoveItemFromListUseCase>();
 }
 
 @riverpod
-ToggleItemCompletionUseCase toggleItemCompletionUseCase(
-  ToggleItemCompletionUseCaseRef ref,
-) {
+ToggleItemCompletionUseCase toggleItemCompletionUseCase(Ref ref) {
   return di.getIt<ToggleItemCompletionUseCase>();
 }
 
@@ -165,8 +162,8 @@ class ListItemsNotifier extends _$ListItemsNotifier {
 
 /// Provider for pending items count
 @riverpod
-int pendingItemsCount(PendingItemsCountRef ref, String listId) {
-  final itemsAsync = ref.watch(listItemsNotifierProvider(listId));
+int pendingItemsCount(Ref ref, String listId) {
+  final itemsAsync = ref.watch(listItemsProvider(listId));
 
   return itemsAsync.when(
     data: (items) => items.where((item) => !item.isCompleted).length,
@@ -177,8 +174,8 @@ int pendingItemsCount(PendingItemsCountRef ref, String listId) {
 
 /// Provider for completed items count
 @riverpod
-int completedItemsCount(CompletedItemsCountRef ref, String listId) {
-  final itemsAsync = ref.watch(listItemsNotifierProvider(listId));
+int completedItemsCount(Ref ref, String listId) {
+  final itemsAsync = ref.watch(listItemsProvider(listId));
 
   return itemsAsync.when(
     data: (items) => items.where((item) => item.isCompleted).length,
@@ -190,10 +187,10 @@ int completedItemsCount(CompletedItemsCountRef ref, String listId) {
 /// Provider for high priority items
 @riverpod
 List<entities.ListItemEntity> highPriorityItems(
-  HighPriorityItemsRef ref,
+  Ref ref,
   String listId,
 ) {
-  final itemsAsync = ref.watch(listItemsNotifierProvider(listId));
+  final itemsAsync = ref.watch(listItemsProvider(listId));
 
   return itemsAsync.when(
     data: (items) => items

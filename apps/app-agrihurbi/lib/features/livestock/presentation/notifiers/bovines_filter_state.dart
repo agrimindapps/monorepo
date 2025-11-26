@@ -6,7 +6,8 @@ part 'bovines_filter_state.freezed.dart';
 
 /// Immutable state for bovines filters
 @freezed
-class BovinesFilterState with _$BovinesFilterState {
+abstract class BovinesFilterState with _$BovinesFilterState {
+  const BovinesFilterState._();
   const factory BovinesFilterState({
     @Default('') String searchQuery,
     @Default(null) String? selectedBreed,

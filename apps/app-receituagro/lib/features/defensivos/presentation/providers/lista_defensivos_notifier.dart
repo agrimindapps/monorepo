@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
+import '../../../../core/providers/core_providers.dart' as core_providers;
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../data/view_mode.dart';
@@ -124,7 +125,7 @@ class ListaDefensivosNotifier extends _$ListaDefensivosNotifier {
 
   @override
   Future<ListaDefensivosState> build() async {
-    _repository = ref.watch(fitossanitariosRepositoryProvider);
+    _repository = ref.watch(core_providers.fitossanitariosRepositoryProvider);
     ref.onDispose(() {
       _debounceTimer?.cancel();
     });

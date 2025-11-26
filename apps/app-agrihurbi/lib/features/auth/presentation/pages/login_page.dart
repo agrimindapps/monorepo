@@ -113,7 +113,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 const SizedBox(height: 24),
                 Consumer(
                   builder: (context, ref, child) {
-                    final authState = ref.watch(authNotifierProvider);
+                    final authState = ref.watch(authProvider);
                     return ElevatedButton(
                       onPressed: authState.isLoading || authState.isLoggingIn
                           ? null
@@ -150,7 +150,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 const SizedBox(height: 24),
                 Consumer(
                   builder: (context, ref, child) {
-                    final authState = ref.watch(authNotifierProvider);
+                    final authState = ref.watch(authProvider);
                     if (authState.errorMessage != null) {
                       return Container(
                         padding: const EdgeInsets.all(12),
@@ -185,7 +185,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 size: 18,
                               ),
                               onPressed: () => ref
-                                  .read(authNotifierProvider.notifier)
+                                  .read(authProvider.notifier)
                                   .clearError(),
                             ),
                           ],
@@ -205,7 +205,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   void _handleLogin(BuildContext context, WidgetRef ref) async {
     if (_formKey.currentState!.validate()) {
-      final result = await ref.read(authNotifierProvider.notifier).login(
+      final result = await ref.read(authProvider.notifier).login(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );

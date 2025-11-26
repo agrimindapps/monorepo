@@ -1,6 +1,5 @@
 
 import 'package:app_agrihurbi/features/news/domain/entities/news_article_entity.dart';
-import 'package:core/core.dart';
 
 
 /// News Article Model

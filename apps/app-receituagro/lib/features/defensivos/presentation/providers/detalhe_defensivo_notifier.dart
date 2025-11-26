@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/premium_notifier.dart';
+import '../../../../core/providers/core_providers.dart' as core_providers;
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../comentarios/data/comentario_model.dart';
@@ -87,7 +88,7 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
   @override
   Future<DetalheDefensivoState> build() async {
     _favoritosRepository = ref.watch(favoritosRepositorySimplifiedProvider);
-    _fitossanitarioRepository = ref.watch(fitossanitariosRepositoryProvider);
+    _fitossanitarioRepository = ref.watch(core_providers.fitossanitariosRepositoryProvider);
     _comentariosService = ref.watch(comentariosServiceProvider);
     _setupPremiumStatusListener();
 

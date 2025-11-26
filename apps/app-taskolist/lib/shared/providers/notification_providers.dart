@@ -1,9 +1,12 @@
 import 'package:core/core.dart' as core;
 import 'package:core/core.dart' hide Column;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/providers/core_providers.dart';
 import '../../features/notifications/presentation/notification_stats.dart' as local_stats;
 import '../../infrastructure/services/notification_service.dart';
+
+part 'notification_providers.g.dart';
 final notificationPermissionProvider = FutureProvider<core.NotificationPermissionEntity>((ref) async {
   final notificationService = ref.watch(taskManagerNotificationServiceProvider);
   return await notificationService.getPermissionStatus();
@@ -28,17 +31,13 @@ final isNotificationScheduledProvider = FutureProvider.family<bool, int>((ref, n
   final notificationService = ref.watch(taskManagerNotificationServiceProvider);
   return await notificationService.isNotificationScheduled(notificationId);
 });
-final notificationSettingsProvider = StateNotifierProvider<NotificationSettingsNotifier, NotificationSettings>((ref) {
-  return NotificationSettingsNotifier();
-});
-final notificationActionsProvider = Provider<NotificationActions>((ref) {
-  final notificationService = ref.watch(taskManagerNotificationServiceProvider);
-  return NotificationActions(notificationService, ref);
-});
-
 /// Notifier para gerenciar configurações de notificação
-class NotificationSettingsNotifier extends StateNotifier<NotificationSettings> {
-  NotificationSettingsNotifier() : super(const NotificationSettings());
+@riverpod
+class NotificationSettingsNotifier extends _$NotificationSettingsNotifier {
+  @override
+  NotificationSettings build() {
+    return const NotificationSettings();
+  }
 
   void updateTaskReminders(bool enabled) {
     state = state.copyWith(taskRemindersEnabled: enabled);
@@ -79,6 +78,11 @@ class NotificationSettingsNotifier extends StateNotifier<NotificationSettings> {
     );
   }
 }
+
+final notificationActionsProvider = Provider<NotificationActions>((ref) {
+  final notificationService = ref.watch(taskManagerNotificationServiceProvider);
+  return NotificationActions(notificationService, ref);
+});
 
 /// Classe para representar configurações de notificação
 class NotificationSettings {

@@ -15,7 +15,7 @@ class ComentariosPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Watch comentarios state
-    final comentariosAsync = ref.watch(comentariosNotifierProvider);
+    final comentariosAsync = ref.watch(comentariosProvider);
 
     return Scaffold(
       appBar: const CustomAppBar(),
@@ -98,7 +98,7 @@ class ComentariosPage extends ConsumerWidget {
       ),
       error: (error, stack) => ErrorComentariosWidget(
         error: error.toString(),
-        onRetry: () => ref.invalidate(comentariosNotifierProvider),
+        onRetry: () => ref.invalidate(comentariosProvider),
       ),
     );
   }
@@ -141,7 +141,7 @@ class ComentariosPage extends ConsumerWidget {
     );
 
     if (confirmed == true) {
-      await ref.read(comentariosNotifierProvider.notifier).deleteComentario(id);
+      await ref.read(comentariosProvider.notifier).deleteComentario(id);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

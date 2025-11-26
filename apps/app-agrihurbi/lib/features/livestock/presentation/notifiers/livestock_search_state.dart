@@ -6,7 +6,8 @@ part 'livestock_search_state.freezed.dart';
 
 /// Immutable state for livestock search
 @freezed
-class LivestockSearchState with _$LivestockSearchState {
+abstract class LivestockSearchState with _$LivestockSearchState {
+  const LivestockSearchState._();
   const factory LivestockSearchState({
     @Default(false) bool isSearching,
     @Default([]) List<AnimalBaseEntity> searchResults,

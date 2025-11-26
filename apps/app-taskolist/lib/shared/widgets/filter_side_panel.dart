@@ -157,7 +157,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
   }
 
   Widget _buildModernUserSection() {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
     final user = authState.value;
     final userDisplayName = user?.displayName ?? 'Usuário';
     final userEmail = user?.email ?? 'usuario@exemplo.com';
@@ -899,7 +899,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
 
   Future<void> _handleLogout() async {
     try {
-      await ref.read(authNotifierProvider.notifier).signOut();
+      await ref.read(authProvider.notifier).signOut();
       if (mounted) {
       }
     } catch (e) {

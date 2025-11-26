@@ -9,13 +9,13 @@ class FitossanitarioDialog extends StatefulWidget {
   final Fitossanitario? fitossanitario;
 
   const FitossanitarioDialog({
-    Key? key,
+    super.key,
     required this.repository,
     this.fitossanitario,
-  }) : super(key: key);
+  });
 
   @override
-  _FitossanitarioDialogState createState() => _FitossanitarioDialogState();
+  State<FitossanitarioDialog> createState() => _FitossanitarioDialogState();
 }
 
 class _FitossanitarioDialogState extends State<FitossanitarioDialog> {
@@ -65,6 +65,8 @@ class _FitossanitarioDialogState extends State<FitossanitarioDialog> {
               } else {
                 await widget.repository.update(_fitossanitario);
               }
+              if (!mounted) return;
+              // ignore: use_build_context_synchronously
               Navigator.of(context).pop(_fitossanitario);
             }
           },

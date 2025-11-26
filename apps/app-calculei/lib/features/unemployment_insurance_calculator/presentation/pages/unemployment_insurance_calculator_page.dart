@@ -31,7 +31,7 @@ class _UnemploymentInsuranceCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(unemploymentInsuranceCalculatorNotifierProvider);
+    final state = ref.watch(unemploymentInsuranceCalculatorProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -178,14 +178,14 @@ class _UnemploymentInsuranceCalculatorPageState
 
   void _handleCalculate(CalculateUnemploymentInsuranceParams params) {
     ref
-        .read(unemploymentInsuranceCalculatorNotifierProvider.notifier)
+        .read(unemploymentInsuranceCalculatorProvider.notifier)
         .calculate(params);
   }
 
   void _handleClear() {
     _formKey.currentState?.reset();
     ref
-        .read(unemploymentInsuranceCalculatorNotifierProvider.notifier)
+        .read(unemploymentInsuranceCalculatorProvider.notifier)
         .clearCalculation();
   }
 

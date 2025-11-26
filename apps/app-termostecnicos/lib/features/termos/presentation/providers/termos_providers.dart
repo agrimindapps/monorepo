@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/categoria.dart';
@@ -227,7 +226,7 @@ class CategoriaAtualNotifier extends _$CategoriaAtualNotifier {
     });
 
     // Refresh termos list when category changes
-    ref.invalidate(termosNotifierProvider);
+    ref.invalidate(termosProvider);
   }
 }
 
@@ -237,7 +236,7 @@ class CategoriaAtualNotifier extends _$CategoriaAtualNotifier {
 
 @riverpod
 Future<List<Termo>> favoritosTermos(Ref ref) async {
-  final termosAsync = ref.watch(termosNotifierProvider);
+  final termosAsync = ref.watch(termosProvider);
 
   return termosAsync.when(
     data: (termos) => termos.where((termo) => termo.favorito).toList(),
@@ -267,7 +266,7 @@ Future<List<Categoria>> categoriasList(Ref ref) async {
 
 @riverpod
 List<Termo> termosPorCategoria(Ref ref, String categoria) {
-  final termosAsync = ref.watch(termosNotifierProvider);
+  final termosAsync = ref.watch(termosProvider);
 
   return termosAsync.when(
     data: (termos) =>
@@ -283,7 +282,7 @@ List<Termo> termosPorCategoria(Ref ref, String categoria) {
 
 @riverpod
 List<Termo> searchTermos(Ref ref, String query) {
-  final termosAsync = ref.watch(termosNotifierProvider);
+  final termosAsync = ref.watch(termosProvider);
 
   if (query.trim().isEmpty) {
     return termosAsync.value ?? [];

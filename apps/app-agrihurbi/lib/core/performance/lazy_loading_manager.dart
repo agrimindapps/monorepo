@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:core/core.dart'
-    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 /// State para gerenciamento de lazy loading
 class LazyLoadingState {

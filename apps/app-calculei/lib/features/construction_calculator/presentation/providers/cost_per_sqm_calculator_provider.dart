@@ -33,7 +33,7 @@ class CostPerSqmCalculatorState {
 /// Provider for calculate cost per sqm use case
 @riverpod
 CalculateCostPerSqmUseCase calculateCostPerSqmUseCase(
-  CalculateCostPerSqmUseCaseRef ref,
+  Ref ref,
 ) {
   final repository = ref.watch(constructionCalculatorRepositoryProvider);
   return CalculateCostPerSqmUseCase(repository: repository);

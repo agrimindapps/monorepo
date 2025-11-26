@@ -6,7 +6,8 @@ part 'auth_state.freezed.dart';
 
 /// Immutable state for authentication
 @freezed
-class AuthState with _$AuthState {
+abstract class AuthState with _$AuthState {
+  const AuthState._();
   const factory AuthState({
     @Default(null) UserEntity? currentUser,
     @Default(false) bool isLoading,

@@ -7,11 +7,10 @@ import 'defensivos_dialog.dart';
 class FitossanitariosPage extends StatefulWidget {
   final FitossanitarioRepository repository;
 
-  const FitossanitariosPage({Key? key, required this.repository})
-      : super(key: key);
+  const FitossanitariosPage({super.key, required this.repository});
 
   @override
-  _FitossanitariosPageState createState() => _FitossanitariosPageState();
+  State<FitossanitariosPage> createState() => _FitossanitariosPageState();
 }
 
 class _FitossanitariosPageState extends State<FitossanitariosPage> {

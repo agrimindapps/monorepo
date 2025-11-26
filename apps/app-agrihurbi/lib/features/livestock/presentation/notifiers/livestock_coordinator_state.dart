@@ -6,7 +6,8 @@ part 'livestock_coordinator_state.freezed.dart';
 ///
 /// This is a lightweight state as the actual data is in specialized notifiers
 @freezed
-class LivestockCoordinatorState with _$LivestockCoordinatorState {
+abstract class LivestockCoordinatorState with _$LivestockCoordinatorState {
+  const LivestockCoordinatorState._();
   const factory LivestockCoordinatorState({
     @Default(false) bool isInitializing,
     @Default(null) String? errorMessage,

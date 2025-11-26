@@ -27,6 +27,18 @@ dependencies:
   riverpod_annotation: any
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  
+  # DI (used locally for injectable)
+  get_it: any
+  injectable: any
+  
+  # Firebase (re-exported from core but needed for direct imports)
+  cloud_firestore: any
+  firebase_core: any
+  
+  # State Management & Navigation (re-exported from core)
+  flutter_riverpod: any
+  go_router: any
 
 dev_dependencies:
   flutter_test:
@@ -34,10 +46,11 @@ dev_dependencies:
 
   # Code Generation
   build_runner: any
-  freezed: ^2.5.2
-  json_serializable: ^6.8.0
+  freezed: any
+  json_serializable: any
   riverpod_generator: any
   drift_dev: any
+  injectable_generator: any
 
 flutter:
   uses-material-design: true

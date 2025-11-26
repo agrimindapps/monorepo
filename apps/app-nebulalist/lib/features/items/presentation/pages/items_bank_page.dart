@@ -41,7 +41,7 @@ class _ItemsBankPageState extends ConsumerState<ItemsBankPage> {
 
   @override
   Widget build(BuildContext context) {
-    final itemsAsync = ref.watch(itemMastersNotifierProvider);
+    final itemsAsync = ref.watch(itemMastersProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -124,7 +124,7 @@ class _ItemsBankPageState extends ConsumerState<ItemsBankPage> {
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async {
-                ref.invalidate(itemMastersNotifierProvider);
+                ref.invalidate(itemMastersProvider);
               },
               child: itemsAsync.when(
                 data: (items) {
@@ -226,7 +226,7 @@ class _ItemsBankPageState extends ConsumerState<ItemsBankPage> {
                       const SizedBox(height: 24),
                       ElevatedButton.icon(
                         onPressed: () {
-                          ref.invalidate(itemMastersNotifierProvider);
+                          ref.invalidate(itemMastersProvider);
                         },
                         icon: const Icon(Icons.refresh),
                         label: const Text('Tentar Novamente'),
@@ -321,7 +321,7 @@ class _ItemsBankPageState extends ConsumerState<ItemsBankPage> {
     if (confirmed == true) {
       try {
         await ref
-            .read(itemMastersNotifierProvider.notifier)
+            .read(itemMastersProvider.notifier)
             .deleteItemMaster(item.id);
 
         if (mounted) {

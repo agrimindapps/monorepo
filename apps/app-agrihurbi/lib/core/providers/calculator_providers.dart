@@ -896,76 +896,76 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
 /// Provider para lista filtrada de calculadoras
 @riverpod
 List<CalculatorEntity> filteredCalculators(Ref ref) {
-  final state = ref.watch(calculatorNotifierProvider);
+  final state = ref.watch(calculatorProvider);
   return state.filteredCalculators;
 }
 
 /// Provider para calculadoras favoritas
 @riverpod
 List<CalculatorEntity> favoriteCalculators(Ref ref) {
-  final state = ref.watch(calculatorNotifierProvider);
+  final state = ref.watch(calculatorProvider);
   return state.favoriteCalculators;
 }
 
 /// Provider para histórico de cálculos
 @riverpod
 List<CalculationHistory> calculationHistory(Ref ref) {
-  final state = ref.watch(calculatorNotifierProvider);
+  final state = ref.watch(calculatorProvider);
   return state.calculationHistory;
 }
 
 /// Provider para resultado atual de cálculo
 @riverpod
 CalculationResult? currentCalculationResult(Ref ref) {
-  final state = ref.watch(calculatorNotifierProvider);
+  final state = ref.watch(calculatorProvider);
   return state.currentResult;
 }
 
 /// Provider para inputs atuais
 @riverpod
 Map<String, dynamic> currentCalculationInputs(Ref ref) {
-  final state = ref.watch(calculatorNotifierProvider);
+  final state = ref.watch(calculatorProvider);
   return state.currentInputs;
 }
 
 /// Provider para status de loading das calculadoras
 @riverpod
 bool calculatorsLoading(Ref ref) {
-  final state = ref.watch(calculatorNotifierProvider);
+  final state = ref.watch(calculatorProvider);
   return state.isLoading;
 }
 
 /// Provider para status de execução de cálculo
 @riverpod
 bool calculationExecuting(Ref ref) {
-  final state = ref.watch(calculatorNotifierProvider);
+  final state = ref.watch(calculatorProvider);
   return state.isCalculating;
 }
 
 /// Provider para templates filtrados
 @riverpod
 List<CalculationTemplate> filteredTemplates(Ref ref) {
-  final state = ref.watch(calculatorFeaturesNotifierProvider);
+  final state = ref.watch(calculatorFeaturesProvider);
   return state.filteredTemplates;
 }
 
 /// Provider para IDs de favoritos
 @riverpod
 List<String> favoriteCalculatorIds(Ref ref) {
-  final state = ref.watch(calculatorFeaturesNotifierProvider);
+  final state = ref.watch(calculatorFeaturesProvider);
   return state.favoriteIds;
 }
 
 /// Provider para status de loading de templates
 @riverpod
 bool templatesLoading(Ref ref) {
-  final state = ref.watch(calculatorFeaturesNotifierProvider);
+  final state = ref.watch(calculatorFeaturesProvider);
   return state.isLoadingTemplates;
 }
 
 /// Provider para status de loading de favoritos
 @riverpod
 bool favoritesLoading(Ref ref) {
-  final state = ref.watch(calculatorFeaturesNotifierProvider);
+  final state = ref.watch(calculatorFeaturesProvider);
   return state.isLoadingFavorites;
 }

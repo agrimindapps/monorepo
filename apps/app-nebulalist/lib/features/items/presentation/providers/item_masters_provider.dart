@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/di/injection.dart' as di;
 import '../../../../core/providers/services_providers.dart';
@@ -13,33 +14,27 @@ part 'item_masters_provider.g.dart';
 
 /// Provider for use cases (dependencies)
 @riverpod
-GetItemMastersUseCase getItemMastersUseCase(GetItemMastersUseCaseRef ref) {
+GetItemMastersUseCase getItemMastersUseCase(Ref ref) {
   return di.getIt<GetItemMastersUseCase>();
 }
 
 @riverpod
-CreateItemMasterUseCase createItemMasterUseCase(
-  CreateItemMasterUseCaseRef ref,
-) {
+CreateItemMasterUseCase createItemMasterUseCase(Ref ref) {
   return di.getIt<CreateItemMasterUseCase>();
 }
 
 @riverpod
-UpdateItemMasterUseCase updateItemMasterUseCase(
-  UpdateItemMasterUseCaseRef ref,
-) {
+UpdateItemMasterUseCase updateItemMasterUseCase(Ref ref) {
   return di.getIt<UpdateItemMasterUseCase>();
 }
 
 @riverpod
-DeleteItemMasterUseCase deleteItemMasterUseCase(
-  DeleteItemMasterUseCaseRef ref,
-) {
+DeleteItemMasterUseCase deleteItemMasterUseCase(Ref ref) {
   return di.getIt<DeleteItemMasterUseCase>();
 }
 
 @riverpod
-CheckItemLimitUseCase checkItemLimitUseCase(CheckItemLimitUseCaseRef ref) {
+CheckItemLimitUseCase checkItemLimitUseCase(Ref ref) {
   return di.getIt<CheckItemLimitUseCase>();
 }
 
@@ -166,8 +161,8 @@ class ItemMastersNotifier extends _$ItemMastersNotifier {
 
 /// Provider for ItemMasters count
 @riverpod
-int itemMastersCount(ItemMastersCountRef ref) {
-  final itemsAsync = ref.watch(itemMastersNotifierProvider);
+int itemMastersCount(Ref ref) {
+  final itemsAsync = ref.watch(itemMastersProvider);
 
   return itemsAsync.when(
     data: (items) => items.length,
@@ -178,7 +173,7 @@ int itemMastersCount(ItemMastersCountRef ref) {
 
 /// Provider to check if can create ItemMaster (free tier limit)
 @riverpod
-Future<bool> canCreateItemMaster(CanCreateItemMasterRef ref) async {
+Future<bool> canCreateItemMaster(Ref ref) async {
   final result = await ref.read(checkItemLimitUseCaseProvider).call();
 
   return result.fold(
@@ -190,10 +185,10 @@ Future<bool> canCreateItemMaster(CanCreateItemMasterRef ref) async {
 /// Provider for ItemMasters by category
 @riverpod
 List<ItemMasterEntity> itemMastersByCategory(
-  ItemMastersByCategoryRef ref,
+  Ref ref,
   String category,
 ) {
-  final itemsAsync = ref.watch(itemMastersNotifierProvider);
+  final itemsAsync = ref.watch(itemMastersProvider);
 
   return itemsAsync.when(
     data: (items) => items.where((item) => item.category == category).toList(),

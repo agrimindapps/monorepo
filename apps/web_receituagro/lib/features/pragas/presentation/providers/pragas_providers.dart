@@ -9,7 +9,7 @@ part 'pragas_providers.g.dart';
 
 /// Provider for GetAllPragasUseCase
 @riverpod
-GetAllPragasUseCase getAllPragasUseCase(GetAllPragasUseCaseRef ref) {
+GetAllPragasUseCase getAllPragasUseCase(Ref ref) {
   return getIt<GetAllPragasUseCase>();
 }
 
@@ -40,6 +40,6 @@ class PragasNotifier extends _$PragasNotifier {
 
 /// Alias provider for easier access (matches naming convention)
 @riverpod
-Future<List<Praga>> pragasList(PragasListRef ref) async {
+Future<List<Praga>> pragasList(Ref ref) async {
   return ref.watch(pragasNotifierProvider.future);
 }

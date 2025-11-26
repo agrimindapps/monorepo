@@ -34,7 +34,7 @@ class _TaskHeaderCardState extends ConsumerState<TaskHeaderCard> {
     );
 
     try {
-      await ref.read<TaskNotifier>(taskNotifierProvider.notifier).updateTask(updatedTask);
+      await ref.read<TaskNotifier>(taskProvider.notifier).updateTask(updatedTask);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -71,7 +71,7 @@ class _TaskHeaderCardState extends ConsumerState<TaskHeaderCard> {
     );
 
     try {
-      await ref.read<TaskNotifier>(taskNotifierProvider.notifier).updateTask(updatedTask);
+      await ref.read<TaskNotifier>(taskProvider.notifier).updateTask(updatedTask);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

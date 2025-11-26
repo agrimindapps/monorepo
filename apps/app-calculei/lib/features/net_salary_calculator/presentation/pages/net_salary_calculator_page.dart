@@ -27,7 +27,7 @@ class _NetSalaryCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(netSalaryCalculatorNotifierProvider);
+    final state = ref.watch(netSalaryCalculatorProvider);
 
     return CalculatorLayout(
       title: 'Cálculo de Salário Líquido',
@@ -183,12 +183,12 @@ class _NetSalaryCalculatorPageState
   }
 
   void _handleCalculate(CalculateNetSalaryParams params) {
-    ref.read(netSalaryCalculatorNotifierProvider.notifier).calculate(params);
+    ref.read(netSalaryCalculatorProvider.notifier).calculate(params);
   }
 
   void _handleClear() {
     _formKey.currentState?.reset();
-    ref.read(netSalaryCalculatorNotifierProvider.notifier).clearCalculation();
+    ref.read(netSalaryCalculatorProvider.notifier).clearCalculation();
   }
 
   void _showInfo(BuildContext context) {

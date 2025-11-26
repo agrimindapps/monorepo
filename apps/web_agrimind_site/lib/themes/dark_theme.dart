@@ -154,8 +154,8 @@ ThemeData darkTheme = ThemeData(
     elevation: 0,
     backgroundColor: Color.fromRGBO(44, 44, 56, 1),
   ),
-  dialogBackgroundColor: const Color.fromRGBO(38, 41, 46, 1),
   dialogTheme: const DialogThemeData(
+    backgroundColor: Color.fromRGBO(38, 41, 46, 1),
     surfaceTintColor: Color.fromRGBO(38, 41, 46, 1),
     elevation: 4,
   ),
@@ -172,7 +172,7 @@ ThemeData darkTheme = ThemeData(
     ),
     indicator: BoxDecoration(
       borderRadius: BorderRadius.circular(8.0),
-      color: Colors.green.withOpacity(0.4),
+      color: Colors.green.withValues(alpha: 0.4),
     ),
     dividerColor: Colors.transparent,
   ),

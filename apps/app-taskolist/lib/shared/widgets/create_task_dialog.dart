@@ -27,7 +27,7 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
 
   void _createTask() async {
     if (_formKey.currentState!.validate()) {
-      final currentUser = ref.read(authNotifierProvider).value;
+      final currentUser = ref.read(authProvider).value;
       if (currentUser == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Usuário não autenticado')),
@@ -37,7 +37,7 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
 
       try {
         await ref
-            .read<TaskNotifier>(taskNotifierProvider.notifier)
+            .read<TaskNotifier>(taskProvider.notifier)
             .createTask(
               TaskEntity(
                 id: FirebaseFirestore.instance.collection('_').doc().id,

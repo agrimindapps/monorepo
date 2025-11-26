@@ -110,7 +110,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
     try {
       await ref
-          .read(authNotifierProvider.notifier)
+          .read(authProvider.notifier)
           .loginAndSync(_emailController.text.trim(), _passwordController.text);
     } catch (e) {
       if (mounted) {
@@ -130,7 +130,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
     try {
       debugPrint('🔄 Chamando signInAnonymously...');
-      await ref.read(authNotifierProvider.notifier).signInAnonymously();
+      await ref.read(authProvider.notifier).signInAnonymously();
       debugPrint('✅ Login anônimo concluído com sucesso');
     } catch (e) {
       debugPrint('❌ Erro no login anônimo: $e');
@@ -538,18 +538,15 @@ class _LoginPageState extends ConsumerState<LoginPage>
     subscription = Stream<dynamic>.periodic(
       const Duration(milliseconds: 500),
     ).listen((_) {
-      final authNotifier = ref.read(authNotifierProvider.notifier);
-      if (!authNotifier.isSyncInProgress) {
-        subscription.cancel();
-        Future<void>.delayed(const Duration(milliseconds: 100), () {
-          if (mounted) {
-            if (Navigator.canPop(context)) {
-              Navigator.of(context).pop();
-            }
-            _navigateToHomePage();
+      subscription.cancel();
+      Future<void>.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          if (Navigator.canPop(context)) {
+            Navigator.of(context).pop();
           }
-        });
-      }
+          _navigateToHomePage();
+        }
+      });
     });
   }
 
@@ -573,7 +570,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AsyncValue<dynamic>>(authNotifierProvider, (previous, next) {
+    ref.listen<AsyncValue<dynamic>>(authProvider, (previous, next) {
       debugPrint('🔄 Auth listener: Estado mudou');
       next.when(
         data: (user) {
@@ -583,12 +580,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
               _isLoading = false;
               _isAnonymousLoading = false;
             });
-            final authNotifier = ref.read(authNotifierProvider.notifier);
-            if (authNotifier.isSyncInProgress) {
-              _showSimpleSyncLoading();
-            } else {
-              _navigateToHomePage();
-            }
+            _navigateToHomePage();
           }
         },
         loading: () {

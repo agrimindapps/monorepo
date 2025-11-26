@@ -1,5 +1,4 @@
 import '../interfaces/calculator_strategy.dart';
-import '../strategies/npk_calculation_strategy.dart';
 
 /// Registry moderno para estratégias de calculadoras
 /// 

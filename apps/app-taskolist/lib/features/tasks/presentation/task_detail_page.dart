@@ -67,7 +67,7 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
         updatedAt: DateTime.now(),
       );
 
-      await ref.read<TaskNotifier>(taskNotifierProvider.notifier).updateTask(updatedTask);
+      await ref.read<TaskNotifier>(taskProvider.notifier).updateTask(updatedTask);
 
       if (mounted) {
         setState(() => _isEditing = false);
@@ -119,7 +119,7 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
 
       try {
         await ref
-            .read<TaskNotifier>(taskNotifierProvider.notifier)
+            .read<TaskNotifier>(taskProvider.notifier)
             .deleteTask(widget.task.id);
 
         if (mounted) {

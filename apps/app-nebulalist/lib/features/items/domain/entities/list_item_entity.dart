@@ -39,7 +39,9 @@ enum Priority {
 /// Entity representing a ListItem (instance of an ItemMaster in a specific list)
 /// Links an ItemMaster to a List with quantity, priority, and completion status
 @freezed
-class ListItemEntity with _$ListItemEntity {
+abstract class ListItemEntity with _$ListItemEntity {
+  const ListItemEntity._();
+
   const factory ListItemEntity({
     required String id,
     required String listId,
@@ -54,8 +56,6 @@ class ListItemEntity with _$ListItemEntity {
     required DateTime updatedAt,
     String? addedBy,
   }) = _ListItemEntity;
-
-  const ListItemEntity._();
 
   /// Check if item is overdue (if needed for future features)
   bool get isOverdue => false; // Placeholder for future reminder logic

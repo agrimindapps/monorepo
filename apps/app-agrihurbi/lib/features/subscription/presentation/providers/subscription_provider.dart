@@ -1,5 +1,4 @@
-import 'package:core/core.dart' show StateNotifier, StateNotifierProvider;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../../core/interfaces/usecase.dart' as local;
 import '../../domain/entities/subscription_plan.dart';

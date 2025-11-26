@@ -106,7 +106,7 @@ class AppRouter {
 
       // Redirect logic for authentication
       redirect: (context, state) {
-        final authState = ref.read(authNotifierProvider);
+        final authState = ref.read(authProvider);
         final isLoggedIn = authState.currentUser != null;
         final isAuthRoute = state.matchedLocation == AppConstants.loginRoute ||
             state.matchedLocation == AppConstants.signUpRoute ||
@@ -143,7 +143,7 @@ class _HomePageState extends ConsumerState<_HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
     final user = authState.currentUser;
 
     // Define pages for each tab
@@ -167,7 +167,7 @@ class _HomePageState extends ConsumerState<_HomePage> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              await ref.read(authNotifierProvider.notifier).signOut();
+              await ref.read(authProvider.notifier).signOut();
             },
           ),
         ],
@@ -301,7 +301,7 @@ class _ConfiguracoesTab extends ConsumerWidget {
           leading: const Icon(Icons.logout, color: Colors.red),
           title: const Text('Sair', style: TextStyle(color: Colors.red)),
           onTap: () async {
-            await ref.read(authNotifierProvider.notifier).signOut();
+            await ref.read(authProvider.notifier).signOut();
             if (context.mounted) {
               context.go(AppConstants.loginRoute);
             }
@@ -328,7 +328,7 @@ class _SettingsPage extends ConsumerWidget {
             leading: const Icon(Icons.logout),
             title: const Text('Sair'),
             onTap: () async {
-              await ref.read(authNotifierProvider.notifier).signOut();
+              await ref.read(authProvider.notifier).signOut();
               if (context.mounted) {
                 context.go(AppConstants.loginRoute);
               }

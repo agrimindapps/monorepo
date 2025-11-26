@@ -4,6 +4,7 @@ import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/services/access_history_service.dart';
 import '../../../../core/services/fitossanitarios_data_loader.dart';
 import '../../../../core/services/receituagro_random_extensions.dart';
+import '../../../../core/providers/core_providers.dart' as core_providers;
 import '../../../../database/providers/database_providers.dart';
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/fitossanitarios_info_repository.dart';
@@ -138,7 +139,7 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
 
   @override
   Future<HomeDefensivosState> build() async {
-    _repository = ref.watch(fitossanitariosRepositoryProvider);
+    _repository = ref.watch(core_providers.fitossanitariosRepositoryProvider);
     _infoRepository = ref.watch(fitossanitariosInfoRepositoryProvider);
     _historyService = AccessHistoryService();
     return _loadInitialData();

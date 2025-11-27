@@ -11,15 +11,15 @@ class PesoModel extends BaseModel {
   @override
   final DateTime? updatedAt;
 
-  int dataRegistro;
+  final int dataRegistro;
 
-  double peso;
+  final double peso;
 
   final String fkIdPerfil;
 
   final bool isDeleted;
 
-  PesoModel({
+  const PesoModel({
     required this.id,
     required this.createdAt,
     required this.updatedAt,
@@ -69,6 +69,27 @@ class PesoModel extends BaseModel {
       peso: peso,
       fkIdPerfil: fkIdPerfil,
       isDeleted: true,
+    );
+  }
+
+  /// Copy with pattern for immutable updates
+  PesoModel copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    int? dataRegistro,
+    double? peso,
+    String? fkIdPerfil,
+    bool? isDeleted,
+  }) {
+    return PesoModel(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      dataRegistro: dataRegistro ?? this.dataRegistro,
+      peso: peso ?? this.peso,
+      fkIdPerfil: fkIdPerfil ?? this.fkIdPerfil,
+      isDeleted: isDeleted ?? this.isDeleted,
     );
   }
 

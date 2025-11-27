@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart';
 
 import '../../database/petiveti_database.dart';
+import '../../database/repositories/animal_repository.dart';
 
 part 'database_providers.g.dart';
 
@@ -29,6 +30,19 @@ PetivetiDatabase petivetiDatabase(Ref ref) {
   ref.keepAlive();
 
   return db;
+}
+
+// ============================================================================
+// REPOSITORY PROVIDERS (Padrão DriftRepositoryBase)
+// ============================================================================
+
+/// Provider do AnimalRepository
+///
+/// Usa DriftRepositoryBase para CRUD com Result<T> e error handling.
+@riverpod
+AnimalRepository animalRepository(Ref ref) {
+  final db = ref.watch(petivetiDatabaseProvider);
+  return AnimalRepository(db);
 }
 
 /// Provider for Firestore instance (local version - prefer using core_services_providers.dart)

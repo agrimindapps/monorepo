@@ -13,6 +13,8 @@ import '../providers/snake_game_notifier.dart';
 
 // Domain imports:
 import '../../domain/entities/enums.dart';
+import '../../domain/entities/game_state.dart';
+import '../../domain/entities/power_up.dart';
 
 /// Snake game page with Neon Arcade theme
 class SnakePage extends ConsumerWidget {
@@ -116,13 +118,23 @@ class SnakePage extends ConsumerWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            _buildGlassScoreCard('SCORE', state.score.toString(), Colors.greenAccent),
+                            _buildGlassScoreCard(
+                              'SCORE', 
+                              state.score.toString(), 
+                              state.hasDoublePoints ? Colors.amber : Colors.greenAccent,
+                            ),
                             _buildGlassScoreCard('BEST', notifier.highScore.toString(), Colors.amberAccent),
                           ],
                         ),
                       ),
                       
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
+
+                      // Active Power-Ups Bar
+                      if (state.activePowerUps.isNotEmpty)
+                        _buildActivePowerUpsBar(state.activePowerUps),
+
+                      const SizedBox(height: 10),
 
                       // Wall Toggle
                       Row(
@@ -276,29 +288,56 @@ class SnakePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildGridCell(int x, int y, dynamic state) {
+  Widget _buildGridCell(int x, int y, SnakeGameState state) {
     if (state.isSnakeHead(x, y)) {
+      // Apply visual effects for active power-ups
+      Color headColor = state.difficulty.color;
+      if (state.hasGhostMode) {
+        headColor = headColor.withValues(alpha: 0.5);
+      }
+      if (state.hasShield) {
+        headColor = Colors.blue;
+      }
+      
       return Container(
         decoration: BoxDecoration(
-          color: state.difficulty.color,
+          color: headColor,
           borderRadius: BorderRadius.circular(4),
           boxShadow: [
             BoxShadow(
-              color: state.difficulty.color.withValues(alpha: 0.6),
+              color: headColor.withValues(alpha: 0.6),
               blurRadius: 8,
               spreadRadius: 1,
             ),
+            if (state.hasShield)
+              BoxShadow(
+                color: Colors.blue.withValues(alpha: 0.4),
+                blurRadius: 12,
+                spreadRadius: 3,
+              ),
           ],
         ),
       );
     } else if (state.isSnake(x, y)) {
+      Color bodyColor = state.difficulty.color.withValues(alpha: 0.7);
+      if (state.hasGhostMode) {
+        bodyColor = bodyColor.withValues(alpha: 0.3);
+      }
+      
       return Container(
         decoration: BoxDecoration(
-          color: state.difficulty.color.withValues(alpha: 0.7),
+          color: bodyColor,
           borderRadius: BorderRadius.circular(2),
         ),
       );
-    } else if (state.isFood(x, y)) {
+    } else if (state.isPowerUp(x, y)) {
+      final powerUp = state.getPowerUpAt(x, y);
+      if (powerUp != null) {
+        return _buildPowerUpCell(powerUp);
+      }
+    }
+    
+    if (state.isFood(x, y)) {
       return TweenAnimationBuilder<double>(
         tween: Tween(begin: 0.8, end: 1.2),
         duration: const Duration(milliseconds: 500),
@@ -309,10 +348,11 @@ class SnakePage extends ConsumerWidget {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.redAccent,
+                color: state.hasMagnet ? Colors.orange : Colors.redAccent,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.redAccent.withValues(alpha: 0.6),
+                    color: (state.hasMagnet ? Colors.orange : Colors.redAccent)
+                        .withValues(alpha: 0.6),
                     blurRadius: 10,
                     spreadRadius: 2,
                   ),
@@ -321,15 +361,111 @@ class SnakePage extends ConsumerWidget {
             ),
           );
         },
-        onEnd: () {}, // Loop handled by parent logic or simple pulse here? 
-                      // Simple pulse needs state, keeping it simple for now with one-way or just static glow
-      );
-    } else {
-      // Empty cell with subtle grid
-      return Container(
-        color: Colors.white.withValues(alpha: 0.02),
+        onEnd: () {},
       );
     }
+
+    // Empty cell with subtle grid
+    return Container(
+      color: Colors.white.withValues(alpha: 0.02),
+    );
+  }
+
+  Widget _buildPowerUpCell(PowerUp powerUp) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.8, end: 1.1),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeInOut,
+      builder: (context, scale, child) {
+        return Transform.scale(
+          scale: scale,
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: powerUp.type.color.withValues(alpha: 0.8),
+              boxShadow: [
+                BoxShadow(
+                  color: powerUp.type.color.withValues(alpha: 0.6),
+                  blurRadius: 12,
+                  spreadRadius: 3,
+                ),
+              ],
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.5),
+                width: 1,
+              ),
+            ),
+            child: Center(
+              child: Text(
+                powerUp.type.emoji,
+                style: const TextStyle(fontSize: 10),
+              ),
+            ),
+          ),
+        );
+      },
+      onEnd: () {},
+    );
+  }
+
+  Widget _buildActivePowerUpsBar(List<ActivePowerUp> activePowerUps) {
+    final activeOnes = activePowerUps.where((p) => p.isActive).toList();
+    if (activeOnes.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: activeOnes
+            .map((p) => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: _buildPowerUpIndicator(p),
+                ))
+            .toList(),
+      ),
+    );
+  }
+
+  Widget _buildPowerUpIndicator(ActivePowerUp powerUp) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: powerUp.type.color.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: powerUp.type.color.withValues(alpha: 0.5),
+              width: 2,
+            ),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Circular progress indicator
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: CircularProgressIndicator(
+                  value: powerUp.remainingPercent,
+                  strokeWidth: 3,
+                  backgroundColor: Colors.white.withValues(alpha: 0.1),
+                  valueColor: AlwaysStoppedAnimation<Color>(powerUp.type.color),
+                ),
+              ),
+              // Emoji
+              Text(
+                powerUp.type.emoji,
+                style: const TextStyle(fontSize: 18),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildGlassScoreCard(String label, String value, Color accentColor) {

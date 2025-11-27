@@ -42,3 +42,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  # Assets para Drift WASM (necessário para web)
+  assets:
+    - web/sqlite3.wasm
+    - web/drift_worker.dart.js

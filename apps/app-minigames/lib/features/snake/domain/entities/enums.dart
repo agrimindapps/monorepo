@@ -17,6 +17,103 @@ enum Direction {
   }
 }
 
+/// Game modes for snake game
+enum SnakeGameMode {
+  classic(
+    label: 'Clássico',
+    description: 'Modo tradicional',
+    emoji: '🐍',
+  ),
+  survival(
+    label: 'Survival',
+    description: 'Velocidade aumenta constantemente',
+    emoji: '⚡',
+  ),
+  timeAttack(
+    label: 'Time Attack',
+    description: 'Máximo de pontos no tempo limite',
+    emoji: '⏱️',
+  ),
+  endless(
+    label: 'Endless',
+    description: 'Sem game over por colisão',
+    emoji: '♾️',
+  );
+
+  const SnakeGameMode({
+    required this.label,
+    required this.description,
+    required this.emoji,
+  });
+
+  final String label;
+  final String description;
+  final String emoji;
+}
+
+/// Death types for statistics tracking
+enum SnakeDeathType {
+  self('Próprio corpo'),
+  wall('Parede'),
+  timeout('Tempo esgotado'),
+  scorePenalty('Penalidade de score');
+
+  const SnakeDeathType(this.label);
+  final String label;
+}
+
+/// Types of power-ups available in the game
+enum PowerUpType {
+  speedBoost(
+    label: 'Speed Boost',
+    emoji: '🚀',
+    duration: Duration(seconds: 5),
+    color: Colors.cyan,
+  ),
+  shield(
+    label: 'Shield',
+    emoji: '🛡️',
+    duration: Duration(seconds: 8),
+    color: Colors.blue,
+  ),
+  doublePoints(
+    label: 'Double Points',
+    emoji: '⭐',
+    duration: Duration(seconds: 10),
+    color: Colors.amber,
+  ),
+  slowMotion(
+    label: 'Slow Motion',
+    emoji: '🐌',
+    duration: Duration(seconds: 6),
+    color: Colors.purple,
+  ),
+  magnet(
+    label: 'Magnet',
+    emoji: '🧲',
+    duration: Duration(seconds: 7),
+    color: Colors.red,
+  ),
+  ghostMode(
+    label: 'Ghost Mode',
+    emoji: '👻',
+    duration: Duration(seconds: 5),
+    color: Colors.grey,
+  );
+
+  const PowerUpType({
+    required this.label,
+    required this.emoji,
+    required this.duration,
+    required this.color,
+  });
+
+  final String label;
+  final String emoji;
+  final Duration duration;
+  final Color color;
+}
+
 /// Status of the snake game
 enum SnakeGameStatus {
   notStarted,

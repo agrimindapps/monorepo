@@ -13,7 +13,7 @@
 - **receituagro_web**: Web platform - **Migrating to Riverpod**
 
 ### **Packages**
-- **packages/core**: Shared services (Firebase, RevenueCat, Hive, Riverpod)
+- **packages/core**: Shared services (Firebase, RevenueCat, Drift, Riverpod)
 
 ---
 
@@ -26,9 +26,19 @@
 
 ### **Arquitetura**
 - **Clean Architecture** (Presentation/Domain/Data)
-- **Repository Pattern** (Hive local + Firebase remote)
+- **Repository Pattern** (Drift local + Firebase remote)
 - **SOLID Principles** com Specialized Services
 - **Error Handling**: Either<Failure, T> (dartz) - **OBRIGATÓRIO**
+
+### **Persistência Local**
+- **PADRÃO ÚNICO**: Drift (SQLite type-safe)
+- **Status**: ✅ Implementado em todos os apps
+- **Referência**: `.claude/guides/DRIFT_IMPLEMENTATION_GUIDE.md`
+- **Características**:
+  - Type-safe queries
+  - Reactive streams (watchAll, watchById)
+  - Migrations automáticas
+  - Result<T> error handling
 
 ### **Testing**
 - **Mocktail** para mocking (padrão)
@@ -215,7 +225,8 @@ Para garantir consistência e qualidade, consulte estes documentos antes de gera
 - **[Tech Stack](.claude/docs/TECH_STACK.md)**: Versões e pacotes permitidos.
 
 ### **Guias Técnicos**
-- `.claude/guides/MIGRATION_PROVIDER_TO_RIVERPOD.md` - Guia completo de migração
+- `.claude/guides/MIGRATION_PROVIDER_TO_RIVERPOD.md` - Guia completo de migração Riverpod
+- `.claude/guides/DRIFT_IMPLEMENTATION_GUIDE.md` - Guia de implementação Drift (SQLite)
 - `.claude/agents/flutter-architect.md` - Padrões arquiteturais Riverpod
 - `.claude/agents/flutter-engineer.md` - Padrões de desenvolvimento Riverpod
 

@@ -9,7 +9,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/providers/dependency_providers.dart';
 import '../models/achievement_model.dart';
 import '../models/peso_model.dart';
-import '../repository/peso_repository.dart';
 
 part 'peso_controller.g.dart';
 
@@ -48,14 +47,6 @@ class PesoState {
       isLoading: isLoading ?? this.isLoading,
     );
   }
-}
-
-/// Provider for PesoRepository
-@riverpod
-PesoRepository pesoRepository(Ref ref) {
-  final firestoreService = ref.watch(firestoreServiceProvider);
-  final database = ref.watch(nutritutiDatabaseProvider);
-  return PesoRepository(firestoreService, database);
 }
 
 /// Main Peso Notifier

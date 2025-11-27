@@ -98,6 +98,7 @@ flutter:
     - assets/database/json/medicina/
     - assets/database/json/quimica/
     - web/sqlite3.wasm  # Drift WASM (necessário para web)
+    - web/drift_worker.dart.js
     - assets/icons_app/
     - assets/
     - lib/assets/

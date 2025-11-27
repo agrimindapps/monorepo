@@ -37,3 +37,4 @@ flutter:
   # Assets para Drift WASM (necessário para web)
   assets:
     - web/sqlite3.wasm
+    - web/drift_worker.dart.js

@@ -2,7 +2,6 @@
 import 'dart:async';
 
 // Package imports:
-// Package imports:
 import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -11,6 +10,8 @@ import '../../domain/entities/game_state.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/services/direction_queue.dart';
 import '../../domain/services/snake_movement_service.dart';
+import '../../domain/services/power_up_service.dart';
+import '../../domain/services/game_mode_service.dart';
 import '../../domain/usecases/update_snake_position_usecase.dart';
 import '../../domain/usecases/change_direction_usecase.dart';
 import '../../domain/usecases/start_new_game_usecase.dart';
@@ -35,12 +36,23 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
 
   // Services
   late final SnakeMovementService _movementService;
+  late final PowerUpService _powerUpService;
+  late final GameModeService _gameModeService;
 
   // Game loop timer
   Timer? _gameTimer;
+  
+  // Elapsed time timer for survival/time attack modes
+  Timer? _elapsedTimer;
 
   // High score (cached)
   int _highScore = 0;
+  
+  // XP gained this game (for display)
+  int _lastXpGained = 0;
+  
+  // Was new high score achieved
+  bool _isNewHighScore = false;
 
   // Mounted flag for race condition protection
   bool _isMounted = true;
@@ -61,11 +73,14 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
 
     // Inject services
     _movementService = ref.read(snakeMovementServiceProvider);
+    _powerUpService = ref.read(powerUpServiceProvider);
+    _gameModeService = ref.read(gameModeServiceProvider);
 
     // Cleanup on dispose
     ref.onDispose(() {
       _isMounted = false;
       _gameTimer?.cancel();
+      _elapsedTimer?.cancel();
       _directionQueue.clear();
     });
 
@@ -78,6 +93,12 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
 
   /// Get current high score
   int get highScore => _highScore;
+  
+  /// Get last XP gained
+  int get lastXpGained => _lastXpGained;
+  
+  /// Was new high score achieved in last game
+  bool get isNewHighScore => _isNewHighScore;
 
   /// Load high score
   Future<void> _loadHighScore() async {
@@ -93,7 +114,8 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    if (currentState.score > _highScore) {
+    _isNewHighScore = currentState.score > _highScore;
+    if (_isNewHighScore) {
       final result = await _saveHighScoreUseCase(score: currentState.score);
       result.fold(
         (failure) {}, // Ignore failure
@@ -102,14 +124,23 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
     }
   }
 
-  /// Start a new game
-  Future<void> startGame() async {
+  /// Start a new game with optional mode and difficulty
+  Future<void> startGame({
+    SnakeGameMode? gameMode,
+    SnakeDifficulty? difficulty,
+    int? gridSize,
+  }) async {
     if (!_isMounted) return;
+    
+    _isNewHighScore = false;
+    _lastXpGained = 0;
 
-    final currentDifficulty =
-        state.value?.difficulty ?? SnakeDifficulty.medium;
+    final currentState = state.value;
+    final finalDifficulty = difficulty ?? currentState?.difficulty ?? SnakeDifficulty.medium;
+    final finalGameMode = gameMode ?? currentState?.gameMode ?? SnakeGameMode.classic;
+    final finalGridSize = gridSize ?? currentState?.gridSize ?? 20;
 
-    final result = await _startNewGameUseCase(difficulty: currentDifficulty);
+    final result = await _startNewGameUseCase(difficulty: finalDifficulty);
     if (!_isMounted) return;
 
     result.fold(
@@ -119,14 +150,65 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
       },
       (newState) {
         if (!_isMounted) return;
-        state = AsyncValue.data(newState);
+        // Apply game mode and grid size to the new state
+        final stateWithMode = newState.copyWith(
+          gameMode: finalGameMode,
+          gridSize: finalGridSize,
+          timeAttackRemainingSeconds: finalGameMode == SnakeGameMode.timeAttack 
+              ? _gameModeService.getTimeAttackDuration() 
+              : 120,
+        );
+        state = AsyncValue.data(stateWithMode);
         _startGameLoop();
+        _startElapsedTimer();
       },
     );
   }
+  
+  /// Start elapsed time timer
+  void _startElapsedTimer() {
+    _elapsedTimer?.cancel();
+    _elapsedTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!_isMounted) return;
+      
+      final currentState = state.value;
+      if (currentState == null || !currentState.gameStatus.isRunning) {
+        _elapsedTimer?.cancel();
+        return;
+      }
+      
+      // Update elapsed seconds
+      var newState = currentState.copyWith(
+        elapsedSeconds: currentState.elapsedSeconds + 1,
+      );
+      
+      // Handle Time Attack mode countdown
+      if (currentState.gameMode == SnakeGameMode.timeAttack) {
+        final newRemaining = currentState.timeAttackRemainingSeconds - 1;
+        if (newRemaining <= 0) {
+          // Time's up - game over
+          newState = newState.copyWith(
+            gameStatus: SnakeGameStatus.gameOver,
+            timeAttackRemainingSeconds: 0,
+            lastDeathType: SnakeDeathType.timeout,
+          );
+          _gameTimer?.cancel();
+          _elapsedTimer?.cancel();
+          _saveHighScore();
+          HapticFeedback.heavyImpact();
+        } else {
+          newState = newState.copyWith(
+            timeAttackRemainingSeconds: newRemaining,
+          );
+        }
+      }
+      
+      state = AsyncValue.data(newState);
+    });
+  }
 
   /// Start game loop (Timer.periodic)
-  /// Uses dynamic game speed based on current score
+  /// Uses dynamic game speed based on current score and power-ups
   void _startGameLoop() {
     _gameTimer?.cancel();
     _directionQueue.clear();
@@ -135,10 +217,25 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
     if (initialState == null) return;
 
     // Calculate initial game speed with dynamic difficulty
-    final dynamicGameSpeed = _movementService.calculateDynamicGameSpeed(
+    var dynamicGameSpeed = _movementService.calculateDynamicGameSpeed(
       baseDifficulty: initialState.difficulty,
       score: initialState.score,
     );
+
+    // Apply power-up speed modifiers
+    dynamicGameSpeed = _powerUpService.calculateSpeedWithPowerUps(
+      baseSpeed: dynamicGameSpeed,
+      hasSpeedBoost: initialState.hasSpeedBoost,
+      hasSlowMotion: initialState.hasSlowMotion,
+    );
+    
+    // Apply survival mode speed if applicable
+    if (initialState.gameMode == SnakeGameMode.survival) {
+      dynamicGameSpeed = _gameModeService.calculateSurvivalSpeed(
+        baseSpeed: dynamicGameSpeed,
+        secondsElapsed: initialState.elapsedSeconds,
+      );
+    }
 
     _gameTimer =
         Timer.periodic(Duration(milliseconds: dynamicGameSpeed), (_) async {
@@ -179,25 +276,67 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
           },
           (newState) {
             if (!_isMounted) return;
-            state = AsyncValue.data(newState);
+            
+            // Track food eaten and power-ups collected
+            var updatedState = newState;
+            if (newState.score > currentState!.score) {
+              final foodEaten = (newState.score - currentState!.score) ~/ 10;
+              updatedState = updatedState.copyWith(
+                foodEatenThisGame: updatedState.foodEatenThisGame + foodEaten,
+              );
+            }
+            
+            // Track power-ups collected
+            if (newState.activePowerUps.length > currentState!.activePowerUps.length) {
+              final newPowerUps = Map<String, int>.from(updatedState.powerUpsCollectedThisGame);
+              for (final powerUp in newState.activePowerUps) {
+                if (!currentState!.activePowerUps.any((p) => p.type == powerUp.type && p.activatedAt == powerUp.activatedAt)) {
+                  final typeName = powerUp.type.name;
+                  newPowerUps[typeName] = (newPowerUps[typeName] ?? 0) + 1;
+                }
+              }
+              updatedState = updatedState.copyWith(
+                powerUpsCollectedThisGame: newPowerUps,
+              );
+            }
+            
+            state = AsyncValue.data(updatedState);
 
             // Check game over
             if (newState.gameStatus.isGameOver) {
               _gameTimer?.cancel();
+              _elapsedTimer?.cancel();
               _saveHighScore();
               HapticFeedback.heavyImpact();
             } else {
-              // Check if score increased (food eaten)
+              // Check if score increased (food eaten) or power-up collected
               if (newState.score > currentState!.score) {
                 HapticFeedback.lightImpact();
               }
+              if (newState.activePowerUps.length > currentState!.activePowerUps.length) {
+                HapticFeedback.mediumImpact();
+              }
 
-              // Recalculate game speed if score changed (dynamic difficulty)
-              final newDynamicSpeed =
-                  _movementService.calculateDynamicGameSpeed(
+              // Recalculate game speed if score or power-ups changed
+              var newDynamicSpeed = _movementService.calculateDynamicGameSpeed(
                 baseDifficulty: newState.difficulty,
                 score: newState.score,
               );
+
+              // Apply power-up speed modifiers
+              newDynamicSpeed = _powerUpService.calculateSpeedWithPowerUps(
+                baseSpeed: newDynamicSpeed,
+                hasSpeedBoost: newState.hasSpeedBoost,
+                hasSlowMotion: newState.hasSlowMotion,
+              );
+              
+              // Apply survival mode speed if applicable
+              if (newState.gameMode == SnakeGameMode.survival) {
+                newDynamicSpeed = _gameModeService.calculateSurvivalSpeed(
+                  baseSpeed: newDynamicSpeed,
+                  secondsElapsed: newState.elapsedSeconds,
+                );
+              }
 
               if (newDynamicSpeed != dynamicGameSpeed) {
                 // Speed changed, restart timer with new speed
@@ -289,8 +428,10 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
 
         if (newState.gameStatus.isRunning) {
           _startGameLoop();
+          _startElapsedTimer();
         } else {
           _gameTimer?.cancel();
+          _elapsedTimer?.cancel();
         }
       },
     );
@@ -299,6 +440,7 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
   /// Restart game
   Future<void> restartGame() async {
     _gameTimer?.cancel();
+    _elapsedTimer?.cancel();
     await startGame();
   }
 
@@ -310,6 +452,7 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
     if (currentState == null) return;
 
     _gameTimer?.cancel();
+    _elapsedTimer?.cancel();
 
     final result = await _changeDifficultyUseCase(
       currentState: currentState,
@@ -329,6 +472,46 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
       },
     );
   }
+  
+  /// Change game mode
+  Future<void> changeGameMode(SnakeGameMode newMode) async {
+    if (!_isMounted) return;
+    
+    final currentState = state.value;
+    if (currentState == null) return;
+    
+    _gameTimer?.cancel();
+    _elapsedTimer?.cancel();
+    
+    final newState = SnakeGameState.initial(
+      difficulty: currentState.difficulty,
+      hasWalls: currentState.hasWalls,
+      gameMode: newMode,
+      gridSize: currentState.gridSize,
+    );
+    
+    state = AsyncValue.data(newState);
+  }
+  
+  /// Change grid size
+  Future<void> changeGridSize(int newGridSize) async {
+    if (!_isMounted) return;
+    
+    final currentState = state.value;
+    if (currentState == null) return;
+    
+    _gameTimer?.cancel();
+    _elapsedTimer?.cancel();
+    
+    final newState = SnakeGameState.initial(
+      difficulty: currentState.difficulty,
+      hasWalls: currentState.hasWalls,
+      gameMode: currentState.gameMode,
+      gridSize: newGridSize,
+    );
+    
+    state = AsyncValue.data(newState);
+  }
 
   /// Toggle wall mode
   Future<void> toggleWalls() async {
@@ -342,16 +525,57 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
 
     // Restart game with new setting
     _gameTimer?.cancel();
-
-    // We need to update the startNewGameUseCase to accept hasWalls or update state manually
-    // For now, let's update state manually and restart
+    _elapsedTimer?.cancel();
 
     final newState = SnakeGameState.initial(
       difficulty: currentState.difficulty,
       hasWalls: newHasWalls,
+      gameMode: currentState.gameMode,
+      gridSize: currentState.gridSize,
     );
 
     state = AsyncValue.data(newState);
     // Don't auto-start, let user start
+  }
+  
+  /// Calculate XP for current game (for display purposes)
+  int calculateXpForCurrentGame() {
+    final currentState = state.value;
+    if (currentState == null) return 0;
+    
+    final totalPowerUps = currentState.powerUpsCollectedThisGame.values
+        .fold<int>(0, (sum, count) => sum + count);
+    
+    return _calculateXp(
+      score: currentState.score,
+      snakeLength: currentState.length,
+      survivalSeconds: currentState.elapsedSeconds,
+      difficulty: currentState.difficulty.name,
+      powerUpsCollected: totalPowerUps,
+    );
+  }
+  
+  int _calculateXp({
+    required int score,
+    required int snakeLength,
+    required int survivalSeconds,
+    required String difficulty,
+    required int powerUpsCollected,
+  }) {
+    int baseXp = score * 2;
+    int lengthBonus = snakeLength * 5;
+    int survivalBonus = survivalSeconds ~/ 10;
+    int powerUpBonus = powerUpsCollected * 10;
+
+    double difficultyMultiplier = switch (difficulty) {
+      'easy' => 1.0,
+      'medium' => 1.5,
+      'hard' => 2.0,
+      _ => 1.0,
+    };
+
+    return ((baseXp + lengthBonus + survivalBonus + powerUpBonus) *
+            difficultyMultiplier)
+        .round();
   }
 }

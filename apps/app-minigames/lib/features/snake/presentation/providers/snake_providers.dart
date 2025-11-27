@@ -9,6 +9,9 @@ import '../../domain/services/collision_detection_service.dart';
 import '../../domain/services/food_generator_service.dart';
 import '../../domain/services/game_state_manager_service.dart';
 import '../../domain/services/snake_movement_service.dart';
+import '../../domain/services/power_up_service.dart';
+import '../../domain/services/game_mode_service.dart';
+import '../../domain/services/share_service.dart';
 import '../../domain/usecases/change_difficulty_usecase.dart';
 import '../../domain/usecases/change_direction_usecase.dart';
 import '../../domain/usecases/load_high_score_usecase.dart';
@@ -16,6 +19,9 @@ import '../../domain/usecases/save_high_score_usecase.dart';
 import '../../domain/usecases/start_new_game_usecase.dart';
 import '../../domain/usecases/toggle_pause_usecase.dart';
 import '../../domain/usecases/update_snake_position_usecase.dart';
+import '../../domain/usecases/collect_power_up_usecase.dart';
+import '../../domain/usecases/spawn_power_up_usecase.dart';
+import '../../domain/usecases/update_power_ups_usecase.dart';
 
 part 'snake_providers.g.dart';
 
@@ -46,6 +52,9 @@ GameStateManagerService gameStateManagerService(Ref ref) =>
 @riverpod
 SnakeMovementService snakeMovementService(Ref ref) =>
     SnakeMovementService();
+
+@riverpod
+PowerUpService powerUpService(Ref ref) => PowerUpService();
 
 @riverpod
 ChangeDifficultyUseCase changeDifficultyUseCase(Ref ref) {
@@ -82,6 +91,31 @@ UpdateSnakePositionUseCase updateSnakePositionUseCase(Ref ref) {
   final movement = ref.watch(snakeMovementServiceProvider);
   final collision = ref.watch(collisionDetectionServiceProvider);
   final foodGenerator = ref.watch(foodGeneratorServiceProvider);
+  final powerUpService = ref.watch(powerUpServiceProvider);
   return UpdateSnakePositionUseCase(
-      foodGenerator, movement, collision);
+      foodGenerator, movement, collision, powerUpService);
 }
+
+@riverpod
+CollectPowerUpUseCase collectPowerUpUseCase(Ref ref) {
+  final powerUpService = ref.watch(powerUpServiceProvider);
+  return CollectPowerUpUseCase(powerUpService);
+}
+
+@riverpod
+SpawnPowerUpUseCase spawnPowerUpUseCase(Ref ref) {
+  final powerUpService = ref.watch(powerUpServiceProvider);
+  return SpawnPowerUpUseCase(powerUpService);
+}
+
+@riverpod
+UpdatePowerUpsUseCase updatePowerUpsUseCase(Ref ref) {
+  final powerUpService = ref.watch(powerUpServiceProvider);
+  return UpdatePowerUpsUseCase(powerUpService);
+}
+
+@riverpod
+GameModeService gameModeService(Ref ref) => GameModeService();
+
+@riverpod
+ShareService shareService(Ref ref) => ShareService();

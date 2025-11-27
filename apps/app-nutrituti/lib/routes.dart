@@ -22,6 +22,8 @@ import 'pages/calc/taxa_metabolica_basal/index.dart';
 import 'pages/calc/volume_sanguineo/index.dart';
 import 'pages/config_page.dart';
 import 'pages/exercicios/pages/exercicio_page.dart';
+import 'pages/exercicios/gamification/pages/fitquest_dashboard_page.dart';
+import 'pages/exercicios/gamification/pages/workout_session_page.dart';
 import 'pages/login_page.dart';
 import 'pages/meditacao/index.dart';
 import 'pages/peso/peso_page.dart';
@@ -67,6 +69,8 @@ class AppRoutes {
   static String peso = '/peso';
   static String beberAgua = '/beber_agua';
   static String exercicios = '/exercicios';
+  static String fitquest = '/fitquest';
+  static String fitquestWorkout = '/fitquest/workout';
   static String meditacao = '/meditacao';
   static String pratos = '/pratos';
   static String receitas = '/receitas';
@@ -134,6 +138,8 @@ class Routes {
       AppRoutes.peso: (_) => const PesoPage(),
       AppRoutes.beberAgua: (_) => const BeberAguaPage(),
       AppRoutes.exercicios: (_) => const ExercicioPage(),
+      AppRoutes.fitquest: (_) => const FitQuestDashboardPage(),
+      AppRoutes.fitquestWorkout: (_) => const WorkoutSessionPage(),
       AppRoutes.meditacao: (_) => MeditacaoPage(),
       AppRoutes.pratos: (_) => const PratosPage(),
       AppRoutes.receitas: (_) => const ReceitasPage(),

@@ -39,15 +39,17 @@ export 'package:url_launcher/url_launcher.dart';
 
 export 'models/license_info.dart';
 export 'repositories/license_repository.dart';
-// Drift - Sistema de persistência SQL
-// export 'package:drift/drift.dart'
-//     hide JsonKey, Index, VerificationResult, Query;
-// export 'services/drift/drift.dart';
-
-// Export Drift services used in app-plantis and other apps
+// ============================================================================
+// DRIFT - Sistema de Persistência SQL (Padrão do Monorepo)
+// ============================================================================
+// Camada 1: Serviços Base (services/drift/)
 export 'services/drift/base_drift_database.dart';
 export 'services/drift/base_drift_repository.dart';
 export 'services/drift/drift_database_config.dart';
+
+// Camada 2: Infraestrutura Avançada (infrastructure/storage/drift/)
+export 'src/infrastructure/storage/drift/drift_storage.dart';
+export 'src/infrastructure/storage/drift/interfaces/i_drift_manager.dart';
 export 'services/image_compression_service.dart';
 export 'services/license_service.dart';
 export 'services/shimmer_service.dart';
@@ -147,9 +149,8 @@ export 'src/infrastructure/services/security_service.dart';
 export 'src/infrastructure/services/sync_firebase_service.dart';
 export 'src/infrastructure/services/validation_service.dart';
 export 'src/infrastructure/services/web_notification_service.dart';
-// Export Drift storage service for local storage compatibility
+// Drift Storage Service e Sync Infrastructure
 export 'src/infrastructure/storage/drift/services/drift_storage_service.dart';
-// Export Drift Sync Infrastructure
 export 'src/infrastructure/storage/drift/sync/adapters/drift_sync_adapter_base.dart';
 export 'src/infrastructure/storage/drift/sync/interfaces/i_drift_sync_adapter.dart';
 export 'src/infrastructure/storage/drift/sync/models/sync_results.dart';
@@ -174,9 +175,6 @@ export 'src/riverpod/domain/device/device_management_providers.dart';
 export 'src/riverpod/domain/premium/subscription_providers.dart';
 export 'src/riverpod/domain/sync/sync_providers.dart' hide OfflineData;
 export 'src/riverpod/riverpod_utils.dart';
-// Storage - Drift (Novo)
-// export 'src/infrastructure/storage/drift/drift_storage.dart';
-
 export 'src/services/cache/cache_service.dart';
 export 'src/services/simple_subscription_sync_service.dart';
 export 'src/services/subscription/advanced_subscription_services.dart'

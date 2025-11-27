@@ -64,46 +64,49 @@ class _PesoFormWidgetState extends ConsumerState<PesoFormWidget> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
+      // Parse peso antes de qualquer operação assíncrona
+      final pesoValue = double.parse(_pesoController.text.replaceAll(',', '.'));
+      final now = DateTime.now();
+      
+      // Criar o registro atualizado
+      final registroParaSalvar = _localRegistro.copyWith(
+        peso: pesoValue,
+        dataRegistro: _localRegistro.dataRegistro,
+        updatedAt: now,
+        createdAt: widget.registro?.createdAt ?? now,
+      );
+
       try {
         if (widget.registro != null) {
           await ref
               .read(pesoProvider.notifier)
-              .updateRegistro(_localRegistro);
-
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Registro de peso atualizado com sucesso!'),
-                backgroundColor: Colors.green[100],
-              ),
-            );
-            Navigator.pop(context);
-          }
+              .updateRegistro(registroParaSalvar);
         } else {
           await ref
               .read(pesoProvider.notifier)
-              .addRegistro(_localRegistro);
-
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content:
-                    const Text('Novo registro de peso adicionado com sucesso!'),
-                backgroundColor: Colors.green[100],
-              ),
-            );
-            Navigator.pop(context);
-          }
+              .addRegistro(registroParaSalvar);
         }
+        
+        if (!mounted) return;
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(widget.registro != null 
+                ? 'Registro de peso atualizado com sucesso!'
+                : 'Novo registro de peso adicionado com sucesso!'),
+            backgroundColor: Colors.green[100],
+          ),
+        );
+        Navigator.pop(context);
       } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Ocorreu um erro ao salvar os dados: ${e.toString()}'),
-              backgroundColor: Colors.red[100],
-            ),
-          );
-        }
+        if (!mounted) return;
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ocorreu um erro ao salvar os dados: ${e.toString()}'),
+            backgroundColor: Colors.red[100],
+          ),
+        );
       }
     }
   }
@@ -153,7 +156,9 @@ class _PesoFormWidgetState extends ConsumerState<PesoFormWidget> {
 
     if (pickedDate != null && pickedDate != currentDate) {
       setState(() {
-        _localRegistro.dataRegistro = pickedDate.millisecondsSinceEpoch;
+        _localRegistro = _localRegistro.copyWith(
+          dataRegistro: pickedDate.millisecondsSinceEpoch,
+        );
         _dataController.text = _dateFormat.format(pickedDate);
       });
     }
@@ -201,11 +206,6 @@ class _PesoFormWidgetState extends ConsumerState<PesoFormWidget> {
       ),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       validator: _validatePeso,
-      onSaved: (value) {
-        if (value != null) {
-          _localRegistro.peso = double.parse(value.replaceAll(',', '.'));
-        }
-      },
     );
   }
 

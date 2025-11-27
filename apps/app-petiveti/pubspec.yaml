@@ -52,6 +52,7 @@ flutter:
   uses-material-design: true
   
   # Assets para Drift WASM (necessário para web)
-  # O drift_worker.dart será compilado automaticamente para JS pelo Flutter
+  # Assets para Drift WASM (necessário para web)
   assets:
     - web/sqlite3.wasm
+    - web/drift_worker.dart.js

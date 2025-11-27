@@ -22,6 +22,7 @@ class PesoFormPage extends StatefulWidget {
 class _PesoFormPageState extends State<PesoFormPage> {
   final _formKey = GlobalKey<FormState>();
   late PesoModel _localRegistro;
+  late TextEditingController _pesoController;
 
   @override
   void initState() {
@@ -35,11 +36,23 @@ class _PesoFormPageState extends State<PesoFormPage> {
           peso: 0.0,
           fkIdPerfil: '',
         );
+    _pesoController = TextEditingController(
+      text: _localRegistro.peso > 0 ? _localRegistro.peso.toString() : '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _pesoController.dispose();
+    super.dispose();
   }
 
   void _saveForm() {
     if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
+      // Parse peso value from controller
+      final pesoValue = double.tryParse(
+        _pesoController.text.replaceAll(',', '.'),
+      ) ?? 0.0;
 
       // Criar novo registro com timestamps atualizados
       final now = DateTime.now();
@@ -48,7 +61,7 @@ class _PesoFormPageState extends State<PesoFormPage> {
         createdAt: widget.registro?.createdAt ?? now,
         updatedAt: now,
         dataRegistro: _localRegistro.dataRegistro,
-        peso: _localRegistro.peso,
+        peso: pesoValue,
         fkIdPerfil: _localRegistro.fkIdPerfil,
       );
 
@@ -61,7 +74,7 @@ class _PesoFormPageState extends State<PesoFormPage> {
     if (value == null || value.isEmpty) {
       return 'Por favor, insira o peso';
     }
-    if (double.tryParse(value) == null) {
+    if (double.tryParse(value.replaceAll(',', '.')) == null) {
       return 'Por favor, insira um número válido';
     }
     return null;
@@ -80,7 +93,9 @@ class _PesoFormPageState extends State<PesoFormPage> {
         pickedDate !=
             DateTime.fromMillisecondsSinceEpoch(_localRegistro.dataRegistro)) {
       setState(() {
-        _localRegistro.dataRegistro = pickedDate.millisecondsSinceEpoch;
+        _localRegistro = _localRegistro.copyWith(
+          dataRegistro: pickedDate.millisecondsSinceEpoch,
+        );
       });
     }
   }
@@ -117,8 +132,7 @@ class _PesoFormPageState extends State<PesoFormPage> {
 
   Widget _buildPesoField() {
     return TextFormField(
-      initialValue:
-          _localRegistro.peso > 0 ? _localRegistro.peso.toString() : '',
+      controller: _pesoController,
       decoration: const InputDecoration(
         labelText: 'Peso (kg)',
         hintText: 'Ex: 75.5',
@@ -126,11 +140,6 @@ class _PesoFormPageState extends State<PesoFormPage> {
       ),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       validator: _validatePeso,
-      onSaved: (value) {
-        if (value != null && value.isNotEmpty) {
-          _localRegistro.peso = double.parse(value);
-        }
-      },
     );
   }
 

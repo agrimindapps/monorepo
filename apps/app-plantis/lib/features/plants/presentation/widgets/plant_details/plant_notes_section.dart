@@ -24,7 +24,9 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        ref.read(commentsNotifierProvider.notifier).loadComments(widget.plant.id);
+        ref
+            .read(commentsNotifierProvider.notifier)
+            .loadComments(widget.plant.id);
       }
     });
   }
@@ -78,10 +80,9 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color:
-            theme.brightness == Brightness.dark
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFFFFFFF), // Branco puro
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2C2C2E)
+            : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.1),
@@ -150,12 +151,11 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
               ),
               contentPadding: const EdgeInsets.all(16),
               filled: true,
-              fillColor:
-                  theme.brightness == Brightness.dark
-                      ? const Color(0xFF1C1C1E)
-                      : theme.colorScheme.surfaceContainerHighest.withValues(
-                        alpha: 0.3,
-                      ),
+              fillColor: theme.brightness == Brightness.dark
+                  ? const Color(0xFF1C1C1E)
+                  : theme.colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.3,
+                    ),
             ),
           ),
           const SizedBox(height: 16),
@@ -245,10 +245,9 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color:
-            theme.brightness == Brightness.dark
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFFFFFFF), // Branco puro
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2C2C2E)
+            : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.1),
@@ -290,35 +289,33 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
                   size: 18,
                 ),
                 onSelected: (action) => _handleCommentAction(action, comment),
-                itemBuilder:
-                    (context) => [
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: ListTile(
-                          leading: Icon(Icons.edit_outlined),
-                          title: Text('Editar'),
-                          contentPadding: EdgeInsets.zero,
-                        ),
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'edit',
+                    child: ListTile(
+                      leading: Icon(Icons.edit_outlined),
+                      title: Text('Editar'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.delete_outline,
+                        color: Colors.red,
                       ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: ListTile(
-                          leading: Icon(
-                            Icons.delete_outline,
-                            color: Colors.red,
-                          ),
-                          title: Text(
-                            'Excluir',
-                            style: TextStyle(color: Colors.red),
-                          ),
-                          contentPadding: EdgeInsets.zero,
-                        ),
+                      title: Text(
+                        'Excluir',
+                        style: TextStyle(color: Colors.red),
                       ),
-                    ],
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-
           const SizedBox(height: 12),
           Text(
             comment.conteudo,
@@ -351,12 +348,14 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
       print('   Plant ID: ${widget.plant.id}');
       print('   Plant Name: ${widget.plant.displayName}');
       print('   Content Length: ${text.length}');
-      print('   Content: ${text.substring(0, text.length > 50 ? 50 : text.length)}...');
+      print(
+          '   Content: ${text.substring(0, text.length > 50 ? 50 : text.length)}...');
     }
 
     try {
-      final success =
-          await ref.read(commentsNotifierProvider.notifier).addComment(widget.plant.id, text);
+      final success = await ref
+          .read(commentsNotifierProvider.notifier)
+          .addComment(widget.plant.id, text);
 
       if (kDebugMode) {
         print('   Result: ${success ? "✅ Sucesso" : "❌ Falhou"}');
@@ -376,7 +375,8 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
       } else {
         if (mounted) {
           final commentsState = ref.read(commentsNotifierProvider).value;
-          final errorMsg = commentsState?.errorMessage ?? 'Erro desconhecido ao adicionar observação';
+          final errorMsg = commentsState?.errorMessage ??
+              'Erro desconhecido ao adicionar observação';
 
           if (kDebugMode) {
             print('   Error Message: $errorMsg');
@@ -428,90 +428,89 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
 
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Editar observação'),
-            content: TextField(
-              controller: editController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                hintText: 'Edite sua observação...',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  editController.dispose();
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  final newText = editController.text.trim();
-                  if (newText.isNotEmpty && newText != comment.conteudo) {
-                    final success = await ref
-                        .read(commentsNotifierProvider.notifier)
-                        .updateComment(comment.id, newText);
-
-                    if (success) {
-                      if (!context.mounted) return;
-                      Navigator.of(context).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Observação atualizada'),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                    }
-                  } else {
-                    Navigator.of(context).pop();
-                  }
-                  editController.dispose();
-                },
-                child: const Text('Salvar'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Editar observação'),
+        content: TextField(
+          controller: editController,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            hintText: 'Edite sua observação...',
+            border: OutlineInputBorder(),
           ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              editController.dispose();
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final newText = editController.text.trim();
+              if (newText.isNotEmpty && newText != comment.conteudo) {
+                final success = await ref
+                    .read(commentsNotifierProvider.notifier)
+                    .updateComment(comment.id, newText);
+
+                if (success) {
+                  if (!context.mounted) return;
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Observação atualizada'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              } else {
+                Navigator.of(context).pop();
+              }
+              editController.dispose();
+            },
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
     );
   }
 
   void _confirmDeleteComment(ComentarioModel comment) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Excluir observação'),
-            content: const Text(
-              'Tem certeza que deseja excluir esta observação?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  final success =
-                      await ref.read(commentsNotifierProvider.notifier).deleteComment(comment.id);
-
-                  if (success) {
-                    if (!context.mounted) return;
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Observação excluída'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  }
-                },
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: const Text('Excluir'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Excluir observação'),
+        content: const Text(
+          'Tem certeza que deseja excluir esta observação?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
           ),
+          TextButton(
+            onPressed: () async {
+              final success = await ref
+                  .read(commentsNotifierProvider.notifier)
+                  .deleteComment(comment.id);
+
+              if (success) {
+                if (!context.mounted) return;
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Observação excluída'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -607,7 +606,8 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
             ),
           ),
           TextButton(
-            onPressed: () => ref.read(commentsNotifierProvider.notifier).clearError(),
+            onPressed: () =>
+                ref.read(commentsNotifierProvider.notifier).clearError(),
             child: const Text('OK'),
           ),
         ],

@@ -22,18 +22,16 @@ class PlantListTile extends ConsumerWidget {
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border:
-            isDark
-                ? Border.all(color: Colors.grey.withValues(alpha: 0.1))
-                : Border.all(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.1),
-                ),
+        border: isDark
+            ? Border.all(color: Colors.grey.withValues(alpha: 0.1))
+            : Border.all(
+                color: theme.colorScheme.outline.withValues(alpha: 0.1),
+              ),
         boxShadow: [
           BoxShadow(
-            color:
-                isDark
-                    ? Colors.black.withValues(alpha: 0.3)
-                    : Colors.black.withValues(alpha: 0.08),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.08),
             blurRadius: isDark ? 8 : 12,
             offset: const Offset(0, 4),
             spreadRadius: isDark ? 0 : 2,
@@ -50,7 +48,6 @@ class PlantListTile extends ConsumerWidget {
             child: Row(
               children: [
                 _buildPlantAvatar(context),
-
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -60,28 +57,25 @@ class PlantListTile extends ConsumerWidget {
                         plant.displayName,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color:
-                              isDark
-                                  ? Colors.white
-                                  : theme.colorScheme.onSurface,
+                          color: isDark
+                              ? Colors.white
+                              : theme.colorScheme.onSurface,
                           fontSize: 18,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-
                       const SizedBox(height: 4),
                       Row(
                         children: [
                           Text(
                             plant.displaySpecies,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color:
-                                  isDark
-                                      ? Colors.white.withValues(alpha: 0.7)
-                                      : theme.colorScheme.onSurface.withValues(
-                                        alpha: 0.7,
-                                      ),
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.7)
+                                  : theme.colorScheme.onSurface.withValues(
+                                      alpha: 0.7,
+                                    ),
                               fontSize: 14,
                             ),
                             maxLines: 1,
@@ -91,29 +85,26 @@ class PlantListTile extends ConsumerWidget {
                           Icon(
                             Icons.location_on,
                             size: 14,
-                            color:
-                                isDark
-                                    ? Colors.white.withValues(alpha: 0.5)
-                                    : theme.colorScheme.onSurface.withValues(
-                                      alpha: 0.5,
-                                    ),
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.5)
+                                : theme.colorScheme.onSurface.withValues(
+                                    alpha: 0.5,
+                                  ),
                           ),
                           const SizedBox(width: 2),
                           Text(
                             'Sala de Estar',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color:
-                                  isDark
-                                      ? Colors.white.withValues(alpha: 0.7)
-                                      : theme.colorScheme.onSurface.withValues(
-                                        alpha: 0.7,
-                                      ),
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.7)
+                                  : theme.colorScheme.onSurface.withValues(
+                                      alpha: 0.7,
+                                    ),
                               fontSize: 14,
                             ),
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 12),
                       PlantTasksHelper.buildTaskBadge(
                         ref,
@@ -144,8 +135,8 @@ class PlantListTile extends ConsumerWidget {
             width: size,
             height: size,
             fit: BoxFit.cover,
-            errorBuilder:
-                (context, error, stackTrace) => _buildPlaceholder(size),
+            errorBuilder: (context, error, stackTrace) =>
+                _buildPlaceholder(size),
           ),
         );
       } catch (e) {
@@ -167,10 +158,9 @@ class PlantListTile extends ConsumerWidget {
           height: size,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color:
-                isDark
-                    ? const Color(0xFF2C2C2E)
-                    : theme.colorScheme.primary.withValues(alpha: 0.1),
+            color: isDark
+                ? const Color(0xFF2C2C2E)
+                : theme.colorScheme.primary.withValues(alpha: 0.1),
             border: isDark ? Border.all(color: const Color(0xFF3A3A3C)) : null,
           ),
           child: Icon(
@@ -182,5 +172,4 @@ class PlantListTile extends ConsumerWidget {
       },
     );
   }
-
 }

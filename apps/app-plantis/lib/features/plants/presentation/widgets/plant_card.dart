@@ -78,9 +78,8 @@ class _PlantCardState extends ConsumerState<PlantCard> {
                     widget.plant.displayName,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: isDark
-                          ? Colors.white
-                          : theme.colorScheme.onSurface,
+                      color:
+                          isDark ? Colors.white : theme.colorScheme.onSurface,
                       fontSize: 18,
                     ),
                     maxLines: 1,

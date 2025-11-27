@@ -20,15 +20,13 @@ class PlantTasksHelper {
       if (!tasksAsync.hasValue) return 0;
 
       final tasksState = tasksAsync.value!;
-      final plantTasks =
-          tasksState.allTasks
-              .whereType<task_entity.Task>()
-              .where((task) => task.plantId == plantId)
-              .toList();
-      final pendingTasks =
-          plantTasks
-              .where((task) => task.status == task_entity.TaskStatus.pending)
-              .length;
+      final plantTasks = tasksState.allTasks
+          .whereType<task_entity.Task>()
+          .where((task) => task.plantId == plantId)
+          .toList();
+      final pendingTasks = plantTasks
+          .where((task) => task.status == task_entity.TaskStatus.pending)
+          .length;
 
       return pendingTasks;
     } catch (e) {
@@ -44,16 +42,15 @@ class PlantTasksHelper {
       if (!tasksAsync.hasValue) return 0;
 
       final tasksState = tasksAsync.value!;
-      final overdueTasks =
-          tasksState.allTasks
-              .whereType<task_entity.Task>()
-              .where(
-                (task) =>
-                  task.plantId == plantId &&
-                  task.status == task_entity.TaskStatus.pending &&
-                  task.isOverdue,
-              )
-              .length;
+      final overdueTasks = tasksState.allTasks
+          .whereType<task_entity.Task>()
+          .where(
+            (task) =>
+                task.plantId == plantId &&
+                task.status == task_entity.TaskStatus.pending &&
+                task.isOverdue,
+          )
+          .length;
 
       return overdueTasks;
     } catch (e) {
@@ -81,10 +78,7 @@ class PlantTasksHelper {
     if (overdueCount > 0) {
       return TaskBadgeInfo(
         count: pendingCount,
-        text:
-            overdueCount == 1
-                ? '1 atrasada'
-                : '$overdueCount atrasadas',
+        text: overdueCount == 1 ? '1 atrasada' : '$overdueCount atrasadas',
         color: Colors.red,
         backgroundColor: Colors.red.withValues(alpha: 0.15),
         icon: Icons.error,
@@ -94,10 +88,9 @@ class PlantTasksHelper {
 
     return TaskBadgeInfo(
       count: pendingCount,
-      text:
-          pendingCount == 1
-              ? '1 tarefa pendente'
-              : '$pendingCount tarefas pendentes',
+      text: pendingCount == 1
+          ? '1 tarefa pendente'
+          : '$pendingCount tarefas pendentes',
       color: const Color(0xFFFF9500), // Laranja
       backgroundColor: const Color(0xFFFF9500).withValues(alpha: 0.15),
       icon: Icons.schedule,

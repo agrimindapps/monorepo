@@ -77,7 +77,6 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
 
   /// Busca despesas de um veículo
   Future<List<ExpenseData>> findByVehicleId(int vehicleId) async {
-    if (_db == null) return [];
     final query = _db.select(_db.expenses)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
@@ -90,7 +89,6 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
 
   /// Stream de despesas de um veículo
   Stream<List<ExpenseData>> watchByVehicleId(int vehicleId) {
-    if (_db == null) return Stream.empty();
     final query = _db.select(_db.expenses)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
@@ -107,7 +105,6 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
     int vehicleId,
     String category,
   ) async {
-    if (_db == null) return [];
     final query = _db.select(_db.expenses)
       ..where(
         (tbl) =>
@@ -123,7 +120,6 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
 
   /// Stream de despesas por categoria
   Stream<List<ExpenseData>> watchByCategory(int vehicleId, String category) {
-    if (_db == null) return Stream.empty();
     final query = _db.select(_db.expenses)
       ..where(
         (tbl) =>
@@ -144,7 +140,6 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    if (_db == null) return [];
     final startMs = startDate.millisecondsSinceEpoch;
     final endMs = endDate.millisecondsSinceEpoch;
 
@@ -168,7 +163,6 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
     DateTime? startDate,
     DateTime? endDate,
   }) async {
-    if (_db == null) return 0.0;
     var query = _db.selectOnly(_db.expenses)
       ..addColumns([_db.expenses.amount.sum()])
       ..where(
@@ -202,7 +196,6 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
     int vehicleId,
     String category,
   ) async {
-    if (_db == null) return 0.0;
     final query = _db.selectOnly(_db.expenses)
       ..addColumns([_db.expenses.amount.sum()])
       ..where(
@@ -217,7 +210,6 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
 
   /// Busca estatísticas de despesas por categoria
   Future<Map<String, double>> getExpensesByCategory(int vehicleId) async {
-    if (_db == null) return {};
     final query = _db.selectOnly(_db.expenses)
       ..addColumns([_db.expenses.category, _db.expenses.amount.sum()])
       ..where(
@@ -242,7 +234,6 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
 
   /// Conta total de despesas de um veículo
   Future<int> countByVehicleId(int vehicleId) async {
-    if (_db == null) return 0;
     final query = _db.selectOnly(_db.expenses)
       ..addColumns([_db.expenses.id.count()])
       ..where(
@@ -256,7 +247,6 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
 
   /// Busca categorias distintas de um veículo
   Future<List<String>> findDistinctCategories(int vehicleId) async {
-    if (_db == null) return [];
     final query = _db.selectOnly(_db.expenses, distinct: true)
       ..addColumns([_db.expenses.category])
       ..where(
@@ -275,7 +265,6 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
 
   /// Busca despesas mais recentes
   Future<List<ExpenseData>> findRecent(int vehicleId, {int limit = 10}) async {
-    if (_db == null) return [];
     final query = _db.select(_db.expenses)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
@@ -289,7 +278,6 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
 
   /// Busca despesas que precisam ser sincronizadas
   Future<List<ExpenseData>> findDirtyRecords() async {
-    if (_db == null) return [];
     final query = _db.select(_db.expenses)
       ..where((tbl) => tbl.isDirty.equals(true));
 
@@ -299,7 +287,6 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
 
   /// Marca registros como sincronizados
   Future<void> markAsSynced(List<int> expenseIds) async {
-    if (_db == null) return;
     await _db.executeTransaction(() async {
       for (final id in expenseIds) {
         await (_db.update(
@@ -316,7 +303,6 @@ class ExpenseRepository extends BaseDriftRepositoryImpl<ExpenseData, Expense> {
 
   /// Soft delete de uma despesa
   Future<bool> softDelete(int expenseId) async {
-    if (_db == null) return false;
     final rowsAffected =
         await (_db.update(
           _db.expenses,

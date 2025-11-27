@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -502,11 +504,8 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
               children: [
                 Radio<String>(
                   value: (plan as Map<String, dynamic>)['id'] as String,
-                  onChanged: (String? value) {
-                    if (value != null) {
-                      _selectPlan(value);
-                    }
-                  },
+                  groupValue: _selectedPlanId,
+                  onChanged: _selectPlan,
                 ),
 
                 const SizedBox(width: 8),

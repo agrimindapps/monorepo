@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:core/core.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dependency_providers.dart';
 

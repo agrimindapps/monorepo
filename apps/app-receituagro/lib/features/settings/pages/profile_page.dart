@@ -4,10 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/core_providers.dart';
 import '../../../core/providers/auth_providers.dart';
-import '../../../core/services/receita_agro_sync_service.dart';
 import '../../../core/widgets/modern_header_widget.dart';
 import '../../../core/widgets/responsive_content_wrapper.dart';
-import '../../analytics/analytics_service.dart';
 import '../../auth/presentation/pages/login_page.dart';
 import '../../subscription/presentation/providers/subscription_notifier.dart';
 import '../../subscription/presentation/widgets/subscription_progress_widget.dart';
@@ -338,7 +336,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     if (shouldClear == true && context.mounted) {
       final authState = ref.read(authProvider);
-      final userId = authState?.currentUser?.id ?? 'unknown';
+      final userId = authState.currentUser?.id ?? 'unknown';
 
       try {
         // Obter o serviço de analytics

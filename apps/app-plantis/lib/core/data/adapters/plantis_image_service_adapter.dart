@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
@@ -8,17 +7,8 @@ import '../../services/image_preloader_service.dart';
 
 /// Plantis Image Service Adapter
 ///
-/// Provides a seamless migration path from fragmented image services
-/// to the consolidated Core ImageService with enhanced features.
-///
-/// Phase 1: Enhanced Integration
-/// - Maintains backward compatibility with existing ImageService API
-/// - Adds preloading capabilities from ImagePreloaderService
-/// - Provides unified interface for image operations
-///
-/// This adapter consolidates functionality from:
-/// - Core ImageService: Selection + Upload + Basic operations
-/// - ImagePreloaderService: Queue-based preloading + Priority system
+/// Cross-platform adapter for image operations.
+/// Funciona em Web, Mobile e Desktop.
 class PlantisImageServiceAdapter {
   final ImageService _coreImageService;
   final ImagePreloaderService _preloaderService;
@@ -30,61 +20,49 @@ class PlantisImageServiceAdapter {
        _preloaderService = preloaderService ?? ImagePreloaderService.instance;
 
   /// Sanitiza nome de arquivo removendo espaços e caracteres especiais
-  /// Essencial para compatibilidade com Firebase Storage em web
   static String _sanitizeFileName(String fileName) {
-    // Remove espaços e substitui por underscore
     String sanitized = fileName.replaceAll(RegExp(r'\s+'), '_');
-
-    // Remove caracteres especiais mantendo apenas alphanumericos, pontos, hífens e underscores
     sanitized = sanitized.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '');
-
-    // Remove múltiplos underscores consecutivos
     sanitized = sanitized.replaceAll(RegExp(r'_+'), '_');
-
-    // Remove pontos no início
     while (sanitized.startsWith('.')) {
       sanitized = sanitized.substring(1);
     }
-
-    // Se ficou vazio, usa um padrão
     if (sanitized.isEmpty) {
       sanitized = 'image_${DateTime.now().millisecondsSinceEpoch}';
     }
-
     return sanitized;
   }
 
-  /// Pick single image from gallery (backward compatible)
-  Future<Either<Failure, File>> pickImageFromGallery() async {
+  /// Pick single image from gallery (Cross-platform)
+  Future<Either<Failure, PickedImage>> pickImageFromGallery() async {
     final result = await _coreImageService.pickImageFromGallery();
     return result.toEither();
   }
 
-  /// Pick single image from camera (backward compatible)
-  Future<Either<Failure, File>> pickImageFromCamera() async {
+  /// Pick single image from camera (Cross-platform)
+  Future<Either<Failure, PickedImage>> pickImageFromCamera() async {
     final result = await _coreImageService.pickImageFromCamera();
     return result.toEither();
   }
 
-  /// Pick multiple images (backward compatible)
-  Future<Either<Failure, List<File>>> pickMultipleImages({int? maxImages}) async {
+  /// Pick multiple images (Cross-platform)
+  Future<Either<Failure, List<PickedImage>>> pickMultipleImages({int? maxImages}) async {
     final result = await _coreImageService.pickMultipleImages(maxImages: maxImages);
     return result.toEither();
   }
 
-  /// Upload single image (backward compatible)
+  /// Upload single image (Cross-platform)
   Future<Either<Failure, ImageUploadResult>> uploadImage(
-    File imageFile, {
+    PickedImage image, {
     String? folder,
     String? fileName,
     String? uploadType,
     void Function(double progress)? onProgress,
   }) async {
-    // Sanitiza o nome do arquivo se fornecido
     final sanitizedFileName = fileName != null ? _sanitizeFileName(fileName) : null;
 
     final result = await _coreImageService.uploadImage(
-      imageFile,
+      image,
       folder: folder,
       fileName: sanitizedFileName,
       uploadType: uploadType,
@@ -93,15 +71,15 @@ class PlantisImageServiceAdapter {
     return result.toEither();
   }
 
-  /// Upload multiple images (backward compatible)
+  /// Upload multiple images (Cross-platform)
   Future<Either<Failure, MultipleImageUploadResult>> uploadMultipleImages(
-    List<File> imageFiles, {
+    List<PickedImage> images, {
     String? folder,
     String? uploadType,
     void Function(double progress)? onProgress,
   }) async {
     final result = await _coreImageService.uploadMultipleImages(
-      imageFiles,
+      images,
       folder: folder,
       uploadType: uploadType,
       onProgress: onProgress != null
@@ -111,13 +89,13 @@ class PlantisImageServiceAdapter {
     return result.toEither();
   }
 
-  /// Delete image (backward compatible)
+  /// Delete image
   Future<Either<Failure, void>> deleteImage(String downloadUrl) async {
     final result = await _coreImageService.deleteImage(downloadUrl);
     return result.toEither();
   }
 
-  /// Delete multiple images (backward compatible)
+  /// Delete multiple images
   Future<Either<Failure, List<AppError>>> deleteMultipleImages(
     List<String> downloadUrls,
   ) async {
@@ -125,15 +103,15 @@ class PlantisImageServiceAdapter {
     return result.toEither();
   }
 
-  /// Compress image (backward compatible)
-  Future<Either<Failure, File>> compressImage(
-    File imageFile, {
+  /// Compress image (Cross-platform)
+  Future<Either<Failure, PickedImage>> compressImage(
+    PickedImage image, {
     int? maxWidth,
     int? maxHeight,
     int? quality,
   }) async {
     final result = await _coreImageService.compressImage(
-      imageFile,
+      image,
       maxWidth: maxWidth,
       maxHeight: maxHeight,
       quality: quality,
@@ -170,12 +148,12 @@ class PlantisImageServiceAdapter {
     return _preloaderService.isPreloaded(imageUrl);
   }
 
-  /// Get preloader statistics (ImagePreloaderService compatibility)
+  /// Get preloader statistics
   Map<String, dynamic> getStats() {
     return _preloaderService.getStats();
   }
 
-  /// Pick and upload image in one operation (new convenience method)
+  /// Pick and upload image in one operation
   Future<Either<Failure, ImageUploadResult>> pickAndUploadFromGallery({
     String? folder,
     String? uploadType,
@@ -185,8 +163,8 @@ class PlantisImageServiceAdapter {
 
     return pickResult.fold(
       (failure) => Left(failure),
-      (imageFile) => uploadImage(
-        imageFile,
+      (image) => uploadImage(
+        image,
         folder: folder,
         uploadType: uploadType,
         onProgress: onProgress,
@@ -194,7 +172,7 @@ class PlantisImageServiceAdapter {
     );
   }
 
-  /// Pick and upload image from camera in one operation (new convenience method)
+  /// Pick and upload image from camera in one operation
   Future<Either<Failure, ImageUploadResult>> pickAndUploadFromCamera({
     String? folder,
     String? uploadType,
@@ -204,8 +182,8 @@ class PlantisImageServiceAdapter {
 
     return pickResult.fold(
       (failure) => Left(failure),
-      (imageFile) => uploadImage(
-        imageFile,
+      (image) => uploadImage(
+        image,
         folder: folder,
         uploadType: uploadType,
         onProgress: onProgress,
@@ -213,7 +191,7 @@ class PlantisImageServiceAdapter {
     );
   }
 
-  /// Pick and upload multiple images in one operation (new convenience method)
+  /// Pick and upload multiple images in one operation
   Future<Either<Failure, MultipleImageUploadResult>> pickAndUploadMultiple({
     int? maxImages,
     String? folder,
@@ -224,8 +202,8 @@ class PlantisImageServiceAdapter {
 
     return pickResult.fold(
       (failure) => Left(failure),
-      (imageFiles) => uploadMultipleImages(
-        imageFiles,
+      (images) => uploadMultipleImages(
+        images,
         folder: folder,
         uploadType: uploadType,
         onProgress: onProgress,
@@ -233,15 +211,15 @@ class PlantisImageServiceAdapter {
     );
   }
 
-  /// Upload image and preload it (new convenience method)
+  /// Upload image and preload it
   Future<Either<Failure, ImageUploadResult>> uploadAndPreload(
-    File imageFile, {
+    PickedImage image, {
     String? folder,
     String? uploadType,
     void Function(double progress)? onProgress,
   }) async {
     final uploadResult = await uploadImage(
-      imageFile,
+      image,
       folder: folder,
       uploadType: uploadType,
       onProgress: onProgress,

@@ -35,20 +35,8 @@ UserHistorySyncEntity _userHistoryFromFirebaseMap(Map<String, dynamic> map) {
   return UserHistorySyncEntity.fromFirebaseMap(map);
 }
 
-Map<String, dynamic> _userHistoryToFirebaseMap(BaseSyncEntity entity) {
-  return (entity as UserHistorySyncEntity).toMap();
-}
-
 UserEntity _userEntityFromFirebaseMap(Map<String, dynamic> map) {
   return UserEntityReceitaAgroExtension.fromReceitaAgroFirebaseMap(map);
-}
-
-Map<String, dynamic> _userEntityToFirebaseMap(BaseSyncEntity entity) {
-  return (entity as UserEntity).toReceitaAgroFirebaseMap();
-}
-
-Map<String, dynamic> _subscriptionToFirebaseMap(BaseSyncEntity entity) {
-  return (entity as SubscriptionEntity).toFirebaseMap();
 }
 
 /// Configuração de sincronização específica do ReceitaAgro

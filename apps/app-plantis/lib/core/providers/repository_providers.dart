@@ -19,7 +19,6 @@ import '../../features/settings/data/repositories/settings_repository.dart';
 import '../../features/settings/domain/repositories/i_settings_repository.dart';
 import '../../database/repositories/sync_queue_drift_repository.dart';
 import '../../core/sync/sync_queue_drift_service.dart';
-import '../../core/sync/sync_queue.dart' as app_sync_queue;
 import '../../features/settings/domain/usecases/sync_settings_usecase.dart';
 import '../../features/plants/data/datasources/local/plant_tasks_local_datasource.dart';
 import '../../features/plants/data/datasources/local/plants_local_datasource.dart';
@@ -27,13 +26,12 @@ import '../../features/plants/data/datasources/local/spaces_local_datasource.dar
 import '../../features/plants/data/datasources/remote/plant_tasks_remote_datasource.dart';
 import '../../features/plants/data/datasources/remote/plants_remote_datasource.dart';
 import '../../features/plants/data/datasources/remote/spaces_remote_datasource.dart';
-import '../../features/plants/data/repositories/plant_comments_repository_impl.dart';
+import 'comments_providers.dart';
 import '../../features/plants/data/repositories/plant_tasks_repository_impl.dart';
 import '../../features/plants/data/repositories/plants_repository_impl.dart';
 import '../../features/plants/data/repositories/spaces_repository_impl.dart';
 import '../../features/plants/data/services/plant_sync_service_impl.dart';
 import '../../features/plants/data/services/plants_connectivity_service_impl.dart';
-import '../../features/plants/domain/repositories/plant_comments_repository.dart';
 import '../../features/plants/domain/repositories/plant_tasks_repository.dart';
 import '../../features/plants/domain/repositories/plants_repository.dart';
 import '../../features/plants/domain/repositories/spaces_repository.dart';
@@ -185,11 +183,7 @@ PlantSyncService plantSyncService(Ref ref) {
 
 /// === REPOSITORIES ===
 
-@riverpod
-PlantCommentsRepository plantCommentsRepository(
-    Ref ref) {
-  return PlantCommentsRepositoryImpl();
-}
+// PlantCommentsRepository moved to comments_providers.dart
 
 @riverpod
 PlantTasksRepository plantTasksRepository(Ref ref) {

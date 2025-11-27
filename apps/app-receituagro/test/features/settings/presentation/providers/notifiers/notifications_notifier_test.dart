@@ -3,7 +3,6 @@ import 'package:app_receituagro/core/services/receituagro_notification_service.d
 import 'package:app_receituagro/features/settings/domain/entities/user_settings_entity.dart';
 import 'package:app_receituagro/features/settings/domain/usecases/get_user_settings_usecase.dart';
 import 'package:app_receituagro/features/settings/domain/usecases/update_user_settings_usecase.dart';
-import 'package:app_receituagro/features/settings/presentation/providers/notifiers/notifications_notifier.dart';
 import 'package:app_receituagro/features/settings/presentation/providers/notification_notifier.dart';
 import 'package:core/core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,13 +31,11 @@ void main() {
   late MockGetUserSettingsUseCase mockGetUserSettingsUseCase;
   late MockUpdateUserSettingsUseCase mockUpdateUserSettingsUseCase;
   late MockReceitaAgroNotificationService mockNotificationService;
-  late MockPromotionalNotificationManager mockPromotionalManager;
 
   setUp(() {
     mockGetUserSettingsUseCase = MockGetUserSettingsUseCase();
     mockUpdateUserSettingsUseCase = MockUpdateUserSettingsUseCase();
     mockNotificationService = MockReceitaAgroNotificationService();
-    mockPromotionalManager = MockPromotionalNotificationManager();
 
     registerFallbackValue(
       UserSettingsEntity.createDefault('user-123'),
@@ -137,12 +134,12 @@ void main() {
       expect(expectedSettings.notificationsEnabled, false);
     });
 
-    test('should return false when settings are null', () async {
+    test('should handle null settings scenario', () async {
       // Arrange
       UserSettingsEntity? nullSettings;
 
-      // Act & Assert
-      expect(nullSettings == null, true);
+      // Act & Assert - verifying nullable type behavior
+      expect(nullSettings, isNull);
     });
 
     test('should handle update error gracefully', () async {
@@ -221,12 +218,12 @@ void main() {
       expect(expectedSettings.soundEnabled, false);
     });
 
-    test('should return false when settings are null', () async {
+    test('should handle null settings scenario for sound', () async {
       // Arrange
       UserSettingsEntity? nullSettings;
 
-      // Act & Assert
-      expect(nullSettings == null, true);
+      // Act & Assert - verifying nullable type behavior
+      expect(nullSettings, isNull);
     });
 
     test('should handle sound update error', () async {

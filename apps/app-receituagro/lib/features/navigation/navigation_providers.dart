@@ -1,6 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../core/navigation/agricultural_navigation_extension.dart';
 import '../../core/providers/core_providers.dart';
 import '../../core/services/receituagro_navigation_service.dart';
 import 'domain/navigation_page_service.dart';

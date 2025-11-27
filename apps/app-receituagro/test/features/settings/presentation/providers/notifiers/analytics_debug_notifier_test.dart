@@ -30,31 +30,31 @@ void main() {
     mockPremiumService = MockIPremiumService();
 
     // Mock successful responses
-    when(() => mockAnalyticsRepository.logEvent(any(), parameters: any(named: 'parameters')))
-        .thenAnswer((_) async => const Right(null));
+    when(() => mockAnalyticsRepository.logEvent(any<String>(), parameters: any<Map<String, dynamic>?>(named: 'parameters')))
+        .thenAnswer((_) async => const Right<Failure, void>(null));
 
-    when(() => mockCrashlyticsRepository.log(any()))
-        .thenAnswer((_) async => const Right(null));
+    when(() => mockCrashlyticsRepository.log(any<String>()))
+        .thenAnswer((_) async => const Right<Failure, void>(null));
 
-    when(() => mockCrashlyticsRepository.setCustomKey(key: any(named: 'key'), value: any(named: 'value')))
-        .thenAnswer((_) async => const Right(null));
+    when(() => mockCrashlyticsRepository.setCustomKey(key: any<String>(named: 'key'), value: any<dynamic>(named: 'value')))
+        .thenAnswer((_) async => const Right<Failure, void>(null));
 
     when(() => mockCrashlyticsRepository.recordError(
-          exception: any(named: 'exception'),
-          stackTrace: any(named: 'stackTrace'),
-          reason: any(named: 'reason'),
-          fatal: any(named: 'fatal'),
+          exception: any<Object>(named: 'exception'),
+          stackTrace: any<StackTrace>(named: 'stackTrace'),
+          reason: any<String?>(named: 'reason'),
+          fatal: any<bool>(named: 'fatal'),
         ))
-        .thenAnswer((_) async => const Right(null));
+        .thenAnswer((_) async => const Right<Failure, void>(null));
 
     when(() => mockAppRatingRepository.showRatingDialog())
         .thenAnswer((_) async => true);
 
     when(() => mockPremiumService.generateTestSubscription())
-        .thenAnswer((_) async => const Right(null));
+        .thenAnswer((_) async => const Right<Failure, void>(null));
 
     when(() => mockPremiumService.removeTestSubscription())
-        .thenAnswer((_) async => const Right(null));
+        .thenAnswer((_) async => const Right<Failure, void>(null));
   });
 
   // ===== GROUP 1: ANALYTICS TESTING =====
@@ -188,7 +188,7 @@ void main() {
       // Assert
       verify(() => mockCrashlyticsRepository.setCustomKey(
             key: 'test_timestamp',
-            value: any(named: 'value'),
+            value: any<dynamic>(named: 'value'),
           )).called(1);
     });
 
@@ -199,10 +199,10 @@ void main() {
 
       when(() => mockCrashlyticsRepository.recordError(
             exception: testException,
-            stackTrace: any(named: 'stackTrace'),
+            stackTrace: any<StackTrace>(named: 'stackTrace'),
             reason: 'Testing Crashlytics integration',
             fatal: false,
-          )).thenAnswer((_) async => const Right(null));
+          )).thenAnswer((_) async => const Right<Failure, void>(null));
 
       // Act
       await mockCrashlyticsRepository.recordError(
@@ -214,8 +214,8 @@ void main() {
 
       // Assert
       verify(() => mockCrashlyticsRepository.recordError(
-            exception: any(named: 'exception'),
-            stackTrace: any(named: 'stackTrace'),
+            exception: any<Object>(named: 'exception'),
+            stackTrace: any<StackTrace>(named: 'stackTrace'),
             reason: 'Testing Crashlytics integration',
             fatal: false,
           )).called(1);
@@ -243,7 +243,7 @@ void main() {
       await mockCrashlyticsRepository.log('Log 3');
 
       // Assert
-      verify(() => mockCrashlyticsRepository.log(any())).called(3);
+      verify(() => mockCrashlyticsRepository.log(any<String>())).called(3);
     });
 
     test('should handle non-fatal errors', () async {
@@ -251,11 +251,11 @@ void main() {
       final exception = Exception('Non-fatal error');
 
       when(() => mockCrashlyticsRepository.recordError(
-            exception: any(named: 'exception'),
-            stackTrace: any(named: 'stackTrace'),
-            reason: any(named: 'reason'),
+            exception: any<Object>(named: 'exception'),
+            stackTrace: any<StackTrace>(named: 'stackTrace'),
+            reason: any<String?>(named: 'reason'),
             fatal: false,
-          )).thenAnswer((_) async => const Right(null));
+          )).thenAnswer((_) async => const Right<Failure, void>(null));
 
       // Act
       await mockCrashlyticsRepository.recordError(
@@ -267,9 +267,9 @@ void main() {
 
       // Assert
       verify(() => mockCrashlyticsRepository.recordError(
-            exception: any(named: 'exception'),
-            stackTrace: any(named: 'stackTrace'),
-            reason: any(named: 'reason'),
+            exception: any<Object>(named: 'exception'),
+            stackTrace: any<StackTrace>(named: 'stackTrace'),
+            reason: any<String?>(named: 'reason'),
             fatal: false,
           )).called(1);
     });
@@ -279,11 +279,11 @@ void main() {
       final exception = Exception('Fatal error');
 
       when(() => mockCrashlyticsRepository.recordError(
-            exception: any(named: 'exception'),
-            stackTrace: any(named: 'stackTrace'),
-            reason: any(named: 'reason'),
+            exception: any<Object>(named: 'exception'),
+            stackTrace: any<StackTrace>(named: 'stackTrace'),
+            reason: any<String?>(named: 'reason'),
             fatal: true,
-          )).thenAnswer((_) async => const Right(null));
+          )).thenAnswer((_) async => const Right<Failure, void>(null));
 
       // Act
       await mockCrashlyticsRepository.recordError(
@@ -295,9 +295,9 @@ void main() {
 
       // Assert
       verify(() => mockCrashlyticsRepository.recordError(
-            exception: any(named: 'exception'),
-            stackTrace: any(named: 'stackTrace'),
-            reason: any(named: 'reason'),
+            exception: any<Object>(named: 'exception'),
+            stackTrace: any<StackTrace>(named: 'stackTrace'),
+            reason: any<String?>(named: 'reason'),
             fatal: true,
           )).called(1);
     });
@@ -372,7 +372,7 @@ void main() {
     test('should generate test license successfully', () async {
       // Arrange
       when(() => mockPremiumService.generateTestSubscription())
-          .thenAnswer((_) async => const Right(null));
+          .thenAnswer((_) async => const Right<Failure, void>(null));
 
       // Act
       await mockPremiumService.generateTestSubscription();
@@ -384,7 +384,7 @@ void main() {
     test('should remove test license successfully', () async {
       // Arrange
       when(() => mockPremiumService.removeTestSubscription())
-          .thenAnswer((_) async => const Right(null));
+          .thenAnswer((_) async => const Right<Failure, void>(null));
 
       // Act
       await mockPremiumService.removeTestSubscription();
@@ -418,9 +418,9 @@ void main() {
     test('should generate and remove test license in sequence', () async {
       // Arrange
       when(() => mockPremiumService.generateTestSubscription())
-          .thenAnswer((_) async => const Right(null));
+          .thenAnswer((_) async => const Right<Failure, void>(null));
       when(() => mockPremiumService.removeTestSubscription())
-          .thenAnswer((_) async => const Right(null));
+          .thenAnswer((_) async => const Right<Failure, void>(null));
 
       // Act
       await mockPremiumService.generateTestSubscription();
@@ -458,12 +458,12 @@ void main() {
 
     test('should handle multiple debug operations concurrently', () async {
       // Arrange
-      when(() => mockAnalyticsRepository.logEvent(any(), parameters: any(named: 'parameters')))
-          .thenAnswer((_) async => const Right(null));
-      when(() => mockCrashlyticsRepository.log(any()))
-          .thenAnswer((_) async => const Right(null));
+      when(() => mockAnalyticsRepository.logEvent(any<String>(), parameters: any<Map<String, dynamic>?>(named: 'parameters')))
+          .thenAnswer((_) async => const Right<Failure, void>(null));
+      when(() => mockCrashlyticsRepository.log(any<String>()))
+          .thenAnswer((_) async => const Right<Failure, void>(null));
       when(() => mockPremiumService.generateTestSubscription())
-          .thenAnswer((_) async => const Right(null));
+          .thenAnswer((_) async => const Right<Failure, void>(null));
 
       // Act - Execute concurrent operations
       final future1 =

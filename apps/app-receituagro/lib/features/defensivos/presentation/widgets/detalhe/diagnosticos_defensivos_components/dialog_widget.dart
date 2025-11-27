@@ -6,7 +6,6 @@ import '../../../../../../core/extensions/diagnostico_drift_extension.dart';
 import '../../../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../../../core/widgets/praga_image_widget.dart';
 import '../../../../../../database/receituagro_database.dart';
-import '../../../../../../database/repositories/pragas_repository.dart';
 
 /// Widget responsável pelo modal de detalhes do diagnóstico
 ///

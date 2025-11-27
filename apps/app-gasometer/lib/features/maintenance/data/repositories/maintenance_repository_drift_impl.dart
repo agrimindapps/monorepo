@@ -1,16 +1,28 @@
+import 'dart:developer' as developer;
+
 import 'package:core/core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import '../../../../database/repositories/maintenance_repository.dart' as db;
 import '../../domain/entities/maintenance_entity.dart';
 import '../../domain/repositories/maintenance_repository.dart';
 import '../datasources/maintenance_local_datasource.dart';
+import '../sync/maintenance_drift_sync_adapter.dart';
 
 /// Implementação do repositório de manutenções usando Drift
+///
+/// Padrão "Sync-on-Write": Sincroniza imediatamente com Firebase quando online,
+/// seguindo o padrão do app-plantis. Background sync permanece como fallback.
 
 class MaintenanceRepositoryDriftImpl implements MaintenanceRepository {
-  const MaintenanceRepositoryDriftImpl(this._dataSource);
+  const MaintenanceRepositoryDriftImpl(
+    this._dataSource,
+    this._connectivityService,
+    this._syncAdapter,
+  );
 
   final MaintenanceLocalDataSource _dataSource;
+  final ConnectivityService _connectivityService;
+  final MaintenanceDriftSyncAdapter _syncAdapter;
 
   String get _userId {
     final user = FirebaseAuth.instance.currentUser;
@@ -104,6 +116,12 @@ class MaintenanceRepositoryDriftImpl implements MaintenanceRepository {
     MaintenanceEntity maintenance,
   ) async {
     try {
+      developer.log(
+        '🔵 MaintenanceRepository.addMaintenanceRecord() - Starting',
+        name: 'MaintenanceRepository',
+      );
+
+      // 1. Salvar localmente primeiro (sempre)
       final id = await _dataSource.create(
         userId: _userId,
         vehicleId: int.parse(maintenance.vehicleId),
@@ -127,8 +145,65 @@ class MaintenanceRepositoryDriftImpl implements MaintenanceRepository {
         );
       }
 
-      return Right(_toEntity(createdData));
+      var entity = _toEntity(createdData);
+      developer.log(
+        '✅ MaintenanceRepository.addMaintenanceRecord() - Saved locally with id=$id',
+        name: 'MaintenanceRepository',
+      );
+
+      // 2. Sync-on-Write: Se online, sincronizar imediatamente com Firebase
+      final isOnlineResult = await _connectivityService.isOnline();
+      final isOnline = isOnlineResult.fold((_) => false, (online) => online);
+
+      if (isOnline) {
+        developer.log(
+          '🌐 MaintenanceRepository.addMaintenanceRecord() - Online, syncing to Firebase...',
+          name: 'MaintenanceRepository',
+        );
+        try {
+          // Push para Firebase usando o adapter
+          final pushResult = await _syncAdapter.pushDirtyRecords(_userId);
+
+          pushResult.fold(
+            (failure) {
+              developer.log(
+                '⚠️ MaintenanceRepository.addMaintenanceRecord() - Sync failed: ${failure.message}. Will retry via background sync.',
+                name: 'MaintenanceRepository',
+              );
+            },
+            (result) {
+              developer.log(
+                '✅ MaintenanceRepository.addMaintenanceRecord() - Synced to Firebase (${result.recordsPushed} pushed, ${result.recordsFailed} failed)',
+                name: 'MaintenanceRepository',
+              );
+            },
+          );
+
+          // Reload entity com estado atualizado (isDirty=false, firebaseId set)
+          final refreshed = await _dataSource.findById(id);
+          if (refreshed != null) {
+            entity = _toEntity(refreshed);
+          }
+        } catch (e) {
+          developer.log(
+            '⚠️ MaintenanceRepository.addMaintenanceRecord() - Sync error: $e. Will retry via background sync.',
+            name: 'MaintenanceRepository',
+          );
+          // Falhou remoto, mas local já está salvo - retorna local
+        }
+      } else {
+        developer.log(
+          '📴 MaintenanceRepository.addMaintenanceRecord() - Offline, will sync later via background sync',
+          name: 'MaintenanceRepository',
+        );
+      }
+
+      return Right(entity);
     } catch (e) {
+      developer.log(
+        '❌ MaintenanceRepository.addMaintenanceRecord() - Error: $e',
+        name: 'MaintenanceRepository',
+      );
       return Left(CacheFailure(e.toString()));
     }
   }
@@ -138,6 +213,12 @@ class MaintenanceRepositoryDriftImpl implements MaintenanceRepository {
     MaintenanceEntity maintenance,
   ) async {
     try {
+      developer.log(
+        '🔵 MaintenanceRepository.updateMaintenanceRecord() - Starting for id=${maintenance.id}',
+        name: 'MaintenanceRepository',
+      );
+
+      // 1. Atualizar localmente primeiro
       final idInt = int.parse(maintenance.id);
       final success = await _dataSource.update(
         id: idInt,
@@ -167,8 +248,58 @@ class MaintenanceRepositoryDriftImpl implements MaintenanceRepository {
         );
       }
 
-      return Right(_toEntity(updatedData));
+      var entity = _toEntity(updatedData);
+      developer.log(
+        '✅ MaintenanceRepository.updateMaintenanceRecord() - Updated locally',
+        name: 'MaintenanceRepository',
+      );
+
+      // 2. Sync-on-Write: Se online, sincronizar imediatamente
+      final isOnlineResult = await _connectivityService.isOnline();
+      final isOnline = isOnlineResult.fold((_) => false, (online) => online);
+
+      if (isOnline) {
+        developer.log(
+          '🌐 MaintenanceRepository.updateMaintenanceRecord() - Online, syncing to Firebase...',
+          name: 'MaintenanceRepository',
+        );
+        try {
+          final pushResult = await _syncAdapter.pushDirtyRecords(_userId);
+
+          pushResult.fold(
+            (failure) {
+              developer.log(
+                '⚠️ MaintenanceRepository.updateMaintenanceRecord() - Sync failed: ${failure.message}',
+                name: 'MaintenanceRepository',
+              );
+            },
+            (result) {
+              developer.log(
+                '✅ MaintenanceRepository.updateMaintenanceRecord() - Synced to Firebase',
+                name: 'MaintenanceRepository',
+              );
+            },
+          );
+
+          // Reload entity com estado atualizado
+          final refreshed = await _dataSource.findById(idInt);
+          if (refreshed != null) {
+            entity = _toEntity(refreshed);
+          }
+        } catch (e) {
+          developer.log(
+            '⚠️ MaintenanceRepository.updateMaintenanceRecord() - Sync error: $e',
+            name: 'MaintenanceRepository',
+          );
+        }
+      }
+
+      return Right(entity);
     } catch (e) {
+      developer.log(
+        '❌ MaintenanceRepository.updateMaintenanceRecord() - Error: $e',
+        name: 'MaintenanceRepository',
+      );
       return Left(CacheFailure(e.toString()));
     }
   }
@@ -176,10 +307,60 @@ class MaintenanceRepositoryDriftImpl implements MaintenanceRepository {
   @override
   Future<Either<Failure, Unit>> deleteMaintenanceRecord(String id) async {
     try {
+      developer.log(
+        '🔵 MaintenanceRepository.deleteMaintenanceRecord() - Starting for id=$id',
+        name: 'MaintenanceRepository',
+      );
+
+      // 1. Soft delete localmente primeiro (marca isDeleted=true, isDirty=true)
       final idInt = int.parse(id);
       await _dataSource.delete(idInt);
+
+      developer.log(
+        '✅ MaintenanceRepository.deleteMaintenanceRecord() - Marked as deleted locally',
+        name: 'MaintenanceRepository',
+      );
+
+      // 2. Sync-on-Write: Se online, sincronizar imediatamente
+      final isOnlineResult = await _connectivityService.isOnline();
+      final isOnline = isOnlineResult.fold((_) => false, (online) => online);
+
+      if (isOnline) {
+        developer.log(
+          '🌐 MaintenanceRepository.deleteMaintenanceRecord() - Online, syncing deletion to Firebase...',
+          name: 'MaintenanceRepository',
+        );
+        try {
+          final pushResult = await _syncAdapter.pushDirtyRecords(_userId);
+
+          pushResult.fold(
+            (failure) {
+              developer.log(
+                '⚠️ MaintenanceRepository.deleteMaintenanceRecord() - Sync failed: ${failure.message}',
+                name: 'MaintenanceRepository',
+              );
+            },
+            (result) {
+              developer.log(
+                '✅ MaintenanceRepository.deleteMaintenanceRecord() - Synced deletion to Firebase',
+                name: 'MaintenanceRepository',
+              );
+            },
+          );
+        } catch (e) {
+          developer.log(
+            '⚠️ MaintenanceRepository.deleteMaintenanceRecord() - Sync error: $e',
+            name: 'MaintenanceRepository',
+          );
+        }
+      }
+
       return const Right(unit);
     } catch (e) {
+      developer.log(
+        '❌ MaintenanceRepository.deleteMaintenanceRecord() - Error: $e',
+        name: 'MaintenanceRepository',
+      );
       return Left(CacheFailure(e.toString()));
     }
   }

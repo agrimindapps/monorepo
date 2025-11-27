@@ -2,7 +2,7 @@ import 'package:app_plantis/features/tasks/domain/entities/task.dart' as task_en
 import 'package:app_plantis/features/tasks/domain/services/task_filter_service.dart';
 import 'package:app_plantis/features/tasks/presentation/notifiers/tasks_schedule_notifier.dart';
 import 'package:app_plantis/features/tasks/presentation/providers/tasks_state.dart';
-import 'package:core/core.dart' hide test;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';

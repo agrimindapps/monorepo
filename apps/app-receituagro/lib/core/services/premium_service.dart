@@ -134,10 +134,10 @@ class ReceitaAgroPremiumService {
 
   /// Factory for singleton pattern (optional, for backward compatibility)
   /// DEPRECATED: Use constructor injection via DI container instead
-  @Deprecated('Use constructor injection via GetIt or Provider instead')
+  @Deprecated('Use constructor injection via Riverpod Provider instead')
   static ReceitaAgroPremiumService? _instance;
 
-  @Deprecated('Use constructor injection via GetIt or Provider instead')
+  @Deprecated('Use constructor injection via Riverpod Provider instead')
   static ReceitaAgroPremiumService get instance {
     if (_instance == null) {
       throw StateError(
@@ -150,7 +150,7 @@ class ReceitaAgroPremiumService {
 
   /// Set singleton instance (for backward compatibility only)
   /// DEPRECATED: Use constructor injection instead
-  @Deprecated('Use constructor injection via GetIt or Provider instead')
+  @Deprecated('Use constructor injection via Riverpod Provider instead')
   static void setInstance(ReceitaAgroPremiumService service) {
     _instance = service;
   }

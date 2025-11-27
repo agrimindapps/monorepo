@@ -3,7 +3,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/services/failure_message_service.dart' as core_failure;
 import '../../../../core/services/i_recommendation_service.dart';
-import '../../../../core/providers/core_providers.dart';
 import '../../../../core/providers/recommendation_provider.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/services/filtering/i_diagnosticos_filter_service.dart';

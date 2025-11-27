@@ -13,8 +13,6 @@ import '../../domain/usecases/register_usecase.dart';
 import 'auth_di_providers.dart';
 
 /// Provider Riverpod para AuthProvider
-///
-/// Integra GetIt com Riverpod para gerenciamento de estado
 final authProviderProvider = ChangeNotifierProvider<AuthProvider>((ref) {
   final loginUseCase = ref.watch(loginUseCaseProvider);
   final registerUseCase = ref.watch(registerUseCaseProvider);

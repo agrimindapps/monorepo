@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/providers/auth_notifier.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/providers/auth_state.dart';
 import '../../../auth/presentation/pages/login_page.dart';
@@ -355,32 +354,5 @@ class AuthSection extends ConsumerWidget {
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-  }
-
-  Widget _buildErrorSection(BuildContext context, Object error) {
-    return Container(
-      decoration: SettingsDesignTokens.getCardDecoration(context),
-      margin: SettingsDesignTokens.sectionMargin,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-        child: Column(
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(
-              'Erro ao carregar dados do usuário',
-              style: Theme.of(context).textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              error.toString(),
-              style: Theme.of(context).textTheme.bodySmall,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

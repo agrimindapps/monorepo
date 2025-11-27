@@ -183,7 +183,7 @@ Future<void> _initializeFirebaseServices() async {
       SecureLogger.info('Firebase services initialized successfully');
     }
     */
-  } catch (e, stackTrace) {
+  } catch (e, _) {
     SecureLogger.error('Error initializing Firebase services', error: e);
     try {
       /*

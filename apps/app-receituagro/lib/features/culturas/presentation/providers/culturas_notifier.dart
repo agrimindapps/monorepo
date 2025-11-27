@@ -2,7 +2,6 @@ import 'package:core/core.dart' hide Column;
 
 import '../../domain/entities/cultura_entity.dart';
 import '../../domain/usecases/get_culturas_params.dart';
-import '../../domain/usecases/get_culturas_usecase.dart';
 import 'culturas_providers.dart';
 import 'culturas_state.dart';
 

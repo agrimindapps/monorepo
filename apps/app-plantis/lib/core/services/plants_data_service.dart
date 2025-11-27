@@ -5,7 +5,6 @@ import '../../features/plants/domain/usecases/add_plant_usecase.dart';
 import '../../features/plants/domain/usecases/delete_plant_usecase.dart';
 import '../../features/plants/domain/usecases/get_plants_usecase.dart';
 import '../../features/plants/domain/usecases/update_plant_usecase.dart';
-import '../data/adapters/auth_state_provider_adapter.dart';
 import '../interfaces/i_auth_state_provider.dart';
 
 /// Serviço responsável APENAS pelas operações de dados das plantas

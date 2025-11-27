@@ -3,9 +3,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'defensivos_providers.dart';
 import '../../domain/entities/defensivo_entity.dart';
-import '../../domain/usecases/get_defensivos_agrupados_usecase.dart';
-import '../../domain/usecases/get_defensivos_com_filtros_usecase.dart';
-import '../../domain/usecases/get_defensivos_completos_usecase.dart';
 
 part 'defensivos_unificado_notifier.g.dart';
 

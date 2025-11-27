@@ -6,7 +6,6 @@ import '../../../../core/services/access_history_service.dart';
 import '../../../../core/providers/core_providers.dart' as core_providers;
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
-import 'defensivos_providers.dart';
 
 part 'defensivos_history_notifier.g.dart';
 

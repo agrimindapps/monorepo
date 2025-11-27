@@ -1,22 +1,16 @@
-import 'dart:async';
-
 import 'package:core/core.dart' as core;
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
 import '../../../../core/services/storage/firebase_storage_service.dart' as local_storage;
 import '../../../../core/validation/input_sanitizer.dart';
 import '../../../../features/receipt/domain/services/receipt_image_service.dart';
 import '../../../vehicles/domain/usecases/get_vehicle_by_id.dart';
-import '../../core/constants/expense_constants.dart';
 import '../../domain/entities/expense_entity.dart';
-import '../../domain/services/expense_formatter_service.dart';
-import '../../domain/services/expense_validation_service.dart';
 import '../../domain/usecases/add_expense.dart';
 import '../../domain/usecases/update_expense.dart';
+import '../helpers/helpers.dart';
 import '../providers/expenses_providers.dart';
 import 'expense_form_state.dart';
 
@@ -24,267 +18,173 @@ part 'expense_form_notifier.g.dart';
 
 /// Notifier Riverpod para gerenciar o estado do formulário de despesas
 ///
-/// Features:
-/// - Gerenciamento de campos de texto com TextEditingControllers
-/// - Validação em tempo real com debounce
-/// - Upload e processamento de imagens de comprovantes
-/// - Sugestão automática de categoria baseada em descrição
-/// - Sanitização de inputs para segurança
-/// - Persistência offline com sincronização
+/// Orquestra helpers especializados:
+/// - [ExpenseFormControllerManager]: Gerenciamento de TextEditingControllers
+/// - [ExpenseFormValidatorHandler]: Validação com debounce
+/// - [ExpenseFormImageHandler]: Upload e processamento de imagens
+/// - [ExpenseDatePickerHelper]: Date/Time pickers
 @riverpod
 class ExpenseFormNotifier extends _$ExpenseFormNotifier {
-  late final TextEditingController descriptionController;
-  late final TextEditingController amountController;
-  late final TextEditingController odometerController;
-  late final TextEditingController locationController;
-  late final TextEditingController notesController;
-  late final ExpenseFormatterService _formatter;
-  late final ExpenseValidationService _validator;
-  late final ReceiptImageService _receiptImageService;
+  late final ExpenseFormControllerManager _controllerManager;
+  late final ExpenseFormValidatorHandler _validatorHandler;
+  late final ExpenseFormImageHandler _imageHandler;
+  late final ExpenseDatePickerHelper _datePickerHelper;
   late final GetVehicleById _getVehicleById;
-  late final ImagePicker _imagePicker;
   late final AddExpenseUseCase _addExpense;
   late final UpdateExpenseUseCase _updateExpense;
-  Timer? _amountDebounceTimer;
-  Timer? _odometerDebounceTimer;
-  Timer? _descriptionDebounceTimer;
+
+  TextEditingController get descriptionController =>
+      _controllerManager.descriptionController;
+  TextEditingController get amountController =>
+      _controllerManager.amountController;
+  TextEditingController get odometerController =>
+      _controllerManager.odometerController;
+  TextEditingController get locationController =>
+      _controllerManager.locationController;
+  TextEditingController get notesController =>
+      _controllerManager.notesController;
 
   @override
   ExpenseFormState build() {
-    descriptionController = TextEditingController();
-    amountController = TextEditingController();
-    odometerController = TextEditingController();
-    locationController = TextEditingController();
-    notesController = TextEditingController();
-    _formatter = ExpenseFormatterService();
-    _validator = const ExpenseValidationService();
+    _controllerManager = ExpenseFormControllerManager();
+    _controllerManager.initialize();
+    _validatorHandler = ExpenseFormValidatorHandler();
+    _datePickerHelper = const ExpenseDatePickerHelper();
     
-    // Inject dependencies
     final compressionService = core.ImageCompressionService();
     final storageService = local_storage.FirebaseStorageService();
     final connectivityService = ref.watch(connectivityServiceProvider);
     final imageSyncService = ref.watch(imageSyncServiceProvider);
     
-    _receiptImageService = ReceiptImageService(
+    final receiptImageService = ReceiptImageService(
       compressionService,
       storageService,
       connectivityService,
       imageSyncService,
     );
+    _imageHandler = ExpenseFormImageHandler(
+      receiptImageService: receiptImageService,
+    );
+    
     _getVehicleById = ref.watch(getVehicleByIdProvider);
     _addExpense = ref.watch(addExpenseProvider);
     _updateExpense = ref.watch(updateExpenseProvider);
     
-    _imagePicker = ImagePicker();
-    _initializeControllers();
-    ref.onDispose(() {
-      _amountDebounceTimer?.cancel();
-      _odometerDebounceTimer?.cancel();
-      _descriptionDebounceTimer?.cancel();
-      descriptionController.removeListener(_onDescriptionChanged);
-      amountController.removeListener(_onAmountChanged);
-      odometerController.removeListener(_onOdometerChanged);
-      locationController.removeListener(_onLocationChanged);
-      notesController.removeListener(_onNotesChanged);
-      descriptionController.dispose();
-      amountController.dispose();
-      odometerController.dispose();
-      locationController.dispose();
-      notesController.dispose();
-    });
+    _setupControllerListeners();
+    ref.onDispose(_dispose);
 
     return const ExpenseFormState();
   }
 
-  /// Adiciona listeners aos controllers
-  void _initializeControllers() {
-    descriptionController.addListener(_onDescriptionChanged);
-    amountController.addListener(_onAmountChanged);
-    odometerController.addListener(_onOdometerChanged);
-    locationController.addListener(_onLocationChanged);
-    notesController.addListener(_onNotesChanged);
+  void _setupControllerListeners() {
+    _controllerManager.addListeners(
+      onDescriptionChanged: _onDescriptionChanged,
+      onAmountChanged: _onAmountChanged,
+      onOdometerChanged: _onOdometerChanged,
+      onLocationChanged: _onLocationChanged,
+      onNotesChanged: _onNotesChanged,
+    );
   }
 
-  /// Inicializa formulário para nova despesa
-  Future<void> initialize({
-    required String vehicleId,
-    required String userId,
-  }) async {
+  void _dispose() {
+    _validatorHandler.dispose();
+    _controllerManager.dispose();
+  }
+
+  Future<void> initialize({required String vehicleId, required String userId}) async {
     if (vehicleId.isEmpty) {
       state = state.copyWith(errorMessage: () => 'Nenhum veículo selecionado');
       return;
     }
-
     state = state.copyWith(isLoading: true);
-
     try {
-      final vehicleResult = await _getVehicleById(
-        GetVehicleByIdParams(vehicleId: vehicleId),
-      );
-
+      final vehicleResult = await _getVehicleById(GetVehicleByIdParams(vehicleId: vehicleId));
       await vehicleResult.fold(
-        (failure) async {
-          state = state.copyWith(
-            isLoading: false,
-            errorMessage: () => failure.message,
-          );
-        },
+        (failure) async => state = state.copyWith(isLoading: false, errorMessage: () => failure.message),
         (vehicle) async {
           state = ExpenseFormState.initial(vehicleId: vehicleId, userId: userId)
-              .copyWith(
-                vehicle: vehicle,
-                odometer: vehicle.currentOdometer,
-                isLoading: false,
-              );
-
-          _updateTextControllers();
+              .copyWith(vehicle: vehicle, odometer: vehicle.currentOdometer, isLoading: false);
+          _controllerManager.updateFromState(state);
         },
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: () => 'Erro ao inicializar formulário: $e',
-      );
+      state = state.copyWith(isLoading: false, errorMessage: () => 'Erro ao inicializar formulário: $e');
     }
   }
 
-  /// Inicializa com despesa existente para edição
   Future<void> initializeWithExpense(ExpenseEntity expense) async {
     state = state.copyWith(isLoading: true);
-
     try {
-      final vehicleResult = await _getVehicleById(
-        GetVehicleByIdParams(vehicleId: expense.vehicleId),
-      );
-
+      final vehicleResult = await _getVehicleById(GetVehicleByIdParams(vehicleId: expense.vehicleId));
       await vehicleResult.fold(
-        (failure) async {
-          state = state.copyWith(
-            isLoading: false,
-            errorMessage: () => failure.message,
-          );
-        },
+        (failure) async => state = state.copyWith(isLoading: false, errorMessage: () => failure.message),
         (vehicle) async {
-          state = ExpenseFormState.fromExpense(
-            expense,
-          ).copyWith(vehicle: vehicle, isLoading: false);
-
-          _updateTextControllers();
+          state = ExpenseFormState.fromExpense(expense).copyWith(vehicle: vehicle, isLoading: false);
+          _controllerManager.updateFromState(state);
         },
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: () => 'Erro ao carregar despesa: $e',
-      );
+      state = state.copyWith(isLoading: false, errorMessage: () => 'Erro ao carregar despesa: $e');
     }
   }
 
-  /// Atualiza controllers com valores do estado
-  void _updateTextControllers() {
-    descriptionController.text = state.description;
-
-    amountController.text = state.amount > 0
-        ? _formatter.formatAmount(state.amount)
-        : '';
-
-    odometerController.text = state.odometer > 0
-        ? _formatter.formatOdometer(state.odometer)
-        : '';
-
-    locationController.text = state.location;
-    notesController.text = state.notes;
-  }
+  // ============================================================
+  // Controller Change Handlers
+  // ============================================================
 
   void _onDescriptionChanged() {
-    _descriptionDebounceTimer?.cancel();
-    _descriptionDebounceTimer = Timer(
-      const Duration(milliseconds: ExpenseConstants.descriptionDebounceMs),
-      () {
-        final sanitized = InputSanitizer.sanitizeDescription(
-          descriptionController.text,
-        );
-
-        state = state
-            .copyWith(description: sanitized, hasChanges: true)
-            .clearFieldError('description');
-        if (sanitized.isNotEmpty && state.expenseType == ExpenseType.other) {
-          final suggestedType = _validator.suggestCategoryFromDescription(
-            sanitized,
-          );
-          if (suggestedType != ExpenseType.other) {
-            updateExpenseType(suggestedType);
-          }
-        }
-      },
+    _validatorHandler.validateDescriptionWithDebounce(
+      value: descriptionController.text,
+      onSanitizedValue: (sanitized) => state = state
+          .copyWith(description: sanitized, hasChanges: true)
+          .clearFieldError('description'),
+      onSuggestedType: (type) { if (type != null) updateExpenseType(type); },
+      currentType: state.expenseType,
     );
   }
 
   void _onAmountChanged() {
-    _amountDebounceTimer?.cancel();
-    _amountDebounceTimer = Timer(
-      const Duration(milliseconds: ExpenseConstants.amountDebounceMs),
-      () {
-        final value = _formatter.parseFormattedAmount(amountController.text);
-
-        state = state
-            .copyWith(amount: value, hasChanges: true)
-            .clearFieldError('amount');
-      },
+    _validatorHandler.validateAmountWithDebounce(
+      value: amountController.text,
+      onParsedValue: (value) => state = state
+          .copyWith(amount: value, hasChanges: true)
+          .clearFieldError('amount'),
     );
   }
 
   void _onOdometerChanged() {
-    _odometerDebounceTimer?.cancel();
-    _odometerDebounceTimer = Timer(
-      const Duration(milliseconds: ExpenseConstants.odometerDebounceMs),
-      () {
-        final value = _formatter.parseFormattedOdometer(
-          odometerController.text,
-        );
-
-        state = state
-            .copyWith(odometer: value, hasChanges: true)
-            .clearFieldError('odometer');
-      },
+    _validatorHandler.validateOdometerWithDebounce(
+      value: odometerController.text,
+      onParsedValue: (value) => state = state
+          .copyWith(odometer: value, hasChanges: true)
+          .clearFieldError('odometer'),
     );
   }
 
   void _onLocationChanged() {
-    final sanitized = InputSanitizer.sanitize(locationController.text);
-
-    state = state
-        .copyWith(location: sanitized, hasChanges: true)
-        .clearFieldError('location');
+    final sanitized = _validatorHandler.sanitizeLocation(locationController.text);
+    state = state.copyWith(location: sanitized, hasChanges: true).clearFieldError('location');
   }
 
   void _onNotesChanged() {
-    final sanitized = InputSanitizer.sanitizeDescription(notesController.text);
-
-    state = state
-        .copyWith(notes: sanitized, hasChanges: true)
-        .clearFieldError('notes');
+    final sanitized = _validatorHandler.sanitizeNotes(notesController.text);
+    state = state.copyWith(notes: sanitized, hasChanges: true).clearFieldError('notes');
   }
 
-  /// Atualiza tipo de despesa
+  // ============================================================
+  // State Updates
+  // ============================================================
+
   void updateExpenseType(ExpenseType expenseType) {
     if (state.expenseType == expenseType) return;
-
-    state = state
-        .copyWith(expenseType: expenseType, hasChanges: true)
-        .clearFieldError('expenseType');
+    state = state.copyWith(expenseType: expenseType, hasChanges: true).clearFieldError('expenseType');
   }
 
-  /// Atualiza data
   void updateDate(DateTime date) {
     if (state.date == date) return;
-
-    state = state
-        .copyWith(date: date, hasChanges: true)
-        .clearFieldError('date');
+    state = state.copyWith(date: date, hasChanges: true).clearFieldError('date');
   }
 
-  /// Limpa mensagem de erro
   void clearError() {
     state = state.clearError();
   }
@@ -294,30 +194,22 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     state = state.clearImageError();
   }
 
+  // ============================================================
+  // Validation
+  // ============================================================
+
   /// Valida campo específico (para TextFormField)
   String? validateField(String field, String? value) {
-    switch (field) {
-      case 'description':
-        return _validator.validateDescription(value);
-      case 'amount':
-        return _validator.validateAmount(value, expenseType: state.expenseType);
-      case 'odometer':
-        return _validator.validateOdometer(
-          value,
-          currentOdometer: state.vehicle?.currentOdometer,
-        );
-      case 'location':
-        return _validator.validateLocation(value);
-      case 'notes':
-        return _validator.validateNotes(value);
-      default:
-        return null;
-    }
+    return _validatorHandler.validateField(
+      field,
+      value,
+      expenseType: state.expenseType,
+      currentOdometer: state.vehicle?.currentOdometer,
+    );
   }
 
-  /// Valida formulário completo
   bool validateForm() {
-    final errors = _validator.validateCompleteForm(
+    final errors = _validatorHandler.validator.validateCompleteForm(
       expenseType: state.expenseType,
       description: descriptionController.text,
       amount: amountController.text,
@@ -327,232 +219,92 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
       notes: notesController.text,
       vehicle: state.vehicle,
     );
-
     state = state.copyWith(fieldErrors: errors);
-
     return errors.isEmpty;
   }
 
-  /// Abre picker de data
+  // ============================================================
+  // Date/Time Pickers
+  // ============================================================
+
   Future<void> pickDate(BuildContext context) async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: state.date ?? DateTime.now(),
-      firstDate: DateTime.now().subtract(
-        const Duration(days: 365 * ExpenseConstants.maxYearsBack),
-      ),
-      lastDate: DateTime.now(),
-      locale: const Locale('pt', 'BR'),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Colors.grey.shade800,
-              onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (date != null) {
-      final currentTime = TimeOfDay.fromDateTime(state.date ?? DateTime.now());
-      final newDateTime = DateTime(
-        date.year,
-        date.month,
-        date.day,
-        currentTime.hour,
-        currentTime.minute,
-      );
-      updateDate(newDateTime);
-    }
+    final newDateTime = await _datePickerHelper.pickDate(context, initialDate: state.date);
+    if (newDateTime != null) updateDate(newDateTime);
   }
 
-  /// Abre picker de hora
   Future<void> pickTime(BuildContext context) async {
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(state.date ?? DateTime.now()),
-      builder: (context, child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
-          child: Localizations.override(
-            context: context,
-            locale: const Locale('pt', 'BR'),
-            child: Theme(
-              data: Theme.of(context).copyWith(
-                colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              child: child!,
-            ),
-          ),
-        );
-      },
-    );
-
-    if (time != null) {
-      final currentDate = state.date ?? DateTime.now();
-      final newDateTime = DateTime(
-        currentDate.year,
-        currentDate.month,
-        currentDate.day,
-        time.hour,
-        time.minute,
-      );
-      updateDate(newDateTime);
-    }
+    final newDateTime = await _datePickerHelper.pickTime(context, initialDateTime: state.date);
+    if (newDateTime != null) updateDate(newDateTime);
   }
 
-  /// Captura imagem usando câmera
+  // ============================================================
+  // Image Operations
+  // ============================================================
+
   Future<void> captureReceiptImage() async {
-    try {
-      state = state.clearImageError();
-
-      final XFile? image = await _imagePicker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 80,
-        maxWidth: 1920,
-        maxHeight: 1080,
-      );
-
-      if (image != null) {
-        await _processReceiptImage(image.path);
-      }
-    } catch (e) {
-      state = state.copyWith(
-        imageUploadError: () => 'Erro ao capturar imagem: $e',
-      );
-    }
+    state = state.copyWith(isUploadingImage: true).clearImageError();
+    _handleImageResult(await _imageHandler.captureAndProcessImage(
+      userId: state.userId, expenseId: _imageHandler.generateTemporaryId()));
   }
 
-  /// Seleciona imagem da galeria
   Future<void> selectReceiptImageFromGallery() async {
-    try {
-      state = state.clearImageError();
-
-      final XFile? image = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 80,
-        maxWidth: 1920,
-        maxHeight: 1080,
-      );
-
-      if (image != null) {
-        await _processReceiptImage(image.path);
-      }
-    } catch (e) {
-      state = state.copyWith(
-        imageUploadError: () => 'Erro ao selecionar imagem: $e',
-      );
-    }
+    state = state.copyWith(isUploadingImage: true).clearImageError();
+    _handleImageResult(await _imageHandler.selectFromGalleryAndProcess(
+      userId: state.userId, expenseId: _imageHandler.generateTemporaryId()));
   }
 
-  /// Processa e faz upload da imagem do comprovante
-  Future<void> _processReceiptImage(String imagePath) async {
-    try {
-      state = state.copyWith(isUploadingImage: true).clearImageError();
-      final isValid = await _receiptImageService.isValidImage(imagePath);
-      if (!isValid) {
-        throw Exception('Arquivo de imagem inválido');
-      }
-      final result = await _receiptImageService.processExpenseReceiptImage(
-        userId: state.userId,
-        expenseId: _generateTemporaryId(),
-        imagePath: imagePath,
-        compressImage: true,
-        uploadToFirebase: true,
-      );
-
-      state = state.copyWith(
-        receiptImagePath: result.localPath,
-        receiptImageUrl: result.downloadUrl,
+  void _handleImageResult(Either<Failure, ImageProcessingResult> result) {
+    result.fold(
+      (failure) => state = state.copyWith(isUploadingImage: false, imageUploadError: () => failure.message),
+      (imageResult) => state = state.copyWith(
+        receiptImagePath: imageResult.localPath,
+        receiptImageUrl: imageResult.downloadUrl,
         hasChanges: true,
         isUploadingImage: false,
-      );
-
-      debugPrint('[EXPENSE FORM] Image processed successfully');
-      debugPrint('[EXPENSE FORM] Local path: ${result.localPath}');
-      debugPrint('[EXPENSE FORM] Download URL: ${result.downloadUrl}');
-    } catch (e) {
-      state = state.copyWith(
-        isUploadingImage: false,
-        imageUploadError: () => 'Erro ao processar imagem: $e',
-      );
-      debugPrint('[EXPENSE FORM] Image processing error: $e');
-    }
+      ),
+    );
   }
 
-  /// Remove imagem do comprovante
   Future<void> removeReceiptImage() async {
-    try {
-      if (state.receiptImagePath != null || state.receiptImageUrl != null) {
-        await _receiptImageService.deleteReceiptImage(
-          localPath: state.receiptImagePath,
-          downloadUrl: state.receiptImageUrl,
-        );
-      }
-
-      state = state
-          .copyWith(
-            hasChanges: true,
-            clearReceiptImage: true,
-            clearReceiptUrl: true,
-          )
-          .clearImageError();
-    } catch (e) {
-      state = state.copyWith(
-        imageUploadError: () => 'Erro ao remover imagem: $e',
-      );
-    }
+    final result = await _imageHandler.removeImage(
+      localPath: state.receiptImagePath,
+      downloadUrl: state.receiptImageUrl,
+    );
+    result.fold(
+      (failure) => state = state.copyWith(imageUploadError: () => failure.message),
+      (_) => state = state.copyWith(
+        hasChanges: true,
+        clearReceiptImage: true,
+        clearReceiptUrl: true,
+      ).clearImageError(),
+    );
   }
 
-  /// Sincroniza imagem local com Firebase (para casos offline)
   Future<void> syncImageToFirebase(String actualExpenseId) async {
-    if (state.receiptImagePath == null || state.receiptImageUrl != null) {
-      return; // Nada para sincronizar
-    }
+    if (state.receiptImagePath == null || state.receiptImageUrl != null) return;
 
-    try {
-      state = state.copyWith(isUploadingImage: true);
-
-      final result = await _receiptImageService.processExpenseReceiptImage(
-        userId: state.userId,
-        expenseId: actualExpenseId,
-        imagePath: state.receiptImagePath!,
-        compressImage: false, // Já foi comprimida
-        uploadToFirebase: true,
-      );
-
-      state = state.copyWith(
-        receiptImageUrl: result.downloadUrl,
+    state = state.copyWith(isUploadingImage: true);
+    final result = await _imageHandler.syncImageToFirebase(
+      localPath: state.receiptImagePath!,
+      userId: state.userId,
+      expenseId: actualExpenseId,
+    );
+    result.fold(
+      (_) => state = state.copyWith(isUploadingImage: false),
+      (downloadUrl) => state = state.copyWith(
+        receiptImageUrl: downloadUrl,
         isUploadingImage: false,
-      );
-
-      debugPrint(
-        '[EXPENSE FORM] Image synced to Firebase: ${result.downloadUrl}',
-      );
-    } catch (e) {
-      debugPrint('[EXPENSE FORM] Failed to sync image: $e');
-      state = state.copyWith(isUploadingImage: false);
-    }
+      ),
+    );
   }
 
-  /// Gera ID temporário para processar imagem antes do save
-  String _generateTemporaryId() {
-    return 'temp_${DateTime.now().millisecondsSinceEpoch}';
-  }
+  // ============================================================
+  // Save Operations
+  // ============================================================
 
-  /// Salva o registro de despesa (criar ou atualizar)
   Future<Either<Failure, ExpenseEntity?>> saveExpenseRecord() async {
     try {
-      // Valida antes de salvar
       if (!validateForm()) {
-        // Pega a primeira mensagem de erro
         final firstError = state.fieldErrors.values.isNotEmpty
             ? state.fieldErrors.values.first
             : 'Formulário inválido';
@@ -560,23 +312,11 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
       }
 
       state = state.copyWith(isLoading: true, errorMessage: () => null);
-
-      // Cria entidade a partir do formulário
       final expenseEntity = _buildExpenseEntity();
-
-      // Decide se é criar ou atualizar
-      final Either<Failure, ExpenseEntity?> result;
-
-      if (state.id.isEmpty) {
-        // Criar novo
-        result = await _addExpense(expenseEntity);
-      } else {
-        // Atualizar existente
-        result = await _updateExpense(expenseEntity);
-      }
-
+      final result = state.id.isEmpty
+          ? await _addExpense(expenseEntity)
+          : await _updateExpense(expenseEntity);
       state = state.copyWith(isLoading: false);
-
       return result;
     } catch (e) {
       state = state.copyWith(
@@ -587,7 +327,6 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     }
   }
 
-  /// Constrói a entidade de despesa a partir do estado atual
   ExpenseEntity _buildExpenseEntity() {
     final sanitizedDescription = InputSanitizer.sanitizeDescription(
       descriptionController.text,
@@ -596,23 +335,12 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     final sanitizedNotes = InputSanitizer.sanitizeDescription(
       notesController.text,
     );
-
-    final amount =
-        double.tryParse(
-          amountController.text
-              .replaceAll(RegExp(r'[^\d,.]'), '')
-              .replaceAll(',', '.'),
-        ) ??
-        0.0;
-
-    final odometer =
-        double.tryParse(
-          odometerController.text
-              .replaceAll(RegExp(r'[^\d,.]'), '')
-              .replaceAll(',', '.'),
-        ) ??
-        0.0;
-
+    final amount = _validatorHandler.formatter.parseFormattedAmount(
+      amountController.text,
+    );
+    final odometer = _validatorHandler.formatter.parseFormattedOdometer(
+      odometerController.text,
+    );
     final now = DateTime.now();
 
     return ExpenseEntity(
@@ -636,21 +364,18 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     );
   }
 
-  /// Limpa formulário
-  void clearForm() {
-    descriptionController.clear();
-    amountController.clear();
-    odometerController.clear();
-    locationController.clear();
-    notesController.clear();
+  // ============================================================
+  // Form Reset
+  // ============================================================
 
+  void clearForm() {
+    _controllerManager.clearAll();
     state = ExpenseFormState.initial(
       vehicleId: state.vehicleId,
       userId: state.userId,
     ).copyWith(vehicle: state.vehicle);
   }
 
-  /// Reseta formulário
   void resetForm() {
     clearForm();
     state = state.copyWith(

@@ -14,8 +14,6 @@ import '../../domain/usecases/get_weather_measurements.dart';
 import 'weather_di_providers.dart';
 
 /// Provider Riverpod para WeatherProvider
-///
-/// Integra GetIt com Riverpod para gerenciamento de estado
 final weatherProviderProvider = ChangeNotifierProvider<WeatherProvider>((ref) {
   final getWeatherMeasurements = ref.watch(getWeatherMeasurementsProvider);
   final createWeatherMeasurement = ref.watch(createWeatherMeasurementProvider);

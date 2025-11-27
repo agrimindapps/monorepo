@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:core/core.dart' hide Column;
 
 /// Tabela de Veículos
 ///

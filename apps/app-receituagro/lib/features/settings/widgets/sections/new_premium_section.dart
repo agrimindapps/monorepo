@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../presentation/providers/index.dart';
+import '../../../../core/providers/premium_notifier.dart';
 import '../shared/section_header.dart';
 import '../shared/settings_card.dart';
 
@@ -12,44 +12,49 @@ class NewPremiumSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final premiumState = ref.watch(premiumProvider);
+    final premiumAsync = ref.watch(premiumProvider);
 
-    return Column(
-      children: [
-        SectionHeader(
-          title: premiumState.settings.hasPremiumFeatures
-              ? 'Premium ✨'
-              : 'Plano Atual',
-        ),
-        SettingsCard(
-          child: Column(
-            children: [
-              _buildStatusCard(context, premiumState),
-              const Divider(height: 1),
-              _buildFeaturesSection(context, premiumState),
-              if (premiumState.settings.isDevelopmentMode)
-                const Divider(height: 1),
-              if (premiumState.settings.isDevelopmentMode)
-                _buildDevModeToggle(context, ref, premiumState),
-              if (premiumState.settings.isDevelopmentMode)
-                const Divider(height: 1),
-              if (premiumState.settings.isDevelopmentMode)
-                _buildAnalyticsToggle(context, ref, premiumState),
-              if (premiumState.isLoading || premiumState.error != null)
-                const Divider(height: 1),
-              if (premiumState.isLoading) _buildLoadingIndicator(),
-              if (premiumState.error != null)
-                _buildErrorMessage(context, premiumState),
-            ],
+    return premiumAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => _buildErrorWidget(context, error.toString()),
+      data: (premiumState) => Column(
+        children: [
+          SectionHeader(
+            title: premiumState.isPremium ? 'Premium ✨' : 'Plano Atual',
           ),
+          SettingsCard(
+            child: Column(
+              children: [
+                _buildStatusCard(context, premiumState),
+                const Divider(height: 1),
+                _buildFeaturesSection(context, premiumState),
+                if (premiumState.isLoading) const Divider(height: 1),
+                if (premiumState.isLoading) _buildLoadingIndicator(),
+                if (premiumState.lastError != null)
+                  _buildErrorMessage(context, premiumState.lastError!),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget(BuildContext context, String error) {
+    return SettingsCard(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Text(
+          'Erro ao carregar status premium: $error',
+          style: TextStyle(color: Theme.of(context).colorScheme.error),
         ),
-      ],
+      ),
     );
   }
 
   Widget _buildStatusCard(BuildContext context, PremiumState premiumState) {
-    final hasPremium = premiumState.settings.hasPremiumFeatures;
-    final isDev = premiumState.settings.isDevelopmentMode;
+    final hasPremium = premiumState.isPremium;
+    final isTrialActive = premiumState.isTrialActive;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -84,20 +89,20 @@ class NewPremiumSection extends ConsumerWidget {
                         : null,
                   ),
                 ),
-                if (isDev)
+                if (isTrialActive)
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.3),
+                      color: Colors.orange.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      'DEV',
+                      'TRIAL',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.red,
+                        color: Colors.orange,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -106,7 +111,7 @@ class NewPremiumSection extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              premiumState.settings.statusDescription,
+              _getStatusDescription(premiumState),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: hasPremium
                     ? Theme.of(context).colorScheme.onPrimary
@@ -119,11 +124,38 @@ class NewPremiumSection extends ConsumerWidget {
     );
   }
 
+  String _getStatusDescription(PremiumState state) {
+    if (state.isPremium && state.isActive) {
+      if (state.isTrialActive) {
+        return 'Período de teste ativo';
+      }
+      final expDate = state.currentSubscription?.expirationDate;
+      if (expDate != null) {
+        final daysLeft = expDate.difference(DateTime.now()).inDays;
+        return 'Ativo - $daysLeft dias restantes';
+      }
+      return 'Assinatura ativa';
+    }
+    return 'Atualize para Premium para desbloquear todas as funcionalidades';
+  }
+
   Widget _buildFeaturesSection(
     BuildContext context,
     PremiumState premiumState,
   ) {
-    final features = premiumState.settings.availableFeatures;
+    final hasPremium = premiumState.isPremium;
+    final features = hasPremium
+        ? [
+            'Diagnósticos avançados',
+            'Busca ilimitada',
+            'Modo offline',
+            'Exportar relatórios',
+            'Suporte prioritário',
+          ]
+        : [
+            'Diagnósticos básicos',
+            '5 buscas por dia',
+          ];
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -150,94 +182,13 @@ class NewPremiumSection extends ConsumerWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      _getFeatureDisplayName(feature),
+                      feature,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDevModeToggle(
-    BuildContext context,
-    WidgetRef ref,
-    PremiumState premiumState,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Modo Desenvolvimento',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: Colors.red,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Unlocks debug features (⚠️ não salvar)',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          Switch(
-            value: premiumState.settings.isDevelopmentMode,
-            onChanged: (value) {
-              ref
-                  .read(premiumProvider.notifier)
-                  .setDevelopmentMode(value);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAnalyticsToggle(
-    BuildContext context,
-    WidgetRef ref,
-    PremiumState premiumState,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Analytics Debug',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Log analytics events to console',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          Switch(
-            value: premiumState.settings.analyticsEnabled,
-            onChanged: (value) {
-              ref.read(premiumProvider.notifier).toggleAnalytics();
-            },
           ),
         ],
       ),
@@ -254,7 +205,7 @@ class NewPremiumSection extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorMessage(BuildContext context, PremiumState premiumState) {
+  Widget _buildErrorMessage(BuildContext context, String error) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -267,7 +218,7 @@ class NewPremiumSection extends ConsumerWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              premiumState.error ?? 'Erro desconhecido',
+              error,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.error,
               ),
@@ -278,17 +229,5 @@ class NewPremiumSection extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  String _getFeatureDisplayName(String feature) {
-    const featureNames = {
-      'recipes_unlimited': 'Receitas Ilimitadas',
-      'advanced_search': 'Busca Avançada',
-      'sync_unlimited': 'Sincronização Sem Limite',
-      'offline_mode': 'Modo Offline',
-      'export_pdf': 'Exportar para PDF',
-    };
-
-    return featureNames[feature] ?? feature;
   }
 }

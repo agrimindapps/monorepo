@@ -10,9 +10,6 @@ part 'dialog_managers_providers.g.dart';
 /// ✅ REFACTORED: Providers para Dialog Managers
 /// Segue DIP: Injeta dependências via Riverpod
 ///
-/// ANTES: account_actions_section usava GetIt direto
-/// DEPOIS: Providers centralizam injeção de dependências
-///
 /// BENEFITS:
 /// ✅ DIP: Dependências injetadas, não criadas direto
 /// ✅ Testable: Fácil overriding em testes

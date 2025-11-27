@@ -1,18 +1,10 @@
-import 'dart:io';
-
 import 'package:core/core.dart';
 
 import '../entities/tts_settings_entity.dart';
 import '../entities/user_settings_entity.dart';
 
 /// Composite repository that provides unified access to all settings repositories.
-/// Implements the Composite Pattern for settings management.
-///
-/// Benefits:
-/// - Single point of access for all settings operations
-/// - Unified operations (resetAll, exportAll, importAll)
-/// - Delegates to specialized repositories (composition over inheritance)
-/// - Easy to extend with new settings repositories
+/// Cross-platform: funciona em Web, Mobile e Desktop
 abstract class ISettingsCompositeRepository {
   // ============================================================================
   // USER SETTINGS DELEGATION
@@ -51,9 +43,9 @@ abstract class ISettingsCompositeRepository {
   // PROFILE OPERATIONS DELEGATION
   // ============================================================================
 
-  /// Upload profile image
+  /// Upload profile image (Cross-platform)
   Future<Either<Failure, ProfileImageResult>> uploadProfileImage(
-    File imageFile, {
+    PickedImage image, {
     void Function(double)? onProgress,
   });
 

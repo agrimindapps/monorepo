@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import '../loading/contextual_loading_manager.dart';
 import 'confirmation_system.dart';
 import 'feedback_system.dart';
-import 'haptic_service.dart';
 import 'progress_tracker.dart';
-import 'toast_service.dart';
 
 /// Sistema unificado de feedback que integra todos os componentes
 /// Trabalha em conjunto com ContextualLoadingManager para experiência completa
@@ -77,7 +75,8 @@ class UnifiedFeedbackSystem {
         // await getIt<HapticService>().error();
       }
 
-      final errorMsg = errorMessage ?? 'Erro na operação: ${error.toString()}';
+      // Error message available for future use if needed
+      final _ = errorMessage ?? 'Erro na operação: ${error.toString()}';
 
       if (showToast && context.mounted) {
         // getIt<ToastService>().showError(

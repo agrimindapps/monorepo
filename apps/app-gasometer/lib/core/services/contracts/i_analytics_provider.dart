@@ -1,4 +1,3 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 
 /// Interface abstrata para análise (analytics)

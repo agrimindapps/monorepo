@@ -83,24 +83,30 @@ final odometerReadingRepositoryProvider = Provider<OdometerReadingRepository>((
 });
 
 /// Provider do repositório de odômetro (interface do domain)
-/// Usa OdometerRepositoryDriftImpl como implementação
+/// Usa OdometerRepositoryDriftImpl como implementação com Sync-on-Write
 final odometerRepositoryProvider = Provider<OdometerRepository>((ref) {
   final dataSource = ref.watch(deps.odometerReadingLocalDataSourceProvider);
-  return OdometerRepositoryDriftImpl(dataSource);
+  final connectivityService = ref.watch(deps.connectivityServiceProvider);
+  final syncAdapter = ref.watch(deps.odometerDriftSyncAdapterProvider);
+  return OdometerRepositoryDriftImpl(dataSource, connectivityService, syncAdapter);
 });
 
 /// Provider do repositório de manutenção (interface do domain)
-/// Usa MaintenanceRepositoryDriftImpl como implementação
+/// Usa MaintenanceRepositoryDriftImpl como implementação com Sync-on-Write
 final maintenanceDomainRepositoryProvider = Provider<domain_maintenance.MaintenanceRepository>((ref) {
   final dataSource = ref.watch(deps.maintenanceLocalDataSourceProvider);
-  return MaintenanceRepositoryDriftImpl(dataSource);
+  final connectivityService = ref.watch(deps.connectivityServiceProvider);
+  final syncAdapter = ref.watch(deps.maintenanceDriftSyncAdapterProvider);
+  return MaintenanceRepositoryDriftImpl(dataSource, connectivityService, syncAdapter);
 });
 
 /// Provider do repositório de despesas (interface do domain)
-/// Usa ExpensesRepositoryDriftImpl como implementação
+/// Usa ExpensesRepositoryDriftImpl como implementação com Sync-on-Write
 final expensesDomainRepositoryProvider = Provider<IExpensesRepository>((ref) {
   final dataSource = ref.watch(deps.expensesLocalDataSourceProvider);
-  return ExpensesRepositoryDriftImpl(dataSource);
+  final connectivityService = ref.watch(deps.connectivityServiceProvider);
+  final syncAdapter = ref.watch(deps.expenseDriftSyncAdapterProvider);
+  return ExpensesRepositoryDriftImpl(dataSource, connectivityService, syncAdapter);
 });
 
 /// Provider do repositório de auditoria

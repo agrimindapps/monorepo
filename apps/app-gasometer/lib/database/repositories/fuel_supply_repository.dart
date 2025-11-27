@@ -89,7 +89,6 @@ class FuelSupplyRepository
     int vehicleId, {
     int? limit,
   }) async {
-    if (_db == null) return [];
     final query = _db.select(_db.fuelSupplies)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
@@ -106,7 +105,6 @@ class FuelSupplyRepository
 
   /// Stream de abastecimentos de um veículo
   Stream<List<FuelSupplyData>> watchByVehicleId(int vehicleId) {
-    if (_db == null) return Stream.empty();
     final query = _db.select(_db.fuelSupplies)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
@@ -120,7 +118,6 @@ class FuelSupplyRepository
 
   /// Busca último abastecimento de um veículo
   Future<FuelSupplyData?> findLastByVehicleId(int vehicleId) async {
-    if (_db == null) return null;
     final query = _db.select(_db.fuelSupplies)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
@@ -138,7 +135,6 @@ class FuelSupplyRepository
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    if (_db == null) return [];
     final startMs = startDate.millisecondsSinceEpoch;
     final endMs = endDate.millisecondsSinceEpoch;
 
@@ -158,7 +154,6 @@ class FuelSupplyRepository
 
   /// Busca abastecimentos com tanque cheio (para cálculo de consumo)
   Future<List<FuelSupplyData>> findFullTankByVehicleId(int vehicleId) async {
-    if (_db == null) return [];
     final query = _db.select(_db.fuelSupplies)
       ..where(
         (tbl) =>
@@ -178,7 +173,6 @@ class FuelSupplyRepository
     DateTime? startDate,
     DateTime? endDate,
   }) async {
-    if (_db == null) return 0.0;
     var query = _db.selectOnly(_db.fuelSupplies)
       ..addColumns([_db.fuelSupplies.totalPrice.sum()])
       ..where(
@@ -213,7 +207,6 @@ class FuelSupplyRepository
     DateTime? startDate,
     DateTime? endDate,
   }) async {
-    if (_db == null) return 0.0;
     var query = _db.selectOnly(_db.fuelSupplies)
       ..addColumns([_db.fuelSupplies.liters.sum()])
       ..where(
@@ -244,7 +237,6 @@ class FuelSupplyRepository
 
   /// Calcula preço médio por litro
   Future<double> calculateAveragePricePerLiter(int vehicleId) async {
-    if (_db == null) return 0.0;
     final query = _db.selectOnly(_db.fuelSupplies)
       ..addColumns([_db.fuelSupplies.pricePerLiter.avg()])
       ..where(
@@ -258,7 +250,6 @@ class FuelSupplyRepository
 
   /// Conta total de abastecimentos de um veículo
   Future<int> countByVehicleId(int vehicleId) async {
-    if (_db == null) return 0;
     final query = _db.selectOnly(_db.fuelSupplies)
       ..addColumns([_db.fuelSupplies.id.count()])
       ..where(
@@ -272,7 +263,6 @@ class FuelSupplyRepository
 
   /// Busca abastecimentos que precisam ser sincronizados
   Future<List<FuelSupplyData>> findDirtyRecords() async {
-    if (_db == null) return [];
     final query = _db.select(_db.fuelSupplies)
       ..where((tbl) => tbl.isDirty.equals(true));
 
@@ -282,7 +272,6 @@ class FuelSupplyRepository
 
   /// Marca registros como sincronizados
   Future<void> markAsSynced(List<int> supplyIds) async {
-    if (_db == null) return;
     await _db.executeTransaction(() async {
       for (final id in supplyIds) {
         await (_db.update(
@@ -299,7 +288,6 @@ class FuelSupplyRepository
 
   /// Soft delete de um abastecimento
   Future<bool> softDelete(int supplyId) async {
-    if (_db == null) return false;
     final rowsAffected =
         await (_db.update(
           _db.fuelSupplies,

@@ -1,8 +1,6 @@
 import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../../core/providers/core_di_providers.dart';
 import '../managers/auth_dialog_manager.dart';
 import '../managers/auth_submission_manager.dart';
 import '../managers/credentials_persistence_manager.dart';

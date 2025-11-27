@@ -82,7 +82,6 @@ class MaintenanceRepository
 
   /// Busca manutenções de um veículo
   Future<List<MaintenanceData>> findByVehicleId(int vehicleId) async {
-    if (_db == null) return [];
     final query = _db.select(_db.maintenances)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
@@ -95,7 +94,6 @@ class MaintenanceRepository
 
   /// Stream de manutenções de um veículo
   Stream<List<MaintenanceData>> watchByVehicleId(int vehicleId) {
-    if (_db == null) return Stream.empty();
     final query = _db.select(_db.maintenances)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
@@ -109,7 +107,6 @@ class MaintenanceRepository
 
   /// Busca manutenções pendentes (não concluídas)
   Future<List<MaintenanceData>> findPendingByVehicleId(int vehicleId) async {
-    if (_db == null) return [];
     final query = _db.select(_db.maintenances)
       ..where(
         (tbl) =>
@@ -125,7 +122,6 @@ class MaintenanceRepository
 
   /// Stream de manutenções pendentes
   Stream<List<MaintenanceData>> watchPendingByVehicleId(int vehicleId) {
-    if (_db == null) return Stream.empty();
     final query = _db.select(_db.maintenances)
       ..where(
         (tbl) =>
@@ -142,7 +138,6 @@ class MaintenanceRepository
 
   /// Busca manutenções concluídas
   Future<List<MaintenanceData>> findCompletedByVehicleId(int vehicleId) async {
-    if (_db == null) return [];
     final query = _db.select(_db.maintenances)
       ..where(
         (tbl) =>
@@ -158,7 +153,6 @@ class MaintenanceRepository
 
   /// Busca manutenções por tipo
   Future<List<MaintenanceData>> findByType(int vehicleId, String tipo) async {
-    if (_db == null) return [];
     final query = _db.select(_db.maintenances)
       ..where(
         (tbl) =>
@@ -178,7 +172,6 @@ class MaintenanceRepository
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    if (_db == null) return [];
     final startMs = startDate.millisecondsSinceEpoch;
     final endMs = endDate.millisecondsSinceEpoch;
 
@@ -202,7 +195,6 @@ class MaintenanceRepository
     DateTime? startDate,
     DateTime? endDate,
   }) async {
-    if (_db == null) return 0.0;
     var query = _db.selectOnly(_db.maintenances)
       ..addColumns([_db.maintenances.valor.sum()])
       ..where(
@@ -233,7 +225,6 @@ class MaintenanceRepository
 
   /// Conta total de manutenções de um veículo
   Future<int> countByVehicleId(int vehicleId) async {
-    if (_db == null) return 0;
     final query = _db.selectOnly(_db.maintenances)
       ..addColumns([_db.maintenances.id.count()])
       ..where(
@@ -247,7 +238,6 @@ class MaintenanceRepository
 
   /// Conta manutenções pendentes
   Future<int> countPendingByVehicleId(int vehicleId) async {
-    if (_db == null) return 0;
     final query = _db.selectOnly(_db.maintenances)
       ..addColumns([_db.maintenances.id.count()])
       ..where(
@@ -262,7 +252,6 @@ class MaintenanceRepository
 
   /// Marca uma manutenção como concluída
   Future<bool> markAsCompleted(int maintenanceId) async {
-    if (_db == null) return false;
     final rowsAffected =
         await (_db.update(
           _db.maintenances,
@@ -278,7 +267,6 @@ class MaintenanceRepository
 
   /// Busca tipos de manutenção distintos
   Future<List<String>> findDistinctTypes(int vehicleId) async {
-    if (_db == null) return [];
     final query = _db.selectOnly(_db.maintenances, distinct: true)
       ..addColumns([_db.maintenances.tipo])
       ..where(
@@ -297,7 +285,6 @@ class MaintenanceRepository
 
   /// Busca manutenções que precisam ser sincronizadas
   Future<List<MaintenanceData>> findDirtyRecords() async {
-    if (_db == null) return [];
     final query = _db.select(_db.maintenances)
       ..where((tbl) => tbl.isDirty.equals(true));
 
@@ -307,7 +294,6 @@ class MaintenanceRepository
 
   /// Marca registros como sincronizados
   Future<void> markAsSynced(List<int> maintenanceIds) async {
-    if (_db == null) return;
     await _db.executeTransaction(() async {
       for (final id in maintenanceIds) {
         await (_db.update(
@@ -324,7 +310,6 @@ class MaintenanceRepository
 
   /// Soft delete de uma manutenção
   Future<bool> softDelete(int maintenanceId) async {
-    if (_db == null) return false;
     final rowsAffected =
         await (_db.update(
           _db.maintenances,

@@ -11,7 +11,6 @@ import '../../data/services/pragas_cultura_sort_service.dart';
 import '../../data/services/pragas_cultura_statistics_service.dart';
 import '../../domain/repositories/i_pragas_cultura_repository.dart';
 import '../services/pragas_cultura_error_message_service.dart';
-import 'pragas_cultura_page_view_model.dart';
 
 part 'pragas_cultura_providers.g.dart';
 

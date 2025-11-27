@@ -1,11 +1,10 @@
 export 'constants/settings_design_tokens.dart';
 export 'data/repositories/user_settings_repository_impl.dart';
-export 'di/settings_di.dart';
+// export 'di/settings_di.dart'; // TODO: Criar se necessário
 export 'domain/device_service.dart';
 export 'domain/entities/user_settings_entity.dart';
 export 'domain/exceptions/settings_exceptions.dart';
 export 'domain/navigation_service.dart';
-export 'domain/premium_service.dart';
 export 'domain/repositories/i_user_settings_repository.dart';
 export 'domain/theme_service.dart';
 export 'presentation/providers/settings_state.dart';

@@ -1,13 +1,9 @@
-import 'dart:io';
-
 import 'package:core/core.dart' hide Column;
 
-import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/providers/auth_state.dart' as local;
 import '../../domain/repositories/profile_repository.dart';
 
 /// Conversão de Result<T> para Either<Failure, T>
-/// Bridge function to convert core package Result to Either
 // ignore: deprecated_member_use
 Either<Failure, T> _resultToEither<T>(Result<T> result) {
   if (result.isError) {
@@ -17,7 +13,6 @@ Either<Failure, T> _resultToEither<T>(Result<T> result) {
 }
 
 /// Conversão de Result<void> para Either<Failure, Unit>
-/// Bridge function to convert core package Result to Either
 // ignore: deprecated_member_use
 Either<Failure, Unit> _resultToEitherUnit(Result<void> result) {
   if (result.isError) {
@@ -27,7 +22,6 @@ Either<Failure, Unit> _resultToEitherUnit(Result<void> result) {
 }
 
 /// Conversão async de Result<T> para Either<Failure, T>
-/// Bridge function to convert core package Result to Either
 Future<Either<Failure, T>> _resultToEitherAsync<T>(
   // ignore: deprecated_member_use
   Future<Result<T>> futureResult,
@@ -37,7 +31,6 @@ Future<Either<Failure, T>> _resultToEitherAsync<T>(
 }
 
 /// Conversão async de Result<void> para Either<Failure, Unit>
-/// Bridge function to convert core package Result to Either
 Future<Either<Failure, Unit>> _resultToEitherUnitAsync(
   // ignore: deprecated_member_use
   Future<Result<void>> futureResult,
@@ -47,8 +40,7 @@ Future<Either<Failure, Unit>> _resultToEitherUnitAsync(
 }
 
 /// Implementação do ProfileRepository para ReceitaAgro
-/// Utiliza o ProfileImageService do core package
-/// NOTE: Cannot use  due to function type dependency
+/// Cross-platform: funciona em Web, Mobile e Desktop
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileImageService _profileImageService;
   final local.AuthState? Function() _getAuthState;
@@ -61,12 +53,12 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   @override
   Future<Either<Failure, ProfileImageResult>> uploadProfileImage(
-    File imageFile, {
+    PickedImage image, {
     void Function(double)? onProgress,
   }) async {
     return _resultToEitherAsync(
       _profileImageService.uploadProfileImage(
-        imageFile,
+        image,
         onProgress: onProgress,
       ),
     );
@@ -80,14 +72,14 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Either<Failure, File>> pickImageFromGallery() async {
+  Future<Either<Failure, PickedImage>> pickImageFromGallery() async {
     return _resultToEitherAsync(
       _profileImageService.pickImageFromGallery(),
     );
   }
 
   @override
-  Future<Either<Failure, File>> pickImageFromCamera() async {
+  Future<Either<Failure, PickedImage>> pickImageFromCamera() async {
     return _resultToEitherAsync(
       _profileImageService.pickImageFromCamera(),
     );
@@ -113,9 +105,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Either<Failure, Unit> validateProfileImage(File imageFile) {
+  Either<Failure, Unit> validateProfileImage(PickedImage image) {
     return _resultToEitherUnit(
-      _profileImageService.validateProfileImage(imageFile),
+      _profileImageService.validateProfileImage(image),
     );
   }
 

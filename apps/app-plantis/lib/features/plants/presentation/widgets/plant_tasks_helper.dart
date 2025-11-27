@@ -83,8 +83,8 @@ class PlantTasksHelper {
         count: pendingCount,
         text:
             overdueCount == 1
-                ? '1 tarefa atrasada'
-                : '$overdueCount tarefas atrasadas',
+                ? '1 atrasada'
+                : '$overdueCount atrasadas',
         color: Colors.red,
         backgroundColor: Colors.red.withValues(alpha: 0.15),
         icon: Icons.error,

@@ -39,7 +39,7 @@ enum ReceitaAgroAnalyticsEvent {
 /// Uses Core Package services directly instead of Riverpod notifier
 ///
 /// This approach is used for:
-/// 1. GetIt dependency injection compatibility
+/// 1. Riverpod dependency injection compatibility
 /// 2. Service-layer analytics operations (not UI state management)
 /// 3. Backward compatibility with existing analytics code
 class ReceitaAgroAnalyticsService {

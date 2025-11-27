@@ -8,12 +8,12 @@ import '../utils/diagnostico_logger.dart';
 /// EXEMPLO DE USO:
 ///
 /// ```dart
-/// // Injeção de dependências (GetIt)
+/// // Injeção de dependências via Riverpod
 /// final validator = DataIntegrityValidator(
-///   diagnosticoRepo: getIt<DiagnosticoRepository>(),
-///   defensivoRepo: getIt<FitossanitariosRepository>(),
-///   pragaRepo: getIt<PragasRepository>(),
-///   culturaRepo: getIt<CulturasRepository>(),
+///   diagnosticoRepo: ref.watch(diagnosticoRepositoryProvider),
+///   defensivoRepo: ref.watch(fitossanitariosRepositoryProvider),
+///   pragaRepo: ref.watch(pragasRepositoryProvider),
+///   culturaRepo: ref.watch(culturasRepositoryProvider),
 /// );
 ///
 /// // Validação completa

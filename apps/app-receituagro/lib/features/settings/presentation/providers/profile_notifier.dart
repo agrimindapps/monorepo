@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -158,7 +156,7 @@ class ProfileNotifier extends _$ProfileNotifier {
   }
 
   Future<bool> _pickAndUpload(
-    Future<Either<Failure, File>> Function() pickFunction,
+    Future<Either<Failure, PickedImage>> Function() pickFunction,
   ) async {
     final currentState = state.value;
     if (currentState == null) return false;
@@ -187,9 +185,9 @@ class ProfileNotifier extends _$ProfileNotifier {
           );
           return false;
         },
-        (imageFile) async {
+        (image) async {
           final validationResult = _profileRepository.validateProfileImage(
-            imageFile,
+            image,
           );
 
           return validationResult.fold(
@@ -212,7 +210,7 @@ class ProfileNotifier extends _$ProfileNotifier {
               );
 
               final uploadResult = await _profileRepository.uploadProfileImage(
-                imageFile,
+                image,
                 onProgress: _updateProgress,
               );
 
@@ -267,7 +265,7 @@ class ProfileNotifier extends _$ProfileNotifier {
   }
 
   /// Upload direto de arquivo (para casos especiais)
-  Future<bool> uploadProfileImage(File imageFile) async {
+  Future<bool> uploadProfileImage(PickedImage image) async {
     final currentState = state.value;
     if (currentState == null) return false;
 
@@ -285,7 +283,7 @@ class ProfileNotifier extends _$ProfileNotifier {
             .clearError(),
       );
       final validationResult = _profileRepository.validateProfileImage(
-        imageFile,
+        image,
       );
 
       return validationResult.fold(
@@ -300,7 +298,7 @@ class ProfileNotifier extends _$ProfileNotifier {
         },
         (_) async {
           final uploadResult = await _profileRepository.uploadProfileImage(
-            imageFile,
+            image,
             onProgress: _updateProgress,
           );
 
@@ -456,8 +454,8 @@ class ProfileNotifier extends _$ProfileNotifier {
   }
 
   /// Validar imagem sem fazer upload
-  Either<Failure, Unit> validateImage(File imageFile) {
-    return _profileRepository.validateProfileImage(imageFile);
+  Either<Failure, Unit> validateImage(PickedImage image) {
+    return _profileRepository.validateProfileImage(image);
   }
 
   /// Reset do estado

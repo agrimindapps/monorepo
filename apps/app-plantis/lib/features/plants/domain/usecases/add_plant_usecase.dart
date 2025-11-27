@@ -227,10 +227,6 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
     return null;
   }
 
-  String _generateId() {
-    return DateTime.now().millisecondsSinceEpoch.toString();
-  }
-
   /// Gera PlantTasks automáticas com tratamento robusto de erros
   /// Retorna resultado detalhado para logging e feedback
   Future<TaskGenerationResult> _generatePlantTasksWithErrorHandling(

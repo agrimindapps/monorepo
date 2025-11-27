@@ -3,7 +3,6 @@ import '../utils/data_with_warnings.dart';
 
 /// Extensão para Diagnostico (Drift) com métodos display e formatação
 /// 
-/// NOTA: Esta extensão foi temporariamente desabilitada durante a migração GetIt -> Riverpod
 /// TODO: Refatorar para usar injeção de dependências via parâmetros
 extension DiagnosticoDriftExtension on Diagnostico {
   /// Retorna o nome do defensivo

@@ -66,95 +66,54 @@ class _PlantCardState extends ConsumerState<PlantCard> {
             onTap: widget.onTap ??
                 () => context.push(AppRouter.plantDetailsPath(widget.plant.id)),
             borderRadius: BorderRadius.circular(16),
-            child: Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 8),
-                      Center(child: _buildPlantAvatar()),
-                      const SizedBox(height: 16),
-                      Text(
-                        widget.plant.displayName,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: isDark
-                              ? Colors.white
-                              : theme.colorScheme.onSurface,
-                          fontSize: 18,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        widget.plant.displaySpecies,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.7)
-                              : theme.colorScheme.onSurface.withValues(
-                                  alpha: 0.7,
-                                ),
-                          fontSize: 14,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      Center(
-                        child: PlantTasksHelper.buildTaskBadge(
-                          ref,
-                          widget.plant.id,
-                        ),
-                      ),
-                    ],
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 8),
+                  Center(child: _buildPlantAvatar()),
+                  const SizedBox(height: 16),
+                  Text(
+                    widget.plant.displayName,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: isDark
+                          ? Colors.white
+                          : theme.colorScheme.onSurface,
+                      fontSize: 18,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                   ),
-                ),
-                Positioned(top: 4, right: 4, child: _buildMoreOptionsButton()),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.plant.displaySpecies,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.7)
+                          : theme.colorScheme.onSurface.withValues(
+                              alpha: 0.7,
+                            ),
+                      fontSize: 14,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: PlantTasksHelper.buildTaskBadge(
+                      ref,
+                      widget.plant.id,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildMoreOptionsButton() {
-    return SizedBox(
-      height: 32,
-      width: 32,
-      child: PopupMenuButton<String>(
-        padding: EdgeInsets.zero,
-        icon: Icon(
-          Icons.more_vert,
-          size: 20,
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        onSelected: (value) {
-          if (value == 'edit') {
-            context.pushNamed(
-              'plant-edit',
-              pathParameters: {'id': widget.plant.id},
-            );
-          }
-        },
-        itemBuilder: (context) => [
-          const PopupMenuItem(
-            value: 'edit',
-            child: Row(
-              children: [
-                Icon(Icons.edit_outlined, size: 20),
-                SizedBox(width: 12),
-                Text('Editar'),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

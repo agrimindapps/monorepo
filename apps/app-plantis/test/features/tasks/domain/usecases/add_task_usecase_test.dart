@@ -1,6 +1,6 @@
 import 'package:app_plantis/features/tasks/domain/entities/task.dart' as task_entity;
 import 'package:app_plantis/features/tasks/domain/usecases/add_task_usecase.dart';
-import 'package:core/core.dart' hide test;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

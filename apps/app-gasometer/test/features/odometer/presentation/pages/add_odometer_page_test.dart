@@ -1,61 +1,11 @@
 import 'package:gasometer_drift/features/auth/presentation/notifiers/auth_notifier.dart';
 import 'package:gasometer_drift/features/auth/presentation/state/auth_state.dart';
 import 'package:gasometer_drift/features/auth/domain/entities/user_entity.dart';
-import 'package:gasometer_drift/features/odometer/domain/repositories/odometer_repository.dart';
-import 'package:gasometer_drift/features/odometer/domain/usecases/add_odometer_reading.dart';
-import 'package:gasometer_drift/features/odometer/domain/usecases/update_odometer_reading.dart';
 import 'package:gasometer_drift/features/odometer/presentation/pages/add_odometer_page.dart';
-import 'package:gasometer_drift/features/vehicles/domain/entities/vehicle_entity.dart';
-import 'package:gasometer_drift/features/vehicles/domain/repositories/vehicle_repository.dart';
-import 'package:gasometer_drift/features/vehicles/domain/usecases/get_vehicle_by_id.dart';
 import 'package:core/core.dart' hide AuthState, AuthStatus, UserEntity;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
-
-// Manual Mocks
-class MockGetVehicleById extends GetVehicleById {
-  MockGetVehicleById() : super(MockVehicleRepository());
-
-  @override
-  Future<Either<Failure, VehicleEntity>> call(
-      GetVehicleByIdParams params) async {
-    return Right(VehicleEntity(
-      id: 'test_vehicle_id',
-      userId: 'test_user',
-      name: 'Test Car',
-      brand: 'Test Brand',
-      model: 'Test Model',
-      year: 2020,
-      color: 'White',
-      licensePlate: 'ABC1234',
-      type: VehicleType.car,
-      supportedFuels: [],
-      currentOdometer: 10000,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    ));
-  }
-}
-
-class MockVehicleRepository implements VehicleRepository {
-  @override
-  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-class MockAddOdometerReading extends AddOdometerReadingUseCase {
-  MockAddOdometerReading() : super(MockOdometerRepository());
-}
-
-class MockUpdateOdometerReading extends UpdateOdometerReadingUseCase {
-  MockUpdateOdometerReading() : super(MockOdometerRepository());
-}
-
-class MockOdometerRepository implements OdometerRepository {
-  @override
-  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
 
 class MockAuth extends Auth {
   @override
@@ -76,16 +26,6 @@ class MockAuth extends Auth {
 }
 
 void main() {
-  final getIt = GetIt.instance;
-
-  setUp(() {
-    getIt.reset();
-    getIt.registerLazySingleton<GetVehicleById>(() => MockGetVehicleById());
-    getIt.registerLazySingleton<AddOdometerReadingUseCase>(
-        () => MockAddOdometerReading());
-    getIt.registerLazySingleton<UpdateOdometerReadingUseCase>(
-        () => MockUpdateOdometerReading());
-  });
 
   Widget createWidgetUnderTest(ProviderContainer container) {
     return UncontrolledProviderScope(

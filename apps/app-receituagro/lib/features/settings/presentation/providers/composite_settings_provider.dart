@@ -6,7 +6,6 @@ import '../../domain/entities/premium_settings_entity.dart';
 import '../../domain/entities/theme_settings_entity.dart';
 import 'device_notifier.dart';
 import 'notification_notifier.dart';
-import 'premium_notifier.dart';
 import 'theme_notifier.dart';
 
 /// Combined model representing all user settings
@@ -252,32 +251,30 @@ UserSettingsModel Summary:
 final compositeSettingsProvider = Provider.autoDispose<UserSettingsModel>((
   ref,
 ) {
-  // Watch all 4 individual notifiers
+  // Watch all individual notifiers
   final themeState = ref.watch(themeSettingsProvider);
   final notificationState = ref.watch(notificationSettingsProvider);
   final deviceState = ref.watch(deviceProvider(initialDeviceId: null));
-  final premiumState = ref.watch(premiumProvider);
 
   // Determine if any is loading
   final isLoading =
       themeState.isLoading ||
       notificationState.isLoading ||
-      deviceState.isLoading ||
-      premiumState.isLoading;
+      deviceState.isLoading;
 
   // Collect errors (prioritize by importance)
   final error =
-      premiumState.error ??
       deviceState.error ??
       notificationState.error ??
       themeState.error;
 
   // Combine into single model
+  // Premium settings are derived from core premium provider separately
   return UserSettingsModel(
     themeSettings: themeState.settings,
     notificationSettings: notificationState.settings,
     deviceSettings: deviceState.settings,
-    premiumSettings: premiumState.settings,
+    premiumSettings: PremiumSettingsEntity.defaults(),
     isLoading: isLoading,
     error: error,
   );

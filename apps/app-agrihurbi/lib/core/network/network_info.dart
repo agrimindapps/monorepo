@@ -1,5 +1,4 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
-// import 'package:injectable/injectable.dart'; // Commented out - migrating to Riverpod
 
 /// Abstract class for network information
 abstract class NetworkInfo {

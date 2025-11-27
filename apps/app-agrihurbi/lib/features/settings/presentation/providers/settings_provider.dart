@@ -6,8 +6,6 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'settings_di_providers.dart';
 
 /// Provider Riverpod para SettingsProvider
-///
-/// Integra GetIt com Riverpod para gerenciamento de estado
 final settingsProviderProvider = ChangeNotifierProvider<SettingsProvider>((ref) {
   final manageSettings = ref.watch(manageSettingsProvider);
   return SettingsProvider(manageSettings);

@@ -1,16 +1,28 @@
+import 'dart:developer' as developer;
+
 import 'package:core/core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import '../../../../database/repositories/odometer_reading_repository.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../../domain/repositories/odometer_repository.dart';
 import '../datasources/odometer_reading_local_datasource.dart';
+import '../sync/odometer_drift_sync_adapter.dart';
 
 /// Implementação do repositório de odômetro usando Drift
+///
+/// Padrão "Sync-on-Write": Sincroniza imediatamente com Firebase quando online,
+/// seguindo o padrão do app-plantis. Background sync permanece como fallback.
 
 class OdometerRepositoryDriftImpl implements OdometerRepository {
-  const OdometerRepositoryDriftImpl(this._dataSource);
+  const OdometerRepositoryDriftImpl(
+    this._dataSource,
+    this._connectivityService,
+    this._syncAdapter,
+  );
 
   final OdometerReadingLocalDataSource _dataSource;
+  final ConnectivityService _connectivityService;
+  final OdometerDriftSyncAdapter _syncAdapter;
 
   String get _userId {
     final user = FirebaseAuth.instance.currentUser;
@@ -71,6 +83,12 @@ class OdometerRepositoryDriftImpl implements OdometerRepository {
     OdometerEntity reading,
   ) async {
     try {
+      developer.log(
+        '🔵 OdometerRepository.addOdometerReading() - Starting',
+        name: 'OdometerRepository',
+      );
+
+      // 1. Salvar localmente primeiro (sempre)
       final id = await _dataSource.create(
         userId: _userId,
         vehicleId: int.parse(reading.vehicleId),
@@ -85,8 +103,65 @@ class OdometerRepositoryDriftImpl implements OdometerRepository {
         return const Left(CacheFailure('Failed to retrieve created record'));
       }
 
-      return Right(_toEntity(created));
+      var entity = _toEntity(created);
+      developer.log(
+        '✅ OdometerRepository.addOdometerReading() - Saved locally with id=$id',
+        name: 'OdometerRepository',
+      );
+
+      // 2. Sync-on-Write: Se online, sincronizar imediatamente com Firebase
+      final isOnlineResult = await _connectivityService.isOnline();
+      final isOnline = isOnlineResult.fold((_) => false, (online) => online);
+
+      if (isOnline) {
+        developer.log(
+          '🌐 OdometerRepository.addOdometerReading() - Online, syncing to Firebase...',
+          name: 'OdometerRepository',
+        );
+        try {
+          // Push para Firebase usando o adapter
+          final pushResult = await _syncAdapter.pushDirtyRecords(_userId);
+
+          pushResult.fold(
+            (failure) {
+              developer.log(
+                '⚠️ OdometerRepository.addOdometerReading() - Sync failed: ${failure.message}. Will retry via background sync.',
+                name: 'OdometerRepository',
+              );
+            },
+            (result) {
+              developer.log(
+                '✅ OdometerRepository.addOdometerReading() - Synced to Firebase (${result.recordsPushed} pushed, ${result.recordsFailed} failed)',
+                name: 'OdometerRepository',
+              );
+            },
+          );
+
+          // Reload entity com estado atualizado (isDirty=false, firebaseId set)
+          final refreshed = await _dataSource.findById(id);
+          if (refreshed != null) {
+            entity = _toEntity(refreshed);
+          }
+        } catch (e) {
+          developer.log(
+            '⚠️ OdometerRepository.addOdometerReading() - Sync error: $e. Will retry via background sync.',
+            name: 'OdometerRepository',
+          );
+          // Falhou remoto, mas local já está salvo - retorna local
+        }
+      } else {
+        developer.log(
+          '📴 OdometerRepository.addOdometerReading() - Offline, will sync later via background sync',
+          name: 'OdometerRepository',
+        );
+      }
+
+      return Right(entity);
     } catch (e) {
+      developer.log(
+        '❌ OdometerRepository.addOdometerReading() - Error: $e',
+        name: 'OdometerRepository',
+      );
       return Left(CacheFailure(e.toString()));
     }
   }
@@ -96,8 +171,15 @@ class OdometerRepositoryDriftImpl implements OdometerRepository {
     OdometerEntity reading,
   ) async {
     try {
+      developer.log(
+        '🔵 OdometerRepository.updateOdometerReading() - Starting for id=${reading.id}',
+        name: 'OdometerRepository',
+      );
+
+      // 1. Atualizar localmente primeiro
+      final idInt = int.parse(reading.id);
       final success = await _dataSource.update(
-        id: int.parse(reading.id),
+        id: idInt,
         userId: _userId,
         vehicleId: int.parse(reading.vehicleId),
         reading: reading.value,
@@ -110,13 +192,63 @@ class OdometerRepositoryDriftImpl implements OdometerRepository {
       }
 
       // Buscar o registro atualizado para retornar
-      final updated = await _dataSource.findById(int.parse(reading.id));
+      final updated = await _dataSource.findById(idInt);
       if (updated == null) {
         return const Left(CacheFailure('Failed to retrieve updated record'));
       }
 
-      return Right(_toEntity(updated));
+      var entity = _toEntity(updated);
+      developer.log(
+        '✅ OdometerRepository.updateOdometerReading() - Updated locally',
+        name: 'OdometerRepository',
+      );
+
+      // 2. Sync-on-Write: Se online, sincronizar imediatamente
+      final isOnlineResult = await _connectivityService.isOnline();
+      final isOnline = isOnlineResult.fold((_) => false, (online) => online);
+
+      if (isOnline) {
+        developer.log(
+          '🌐 OdometerRepository.updateOdometerReading() - Online, syncing to Firebase...',
+          name: 'OdometerRepository',
+        );
+        try {
+          final pushResult = await _syncAdapter.pushDirtyRecords(_userId);
+
+          pushResult.fold(
+            (failure) {
+              developer.log(
+                '⚠️ OdometerRepository.updateOdometerReading() - Sync failed: ${failure.message}',
+                name: 'OdometerRepository',
+              );
+            },
+            (result) {
+              developer.log(
+                '✅ OdometerRepository.updateOdometerReading() - Synced to Firebase',
+                name: 'OdometerRepository',
+              );
+            },
+          );
+
+          // Reload entity com estado atualizado
+          final refreshed = await _dataSource.findById(idInt);
+          if (refreshed != null) {
+            entity = _toEntity(refreshed);
+          }
+        } catch (e) {
+          developer.log(
+            '⚠️ OdometerRepository.updateOdometerReading() - Sync error: $e',
+            name: 'OdometerRepository',
+          );
+        }
+      }
+
+      return Right(entity);
     } catch (e) {
+      developer.log(
+        '❌ OdometerRepository.updateOdometerReading() - Error: $e',
+        name: 'OdometerRepository',
+      );
       return Left(CacheFailure(e.toString()));
     }
   }
@@ -124,10 +256,64 @@ class OdometerRepositoryDriftImpl implements OdometerRepository {
   @override
   Future<Either<Failure, bool>> deleteOdometerReading(String id) async {
     try {
+      developer.log(
+        '🔵 OdometerRepository.deleteOdometerReading() - Starting for id=$id',
+        name: 'OdometerRepository',
+      );
+
+      // 1. Soft delete localmente primeiro (marca isDeleted=true, isDirty=true)
       final idInt = int.parse(id);
       final success = await _dataSource.delete(idInt);
+
+      if (!success) {
+        return const Left(CacheFailure('Failed to delete odometer reading'));
+      }
+
+      developer.log(
+        '✅ OdometerRepository.deleteOdometerReading() - Marked as deleted locally',
+        name: 'OdometerRepository',
+      );
+
+      // 2. Sync-on-Write: Se online, sincronizar imediatamente
+      final isOnlineResult = await _connectivityService.isOnline();
+      final isOnline = isOnlineResult.fold((_) => false, (online) => online);
+
+      if (isOnline) {
+        developer.log(
+          '🌐 OdometerRepository.deleteOdometerReading() - Online, syncing deletion to Firebase...',
+          name: 'OdometerRepository',
+        );
+        try {
+          final pushResult = await _syncAdapter.pushDirtyRecords(_userId);
+
+          pushResult.fold(
+            (failure) {
+              developer.log(
+                '⚠️ OdometerRepository.deleteOdometerReading() - Sync failed: ${failure.message}',
+                name: 'OdometerRepository',
+              );
+            },
+            (result) {
+              developer.log(
+                '✅ OdometerRepository.deleteOdometerReading() - Synced deletion to Firebase',
+                name: 'OdometerRepository',
+              );
+            },
+          );
+        } catch (e) {
+          developer.log(
+            '⚠️ OdometerRepository.deleteOdometerReading() - Sync error: $e',
+            name: 'OdometerRepository',
+          );
+        }
+      }
+
       return Right(success);
     } catch (e) {
+      developer.log(
+        '❌ OdometerRepository.deleteOdometerReading() - Error: $e',
+        name: 'OdometerRepository',
+      );
       return Left(CacheFailure(e.toString()));
     }
   }

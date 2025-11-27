@@ -1,11 +1,6 @@
 import 'package:core/core.dart' hide Column, DeleteAccountUseCase, LogoutUseCase;
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 
-import '../../../../core/services/data_cleaner_service.dart';
-import '../../../../database/repositories/plant_tasks_drift_repository.dart';
-import '../../../../database/repositories/plants_drift_repository.dart';
-import '../../../../database/repositories/spaces_drift_repository.dart';
-import '../../../../database/repositories/tasks_drift_repository.dart';
 import '../../data/datasources/account_local_datasource.dart';
 import '../../data/datasources/account_remote_datasource.dart';
 import '../../data/repositories/account_repository_impl.dart';

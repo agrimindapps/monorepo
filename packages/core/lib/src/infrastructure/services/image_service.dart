@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../shared/utils/app_error.dart';
@@ -93,8 +94,113 @@ class MultipleImageUploadResult {
   int get failureCount => failed.length;
 }
 
+/// Imagem selecionada - Cross-platform (funciona em Web, Mobile e Desktop)
+/// Substitui o uso de dart:io File que não funciona na Web
+class PickedImage {
+  /// Bytes da imagem
+  final Uint8List bytes;
+  
+  /// Nome do arquivo
+  final String name;
+  
+  /// Caminho do arquivo (pode ser vazio na Web)
+  final String path;
+  
+  /// MIME type da imagem
+  final String mimeType;
+
+  const PickedImage({
+    required this.bytes,
+    required this.name,
+    required this.path,
+    required this.mimeType,
+  });
+
+  /// Tamanho em bytes
+  int get sizeInBytes => bytes.length;
+  
+  /// Tamanho em KB
+  double get sizeInKB => sizeInBytes / 1024;
+  
+  /// Tamanho em MB
+  double get sizeInMB => sizeInKB / 1024;
+
+  /// Extensão do arquivo
+  String get extension {
+    final lastDot = name.lastIndexOf('.');
+    if (lastDot == -1) return '';
+    return name.substring(lastDot).toLowerCase();
+  }
+
+  /// Converte para Base64 com prefixo data URI
+  String toBase64DataUri() {
+    final base64String = base64Encode(bytes);
+    return 'data:$mimeType;base64,$base64String';
+  }
+
+  /// Converte para Base64 puro (sem prefixo)
+  String toBase64() => base64Encode(bytes);
+
+  /// Cria PickedImage a partir de XFile
+  static Future<PickedImage> fromXFile(XFile xFile) async {
+    final bytes = await xFile.readAsBytes();
+    final mimeType = xFile.mimeType ?? _getMimeTypeFromPath(xFile.path);
+    
+    return PickedImage(
+      bytes: bytes,
+      name: xFile.name,
+      path: xFile.path,
+      mimeType: mimeType,
+    );
+  }
+
+  /// Cria PickedImage a partir de Base64
+  static PickedImage fromBase64(String base64Data, {String? fileName}) {
+    String mimeType = 'image/jpeg';
+    String base64String = base64Data;
+    
+    if (base64Data.startsWith('data:')) {
+      final mimeMatch = RegExp(r'data:([^;]+)').firstMatch(base64Data);
+      if (mimeMatch != null) {
+        mimeType = mimeMatch.group(1) ?? 'image/jpeg';
+      }
+      base64String = base64Data.split(',').last;
+    }
+    
+    final bytes = base64Decode(base64String);
+    final ext = _getExtensionFromMimeType(mimeType);
+    final name = fileName ?? 'image_${DateTime.now().millisecondsSinceEpoch}$ext';
+    
+    return PickedImage(
+      bytes: bytes,
+      name: name,
+      path: '',
+      mimeType: mimeType,
+    );
+  }
+
+  static String _getMimeTypeFromPath(String path) {
+    final ext = path.toLowerCase();
+    if (ext.endsWith('.png')) return 'image/png';
+    if (ext.endsWith('.webp')) return 'image/webp';
+    if (ext.endsWith('.gif')) return 'image/gif';
+    if (ext.endsWith('.bmp')) return 'image/bmp';
+    return 'image/jpeg';
+  }
+
+  static String _getExtensionFromMimeType(String mimeType) {
+    switch (mimeType.toLowerCase()) {
+      case 'image/png': return '.png';
+      case 'image/webp': return '.webp';
+      case 'image/gif': return '.gif';
+      case 'image/bmp': return '.bmp';
+      default: return '.jpg';
+    }
+  }
+}
+
 /// Serviço genérico para manipulação de imagens
-/// Configurável para diferentes apps e casos de uso
+/// Cross-platform: funciona em Web, Mobile e Desktop
 class ImageService {
   final ImagePicker _picker;
   final FirebaseStorage _storage;
@@ -110,125 +216,121 @@ class ImageService {
        _storage = storage ?? FirebaseStorage.instance,
        _firestore = firestore ?? FirebaseFirestore.instance;
 
-  /// Selecionar imagem da galeria
-  Future<Result<File>> pickImageFromGallery() async {
+  /// Selecionar imagem (Cross-platform)
+  Future<Result<PickedImage>> pickImage({
+    ImageSource source = ImageSource.gallery,
+  }) async {
     return ResultUtils.tryExecuteAsync(() async {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
+      final XFile? xFile = await _picker.pickImage(
+        source: source,
         maxWidth: config.maxWidth.toDouble(),
         maxHeight: config.maxHeight.toDouble(),
         imageQuality: config.imageQuality,
       );
 
-      if (image == null) {
+      if (xFile == null) {
         return Future.error(
-          ValidationError(message: 'Nenhuma imagem foi selecionada'),
+          ValidationError(
+            message: source == ImageSource.camera
+                ? 'Nenhuma imagem foi capturada'
+                : 'Nenhuma imagem foi selecionada',
+          ),
         );
       }
 
-      final file = File(image.path);
-      final validationResult = validateImage(file);
+      final pickedImage = await PickedImage.fromXFile(xFile);
+      final validationResult = validatePickedImage(pickedImage);
       if (validationResult.isError) {
         return Future.error(validationResult.error!);
       }
 
-      return file;
+      return pickedImage;
     });
+  }
+
+  /// Selecionar imagem da galeria
+  Future<Result<PickedImage>> pickImageFromGallery() async {
+    return pickImage(source: ImageSource.gallery);
   }
 
   /// Capturar imagem da câmera
-  Future<Result<File>> pickImageFromCamera() async {
-    return ResultUtils.tryExecuteAsync(() async {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: config.maxWidth.toDouble(),
-        maxHeight: config.maxHeight.toDouble(),
-        imageQuality: config.imageQuality,
-      );
-
-      if (image == null) {
-        return Future.error(
-          ValidationError(message: 'Nenhuma imagem foi capturada'),
-        );
-      }
-
-      final file = File(image.path);
-      final validationResult = validateImage(file);
-      if (validationResult.isError) {
-        return Future.error(validationResult.error!);
-      }
-
-      return file;
-    });
+  Future<Result<PickedImage>> pickImageFromCamera() async {
+    return pickImage(source: ImageSource.camera);
   }
 
-  /// Selecionar múltiplas imagens
-  Future<Result<List<File>>> pickMultipleImages({int? maxImages}) async {
+  /// Selecionar múltiplas imagens (Cross-platform)
+  Future<Result<List<PickedImage>>> pickMultipleImages({int? maxImages}) async {
     return ResultUtils.tryExecuteAsync(() async {
-      final List<XFile> images = await _picker.pickMultiImage(
+      final List<XFile> xFiles = await _picker.pickMultiImage(
         maxWidth: config.maxWidth.toDouble(),
         maxHeight: config.maxHeight.toDouble(),
         imageQuality: config.imageQuality,
       );
 
-      if (images.isEmpty) {
+      if (xFiles.isEmpty) {
         return Future.error(
           ValidationError(message: 'Nenhuma imagem foi selecionada'),
         );
       }
 
       final maxCount = maxImages ?? config.maxImagesCount;
-      final limitedImages = images.take(maxCount).toList();
+      final limitedFiles = xFiles.take(maxCount).toList();
 
-      final List<File> files = [];
-      for (final xFile in limitedImages) {
-        final file = File(xFile.path);
-        final validationResult = validateImage(file);
+      final List<PickedImage> images = [];
+      for (final xFile in limitedFiles) {
+        final pickedImage = await PickedImage.fromXFile(xFile);
+        final validationResult = validatePickedImage(pickedImage);
         if (validationResult.isError) {
           return Future.error(validationResult.error!);
         }
-
-        files.add(file);
+        images.add(pickedImage);
       }
 
-      return files;
+      return images;
     });
   }
 
-  /// Upload de imagem para Firebase Storage
+  /// Upload de imagem (Cross-platform)
   Future<Result<ImageUploadResult>> uploadImage(
-    File imageFile, {
+    PickedImage image, {
     String? folder,
     String? fileName,
     String? uploadType,
     void Function(double)? onProgress,
   }) async {
     return ResultUtils.tryExecuteAsync(() async {
-      final validationResult = validateImage(imageFile);
+      final validationResult = validatePickedImage(image);
       if (validationResult.isError) {
         return Future.error(validationResult.error!);
       }
+
       final targetFolder = _determineFolder(folder, uploadType);
-      final finalFileName =
-          fileName ?? '${_generateFirebaseId()}${_getFileExtension(imageFile.path)}';
+      final finalFileName = fileName ?? 
+          '${_generateFirebaseId()}${image.extension.isNotEmpty ? image.extension : '.jpg'}';
+      
       final Reference storageRef = _storage.ref().child(
         '$targetFolder/$finalFileName',
       );
+      
       final SettableMetadata metadata = SettableMetadata(
-        contentType: _getContentType(imageFile.path),
+        contentType: image.mimeType,
         customMetadata: {
           'uploadedAt': DateTime.now().toIso8601String(),
           'uploadType': uploadType ?? 'general',
-          'originalSize': imageFile.lengthSync().toString(),
+          'originalSize': image.sizeInBytes.toString(),
+          'platform': kIsWeb ? 'web' : 'native',
         },
       );
-      final UploadTask uploadTask = storageRef.putFile(imageFile, metadata);
+
+      final UploadTask uploadTask = storageRef.putData(image.bytes, metadata);
+      
       if (onProgress != null) {
         uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
           final progress = snapshot.bytesTransferred / snapshot.totalBytes;
           onProgress(progress);
         });
       }
+      
       final TaskSnapshot snapshot = await uploadTask;
       final downloadUrl = await snapshot.ref.getDownloadURL();
 
@@ -241,10 +343,9 @@ class ImageService {
     });
   }
 
-  /// Upload de imagem com retry logic
-  /// Tenta fazer upload com retry automático em caso de falha de rede
+  /// Upload com retry logic
   Future<Result<ImageUploadResult>> uploadImageWithRetry(
-    File imageFile, {
+    PickedImage image, {
     String? folder,
     String? fileName,
     String? uploadType,
@@ -258,7 +359,7 @@ class ImageService {
 
     while (attempt < maxRetries) {
       final result = await uploadImage(
-        imageFile,
+        image,
         folder: folder,
         fileName: fileName,
         uploadType: uploadType,
@@ -273,7 +374,6 @@ class ImageService {
       attempt++;
 
       if (attempt < maxRetries) {
-        // Exponential backoff: 2s, 4s, 8s
         await Future<void>.delayed(delay);
         delay *= 2;
       }
@@ -287,8 +387,7 @@ class ImageService {
     );
   }
 
-  /// Upload de imagem diretamente de Base64 (ideal para web)
-  /// Não requer conversão para File, upload direto de bytes
+  /// Upload de imagem diretamente de Base64
   Future<Result<ImageUploadResult>> uploadImageFromBase64(
     String base64Data, {
     String? folder,
@@ -297,91 +396,23 @@ class ImageService {
     String mimeType = 'image/jpeg',
     void Function(double)? onProgress,
   }) async {
-    return ResultUtils.tryExecuteAsync(() async {
-      try {
-        // Remove prefixo data:image/...;base64, se existir
-        final base64String = base64Data.contains(',')
-            ? base64Data.split(',').last
-            : base64Data;
-
-        // Decodifica Base64 para bytes
-        final bytes = base64Decode(base64String);
-
-        // Validações básicas
-        if (bytes.isEmpty) {
-          return Future.error(
-            ValidationError(
-              message: 'Imagem Base64 é vazia',
-            ),
-          );
-        }
-
-        // Verifica tamanho máximo
-        final maxSizeBytes = config.maxFileSizeInMB * 1024 * 1024;
-        if (bytes.length > maxSizeBytes) {
-          return Future.error(
-            ValidationError(
-              message: 'Imagem excede tamanho máximo de ${config.maxFileSizeInMB}MB',
-            ),
-          );
-        }
-
-        // Determina folder e nome do arquivo
-        final targetFolder = _determineFolder(folder, uploadType);
-        final extension = _getExtensionFromMimeType(mimeType);
-        final finalFileName =
-            fileName ?? '${_generateFirebaseId()}$extension';
-
-        // Cria referência no Firebase Storage
-        final Reference storageRef = _storage.ref().child(
-          '$targetFolder/$finalFileName',
-        );
-
-        // Cria metadados
-        final SettableMetadata metadata = SettableMetadata(
-          contentType: mimeType,
-          customMetadata: {
-            'uploadedAt': DateTime.now().toIso8601String(),
-            'uploadType': uploadType ?? 'general',
-            'originalSize': bytes.length.toString(),
-            'uploadMethod': 'base64_web',
-          },
-        );
-
-        // Upload dos bytes
-        final UploadTask uploadTask = storageRef.putData(bytes, metadata);
-
-        // Monitora progresso se callback fornecido
-        if (onProgress != null) {
-          uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
-            final progress = snapshot.bytesTransferred / snapshot.totalBytes;
-            onProgress(progress);
-          });
-        }
-
-        // Aguarda conclusão do upload
-        final TaskSnapshot snapshot = await uploadTask;
-        final downloadUrl = await snapshot.ref.getDownloadURL();
-
-        return ImageUploadResult(
-          downloadUrl: downloadUrl,
-          fileName: finalFileName,
-          folder: targetFolder,
-          uploadedAt: DateTime.now(),
-        );
-      } catch (e) {
-        return Future.error(
-          ExternalServiceError(
-            message: 'Erro ao fazer upload de Base64',
-            details: e.toString(),
-            serviceName: 'Firebase Storage',
-          ),
-        );
-      }
-    });
+    try {
+      final image = PickedImage.fromBase64(base64Data, fileName: fileName);
+      return uploadImage(
+        image,
+        folder: folder,
+        fileName: fileName,
+        uploadType: uploadType,
+        onProgress: onProgress,
+      );
+    } catch (e) {
+      return Result.error(
+        ValidationError(message: 'Erro ao processar Base64: $e'),
+      );
+    }
   }
 
-  /// Upload múltiplo de Base64 (web)
+  /// Upload múltiplo de Base64
   Future<Result<MultipleImageUploadResult>> uploadMultipleImagesFromBase64(
     List<String> base64Images, {
     String? folder,
@@ -399,8 +430,9 @@ class ImageService {
           folder: folder,
           uploadType: uploadType,
           mimeType: mimeType,
-          onProgress:
-              onProgress != null ? (progress) => onProgress(i, progress) : null,
+          onProgress: onProgress != null 
+              ? (progress) => onProgress(i, progress) 
+              : null,
         );
 
         if (uploadResult.isSuccess) {
@@ -416,7 +448,7 @@ class ImageService {
 
   /// Upload de múltiplas imagens
   Future<Result<MultipleImageUploadResult>> uploadMultipleImages(
-    List<File> imageFiles, {
+    List<PickedImage> images, {
     String? folder,
     String? uploadType,
     void Function(int index, double progress)? onProgress,
@@ -425,15 +457,15 @@ class ImageService {
       final List<ImageUploadResult> successful = [];
       final List<AppError> failed = [];
 
-      for (int i = 0; i < imageFiles.length; i++) {
-        final file = imageFiles[i];
-
+      for (int i = 0; i < images.length; i++) {
+        final image = images[i];
         final uploadResult = await uploadImage(
-          file,
+          image,
           folder: folder,
           uploadType: uploadType,
-          onProgress:
-              onProgress != null ? (progress) => onProgress(i, progress) : null,
+          onProgress: onProgress != null 
+              ? (progress) => onProgress(i, progress) 
+              : null,
         );
 
         if (uploadResult.isSuccess) {
@@ -483,27 +515,28 @@ class ImageService {
     });
   }
 
-  /// Validar imagem
-  Result<void> validateImage(File imageFile) {
-    if (!imageFile.existsSync()) {
+  /// Validar PickedImage
+  Result<void> validatePickedImage(PickedImage image) {
+    if (image.bytes.isEmpty) {
       return Result.error(
-        ValidationError(message: 'Arquivo de imagem não encontrado'),
+        ValidationError(message: 'Imagem está vazia'),
       );
     }
-    if (!_isValidImageFormat(imageFile.path)) {
+
+    if (!_isValidImageFormat(image.name)) {
       return Result.error(
         ValidationError(
-          message:
-              'Formato de imagem não suportado. '
+          message: 'Formato de imagem não suportado. '
               'Formatos aceitos: ${config.allowedFormats.join(', ')}',
         ),
       );
     }
-    if (!_isValidFileSize(imageFile)) {
+
+    final maxSizeBytes = config.maxFileSizeInMB * 1024 * 1024;
+    if (image.sizeInBytes > maxSizeBytes) {
       return Result.error(
         ValidationError(
-          message:
-              'Arquivo muito grande. '
+          message: 'Arquivo muito grande. '
               'Tamanho máximo: ${config.maxFileSizeInMB}MB',
         ),
       );
@@ -512,88 +545,37 @@ class ImageService {
     return Result.success(null);
   }
 
-  /// Validar formato de imagem
-  bool _isValidImageFormat(String filePath) {
-    final String extension = _getFileExtension(filePath).toLowerCase();
+  bool _isValidImageFormat(String fileName) {
+    final String extension = _getFileExtension(fileName).toLowerCase();
     return config.allowedFormats.contains(extension);
   }
 
-  /// Validar tamanho do arquivo
-  bool _isValidFileSize(File file) {
-    final int fileSizeInBytes = file.lengthSync();
-    final int maxSizeInBytes = config.maxFileSizeInMB * 1024 * 1024;
-    return fileSizeInBytes <= maxSizeInBytes;
-  }
-
-  /// Extrair extensão do arquivo
   String _getFileExtension(String filePath) {
     final int lastDotIndex = filePath.lastIndexOf('.');
     if (lastDotIndex == -1) return '';
     return filePath.substring(lastDotIndex);
   }
 
-  /// Determinar content type baseado na extensão
-  String _getContentType(String filePath) {
-    final extension = _getFileExtension(filePath).toLowerCase();
-    switch (extension) {
-      case '.jpg':
-      case '.jpeg':
-        return 'image/jpeg';
-      case '.png':
-        return 'image/png';
-      case '.webp':
-        return 'image/webp';
-      default:
-        return 'image/jpeg';
-    }
-  }
-
-  /// Determinar pasta de upload
   String _determineFolder(String? folder, String? uploadType) {
     if (folder != null) return folder;
-
     if (uploadType != null && config.folders.containsKey(uploadType)) {
       return config.folders[uploadType]!;
     }
-
     return config.defaultFolder;
   }
 
-  /// Gerar ID único usando Firebase Firestore
-  /// Substitui o uso de UUID por IDs nativos do Firebase
   String _generateFirebaseId() {
     return _firestore.collection('_').doc().id;
   }
 
-  /// Converter MIME type para extensão de arquivo
-  String _getExtensionFromMimeType(String mimeType) {
-    switch (mimeType.toLowerCase()) {
-      case 'image/jpeg':
-      case 'image/jpg':
-        return '.jpg';
-      case 'image/png':
-        return '.png';
-      case 'image/webp':
-        return '.webp';
-      case 'image/gif':
-        return '.gif';
-      case 'image/bmp':
-        return '.bmp';
-      default:
-        return '.jpg';
-    }
-  }
-
-  /// Comprimir imagem (placeholder para implementação futura)
-  Future<Result<File>> compressImage(
-    File imageFile, {
+  /// Comprimir imagem (placeholder)
+  Future<Result<PickedImage>> compressImage(
+    PickedImage image, {
     int? maxWidth,
     int? maxHeight,
     int? quality,
   }) async {
-    return ResultUtils.tryExecuteAsync(() async {
-      return imageFile;
-    });
+    return Result.success(image);
   }
 }
 
@@ -613,10 +595,8 @@ enum ImageUploadType {
   final String folder;
 }
 
-/// Generic configurations that apps can use as a base
-/// Apps should define their own specific configurations in their respective folders
+/// Configurações padrão
 class DefaultImageConfigs {
-  /// Standard quality configuration for most use cases
   static const standard = ImageServiceConfig(
     maxWidth: 1920,
     maxHeight: 1920,
@@ -626,7 +606,6 @@ class DefaultImageConfigs {
     folders: {},
   );
 
-  /// High quality configuration for apps that need better image quality
   static const highQuality = ImageServiceConfig(
     maxWidth: 2048,
     maxHeight: 2048,
@@ -636,7 +615,6 @@ class DefaultImageConfigs {
     folders: {},
   );
 
-  /// Optimized configuration for mobile with lower quality for bandwidth saving
   static const optimized = ImageServiceConfig(
     maxWidth: 1280,
     maxHeight: 1280,

@@ -87,7 +87,6 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Busca veículos do usuário que não foram deletados
   Future<List<VehicleData>> findByUserId(String userId) async {
-    if (_db == null) return [];
     final query = _db.select(_db.vehicles)
       ..where((tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false))
       ..orderBy([(tbl) => OrderingTerm.asc(tbl.modelo)]);
@@ -98,7 +97,6 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Stream de veículos do usuário
   Stream<List<VehicleData>> watchByUserId(String userId) {
-    if (_db == null) return Stream.empty();
     final query = _db.select(_db.vehicles)
       ..where((tbl) => tbl.userId.equals(userId) & tbl.isDeleted.equals(false))
       ..orderBy([(tbl) => OrderingTerm.asc(tbl.modelo)]);
@@ -110,7 +108,6 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Busca veículo pela placa
   Future<VehicleData?> findByPlate(String userId, String placa) async {
-    if (_db == null) return null;
     final query = _db.select(_db.vehicles)
       ..where(
         (tbl) =>
@@ -126,7 +123,6 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Busca veículos vendidos
   Future<List<VehicleData>> findSoldVehicles(String userId) async {
-    if (_db == null) return [];
     final query = _db.select(_db.vehicles)
       ..where(
         (tbl) =>
@@ -142,7 +138,6 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Busca veículos ativos (não vendidos)
   Future<List<VehicleData>> findActiveVehicles(String userId) async {
-    if (_db == null) return [];
     final query = _db.select(_db.vehicles)
       ..where(
         (tbl) =>
@@ -158,7 +153,6 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Stream de veículos ativos
   Stream<List<VehicleData>> watchActiveVehicles(String userId) {
-    if (_db == null) return Stream.empty();
     final query = _db.select(_db.vehicles)
       ..where(
         (tbl) =>
@@ -175,7 +169,6 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Conta veículos ativos do usuário
   Future<int> countActiveVehicles(String userId) async {
-    if (_db == null) return 0;
     final query = _db.selectOnly(_db.vehicles)
       ..addColumns([_db.vehicles.id.count()])
       ..where(
@@ -190,7 +183,6 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Atualiza o odômetro atual de um veículo
   Future<bool> updateOdometer(int vehicleId, double newOdometer) async {
-    if (_db == null) return false;
     final rowsAffected =
         await (_db.update(
           _db.vehicles,
@@ -206,7 +198,6 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Marca um veículo como vendido
   Future<bool> markAsSold(int vehicleId, double saleValue) async {
-    if (_db == null) return false;
     final rowsAffected =
         await (_db.update(
           _db.vehicles,
@@ -223,7 +214,6 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Soft delete de um veículo
   Future<bool> softDelete(int vehicleId) async {
-    if (_db == null) return false;
     final rowsAffected =
         await (_db.update(
           _db.vehicles,
@@ -239,7 +229,6 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Busca veículos que precisam ser sincronizados
   Future<List<VehicleData>> findDirtyRecords() async {
-    if (_db == null) return [];
     final query = _db.select(_db.vehicles)
       ..where((tbl) => tbl.isDirty.equals(true));
 
@@ -249,7 +238,6 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Marca registros como sincronizados
   Future<void> markAsSynced(List<int> vehicleIds) async {
-    if (_db == null) return;
     await _db.executeTransaction(() async {
       for (final id in vehicleIds) {
         await (_db.update(
@@ -266,7 +254,6 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Busca veículos por ano
   Future<List<VehicleData>> findByYear(String userId, int year) async {
-    if (_db == null) return [];
     final query = _db.select(_db.vehicles)
       ..where(
         (tbl) =>
@@ -282,7 +269,6 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Busca veículos por marca
   Future<List<VehicleData>> findByBrand(String userId, String marca) async {
-    if (_db == null) return [];
     final query = _db.select(_db.vehicles)
       ..where(
         (tbl) =>
@@ -298,7 +284,6 @@ class VehicleRepository extends BaseDriftRepositoryImpl<VehicleData, Vehicle> {
 
   /// Busca todas as marcas distintas do usuário
   Future<List<String>> findDistinctBrands(String userId) async {
-    if (_db == null) return [];
     final query = _db.selectOnly(_db.vehicles, distinct: true)
       ..addColumns([_db.vehicles.marca])
       ..where(

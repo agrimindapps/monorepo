@@ -20,9 +20,8 @@ import 'favoritos_validator_service.dart';
 /// - Now uses FavoritoEntityFactoryRegistry (Strategy Pattern)
 /// - Extensible: adding new tipos doesn't require modifying this service
 class FavoritosService {
-  // Lazy loading do repository (evita erro de acesso antes do registro no GetIt)
+  // Lazy loading do repository
   late final FavoritoRepository _repository;
-  bool _repositoryInitialized = false;
 
   // Specialized Services (injetadas via construtor - DIP)
   final FavoritosDataResolverService _dataResolver;
@@ -43,8 +42,7 @@ class FavoritosService {
        _syncService = syncService,
        _cache = cache,
        _factoryRegistry = factoryRegistry,
-       _repository = repository,
-       _repositoryInitialized = true;
+       _repository = repository;
 
   // Getter lazy para repository (inicializado na primeira vez que é acessado)
   FavoritoRepository get repo => _repository;

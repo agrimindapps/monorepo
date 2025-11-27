@@ -1,7 +1,7 @@
 import 'package:app_plantis/features/sync/domain/entities/sync_result.dart';
 import 'package:app_plantis/features/sync/domain/repositories/i_sync_orchestration_repository.dart';
 import 'package:app_plantis/features/sync/domain/usecases/trigger_manual_sync_usecase.dart';
-import 'package:core/core.dart' hide test;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

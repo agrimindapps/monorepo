@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../database/providers/database_providers.dart';
 import '../../features/plants/data/repositories/plant_comments_repository_impl.dart';
 import '../../features/plants/domain/repositories/plant_comments_repository.dart';
 import '../data/models/comentario_model.dart';
@@ -9,7 +10,8 @@ part 'comments_providers.g.dart';
 
 @riverpod
 PlantCommentsRepository plantCommentsRepository(Ref ref) {
-  return PlantCommentsRepositoryImpl();
+  final driftRepository = ref.watch(commentsDriftRepositoryProvider);
+  return PlantCommentsRepositoryImpl(driftRepository);
 }
 @immutable
 class CommentsState {

@@ -65,12 +65,12 @@ class DatabaseInitialization {
 /// void main() async {
 ///   WidgetsFlutterBinding.ensureInitialized();
 ///
-///   // 1. Configurar GetIt (injectable)
-///   configureDependencies();
+///   // 1. Configurar Riverpod providers
+///   final container = ProviderContainer();
 ///
 ///   // 2. Inicializar Drift (com migração automática)
 ///   await DatabaseInitialization.initialize(
-///     getIt: getIt,
+///     container: container,
 ///     runMigration: true,
 ///   );
 ///

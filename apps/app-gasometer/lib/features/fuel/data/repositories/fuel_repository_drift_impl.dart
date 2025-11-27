@@ -1,17 +1,29 @@
+import 'dart:developer' as developer;
+
 import 'package:core/core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import '../../../../database/repositories/fuel_supply_repository.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../../domain/repositories/fuel_repository.dart';
 import '../datasources/fuel_supply_local_datasource.dart';
+import '../sync/fuel_supply_drift_sync_adapter.dart';
 
 /// Implementação do repositório de combustível usando Drift
+/// 
+/// Padrão "Sync-on-Write": Sincroniza imediatamente com Firebase quando online,
+/// seguindo o padrão do app-plantis. Background sync permanece como fallback.
 
 class FuelRepositoryDriftImpl implements FuelRepository {
-  const FuelRepositoryDriftImpl(this._dataSource);
+  const FuelRepositoryDriftImpl(
+    this._dataSource,
+    this._connectivityService,
+    this._syncAdapter,
+  );
 
   final FuelSupplyLocalDataSource _dataSource;
+  final ConnectivityService _connectivityService;
+  final FuelSupplyDriftSyncAdapter _syncAdapter;
 
   String get _userId {
     final user = FirebaseAuth.instance.currentUser;
@@ -91,6 +103,12 @@ class FuelRepositoryDriftImpl implements FuelRepository {
     FuelRecordEntity fuelRecord,
   ) async {
     try {
+      developer.log(
+        '🔵 FuelRepository.addFuelRecord() - Starting',
+        name: 'FuelRepository',
+      );
+
+      // 1. Salvar localmente primeiro (sempre)
       final id = await _dataSource.create(
         userId: _userId,
         vehicleId: int.parse(fuelRecord.vehicleId),
@@ -105,14 +123,70 @@ class FuelRepositoryDriftImpl implements FuelRepository {
         notes: fuelRecord.notes,
       );
 
-      // Buscar o registro criado para retornar
       final created = await _dataSource.findById(id);
       if (created == null) {
         return const Left(CacheFailure('Failed to retrieve created record'));
       }
 
-      return Right(_toEntity(created));
+      var entity = _toEntity(created);
+      developer.log(
+        '✅ FuelRepository.addFuelRecord() - Saved locally with id=$id',
+        name: 'FuelRepository',
+      );
+
+      // 2. Sync-on-Write: Se online, sincronizar imediatamente com Firebase
+      final isOnlineResult = await _connectivityService.isOnline();
+      final isOnline = isOnlineResult.fold((_) => false, (online) => online);
+
+      if (isOnline) {
+        developer.log(
+          '🌐 FuelRepository.addFuelRecord() - Online, syncing to Firebase...',
+          name: 'FuelRepository',
+        );
+        try {
+          // Push para Firebase usando o adapter
+          final pushResult = await _syncAdapter.pushDirtyRecords(_userId);
+          
+          pushResult.fold(
+            (failure) {
+              developer.log(
+                '⚠️ FuelRepository.addFuelRecord() - Sync failed: ${failure.message}. Will retry via background sync.',
+                name: 'FuelRepository',
+              );
+            },
+            (result) {
+              developer.log(
+                '✅ FuelRepository.addFuelRecord() - Synced to Firebase (${result.recordsPushed} pushed, ${result.recordsFailed} failed)',
+                name: 'FuelRepository',
+              );
+            },
+          );
+          
+          // Reload entity com estado atualizado (isDirty=false, firebaseId set)
+          final refreshed = await _dataSource.findById(id);
+          if (refreshed != null) {
+            entity = _toEntity(refreshed);
+          }
+        } catch (e) {
+          developer.log(
+            '⚠️ FuelRepository.addFuelRecord() - Sync error: $e. Will retry via background sync.',
+            name: 'FuelRepository',
+          );
+          // Falhou remoto, mas local já está salvo - retorna local
+        }
+      } else {
+        developer.log(
+          '📴 FuelRepository.addFuelRecord() - Offline, will sync later via background sync',
+          name: 'FuelRepository',
+        );
+      }
+
+      return Right(entity);
     } catch (e) {
+      developer.log(
+        '❌ FuelRepository.addFuelRecord() - Error: $e',
+        name: 'FuelRepository',
+      );
       return Left(CacheFailure(e.toString()));
     }
   }
@@ -122,6 +196,12 @@ class FuelRepositoryDriftImpl implements FuelRepository {
     FuelRecordEntity fuelRecord,
   ) async {
     try {
+      developer.log(
+        '🔵 FuelRepository.updateFuelRecord() - Starting for id=${fuelRecord.id}',
+        name: 'FuelRepository',
+      );
+
+      // 1. Atualizar localmente primeiro
       final success = await _dataSource.update(
         id: int.parse(fuelRecord.id),
         userId: _userId,
@@ -141,14 +221,63 @@ class FuelRepositoryDriftImpl implements FuelRepository {
         return const Left(CacheFailure('Failed to update fuel record'));
       }
 
-      // Buscar o registro atualizado para retornar
       final updated = await _dataSource.findById(int.parse(fuelRecord.id));
       if (updated == null) {
         return const Left(CacheFailure('Failed to retrieve updated record'));
       }
 
-      return Right(_toEntity(updated));
+      var entity = _toEntity(updated);
+      developer.log(
+        '✅ FuelRepository.updateFuelRecord() - Updated locally',
+        name: 'FuelRepository',
+      );
+
+      // 2. Sync-on-Write: Se online, sincronizar imediatamente
+      final isOnlineResult = await _connectivityService.isOnline();
+      final isOnline = isOnlineResult.fold((_) => false, (online) => online);
+
+      if (isOnline) {
+        developer.log(
+          '🌐 FuelRepository.updateFuelRecord() - Online, syncing to Firebase...',
+          name: 'FuelRepository',
+        );
+        try {
+          final pushResult = await _syncAdapter.pushDirtyRecords(_userId);
+          
+          pushResult.fold(
+            (failure) {
+              developer.log(
+                '⚠️ FuelRepository.updateFuelRecord() - Sync failed: ${failure.message}',
+                name: 'FuelRepository',
+              );
+            },
+            (result) {
+              developer.log(
+                '✅ FuelRepository.updateFuelRecord() - Synced to Firebase',
+                name: 'FuelRepository',
+              );
+            },
+          );
+          
+          // Reload entity com estado atualizado
+          final refreshed = await _dataSource.findById(int.parse(fuelRecord.id));
+          if (refreshed != null) {
+            entity = _toEntity(refreshed);
+          }
+        } catch (e) {
+          developer.log(
+            '⚠️ FuelRepository.updateFuelRecord() - Sync error: $e',
+            name: 'FuelRepository',
+          );
+        }
+      }
+
+      return Right(entity);
     } catch (e) {
+      developer.log(
+        '❌ FuelRepository.updateFuelRecord() - Error: $e',
+        name: 'FuelRepository',
+      );
       return Left(CacheFailure(e.toString()));
     }
   }
@@ -156,6 +285,12 @@ class FuelRepositoryDriftImpl implements FuelRepository {
   @override
   Future<Either<Failure, Unit>> deleteFuelRecord(String id) async {
     try {
+      developer.log(
+        '🔵 FuelRepository.deleteFuelRecord() - Starting for id=$id',
+        name: 'FuelRepository',
+      );
+
+      // 1. Soft delete localmente primeiro (marca isDeleted=true, isDirty=true)
       final idInt = int.parse(id);
       final success = await _dataSource.delete(idInt);
 
@@ -163,8 +298,51 @@ class FuelRepositoryDriftImpl implements FuelRepository {
         return const Left(CacheFailure('Failed to delete fuel record'));
       }
 
+      developer.log(
+        '✅ FuelRepository.deleteFuelRecord() - Marked as deleted locally',
+        name: 'FuelRepository',
+      );
+
+      // 2. Sync-on-Write: Se online, sincronizar imediatamente
+      final isOnlineResult = await _connectivityService.isOnline();
+      final isOnline = isOnlineResult.fold((_) => false, (online) => online);
+
+      if (isOnline) {
+        developer.log(
+          '🌐 FuelRepository.deleteFuelRecord() - Online, syncing deletion to Firebase...',
+          name: 'FuelRepository',
+        );
+        try {
+          final pushResult = await _syncAdapter.pushDirtyRecords(_userId);
+          
+          pushResult.fold(
+            (failure) {
+              developer.log(
+                '⚠️ FuelRepository.deleteFuelRecord() - Sync failed: ${failure.message}',
+                name: 'FuelRepository',
+              );
+            },
+            (result) {
+              developer.log(
+                '✅ FuelRepository.deleteFuelRecord() - Synced deletion to Firebase',
+                name: 'FuelRepository',
+              );
+            },
+          );
+        } catch (e) {
+          developer.log(
+            '⚠️ FuelRepository.deleteFuelRecord() - Sync error: $e',
+            name: 'FuelRepository',
+          );
+        }
+      }
+
       return const Right(unit);
     } catch (e) {
+      developer.log(
+        '❌ FuelRepository.deleteFuelRecord() - Error: $e',
+        name: 'FuelRepository',
+      );
       return Left(CacheFailure(e.toString()));
     }
   }

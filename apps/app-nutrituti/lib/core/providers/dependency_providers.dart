@@ -26,7 +26,7 @@ part 'dependency_providers.g.dart';
 /// DEPENDENCY PROVIDERS - Riverpod 3.0 Implementation
 /// ============================================================================
 ///
-/// Providers centralizados para substituir GetIt/Injectable.
+/// Providers centralizados para injeção de dependências.
 ///
 /// **PADRÃO RIVERPOD 3.0:**
 /// - Usa @riverpod para code generation

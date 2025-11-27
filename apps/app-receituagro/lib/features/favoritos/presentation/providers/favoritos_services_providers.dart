@@ -3,10 +3,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' hide Ref;
 
 import '../../../../database/providers/database_providers.dart';
-import '../../../../database/repositories/culturas_repository.dart';
-import '../../../../database/repositories/diagnostico_repository.dart';
-import '../../../../database/repositories/fitossanitarios_repository.dart';
-import '../../../../database/repositories/pragas_repository.dart';
 import '../../data/factories/favorito_entity_factory_registry.dart';
 import '../../data/services/favoritos_cache_service_inline.dart';
 import '../../data/services/favoritos_data_resolver_service.dart';

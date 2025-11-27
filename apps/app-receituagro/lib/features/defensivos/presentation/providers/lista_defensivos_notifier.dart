@@ -7,7 +7,6 @@ import '../../../../core/providers/core_providers.dart' as core_providers;
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../data/view_mode.dart';
-import 'defensivos_providers.dart';
 
 part 'lista_defensivos_notifier.g.dart';
 

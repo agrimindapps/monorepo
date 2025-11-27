@@ -1,12 +1,6 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:core/core.dart' hide Column;
-import 'package:flutter/foundation.dart';
-import 'package:mime/mime.dart';
 
 /// Interface para abstração do ImageService
-/// Resolve violação DIP - dependência de implementação concreta
 abstract class IImageService {
   Future<Either<Failure, String>> pickFromCamera();
   Future<Either<Failure, String>> pickFromGallery();
@@ -14,7 +8,7 @@ abstract class IImageService {
   Future<Either<Failure, void>> deleteImage(String imageUrl);
 }
 
-/// Adapter para o ImageService existente
+/// Adapter para o ImageService - Cross-platform
 class ImageServiceAdapter implements IImageService {
   final ImageService _imageService;
   
@@ -24,18 +18,9 @@ class ImageServiceAdapter implements IImageService {
   Future<Either<Failure, String>> pickFromCamera() async {
     try {
       final result = await _imageService.pickImageFromCamera();
-      return await result.fold(
-        (error) async => Left(CacheFailure(error.message)),
-        (file) async {
-          try {
-            final bytes = await file.readAsBytes();
-            final base64String = base64Encode(bytes);
-            final mimeType = lookupMimeType(file.path) ?? 'image/jpeg';
-            return Right('data:$mimeType;base64,$base64String');
-          } catch (e) {
-            return Left(CacheFailure('Erro ao processar imagem: $e'));
-          }
-        },
+      return result.fold(
+        (error) => Left(CacheFailure(error.message)),
+        (image) => Right(image.toBase64DataUri()),
       );
     } catch (e) {
       return Left(CacheFailure('Erro ao capturar imagem: $e'));
@@ -46,18 +31,9 @@ class ImageServiceAdapter implements IImageService {
   Future<Either<Failure, String>> pickFromGallery() async {
     try {
       final result = await _imageService.pickImageFromGallery();
-      return await result.fold(
-        (error) async => Left(CacheFailure(error.message)),
-        (file) async {
-          try {
-            final bytes = await file.readAsBytes();
-            final base64String = base64Encode(bytes);
-            final mimeType = lookupMimeType(file.path) ?? 'image/jpeg';
-            return Right('data:$mimeType;base64,$base64String');
-          } catch (e) {
-            return Left(CacheFailure('Erro ao processar imagem: $e'));
-          }
-        },
+      return result.fold(
+        (error) => Left(CacheFailure(error.message)),
+        (image) => Right(image.toBase64DataUri()),
       );
     } catch (e) {
       return Left(CacheFailure('Erro ao selecionar imagem: $e'));
@@ -65,13 +41,13 @@ class ImageServiceAdapter implements IImageService {
   }
   
   @override
-  Future<Either<Failure, List<String>>> uploadImages(List<String> imagePaths) async {
+  Future<Either<Failure, List<String>>> uploadImages(List<String> base64Images) async {
     try {
       final results = <String>[];
       
-      for (final path in imagePaths) {
-        final file = File(path);
-        final result = await _imageService.uploadImage(file);
+      for (final base64Data in base64Images) {
+        final image = PickedImage.fromBase64(base64Data);
+        final result = await _imageService.uploadImage(image);
         result.fold(
           (error) => throw Exception(error.message),
           (uploadResult) => results.add(uploadResult.downloadUrl),
@@ -212,11 +188,8 @@ class ImageManagementService {
     );
   }
   
-  /// Upload de múltiplas imagens com retry e progress tracking
-  /// Em web, converte Base64 diretamente. Em mobile/desktop, cria File temporário.
-  ///
-  /// Nota: Utiliza abstração IImageService para manter DIP (Dependency Inversion Principle)
-  /// Permite injeção de diferentes implementações de ImageService
+  /// Upload de múltiplas imagens (Cross-platform)
+  /// Funciona em Web, Mobile e Desktop
   Future<Either<Failure, List<String>>> uploadImages(
     List<String> base64Images, {
     void Function(int index, double progress)? onProgress,
@@ -232,184 +205,12 @@ class ImageManagementService {
         }
       }
 
-      // Converter Base64 para File temporário (apenas mobile/desktop)
-      // Em web, será null e faremos upload direto do Base64
-      final tempFiles = <File?>[];
-      for (int i = 0; i < base64Images.length; i++) {
-        final base64Image = base64Images[i];
-        final file = await _convertBase64ToFile(base64Image);
-        // Em web, file será null - isso é esperado
-        tempFiles.add(file);
-      }
-
-      // Upload com retry
-      final results = <String>[];
-      for (int i = 0; i < base64Images.length; i++) {
-        final tempFile = tempFiles[i];
-        final base64Image = base64Images[i];
-
-        // Em web (tempFile null), faz upload direto de Base64
-        if (tempFile == null && kIsWeb) {
-          // Extrai MIME type do Base64 ou usa padrão
-          String mimeType = 'image/jpeg';
-          if (base64Image.contains('data:')) {
-            final mimeMatch =
-                RegExp(r'data:([^;]+)').firstMatch(base64Image);
-            if (mimeMatch != null) {
-              mimeType = mimeMatch.group(1) ?? 'image/jpeg';
-            }
-          }
-
-          // Sanitiza o nome do arquivo
-          final fileName = _sanitizeFileName(
-            'image_${DateTime.now().millisecondsSinceEpoch}',
-          );
-
-          // Upload direto de Base64 via IImageService (DIP - Dependency Inversion)
-          final result = await _uploadBase64Image(
-            base64Image,
-            fileName,
-            mimeType,
-            i,
-            onProgress,
-          );
-
-          result.fold(
-            (error) {
-              throw Exception(
-                'Erro ao fazer upload da imagem ${i + 1}: ${error.message}',
-              );
-            },
-            (uploadResult) => results.add(uploadResult),
-          );
-        } else if (tempFile == null) {
-          return Left(ValidationFailure('Erro ao processar imagem ${i + 1}'));
-        } else {
-          // Mobile/Desktop: Upload normal com File via IImageService (DIP)
-          final result = await _uploadFileImage(
-            tempFile,
-            i,
-            onProgress,
-          );
-
-          result.fold(
-            (error) {
-              throw Exception(
-                'Erro ao fazer upload da imagem ${i + 1}: ${error.message}',
-              );
-            },
-            (uploadResult) => results.add(uploadResult),
-          );
-        }
-      }
-
-      // Cleanup dos arquivos temporários após sucesso
-      for (final tempFile in tempFiles) {
-        if (tempFile != null && tempFile.existsSync()) {
-          try {
-            tempFile.deleteSync();
-          } catch (_) {
-            // Ignora erros ao deletar arquivo temporário
-          }
-        }
-      }
-
-      return Right(results);
+      // Upload usando a interface IImageService
+      final result = await _imageService.uploadImages(base64Images);
+      return result;
     } catch (e) {
       return Left(NetworkFailure('Erro no upload: $e'));
     }
-  }
-
-  /// Upload de imagem Base64 via IImageService
-  /// Utiliza abstração para manter DIP
-  Future<Either<Failure, String>> _uploadBase64Image(
-    String base64Image,
-    String fileName,
-    String mimeType,
-    int index,
-    void Function(int index, double progress)? onProgress,
-  ) async {
-    try {
-      // TODO: Implementar abstração específica para Base64 upload
-      // Por agora, retorna erro padrão
-      return const Left(
-        NetworkFailure(
-          'Upload Base64 requer implementação na camada de dados',
-        ),
-      );
-    } catch (e) {
-      return Left(NetworkFailure('Erro ao enviar imagem: $e'));
-    }
-  }
-
-  /// Upload de imagem File via IImageService
-  /// Utiliza abstração para manter DIP
-  Future<Either<Failure, String>> _uploadFileImage(
-    File file,
-    int index,
-    void Function(int index, double progress)? onProgress,
-  ) async {
-    try {
-      final images = <String>[file.path];
-      final result = await _imageService.uploadImages(images);
-
-      return result.fold(
-        (failure) => Left(failure),
-        (urls) => Right(urls.isNotEmpty ? urls[0] : ''),
-      );
-    } catch (e) {
-      return Left(NetworkFailure('Erro ao enviar imagem: $e'));
-    }
-  }
-
-  /// Converte Base64 para File temporário (apenas mobile/desktop)
-  /// Em web, retorna null pois File não funciona nessa plataforma
-  Future<File?> _convertBase64ToFile(String base64Image) async {
-    // Em web, não é possível criar File temporário
-    // A imagem será uploadada diretamente como Base64
-    if (kIsWeb) {
-      return null;
-    }
-
-    try {
-      // Remove o prefixo data:image/...;base64,
-      final base64Data = base64Image.split(',').last;
-      final bytes = base64Decode(base64Data);
-
-      // Cria arquivo temporário (apenas mobile/desktop)
-      final tempDir = Directory.systemTemp;
-      final tempFile = File('${tempDir.path}/temp_${DateTime.now().millisecondsSinceEpoch}.jpg');
-
-      await tempFile.writeAsBytes(bytes);
-
-      return tempFile;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// Sanitiza nome de arquivo removendo espaços e caracteres especiais
-  String _sanitizeFileName(String fileName) {
-    // Remove espaços e substitui por underscore
-    String sanitized = fileName.replaceAll(RegExp(r'\s+'), '_');
-
-    // Remove caracteres especiais mantendo apenas alphanumericos, pontos, hífens e underscores
-    sanitized = sanitized.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '');
-
-    // Remove múltiplos underscores consecutivos
-    sanitized = sanitized.replaceAll(RegExp(r'_+'), '_');
-
-    // Remove pontos no início
-    while (sanitized.startsWith('.')) {
-      sanitized = sanitized.substring(1);
-    }
-
-    // Se ficou vazio, usa um padrão
-    if (sanitized.isEmpty) {
-      sanitized = 'image_${DateTime.now().millisecondsSinceEpoch}';
-    }
-
-    return sanitized;
   }
 
   /// Deleta imagem do servidor

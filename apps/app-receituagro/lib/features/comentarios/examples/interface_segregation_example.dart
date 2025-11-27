@@ -86,16 +86,16 @@ class ComentariosSyncService {
 /// ✅ Example 4: Dependency Injection with segregated interfaces
 class ExampleDependencySetup {
   void setupServices() {
-    // In real code, use GetIt or another DI container
+    // In real code, use Riverpod providers for DI
 
     // Read-only services get read repository
     // final listService = ComentariosListService(
-    //   getIt<IComentariosReadRepository>(),
+    //   ref.watch(comentariosReadRepositoryProvider),
     // );
 
     // Write-only services get write repository
     // final editorService = ComentariosEditorService(
-    //   getIt<IComentariosWriteRepository>(),
+    //   ref.watch(comentariosWriteRepositoryProvider),
     // );
 
     // Services needing both get combined interface

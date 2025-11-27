@@ -5,7 +5,6 @@ import '../../../../core/providers/repository_providers.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/usecases/delete_plant_usecase.dart';
 import '../../domain/usecases/get_plant_by_id_usecase.dart';
-import '../../domain/usecases/get_plants_usecase.dart';
 import '../../domain/usecases/update_plant_usecase.dart';
 
 part 'plant_details_provider.freezed.dart';

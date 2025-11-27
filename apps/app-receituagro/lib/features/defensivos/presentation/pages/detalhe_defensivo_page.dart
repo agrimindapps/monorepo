@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/services/access_history_service.dart';
 import '../../../../core/services/diagnosticos_data_loader.dart';
-import '../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../../core/widgets/standard_tab_bar_widget.dart';
 import '../../../../database/receituagro_database.dart';

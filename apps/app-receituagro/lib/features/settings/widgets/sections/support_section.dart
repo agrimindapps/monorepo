@@ -2,7 +2,6 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/core_providers.dart';
-import '../../../../core/providers/core_providers.dart';
 import '../../constants/settings_design_tokens.dart';
 import '../dialogs/feedback_dialog.dart';
 import '../shared/section_header.dart';

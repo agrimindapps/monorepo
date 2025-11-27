@@ -127,15 +127,19 @@ final expensesLocalDataSourceProvider = Provider<ExpensesLocalDataSource>((ref) 
   return ExpensesLocalDataSource(driftRepo, syncTrigger);
 });
 
-// Repositories
+// Repositories (with Sync-on-Write pattern - like app-plantis)
 final vehicleRepositoryProvider = Provider<VehicleRepository>((ref) {
   final dataSource = ref.watch(vehicleLocalDataSourceProvider);
-  return VehicleRepositoryDriftImpl(dataSource);
+  final connectivityService = ref.watch(connectivityServiceProvider);
+  final syncAdapter = ref.watch(vehicleDriftSyncAdapterProvider);
+  return VehicleRepositoryDriftImpl(dataSource, connectivityService, syncAdapter);
 });
 
 final fuelRepositoryProvider = Provider<FuelRepository>((ref) {
   final dataSource = ref.watch(fuelSupplyLocalDataSourceProvider);
-  return FuelRepositoryDriftImpl(dataSource);
+  final connectivityService = ref.watch(connectivityServiceProvider);
+  final syncAdapter = ref.watch(fuelSupplyDriftSyncAdapterProvider);
+  return FuelRepositoryDriftImpl(dataSource, connectivityService, syncAdapter);
 });
 
 // Use Cases - Vehicles

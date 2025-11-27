@@ -84,7 +84,7 @@ class PetivetiDatabase extends _$PetivetiDatabase with BaseDriftDatabase {
   @override
   int get schemaVersion => 1;
 
-  /// Factory constructor para injeção de dependência (GetIt/Injectable)
+  /// Factory constructor para injeção de dependência via Riverpod
   ///
   /// Retorna a instância de produção.
   // @factoryMethod

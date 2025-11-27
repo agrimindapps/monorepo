@@ -70,7 +70,6 @@ class OdometerReadingRepository
 
   /// Busca leituras de odômetro de um veículo
   Future<List<OdometerReadingData>> findByVehicleId(int vehicleId) async {
-    if (_db == null) return [];
     final query = _db.select(_db.odometerReadings)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
@@ -83,7 +82,6 @@ class OdometerReadingRepository
 
   /// Stream de leituras de odômetro de um veículo
   Stream<List<OdometerReadingData>> watchByVehicleId(int vehicleId) {
-    if (_db == null) return Stream.empty();
     final query = _db.select(_db.odometerReadings)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
@@ -97,7 +95,6 @@ class OdometerReadingRepository
 
   /// Busca última leitura de odômetro
   Future<OdometerReadingData?> findLatestByVehicleId(int vehicleId) async {
-    if (_db == null) return null;
     final query = _db.select(_db.odometerReadings)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
@@ -111,7 +108,6 @@ class OdometerReadingRepository
 
   /// Stream da última leitura de odômetro
   Stream<OdometerReadingData?> watchLatestByVehicleId(int vehicleId) {
-    if (_db == null) return Stream.value(null);
     final query = _db.select(_db.odometerReadings)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
@@ -130,7 +126,6 @@ class OdometerReadingRepository
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    if (_db == null) return [];
     final startMs = startDate.millisecondsSinceEpoch;
     final endMs = endDate.millisecondsSinceEpoch;
 
@@ -150,7 +145,6 @@ class OdometerReadingRepository
 
   /// Busca primeira leitura de odômetro
   Future<OdometerReadingData?> findFirstByVehicleId(int vehicleId) async {
-    if (_db == null) return null;
     final query = _db.select(_db.odometerReadings)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
@@ -194,7 +188,6 @@ class OdometerReadingRepository
 
   /// Calcula odômetro médio por mês
   Future<Map<String, double>> getAverageOdometerByMonth(int vehicleId) async {
-    if (_db == null) return {};
     final query = _db.select(_db.odometerReadings)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
@@ -220,7 +213,6 @@ class OdometerReadingRepository
 
   /// Conta total de leituras de um veículo
   Future<int> countByVehicleId(int vehicleId) async {
-    if (_db == null) return 0;
     final query = _db.selectOnly(_db.odometerReadings)
       ..addColumns([_db.odometerReadings.id.count()])
       ..where(
@@ -237,7 +229,6 @@ class OdometerReadingRepository
     int vehicleId, {
     int limit = 10,
   }) async {
-    if (_db == null) return [];
     final query = _db.select(_db.odometerReadings)
       ..where(
         (tbl) => tbl.vehicleId.equals(vehicleId) & tbl.isDeleted.equals(false),
@@ -255,7 +246,6 @@ class OdometerReadingRepository
     double reading,
     int date,
   ) async {
-    if (_db == null) return false;
     final query = _db.select(_db.odometerReadings)
       ..where(
         (tbl) =>
@@ -272,7 +262,6 @@ class OdometerReadingRepository
 
   /// Busca leituras que precisam ser sincronizadas
   Future<List<OdometerReadingData>> findDirtyRecords() async {
-    if (_db == null) return [];
     final query = _db.select(_db.odometerReadings)
       ..where((tbl) => tbl.isDirty.equals(true));
 
@@ -282,7 +271,6 @@ class OdometerReadingRepository
 
   /// Marca registros como sincronizados
   Future<void> markAsSynced(List<int> readingIds) async {
-    if (_db == null) return;
     await _db.executeTransaction(() async {
       for (final id in readingIds) {
         await (_db.update(
@@ -299,7 +287,6 @@ class OdometerReadingRepository
 
   /// Soft delete de uma leitura
   Future<bool> softDelete(int readingId) async {
-    if (_db == null) return false;
     final rowsAffected =
         await (_db.update(
           _db.odometerReadings,

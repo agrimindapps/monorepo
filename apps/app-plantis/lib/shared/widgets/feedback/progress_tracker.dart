@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'feedback_system.dart';
-import 'haptic_service.dart';
-import 'toast_service.dart';
 
 /// Sistema de tracking de progresso para operações de longa duração
 /// Especializado em uploads, downloads e processamento de dados

@@ -1,4 +1,3 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 
 /// Resultado de uma fase de sincronização

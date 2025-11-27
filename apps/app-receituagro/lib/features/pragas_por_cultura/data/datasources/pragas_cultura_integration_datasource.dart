@@ -1,5 +1,3 @@
-import 'package:core/core.dart' hide Column;
-
 import '../../../../database/repositories/diagnostico_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../../database/repositories/pragas_repository.dart';

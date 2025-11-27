@@ -1,6 +1,6 @@
 import 'package:app_plantis/features/tasks/domain/entities/task.dart';
 import 'package:app_plantis/features/tasks/domain/repositories/tasks_repository.dart';
-import 'package:core/core.dart' hide test, Task;
+import 'package:core/core.dart' hide Column, Task;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../../helpers/test_fixtures.dart';

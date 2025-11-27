@@ -54,7 +54,6 @@ class AuditTrailRepository {
 
   /// Busca entradas de auditoria por entidade
   Future<List<AuditTrailEntry>> getByEntity(String entityId) async {
-    if (_db == null) return [];
     final query = _db.select(_db.auditTrail)
       ..where((t) => t.entityId.equals(entityId));
     final results = await query.get();
@@ -63,7 +62,6 @@ class AuditTrailRepository {
 
   /// Busca entradas de auditoria por tipo de entidade
   Future<List<AuditTrailEntry>> getByEntityType(String entityType) async {
-    if (_db == null) return [];
     final query = _db.select(_db.auditTrail)
       ..where((t) => t.entityType.equals(entityType));
     final results = await query.get();
@@ -72,7 +70,6 @@ class AuditTrailRepository {
 
   /// Busca entradas de auditoria por tipo de evento
   Future<List<AuditTrailEntry>> getByEventType(String eventType) async {
-    if (_db == null) return [];
     final query = _db.select(_db.auditTrail)
       ..where((t) => t.eventType.equals(eventType));
     final results = await query.get();
@@ -84,7 +81,6 @@ class AuditTrailRepository {
     DateTime start,
     DateTime end,
   ) async {
-    if (_db == null) return [];
     final query = _db.select(_db.auditTrail)
       ..where((t) => t.timestamp.isBetweenValues(start, end));
     final results = await query.get();
@@ -96,7 +92,6 @@ class AuditTrailRepository {
     double minValue = 1000.0,
     int days = 30,
   }) async {
-    if (_db == null) return [];
     final startDate = DateTime.now().subtract(Duration(days: days));
     final query = _db.select(_db.auditTrail)
       ..where(
@@ -111,7 +106,6 @@ class AuditTrailRepository {
 
   /// Conta total de entradas de auditoria
   Future<int> countEntries() async {
-    if (_db == null) return 0;
     final query = _db.selectOnly(_db.auditTrail)
       ..addColumns([_db.auditTrail.id.count()]);
     final result = await query.getSingle();
@@ -120,7 +114,6 @@ class AuditTrailRepository {
 
   /// Limpa entradas antigas (mais de X dias)
   Future<int> cleanOldEntries(int daysToKeep) async {
-    if (_db == null) return 0;
     final cutoffDate = DateTime.now().subtract(Duration(days: daysToKeep));
     return await (_db.delete(
       _db.auditTrail,
@@ -152,7 +145,6 @@ class AuditTrailRepository {
 
   /// Insere uma nova entrada de auditoria
   Future<int> insert(AuditTrailEntry entry) async {
-    if (_db == null) return 0;
     return await _db.into(_db.auditTrail).insert(toCompanion(entry));
   }
 }

@@ -8,7 +8,6 @@ import '../../domain/usecases/get_plants_usecase.dart';
 import '../../domain/usecases/search_plants_usecase.dart';
 import '../../domain/usecases/update_plant_usecase.dart';
 import '../../domain/services/plant_task_generator.dart';
-import '../../domain/repositories/plant_comments_repository.dart';
 import '../../../tasks/domain/usecases/generate_initial_tasks_usecase.dart';
 import '../../../tasks/presentation/providers/tasks_providers.dart';
 import '../../../../core/services/task_generation_service.dart';

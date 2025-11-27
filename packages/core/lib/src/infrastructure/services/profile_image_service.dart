@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
@@ -9,7 +7,7 @@ import '../../shared/utils/result.dart';
 import 'image_service.dart';
 
 /// Serviço especializado para manipulação de imagens de perfil
-/// Utiliza o ImageService existente e Firebase Auth para atualizações completas
+/// Cross-platform: funciona em Web, Mobile e Desktop
 class ProfileImageService {
   final ImageService _imageService;
   final FirebaseAuth _auth;
@@ -37,20 +35,20 @@ class ProfileImageService {
     );
   }
 
-  /// Selecionar imagem da galeria
-  Future<Result<File>> pickImageFromGallery() async {
+  /// Selecionar imagem da galeria (Cross-platform)
+  Future<Result<PickedImage>> pickImageFromGallery() async {
     return await _imageService.pickImageFromGallery();
   }
 
-  /// Capturar imagem da câmera
-  Future<Result<File>> pickImageFromCamera() async {
+  /// Capturar imagem da câmera (Cross-platform)
+  Future<Result<PickedImage>> pickImageFromCamera() async {
     return await _imageService.pickImageFromCamera();
   }
 
-  /// Upload completo de imagem de perfil
+  /// Upload completo de imagem de perfil (Cross-platform)
   /// Faz upload para Firebase Storage e atualiza photoURL no Firebase Auth
   Future<Result<ProfileImageResult>> uploadProfileImage(
-    File imageFile, {
+    PickedImage image, {
     String? userId,
     void Function(double)? onProgress,
   }) async {
@@ -63,14 +61,14 @@ class ProfileImageService {
       }
 
       final targetUserId = userId ?? currentUser.uid;
-      final validationResult = _imageService.validateImage(imageFile);
+      final validationResult = _imageService.validatePickedImage(image);
       if (validationResult.isError) {
         return Future.error(validationResult.error!);
       }
       final storagePath = _config.getStoragePathForUser(targetUserId);
-      const fileName = 'avatar.jpg'; // Nome fixo para facilitar cache e substituição
+      const fileName = 'avatar.jpg';
       final uploadResult = await _imageService.uploadImage(
-        imageFile,
+        image,
         folder: storagePath,
         fileName: fileName,
         uploadType: 'profile',
@@ -94,8 +92,8 @@ class ProfileImageService {
         downloadUrl: imageUploadResult.downloadUrl,
         fileName: imageUploadResult.fileName,
         userId: targetUserId,
-        fileSizeInBytes: imageFile.lengthSync(),
-        contentType: _getContentType(imageFile.path),
+        fileSizeInBytes: image.sizeInBytes,
+        contentType: image.mimeType,
       );
 
       return profileResult;
@@ -196,40 +194,17 @@ class ProfileImageService {
   }
 
   /// Comprimir imagem antes do upload
-  Future<Result<File>> compressImage(File imageFile) async {
-    return await _imageService.compressImage(imageFile);
+  Future<Result<PickedImage>> compressImage(PickedImage image) async {
+    return await _imageService.compressImage(image);
   }
 
   /// Validar imagem de perfil
-  Result<void> validateProfileImage(File imageFile) {
-    return _imageService.validateImage(imageFile);
+  Result<void> validateProfileImage(PickedImage image) {
+    return _imageService.validatePickedImage(image);
   }
 
   /// Obter configuração atual
   ProfileImageConfig get config => _config;
-
-  /// Determinar content type baseado na extensão
-  String _getContentType(String filePath) {
-    final extension = _getFileExtension(filePath).toLowerCase();
-    switch (extension) {
-      case '.jpg':
-      case '.jpeg':
-        return 'image/jpeg';
-      case '.png':
-        return 'image/png';
-      case '.webp':
-        return 'image/webp';
-      default:
-        return 'image/jpeg';
-    }
-  }
-
-  /// Extrair extensão do arquivo
-  String _getFileExtension(String filePath) {
-    final int lastDotIndex = filePath.lastIndexOf('.');
-    if (lastDotIndex == -1) return '';
-    return filePath.substring(lastDotIndex);
-  }
 
   /// Cleanup de imagens antigas (para casos especiais)
   /// Remove todas as imagens de perfil do usuário no Storage

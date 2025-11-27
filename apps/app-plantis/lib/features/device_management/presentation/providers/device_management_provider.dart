@@ -17,7 +17,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
-import '../../../../core/providers/auth_state_provider.dart' as auth_provider;
 import '../../../../core/providers/core_di_providers.dart';
 import '../../data/models/device_model.dart';
 import '../../domain/usecases/get_device_statistics_usecase.dart';

@@ -1,5 +1,3 @@
-import 'package:core/core.dart';
-
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
 

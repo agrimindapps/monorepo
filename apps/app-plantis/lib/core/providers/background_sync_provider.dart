@@ -8,7 +8,6 @@ import '../sync/background_sync_status.dart';
 
 import '../../features/plants/presentation/providers/plants_providers.dart';
 import '../../features/tasks/presentation/providers/tasks_providers.dart';
-import 'auth_providers.dart';
 import 'repository_providers.dart';
 
 part 'background_sync_provider.g.dart';

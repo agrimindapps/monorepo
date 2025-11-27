@@ -4,6 +4,7 @@ import '../repositories/tasks_drift_repository.dart';
 import '../repositories/plants_drift_repository.dart';
 import '../repositories/plant_tasks_drift_repository.dart';
 import '../repositories/spaces_drift_repository.dart';
+import '../repositories/comments_drift_repository.dart';
 
 /// ============================================================================
 /// DATABASE PROVIDERS - Riverpod 3.0 (Manual Providers)
@@ -146,4 +147,9 @@ final plantTasksDriftRepositoryProvider = Provider<PlantTasksDriftRepository>((r
 final spacesDriftRepositoryProvider = Provider<SpacesDriftRepository>((ref) {
   final db = ref.watch(plantisDatabaseProvider);
   return SpacesDriftRepository(db);
+});
+
+final commentsDriftRepositoryProvider = Provider<CommentsDriftRepository>((ref) {
+  final db = ref.watch(plantisDatabaseProvider);
+  return CommentsDriftRepository(db);
 });

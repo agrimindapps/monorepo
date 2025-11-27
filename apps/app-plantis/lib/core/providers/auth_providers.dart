@@ -12,7 +12,6 @@ import '../../features/device_management/domain/usecases/validate_device_usecase
 import '../../features/device_management/presentation/providers/device_management_providers.dart'
     as device_management_providers;
 import '../auth/auth_state_notifier.dart';
-import 'auth_state_provider.dart';
 export 'auth_state_provider.dart';
 import '../services/data_sanitization_service.dart';
 import 'repository_providers.dart';

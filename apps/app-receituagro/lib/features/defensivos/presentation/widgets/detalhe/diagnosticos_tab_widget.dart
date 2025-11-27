@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/providers/core_providers.dart';
 import '../../../../../core/theme/spacing_tokens.dart';
-import '../../../../../database/repositories/culturas_repository.dart';
-import '../../../../../database/repositories/pragas_repository.dart';
 import '../../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
 import '../../providers/detalhe_defensivo_notifier.dart';
 import 'diagnosticos_defensivos_components.dart';

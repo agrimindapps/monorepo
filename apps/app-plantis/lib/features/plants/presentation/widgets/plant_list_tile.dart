@@ -20,7 +20,7 @@ class PlantListTile extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2C2C2E) : theme.colorScheme.surface,
+        color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border:
             isDark
@@ -56,39 +56,18 @@ class PlantListTile extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              plant.displayName,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color:
-                                    isDark
-                                        ? Colors.white
-                                        : theme.colorScheme.onSurface,
-                                fontSize: 18,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () => _showPlantMenu(context),
-                            icon: Icon(
-                              Icons.more_vert,
-                              color:
-                                  isDark
-                                      ? Colors.white.withValues(alpha: 0.7)
-                                      : theme.colorScheme.onSurface.withValues(
-                                        alpha: 0.7,
-                                      ),
-                              size: 20,
-                            ),
-                            constraints: const BoxConstraints(),
-                            padding: EdgeInsets.zero,
-                          ),
-                        ],
+                      Text(
+                        plant.displayName,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color:
+                              isDark
+                                  ? Colors.white
+                                  : theme.colorScheme.onSurface,
+                          fontSize: 18,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
 
                       const SizedBox(height: 4),
@@ -204,61 +183,4 @@ class PlantListTile extends ConsumerWidget {
     );
   }
 
-  void _showPlantMenu(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        final theme = Theme.of(context);
-        final isDark = theme.brightness == Brightness.dark;
-
-        return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1C1C1E) : theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 20),
-              ListTile(
-                leading: const Icon(Icons.edit),
-                title: const Text('Editar planta'),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.water_drop),
-                title: const Text('Registrar rega'),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text(
-                  'Excluir planta',
-                  style: TextStyle(color: Colors.red),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        );
-      },
-    );
-  }
 }

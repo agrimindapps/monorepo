@@ -4,14 +4,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/space.dart';
 import '../../domain/usecases/spaces_usecases.dart';
-import '../../data/datasources/local/spaces_local_datasource.dart';
-import '../../data/datasources/remote/spaces_remote_datasource.dart';
-import '../../data/repositories/spaces_repository_impl.dart';
-import '../../domain/repositories/spaces_repository.dart';
 
-import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/providers/repository_providers.dart';
-import '../../../../database/providers/database_providers.dart';
 
 part 'spaces_provider.g.dart';
 

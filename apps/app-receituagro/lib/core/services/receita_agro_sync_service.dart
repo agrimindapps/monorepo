@@ -361,12 +361,14 @@ class ReceitaAgroSyncService implements ISyncService {
           if (kDebugMode) print('⚠️ FavoritosRepository not injected in ReceitaAgroSyncService');
           return const Right(0);
         }
+        
+        final favoritosRepo = _favoritosRepository;
 
         // Dispara sincronização dos favoritos (carrega da storage local)
-        await _favoritosRepository!.syncFavorites();
+        await favoritosRepo.syncFavorites();
 
         // Obtém estatísticas para contar
-        final statsResult = await _favoritosRepository!.getStats();
+        final statsResult = await favoritosRepo.getStats();
 
         // Unwrap Either<Failure, FavoritosStats>
         final totalFavoritos = statsResult.fold(
@@ -383,7 +385,7 @@ class ReceitaAgroSyncService implements ISyncService {
 
         return Right(totalFavoritos);
       } catch (e) {
-        // Se não conseguir via GetIt, tenta sem erro crítico
+        // Se não conseguir, tenta sem erro crítico
         if (kDebugMode) print('⚠️ Aviso ao sincronizar favoritos: $e');
         return const Right(0);
       }

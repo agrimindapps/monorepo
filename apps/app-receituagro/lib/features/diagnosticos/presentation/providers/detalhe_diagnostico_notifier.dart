@@ -8,7 +8,6 @@ import '../../../../core/extensions/diagnostico_drift_extension.dart';
 import '../../../../core/providers/premium_notifier.dart';
 import '../../../../database/providers/database_providers.dart';
 import '../../../../database/receituagro_database.dart';
-import '../../../../database/repositories/diagnostico_repository.dart';
 import '../../../diagnosticos/data/mappers/diagnostico_mapper.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../../../favoritos/presentation/providers/favoritos_providers.dart';

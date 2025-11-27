@@ -1,16 +1,28 @@
+import 'dart:developer' as developer;
+
 import 'package:core/core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import '../../../../core/interfaces/i_expenses_repository.dart';
 import '../../../../database/repositories/expense_repository.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../datasources/expenses_local_datasource.dart';
+import '../sync/expense_drift_sync_adapter.dart';
 
 /// Implementação do repositório de despesas usando Drift
+///
+/// Padrão "Sync-on-Write": Sincroniza imediatamente com Firebase quando online,
+/// seguindo o padrão do app-plantis. Background sync permanece como fallback.
 
 class ExpensesRepositoryDriftImpl implements IExpensesRepository {
-  const ExpensesRepositoryDriftImpl(this._dataSource);
+  const ExpensesRepositoryDriftImpl(
+    this._dataSource,
+    this._connectivityService,
+    this._syncAdapter,
+  );
 
   final ExpensesLocalDataSource _dataSource;
+  final ConnectivityService _connectivityService;
+  final ExpenseDriftSyncAdapter _syncAdapter;
 
   String get _userId {
     final user = FirebaseAuth.instance.currentUser;
@@ -56,6 +68,12 @@ class ExpensesRepositoryDriftImpl implements IExpensesRepository {
   @override
   Future<ExpenseEntity?> saveExpense(ExpenseEntity expense) async {
     try {
+      developer.log(
+        '🔵 ExpensesRepository.saveExpense() - Starting',
+        name: 'ExpensesRepository',
+      );
+
+      // 1. Salvar localmente primeiro (sempre)
       final id = await _dataSource.create(
         userId: _userId,
         vehicleId: int.parse(expense.vehicleId),
@@ -73,8 +91,65 @@ class ExpensesRepositoryDriftImpl implements IExpensesRepository {
         return null;
       }
 
-      return _toEntity(createdData);
+      var entity = _toEntity(createdData);
+      developer.log(
+        '✅ ExpensesRepository.saveExpense() - Saved locally with id=$id',
+        name: 'ExpensesRepository',
+      );
+
+      // 2. Sync-on-Write: Se online, sincronizar imediatamente com Firebase
+      final isOnlineResult = await _connectivityService.isOnline();
+      final isOnline = isOnlineResult.fold((_) => false, (online) => online);
+
+      if (isOnline) {
+        developer.log(
+          '🌐 ExpensesRepository.saveExpense() - Online, syncing to Firebase...',
+          name: 'ExpensesRepository',
+        );
+        try {
+          // Push para Firebase usando o adapter
+          final pushResult = await _syncAdapter.pushDirtyRecords(_userId);
+
+          pushResult.fold(
+            (failure) {
+              developer.log(
+                '⚠️ ExpensesRepository.saveExpense() - Sync failed: ${failure.message}. Will retry via background sync.',
+                name: 'ExpensesRepository',
+              );
+            },
+            (result) {
+              developer.log(
+                '✅ ExpensesRepository.saveExpense() - Synced to Firebase (${result.recordsPushed} pushed, ${result.recordsFailed} failed)',
+                name: 'ExpensesRepository',
+              );
+            },
+          );
+
+          // Reload entity com estado atualizado (isDirty=false, firebaseId set)
+          final refreshed = await _dataSource.findById(id);
+          if (refreshed != null) {
+            entity = _toEntity(refreshed);
+          }
+        } catch (e) {
+          developer.log(
+            '⚠️ ExpensesRepository.saveExpense() - Sync error: $e. Will retry via background sync.',
+            name: 'ExpensesRepository',
+          );
+          // Falhou remoto, mas local já está salvo - retorna local
+        }
+      } else {
+        developer.log(
+          '📴 ExpensesRepository.saveExpense() - Offline, will sync later via background sync',
+          name: 'ExpensesRepository',
+        );
+      }
+
+      return entity;
     } catch (e) {
+      developer.log(
+        '❌ ExpensesRepository.saveExpense() - Error: $e',
+        name: 'ExpensesRepository',
+      );
       return null;
     }
   }
@@ -82,6 +157,12 @@ class ExpensesRepositoryDriftImpl implements IExpensesRepository {
   @override
   Future<ExpenseEntity?> updateExpense(ExpenseEntity expense) async {
     try {
+      developer.log(
+        '🔵 ExpensesRepository.updateExpense() - Starting for id=${expense.id}',
+        name: 'ExpensesRepository',
+      );
+
+      // 1. Atualizar localmente primeiro
       final idInt = int.parse(expense.id);
       final success = await _dataSource.update(
         id: idInt,
@@ -105,8 +186,58 @@ class ExpensesRepositoryDriftImpl implements IExpensesRepository {
         return null;
       }
 
-      return _toEntity(updatedData);
+      var entity = _toEntity(updatedData);
+      developer.log(
+        '✅ ExpensesRepository.updateExpense() - Updated locally',
+        name: 'ExpensesRepository',
+      );
+
+      // 2. Sync-on-Write: Se online, sincronizar imediatamente
+      final isOnlineResult = await _connectivityService.isOnline();
+      final isOnline = isOnlineResult.fold((_) => false, (online) => online);
+
+      if (isOnline) {
+        developer.log(
+          '🌐 ExpensesRepository.updateExpense() - Online, syncing to Firebase...',
+          name: 'ExpensesRepository',
+        );
+        try {
+          final pushResult = await _syncAdapter.pushDirtyRecords(_userId);
+
+          pushResult.fold(
+            (failure) {
+              developer.log(
+                '⚠️ ExpensesRepository.updateExpense() - Sync failed: ${failure.message}',
+                name: 'ExpensesRepository',
+              );
+            },
+            (result) {
+              developer.log(
+                '✅ ExpensesRepository.updateExpense() - Synced to Firebase',
+                name: 'ExpensesRepository',
+              );
+            },
+          );
+
+          // Reload entity com estado atualizado
+          final refreshed = await _dataSource.findById(idInt);
+          if (refreshed != null) {
+            entity = _toEntity(refreshed);
+          }
+        } catch (e) {
+          developer.log(
+            '⚠️ ExpensesRepository.updateExpense() - Sync error: $e',
+            name: 'ExpensesRepository',
+          );
+        }
+      }
+
+      return entity;
     } catch (e) {
+      developer.log(
+        '❌ ExpensesRepository.updateExpense() - Error: $e',
+        name: 'ExpensesRepository',
+      );
       return null;
     }
   }
@@ -114,9 +245,64 @@ class ExpensesRepositoryDriftImpl implements IExpensesRepository {
   @override
   Future<bool> deleteExpense(String expenseId) async {
     try {
+      developer.log(
+        '🔵 ExpensesRepository.deleteExpense() - Starting for id=$expenseId',
+        name: 'ExpensesRepository',
+      );
+
+      // 1. Soft delete localmente primeiro (marca isDeleted=true, isDirty=true)
       final idInt = int.parse(expenseId);
-      return await _dataSource.delete(idInt);
+      final success = await _dataSource.delete(idInt);
+
+      if (!success) {
+        return false;
+      }
+
+      developer.log(
+        '✅ ExpensesRepository.deleteExpense() - Marked as deleted locally',
+        name: 'ExpensesRepository',
+      );
+
+      // 2. Sync-on-Write: Se online, sincronizar imediatamente
+      final isOnlineResult = await _connectivityService.isOnline();
+      final isOnline = isOnlineResult.fold((_) => false, (online) => online);
+
+      if (isOnline) {
+        developer.log(
+          '🌐 ExpensesRepository.deleteExpense() - Online, syncing deletion to Firebase...',
+          name: 'ExpensesRepository',
+        );
+        try {
+          final pushResult = await _syncAdapter.pushDirtyRecords(_userId);
+
+          pushResult.fold(
+            (failure) {
+              developer.log(
+                '⚠️ ExpensesRepository.deleteExpense() - Sync failed: ${failure.message}',
+                name: 'ExpensesRepository',
+              );
+            },
+            (result) {
+              developer.log(
+                '✅ ExpensesRepository.deleteExpense() - Synced deletion to Firebase',
+                name: 'ExpensesRepository',
+              );
+            },
+          );
+        } catch (e) {
+          developer.log(
+            '⚠️ ExpensesRepository.deleteExpense() - Sync error: $e',
+            name: 'ExpensesRepository',
+          );
+        }
+      }
+
+      return true;
     } catch (e) {
+      developer.log(
+        '❌ ExpensesRepository.deleteExpense() - Error: $e',
+        name: 'ExpensesRepository',
+      );
       return false;
     }
   }

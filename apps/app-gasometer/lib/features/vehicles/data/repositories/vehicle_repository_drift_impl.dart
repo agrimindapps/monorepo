@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
 import 'package:drift/drift.dart' as drift;
-import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../database/gasometer_database.dart';
 import '../../../../database/repositories/vehicle_repository.dart'
@@ -11,22 +11,29 @@ import '../../domain/entities/vehicle_entity.dart';
 import '../../domain/repositories/vehicle_repository.dart';
 import '../datasources/vehicle_local_datasource.dart';
 import '../models/vehicle_model.dart';
+import '../sync/vehicle_drift_sync_adapter.dart';
 
 /// VehicleRepository implementation using Drift
 ///
-/// This implementation bridges the domain layer (Clean Architecture)
-/// with the Drift data layer, converting between VehicleEntity and VehicleData.
+/// Padrão "Sync-on-Write": Sincroniza imediatamente com Firebase quando online,
+/// seguindo o padrão do app-plantis. Background sync permanece como fallback.
 
 class VehicleRepositoryDriftImpl implements VehicleRepository {
-  final VehicleLocalDataSource _datasource;
+  VehicleRepositoryDriftImpl(
+    this._datasource,
+    this._connectivityService,
+    this._syncAdapter,
+  );
 
-  VehicleRepositoryDriftImpl(this._datasource);
+  final VehicleLocalDataSource _datasource;
+  final ConnectivityService _connectivityService;
+  final VehicleDriftSyncAdapter _syncAdapter;
 
   /// Get current authenticated user ID
   String get _userId {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      throw UnknownFailure('No authenticated user');
+      throw const UnknownFailure('No authenticated user');
     }
     return user.uid;
   }
@@ -66,6 +73,12 @@ class VehicleRepositoryDriftImpl implements VehicleRepository {
     VehicleEntity vehicle,
   ) async {
     try {
+      developer.log(
+        '🔵 VehicleRepository.addVehicle() - Starting',
+        name: 'VehicleRepository',
+      );
+
+      // 1. Salvar localmente primeiro
       final id = await _datasource.addVehicle(
         userId: _userId,
         marca: vehicle.brand,
@@ -85,14 +98,68 @@ class VehicleRepositoryDriftImpl implements VehicleRepository {
         foto: vehicle.photoUrl,
       );
 
-      // Fetch the created vehicle
       final created = await _datasource.findById(id);
       if (created == null) {
         return const Left(CacheFailure('Failed to fetch created vehicle'));
       }
 
-      return Right(_fromData(created));
+      var entity = _fromData(created);
+      developer.log(
+        '✅ VehicleRepository.addVehicle() - Saved locally with id=$id',
+        name: 'VehicleRepository',
+      );
+
+      // 2. Sync-on-Write: Se online, sincronizar imediatamente com Firebase
+      final isOnlineResult = await _connectivityService.isOnline();
+      final isOnline = isOnlineResult.fold((_) => false, (online) => online);
+
+      if (isOnline) {
+        developer.log(
+          '🌐 VehicleRepository.addVehicle() - Online, syncing to Firebase...',
+          name: 'VehicleRepository',
+        );
+        try {
+          final pushResult = await _syncAdapter.pushDirtyRecords(_userId);
+          
+          pushResult.fold(
+            (failure) {
+              developer.log(
+                '⚠️ VehicleRepository.addVehicle() - Sync failed: ${failure.message}. Will retry via background sync.',
+                name: 'VehicleRepository',
+              );
+            },
+            (result) {
+              developer.log(
+                '✅ VehicleRepository.addVehicle() - Synced to Firebase (${result.recordsPushed} pushed, ${result.recordsFailed} failed)',
+                name: 'VehicleRepository',
+              );
+            },
+          );
+          
+          // Reload entity com estado atualizado
+          final refreshed = await _datasource.findById(id);
+          if (refreshed != null) {
+            entity = _fromData(refreshed);
+          }
+        } catch (e) {
+          developer.log(
+            '⚠️ VehicleRepository.addVehicle() - Sync error: $e. Will retry via background sync.',
+            name: 'VehicleRepository',
+          );
+        }
+      } else {
+        developer.log(
+          '📴 VehicleRepository.addVehicle() - Offline, will sync later via background sync',
+          name: 'VehicleRepository',
+        );
+      }
+
+      return Right(entity);
     } catch (e) {
+      developer.log(
+        '❌ VehicleRepository.addVehicle() - Error: $e',
+        name: 'VehicleRepository',
+      );
       return Left(CacheFailure('Failed to add vehicle: $e'));
     }
   }
@@ -102,11 +169,17 @@ class VehicleRepositoryDriftImpl implements VehicleRepository {
     VehicleEntity vehicle,
   ) async {
     try {
+      developer.log(
+        '🔵 VehicleRepository.updateVehicle() - Starting for id=${vehicle.id}',
+        name: 'VehicleRepository',
+      );
+
       final vehicleId = int.tryParse(vehicle.id);
       if (vehicleId == null) {
         return const Left(ValidationFailure('Invalid vehicle ID'));
       }
 
+      // 1. Atualizar localmente primeiro
       final updates = VehiclesCompanion(
         marca: drift.Value(vehicle.brand),
         modelo: drift.Value(vehicle.model),
@@ -139,8 +212,58 @@ class VehicleRepositoryDriftImpl implements VehicleRepository {
         return const Left(CacheFailure('Failed to update vehicle'));
       }
 
-      return Right(vehicle);
+      var entity = vehicle;
+      developer.log(
+        '✅ VehicleRepository.updateVehicle() - Updated locally',
+        name: 'VehicleRepository',
+      );
+
+      // 2. Sync-on-Write: Se online, sincronizar imediatamente
+      final isOnlineResult = await _connectivityService.isOnline();
+      final isOnline = isOnlineResult.fold((_) => false, (online) => online);
+
+      if (isOnline) {
+        developer.log(
+          '🌐 VehicleRepository.updateVehicle() - Online, syncing to Firebase...',
+          name: 'VehicleRepository',
+        );
+        try {
+          final pushResult = await _syncAdapter.pushDirtyRecords(_userId);
+          
+          pushResult.fold(
+            (failure) {
+              developer.log(
+                '⚠️ VehicleRepository.updateVehicle() - Sync failed: ${failure.message}',
+                name: 'VehicleRepository',
+              );
+            },
+            (result) {
+              developer.log(
+                '✅ VehicleRepository.updateVehicle() - Synced to Firebase',
+                name: 'VehicleRepository',
+              );
+            },
+          );
+          
+          // Reload entity com estado atualizado
+          final refreshed = await _datasource.findById(vehicleId);
+          if (refreshed != null) {
+            entity = _fromData(refreshed);
+          }
+        } catch (e) {
+          developer.log(
+            '⚠️ VehicleRepository.updateVehicle() - Sync error: $e',
+            name: 'VehicleRepository',
+          );
+        }
+      }
+
+      return Right(entity);
     } catch (e) {
+      developer.log(
+        '❌ VehicleRepository.updateVehicle() - Error: $e',
+        name: 'VehicleRepository',
+      );
       return Left(CacheFailure('Failed to update vehicle: $e'));
     }
   }
@@ -148,18 +271,67 @@ class VehicleRepositoryDriftImpl implements VehicleRepository {
   @override
   Future<Either<Failure, Unit>> deleteVehicle(String id) async {
     try {
+      developer.log(
+        '🔵 VehicleRepository.deleteVehicle() - Starting for id=$id',
+        name: 'VehicleRepository',
+      );
+
       final vehicleId = int.tryParse(id);
       if (vehicleId == null) {
         return const Left(ValidationFailure('Invalid vehicle ID'));
       }
 
+      // 1. Soft delete localmente primeiro
       final success = await _datasource.deleteVehicle(vehicleId);
       if (!success) {
         return const Left(CacheFailure('Failed to delete vehicle'));
       }
 
+      developer.log(
+        '✅ VehicleRepository.deleteVehicle() - Marked as deleted locally',
+        name: 'VehicleRepository',
+      );
+
+      // 2. Sync-on-Write: Se online, sincronizar imediatamente
+      final isOnlineResult = await _connectivityService.isOnline();
+      final isOnline = isOnlineResult.fold((_) => false, (online) => online);
+
+      if (isOnline) {
+        developer.log(
+          '🌐 VehicleRepository.deleteVehicle() - Online, syncing deletion to Firebase...',
+          name: 'VehicleRepository',
+        );
+        try {
+          final pushResult = await _syncAdapter.pushDirtyRecords(_userId);
+          
+          pushResult.fold(
+            (failure) {
+              developer.log(
+                '⚠️ VehicleRepository.deleteVehicle() - Sync failed: ${failure.message}',
+                name: 'VehicleRepository',
+              );
+            },
+            (result) {
+              developer.log(
+                '✅ VehicleRepository.deleteVehicle() - Synced deletion to Firebase',
+                name: 'VehicleRepository',
+              );
+            },
+          );
+        } catch (e) {
+          developer.log(
+            '⚠️ VehicleRepository.deleteVehicle() - Sync error: $e',
+            name: 'VehicleRepository',
+          );
+        }
+      }
+
       return const Right(unit);
     } catch (e) {
+      developer.log(
+        '❌ VehicleRepository.deleteVehicle() - Error: $e',
+        name: 'VehicleRepository',
+      );
       return Left(CacheFailure('Failed to delete vehicle: $e'));
     }
   }

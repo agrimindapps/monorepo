@@ -17,8 +17,6 @@ part 'database_providers.g.dart';
 /// Cria uma única instância do banco de dados e a mantém viva durante
 /// toda a vida do app. Quando o ref for disposed, fecha o banco.
 ///
-/// MIGRATED: Removida dependência de GetIt - cria instância diretamente
-///
 /// IMPORTANTE: keepAlive: true garante que apenas UMA instância seja criada
 /// durante toda a vida da aplicação, evitando race conditions
 @Riverpod(keepAlive: true)

@@ -4,7 +4,6 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/services/receituagro_navigation_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../database/receituagro_database.dart';
 import '../../database/repositories/culturas_repository.dart';

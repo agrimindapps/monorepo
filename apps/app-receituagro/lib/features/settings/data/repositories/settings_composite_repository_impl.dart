@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:core/core.dart';
 
 import '../../domain/entities/tts_settings_entity.dart';
@@ -107,10 +105,10 @@ class SettingsCompositeRepositoryImpl implements ISettingsCompositeRepository {
 
   @override
   Future<Either<Failure, ProfileImageResult>> uploadProfileImage(
-    File imageFile, {
+    PickedImage image, {
     void Function(double)? onProgress,
   }) async {
-    return _profileRepo.uploadProfileImage(imageFile, onProgress: onProgress);
+    return _profileRepo.uploadProfileImage(image, onProgress: onProgress);
   }
 
   @override

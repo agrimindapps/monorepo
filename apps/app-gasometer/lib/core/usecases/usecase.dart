@@ -1,6 +1,5 @@
 import 'package:core/core.dart' as core;
 import 'package:core/core.dart' show Equatable;
-import 'package:dartz/dartz.dart';
 
 import '../constants/ui_constants.dart';
 
@@ -9,12 +8,12 @@ import '../constants/ui_constants.dart';
 /// [Type] is the return type
 /// [Params] is the input parameters type
 abstract class UseCase<Type, Params> {
-  Future<Either<core.Failure, Type>> call(Params params);
+  Future<core.Either<core.Failure, Type>> call(Params params);
 }
 
 /// Use case for operations that don't require parameters
 abstract class NoParamsUseCase<Type> {
-  Future<Either<core.Failure, Type>> call();
+  Future<core.Either<core.Failure, Type>> call();
 }
 
 /// Base class for use case parameters

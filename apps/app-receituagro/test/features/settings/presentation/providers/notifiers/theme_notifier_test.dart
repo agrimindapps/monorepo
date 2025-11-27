@@ -42,13 +42,6 @@ void main() {
       when(() => mockGetUserSettingsUseCase(userId))
           .thenAnswer((_) async => settings);
 
-      final container = ProviderContainer(
-        overrides: [
-          // Override dependencies by accessing the provider's internal structure
-          // This uses reflection to inject mocks into the notifier
-        ],
-      );
-
       // Act & Assert - Direct testing without full container override
       // (Riverpod providers are tested differently due to code generation)
       expect(settings.isDarkTheme, settings.isDarkTheme);
@@ -129,12 +122,12 @@ void main() {
       verify(() => mockUpdateUserSettingsUseCase(any())).called(1);
     });
 
-    test('should return false when settings are null', () async {
+    test('should handle null settings scenario for dark theme', () async {
       // Arrange
       UserSettingsEntity? nullSettings;
 
-      // Act & Assert
-      expect(nullSettings == null, true);
+      // Act & Assert - verifying nullable type behavior
+      expect(nullSettings, isNull);
     });
 
     test('should handle update error gracefully', () async {
@@ -220,12 +213,12 @@ void main() {
       expect(expectedSettings.language, 'es_ES');
     });
 
-    test('should return false when settings are null', () async {
+    test('should handle null settings scenario for language', () async {
       // Arrange
       UserSettingsEntity? nullSettings;
 
-      // Act & Assert
-      expect(nullSettings == null, true);
+      // Act & Assert - verifying nullable type behavior
+      expect(nullSettings, isNull);
     });
 
     test('should handle language update error', () async {

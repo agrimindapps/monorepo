@@ -7,14 +7,7 @@ import '../../../../database/repositories/diagnosticos_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../../database/repositories/pragas_repository.dart';
 import '../../domain/entities/diagnostico_entity.dart';
-import '../../domain/repositories/i_diagnosticos_metadata_repository.dart';
-import '../../domain/repositories/i_diagnosticos_query_repository.dart';
-import '../../domain/repositories/i_diagnosticos_read_repository.dart';
-import '../../domain/repositories/i_diagnosticos_recommendation_repository.dart';
 import '../../domain/repositories/i_diagnosticos_repository.dart';
-import '../../domain/repositories/i_diagnosticos_search_repository.dart';
-import '../../domain/repositories/i_diagnosticos_stats_repository.dart';
-import '../../domain/repositories/i_diagnosticos_validation_repository.dart';
 import '../mappers/diagnostico_mapper.dart';
 
 /// Implementation of diagnosticos repository (Data Layer)
@@ -380,8 +373,8 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   }) async {
     try {
       final diagnosticosDrift = await _repository.findByTriplaCombinacao(
-        culturaId: int.tryParse(culturaId ?? ''),
-        pragaId: int.tryParse(pragaId ?? ''),
+        culturaId: int.tryParse(culturaId),
+        pragaId: int.tryParse(pragaId),
       );
 
       final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
@@ -594,9 +587,9 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   }) async {
     try {
       final diagnosticosDrift = await _repository.findByTriplaCombinacao(
-        defensivoId: int.tryParse(idDefensivo ?? ''),
-        culturaId: int.tryParse(idCultura ?? ''),
-        pragaId: int.tryParse(idPraga ?? ''),
+        defensivoId: int.tryParse(idDefensivo),
+        culturaId: int.tryParse(idCultura),
+        pragaId: int.tryParse(idPraga),
       );
 
       return Right(diagnosticosDrift.isNotEmpty);

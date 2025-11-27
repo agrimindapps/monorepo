@@ -62,7 +62,7 @@ class DiagnosticoMapper {
       pragaId: Value(int.tryParse(entity.idPraga) ?? 0),
       dsMin: Value(entity.dosagem.dosagemMinima?.toString()),
       dsMax: Value(entity.dosagem.dosagemMaxima.toString()),
-      um: Value(entity.dosagem.unidadeMedida ?? ''),
+      um: Value(entity.dosagem.unidadeMedida),
       minAplicacaoT: Value(entity.aplicacao.terrestre?.volumeMinimo?.toString()),
       maxAplicacaoT: Value(entity.aplicacao.terrestre?.volumeMaximo?.toString()),
       umT: Value(entity.aplicacao.terrestre?.unidadeMedida),

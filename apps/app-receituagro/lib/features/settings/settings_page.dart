@@ -1,7 +1,6 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../core/services/device_identity_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/responsive_content_wrapper.dart';
 import 'presentation/providers/settings_notifier.dart';

@@ -2,7 +2,6 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/core_providers.dart';
-import '../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../notifiers/favoritos_notifier.dart';

@@ -7,8 +7,8 @@ import '../providers/premium_notifier.dart';
 
 /// Real implementation of IPremiumService that syncs with Riverpod PremiumNotifier
 ///
-/// This adapter bridges the old GetIt-based IPremiumService interface
-/// with the new Riverpod-based PremiumNotifier state management.
+/// This adapter bridges the old IPremiumService interface
+/// with the Riverpod-based PremiumNotifier state management.
 class RiverpodPremiumService implements IPremiumService {
   final ProviderContainer _container;
   final StreamController<bool> _statusController = StreamController<bool>.broadcast();

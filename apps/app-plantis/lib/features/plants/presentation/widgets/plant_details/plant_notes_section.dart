@@ -214,7 +214,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
             ),
             const Spacer(),
             Text(
-              '${comments.length} observação${comments.length != 1 ? 'ões' : ''}',
+              '${comments.length} ${comments.length == 1 ? 'observação' : 'observações'}',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

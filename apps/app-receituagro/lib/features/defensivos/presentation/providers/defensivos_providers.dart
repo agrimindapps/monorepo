@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' hide Ref;
 import '../../../../database/providers/database_providers.dart';
-import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../comentarios/domain/comentarios_service.dart';
 import '../../../../core/providers/premium_providers.dart';
 import '../../../../core/providers/core_providers.dart' as core_providers;

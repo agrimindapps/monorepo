@@ -1,5 +1,3 @@
-import 'package:core/core.dart' hide Column;
-
 import '../entities/user_settings_entity.dart';
 import '../exceptions/settings_exceptions.dart';
 import '../repositories/i_user_settings_repository.dart';

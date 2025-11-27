@@ -1,6 +1,6 @@
 import 'package:app_plantis/core/auth/auth_state_notifier.dart';
 import 'package:app_plantis/features/plants/domain/usecases/add_plant_usecase.dart';
-import 'package:core/core.dart' hide test;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

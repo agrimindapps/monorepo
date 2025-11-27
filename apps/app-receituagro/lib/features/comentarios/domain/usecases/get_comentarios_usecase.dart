@@ -1,5 +1,3 @@
-import 'package:core/core.dart' hide Column;
-
 import '../entities/comentario_entity.dart';
 import '../repositories/i_comentarios_read_repository.dart';
 

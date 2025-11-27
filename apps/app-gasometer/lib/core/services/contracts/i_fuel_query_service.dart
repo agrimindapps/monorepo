@@ -1,4 +1,3 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 import '../../../features/fuel/domain/entities/fuel_record_entity.dart';
 

@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide Column, Consumer, ChangeNotifierProvider;
+import 'package:core/core.dart' hide Column, Consumer;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

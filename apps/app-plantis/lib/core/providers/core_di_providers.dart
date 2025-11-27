@@ -1,6 +1,5 @@
 import 'package:core/core.dart' hide Column;
 
-import '../config/security_config.dart';
 import '../constants/app_constants.dart';
 import '../data/adapters/plantis_image_service_adapter.dart';
 import '../services/notification_manager.dart';

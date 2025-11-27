@@ -29,16 +29,18 @@ class ComentariosService {
     String? pkIdentificador,
   }) async {
     try {
-      if (_repository == null || _mapper == null) return [];
+      final repository = _repository;
+      final mapper = _mapper;
+      if (repository == null || mapper == null) return [];
 
       final entities = pkIdentificador != null && pkIdentificador.isNotEmpty
-          ? await _repository!.getComentariosByContext(pkIdentificador)
-          : await _repository!.getAllComentarios();
+          ? await repository.getComentariosByContext(pkIdentificador)
+          : await repository.getAllComentarios();
 
       // Sort by createdAt descending
       entities.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-      return _mapper!.entitiesToModels(entities);
+      return mapper.entitiesToModels(entities);
     } catch (e) {
       return [];
     }
@@ -51,12 +53,14 @@ class ComentariosService {
       level: 500,
     );
     try {
-      if (_repository == null || _mapper == null) return;
+      final repository = _repository;
+      final mapper = _mapper;
+      if (repository == null || mapper == null) return;
 
       developer.log('Salvando no repositório local',
           name: 'ComentarioService', level: 500);
-      final entity = _mapper!.modelToEntity(comentario);
-      await _repository!.addComentario(entity);
+      final entity = mapper.modelToEntity(comentario);
+      await repository.addComentario(entity);
 
       developer.log('Comentário salvo localmente com sucesso',
           name: 'ComentarioService', level: 500);
@@ -77,12 +81,14 @@ class ComentariosService {
       level: 500,
     );
     try {
-      if (_repository == null || _mapper == null) return;
+      final repository = _repository;
+      final mapper = _mapper;
+      if (repository == null || mapper == null) return;
 
       developer.log('Atualizando no repositório local',
           name: 'ComentarioService', level: 500);
-      final entity = _mapper!.modelToEntity(comentario);
-      await _repository!.updateComentario(entity);
+      final entity = mapper.modelToEntity(comentario);
+      await repository.updateComentario(entity);
 
       developer.log('Comentário atualizado localmente com sucesso',
           name: 'ComentarioService', level: 500);
@@ -100,11 +106,12 @@ class ComentariosService {
     developer.log('Deletando comentário - id=$id',
         name: 'ComentarioService', level: 500);
     try {
-      if (_repository == null) return;
+      final repository = _repository;
+      if (repository == null) return;
 
       developer.log('Removendo do repositório local',
           name: 'ComentarioService', level: 500);
-      await _repository!.deleteComentario(id);
+      await repository.deleteComentario(id);
 
       developer.log('Comentário removido localmente com sucesso',
           name: 'ComentarioService', level: 500);

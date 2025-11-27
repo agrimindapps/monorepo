@@ -7,7 +7,7 @@ import 'package:app_plantis/features/tasks/domain/usecases/complete_task_usecase
 import 'package:app_plantis/features/tasks/presentation/notifiers/tasks_crud_notifier.dart';
 import 'package:app_plantis/features/tasks/presentation/providers/tasks_providers.dart';
 import 'package:app_plantis/features/tasks/presentation/providers/tasks_state.dart';
-import 'package:core/core.dart' hide test;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

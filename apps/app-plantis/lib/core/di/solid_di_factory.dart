@@ -109,9 +109,9 @@ class SolidDIFactory {
 
   /// ==== REGISTRO NO CONTAINER DI ====
 
-  /// Registra todas as dependências SOLID no GetIt
+  /// Registra todas as dependências SOLID via Riverpod
   void registerSolidDependencies() {
-    // GetIt usage removed
+    // Dependências agora gerenciadas via Riverpod providers
   }
 
   /// ==== HELPERS DE CONFIGURAÇÃO ====
@@ -123,7 +123,7 @@ class SolidDIFactory {
 
   /// Limpa todas as dependências SOLID registradas (para testes)
   void clearSolidDependencies() {
-    // GetIt usage removed
+    // Dependências agora gerenciadas via Riverpod providers
   }
 }
 

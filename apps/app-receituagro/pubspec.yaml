@@ -15,24 +15,24 @@ dependencies:
   core:
     path: ../../packages/core
 
-  collection: ^1.18.0
-  flutter_riverpod: ^3.0.3
+  collection: any
+  flutter_riverpod: any
 
   # Drift - SQL Database
-  drift: ^2.28.0
-  sqlite3_flutter_libs: ^0.5.0
-  path_provider: ^2.1.0
-  path: ^1.9.0
+  drift: any
+  sqlite3_flutter_libs: any
+  path_provider: any
+  path: any
 
   # Dependencies inherited from core package (declared here to satisfy linter)
-  dartz: ^0.10.1
-  equatable: ^2.0.6
-  riverpod_annotation: ^3.0.3
-  freezed_annotation: ^3.0.0
-  cloud_firestore: ^6.0.3
-  shared_preferences: ^2.2.3
-  firebase_messaging: ^16.0.3
-  url_launcher: ^6.3.1
+  dartz: any
+  equatable: any
+  riverpod_annotation: any
+  freezed_annotation: any
+  cloud_firestore: any
+  shared_preferences: any
+  firebase_messaging: any
+  url_launcher: any
 
   firebase_auth: any
   flutter_local_notifications: any
@@ -48,9 +48,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  build_runner: ^2.4.6
-  freezed: ^3.0.0
-  drift_dev: ^2.28.0
+  build_runner: any
+  freezed: any
+  drift_dev: any
   riverpod_generator: any
   mocktail: ^1.0.0
 

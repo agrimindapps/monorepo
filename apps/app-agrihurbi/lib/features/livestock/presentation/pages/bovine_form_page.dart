@@ -15,8 +15,6 @@ import '../widgets/bovine_form_action_buttons.dart';
 import '../widgets/bovine_status_section.dart';
 
 final bovineFormProvider = ChangeNotifierProvider<BovineFormProvider>((ref) {
-  // TODO: Replace getIt calls with Riverpod providers
-  // final formService = getIt<BovineFormService>();
   // Temporary mock service for migration
   final validationService = LivestockValidationService();
   final formService = BovineFormService(validationService);

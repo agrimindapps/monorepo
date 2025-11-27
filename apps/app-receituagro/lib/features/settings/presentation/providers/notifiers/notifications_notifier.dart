@@ -28,7 +28,7 @@ part 'notifications_notifier.g.dart';
 ///
 /// ✅ DEPENDENCY INVERSION PRINCIPLE (DIP):
 /// - Depends on abstractions (use cases, interfaces)
-/// - Injected via service locator (di.sl)
+/// - Injected via Riverpod providers
 /// - Easy to mock and test
 ///
 /// ✅ RESOURCE MANAGEMENT:

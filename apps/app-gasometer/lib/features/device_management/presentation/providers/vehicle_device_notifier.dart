@@ -108,7 +108,7 @@ core.DeviceManagementService? deviceManagementService(Ref ref) {
 }
 
 /// Provider de conectividade (stream)
-/// Uses ConnectivityService from dependency_providers.dart (GetIt registered)
+/// Uses ConnectivityService from dependency_providers.dart (Riverpod provider)
 @riverpod
 Stream<bool> connectivityStream(Ref ref) {
   final connectivityService = ref.watch(connectivityServiceProvider);
@@ -116,7 +116,7 @@ Stream<bool> connectivityStream(Ref ref) {
 }
 
 /// Provider de status online
-/// Uses ConnectivityService from dependency_providers.dart (GetIt registered)
+/// Uses ConnectivityService from dependency_providers.dart (Riverpod provider)
 @riverpod
 Future<bool> isOnlineStatus(Ref ref) async {
   final connectivityService = ref.watch(connectivityServiceProvider);

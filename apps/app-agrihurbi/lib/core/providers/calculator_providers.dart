@@ -211,14 +211,6 @@ class CalculatorNotifier extends _$CalculatorNotifier {
 
   @override
   CalculatorState build() {
-    // TODO: Replace getIt calls with Riverpod providers
-    // _getCalculators = di.getIt<GetCalculators>();
-    // _getCalculatorById = di.getIt<GetCalculatorById>();
-    // _executeCalculation = di.getIt<ExecuteCalculation>();
-    // _getCalculationHistory = di.getIt<GetCalculationHistory>();
-    // _saveCalculationToHistory = di.getIt<SaveCalculationToHistory>();
-    // _manageFavorites = di.getIt<ManageFavorites>();
-
     return const CalculatorState();
   }
 
@@ -515,8 +507,6 @@ class CalculatorExecutionNotifier extends _$CalculatorExecutionNotifier {
 
   @override
   CalculatorExecutionState build() {
-    // TODO: Replace getIt calls with Riverpod providers
-    // _executeCalculation = di.getIt<ExecuteCalculation>();
     return const CalculatorExecutionState();
   }
 
@@ -661,9 +651,6 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
 
   @override
   CalculatorFeaturesState build() {
-    // TODO: Replace getIt calls with Riverpod providers
-    // _favoritesService = di.getIt<CalculatorFavoritesService>();
-    // _templateService = di.getIt<CalculatorTemplateService>();
     return const CalculatorFeaturesState();
   }
 

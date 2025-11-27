@@ -16,8 +16,6 @@ class LivestockSyncNotifier extends _$LivestockSyncNotifier {
 
   @override
   LivestockSyncState build() {
-    // TODO: Replace getIt calls with Riverpod providers
-    // _repository = getIt<LivestockRepository>();
     return const LivestockSyncState();
   }
 

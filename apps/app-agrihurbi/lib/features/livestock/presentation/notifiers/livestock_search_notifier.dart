@@ -17,8 +17,6 @@ class LivestockSearchNotifier extends _$LivestockSearchNotifier {
 
   @override
   LivestockSearchState build() {
-    // TODO: Replace getIt calls with Riverpod providers
-    // _searchAnimals = getIt<search_use_case.SearchAnimalsUseCase>();
     return const LivestockSearchState();
   }
 

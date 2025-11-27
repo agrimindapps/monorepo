@@ -119,20 +119,7 @@ void main() async {
       '🔄 User authenticated (${currentUser.email}) - starting initial sync...',
     );
     // Fire and forget - não bloqueamos a inicialização do app
-    /*
-    unawaited(
-      SyncDIModule.performInitialSync(di.sl)
-          .then((_) {
-            DiagnosticoLogger.debug('✅ Initial sync completed in background');
-          })
-          .catchError((Object e) {
-            DiagnosticoLogger.warning(
-              '⚠️ Initial sync failed (non-blocking)',
-              e,
-            );
-          }),
-    );
-    */
+    // TODO: Implementar sync via Riverpod provider
   } else {
     DiagnosticoLogger.debug('ℹ️ User is anonymous - skipping initial sync');
   }

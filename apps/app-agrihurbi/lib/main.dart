@@ -58,10 +58,6 @@ Future<void> main() async {
 
     try {
       print('🔐 MAIN: Initializing account deletion module...');
-      // AccountDeletionModule might need refactoring too if it uses getIt
-      // For now, let's assume we can pass a function or it's static
-      // AccountDeletionModule.init(di.getIt); 
-      // TODO: Refactor AccountDeletionModule to use Riverpod or pass dependencies
       print('✅ MAIN: Account deletion module initialized successfully');
     } catch (e) {
       print('❌ MAIN: Account deletion initialization failed: $e');

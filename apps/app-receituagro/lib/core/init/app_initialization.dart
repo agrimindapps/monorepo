@@ -134,8 +134,6 @@ class AppInitialization {
       await ReceitaAgroSyncConfig.configure(container);
       DiagnosticoLogger.debug('Sync initialization completed successfully');
 
-      // SyncDIModule.init(getIt);
-      // await SyncDIModule.initializeSyncService(getIt);
       await ReceitaAgroRealtimeService.instance.initialize();
 
       DiagnosticoLogger.debug('Realtime sync service initialized successfully');

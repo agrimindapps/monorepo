@@ -705,7 +705,6 @@ class SubscriptionStateNotifier extends StateNotifier<SubscriptionState> {
 */
 
 /// Provider para gerenciamento de configurações
-// TODO: Replace getIt calls with Riverpod providers - commented out temporarily
 /*
 final settingsProvider =
     StateNotifierProvider<SettingsStateNotifier, SettingsState>((ref) {
@@ -731,7 +730,7 @@ final newsProvider = StateNotifierProvider<NewsStateNotifier, NewsState>((ref) {
 /// Provider para gerenciamento de assinaturas
 final subscriptionProvider = StateNotifierProvider<SubscriptionStateNotifier, SubscriptionState>((ref) {
   return SubscriptionStateNotifier(
-    di.getIt<ManageSubscription>(),
+    ref.watch(manageSubscriptionProvider),
   );
 });
 */

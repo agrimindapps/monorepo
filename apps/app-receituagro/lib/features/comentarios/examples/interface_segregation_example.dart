@@ -100,7 +100,7 @@ class ExampleDependencySetup {
 
     // Services needing both get combined interface
     // final syncService = ComentariosSyncService(
-    //   getIt<IComentariosRepository>(),
+    //   ref.read(comentariosRepositoryProvider),
     // );
   }
 }

@@ -25,7 +25,7 @@ import '../error/failures.dart';
 ///
 /// **Exemplo:**
 /// ```dart
-/// final service = getIt<DataIntegrityService>();
+/// final service = ref.read(dataIntegrityServiceProvider);
 ///
 /// // Reconciliar ID após sync
 /// await service.reconcileAnimalId('local_abc123', 'firebase_xyz789');

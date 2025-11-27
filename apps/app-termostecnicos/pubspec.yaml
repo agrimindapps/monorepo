@@ -20,35 +20,35 @@ dependencies:
     path: ../../packages/core
 
   # UI
-  cupertino_icons: ^1.0.8
+  cupertino_icons: any
 
   # State Management (Riverpod - replacing GetX)
   flutter_riverpod: any
   riverpod_annotation: any
 
   # Functional Programming
-  dartz: ^0.10.1
-  equatable: ^2.0.7
+  dartz: any
+  equatable: any
 
   # Immutability
   freezed_annotation: any
 
   # Utils
-  logger: ^2.4.0
+  logger: any
 
   # App-specific
   flutter_quill: ^11.0.0
-  flutter_tts: ^4.0.2
+  flutter_tts: any
   app_settings: ^5.1.1
   purchases_ui_flutter: ^9.8.0
   flutter_localization: ^0.2.1
   flutter_localizations:
     sdk: flutter
   skeletonizer: ^1.4.2
-  flutter_staggered_grid_view: ^0.7.0
+  flutter_staggered_grid_view: any
 
   # Navigation
-  go_router: ^16.2.4
+  go_router: any
 
   # Dependencies from core but used directly in app code
   # (Required for direct imports per analyzer)
@@ -62,9 +62,9 @@ dependencies:
   purchases_flutter: any
 
   # Database
-  drift: any  # Versão do core: ^2.28.2
-  sqlite3_flutter_libs: any  # Do core
-  sqlite3_web: any  # Do core
+  drift: any
+  sqlite3_flutter_libs: any
+  sqlite3_web: any
   path_provider: any
   path: any
 
@@ -73,14 +73,14 @@ dev_dependencies:
     sdk: flutter
 
   # Linting
-  flutter_lints: ^5.0.0
+  flutter_lints: any
 
   # Code Generation
-  drift_dev: any  # Do core: ^2.28.0
-  build_runner: ^2.4.12
-  riverpod_generator: ^3.0.3
-  freezed: ^3.0.0
-  json_serializable: ^6.8.0
+  drift_dev: any
+  build_runner: any
+  riverpod_generator: any
+  freezed: any
+  json_serializable: any
 
 flutter:
   uses-material-design: true

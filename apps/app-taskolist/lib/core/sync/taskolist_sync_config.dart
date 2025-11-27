@@ -30,7 +30,7 @@ import '../storage/shared_preferences_local_storage.dart';
 /// await unifiedSync.forceSyncApp('taskolist');
 ///
 /// // 3. Reconciliar IDs (se necessário)
-/// final dataIntegrity = getIt<DataIntegrityService>();
+/// final dataIntegrity = ref.read(dataIntegrityServiceProvider);
 /// await dataIntegrity.verifyTaskIntegrity();
 /// ```
 abstract final class TaskolistSyncConfig {

@@ -397,14 +397,14 @@ class _DestructiveConfirmationDialogState
       setState(() {
         _firstConfirmation = true;
       });
-      // getIt<HapticService>().warning();
+      // TODO: Inject HapticService via Riverpod
       _shakeController.forward().then((_) {
         _shakeController.reset();
       });
       return;
     }
 
-    // getIt<HapticService>().heavy();
+    // TODO: Inject HapticService via Riverpod
     Navigator.of(context).pop(true);
   }
 
@@ -475,7 +475,7 @@ class _DestructiveConfirmationDialogState
         actions: [
           TextButton(
             onPressed: () {
-              // getIt<HapticService>().light();
+              // TODO: Inject HapticService via Riverpod
               Navigator.of(context).pop(false);
             },
             style: TextButton.styleFrom(
@@ -555,10 +555,10 @@ class _InputConfirmationDialogState extends State<InputConfirmationDialog> {
 
   void _handleConfirm() {
     if (_formKey.currentState?.validate() ?? false) {
-      // getIt<HapticService>().selection();
+      // TODO: Inject HapticService via Riverpod
       Navigator.of(context).pop(_controller.text.trim());
     } else {
-      // getIt<HapticService>().warning();
+      // TODO: Inject HapticService via Riverpod
     }
   }
 
@@ -624,7 +624,7 @@ class _InputConfirmationDialogState extends State<InputConfirmationDialog> {
       actions: [
         TextButton(
           onPressed: () {
-            // getIt<HapticService>().light();
+            // TODO: Inject HapticService via Riverpod
             Navigator.of(context).pop(null);
           },
           style: TextButton.styleFrom(
@@ -690,7 +690,7 @@ class _ChecklistConfirmationDialogState
 
   void _handleConfirm() {
     if (_canConfirm) {
-      // getIt<HapticService>().selection();
+      // TODO: Inject HapticService via Riverpod
       final selectedItems = <String>[];
       for (int i = 0; i < widget.items.length; i++) {
         if (_checkedItems[i]) {
@@ -699,7 +699,7 @@ class _ChecklistConfirmationDialogState
       }
       Navigator.of(context).pop(selectedItems);
     } else {
-      // getIt<HapticService>().warning();
+      // TODO: Inject HapticService via Riverpod
     }
   }
 
@@ -751,7 +751,7 @@ class _ChecklistConfirmationDialogState
                   setState(() {
                     _checkedItems[index] = value ?? false;
                   });
-                  // getIt<HapticService>().selection();
+                  // TODO: Inject HapticService via Riverpod
                 },
                 title: Text(item.title),
                 subtitle: item.subtitle != null ? Text(item.subtitle!) : null,
@@ -765,7 +765,7 @@ class _ChecklistConfirmationDialogState
       actions: [
         TextButton(
           onPressed: () {
-            // getIt<HapticService>().light();
+            // TODO: Inject HapticService via Riverpod
             Navigator.of(context).pop(null);
           },
           style: TextButton.styleFrom(
@@ -869,7 +869,7 @@ class ConfirmationBottomSheet extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      // getIt<HapticService>().light();
+                      // TODO: Inject HapticService via Riverpod
                       Navigator.of(context).pop(false);
                     },
                     style: OutlinedButton.styleFrom(
@@ -884,7 +884,7 @@ class ConfirmationBottomSheet extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      // getIt<HapticService>().selection();
+                      // TODO: Inject HapticService via Riverpod
                       Navigator.of(context).pop(true);
                     },
                     style: ElevatedButton.styleFrom(

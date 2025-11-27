@@ -11,7 +11,7 @@ import '../../../../shared/widgets/dialogs/app_dialogs.dart';
 ///
 /// **Usage:**
 /// ```dart
-/// final actionsService = getIt<ProfileActionsService>();
+/// final actionsService = ref.read(profileActionsServiceProvider);
 /// actionsService.showNotificationsSettings(context);
 /// ```
 class ProfileActionsService {

@@ -20,26 +20,26 @@ dependencies:
     path: ../../packages/core
 
   # UI
-  cupertino_icons: ^1.0.8
+  cupertino_icons: any
 
   # State Management (Riverpod - padrão monorepo)
-  flutter_riverpod: ^3.0.3
-  riverpod_annotation: ^3.0.3
+  flutter_riverpod: any
+  riverpod_annotation: any
 
   # Functional Programming
-  dartz: ^0.10.1
-  equatable: ^2.0.7
+  dartz: any
+  equatable: any
 
   # Utils
-  logger: ^2.4.0
+  logger: any
   uuid: ^4.5.1
 
   # Navigation
-  go_router: ^16.2.4
+  go_router: any
 
   # App-specific
   fl_chart: ^0.69.0
-  flutter_staggered_grid_view: ^0.7.0
+  flutter_staggered_grid_view: any
   mask_text_input_formatter: ^2.9.0
 
   # Dependencies from core (use core's versions)
@@ -60,16 +60,12 @@ dev_dependencies:
     sdk: flutter
 
   # Linting
-  flutter_lints: ^5.0.0
+  flutter_lints: any
 
   # Code Generation
-  build_runner: ^2.4.13
-  riverpod_generator: ^3.0.3
-  drift_dev: any  # Desabilitado temporariamente por incompatibilidade analyzer
-
-  # Custom Linting (desabilitados temporariamente por incompatibilidade)
-  # custom_lint: ^0.7.0
-  # riverpod_lint: ^2.6.2
+  build_runner: any
+  riverpod_generator: any
+  drift_dev: any
 
   # Testing
   mocktail: ^1.0.0

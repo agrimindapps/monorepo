@@ -9,7 +9,7 @@
 ///
 /// **Uso:**
 /// ```dart
-/// final errorService = di.sl<FavoritosErrorMessageService>();
+/// final errorService = ref.watch(favoritosErrorMessageServiceProvider);
 /// final message = errorService.getAddErrorMessage('defensivo');
 /// ```
 

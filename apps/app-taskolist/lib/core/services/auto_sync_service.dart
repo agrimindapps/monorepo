@@ -33,7 +33,7 @@ import 'data_integrity_service.dart';
 /// **Exemplo de uso:**
 /// ```dart
 /// // No main.dart
-/// final autoSync = getIt<AutoSyncService>();
+/// final autoSync = ref.read(autoSyncServiceProvider);
 /// await autoSync.initialize();
 ///
 /// // Para trigger manual

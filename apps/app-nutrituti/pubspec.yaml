@@ -21,22 +21,22 @@ dependencies:
     path: ../../packages/core
 
   # UI
-  cupertino_icons: ^1.0.8
+  cupertino_icons: any
 
   # State Management (Riverpod 3.0)
   flutter_riverpod: any
   riverpod_annotation: any
 
   # Utils
-  logger: ^2.4.0
+  logger: any
 
   # Navigation
-  go_router: ^16.2.4
+  go_router: any
 
   # App-specific
-  supabase_flutter: ^2.9.1
+  supabase_flutter: any
   skeletonizer: ^2.1.0
-  flutter_staggered_grid_view: ^0.7.0
+  flutter_staggered_grid_view: any
   table_calendar: ^3.1.2
 
   # Dependencies from core (use core's versions)
@@ -45,11 +45,11 @@ dependencies:
   # Dependencies from core but used directly in app code
   # (Required for direct imports per analyzer)
   shared_preferences: any
-  drift: any  # Versão do core: ^2.28.2
-  sqlite3_flutter_libs: any  # Versão do core: ^0.5.24
-  sqlite3_web: any  # Versão do core: ^0.4.1 - Suporte web WASM para Drift
-  path_provider: ^2.1.4
-  path: ^1.9.0
+  drift: any
+  sqlite3_flutter_libs: any
+  sqlite3_web: any
+  path_provider: any
+  path: any
   firebase_core: any
   icons_plus: any
   url_launcher: any
@@ -76,12 +76,12 @@ dev_dependencies:
     sdk: flutter
 
   # Linting
-  flutter_lints: ^5.0.0
+  flutter_lints: any
 
   # Code Generation
-  drift_dev: any  # Versão do core: ^2.28.0
-  build_runner: ^2.4.12
-  riverpod_generator: ^3.0.3
+  drift_dev: any
+  build_runner: any
+  riverpod_generator: any
 
   # Testing
   mocktail: ^1.0.0

@@ -16,8 +16,6 @@ class LivestockStatisticsNotifier extends _$LivestockStatisticsNotifier {
 
   @override
   LivestockStatisticsState build() {
-    // TODO: Replace getIt calls with Riverpod providers
-    // _repository = getIt<LivestockRepository>();
     return const LivestockStatisticsState();
   }
 

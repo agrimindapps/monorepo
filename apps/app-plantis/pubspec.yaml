@@ -14,12 +14,12 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  # Core Package - Serviços compartilhados (Firebase, Riverpod, GetIt, Injectable, Provider, dartz, equatable, etc.)
+  # Core Package - Serviços compartilhados (Firebase, Riverpod, dartz, equatable, etc.)
   core:
     path: ../../packages/core
 
-  flutter_staggered_grid_view: ^0.7.0
-  mime: ^2.0.0
+  flutter_staggered_grid_view: any
+  mime: any
 
   dartz: any
   path_provider: any
@@ -30,23 +30,23 @@ dependencies:
   flutter_riverpod: any
   cloud_firestore: any
   go_router: any
-  freezed_annotation: ^3.0.0
+  freezed_annotation: any
 
   # Drift - SQL Database
-  drift: ^2.28.0
-  sqlite3_flutter_libs: ^0.5.24
+  drift: any
+  sqlite3_flutter_libs: any
   equatable: any
   firebase_auth: any
   google_fonts: ^6.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner: ^2.4.6
+  build_runner: any
   riverpod_generator: any
   mocktail: ^1.0.0
-  freezed: ^3.0.0
-  json_serializable: ^6.8.0
-  drift_dev: ^2.28.0
+  freezed: any
+  json_serializable: any
+  drift_dev: any
 
 flutter:
   uses-material-design: true

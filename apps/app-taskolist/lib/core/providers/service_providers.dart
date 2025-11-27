@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide getIt, Column;
+import 'package:core/core.dart' hide Column;
 
 import '../../features/tasks/domain/get_tasks.dart';
 import '../../features/tasks/domain/task_entity.dart';

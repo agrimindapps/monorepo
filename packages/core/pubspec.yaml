@@ -119,6 +119,9 @@ dependencies:
   # Code Generation - Immutability
   freezed_annotation: ^3.0.0
 
+  # Logging
+  logger: ^2.6.0
+
   # Analysis/Linting (needed for transitive analysis_options.yaml inheritance)
   flutter_lints: ^5.0.0
 

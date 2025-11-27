@@ -23,12 +23,6 @@ class BovinesManagementNotifier extends _$BovinesManagementNotifier {
 
   @override
   BovinesManagementState build() {
-    // TODO: Replace getIt calls with Riverpod providers
-    // _getAllBovines = getIt<GetAllBovinesUseCase>();
-    // _createBovine = getIt<CreateBovineUseCase>();
-    // _updateBovine = getIt<UpdateBovineUseCase>();
-    // _deleteBovine = getIt<DeleteBovineUseCase>();
-
     return const BovinesManagementState();
   }
 

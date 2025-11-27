@@ -20,7 +20,7 @@ class ProgressTracker {
     bool includeHaptic = true,
   }) {
     if (includeHaptic) {
-      // getIt<HapticService>().uploadStart();
+      // TODO: Inject HapticService via Riverpod
     }
 
     final operation = ProgressOperation(
@@ -54,7 +54,7 @@ class ProgressTracker {
       );
 
       if (includeHaptic) {
-        // getIt<HapticService>().uploadProgress();
+        // TODO: Inject HapticService via Riverpod
       }
 
       _notifyListeners();
@@ -73,15 +73,11 @@ class ProgressTracker {
       operation._complete(successMessage);
 
       if (includeHaptic) {
-        // getIt<HapticService>().uploadComplete();
+        // TODO: Inject HapticService via Riverpod
       }
 
       if (showToast && operation.context != null) {
-        // getIt<ToastService>().showSuccess(
-        //   context: operation.context!,
-        //   message: successMessage ?? 'Operação concluída!',
-        //   icon: Icons.check_circle,
-        // );
+        // TODO: Inject ToastService via Riverpod
       }
       Future.delayed(const Duration(seconds: 2), () {
         _activeOperations.remove(key);
@@ -103,16 +99,11 @@ class ProgressTracker {
       operation._fail(errorMessage);
 
       if (includeHaptic) {
-        // getIt<HapticService>().uploadError();
+        // TODO: Inject HapticService via Riverpod
       }
 
       if (showToast && operation.context != null) {
-        // getIt<ToastService>().showError(
-        //   context: operation.context!,
-        //   message: errorMessage,
-        //   actionLabel: onRetry != null ? 'Tentar novamente' : null,
-        //   onAction: onRetry,
-        // );
+        // TODO: Inject ToastService via Riverpod
       }
 
       _notifyListeners();
@@ -148,15 +139,11 @@ class ProgressTracker {
       operation._cancel();
 
       if (includeHaptic) {
-        // getIt<HapticService>().selection();
+        // TODO: Inject HapticService via Riverpod
       }
 
       if (showToast && operation.context != null) {
-        // getIt<ToastService>().showInfo(
-        //   context: operation.context!,
-        //   message: 'Operação cancelada',
-        //   icon: Icons.cancel,
-        // );
+        // TODO: Inject ToastService via Riverpod
       }
 
       _activeOperations.remove(key);

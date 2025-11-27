@@ -23,6 +23,7 @@ export 'package:google_sign_in/google_sign_in.dart';
 export 'package:icons_plus/icons_plus.dart';
 export 'package:intl/intl.dart';
 export 'package:json_annotation/json_annotation.dart';
+export 'package:logger/logger.dart';
 export 'package:package_info_plus/package_info_plus.dart';
 export 'package:purchases_flutter/purchases_flutter.dart' hide LogLevel, Store;
 export 'package:riverpod/riverpod.dart' hide StreamProvider;

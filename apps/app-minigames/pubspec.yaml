@@ -20,7 +20,7 @@ dependencies:
     path: ../../packages/core
 
   # Utils
-  logger: ^2.4.0
+  logger: any
   shared_preferences: any
   equatable: any
   dartz: any
@@ -32,11 +32,11 @@ dev_dependencies:
     sdk: flutter
 
   # Linting
-  flutter_lints: ^5.0.0
+  flutter_lints: any
 
   # Code Generation
-  build_runner: ^2.4.12
-  riverpod_generator: ^3.0.3
+  build_runner: any
+  riverpod_generator: any
 
   # Testing
   mocktail: ^1.0.0

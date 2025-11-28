@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/enums.dart';
+import '../../domain/entities/achievement.dart';
 
 class VictoryDialog extends StatelessWidget {
   final String time;
@@ -9,6 +10,7 @@ class VictoryDialog extends StatelessWidget {
   final bool isNewRecord;
   final VoidCallback onPlayAgain;
   final Function(GameDifficulty) onChangeDifficulty;
+  final List<SudokuAchievementDefinition> newAchievements;
 
   const VictoryDialog({
     super.key,
@@ -19,6 +21,7 @@ class VictoryDialog extends StatelessWidget {
     required this.isNewRecord,
     required this.onPlayAgain,
     required this.onChangeDifficulty,
+    this.newAchievements = const [],
   });
 
   @override
@@ -54,6 +57,77 @@ class VictoryDialog extends StatelessWidget {
               ),
             ),
           if (isNewRecord) const SizedBox(height: 16),
+          // New achievements section
+          if (newAchievements.isNotEmpty) ...[
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.purple.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.purple.shade200),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.emoji_events, color: Colors.amber),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Conquistas Desbloqueadas! (${newAchievements.length})',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  ...newAchievements.take(3).map((achievement) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Row(
+                          children: [
+                            Text(achievement.emoji, style: const TextStyle(fontSize: 20)),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    achievement.title,
+                                    style: const TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                  Text(
+                                    '+${achievement.rarity.xpReward} XP',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: achievement.rarity.color,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )),
+                  if (newAchievements.length > 3)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        '... e mais ${newAchievements.length - 3} conquista(s)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
           _buildStat('Dificuldade', difficulty.label),
           const SizedBox(height: 8),
           _buildStat('Tempo', time),

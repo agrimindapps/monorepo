@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/presentation/providers/recent_access_provider.dart';
 import '../../../../core/widgets/internal_page_layout.dart';
 import '../providers/defensivo_cadastro_provider.dart';
+import '../providers/defensivos_providers.dart';
 import '../widgets/defensivo_cadastro_tab1_informacoes.dart';
 import '../widgets/defensivo_cadastro_tab2_diagnostico.dart';
 import '../widgets/defensivo_cadastro_tab3_aplicacao.dart';
@@ -26,6 +28,7 @@ class DefensivoCadastroPage extends ConsumerStatefulWidget {
 class _DefensivoCadastroPageState extends ConsumerState<DefensivoCadastroPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool _accessRegistered = false;
 
   @override
   void initState() {
@@ -38,6 +41,8 @@ class _DefensivoCadastroPageState extends ConsumerState<DefensivoCadastroPage>
         ref
             .read(defensivoCadastroProvider.notifier)
             .loadDefensivo(widget.defensivoId!);
+        // Register access after loading
+        _registerAccessFromList();
       });
     }
 
@@ -57,10 +62,31 @@ class _DefensivoCadastroPageState extends ConsumerState<DefensivoCadastroPage>
     super.dispose();
   }
 
+  /// Register access by finding the defensivo from the list
+  void _registerAccessFromList() {
+    if (_accessRegistered || widget.defensivoId == null) return;
+
+    final defensivosAsync = ref.read(defensivosProvider);
+    defensivosAsync.whenData((defensivos) {
+      final defensivo = defensivos
+          .where((d) => d.id == widget.defensivoId)
+          .firstOrNull;
+      if (defensivo != null) {
+        _accessRegistered = true;
+        ref.read(recentAccessProvider.notifier).addDefensivoAccess(defensivo);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(defensivoCadastroProvider);
     final isEdit = widget.defensivoId != null;
+
+    // Try to register access if not done yet
+    if (isEdit && !_accessRegistered) {
+      _registerAccessFromList();
+    }
 
     return InternalPageLayout(
       title: isEdit ? 'Editar Defensivo' : 'Novo Defensivo',

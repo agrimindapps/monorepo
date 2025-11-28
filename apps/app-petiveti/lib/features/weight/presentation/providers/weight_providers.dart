@@ -1,16 +1,16 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/providers/database_providers.dart';
 import '../../../../core/interfaces/usecase.dart' as local;
+import '../../../../core/providers/database_providers.dart';
 import '../../data/datasources/weight_local_datasource.dart';
-import '../../domain/entities/weight.dart';
 import '../../data/repositories/weight_repository_impl.dart';
 import '../../data/services/weight_error_handling_service.dart';
+import '../../domain/entities/weight.dart';
 import '../../domain/repositories/weight_repository.dart';
 import '../../domain/services/weight_validation_service.dart';
 import '../../domain/usecases/add_weight.dart';
-import '../../domain/usecases/delete_weight.dart' as del;
-import '../../domain/usecases/get_weight_by_id.dart' as getWeight;
+import '../../domain/usecases/delete_weight.dart' as delete_weight_usecase;
+import '../../domain/usecases/get_weight_by_id.dart' as get_weight_usecase;
 import '../../domain/usecases/get_weight_statistics.dart';
 import '../../domain/usecases/get_weights.dart';
 import '../../domain/usecases/get_weights_by_animal_id.dart';
@@ -74,8 +74,8 @@ GetWeightStatistics getWeightStatistics(Ref ref) {
 }
 
 @riverpod
-getWeight.GetWeightById getWeightById(Ref ref) {
-  return getWeight.GetWeightById(ref.watch(weightRepositoryProvider));
+get_weight_usecase.GetWeightById getWeightById(Ref ref) {
+  return get_weight_usecase.GetWeightById(ref.watch(weightRepositoryProvider));
 }
 
 @riverpod
@@ -89,8 +89,8 @@ UpdateWeight updateWeight(Ref ref) {
 }
 
 @riverpod
-del.DeleteWeight deleteWeight(Ref ref) {
-  return del.DeleteWeight(ref.watch(weightRepositoryProvider));
+delete_weight_usecase.DeleteWeight deleteWeight(Ref ref) {
+  return delete_weight_usecase.DeleteWeight(ref.watch(weightRepositoryProvider));
 }
 
 // ============================================================================

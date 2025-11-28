@@ -26,6 +26,9 @@ class _DefensivoCadastroTab2DiagnosticoState
     extends ConsumerState<DefensivoCadastroTab2Diagnostico> {
   // Batch editing controllers per cultura
   final Map<String, Map<String, TextEditingController>> _batchControllers = {};
+  
+  // Collapsed state per cultura
+  final Map<String, bool> _collapsedGroups = {};
 
   @override
   void dispose() {
@@ -53,7 +56,7 @@ class _DefensivoCadastroTab2DiagnosticoState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with add button
+          // Header with action buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -64,16 +67,54 @@ class _DefensivoCadastroTab2DiagnosticoState
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              ElevatedButton.icon(
-                onPressed: state.defensivo == null
-                    ? null
-                    : () => _showAddDiagnosticoDialog(),
-                icon: const Icon(Icons.add),
-                label: const Text('Adicionar'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                ),
+              Row(
+                children: [
+                  // Excluir SD button (Excluir Sem Dosagem)
+                  if (diagnosticos.isNotEmpty)
+                    ElevatedButton.icon(
+                      onPressed: () => _excluirSemDosagem(),
+                      icon: const Icon(Icons.delete_sweep, size: 18),
+                      label: const Text('Excluir SD'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red.shade400,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                    ),
+                  const SizedBox(width: 8),
+                  // Expandir/Colapsar todos
+                  if (diagnosticos.isNotEmpty)
+                    OutlinedButton.icon(
+                      onPressed: () => _toggleAllGroups(),
+                      icon: Icon(
+                        _collapsedGroups.values.every((c) => c) 
+                            ? Icons.unfold_more 
+                            : Icons.unfold_less,
+                        size: 18,
+                      ),
+                      label: Text(
+                        _collapsedGroups.values.every((c) => c) 
+                            ? 'Expandir' 
+                            : 'Colapsar',
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                    ),
+                  const SizedBox(width: 8),
+                  // Adicionar button
+                  ElevatedButton.icon(
+                    onPressed: state.defensivo == null
+                        ? null
+                        : () => _showAddDiagnosticoDialog(),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Adicionar'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -166,7 +207,14 @@ class _DefensivoCadastroTab2DiagnosticoState
       };
     }
 
+    // Initialize collapsed state
+    _collapsedGroups[culturaId] ??= false;
+    final isCollapsed = _collapsedGroups[culturaId]!;
+
     final batchControllers = _batchControllers[culturaId]!;
+    
+    // Sort diagnosticos by praga name
+    final sortedDiagnosticos = List<Diagnostico>.from(diagnosticos);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16.0),
@@ -174,195 +222,231 @@ class _DefensivoCadastroTab2DiagnosticoState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Cultura header with batch editing fields
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            color: Colors.green.shade50,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      culturaNome,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Row(
+          // Cultura header - always visible
+          InkWell(
+            onTap: () => _toggleGroup(culturaId),
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              color: Colors.green.shade50,
+              child: Row(
+                children: [
+                  // Expand/Collapse icon
+                  Icon(
+                    isCollapsed ? Icons.expand_more : Icons.expand_less,
+                    color: Colors.green.shade700,
+                  ),
+                  const SizedBox(width: 8),
+                  // Cultura name and count
+                  Expanded(
+                    child: Row(
                       children: [
-                        // Refletir dados button
-                        ElevatedButton.icon(
-                          onPressed: diagnosticos.isEmpty
-                              ? null
-                              : () => _refletirDados(culturaId, diagnosticos),
-                          icon: const Icon(Icons.copy_all, size: 16),
-                          label: const Text('Refletir Dados'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
+                        Text(
+                          culturaNome,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(width: 8),
-                        // Apply batch button
-                        ElevatedButton.icon(
-                          onPressed: () =>
-                              _applyBatchEdit(culturaId, diagnosticos),
-                          icon: const Icon(Icons.done_all, size: 16),
-                          label: const Text('Aplicar a Todos'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${diagnosticos.length} ${diagnosticos.length == 1 ? 'praga' : 'pragas'}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.green.shade700,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
                       ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-
-                // Batch editing fields
-                const Text(
-                  'Edição em lote (aplica a todos desta cultura):',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
                   ),
-                ),
-                const SizedBox(height: 8),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildBatchField('Dose Mín', batchControllers['dsMin']!),
-                      _buildBatchField('Dose Máx', batchControllers['dsMax']!),
-                      _buildBatchField('UM', batchControllers['um']!),
-                      _buildBatchField(
-                        'Terr Mín',
-                        batchControllers['minAplicacaoT']!,
-                      ),
-                      _buildBatchField(
-                        'Terr Máx',
-                        batchControllers['maxAplicacaoT']!,
-                      ),
-                      _buildBatchField('UM T', batchControllers['umT']!),
-                      _buildBatchField(
-                        'Aér Mín',
-                        batchControllers['minAplicacaoA']!,
-                      ),
-                      _buildBatchField(
-                        'Aér Máx',
-                        batchControllers['maxAplicacaoA']!,
-                      ),
-                      _buildBatchField('UM A', batchControllers['umA']!),
-                      _buildBatchField(
-                        'Intervalo',
-                        batchControllers['intervalo']!,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // DataTable for this cultura's diagnosticos
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: pragasAsync.when(
-              data: (pragas) => DataTable(
-                border: TableBorder.all(color: Colors.grey.shade300),
-                headingRowColor: MaterialStateColor.resolveWith(
-                  (states) => Colors.grey.shade200,
-                ),
-                columnSpacing: 12,
-                horizontalMargin: 12,
-                columns: const [
-                  DataColumn(label: Text('Praga', style: TextStyle(fontSize: 12))),
-                  DataColumn(label: Text('Dose\nMín', style: TextStyle(fontSize: 11))),
-                  DataColumn(label: Text('Dose\nMáx', style: TextStyle(fontSize: 11))),
-                  DataColumn(label: Text('UM', style: TextStyle(fontSize: 11))),
-                  DataColumn(label: Text('Terr\nMín', style: TextStyle(fontSize: 11))),
-                  DataColumn(label: Text('Terr\nMáx', style: TextStyle(fontSize: 11))),
-                  DataColumn(label: Text('UM', style: TextStyle(fontSize: 11))),
-                  DataColumn(label: Text('Aér\nMín', style: TextStyle(fontSize: 11))),
-                  DataColumn(label: Text('Aér\nMáx', style: TextStyle(fontSize: 11))),
-                  DataColumn(label: Text('UM', style: TextStyle(fontSize: 11))),
-                  DataColumn(label: Text('Intervalo', style: TextStyle(fontSize: 11))),
-                  DataColumn(label: Text('Ações', style: TextStyle(fontSize: 11))),
-                ],
-                rows: diagnosticos.asMap().entries.map((entry) {
-                  final globalIndex = ref
-                      .read(defensivoCadastroProvider)
-                      .diagnosticos
-                      .indexOf(entry.value);
-                  final diagnostico = entry.value;
-                  final praga = pragas.firstWhereOrNull(
-                    (p) => p.id == diagnostico.pragaId,
-                  );
-
-                  return DataRow(
-                    cells: [
-                      DataCell(Text(
-                        praga?.nomeComum ?? 'Desconhecida',
-                        style: const TextStyle(fontSize: 11),
-                      )),
-                      _buildEditableCell(diagnostico.dsMin ?? '', globalIndex,
-                          'dsMin'),
-                      _buildEditableCell(diagnostico.dsMax ?? '', globalIndex,
-                          'dsMax'),
-                      _buildEditableCell(
-                          diagnostico.um ?? '', globalIndex, 'um'),
-                      _buildEditableCell(
-                          diagnostico.minAplicacaoT ?? '', globalIndex, 'minAplicacaoT'),
-                      _buildEditableCell(
-                          diagnostico.maxAplicacaoT ?? '', globalIndex, 'maxAplicacaoT'),
-                      _buildEditableCell(
-                          diagnostico.umT ?? '', globalIndex, 'umT'),
-                      _buildEditableCell(
-                          diagnostico.minAplicacaoA ?? '', globalIndex, 'minAplicacaoA'),
-                      _buildEditableCell(
-                          diagnostico.maxAplicacaoA ?? '', globalIndex, 'maxAplicacaoA'),
-                      _buildEditableCell(
-                          diagnostico.umA ?? '', globalIndex, 'umA'),
-                      _buildEditableCell(
-                          diagnostico.intervalo ?? '', globalIndex, 'intervalo'),
-                      DataCell(
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit, size: 16),
-                              onPressed: () => _editDiagnostico(globalIndex),
-                              tooltip: 'Editar',
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete,
-                                  size: 16, color: Colors.red),
-                              onPressed: () => _deleteDiagnostico(globalIndex),
-                              tooltip: 'Excluir',
-                            ),
-                          ],
+                  // Action buttons (only when expanded)
+                  if (!isCollapsed) ...[
+                    // Refletir dados button
+                    ElevatedButton.icon(
+                      onPressed: diagnosticos.isEmpty
+                          ? null
+                          : () => _refletirDados(culturaId, diagnosticos),
+                      icon: const Icon(Icons.copy_all, size: 16),
+                      label: const Text('Refletir'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
                         ),
                       ),
-                    ],
-                  );
-                }).toList(),
+                    ),
+                    const SizedBox(width: 8),
+                    // Apply batch button
+                    ElevatedButton.icon(
+                      onPressed: () =>
+                          _applyBatchEdit(culturaId, diagnosticos),
+                      icon: const Icon(Icons.done_all, size: 16),
+                      label: const Text('Aplicar Lote'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, __) => const Text('Erro'),
             ),
           ),
+
+          // Collapsible content
+          if (!isCollapsed) ...[
+            // Batch editing fields
+            Container(
+              padding: const EdgeInsets.all(12.0),
+              color: Colors.grey.shade50,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Edição em lote (aplica a todos desta cultura):',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildBatchField('Dose Mín', batchControllers['dsMin']!),
+                        _buildBatchField('Dose Máx', batchControllers['dsMax']!),
+                        _buildBatchField('UM', batchControllers['um']!),
+                        _buildBatchField(
+                          'Terr Mín',
+                          batchControllers['minAplicacaoT']!,
+                        ),
+                        _buildBatchField(
+                          'Terr Máx',
+                          batchControllers['maxAplicacaoT']!,
+                        ),
+                        _buildBatchField('UM T', batchControllers['umT']!),
+                        _buildBatchField(
+                          'Aér Mín',
+                          batchControllers['minAplicacaoA']!,
+                        ),
+                        _buildBatchField(
+                          'Aér Máx',
+                          batchControllers['maxAplicacaoA']!,
+                        ),
+                        _buildBatchField('UM A', batchControllers['umA']!),
+                        _buildBatchField(
+                          'Intervalo',
+                          batchControllers['intervalo']!,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // DataTable for this cultura's diagnosticos
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: pragasAsync.when(
+                data: (pragas) => DataTable(
+                  border: TableBorder.all(color: Colors.grey.shade300),
+                  headingRowColor: WidgetStateColor.resolveWith(
+                    (states) => Colors.grey.shade200,
+                  ),
+                  columnSpacing: 12,
+                  horizontalMargin: 12,
+                  columns: const [
+                    DataColumn(label: Text('Praga', style: TextStyle(fontSize: 12))),
+                    DataColumn(label: Text('Dose\nMín', style: TextStyle(fontSize: 11))),
+                    DataColumn(label: Text('Dose\nMáx', style: TextStyle(fontSize: 11))),
+                    DataColumn(label: Text('UM', style: TextStyle(fontSize: 11))),
+                    DataColumn(label: Text('Terr\nMín', style: TextStyle(fontSize: 11))),
+                    DataColumn(label: Text('Terr\nMáx', style: TextStyle(fontSize: 11))),
+                    DataColumn(label: Text('UM', style: TextStyle(fontSize: 11))),
+                    DataColumn(label: Text('Aér\nMín', style: TextStyle(fontSize: 11))),
+                    DataColumn(label: Text('Aér\nMáx', style: TextStyle(fontSize: 11))),
+                    DataColumn(label: Text('UM', style: TextStyle(fontSize: 11))),
+                    DataColumn(label: Text('Intervalo', style: TextStyle(fontSize: 11))),
+                    DataColumn(label: Text('Ações', style: TextStyle(fontSize: 11))),
+                  ],
+                  rows: sortedDiagnosticos.asMap().entries.map((entry) {
+                    final globalIndex = ref
+                        .read(defensivoCadastroProvider)
+                        .diagnosticos
+                        .indexOf(entry.value);
+                    final diagnostico = entry.value;
+                    final praga = pragas.firstWhereOrNull(
+                      (p) => p.id == diagnostico.pragaId,
+                    );
+
+                    return DataRow(
+                      cells: [
+                        DataCell(Text(
+                          praga?.nomeComum ?? 'Desconhecida',
+                          style: const TextStyle(fontSize: 11),
+                        )),
+                        _buildEditableCell(diagnostico.dsMin ?? '', globalIndex,
+                            'dsMin'),
+                        _buildEditableCell(diagnostico.dsMax ?? '', globalIndex,
+                            'dsMax'),
+                        _buildEditableCell(
+                            diagnostico.um ?? '', globalIndex, 'um'),
+                        _buildEditableCell(
+                            diagnostico.minAplicacaoT ?? '', globalIndex, 'minAplicacaoT'),
+                        _buildEditableCell(
+                            diagnostico.maxAplicacaoT ?? '', globalIndex, 'maxAplicacaoT'),
+                        _buildEditableCell(
+                            diagnostico.umT ?? '', globalIndex, 'umT'),
+                        _buildEditableCell(
+                            diagnostico.minAplicacaoA ?? '', globalIndex, 'minAplicacaoA'),
+                        _buildEditableCell(
+                            diagnostico.maxAplicacaoA ?? '', globalIndex, 'maxAplicacaoA'),
+                        _buildEditableCell(
+                            diagnostico.umA ?? '', globalIndex, 'umA'),
+                        _buildEditableCell(
+                            diagnostico.intervalo ?? '', globalIndex, 'intervalo'),
+                        DataCell(
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit, size: 16),
+                                onPressed: () => _editDiagnostico(globalIndex),
+                                tooltip: 'Editar',
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete,
+                                    size: 16, color: Colors.red),
+                                onPressed: () => _deleteDiagnostico(globalIndex),
+                                tooltip: 'Excluir',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => const Text('Erro'),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -632,6 +716,89 @@ class _DefensivoCadastroTab2DiagnosticoState
                   .read(defensivoCadastroProvider.notifier)
                   .removeDiagnostico(index);
               Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Toggle collapse/expand for a specific group
+  void _toggleGroup(String culturaId) {
+    setState(() {
+      _collapsedGroups[culturaId] = !(_collapsedGroups[culturaId] ?? false);
+    });
+  }
+
+  /// Toggle all groups collapse/expand
+  void _toggleAllGroups() {
+    setState(() {
+      final allCollapsed = _collapsedGroups.values.every((c) => c);
+      for (final key in _collapsedGroups.keys) {
+        _collapsedGroups[key] = !allCollapsed;
+      }
+    });
+  }
+
+  /// Excluir diagnósticos sem dosagem (SD = Sem Dosagem)
+  void _excluirSemDosagem() {
+    final diagnosticos = ref.read(defensivoCadastroProvider).diagnosticos;
+    
+    // Find diagnosticos without dosage
+    final semDosagem = diagnosticos.where((d) {
+      final hasMin = d.dsMin != null && d.dsMin!.isNotEmpty;
+      final hasMax = d.dsMax != null && d.dsMax!.isNotEmpty;
+      return !hasMin && !hasMax;
+    }).toList();
+
+    if (semDosagem.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Não há diagnósticos sem dosagem para excluir.'),
+          backgroundColor: Colors.blue,
+        ),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Excluir Sem Dosagem'),
+        content: Text(
+          'Deseja excluir ${semDosagem.length} diagnóstico(s) sem dosagem preenchida?\n\n'
+          'Esta ação não pode ser desfeita.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // Remove in reverse order to maintain indices
+              final indices = semDosagem
+                  .map((d) => diagnosticos.indexOf(d))
+                  .where((i) => i != -1)
+                  .toList()
+                ..sort((a, b) => b.compareTo(a));
+
+              for (final index in indices) {
+                ref
+                    .read(defensivoCadastroProvider.notifier)
+                    .removeDiagnostico(index);
+              }
+
+              Navigator.pop(context);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${semDosagem.length} diagnóstico(s) excluído(s).'),
+                  backgroundColor: Colors.green,
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Excluir'),

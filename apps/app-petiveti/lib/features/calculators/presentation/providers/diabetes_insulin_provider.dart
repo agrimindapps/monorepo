@@ -1,14 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'package:core/core.dart';
-
-
 import '../../domain/calculators/diabetes_insulin_calculator.dart';
-
 import '../../domain/entities/calculation_result.dart';
-
-import '../../domain/usecases/perform_calculation.dart';
-
 import 'calculators_providers.dart';
 
 part 'diabetes_insulin_provider.g.dart';

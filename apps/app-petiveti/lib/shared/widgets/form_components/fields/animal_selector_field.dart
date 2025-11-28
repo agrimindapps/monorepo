@@ -5,7 +5,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../features/animals/domain/entities/animal.dart';
 import '../../../../features/animals/domain/entities/animal_enums.dart';
 import '../../../../features/animals/presentation/providers/animals_providers.dart';
-import '../../../../features/animals/presentation/providers/animals_providers.dart';
 
 /// **Animal Selector Field Component**
 ///

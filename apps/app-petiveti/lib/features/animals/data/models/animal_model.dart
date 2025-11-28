@@ -80,7 +80,7 @@ class AnimalModel {
 
   factory AnimalModel.fromEntity(Animal animal) {
     return AnimalModel(
-      id: animal.id != null ? int.tryParse(animal.id!) : null,
+      id: int.tryParse(animal.id),
       userId: animal.userId,
       name: animal.name,
       species: animal.species,

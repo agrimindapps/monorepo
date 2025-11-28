@@ -2,7 +2,6 @@ import 'package:core/core.dart' hide SubscriptionState;
 import 'package:flutter/material.dart';
 
 import '../providers/subscription_providers.dart';
-import '../providers/subscription_providers.dart';
 import 'subscription_page_coordinator.dart';
 
 /// Widget responsible for rendering the restore purchases button

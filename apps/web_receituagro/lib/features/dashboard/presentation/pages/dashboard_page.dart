@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/presentation/providers/recent_access_provider.dart';
 import '../../../../core/widgets/web_internal_layout.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../defensivos/domain/entities/defensivo.dart';
+import '../../../defensivos/presentation/providers/defensivos_providers.dart';
+import '../../../pragas/domain/entities/praga.dart';
+import '../widgets/pragas_carousel.dart';
+import '../widgets/recent_items_section.dart';
 
 /// Dashboard page - Internal home after login
 class DashboardPage extends ConsumerWidget {
@@ -11,6 +17,7 @@ class DashboardPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
+    final defensivosAsync = ref.watch(defensivosProvider);
 
     return WebInternalLayout(
       title: 'Dashboard',
@@ -77,6 +84,14 @@ class DashboardPage extends ConsumerWidget {
                       color: Colors.orange,
                       onTap: () => Navigator.of(context).pushNamed('/pragas'),
                     ),
+                    _QuickAccessCard(
+                      icon: Icons.download,
+                      title: 'Exportar',
+                      subtitle: 'Exportar dados do sistema',
+                      color: Colors.blue,
+                      onTap: () =>
+                          Navigator.of(context).pushNamed('/exportar'),
+                    ),
                     // Admin card (only for admins)
                     authState.whenOrNull(
                           data: (user) {
@@ -85,7 +100,7 @@ class DashboardPage extends ConsumerWidget {
                                 icon: Icons.admin_panel_settings,
                                 title: 'Admin',
                                 subtitle: 'Painel administrativo',
-                                color: Colors.blue,
+                                color: Colors.purple,
                                 onTap: () =>
                                     Navigator.of(context).pushNamed('/admin'),
                               );
@@ -98,6 +113,53 @@ class DashboardPage extends ConsumerWidget {
                 );
               },
             ),
+
+            const SizedBox(height: 32),
+
+            // Pragas Carousel (placeholder - needs pragas provider)
+            PragasCarousel(
+              pragas: const [], // TODO: Integrate with pragas provider
+              onPragaTap: (praga) {
+                Navigator.of(context).pushNamed(
+                  '/pragas/details',
+                  arguments: {'id': praga.id},
+                );
+              },
+            ),
+
+            const SizedBox(height: 32),
+
+            // New Products Section
+            defensivosAsync.when(
+              data: (defensivos) {
+                // Get latest 10 defensivos (simulating new products)
+                final newProducts = defensivos.take(10).toList();
+                return NewProductsSection(
+                  defensivos: newProducts,
+                  onDefensivoTap: (defensivo) {
+                    Navigator.of(context).pushNamed(
+                      '/defensivo',
+                      arguments: {'id': defensivo.id},
+                    );
+                  },
+                  onViewAll: () {
+                    Navigator.of(context).pushNamed('/defensivos');
+                  },
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+
+            const SizedBox(height: 32),
+
+            // Recent Pragas Avatars - Using real history data
+            _buildRecentPragasSection(context, ref),
+
+            const SizedBox(height: 32),
+
+            // Recent Defensivos List - Using real history data
+            _buildRecentDefensivosSection(context, ref),
 
             const SizedBox(height: 32),
 
@@ -258,6 +320,76 @@ class DashboardPage extends ConsumerWidget {
     if (width < 900) return 2;
     if (width < 1200) return 3;
     return 4;
+  }
+
+  /// Build recent pragas section with real data from history
+  Widget _buildRecentPragasSection(BuildContext context, WidgetRef ref) {
+    final recentState = ref.watch(recentAccessProvider);
+
+    if (recentState.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Convert RecentAccess to Praga for the widget
+    final recentPragas = recentState.recentPragas.map((access) {
+      return Praga(
+        id: access.itemId,
+        nomeComum: access.itemName ?? 'Praga',
+        nomeCientifico: access.itemSubtitle ?? '',
+        ordem: '',
+        familia: '',
+        imageUrl: access.imageUrl,
+        createdAt: access.accessedAt,
+        updatedAt: access.accessedAt,
+      );
+    }).toList();
+
+    return RecentPragasAvatars(
+      pragas: recentPragas,
+      onPragaTap: (praga) {
+        Navigator.of(context).pushNamed(
+          '/pragas/details',
+          arguments: {'id': praga.id},
+        );
+      },
+      onViewAll: () {
+        Navigator.of(context).pushNamed('/pragas');
+      },
+    );
+  }
+
+  /// Build recent defensivos section with real data from history
+  Widget _buildRecentDefensivosSection(BuildContext context, WidgetRef ref) {
+    final recentState = ref.watch(recentAccessProvider);
+
+    if (recentState.isLoading) {
+      return const SizedBox.shrink();
+    }
+
+    // Convert RecentAccess to Defensivo for the widget
+    final recentDefensivos = recentState.recentDefensivos.map((access) {
+      return Defensivo(
+        id: access.itemId,
+        nomeComum: access.itemName ?? 'Defensivo',
+        fabricante: access.itemSubtitle ?? '',
+        ingredienteAtivo: '',
+        createdAt: access.accessedAt,
+        updatedAt: access.accessedAt,
+      );
+    }).toList();
+
+    return RecentDefensivosList(
+      defensivos: recentDefensivos,
+      onDefensivoTap: (defensivo) {
+        Navigator.of(context).pushNamed(
+          '/defensivo',
+          arguments: {'id': defensivo.id},
+        );
+      },
+      onViewAll: () {
+        Navigator.of(context).pushNamed('/defensivos');
+      },
+    );
   }
 }
 

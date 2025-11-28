@@ -1,8 +1,6 @@
 import 'dart:convert';
 
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Adapter for SharedPreferences to implement ILocalStorageRepository
 class PetivetiSharedPreferencesLocalStorage implements ILocalStorageRepository {
@@ -61,7 +59,7 @@ class PetivetiSharedPreferencesLocalStorage implements ILocalStorageRepository {
       if (value is String && (T.toString().contains('Map') || T.toString().contains('List'))) {
         try {
           final decoded = jsonDecode(value);
-          if (decoded is T) return Right(decoded as T);
+          if (decoded is T) return Right(decoded);
         } catch (_) {
           // Ignore json decode error, maybe it's just a string
         }
@@ -126,7 +124,7 @@ class PetivetiSharedPreferencesLocalStorage implements ILocalStorageRepository {
     String? box,
   }) async {
     // Not efficiently supported by SharedPreferences
-    return Left(CacheFailure('getValues not supported by SharedPreferences adapter'));
+    return const Left(CacheFailure('getValues not supported by SharedPreferences adapter'));
   }
 
   @override

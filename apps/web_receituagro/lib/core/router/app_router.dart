@@ -9,7 +9,9 @@ import '../../features/culturas/presentation/pages/culturas_list_page.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/defensivos/presentation/pages/defensivo_cadastro_page.dart';
 import '../../features/defensivos/presentation/pages/defensivos_list_page.dart';
+import '../../features/export/presentation/pages/export_page.dart';
 import '../../features/pragas/presentation/pages/praga_cadastro_page.dart';
+import '../../features/pragas/presentation/pages/praga_detalhes_page.dart';
 import '../../features/pragas/presentation/pages/pragas_list_page.dart';
 import 'route_guard.dart';
 
@@ -127,8 +129,8 @@ class AppRouter {
           return _buildErrorRoute('ID da praga é obrigatório');
         }
         return MaterialPageRoute(
-          builder: (_) => _PragaDetailsPlaceholder(
-            id: args['id'] as String,
+          builder: (_) => PragaDetalhesPage(
+            pragaId: args['id'] as String,
           ).requireAuth(),
         );
 
@@ -161,6 +163,12 @@ class AppRouter {
         // PROTECTED - Gerenciar usuários (Admin only)
         return MaterialPageRoute(
           builder: (_) => const _UsersPlaceholder().requireAdmin(),
+        );
+
+      case '/exportar':
+        // PROTECTED - Exportar dados (Editor + Admin)
+        return MaterialPageRoute(
+          builder: (_) => const ExportPage().requireWrite(),
         );
 
       // ========== ERROR ROUTE ==========

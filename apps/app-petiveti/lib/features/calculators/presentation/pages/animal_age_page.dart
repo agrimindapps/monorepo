@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide FormState, Column, Table;
+import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 
 /// Página da Calculadora de Idade Animal

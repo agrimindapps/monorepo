@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+
 import '../storage/shared_preferences_local_storage.dart';
 
 import '../../features/animals/domain/entities/sync/animal_sync_entity.dart';

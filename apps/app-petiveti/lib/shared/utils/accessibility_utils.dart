@@ -459,9 +459,11 @@ enum LiveRegionPoliteness {
 /// Different levels of WCAG accessibility compliance.
 enum WCAGLevel {
   /// Level AA - Standard compliance (recommended minimum)
+  // ignore: constant_identifier_names
   AA,
   
   /// Level AAA - Enhanced compliance (gold standard)
+  // ignore: constant_identifier_names
   AAA,
 }
 

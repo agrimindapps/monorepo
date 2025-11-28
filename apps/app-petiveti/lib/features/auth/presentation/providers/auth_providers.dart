@@ -1,7 +1,4 @@
 import 'package:core/core.dart' hide SignInWithApple;
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_services_providers.dart' as core_providers;
 import '../../data/datasources/auth_local_datasource.dart';

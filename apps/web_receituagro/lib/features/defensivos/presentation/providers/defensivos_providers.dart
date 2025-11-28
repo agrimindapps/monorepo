@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/interfaces/usecase.dart';
 import '../../../../core/providers/dependency_providers.dart';
 import '../../domain/entities/defensivo.dart';
+import '../../domain/entities/defensivo_filter.dart';
 import '../../domain/services/defensivos_filter_service.dart';
 import '../../domain/services/defensivos_pagination_service.dart';
 import '../../domain/usecases/search_defensivos_usecase.dart';
@@ -19,6 +20,39 @@ DefensivosFilterService defensivosFilterService(Ref ref) {
 @riverpod
 DefensivosPaginationService defensivosPaginationService(Ref ref) {
   return DefensivosPaginationService();
+}
+
+// ========== Filter State Providers ==========
+
+/// Current filter type provider
+@riverpod
+class CurrentFilter extends _$CurrentFilter {
+  @override
+  DefensivoFilter build() => DefensivoFilter.todos;
+
+  void setFilter(DefensivoFilter filter) {
+    state = filter;
+  }
+
+  void reset() {
+    state = DefensivoFilter.todos;
+  }
+}
+
+/// Stats map provider (defensivo id -> DefensivoStats)
+/// In production, this would be populated from repository
+@riverpod
+class DefensivosStats extends _$DefensivosStats {
+  @override
+  Map<String, DefensivoStats> build() => {};
+
+  void setStats(Map<String, DefensivoStats> stats) {
+    state = stats;
+  }
+
+  void updateStat(String defensivoId, DefensivoStats stats) {
+    state = {...state, defensivoId: stats};
+  }
 }
 
 // ========== State Providers ==========
@@ -131,35 +165,40 @@ class CurrentPage extends _$CurrentPage {
 
 // ========== Derived States ==========
 
-/// Paginated defensivos (current page items)
+/// Filtered defensivos (by current filter)
 @riverpod
-List<Defensivo> paginatedDefensivos(Ref ref) {
+List<Defensivo> filteredDefensivos(Ref ref) {
   final defensivosAsync = ref.watch(defensivosProvider);
-  final currentPage = ref.watch(currentPageProvider);
-  final paginationService = ref.watch(defensivosPaginationServiceProvider);
+  final currentFilter = ref.watch(currentFilterProvider);
+  final statsMap = ref.watch(defensivosStatsProvider);
+  final filterService = ref.watch(defensivosFilterServiceProvider);
 
   return defensivosAsync.when(
     data: (defensivos) {
-      return paginationService.getPage(defensivos, currentPage);
+      return filterService.filterByType(defensivos, currentFilter, statsMap);
     },
     loading: () => [],
     error: (_, __) => [],
   );
 }
 
+/// Paginated defensivos (current page items)
+@riverpod
+List<Defensivo> paginatedDefensivos(Ref ref) {
+  final filteredList = ref.watch(filteredDefensivosProvider);
+  final currentPage = ref.watch(currentPageProvider);
+  final paginationService = ref.watch(defensivosPaginationServiceProvider);
+
+  return paginationService.getPage(filteredList, currentPage);
+}
+
 /// Total pages
 @riverpod
 int totalPages(Ref ref) {
-  final defensivosAsync = ref.watch(defensivosProvider);
+  final filteredList = ref.watch(filteredDefensivosProvider);
   final paginationService = ref.watch(defensivosPaginationServiceProvider);
 
-  return defensivosAsync.when(
-    data: (defensivos) {
-      return paginationService.getTotalPages(defensivos.length);
-    },
-    loading: () => 1,
-    error: (_, __) => 1,
-  );
+  return paginationService.getTotalPages(filteredList.length);
 }
 
 /// Page numbers to display in pagination UI
@@ -170,4 +209,25 @@ List<int> pageNumbers(Ref ref) {
   final paginationService = ref.watch(defensivosPaginationServiceProvider);
 
   return paginationService.getPageNumbers(currentPage, totalPagesCount);
+}
+
+/// Filter counts for display in filter menu
+@riverpod
+Map<DefensivoFilter, int> filterCounts(Ref ref) {
+  final defensivosAsync = ref.watch(defensivosProvider);
+  final statsMap = ref.watch(defensivosStatsProvider);
+  final filterService = ref.watch(defensivosFilterServiceProvider);
+
+  return defensivosAsync.when(
+    data: (defensivos) {
+      final counts = <DefensivoFilter, int>{};
+      for (final filter in DefensivoFilter.values) {
+        counts[filter] =
+            filterService.filterByType(defensivos, filter, statsMap).length;
+      }
+      return counts;
+    },
+    loading: () => {},
+    error: (_, __) => {},
+  );
 }

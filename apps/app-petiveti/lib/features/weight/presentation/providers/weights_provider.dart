@@ -1,43 +1,19 @@
+import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'package:core/core.dart';
-
-import 'package:flutter/material.dart';
-
-
-import 'weight_providers.dart';
-
 import '../../../../core/interfaces/usecase.dart' as local;
-
 import '../../domain/entities/weight.dart';
-
 import '../../domain/repositories/weight_repository.dart';
-
 import '../../domain/usecases/add_weight.dart';
-
 import '../../domain/usecases/get_weight_statistics.dart';
-
 import '../../domain/usecases/get_weights.dart';
-
 import '../../domain/usecases/get_weights_by_animal_id.dart';
-
 import '../../domain/usecases/update_weight.dart';
-
 import '../states/weights_crud_state.dart';
-
 import '../states/weights_filter_state.dart';
-
 import '../states/weights_query_state.dart';
-
 import '../states/weights_sort_state.dart';
-
-import './notifiers/weights_crud_notifier.dart';
-
-import './notifiers/weights_filter_notifier.dart';
-
-import './notifiers/weights_query_notifier.dart';
-
-import './notifiers/weights_sort_notifier.dart';
+import 'weight_providers.dart';
 
 part 'weights_provider.g.dart';
 

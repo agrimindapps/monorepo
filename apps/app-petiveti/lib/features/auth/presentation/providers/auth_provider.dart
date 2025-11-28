@@ -1,12 +1,12 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:core/core.dart' show EnhancedAccountDeletionService;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:core/core.dart' show EnhancedAccountDeletionService;
-import 'auth_providers.dart';
-import '../../domain/entities/user.dart';
-import '../../domain/services/pet_data_sync_service.dart';
-import '../../domain/usecases/auth_usecases.dart' as auth_usecases;
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../../../core/interfaces/usecase.dart' as local;
+import '../../domain/entities/user.dart';
+import '../../domain/usecases/auth_usecases.dart' as auth_usecases;
+import 'auth_providers.dart';
 
 part 'auth_provider.g.dart';
 

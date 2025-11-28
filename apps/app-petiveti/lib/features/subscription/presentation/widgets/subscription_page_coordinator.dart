@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../domain/entities/subscription_plan.dart';
 import '../providers/subscription_providers.dart';
-import '../providers/subscription_providers.dart';
 
 /// Coordinator responsible for managing subscription page business logic
 /// and coordinating between different subscription components

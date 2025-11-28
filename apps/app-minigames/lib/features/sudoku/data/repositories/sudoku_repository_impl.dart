@@ -2,9 +2,13 @@ import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/high_score_entity.dart';
+import '../../domain/entities/achievement.dart';
+import '../../domain/entities/sudoku_statistics.dart';
 import '../../domain/repositories/sudoku_repository.dart';
 import '../datasources/sudoku_local_datasource.dart';
 import '../models/high_score_model.dart';
+import '../models/achievement_model.dart';
+import '../models/sudoku_statistics_model.dart';
 
 class SudokuRepositoryImpl implements SudokuRepository {
   final SudokuLocalDataSource _localDataSource;
@@ -63,6 +67,56 @@ class SudokuRepositoryImpl implements SudokuRepository {
       return Left(
         CacheFailure('Failed to clear high scores: ${e.toString()}'),
       );
+    }
+  }
+
+  // ==================== ACHIEVEMENTS ====================
+
+  @override
+  Future<Either<Failure, List<SudokuAchievement>>> loadAchievements() async {
+    try {
+      final data = await _localDataSource.loadAchievements();
+      return Right(data.toEntities());
+    } on Exception catch (e) {
+      return Left(CacheFailure('Failed to load achievements: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> saveAchievements(
+    List<SudokuAchievement> achievements,
+  ) async {
+    try {
+      final data = SudokuAchievementsDataModel.fromEntities(achievements);
+      await _localDataSource.saveAchievements(data);
+      return const Right(null);
+    } on Exception catch (e) {
+      return Left(CacheFailure('Failed to save achievements: ${e.toString()}'));
+    }
+  }
+
+  // ==================== STATISTICS ====================
+
+  @override
+  Future<Either<Failure, SudokuStatistics>> loadStatistics() async {
+    try {
+      final data = await _localDataSource.loadStatistics();
+      return Right(data);
+    } on Exception catch (e) {
+      return Left(CacheFailure('Failed to load statistics: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> saveStatistics(
+    SudokuStatistics statistics,
+  ) async {
+    try {
+      final data = SudokuStatisticsModel.fromEntity(statistics);
+      await _localDataSource.saveStatistics(data);
+      return const Right(null);
+    } on Exception catch (e) {
+      return Left(CacheFailure('Failed to save statistics: ${e.toString()}'));
     }
   }
 }

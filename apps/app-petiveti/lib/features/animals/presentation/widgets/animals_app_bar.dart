@@ -2,7 +2,6 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/animals_constants.dart';
-import '../../domain/entities/animal_enums.dart';
 import '../providers/animals_providers.dart';
 
 class AnimalsAppBar extends ConsumerStatefulWidget

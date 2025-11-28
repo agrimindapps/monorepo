@@ -2,11 +2,15 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/enums.dart';
 import '../models/high_score_model.dart';
+import '../models/achievement_model.dart';
+import '../models/sudoku_statistics_model.dart';
 
 class SudokuLocalDataSource {
   final SharedPreferences _prefs;
 
   static const String _highScorePrefix = 'sudoku_high_score_';
+  static const String _achievementsKey = 'sudoku_achievements';
+  static const String _statisticsKey = 'sudoku_statistics';
 
   SudokuLocalDataSource(this._prefs);
 
@@ -77,5 +81,70 @@ class SudokuLocalDataSource {
   bool hasHighScore(GameDifficulty difficulty) {
     final key = _getKey(difficulty);
     return _prefs.containsKey(key);
+  }
+
+  // ==================== ACHIEVEMENTS ====================
+
+  /// Load achievements
+  Future<SudokuAchievementsDataModel> loadAchievements() async {
+    try {
+      final jsonString = _prefs.getString(_achievementsKey);
+
+      if (jsonString == null) {
+        return SudokuAchievementsDataModel.empty();
+      }
+
+      return SudokuAchievementsDataModel.fromJsonString(jsonString);
+    } catch (e) {
+      return SudokuAchievementsDataModel.empty();
+    }
+  }
+
+  /// Save achievements
+  Future<void> saveAchievements(SudokuAchievementsDataModel data) async {
+    try {
+      final jsonString = data.toJsonString();
+      await _prefs.setString(_achievementsKey, jsonString);
+    } catch (e) {
+      throw Exception('Failed to save achievements: $e');
+    }
+  }
+
+  // ==================== STATISTICS ====================
+
+  /// Load statistics
+  Future<SudokuStatisticsModel> loadStatistics() async {
+    try {
+      final jsonString = _prefs.getString(_statisticsKey);
+
+      if (jsonString == null) {
+        return SudokuStatisticsModel.empty();
+      }
+
+      return SudokuStatisticsModel.fromJsonString(jsonString);
+    } catch (e) {
+      return SudokuStatisticsModel.empty();
+    }
+  }
+
+  /// Save statistics
+  Future<void> saveStatistics(SudokuStatisticsModel data) async {
+    try {
+      final jsonString = data.toJsonString();
+      await _prefs.setString(_statisticsKey, jsonString);
+    } catch (e) {
+      throw Exception('Failed to save statistics: $e');
+    }
+  }
+
+  /// Clear all Sudoku data (high scores, achievements, statistics)
+  Future<void> clearAllData() async {
+    try {
+      await clearAllHighScores();
+      await _prefs.remove(_achievementsKey);
+      await _prefs.remove(_statisticsKey);
+    } catch (e) {
+      throw Exception('Failed to clear all data: $e');
+    }
   }
 }

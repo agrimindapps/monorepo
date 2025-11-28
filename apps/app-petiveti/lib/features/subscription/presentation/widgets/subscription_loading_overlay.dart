@@ -1,7 +1,5 @@
-import 'package:core/core.dart' hide SubscriptionState;
 import 'package:flutter/material.dart';
 
-import '../providers/subscription_providers.dart';
 import '../providers/subscription_providers.dart';
 
 /// Widget responsible for displaying loading overlay during subscription operations

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../domain/entities/subscription_plan.dart';
 import '../providers/subscription_providers.dart';
-import '../providers/subscription_providers.dart';
 import 'subscription_page_coordinator.dart';
 
 /// Widget responsible for displaying subscription plan information and actions

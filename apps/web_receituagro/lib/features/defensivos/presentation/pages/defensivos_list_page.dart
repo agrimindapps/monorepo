@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/defensivo.dart';
+import '../../domain/entities/defensivo_filter.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../providers/defensivos_providers.dart';
 
@@ -26,6 +27,7 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
   Widget build(BuildContext context) {
     final defensivosAsync = ref.watch(defensivosProvider);
     final authState = ref.watch(authProvider);
+    final currentFilter = ref.watch(currentFilterProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -61,15 +63,37 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Export button (Editor + Admin)
+                  if (user.canWrite)
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/exportar');
+                      },
+                      icon: const Icon(Icons.download, size: 18),
+                      label: const Text('Exportar'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green.shade600,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+
+                  const SizedBox(width: 8),
+
                   // New Defensivo button (only for Editor/Admin)
                   if (user.canWrite)
-                    IconButton(
-                      icon: const Icon(Icons.add_circle_outline),
+                    ElevatedButton.icon(
                       onPressed: () {
                         Navigator.of(context).pushNamed('/defensivo/new');
                       },
-                      tooltip: 'Novo Defensivo',
+                      icon: const Icon(Icons.add, size: 18),
+                      label: const Text('Novo'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green.shade700,
+                        foregroundColor: Colors.white,
+                      ),
                     ),
+
+                  const SizedBox(width: 8),
 
                   // Admin panel button (only for Admin)
                   if (user.isAdmin)
@@ -242,8 +266,8 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
       ),
       body: Column(
         children: [
-          // Search bar
-          _buildSearchBar(),
+          // Search bar with filters
+          _buildSearchBar(currentFilter),
 
           // Main content
           Expanded(
@@ -258,57 +282,144 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
     );
   }
 
-  Widget _buildSearchBar() {
-    return Padding(
+  Widget _buildSearchBar(DefensivoFilter currentFilter) {
+    final filterCounts = ref.watch(filterCountsProvider);
+
+    return Container(
       padding: const EdgeInsets.all(16.0),
-      child: Row(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
         children: [
-          Expanded(
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Buscar defensivo, ingrediente ativo...',
-                prefixIcon: const Icon(Icons.search),
-                border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Buscar defensivo, ingrediente ativo...',
+                    prefixIcon: const Icon(Icons.search),
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              ref
+                                  .read(defensivosProvider.notifier)
+                                  .showAll();
+                            },
+                          )
+                        : null,
+                  ),
+                  onSubmitted: (value) {
+                    if (value.trim().isNotEmpty) {
+                      ref.read(defensivosProvider.notifier).search(value);
+                    }
+                  },
                 ),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          ref
-                              .read(defensivosProvider.notifier)
-                              .showAll();
-                        },
-                      )
-                    : null,
               ),
-              onSubmitted: (value) {
-                if (value.trim().isNotEmpty) {
-                  ref.read(defensivosProvider.notifier).search(value);
-                }
-              },
+              const SizedBox(width: 8),
+              ElevatedButton.icon(
+                onPressed: () {
+                  final query = _searchController.text.trim();
+                  if (query.isNotEmpty) {
+                    ref.read(defensivosProvider.notifier).search(query);
+                  }
+                },
+                icon: const Icon(Icons.search),
+                label: const Text('Buscar'),
+              ),
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: () {
+                  _searchController.clear();
+                  ref.read(defensivosProvider.notifier).showAll();
+                  ref.read(currentFilterProvider.notifier).reset();
+                },
+                child: const Text('Limpar'),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // Filter chips
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: DefensivoFilter.values.map((filter) {
+                final isSelected = currentFilter == filter;
+                final count = filterCounts[filter] ?? 0;
+
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    selected: isSelected,
+                    label: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (filter.icon != null) ...[
+                          Icon(
+                            filter.icon,
+                            size: 16,
+                            color: isSelected
+                                ? Colors.white
+                                : Colors.grey.shade700,
+                          ),
+                          const SizedBox(width: 4),
+                        ],
+                        Text(filter.label),
+                        if (count > 0) ...[
+                          const SizedBox(width: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Colors.white.withOpacity(0.3)
+                                  : Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              '$count',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.grey.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    selectedColor: Colors.green.shade600,
+                    backgroundColor: Colors.grey.shade100,
+                    labelStyle: TextStyle(
+                      color: isSelected ? Colors.white : Colors.grey.shade800,
+                    ),
+                    onSelected: (selected) {
+                      ref.read(currentFilterProvider.notifier).setFilter(filter);
+                      ref.read(currentPageProvider.notifier).firstPage();
+                    },
+                  ),
+                );
+              }).toList(),
             ),
-          ),
-          const SizedBox(width: 8),
-          ElevatedButton.icon(
-            onPressed: () {
-              final query = _searchController.text.trim();
-              if (query.isNotEmpty) {
-                ref.read(defensivosProvider.notifier).search(query);
-              }
-            },
-            icon: const Icon(Icons.search),
-            label: const Text('Buscar'),
-          ),
-          const SizedBox(width: 8),
-          TextButton(
-            onPressed: () {
-              _searchController.clear();
-              ref.read(defensivosProvider.notifier).showAll();
-            },
-            child: const Text('Todos'),
           ),
         ],
       ),
@@ -316,7 +427,9 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
   }
 
   Widget _buildContent(List<Defensivo> defensivos) {
-    if (defensivos.isEmpty) {
+    final filteredList = ref.watch(filteredDefensivosProvider);
+
+    if (filteredList.isEmpty) {
       return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -538,7 +651,7 @@ class _DefensivosListPageState extends ConsumerState<DefensivosListPage> {
   }
 }
 
-/// DataTable widget for defensivos
+/// DataTable widget for defensivos with enhanced columns
 class _DefensivosGrid extends ConsumerWidget {
   final void Function(BuildContext context, String name) onCopyName;
   final Future<void> Function(
@@ -553,6 +666,7 @@ class _DefensivosGrid extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final paginatedDefensivos = ref.watch(paginatedDefensivosProvider);
+    final statsMap = ref.watch(defensivosStatsProvider);
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -560,12 +674,13 @@ class _DefensivosGrid extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: DataTable(
-            headingRowColor: MaterialStateProperty.all(Colors.green.shade50),
+            headingRowColor: WidgetStateProperty.all(Colors.green.shade50),
             border: TableBorder.all(color: Colors.grey.shade300, width: 1),
+            columnSpacing: 24,
             columns: const [
               DataColumn(
                 label: Text(
-                  'Nome Comum',
+                  'Defensivo',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -577,15 +692,30 @@ class _DefensivosGrid extends ConsumerWidget {
               ),
               DataColumn(
                 label: Text(
-                  'Ingrediente Ativo',
+                  'Tóxico',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
               DataColumn(
                 label: Text(
-                  'Classe Agronômica',
+                  'Diagn.',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
+                tooltip: 'Preenchidos / Total de Diagnósticos',
+              ),
+              DataColumn(
+                label: Text(
+                  'Preench.',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                tooltip: 'Diagnósticos Completos',
+              ),
+              DataColumn(
+                label: Text(
+                  'Info.',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                tooltip: 'Informações Complementares',
               ),
               DataColumn(
                 label: Text(
@@ -595,20 +725,41 @@ class _DefensivosGrid extends ConsumerWidget {
               ),
             ],
             rows: paginatedDefensivos.map((defensivo) {
+              final stats =
+                  statsMap[defensivo.id] ?? const DefensivoStats.empty();
+
               return DataRow(
                 cells: [
+                  // Nome do Defensivo
                   DataCell(
                     SizedBox(
                       width: 200,
-                      child: Text(
-                        defensivo.nomeComum,
-                        overflow: TextOverflow.ellipsis,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            defensivo.nomeComum,
+                            style: const TextStyle(fontWeight: FontWeight.w500),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (defensivo.ingredienteAtivo.isNotEmpty)
+                            Text(
+                              defensivo.ingredienteAtivo,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey.shade600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                        ],
                       ),
                     ),
                   ),
+                  // Fabricante
                   DataCell(
                     SizedBox(
-                      width: 150,
+                      width: 140,
                       child: Text(
                         defensivo.fabricante.isEmpty
                             ? '-'
@@ -617,28 +768,23 @@ class _DefensivosGrid extends ConsumerWidget {
                       ),
                     ),
                   ),
+                  // Classe Toxicológica
                   DataCell(
-                    SizedBox(
-                      width: 180,
-                      child: Text(
-                        defensivo.ingredienteAtivo.isEmpty
-                            ? '-'
-                            : defensivo.ingredienteAtivo,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
+                    _buildToxicoCell(defensivo.toxico),
                   ),
+                  // Diagnósticos (X/Y)
                   DataCell(
-                    SizedBox(
-                      width: 150,
-                      child: Text(
-                        defensivo.classeAgronomica?.isEmpty ?? true
-                            ? '-'
-                            : defensivo.classeAgronomica!,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
+                    _buildDiagnosticosCell(stats),
                   ),
+                  // Preenchimento (check if complete)
+                  DataCell(
+                    _buildPreenchimentoCell(stats),
+                  ),
+                  // Informações (check if has info)
+                  DataCell(
+                    _buildInfoCell(stats),
+                  ),
+                  // Ações
                   DataCell(
                     Row(
                       mainAxisSize: MainAxisSize.min,
@@ -681,7 +827,11 @@ class _DefensivosGrid extends ConsumerWidget {
                         ),
                         // Copy button
                         IconButton(
-                          icon: const Icon(Icons.copy, size: 20),
+                          icon: Icon(
+                            Icons.copy,
+                            size: 20,
+                            color: Colors.blue.shade600,
+                          ),
                           tooltip: 'Copiar nome',
                           onPressed: () {
                             onCopyName(context, defensivo.nomeComum);
@@ -724,19 +874,120 @@ class _DefensivosGrid extends ConsumerWidget {
       ),
     );
   }
+
+  Widget _buildToxicoCell(String? toxico) {
+    if (toxico == null || toxico.isEmpty) {
+      return const Text('-', style: TextStyle(color: Colors.grey));
+    }
+
+    // Map toxicity class to color
+    Color color;
+    switch (toxico.toUpperCase()) {
+      case 'I':
+        color = Colors.red.shade700;
+        break;
+      case 'II':
+        color = Colors.orange.shade700;
+        break;
+      case 'III':
+        color = Colors.yellow.shade800;
+        break;
+      case 'IV':
+        color = Colors.green.shade700;
+        break;
+      default:
+        color = Colors.grey.shade700;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Text(
+        toxico,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDiagnosticosCell(DefensivoStats stats) {
+    final hasAny = stats.hasDiagnosticos;
+    final isComplete = stats.isDiagnosticosComplete;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          stats.diagnosticoDisplay,
+          style: TextStyle(
+            color: hasAny
+                ? (isComplete ? Colors.green.shade700 : Colors.orange.shade700)
+                : Colors.grey,
+            fontWeight: hasAny ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+        if (hasAny && !isComplete) ...[
+          const SizedBox(width: 4),
+          Icon(
+            Icons.warning_amber,
+            size: 14,
+            color: Colors.orange.shade700,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildPreenchimentoCell(DefensivoStats stats) {
+    if (stats.isDiagnosticosComplete && stats.hasDiagnosticos) {
+      return Icon(
+        Icons.check_circle,
+        color: Colors.green.shade600,
+        size: 20,
+      );
+    }
+    return Icon(
+      Icons.radio_button_unchecked,
+      color: Colors.grey.shade400,
+      size: 20,
+    );
+  }
+
+  Widget _buildInfoCell(DefensivoStats stats) {
+    if (stats.hasInfo) {
+      return Icon(
+        Icons.check_circle,
+        color: Colors.green.shade600,
+        size: 20,
+      );
+    }
+    return Icon(
+      Icons.radio_button_unchecked,
+      color: Colors.grey.shade400,
+      size: 20,
+    );
+  }
 }
 
 /// Total count widget
 class _TotalCount extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final filteredList = ref.watch(filteredDefensivosProvider);
     final defensivosAsync = ref.watch(defensivosProvider);
 
     return defensivosAsync.when(
       data: (defensivos) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Text(
-          'Total de registros: ${defensivos.length}',
+          'Exibindo ${filteredList.length} de ${defensivos.length} registros',
           style: Theme.of(
             context,
           ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),

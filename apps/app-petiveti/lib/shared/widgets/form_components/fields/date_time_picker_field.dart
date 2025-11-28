@@ -433,7 +433,7 @@ class DateTimePickerField extends StatelessWidget {
       confirmText: 'Continuar',
     );
 
-    if (date != null) {
+    if (date != null && context.mounted) {
       final time = await showTimePicker(
         context: context,
         initialTime: value != null

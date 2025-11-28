@@ -1,9 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../providers/expenses_providers.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/entities/expense_summary.dart';
-import '../../domain/repositories/expense_repository.dart';
 import '../../domain/services/expense_processing_service.dart';
 import '../../domain/usecases/add_expense.dart';
 import '../../domain/usecases/delete_expense.dart';
@@ -12,6 +10,7 @@ import '../../domain/usecases/get_expenses.dart';
 import '../../domain/usecases/get_expenses_by_category.dart';
 import '../../domain/usecases/get_expenses_by_date_range.dart';
 import '../../domain/usecases/update_expense.dart';
+import '../providers/expenses_providers.dart';
 
 part 'expenses_notifier.g.dart';
 

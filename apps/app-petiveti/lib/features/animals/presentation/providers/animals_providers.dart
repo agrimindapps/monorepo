@@ -2,23 +2,20 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:core/core.dart';
 
+import '../../../../core/interfaces/usecase.dart' as local;
 import '../../../../core/providers/database_providers.dart';
 import '../../data/datasources/animal_local_datasource.dart';
 import '../../data/repositories/animal_repository_impl.dart';
 import '../../data/repositories/noop_sync_manager.dart';
 import '../../data/services/animal_error_handling_service.dart';
+import '../../domain/entities/animal.dart';
 import '../../domain/repositories/animal_repository.dart';
-import '../../domain/repositories/isync_manager.dart';
 import '../../domain/services/animal_validation_service.dart';
 import '../../domain/usecases/add_animal.dart';
 import '../../domain/usecases/delete_animal.dart';
 import '../../domain/usecases/get_animal_by_id.dart';
 import '../../domain/usecases/get_animals.dart';
 import '../../domain/usecases/update_animal.dart';
-import '../../../../core/interfaces/usecase.dart' as local;
-import '../../../../core/interfaces/logging_service.dart';
-import '../../../../core/providers/core_services_providers.dart';
-import '../../domain/entities/animal.dart';
 
 // Export state classes and providers for use in other modules
 // export '../notifiers/animals_notifier.dart' show AnimalsState, AnimalsNotifier, animalsProvider;

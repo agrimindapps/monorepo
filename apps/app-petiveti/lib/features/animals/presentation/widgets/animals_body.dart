@@ -86,14 +86,12 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
     }
     // TODO: Re-implement filter detection with new filter strategy
     // if (animalsState.filter.hasActiveFilters && filteredAnimals.isEmpty) {
-    if (false && filteredAnimals.isEmpty) {
-      return UIComponents.searchEmptyState(
-        onClearFilters: () {
-          // TODO: Re-implement clear filters with new filter strategy
-          // ref.read(animalsProvider.notifier).clearFilters();
-        },
-      );
-    }
+    //   return UIComponents.searchEmptyState(
+    //     onClearFilters: () {
+    //       ref.read(animalsProvider.notifier).clearFilters();
+    //     },
+    //   );
+    // }
 
     return Semantics(
       label: 'Lista de pets',

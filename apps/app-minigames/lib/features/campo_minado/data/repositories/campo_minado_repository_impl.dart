@@ -1,9 +1,11 @@
 import 'package:core/core.dart';
 import '../../domain/entities/game_stats.dart';
+import '../../domain/entities/campo_minado_statistics.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/repositories/campo_minado_repository.dart';
 import '../datasources/campo_minado_local_data_source.dart';
 import '../models/game_stats_model.dart';
+import '../models/campo_minado_statistics_model.dart';
 
 /// Implementation of Campo Minado repository
 class CampoMinadoRepositoryImpl implements CampoMinadoRepository {
@@ -60,6 +62,34 @@ class CampoMinadoRepositoryImpl implements CampoMinadoRepository {
     } catch (e) {
       return Left(
         CacheFailure('Falha ao carregar estatísticas globais: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, CampoMinadoStatistics>> loadExtendedStats() async {
+    try {
+      final stats = await _localDataSource.loadExtendedStats();
+      return Right(stats);
+    } catch (e) {
+      return Left(
+        CacheFailure('Falha ao carregar estatísticas estendidas: ${e.toString()}'),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> saveExtendedStats(CampoMinadoStatistics stats) async {
+    try {
+      final model = stats is CampoMinadoStatisticsModel
+          ? stats
+          : CampoMinadoStatisticsModel.fromEntity(stats);
+
+      await _localDataSource.saveExtendedStats(model);
+      return const Right(null);
+    } catch (e) {
+      return Left(
+        CacheFailure('Falha ao salvar estatísticas estendidas: ${e.toString()}'),
       );
     }
   }

@@ -4,13 +4,12 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
-import '../../../../core/logging/entities/log_entry.dart';
 import '../../../../core/interfaces/logging_service.dart';
+import '../../../../core/logging/entities/log_entry.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_local_datasource.dart';
 import '../datasources/auth_remote_datasource.dart';
-import '../models/user_model.dart';
 import '../services/auth_error_handling_service.dart';
 
 class AuthRepositoryImpl implements AuthRepository {

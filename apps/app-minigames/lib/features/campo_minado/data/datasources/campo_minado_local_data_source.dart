@@ -1,6 +1,8 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../models/game_stats_model.dart';
+import '../models/achievement_model.dart';
+import '../models/campo_minado_statistics_model.dart';
 import '../../domain/entities/enums.dart';
 
 /// Local data source for Campo Minado game using SharedPreferences
@@ -15,6 +17,8 @@ class CampoMinadoLocalDataSource {
   static const String _statsIntermediateKey = '${_keyPrefix}stats_intermediate';
   static const String _statsExpertKey = '${_keyPrefix}stats_expert';
   static const String _globalStatsKey = '${_keyPrefix}stats_global';
+  static const String _achievementsKey = '${_keyPrefix}achievements';
+  static const String _extendedStatsKey = '${_keyPrefix}extended_stats';
 
   /// Gets storage key for difficulty
   String _getKeyForDifficulty(Difficulty difficulty) {
@@ -112,5 +116,63 @@ class CampoMinadoLocalDataSource {
     await _prefs.remove(_statsIntermediateKey);
     await _prefs.remove(_statsExpertKey);
     await _prefs.remove(_globalStatsKey);
+    await _prefs.remove(_achievementsKey);
+    await _prefs.remove(_extendedStatsKey);
+  }
+
+  // ==================== ACHIEVEMENTS ====================
+
+  /// Loads achievements data
+  Future<CampoMinadoAchievementsDataModel> loadAchievements() async {
+    try {
+      final jsonString = _prefs.getString(_achievementsKey);
+
+      if (jsonString == null) {
+        return CampoMinadoAchievementsDataModel.empty();
+      }
+
+      return CampoMinadoAchievementsDataModel.fromJsonString(jsonString);
+    } catch (e) {
+      return CampoMinadoAchievementsDataModel.empty();
+    }
+  }
+
+  /// Saves achievements data
+  Future<void> saveAchievements(CampoMinadoAchievementsDataModel data) async {
+    final jsonString = data.toJsonString();
+    await _prefs.setString(_achievementsKey, jsonString);
+  }
+
+  /// Resets achievements data
+  Future<void> resetAchievements() async {
+    await _prefs.remove(_achievementsKey);
+  }
+
+  // ==================== EXTENDED STATISTICS ====================
+
+  /// Loads extended statistics
+  Future<CampoMinadoStatisticsModel> loadExtendedStats() async {
+    try {
+      final jsonString = _prefs.getString(_extendedStatsKey);
+
+      if (jsonString == null) {
+        return CampoMinadoStatisticsModel.empty();
+      }
+
+      return CampoMinadoStatisticsModel.fromJsonString(jsonString);
+    } catch (e) {
+      return CampoMinadoStatisticsModel.empty();
+    }
+  }
+
+  /// Saves extended statistics
+  Future<void> saveExtendedStats(CampoMinadoStatisticsModel stats) async {
+    final jsonString = stats.toJsonString();
+    await _prefs.setString(_extendedStatsKey, jsonString);
+  }
+
+  /// Resets extended statistics
+  Future<void> resetExtendedStats() async {
+    await _prefs.remove(_extendedStatsKey);
   }
 }

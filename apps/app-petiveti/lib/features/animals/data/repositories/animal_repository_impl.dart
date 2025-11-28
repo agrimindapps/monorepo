@@ -1,6 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/error/failures.dart' as local_failures;

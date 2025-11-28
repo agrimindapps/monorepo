@@ -56,7 +56,7 @@ class PragasSupabaseDataSource implements PragasRemoteDataSource {
       final response = await client
           .from(_tableName)
           .select()
-          .or('nome_comum.ilike.%$query%,nome_cientifico.ilike.%$query%,ordem.ilike.%$query%')
+          .or('nome_comum.ilike.%$query%,nome_cientifico.ilike.%$query%,nomes_secundarios.ilike.%$query%,ordem.ilike.%$query%')
           .order('nome_comum', ascending: true);
 
       return (response as List)

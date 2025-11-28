@@ -4,6 +4,7 @@ import '../providers/campo_minado_game_notifier.dart';
 import '../widgets/game_header_widget.dart';
 import '../widgets/minefield_widget.dart';
 import '../widgets/game_over_dialog.dart';
+import '../widgets/achievements_dialog.dart';
 import '../../domain/entities/enums.dart';
 
 /// Main page for Campo Minado (Minesweeper) game
@@ -76,6 +77,11 @@ class _CampoMinadoPageState extends ConsumerState<CampoMinadoPage>
         elevation: 0,
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.emoji_events),
+            onPressed: () => _showAchievementsDialog(context),
+            tooltip: 'Conquistas',
+          ),
           IconButton(
             icon: const Icon(Icons.help_outline),
             onPressed: () => _showHelpDialog(context),
@@ -210,6 +216,13 @@ class _CampoMinadoPageState extends ConsumerState<CampoMinadoPage>
           ],
         );
       },
+    );
+  }
+
+  void _showAchievementsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => const CampoMinadoAchievementsDialog(),
     );
   }
 }

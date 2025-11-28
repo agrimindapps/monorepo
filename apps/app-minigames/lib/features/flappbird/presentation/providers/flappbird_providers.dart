@@ -8,6 +8,7 @@ import '../../domain/repositories/flappbird_repository.dart';
 import '../../domain/services/collision_service.dart';
 import '../../domain/services/physics_service.dart';
 import '../../domain/services/pipe_generator_service.dart';
+import '../../domain/services/power_up_service.dart';
 import '../../domain/usecases/check_collision_usecase.dart';
 import '../../domain/usecases/flap_bird_usecase.dart';
 import '../../domain/usecases/load_high_score_usecase.dart';
@@ -49,6 +50,11 @@ PipeGeneratorService pipeGeneratorService(Ref ref) {
 @riverpod
 CollisionService collisionService(Ref ref) {
   return CollisionService();
+}
+
+@riverpod
+PowerUpService powerUpService(Ref ref) {
+  return PowerUpService();
 }
 
 // Use Cases

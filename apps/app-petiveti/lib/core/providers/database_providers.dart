@@ -1,7 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
 import 'package:core/core.dart';
 
 import '../../database/petiveti_database.dart';

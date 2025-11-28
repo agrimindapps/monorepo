@@ -27,12 +27,22 @@ import '../../features/culturas/domain/usecases/update_cultura_usecase.dart';
 // PRAGAS
 // ============================================================================
 import '../../features/pragas/data/datasources/pragas_supabase_datasource.dart';
+import '../../features/pragas/data/datasources/praga_info_supabase_datasource.dart';
+import '../../features/pragas/data/datasources/planta_info_supabase_datasource.dart';
 import '../../features/pragas/data/repositories/pragas_repository_impl.dart';
+import '../../features/pragas/data/repositories/praga_info_repository_impl.dart';
+import '../../features/pragas/data/repositories/planta_info_repository_impl.dart';
 import '../../features/pragas/domain/repositories/pragas_repository.dart';
+import '../../features/pragas/domain/repositories/praga_info_repository.dart';
+import '../../features/pragas/domain/repositories/planta_info_repository.dart';
 import '../../features/pragas/domain/usecases/create_praga_usecase.dart';
 import '../../features/pragas/domain/usecases/delete_praga_usecase.dart';
 import '../../features/pragas/domain/usecases/get_all_pragas_usecase.dart';
 import '../../features/pragas/domain/usecases/update_praga_usecase.dart';
+import '../../features/pragas/domain/usecases/get_praga_info_usecase.dart';
+import '../../features/pragas/domain/usecases/save_praga_info_usecase.dart';
+import '../../features/pragas/domain/usecases/get_planta_info_usecase.dart';
+import '../../features/pragas/domain/usecases/save_planta_info_usecase.dart';
 
 // ============================================================================
 // DEFENSIVOS
@@ -181,6 +191,64 @@ final updatePragaUseCaseProvider = Provider<UpdatePragaUseCase>((ref) {
 final deletePragaUseCaseProvider = Provider<DeletePragaUseCase>((ref) {
   final repository = ref.watch(pragasRepositoryProvider);
   return DeletePragaUseCase(repository);
+});
+
+// ============================================================================
+// PRAGAS INFO PROVIDERS
+// ============================================================================
+
+/// Praga info remote data source provider
+final pragaInfoRemoteDataSourceProvider =
+    Provider<PragaInfoRemoteDataSource>((ref) {
+  final client = ref.watch(supabaseClientProvider);
+  return PragaInfoSupabaseDataSource(client);
+});
+
+/// Praga info repository provider
+final pragaInfoRepositoryProvider = Provider<PragaInfoRepository>((ref) {
+  final dataSource = ref.watch(pragaInfoRemoteDataSourceProvider);
+  return PragaInfoRepositoryImpl(dataSource);
+});
+
+/// Get praga info use case provider
+final getPragaInfoUseCaseProvider = Provider<GetPragaInfoUseCase>((ref) {
+  final repository = ref.watch(pragaInfoRepositoryProvider);
+  return GetPragaInfoUseCase(repository);
+});
+
+/// Save praga info use case provider
+final savePragaInfoUseCaseProvider = Provider<SavePragaInfoUseCase>((ref) {
+  final repository = ref.watch(pragaInfoRepositoryProvider);
+  return SavePragaInfoUseCase(repository);
+});
+
+// ============================================================================
+// PLANTAS INFO PROVIDERS
+// ============================================================================
+
+/// Planta info remote data source provider
+final plantaInfoRemoteDataSourceProvider =
+    Provider<PlantaInfoRemoteDataSource>((ref) {
+  final client = ref.watch(supabaseClientProvider);
+  return PlantaInfoSupabaseDataSource(client);
+});
+
+/// Planta info repository provider
+final plantaInfoRepositoryProvider = Provider<PlantaInfoRepository>((ref) {
+  final dataSource = ref.watch(plantaInfoRemoteDataSourceProvider);
+  return PlantaInfoRepositoryImpl(dataSource);
+});
+
+/// Get planta info use case provider
+final getPlantaInfoUseCaseProvider = Provider<GetPlantaInfoUseCase>((ref) {
+  final repository = ref.watch(plantaInfoRepositoryProvider);
+  return GetPlantaInfoUseCase(repository);
+});
+
+/// Save planta info use case provider
+final savePlantaInfoUseCaseProvider = Provider<SavePlantaInfoUseCase>((ref) {
+  final repository = ref.watch(plantaInfoRepositoryProvider);
+  return SavePlantaInfoUseCase(repository);
 });
 
 // ============================================================================

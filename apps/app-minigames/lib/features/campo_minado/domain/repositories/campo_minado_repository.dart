@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import '../entities/game_stats.dart';
+import '../entities/campo_minado_statistics.dart';
 import '../entities/enums.dart';
 
 /// Repository interface for Campo Minado game data
@@ -15,4 +16,10 @@ abstract class CampoMinadoRepository {
 
   /// Loads global statistics (all difficulties combined)
   Future<Either<Failure, GameStats>> loadGlobalStats();
+
+  /// Loads extended statistics for achievements
+  Future<Either<Failure, CampoMinadoStatistics>> loadExtendedStats();
+
+  /// Saves extended statistics for achievements
+  Future<Either<Failure, void>> saveExtendedStats(CampoMinadoStatistics stats);
 }

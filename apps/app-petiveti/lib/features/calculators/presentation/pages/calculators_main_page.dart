@@ -1,6 +1,7 @@
-import '../../domain/entities/calculator.dart';
-import 'package:core/core.dart' hide Column, Calculator;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
+
+import '../../domain/entities/calculator.dart';
 
 import '../providers/calculators_providers.dart';
 

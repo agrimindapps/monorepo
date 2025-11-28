@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/sync/petiveti_sync_service.dart';
@@ -332,7 +334,7 @@ class _EmergencySyncBannerState extends State<EmergencySyncBanner>
 
   /// Manipula sincronização de emergência
   Future<void> _handleEmergencySync() async {
-    showDialog<void>(
+    unawaited(showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => const AlertDialog(
@@ -344,7 +346,7 @@ class _EmergencySyncBannerState extends State<EmergencySyncBanner>
           ],
         ),
       ),
-    );
+    ));
 
     try {
       final result = await PetivetiSyncService.instance.forceEmergencySync();

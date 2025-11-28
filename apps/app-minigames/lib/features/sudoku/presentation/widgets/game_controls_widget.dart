@@ -3,17 +3,25 @@ import 'package:flutter/material.dart';
 class GameControlsWidget extends StatelessWidget {
   final bool notesMode;
   final bool canUseHint;
+  final bool canUndo;
+  final bool canRedo;
   final VoidCallback onNotesToggle;
   final VoidCallback onHint;
   final VoidCallback onRestart;
+  final VoidCallback? onUndo;
+  final VoidCallback? onRedo;
 
   const GameControlsWidget({
     super.key,
     required this.notesMode,
     required this.canUseHint,
+    this.canUndo = false,
+    this.canRedo = false,
     required this.onNotesToggle,
     required this.onHint,
     required this.onRestart,
+    this.onUndo,
+    this.onRedo,
   });
 
   @override
@@ -23,6 +31,20 @@ class GameControlsWidget extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
+          // Undo
+          _buildControlButton(
+            icon: Icons.undo,
+            label: 'Desfazer',
+            onTap: canUndo ? onUndo : null,
+            isActive: false,
+          ),
+          // Redo
+          _buildControlButton(
+            icon: Icons.redo,
+            label: 'Refazer',
+            onTap: canRedo ? onRedo : null,
+            isActive: false,
+          ),
           // Notes toggle
           _buildControlButton(
             icon: notesMode ? Icons.edit : Icons.edit_outlined,
@@ -65,14 +87,14 @@ class GameControlsWidget extends StatelessWidget {
           children: [
             Icon(
               icon,
-              size: 32,
+              size: 28,
               color: isActive ? Colors.blue : Colors.grey.shade700,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 10,
                 color: isActive ? Colors.blue : Colors.grey.shade700,
               ),
             ),

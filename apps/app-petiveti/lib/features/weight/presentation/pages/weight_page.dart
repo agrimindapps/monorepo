@@ -5,7 +5,7 @@ import '../../../animals/presentation/providers/animals_providers.dart';
 import '../../domain/entities/weight.dart';
 import '../providers/weights_provider.dart';
 import '../states/weight_sort_order.dart';
-import '../widgets/add_weight_form.dart';
+import '../widgets/add_weight_dialog.dart';
 import '../widgets/body_condition_correlation.dart';
 import '../widgets/weight_card.dart';
 import '../widgets/weight_chart_visualization.dart';
@@ -460,20 +460,16 @@ class _WeightPageState extends ConsumerState<WeightPage> {
   }
 
   void _navigateToAddWeight(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => AddWeightForm(initialAnimalId: _selectedAnimalId),
-      ),
+    showDialog<void>(
+      context: context,
+      builder: (context) => AddWeightDialog(initialAnimalId: _selectedAnimalId),
     );
   }
 
   void _navigateToEditWeight(BuildContext context, Weight weight) {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => AddWeightForm(weight: weight),
-      ),
+    showDialog<void>(
+      context: context,
+      builder: (context) => AddWeightDialog(weight: weight),
     );
   }
 
@@ -592,11 +588,11 @@ class _WeightPageState extends ConsumerState<WeightPage> {
           mainAxisSize: MainAxisSize.min,
           children: WeightSortOrder.values
               .map(
-                (order) => RadioListTile<WeightSortOrder>(
+                (order) => RadioListTile<WeightSortOrder>.adaptive(
                   title: Text(order.displayName),
                   value: order,
-                  groupValue: weightsState.sortOrder,
-                  onChanged: (value) {
+                  groupValue: weightsState.sortOrder, // ignore: deprecated_member_use
+                  onChanged: (value) { // ignore: deprecated_member_use
                     if (value != null) {
                       ref.read(weightsProvider.notifier).setSortOrder(value);
                     }

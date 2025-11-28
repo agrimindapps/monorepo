@@ -99,11 +99,10 @@ class CalorieActivityConditionStep extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        // ignore: deprecated_member_use
-                        Radio<ActivityLevel>(
+                        Radio<ActivityLevel>.adaptive(
                           value: level,
-                          groupValue: input.activityLevel,
-                          onChanged: (value) => _updateActivityLevel(value!),
+                          groupValue: input.activityLevel, // ignore: deprecated_member_use
+                          onChanged: (value) => _updateActivityLevel(value!), // ignore: deprecated_member_use
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -203,11 +202,10 @@ class CalorieActivityConditionStep extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        // ignore: deprecated_member_use
-                        Radio<BodyConditionScore>(
+                        Radio<BodyConditionScore>.adaptive(
                           value: bcs,
-                          groupValue: input.bodyConditionScore,
-                          onChanged: (value) => _updateBodyConditionScore(value!),
+                          groupValue: input.bodyConditionScore, // ignore: deprecated_member_use
+                          onChanged: (value) => _updateBodyConditionScore(value!), // ignore: deprecated_member_use
                         ),
                         const SizedBox(width: 12),
                         Expanded(

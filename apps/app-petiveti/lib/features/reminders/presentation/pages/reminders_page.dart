@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../shared/constants/reminders_constants.dart';
 import '../../domain/entities/reminder.dart';
 import '../providers/reminders_providers.dart';
+import '../widgets/add_reminder_dialog.dart';
 
 class RemindersPage extends ConsumerStatefulWidget {
   final String userId;
@@ -464,11 +465,20 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
   }
 
   void _showAddReminderDialog(BuildContext context) {
-    context.push('/reminders/add');
+    showDialog<void>(
+      context: context,
+      builder: (context) => AddReminderDialog(userId: widget.userId),
+    );
   }
 
   void _showEditReminderDialog(Reminder reminder) {
-    context.push('/reminders/edit', extra: {'reminder': reminder});
+    showDialog<void>(
+      context: context,
+      builder: (context) => AddReminderDialog(
+        reminder: reminder,
+        userId: widget.userId,
+      ),
+    );
   }
 
   void _showSnoozeDialog(Reminder reminder) {

@@ -150,10 +150,10 @@ class _CalorieSpecialConditionsStepState extends State<CalorieSpecialConditionsS
                     ),
                     child: Row(
                       children: [
-                        Radio<EnvironmentalCondition>(
+                        Radio<EnvironmentalCondition>.adaptive(
                           value: condition,
-                          groupValue: widget.input.environmentalCondition,
-                          onChanged: (value) => _updateEnvironmentalCondition(value!),
+                          groupValue: widget.input.environmentalCondition, // ignore: deprecated_member_use
+                          onChanged: (value) => _updateEnvironmentalCondition(value!), // ignore: deprecated_member_use
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -247,10 +247,10 @@ class _CalorieSpecialConditionsStepState extends State<CalorieSpecialConditionsS
                     ),
                     child: Row(
                       children: [
-                        Radio<MedicalCondition>(
+                        Radio<MedicalCondition>.adaptive(
                           value: condition,
-                          groupValue: widget.input.medicalCondition,
-                          onChanged: (value) => _updateMedicalCondition(value!),
+                          groupValue: widget.input.medicalCondition, // ignore: deprecated_member_use
+                          onChanged: (value) => _updateMedicalCondition(value!), // ignore: deprecated_member_use
                         ),
                         const SizedBox(width: 12),
                         Expanded(

@@ -25,12 +25,12 @@ import '../../features/expenses/presentation/pages/expenses_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/medications/domain/entities/medication.dart';
 import '../../features/medications/presentation/pages/medications_page.dart';
-import '../../features/medications/presentation/widgets/add_medication_form.dart';
+import '../../features/medications/presentation/widgets/add_medication_dialog.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/promo/presentation/pages/promo_page.dart';
 import '../../features/reminders/domain/entities/reminder.dart';
 import '../../features/reminders/presentation/pages/reminders_page.dart';
-import '../../features/reminders/presentation/widgets/add_reminder_form.dart';
+import '../../features/reminders/presentation/widgets/add_reminder_dialog.dart';
 import '../../features/subscription/presentation/pages/subscription_page.dart'
     as local;
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
@@ -155,7 +155,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 name: 'add-medication',
                 builder: (context, state) {
                   final args = state.extra as Map<String, dynamic>? ?? {};
-                  return AddMedicationForm(
+                  return AddMedicationDialog(
                     initialAnimalId: args['animalId'] as String?,
                   );
                 },
@@ -165,7 +165,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 name: 'new-medication',
                 builder: (context, state) {
                   final args = state.extra as Map<String, dynamic>? ?? {};
-                  return AddMedicationForm(
+                  return AddMedicationDialog(
                     medication: args['medication'] as Medication?,
                   );
                 },
@@ -239,7 +239,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 name: 'add-reminder',
                 builder: (context, state) {
                   final args = state.extra as Map<String, dynamic>? ?? {};
-                  return AddReminderForm(
+                  return AddReminderDialog(
                     initialAnimalId: args['animalId'] as String?,
                     userId: 'temp_user_id',
                   );
@@ -250,7 +250,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 name: 'edit-reminder',
                 builder: (context, state) {
                   final args = state.extra as Map<String, dynamic>? ?? {};
-                  return AddReminderForm(
+                  return AddReminderDialog(
                     reminder: args['reminder'] as Reminder?,
                     userId: 'temp_user_id',
                   );

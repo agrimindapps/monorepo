@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/entities/vaccine.dart';
 import '../providers/vaccines_provider.dart';
-import '../widgets/add_vaccine_form.dart';
+import '../widgets/add_vaccine_dialog.dart';
 import '../widgets/vaccine_calendar_widget.dart';
 import '../widgets/vaccine_card.dart';
 import '../widgets/vaccine_dashboard_cards.dart';
@@ -330,18 +330,16 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
   }
 
   void _navigateToAddVaccine(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(builder: (context) => const AddVaccineForm()),
+    showDialog<void>(
+      context: context,
+      builder: (context) => const AddVaccineDialog(),
     );
   }
 
   void _navigateToEditVaccine(BuildContext context, Vaccine vaccine) {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => AddVaccineForm(vaccine: vaccine),
-      ),
+    showDialog<void>(
+      context: context,
+      builder: (context) => AddVaccineDialog(vaccine: vaccine),
     );
   }
 
@@ -438,11 +436,11 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
           mainAxisSize: MainAxisSize.min,
           children: VaccinesFilter.values
               .map(
-                (filter) => RadioListTile<VaccinesFilter>(
+                (filter) => RadioListTile<VaccinesFilter>.adaptive(
                   title: Text(filter.displayName),
                   value: filter,
-                  groupValue: vaccinesState.filter,
-                  onChanged: (value) {
+                  groupValue: vaccinesState.filter, // ignore: deprecated_member_use
+                  onChanged: (value) { // ignore: deprecated_member_use
                     if (value != null) {
                       ref.read(vaccinesProvider.notifier).setFilter(value);
                     }

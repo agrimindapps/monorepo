@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/dialogs/pet_form_dialog.dart';
 import '../../../../shared/widgets/form_components/form_components.dart';
 import '../../../../shared/widgets/sections/form_section_widget.dart';
+import '../../data/breed_suggestions.dart';
 import '../../domain/entities/animal.dart';
 import '../../domain/entities/animal_enums.dart';
 import '../providers/animals_providers.dart';
@@ -26,6 +27,10 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
   final _weightController = TextEditingController();
   final _colorController = TextEditingController();
   final _notesController = TextEditingController();
+  final _microchipController = TextEditingController();
+  final _veterinarianController = TextEditingController();
+  final _insuranceController = TextEditingController();
+  final _allergyInputController = TextEditingController();
 
   AnimalSpecies _selectedSpecies = AnimalSpecies.dog;
   AnimalGender _selectedGender = AnimalGender.male;
@@ -33,6 +38,9 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
     const Duration(days: 365),
   );
   bool _isLoading = false;
+  bool _isCastrated = false;
+  String? _selectedBloodType;
+  List<String> _allergies = [];
 
   bool get _isEditing => widget.animal != null;
 
@@ -50,11 +58,17 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
       _weightController.text = animal.weight?.toString() ?? '';
       _colorController.text = animal.color ?? '';
       _notesController.text = animal.notes ?? '';
+      _microchipController.text = animal.microchipNumber ?? '';
+      _veterinarianController.text = animal.preferredVeterinarian ?? '';
+      _insuranceController.text = animal.insuranceInfo ?? '';
       _selectedSpecies = animal.species;
       _selectedGender = animal.gender;
       _selectedBirthDate =
           animal.birthDate ??
           DateTime.now().subtract(const Duration(days: 365));
+      _isCastrated = animal.isCastrated;
+      _selectedBloodType = animal.bloodType;
+      _allergies = animal.allergies?.toList() ?? [];
     }
   }
 
@@ -65,6 +79,10 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
     _weightController.dispose();
     _colorController.dispose();
     _notesController.dispose();
+    _microchipController.dispose();
+    _veterinarianController.dispose();
+    _insuranceController.dispose();
+    _allergyInputController.dispose();
     super.dispose();
   }
 
@@ -88,6 +106,10 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
             _buildBasicInfoSection(),
             const SizedBox(height: 20),
             _buildPhysicalInfoSection(),
+            const SizedBox(height: 20),
+            _buildHealthInfoSection(),
+            const SizedBox(height: 20),
+            _buildCareSection(),
             const SizedBox(height: 20),
             _buildAdditionalInfoSection(),
             const SizedBox(height: 20),
@@ -203,6 +225,8 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
   }
 
   Widget _buildPhysicalInfoSection() {
+    final breeds = getBreedsForSpecies(_selectedSpecies);
+
     return FormSectionWidget(
       title: 'Características Físicas',
       icon: Icons.straighten,
@@ -210,20 +234,77 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
         Row(
           children: [
             Expanded(
-              child: TextFormField(
-                controller: _breedController,
-                decoration: const InputDecoration(
-                  labelText: 'Raça *',
-                  hintText: 'Ex: Labrador, Persa...',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.pets),
-                ),
-                textCapitalization: TextCapitalization.words,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Raça é obrigatória';
+              child: Autocomplete<String>(
+                initialValue: TextEditingValue(text: _breedController.text),
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (textEditingValue.text.isEmpty) {
+                    return breeds.take(10);
                   }
-                  return null;
+                  return breeds.where((breed) => breed
+                      .toLowerCase()
+                      .contains(textEditingValue.text.toLowerCase()));
+                },
+                onSelected: (String selection) {
+                  _breedController.text = selection;
+                },
+                fieldViewBuilder: (
+                  BuildContext context,
+                  TextEditingController fieldController,
+                  FocusNode focusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  if (fieldController.text.isEmpty &&
+                      _breedController.text.isNotEmpty) {
+                    fieldController.text = _breedController.text;
+                  }
+                  return TextFormField(
+                    controller: fieldController,
+                    focusNode: focusNode,
+                    decoration: const InputDecoration(
+                      labelText: 'Raça *',
+                      hintText: 'Digite para buscar...',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.pets),
+                    ),
+                    textCapitalization: TextCapitalization.words,
+                    onChanged: (value) {
+                      _breedController.text = value;
+                    },
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Raça é obrigatória';
+                      }
+                      return null;
+                    },
+                  );
+                },
+                optionsViewBuilder: (context, onSelected, options) {
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: Material(
+                      elevation: 4,
+                      borderRadius: BorderRadius.circular(8),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          maxHeight: 200,
+                          maxWidth: 300,
+                        ),
+                        child: ListView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          itemCount: options.length,
+                          itemBuilder: (context, index) {
+                            final option = options.elementAt(index);
+                            return ListTile(
+                              dense: true,
+                              title: Text(option),
+                              onTap: () => onSelected(option),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  );
                 },
               ),
             ),
@@ -275,6 +356,245 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
             }
             return null;
           },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHealthInfoSection() {
+    final bloodTypeOptions = getBloodTypesForSpecies(_selectedSpecies);
+
+    return FormSectionWidget(
+      title: 'Informações de Saúde',
+      icon: Icons.local_hospital,
+      children: [
+        // Castrated toggle
+        SwitchListTile(
+          title: const Text('Castrado(a)'),
+          subtitle: Text(
+            _isCastrated ? 'Pet castrado' : 'Pet não castrado',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+          value: _isCastrated,
+          activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
+          thumbColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return AppColors.primary;
+            }
+            return null;
+          }),
+          contentPadding: EdgeInsets.zero,
+          onChanged: (value) {
+            setState(() {
+              _isCastrated = value;
+            });
+          },
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _microchipController,
+                decoration: const InputDecoration(
+                  labelText: 'Microchip',
+                  hintText: 'Número do microchip',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.memory),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                value: _selectedBloodType,
+                decoration: const InputDecoration(
+                  labelText: 'Tipo Sanguíneo',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.bloodtype),
+                ),
+                items: bloodTypeOptions.map((type) {
+                  return DropdownMenuItem(value: type, child: Text(type));
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedBloodType = value;
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // Allergies section
+        _buildAllergiesSection(),
+      ],
+    );
+  }
+
+  Widget _buildAllergiesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.warning_amber, size: 20, color: AppColors.warning),
+            const SizedBox(width: 8),
+            Text(
+              'Alergias',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        // Allergy chips
+        if (_allergies.isNotEmpty) ...[
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _allergies.map((allergy) {
+              return Chip(
+                label: Text(allergy),
+                deleteIcon: const Icon(Icons.close, size: 16),
+                onDeleted: () {
+                  setState(() {
+                    _allergies.remove(allergy);
+                  });
+                },
+                backgroundColor:
+                    AppColors.warning.withValues(alpha: 0.1),
+                labelStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 8),
+        ],
+        // Add allergy autocomplete
+        Autocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            if (textEditingValue.text.isEmpty) {
+              return commonAllergies
+                  .where((a) => !_allergies.contains(a))
+                  .take(5);
+            }
+            return commonAllergies
+                .where((allergy) =>
+                    allergy
+                        .toLowerCase()
+                        .contains(textEditingValue.text.toLowerCase()) &&
+                    !_allergies.contains(allergy))
+                .take(10);
+          },
+          onSelected: (String selection) {
+            setState(() {
+              _allergies.add(selection);
+              _allergyInputController.clear();
+            });
+          },
+          fieldViewBuilder: (
+            BuildContext context,
+            TextEditingController fieldController,
+            FocusNode focusNode,
+            VoidCallback onFieldSubmitted,
+          ) {
+            return TextFormField(
+              controller: fieldController,
+              focusNode: focusNode,
+              decoration: InputDecoration(
+                hintText: 'Digite para adicionar alergia...',
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.add),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.add_circle),
+                  onPressed: () {
+                    final text = fieldController.text.trim();
+                    if (text.isNotEmpty && !_allergies.contains(text)) {
+                      setState(() {
+                        _allergies.add(text);
+                        fieldController.clear();
+                      });
+                    }
+                  },
+                ),
+              ),
+              textCapitalization: TextCapitalization.sentences,
+              onFieldSubmitted: (value) {
+                final text = value.trim();
+                if (text.isNotEmpty && !_allergies.contains(text)) {
+                  setState(() {
+                    _allergies.add(text);
+                    fieldController.clear();
+                  });
+                }
+              },
+            );
+          },
+          optionsViewBuilder: (context, onSelected, options) {
+            return Align(
+              alignment: Alignment.topLeft,
+              child: Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(8),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxHeight: 200,
+                    maxWidth: 300,
+                  ),
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    itemCount: options.length,
+                    itemBuilder: (context, index) {
+                      final option = options.elementAt(index);
+                      return ListTile(
+                        dense: true,
+                        leading: const Icon(Icons.add, size: 16),
+                        title: Text(option),
+                        onTap: () => onSelected(option),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCareSection() {
+    return FormSectionWidget(
+      title: 'Cuidados',
+      icon: Icons.medical_services,
+      children: [
+        TextFormField(
+          controller: _veterinarianController,
+          decoration: const InputDecoration(
+            labelText: 'Veterinário Preferencial',
+            hintText: 'Nome ou clínica veterinária',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.person),
+          ),
+          textCapitalization: TextCapitalization.words,
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: _insuranceController,
+          decoration: const InputDecoration(
+            labelText: 'Plano de Saúde Pet',
+            hintText: 'Operadora / número do plano',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.health_and_safety),
+          ),
         ),
       ],
     );
@@ -344,6 +664,19 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
             : _notesController.text.trim(),
         createdAt: widget.animal?.createdAt ?? now,
         updatedAt: now,
+        // New health fields
+        isCastrated: _isCastrated,
+        microchipNumber: _microchipController.text.trim().isEmpty
+            ? null
+            : _microchipController.text.trim(),
+        bloodType: _selectedBloodType,
+        allergies: _allergies.isEmpty ? null : _allergies,
+        preferredVeterinarian: _veterinarianController.text.trim().isEmpty
+            ? null
+            : _veterinarianController.text.trim(),
+        insuranceInfo: _insuranceController.text.trim().isEmpty
+            ? null
+            : _insuranceController.text.trim(),
       );
       if (_isEditing) {
         await ref.read(animalsProvider.notifier).updateAnimal(animal);

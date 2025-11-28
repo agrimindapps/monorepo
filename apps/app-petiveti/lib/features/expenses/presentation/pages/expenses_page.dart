@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../providers/expenses_provider.dart';
+import '../widgets/add_expense_dialog.dart';
 import '../widgets/expense_categories_tab.dart';
 import '../widgets/expense_list_tab.dart';
 import '../widgets/expense_summary_tab.dart';
@@ -145,13 +146,9 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage>
   }
 
   void _showAddExpenseDialog(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Funcionalidade de adicionar despesa será implementada em breve',
-        ),
-        duration: Duration(seconds: 2),
-      ),
+    showDialog<void>(
+      context: context,
+      builder: (context) => const AddExpenseDialog(),
     );
   }
 

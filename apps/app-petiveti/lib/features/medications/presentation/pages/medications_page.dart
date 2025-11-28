@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../shared/constants/medications_constants.dart';
 import '../../domain/entities/medication.dart';
 import '../providers/medications_provider.dart';
+import '../widgets/add_medication_dialog.dart';
 import '../widgets/empty_medications_state.dart';
 import '../widgets/medication_card.dart';
 import '../widgets/medication_filters.dart';
@@ -488,9 +489,12 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
   }
 
   void _navigateToAddMedication(BuildContext context) {
-    Navigator.of(
-      context,
-    ).pushNamed('/medications/add', arguments: {'animalId': widget.animalId});
+    showDialog<void>(
+      context: context,
+      builder: (context) => AddMedicationDialog(
+        initialAnimalId: widget.animalId,
+      ),
+    );
   }
 
   void _navigateToMedicationDetails(
@@ -504,9 +508,10 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
   }
 
   void _navigateToEditMedication(BuildContext context, Medication medication) {
-    Navigator.of(
-      context,
-    ).pushNamed('/medications/edit', arguments: {'medication': medication});
+    showDialog<void>(
+      context: context,
+      builder: (context) => AddMedicationDialog(medication: medication),
+    );
   }
 
   Future<void> _confirmDeleteMedication(

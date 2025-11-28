@@ -688,11 +688,11 @@ class _VaccineReminderManagementState
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [3, 5, 7, 10, 14, 21, 30].map((days) {
-            return RadioListTile<int>(
+            return RadioListTile<int>.adaptive(
               title: Text('$days dias'),
               value: days,
-              groupValue: _daysBeforeReminder,
-              onChanged: (value) {
+              groupValue: _daysBeforeReminder, // ignore: deprecated_member_use
+              onChanged: (value) { // ignore: deprecated_member_use
                 setState(() => _daysBeforeReminder = value!);
                 Navigator.pop(context);
               },
@@ -711,11 +711,11 @@ class _VaccineReminderManagementState
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [1, 2, 3, 5, 7].map((days) {
-            return RadioListTile<int>(
+            return RadioListTile<int>.adaptive(
               title: Text('$days dias'),
               value: days,
-              groupValue: _urgentReminderDays,
-              onChanged: (value) {
+              groupValue: _urgentReminderDays, // ignore: deprecated_member_use
+              onChanged: (value) { // ignore: deprecated_member_use
                 setState(() => _urgentReminderDays = value!);
                 Navigator.pop(context);
               },
@@ -750,11 +750,11 @@ class _VaccineReminderManagementState
                 {'value': 'daily', 'name': 'Diariamente'},
                 {'value': 'weekly', 'name': 'Semanalmente'},
               ].map((freq) {
-                return RadioListTile<String>(
+                return RadioListTile<String>.adaptive(
                   title: Text(freq['name']!),
                   value: freq['value']!,
-                  groupValue: _reminderFrequency,
-                  onChanged: (value) {
+                  groupValue: _reminderFrequency, // ignore: deprecated_member_use
+                  onChanged: (value) { // ignore: deprecated_member_use
                     setState(() => _reminderFrequency = value!);
                     Navigator.pop(context);
                   },

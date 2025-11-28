@@ -58,6 +58,22 @@ class AnimalModel {
   @JsonKey(name: 'updated_at')
   final DateTime? updatedAt;
 
+  // New health fields
+  @JsonKey(name: 'is_castrated')
+  final bool isCastrated;
+
+  @JsonKey(name: 'allergies')
+  final List<String>? allergies;
+
+  @JsonKey(name: 'blood_type')
+  final String? bloodType;
+
+  @JsonKey(name: 'preferred_veterinarian')
+  final String? preferredVeterinarian;
+
+  @JsonKey(name: 'insurance_info')
+  final String? insuranceInfo;
+
   AnimalModel({
     this.id,
     required this.userId,
@@ -76,6 +92,11 @@ class AnimalModel {
     this.isDeleted = false,
     required this.createdAt,
     this.updatedAt,
+    this.isCastrated = false,
+    this.allergies,
+    this.bloodType,
+    this.preferredVeterinarian,
+    this.insuranceInfo,
   });
 
   factory AnimalModel.fromEntity(Animal animal) {
@@ -96,6 +117,11 @@ class AnimalModel {
       isActive: animal.isActive,
       createdAt: animal.createdAt,
       updatedAt: animal.updatedAt,
+      isCastrated: animal.isCastrated,
+      allergies: animal.allergies,
+      bloodType: animal.bloodType,
+      preferredVeterinarian: animal.preferredVeterinarian,
+      insuranceInfo: animal.insuranceInfo,
     );
   }
 
@@ -131,6 +157,11 @@ class AnimalModel {
       isActive: json['is_active'] as bool? ?? true,
       createdAt: DateTime.fromMillisecondsSinceEpoch(json['created_at'] as int),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(json['updated_at'] as int),
+      isCastrated: json['is_castrated'] as bool? ?? false,
+      allergies: (json['allergies'] as List<dynamic>?)?.cast<String>(),
+      bloodType: json['blood_type'] as String?,
+      preferredVeterinarian: json['preferred_veterinarian'] as String?,
+      insuranceInfo: json['insurance_info'] as String?,
     );
   }
 
@@ -152,6 +183,11 @@ class AnimalModel {
       'is_active': isActive,
       'created_at': createdAt.millisecondsSinceEpoch,
       'updated_at': updatedAt?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch,
+      'is_castrated': isCastrated,
+      'allergies': allergies,
+      'blood_type': bloodType,
+      'preferred_veterinarian': preferredVeterinarian,
+      'insurance_info': insuranceInfo,
     };
   }
 
@@ -173,6 +209,11 @@ class AnimalModel {
       isActive: isActive,
       createdAt: createdAt,
       updatedAt: updatedAt ?? createdAt,
+      isCastrated: isCastrated,
+      allergies: allergies,
+      bloodType: bloodType,
+      preferredVeterinarian: preferredVeterinarian,
+      insuranceInfo: insuranceInfo,
     );
   }
 
@@ -193,6 +234,11 @@ class AnimalModel {
     bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
+    bool? isCastrated,
+    List<String>? allergies,
+    String? bloodType,
+    String? preferredVeterinarian,
+    String? insuranceInfo,
   }) {
     return AnimalModel(
       id: id ?? this.id,
@@ -211,6 +257,11 @@ class AnimalModel {
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      isCastrated: isCastrated ?? this.isCastrated,
+      allergies: allergies ?? this.allergies,
+      bloodType: bloodType ?? this.bloodType,
+      preferredVeterinarian: preferredVeterinarian ?? this.preferredVeterinarian,
+      insuranceInfo: insuranceInfo ?? this.insuranceInfo,
     );
   }
   bool get isDeletedComputed => !isActive;

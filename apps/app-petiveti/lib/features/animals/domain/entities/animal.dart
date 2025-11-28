@@ -103,6 +103,13 @@ class Animal extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  // New health fields
+  final bool isCastrated;
+  final List<String>? allergies;
+  final String? bloodType;
+  final String? preferredVeterinarian;
+  final String? insuranceInfo;
+
   const Animal({
     required this.id,
     required this.userId,
@@ -120,6 +127,11 @@ class Animal extends Equatable {
     this.isActive = true,
     required this.createdAt,
     required this.updatedAt,
+    this.isCastrated = false,
+    this.allergies,
+    this.bloodType,
+    this.preferredVeterinarian,
+    this.insuranceInfo,
   });
 
   Animal copyWith({
@@ -139,6 +151,11 @@ class Animal extends Equatable {
     bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
+    bool? isCastrated,
+    List<String>? allergies,
+    String? bloodType,
+    String? preferredVeterinarian,
+    String? insuranceInfo,
   }) {
     return Animal(
       id: id ?? this.id,
@@ -157,6 +174,11 @@ class Animal extends Equatable {
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      isCastrated: isCastrated ?? this.isCastrated,
+      allergies: allergies ?? this.allergies,
+      bloodType: bloodType ?? this.bloodType,
+      preferredVeterinarian: preferredVeterinarian ?? this.preferredVeterinarian,
+      insuranceInfo: insuranceInfo ?? this.insuranceInfo,
     );
   }
 
@@ -205,5 +227,10 @@ class Animal extends Equatable {
     isActive,
     createdAt,
     updatedAt,
+    isCastrated,
+    allergies,
+    bloodType,
+    preferredVeterinarian,
+    insuranceInfo,
   ];
 }

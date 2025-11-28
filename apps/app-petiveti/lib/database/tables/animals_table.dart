@@ -22,4 +22,11 @@ class Animals extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().nullable()();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+  
+  // Health fields
+  BoolColumn get isCastrated => boolean().withDefault(const Constant(false))();
+  TextColumn get allergies => text().nullable()(); // JSON string list
+  TextColumn get bloodType => text().nullable()();
+  TextColumn get preferredVeterinarian => text().nullable()();
+  TextColumn get insuranceInfo => text().nullable()();
 }

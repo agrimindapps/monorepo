@@ -15,7 +15,7 @@ class GridEntity extends Equatable {
 
   /// Creates an empty grid
   factory GridEntity.empty(int size) {
-    return GridEntity(tiles: [], size: size);
+    return GridEntity(tiles: const [], size: size);
   }
 
   /// Gets tile at specific position (nullable)

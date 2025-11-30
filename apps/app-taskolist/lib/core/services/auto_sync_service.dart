@@ -109,7 +109,7 @@ class AutoSyncService {
       // 1. Inicializar ConnectivityService
       final connectivityInit = await _connectivityService.initialize();
       if (connectivityInit.isLeft()) {
-        return Left(
+        return const Left(
           local_failures.ServerFailure(
             'Failed to initialize connectivity service',
           ),
@@ -272,7 +272,7 @@ class AutoSyncService {
   /// - Após mudanças importantes
   Future<Either<local_failures.Failure, void>> forceSync() async {
     if (!_isInitialized) {
-      return Left(
+      return const Left(
         local_failures.ServerFailure('AutoSyncService not initialized'),
       );
     }
@@ -286,7 +286,7 @@ class AutoSyncService {
     final isOnline = isOnlineResult.getOrElse(() => false);
 
     if (!isOnline) {
-      return Left(
+      return const Left(
         local_failures.NetworkFailure('Cannot sync while offline'),
       );
     }

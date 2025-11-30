@@ -4,11 +4,11 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/localization/app_strings.dart';
-import '../notifiers/tasks_notifier.dart';
-import '../providers/tasks_state.dart';
 import '../../core/constants/tasks_constants.dart';
 import '../../core/utils/task_display_utils.dart';
 import '../../domain/entities/task.dart' as task_entity;
+import '../notifiers/tasks_notifier.dart';
+import '../providers/tasks_state.dart';
 
 /// Enhanced app bar for tasks with search, filtering, and quick actions
 ///

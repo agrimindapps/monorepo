@@ -3,10 +3,8 @@ import 'dart:io' show Platform;
 import 'dart:ui';
 
 import 'package:core/core.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'app_page.dart';
@@ -24,7 +22,7 @@ void main() async {
   usePathUrlStrategy();
 
   // Initialize Firebase with error handling
-  bool firebaseInitialized = false;
+  var firebaseInitialized = false;
   FirebaseCrashlyticsService? crashlyticsService;
 
   try {

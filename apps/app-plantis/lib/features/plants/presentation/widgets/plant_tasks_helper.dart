@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../tasks/presentation/notifiers/tasks_notifier.dart';
 import '../../../tasks/domain/entities/task.dart' as task_entity;
+import '../../../tasks/presentation/notifiers/tasks_notifier.dart';
 
 /// Helper unificado para calcular e exibir informações de tarefas pendentes
 /// tanto no PlantCard quanto no PlantListTile.

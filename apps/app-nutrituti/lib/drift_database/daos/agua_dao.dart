@@ -6,7 +6,7 @@ part 'agua_dao.g.dart';
 
 @DriftAccessor(tables: [AguaRegistros])
 class AguaDao extends DatabaseAccessor<NutritutiDatabase> with _$AguaDaoMixin {
-  AguaDao(NutritutiDatabase db) : super(db);
+  AguaDao(super.db);
 
   /// Get all registros for a perfil
   Future<List<AguaRegistro>> getAllRegistros(String perfilId) {

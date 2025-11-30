@@ -44,7 +44,7 @@ class PragasSupabaseDataSource implements PragasRemoteDataSource {
           .eq('id', id)
           .single();
 
-      return PragaModel.fromJson(response as Map<String, dynamic>);
+      return PragaModel.fromJson(response);
     } catch (e) {
       throw Exception('Erro ao buscar praga: $e');
     }
@@ -81,7 +81,7 @@ class PragasSupabaseDataSource implements PragasRemoteDataSource {
           .select()
           .single();
 
-      return PragaModel.fromJson(response as Map<String, dynamic>);
+      return PragaModel.fromJson(response);
     } catch (e) {
       throw Exception('Erro ao criar praga: $e');
     }
@@ -100,7 +100,7 @@ class PragasSupabaseDataSource implements PragasRemoteDataSource {
           .select()
           .single();
 
-      return PragaModel.fromJson(response as Map<String, dynamic>);
+      return PragaModel.fromJson(response);
     } catch (e) {
       throw Exception('Erro ao atualizar praga: $e');
     }

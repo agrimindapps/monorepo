@@ -6,7 +6,7 @@ part 'promo_dao.g.dart';
 
 @DriftAccessor(tables: [PromoContent])
 class PromoDao extends DatabaseAccessor<PetivetiDatabase> with _$PromoDaoMixin {
-  PromoDao(PetivetiDatabase db) : super(db);
+  PromoDao(super.db);
 
   /// Get all active promo content
   Future<List<PromoContentEntry>> getActivePromos() {

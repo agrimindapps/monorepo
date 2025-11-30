@@ -6,7 +6,7 @@ part 'vaccine_dao.g.dart';
 
 @DriftAccessor(tables: [Vaccines])
 class VaccineDao extends DatabaseAccessor<PetivetiDatabase> with _$VaccineDaoMixin {
-  VaccineDao(PetivetiDatabase db) : super(db);
+  VaccineDao(super.db);
 
   /// Get all vaccines for a user
   Future<List<Vaccine>> getAllVaccines(String userId) {

@@ -3,6 +3,7 @@
 /// Service responsible for pragas sorting logic
 /// Replaces switch statement with strategy pattern
 /// Follows OCP - extensible without modification
+library;
 
 class PragasCulturaSortService {
   PragasCulturaSortService();

@@ -8,7 +8,7 @@ part 'water_dao.g.dart';
 @DriftAccessor(tables: [WaterRecords, WaterAchievements])
 class WaterDao extends DatabaseAccessor<NutritutiDatabase>
     with _$WaterDaoMixin {
-  WaterDao(NutritutiDatabase db) : super(db);
+  WaterDao(super.db);
 
   // ==================== WATER RECORDS ====================
 

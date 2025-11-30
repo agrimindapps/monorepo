@@ -7,7 +7,7 @@ part 'list_dao.g.dart';
 /// DAO para operações de listas
 @DriftAccessor(tables: [Lists])
 class ListDao extends DatabaseAccessor<NebulalistDatabase> with _$ListDaoMixin {
-  ListDao(NebulalistDatabase db) : super(db);
+  ListDao(super.db);
 
   /// Buscar todas as listas
   Future<List<ListRecord>> getAllLists() => select(lists).get();

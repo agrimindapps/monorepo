@@ -31,7 +31,7 @@ class GameStateManagerService {
       );
     }
 
-    return GameStateTransitionResult(
+    return const GameStateTransitionResult(
       success: true,
       newStatus: SnakeGameStatus.running,
       errorMessage: null,
@@ -51,13 +51,13 @@ class GameStateManagerService {
   /// Toggles pause state
   GameStateTransitionResult togglePause(SnakeGameStatus currentStatus) {
     if (canPauseGame(currentStatus)) {
-      return GameStateTransitionResult(
+      return const GameStateTransitionResult(
         success: true,
         newStatus: SnakeGameStatus.paused,
         errorMessage: null,
       );
     } else if (canResumeGame(currentStatus)) {
-      return GameStateTransitionResult(
+      return const GameStateTransitionResult(
         success: true,
         newStatus: SnakeGameStatus.running,
         errorMessage: null,
@@ -73,7 +73,7 @@ class GameStateManagerService {
 
   /// Ends the game
   GameStateTransitionResult endGame() {
-    return GameStateTransitionResult(
+    return const GameStateTransitionResult(
       success: true,
       newStatus: SnakeGameStatus.gameOver,
       errorMessage: null,
@@ -112,7 +112,7 @@ class GameStateManagerService {
   /// Validates if position update can be performed
   PositionUpdateValidation validatePositionUpdate(SnakeGameStatus status) {
     if (!isRunning(status)) {
-      return PositionUpdateValidation(
+      return const PositionUpdateValidation(
         canUpdate: false,
         errorMessage: 'Game is not running',
       );
@@ -134,7 +134,7 @@ class GameStateManagerService {
       );
     }
 
-    return DirectionChangeValidation(
+    return const DirectionChangeValidation(
       canChange: false,
       errorMessage: 'Cannot change direction in current state',
     );

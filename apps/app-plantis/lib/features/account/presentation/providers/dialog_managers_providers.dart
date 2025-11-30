@@ -1,8 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../domain/usecases/logout_usecase.dart';
 import '../managers/clear_data_dialog_manager.dart';
 import '../managers/logout_dialog_manager.dart';
-import '../../domain/usecases/logout_usecase.dart';
 import 'account_providers.dart';
 
 part 'dialog_managers_providers.g.dart';

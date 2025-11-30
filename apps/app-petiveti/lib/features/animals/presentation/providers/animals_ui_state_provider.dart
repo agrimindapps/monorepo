@@ -1,10 +1,7 @@
+import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'package:core/core.dart';
-
-
 import '../../domain/entities/animal.dart';
-
 import 'animals_providers.dart';
 
 part 'animals_ui_state_provider.g.dart';

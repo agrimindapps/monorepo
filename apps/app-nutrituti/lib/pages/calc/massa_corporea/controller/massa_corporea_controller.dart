@@ -117,7 +117,7 @@ class MassaCorporeaController extends ChangeNotifier {
     t.writeln('Seu IMC: ${model.resultado.toStringAsFixed(2)}');
     t.writeln('Categoria: ${model.textIMC}');
 
-    Share.share(t.toString());
+    SharePlus.instance.share(ShareParams(text: t.toString()));
   }
 
   String getSuggestionText() {

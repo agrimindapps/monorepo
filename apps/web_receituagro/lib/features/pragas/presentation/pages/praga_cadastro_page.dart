@@ -717,7 +717,7 @@ class _PragaCadastroPageState extends ConsumerState<PragaCadastroPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         DropdownButtonFormField<TipoPraga>(
-          value: _selectedTipoPraga,
+          initialValue: _selectedTipoPraga,
           decoration: const InputDecoration(
             labelText: 'Tipo de Praga *',
             border: OutlineInputBorder(),

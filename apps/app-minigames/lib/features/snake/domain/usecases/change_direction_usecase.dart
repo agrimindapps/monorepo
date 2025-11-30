@@ -20,7 +20,7 @@ class ChangeDirectionUseCase {
   }) async {
     // Validation: cannot go in opposite direction
     if (currentState.direction.isOpposite(newDirection)) {
-      return Left(ValidationFailure('Cannot go in opposite direction'));
+      return const Left(ValidationFailure('Cannot go in opposite direction'));
     }
 
     return Right(currentState.copyWith(direction: newDirection));

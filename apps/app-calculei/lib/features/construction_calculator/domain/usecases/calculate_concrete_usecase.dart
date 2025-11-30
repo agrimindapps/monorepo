@@ -38,7 +38,7 @@ class CalculateConcreteUseCase
   Future<Either<Failure, ConcreteCalculation>> call(
     CalculateConcreteParams params,
   ) async {
-    return await repository.calculateConcrete(
+    return repository.calculateConcrete(
       length: params.length,
       width: params.width,
       height: params.height,

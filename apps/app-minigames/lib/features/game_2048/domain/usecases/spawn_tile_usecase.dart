@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 
 import '../entities/grid_entity.dart';
@@ -19,7 +18,7 @@ class SpawnTileUseCase {
 
       // Validation: grid must have empty space
       if (emptyPositions.isEmpty) {
-        return Left(ValidationFailure('No empty positions to spawn tile'));
+        return const Left(ValidationFailure('No empty positions to spawn tile'));
       }
 
       // Select random position
@@ -48,7 +47,7 @@ class SpawnTileUseCase {
   ) async {
     try {
       if (count < 1) {
-        return Left(ValidationFailure('Count must be at least 1'));
+        return const Left(ValidationFailure('Count must be at least 1'));
       }
 
       GridEntity currentGrid = grid;

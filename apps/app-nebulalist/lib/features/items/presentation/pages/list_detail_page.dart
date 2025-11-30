@@ -147,7 +147,7 @@ class ListDetailPage extends ConsumerWidget {
                       child: LinearProgressIndicator(
                         value: totalItems > 0 ? completedItems / totalItems : 0,
                         minHeight: 8,
-                        backgroundColor: theme.colorScheme.surfaceVariant,
+                        backgroundColor: theme.colorScheme.surfaceContainerHighest,
                       ),
                     ),
                   ],
@@ -293,8 +293,8 @@ class ListDetailPage extends ConsumerWidget {
 
           // Get item names if available
           List<String>? itemNames;
-          await listItemsAsync.whenData((listItems) async {
-            await itemMastersAsync.whenData((itemMasters) {
+          listItemsAsync.whenData((listItems) async {
+            itemMastersAsync.whenData((itemMasters) {
               final itemMastersMap = {
                 for (var item in itemMasters) item.id: item,
               };

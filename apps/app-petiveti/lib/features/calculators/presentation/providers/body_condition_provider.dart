@@ -1,18 +1,11 @@
+import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'package:core/core.dart';
-
-
 import '../../../../core/error/exceptions.dart';
-
 import '../../domain/entities/body_condition_input.dart';
-
 import '../../domain/entities/body_condition_output.dart';
-
 import '../../domain/entities/calculation_result.dart';
-
 import '../../domain/strategies/body_condition_strategy.dart';
-
 import '../../domain/strategies/calculator_strategy.dart';
 
 part 'body_condition_provider.g.dart';

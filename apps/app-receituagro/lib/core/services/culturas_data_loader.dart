@@ -54,7 +54,7 @@ class CulturasDataLoader {
         '🌱 [CULTURAS] JSON carregado: ${allCulturas.length} registros totais, ${culturas.length} culturas válidas',
       );
 
-      final repository = ref.watch(culturasRepositoryProvider);
+      final repository = ref.read(culturasRepositoryProvider);
 
       try {
         await repository.loadFromJson(culturas, '1.0.0');
@@ -96,10 +96,9 @@ class CulturasDataLoader {
     }
   }
 
-  /// Força recarregamento dos dados (para desenvolvimento)
-  static Future<void> forceReload(dynamic ref) async {
+  /// Força recarregamento dos dados (reseta flag para permitir novo carregamento)
+  static void forceReload(dynamic ref) {
     _isLoaded = false;
-    await loadCulturasData(ref);
   }
 
   /// Verifica se dados estão carregados
@@ -107,7 +106,7 @@ class CulturasDataLoader {
     if (!_isLoaded) return false;
 
     try {
-      final repository = ref.watch(culturasRepositoryProvider);
+      final repository = ref.read(culturasRepositoryProvider);
       final List<Cultura> culturas =
           (await repository.findAll()) as List<Cultura>;
       return culturas.isNotEmpty;

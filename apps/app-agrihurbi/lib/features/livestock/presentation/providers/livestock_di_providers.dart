@@ -1,5 +1,8 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:core/core.dart';
+
+import '../../../../core/network/network_info.dart';
+// import '../../../../database/agrihurbi_database.dart';
+import '../../../../database/database_provider.dart';
 import '../../data/datasources/livestock_local_datasource.dart';
 import '../../data/datasources/livestock_remote_datasource.dart';
 import '../../data/repositories/livestock_repository_impl.dart';
@@ -11,10 +14,6 @@ import '../../domain/usecases/get_bovines.dart';
 import '../../domain/usecases/get_equines.dart';
 import '../../domain/usecases/search_animals.dart';
 import '../../domain/usecases/update_bovine.dart';
-// import '../../../../database/agrihurbi_database.dart';
-import '../../../../database/database_provider.dart';
-import '../../../../core/network/network_info.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
 // Network Info
 final networkInfoProvider = Provider<NetworkInfo>((ref) {

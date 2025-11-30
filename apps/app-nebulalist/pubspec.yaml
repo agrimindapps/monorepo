@@ -33,6 +33,7 @@ dependencies:
   
   # State Management & Navigation (re-exported from core)
   flutter_riverpod: any
+  riverpod_annotation: any
   go_router: any
 
 dev_dependencies:
@@ -44,6 +45,7 @@ dev_dependencies:
   freezed: any
   json_serializable: any
   drift_dev: any
+  riverpod_generator: any
 
 flutter:
   uses-material-design: true

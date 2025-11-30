@@ -1,13 +1,12 @@
-import 'package:drift/drift.dart';
 import 'package:core/core.dart';
-
-// Tables
-import 'tables/tasks_table.dart';
-import 'tables/users_table.dart';
+import 'package:drift/drift.dart';
 
 // DAOs
 import 'daos/task_dao.dart';
 import 'daos/user_dao.dart';
+// Tables
+import 'tables/tasks_table.dart';
+import 'tables/users_table.dart';
 
 part 'taskolist_database.g.dart';
 
@@ -33,7 +32,7 @@ part 'taskolist_database.g.dart';
 
 @DriftDatabase(tables: [Tasks, Users], daos: [TaskDao, UserDao])
 class TaskolistDatabase extends _$TaskolistDatabase with BaseDriftDatabase {
-  TaskolistDatabase(QueryExecutor e) : super(e);
+  TaskolistDatabase(super.e);
 
   /// Versão do schema do banco de dados
   @override

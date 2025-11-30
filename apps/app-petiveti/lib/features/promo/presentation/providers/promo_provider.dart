@@ -1,20 +1,12 @@
+import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'package:core/core.dart';
-
-
 import '../../../../core/interfaces/usecase.dart' as local;
-
 import '../../domain/entities/promo_content.dart';
-
 import '../../domain/usecases/get_promo_content.dart';
-
 import '../../domain/usecases/submit_pre_registration.dart';
-
 import '../../domain/usecases/track_analytics.dart';
-
 import '../states/promo_state.dart';
-
 import 'promo_providers.dart';
 
 part 'promo_provider.g.dart';

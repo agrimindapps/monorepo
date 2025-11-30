@@ -6,7 +6,7 @@ part 'peso_dao.g.dart';
 
 @DriftAccessor(tables: [Pesos])
 class PesoDao extends DatabaseAccessor<NutritutiDatabase> with _$PesoDaoMixin {
-  PesoDao(NutritutiDatabase db) : super(db);
+  PesoDao(super.db);
 
   /// Get all pesos for a perfil (not deleted)
   Future<List<Peso>> getAllPesos(String perfilId) {

@@ -1,12 +1,11 @@
 // Flutter imports:
+// Project imports:
+import 'package:app_calculei/core/style/shadcn_style.dart';
 import 'package:flutter/material.dart';
-
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-// Project imports:
-import 'package:app_calculei/core/style/shadcn_style.dart';
 import '../../domain/usecases/calculate_cash_vs_installment_usecase.dart';
 import '../providers/cash_vs_installment_calculator_provider.dart';
 import '../widgets/cash_vs_installment_input_form.dart';
@@ -74,7 +73,7 @@ class _CashVsInstallmentCalculatorPageState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Compare à vista vs parcelado',
                             style: TextStyle(
                               fontSize: 18,

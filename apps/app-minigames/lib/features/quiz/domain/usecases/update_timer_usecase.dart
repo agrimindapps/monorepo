@@ -18,7 +18,7 @@ class UpdateTimerUseCase {
   }) async {
     // Validation: game must be playing
     if (!currentState.gameStatus.isPlaying) {
-      return Left(GameLogicFailure('Game is not in progress'));
+      return const Left(GameLogicFailure('Game is not in progress'));
     }
 
     // Decrement timer

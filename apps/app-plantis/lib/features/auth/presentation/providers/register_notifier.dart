@@ -263,4 +263,4 @@ class RegisterNotifier extends _$RegisterNotifier {
 
 // LEGACY ALIAS
 // ignore: deprecated_member_use_from_same_package
-final registerNotifierProvider = registerProvider;
+const registerNotifierProvider = registerProvider;

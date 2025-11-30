@@ -305,8 +305,9 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
                       border: OutlineInputBorder(),
                     ),
                     onChanged: (value) {
-                      ref.read(medicationSearchQueryProvider.notifier).state =
-                          value;
+                      ref
+                          .read(medicationSearchQueryProvider.notifier)
+                          .set(value);
                     },
                   ),
                 ),

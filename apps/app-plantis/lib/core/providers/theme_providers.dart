@@ -1,7 +1,6 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/settings/domain/entities/settings_entity.dart';
 
@@ -256,4 +255,4 @@ IconData themeIcon(Ref ref) {
 
 // LEGACY ALIAS
 // ignore: deprecated_member_use_from_same_package  
-final themeNotifierProvider = themeProvider;
+const themeNotifierProvider = themeProvider;

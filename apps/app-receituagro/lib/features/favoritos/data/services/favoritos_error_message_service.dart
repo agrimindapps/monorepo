@@ -12,6 +12,7 @@
 /// final errorService = ref.watch(favoritosErrorMessageServiceProvider);
 /// final message = errorService.getAddErrorMessage('defensivo');
 /// ```
+library;
 
 class FavoritosErrorMessageService {
   /// Mensagem para erro ao alterar favorito (toggle)

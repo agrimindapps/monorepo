@@ -28,7 +28,7 @@ class VacationLocalDataSourceImpl implements VacationLocalDataSource {
 
   VacationLocalDataSourceImpl(this._prefs);
 
-  String _getKey(String id) => '${_storagePrefix}:$id';
+  String _getKey(String id) => '$_storagePrefix:$id';
 
   Future<List<String>> _getStoredIds() async {
     return _prefs.getStringList(_idsKey) ?? [];

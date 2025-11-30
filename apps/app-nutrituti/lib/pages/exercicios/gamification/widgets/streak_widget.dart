@@ -85,7 +85,7 @@ class StreakWidget extends ConsumerWidget {
         boxShadow: isOnFire
             ? [
                 BoxShadow(
-                  color: Colors.orange.withOpacity(0.3),
+                  color: Colors.orange.withValues(alpha: 0.3),
                   blurRadius: 15,
                   offset: const Offset(0, 5),
                 ),
@@ -130,8 +130,8 @@ class StreakWidget extends ConsumerWidget {
                         ),
                         decoration: BoxDecoration(
                           color: isOnFire
-                              ? Colors.white.withOpacity(0.2)
-                              : Colors.grey.withOpacity(0.2),
+                              ? Colors.white.withValues(alpha: 0.2)
+                              : Colors.grey.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -218,8 +218,8 @@ class _StreakFireAnimationState extends State<_StreakFireAnimation>
             height: 56,
             decoration: BoxDecoration(
               color: widget.isOnFire
-                  ? Colors.white.withOpacity(0.2)
-                  : Colors.grey.withOpacity(0.2),
+                  ? Colors.white.withValues(alpha: 0.2)
+                  : Colors.grey.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Center(

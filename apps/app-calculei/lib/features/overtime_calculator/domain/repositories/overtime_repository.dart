@@ -1,6 +1,5 @@
 // Package imports:
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 // Project imports:
 import '../entities/overtime_calculation.dart';

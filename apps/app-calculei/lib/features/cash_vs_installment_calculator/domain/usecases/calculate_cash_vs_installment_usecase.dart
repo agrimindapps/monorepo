@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:uuid/uuid.dart';
 import '../entities/cash_vs_installment_calculation.dart';
 
@@ -167,10 +166,10 @@ class CalculateCashVsInstallmentUseCase {
       return installmentPrice * numberOfInstallments;
     }
 
-    double presentValue = 0.0;
+    var presentValue = 0.0;
 
     // Calculate present value of each installment
-    for (int i = 1; i <= numberOfInstallments; i++) {
+    for (var i = 1; i <= numberOfInstallments; i++) {
       final discountFactor = math.pow(1 + rate, i) as double;
 
       // Validate discount factor

@@ -496,4 +496,4 @@ typedef PlantTaskProvider = PlantTaskNotifier;
 
 // LEGACY ALIAS
 // ignore: deprecated_member_use_from_same_package
-final plantTaskNotifierProvider = plantTaskProvider;
+const plantTaskNotifierProvider = plantTaskProvider;

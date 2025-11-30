@@ -132,7 +132,7 @@ class CaloriasDiariasController extends ChangeNotifier {
 
   void compartilhar() {
     final texto = _gerarTextoCompartilhamento();
-    Share.share(texto);
+    SharePlus.instance.share(ShareParams(text: texto));
   }
 
   String _gerarTextoCompartilhamento() {

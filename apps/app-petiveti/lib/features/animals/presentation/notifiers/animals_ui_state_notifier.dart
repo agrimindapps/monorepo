@@ -1,12 +1,12 @@
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-// Re-export the AnimalsUIState from the provider file for backward compatibility
-export '../providers/animals_ui_state_provider.dart' show AnimalsUIState;
-
 import '../../domain/entities/animal.dart';
 import '../providers/animals_providers.dart';
 import '../providers/animals_ui_state_provider.dart';
+
+// Re-export the AnimalsUIState from the provider file for backward compatibility
+export '../providers/animals_ui_state_provider.dart' show AnimalsUIState;
 
 part 'animals_ui_state_notifier.g.dart';
 

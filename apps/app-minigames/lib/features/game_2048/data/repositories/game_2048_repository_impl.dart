@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/high_score_entity.dart';

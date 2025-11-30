@@ -40,7 +40,7 @@ class ResultCard extends StatelessWidget {
       'Gasto Energético Total: ${model.resultadoTEE.toStringAsFixed(0)} calorias/dia',
     );
 
-    Share.share(t.toString());
+    SharePlus.instance.share(ShareParams(text: t.toString()));
   }
 
   Widget _buildResultCard(String title, String value, IconData icon,

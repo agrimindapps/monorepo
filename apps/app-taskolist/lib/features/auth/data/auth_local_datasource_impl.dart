@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:core/core.dart';
 
 import '../../../database/daos/user_dao.dart';
 import '../../../database/taskolist_database.dart';

@@ -350,7 +350,7 @@ class _AddVaccineDialogState extends ConsumerState<AddVaccineDialog> {
           label: 'Data do Lembrete',
           onChanged: (date) => setState(() => _reminderDate = date),
           firstDate: DateTime.now(),
-          lastDate: _nextDueDate!,
+          lastDate: _nextDueDate,
         ),
       ],
     );

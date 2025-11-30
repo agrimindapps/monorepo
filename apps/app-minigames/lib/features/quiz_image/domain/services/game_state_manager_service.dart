@@ -24,7 +24,7 @@ class GameStateManagerService {
   /// Starts the game
   GameStateTransitionResult startGame(QuizGameState currentState) {
     if (!canStartGame(currentState)) {
-      return GameStateTransitionResult(
+      return const GameStateTransitionResult(
         success: false,
         errorMessage:
             'Cannot start game. State must be ready and questions must be loaded.',
@@ -32,7 +32,7 @@ class GameStateManagerService {
       );
     }
 
-    return GameStateTransitionResult(
+    return const GameStateTransitionResult(
       success: true,
       errorMessage: null,
       newState: GameStateEnum.playing,
@@ -41,7 +41,7 @@ class GameStateManagerService {
 
   /// Ends the game
   GameStateTransitionResult endGame(QuizGameState currentState) {
-    return GameStateTransitionResult(
+    return const GameStateTransitionResult(
       success: true,
       errorMessage: null,
       newState: GameStateEnum.gameOver,

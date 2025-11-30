@@ -1,5 +1,5 @@
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../domain/entities/market_entity.dart';
 import '../../domain/entities/market_filter_entity.dart';

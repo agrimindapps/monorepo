@@ -480,10 +480,12 @@ class BcsEstimationPreview extends ConsumerWidget {
   double _calculatePreliminaryBcs(BodyConditionState state) {
     double baseBcs = 5.0; // Average BCS
     if (state.input.species == AnimalSpecies.dog) {
-      if (state.input.currentWeight < 5)
+      if (state.input.currentWeight < 5) {
         baseBcs += 0.5; // Small dogs tend to be overweight
-      if (state.input.currentWeight > 30)
+      }
+      if (state.input.currentWeight > 30) {
         baseBcs -= 0.5; // Large dogs tend to be underweight
+      }
     } else if (state.input.species == AnimalSpecies.cat) {
       if (state.input.currentWeight < 3) baseBcs -= 1.0;
       if (state.input.currentWeight > 6) baseBcs += 1.0;

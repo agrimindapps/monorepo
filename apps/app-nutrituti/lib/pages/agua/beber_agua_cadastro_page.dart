@@ -184,18 +184,20 @@ class _BeberAguaFormWidgetState extends ConsumerState<BeberAguaFormWidget> {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: <Widget>[
-              _buildQuantidadeField(),
-              const SizedBox(height: 20),
-              _buildDataField(context),
-              const SizedBox(height: 20),
-              _buildSaveButton(),
-              const SizedBox(height: 20),
-              // _buildProgressPreview(),
-            ],
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                _buildQuantidadeField(),
+                const SizedBox(height: 20),
+                _buildDataField(context),
+                const SizedBox(height: 20),
+                _buildSaveButton(),
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       ),

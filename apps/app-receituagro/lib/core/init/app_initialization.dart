@@ -2,9 +2,8 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../providers/core_providers.dart' as core_providers;
-import '../services/prioritized_data_loader.dart';
-import '../sync/receituagro_sync_config.dart';
 import '../services/receituagro_realtime_service.dart';
+import '../sync/receituagro_sync_config.dart';
 import '../utils/diagnostico_logger.dart';
 
 /// Helper class to initialize app services using Riverpod ProviderContainer
@@ -143,49 +142,28 @@ class AppInitialization {
   }
 
   /// Load priority data
+  /// 
+  /// NOTA: Este método agora é um no-op pois o carregamento de dados
+  /// é gerenciado pelo StaticDataLoaderService através do AppDataManager.initialize()
+  /// que verifica controle de versão e evita recarregamentos desnecessários.
   static Future<void> loadPriorityData(ProviderContainer container) async {
-    try {
-      DiagnosticoLogger.debug(
-        '🚀 [PHASE 1] Carregando dados prioritários (culturas, pragas, fitossanitários)...',
-      );
-      await PrioritizedDataLoader.loadPriorityData(container);
-
-      final isPriorityReady = await PrioritizedDataLoader.isPriorityDataReady(container);
-      if (isPriorityReady) {
-        DiagnosticoLogger.debug(
-          '✅ [PHASE 1] Dados prioritários carregados - app pronto para iniciar',
-        );
-      } else {
-        DiagnosticoLogger.warning(
-          '⚠️ [PHASE 1] Dados prioritários não carregados completamente',
-          null,
-        );
-      }
-    } catch (e) {
-      DiagnosticoLogger.warning(
-        '❌ [PHASE 1] Erro ao carregar dados prioritários',
-        e,
-      );
-      DiagnosticoLogger.debug('Stack trace do erro: ${StackTrace.current}');
-      if (EnvironmentConfig.enableAnalytics) {
-        // TODO: Get crashlyticsRepositoryProvider from core package
-        // final crashlytics = container.read(core.crashlyticsRepositoryProvider);
-        // await crashlytics.recordError(
-        //   exception: e,
-        //   stackTrace: StackTrace.current,
-        //   reason: 'Priority data loading failed',
-        //   fatal: false,
-        // );
-      }
-    }
+    // O carregamento de dados estáticos agora é feito no AppDataManager.initialize()
+    // usando o StaticDataLoaderService com controle de versão persistido.
+    // Este método é mantido para compatibilidade mas não faz mais nada.
+    DiagnosticoLogger.debug(
+      '✅ [PHASE 1] Dados estáticos carregados via AppDataManager (com controle de versão)',
+    );
   }
 
   /// Load background data (non-blocking)
+  /// 
+  /// NOTA: Este método agora é um no-op pois os diagnósticos são carregados
+  /// junto com os outros dados estáticos no StaticDataLoaderService.
   static void loadBackgroundData(ProviderContainer container) {
+    // Diagnósticos agora são carregados junto com os outros dados no StaticDataLoaderService
     DiagnosticoLogger.debug(
-      '⏳ [PHASE 2] Iniciando carregamento em background (diagnósticos)...',
+      '✅ [PHASE 2] Diagnósticos carregados via StaticDataLoaderService',
     );
-    PrioritizedDataLoader.loadBackgroundData(container);
   }
 
   /// Initialize Firebase services

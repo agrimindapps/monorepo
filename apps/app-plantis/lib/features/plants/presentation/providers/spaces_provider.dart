@@ -1,11 +1,9 @@
 import 'package:core/core.dart' hide Column;
-import '../../../../core/providers/spaces_providers.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-import '../../domain/entities/space.dart';
-import '../../domain/usecases/spaces_usecases.dart';
 
 import '../../../../core/providers/repository_providers.dart';
+import '../../../../core/providers/spaces_providers.dart';
+import '../../domain/entities/space.dart';
+import '../../domain/usecases/spaces_usecases.dart';
 
 part 'spaces_provider.g.dart';
 

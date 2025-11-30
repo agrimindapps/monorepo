@@ -11,6 +11,7 @@
 /// Não bloqueia operações principais se falhar
 ///
 /// Nota: Cache é armazenado em memória durante a sessão
+library;
 
 class PragasCulturaLocalDataSource {
   static const String _cacheBoxName = 'pragas_cultura_cache';

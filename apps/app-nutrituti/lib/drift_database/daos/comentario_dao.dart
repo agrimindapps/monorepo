@@ -7,7 +7,7 @@ part 'comentario_dao.g.dart';
 @DriftAccessor(tables: [Comentarios])
 class ComentarioDao extends DatabaseAccessor<NutritutiDatabase>
     with _$ComentarioDaoMixin {
-  ComentarioDao(NutritutiDatabase db) : super(db);
+  ComentarioDao(super.db);
 
   /// Get all comentarios
   Future<List<Comentario>> getAllComentarios() {

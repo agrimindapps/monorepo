@@ -1,5 +1,4 @@
 // Package imports:
-import 'package:dartz/dartz.dart';
 
 // Core imports:
 import 'package:core/core.dart';
@@ -17,7 +16,7 @@ class SaveHighScoreUseCase {
     try {
       // Validate score
       if (score < 0) {
-        return Left(ValidationFailure('Score cannot be negative'));
+        return const Left(ValidationFailure('Score cannot be negative'));
       }
 
       return await _repository.saveHighScore(score: score);

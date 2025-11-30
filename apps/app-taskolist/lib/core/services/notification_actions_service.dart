@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../features/tasks/domain/task_entity.dart';
 import '../../features/tasks/domain/update_task.dart';
-import '../../features/tasks/providers/task_providers.dart';
-import '../../shared/providers/notification_providers.dart';
 import '../providers/core_providers.dart';
 import '../providers/service_providers.dart';
 import 'navigation_service.dart' as local_nav;

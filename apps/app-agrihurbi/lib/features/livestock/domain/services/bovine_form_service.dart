@@ -157,15 +157,17 @@ class BovineFormService {
     if (commonNameError != null) errors['commonName'] = commonNameError;
 
     final registrationIdError = validateRegistrationId(formData.registrationId);
-    if (registrationIdError != null)
+    if (registrationIdError != null) {
       errors['registrationId'] = registrationIdError;
+    }
 
     final breedError = validateBreed(formData.breed);
     if (breedError != null) errors['breed'] = breedError;
 
     final originCountryError = validateOriginCountry(formData.originCountry);
-    if (originCountryError != null)
+    if (originCountryError != null) {
       errors['originCountry'] = originCountryError;
+    }
 
     final animalTypeError = validateAnimalType(formData.animalType);
     if (animalTypeError != null) errors['animalType'] = animalTypeError;
@@ -175,8 +177,9 @@ class BovineFormService {
 
     final characteristicsError =
         validateCharacteristics(formData.characteristics);
-    if (characteristicsError != null)
+    if (characteristicsError != null) {
       errors['characteristics'] = characteristicsError;
+    }
 
     final purposeError = validatePurpose(formData.purpose);
     if (purposeError != null) errors['purpose'] = purposeError;

@@ -1,6 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:dartz/dartz.dart';
 
 import 'package:app_nutrituti/features/water_tracker/domain/entities/water_goal_entity.dart';
 import 'package:app_nutrituti/features/water_tracker/domain/entities/water_streak_entity.dart';

@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/providers/recommendation_provider.dart';
 import '../../../../core/services/failure_message_service.dart' as core_failure;
 import '../../../../core/services/i_recommendation_service.dart';
-import '../../../../core/providers/recommendation_provider.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/services/filtering/i_diagnosticos_filter_service.dart';
 import '../../domain/services/metadata/i_diagnosticos_metadata_service.dart';

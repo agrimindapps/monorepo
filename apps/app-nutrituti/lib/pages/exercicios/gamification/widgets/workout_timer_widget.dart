@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../enums/exercicio_categoria.dart';
 import '../models/workout_session.dart';
 import '../providers/gamification_provider.dart';
 
@@ -65,14 +64,14 @@ class _WorkoutTimerWidgetState extends ConsumerState<WorkoutTimerWidget>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            session.categoria.color.withOpacity(0.8),
+            session.categoria.color.withValues(alpha: 0.8),
             session.categoria.color,
           ],
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: session.categoria.color.withOpacity(0.3),
+            color: session.categoria.color.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -85,7 +84,7 @@ class _WorkoutTimerWidgetState extends ConsumerState<WorkoutTimerWidget>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -127,7 +126,7 @@ class _WorkoutTimerWidgetState extends ConsumerState<WorkoutTimerWidget>
                       child: CircularProgressIndicator(
                         value: (minutes % 60) / 60,
                         strokeWidth: 8,
-                        backgroundColor: Colors.white.withOpacity(0.2),
+                        backgroundColor: Colors.white.withValues(alpha: 0.2),
                         valueColor: const AlwaysStoppedAnimation<Color>(
                           Colors.white,
                         ),
@@ -153,7 +152,7 @@ class _WorkoutTimerWidgetState extends ConsumerState<WorkoutTimerWidget>
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Text(
@@ -205,7 +204,7 @@ class _WorkoutTimerWidgetState extends ConsumerState<WorkoutTimerWidget>
               IconButton(
                 onPressed: () => _showCancelDialog(context),
                 style: IconButton.styleFrom(
-                  backgroundColor: Colors.white.withOpacity(0.2),
+                  backgroundColor: Colors.white.withValues(alpha: 0.2),
                   padding: const EdgeInsets.all(12),
                 ),
                 icon: const Icon(Icons.close, color: Colors.white),
@@ -223,7 +222,7 @@ class _WorkoutTimerWidgetState extends ConsumerState<WorkoutTimerWidget>
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withValues(alpha: 0.2),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -262,7 +261,7 @@ class _WorkoutTimerWidgetState extends ConsumerState<WorkoutTimerWidget>
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: Colors.white.withOpacity(0.8), size: 20),
+        Icon(icon, color: Colors.white.withValues(alpha: 0.8), size: 20),
         const SizedBox(height: 4),
         Text(
           value,
@@ -275,7 +274,7 @@ class _WorkoutTimerWidgetState extends ConsumerState<WorkoutTimerWidget>
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 12,
           ),
         ),

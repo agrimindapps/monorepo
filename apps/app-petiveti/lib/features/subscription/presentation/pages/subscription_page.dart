@@ -193,7 +193,6 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(subscriptionProvider);
     return SubscriptionPageCoordinator(
       userId: widget.userId,
       bodyBuilder: (state) => _buildScaffold(state),

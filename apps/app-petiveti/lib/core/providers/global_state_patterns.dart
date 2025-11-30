@@ -9,6 +9,7 @@
 /// - **Error Handling**: Unified error state management
 /// - **Loading States**: Consistent loading indicator patterns
 /// - **Cache Management**: Efficient data caching strategies
+library;
 
 /// **Base State Class**
 /// 

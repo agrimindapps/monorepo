@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 
-import '../../domain/repositories/i_favoritos_repository.dart';
 import '../../domain/entities/favorito_entity.dart';
+import '../../domain/repositories/i_favoritos_repository.dart';
 import '../services/favoritos_service.dart';
 
 /// Repositório simplificado para Favoritos usando o FavoritosService consolidado

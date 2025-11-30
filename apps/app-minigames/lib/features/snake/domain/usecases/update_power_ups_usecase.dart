@@ -22,7 +22,7 @@ class UpdatePowerUpsUseCase {
   }) async {
     // Validation
     if (!currentState.gameStatus.isRunning) {
-      return Left(GameLogicFailure('Game is not running'));
+      return const Left(GameLogicFailure('Game is not running'));
     }
 
     // Clean expired power-ups from grid

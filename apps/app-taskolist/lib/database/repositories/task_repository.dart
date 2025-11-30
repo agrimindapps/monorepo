@@ -1,9 +1,9 @@
 import 'package:core/core.dart';
 import 'package:drift/drift.dart';
 
-import '../taskolist_database.dart';
-import '../tables/tasks_table.dart';
 import '../../features/tasks/domain/task_entity.dart';
+import '../tables/tasks_table.dart';
+import '../taskolist_database.dart';
 
 /// ============================================================================
 /// TASK REPOSITORY - Padrão DriftRepositoryBase

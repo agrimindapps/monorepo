@@ -1,7 +1,8 @@
-import 'package:drift/drift.dart';
 import 'package:core/core.dart';
+import 'package:drift/drift.dart';
 
 import 'tables/livestock_tables.dart';
+import 'tables/pluviometer_tables.dart';
 
 part 'agrihurbi_database.g.dart'; // Será gerado pelo Drift
 
@@ -32,7 +33,7 @@ part 'agrihurbi_database.g.dart'; // Será gerado pelo Drift
 /// });
 /// ```
 @DriftDatabase(
-  tables: [Bovines, Equines],
+  tables: [Bovines, Equines, RainGauges, RainfallMeasurements],
 )
 class AgrihurbiDatabase extends _$AgrihurbiDatabase with BaseDriftDatabase {
   AgrihurbiDatabase(super.e);

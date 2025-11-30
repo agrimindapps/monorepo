@@ -1,6 +1,9 @@
 import 'package:core/core.dart' hide Column, DeleteAccountUseCase, LogoutUseCase;
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 
+import '../../../../core/providers/core_di_providers.dart';
+import '../../../../core/providers/repository_providers.dart';
+import '../../../../database/providers/database_providers.dart';
 import '../../data/datasources/account_local_datasource.dart';
 import '../../data/datasources/account_remote_datasource.dart';
 import '../../data/repositories/account_repository_impl.dart';
@@ -10,10 +13,6 @@ import '../../domain/usecases/clear_data_usecase.dart';
 import '../../domain/usecases/delete_account_usecase.dart';
 import '../../domain/usecases/get_account_info_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
-
-import '../../../../core/providers/repository_providers.dart';
-import '../../../../core/providers/core_di_providers.dart';
-import '../../../../database/providers/database_providers.dart';
 
 part 'account_providers.g.dart';
 

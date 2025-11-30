@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:uuid/uuid.dart';
 import '../entities/emergency_reserve_calculation.dart';
 
@@ -84,8 +83,8 @@ class CalculateEmergencyReserveUseCase {
     final totalReserveAmount = totalMonthlyExpenses * params.desiredMonths;
 
     // 3. Calculate construction time if monthly savings is provided
-    int constructionYears = 0;
-    int constructionMonths = 0;
+    var constructionYears = 0;
+    var constructionMonths = 0;
 
     if (params.monthlySavings > 0 &&
         params.monthlySavings >= (totalReserveAmount * 0.01)) {

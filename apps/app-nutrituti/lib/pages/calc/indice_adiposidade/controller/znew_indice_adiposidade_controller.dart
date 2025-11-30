@@ -75,7 +75,7 @@ class ZNewIndiceAdiposidadeController extends ChangeNotifier {
 
   void compartilhar() {
     final texto = ZNewIndiceAdiposidadeUtils.gerarTextoCompartilhamento(modelo);
-    Share.share(texto);
+    SharePlus.instance.share(ShareParams(text: texto));
   }
 
   void _exibirMensagem(BuildContext context, String message,

@@ -1,6 +1,5 @@
 import 'package:core/core.dart' as core;
 import 'package:core/core.dart' hide Column;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/providers/core_providers.dart';
 import '../../features/notifications/presentation/notification_stats.dart' as local_stats;

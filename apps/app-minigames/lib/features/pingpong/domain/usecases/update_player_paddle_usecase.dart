@@ -1,4 +1,3 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 import '../entities/game_state_entity.dart';
 import '../entities/enums.dart';
@@ -11,7 +10,7 @@ class UpdatePlayerPaddleUseCase {
     PaddleDirection direction,
   ) async {
     if (!state.canPlay) {
-      return Left(ValidationFailure('Game is not active'));
+      return const Left(ValidationFailure('Game is not active'));
     }
 
     try {

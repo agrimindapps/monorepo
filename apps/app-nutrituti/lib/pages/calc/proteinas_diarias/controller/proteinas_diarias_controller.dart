@@ -62,21 +62,20 @@ class ProteinasDiariasController {
   void compartilhar() {
     if (!model.calculado) return;
 
-    final shareText = '''
-    Cálculo de Proteínas Diárias
-    
-    Valores de entrada:
-    Peso: ${model.numberFormat.format(model.peso)} kg
-    Nível de atividade: ${model.nivelAtividade}
-    
-    Resultado:
-    Consumo recomendado de proteínas:
-    Mínimo: ${model.numberFormat.format(model.proteinasMinimas)} g/dia
-    Máximo: ${model.numberFormat.format(model.proteinasMaximas)} g/dia
-    ''';
-
-    // Implementar compartilhamento
-    // Share.share(shareText);
+    // TODO: Implement share functionality
+    // final shareText = '''
+    // Cálculo de Proteínas Diárias
+    // 
+    // Valores de entrada:
+    // Peso: ${model.numberFormat.format(model.peso)} kg
+    // Nível de atividade: ${model.nivelAtividade}
+    // 
+    // Resultado:
+    // Consumo recomendado de proteínas:
+    // Mínimo: ${model.numberFormat.format(model.proteinasMinimas)} g/dia
+    // Máximo: ${model.numberFormat.format(model.proteinasMaximas)} g/dia
+    // ''';
+    // SharePlus.instance.share(ShareParams(text: shareText));
   }
 
   void _exibirMensagem(BuildContext context, String message,

@@ -9,7 +9,6 @@ import '../../domain/usecases/check_letter_usecase.dart';
 import '../../domain/usecases/generate_word_usecase.dart';
 import '../../domain/usecases/restart_game_usecase.dart';
 import '../../domain/usecases/reveal_hint_usecase.dart';
-import '../../domain/usecases/skip_word_usecase.dart';
 import 'soletrando_providers.dart';
 
 part 'soletrando_game_notifier.g.dart';

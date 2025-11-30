@@ -1,6 +1,6 @@
-import 'package:flutter_riverpod/legacy.dart';
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../domain/entities/equine_entity.dart';
 import '../../domain/usecases/get_equines.dart';
@@ -123,7 +123,7 @@ class EquinesProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
-    final params = GetEquinesParams(searchParams: null);
+    const params = GetEquinesParams(searchParams: null);
     final result = await _getEquines(params);
 
     result.fold(

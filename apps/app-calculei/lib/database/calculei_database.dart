@@ -1,14 +1,14 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'dart:io';
-
-// Tables
-import 'tables/calculations_table.dart';
 
 // DAOs
 import 'daos/calculation_dao.dart';
+// Tables
+import 'tables/calculations_table.dart';
 
 part 'calculei_database.g.dart';
 

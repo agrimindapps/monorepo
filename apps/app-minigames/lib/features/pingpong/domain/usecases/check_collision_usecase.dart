@@ -1,4 +1,3 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 import '../entities/game_state_entity.dart';
 import '../services/collision_detection_service.dart';
@@ -12,7 +11,7 @@ class CheckCollisionUseCase {
 
   Future<Either<Failure, GameStateEntity>> call(GameStateEntity state) async {
     if (!state.canPlay) {
-      return Left(ValidationFailure('Game is not active'));
+      return const Left(ValidationFailure('Game is not active'));
     }
 
     try {

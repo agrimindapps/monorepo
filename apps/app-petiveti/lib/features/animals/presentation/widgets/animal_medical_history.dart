@@ -2,14 +2,14 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../vaccines/domain/entities/vaccine.dart';
-import '../../../vaccines/presentation/providers/vaccines_provider.dart';
-import '../../../medications/domain/entities/medication.dart';
-import '../../../medications/presentation/providers/medications_provider.dart';
 import '../../../appointments/domain/entities/appointment.dart';
 import '../../../appointments/presentation/providers/appointments_providers.dart';
 import '../../../expenses/domain/entities/expense.dart';
 import '../../../expenses/presentation/providers/expenses_provider.dart';
+import '../../../medications/domain/entities/medication.dart';
+import '../../../medications/presentation/providers/medications_provider.dart';
+import '../../../vaccines/domain/entities/vaccine.dart';
+import '../../../vaccines/presentation/providers/vaccines_provider.dart';
 import '../../domain/entities/animal.dart';
 
 /// Widget que exibe o histórico médico consolidado de um animal

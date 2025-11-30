@@ -110,7 +110,7 @@ class AIMoveStrategyService {
 
     // Priority 3: Take center if available
     if (_isCellAvailable(board, 1, 1)) {
-      return MoveResult(
+      return const MoveResult(
         row: 1,
         col: 1,
         strategy: MoveStrategy.center,

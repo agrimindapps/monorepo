@@ -75,7 +75,7 @@ class FitossanitariosDataLoader {
       print(
         '🛡️ [FITOSSANITARIOS] JSON carregado: ${allFitossanitarios.length} registros totais, ${fitossanitarios.length} fitossanitários válidos',
       );
-      final repository = ref.watch(fitossanitariosRepositoryProvider);
+      final repository = ref.read(fitossanitariosRepositoryProvider);
       await repository.loadFromJson(fitossanitarios, '1.0.0');
 
       developer.log(
@@ -109,10 +109,9 @@ class FitossanitariosDataLoader {
     }
   }
 
-  /// Força recarregamento dos dados (para desenvolvimento)
-  static Future<void> forceReload(dynamic ref) async {
+  /// Força recarregamento dos dados (reseta flag para permitir novo carregamento)
+  static void forceReload(dynamic ref) {
     _isLoaded = false;
-    await loadFitossanitariosData(ref);
   }
 
   /// Verifica se dados estão carregados

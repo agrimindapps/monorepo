@@ -18,7 +18,7 @@ class CaloriasExercicioResultWidget extends StatelessWidget {
   void _compartilhar() {
     final texto = controller.gerarTextoCompartilhamento();
     if (texto.isNotEmpty) {
-      Share.share(texto);
+      SharePlus.instance.share(ShareParams(text: texto));
     }
   }
 

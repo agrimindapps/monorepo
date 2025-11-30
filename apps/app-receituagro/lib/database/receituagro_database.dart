@@ -45,13 +45,15 @@ part 'receituagro_database.g.dart';
     PragasInf,
     Fitossanitarios,
     FitossanitariosInfo,
+    // Version control
+    StaticDataVersion,
   ],
 )
 class ReceituagroDatabase extends _$ReceituagroDatabase with BaseDriftDatabase {
   ReceituagroDatabase(super.e);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   /// Factory para ambiente de produção
   factory ReceituagroDatabase.production() {
@@ -64,20 +66,16 @@ class ReceituagroDatabase extends _$ReceituagroDatabase with BaseDriftDatabase {
   }
 
   /// Factory para ambiente de desenvolvimento
-  ///
-  /// Habilita logging de SQL queries para debug
   factory ReceituagroDatabase.development() {
     return ReceituagroDatabase(
       DriftDatabaseConfig.createExecutor(
         databaseName: 'receituagro_drift_dev.db',
-        logStatements: true, // Log SQL queries
+        logStatements: true,
       ),
     );
   }
 
   /// Factory para testes
-  ///
-  /// Usa banco de dados em memória
   factory ReceituagroDatabase.test() {
     return ReceituagroDatabase(
       DriftDatabaseConfig.createInMemoryExecutor(logStatements: true),
@@ -85,8 +83,6 @@ class ReceituagroDatabase extends _$ReceituagroDatabase with BaseDriftDatabase {
   }
 
   /// Factory com path customizado
-  ///
-  /// Útil para backup/restore ou testes específicos
   factory ReceituagroDatabase.withPath(String path) {
     return ReceituagroDatabase(
       DriftDatabaseConfig.createCustomExecutor(
@@ -97,22 +93,19 @@ class ReceituagroDatabase extends _$ReceituagroDatabase with BaseDriftDatabase {
     );
   }
 
-  /// Estratégia de migração do banco de dados
-  ///
-  /// Define como o banco deve ser criado e atualizado entre versões
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
       // Criar todas as tabelas
       await m.createAll();
-
       print('✅ Receituagro Database: Tabelas criadas');
     },
     onUpgrade: (Migrator m, int from, int to) async {
-      // Migrações futuras virão aqui
-      // if (from < 2) {
-      //   await m.addColumn(diagnosticos, diagnosticos.newColumn);
-      // }
+      // Migration from version 1 to 2: Add StaticDataVersion table
+      if (from < 2) {
+        await m.createTable(staticDataVersion);
+        print('⬆️ Migration v1→v2: StaticDataVersion table added');
+      }
     },
     beforeOpen: (details) async {
       // ⚠️ CRÍTICO: Habilitar foreign keys

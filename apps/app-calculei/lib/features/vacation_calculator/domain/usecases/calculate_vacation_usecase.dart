@@ -1,6 +1,5 @@
-import 'package:uuid/uuid.dart';
-
 import 'package:core/core.dart';
+import 'package:uuid/uuid.dart';
 
 import '../entities/vacation_calculation.dart';
 
@@ -130,8 +129,8 @@ class CalculateVacationUseCase {
       (limit: 7786.02, rate: 0.14),
     ];
 
-    double discount = 0.0;
-    double previousLimit = 0.0;
+    var discount = 0.0;
+    var previousLimit = 0.0;
 
     for (final bracket in brackets) {
       if (value <= previousLimit) break;

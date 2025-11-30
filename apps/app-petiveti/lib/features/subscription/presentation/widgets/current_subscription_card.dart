@@ -149,25 +149,18 @@ class CurrentSubscriptionCard extends ConsumerWidget {
   }
 
   Widget _buildActionButtons(BuildContext context, WidgetRef ref) {
+    // TODO: Add isCancelling and isResuming to SubscriptionState for loading states
     return Row(
       children: [
         if (subscription.isActive && !subscription.isCancelled) ...[
           Expanded(
             child: OutlinedButton.icon(
-              onPressed: false // TODO: Add isCancelling to SubscriptionState
-                  ? null
-                  : () => _showCancelDialog(context, ref),
+              onPressed: () => _showCancelDialog(context, ref),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Theme.of(context).colorScheme.error,
               ),
-              icon: false // TODO: Add isCancelling to SubscriptionState
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.cancel, size: 18),
-              label: const Text('Cancelar'), // TODO: Add isCancelling to SubscriptionState
+              icon: const Icon(Icons.cancel, size: 18),
+              label: const Text('Cancelar'),
             ),
           ),
           const SizedBox(width: 8),
@@ -175,24 +168,13 @@ class CurrentSubscriptionCard extends ConsumerWidget {
         if (subscription.isPaused) ...[
           Expanded(
             child: ElevatedButton.icon(
-              onPressed: false // TODO: Add isResuming to SubscriptionState
-                  ? null
-                  : () => SubscriptionPageCoordinator.resumeSubscription(
-                      ref,
-                      context,
-                      userId,
-                    ),
-              icon: false // TODO: Add isResuming to SubscriptionState
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.play_arrow, size: 18),
-              label: const Text('Retomar'), // TODO: Add isResuming to SubscriptionState
+              onPressed: () => SubscriptionPageCoordinator.resumeSubscription(
+                ref,
+                context,
+                userId,
+              ),
+              icon: const Icon(Icons.play_arrow, size: 18),
+              label: const Text('Retomar'),
             ),
           ),
         ],

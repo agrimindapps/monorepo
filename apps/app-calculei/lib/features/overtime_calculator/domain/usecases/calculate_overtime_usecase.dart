@@ -1,10 +1,9 @@
 // Package imports:
-import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
-import 'package:uuid/uuid.dart';
-
 // Project imports:
 import 'package:app_calculei/constants/calculation_constants.dart';
+import 'package:core/core.dart';
+import 'package:uuid/uuid.dart';
+
 import '../entities/overtime_calculation.dart';
 
 class CalculateOvertimeParams {
@@ -63,7 +62,7 @@ class CalculateOvertimeUseCase {
       return const ValidationFailure('Horas semanais devem ser maior que zero');
     }
     if (params.weeklyHours > CalculationConstants.maxHorasSemanais) {
-      return ValidationFailure(
+      return const ValidationFailure(
         'Horas semanais não podem exceder ${CalculationConstants.maxHorasSemanais}',
       );
     }
@@ -72,7 +71,7 @@ class CalculateOvertimeUseCase {
     }
     final totalOvertime = params.hours50 + params.hours100;
     if (totalOvertime > CalculationConstants.maxHorasExtrasMes) {
-      return ValidationFailure(
+      return const ValidationFailure(
         'Total de horas extras não pode exceder ${CalculationConstants.maxHorasExtrasMes} por mês',
       );
     }
@@ -99,7 +98,7 @@ class CalculateOvertimeUseCase {
       );
     }
     if (params.dependents > CalculationConstants.maxDependentes) {
-      return ValidationFailure(
+      return const ValidationFailure(
         'Número de dependentes não pode exceder ${CalculationConstants.maxDependentes}',
       );
     }
@@ -183,8 +182,8 @@ class CalculateOvertimeUseCase {
   }
 
   Map<String, double> _calculateInss(double grossTotal) {
-    double desconto = 0.0;
-    double aliquota = 0.0;
+    var desconto = 0.0;
+    var aliquota = 0.0;
     for (final faixa in CalculationConstants.faixasInss) {
       final min = faixa['min']!;
       final max = faixa['max']!;
@@ -196,7 +195,7 @@ class CalculateOvertimeUseCase {
         aliquota = aliquotaFaixa;
       }
     }
-    final tetoInss = CalculationConstants.tetoInss * 0.14;
+    const tetoInss = CalculationConstants.tetoInss * 0.14;
     if (desconto > tetoInss) {
       desconto = tetoInss;
     }

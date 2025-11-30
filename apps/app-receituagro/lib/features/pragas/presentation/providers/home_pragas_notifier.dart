@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/praga_entity.dart';
@@ -121,14 +122,21 @@ class HomePragasState {
 class HomePragasNotifier extends _$HomePragasNotifier {
   @override
   Future<HomePragasState> build() async {
+    debugPrint('🏠 [HOME_PRAGAS] build() iniciado');
     return await _initialize();
   }
 
   /// Inicializa o notifier e carrega dados necessários
   Future<HomePragasState> _initialize() async {
+    debugPrint('🏠 [HOME_PRAGAS] _initialize() iniciado');
     try {
+      debugPrint('🏠 [HOME_PRAGAS] Carregando dados de culturas...');
       final totalCulturas = await _loadCulturaData();
+      debugPrint('🏠 [HOME_PRAGAS] Culturas carregadas: $totalCulturas');
+      
+      debugPrint('🏠 [HOME_PRAGAS] Aguardando pragasProvider...');
       final pragasState = await ref.watch(pragasProvider.future);
+      debugPrint('🏠 [HOME_PRAGAS] pragasState obtido - pragas: ${pragasState.pragas.length}, error: ${pragasState.errorMessage}');
 
       // Criar objeto de estatísticas com contagens por tipo
       final stats = {
@@ -136,6 +144,7 @@ class HomePragasNotifier extends _$HomePragasNotifier {
         'doencas': pragasState.doencas.length,
         'plantas': pragasState.plantas.length,
       };
+      debugPrint('🏠 [HOME_PRAGAS] Stats: insetos=${stats['insetos']}, doencas=${stats['doencas']}, plantas=${stats['plantas']}');
 
       return HomePragasState(
         isInitializing: false,
@@ -151,7 +160,9 @@ class HomePragasNotifier extends _$HomePragasNotifier {
         onRecordPragaAccess: (praga) => recordPragaAccess(praga),
         onUpdateCarouselIndex: (index) => updateCarouselIndex(index),
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('🏠 [HOME_PRAGAS] ❌ ERRO na inicialização: $e');
+      debugPrint('🏠 [HOME_PRAGAS] Stack: $stackTrace');
       return HomePragasState.initial().copyWith(
         isInitializing: false,
         initializationFailed: true,
@@ -165,8 +176,10 @@ class HomePragasNotifier extends _$HomePragasNotifier {
     try {
       final culturaRepository = ref.read(culturasRepositoryProvider);
       final culturas = await culturaRepository.findAll();
+      debugPrint('🏠 [HOME_PRAGAS] _loadCulturaData: ${culturas.length} culturas');
       return culturas.length;
     } catch (e) {
+      debugPrint('🏠 [HOME_PRAGAS] ❌ Erro ao carregar culturas: $e');
       return 0;
     }
   }

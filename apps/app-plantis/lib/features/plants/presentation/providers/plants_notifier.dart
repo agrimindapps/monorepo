@@ -14,14 +14,13 @@ import '../../domain/usecases/get_plant_by_id_usecase.dart';
 import '../../domain/usecases/get_plants_usecase.dart';
 import '../../domain/usecases/search_plants_usecase.dart';
 import '../../domain/usecases/update_plant_usecase.dart';
+import 'plants_providers.dart';
 // Use plants_state.dart PlantsState which is @freezed and preferred
 import 'plants_state.dart';
 
 export '../../domain/services/plants_care_service.dart' show CareStatus;
 export '../../domain/services/plants_sort_service.dart' show SortBy, ViewMode;
 export 'plants_state.dart';
-
-import 'plants_providers.dart';
 
 part 'plants_notifier.g.dart';
 

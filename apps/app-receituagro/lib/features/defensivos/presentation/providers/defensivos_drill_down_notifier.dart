@@ -1,10 +1,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'defensivos_providers.dart';
 import '../../data/services/defensivos_grouping_service.dart';
 import '../../domain/entities/defensivo_entity.dart';
 import '../../domain/entities/defensivo_group_entity.dart';
 import '../../domain/entities/drill_down_navigation_state.dart';
+import 'defensivos_providers.dart';
 
 part 'defensivos_drill_down_notifier.g.dart';
 

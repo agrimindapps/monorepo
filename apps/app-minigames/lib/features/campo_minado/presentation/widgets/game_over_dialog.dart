@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/achievement.dart';
 import '../providers/campo_minado_game_notifier.dart';
@@ -124,7 +125,7 @@ class GameOverDialog extends ConsumerWidget {
           onPressed: () {
             ref.read(campoMinadoGameProvider.notifier).clearNewlyUnlockedAchievements();
             Navigator.of(context).pop();
-            Navigator.of(context).pop(); // Return to home
+            context.go('/'); // Return to home using go_router
           },
           child: const Text('Sair'),
         ),

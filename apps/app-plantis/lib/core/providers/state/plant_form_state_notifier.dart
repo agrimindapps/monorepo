@@ -910,4 +910,4 @@ UpdatePlantUseCase updatePlantUseCaseForForm(Ref ref) {
 
 // LEGACY ALIAS
 // ignore: deprecated_member_use_from_same_package
-final plantFormStateNotifierProvider = plantFormStateProvider;
+const plantFormStateNotifierProvider = plantFormStateProvider;

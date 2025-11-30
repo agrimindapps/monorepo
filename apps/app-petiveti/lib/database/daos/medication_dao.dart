@@ -6,7 +6,7 @@ part 'medication_dao.g.dart';
 
 @DriftAccessor(tables: [Medications])
 class MedicationDao extends DatabaseAccessor<PetivetiDatabase> with _$MedicationDaoMixin {
-  MedicationDao(PetivetiDatabase db) : super(db);
+  MedicationDao(super.db);
 
   /// Get all medications for a user
   Future<List<Medication>> getAllMedications(String userId) {

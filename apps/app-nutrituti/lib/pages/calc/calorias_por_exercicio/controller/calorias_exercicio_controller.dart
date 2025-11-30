@@ -70,7 +70,7 @@ class CaloriasExercicioController extends ChangeNotifier {
     t.writeln(
         '${_atividadeSelecionada.text} consome ${_atividadeSelecionada.value} kCal por minuto');
 
-    Share.share(t.toString());
+    SharePlus.instance.share(ShareParams(text: t.toString()));
   }
 
   void _exibirMensagem(BuildContext context, String message) {

@@ -6,14 +6,14 @@ class BeberAgua extends BaseModel {
   final double quantidade;
   final String fkIdPerfil;
 
-  BeberAgua({
-    required String? id,
-    required DateTime? createdAt,
-    required DateTime? updatedAt,
+  const BeberAgua({
+    required super.id,
+    required super.createdAt,
+    required super.updatedAt,
     required this.dataRegistro,
     required this.quantidade,
     required this.fkIdPerfil,
-  }) : super(id: id, createdAt: createdAt, updatedAt: updatedAt);
+  });
 
   @override
   Map<String, dynamic> toMap() {

@@ -97,7 +97,7 @@ class CinturaQuadrilController extends ChangeNotifier {
 
   void compartilhar() {
     if (resultado != null) {
-      Share.share(resultado!.gerarTextoCompartilhamento());
+      SharePlus.instance.share(ShareParams(text: resultado!.gerarTextoCompartilhamento()));
     }
   }
 

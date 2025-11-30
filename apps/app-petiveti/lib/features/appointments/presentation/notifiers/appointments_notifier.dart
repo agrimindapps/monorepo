@@ -1,7 +1,6 @@
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../providers/appointments_providers.dart';
 import '../../domain/entities/appointment.dart';
 import '../../domain/usecases/add_appointment.dart';
 import '../../domain/usecases/delete_appointment.dart';
@@ -9,6 +8,7 @@ import '../../domain/usecases/get_appointment_by_id.dart';
 import '../../domain/usecases/get_appointments.dart';
 import '../../domain/usecases/get_upcoming_appointments.dart';
 import '../../domain/usecases/update_appointment.dart';
+import '../providers/appointments_providers.dart';
 
 part 'appointments_notifier.g.dart';
 

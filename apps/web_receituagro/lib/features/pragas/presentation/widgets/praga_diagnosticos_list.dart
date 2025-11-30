@@ -55,7 +55,7 @@ class _PragaDiagnosticosListState extends ConsumerState<PragaDiagnosticosList> {
               child: culturasAsync.when(
                 data: (culturas) {
                   return DropdownButtonFormField<String>(
-                    value: _selectedCulturaId,
+                    initialValue: _selectedCulturaId,
                     decoration: const InputDecoration(
                       labelText: 'Filtrar por Cultura',
                       border: OutlineInputBorder(),

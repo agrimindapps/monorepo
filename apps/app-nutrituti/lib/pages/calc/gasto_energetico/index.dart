@@ -64,9 +64,10 @@ class _GastoEnergeticoView extends StatelessWidget {
           model: controller.modelo,
           isVisible: controller.calculado,
           onShare: () {
+            // ignore: unused_local_variable
             final texto = GastoEnergeticoUtils.gerarTextoCompartilhamento(
                 controller.modelo);
-            // Compartilhamento pode ser implementado aqui
+            // TODO: Implement share functionality
           },
         ),
         const SizedBox(height: 16),

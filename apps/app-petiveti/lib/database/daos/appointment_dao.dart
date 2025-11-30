@@ -6,7 +6,7 @@ part 'appointment_dao.g.dart';
 
 @DriftAccessor(tables: [Appointments])
 class AppointmentDao extends DatabaseAccessor<PetivetiDatabase> with _$AppointmentDaoMixin {
-  AppointmentDao(PetivetiDatabase db) : super(db);
+  AppointmentDao(super.db);
 
   /// Get all appointments for a user
   Future<List<Appointment>> getAllAppointments(String userId) {

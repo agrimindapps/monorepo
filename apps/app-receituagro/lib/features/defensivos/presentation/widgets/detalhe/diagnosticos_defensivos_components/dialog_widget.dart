@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../../core/providers/core_providers.dart';
 import '../../../../../../core/extensions/diagnostico_drift_extension.dart';
+import '../../../../../../core/providers/core_providers.dart';
 import '../../../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../../../core/widgets/praga_image_widget.dart';
 import '../../../../../../database/receituagro_database.dart';

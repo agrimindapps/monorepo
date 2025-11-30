@@ -10,7 +10,9 @@ class DeficitSuperavitModel {
   int tipoMetaSelecionado;
   bool calculado;
 
+  // ignore: constant_identifier_names
   static const double CALORIAS_POR_KG = 7700.0;
+  // ignore: constant_identifier_names
   static const double MINIMO_CALORIAS_DIARIAS = 1200.0;
 
   DeficitSuperavitModel({

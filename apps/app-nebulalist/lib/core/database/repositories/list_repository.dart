@@ -2,7 +2,6 @@ import 'package:core/core.dart';
 import 'package:drift/drift.dart';
 
 import '../nebulalist_database.dart';
-import '../tables/lists_table.dart';
 
 /// ============================================================================
 /// LIST REPOSITORY - Padrão DriftRepositoryBase (String ID)

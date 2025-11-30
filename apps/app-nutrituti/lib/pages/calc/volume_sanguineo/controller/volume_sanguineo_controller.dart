@@ -145,7 +145,7 @@ class VolumeSanguineoController extends ChangeNotifier {
   void compartilhar() {
     if (!_isCalculated) return;
     final shareText = _model.getShareText();
-    Share.share(shareText);
+    SharePlus.instance.share(ShareParams(text: shareText));
   }
 
   /// Método com nome padronizado

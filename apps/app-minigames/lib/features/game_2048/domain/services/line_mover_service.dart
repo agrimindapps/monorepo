@@ -38,7 +38,7 @@ class LineMoverService {
     final nonEmptyTiles = line.whereType<TileEntity>().toList();
 
     if (nonEmptyTiles.isEmpty) {
-      return LineProcessResult(
+      return const LineProcessResult(
         tiles: [],
         scoreGained: 0,
         moved: false,

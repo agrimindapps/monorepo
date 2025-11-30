@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/data/calculator_content_repository.dart';
+import '../../../../shared/widgets/educational_tabs.dart';
+import '../../../../shared/widgets/share_button.dart';
 import '../providers/vacation_calculator_provider.dart';
 import '../widgets/calculation_result_card.dart';
 import '../widgets/vacation_input_form.dart';
@@ -18,6 +21,16 @@ class VacationCalculatorPage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Calculadora de Férias'),
         actions: [
+          if (calculation.id.isNotEmpty)
+            ShareButton(
+              text: ShareFormatter.formatVacationCalculation(
+                grossSalary: calculation.grossSalary,
+                vacationDays: calculation.vacationDays,
+                totalGross: calculation.grossTotal,
+                totalNet: calculation.netTotal,
+              ),
+              subject: 'Cálculo de Férias',
+            ),
           IconButton(
             icon: const Icon(Icons.history),
             onPressed: () => _showHistory(context, ref),
@@ -98,6 +111,24 @@ class VacationCalculatorPage extends ConsumerWidget {
               // Result Card
               if (calculation.id.isNotEmpty)
                 CalculationResultCard(calculation: calculation),
+
+              const SizedBox(height: 32),
+
+              // Educational Tabs
+              if (CalculatorContentRepository.hasContent(
+                  '/calculators/financial/vacation')) ...[
+                Text(
+                  'Saiba Mais',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 16),
+                EducationalTabs(
+                  content: CalculatorContentRepository.getContent(
+                      '/calculators/financial/vacation')!,
+                ),
+              ],
             ],
           ),
         ),

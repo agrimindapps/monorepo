@@ -19,7 +19,7 @@ part 'gamification_dao.g.dart';
 ])
 class GamificationDao extends DatabaseAccessor<NutritutiDatabase>
     with _$GamificationDaoMixin {
-  GamificationDao(NutritutiDatabase db) : super(db);
+  GamificationDao(super.db);
 
   // ============================================================================
   // FITNESS PROFILE OPERATIONS

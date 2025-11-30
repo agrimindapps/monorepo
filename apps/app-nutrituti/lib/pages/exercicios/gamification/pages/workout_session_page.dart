@@ -131,19 +131,19 @@ class _WorkoutSessionPageState extends ConsumerState<WorkoutSessionPage> {
                   duration: const Duration(milliseconds: 200),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? categoria.color.withOpacity(0.15)
+                        ? categoria.color.withValues(alpha: 0.15)
                         : theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isSelected
                           ? categoria.color
-                          : theme.dividerColor.withOpacity(0.3),
+                          : theme.dividerColor.withValues(alpha: 0.3),
                       width: isSelected ? 2 : 1,
                     ),
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: categoria.color.withOpacity(0.2),
+                              color: categoria.color.withValues(alpha: 0.2),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -165,7 +165,7 @@ class _WorkoutSessionPageState extends ConsumerState<WorkoutSessionPage> {
                               isSelected ? FontWeight.bold : FontWeight.normal,
                           color: isSelected
                               ? categoria.color
-                              : theme.colorScheme.onSurface.withOpacity(0.7),
+                              : theme.colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                         textAlign: TextAlign.center,
                         maxLines: 1,
@@ -184,7 +184,7 @@ class _WorkoutSessionPageState extends ConsumerState<WorkoutSessionPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: _selectedCategoria!.color.withOpacity(0.1),
+                color: _selectedCategoria!.color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -201,7 +201,7 @@ class _WorkoutSessionPageState extends ConsumerState<WorkoutSessionPage> {
                         Text(
                           'Estimativa de Calorias',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                         Text(

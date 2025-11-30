@@ -24,7 +24,7 @@ import '../repositories/i_favoritos_repository.dart';
 /// ```
 ///
 /// **Benefício:** Menos boilerplate, lógica centralizada no repositório
-@Deprecated("Deprecated - use alternative")
+@Deprecated('Deprecated - use alternative')
 class GetFavoritoDefensivosUseCase {
   final IFavoritosDefensivosRepository _repository;
 

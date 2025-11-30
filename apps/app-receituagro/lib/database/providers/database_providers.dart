@@ -1,10 +1,10 @@
 import 'package:core/core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/providers/core_providers.dart';
 import '../receituagro_database.dart';
 import '../repositories/repositories.dart';
+import '../repositories/static_data_version_repository.dart';
 import '../sync/adapters/comentarios_drift_sync_adapter.dart';
 import '../sync/adapters/favoritos_drift_sync_adapter.dart';
 
@@ -14,21 +14,16 @@ part 'database_providers.g.dart';
 
 /// Provider do banco de dados Drift
 ///
-/// Cria uma única instância do banco de dados e a mantém viva durante
-/// toda a vida do app. Quando o ref for disposed, fecha o banco.
+/// IMPORTANTE: Este provider é um ALIAS para receituagroDatabaseProvider
+/// definido em core_providers.dart, garantindo que apenas UMA instância
+/// do banco de dados seja criada durante toda a vida da aplicação.
 ///
-/// IMPORTANTE: keepAlive: true garante que apenas UMA instância seja criada
-/// durante toda a vida da aplicação, evitando race conditions
+/// Usar SEMPRE este provider ou receituagroDatabaseProvider para acessar o banco.
 @Riverpod(keepAlive: true)
 ReceituagroDatabase database(Ref ref) {
-  debugPrint('🔵 [DATABASE] Criando instância do ReceituagroDatabase');
-  final db = ReceituagroDatabase.production();
-  ref.onDispose(() {
-    debugPrint('🔴 [DATABASE] Fechando ReceituagroDatabase');
-    db.close();
-  });
-  debugPrint('✅ [DATABASE] ReceituagroDatabase criado e pronto');
-  return db;
+  // Reutiliza a instância do receituagroDatabaseProvider (manual provider)
+  // para evitar criar múltiplas instâncias do banco de dados
+  return ref.watch(receituagroDatabaseProvider);
 }
 
 // ========== REPOSITORY PROVIDERS ==========
@@ -80,6 +75,27 @@ CulturasRepository culturasRepository(Ref ref) {
 PragasRepository pragasRepository(Ref ref) {
   final db = ref.watch(databaseProvider);
   return PragasRepository(db);
+}
+
+/// Provider do repositório de informações de pragas
+@riverpod
+PragasInfRepository pragasInfRepository(Ref ref) {
+  final db = ref.watch(databaseProvider);
+  return PragasInfRepository(db);
+}
+
+/// Provider do repositório de informações de plantas
+@riverpod
+PlantasInfRepository plantasInfRepository(Ref ref) {
+  final db = ref.watch(databaseProvider);
+  return PlantasInfRepository(db);
+}
+
+/// Provider do repositório de controle de versão dos dados estáticos
+@riverpod
+StaticDataVersionRepository staticDataVersionRepository(Ref ref) {
+  final db = ref.watch(databaseProvider);
+  return StaticDataVersionRepository(db);
 }
 
 // ========== STREAM PROVIDERS (Reactive UI) ==========

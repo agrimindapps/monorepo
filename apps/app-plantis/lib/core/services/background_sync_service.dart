@@ -17,10 +17,10 @@ class BackgroundSyncService extends ChangeNotifier {
   BackgroundSyncStatus _syncStatus = BackgroundSyncStatus.idle;
   final Map<String, bool> _operationStatus = {};
 
-  GetPlantsUseCase? _getPlantsUseCase;
-  GetTasksUseCase? _getTasksUseCase;
-  SyncUserProfileUseCase? _syncUserProfileUseCase;
-  SyncSettingsUseCase? _syncSettingsUseCase;
+  final GetPlantsUseCase? _getPlantsUseCase;
+  final GetTasksUseCase? _getTasksUseCase;
+  final SyncUserProfileUseCase? _syncUserProfileUseCase;
+  final SyncSettingsUseCase? _syncSettingsUseCase;
 
   final StreamController<String> _syncMessageController =
       StreamController<String>.broadcast();
@@ -133,7 +133,7 @@ class BackgroundSyncService extends ChangeNotifier {
       if (kDebugMode) {
         debugPrint('👤 BackgroundSync: Executando sync REAL do perfil...');
       }
-      final result = await _syncUserProfileUseCase!.call();
+      final result = await _syncUserProfileUseCase.call();
 
       result.fold(
         (failure) {
@@ -177,7 +177,7 @@ class BackgroundSyncService extends ChangeNotifier {
       if (kDebugMode) {
         debugPrint('📱 BackgroundSync: Executando sync REAL das plantas...');
       }
-      final result = await _getPlantsUseCase!.call(const NoParams());
+      final result = await _getPlantsUseCase.call(const NoParams());
 
       result.fold(
         (failure) {
@@ -222,7 +222,7 @@ class BackgroundSyncService extends ChangeNotifier {
       if (kDebugMode) {
         debugPrint('📅 BackgroundSync: Executando sync REAL das tarefas...');
       }
-      final result = await _getTasksUseCase!.call(const NoParams());
+      final result = await _getTasksUseCase.call(const NoParams());
 
       result.fold(
         (failure) {
@@ -273,7 +273,7 @@ class BackgroundSyncService extends ChangeNotifier {
           '⚙️ BackgroundSync: Executando sync REAL das configurações...',
         );
       }
-      final result = await _syncSettingsUseCase!.call();
+      final result = await _syncSettingsUseCase.call();
 
       result.fold(
         (failure) {

@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/unemployment_insurance_calculation.dart';
 import '../../domain/repositories/unemployment_insurance_repository.dart';

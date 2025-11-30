@@ -170,7 +170,7 @@ class AlimentosRepository {
       text += '${item['text']}: ${selectItem[item['value']]} ${item['med']}\n';
     }
 
-    Share.share(text);
+    SharePlus.instance.share(ShareParams(text: text));
   }
 
   void dispose() {

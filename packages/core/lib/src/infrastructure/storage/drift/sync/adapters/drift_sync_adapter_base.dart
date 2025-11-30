@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 import 'package:cloud_firestore/cloud_firestore.dart' as fs;
 import 'package:dartz/dartz.dart';
 import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../../domain/entities/base_sync_entity.dart';
 import '../../../../../shared/utils/failure.dart';
@@ -118,23 +119,47 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
               continue;
             }
 
+            // Determinar o docId para Firebase:
+            // - Se entity.id parece ser um UUID (36 chars com hífens), usa ele
+            // - Se entity.id é numérico (ID local do Drift), gera novo UUID
+            final String docId;
+            
+            if (_isValidUuid(entity.id)) {
+              // Já tem UUID válido, usa ele
+              docId = entity.id;
+            } else {
+              // ID numérico do Drift, gera UUID para Firebase
+              docId = const Uuid().v4();
+              developer.log(
+                '🆔 Generating new Firebase docId: $docId for local id: ${entity.id}',
+                name: 'DriftSync.$collectionName',
+              );
+            }
+
             final docRef = firestore
                 .collection('users')
                 .doc(userId)
                 .collection(collectionName)
-                .doc(entity.id);
+                .doc(docId);
 
             final map = toFirestoreMap(entity);
             map['lastSyncAt'] = fs.FieldValue.serverTimestamp();
+            // Garantir que o ID no documento seja o UUID
+            map['id'] = docId;
 
-            batchWrite.set(docRef, map, fs.SetOptions(merge: true));
+            // Converter recursivamente para evitar IdentityMap no Web
+            final sanitizedMap = _sanitizeMapForFirestore(map);
+
+            batchWrite.set(docRef, sanitizedMap, fs.SetOptions(merge: true));
 
             // Preparar atualização local após sucesso
+            // Se gerou novo UUID, passar como firebaseId para atualizar o registro local
+            final String localId = entity.id; // ID original (pode ser "1", "2", etc)
             pendingUpdates.add(
-              markAsSynced(entity.id, firebaseId: entity.id).then((result) {
+              markAsSynced(localId, firebaseId: docId).then((result) {
                 if (result.isLeft()) {
                   developer.log(
-                    'Failed to mark as synced locally: ${entity.id}',
+                    'Failed to mark as synced locally: $localId',
                     name: 'DriftSync.$collectionName',
                     error: (result as Left).value.message,
                   );
@@ -197,6 +222,11 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
     final stopwatch = Stopwatch()..start();
 
     try {
+      developer.log(
+        '🔄 Pull starting for $collectionName (userId: $userId, since: $since)',
+        name: 'DriftSync.$collectionName',
+      );
+
       // 1. Verificar conectividade
       final connectivityResult = await connectivityService.isOnline();
       final isOnline = connectivityResult.fold(
@@ -205,6 +235,10 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
       );
 
       if (!isOnline) {
+        developer.log(
+          '❌ Pull aborted: No internet connection',
+          name: 'DriftSync.$collectionName',
+        );
         return const Left(NetworkFailure('Sem conexão com a internet'));
       }
 
@@ -212,32 +246,48 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
       // ⚠️ IMPORTANT: This query requires Firestore composite indices!
       //
       // Query Pattern:
-      //   .where('updatedAt', isGreaterThan: timestamp).limit(500)
+      //   .where('updated_at', isGreaterThan: timestamp).limit(500)
       //
       // Without indices, Firestore will reject this query with:
       //   "The query requires an index. You can create it by following the link
       //    in the console or locally via the Firebase CLI."
       //
-      // Required Index Setup:
-      //   - vehicles: updatedAt ASC
-      //   - fuel_supplies: updatedAt ASC
-      //   - maintenances: updatedAt ASC
-      //   - expenses: updatedAt ASC
-      //   - odometer_readings: updatedAt ASC
+      // Required Index Setup (snake_case field names):
+      //   - vehicles: updated_at ASC
+      //   - fuel_supplies: updated_at ASC
+      //   - maintenances: updated_at ASC
+      //   - expenses: updated_at ASC
+      //   - odometer_readings: updated_at ASC
       //
       // Deployment:
       //   1. CLI: ./deploy-firestore-indexes.sh my-project-id
       //   2. Manual: https://console.firebase.google.com/project/{PROJECT}/firestore/indexes
       //   3. Docs: See FIRESTORE_INDICES.md for full instructions
       //
+      final collectionPath = 'users/$userId/$collectionName';
+      developer.log(
+        '📂 Querying Firestore path: $collectionPath',
+        name: 'DriftSync.$collectionName',
+      );
+
       fs.Query query = firestore
           .collection('users')
           .doc(userId)
           .collection(collectionName);
 
       if (since != null) {
-        // This where() clause requires the index on updatedAt
-        query = query.where('updatedAt', isGreaterThan: since);
+        // This where() clause requires the index on updated_at
+        // NOTE: Field name uses snake_case (updated_at) to match baseFirebaseFields
+        developer.log(
+          '📅 Applying delta filter: updated_at > ${since.toIso8601String()}',
+          name: 'DriftSync.$collectionName',
+        );
+        query = query.where('updated_at', isGreaterThan: since.toIso8601String());
+      } else {
+        developer.log(
+          '📦 No lastSync - performing FULL sync (no filter)',
+          name: 'DriftSync.$collectionName',
+        );
       }
 
       // Limitar tamanho do pull para evitar OOM em syncs grandes
@@ -246,7 +296,16 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
 
       final snapshot = await query.get();
 
+      developer.log(
+        '📊 Firestore returned ${snapshot.docs.length} documents',
+        name: 'DriftSync.$collectionName',
+      );
+
       if (snapshot.docs.isEmpty) {
+        developer.log(
+          '⚠️ No documents found in Firestore for $collectionPath',
+          name: 'DriftSync.$collectionName',
+        );
         return Right(
           SyncPullResult(
             recordsPulled: 0,
@@ -270,15 +329,30 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
         for (final doc in snapshot.docs) {
           try {
             final data = doc.data() as Map<String, dynamic>;
+            // Garantir que o documento tenha o ID do Firestore
+            data['id'] = doc.id;
             final remoteEntity = fromFirestoreDoc(data);
 
-            // Verificar se existe localmente
-            final localRow =
-                await (db.select(table)..where((tbl) {
-                      final idCol = (tbl as dynamic).id as Expression<String>;
-                      return idCol.equals(remoteEntity.id);
-                    }))
-                    .getSingleOrNull();
+            // Verificar se existe localmente pelo firebaseId
+            // Como tabelas podem ter id (int) ou firebaseId (text),
+            // tentamos buscar por firebaseId primeiro
+            dynamic localRow;
+            try {
+              localRow = await (db.select(table)..where((tbl) {
+                    // Tentar buscar por firebaseId (campo text usado para UUID)
+                    // Usamos isValue para comparação com nullable
+                    final firebaseIdCol = (tbl as dynamic).firebaseId as GeneratedColumn<String>;
+                    return firebaseIdCol.isValue(doc.id);
+                  }))
+                  .getSingleOrNull();
+            } catch (e) {
+              // Se falhar (tabela não tem firebaseId), tenta pelo id
+              developer.log(
+                'firebaseId column not found, trying by id: $e',
+                name: 'DriftSync.$collectionName',
+              );
+              localRow = null;
+            }
 
             if (localRow != null) {
               final localEntity = driftToEntity(localRow as TDriftRow);
@@ -308,6 +382,10 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
               }
             } else {
               // Novo registro, inserir direto
+              developer.log(
+                '➕ Inserting new record from Firebase: ${doc.id}',
+                name: 'DriftSync.$collectionName',
+              );
               await db
                   .into(table)
                   .insert(
@@ -319,6 +397,11 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
           } catch (e) {
             failedCount++;
             errors.add('Error processing doc ${doc.id}: $e');
+            developer.log(
+              '❌ Error processing doc ${doc.id}: $e',
+              name: 'DriftSync.$collectionName',
+              error: e,
+            );
           }
         }
       });
@@ -443,5 +526,73 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
       return const Left(ValidationFailure('ID não pode ser vazio'));
     }
     return const Right(null);
+  }
+
+  // ==========================================================================
+  // HELPERS PRIVADOS
+  // ==========================================================================
+
+  /// Sanitiza o mapa recursivamente para evitar IdentityMap no Flutter Web
+  ///
+  /// O Firestore no Web não aceita IdentityMap diretamente, então precisamos
+  /// converter todos os Maps e Lists internos para tipos regulares.
+  Map<String, dynamic> _sanitizeMapForFirestore(Map<String, dynamic> map) {
+    final sanitized = <String, dynamic>{};
+    
+    for (final entry in map.entries) {
+      final value = entry.value;
+      
+      if (value == null) {
+        // Não adicionar valores nulos para evitar problemas no Firestore
+        continue;
+      } else if (value is Map) {
+        // Converter Map recursivamente
+        sanitized[entry.key] = _sanitizeMapForFirestore(
+          Map<String, dynamic>.from(value),
+        );
+      } else if (value is List) {
+        // Converter List recursivamente
+        sanitized[entry.key] = _sanitizeListForFirestore(value);
+      } else if (value is fs.FieldValue) {
+        // Manter FieldValue como está (serverTimestamp, etc)
+        sanitized[entry.key] = value;
+      } else {
+        // Outros tipos primitivos (String, int, double, bool, DateTime, etc)
+        sanitized[entry.key] = value;
+      }
+    }
+    
+    return sanitized;
+  }
+
+  /// Sanitiza uma lista recursivamente para evitar IdentityMap no Flutter Web
+  List<dynamic> _sanitizeListForFirestore(List<dynamic> list) {
+    return list.map((item) {
+      if (item == null) {
+        return null;
+      } else if (item is Map) {
+        return _sanitizeMapForFirestore(Map<String, dynamic>.from(item));
+      } else if (item is List) {
+        return _sanitizeListForFirestore(item);
+      } else {
+        return item;
+      }
+    }).where((item) => item != null).toList();
+  }
+
+  /// Verifica se uma string é um UUID válido (formato v4)
+  /// 
+  /// UUID v4 tem formato: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+  /// onde x é qualquer dígito hex e y é 8, 9, a, ou b
+  bool _isValidUuid(String id) {
+    // UUID tem exatamente 36 caracteres (32 hex + 4 hífens)
+    if (id.length != 36) return false;
+    
+    // Regex para validar formato UUID
+    final uuidRegex = RegExp(
+      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+    );
+    
+    return uuidRegex.hasMatch(id);
   }
 }

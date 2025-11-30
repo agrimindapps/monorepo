@@ -1,9 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 import 'package:core/src/services/optimized_analytics_wrapper.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/items/data/datasources/item_master_local_datasource.dart';
 import '../../features/items/data/datasources/item_master_remote_datasource.dart';

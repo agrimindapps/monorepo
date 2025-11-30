@@ -21,7 +21,7 @@ class StartGameUseCase {
   }) async {
     // Validation: must have questions
     if (questions.isEmpty) {
-      return Left(ValidationFailure('No questions provided'));
+      return const Left(ValidationFailure('No questions provided'));
     }
 
     // Create initial playing state

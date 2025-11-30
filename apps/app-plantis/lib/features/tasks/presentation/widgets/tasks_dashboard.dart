@@ -2,9 +2,9 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/localization/app_strings.dart';
+import '../../core/constants/tasks_constants.dart';
 import '../notifiers/tasks_notifier.dart';
 import '../providers/tasks_state.dart';
-import '../../core/constants/tasks_constants.dart';
 
 class TasksDashboard extends ConsumerWidget {
   const TasksDashboard({super.key});

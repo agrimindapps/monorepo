@@ -22,7 +22,7 @@ class HandleTimeoutUseCase {
   }) async {
     // Validation: game must be playing
     if (!currentState.gameStatus.isPlaying) {
-      return Left(GameLogicFailure('Game is not in progress'));
+      return const Left(GameLogicFailure('Game is not in progress'));
     }
 
     // Timeout: deduct lives using service

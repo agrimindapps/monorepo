@@ -27,11 +27,11 @@ class VictoryDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Row(
+      title: const Row(
         children: [
-          const Icon(Icons.emoji_events, color: Colors.amber, size: 32),
-          const SizedBox(width: 8),
-          const Text('Parabéns!'),
+          Icon(Icons.emoji_events, color: Colors.amber, size: 32),
+          SizedBox(width: 8),
+          Text('Parabéns!'),
         ],
       ),
       content: Column(

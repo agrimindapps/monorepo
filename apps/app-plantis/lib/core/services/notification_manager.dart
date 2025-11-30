@@ -1,11 +1,11 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import 'plantis_notification_service.dart';
+import 'interfaces/i_notification_permission_manager.dart';
 import 'interfaces/i_notification_schedule_manager.dart';
 import 'interfaces/i_plant_notification_manager.dart';
 import 'interfaces/i_task_notification_manager.dart';
-import 'interfaces/i_notification_permission_manager.dart';
+import 'plantis_notification_service.dart';
 
 /// Gerenciador centralizado de notificações do Plantis
 /// Implementa interfaces segregadas seguindo o princípio ISP

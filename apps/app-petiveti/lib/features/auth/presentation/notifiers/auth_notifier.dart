@@ -1,11 +1,11 @@
 import 'package:core/core.dart' hide User;
 
-import '../providers/auth_providers.dart';
 import '../../../../core/interfaces/usecase.dart' as local;
 import '../../domain/entities/user.dart';
 import '../../domain/services/pet_data_sync_service.dart';
 import '../../domain/services/rate_limit_service.dart';
 import '../../domain/usecases/auth_usecases.dart' as auth_usecases;
+import '../providers/auth_providers.dart';
 
 part 'auth_notifier.g.dart';
 

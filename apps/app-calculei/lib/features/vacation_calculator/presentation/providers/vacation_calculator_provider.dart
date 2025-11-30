@@ -6,8 +6,8 @@ import '../../data/repositories/vacation_repository_impl.dart';
 import '../../domain/entities/vacation_calculation.dart';
 import '../../domain/repositories/vacation_repository.dart';
 import '../../domain/usecases/calculate_vacation_usecase.dart';
-import '../../domain/usecases/save_calculation_usecase.dart';
 import '../../domain/usecases/get_calculation_history_usecase.dart';
+import '../../domain/usecases/save_calculation_usecase.dart';
 
 part 'vacation_calculator_provider.g.dart';
 

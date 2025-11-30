@@ -124,7 +124,7 @@ class AlcoolSangueController extends ChangeNotifier {
 
   void compartilhar() {
     final texto = AlcoolSangueUtils.gerarTextoCompartilhamento(_modelo);
-    Share.share(texto);
+    SharePlus.instance.share(ShareParams(text: texto));
   }
 
   @override

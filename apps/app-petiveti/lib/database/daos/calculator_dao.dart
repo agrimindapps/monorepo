@@ -7,7 +7,7 @@ part 'calculator_dao.g.dart';
 @DriftAccessor(tables: [CalculationHistory])
 class CalculatorDao extends DatabaseAccessor<PetivetiDatabase>
     with _$CalculatorDaoMixin {
-  CalculatorDao(PetivetiDatabase db) : super(db);
+  CalculatorDao(super.db);
 
   /// Get all calculation history for a user
   Future<List<CalculationHistoryEntry>> getAllHistory(String userId) {
@@ -67,8 +67,9 @@ class CalculatorDao extends DatabaseAccessor<PetivetiDatabase>
     String? result,
   }) async {
     final updates = <String, Value<String>>{};
-    if (calculatorType != null)
+    if (calculatorType != null) {
       updates['calculator_type'] = Value(calculatorType);
+    }
     if (inputData != null) updates['input_data'] = Value(inputData);
     if (result != null) updates['result'] = Value(result);
 

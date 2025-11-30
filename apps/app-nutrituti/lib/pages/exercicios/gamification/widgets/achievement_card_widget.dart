@@ -41,13 +41,13 @@ class AchievementCardWidget extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: isUnlocked
-              ? Colors.amber.withOpacity(0.1)
+              ? Colors.amber.withValues(alpha: 0.1)
               : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isUnlocked
-                ? Colors.amber.withOpacity(0.5)
-                : theme.dividerColor.withOpacity(0.2),
+                ? Colors.amber.withValues(alpha: 0.5)
+                : theme.dividerColor.withValues(alpha: 0.2),
           ),
         ),
         child: Column(
@@ -68,7 +68,7 @@ class AchievementCardWidget extends StatelessWidget {
                   Positioned.fill(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(
@@ -87,7 +87,7 @@ class AchievementCardWidget extends StatelessWidget {
                 height: 4,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: theme.dividerColor.withOpacity(0.3),
+                  color: theme.dividerColor.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
                 child: FractionallySizedBox(
@@ -120,19 +120,19 @@ class AchievementCardWidget extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isUnlocked
-              ? Colors.amber.withOpacity(0.1)
+              ? Colors.amber.withValues(alpha: 0.1)
               : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isUnlocked
-                ? Colors.amber.withOpacity(0.5)
-                : theme.dividerColor.withOpacity(0.2),
+                ? Colors.amber.withValues(alpha: 0.5)
+                : theme.dividerColor.withValues(alpha: 0.2),
             width: isUnlocked ? 2 : 1,
           ),
           boxShadow: isUnlocked
               ? [
                   BoxShadow(
-                    color: Colors.amber.withOpacity(0.2),
+                    color: Colors.amber.withValues(alpha: 0.2),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -147,8 +147,8 @@ class AchievementCardWidget extends StatelessWidget {
               height: 56,
               decoration: BoxDecoration(
                 color: isUnlocked
-                    ? Colors.amber.withOpacity(0.2)
-                    : theme.dividerColor.withOpacity(0.1),
+                    ? Colors.amber.withValues(alpha: 0.2)
+                    : theme.dividerColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Stack(
@@ -165,7 +165,7 @@ class AchievementCardWidget extends StatelessWidget {
                     Positioned.fill(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.4),
+                          color: Colors.black.withValues(alpha: 0.4),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(
@@ -191,14 +191,14 @@ class AchievementCardWidget extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       color: isUnlocked
                           ? theme.colorScheme.onSurface
-                          : theme.colorScheme.onSurface.withOpacity(0.6),
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     def.description,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                   if (!isUnlocked) ...[
@@ -210,7 +210,7 @@ class AchievementCardWidget extends StatelessWidget {
                           child: Container(
                             height: 6,
                             decoration: BoxDecoration(
-                              color: theme.dividerColor.withOpacity(0.3),
+                              color: theme.dividerColor.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(3),
                             ),
                             child: FractionallySizedBox(
@@ -259,8 +259,8 @@ class AchievementCardWidget extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: isUnlocked
-                    ? Colors.amber.withOpacity(0.2)
-                    : theme.dividerColor.withOpacity(0.1),
+                    ? Colors.amber.withValues(alpha: 0.2)
+                    : theme.dividerColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -323,13 +323,13 @@ class AchievementsList extends StatelessWidget {
               Icon(
                 Icons.emoji_events_outlined,
                 size: 48,
-                color: theme.colorScheme.onSurface.withOpacity(0.3),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
               ),
               const SizedBox(height: 12),
               Text(
                 emptyMessage,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
               ),
             ],

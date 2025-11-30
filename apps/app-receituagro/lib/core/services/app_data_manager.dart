@@ -3,7 +3,7 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart' hide Column;
 
-import 'receituagro_data_setup.dart';
+import 'static_data_loader_service.dart';
 
 /// Interface para o gerenciador de dados da aplicação
 abstract class IAppDataManager {
@@ -46,12 +46,13 @@ class AppDataManager implements IAppDataManager {
 
       await _createServices();
       developer.log(
-        'Inicializando dados diretamente...',
+        'Carregando dados estáticos com controle de versão...',
         name: 'AppDataManager',
       );
 
-      // Carregar dados estáticos (culturas, pragas, fitossanitários, diagnósticos)
-      await ReceitaAgroDataSetup.initialize(ref);
+      // Carregar dados estáticos usando o novo serviço com controle de versão
+      // Isso garante que os dados só são carregados uma vez por versão
+      await StaticDataLoaderService.loadAllStaticDataIfNeeded(ref);
 
       _isInitialized = true;
 
@@ -103,8 +104,11 @@ class AppDataManager implements IAppDataManager {
         'Forçando recarregamento de dados...',
         name: 'AppDataManager',
       );
+      
+      await StaticDataLoaderService.forceReloadAll(ref);
+      
       developer.log(
-        'Force reload requested but method not implemented',
+        'Recarregamento forçado concluído com sucesso',
         name: 'AppDataManager',
       );
 
@@ -127,25 +131,18 @@ class AppDataManager implements IAppDataManager {
       return {'error': 'Sistema não foi inicializado'};
     }
 
-    return {
-      'initialized': _isInitialized,
-      'timestamp': DateTime.now().toIso8601String(),
-      'storage': 'Drift',
-    };
+    try {
+      return await StaticDataLoaderService.getStats(ref);
+    } catch (e) {
+      return {'error': e.toString()};
+    }
   }
 
   /// Verifica se os dados estão carregados
   @override
   Future<bool> isDataReady() async {
-    // ⚠️ SIMPLIFIED: Just return initialization status
-    return _isInitialized;
-  }
-
-  /// Version control service removed - no longer available
-  dynamic get versionControlService {
-    throw Exception(
-      'Version control service was removed - functionality not available',
-    );
+    if (!_isInitialized) return false;
+    return await StaticDataLoaderService.isAllDataLoaded(ref);
   }
 
   /// Limpa recursos do sistema

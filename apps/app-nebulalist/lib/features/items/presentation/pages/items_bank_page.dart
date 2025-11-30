@@ -71,7 +71,7 @@ class _ItemsBankPageState extends ConsumerState<ItemsBankPage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 filled: true,
-                fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
               ),
               onChanged: (value) {
                 setState(() {

@@ -57,6 +57,7 @@ class MeditacaoController {
   // Future<void> _carregarDados() async { ... }
 
   // Inicializar notificações
+  // ignore: unused_element
   Future<void> _inicializarNotificacoes() async {
     flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -114,6 +115,7 @@ class MeditacaoController {
       presentSound: true,
     );
 
+    // ignore: unused_local_variable
     const detalhes = NotificationDetails(
       android: androidDetails,
       iOS: iOSDetails,
@@ -178,9 +180,6 @@ class MeditacaoController {
 // STUB: Helper class para substituir Rx do GetX (FASE 0.7)
 // TODO FASE 1: Remover após migração completa para Riverpod
 class _RxValue<T> {
-  T _value;
-  _RxValue(this._value);
-
-  T get value => _value;
-  set value(T newValue) => _value = newValue;
+  T value;
+  _RxValue(this.value);
 }

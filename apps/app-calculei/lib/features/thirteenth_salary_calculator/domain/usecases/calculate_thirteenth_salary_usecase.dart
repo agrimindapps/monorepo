@@ -1,10 +1,9 @@
 // Package imports:
-import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
-import 'package:uuid/uuid.dart';
-
 // Project imports:
 import 'package:app_calculei/constants/calculation_constants.dart';
+import 'package:core/core.dart';
+import 'package:uuid/uuid.dart';
+
 import '../entities/thirteenth_salary_calculation.dart';
 
 /// Parameters for calculating 13th salary
@@ -209,8 +208,8 @@ class CalculateThirteenthSalaryUseCase {
 
   /// Calculates INSS (progressive tax with ceiling)
   Map<String, double> _calculateInss(double grossThirteenthSalary) {
-    double desconto = 0.0;
-    double aliquota = 0.0;
+    var desconto = 0.0;
+    var aliquota = 0.0;
 
     for (final faixa in CalculationConstants.faixasInss) {
       final min = faixa['min']!;
@@ -227,7 +226,7 @@ class CalculateThirteenthSalaryUseCase {
     }
 
     // Apply INSS ceiling
-    final tetoInss = CalculationConstants.tetoInss * 0.14;
+    const tetoInss = CalculationConstants.tetoInss * 0.14;
     if (desconto > tetoInss) {
       desconto = tetoInss;
     }

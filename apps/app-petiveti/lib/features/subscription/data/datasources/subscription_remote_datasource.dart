@@ -107,8 +107,9 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
 
     final periodLower = period.toLowerCase();
     if (periodLower.contains('month')) return 30;
-    if (periodLower.contains('year') || periodLower.contains('annual'))
+    if (periodLower.contains('year') || periodLower.contains('annual')) {
       return 365;
+    }
     if (periodLower.contains('lifetime')) return null;
 
     return 30;

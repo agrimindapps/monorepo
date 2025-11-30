@@ -30,7 +30,7 @@ class CalculatePaintConsumptionUseCase extends UseCase<
   Future<Either<Failure, PaintConsumptionCalculation>> call(
     CalculatePaintConsumptionParams params,
   ) async {
-    return await repository.calculatePaintConsumption(
+    return repository.calculatePaintConsumption(
       area: params.area,
       surfacePreparation: params.surfacePreparation,
       coats: params.coats,

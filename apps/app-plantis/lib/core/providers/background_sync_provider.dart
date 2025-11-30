@@ -3,11 +3,10 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../services/background_sync_service.dart';
-import '../sync/background_sync_status.dart';
-
 import '../../features/plants/presentation/providers/plants_providers.dart';
 import '../../features/tasks/presentation/providers/tasks_providers.dart';
+import '../services/background_sync_service.dart';
+import '../sync/background_sync_status.dart';
 import 'repository_providers.dart';
 
 part 'background_sync_provider.g.dart';

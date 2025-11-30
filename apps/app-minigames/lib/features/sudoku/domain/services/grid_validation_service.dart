@@ -258,7 +258,7 @@ class GridValidationService {
     required int col,
   }) {
     if (!isValidPosition(row: row, col: col)) {
-      return CellEditability(
+      return const CellEditability(
         canEdit: false,
         reason: 'Position out of bounds',
       );
@@ -267,13 +267,13 @@ class GridValidationService {
     final cell = grid.getCell(row, col);
 
     if (cell.isFixed) {
-      return CellEditability(
+      return const CellEditability(
         canEdit: false,
         reason: 'Cell is a fixed clue',
       );
     }
 
-    return CellEditability(
+    return const CellEditability(
       canEdit: true,
       reason: null,
     );

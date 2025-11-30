@@ -1,8 +1,8 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../notifiers/tasks_notifier.dart';
 import '../../domain/entities/task.dart' as task_entity;
+import '../notifiers/tasks_notifier.dart';
 import 'task_creation_dialog.dart';
 
 class TasksFab extends ConsumerWidget {

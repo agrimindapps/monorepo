@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../culturas/domain/entities/cultura.dart';
 import '../../../culturas/presentation/providers/culturas_providers.dart';
-import '../../../pragas/domain/entities/praga.dart';
 import '../../../pragas/presentation/providers/pragas_providers.dart';
 import '../../domain/entities/diagnostico.dart';
 
@@ -126,7 +124,7 @@ class _DiagnosticoAddDialogState extends ConsumerState<DiagnosticoAddDialog> {
                     Expanded(
                       child: culturasAsync.when(
                         data: (culturas) => DropdownButtonFormField<String>(
-                          value: _selectedCulturaId,
+                          initialValue: _selectedCulturaId,
                           decoration: const InputDecoration(
                             labelText: 'Cultura *',
                             border: OutlineInputBorder(),
@@ -161,7 +159,7 @@ class _DiagnosticoAddDialogState extends ConsumerState<DiagnosticoAddDialog> {
                     Expanded(
                       child: pragasAsync.when(
                         data: (pragas) => DropdownButtonFormField<String>(
-                          value: _selectedPragaId,
+                          initialValue: _selectedPragaId,
                           decoration: const InputDecoration(
                             labelText: 'Praga *',
                             border: OutlineInputBorder(),

@@ -167,7 +167,7 @@ class WeightTrackerDao extends DatabaseAccessor<NutritutiDatabase>
           : initialWeight + (i * milestoneInterval);
 
       await into(weightMilestones).insert(WeightMilestonesCompanion.insert(
-        id: 'milestone_${i}',
+        id: 'milestone_$i',
         targetWeight: milestoneWeight,
         title: isLosingWeight
             ? '-${(i * milestoneInterval).toStringAsFixed(0)}kg'

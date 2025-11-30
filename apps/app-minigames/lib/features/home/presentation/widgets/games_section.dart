@@ -1,0 +1,125 @@
+import 'package:flutter/material.dart';
+
+import '../../domain/entities/game_entity.dart';
+import 'game_card.dart';
+
+/// Section with title and grid of games
+class GamesSection extends StatelessWidget {
+  final String title;
+  final IconData? icon;
+  final List<GameEntity> games;
+  final VoidCallback? onSeeAll;
+  final int crossAxisCount;
+  final bool isCompact;
+
+  const GamesSection({
+    super.key,
+    required this.title,
+    this.icon,
+    required this.games,
+    this.onSeeAll,
+    this.crossAxisCount = 4,
+    this.isCompact = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (games.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          child: Row(
+            children: [
+              if (icon != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFD700).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: const Color(0xFFFFD700),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ],
+              Text(
+                title.toUpperCase(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const Spacer(),
+              if (onSeeAll != null)
+                TextButton(
+                  onPressed: onSeeAll,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'VER MAIS',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.7),
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.arrow_forward,
+                        color: Colors.white.withOpacity(0.7),
+                        size: 16,
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // Grid
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            final calculatedCount = width < 400
+                ? 2
+                : width < 700
+                    ? 3
+                    : width < 1000
+                        ? 4
+                        : crossAxisCount;
+
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: calculatedCount,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: isCompact ? 1.0 : 0.85,
+              ),
+              itemCount: games.length,
+              itemBuilder: (context, index) {
+                return GameCard(
+                  game: games[index],
+                  isCompact: isCompact,
+                );
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+}

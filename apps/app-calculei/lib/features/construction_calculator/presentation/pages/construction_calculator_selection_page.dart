@@ -110,7 +110,7 @@ class _ConstructionCalculatorSelectionPageState
   }
 
   List<Widget> _buildCalculatorCards() {
-    final calcTypes = ConstructionCalcType.values;
+    const calcTypes = ConstructionCalcType.values;
     return List.generate(
       calcTypes.length,
       (index) => Padding(

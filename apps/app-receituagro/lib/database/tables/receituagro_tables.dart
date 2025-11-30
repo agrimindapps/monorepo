@@ -386,6 +386,36 @@ class PlantasInf extends Table {
 
 /// ========== APP SETTINGS TABLES ==========
 
+/// Tabela de Controle de Versão dos Dados Estáticos
+///
+/// Registra a versão dos dados carregados do JSON para o SQLite.
+/// Permite evitar recarregamento desnecessário e força atualização
+/// quando a versão do app muda.
+class StaticDataVersion extends Table {
+  // ========== PRIMARY KEY ==========
+  IntColumn get id => integer().autoIncrement()();
+
+  // ========== VERSION CONTROL ==========
+  /// Nome da tabela de dados estáticos
+  /// Ex: 'culturas', 'pragas', 'fitossanitarios', 'diagnosticos'
+  TextColumn get dataTableName => text().unique()();
+
+  /// Versão dos dados carregados
+  TextColumn get dataVersion => text()();
+
+  /// Versão do app quando os dados foram carregados
+  TextColumn get appVersion => text()();
+
+  /// Timestamp de quando foi carregado
+  DateTimeColumn get loadedAt => dateTime().withDefault(currentDateAndTime)();
+
+  /// Quantidade de registros carregados
+  IntColumn get recordCount => integer().withDefault(const Constant(0))();
+
+  /// Checksum/hash dos dados (opcional, para validação)
+  TextColumn get checksum => text().nullable()();
+}
+
 /// Tabela de Configurações do App
 ///
 /// Armazena configurações específicas do usuário para o aplicativo,

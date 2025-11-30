@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/tasks/domain/task_entity.dart';
 import '../storage/shared_preferences_local_storage.dart';

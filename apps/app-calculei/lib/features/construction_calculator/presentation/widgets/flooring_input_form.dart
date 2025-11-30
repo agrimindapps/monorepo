@@ -167,7 +167,7 @@ class _FlooringInputFormState extends State<FlooringInputForm> {
 
           // Waste Percentage Dropdown
           DropdownButtonFormField<double>(
-            value: _wastePercentage,
+            initialValue: _wastePercentage,
             decoration: const InputDecoration(
               labelText: 'Percentual de perda',
               prefixIcon: Icon(Icons.percent),

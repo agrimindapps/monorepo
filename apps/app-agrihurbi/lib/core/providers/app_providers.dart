@@ -1,6 +1,4 @@
 import 'package:core/core.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../network/auth_interceptor.dart';
 import '../services/premium_service.dart';

@@ -23,6 +23,6 @@ class TogglePauseUseCase {
       return Right(currentState.copyWith(gameStatus: SnakeGameStatus.running));
     }
 
-    return Left(GameLogicFailure('Cannot toggle pause in current state'));
+    return const Left(GameLogicFailure('Cannot toggle pause in current state'));
   }
 }

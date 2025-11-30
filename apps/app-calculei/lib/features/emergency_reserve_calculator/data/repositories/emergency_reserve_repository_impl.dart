@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/emergency_reserve_calculation.dart';
 import '../../domain/repositories/emergency_reserve_repository.dart';

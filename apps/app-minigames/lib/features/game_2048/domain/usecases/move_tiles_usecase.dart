@@ -1,4 +1,3 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 
 import '../entities/enums.dart';
@@ -17,7 +16,7 @@ class MoveTilesUseCase {
     try {
       // Validation
       if (currentState.status != GameStatus.playing) {
-        return Left(
+        return const Left(
           ValidationFailure('Cannot move tiles when game is not playing'),
         );
       }

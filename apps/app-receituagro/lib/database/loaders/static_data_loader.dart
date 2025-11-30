@@ -231,6 +231,13 @@ class StaticDataLoader {
         name: 'StaticDataLoader',
       );
 
+      // LIMPAR DADOS EXISTENTES antes de inserir novos
+      developer.log(
+        '🗑️ Clearing existing pragas info data...',
+        name: 'StaticDataLoader',
+      );
+      await db.delete(db.pragasInf).go();
+
       int loaded = 0;
       for (final item in jsonList) {
         final data = item as Map<String, dynamic>;
@@ -284,17 +291,11 @@ class StaticDataLoader {
 
   /// Carrega fitossanitários dos JSONs
   Future<void> loadFitossanitarios() async {
-    final files = [
-      'TBFITOSSANITARIOS_FUNGICIDAS_BACTERICIDAS.json',
-      'TBFITOSSANITARIOS_HERBICIDAS.json',
-      'TBFITOSSANITARIOS_INSETICIDAS_ACARICIDAS.json',
-      'TBFITOSSANITARIOS_ADJUVANTES.json',
-      'TBFITOSSANITARIOS_BIOLOGICOS.json',
-    ];
-
+    int fileIndex = 0;
     int totalLoaded = 0;
 
-    for (final file in files) {
+    while (true) {
+      final file = 'TBFITOSSANITARIOS$fileIndex.json';
       try {
         final jsonString = await rootBundle.loadString(
           'assets/database/json/tbfitossanitarios/$file',
@@ -321,7 +322,7 @@ class StaticDataLoader {
           final mapa = data['mapa'] as String?;
           final status = data['status'] != null ? data['status'] as bool : true;
           final comercializado = data['comercializado'] != null
-              ? data['comercializado'] as int
+              ? int.tryParse(data['comercializado'].toString()) ?? 1
               : 1;
           final elegivel = data['elegivel'] != null
               ? data['elegivel'] as bool
@@ -331,20 +332,13 @@ class StaticDataLoader {
             continue;
           }
 
-          // Inferir classe do nome do arquivo
+          // Inferir classe
           String? classe;
-          if (file.contains('FUNGICIDAS')) {
-            classe = 'fungicida';
-          } else if (file.contains('HERBICIDAS')) {
-            classe = 'herbicida';
-          } else if (file.contains('INSETICIDAS')) {
-            classe = 'inseticida';
-          } else if (file.contains('ADJUVANTES')) {
-            classe = 'adjuvante';
-          } else if (file.contains('BIOLOGICOS')) {
-            classe = 'biológico';
+          if (classeAgronomica != null) {
+            classe = classeAgronomica.toLowerCase();
           }
 
+          // Inserir Fitossanitario
           await db
               .into(db.fitossanitarios)
               .insert(
@@ -363,6 +357,50 @@ class StaticDataLoader {
                 ),
                 mode: InsertMode.insertOrIgnore,
               );
+
+          // Tentar recuperar o ID inserido/existente para inserir Info
+          final defensivo = await (db.select(db.fitossanitarios)
+                ..where((t) => t.idDefensivo.equals(idReg)))
+              .getSingleOrNull();
+
+          if (defensivo != null) {
+            // Extrair dados para FitossanitariosInfo que estão neste JSON
+            final modoAcao = data['modoAcao'] as String?;
+            final formulacao = data['formulacao'] as String?;
+            final toxico = data['toxico'] as String?;
+
+            if (modoAcao != null || formulacao != null || toxico != null) {
+              // Verificar se já existe info
+              final existingInfo = await (db.select(db.fitossanitariosInfo)
+                    ..where((t) => t.idReg.equals(idReg)))
+                  .getSingleOrNull();
+
+              if (existingInfo == null) {
+                await db.into(db.fitossanitariosInfo).insert(
+                      FitossanitariosInfoCompanion.insert(
+                        idReg: idReg,
+                        defensivoId: defensivo.id,
+                        modoAcao: Value(modoAcao),
+                        formulacao: Value(formulacao),
+                        toxicidade: Value(toxico),
+                      ),
+                      mode: InsertMode.insertOrIgnore,
+                    );
+              } else {
+                // Atualizar campos se estiverem vazios ou se tivermos novos dados
+                await (db.update(db.fitossanitariosInfo)
+                      ..where((t) => t.idReg.equals(idReg)))
+                    .write(
+                  FitossanitariosInfoCompanion(
+                    modoAcao: Value(modoAcao ?? existingInfo.modoAcao),
+                    formulacao: Value(formulacao ?? existingInfo.formulacao),
+                    toxicidade: Value(toxico ?? existingInfo.toxicidade),
+                  ),
+                );
+              }
+            }
+          }
+
           loaded++;
         }
 
@@ -371,14 +409,14 @@ class StaticDataLoader {
           'Loaded $loaded fitossanitarios from $file',
           name: 'StaticDataLoader',
         );
-      } catch (e, stack) {
+        fileIndex++;
+      } catch (e) {
+        // Arquivo não encontrado, fim da lista
         developer.log(
-          'Error loading fitossanitarios from $file: $e',
+          'Finished loading fitossanitarios files. Last file index: ${fileIndex - 1}',
           name: 'StaticDataLoader',
-          error: e,
-          stackTrace: stack,
         );
-        // Continua com os próximos arquivos
+        break;
       }
     }
 
@@ -390,41 +428,18 @@ class StaticDataLoader {
 
   /// Carrega informações de fitossanitários dos JSONs
   Future<void> loadFitossanitariosInfo() async {
-    // Lista todos os arquivos TBFITOSSANITARIOSINFO_*.json
-    // Como não podemos listar diretórios em assets, usamos lista conhecida
-    final prefixes = [
-      'A',
-      'B',
-      'C',
-      'D',
-      'E',
-      'F',
-      'G',
-      'H',
-      'I',
-      'J',
-      'K',
-      'L',
-      'M',
-      'N',
-      'O',
-      'P',
-      'Q',
-      'R',
-      'S',
-      'T',
-      'U',
-      'V',
-      'W',
-      'X',
-      'Y',
-      'Z',
-    ];
+    // LIMPAR DADOS EXISTENTES antes de inserir novos
+    developer.log(
+      '🗑️ Clearing existing fitossanitarios info data...',
+      name: 'StaticDataLoader',
+    );
+    await db.delete(db.fitossanitariosInfo).go();
 
+    int fileIndex = 0;
     int totalLoaded = 0;
 
-    for (final prefix in prefixes) {
-      final file = 'TBFITOSSANITARIOSINFO_$prefix.json';
+    while (true) {
+      final file = 'TBFITOSSANITARIOSINFO$fileIndex.json';
 
       try {
         final jsonString = await rootBundle.loadString(
@@ -445,13 +460,11 @@ class StaticDataLoader {
           final defensivo = await defensivoQuery.getSingleOrNull();
 
           if (defensivo == null) {
-            // Info sem defensivo correspondente - pode ser que ainda não foi carregado
             continue;
           }
 
-          await db
-              .into(db.fitossanitariosInfo)
-              .insert(
+          // Inserir ou atualizar info (upsert)
+          await db.into(db.fitossanitariosInfo).insert(
                 FitossanitariosInfoCompanion.insert(
                   idReg: idReg,
                   defensivoId: defensivo.id,
@@ -463,7 +476,7 @@ class StaticDataLoader {
                     data['informacoesAdicionais'] as String?,
                   ),
                 ),
-                mode: InsertMode.insertOrIgnore,
+                mode: InsertMode.insertOrReplace,
               );
           loaded++;
         }
@@ -475,9 +488,14 @@ class StaticDataLoader {
             name: 'StaticDataLoader',
           );
         }
+        fileIndex++;
       } catch (e) {
-        // Arquivo pode não existir, ignora silenciosamente
-        continue;
+        // Arquivo não encontrado
+        developer.log(
+          'Finished loading fitossanitarios info files. Last file index: ${fileIndex - 1}',
+          name: 'StaticDataLoader',
+        );
+        break;
       }
     }
 

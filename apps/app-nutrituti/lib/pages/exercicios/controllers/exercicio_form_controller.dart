@@ -57,11 +57,6 @@ class ExercicioFormState {
   }
 }
 
-// Helper class for default DateTime value
-class _DefaultDateTime {
-  const _DefaultDateTime._();
-}
-
 /// Provider for ExercicioDataService
 @riverpod
 ExercicioDataService exercicioDataService(Ref ref) {

@@ -1,5 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:core/core.dart' hide Ref;
+
 import '../../../../core/services/device_identity_service.dart';
 import '../../data/repositories/user_settings_repository_impl.dart';
 import '../../domain/repositories/i_user_settings_repository.dart';

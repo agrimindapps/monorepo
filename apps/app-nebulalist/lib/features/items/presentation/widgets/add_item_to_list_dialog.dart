@@ -303,7 +303,7 @@ class _AddItemToListDialogState extends ConsumerState<AddItemToListDialog> {
 
             // Priority dropdown
             DropdownButtonFormField<entities.Priority>(
-              value: _selectedPriority,
+              initialValue: _selectedPriority,
               decoration: const InputDecoration(
                 labelText: 'Prioridade',
                 border: OutlineInputBorder(),

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:core/core.dart' hide Column, SyncQueue, SyncQueueItem;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../data/models/sync_queue_item.dart';
 import '../sync/sync_queue.dart';

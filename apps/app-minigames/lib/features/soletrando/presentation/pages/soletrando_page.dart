@@ -76,7 +76,7 @@ class _SoletrandoPageState extends ConsumerState<SoletrandoPage> {
           children: [
             // Difficulty selection
             DropdownButtonFormField<GameDifficulty>(
-              value: _selectedDifficulty,
+              initialValue: _selectedDifficulty,
               decoration: const InputDecoration(labelText: 'Dificuldade'),
               items: GameDifficulty.values.map((difficulty) {
                 return DropdownMenuItem(
@@ -96,7 +96,7 @@ class _SoletrandoPageState extends ConsumerState<SoletrandoPage> {
 
             // Category selection
             DropdownButtonFormField<WordCategory>(
-              value: _selectedCategory,
+              initialValue: _selectedCategory,
               decoration: const InputDecoration(labelText: 'Categoria'),
               items: WordCategory.values.map((category) {
                 return DropdownMenuItem(

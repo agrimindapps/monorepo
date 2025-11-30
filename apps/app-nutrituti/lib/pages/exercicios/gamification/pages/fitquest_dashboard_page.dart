@@ -176,10 +176,10 @@ class FitQuestDashboardPage extends ConsumerWidget {
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: stat.color.withOpacity(0.1),
+            color: stat.color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: stat.color.withOpacity(0.2),
+              color: stat.color.withValues(alpha: 0.2),
             ),
           ),
           child: Row(
@@ -187,7 +187,7 @@ class FitQuestDashboardPage extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: stat.color.withOpacity(0.2),
+                  color: stat.color.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(stat.icon, color: stat.color, size: 24),
@@ -208,7 +208,7 @@ class FitQuestDashboardPage extends ConsumerWidget {
                     Text(
                       stat.label,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -235,27 +235,27 @@ class FitQuestDashboardPage extends ConsumerWidget {
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: theme.dividerColor.withOpacity(0.2)),
+          border: Border.all(color: theme.dividerColor.withValues(alpha: 0.2)),
         ),
         child: Column(
           children: [
             Icon(
               Icons.emoji_events_outlined,
               size: 48,
-              color: theme.colorScheme.onSurface.withOpacity(0.3),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 12),
             Text(
               'Nenhuma conquista ainda',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Complete treinos para desbloquear conquistas!',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.4),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
               ),
               textAlign: TextAlign.center,
             ),
@@ -282,7 +282,7 @@ class FitQuestDashboardPage extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: theme.dividerColor.withOpacity(0.3)),
+                  border: Border.all(color: theme.dividerColor.withValues(alpha: 0.3)),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -329,9 +329,9 @@ class FitQuestDashboardPage extends ConsumerWidget {
       return Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Colors.amber.withOpacity(0.1),
+          color: Colors.amber.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.amber.withOpacity(0.3)),
+          border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
         ),
         child: const Column(
           children: [

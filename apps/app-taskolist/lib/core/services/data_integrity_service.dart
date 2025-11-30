@@ -60,7 +60,7 @@ class DataIntegrityService {
     try {
       if (localId == remoteId) {
         // Mesmo ID - não há o que reconciliar
-        return Right<Failure, void>(null);
+        return const Right<Failure, void>(null);
       }
 
       if (kDebugMode) {
@@ -74,7 +74,7 @@ class DataIntegrityService {
         if (kDebugMode) {
           debugPrint('[DataIntegrity] Local task $localId not found - already reconciled?');
         }
-        return Right<Failure, void>(null);
+        return const Right<Failure, void>(null);
       }
 
       // 2. Verificar se task remota já existe
@@ -100,7 +100,7 @@ class DataIntegrityService {
       // 3. Atualizar referências em subtasks (parentTaskId)
       await _updateSubtaskReferences(localId, remoteId);
 
-      return Right<Failure, void>(null);
+      return const Right<Failure, void>(null);
     } catch (e, stackTrace) {
       if (kDebugMode) {
         debugPrint('[DataIntegrity] ❌ Error reconciling task ID: $e');
@@ -288,7 +288,7 @@ class DataIntegrityService {
         debugPrint('[DataIntegrity] ✅ Batch reconciliation complete');
       }
 
-      return Right<Failure, void>(null);
+      return const Right<Failure, void>(null);
     } catch (e) {
       return Left<Failure, void>(ServerFailure('Batch reconciliation failed: $e'));
     }

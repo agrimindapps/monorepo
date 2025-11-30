@@ -4,13 +4,12 @@ import 'dart:developer' as developer;
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../storage/shared_preferences_local_storage.dart';
-
 import '../../features/animals/domain/entities/sync/animal_sync_entity.dart';
 import '../../features/appointments/domain/entities/sync/appointment_sync_entity.dart';
 import '../../features/medications/domain/entities/sync/medication_sync_entity.dart';
 import '../../features/settings/domain/entities/sync/user_settings_sync_entity.dart';
 import '../../features/weight/domain/entities/sync/weight_sync_entity.dart';
+import '../storage/shared_preferences_local_storage.dart';
 import 'petiveti_sync_config.dart';
 
 /// Serviço principal de sincronização para Petiveti

@@ -1,5 +1,5 @@
-import '../../domain/repositories/i_pragas_cultura_repository.dart';
 import '../../../culturas/domain/entities/cultura_entity.dart';
+import '../../domain/repositories/i_pragas_cultura_repository.dart';
 
 /// Service para operações de I/O com pragas por cultura
 ///

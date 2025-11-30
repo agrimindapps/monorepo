@@ -25,12 +25,12 @@ ExpenseLocalDataSource expenseLocalDataSource(Ref ref) {
 
 @riverpod
 ExpenseErrorHandlingService expenseErrorHandlingService(Ref ref) {
-  return ExpenseErrorHandlingService();
+  return const ExpenseErrorHandlingService();
 }
 
 @riverpod
 ExpenseValidationService expenseValidationService(Ref ref) {
-  return ExpenseValidationService();
+  return const ExpenseValidationService();
 }
 
 @riverpod
@@ -45,7 +45,7 @@ ExpenseRepository expenseRepository(Ref ref) {
 
 @riverpod
 ExpenseProcessingService expenseProcessingService(Ref ref) {
-  return ExpenseProcessingService();
+  return const ExpenseProcessingService();
 }
 
 @riverpod

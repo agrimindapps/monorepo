@@ -95,7 +95,7 @@ class _MaterialsQuantityCalculatorPageState
                         const SizedBox(height: 16),
                         // Building Type Dropdown
                         DropdownButtonFormField<String>(
-                          value: _selectedBuildingType,
+                          initialValue: _selectedBuildingType,
                           decoration: const InputDecoration(
                             labelText: 'Tipo de Construção',
                             border: OutlineInputBorder(),

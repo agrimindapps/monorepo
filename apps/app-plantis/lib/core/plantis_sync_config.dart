@@ -1,6 +1,4 @@
 import 'package:core/core.dart' hide Column;
-import 'package:core/src/domain/repositories/i_local_storage_repository.dart';
-import 'package:dartz/dartz.dart';
 import '../core/data/models/comentario_model.dart';
 import '../features/plants/domain/entities/plant.dart';
 import '../features/tasks/domain/entities/task.dart' as task_entity;

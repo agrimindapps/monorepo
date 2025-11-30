@@ -13,8 +13,7 @@ class SubscriptionLoadingOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Add proper loading state properties to SubscriptionState
-    const shouldShowOverlay = false; // _shouldShowOverlay
+    final shouldShowOverlay = _shouldShowOverlay;
     if (!shouldShowOverlay) {
       return const SizedBox.shrink();
     }
@@ -32,20 +31,10 @@ class SubscriptionLoadingOverlay extends StatelessWidget {
                   const CircularProgressIndicator(),
                   const SizedBox(height: 16),
                   Text(
-                    'Carregando...', // TODO: state.loadingMessage
+                    'Carregando...',
                     style: Theme.of(context).textTheme.titleMedium,
                     textAlign: TextAlign.center,
                   ),
-                  if (false) ...[  // TODO: state.isProcessingPurchase
-                    const SizedBox(height: 8),
-                    Text(
-                      'Este processo pode levar alguns segundos...',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -55,8 +44,8 @@ class SubscriptionLoadingOverlay extends StatelessWidget {
     );
   }
 
-  bool get _shouldShowOverlay => 
-      state.hasAnyLoading && 
-      !state.isLoadingPlans && 
+  bool get _shouldShowOverlay =>
+      state.hasAnyLoading &&
+      !state.isLoadingPlans &&
       !state.isLoadingCurrentSubscription;
 }

@@ -26,7 +26,7 @@ class AchievementsCardWidget extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             SizedBox(
-              height: 120,
+              height: 130,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: achievements.length,
@@ -51,6 +51,7 @@ class AchievementsCardWidget extends StatelessWidget {
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               achievement.title,
@@ -60,19 +61,25 @@ class AchievementsCardWidget extends StatelessWidget {
                                     ? Colors.green[800]
                                     : Colors.grey[600],
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              achievement.description,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: achievement.isUnlocked
-                                    ? Colors.green[800]
-                                    : Colors.grey[600],
+                            const SizedBox(height: 4),
+                            Flexible(
+                              child: Text(
+                                achievement.description,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: achievement.isUnlocked
+                                      ? Colors.green[800]
+                                      : Colors.grey[600],
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 4),
                             Icon(
                               achievement.isUnlocked
                                   ? Icons.check_circle
@@ -80,6 +87,7 @@ class AchievementsCardWidget extends StatelessWidget {
                               color: achievement.isUnlocked
                                   ? Colors.green
                                   : Colors.grey,
+                              size: 20,
                             ),
                           ],
                         ),

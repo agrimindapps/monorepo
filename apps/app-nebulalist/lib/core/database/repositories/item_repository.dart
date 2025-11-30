@@ -2,7 +2,6 @@ import 'package:core/core.dart';
 import 'package:drift/drift.dart';
 
 import '../nebulalist_database.dart';
-import '../tables/items_table.dart';
 
 /// ============================================================================
 /// ITEM REPOSITORY - Padrão Nebulalist (String ID)

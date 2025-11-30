@@ -8,7 +8,7 @@ part 'calculation_dao.g.dart';
 @DriftAccessor(tables: [Calculations])
 class CalculationDao extends DatabaseAccessor<CalculeiDatabase>
     with _$CalculationDaoMixin {
-  CalculationDao(CalculeiDatabase db) : super(db);
+  CalculationDao(super.db);
 
   /// Get all calculations for a specific calculator type
   Future<List<Calculation>> getCalculationsByType(

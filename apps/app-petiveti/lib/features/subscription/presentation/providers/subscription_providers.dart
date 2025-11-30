@@ -6,9 +6,9 @@ import '../../data/datasources/subscription_local_datasource.dart';
 import '../../data/datasources/subscription_remote_datasource.dart';
 import '../../data/repositories/subscription_repository_impl.dart';
 import '../../data/services/subscription_error_handling_service.dart';
+import '../../domain/entities/subscription_plan.dart';
 import '../../domain/repositories/subscription_repository.dart';
 import '../../domain/services/subscription_validation_service.dart';
-import '../../domain/entities/subscription_plan.dart';
 import '../../domain/usecases/subscription_usecases.dart';
 
 part 'subscription_providers.g.dart';

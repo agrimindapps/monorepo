@@ -1,9 +1,7 @@
-import 'package:core/core.dart' hide Ref;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/services/access_history_service.dart';
-import '../../../../database/providers/database_providers.dart';
+import '../../../../database/providers/database_providers.dart' as db;
 import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../database/repositories/diagnosticos_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
@@ -52,15 +50,16 @@ IPragasErrorMessageService pragasErrorMessageService(Ref ref) {
   return PragasErrorMessageService();
 }
 
+/// Provider de PragasRepository - usa o do database_providers
 @riverpod
 PragasRepository pragasRepository(Ref ref) {
-  return ref.watch(pragasRepositoryProvider);
+  return ref.watch(db.pragasRepositoryProvider);
 }
 
 @riverpod
 IPragasRepository iPragasRepository(Ref ref) {
   return PragasRepositoryImpl(
-    ref.watch(pragasRepositoryProvider),
+    ref.watch(db.pragasRepositoryProvider),
     ref.watch(pragasQueryServiceProvider),
     ref.watch(pragasSearchServiceProvider),
     ref.watch(pragasStatsServiceProvider),
@@ -73,9 +72,10 @@ AccessHistoryService accessHistoryService(Ref ref) {
   return AccessHistoryService();
 }
 
+/// Provider de CulturasRepository - usa o do database_providers
 @riverpod
 CulturasRepository culturasRepository(Ref ref) {
-  return ref.watch(culturasRepositoryProvider);
+  return ref.watch(db.culturasRepositoryProvider);
 }
 
 @riverpod
@@ -85,20 +85,21 @@ ComentariosService comentariosService(Ref ref) {
 
 @riverpod
 IDiagnosticosRepository iDiagnosticosRepository(Ref ref) {
-  final baseRepo = ref.watch(diagnosticoRepositoryProvider);
+  final baseRepo = ref.watch(db.diagnosticoRepositoryProvider);
   final wrapperRepo = DiagnosticosRepository(baseRepo);
 
   return DiagnosticosRepositoryImpl(
     wrapperRepo,
-    ref.watch(fitossanitariosRepositoryProvider),
-    ref.watch(culturasRepositoryProvider),
-    ref.watch(pragasRepositoryProvider),
+    ref.watch(db.fitossanitariosRepositoryProvider),
+    ref.watch(db.culturasRepositoryProvider),
+    ref.watch(db.pragasRepositoryProvider),
   );
 }
 
+/// Provider de FitossanitariosRepository - usa o do database_providers
 @riverpod
 FitossanitariosRepository fitossanitariosRepository(Ref ref) {
-  return ref.watch(fitossanitariosRepositoryProvider);
+  return ref.watch(db.fitossanitariosRepositoryProvider);
 }
 
 @riverpod

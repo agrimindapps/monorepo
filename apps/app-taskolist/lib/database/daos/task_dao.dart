@@ -1,15 +1,17 @@
 import 'dart:convert';
+
 import 'package:drift/drift.dart';
-import '../taskolist_database.dart';
-import '../tables/tasks_table.dart';
+
 import '../../features/tasks/data/task_model.dart';
 import '../../features/tasks/domain/task_entity.dart';
+import '../tables/tasks_table.dart';
+import '../taskolist_database.dart';
 
 part 'task_dao.g.dart';
 
 @DriftAccessor(tables: [Tasks])
 class TaskDao extends DatabaseAccessor<TaskolistDatabase> with _$TaskDaoMixin {
-  TaskDao(TaskolistDatabase db) : super(db);
+  TaskDao(super.db);
 
   // ========================================================================
   // READ OPERATIONS

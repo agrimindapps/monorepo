@@ -108,11 +108,11 @@ class ConstructionLocalDataSourceImpl implements ConstructionLocalDataSource {
     // Base: 1 liter per ~10-12 m² (depending on surface)
     // Roughness factor: 0 (smooth) to 3 (very rough)
 
-    const double baseConsumption = 0.1; // 1L per 10m²
-    final double adjustedConsumption =
+    const baseConsumption = 0.1; // 1L per 10m²
+    final adjustedConsumption =
         baseConsumption + (surfacePreparation * 0.02);
-    final double paintQuantity = area * adjustedConsumption * coats;
-    final double buckets = (paintQuantity / 18).ceilToDouble(); // 18L buckets
+    final paintQuantity = area * adjustedConsumption * coats;
+    final buckets = (paintQuantity / 18).ceilToDouble(); // 18L buckets
 
     return PaintConsumptionCalculation(
       area: area,
@@ -133,17 +133,17 @@ class ConstructionLocalDataSourceImpl implements ConstructionLocalDataSource {
     double wastePercentage = 10.0,
   }) async {
     // Calculate area per tile in square meters
-    final double areaPerTile = (tileWidth * tileLength) / 10000;
+    final areaPerTile = (tileWidth * tileLength) / 10000;
 
     // Calculate tiles needed without waste
-    final int tilesNeeded = (area / areaPerTile).ceil();
+    final tilesNeeded = (area / areaPerTile).ceil();
 
     // Add waste percentage
-    final int tilesWithWaste =
+    final tilesWithWaste =
         (tilesNeeded * (1 + wastePercentage / 100)).ceil();
 
     // Calculate total cost if price is provided
-    final double? totalCost =
+    final totalCost =
         pricePerTile != null ? tilesWithWaste * pricePerTile : null;
 
     return FlooringCalculation(
@@ -168,11 +168,11 @@ class ConstructionLocalDataSourceImpl implements ConstructionLocalDataSource {
     double? gravelPricePerCubicMeter,
   }) async {
     // Calculate volume
-    final double volume = length * width * height;
+    final volume = length * width * height;
 
     // Concrete mix ratios based on concrete type (Brazilian standards)
     // These are typical ratios for different concrete strengths
-    final Map<String, Map<String, double>> concreteRatios = {
+    final concreteRatios = <String, Map<String, double>>{
       'fck 10': {'cement': 6.0, 'sand': 0.54, 'gravel': 0.82, 'water': 180.0},
       'fck 15': {'cement': 7.0, 'sand': 0.50, 'gravel': 0.75, 'water': 190.0},
       'fck 20': {'cement': 8.0, 'sand': 0.48, 'gravel': 0.72, 'water': 200.0},
@@ -184,10 +184,10 @@ class ConstructionLocalDataSourceImpl implements ConstructionLocalDataSource {
         concreteRatios['fck 20']!; // Default to fck 20
 
     // Calculate materials per cubic meter
-    final double cementBags = volume * ratios['cement']!; // 50kg bags
-    final double sandVolume = volume * ratios['sand']!;
-    final double gravelVolume = volume * ratios['gravel']!;
-    final double waterVolume = volume * ratios['water']!; // liters
+    final cementBags = volume * ratios['cement']!; // 50kg bags
+    final sandVolume = volume * ratios['sand']!;
+    final gravelVolume = volume * ratios['gravel']!;
+    final waterVolume = volume * ratios['water']!; // liters
 
     // Calculate total cost if prices are provided
     double? totalCost;

@@ -1,4 +1,3 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 
 import '../entities/high_score_entity.dart';
@@ -18,11 +17,11 @@ class SaveHighScoreUseCase {
     try {
       // Validation
       if (newScore.score < 0) {
-        return Left(ValidationFailure('Score cannot be negative'));
+        return const Left(ValidationFailure('Score cannot be negative'));
       }
 
       if (newScore.moves < 0) {
-        return Left(ValidationFailure('Moves cannot be negative'));
+        return const Left(ValidationFailure('Moves cannot be negative'));
       }
 
       // Check if new score is better

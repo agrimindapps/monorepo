@@ -6,6 +6,7 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'app_page.dart';
 import 'const/environment_const.dart';
@@ -16,6 +17,9 @@ void main() async {
   if (!kIsWeb) DartPluginRegistrant.ensureInitialized();
 
   usePathUrlStrategy();
+
+  // Initialize date formatting for pt_BR locale
+  await initializeDateFormatting('pt_BR', null);
 
   // Initialize Environment (AdMob, Supabase, etc)
   AppEnvironment().initialize();

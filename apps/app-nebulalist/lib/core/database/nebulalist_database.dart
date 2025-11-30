@@ -29,7 +29,7 @@ part 'nebulalist_database.g.dart';
 
 @DriftDatabase(tables: [Lists, Items], daos: [ListDao, ItemDao])
 class NebulalistDatabase extends _$NebulalistDatabase with BaseDriftDatabase {
-  NebulalistDatabase(QueryExecutor e) : super(e);
+  NebulalistDatabase(super.e);
 
   /// Versão do schema do banco de dados
   @override

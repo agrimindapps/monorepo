@@ -1,13 +1,13 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../animals/domain/entities/animal_enums.dart';
+import '../../../animals/presentation/providers/animals_providers.dart';
+import '../../data/repositories/dashboard_repository_impl.dart';
 import '../../data/repositories/home_aggregation_repository_impl.dart';
 import '../../data/repositories/notification_repository_impl.dart';
-import '../../data/repositories/dashboard_repository_impl.dart';
 import '../../domain/repositories/dashboard_repository.dart';
 import '../../domain/repositories/home_aggregation_repository.dart';
 import '../../domain/repositories/notification_repository.dart';
-import '../../../animals/domain/entities/animal_enums.dart';
-import '../../../animals/presentation/providers/animals_providers.dart';
 
 part 'home_providers.g.dart';
 

@@ -1,11 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
 import '../../domain/entities/list_entity.dart';
 
+part 'lists_provider.g.dart';
+
 /// Main Lists Notifier with pure Riverpod
 /// Manages lists state with AsyncValue for loading/error/data states
-class ListsNotifier extends AutoDisposeAsyncNotifier<List<ListEntity>> {
+@riverpod
+class ListsNotifier extends _$ListsNotifier {
   @override
   Future<List<ListEntity>> build() async {
     // Load initial lists
@@ -139,12 +143,6 @@ class ListsNotifier extends AutoDisposeAsyncNotifier<List<ListEntity>> {
     ref.invalidateSelf();
   }
 }
-
-/// Main lists provider
-final listsProvider =
-    AutoDisposeAsyncNotifierProvider<ListsNotifier, List<ListEntity>>(
-  ListsNotifier.new,
-);
 
 /// Provider for filtered lists (favorites only)
 final favoriteListsProvider = Provider.autoDispose<List<ListEntity>>((ref) {

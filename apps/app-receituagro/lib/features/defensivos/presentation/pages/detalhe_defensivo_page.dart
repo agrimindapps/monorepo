@@ -9,9 +9,9 @@ import '../../../../core/services/access_history_service.dart';
 import '../../../../core/services/diagnosticos_data_loader.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../../core/widgets/standard_tab_bar_widget.dart';
+import '../../../../database/providers/database_providers.dart';
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/diagnostico_repository.dart';
-import '../../../../database/providers/database_providers.dart';
 import '../../../../features/navigation/navigation_providers.dart';
 import '../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
 import '../../domain/entities/defensivo_details_entity.dart';
@@ -476,6 +476,11 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
 
     return state.when(
       data: (data) {
+        // Mostra skeleton durante o loading
+        if (data.isLoading) {
+          return LoadingErrorWidgets.buildLoadingState(context);
+        }
+
         if (data.defensivoData == null) {
           return LoadingErrorWidgets.buildEmptyState(
             context,

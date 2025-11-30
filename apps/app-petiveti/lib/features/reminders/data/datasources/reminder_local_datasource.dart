@@ -116,9 +116,9 @@ class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
         title: Value(model.title),
         description: Value.absentIfNull(model.description),
         reminderDateTime: Value(model.scheduledDate),
-        frequency: Value('once'),
+        frequency: const Value('once'),
         isCompleted: Value(model.status == ReminderStatus.completed),
-        notificationEnabled: Value(true),
+        notificationEnabled: const Value(true),
         userId: Value(model.userId),
       );
     }
@@ -128,9 +128,9 @@ class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
       title: model.title,
       description: Value.absentIfNull(model.description),
       reminderDateTime: model.scheduledDate,
-      frequency: Value('once'),
+      frequency: const Value('once'),
       isCompleted: Value(model.status == ReminderStatus.completed),
-      notificationEnabled: Value(true),
+      notificationEnabled: const Value(true),
       userId: model.userId,
       createdAt: Value(model.createdAt),
     );

@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../core/errors/failures.dart' as local_failures;

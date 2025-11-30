@@ -1,11 +1,10 @@
 // Flutter imports:
+// Project imports:
+import 'package:app_calculei/core/style/shadcn_style.dart';
 import 'package:flutter/material.dart';
-
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Project imports:
-import 'package:app_calculei/core/style/shadcn_style.dart';
 import '../../domain/usecases/calculate_overtime_usecase.dart';
 import '../providers/overtime_calculator_provider.dart';
 import '../widgets/overtime_input_form.dart';
@@ -73,7 +72,7 @@ class _OvertimeCalculatorPageState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Calcule suas horas extras',
                             style: TextStyle(
                               fontSize: 18,

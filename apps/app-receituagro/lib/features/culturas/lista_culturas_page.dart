@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/widgets/modern_header_widget.dart';
+import '../../database/providers/database_providers.dart';
 import '../../database/receituagro_database.dart';
 import '../../database/repositories/culturas_repository.dart';
-import '../../database/providers/database_providers.dart';
 import '../../features/navigation/navigation_providers.dart';
 import '../pragas_por_cultura/pragas_por_cultura_detalhadas_page.dart';
 import 'data/cultura_view_mode.dart';
@@ -59,7 +59,8 @@ class _ListaCulturasPageState extends ConsumerState<ListaCulturasPage> {
       final culturas = await _repository.findAll();
       setState(() {
         _culturas = culturas;
-        _filteredCulturas = culturas;
+        _filteredCulturas = List.from(culturas);
+        _sortCulturas(); // Ordena alfabeticamente por padrão
         _isLoading = false;
       });
     } catch (e) {

@@ -81,13 +81,12 @@ class _PragasPorCulturaDetalhadasPageState
                             child: CulturaSelectorWidget(
                               culturas: state.culturas
                                   .map(
-                                    (c) => {
-                                      'id': c['id'] ?? '',
-                                      'nome': c['nome'] ?? '',
+                                    (c) => <String, String>{
+                                      'id': (c['id'] ?? '').toString(),
+                                      'nome': (c['nome'] ?? '').toString(),
                                     },
                                   )
-                                  .toList()
-                                  .cast<Map<String, String>>(),
+                                  .toList(),
                               culturaIdSelecionada: _extractCulturaId(state),
                               onCulturaChanged: (culturaId) {
                                 viewModel.loadPragasForCultura(culturaId);

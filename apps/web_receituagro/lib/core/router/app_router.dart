@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../app-site/pages/detalhes_defensivos_page.dart';
 import '../../app-site/pages/home_defensivos_page.dart';
-import '../../features/auth/domain/entities/user_role.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/culturas/presentation/pages/cultura_cadastro_page.dart';
 import '../../features/culturas/presentation/pages/culturas_list_page.dart';
@@ -338,7 +337,7 @@ class _CreateCulturaPlaceholder extends StatelessWidget {
 class _EditCulturaPlaceholder extends StatelessWidget {
   final String? id;
 
-  const _EditCulturaPlaceholder({this.id});
+  const _EditCulturaPlaceholder();
 
   @override
   Widget build(BuildContext context) {
@@ -365,7 +364,7 @@ class _EditCulturaPlaceholder extends StatelessWidget {
 class _PragaDetailsPlaceholder extends StatelessWidget {
   final String? id;
 
-  const _PragaDetailsPlaceholder({this.id});
+  const _PragaDetailsPlaceholder();
 
   @override
   Widget build(BuildContext context) {
@@ -413,7 +412,7 @@ class _CreatePragaPlaceholder extends StatelessWidget {
 class _EditPragaPlaceholder extends StatelessWidget {
   final String? id;
 
-  const _EditPragaPlaceholder({this.id});
+  const _EditPragaPlaceholder();
 
   @override
   Widget build(BuildContext context) {

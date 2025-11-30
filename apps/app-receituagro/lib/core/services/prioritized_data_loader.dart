@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 
+import '../../database/providers/static_data_providers.dart';
 import 'culturas_data_loader.dart';
 import 'diagnosticos_data_loader.dart';
 import 'fitossanitarios_data_loader.dart';
@@ -40,7 +41,8 @@ class PrioritizedDataLoader {
       await Future.wait([
         CulturasDataLoader.loadCulturasData(ref),
         PragasDataLoader.loadPragasData(ref),
-        FitossanitariosDataLoader.loadFitossanitariosData(ref),
+        // Usar StaticDataLoader para carregar fitossanitários e suas informações (modo de ação, etc)
+        _loadFitossanitariosComplete(ref),
       ]);
 
       final duration = DateTime.now().difference(startTime);
@@ -62,6 +64,38 @@ class PrioritizedDataLoader {
         stackTrace: stackTrace,
       );
       rethrow;
+    }
+  }
+
+  /// Carrega fitossanitários e informações complementares usando StaticDataLoader
+  static Future<void> _loadFitossanitariosComplete(dynamic ref) async {
+    try {
+      developer.log(
+        '🛡️ [FITOSSANITARIOS] Iniciando carregamento completo via StaticDataLoader...',
+        name: 'PrioritizedDataLoader',
+      );
+      
+      // Obtém o loader via provider
+      // ref pode ser WidgetRef, ProviderContainer ou Ref
+      final loader = ref.read(staticDataLoaderProvider);
+      
+      // Carrega fitossanitários (tabela principal)
+      await loader.loadFitossanitarios();
+      
+      // Carrega informações complementares (modo de ação, etc)
+      await loader.loadFitossanitariosInfo();
+      
+      developer.log(
+        '✅ [FITOSSANITARIOS] Carregamento completo concluído!',
+        name: 'PrioritizedDataLoader',
+      );
+    } catch (e) {
+      developer.log(
+        '❌ [FITOSSANITARIOS] Erro no carregamento completo: $e',
+        name: 'PrioritizedDataLoader',
+      );
+      // Fallback para o loader antigo se falhar
+      await FitossanitariosDataLoader.loadFitossanitariosData(ref);
     }
   }
 

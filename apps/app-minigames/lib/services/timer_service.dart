@@ -50,7 +50,7 @@ class TimerService {
     final timerId = _nextTimerId++;
     _timerIds[type] = timerId;
 
-    safeCallback(Timer timer) {
+    void safeCallback(Timer timer) {
       // Verifica se o timer ainda é válido e o service não foi disposed
       if (_isDisposed || _timerIds[type] != timerId) {
         timer.cancel();
@@ -94,7 +94,7 @@ class TimerService {
     final timerId = _nextTimerId++;
     _timerIds[type] = timerId;
 
-    safeCallback() {
+    void safeCallback() {
       // Verifica se o timer ainda é válido e o service não foi disposed
       if (_isDisposed || _timerIds[type] != timerId) {
         return;

@@ -49,7 +49,7 @@ class GameResultValidationService {
       );
     }
 
-    return WinCheckResult(
+    return const WinCheckResult(
       hasWinner: false,
       winner: Player.none,
       result: GameResult.inProgress,
@@ -219,7 +219,7 @@ class GameResultValidationService {
 
     // Check for draw
     if (isDraw(board)) {
-      return GameResultAnalysis(
+      return const GameResultAnalysis(
         result: GameResult.draw,
         hasWinner: false,
         winner: Player.none,
@@ -230,7 +230,7 @@ class GameResultValidationService {
     }
 
     // Game still in progress
-    return GameResultAnalysis(
+    return const GameResultAnalysis(
       result: GameResult.inProgress,
       hasWinner: false,
       winner: Player.none,

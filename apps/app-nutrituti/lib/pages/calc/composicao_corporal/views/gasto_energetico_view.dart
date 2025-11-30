@@ -134,7 +134,7 @@ class _GastoEnergeticoViewState extends State<GastoEnergeticoView> {
   }
 
   void _compartilhar() {
-    Share.share(_controller.gerarTextoCompartilhamento());
+    SharePlus.instance.share(ShareParams(text: _controller.gerarTextoCompartilhamento()));
   }
 
   @override

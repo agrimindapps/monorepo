@@ -1,14 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
 import '../../domain/entities/list_item_entity.dart' as entities;
 
+part 'list_items_provider.g.dart';
+
 /// Main ListItems Notifier with pure Riverpod
 /// Manages list items for a specific list
-class ListItemsNotifier
-    extends AutoDisposeFamilyAsyncNotifier<List<entities.ListItemEntity>, String> {
+@riverpod
+class ListItemsNotifier extends _$ListItemsNotifier {
+  late String _listId;
+  
   @override
   Future<List<entities.ListItemEntity>> build(String listId) async {
+    _listId = listId;
     // Load items for specific list
     final result = await ref.read(getListItemsUseCaseProvider).call(listId);
 
@@ -25,7 +31,7 @@ class ListItemsNotifier
     entities.Priority priority = entities.Priority.normal,
     String? notes,
   }) async {
-    final currentListId = state.value?.first.listId ?? arg;
+    final currentListId = state.value?.firstOrNull?.listId ?? _listId;
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
@@ -124,12 +130,6 @@ class ListItemsNotifier
     ref.invalidateSelf();
   }
 }
-
-/// Main list items provider (family - parameterized by listId)
-final listItemsProvider = AutoDisposeAsyncNotifierProvider.family<
-    ListItemsNotifier, List<entities.ListItemEntity>, String>(
-  ListItemsNotifier.new,
-);
 
 /// Provider for pending items count
 final pendingItemsCountProvider =

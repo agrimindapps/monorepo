@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../constants/calculation_constants.dart';
 import '../entities/unemployment_insurance_calculation.dart';
@@ -51,7 +50,7 @@ class CalculateUnemploymentInsuranceUseCase {
 
     if (params.workMonths >
         CalculationConstants.seguroDesempregoMaxTempoTrabalho) {
-      return ValidationFailure(
+      return const ValidationFailure(
         'Tempo de trabalho não pode exceder ${CalculationConstants.seguroDesempregoMaxTempoTrabalho} meses',
       );
     }
@@ -62,7 +61,7 @@ class CalculateUnemploymentInsuranceUseCase {
 
     if (params.timesReceived >
         CalculationConstants.seguroDesempregoMaxVezesRecebidas) {
-      return ValidationFailure(
+      return const ValidationFailure(
         'Vezes recebidas não pode exceder ${CalculationConstants.seguroDesempregoMaxVezesRecebidas}',
       );
     }
@@ -74,7 +73,7 @@ class CalculateUnemploymentInsuranceUseCase {
 
     final minDate = DateTime(CalculationConstants.anoMinimoAdmissao);
     if (params.dismissalDate.isBefore(minDate)) {
-      return ValidationFailure(
+      return const ValidationFailure(
           'Data de demissão não pode ser anterior a ${CalculationConstants.anoMinimoAdmissao}');
     }
 
@@ -103,7 +102,7 @@ class CalculateUnemploymentInsuranceUseCase {
 
     // 5. Calculate dates
     final deadlineToRequest = params.dismissalDate.add(
-      Duration(days: CalculationConstants.seguroDesempregoPrazoRequererDias),
+      const Duration(days: CalculationConstants.seguroDesempregoPrazoRequererDias),
     );
     final paymentStart =
         params.dismissalDate.add(const Duration(days: 30)); // Approx 30 days
@@ -264,9 +263,9 @@ class CalculateUnemploymentInsuranceUseCase {
 
   List<DateTime> _createPaymentSchedule(
       DateTime start, int numberOfInstallments) {
-    final List<DateTime> schedule = [];
+    final schedule = <DateTime>[];
 
-    for (int i = 0; i < numberOfInstallments; i++) {
+    for (var i = 0; i < numberOfInstallments; i++) {
       schedule.add(start.add(Duration(
           days:
               i * CalculationConstants.seguroDesempregoIntervaloParcelasDias)));
@@ -291,7 +290,7 @@ class CalculateUnemploymentInsuranceUseCase {
       deadlineToRequest: params.dismissalDate,
       paymentStart: params.dismissalDate,
       paymentEnd: params.dismissalDate,
-      paymentSchedule: [],
+      paymentSchedule: const [],
       eligible: false,
       ineligibilityReason: eligibilityCheck['reason'],
       requiredCarencyMonths: eligibilityCheck['carency'],

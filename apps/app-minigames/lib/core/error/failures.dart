@@ -16,25 +16,25 @@ abstract class Failure extends Equatable {
 
 /// Failure related to cache/local storage operations
 class CacheFailure extends Failure {
-  const CacheFailure([String message = 'Cache operation failed']) : super(message);
+  const CacheFailure([super.message = 'Cache operation failed']);
 }
 
 /// Failure related to game logic validation
 class GameLogicFailure extends Failure {
-  const GameLogicFailure(String message) : super(message);
+  const GameLogicFailure(super.message);
 }
 
 /// Failure related to validation of input data
 class ValidationFailure extends Failure {
-  const ValidationFailure(String message) : super(message);
+  const ValidationFailure(super.message);
 }
 
 /// Failure related to data loading/parsing operations
 class DataFailure extends Failure {
-  const DataFailure([String message = 'Data operation failed']) : super(message);
+  const DataFailure([super.message = 'Data operation failed']);
 }
 
 /// Failure for unexpected errors
 class UnexpectedFailure extends Failure {
-  const UnexpectedFailure([String message = 'Unexpected error occurred']) : super(message);
+  const UnexpectedFailure([super.message = 'Unexpected error occurred']);
 }

@@ -158,9 +158,8 @@ class ItemMasterCard extends StatelessWidget {
 
             // Actions
             if (onEdit != null || onDelete != null)
-              ButtonBar(
+              OverflowBar(
                 alignment: MainAxisAlignment.start,
-                buttonPadding: EdgeInsets.zero,
                 children: [
                   if (onEdit != null)
                     IconButton(

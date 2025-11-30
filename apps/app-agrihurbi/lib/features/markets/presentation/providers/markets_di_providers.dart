@@ -1,8 +1,6 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_agrihurbi/core/network/network_info.dart';
 import 'package:core/core.dart';
 import 'package:dio/dio.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:app_agrihurbi/core/network/network_info.dart';
 
 import '../../data/datasources/market_local_datasource.dart';
 import '../../data/datasources/market_remote_datasource.dart';

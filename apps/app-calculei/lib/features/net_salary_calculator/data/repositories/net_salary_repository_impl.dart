@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/net_salary_calculation.dart';
 import '../../domain/repositories/net_salary_repository.dart';

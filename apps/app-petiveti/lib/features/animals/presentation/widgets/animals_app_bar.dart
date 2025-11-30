@@ -27,46 +27,16 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    final animalsState = ref.watch(animalsProvider);
     // TODO: Re-implement filter detection with new filter strategy pattern
-    const hasActiveFilters = false;
+    // final hasActiveFilters = ...;
 
     return AppBar(
       title: _isSearching
           ? _buildSearchField()
-          : Row(
+          : const Row(
               children: [
-                const Text(AnimalsConstants.myPets),
-                if (hasActiveFilters) ...[
-                  const SizedBox(width: 8),
-                  Semantics(
-                    label:
-                        '${animalsState.animals.length} pets filtrados',
-                    hint: 'Número de pets que atendem aos filtros aplicados',
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AnimalsConstants.badgeHorizontalPadding,
-                        vertical: AnimalsConstants.badgeVerticalPadding,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(
-                          AnimalsConstants.badgeBorderRadius,
-                        ),
-                      ),
-                      child: Text(
-                        '${animalsState.animals.length}',
-                        style: TextStyle(
-                          fontSize: AnimalsConstants.badgeFontSize,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onPrimaryContainer,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                Text(AnimalsConstants.myPets),
+                // TODO: Add filter badge when hasActiveFilters is implemented
               ],
             ),
       leading: _isSearching
@@ -91,17 +61,10 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
         if (!_isSearching) ...[
           Semantics(
             label: AnimalsConstants.searchPets,
-            hint: hasActiveFilters
-                ? AnimalsConstants.searchActiveHint
-                : AnimalsConstants.searchPetsAccessibilityHint,
+            hint: AnimalsConstants.searchPetsAccessibilityHint,
             button: true,
             child: IconButton(
-              icon: Icon(
-                Icons.search,
-                color: hasActiveFilters
-                    ? Theme.of(context).colorScheme.primary
-                    : null,
-              ),
+              icon: const Icon(Icons.search),
               onPressed: () {
                 setState(() {
                   _isSearching = true;
@@ -110,39 +73,14 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
             ),
           ),
           Semantics(
-            label: hasActiveFilters
-                ? AnimalsConstants.filtersActiveLabel
-                : AnimalsConstants.filtersLabel,
-            hint: hasActiveFilters
-                ? AnimalsConstants.filtersActiveHint
-                : AnimalsConstants.filtersHint,
+            label: AnimalsConstants.filtersLabel,
+            hint: AnimalsConstants.filtersHint,
             button: true,
             child: IconButton(
-              icon: Icon(
-                Icons.filter_list,
-                color: hasActiveFilters
-                    ? Theme.of(context).colorScheme.primary
-                    : null,
-              ),
+              icon: const Icon(Icons.filter_list),
               onPressed: () => _showFilterBottomSheet(context),
             ),
           ),
-        ],
-        if (_isSearching) ...[
-          // TODO: Re-implement clear search with new filter strategy
-          // if (animalsState.filter.searchQuery.isNotEmpty)
-          //   Semantics(
-          //     label: AnimalsConstants.clearSearch,
-          //     hint: AnimalsConstants.clearSearchHint,
-          //     button: true,
-          //     child: IconButton(
-          //       icon: const Icon(Icons.clear),
-          //       onPressed: () {
-          //         _searchController.clear();
-          //         ref.read(animalsProvider.notifier).updateSearchQuery('');
-          //       },
-          //     ),
-          //   ),
         ],
         Semantics(
           label: AnimalsConstants.optionsMenu,
@@ -178,22 +116,7 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
                   ),
                 ),
               ),
-              if (hasActiveFilters)
-                PopupMenuItem(
-                  value: 'clear_filters',
-                  child: Semantics(
-                    label: AnimalsConstants.clearAllFilters,
-                    hint: AnimalsConstants.clearAllFiltersHint,
-                    button: true,
-                    child: const Row(
-                      children: [
-                        Icon(Icons.clear_all),
-                        SizedBox(width: 8),
-                        Text(AnimalsConstants.clearFilters),
-                      ],
-                    ),
-                  ),
-                ),
+              // TODO: Add clear_filters menu item when hasActiveFilters is implemented
               PopupMenuItem(
                 value: 'settings',
                 child: Semantics(
@@ -278,195 +201,3 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
     await ref.read(animalsProvider.notifier).loadAnimals();
   }
 }
-
-// TODO: Refactor to use filter strategies (animal_filter_strategy.dart)
-// class AnimalsFilterBottomSheet extends ConsumerStatefulWidget {
-//   const AnimalsFilterBottomSheet({super.key});
-//
-//   @override
-//   ConsumerState<AnimalsFilterBottomSheet> createState() =>
-//       _AnimalsFilterBottomSheetState();
-// }
-//
-// class _AnimalsFilterBottomSheetState
-//     extends ConsumerState<AnimalsFilterBottomSheet> {
-//   late AnimalsFilter _tempFilter;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     _tempFilter = ref.read(animalsProvider).filter;
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       padding: const EdgeInsets.all(AnimalsConstants.filterContainerPadding),
-//       child: Column(
-//         mainAxisSize: MainAxisSize.min,
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Row(
-//             children: [
-//               const Text(
-//                 AnimalsConstants.filters,
-//                 style: TextStyle(
-//                   fontSize: AnimalsConstants.filterHeaderFontSize,
-//                   fontWeight: FontWeight.bold,
-//                 ),
-//               ),
-//               const Spacer(),
-//               Semantics(
-//                 label: AnimalsConstants.clearAllFiltersDialog,
-//                 hint: AnimalsConstants.clearAllFiltersDialogHint,
-//                 button: true,
-//                 child: TextButton(
-//                   onPressed: () {
-//                     setState(() {
-//                       _tempFilter = const AnimalsFilter();
-//                     });
-//                   },
-//                   child: const Text(AnimalsConstants.clearAll),
-//                 ),
-//               ),
-//               const SizedBox(width: 8),
-//               Semantics(
-//                 label: AnimalsConstants.applyFilters,
-//                 hint: AnimalsConstants.applyFiltersHint,
-//                 button: true,
-//                 child: ElevatedButton(
-//                   onPressed: () {
-//                     _applyFilters();
-//                     Navigator.of(context).pop();
-//                   },
-//                   child: const Text(AnimalsConstants.apply),
-//                 ),
-//               ),
-//             ],
-//           ),
-//           const SizedBox(height: AnimalsConstants.filterSectionSpacing),
-//           _buildFilterSection(
-//             AnimalsConstants.species,
-//             Semantics(
-//               label: AnimalsConstants.speciesFilterLabel,
-//               hint: AnimalsConstants.speciesFilterHint,
-//               button: true,
-//               child: DropdownButton<AnimalSpecies?>(
-//                 value: _tempFilter.speciesFilter,
-//                 isExpanded: true,
-//                 items: [
-//                   const DropdownMenuItem<AnimalSpecies?>(
-//                     value: null,
-//                     child: Text(AnimalsConstants.allSpecies),
-//                   ),
-//                   ...AnimalSpecies.values.map(
-//                     (species) => DropdownMenuItem<AnimalSpecies?>(
-//                       value: species,
-//                       child: Text(species.displayName),
-//                     ),
-//                   ),
-//                 ],
-//                 onChanged: (value) {
-//                   setState(() {
-//                     _tempFilter = _tempFilter.copyWith(speciesFilter: value);
-//                   });
-//                 },
-//               ),
-//             ),
-//           ),
-//           _buildFilterSection(
-//             AnimalsConstants.gender,
-//             Semantics(
-//               label: AnimalsConstants.genderFilterLabel,
-//               hint: AnimalsConstants.genderFilterHint,
-//               button: true,
-//               child: DropdownButton<AnimalGender?>(
-//                 value: _tempFilter.genderFilter,
-//                 isExpanded: true,
-//                 items: [
-//                   const DropdownMenuItem<AnimalGender?>(
-//                     value: null,
-//                     child: Text(AnimalsConstants.allGenders),
-//                   ),
-//                   ...AnimalGender.values.map(
-//                     (gender) => DropdownMenuItem<AnimalGender?>(
-//                       value: gender,
-//                       child: Text(gender.displayName),
-//                     ),
-//                   ),
-//                 ],
-//                 onChanged: (value) {
-//                   setState(() {
-//                     _tempFilter = _tempFilter.copyWith(genderFilter: value);
-//                   });
-//                 },
-//               ),
-//             ),
-//           ),
-//           _buildFilterSection(
-//             AnimalsConstants.size,
-//             Semantics(
-//               label: AnimalsConstants.sizeFilterLabel,
-//               hint: AnimalsConstants.sizeFilterHint,
-//               button: true,
-//               child: DropdownButton<AnimalSize?>(
-//                 value: _tempFilter.sizeFilter,
-//                 isExpanded: true,
-//                 items: [
-//                   const DropdownMenuItem<AnimalSize?>(
-//                     value: null,
-//                     child: Text(AnimalsConstants.allSizes),
-//                   ),
-//                   ...AnimalSize.values
-//                       .where((size) => size != AnimalSize.unknown)
-//                       .map(
-//                         (size) => DropdownMenuItem<AnimalSize?>(
-//                           value: size,
-//                           child: Text(size.displayName),
-//                         ),
-//                       ),
-//                 ],
-//                 onChanged: (value) {
-//                   setState(() {
-//                     _tempFilter = _tempFilter.copyWith(sizeFilter: value);
-//                   });
-//                 },
-//               ),
-//             ),
-//           ),
-//
-//           const SizedBox(height: AnimalsConstants.filterSectionSpacing),
-//         ],
-//       ),
-//     );
-//   }
-//
-//   Widget _buildFilterSection(String title, Widget child) {
-//     return Padding(
-//       padding: const EdgeInsets.only(
-//         bottom: AnimalsConstants.filterSectionSpacing,
-//       ),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Text(
-//             title,
-//             style: const TextStyle(
-//               fontWeight: FontWeight.w600,
-//               fontSize: AnimalsConstants.filterTitleFontSize,
-//             ),
-//           ),
-//           const SizedBox(height: AnimalsConstants.filterSectionSpacingSmall),
-//           child,
-//         ],
-//       ),
-//     );
-//   }
-//
-//   void _applyFilters() {
-//     final notifier = ref.read(animalsProvider.notifier);
-//     notifier.updateSpeciesFilter(_tempFilter.speciesFilter);
-//     notifier.updateGenderFilter(_tempFilter.genderFilter);
-//     notifier.updateSizeFilter(_tempFilter.sizeFilter);
-//   }
-// }

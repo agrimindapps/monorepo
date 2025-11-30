@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_receituagro/core/providers/core_providers.dart';
 import 'package:app_receituagro/core/providers/domain_providers.dart'
     as domain_providers;

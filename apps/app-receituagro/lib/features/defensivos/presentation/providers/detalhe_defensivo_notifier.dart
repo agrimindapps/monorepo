@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/providers/premium_notifier.dart';
 import '../../../../core/providers/core_providers.dart' as core_providers;
+import '../../../../core/providers/premium_notifier.dart';
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../comentarios/data/comentario_model.dart';
@@ -39,7 +39,7 @@ class DetalheDefensivoState {
       comentarios: [],
       isFavorited: false,
       isPremium: false,
-      isLoading: false,
+      isLoading: true, // Inicia em loading para mostrar skeleton imediatamente
       isLoadingComments: false,
       errorMessage: null,
     );

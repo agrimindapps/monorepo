@@ -18,7 +18,7 @@ class BackgroundWidget extends StatelessWidget {
           ],
         ),
       ),
-      child: Stack(
+      child: const Stack(
         children: [
           // Static clouds
           Positioned(

@@ -479,4 +479,4 @@ String themeSubtitle(Ref ref) {
 
 // LEGACY ALIAS
 // ignore: deprecated_member_use_from_same_package
-final settingsNotifierProvider = settingsProvider;
+const settingsNotifierProvider = settingsProvider;

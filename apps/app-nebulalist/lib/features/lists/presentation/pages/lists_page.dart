@@ -1,6 +1,5 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/providers/services_providers.dart';
 import '../providers/lists_provider.dart';
 import '../widgets/create_list_dialog.dart';

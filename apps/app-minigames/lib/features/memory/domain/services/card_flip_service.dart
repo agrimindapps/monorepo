@@ -30,7 +30,7 @@ class CardFlipService {
   }) {
     // Check game status
     if (!gameStatus.canInteract) {
-      return FlipValidation(
+      return const FlipValidation(
         canFlip: false,
         reason: FlipDeniedReason.gameNotPlaying,
         errorMessage: 'Cannot flip card when game is not playing',
@@ -39,7 +39,7 @@ class CardFlipService {
 
     // Check if already at max flipped cards
     if (currentFlippedCards.length >= maxFlippedCards) {
-      return FlipValidation(
+      return const FlipValidation(
         canFlip: false,
         reason: FlipDeniedReason.tooManyFlipped,
         errorMessage: 'Maximum $maxFlippedCards cards can be flipped at once',
@@ -48,7 +48,7 @@ class CardFlipService {
 
     // Check if card is already flipped
     if (card.isFlipped) {
-      return FlipValidation(
+      return const FlipValidation(
         canFlip: false,
         reason: FlipDeniedReason.alreadyFlipped,
         errorMessage: 'Card is already flipped',
@@ -57,7 +57,7 @@ class CardFlipService {
 
     // Check if card is already matched
     if (card.isMatched) {
-      return FlipValidation(
+      return const FlipValidation(
         canFlip: false,
         reason: FlipDeniedReason.alreadyMatched,
         errorMessage: 'Card is already matched',
@@ -66,7 +66,7 @@ class CardFlipService {
 
     // Check if card is already in flipped list
     if (currentFlippedCards.any((c) => c.id == card.id)) {
-      return FlipValidation(
+      return const FlipValidation(
         canFlip: false,
         reason: FlipDeniedReason.duplicateInFlippedList,
         errorMessage: 'Card is already in flipped list',

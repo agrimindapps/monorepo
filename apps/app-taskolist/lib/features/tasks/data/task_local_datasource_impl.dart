@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../database/daos/task_dao.dart';

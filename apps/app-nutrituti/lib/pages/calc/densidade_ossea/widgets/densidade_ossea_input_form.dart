@@ -4,7 +4,6 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import '../../../../../core/themes/manager.dart';
 import '../model/densidade_ossea_model.dart';
 
 class DensidadeOsseaInputForm extends StatelessWidget {
@@ -23,7 +22,6 @@ class DensidadeOsseaInputForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = ThemeManager().isDark.value;
     return Card(
       clipBehavior: Clip.antiAliasWithSaveLayer,
       elevation: 2,

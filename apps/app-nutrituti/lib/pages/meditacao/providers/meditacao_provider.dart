@@ -228,6 +228,7 @@ class MeditacaoNotifier extends _$MeditacaoNotifier {
       presentSound: true,
     );
 
+    // ignore: unused_local_variable
     const detalhes = NotificationDetails(
       android: androidDetails,
       iOS: iOSDetails,

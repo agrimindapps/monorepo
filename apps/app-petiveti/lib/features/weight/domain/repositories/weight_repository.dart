@@ -2,9 +2,9 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/failures.dart';
 import '../entities/weight.dart';
+import 'weight_analytics_repository.dart';
 import 'weight_crud_repository.dart';
 import 'weight_query_repository.dart';
-import 'weight_analytics_repository.dart';
 import 'weight_stream_repository.dart';
 
 /// **ISP - Interface Segregation Principle**

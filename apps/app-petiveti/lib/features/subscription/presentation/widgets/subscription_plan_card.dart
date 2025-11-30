@@ -211,9 +211,8 @@ class SubscriptionPlanCard extends ConsumerWidget {
     WidgetRef ref,
     bool isCurrentPlan,
   ) {
-    // TODO: Add isPurchasing method to SubscriptionState
-    const isPurchasing = false; // state.isPurchasing(plan.id);
-    final isButtonDisabled = isCurrentPlan || isPurchasing;
+    // TODO: Add isPurchasing method to SubscriptionState when implemented
+    final isButtonDisabled = isCurrentPlan;
 
     return SizedBox(
       width: double.infinity,
@@ -232,14 +231,10 @@ class SubscriptionPlanCard extends ConsumerWidget {
               : null,
           padding: const EdgeInsets.symmetric(vertical: 12),
         ),
-        icon: _buildButtonIcon(context, isPurchasing, isCurrentPlan),
-        label: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          child: Text(
-            _getButtonText(isPurchasing, isCurrentPlan),
-            key: ValueKey(isPurchasing ? 'loading' : 'normal'),
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+        icon: _buildButtonIcon(context, isCurrentPlan),
+        label: Text(
+          _getButtonText(isCurrentPlan),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
     );
@@ -247,29 +242,17 @@ class SubscriptionPlanCard extends ConsumerWidget {
 
   Widget _buildButtonIcon(
     BuildContext context,
-    bool isPurchasing,
     bool isCurrentPlan,
   ) {
-    if (isPurchasing) {
-      return SizedBox(
-        width: 16,
-        height: 16,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: Theme.of(context).colorScheme.onPrimary,
-        ),
-      );
-    } else if (isCurrentPlan) {
+    if (isCurrentPlan) {
       return const Icon(Icons.check_circle, size: 18);
     } else {
       return const Icon(Icons.shopping_cart, size: 18);
     }
   }
 
-  String _getButtonText(bool isPurchasing, bool isCurrentPlan) {
-    if (isPurchasing) {
-      return 'Processando...';
-    } else if (isCurrentPlan) {
+  String _getButtonText(bool isCurrentPlan) {
+    if (isCurrentPlan) {
       return 'Plano Atual';
     } else {
       return 'Assinar Agora';

@@ -54,10 +54,17 @@ class DiagnosticosDataLoader {
           .toList();
 
       if (diagnosticos.isNotEmpty) {
-        final repository = ref.watch(diagnosticoRepositoryProvider);
+        final repository = ref.read(diagnosticoRepositoryProvider);
         final fitossanitariosRepo = ref.read(fitossanitariosRepositoryProvider);
         final culturasRepo = ref.read(culturasRepositoryProvider);
         final pragasRepo = ref.read(pragasRepositoryProvider);
+
+        // LIMPAR DADOS EXISTENTES antes de inserir novos
+        // Isso garante que registros removidos do JSON sejam removidos do SQLite
+        if (kDebugMode) {
+          debugPrint('🗑️ DiagnosticosDataLoader: Limpando dados existentes...');
+        }
+        await repository.deleteAll();
 
         // Load lookup maps
         final List<Fitossanitario> fitossanitarios = await (fitossanitariosRepo
@@ -108,7 +115,7 @@ class DiagnosticosDataLoader {
         }
 
         if (batch.isNotEmpty) {
-          // Insert into database
+          // Usar insertBatch pois já limpamos a tabela antes
           await repository.insertBatch(batch);
 
           if (kDebugMode) {
@@ -134,10 +141,9 @@ class DiagnosticosDataLoader {
     }
   }
 
-  /// Força recarregamento dos dados (para desenvolvimento)
-  static Future<void> forceReload(dynamic ref) async {
+  /// Força recarregamento dos dados (reseta flag para permitir novo carregamento)
+  static void forceReload(dynamic ref) {
     _isLoaded = false;
-    await loadDiagnosticosData(ref);
   }
 
   /// Verifica se dados estão carregados

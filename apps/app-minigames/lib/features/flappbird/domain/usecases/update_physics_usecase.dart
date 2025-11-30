@@ -1,5 +1,4 @@
 // Package imports:
-import 'package:dartz/dartz.dart';
 
 // Core imports:
 import 'package:core/core.dart';

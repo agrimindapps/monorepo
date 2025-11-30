@@ -1,27 +1,26 @@
-import 'package:drift/drift.dart';
 import 'package:core/core.dart';
-
-// Tables
-import 'tables/animals_table.dart';
-import 'tables/medications_table.dart';
-import 'tables/vaccines_table.dart';
-import 'tables/appointments_table.dart';
-import 'tables/weight_records_table.dart';
-import 'tables/expenses_table.dart';
-import 'tables/reminders_table.dart';
-import 'tables/calculation_history_table.dart';
-import 'tables/promo_content_table.dart';
+import 'package:drift/drift.dart';
 
 // DAOs
 import 'daos/animal_dao.dart';
-import 'daos/medication_dao.dart';
-import 'daos/vaccine_dao.dart';
 import 'daos/appointment_dao.dart';
-import 'daos/weight_dao.dart';
-import 'daos/expense_dao.dart';
-import 'daos/reminder_dao.dart';
 import 'daos/calculator_dao.dart';
+import 'daos/expense_dao.dart';
+import 'daos/medication_dao.dart';
 import 'daos/promo_dao.dart';
+import 'daos/reminder_dao.dart';
+import 'daos/vaccine_dao.dart';
+import 'daos/weight_dao.dart';
+// Tables
+import 'tables/animals_table.dart';
+import 'tables/appointments_table.dart';
+import 'tables/calculation_history_table.dart';
+import 'tables/expenses_table.dart';
+import 'tables/medications_table.dart';
+import 'tables/promo_content_table.dart';
+import 'tables/reminders_table.dart';
+import 'tables/vaccines_table.dart';
+import 'tables/weight_records_table.dart';
 
 part 'petiveti_database.g.dart';
 
@@ -76,7 +75,7 @@ part 'petiveti_database.g.dart';
   ],
 )
 class PetivetiDatabase extends _$PetivetiDatabase with BaseDriftDatabase {
-  PetivetiDatabase(QueryExecutor e) : super(e);
+  PetivetiDatabase(super.e);
 
   /// Versão do schema do banco de dados
   ///

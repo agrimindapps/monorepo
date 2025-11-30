@@ -44,7 +44,7 @@ class CulturasSupabaseDataSource implements CulturasRemoteDataSource {
           .eq('id', id)
           .single();
 
-      return CulturaModel.fromJson(response as Map<String, dynamic>);
+      return CulturaModel.fromJson(response);
     } catch (e) {
       throw Exception('Erro ao buscar cultura: $e');
     }
@@ -81,7 +81,7 @@ class CulturasSupabaseDataSource implements CulturasRemoteDataSource {
           .select()
           .single();
 
-      return CulturaModel.fromJson(response as Map<String, dynamic>);
+      return CulturaModel.fromJson(response);
     } catch (e) {
       throw Exception('Erro ao criar cultura: $e');
     }
@@ -100,7 +100,7 @@ class CulturasSupabaseDataSource implements CulturasRemoteDataSource {
           .select()
           .single();
 
-      return CulturaModel.fromJson(response as Map<String, dynamic>);
+      return CulturaModel.fromJson(response);
     } catch (e) {
       throw Exception('Erro ao atualizar cultura: $e');
     }

@@ -144,9 +144,10 @@ class AlcoolSangueResult extends StatelessWidget {
   }
 
   Widget _buildTasGauge(BuildContext context) {
-    final isDark = ThemeManager().isDark.value;
     final screenWidth = MediaQuery.of(context).size.width;
+    // ignore: unused_local_variable
     final isSmallScreen = screenWidth < 600;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Determinar cores baseadas no nível de TAS
     Color tasColor = Colors.green;

@@ -66,11 +66,11 @@ class GameOverDialog extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: Colors.amber),
                       ),
-                      child: Column(
+                      child: const Column(
                         children: [
-                          const Icon(Icons.emoji_events, color: Colors.amber, size: 32),
-                          const SizedBox(height: 8),
-                          const Text(
+                          Icon(Icons.emoji_events, color: Colors.amber, size: 32),
+                          SizedBox(height: 8),
+                          Text(
                             'Novo Recorde!',
                             style: TextStyle(
                               color: Colors.amber,

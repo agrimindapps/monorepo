@@ -7,7 +7,7 @@ part 'item_dao.g.dart';
 /// DAO para operações de itens
 @DriftAccessor(tables: [Items])
 class ItemDao extends DatabaseAccessor<NebulalistDatabase> with _$ItemDaoMixin {
-  ItemDao(NebulalistDatabase db) : super(db);
+  ItemDao(super.db);
 
   /// Buscar todos os itens de uma lista
   Future<List<ItemRecord>> getItemsByListId(String listId) =>

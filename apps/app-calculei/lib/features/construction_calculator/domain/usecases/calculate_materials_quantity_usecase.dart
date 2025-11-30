@@ -28,7 +28,7 @@ class CalculateMaterialsQuantityUseCase extends UseCase<
   Future<Either<Failure, MaterialsQuantityCalculation>> call(
     CalculateMaterialsQuantityParams params,
   ) async {
-    return await repository.calculateMaterialsQuantity(
+    return repository.calculateMaterialsQuantity(
       area: params.area,
       buildingType: params.buildingType,
     );

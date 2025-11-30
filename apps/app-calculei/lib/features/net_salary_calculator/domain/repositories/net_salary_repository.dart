@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import '../entities/net_salary_calculation.dart';
 
 abstract class NetSalaryRepository {

@@ -5,8 +5,7 @@ import 'package:core/core.dart' hide PremiumFeature, Column;
 import 'package:flutter/foundation.dart';
 
 import '../../features/analytics/analytics_service.dart';
-import '../../features/analytics/analytics_providers.dart';
-import '../providers/core_providers.dart' hide analyticsServiceProvider;
+import '../providers/core_providers.dart' as local_providers;
 import '../services/cloud_functions_service.dart';
 import '../services/premium_service.dart';
 import '../services/remote_config_service.dart';
@@ -80,11 +79,11 @@ class PremiumNotifier extends _$PremiumNotifier {
 
   @override
   Future<PremiumState> build() async {
-    _analytics = ref.watch(analyticsRepositoryProvider) as ReceitaAgroAnalyticsService;
+    _analytics = ref.watch(local_providers.analyticsServiceProvider);
     // _cloudFunctions = ref.watch(receitaAgroCloudFunctionsServiceProvider);
     _cloudFunctions = ReceitaAgroCloudFunctionsService.instance;
     _remoteConfig = ReceitaAgroRemoteConfigService.instance;
-    _subscriptionRepository = ref.watch(subscriptionRepositoryProvider);
+    _subscriptionRepository = ref.watch(local_providers.subscriptionRepositoryProvider);
     ref.onDispose(() {
       _subscriptionStreamSubscription?.cancel();
       if (EnvironmentConfig.enableLogging) {

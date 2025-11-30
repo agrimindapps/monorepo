@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../domain/usecases/calculate_paint_consumption_usecase.dart';
 import '../providers/paint_consumption_calculator_provider.dart';
 import '../widgets/paint_consumption_input_form.dart';
 import '../widgets/paint_consumption_result_card.dart';
-import '../../domain/usecases/calculate_paint_consumption_usecase.dart';
 
 /// Page for calculating paint consumption
 class PaintConsumptionCalculatorPage extends ConsumerStatefulWidget {

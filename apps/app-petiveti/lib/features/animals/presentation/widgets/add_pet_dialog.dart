@@ -409,7 +409,7 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
             const SizedBox(width: 12),
             Expanded(
               child: DropdownButtonFormField<String>(
-                value: _selectedBloodType,
+                initialValue: _selectedBloodType,
                 decoration: const InputDecoration(
                   labelText: 'Tipo Sanguíneo',
                   border: OutlineInputBorder(),

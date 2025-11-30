@@ -1,5 +1,6 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:developer' as developer;
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/culturas_data_loader.dart';
 import '../services/diagnosticos_data_loader.dart';
@@ -113,12 +114,10 @@ class ReceitaAgroDataSetup {
         '🔄 Forçando recarregamento dos dados...',
         name: 'ReceitaAgroDataSetup',
       );
-      await Future.wait<void>([
-        CulturasDataLoader.forceReload(ref),
-        FitossanitariosDataLoader.forceReload(ref),
-        PragasDataLoader.forceReload(ref),
-        DiagnosticosDataLoader.forceReload(ref),
-      ]);
+      CulturasDataLoader.forceReload(ref);
+      FitossanitariosDataLoader.forceReload(ref);
+      PragasDataLoader.forceReload(ref);
+      DiagnosticosDataLoader.forceReload(ref);
 
       developer.log(
         '✅ Recarregamento concluído!',
@@ -151,7 +150,8 @@ class ReceitaAgroDataSetup {
   static Future<Map<String, dynamic>> getDataStats(Ref ref) async {
     try {
       final pragasStats = await PragasDataLoader.getStats(ref);
-      final fitossanitariosStats = await FitossanitariosDataLoader.getStats(ref);
+      final fitossanitariosStats =
+          await FitossanitariosDataLoader.getStats(ref);
       final culturasStats = await CulturasDataLoader.getStats(ref);
       final diagnosticosStats = await DiagnosticosDataLoader.getStats(ref);
 
@@ -167,8 +167,7 @@ class ReceitaAgroDataSetup {
         'culturas_count': culturasCount,
         'fitossanitarios_count': fitossanitariosCount,
         'diagnosticos_count': diagnosticosCount,
-        'total_items':
-            pragasCount +
+        'total_items': pragasCount +
             culturasCount +
             fitossanitariosCount +
             diagnosticosCount,

@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'defensivos_providers.dart';
 import '../../domain/entities/defensivo_entity.dart';
+import 'defensivos_providers.dart';
 
 part 'defensivos_unificado_notifier.g.dart';
 
@@ -165,9 +165,6 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
       final result = await useCase(
         tipoAgrupamento: tipoAgrupamento,
         filtroTexto: filtroTexto,
-      );
-      debugPrint(
-        '🔄 [NOTIFIER AGRUPADOS] Resultado do use case recebido: $result',
       );
 
       result.fold(

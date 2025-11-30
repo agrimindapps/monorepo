@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../domain/usecases/index.dart';
+
 import '../../domain/entities/index.dart';
+import '../../domain/usecases/index.dart';
 import 'construction_calculator_providers.dart';
 
 part 'paint_consumption_calculator_provider.g.dart';

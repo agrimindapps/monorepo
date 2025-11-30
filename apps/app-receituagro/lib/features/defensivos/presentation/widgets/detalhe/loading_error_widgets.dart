@@ -1,13 +1,21 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import 'defensivo_details_skeleton_widget.dart';
+
 /// Widgets para estados de loading e erro
 /// Responsabilidade única: exibir estados visuais consistentes
 class LoadingErrorWidgets {
   LoadingErrorWidgets._(); // Private constructor prevents instantiation
 
-  /// Widget de loading personalizado
+  /// Widget de loading com skeleton que imita a estrutura real da página
+  /// Proporciona uma experiência visual mais fluida durante o carregamento
   static Widget buildLoadingState(BuildContext context) {
+    return const DefensivoDetailsSkeletonWidget();
+  }
+
+  /// Widget de loading legado com spinner (mantido para compatibilidade)
+  static Widget buildLoadingStateSpinner(BuildContext context) {
     final theme = Theme.of(context);
 
     return Center(

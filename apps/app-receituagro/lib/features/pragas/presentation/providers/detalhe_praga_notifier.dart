@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/premium_notifier.dart';
+import '../../../../database/providers/database_providers.dart';
 import '../../../../database/receituagro_database.dart';
 import '../../../comentarios/data/comentario_model.dart';
 import '../../domain/entities/praga_entity.dart';
@@ -322,33 +324,33 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   /// Carrega informações específicas baseado no tipo da praga
   /// MIGRATION TODO: Reimplement with Drift-based repository queries
   Future<void> _loadPragaSpecificInfo() async {
-    // TEMPORARILY DISABLED: Legacy repositories removed during Drift migration
-    // final currentState = state.value;
-    // if (currentState == null || currentState.pragaData == null) return;
-    //
-    // try {
-    //   PragasInfData? pragaInfo;
-    //   PlantasInfData? plantaInfo;
-    //   if (currentState.pragaData!.tipo == '1') {
-    //     // Query PragasInf using Drift database
-    //     // pragaInfo = await database.getPragasInfByIdReg(currentState.pragaData!.idPraga);
-    //   } else if (currentState.pragaData!.tipo == '3') {
-    //     // Query PlantasInf using Drift database
-    //     // plantaInfo = await database.getPlantasInfByIdReg(currentState.pragaData!.idPraga);
-    //   } else if (currentState.pragaData!.tipo == '2') {
-    //     // Query PragasInf using Drift database
-    //     // pragaInfo = await database.getPragasInfByIdReg(currentState.pragaData!.idPraga);
-    //   }
-    //
-    //   state = AsyncValue.data(
-    //     currentState.copyWith(pragaInfo: pragaInfo, plantaInfo: plantaInfo),
-    //   );
-    // } catch (e) {
-    //   // Error handling
-    // }
+    final currentState = state.value;
+    if (currentState == null || currentState.pragaData == null) return;
 
-    // For now, just skip loading specific info
-    return;
+    try {
+      PragasInfData? pragaInfo;
+      PlantasInfData? plantaInfo;
+      
+      final pragaIdPraga = currentState.pragaData!.idPraga;
+      final pragaTipo = currentState.pragaData!.tipo;
+      
+      if (pragaTipo == '1' || pragaTipo == '2') {
+        // Tipo 1 = Inseto, Tipo 2 = Doença -> usa PragasInf
+        final pragasInfRepo = ref.read(pragasInfRepositoryProvider);
+        pragaInfo = await pragasInfRepo.findByIdReg(pragaIdPraga);
+      } else if (pragaTipo == '3') {
+        // Tipo 3 = Planta Daninha -> usa PlantasInf
+        final plantasInfRepo = ref.read(plantasInfRepositoryProvider);
+        plantaInfo = await plantasInfRepo.findByIdReg(pragaIdPraga);
+      }
+
+      state = AsyncValue.data(
+        currentState.copyWith(pragaInfo: pragaInfo, plantaInfo: plantaInfo),
+      );
+    } catch (e) {
+      // Silently handle error - info is optional
+      debugPrint('🐛 [DETALHE_PRAGA] Erro ao carregar info específica: $e');
+    }
   }
 
   /// Carrega status premium do usuário

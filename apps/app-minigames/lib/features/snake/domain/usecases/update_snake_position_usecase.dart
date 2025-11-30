@@ -34,7 +34,7 @@ class UpdateSnakePositionUseCase {
   }) async {
     // Validation: game must be running
     if (!currentState.gameStatus.isRunning) {
-      return Left(GameLogicFailure('Game is not running'));
+      return const Left(GameLogicFailure('Game is not running'));
     }
 
     // Update power-ups first (remove expired, apply effects)

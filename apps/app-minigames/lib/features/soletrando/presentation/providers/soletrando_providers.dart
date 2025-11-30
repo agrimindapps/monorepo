@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,7 +8,6 @@ import '../../domain/repositories/soletrando_repository.dart';
 import '../../domain/usecases/generate_word_usecase.dart';
 import '../../domain/usecases/skip_word_usecase.dart';
 import '../../domain/usecases/restart_game_usecase.dart';
-import '../../../../core/providers/core_providers.dart';
 
 part 'soletrando_providers.g.dart';
 

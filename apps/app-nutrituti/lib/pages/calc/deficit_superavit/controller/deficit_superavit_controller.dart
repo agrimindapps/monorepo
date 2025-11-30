@@ -64,7 +64,7 @@ class DeficitSuperavitController extends ChangeNotifier {
   }
 
   void compartilhar() {
-    Share.share(model.gerarTextoCompartilhamento());
+    SharePlus.instance.share(ShareParams(text: model.gerarTextoCompartilhamento()));
   }
 
   void _exibirMensagem(BuildContext context, String message) {

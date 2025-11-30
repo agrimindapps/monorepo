@@ -27,6 +27,12 @@ dependencies:
   flutter_riverpod: any
   riverpod_annotation: any
 
+  firebase_core: any
+  cloud_firestore: any
+  firebase_auth: any
+  go_router: any
+  icons_plus: any
+  uuid: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

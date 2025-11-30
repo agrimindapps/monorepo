@@ -333,16 +333,16 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
               Tab(text: 'Cuidados'),
             ],
           ),
-          Expanded(
+          const Expanded(
             child: TabBarView(
               children: [
                 SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
-                  child: const PlantFormBasicInfo(),
+                  padding: EdgeInsets.fromLTRB(20, 24, 20, 8),
+                  child: PlantFormBasicInfo(),
                 ),
                 SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
-                  child: const PlantFormCareConfig(),
+                  padding: EdgeInsets.fromLTRB(20, 24, 20, 8),
+                  child: PlantFormCareConfig(),
                 ),
               ],
             ),

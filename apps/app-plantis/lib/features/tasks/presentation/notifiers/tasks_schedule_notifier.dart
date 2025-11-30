@@ -130,4 +130,4 @@ class TasksScheduleNotifier extends _$TasksScheduleNotifier {
 
 // LEGACY ALIAS
 // ignore: deprecated_member_use_from_same_package
-final tasksScheduleNotifierProvider = tasksScheduleProvider;
+const tasksScheduleNotifierProvider = tasksScheduleProvider;

@@ -1,14 +1,14 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-export 'medications_providers.dart';
-
 import 'medications_providers.dart';
+
+export 'medications_providers.dart';
 
 part 'medications_provider.g.dart';
 
 // Aliases for backward compatibility
-final medicationsProviderAlias = medicationsProvider;
-final medicationProviderAlias = medicationByIdProvider;
+const medicationsProviderAlias = medicationsProvider;
+const medicationProviderAlias = medicationByIdProvider;
 
 @riverpod
 class SelectedMedication extends _$SelectedMedication {

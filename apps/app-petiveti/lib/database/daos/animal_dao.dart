@@ -6,7 +6,7 @@ part 'animal_dao.g.dart';
 
 @DriftAccessor(tables: [Animals])
 class AnimalDao extends DatabaseAccessor<PetivetiDatabase> with _$AnimalDaoMixin {
-  AnimalDao(PetivetiDatabase db) : super(db);
+  AnimalDao(super.db);
 
   /// Get all active animals for a user
   Future<List<Animal>> getAllAnimals(String userId) {

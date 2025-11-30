@@ -107,7 +107,7 @@ class ListCard extends StatelessWidget {
                             ? list.completedCount / list.itemCount
                             : 0,
                         minHeight: 6,
-                        backgroundColor: colorScheme.surfaceVariant,
+                        backgroundColor: colorScheme.surfaceContainerHighest,
                       ),
                     ),
                   ],
@@ -116,9 +116,8 @@ class ListCard extends StatelessWidget {
             ),
 
             // Actions
-            ButtonBar(
+            OverflowBar(
               alignment: MainAxisAlignment.start,
-              buttonPadding: EdgeInsets.zero,
               children: [
                 if (onSetReminder != null)
                   IconButton(

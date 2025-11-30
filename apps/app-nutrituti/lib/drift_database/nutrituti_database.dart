@@ -19,6 +19,13 @@ import 'tables/fitness_profiles_table.dart';
 import 'tables/fitness_achievements_table.dart';
 import 'tables/weekly_challenges_table.dart';
 import 'tables/workout_sessions_table.dart';
+// Weight Tracker Tables
+import 'tables/weight_records_table.dart';
+import 'tables/weight_achievements_table.dart';
+import 'tables/weight_goals_table.dart';
+import 'tables/weight_milestones_table.dart';
+import 'tables/weight_reminders_table.dart';
+import 'tables/weight_daily_stats_table.dart';
 
 // DAOs
 import 'daos/perfil_dao.dart';
@@ -29,6 +36,7 @@ import 'daos/water_tracker_dao.dart';
 import 'daos/exercicio_dao.dart';
 import 'daos/comentario_dao.dart';
 import 'daos/gamification_dao.dart';
+import 'daos/weight_tracker_dao.dart';
 
 part 'nutrituti_database.g.dart';
 
@@ -84,6 +92,13 @@ part 'nutrituti_database.g.dart';
     FitnessAchievements,
     WeeklyChallenges,
     WorkoutSessions,
+    // Weight Tracker
+    WeightRecords,
+    WeightAchievements,
+    WeightGoals,
+    WeightMilestones,
+    WeightReminders,
+    WeightDailyStats,
   ],
   daos: [
     PerfilDao,
@@ -94,14 +109,15 @@ part 'nutrituti_database.g.dart';
     ExercicioDao,
     ComentarioDao,
     GamificationDao,
+    WeightTrackerDao,
   ],
 )
 class NutritutiDatabase extends _$NutritutiDatabase with BaseDriftDatabase {
-  NutritutiDatabase(QueryExecutor e) : super(e);
+  NutritutiDatabase(super.e);
 
   /// Versão do schema do banco de dados
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   /// Factory constructor para ambiente de produção
   factory NutritutiDatabase.production() {
@@ -170,6 +186,15 @@ class NutritutiDatabase extends _$NutritutiDatabase with BaseDriftDatabase {
             await m.createTable(fitnessAchievements);
             await m.createTable(weeklyChallenges);
             await m.createTable(workoutSessions);
+          }
+          // Migration from version 3 to 4 (Weight Tracker)
+          if (from < 4) {
+            await m.createTable(weightRecords);
+            await m.createTable(weightAchievements);
+            await m.createTable(weightGoals);
+            await m.createTable(weightMilestones);
+            await m.createTable(weightReminders);
+            await m.createTable(weightDailyStats);
           }
         },
       );

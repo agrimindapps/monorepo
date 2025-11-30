@@ -1,12 +1,11 @@
 // Flutter imports:
+import 'package:app_calculei/core/presentation/widgets/calculator_layout.dart';
+// Project imports:
+import 'package:app_calculei/core/style/shadcn_style.dart';
 import 'package:flutter/material.dart';
-
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Project imports:
-import 'package:app_calculei/core/style/shadcn_style.dart';
-import 'package:app_calculei/core/presentation/widgets/calculator_layout.dart';
 import '../../domain/usecases/calculate_net_salary_usecase.dart';
 import '../providers/net_salary_calculator_provider.dart';
 import '../widgets/net_salary_input_form.dart';
@@ -47,7 +46,7 @@ class _NetSalaryCalculatorPageState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Dados do Cálculo',
                 style: TextStyle(
                   fontSize: 18,

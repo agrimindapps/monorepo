@@ -28,7 +28,7 @@ class CalculateCostPerSqmUseCase
   Future<Either<Failure, CostPerSquareMeterCalculation>> call(
     CalculateCostPerSqmParams params,
   ) async {
-    return await repository.calculateCostPerSqm(
+    return repository.calculateCostPerSqm(
       area: params.area,
       costPerSquareMeter: params.costPerSquareMeter,
     );

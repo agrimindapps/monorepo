@@ -31,21 +31,21 @@ class LevelBadgeWidget extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            color.withOpacity(0.8),
+            color.withValues(alpha: 0.8),
             color,
-            color.withOpacity(0.9),
+            color.withValues(alpha: 0.9),
           ],
         ),
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.4),
+            color: color.withValues(alpha: 0.4),
             blurRadius: size * 0.2,
             offset: Offset(0, size * 0.08),
           ),
         ],
         border: Border.all(
-          color: Colors.white.withOpacity(0.3),
+          color: Colors.white.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -60,7 +60,7 @@ class LevelBadgeWidget extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  Colors.white.withOpacity(0.3),
+                  Colors.white.withValues(alpha: 0.3),
                   Colors.transparent,
                 ],
               ),
@@ -82,7 +82,7 @@ class LevelBadgeWidget extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 4,
                   ),
                 ],
@@ -295,7 +295,7 @@ class _LevelUpAnimationState extends State<LevelUpAnimation>
     return FadeTransition(
       opacity: _fadeAnimation,
       child: Container(
-        color: Colors.black.withOpacity(0.8),
+        color: Colors.black.withValues(alpha: 0.8),
         child: Center(
           child: ScaleTransition(
             scale: _scaleAnimation,

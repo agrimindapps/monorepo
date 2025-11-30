@@ -205,7 +205,7 @@ class MacronutrientesController extends ChangeNotifier {
     texto.writeln('Proteínas: ${model.proteinasGramas.toStringAsFixed(1)}g');
     texto.writeln('Gorduras: ${model.gordurasGramas.toStringAsFixed(1)}g');
 
-    Share.share(texto.toString());
+    SharePlus.instance.share(ShareParams(text: texto.toString()));
   }
 
   int getSomaPorcentagens() {
@@ -214,5 +214,10 @@ class MacronutrientesController extends ChangeNotifier {
     int fat = int.tryParse(model.gordurasController.text) ?? 0;
 
     return carbs + protein + fat;
+  }
+
+  /// Atualiza o estado e notifica os listeners
+  void updateState() {
+    notifyListeners();
   }
 }

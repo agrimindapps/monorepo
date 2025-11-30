@@ -2,8 +2,8 @@ import '../../domain/entities/expense.dart';
 
 class ExpenseModel extends Expense {
   const ExpenseModel({
-    required String super.id,
-    required String super.animalId,
+    required super.id,
+    required super.animalId,
     required super.userId,
     required super.title,
     required super.description,

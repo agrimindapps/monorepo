@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../constants/calculation_constants.dart';
 import '../entities/net_salary_calculation.dart';
@@ -53,7 +52,7 @@ class CalculateNetSalaryUseCase {
     }
 
     if (params.dependents > CalculationConstants.maxDependentes) {
-      return ValidationFailure(
+      return const ValidationFailure(
         'Número de dependentes não pode exceder ${CalculationConstants.maxDependentes}',
       );
     }
@@ -135,8 +134,8 @@ class CalculateNetSalaryUseCase {
   }
 
   Map<String, double> _calculateInss(double grossSalary) {
-    double discount = 0.0;
-    double rate = 0.0;
+    var discount = 0.0;
+    var rate = 0.0;
 
     for (final bracket in CalculationConstants.faixasInss) {
       final min = bracket['min']!;
@@ -152,7 +151,7 @@ class CalculateNetSalaryUseCase {
     }
 
     // Apply INSS ceiling
-    final maxInssDiscount = CalculationConstants.tetoInss * 0.14;
+    const maxInssDiscount = CalculationConstants.tetoInss * 0.14;
     if (discount > maxInssDiscount) {
       discount = maxInssDiscount;
     }

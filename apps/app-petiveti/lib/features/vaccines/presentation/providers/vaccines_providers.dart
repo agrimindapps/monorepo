@@ -35,7 +35,7 @@ VaccineLocalDataSource vaccineLocalDataSource(Ref ref) {
 VaccineRemoteDataSource vaccineRemoteDataSource(Ref ref) {
   final firestore = FirebaseFirestore.instance;
   // TODO: Get actual user ID from auth provider
-  final userId = 'temp_user_id'; 
+  const userId = 'temp_user_id'; 
   return VaccineRemoteDataSourceImpl(firestore, userId);
 }
 

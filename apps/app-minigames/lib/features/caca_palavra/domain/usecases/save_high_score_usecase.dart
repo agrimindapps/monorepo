@@ -17,7 +17,7 @@ class SaveHighScoreUseCase {
     try {
       // Validation
       if (completionTime <= 0) {
-        return Left(ValidationFailure('Completion time must be positive'));
+        return const Left(ValidationFailure('Completion time must be positive'));
       }
 
       // Load current high score

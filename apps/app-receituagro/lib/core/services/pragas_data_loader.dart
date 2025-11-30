@@ -79,10 +79,9 @@ class PragasDataLoader {
     }
   }
 
-  /// Força recarregamento dos dados (para desenvolvimento)
-  static Future<void> forceReload(dynamic ref) async {
+  /// Força recarregamento dos dados (reseta flag para permitir novo carregamento)
+  static void forceReload(dynamic ref) {
     _isLoaded = false;
-    await loadPragasData(ref);
   }
 
   /// Verifica se dados estão carregados

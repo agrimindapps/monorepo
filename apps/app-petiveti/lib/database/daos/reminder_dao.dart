@@ -6,7 +6,7 @@ part 'reminder_dao.g.dart';
 
 @DriftAccessor(tables: [Reminders])
 class ReminderDao extends DatabaseAccessor<PetivetiDatabase> with _$ReminderDaoMixin {
-  ReminderDao(PetivetiDatabase db) : super(db);
+  ReminderDao(super.db);
 
   /// Get all reminders for a user
   Future<List<Reminder>> getAllReminders(String userId) {

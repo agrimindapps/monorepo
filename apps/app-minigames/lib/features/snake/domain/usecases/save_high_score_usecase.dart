@@ -17,7 +17,7 @@ class SaveHighScoreUseCase {
   Future<Either<Failure, void>> call({required int score}) async {
     // Validation: score must be non-negative
     if (score < 0) {
-      return Left(ValidationFailure('Score cannot be negative'));
+      return const Left(ValidationFailure('Score cannot be negative'));
     }
 
     return await repository.saveHighScore(score);

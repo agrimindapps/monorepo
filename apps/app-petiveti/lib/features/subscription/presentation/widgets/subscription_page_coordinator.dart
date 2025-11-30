@@ -51,79 +51,71 @@ class SubscriptionPageCoordinator extends ConsumerWidget {
   }
 
   /// Handle subscription to a plan
-  static Future<void> subscribeToPlan(
+  /// TODO: Implement subscribeToPlan in SubscriptionNotifier
+  static Future<bool> subscribeToPlan(
     WidgetRef ref,
     BuildContext context,
     String userId,
     SubscriptionPlan plan,
   ) async {
-    // TODO: Implement subscribeToPlan in SubscriptionNotifier
+    // TODO: Uncomment when implemented
     // final success = await ref.read(subscriptionProvider.notifier).subscribeToPlan(
     //       userId,
     //       plan.id,
     //     );
-    const success = false;
-
-    if (success && context.mounted) {
-      _showSuccessMessage(
-        context,
-        'Assinatura do ${plan.title} ativada com sucesso!',
-      );
-    }
+    // if (success && context.mounted) {
+    //   _showSuccessMessage(context, 'Assinatura do ${plan.title} ativada com sucesso!');
+    // }
+    // return success;
+    return false;
   }
 
   /// Handle subscription cancellation
-  static Future<void> cancelSubscription(
+  /// TODO: Implement cancelSubscription in SubscriptionNotifier
+  static Future<bool> cancelSubscription(
     WidgetRef ref,
     BuildContext context,
     String userId,
   ) async {
-    // TODO: Implement cancelSubscription in SubscriptionNotifier
+    // TODO: Uncomment when implemented
     // final success = await ref.read(subscriptionProvider.notifier).cancelSubscription(userId);
-    const success = false;
-
-    if (success && context.mounted) {
-      _showSuccessMessage(
-        context,
-        'Assinatura cancelada com sucesso',
-      );
-    }
+    // if (success && context.mounted) {
+    //   _showSuccessMessage(context, 'Assinatura cancelada com sucesso');
+    // }
+    // return success;
+    return false;
   }
 
   /// Handle subscription resumption
-  static Future<void> resumeSubscription(
+  /// TODO: Implement resumeSubscription in SubscriptionNotifier
+  static Future<bool> resumeSubscription(
     WidgetRef ref,
     BuildContext context,
     String userId,
   ) async {
-    // TODO: Implement resumeSubscription in SubscriptionNotifier
+    // TODO: Uncomment when implemented
     // final success = await ref.read(subscriptionProvider.notifier).resumeSubscription(userId);
-    const success = false;
-
-    if (success && context.mounted) {
-      _showSuccessMessage(
-        context,
-        'Assinatura retomada com sucesso',
-      );
-    }
+    // if (success && context.mounted) {
+    //   _showSuccessMessage(context, 'Assinatura retomada com sucesso');
+    // }
+    // return success;
+    return false;
   }
 
   /// Handle purchases restoration
-  static Future<void> restorePurchases(
+  /// TODO: Implement restorePurchases in SubscriptionNotifier
+  static Future<bool> restorePurchases(
     WidgetRef ref,
     BuildContext context,
     String userId,
   ) async {
-    // TODO: Implement restorePurchases in SubscriptionNotifier
+    // TODO: Uncomment when implemented
     // final success = await ref.read(subscriptionProvider.notifier).restorePurchases(userId);
-    const success = false;
-
-    if (success && context.mounted) {
-      _showSuccessMessage(
-        context,
-        'Compras restauradas com sucesso',
-      );
-    }
+    // if (success && context.mounted) {
+    //   _showSuccessMessage(context, 'Compras restauradas com sucesso');
+    // }
+    // return success;
+    return false;
   }
 
   /// Reload subscription plans
@@ -132,6 +124,7 @@ class SubscriptionPageCoordinator extends ConsumerWidget {
     // ref.read(subscriptionProvider.notifier).loadAvailablePlans();
   }
 
+  // ignore: unused_element
   static void _showSuccessMessage(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

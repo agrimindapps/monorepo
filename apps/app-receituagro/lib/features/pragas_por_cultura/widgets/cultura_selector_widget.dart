@@ -188,6 +188,7 @@ class CulturaSelectorWidget extends StatelessWidget {
                 DropdownMenuItem<String>(
                   value: 'todas',
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
                         padding: const EdgeInsets.all(3),
@@ -202,7 +203,7 @@ class CulturaSelectorWidget extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Expanded(
+                      const Flexible(
                         child: Text(
                           'Todas as culturas',
                           style: TextStyle(
@@ -227,6 +228,7 @@ class CulturaSelectorWidget extends StatelessWidget {
                   return DropdownMenuItem<String>(
                     value: cultura['id'] as String?,
                     child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
                           padding: const EdgeInsets.all(3),
@@ -241,7 +243,7 @@ class CulturaSelectorWidget extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Expanded(
+                        Flexible(
                           child: Text(
                             cultura['nome'] as String,
                             style: const TextStyle(fontSize: 12),

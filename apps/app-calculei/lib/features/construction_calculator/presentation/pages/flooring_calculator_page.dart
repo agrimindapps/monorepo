@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../domain/usecases/calculate_flooring_usecase.dart';
 import '../providers/flooring_calculator_provider.dart';
 import '../widgets/flooring_input_form.dart';
 import '../widgets/flooring_result_card.dart';
-import '../../domain/usecases/calculate_flooring_usecase.dart';
 
 /// Page for calculating flooring materials
 class FlooringCalculatorPage extends ConsumerStatefulWidget {

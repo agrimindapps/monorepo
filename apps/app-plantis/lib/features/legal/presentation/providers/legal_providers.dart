@@ -1,5 +1,4 @@
 import 'package:core/core.dart' hide Column;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/datasources/account_deletion_datasource.dart';
 import '../../data/datasources/privacy_policy_datasource.dart';

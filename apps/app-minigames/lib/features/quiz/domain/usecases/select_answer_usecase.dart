@@ -28,13 +28,13 @@ class SelectAnswerUseCase {
   }) async {
     // Validation: game must be playing
     if (!currentState.gameStatus.isPlaying) {
-      return Left(GameLogicFailure('Game is not in progress'));
+      return const Left(GameLogicFailure('Game is not in progress'));
     }
 
     // Validation: must have current question
     final currentQuestion = currentState.currentQuestion;
     if (currentQuestion == null) {
-      return Left(GameLogicFailure('No current question'));
+      return const Left(GameLogicFailure('No current question'));
     }
 
     // Validate answer using service

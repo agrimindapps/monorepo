@@ -31,7 +31,7 @@ class WeeklyChallengeWidget extends ConsumerWidget {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: theme.dividerColor.withOpacity(0.2),
+          color: theme.dividerColor.withValues(alpha: 0.2),
           style: BorderStyle.solid,
         ),
       ),
@@ -41,7 +41,7 @@ class WeeklyChallengeWidget extends ConsumerWidget {
           Icon(
             Icons.flag_outlined,
             size: 48,
-            color: theme.colorScheme.primary.withOpacity(0.5),
+            color: theme.colorScheme.primary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 12),
           Text(
@@ -54,7 +54,7 @@ class WeeklyChallengeWidget extends ConsumerWidget {
           Text(
             'Comece um novo desafio semanal!',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 16),
@@ -98,7 +98,7 @@ class WeeklyChallengeWidget extends ConsumerWidget {
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: progressColor.withOpacity(0.3),
+          color: progressColor.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -113,7 +113,7 @@ class WeeklyChallengeWidget extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: progressColor.withOpacity(0.2),
+                      color: progressColor.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
@@ -159,7 +159,7 @@ class WeeklyChallengeWidget extends ConsumerWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.amber.withOpacity(0.2),
+                  color: Colors.amber.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -189,7 +189,7 @@ class WeeklyChallengeWidget extends ConsumerWidget {
           Text(
             challenge.description,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(height: 16),
@@ -222,7 +222,7 @@ class WeeklyChallengeWidget extends ConsumerWidget {
                   Container(
                     height: 10,
                     decoration: BoxDecoration(
-                      color: progressColor.withOpacity(0.2),
+                      color: progressColor.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(5),
                     ),
                   ),
@@ -233,14 +233,14 @@ class WeeklyChallengeWidget extends ConsumerWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            progressColor.withOpacity(0.8),
+                            progressColor.withValues(alpha: 0.8),
                             progressColor,
                           ],
                         ),
                         borderRadius: BorderRadius.circular(5),
                         boxShadow: [
                           BoxShadow(
-                            color: progressColor.withOpacity(0.4),
+                            color: progressColor.withValues(alpha: 0.4),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -261,13 +261,13 @@ class WeeklyChallengeWidget extends ConsumerWidget {
                 Icon(
                   Icons.access_time,
                   size: 14,
-                  color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
                 const SizedBox(width: 4),
                 Text(
                   '${challenge.daysRemaining} dias restantes',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
               ],

@@ -33,7 +33,7 @@ class XpProgressWidget extends ConsumerWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: levelColor.withOpacity(0.1),
+            color: levelColor.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -56,7 +56,7 @@ class XpProgressWidget extends ConsumerWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          levelColor.withOpacity(0.8),
+                          levelColor.withValues(alpha: 0.8),
                           levelColor,
                         ],
                       ),
@@ -87,7 +87,7 @@ class XpProgressWidget extends ConsumerWidget {
                       Text(
                         'Nível $currentLevel',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
                     ],
@@ -108,7 +108,7 @@ class XpProgressWidget extends ConsumerWidget {
                   Text(
                     'XP Total',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ],
@@ -129,7 +129,7 @@ class XpProgressWidget extends ConsumerWidget {
                         ? 'Nível Máximo!'
                         : 'Próximo: Nível $nextLevel',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),
                   Text(
@@ -227,7 +227,7 @@ class _AnimatedXpBarState extends State<AnimatedXpBar>
         return Container(
           height: 12,
           decoration: BoxDecoration(
-            color: widget.color.withOpacity(0.15),
+            color: widget.color.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Stack(
@@ -238,14 +238,14 @@ class _AnimatedXpBarState extends State<AnimatedXpBar>
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        widget.color.withOpacity(0.8),
+                        widget.color.withValues(alpha: 0.8),
                         widget.color,
                       ],
                     ),
                     borderRadius: BorderRadius.circular(6),
                     boxShadow: [
                       BoxShadow(
-                        color: widget.color.withOpacity(0.4),
+                        color: widget.color.withValues(alpha: 0.4),
                         blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),

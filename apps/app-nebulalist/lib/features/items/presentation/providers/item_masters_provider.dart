@@ -1,12 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
 import '../../domain/entities/item_master_entity.dart';
 
+part 'item_masters_provider.g.dart';
+
 /// Main ItemMasters Notifier with pure Riverpod
 /// Manages ItemMaster bank state with AsyncValue
-class ItemMastersNotifier
-    extends AutoDisposeAsyncNotifier<List<ItemMasterEntity>> {
+@riverpod
+class ItemMastersNotifier extends _$ItemMastersNotifier {
   @override
   Future<List<ItemMasterEntity>> build() async {
     // Load initial ItemMasters (sorted by usage count)
@@ -122,12 +125,6 @@ class ItemMastersNotifier
     ref.invalidateSelf();
   }
 }
-
-/// Main item masters provider
-final itemMastersProvider =
-    AutoDisposeAsyncNotifierProvider<ItemMastersNotifier, List<ItemMasterEntity>>(
-  ItemMastersNotifier.new,
-);
 
 /// Provider for ItemMasters count
 final itemMastersCountProvider = Provider.autoDispose<int>((ref) {

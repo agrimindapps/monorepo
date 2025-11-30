@@ -95,14 +95,17 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
   bool _matchesFilters(AnimalBaseEntity animal) {
     if (_showActiveOnly && !animal.isActive) return false;
     if (animal is BovineEntity) {
-      if (_selectedBreed != null && animal.breed != _selectedBreed)
+      if (_selectedBreed != null && animal.breed != _selectedBreed) {
         return false;
-      if (_selectedAptitude != null && animal.aptitude != _selectedAptitude)
+      }
+      if (_selectedAptitude != null && animal.aptitude != _selectedAptitude) {
         return false;
+      }
     } else if (animal is EquineEntity) {
       if (_selectedTemperament != null &&
-          animal.temperament != _selectedTemperament)
+          animal.temperament != _selectedTemperament) {
         return false;
+      }
     }
     if (_selectedOriginCountry != null &&
         animal.originCountry != _selectedOriginCountry) {

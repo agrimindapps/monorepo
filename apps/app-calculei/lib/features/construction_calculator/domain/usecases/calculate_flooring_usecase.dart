@@ -34,7 +34,7 @@ class CalculateFlooringUseCase
   Future<Either<Failure, FlooringCalculation>> call(
     CalculateFlooringParams params,
   ) async {
-    return await repository.calculateFlooring(
+    return repository.calculateFlooring(
       area: params.area,
       tileWidth: params.tileWidth,
       tileLength: params.tileLength,

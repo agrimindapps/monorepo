@@ -37,7 +37,7 @@ AuthErrorHandlingService authErrorHandlingService(Ref ref) {
 
 @riverpod
 AuthValidationService authValidationService(Ref ref) {
-  return AuthValidationService();
+  return const AuthValidationService();
 }
 
 @riverpod

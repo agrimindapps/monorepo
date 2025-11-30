@@ -723,12 +723,15 @@ class WeatherRepositoryImpl implements WeatherRepository {
     WeatherMeasurementEntity measurement,
   ) async {
     try {
-      if (measurement.temperature < -100 || measurement.temperature > 70)
+      if (measurement.temperature < -100 || measurement.temperature > 70) {
         return const Right(false);
-      if (measurement.humidity < 0 || measurement.humidity > 100)
+      }
+      if (measurement.humidity < 0 || measurement.humidity > 100) {
         return const Right(false);
-      if (measurement.pressure < 800 || measurement.pressure > 1200)
+      }
+      if (measurement.pressure < 800 || measurement.pressure > 1200) {
         return const Right(false);
+      }
 
       return const Right(true);
     } catch (e) {

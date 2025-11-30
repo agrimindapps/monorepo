@@ -5,7 +5,6 @@ import 'package:app_agrihurbi/core/theme/design_tokens.dart';
 import 'package:app_agrihurbi/core/utils/error_handler.dart';
 import 'package:app_agrihurbi/core/validators/input_validators.dart';
 import 'package:app_agrihurbi/features/auth/presentation/notifiers/auth_notifier.dart';
-import 'package:core/core.dart' show Consumer;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';

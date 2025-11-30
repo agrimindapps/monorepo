@@ -1,5 +1,4 @@
 // Package imports:
-import 'package:dartz/dartz.dart';
 
 // Core imports:
 import 'package:core/core.dart';
@@ -18,7 +17,7 @@ class FlapBirdUseCase {
     try {
       // Can only flap when game is playing
       if (!currentState.isPlaying) {
-        return Left(
+        return const Left(
           ValidationFailure('Cannot flap when game is not playing'),
         );
       }

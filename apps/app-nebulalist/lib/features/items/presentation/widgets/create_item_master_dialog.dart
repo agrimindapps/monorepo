@@ -109,7 +109,7 @@ class _CreateItemMasterDialogState
                   if (value == null || value.trim().isEmpty) {
                     return 'Nome é obrigatório';
                   }
-                  if (value.trim().length < 1) {
+                  if (value.trim().isEmpty) {
                     return 'Nome deve ter pelo menos 1 caractere';
                   }
                   if (value.trim().length > 100) {
@@ -123,7 +123,7 @@ class _CreateItemMasterDialogState
 
               // Category dropdown
               DropdownButtonFormField<String>(
-                value: _selectedCategory,
+                initialValue: _selectedCategory,
                 decoration: const InputDecoration(
                   labelText: 'Categoria *',
                   border: OutlineInputBorder(),

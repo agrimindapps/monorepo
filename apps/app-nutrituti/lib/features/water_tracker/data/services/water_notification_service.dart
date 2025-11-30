@@ -39,12 +39,11 @@ class WaterNotificationService {
     // Android settings
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    // iOS settings
-    final darwinSettings = DarwinInitializationSettings(
+    // iOS settings - onDidReceiveLocalNotification removed in newer versions
+    const darwinSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
-      onDidReceiveLocalNotification: _onDidReceiveLocalNotification,
     );
 
     final initSettings = InitializationSettings(
@@ -81,15 +80,6 @@ class WaterNotificationService {
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
-  }
-
-  void _onDidReceiveLocalNotification(
-    int id,
-    String? title,
-    String? body,
-    String? payload,
-  ) {
-    debugPrint('iOS notification received: $title');
   }
 
   void _onNotificationResponse(NotificationResponse response) {

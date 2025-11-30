@@ -1,11 +1,10 @@
 // Flutter imports:
+// Project imports:
+import 'package:app_calculei/core/style/shadcn_style.dart';
 import 'package:flutter/material.dart';
-
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Project imports:
-import 'package:app_calculei/core/style/shadcn_style.dart';
 import '../../domain/usecases/calculate_emergency_reserve_usecase.dart';
 import '../providers/emergency_reserve_calculator_provider.dart';
 import '../widgets/emergency_reserve_input_form.dart';
@@ -73,7 +72,7 @@ class _EmergencyReserveCalculatorPageState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Calcule sua reserva de emergência',
                             style: TextStyle(
                               fontSize: 18,

@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import '../entities/cash_vs_installment_calculation.dart';
 
 abstract class CashVsInstallmentRepository {

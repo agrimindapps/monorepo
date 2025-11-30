@@ -1,16 +1,16 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:core/core.dart' hide Ref;
+
+import '../../../../core/providers/core_providers.dart' as core_providers;
+import '../../../../core/providers/premium_providers.dart';
 import '../../../../database/providers/database_providers.dart';
 import '../../../comentarios/domain/comentarios_service.dart';
-import '../../../../core/providers/premium_providers.dart';
-import '../../../../core/providers/core_providers.dart' as core_providers;
 import '../../../comentarios/presentation/providers/comentarios_mapper_provider.dart';
 import '../../../comentarios/presentation/providers/comentarios_providers.dart';
 import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
 import '../../../favoritos/presentation/providers/favoritos_services_providers.dart';
 import '../../data/repositories/defensivos_repository_impl.dart';
 import '../../data/services/defensivos_filter_service.dart';
+import '../../data/services/defensivos_grouping_service.dart';
 import '../../data/services/defensivos_query_service.dart';
 import '../../data/services/defensivos_search_service.dart';
 import '../../data/services/defensivos_stats_service.dart';
@@ -19,7 +19,6 @@ import '../../domain/usecases/get_defensivos_agrupados_usecase.dart';
 import '../../domain/usecases/get_defensivos_com_filtros_usecase.dart';
 import '../../domain/usecases/get_defensivos_completos_usecase.dart';
 import '../../domain/usecases/get_defensivos_usecase.dart';
-import '../../data/services/defensivos_grouping_service.dart';
 
 part 'defensivos_providers.g.dart';
 

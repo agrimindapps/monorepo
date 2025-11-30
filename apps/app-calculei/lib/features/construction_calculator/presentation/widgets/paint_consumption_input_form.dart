@@ -74,7 +74,7 @@ class _PaintConsumptionInputFormState extends State<PaintConsumptionInputForm> {
 
           // Surface Preparation Dropdown
           DropdownButtonFormField<double>(
-            value: _surfacePreparation,
+            initialValue: _surfacePreparation,
             decoration: const InputDecoration(
               labelText: 'Preparo da superfície',
               prefixIcon: Icon(Icons.texture),
@@ -105,7 +105,7 @@ class _PaintConsumptionInputFormState extends State<PaintConsumptionInputForm> {
 
           // Coats Input
           DropdownButtonFormField<int>(
-            value: _coats,
+            initialValue: _coats,
             decoration: const InputDecoration(
               labelText: 'Número de demãos',
               prefixIcon: Icon(Icons.layers),

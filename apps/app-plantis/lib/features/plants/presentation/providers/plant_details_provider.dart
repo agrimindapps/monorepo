@@ -216,7 +216,7 @@ UpdatePlantUseCase updatePlantUseCase(Ref ref) {
 
 /// Alias for backwards compatibility with existing code
 /// Use plantDetailsNotifierProvider instead in new code
-final plantDetailsProviderProvider = plantDetailsNotifierProvider;
+const plantDetailsProviderProvider = plantDetailsNotifierProvider;
 
 /// Compatibility wrapper class for PlantDetailsController
 /// This class wraps the Riverpod notifier to provide a compatible interface
@@ -240,4 +240,4 @@ class PlantDetailsProvider {
 
 // LEGACY ALIAS
 // ignore: deprecated_member_use_from_same_package
-final plantDetailsNotifierProvider = plantDetailsProvider;
+const plantDetailsNotifierProvider = plantDetailsProvider;

@@ -37,7 +37,9 @@ class NewMacronutrientesResultWidget extends StatelessWidget {
   }
 
   Widget _buildResponsiveLayout(BuildContext context, model, controller) {
+    // ignore: unused_local_variable
     final screenWidth = MediaQuery.of(context).size.width;
+    // ignore: unused_local_variable
     final isSmallScreen = screenWidth < 600;
 
     return Column(

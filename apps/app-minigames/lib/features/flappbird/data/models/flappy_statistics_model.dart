@@ -189,15 +189,15 @@ class FlappyStatisticsModel {
   });
 
   factory FlappyStatisticsModel.empty() {
-    return FlappyStatisticsModel(
-      easyStats: const FlappyDifficultyStatsModel(difficulty: 'easy'),
-      mediumStats: const FlappyDifficultyStatsModel(difficulty: 'medium'),
-      hardStats: const FlappyDifficultyStatsModel(difficulty: 'hard'),
-      classicStats: const FlappyGameModeStatsModel(gameMode: 'classic'),
-      timeAttackStats: const FlappyGameModeStatsModel(gameMode: 'timeAttack'),
-      speedRunStats: const FlappyGameModeStatsModel(gameMode: 'speedRun'),
-      nightModeStats: const FlappyGameModeStatsModel(gameMode: 'nightMode'),
-      hardcoreStats: const FlappyGameModeStatsModel(gameMode: 'hardcore'),
+    return const FlappyStatisticsModel(
+      easyStats: FlappyDifficultyStatsModel(difficulty: 'easy'),
+      mediumStats: FlappyDifficultyStatsModel(difficulty: 'medium'),
+      hardStats: FlappyDifficultyStatsModel(difficulty: 'hard'),
+      classicStats: FlappyGameModeStatsModel(gameMode: 'classic'),
+      timeAttackStats: FlappyGameModeStatsModel(gameMode: 'timeAttack'),
+      speedRunStats: FlappyGameModeStatsModel(gameMode: 'speedRun'),
+      nightModeStats: FlappyGameModeStatsModel(gameMode: 'nightMode'),
+      hardcoreStats: FlappyGameModeStatsModel(gameMode: 'hardcore'),
     );
   }
 

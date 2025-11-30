@@ -2,8 +2,8 @@ import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
-import '../../../../core/services/access_history_service.dart';
 import '../../../../core/providers/core_providers.dart' as core_providers;
+import '../../../../core/services/access_history_service.dart';
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 

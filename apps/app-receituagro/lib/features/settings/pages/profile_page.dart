@@ -2,8 +2,8 @@ import 'package:core/core.dart' as core;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/providers/core_providers.dart';
 import '../../../core/providers/auth_providers.dart';
+import '../../../core/providers/core_providers.dart';
 import '../../../core/widgets/modern_header_widget.dart';
 import '../../../core/widgets/responsive_content_wrapper.dart';
 import '../../auth/presentation/pages/login_page.dart';

@@ -181,7 +181,7 @@ class AdipososidadeController extends ChangeNotifier {
     if (_stateService.state.hasValidResult) {
       _stateService.setSharingState();
       // final texto = AdipososidadeUtils.gerarTextoCompartilhamento(_stateService.resultado!);
-      // Share.share(texto);
+      // SharePlus.instance.share(ShareParams(text: texto));
     }
   }
 

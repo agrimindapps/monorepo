@@ -1,12 +1,10 @@
 import 'package:core/core.dart';
 
-
-
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/datasources/settings_local_datasource.dart';
 import '../../data/repositories/settings_repository_impl.dart';
 import '../../domain/repositories/settings_repository.dart';
 import '../../domain/usecases/manage_settings.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
 
 // Core Services
 final sharedPreferencesProvider = FutureProvider<SharedPreferences>((ref) async {

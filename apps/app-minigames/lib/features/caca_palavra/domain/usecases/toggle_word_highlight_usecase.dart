@@ -11,7 +11,7 @@ class ToggleWordHighlightUseCase {
     try {
       // Validate index
       if (wordIndex < 0 || wordIndex >= currentState.words.length) {
-        return Left(ValidationFailure('Invalid word index'));
+        return const Left(ValidationFailure('Invalid word index'));
       }
 
       final targetWord = currentState.words[wordIndex];

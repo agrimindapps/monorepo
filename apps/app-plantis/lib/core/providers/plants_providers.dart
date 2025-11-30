@@ -6,18 +6,17 @@ import 'package:flutter/foundation.dart';
 import '../../features/plants/domain/entities/plant.dart';
 import '../../features/plants/domain/usecases/add_plant_usecase.dart';
 import '../../features/plants/domain/usecases/delete_plant_usecase.dart';
-import '../../features/plants/domain/usecases/get_plants_usecase.dart';
 import '../../features/plants/domain/usecases/get_plant_by_id_usecase.dart';
+import '../../features/plants/domain/usecases/get_plants_usecase.dart';
 import '../../features/plants/domain/usecases/search_plants_usecase.dart';
 import '../../features/plants/domain/usecases/update_plant_usecase.dart';
+import '../../features/plants/presentation/providers/plants_providers.dart';
 import '../auth/auth_state_notifier.dart';
 import '../data/adapters/auth_state_provider_adapter.dart';
 import '../interfaces/i_auth_state_provider.dart';
 import '../services/plants_care_calculator.dart';
 import '../services/plants_data_service.dart';
 import '../services/plants_filter_service.dart';
-
-import '../../features/plants/presentation/providers/plants_providers.dart';
 
 part 'plants_providers.g.dart';
 
@@ -1153,4 +1152,4 @@ String? plantsError(Ref ref) {
 // LEGACY PROVIDER ALIASES - For backward compatibility
 // ============================================================================
 // ignore: deprecated_member_use_from_same_package
-final plantsNotifierProvider = plantsProvider;
+const plantsNotifierProvider = plantsProvider;

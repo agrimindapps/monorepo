@@ -5,10 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../database/receituagro_database.dart';
 import '../../database/repositories/repositories.dart';
-import '../../database/sync/adapters/favoritos_drift_sync_adapter.dart';
 import '../../database/sync/adapters/comentarios_drift_sync_adapter.dart';
-import '../../features/analytics/analytics_service.dart';
+import '../../database/sync/adapters/favoritos_drift_sync_adapter.dart';
 import '../../features/analytics/analytics_providers.dart';
+import '../../features/analytics/analytics_service.dart';
+import '../../features/favoritos/presentation/providers/favoritos_providers.dart';
+import '../../features/sync/services/sync_coordinator.dart';
 import '../navigation/agricultural_navigation_extension.dart';
 import '../services/app_data_manager.dart';
 import '../services/cloud_functions_service.dart';
@@ -16,17 +18,15 @@ import '../services/device_identity_service.dart';
 import '../services/diagnostico_integration_service.dart';
 import '../services/firebase_messaging_service.dart';
 import '../services/premium_service.dart';
+import '../services/promotional_notification_manager.dart';
+import '../services/receita_agro_sync_service.dart';
 import '../services/receituagro_data_cleaner.dart';
 import '../services/receituagro_navigation_service.dart';
 import '../services/receituagro_notification_service.dart';
 import '../services/remote_config_service.dart';
-import '../services/receita_agro_sync_service.dart';
-import '../services/promotional_notification_manager.dart';
 import '../sync/receituagro_drift_storage_adapter.dart';
 import '../sync/sync_operations.dart';
 import '../sync/sync_queue.dart';
-import '../../features/favoritos/presentation/providers/favoritos_providers.dart';
-import '../../features/sync/services/sync_coordinator.dart';
 
 // ============================================================================
 // MANUAL PROVIDERS - Riverpod 3.0 Compatible

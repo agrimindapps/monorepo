@@ -7,7 +7,7 @@ part 'perfil_dao.g.dart';
 @DriftAccessor(tables: [Perfis])
 class PerfilDao extends DatabaseAccessor<NutritutiDatabase>
     with _$PerfilDaoMixin {
-  PerfilDao(NutritutiDatabase db) : super(db);
+  PerfilDao(super.db);
 
   /// Get perfil by ID
   Future<Perfil?> getPerfilById(String id) {

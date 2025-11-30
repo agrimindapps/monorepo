@@ -6,7 +6,7 @@ part 'expense_dao.g.dart';
 
 @DriftAccessor(tables: [Expenses])
 class ExpenseDao extends DatabaseAccessor<PetivetiDatabase> with _$ExpenseDaoMixin {
-  ExpenseDao(PetivetiDatabase db) : super(db);
+  ExpenseDao(super.db);
 
   /// Get all expenses for a user
   Future<List<Expense>> getAllExpenses(String userId) {

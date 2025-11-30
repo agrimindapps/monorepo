@@ -238,4 +238,4 @@ class TasksCrudNotifier extends _$TasksCrudNotifier {
 
 // LEGACY ALIAS
 // ignore: deprecated_member_use_from_same_package
-final tasksCrudNotifierProvider = tasksCrudProvider;
+const tasksCrudNotifierProvider = tasksCrudProvider;

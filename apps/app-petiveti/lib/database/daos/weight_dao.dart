@@ -6,7 +6,7 @@ part 'weight_dao.g.dart';
 
 @DriftAccessor(tables: [WeightRecords])
 class WeightDao extends DatabaseAccessor<PetivetiDatabase> with _$WeightDaoMixin {
-  WeightDao(PetivetiDatabase db) : super(db);
+  WeightDao(super.db);
 
   /// Get all weight records for a user
   Future<List<WeightRecord>> getAllWeightRecords(String userId) {

@@ -1,6 +1,9 @@
 // Dart imports:
 import 'dart:io' show Platform;
 
+// Flutter imports:
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 // Project imports:
 import '../../core/services/info_device_service.dart';
 
@@ -34,36 +37,45 @@ class AppEnvironment {
   String siteApp = 'https://nutrituti.agrimind.com.br';
   final String linkPoliticaPrivacidade =
       'https://agrimindapps.blogspot.com/2022/08/nutrituti-politica-de-privacidade.html';
-  final String linkTermoUso = Platform.isAndroid
-      ? 'https://agrimindapps.blogspot.com/2022/08/nutrituti-termos-e-condicoes.html'
-      : 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
+  
+  String get linkTermoUso {
+    if (kIsWeb) {
+      return 'https://agrimindapps.blogspot.com/2022/08/nutrituti-termos-e-condicoes.html';
+    }
+    return Platform.isAndroid
+        ? 'https://agrimindapps.blogspot.com/2022/08/nutrituti-termos-e-condicoes.html'
+        : 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
+  }
+
+  /// Helper para verificar se é Android (seguro para web)
+  bool get _isAndroid => !kIsWeb && Platform.isAndroid;
 
   void initialize() {
     if (InfoDeviceService().isProduction.value) {
-      admobBanner = Platform.isAndroid
+      admobBanner = _isAndroid
           ? prod['admobBanner-android'] as String
           : prod['admobBanner-ios'] as String;
-      onOpenApp = Platform.isAndroid
+      onOpenApp = _isAndroid
           ? prod['onOpenApp-android'] as String
           : prod['onOpenApp-ios'] as String;
-      admobPremiado = Platform.isAndroid
+      admobPremiado = _isAndroid
           ? prod['admobPremiado-android'] as String
           : prod['admobPremiado-ios'] as String;
-      altAdmobBanner = Platform.isAndroid
+      altAdmobBanner = _isAndroid
           ? prod['altAdmobBanner-android'] as String
           : prod['altAdmobBanner-ios'] as String;
     } else {
       // Homologação
-      admobBanner = Platform.isAndroid
+      admobBanner = _isAndroid
           ? hml['admobBanner-android'] as String
           : hml['admobBanner-ios'] as String;
-      onOpenApp = Platform.isAndroid
+      onOpenApp = _isAndroid
           ? hml['onOpenApp-android'] as String
           : hml['onOpenApp-ios'] as String;
-      admobPremiado = Platform.isAndroid
+      admobPremiado = _isAndroid
           ? hml['admobPremiado-android'] as String
           : hml['admobPremiado-ios'] as String;
-      altAdmobBanner = Platform.isAndroid
+      altAdmobBanner = _isAndroid
           ? hml['altAdmobBanner-android'] as String
           : hml['altAdmobBanner-ios'] as String;
     }

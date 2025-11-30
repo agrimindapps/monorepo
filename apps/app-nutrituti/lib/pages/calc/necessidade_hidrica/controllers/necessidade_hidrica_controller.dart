@@ -87,7 +87,7 @@ Clima: $climaTexto$templateResultados
 Ingestão básica recomendada: $resultadoBasico litros/dia
 Ingestão ajustada recomendada: $resultadoAjustado litros/dia$templateAviso''';
 
-    Share.share(shareText);
+    SharePlus.instance.share(ShareParams(text: shareText));
   }
 
   void _exibirMensagem(BuildContext context, String message,

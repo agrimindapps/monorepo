@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../domain/usecases/calculate_cost_per_sqm_usecase.dart';
 import '../providers/cost_per_sqm_calculator_provider.dart';
 import '../widgets/cost_per_sqm_input_form.dart';
 import '../widgets/cost_per_sqm_result_card.dart';
-import '../../domain/usecases/calculate_cost_per_sqm_usecase.dart';
 
 /// Page for calculating cost per square meter
 class CostPerSqmCalculatorPage extends ConsumerStatefulWidget {

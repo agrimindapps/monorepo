@@ -18,7 +18,7 @@ class NetSalaryLocalDataSourceImpl implements NetSalaryLocalDataSource {
 
   NetSalaryLocalDataSourceImpl(this._prefs);
 
-  String _getKey(String id) => '${_storagePrefix}:$id';
+  String _getKey(String id) => '$_storagePrefix:$id';
 
   Future<List<String>> _getStoredIds() async {
     return _prefs.getStringList(_idsKey) ?? [];

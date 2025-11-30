@@ -24,7 +24,7 @@ class SnakeRepositoryImpl implements SnakeRepository {
       final highScore = await localDataSource.loadHighScore();
       return Right(highScore);
     } on CacheException {
-      return Left(CacheFailure());
+      return const Left(CacheFailure());
     }
   }
 
@@ -34,7 +34,7 @@ class SnakeRepositoryImpl implements SnakeRepository {
       await localDataSource.saveHighScore(score);
       return const Right(null);
     } on CacheException {
-      return Left(CacheFailure());
+      return const Left(CacheFailure());
     }
   }
 }

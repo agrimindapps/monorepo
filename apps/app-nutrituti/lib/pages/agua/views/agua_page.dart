@@ -159,6 +159,7 @@ class AguaPage extends ConsumerWidget {
   }
 
   // Método para deletar um registro
+  // ignore: unused_element
   Future<void> _deleteRegistro(BuildContext context, WidgetRef ref, BeberAgua registro) async {
     final confirm = await showDialog<bool>(
       context: context,

@@ -25,7 +25,7 @@ class GenerateGameQuestionsUseCase {
       (questions) {
         // Validation: must have at least 1 question
         if (questions.isEmpty) {
-          return Left(ValidationFailure('No questions available'));
+          return const Left(ValidationFailure('No questions available'));
         }
 
         // Return all questions (no random selection for quiz)

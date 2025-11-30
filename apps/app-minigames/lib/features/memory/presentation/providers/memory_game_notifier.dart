@@ -4,11 +4,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/game_state_entity.dart';
 import '../../domain/entities/high_score_entity.dart';
-import '../../domain/usecases/check_match_usecase.dart';
 import '../../domain/usecases/flip_card_usecase.dart';
 import '../../domain/usecases/load_high_score_usecase.dart';
 import '../../domain/usecases/restart_game_usecase.dart';
-import '../../domain/usecases/save_high_score_usecase.dart';
 import 'memory_providers.dart';
 
 part 'memory_game_notifier.g.dart';

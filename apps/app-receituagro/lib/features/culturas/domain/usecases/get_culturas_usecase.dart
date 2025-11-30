@@ -91,15 +91,15 @@ class GetCulturasUseCase {
 /// ============================================================================
 
 /// Use case para buscar todas as culturas [DEPRECATED]
-@Deprecated("Deprecated - use alternative")
+@Deprecated('Deprecated - use alternative')
 class GetAllCulturasUseCase implements UseCase<List<CulturaEntity>, NoParams> {
   final ICulturasRepository repository;
 
-  @Deprecated("Deprecated - use alternative")
+  @Deprecated('Deprecated - use alternative')
   GetAllCulturasUseCase(this.repository);
 
   @override
-  @Deprecated("Deprecated - use alternative")
+  @Deprecated('Deprecated - use alternative')
   Future<Either<Failure, List<CulturaEntity>>> call(NoParams params) async {
     return await repository.getAllCulturas();
   }

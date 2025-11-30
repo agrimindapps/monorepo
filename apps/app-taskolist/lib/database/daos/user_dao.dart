@@ -1,13 +1,14 @@
 import 'package:drift/drift.dart';
-import '../taskolist_database.dart';
-import '../tables/users_table.dart';
+
 import '../../features/auth/data/user_model.dart';
+import '../tables/users_table.dart';
+import '../taskolist_database.dart';
 
 part 'user_dao.g.dart';
 
 @DriftAccessor(tables: [Users])
 class UserDao extends DatabaseAccessor<TaskolistDatabase> with _$UserDaoMixin {
-  UserDao(TaskolistDatabase db) : super(db);
+  UserDao(super.db);
 
   // ========================================================================
   // READ OPERATIONS

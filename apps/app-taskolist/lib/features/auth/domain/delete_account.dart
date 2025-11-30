@@ -1,4 +1,3 @@
-import 'package:core/core.dart';
 
 import '../../../core/usecases/usecase.dart';
 import '../../../core/utils/typedef.dart';

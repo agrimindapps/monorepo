@@ -13,13 +13,13 @@ class SelectCellUseCase {
     try {
       // Validate if game is still playing
       if (!currentState.isPlaying) {
-        return Left(ValidationFailure('Game is not in playing state'));
+        return const Left(ValidationFailure('Game is not in playing state'));
       }
 
       // Validate position bounds
       if (row < 0 || row >= currentState.gridSize ||
           col < 0 || col >= currentState.gridSize) {
-        return Left(ValidationFailure('Invalid grid position'));
+        return const Left(ValidationFailure('Invalid grid position'));
       }
 
       final position = Position(row, col);

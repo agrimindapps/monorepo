@@ -1,6 +1,5 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/core_di_providers.dart';
 import '../../../../core/theme/plantis_colors.dart';

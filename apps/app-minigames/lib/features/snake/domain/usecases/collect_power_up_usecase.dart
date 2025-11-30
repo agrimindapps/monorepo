@@ -23,7 +23,7 @@ class CollectPowerUpUseCase {
   }) async {
     // Validation
     if (!currentState.gameStatus.isRunning) {
-      return Left(GameLogicFailure('Game is not running'));
+      return const Left(GameLogicFailure('Game is not running'));
     }
 
     // Remove power-up from grid

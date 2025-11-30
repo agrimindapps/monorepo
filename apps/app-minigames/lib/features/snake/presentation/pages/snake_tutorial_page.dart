@@ -25,7 +25,7 @@ class _SnakeTutorialPageState extends State<SnakeTutorialPage> {
   bool _dontShowAgain = false;
 
   final List<_TutorialSlide> _slides = [
-    _TutorialSlide(
+    const _TutorialSlide(
       title: 'Bem-vindo ao Neon Snake!',
       description: 'Guie a cobra para comer a comida e crescer. '
           'Quanto maior você ficar, maior será sua pontuação!',

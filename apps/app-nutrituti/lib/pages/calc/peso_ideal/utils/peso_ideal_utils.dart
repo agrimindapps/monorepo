@@ -65,6 +65,6 @@ class PesoIdealUtils {
     Método de cálculo: ${model.generoDef['id'] == 1 ? 'Masculino' : 'Feminino'}
     ''';
 
-    Share.share(shareText);
+    SharePlus.instance.share(ShareParams(text: shareText));
   }
 }

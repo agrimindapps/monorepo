@@ -278,7 +278,7 @@ class WaterLocalDataSourceImpl implements WaterLocalDataSource {
       type: _parseAchievementType(achievement.type),
       title: achievement.title,
       description: achievement.description,
-      unlockedAt: achievement.unlockedAt,
+      unlockedAt: achievement.unlockedAt ?? DateTime.now(),
       iconName: achievement.iconName,
     );
   }

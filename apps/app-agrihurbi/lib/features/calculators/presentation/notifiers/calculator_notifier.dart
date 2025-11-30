@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../providers/calculators_di_providers.dart';
 import '../../domain/entities/calculation_history.dart';
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/entities/calculator_category.dart';
@@ -11,6 +10,7 @@ import '../../domain/usecases/get_calculators.dart';
 import '../../domain/usecases/manage_calculation_history.dart';
 import '../../domain/usecases/manage_favorites.dart';
 import '../../domain/usecases/save_calculation_to_history.dart';
+import '../providers/calculators_di_providers.dart';
 import 'calculator_state.dart';
 
 part 'calculator_notifier.g.dart';

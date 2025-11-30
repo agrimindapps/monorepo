@@ -171,7 +171,7 @@ class NewMacronutrientesFormWidget extends StatelessWidget {
         color: isDark ? color.withValues(alpha: 0.8) : color,
       ),
       inputFormatters: [mainController.model.porcentagemmask],
-      onChanged: (_) => mainController.notifyListeners(),
+      onChanged: (_) => mainController.updateState(),
     );
   }
 

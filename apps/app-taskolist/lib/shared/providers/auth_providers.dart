@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' as core;
 import 'package:core/core.dart' hide Column;
+import 'package:flutter/foundation.dart';
 
 import '../../core/providers/core_providers.dart';
 import '../../infrastructure/services/auth_service.dart';

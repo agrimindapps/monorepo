@@ -20,6 +20,15 @@ class HomePragasStatsWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Determina se deve mostrar estado de erro ou de loading/dados
+    final shouldShowError = state.errorMessage != null && 
+        state.errorMessage!.isNotEmpty &&
+        !state.isLoading;
+    
+    // Se stats é nulo e não há erro, ainda está carregando
+    final isStillLoading = state.isLoading || 
+        (state.stats == null && state.errorMessage == null);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 0),
       child: Card(
@@ -33,31 +42,42 @@ class HomePragasStatsWidget extends ConsumerWidget {
             horizontal: 0,
             vertical: ReceitaAgroSpacing.sm,
           ),
-          child: state.errorMessage != null
-              ? _buildErrorState(context)
-              : LayoutBuilder(
-                  builder: (context, constraints) {
-                    final availableWidth = constraints.maxWidth;
-                    final screenWidth = MediaQuery.of(context).size.width;
-                    final isSmallDevice =
-                        screenWidth < ReceitaAgroBreakpoints.smallDevice;
-                    final useVerticalLayout = isSmallDevice ||
-                        availableWidth <
-                            ReceitaAgroBreakpoints.verticalLayoutThreshold;
+          child: shouldShowError
+              ? _buildErrorState(context, ref)
+              : isStillLoading
+                  ? _buildLoadingState(context)
+                  : LayoutBuilder(
+                      builder: (context, constraints) {
+                        final availableWidth = constraints.maxWidth;
+                        final screenWidth = MediaQuery.of(context).size.width;
+                        final isSmallDevice =
+                            screenWidth < ReceitaAgroBreakpoints.smallDevice;
+                        final useVerticalLayout = isSmallDevice ||
+                            availableWidth <
+                                ReceitaAgroBreakpoints.verticalLayoutThreshold;
 
-                    if (useVerticalLayout) {
-                      return _buildVerticalLayout(context, ref, availableWidth);
-                    } else {
-                      return _buildGridLayout(context, ref, availableWidth);
-                    }
-                  },
-                ),
+                        if (useVerticalLayout) {
+                          return _buildVerticalLayout(context, ref, availableWidth);
+                        } else {
+                          return _buildGridLayout(context, ref, availableWidth);
+                        }
+                      },
+                    ),
         ),
       ),
     );
   }
 
-  Widget _buildErrorState(BuildContext context) {
+  Widget _buildLoadingState(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(ReceitaAgroSpacing.lg),
+      child: const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
     return Container(
@@ -84,9 +104,9 @@ class HomePragasStatsWidget extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const ElevatedButton(
-            onPressed: null, // Refresh handled by parent widget with ref
-            child: Text('Tentar Novamente'),
+          ElevatedButton(
+            onPressed: () => ref.read(homePragasProvider.notifier).forceRefresh(),
+            child: const Text('Tentar Novamente'),
           ),
         ],
       ),

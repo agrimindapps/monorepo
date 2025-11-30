@@ -25,7 +25,7 @@ class QuizRepositoryImpl implements QuizRepository {
       final questions = await localDataSource.getQuestions();
       return Right(questions);
     } on CacheException {
-      return Left(CacheFailure());
+      return const Left(CacheFailure());
     }
   }
 
@@ -35,7 +35,7 @@ class QuizRepositoryImpl implements QuizRepository {
       final highScore = await localDataSource.loadHighScore();
       return Right(highScore);
     } on CacheException {
-      return Left(CacheFailure());
+      return const Left(CacheFailure());
     }
   }
 
@@ -45,7 +45,7 @@ class QuizRepositoryImpl implements QuizRepository {
       await localDataSource.saveHighScore(score);
       return const Right(null);
     } on CacheException {
-      return Left(CacheFailure());
+      return const Left(CacheFailure());
     }
   }
 }

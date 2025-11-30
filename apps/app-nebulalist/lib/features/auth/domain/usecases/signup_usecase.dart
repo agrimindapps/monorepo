@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:equatable/equatable.dart';
 
 /// Use case for user registration with email and password
 class SignUpUseCase {

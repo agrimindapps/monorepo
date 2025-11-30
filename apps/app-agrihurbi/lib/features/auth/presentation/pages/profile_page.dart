@@ -1,6 +1,5 @@
 import 'package:core/core.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../notifiers/auth_notifier.dart';
 

@@ -1,15 +1,10 @@
 import 'package:core/core.dart' hide Column;
 
+import '../../features/plants/presentation/providers/plants_providers.dart';
+import '../../features/tasks/presentation/providers/tasks_providers.dart';
+import '../auth/auth_state_notifier.dart';
 import '../constants/app_constants.dart';
 import '../data/adapters/plantis_image_service_adapter.dart';
-import '../services/notification_manager.dart';
-import '../services/notification_permission_manager.dart';
-import '../services/overdue_task_monitor.dart';
-import '../services/plantis_notification_service.dart';
-import '../services/secure_storage_service.dart';
-import '../services/task_notification_scheduler.dart';
-import '../services/task_notification_service.dart';
-import '../services/url_launcher_service.dart';
 import '../services/data_cleaner_service.dart';
 import '../services/interfaces/i_notification_permission_manager.dart';
 import '../services/interfaces/i_notification_schedule_manager.dart';
@@ -18,10 +13,15 @@ import '../services/interfaces/i_permission_manager.dart';
 import '../services/interfaces/i_plant_notification_manager.dart';
 import '../services/interfaces/i_task_notification_manager.dart';
 import '../services/interfaces/i_task_notification_scheduler.dart';
-import '../auth/auth_state_notifier.dart';
+import '../services/notification_manager.dart';
+import '../services/notification_permission_manager.dart';
+import '../services/overdue_task_monitor.dart';
+import '../services/plantis_notification_service.dart';
+import '../services/secure_storage_service.dart';
+import '../services/task_notification_scheduler.dart';
+import '../services/task_notification_service.dart';
+import '../services/url_launcher_service.dart';
 import 'repository_providers.dart';
-import '../../features/plants/presentation/providers/plants_providers.dart';
-import '../../features/tasks/presentation/providers/tasks_providers.dart';
 
 part 'core_di_providers.g.dart';
 

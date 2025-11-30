@@ -16,12 +16,12 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/providers/core_di_providers.dart';
-import 'device_management_providers.dart';
 import '../../data/models/device_model.dart';
 import '../../domain/usecases/get_device_statistics_usecase.dart';
 import '../../domain/usecases/get_user_devices_usecase.dart';
 import '../../domain/usecases/revoke_device_usecase.dart';
 import '../../domain/usecases/validate_device_usecase.dart';
+import 'device_management_providers.dart';
 
 part 'device_management_notifier.g.dart';
 

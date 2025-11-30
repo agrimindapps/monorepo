@@ -224,10 +224,6 @@ class DialogService {
 
 /// Dialog choice model
 class DialogChoice<T> {
-  final String label;
-  final String? subtitle;
-  final IconData? icon;
-  final T value;
 
   const DialogChoice({
     required this.label,
@@ -235,4 +231,8 @@ class DialogChoice<T> {
     this.icon,
     required this.value,
   });
+  final String label;
+  final String? subtitle;
+  final IconData? icon;
+  final T value;
 }

@@ -1,11 +1,9 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gasometer_drift/features/auth/presentation/providers/auth_providers.dart'
-    as auth_providers;
 import 'package:gasometer_drift/features/auth/domain/entities/user_entity.dart'
     as gasometer_auth;
+import 'package:gasometer_drift/features/auth/presentation/providers/auth_providers.dart'
+    as auth_providers;
 import 'package:gasometer_drift/features/vehicles/domain/entities/vehicle_entity.dart';
 import 'package:gasometer_drift/features/vehicles/domain/usecases/add_vehicle.dart';
 import 'package:gasometer_drift/features/vehicles/domain/usecases/delete_vehicle.dart';

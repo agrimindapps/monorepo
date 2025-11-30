@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 import 'package:uuid/uuid.dart';
 
@@ -11,10 +10,6 @@ import '../../../../core/services/storage/firebase_storage_service.dart'
 
 /// Resultado da sincronização de imagens
 class SyncResult {
-  final int successful;
-  final int failed;
-  final int skipped;
-  final bool wasOffline;
 
   SyncResult({
     required this.successful,
@@ -30,6 +25,10 @@ class SyncResult {
   factory SyncResult.empty() {
     return SyncResult(successful: 0, failed: 0);
   }
+  final int successful;
+  final int failed;
+  final int skipped;
+  final bool wasOffline;
 
   bool get hasErrors => failed > 0;
   bool get hasSuccess => successful > 0;
@@ -43,11 +42,6 @@ class SyncResult {
 
 /// Progresso da sincronização
 class SyncProgress {
-  final int current;
-  final int total;
-  final String? currentItemId;
-  final bool isCompleted;
-  final String? errorMessage;
 
   SyncProgress({
     required this.current,
@@ -69,6 +63,11 @@ class SyncProgress {
       errorMessage: message,
     );
   }
+  final int current;
+  final int total;
+  final String? currentItemId;
+  final bool isCompleted;
+  final String? errorMessage;
 
   double get percentage => total > 0 ? current / total : 0;
 }
@@ -82,6 +81,9 @@ class SyncProgress {
 /// - Persistir fila em memória (Drift pode ser usado futuramente)
 
 class ImageSyncService {
+
+  ImageSyncService(this._storageService, this._connectivityService)
+    : _firestore = FirebaseFirestore.instance;
   final app_storage.FirebaseStorageService _storageService;
   final ConnectivityService _connectivityService;
   final FirebaseFirestore _firestore;
@@ -102,9 +104,6 @@ class ImageSyncService {
   List<PendingImageUpload> get pendingUploads =>
       _initialized ? _pendingUploads.values.toList() : [];
 
-  ImageSyncService(this._storageService, this._connectivityService)
-    : _firestore = FirebaseFirestore.instance;
-
   /// Inicializa o serviço
   Future<void> initialize() async {
     if (_initialized) return;
@@ -113,7 +112,7 @@ class ImageSyncService {
       _initialized = true;
 
       print(
-        '🔄 ImageSyncService initialized with ${pendingCount} pending uploads',
+        '🔄 ImageSyncService initialized with $pendingCount pending uploads',
       );
 
       // Se há uploads pendentes, tenta sincronizar
@@ -153,7 +152,7 @@ class ImageSyncService {
     _pendingUploads[id] = upload;
 
     print(
-      '📤 Added pending upload: $recordId ($category) - Queue size: ${pendingCount}',
+      '📤 Added pending upload: $recordId ($category) - Queue size: $pendingCount',
     );
 
     return id;

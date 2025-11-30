@@ -18,7 +18,7 @@ bool _parseBool(dynamic value) {
 
 /// Vehicle model with Firebase sync support
 class VehicleModel extends BaseSyncModel {
-  VehicleModel({
+  const VehicleModel({
     required this.id,
     this.createdAtMs,
     this.updatedAtMs,

@@ -11,12 +11,12 @@ abstract class ILegalLocalDataSource {
 }
 
 class LegalLocalDataSource implements ILegalLocalDataSource {
+
+  LegalLocalDataSource({required this.sharedPreferences});
   static const String _cachedDocPrefix = 'CACHED_LEGAL_DOC_';
   static const String _acceptedVersionPrefix = 'ACCEPTED_VERSION_';
 
   final SharedPreferences sharedPreferences;
-
-  LegalLocalDataSource({required this.sharedPreferences});
 
   @override
   Future<LegalDocumentModel> getCachedDocument(LegalDocumentType type) async {

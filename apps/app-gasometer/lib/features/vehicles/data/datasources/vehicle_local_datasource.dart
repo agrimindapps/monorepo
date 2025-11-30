@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:drift/drift.dart';
 
-import '../../../../database/repositories/vehicle_repository.dart';
 import '../../../../database/gasometer_database.dart';
+import '../../../../database/repositories/vehicle_repository.dart';
 import '../../../sync/domain/services/sync_write_trigger.dart';
 
 /// Local data source for vehicles using Drift
@@ -15,10 +15,10 @@ import '../../../sync/domain/services/sync_write_trigger.dart';
 /// IDs are integers (auto-increment), not UUIDs.
 
 class VehicleLocalDataSource {
-  final VehicleRepository _repository;
-  final SyncWriteTrigger _syncTrigger;
 
   VehicleLocalDataSource(this._repository, this._syncTrigger);
+  final VehicleRepository _repository;
+  final SyncWriteTrigger _syncTrigger;
 
   void _notifySync() {
     // Debounced para consolidar múltiplas operações em sequência

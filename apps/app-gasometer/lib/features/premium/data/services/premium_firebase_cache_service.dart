@@ -197,15 +197,15 @@ class PremiumFirebaseCacheService {
 
 /// Cache statistics model
 class CacheStatistics {
-  final int total;
-  final int valid;
-  final int expired;
 
   const CacheStatistics({
     required this.total,
     required this.valid,
     required this.expired,
   });
+  final int total;
+  final int valid;
+  final int expired;
 
   double get validPercentage {
     if (total == 0) return 0.0;

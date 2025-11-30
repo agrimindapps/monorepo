@@ -6,8 +6,8 @@ import 'package:core/core.dart' ;
 import 'package:flutter/material.dart';
 
 import '../../features/expenses/data/models/expense_model.dart';
-import '../../features/fuel/data/models/fuel_supply_model.dart';
 import '../../features/financial/domain/services/financial_conflict_resolver.dart';
+import '../../features/fuel/data/models/fuel_supply_model.dart';
 
 /// Dialog for resolving financial data conflicts
 class FinancialConflictDialog extends StatefulWidget {

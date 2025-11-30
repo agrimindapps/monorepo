@@ -362,7 +362,7 @@ class _HeaderSectionState extends State<HeaderSection>
               child: Stack(
                 children: [
                   // App UI Mockup
-                  Container(
+                  ColoredBox(
                     color: const Color(0xFFF8FAFC),
                     child: Column(
                       children: [
@@ -574,9 +574,9 @@ class _HeaderSectionState extends State<HeaderSection>
 }
 
 class _BackgroundPainter extends CustomPainter {
-  final double animationValue;
 
   _BackgroundPainter(this.animationValue);
+  final double animationValue;
 
   @override
   void paint(Canvas canvas, Size size) {

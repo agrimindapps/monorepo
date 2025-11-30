@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:core/core.dart' as core;
-import '../../../image/domain/services/image_sync_service.dart';
+
 import '../../../../core/services/storage/firebase_storage_service.dart'
     as app_storage;
+import '../../../image/domain/services/image_sync_service.dart';
 
 /// Result of image processing operation
 class ImageProcessingResult {

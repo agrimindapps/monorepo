@@ -5,9 +5,9 @@ import '../../../../database/gasometer_database.dart';
 /// Implementação de IAppDataCleaner para o app Gasometer
 /// Responsável por limpar todos os dados locais do app usando Drift
 class GasometerDataCleaner implements IAppDataCleaner {
-  final GasometerDatabase _database;
 
   GasometerDataCleaner(this._database);
+  final GasometerDatabase _database;
 
   @override
   String get appName => 'Gasometer';

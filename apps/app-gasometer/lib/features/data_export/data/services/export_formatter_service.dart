@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:core/core.dart';
 
 import '../../domain/entities/export_metadata.dart';
 

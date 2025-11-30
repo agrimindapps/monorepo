@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../database/providers/database_providers.dart';
 import '../../../audit/domain/services/audit_trail_service.dart';

@@ -1,7 +1,7 @@
 import 'dart:io';
+
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:uuid/uuid.dart';
-import 'package:uuid/enums.dart';
 
 /// Serviço responsável por gerar e gerenciar UUIDs de dispositivos
 ///

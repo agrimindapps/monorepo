@@ -140,7 +140,7 @@ class MaintenanceRepositoryDriftImpl implements MaintenanceRepository {
       // Buscar o registro criado para retornar
       final createdData = await _dataSource.findById(id);
       if (createdData == null) {
-        return Left(
+        return const Left(
           CacheFailure('Failed to retrieve created maintenance record'),
         );
       }
@@ -237,13 +237,13 @@ class MaintenanceRepositoryDriftImpl implements MaintenanceRepository {
       );
 
       if (!success) {
-        return Left(CacheFailure('Failed to update maintenance record'));
+        return const Left(CacheFailure('Failed to update maintenance record'));
       }
 
       // Buscar o registro atualizado para retornar
       final updatedData = await _dataSource.findById(idInt);
       if (updatedData == null) {
-        return Left(
+        return const Left(
           CacheFailure('Failed to retrieve updated maintenance record'),
         );
       }

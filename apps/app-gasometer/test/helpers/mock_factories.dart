@@ -1,12 +1,12 @@
-import 'package:mocktail/mocktail.dart';
+import 'package:gasometer_drift/features/fuel/domain/entities/fuel_record_entity.dart';
 import 'package:gasometer_drift/features/fuel/domain/repositories/fuel_repository.dart';
 import 'package:gasometer_drift/features/fuel/domain/usecases/add_fuel_record.dart';
-import 'package:gasometer_drift/features/fuel/domain/usecases/update_fuel_record.dart';
 import 'package:gasometer_drift/features/fuel/domain/usecases/delete_fuel_record.dart';
 import 'package:gasometer_drift/features/fuel/domain/usecases/get_all_fuel_records.dart';
 import 'package:gasometer_drift/features/fuel/domain/usecases/get_fuel_records_by_vehicle.dart';
-import 'package:gasometer_drift/features/fuel/domain/entities/fuel_record_entity.dart';
+import 'package:gasometer_drift/features/fuel/domain/usecases/update_fuel_record.dart';
 import 'package:gasometer_drift/features/vehicles/domain/entities/vehicle_entity.dart';
+import 'package:mocktail/mocktail.dart';
 
 /// Mock repositories
 class MockFuelRepository extends Mock implements FuelRepository {}

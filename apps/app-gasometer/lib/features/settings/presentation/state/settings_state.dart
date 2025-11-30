@@ -16,7 +16,6 @@ enum SettingsViewState {
 /// Usa @freezed para type-safety, imutabilidade e código gerado
 @freezed
 sealed class SettingsState with _$SettingsState {
-  const SettingsState._();
 
   const factory SettingsState({
     /// Tema escuro ativado
@@ -73,6 +72,7 @@ sealed class SettingsState with _$SettingsState {
     /// Sincronização em progresso
     @Default(false) bool isSyncing,
   }) = _SettingsState;
+  const SettingsState._();
 
   /// Factory para estado inicial
   factory SettingsState.initial() => const SettingsState();

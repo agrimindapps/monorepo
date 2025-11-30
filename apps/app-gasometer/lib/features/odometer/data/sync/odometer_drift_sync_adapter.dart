@@ -1,7 +1,7 @@
-import 'package:drift/drift.dart';
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
+import 'package:drift/drift.dart';
 
 import '../../../../database/gasometer_database.dart';
 import '../../../../database/tables/gasometer_tables.dart';

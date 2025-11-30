@@ -28,7 +28,6 @@ enum MaintenanceStatusFilter {
 /// Usa @freezed para type-safety, imutabilidade e código gerado
 @freezed
 sealed class MaintenanceState with _$MaintenanceState {
-  const MaintenanceState._();
 
   const factory MaintenanceState({
     /// Lista de manutenções
@@ -64,6 +63,7 @@ sealed class MaintenanceState with _$MaintenanceState {
     /// Próxima manutenção agendada
     MaintenanceEntity? nextScheduled,
   }) = _MaintenanceState;
+  const MaintenanceState._();
 
   /// Factory para estado inicial
   factory MaintenanceState.initial() => const MaintenanceState();

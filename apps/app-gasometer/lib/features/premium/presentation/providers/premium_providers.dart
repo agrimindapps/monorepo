@@ -1,26 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:core/core.dart' as core;
 import 'package:dartz/dartz.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
 import '../../../auth/presentation/providers/auth_usecase_providers.dart';
+import '../../data/datasources/premium_firebase_data_source.dart';
 import '../../data/datasources/premium_local_data_source.dart';
 import '../../data/datasources/premium_remote_data_source.dart';
-import '../../data/datasources/premium_firebase_data_source.dart';
 import '../../data/datasources/premium_webhook_data_source.dart';
-import '../../data/services/premium_sync_service.dart';
 import '../../data/repositories/premium_repository_impl.dart';
+import '../../data/services/premium_sync_service.dart';
 import '../../domain/repositories/premium_repository.dart';
-import '../../domain/usecases/check_premium_status.dart';
-import '../../domain/usecases/can_use_feature.dart';
-import '../../domain/usecases/can_add_vehicle.dart';
 import '../../domain/usecases/can_add_fuel_record.dart';
 import '../../domain/usecases/can_add_maintenance_record.dart';
-import '../../domain/usecases/purchase_premium.dart';
+import '../../domain/usecases/can_add_vehicle.dart';
+import '../../domain/usecases/can_use_feature.dart';
+import '../../domain/usecases/check_premium_status.dart';
 import '../../domain/usecases/get_available_products.dart';
-import '../../domain/usecases/restore_purchases.dart';
 import '../../domain/usecases/manage_local_license.dart';
+import '../../domain/usecases/purchase_premium.dart';
+import '../../domain/usecases/restore_purchases.dart';
 
 // Stub subscription repository for apps without subscription feature
 class StubSubscriptionRepository implements core.ISubscriptionRepository {
@@ -29,80 +29,80 @@ class StubSubscriptionRepository implements core.ISubscriptionRepository {
 
   @override
   Future<Either<core.Failure, bool>> hasActiveSubscription() async =>
-      Right(false);
+      const Right(false);
 
   @override
   Future<Either<core.Failure, core.SubscriptionEntity?>>
-      getCurrentSubscription() async => Right(null);
+      getCurrentSubscription() async => const Right(null);
 
   @override
   Future<Either<core.Failure, List<core.SubscriptionEntity>>>
-      getUserSubscriptions() async => Right([]);
+      getUserSubscriptions() async => const Right([]);
 
   @override
   Future<Either<core.Failure, List<core.ProductInfo>>> getAvailableProducts(
           {required List<String> productIds}) async =>
-      Right([]);
+      const Right([]);
 
   @override
   Future<Either<core.Failure, core.SubscriptionEntity>> purchaseProduct(
           {required String productId}) async =>
-      Left(core.UnknownFailure('Not implemented'));
+      const Left(core.UnknownFailure('Not implemented'));
 
   @override
   Future<Either<core.Failure, List<core.SubscriptionEntity>>>
-      restorePurchases() async => Right([]);
+      restorePurchases() async => const Right([]);
 
   @override
   Future<Either<core.Failure, void>> setUser(
           {required String userId, Map<String, String>? attributes}) async =>
-      Right(null);
+      const Right(null);
 
   @override
   Future<Either<core.Failure, void>> setUserAttributes(
           {required Map<String, String> attributes}) async =>
-      Right(null);
+      const Right(null);
 
   @override
   Future<Either<core.Failure, bool>> isEligibleForTrial(
           {required String productId}) async =>
-      Right(false);
+      const Right(false);
 
   @override
-  Future<Either<core.Failure, String?>> getManagementUrl() async => Right(null);
+  Future<Either<core.Failure, String?>> getManagementUrl() async => const Right(null);
 
   @override
   Future<Either<core.Failure, String?>> getSubscriptionManagementUrl() async =>
-      Right(null);
+      const Right(null);
 
   @override
   Future<Either<core.Failure, void>> cancelSubscription(
           {String? reason}) async =>
-      Right(null);
+      const Right(null);
 
   @override
   Future<Either<core.Failure, bool>> hasPlantisSubscription() async =>
-      Right(false);
+      const Right(false);
 
   @override
   Future<Either<core.Failure, bool>> hasReceitaAgroSubscription() async =>
-      Right(false);
+      const Right(false);
 
   @override
   Future<Either<core.Failure, List<core.ProductInfo>>>
-      getPlantisProducts() async => Right([]);
+      getPlantisProducts() async => const Right([]);
 
   @override
   Future<Either<core.Failure, List<core.ProductInfo>>>
-      getReceitaAgroProducts() async => Right([]);
+      getReceitaAgroProducts() async => const Right([]);
 
   @override
   Future<Either<core.Failure, bool>> hasGasometerSubscription() async =>
-      Right(false);
+      const Right(false);
 
   @override
   Future<Either<core.Failure, List<core.ProductInfo>>>
-      getGasometerProducts() async => Right([]);
+      getGasometerProducts() async => const Right([]);
 }
 
 final subscriptionRepositoryProvider =
@@ -117,35 +117,35 @@ class PremiumRemoteDataSourceStub implements PremiumRemoteDataSource {
 
   @override
   Future<Either<core.Failure, bool>> hasActiveSubscription() async =>
-      Right(false);
+      const Right(false);
 
   @override
   Future<Either<core.Failure, core.SubscriptionEntity?>>
-      getCurrentSubscription() async => Right(null);
+      getCurrentSubscription() async => const Right(null);
 
   @override
   Future<Either<core.Failure, List<core.ProductInfo>>>
-      getAvailableProducts() async => Right([]);
+      getAvailableProducts() async => const Right([]);
 
   @override
   Future<Either<core.Failure, core.SubscriptionEntity>> purchaseProduct(
           {required String productId}) async =>
-      Left(core.UnknownFailure('Not implemented'));
+      const Left(core.UnknownFailure('Not implemented'));
 
   @override
   Future<Either<core.Failure, List<core.SubscriptionEntity>>>
-      restorePurchases() async => Right([]);
+      restorePurchases() async => const Right([]);
 
   @override
   Future<Either<core.Failure, void>> setUser(
           {required String userId, Map<String, String>? attributes}) async =>
-      Right(null);
+      const Right(null);
 
   @override
-  Future<Either<core.Failure, String?>> getManagementUrl() async => Right(null);
+  Future<Either<core.Failure, String?>> getManagementUrl() async => const Right(null);
 
   @override
-  Future<Either<core.Failure, bool>> isEligibleForTrial() async => Right(false);
+  Future<Either<core.Failure, bool>> isEligibleForTrial() async => const Right(false);
 }
 
 // Data Sources

@@ -11,9 +11,6 @@ import '../controllers/profile_controller.dart';
 
 /// Widget responsável por exibir e gerenciar a seção do avatar
 class AvatarSection extends ConsumerStatefulWidget {
-  final dynamic user;
-  final bool isAnonymous;
-  final ProfileController profileController;
 
   const AvatarSection({
     super.key,
@@ -21,6 +18,9 @@ class AvatarSection extends ConsumerStatefulWidget {
     required this.isAnonymous,
     required this.profileController,
   });
+  final dynamic user;
+  final bool isAnonymous;
+  final ProfileController profileController;
 
   @override
   ConsumerState<AvatarSection> createState() => _AvatarSectionState();

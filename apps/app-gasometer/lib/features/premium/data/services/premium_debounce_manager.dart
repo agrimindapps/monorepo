@@ -107,9 +107,9 @@ class PremiumDebounceManager {
 
 /// Exception thrown when debounce is cancelled
 class DebounceCancelledException implements Exception {
-  final String key;
 
   DebounceCancelledException(this.key);
+  final String key;
 
   @override
   String toString() => 'Debounce cancelled for key: $key';

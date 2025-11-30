@@ -6,14 +6,14 @@ import 'profile_section_card.dart';
 
 /// Widget para seção de informações da conta
 class ProfileAccountInfoSection extends StatelessWidget {
-  final dynamic user;
-  final bool isPremium;
 
   const ProfileAccountInfoSection({
     super.key,
     required this.user,
     required this.isPremium,
   });
+  final dynamic user;
+  final bool isPremium;
 
   @override
   Widget build(BuildContext context) {

@@ -3,17 +3,17 @@ import 'package:flutter/material.dart';
 /// Service responsible for managing scroll behavior in legal pages
 /// Follows SRP by handling only scroll-related logic
 class LegalScrollControllerManager {
-  final ScrollController _scrollController = ScrollController();
-  final VoidCallback _onScrollThresholdReached;
-  final double _scrollThreshold;
-
-  bool _isListening = false;
 
   LegalScrollControllerManager({
     required VoidCallback onScrollThresholdReached,
     double scrollThreshold = 400.0,
   }) : _onScrollThresholdReached = onScrollThresholdReached,
        _scrollThreshold = scrollThreshold;
+  final ScrollController _scrollController = ScrollController();
+  final VoidCallback _onScrollThresholdReached;
+  final double _scrollThreshold;
+
+  bool _isListening = false;
 
   /// Get the scroll controller instance
   ScrollController get controller => _scrollController;

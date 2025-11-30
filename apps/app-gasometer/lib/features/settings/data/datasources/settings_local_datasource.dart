@@ -5,6 +5,8 @@ import '../models/settings_model.dart';
 ///
 /// Handles persistence of app settings
 class SettingsLocalDataSource {
+
+  SettingsLocalDataSource(this._prefs);
   final SharedPreferences _prefs;
 
   static const String _keyPrefix = 'settings_';
@@ -19,8 +21,6 @@ class SettingsLocalDataSource {
       '${_keyPrefix}maintenanceReminderDays';
   static const String _keyAutoBackup = '${_keyPrefix}autoBackupEnabled';
   static const String _keyAnalytics = '${_keyPrefix}analyticsEnabled';
-
-  SettingsLocalDataSource(this._prefs);
 
   Future<SettingsModel> getSettings() async {
     return SettingsModel(

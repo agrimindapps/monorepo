@@ -11,6 +11,18 @@ class PromoModel extends PromoEntity {
     required super.isActive,
   });
 
+  factory PromoModel.fromEntity(PromoEntity entity) {
+    return PromoModel(
+      id: entity.id,
+      title: entity.title,
+      description: entity.description,
+      imageUrl: entity.imageUrl,
+      startDate: entity.startDate,
+      endDate: entity.endDate,
+      isActive: entity.isActive,
+    );
+  }
+
   factory PromoModel.fromJson(Map<String, dynamic> json) {
     return PromoModel(
       id: json['id'] as String,
@@ -33,17 +45,5 @@ class PromoModel extends PromoEntity {
       'endDate': endDate.toIso8601String(),
       'isActive': isActive,
     };
-  }
-
-  factory PromoModel.fromEntity(PromoEntity entity) {
-    return PromoModel(
-      id: entity.id,
-      title: entity.title,
-      description: entity.description,
-      imageUrl: entity.imageUrl,
-      startDate: entity.startDate,
-      endDate: entity.endDate,
-      isActive: entity.isActive,
-    );
   }
 }

@@ -4,9 +4,6 @@ import '../../../../core/theme/design_tokens.dart';
 
 /// Widget wrapper para seções do perfil com título e ícone
 class ProfileSectionCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final List<Widget> children;
 
   const ProfileSectionCard({
     super.key,
@@ -14,6 +11,9 @@ class ProfileSectionCard extends StatelessWidget {
     required this.icon,
     required this.children,
   });
+  final String title;
+  final IconData icon;
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {

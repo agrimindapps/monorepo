@@ -6,13 +6,13 @@ import '../datasources/legal_local_datasource.dart';
 import '../datasources/legal_remote_datasource.dart';
 
 class LegalRepositoryImpl implements ILegalRepository {
-  final ILegalRemoteDataSource remoteDataSource;
-  final ILegalLocalDataSource localDataSource;
 
   LegalRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
   });
+  final ILegalRemoteDataSource remoteDataSource;
+  final ILegalLocalDataSource localDataSource;
 
   @override
   Future<Either<Failure, LegalDocumentEntity>> getLegalDocument(

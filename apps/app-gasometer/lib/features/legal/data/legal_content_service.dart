@@ -7,13 +7,13 @@ import 'services/terms_of_service_content_provider.dart';
 /// Delegates to specialized content providers following SRP
 
 class LegalContentService {
-  final PrivacyPolicyContentProvider _privacyPolicyProvider;
-  final TermsOfServiceContentProvider _termsOfServiceProvider;
 
   LegalContentService(
     this._privacyPolicyProvider,
     this._termsOfServiceProvider,
   );
+  final PrivacyPolicyContentProvider _privacyPolicyProvider;
+  final TermsOfServiceContentProvider _termsOfServiceProvider;
 
   /// Get privacy policy sections
   List<LegalSection> getPrivacyPolicySections() {

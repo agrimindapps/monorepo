@@ -10,12 +10,12 @@ abstract class IPromoLocalDataSource {
 }
 
 class PromoLocalDataSource implements IPromoLocalDataSource {
+
+  PromoLocalDataSource({required this.sharedPreferences});
   static const String _cachedPromosKey = 'CACHED_PROMOS';
   static const String _viewedPromosKey = 'VIEWED_PROMOS';
 
   final SharedPreferences sharedPreferences;
-
-  PromoLocalDataSource({required this.sharedPreferences});
 
   @override
   Future<List<PromoModel>> getCachedPromos() async {

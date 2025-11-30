@@ -1,11 +1,11 @@
-import 'package:gasometer_drift/features/auth/presentation/notifiers/auth_notifier.dart';
-import 'package:gasometer_drift/features/auth/presentation/state/auth_state.dart';
-import 'package:gasometer_drift/features/auth/domain/entities/user_entity.dart';
-import 'package:gasometer_drift/features/odometer/presentation/pages/add_odometer_page.dart';
 import 'package:core/core.dart' hide AuthState, AuthStatus, UserEntity;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gasometer_drift/features/auth/domain/entities/user_entity.dart';
+import 'package:gasometer_drift/features/auth/presentation/notifiers/auth_notifier.dart';
+import 'package:gasometer_drift/features/auth/presentation/state/auth_state.dart';
+import 'package:gasometer_drift/features/odometer/presentation/pages/add_odometer_page.dart';
 
 class MockAuth extends Auth {
   @override
@@ -30,8 +30,8 @@ void main() {
   Widget createWidgetUnderTest(ProviderContainer container) {
     return UncontrolledProviderScope(
       container: container,
-      child: MaterialApp(
-        home: const AddOdometerPage(vehicleId: 'test_vehicle_id'),
+      child: const MaterialApp(
+        home: AddOdometerPage(vehicleId: 'test_vehicle_id'),
       ),
     );
   }

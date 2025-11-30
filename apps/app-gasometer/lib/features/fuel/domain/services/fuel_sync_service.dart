@@ -1,10 +1,11 @@
 import 'dart:developer' as developer;
+
 import 'package:core/core.dart';
 
+import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../data/datasources/fuel_supply_local_datasource.dart';
 import '../entities/fuel_record_entity.dart';
 import '../services/i_fuel_sync_service.dart';
-import '../../../vehicles/domain/entities/vehicle_entity.dart';
 
 /// Serviço especializado em sincronização de registros de combustível pendentes
 ///
@@ -53,6 +54,7 @@ class FuelSyncService implements IFuelSyncService {
   /// **Retorna:**
   /// - Right(records): Lista de FuelRecords pendentes
   /// - Left(failure): Erro ao carregar
+  @override
   Future<Either<Failure, List<FuelRecordEntity>>> loadPendingRecords() async {
     try {
       developer.log(

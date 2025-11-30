@@ -29,10 +29,6 @@ enum ConflictAction {
 
 /// Resultado da resolução de conflito
 class ConflictResolution<T> {
-  final T? localEntity;
-  final T? remoteEntity;
-  final T? mergedEntity;
-  final ConflictAction action;
 
   const ConflictResolution._({
     this.localEntity,
@@ -61,6 +57,10 @@ class ConflictResolution<T> {
       action: ConflictAction.useMerged,
     );
   }
+  final T? localEntity;
+  final T? remoteEntity;
+  final T? mergedEntity;
+  final ConflictAction action;
 
   /// Retorna a entidade resolvida (independente da ação)
   T get resolvedEntity {

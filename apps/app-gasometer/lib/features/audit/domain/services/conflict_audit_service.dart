@@ -1,5 +1,5 @@
-import '../../../../core/sync/conflict_resolution_strategy.dart';
 import '../../../../core/data/models/base_sync_model.dart';
+import '../../../../core/sync/conflict_resolution_strategy.dart';
 
 /// Interface para logging (compatível com LoggingService do core se existir)
 abstract class LoggingService {
@@ -10,17 +10,6 @@ abstract class LoggingService {
 
 /// Entry de auditoria para conflitos resolvidos
 class ConflictAuditEntry {
-  final String id;
-  final DateTime timestamp;
-  final String entityType;
-  final String entityId;
-  final ConflictAction resolution;
-  final String? localVersion;
-  final String? remoteVersion;
-  final Map<String, dynamic>? localData;
-  final Map<String, dynamic>? remoteData;
-  final Map<String, dynamic>? mergedData;
-  final String? notes;
 
   ConflictAuditEntry({
     required this.id,
@@ -35,22 +24,6 @@ class ConflictAuditEntry {
     this.mergedData,
     this.notes,
   });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'timestamp': timestamp.toIso8601String(),
-      'entityType': entityType,
-      'entityId': entityId,
-      'resolution': resolution.toString(),
-      'localVersion': localVersion,
-      'remoteVersion': remoteVersion,
-      'localData': localData,
-      'remoteData': remoteData,
-      'mergedData': mergedData,
-      'notes': notes,
-    };
-  }
 
   factory ConflictAuditEntry.fromJson(Map<String, dynamic> json) {
     return ConflictAuditEntry(
@@ -69,18 +42,45 @@ class ConflictAuditEntry {
       notes: json['notes'] as String?,
     );
   }
+  final String id;
+  final DateTime timestamp;
+  final String entityType;
+  final String entityId;
+  final ConflictAction resolution;
+  final String? localVersion;
+  final String? remoteVersion;
+  final Map<String, dynamic>? localData;
+  final Map<String, dynamic>? remoteData;
+  final Map<String, dynamic>? mergedData;
+  final String? notes;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'timestamp': timestamp.toIso8601String(),
+      'entityType': entityType,
+      'entityId': entityId,
+      'resolution': resolution.toString(),
+      'localVersion': localVersion,
+      'remoteVersion': remoteVersion,
+      'localData': localData,
+      'remoteData': remoteData,
+      'mergedData': mergedData,
+      'notes': notes,
+    };
+  }
 }
 
 /// Serviço de auditoria para conflitos de sincronização
 /// Registra todos os conflitos detectados e como foram resolvidos
 class ConflictAuditService {
+
+  ConflictAuditService(this._logger);
   final dynamic _logger; // dynamic para aceitar qualquer logger compatível
   final List<ConflictAuditEntry> _auditLog = [];
 
   // Limite de entradas mantidas em memória
   static const int _maxInMemoryEntries = 100;
-
-  ConflictAuditService(this._logger);
 
   /// Registra um conflito resolvido no log de auditoria
   void logConflict<T extends BaseSyncModel>({
@@ -273,10 +273,6 @@ class ConflictAuditService {
 
 /// Estatísticas de conflitos
 class ConflictStatistics {
-  final int totalConflicts;
-  final Map<ConflictAction, int> conflictsByAction;
-  final Map<String, int> conflictsByType;
-  final DateTime? lastConflictAt;
 
   ConflictStatistics({
     required this.totalConflicts,
@@ -284,6 +280,10 @@ class ConflictStatistics {
     required this.conflictsByType,
     this.lastConflictAt,
   });
+  final int totalConflicts;
+  final Map<ConflictAction, int> conflictsByAction;
+  final Map<String, int> conflictsByType;
+  final DateTime? lastConflictAt;
 
   @override
   String toString() {

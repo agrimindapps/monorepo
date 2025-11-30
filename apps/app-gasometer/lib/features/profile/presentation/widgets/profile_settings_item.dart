@@ -4,13 +4,6 @@ import '../../../../core/theme/design_tokens.dart';
 
 /// Widget reutilizável para itens de menu/configurações
 class ProfileSettingsItem extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback? onTap;
-  final bool isFirst;
-  final bool isLast;
-  final bool isDestructive;
 
   const ProfileSettingsItem({
     super.key,
@@ -22,6 +15,13 @@ class ProfileSettingsItem extends StatelessWidget {
     this.isLast = false,
     this.isDestructive = false,
   });
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback? onTap;
+  final bool isFirst;
+  final bool isLast;
+  final bool isDestructive;
 
   @override
   Widget build(BuildContext context) {

@@ -4,7 +4,6 @@ import 'package:core/core.dart' as core show UserEntity, AuthProvider;
 import 'package:core/core.dart' hide AuthStatus, AuthState;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
 import '../../../../core/services/analytics/gasometer_analytics_service.dart';

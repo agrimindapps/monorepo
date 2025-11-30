@@ -8,9 +8,9 @@ abstract class IProfileRemoteDataSource {
 }
 
 class ProfileRemoteDataSource implements IProfileRemoteDataSource {
-  final FirebaseFirestore firestore;
 
   ProfileRemoteDataSource({required this.firestore});
+  final FirebaseFirestore firestore;
 
   @override
   Future<UserProfileModel> getProfile(String userId) async {

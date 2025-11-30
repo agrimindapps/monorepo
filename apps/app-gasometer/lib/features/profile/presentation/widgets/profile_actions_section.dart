@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../features/data_management/domain/services/data_sanitization_service.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../features/data_management/domain/services/data_sanitization_service.dart';
 import '../../../auth/presentation/notifiers/notifiers.dart';
 import 'profile_dialogs.dart';
 import 'profile_info_item.dart';
@@ -15,12 +15,12 @@ import 'profile_settings_item.dart';
 
 /// Widget para seção de ações da conta (logout, excluir)
 class ProfileActionsSection extends ConsumerWidget {
-  final bool isAnonymous;
 
   const ProfileActionsSection({
     super.key,
     required this.isAnonymous,
   });
+  final bool isAnonymous;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

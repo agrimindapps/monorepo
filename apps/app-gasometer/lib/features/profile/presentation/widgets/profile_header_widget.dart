@@ -4,9 +4,9 @@ import '../../../../core/theme/design_tokens.dart';
 
 /// Widget responsável por exibir o header da página de perfil
 class ProfileHeader extends StatelessWidget {
-  final bool isAnonymous;
 
   const ProfileHeader({super.key, required this.isAnonymous});
+  final bool isAnonymous;
 
   @override
   Widget build(BuildContext context) {

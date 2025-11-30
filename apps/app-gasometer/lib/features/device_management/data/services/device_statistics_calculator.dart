@@ -16,18 +16,6 @@ class DeviceStatistics {
     required this.devicesByPlatform,
   });
 
-  final int totalDevices;
-  final int activeDevices;
-  final int inactiveDevices;
-  final int trustedDevices;
-  final int untrustedDevices;
-  final int physicalDevices;
-  final int emulators;
-  final DateTime? lastActivityDate;
-  final DateTime? oldestDeviceDate;
-  final double averageTrustLevel;
-  final Map<String, int> devicesByPlatform;
-
   /// Cria estatísticas vazias
   factory DeviceStatistics.empty() {
     return const DeviceStatistics(
@@ -44,6 +32,18 @@ class DeviceStatistics {
       devicesByPlatform: {},
     );
   }
+
+  final int totalDevices;
+  final int activeDevices;
+  final int inactiveDevices;
+  final int trustedDevices;
+  final int untrustedDevices;
+  final int physicalDevices;
+  final int emulators;
+  final DateTime? lastActivityDate;
+  final DateTime? oldestDeviceDate;
+  final double averageTrustLevel;
+  final Map<String, int> devicesByPlatform;
 
   /// Converte para JSON
   Map<String, dynamic> toJson() => {

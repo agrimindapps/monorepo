@@ -1,12 +1,12 @@
 import 'package:core/core.dart';
 
 import '../../../../core/interfaces/i_expenses_repository.dart';
-import '../../../maintenance/domain/entities/maintenance_entity.dart';
-import '../../../odometer/domain/entities/odometer_entity.dart';
-import '../../../vehicles/domain/repositories/vehicle_repository.dart';
 import '../../../fuel/domain/repositories/fuel_repository.dart';
+import '../../../maintenance/domain/entities/maintenance_entity.dart';
 import '../../../maintenance/domain/repositories/maintenance_repository.dart';
+import '../../../odometer/domain/entities/odometer_entity.dart';
 import '../../../odometer/domain/repositories/odometer_repository.dart';
+import '../../../vehicles/domain/repositories/vehicle_repository.dart';
 import '../../domain/entities/export_request.dart';
 
 /// Serviço de coleta de dados do usuário

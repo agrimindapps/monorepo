@@ -18,15 +18,15 @@ bool _parseBool(dynamic value) {
 /// TypeId: 14 - Gasometer range (10-19) to avoid conflicts with other apps
 class MaintenanceModel extends BaseSyncModel {
   MaintenanceModel({
-    required String id,
+    required super.id,
     int? createdAtMs,
     int? updatedAtMs,
     int? lastSyncAtMs,
-    bool isDirty = false,
-    bool isDeleted = false,
-    int version = 1,
-    String? userId,
-    String? moduleName = 'gasometer',
+    super.isDirty,
+    super.isDeleted,
+    super.version,
+    super.userId,
+    super.moduleName,
     this.veiculoId = '',
     this.tipo = '',
     this.descricao = '',
@@ -38,7 +38,6 @@ class MaintenanceModel extends BaseSyncModel {
     this.receiptImageUrl,
     this.receiptImagePath,
   }) : super(
-         id: id,
          createdAt: createdAtMs != null
              ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
              : null,
@@ -48,27 +47,7 @@ class MaintenanceModel extends BaseSyncModel {
          lastSyncAt: lastSyncAtMs != null
              ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
              : null,
-         isDirty: isDirty,
-         isDeleted: isDeleted,
-         version: version,
-         userId: userId,
-         moduleName: moduleName,
        );
-
-  // Field declarations
-  final String veiculoId;
-  final String tipo;
-  final String descricao;
-  final double valor;
-  final int data;
-  final int odometro;
-  final int? proximaRevisao;
-  final bool concluida;
-  final String? receiptImageUrl;
-  final String? receiptImagePath;
-
-  @override
-  String get collectionName => 'maintenance';
   factory MaintenanceModel.create({
     String? id,
     String? userId,
@@ -132,6 +111,21 @@ class MaintenanceModel extends BaseSyncModel {
       receiptImagePath: map['receipt_image_path']?.toString(),
     );
   }
+
+  // Field declarations
+  final String veiculoId;
+  final String tipo;
+  final String descricao;
+  final double valor;
+  final int data;
+  final int odometro;
+  final int? proximaRevisao;
+  final bool concluida;
+  final String? receiptImageUrl;
+  final String? receiptImagePath;
+
+  @override
+  String get collectionName => 'maintenance';
 
   /// Convert to Firebase map
   @override

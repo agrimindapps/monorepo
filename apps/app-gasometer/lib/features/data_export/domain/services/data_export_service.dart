@@ -1,8 +1,7 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
-import 'package:drift/drift.dart';
 import 'package:core/core.dart';
+import 'package:drift/drift.dart';
 
 import '../../../../database/gasometer_database.dart';
 import '../entities/export_metadata.dart';

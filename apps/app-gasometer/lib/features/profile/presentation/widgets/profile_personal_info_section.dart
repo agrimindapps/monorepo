@@ -4,17 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/design_tokens.dart';
+import '../controllers/profile_controller.dart';
 import 'authenticated_user_section.dart';
 import 'avatar_section.dart';
 import 'profile_section_card.dart';
-import '../controllers/profile_controller.dart';
 
 /// Widget para seção de informações pessoais do perfil
 class ProfilePersonalInfoSection extends ConsumerWidget {
-  final dynamic user;
-  final bool isAnonymous;
-  final bool isPremium;
-  final ProfileController profileController;
 
   const ProfilePersonalInfoSection({
     super.key,
@@ -23,6 +19,10 @@ class ProfilePersonalInfoSection extends ConsumerWidget {
     required this.isPremium,
     required this.profileController,
   });
+  final dynamic user;
+  final bool isAnonymous;
+  final bool isPremium;
+  final ProfileController profileController;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

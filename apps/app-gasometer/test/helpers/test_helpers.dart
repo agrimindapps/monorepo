@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Test helpers for app-gasometer tests
@@ -80,8 +79,8 @@ extension EitherTestExtension<L, R> on Either<L, R> {
 }
 
 class DateTimeRange {
-  final DateTime start;
-  final DateTime end;
 
   DateTimeRange({required this.start, required this.end});
+  final DateTime start;
+  final DateTime end;
 }

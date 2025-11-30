@@ -3,15 +3,13 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../domain/services/fuel_crud_service.dart';
-import '../../domain/services/fuel_query_service.dart';
-import '../../domain/services/fuel_sync_service.dart';
-import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../../domain/services/fuel_calculation_service.dart';
 import '../../domain/services/fuel_connectivity_service.dart';
+import '../../domain/services/fuel_crud_service.dart';
+import '../../domain/services/fuel_query_service.dart';
+import '../../domain/services/fuel_sync_service.dart';
 import '../../domain/usecases/get_fuel_analytics.dart';
-
 import 'providers.dart';
 
 part 'fuel_riverpod_notifier.g.dart';

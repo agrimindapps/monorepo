@@ -1,14 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/interfaces/i_expenses_repository.dart';
+import '../../core/providers/dependency_providers.dart' as deps;
+import '../../features/expenses/data/repositories/expenses_repository_drift_impl.dart';
+import '../../features/maintenance/data/repositories/maintenance_repository_drift_impl.dart';
+import '../../features/maintenance/domain/repositories/maintenance_repository.dart' as domain_maintenance;
+import '../../features/odometer/data/repositories/odometer_repository_drift_impl.dart';
+import '../../features/odometer/domain/repositories/odometer_repository.dart';
 import '../gasometer_database.dart';
 import '../repositories/repositories.dart';
-import '../repositories/audit_trail_repository.dart';
-import '../../features/odometer/domain/repositories/odometer_repository.dart';
-import '../../features/odometer/data/repositories/odometer_repository_drift_impl.dart';
-import '../../features/maintenance/domain/repositories/maintenance_repository.dart' as domain_maintenance;
-import '../../features/maintenance/data/repositories/maintenance_repository_drift_impl.dart';
-import '../../core/interfaces/i_expenses_repository.dart';
-import '../../features/expenses/data/repositories/expenses_repository_drift_impl.dart';
-import '../../core/providers/dependency_providers.dart' as deps;
 
 /// Provider do banco de dados principal
 ///

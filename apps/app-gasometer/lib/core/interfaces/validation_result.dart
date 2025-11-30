@@ -1,4 +1,5 @@
 /// Resultado de validação com suporte para mensagens de erro e aviso
+library;
 
 class ValidationResult {
   const ValidationResult._({

@@ -10,6 +10,17 @@ class UserProfileModel extends UserProfileEntity {
     super.lastModified,
   });
 
+  factory UserProfileModel.fromEntity(UserProfileEntity entity) {
+    return UserProfileModel(
+      id: entity.id,
+      name: entity.name,
+      email: entity.email,
+      photoUrl: entity.photoUrl,
+      createdAt: entity.createdAt,
+      lastModified: entity.lastModified,
+    );
+  }
+
   factory UserProfileModel.fromJson(Map<String, dynamic> json) {
     return UserProfileModel(
       id: json['id'] as String,
@@ -32,16 +43,5 @@ class UserProfileModel extends UserProfileEntity {
       'createdAt': createdAt.toIso8601String(),
       'lastModified': lastModified?.toIso8601String(),
     };
-  }
-
-  factory UserProfileModel.fromEntity(UserProfileEntity entity) {
-    return UserProfileModel(
-      id: entity.id,
-      name: entity.name,
-      email: entity.email,
-      photoUrl: entity.photoUrl,
-      createdAt: entity.createdAt,
-      lastModified: entity.lastModified,
-    );
   }
 }

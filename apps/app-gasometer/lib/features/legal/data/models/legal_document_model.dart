@@ -11,6 +11,18 @@ class LegalDocumentModel extends LegalDocumentEntity {
     super.lastModified,
   });
 
+  factory LegalDocumentModel.fromEntity(LegalDocumentEntity entity) {
+    return LegalDocumentModel(
+      id: entity.id,
+      type: entity.type,
+      title: entity.title,
+      content: entity.content,
+      version: entity.version,
+      effectiveDate: entity.effectiveDate,
+      lastModified: entity.lastModified,
+    );
+  }
+
   factory LegalDocumentModel.fromJson(Map<String, dynamic> json) {
     return LegalDocumentModel(
       id: json['id'] as String,
@@ -63,17 +75,5 @@ class LegalDocumentModel extends LegalDocumentEntity {
       case LegalDocumentType.userAgreement:
         return 'user_agreement';
     }
-  }
-
-  factory LegalDocumentModel.fromEntity(LegalDocumentEntity entity) {
-    return LegalDocumentModel(
-      id: entity.id,
-      type: entity.type,
-      title: entity.title,
-      content: entity.content,
-      version: entity.version,
-      effectiveDate: entity.effectiveDate,
-      lastModified: entity.lastModified,
-    );
   }
 }

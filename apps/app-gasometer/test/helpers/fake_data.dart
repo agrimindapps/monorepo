@@ -1,6 +1,6 @@
+import 'package:core/core.dart';
 import 'package:gasometer_drift/features/fuel/domain/entities/fuel_record_entity.dart';
 import 'package:gasometer_drift/features/vehicles/domain/entities/vehicle_entity.dart';
-import 'package:core/core.dart';
 
 /// Factory methods for creating fake/test data
 class FakeData {

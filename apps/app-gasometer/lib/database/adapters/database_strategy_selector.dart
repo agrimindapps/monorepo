@@ -19,9 +19,9 @@ class DatabaseStrategySelector {
   /// - `Drift` para mobile/desktop
   static IDatabaseAdapter selectStrategy() {
     if (kIsWeb) {
-      return FirestoreDatabaseAdapter();
+      return const FirestoreDatabaseAdapter();
     }
-    return DriftDatabaseAdapter();
+    return const DriftDatabaseAdapter();
   }
 
   /// Verifica se a plataforma atual suporta Drift

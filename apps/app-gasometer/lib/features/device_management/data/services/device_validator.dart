@@ -10,11 +10,6 @@ class DeviceValidationResult {
     this.requiresSecurityCheck = false,
   });
 
-  final bool isValid;
-  final String? errorMessage;
-  final bool requiresTrust;
-  final bool requiresSecurityCheck;
-
   /// Validação bem-sucedida
   factory DeviceValidationResult.success() {
     return const DeviceValidationResult(isValid: true);
@@ -33,6 +28,11 @@ class DeviceValidationResult {
       requiresSecurityCheck: requiresSecurityCheck,
     );
   }
+
+  final bool isValid;
+  final String? errorMessage;
+  final bool requiresTrust;
+  final bool requiresSecurityCheck;
 }
 
 /// Serviço responsável por validar dispositivos

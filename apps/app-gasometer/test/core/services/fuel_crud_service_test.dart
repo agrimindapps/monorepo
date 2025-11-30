@@ -1,11 +1,12 @@
 import 'package:core/core.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:gasometer_drift/features/fuel/domain/services/fuel_crud_service.dart';
 import 'package:gasometer_drift/features/fuel/domain/usecases/add_fuel_record.dart';
 import 'package:gasometer_drift/features/fuel/domain/usecases/delete_fuel_record.dart';
-import '../../helpers/mock_factories.dart';
+import 'package:mocktail/mocktail.dart';
+
 import '../../helpers/fake_data.dart';
+import '../../helpers/mock_factories.dart';
 import '../../helpers/test_helpers.dart';
 
 void main() {

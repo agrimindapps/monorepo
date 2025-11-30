@@ -1,6 +1,7 @@
 
 /// Service responsible for formatting legal document dates
 /// Follows SRP by handling only date formatting concerns
+library;
 
 class LegalDateFormatter {
   /// Format the current date in Portuguese format

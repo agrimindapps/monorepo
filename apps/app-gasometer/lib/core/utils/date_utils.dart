@@ -3,6 +3,7 @@
 /// 
 /// Provides reusable date manipulation methods to avoid code duplication
 /// across the application.
+library;
 
 class DateUtils {
   /// Generates a consistent month key in YYYY-MM format for date grouping

@@ -1,6 +1,5 @@
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 
 /// Níveis de severidade para logging
 enum LogLevel {
@@ -30,8 +29,6 @@ enum LogLevel {
 /// Complementa o LoggingService existente com funcionalidades específicas
 /// para logging de dados financeiros e auditoria
 class FinancialLoggingService {
-  final FirebaseCrashlytics? _crashlytics;
-  final bool _enableCrashlytics;
 
   FinancialLoggingService({
     FirebaseCrashlytics? crashlytics,
@@ -51,6 +48,8 @@ class FinancialLoggingService {
   factory FinancialLoggingService.withoutCrashlytics() {
     return FinancialLoggingService(crashlytics: null, enableCrashlytics: false);
   }
+  final FirebaseCrashlytics? _crashlytics;
+  final bool _enableCrashlytics;
 
   /// Log estruturado com metadata
   void log({

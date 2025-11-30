@@ -4,16 +4,6 @@ import '../../domain/entities/settings_entity.dart';
 ///
 /// Maps between domain entity and persistence layer
 class SettingsModel {
-  final bool isDarkTheme;
-  final bool notificationsEnabled;
-  final bool soundEnabled;
-  final String language;
-  final String distanceUnit;
-  final String volumeUnit;
-  final String currency;
-  final int maintenanceReminderDays;
-  final bool autoBackupEnabled;
-  final bool analyticsEnabled;
 
   const SettingsModel({
     required this.isDarkTheme,
@@ -43,21 +33,6 @@ class SettingsModel {
     );
   }
 
-  SettingsEntity toEntity() {
-    return SettingsEntity(
-      isDarkTheme: isDarkTheme,
-      notificationsEnabled: notificationsEnabled,
-      soundEnabled: soundEnabled,
-      language: language,
-      distanceUnit: distanceUnit,
-      volumeUnit: volumeUnit,
-      currency: currency,
-      maintenanceReminderDays: maintenanceReminderDays,
-      autoBackupEnabled: autoBackupEnabled,
-      analyticsEnabled: analyticsEnabled,
-    );
-  }
-
   factory SettingsModel.fromJson(Map<String, dynamic> json) {
     return SettingsModel(
       isDarkTheme: json['isDarkTheme'] as bool? ?? false,
@@ -70,6 +45,31 @@ class SettingsModel {
       maintenanceReminderDays: json['maintenanceReminderDays'] as int? ?? 7,
       autoBackupEnabled: json['autoBackupEnabled'] as bool? ?? true,
       analyticsEnabled: json['analyticsEnabled'] as bool? ?? true,
+    );
+  }
+  final bool isDarkTheme;
+  final bool notificationsEnabled;
+  final bool soundEnabled;
+  final String language;
+  final String distanceUnit;
+  final String volumeUnit;
+  final String currency;
+  final int maintenanceReminderDays;
+  final bool autoBackupEnabled;
+  final bool analyticsEnabled;
+
+  SettingsEntity toEntity() {
+    return SettingsEntity(
+      isDarkTheme: isDarkTheme,
+      notificationsEnabled: notificationsEnabled,
+      soundEnabled: soundEnabled,
+      language: language,
+      distanceUnit: distanceUnit,
+      volumeUnit: volumeUnit,
+      currency: currency,
+      maintenanceReminderDays: maintenanceReminderDays,
+      autoBackupEnabled: autoBackupEnabled,
+      analyticsEnabled: analyticsEnabled,
     );
   }
 

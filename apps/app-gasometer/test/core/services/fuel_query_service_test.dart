@@ -1,9 +1,10 @@
 import 'package:core/core.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:gasometer_drift/features/fuel/domain/services/fuel_query_service.dart';
-import '../../helpers/mock_factories.dart';
+import 'package:mocktail/mocktail.dart';
+
 import '../../helpers/fake_data.dart';
+import '../../helpers/mock_factories.dart';
 import '../../helpers/test_helpers.dart';
 
 void main() {

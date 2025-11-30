@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../../domain/entities/premium_status.dart';
 

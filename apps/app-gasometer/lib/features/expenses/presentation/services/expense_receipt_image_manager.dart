@@ -151,12 +151,6 @@ class ExpenseReceiptImageManager {
 
 /// Resultado da seleção de imagem
 class ImageSelectionResult {
-  final bool isSuccess;
-  final String? path;
-  final int? sizeBytes;
-  final String? format;
-  final String? errorMessage;
-  final bool isCancelled;
 
   ImageSelectionResult._({
     // ignore: sort_constructors_first
@@ -194,6 +188,12 @@ class ImageSelectionResult {
     // ignore: sort_constructors_first
     return ImageSelectionResult._(isSuccess: false, isCancelled: true);
   }
+  final bool isSuccess;
+  final String? path;
+  final int? sizeBytes;
+  final String? format;
+  final String? errorMessage;
+  final bool isCancelled;
 
   @override
   String toString() {

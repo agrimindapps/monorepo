@@ -190,23 +190,18 @@ class PromoContentService {
 // Models
 
 class PromoFeature {
-  final IconData icon;
-  final String title;
-  final String description;
 
   PromoFeature({
     required this.icon,
     required this.title,
     required this.description,
   });
+  final IconData icon;
+  final String title;
+  final String description;
 }
 
 class Testimonial {
-  final String name;
-  final String role;
-  final String comment;
-  final int rating;
-  final Color avatarColor;
 
   Testimonial({
     required this.name,
@@ -215,20 +210,21 @@ class Testimonial {
     required this.rating,
     required this.avatarColor,
   });
+  final String name;
+  final String role;
+  final String comment;
+  final int rating;
+  final Color avatarColor;
 }
 
 class FaqItem {
-  final String question;
-  final String answer;
 
   FaqItem({required this.question, required this.answer});
+  final String question;
+  final String answer;
 }
 
 class PromoStatistics {
-  final String activeUsers;
-  final String vehiclesRegistered;
-  final String fuelingsTracked;
-  final double averageRating;
 
   PromoStatistics({
     required this.activeUsers,
@@ -236,13 +232,13 @@ class PromoStatistics {
     required this.fuelingsTracked,
     required this.averageRating,
   });
+  final String activeUsers;
+  final String vehiclesRegistered;
+  final String fuelingsTracked;
+  final double averageRating;
 }
 
 class HowItWorksStep {
-  final int step;
-  final String title;
-  final String description;
-  final IconData icon;
 
   HowItWorksStep({
     required this.step,
@@ -250,25 +246,25 @@ class HowItWorksStep {
     required this.description,
     required this.icon,
   });
+  final int step;
+  final String title;
+  final String description;
+  final IconData icon;
 }
 
 class AppDownloadLinks {
-  final String playStoreUrl;
-  final String appStoreUrl;
-  final String webAppUrl;
 
   AppDownloadLinks({
     required this.playStoreUrl,
     required this.appStoreUrl,
     required this.webAppUrl,
   });
+  final String playStoreUrl;
+  final String appStoreUrl;
+  final String webAppUrl;
 }
 
 class ContactInfo {
-  final String email;
-  final String supportEmail;
-  final String phone;
-  final String address;
 
   ContactInfo({
     required this.email,
@@ -276,13 +272,13 @@ class ContactInfo {
     required this.phone,
     required this.address,
   });
+  final String email;
+  final String supportEmail;
+  final String phone;
+  final String address;
 }
 
 class SocialMediaLinks {
-  final String facebook;
-  final String instagram;
-  final String twitter;
-  final String linkedin;
 
   SocialMediaLinks({
     required this.facebook,
@@ -290,16 +286,20 @@ class SocialMediaLinks {
     required this.twitter,
     required this.linkedin,
   });
+  final String facebook;
+  final String instagram;
+  final String twitter;
+  final String linkedin;
 }
 
 class LegalLinks {
-  final String privacyPolicyUrl;
-  final String termsConditionsUrl;
-  final String accountDeletionUrl;
 
   LegalLinks({
     required this.privacyPolicyUrl,
     required this.termsConditionsUrl,
     required this.accountDeletionUrl,
   });
+  final String privacyPolicyUrl;
+  final String termsConditionsUrl;
+  final String accountDeletionUrl;
 }

@@ -1,5 +1,6 @@
-import 'package:drift/drift.dart';
 import 'package:core/core.dart';
+import 'package:drift/drift.dart';
+
 import '../core/drift_exports.dart';
 import 'tables/gasometer_tables.dart';
 
@@ -43,10 +44,7 @@ part 'gasometer_database.g.dart';
 )
 
 class GasometerDatabase extends _$GasometerDatabase with BaseDriftDatabase {
-  GasometerDatabase(QueryExecutor e) : super(e);
-
-  @override
-  int get schemaVersion => 2; // Incrementado para adicionar firebaseId
+  GasometerDatabase(super.e); // Incrementado para adicionar firebaseId
 
   /// Factory para ambiente de produção
   factory GasometerDatabase.production() {
@@ -91,6 +89,9 @@ class GasometerDatabase extends _$GasometerDatabase with BaseDriftDatabase {
       ),
     );
   }
+
+  @override
+  int get schemaVersion => 2;
 
   /// Estratégia de migração do banco de dados
   ///

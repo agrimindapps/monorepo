@@ -6,13 +6,13 @@ import '../datasources/promo_local_datasource.dart';
 import '../datasources/promo_remote_datasource.dart';
 
 class PromoRepositoryImpl implements IPromoRepository {
-  final IPromoRemoteDataSource remoteDataSource;
-  final IPromoLocalDataSource localDataSource;
 
   PromoRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
   });
+  final IPromoRemoteDataSource remoteDataSource;
+  final IPromoLocalDataSource localDataSource;
 
   @override
   Future<Either<Failure, List<PromoEntity>>> getActivePromos() async {

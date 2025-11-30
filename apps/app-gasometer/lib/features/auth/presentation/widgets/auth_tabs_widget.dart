@@ -1,6 +1,5 @@
 import 'package:core/core.dart' ;
 import 'package:flutter/material.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auth_tabs_widget.g.dart';
 

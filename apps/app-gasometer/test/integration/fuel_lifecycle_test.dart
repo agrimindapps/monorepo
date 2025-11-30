@@ -15,8 +15,8 @@ void main() {
   });
 
   group('Fuel Lifecycle Integration Tests', () {
-    final testUserId = 'user-test-001';
-    final testVehicleId = 'vehicle-test-001';
+    const testUserId = 'user-test-001';
+    const testVehicleId = 'vehicle-test-001';
 
     test('Complete lifecycle: add → update → delete → verify', () async {
       // Phase 1: ADD FUEL RECORD
@@ -192,8 +192,8 @@ void main() {
         'Multiple vehicles lifecycle: add fuels → filter by vehicle → calculate stats',
         () async {
       // Setup: Multiple vehicles and fuel records
-      final vehicle1Id = 'vehicle-001';
-      final vehicle2Id = 'vehicle-002';
+      const vehicle1Id = 'vehicle-001';
+      const vehicle2Id = 'vehicle-002';
 
       final vehicle1Fuels = [
         FuelRecordEntity(

@@ -57,6 +57,7 @@ class FuelSupplyIdReconciliationService implements IIdReconciliationService {
   /// **Retorna:**
   /// - Right(null): Reconciliação concluída
   /// - Left(failure): Erro no processo
+  @override
   Future<Either<Failure, void>> reconcileId(
     String localId,
     String remoteId,

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-import '../../../../features/data_management/domain/services/data_sanitization_service.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../features/data_management/domain/services/data_sanitization_service.dart';
 
 /// Widget para exibir informações do perfil do usuário autenticado
 class AuthenticatedUserSection extends StatelessWidget {
-  final dynamic user;
-  final bool isPremium;
 
   const AuthenticatedUserSection({
     super.key,
     required this.user,
     required this.isPremium,
   });
+  final dynamic user;
+  final bool isPremium;
 
   @override
   Widget build(BuildContext context) {
@@ -46,13 +46,13 @@ class AuthenticatedUserSection extends StatelessWidget {
             ),
             child: Column(
               children: [
-                Icon(
+                const Icon(
                   Icons.star,
                   color: GasometerDesignTokens.colorPremiumAccent,
                   size: 32,
                 ),
                 const SizedBox(height: 8),
-                Text(
+                const Text(
                   'Conta Premium',
                   style: TextStyle(
                     fontSize: 18,

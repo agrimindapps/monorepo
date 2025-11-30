@@ -180,7 +180,7 @@ class FuelAnomalyDetector {
 
     // Verifica se odômetro diminuiu
     if (record.odometer < lastWithOdometer.odometer) {
-      return FuelAnomaly(
+      return const FuelAnomaly(
         type: AnomalyType.invalidOdometer,
         severity: AnomalySeverity.error,
         message: 'Odômetro menor que registro anterior',

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/validation/input_sanitizer.dart';
 import '../../../vehicles/domain/usecases/get_vehicle_by_id.dart';

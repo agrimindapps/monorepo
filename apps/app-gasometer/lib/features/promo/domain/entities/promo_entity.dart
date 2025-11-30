@@ -1,13 +1,6 @@
 import 'package:equatable/equatable.dart';
 
 class PromoEntity extends Equatable {
-  final String id;
-  final String title;
-  final String description;
-  final String? imageUrl;
-  final DateTime startDate;
-  final DateTime endDate;
-  final bool isActive;
 
   const PromoEntity({
     required this.id,
@@ -18,6 +11,13 @@ class PromoEntity extends Equatable {
     required this.endDate,
     required this.isActive,
   });
+  final String id;
+  final String title;
+  final String description;
+  final String? imageUrl;
+  final DateTime startDate;
+  final DateTime endDate;
+  final bool isActive;
 
   @override
   List<Object?> get props => [

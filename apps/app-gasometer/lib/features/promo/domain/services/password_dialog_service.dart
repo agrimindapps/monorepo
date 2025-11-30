@@ -192,8 +192,8 @@ class PasswordDialogService {
 // Models
 
 class PasswordValidation {
-  final bool isValid;
-  final String? errorMessage;
 
   PasswordValidation({required this.isValid, this.errorMessage});
+  final bool isValid;
+  final String? errorMessage;
 }

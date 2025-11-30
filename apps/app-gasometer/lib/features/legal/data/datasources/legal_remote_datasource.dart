@@ -8,9 +8,9 @@ abstract class ILegalRemoteDataSource {
 }
 
 class LegalRemoteDataSource implements ILegalRemoteDataSource {
-  final FirebaseFirestore firestore;
 
   LegalRemoteDataSource({required this.firestore});
+  final FirebaseFirestore firestore;
 
   @override
   Future<LegalDocumentModel> getLegalDocument(LegalDocumentType type) async {

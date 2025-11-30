@@ -1,4 +1,3 @@
-import 'package:core/core.dart' show injectable;
 
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../core/constants/expense_constants.dart';

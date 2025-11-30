@@ -9,11 +9,11 @@ abstract class IProfileLocalDataSource {
 }
 
 class ProfileLocalDataSource implements IProfileLocalDataSource {
+
+  ProfileLocalDataSource({required this.sharedPreferences});
   static const String _cachedProfileKey = 'CACHED_USER_PROFILE';
 
   final SharedPreferences sharedPreferences;
-
-  ProfileLocalDataSource({required this.sharedPreferences});
 
   @override
   Future<UserProfileModel> getCachedProfile() async {

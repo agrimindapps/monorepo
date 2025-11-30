@@ -1,4 +1,3 @@
-import 'package:core/core.dart';
 
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../entities/fuel_record_entity.dart';

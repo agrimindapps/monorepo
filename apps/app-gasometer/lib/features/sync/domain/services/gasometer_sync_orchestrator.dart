@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:developer' as developer;
+
 import 'package:core/core.dart';
 
-import 'sync_push_service.dart';
 import 'sync_pull_service.dart';
+import 'sync_push_service.dart';
 
 /// Serviço orquestrador principal de sincronização do Gasometer
 ///
@@ -114,8 +115,8 @@ class GasometerSyncOrchestrator {
         (pushResults) {
           // Report push phase completion
           // pushResults is a single SyncPhaseResult combining all adapters
-          int step = 1;
-          totalPushed = totalPushed + (pushResults?.successCount ?? 0);
+          const int step = 1;
+          totalPushed = totalPushed + (pushResults.successCount ?? 0);
 
           _progressController.add(
             ServiceProgress(
@@ -124,17 +125,17 @@ class GasometerSyncOrchestrator {
               current: step,
               total: 10,
               currentItem: 'Push completado: '
-                  '${pushResults?.successCount ?? 0} sucesso, '
-                  '${pushResults?.failureCount ?? 0} falhas',
+                  '${pushResults.successCount ?? 0} sucesso, '
+                  '${pushResults.failureCount ?? 0} falhas',
             ),
           );
 
-          if ((pushResults?.failureCount ?? 0) > 0) {
-            errors.addAll(pushResults?.errors ?? []);
+          if ((pushResults.failureCount ?? 0) > 0) {
+            errors.addAll(pushResults.errors ?? []);
           }
 
           developer.log(
-            '✅ Push phase completed: ${pushResults?.successCount ?? 0} records pushed',
+            '✅ Push phase completed: ${pushResults.successCount ?? 0} records pushed',
             name: 'GasometerOrchestrator',
           );
         },
@@ -159,8 +160,8 @@ class GasometerSyncOrchestrator {
         (pullResults) {
           // Report pull phase completion
           // pullResults is a single SyncPhaseResult combining all adapters
-          int step = 6;
-          totalPulled = totalPulled + (pullResults?.successCount ?? 0);
+          const int step = 6;
+          totalPulled = totalPulled + (pullResults.successCount ?? 0);
 
           _progressController.add(
             ServiceProgress(
@@ -169,13 +170,13 @@ class GasometerSyncOrchestrator {
               current: step,
               total: 10,
               currentItem: 'Pull completado: '
-                  '${pullResults?.successCount ?? 0} sucesso, '
-                  '${pullResults?.failureCount ?? 0} falhas',
+                  '${pullResults.successCount ?? 0} sucesso, '
+                  '${pullResults.failureCount ?? 0} falhas',
             ),
           );
 
-          if ((pullResults?.failureCount ?? 0) > 0) {
-            errors.addAll(pullResults?.errors ?? []);
+          if ((pullResults.failureCount ?? 0) > 0) {
+            errors.addAll(pullResults.errors ?? []);
           }
 
           developer.log(

@@ -51,10 +51,6 @@ class OfflineFailure extends core.NetworkFailure {
 /// Failure específica para conflitos de sincronização financeira
 /// Usado quando há divergência entre dados locais e remotos em operações financeiras
 class FinancialConflictFailure extends core.Failure {
-  final dynamic localData;
-  final dynamic remoteData;
-  final String entityType;
-  final String entityId;
 
   const FinancialConflictFailure({
     required super.message,
@@ -65,6 +61,10 @@ class FinancialConflictFailure extends core.Failure {
     this.remoteData,
     super.details,
   });
+  final dynamic localData;
+  final dynamic remoteData;
+  final String entityType;
+  final String entityId;
 
   @override
   List<Object?> get props => [
@@ -88,9 +88,6 @@ class FinancialConflictFailure extends core.Failure {
 /// Failure para erros de integridade de dados financeiros
 /// Usado quando regras de negócio financeiras são violadas
 class FinancialIntegrityFailure extends core.ValidationFailure {
-  final String? fieldName;
-  final dynamic invalidValue;
-  final String? constraint;
 
   const FinancialIntegrityFailure({
     required String message,
@@ -104,6 +101,9 @@ class FinancialIntegrityFailure extends core.ValidationFailure {
           code: code ?? 'FINANCIAL_INTEGRITY_ERROR',
           details: details,
         );
+  final String? fieldName;
+  final dynamic invalidValue;
+  final String? constraint;
 
   @override
   List<Object?> get props => [
@@ -134,9 +134,7 @@ class ConnectivityFailure extends core.NetworkFailure {
 }
 
 /// Failure para operações de storage (Firebase Storage, Drift)
-class StorageFailure extends core.CacheFailure {
-  final String? storageType; // 'firebase_storage', 'drift', etc
-  final String? operation; // 'read', 'write', 'delete', etc
+class StorageFailure extends core.CacheFailure { // 'read', 'write', 'delete', etc
 
   const StorageFailure({
     required String message,
@@ -145,6 +143,8 @@ class StorageFailure extends core.CacheFailure {
     this.operation,
     dynamic details,
   }) : super(message, code: code ?? 'STORAGE_ERROR', details: details);
+  final String? storageType; // 'firebase_storage', 'drift', etc
+  final String? operation;
 
   @override
   List<Object?> get props => [...super.props, storageType, operation];
@@ -161,9 +161,6 @@ class StorageFailure extends core.CacheFailure {
 /// Failure para erros de reconciliação de IDs
 /// Usado quando há problemas ao mapear IDs locais para IDs remotos
 class IdReconciliationFailure extends core.SyncFailure {
-  final String localId;
-  final String? remoteId;
-  final String entityType;
 
   const IdReconciliationFailure({
     required String message,
@@ -177,6 +174,9 @@ class IdReconciliationFailure extends core.SyncFailure {
           code: code ?? 'ID_RECONCILIATION_ERROR',
           details: details,
         );
+  final String localId;
+  final String? remoteId;
+  final String entityType;
 
   @override
   List<Object?> get props => [...super.props, localId, remoteId, entityType];
@@ -193,20 +193,18 @@ class IdReconciliationFailure extends core.SyncFailure {
 
 /// Failure para erros em operações de imagem (upload/download)
 class ImageOperationFailure extends core.Failure {
-  final String operation; // 'upload', 'download', 'compress', etc
-  final String? imagePath;
 
   const ImageOperationFailure({
-    required String message,
+    required super.message,
     required this.operation,
     this.imagePath,
     String? code,
-    dynamic details,
+    super.details,
   }) : super(
-          message: message,
           code: code ?? 'IMAGE_OPERATION_ERROR',
-          details: details,
         );
+  final String operation; // 'upload', 'download', 'compress', etc
+  final String? imagePath;
 
   @override
   List<Object?> get props => [...super.props, operation, imagePath];

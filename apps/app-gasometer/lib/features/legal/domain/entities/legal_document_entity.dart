@@ -8,13 +8,6 @@ enum LegalDocumentType {
 }
 
 class LegalDocumentEntity extends Equatable {
-  final String id;
-  final LegalDocumentType type;
-  final String title;
-  final String content;
-  final String version;
-  final DateTime effectiveDate;
-  final DateTime? lastModified;
 
   const LegalDocumentEntity({
     required this.id,
@@ -25,6 +18,13 @@ class LegalDocumentEntity extends Equatable {
     required this.effectiveDate,
     this.lastModified,
   });
+  final String id;
+  final LegalDocumentType type;
+  final String title;
+  final String content;
+  final String version;
+  final DateTime effectiveDate;
+  final DateTime? lastModified;
 
   @override
   List<Object?> get props => [

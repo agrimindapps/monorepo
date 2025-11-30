@@ -1,10 +1,11 @@
 import 'dart:developer' as developer;
+
 import 'package:core/core.dart';
 
 import '../../../../core/services/contracts/i_data_integrity_facade.dart';
-import '../../../vehicles/domain/services/vehicle_id_reconciliation_service.dart';
 import '../../../fuel/domain/services/fuel_supply_id_reconciliation_service.dart';
 import '../../../maintenance/domain/services/maintenance_id_reconciliation_service.dart';
+import '../../../vehicles/domain/services/vehicle_id_reconciliation_service.dart';
 
 /// Facade para orquestrar todos os serviços de integridade de dados
 ///
@@ -76,6 +77,7 @@ class DataIntegrityFacade implements IDataIntegrityFacade {
   /// **Retorna:**
   /// - Right(null): Reconciliação concluída
   /// - Left(failure): Erro na reconciliação
+  @override
   Future<Either<Failure, void>> reconcileVehicleId(
     String localId,
     String remoteId,
@@ -103,6 +105,7 @@ class DataIntegrityFacade implements IDataIntegrityFacade {
   /// **Retorna:**
   /// - Right(null): Reconciliação concluída
   /// - Left(failure): Erro na reconciliação
+  @override
   Future<Either<Failure, void>> reconcileFuelSupplyId(
     String localId,
     String remoteId,
@@ -130,6 +133,7 @@ class DataIntegrityFacade implements IDataIntegrityFacade {
   /// **Retorna:**
   /// - Right(null): Reconciliação concluída
   /// - Left(failure): Erro na reconciliação
+  @override
   Future<Either<Failure, void>> reconcileMaintenanceId(
     String localId,
     String remoteId,
@@ -156,6 +160,7 @@ class DataIntegrityFacade implements IDataIntegrityFacade {
   /// **Retorna:**
   /// - Right(issues): Map com issues detectados (pode ser vazio se tudo ok)
   /// - Left(failure): Erro ao verificar
+  @override
   Future<Either<Failure, Map<String, dynamic>>> verifyDataIntegrity() async {
     try {
       developer.log(

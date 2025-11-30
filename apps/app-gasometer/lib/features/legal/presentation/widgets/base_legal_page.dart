@@ -6,11 +6,6 @@ import '../services/legal_scroll_controller_manager.dart';
 
 /// Base component for legal pages with common functionality
 abstract class BaseLegalPage extends StatefulWidget {
-  final String title;
-  final IconData headerIcon;
-  final String headerTitle;
-  final Gradient headerGradient;
-  final String footerMessage;
 
   const BaseLegalPage({
     super.key,
@@ -20,15 +15,16 @@ abstract class BaseLegalPage extends StatefulWidget {
     required this.headerGradient,
     required this.footerMessage,
   });
+  final String title;
+  final IconData headerIcon;
+  final String headerTitle;
+  final Gradient headerGradient;
+  final String footerMessage;
 
   List<LegalSection> buildSections(BuildContext context, ThemeData theme);
 }
 
 class LegalSection {
-  final String title;
-  final String content;
-  final Color titleColor;
-  final bool isLast;
 
   const LegalSection({
     required this.title,
@@ -36,6 +32,10 @@ class LegalSection {
     required this.titleColor,
     this.isLast = false,
   });
+  final String title;
+  final String content;
+  final Color titleColor;
+  final bool isLast;
 }
 
 abstract class BaseLegalPageState<T extends BaseLegalPage> extends State<T> {

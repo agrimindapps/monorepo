@@ -3,36 +3,6 @@ import 'package:equatable/equatable.dart';
 /// Modelo para armazenar uploads de imagens pendentes
 /// Usado quando o usuário adiciona uma imagem offline
 class PendingImageUpload extends Equatable {
-  /// ID único do upload pendente
-  final String id;
-
-  /// Caminho local da imagem a ser enviada
-  final String localPath;
-
-  /// ID do usuário que criou a imagem
-  final String userId;
-
-  /// ID do registro ao qual a imagem pertence
-  final String recordId;
-
-  /// Categoria do registro (fuel, maintenance, expenses)
-  final String category;
-
-  /// Caminho da coleção no Firestore para atualizar após upload
-  /// Ex: 'fuel_supplies', 'maintenance_records', 'expenses'
-  final String collectionPath;
-
-  /// Quando o upload foi adicionado à fila
-  final int createdAtMs;
-
-  /// Número de tentativas de upload já realizadas
-  final int retryCount;
-
-  /// Última mensagem de erro (se houver)
-  final String? lastError;
-
-  /// Timestamp da última tentativa
-  final int? lastAttemptMs;
 
   const PendingImageUpload({
     required this.id,
@@ -67,6 +37,36 @@ class PendingImageUpload extends Equatable {
       retryCount: 0,
     );
   }
+  /// ID único do upload pendente
+  final String id;
+
+  /// Caminho local da imagem a ser enviada
+  final String localPath;
+
+  /// ID do usuário que criou a imagem
+  final String userId;
+
+  /// ID do registro ao qual a imagem pertence
+  final String recordId;
+
+  /// Categoria do registro (fuel, maintenance, expenses)
+  final String category;
+
+  /// Caminho da coleção no Firestore para atualizar após upload
+  /// Ex: 'fuel_supplies', 'maintenance_records', 'expenses'
+  final String collectionPath;
+
+  /// Quando o upload foi adicionado à fila
+  final int createdAtMs;
+
+  /// Número de tentativas de upload já realizadas
+  final int retryCount;
+
+  /// Última mensagem de erro (se houver)
+  final String? lastError;
+
+  /// Timestamp da última tentativa
+  final int? lastAttemptMs;
 
   /// Incrementa contador de retry e atualiza erro
   PendingImageUpload withRetry(String error) {

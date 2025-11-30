@@ -1,6 +1,7 @@
 
 /// Service responsible for account deletion business logic
 /// Follows SRP by handling only account deletion operations
+library;
 
 class AccountDeletionService {
   /// Validate if user can delete account
@@ -195,60 +196,56 @@ class AccountDeletionService {
 // Models
 
 class AccountDeletionValidation {
-  final bool canDelete;
-  final String? errorMessage;
 
   AccountDeletionValidation({required this.canDelete, this.errorMessage});
+  final bool canDelete;
+  final String? errorMessage;
 }
 
 class DeletionConsequence {
-  final String icon;
-  final String title;
-  final String description;
 
   DeletionConsequence({
     required this.icon,
     required this.title,
     required this.description,
   });
-}
-
-class DataCategory {
   final String icon;
   final String title;
   final String description;
+}
+
+class DataCategory {
 
   DataCategory({
     required this.icon,
     required this.title,
     required this.description,
   });
+  final String icon;
+  final String title;
+  final String description;
 }
 
 class ThirdPartyService {
-  final String name;
-  final String description;
 
   ThirdPartyService({required this.name, required this.description});
+  final String name;
+  final String description;
 }
 
 class DeletionStep {
-  final int step;
-  final String title;
-  final String description;
 
   DeletionStep({
     required this.step,
     required this.title,
     required this.description,
   });
+  final int step;
+  final String title;
+  final String description;
 }
 
 class ContactSupportInfo {
-  final String title;
-  final String description;
-  final String email;
-  final String expectedResponseTime;
 
   ContactSupportInfo({
     required this.title,
@@ -256,4 +253,8 @@ class ContactSupportInfo {
     required this.email,
     required this.expectedResponseTime,
   });
+  final String title;
+  final String description;
+  final String email;
+  final String expectedResponseTime;
 }

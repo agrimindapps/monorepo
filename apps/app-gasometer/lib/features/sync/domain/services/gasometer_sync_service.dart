@@ -3,8 +3,8 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
 
-import 'sync_push_service.dart';
 import 'sync_pull_service.dart';
+import 'sync_push_service.dart';
 
 /// Orquestrador de sincronização para o Gasometer
 ///
@@ -169,13 +169,13 @@ class GasometerSyncService implements ISyncService {
         },
         (phaseResult) {
           // phaseResult is SyncPhaseResult combining all adapters
-          totalSynced = totalSynced + (phaseResult?.successCount ?? 0);
-          totalFailed = totalFailed + (phaseResult?.failureCount ?? 0);
-          if ((phaseResult?.errors ?? []).isNotEmpty) {
-            errors.addAll(phaseResult?.errors ?? []);
+          totalSynced = totalSynced + (phaseResult.successCount ?? 0);
+          totalFailed = totalFailed + (phaseResult.failureCount ?? 0);
+          if ((phaseResult.errors ?? []).isNotEmpty) {
+            errors.addAll(phaseResult.errors ?? []);
           }
           developer.log(
-            '✅ Push completed: ${phaseResult?.successCount ?? 0} records pushed',
+            '✅ Push completed: ${phaseResult.successCount ?? 0} records pushed',
             name: 'GasometerSync',
           );
         },

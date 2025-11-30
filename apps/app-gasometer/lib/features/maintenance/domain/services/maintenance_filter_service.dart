@@ -1,4 +1,3 @@
-import 'package:core/core.dart' show injectable;
 
 import '../entities/maintenance_entity.dart';
 

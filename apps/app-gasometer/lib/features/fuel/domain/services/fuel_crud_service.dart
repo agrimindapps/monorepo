@@ -52,6 +52,7 @@ class FuelCrudService implements IFuelCrudService {
   /// **Retorna:**
   /// - Right(record): Combustível adicionado com sucesso
   /// - Left(failure): Erro na adição
+  @override
   Future<Either<Failure, FuelRecordEntity>> addFuel(
     FuelRecordEntity record,
   ) async {
@@ -97,6 +98,7 @@ class FuelCrudService implements IFuelCrudService {
   /// **Retorna:**
   /// - Right(record): Combustível atualizado
   /// - Left(failure): Erro na atualização
+  @override
   Future<Either<Failure, FuelRecordEntity>> updateFuel(
     FuelRecordEntity record,
   ) async {
@@ -144,6 +146,7 @@ class FuelCrudService implements IFuelCrudService {
   /// **Retorna:**
   /// - Right(null): Combustível deletado
   /// - Left(failure): Erro na deleção
+  @override
   Future<Either<Failure, void>> deleteFuel(String recordId) async {
     try {
       developer.log(

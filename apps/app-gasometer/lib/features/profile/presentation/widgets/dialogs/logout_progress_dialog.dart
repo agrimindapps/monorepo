@@ -83,7 +83,7 @@ class _LogoutProgressDialogState extends State<LogoutProgressDialog>
                   style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
                   textAlign: TextAlign.center),
               const SizedBox(height: 16),
-              SizedBox(width: 40, height: 40, child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(primaryColor))),
+              const SizedBox(width: 40, height: 40, child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(primaryColor))),
               const SizedBox(height: 20),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),

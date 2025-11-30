@@ -2,10 +2,6 @@ import 'package:core/core.dart';
 
 /// Resultado de uma fase de sincronização
 class SyncPhaseResult {
-  final int successCount;
-  final int failureCount;
-  final List<String> errors;
-  final Duration duration;
 
   SyncPhaseResult({
     required this.successCount,
@@ -13,6 +9,10 @@ class SyncPhaseResult {
     required this.errors,
     required this.duration,
   });
+  final int successCount;
+  final int failureCount;
+  final List<String> errors;
+  final Duration duration;
 }
 
 /// Interface para fase de push de sincronização

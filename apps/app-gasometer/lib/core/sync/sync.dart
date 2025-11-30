@@ -32,11 +32,9 @@
 /// ```
 library;
 
-// Interfaces
-export 'package:core/src/infrastructure/storage/drift/sync/interfaces/i_drift_sync_adapter.dart';
-
 // Base classes
 export 'package:core/src/infrastructure/storage/drift/sync/adapters/drift_sync_adapter_base.dart';
-
+// Interfaces
+export 'package:core/src/infrastructure/storage/drift/sync/interfaces/i_drift_sync_adapter.dart';
 // Models
 export 'package:core/src/infrastructure/storage/drift/sync/models/sync_results.dart';

@@ -6,15 +6,15 @@ import '../../../../core/data/models/base_sync_model.dart';
 /// TypeId: 13 - Gasometer range (10-19) to avoid conflicts with other apps
 class ExpenseModel extends BaseSyncModel {
   ExpenseModel({
-    required String id,
+    required super.id,
     int? createdAtMs,
     int? updatedAtMs,
     int? lastSyncAtMs,
-    bool isDirty = false,
-    bool isDeleted = false,
-    int version = 1,
-    String? userId,
-    String? moduleName = 'gasometer',
+    super.isDirty,
+    super.isDeleted,
+    super.version,
+    super.userId,
+    super.moduleName,
     this.veiculoId = '',
     this.tipo = '',
     this.descricao = '',
@@ -27,7 +27,6 @@ class ExpenseModel extends BaseSyncModel {
     this.metadata = const {},
     this.receiptImageUrl,
   }) : super(
-         id: id,
          createdAt: createdAtMs != null
              ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
              : null,
@@ -37,25 +36,7 @@ class ExpenseModel extends BaseSyncModel {
          lastSyncAt: lastSyncAtMs != null
              ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
              : null,
-         isDirty: isDirty,
-         isDeleted: isDeleted,
-         version: version,
-         userId: userId,
-         moduleName: moduleName,
        );
-
-  // Field declarations
-  final String veiculoId;
-  final String tipo;
-  final String descricao;
-  final double valor;
-  final int data;
-  final double odometro;
-  final String? receiptImagePath;
-  final String? location;
-  final String? notes;
-  final Map<String, dynamic> metadata;
-  final String? receiptImageUrl;
 
   /// Factory constructor for creating new expense
   factory ExpenseModel.create({
@@ -132,6 +113,19 @@ class ExpenseModel extends BaseSyncModel {
   factory ExpenseModel.fromJson(Map<String, dynamic> json) {
     return ExpenseModel.fromFirebaseMap(json);
   }
+
+  // Field declarations
+  final String veiculoId;
+  final String tipo;
+  final String descricao;
+  final double valor;
+  final int data;
+  final double odometro;
+  final String? receiptImagePath;
+  final String? location;
+  final String? notes;
+  final Map<String, dynamic> metadata;
+  final String? receiptImageUrl;
 
   @override
   String get collectionName => 'expenses';

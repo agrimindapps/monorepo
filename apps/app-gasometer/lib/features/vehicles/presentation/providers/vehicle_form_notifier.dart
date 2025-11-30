@@ -328,13 +328,13 @@ class VehicleFormNotifier extends _$VehicleFormNotifier {
 
     // Validação adicional: Drift não aceita strings vazias para campos obrigatórios
     if (sanitizedBrand.isEmpty) {
-      throw local_error.ValidationError(message: 'Marca é obrigatória');
+      throw const local_error.ValidationError(message: 'Marca é obrigatória');
     }
     if (sanitizedModel.isEmpty) {
-      throw local_error.ValidationError(message: 'Modelo é obrigatório');
+      throw const local_error.ValidationError(message: 'Modelo é obrigatório');
     }
     if (sanitizedPlate.isEmpty) {
-      throw local_error.ValidationError(message: 'Placa é obrigatória');
+      throw const local_error.ValidationError(message: 'Placa é obrigatória');
     }
 
     return VehicleEntity(

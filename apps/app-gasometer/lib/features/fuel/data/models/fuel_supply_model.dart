@@ -15,15 +15,15 @@ bool? _parseBoolNullable(dynamic value) {
 /// Fuel Supply (Abastecimento) model with Firebase sync support
 class FuelSupplyModel extends BaseSyncModel {
   FuelSupplyModel({
-    required String id,
+    required super.id,
     int? createdAtMs,
     int? updatedAtMs,
     int? lastSyncAtMs,
-    bool isDirty = false,
-    bool isDeleted = false,
-    int version = 1,
-    String? userId,
-    String? moduleName = 'gasometer',
+    super.isDirty,
+    super.isDeleted,
+    super.version,
+    super.userId,
+    super.moduleName,
     this.vehicleId = '',
     this.date = 0,
     this.odometer = 0.0,
@@ -37,7 +37,6 @@ class FuelSupplyModel extends BaseSyncModel {
     this.receiptImageUrl,
     this.receiptImagePath,
   }) : super(
-         id: id,
          createdAt: createdAtMs != null
              ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
              : null,
@@ -47,26 +46,7 @@ class FuelSupplyModel extends BaseSyncModel {
          lastSyncAt: lastSyncAtMs != null
              ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs)
              : null,
-         isDirty: isDirty,
-         isDeleted: isDeleted,
-         version: version,
-         userId: userId,
-         moduleName: moduleName,
        );
-
-  // Field declarations
-  final String vehicleId;
-  final int date;
-  final double odometer;
-  final double liters;
-  final double totalPrice;
-  final bool? fullTank;
-  final double pricePerLiter;
-  final String? gasStationName;
-  final String? notes;
-  final int fuelType;
-  final String? receiptImageUrl;
-  final String? receiptImagePath;
 
   /// Factory constructor for creating new fuel supply
   factory FuelSupplyModel.create({
@@ -143,6 +123,20 @@ class FuelSupplyModel extends BaseSyncModel {
   factory FuelSupplyModel.fromJson(Map<String, dynamic> json) {
     return FuelSupplyModel.fromFirebaseMap(json);
   }
+
+  // Field declarations
+  final String vehicleId;
+  final int date;
+  final double odometer;
+  final double liters;
+  final double totalPrice;
+  final bool? fullTank;
+  final double pricePerLiter;
+  final String? gasStationName;
+  final String? notes;
+  final int fuelType;
+  final String? receiptImageUrl;
+  final String? receiptImagePath;
 
   @override
   String get collectionName => 'fuel_supplies';

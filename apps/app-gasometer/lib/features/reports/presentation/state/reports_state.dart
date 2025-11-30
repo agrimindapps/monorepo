@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../domain/entities/report_summary_entity.dart';
+
 import '../../domain/entities/report_comparison_entity.dart';
+import '../../domain/entities/report_summary_entity.dart';
 
 part 'reports_state.freezed.dart';
 
@@ -43,7 +44,6 @@ enum ReportPeriod {
 /// Usa @freezed para type-safety, imutabilidade e código gerado
 @freezed
 sealed class ReportsState with _$ReportsState {
-  const ReportsState._();
 
   const factory ReportsState({
     /// Tipo de relatório selecionado
@@ -88,6 +88,7 @@ sealed class ReportsState with _$ReportsState {
     /// Formato de exportação (pdf, csv, excel)
     @Default('pdf') String exportFormat,
   }) = _ReportsState;
+  const ReportsState._();
 
   /// Factory para estado inicial
   factory ReportsState.initial() => const ReportsState();
@@ -188,10 +189,10 @@ extension ReportsStateX on ReportsState {
 
 /// Helper class para range de datas
 class DateRange {
-  final DateTime start;
-  final DateTime end;
 
   DateRange(this.start, this.end);
+  final DateTime start;
+  final DateTime end;
 
   Duration get duration => end.difference(start);
   int get days => duration.inDays;

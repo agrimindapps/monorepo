@@ -397,10 +397,12 @@ class MaintenanceEntity extends BaseSyncEntity {
     if (workshopName != null) map['workshop_name'] = workshopName;
     if (workshopPhone != null) map['workshop_phone'] = workshopPhone;
     if (workshopAddress != null) map['workshop_address'] = workshopAddress;
-    if (nextServiceDate != null)
+    if (nextServiceDate != null) {
       map['next_service_date'] = nextServiceDate!.toIso8601String();
-    if (nextServiceOdometer != null)
+    }
+    if (nextServiceOdometer != null) {
       map['next_service_odometer'] = nextServiceOdometer;
+    }
     map['photos_paths'] = photosPaths;
     map['invoices_paths'] = invoicesPaths;
     map['parts'] = parts;

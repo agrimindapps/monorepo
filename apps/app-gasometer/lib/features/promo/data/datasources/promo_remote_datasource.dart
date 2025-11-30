@@ -7,9 +7,9 @@ abstract class IPromoRemoteDataSource {
 }
 
 class PromoRemoteDataSource implements IPromoRemoteDataSource {
-  final FirebaseFirestore firestore;
 
   PromoRemoteDataSource({required this.firestore});
+  final FirebaseFirestore firestore;
 
   @override
   Future<List<PromoModel>> getActivePromos() async {

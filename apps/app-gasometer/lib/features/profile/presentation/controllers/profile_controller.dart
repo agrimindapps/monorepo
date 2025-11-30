@@ -12,10 +12,10 @@ import '../widgets/profile_image_picker_widget.dart';
 
 /// Controller responsável pela lógica de negócio do perfil
 class ProfileController {
-  final AccountService _accountService;
-  final GasometerProfileImageService _imageService;
 
   ProfileController(this._accountService, this._imageService);
+  final AccountService _accountService;
+  final GasometerProfileImageService _imageService;
 
   /// Processa uma nova imagem selecionada para avatar
   Future<void> processNewAvatarImage(

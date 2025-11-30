@@ -42,10 +42,6 @@ enum SyncStatus { idle, syncing, success, error }
 
 /// Estado da sincronização
 class SyncState {
-  final SyncStatus status;
-  final int totalRecords;
-  final int syncedRecords;
-  final String? errorMessage;
 
   const SyncState({
     required this.status,
@@ -53,6 +49,10 @@ class SyncState {
     this.syncedRecords = 0,
     this.errorMessage,
   });
+  final SyncStatus status;
+  final int totalRecords;
+  final int syncedRecords;
+  final String? errorMessage;
 
   SyncState copyWith({
     SyncStatus? status,
@@ -170,11 +170,6 @@ class SyncStateNotifier extends _$SyncStateNotifier {
 
 /// Classe para agrupar registros sujos
 class DirtyRecordsData {
-  final List<VehicleData> vehicles;
-  final List<FuelSupplyData> fuelSupplies;
-  final List<MaintenanceData> maintenances;
-  final List<ExpenseData> expenses;
-  final List<OdometerReadingData> odometerReadings;
 
   const DirtyRecordsData({
     required this.vehicles,
@@ -183,6 +178,11 @@ class DirtyRecordsData {
     required this.expenses,
     required this.odometerReadings,
   });
+  final List<VehicleData> vehicles;
+  final List<FuelSupplyData> fuelSupplies;
+  final List<MaintenanceData> maintenances;
+  final List<ExpenseData> expenses;
+  final List<OdometerReadingData> odometerReadings;
 
   int get totalCount =>
       vehicles.length +

@@ -21,6 +21,62 @@ class AuditTrailEntry extends Equatable {
     this.syncSource,
   });
 
+  /// Factory constructor para criar nova entrada
+  factory AuditTrailEntry.create({
+    required String entityId,
+    required String entityType,
+    required String eventType,
+    String? userId,
+    Map<String, dynamic>? beforeState,
+    Map<String, dynamic>? afterState,
+    String? description,
+    double? monetaryValue,
+    Map<String, dynamic>? metadata,
+    String? syncSource,
+  }) {
+    return AuditTrailEntry(
+      id: const Uuid().v4(),
+      entityId: entityId,
+      entityType: entityType,
+      eventType: eventType,
+      timestamp: DateTime.now(),
+      userId: userId,
+      beforeState: beforeState ?? const {},
+      afterState: afterState ?? const {},
+      description: description,
+      monetaryValue: monetaryValue,
+      metadata: metadata ?? const {},
+      syncSource: syncSource,
+    );
+  }
+
+  /// Cria instância a partir de Map
+  factory AuditTrailEntry.fromMap(Map<String, dynamic> map) {
+    return AuditTrailEntry(
+      id: map['id'] as String,
+      entityId: map['entityId'] as String,
+      entityType: map['entityType'] as String,
+      eventType: map['eventType'] as String,
+      timestamp: DateTime.parse(map['timestamp'] as String),
+      userId: map['userId'] as String?,
+      beforeState:
+          (map['beforeState'] as Map<dynamic, dynamic>?)
+              ?.cast<String, dynamic>() ??
+          {},
+      afterState:
+          (map['afterState'] as Map<dynamic, dynamic>?)
+              ?.cast<String, dynamic>() ??
+          {},
+      description: map['description'] as String?,
+      monetaryValue: map['monetaryValue'] as double?,
+      metadata:
+          (map['metadata'] as Map<dynamic, dynamic>?)
+              ?.cast<String, dynamic>() ??
+          {},
+      syncSource: map['syncSource'] as String?,
+    );
+  }
+
   /// ID único da entrada
   final String id;
 
@@ -57,35 +113,6 @@ class AuditTrailEntry extends Equatable {
   /// Fonte da sincronização (local, remote, conflict_resolution)
   final String? syncSource;
 
-  /// Factory constructor para criar nova entrada
-  factory AuditTrailEntry.create({
-    required String entityId,
-    required String entityType,
-    required String eventType,
-    String? userId,
-    Map<String, dynamic>? beforeState,
-    Map<String, dynamic>? afterState,
-    String? description,
-    double? monetaryValue,
-    Map<String, dynamic>? metadata,
-    String? syncSource,
-  }) {
-    return AuditTrailEntry(
-      id: const Uuid().v4(),
-      entityId: entityId,
-      entityType: entityType,
-      eventType: eventType,
-      timestamp: DateTime.now(),
-      userId: userId,
-      beforeState: beforeState ?? const {},
-      afterState: afterState ?? const {},
-      description: description,
-      monetaryValue: monetaryValue,
-      metadata: metadata ?? const {},
-      syncSource: syncSource,
-    );
-  }
-
   /// Converte para Map para serialização
   Map<String, dynamic> toMap() {
     return {
@@ -102,33 +129,6 @@ class AuditTrailEntry extends Equatable {
       'metadata': metadata,
       'syncSource': syncSource,
     };
-  }
-
-  /// Cria instância a partir de Map
-  factory AuditTrailEntry.fromMap(Map<String, dynamic> map) {
-    return AuditTrailEntry(
-      id: map['id'] as String,
-      entityId: map['entityId'] as String,
-      entityType: map['entityType'] as String,
-      eventType: map['eventType'] as String,
-      timestamp: DateTime.parse(map['timestamp'] as String),
-      userId: map['userId'] as String?,
-      beforeState:
-          (map['beforeState'] as Map<dynamic, dynamic>?)
-              ?.cast<String, dynamic>() ??
-          {},
-      afterState:
-          (map['afterState'] as Map<dynamic, dynamic>?)
-              ?.cast<String, dynamic>() ??
-          {},
-      description: map['description'] as String?,
-      monetaryValue: map['monetaryValue'] as double?,
-      metadata:
-          (map['metadata'] as Map<dynamic, dynamic>?)
-              ?.cast<String, dynamic>() ??
-          {},
-      syncSource: map['syncSource'] as String?,
-    );
   }
 
   /// Cria cópia com campos modificados

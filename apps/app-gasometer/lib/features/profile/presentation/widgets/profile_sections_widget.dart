@@ -15,9 +15,6 @@ import 'logout_confirmation_dialog.dart';
 
 /// Widget responsável por exibir todas as seções do perfil
 class ProfileSections extends ConsumerStatefulWidget {
-  final dynamic user;
-  final bool isAnonymous;
-  final ProfileController profileController;
 
   const ProfileSections({
     super.key,
@@ -25,6 +22,9 @@ class ProfileSections extends ConsumerStatefulWidget {
     required this.isAnonymous,
     required this.profileController,
   });
+  final dynamic user;
+  final bool isAnonymous;
+  final ProfileController profileController;
 
   @override
   ConsumerState<ProfileSections> createState() => _ProfileSectionsState();

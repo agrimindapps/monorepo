@@ -7,13 +7,13 @@ import '../datasources/profile_remote_datasource.dart';
 import '../models/user_profile_model.dart';
 
 class ProfileRepositoryImpl implements IProfileRepository {
-  final IProfileRemoteDataSource remoteDataSource;
-  final IProfileLocalDataSource localDataSource;
 
   ProfileRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
   });
+  final IProfileRemoteDataSource remoteDataSource;
+  final IProfileLocalDataSource localDataSource;
 
   @override
   Future<Either<Failure, UserProfileEntity>> getProfile() async {

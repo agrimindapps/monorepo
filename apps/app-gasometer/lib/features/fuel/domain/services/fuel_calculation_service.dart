@@ -1,4 +1,3 @@
-import 'package:core/core.dart';
 
 import '../entities/fuel_record_entity.dart';
 

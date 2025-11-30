@@ -54,6 +54,7 @@ class FuelQueryService implements IFuelQueryService {
   /// **Retorna:**
   /// - Right(records): Lista de combustíveis carregada
   /// - Left(failure): Erro ao carregar
+  @override
   Future<Either<Failure, List<FuelRecordEntity>>> loadAllRecords({
     bool forceRefresh = false,
   }) async {
@@ -182,7 +183,7 @@ class FuelQueryService implements IFuelQueryService {
   ) async {
     try {
       if (query.trim().isEmpty) {
-        return Right([]);
+        return const Right([]);
       }
 
       developer.log(

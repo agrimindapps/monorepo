@@ -279,7 +279,10 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               Switch(
                 value: isEnabled,
                 onChanged: onToggle,
+                activeThumbColor: Colors.white,
                 activeTrackColor: iconColor,
+                inactiveThumbColor: Colors.grey[400],
+                inactiveTrackColor: Colors.grey[300],
               ),
             ],
           ),
@@ -477,27 +480,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              _buildQuickDateChip(
-                label: 'Hoje',
-                date: DateTime.now(),
-                selectedDate: value,
-                onSelected: onChanged,
-                color: iconColor,
-              ),
-              const SizedBox(width: 8),
-              _buildQuickDateChip(
-                label: 'Ontem',
-                date: DateTime.now().subtract(const Duration(days: 1)),
-                selectedDate: value,
-                onSelected: onChanged,
-                color: iconColor,
-              ),
-            ],
-          ),
         ],
       ),
     );
@@ -561,44 +543,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
     if (date != null) {
       onChanged(date);
     }
-  }
-
-  bool _isSameDay(DateTime? date1, DateTime? date2) {
-    if (date1 == null || date2 == null) return false;
-    return date1.year == date2.year &&
-        date1.month == date2.month &&
-        date1.day == date2.day;
-  }
-
-  Widget _buildQuickDateChip({
-    required String label,
-    required DateTime date,
-    required DateTime? selectedDate,
-    required ValueChanged<DateTime?> onSelected,
-    required Color color,
-  }) {
-    final isSelected = _isSameDay(selectedDate, date);
-    return GestureDetector(
-      onTap: () => onSelected(date),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: isSelected ? color : Colors.transparent,
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(
-            color: isSelected ? color : color.withValues(alpha: 0.3),
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            color: isSelected ? Colors.white : color,
-          ),
-        ),
-      ),
-    );
   }
 
   String _formatDate(DateTime date) {

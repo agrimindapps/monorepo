@@ -228,6 +228,7 @@ class FuelRemoteDataSourceImpl implements FuelRemoteDataSource {
       case 4: return FuelType.gas;
       case 5: return FuelType.hybrid;
       case 6: return FuelType.electric;
+      case 7: return FuelType.flex;
       default: return FuelType.gasoline;
     }
   }
@@ -240,6 +241,7 @@ class FuelRemoteDataSourceImpl implements FuelRemoteDataSource {
       case FuelType.gas: return 4;
       case FuelType.hybrid: return 5;
       case FuelType.electric: return 6;
+      case FuelType.flex: return 7;
     }
   }
 }

@@ -59,25 +59,26 @@ class FavoritosService {
   }
 
   Future<bool> addFavoriteId(String tipo, String id) async {
-    if (kDebugMode) {
-      developer.log(
-        'Adicionando favorito: tipo=$tipo, id=$id',
-        name: 'FavoritosService',
-      );
-    }
+    developer.log(
+      '🔖 [FAVORITOS] Adicionando favorito: tipo=$tipo, id=$id',
+      name: 'FavoritosService',
+    );
 
     try {
       if (!_validator.isValidTipo(tipo)) {
-        if (kDebugMode) {
-          developer.log('Tipo inválido: $tipo', name: 'FavoritosService');
-        }
+        developer.log(
+          '🔖 [FAVORITOS] ❌ Tipo inválido: $tipo',
+          name: 'FavoritosService',
+        );
         return false;
       }
 
-      if (!await _validator.canAddToFavorites(tipo, id)) {
-        if (kDebugMode) {
-          developer.log('Validação falhou', name: 'FavoritosService');
-        }
+      final canAdd = await _validator.canAddToFavorites(tipo, id);
+      if (!canAdd) {
+        developer.log(
+          '🔖 [FAVORITOS] ❌ Validação canAddToFavorites falhou para tipo=$tipo, id=$id',
+          name: 'FavoritosService',
+        );
         return false;
       }
 
@@ -91,15 +92,18 @@ class FavoritosService {
 
       final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
       if (userId.isEmpty) {
-        if (kDebugMode) {
-          developer.log(
-            'Usuário não autenticado ao adicionar favorito',
-            name: 'FavoritosService',
-          );
-        }
+        developer.log(
+          '🔖 [FAVORITOS] ❌ Usuário não autenticado ao adicionar favorito',
+          name: 'FavoritosService',
+        );
         // Se não tiver usuário, não salva no banco local pois a tabela exige userId
         return false;
       }
+
+      developer.log(
+        '🔖 [FAVORITOS] Inserindo no banco: userId=$userId, tipo=$tipo, id=$id',
+        name: 'FavoritosService',
+      );
 
       final insertedId = await repo.addFavorito(
         userId,
@@ -109,26 +113,30 @@ class FavoritosService {
       );
       final result = insertedId > 0;
 
+      developer.log(
+        '🔖 [FAVORITOS] Resultado da inserção: insertedId=$insertedId, success=$result',
+        name: 'FavoritosService',
+      );
+
       if (result) {
         await _cache.clearForTipo(tipo);
         try {
           await _syncService.syncOperation('create', tipo, id, itemData);
         } catch (e) {
-          if (kDebugMode) {
-            developer.log(
-              'Erro na sincronização (local OK): $e',
-              name: 'FavoritosService',
-            );
-          }
+          developer.log(
+            '🔖 [FAVORITOS] ⚠️ Erro na sincronização (local OK): $e',
+            name: 'FavoritosService',
+          );
         }
       }
 
       return result;
-    } catch (e) {
+    } catch (e, stack) {
       developer.log(
-        'Erro ao adicionar favorito: $e',
+        '🔖 [FAVORITOS] ❌ Exception ao adicionar favorito: $e',
         name: 'FavoritosService',
         error: e,
+        stackTrace: stack,
       );
       throw FavoritosException(
         'Erro ao adicionar favorito: $e',

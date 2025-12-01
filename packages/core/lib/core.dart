@@ -31,6 +31,7 @@ export 'package:riverpod_annotation/riverpod_annotation.dart';
 export 'package:share_plus/share_plus.dart';
 export 'package:shared_preferences/shared_preferences.dart';
 export 'package:shimmer/shimmer.dart';
+export 'package:skeletonizer/skeletonizer.dart';
 export 'package:sign_in_with_apple/sign_in_with_apple.dart';
 export 'package:supabase_flutter/supabase_flutter.dart'
     hide AuthException, AuthState, OAuthProvider, User;

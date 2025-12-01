@@ -145,7 +145,7 @@ abstract final class AppRouter {
           showBottomNav: true,
         );
 
-      // ========== PÁGINAS DE DETALHES ==========
+      // ========== PÁGINAS DE DETALHES (sem bottom nav) ==========
 
       case '/detalhe-defensivo':
         final detDefArgs = arguments as Map<String, dynamic>?;
@@ -155,7 +155,7 @@ abstract final class AppRouter {
             fabricante: detDefArgs?['fabricante'] as String? ?? '',
           ),
           settings: settings,
-          showBottomNav: true,
+          showBottomNav: false,
         );
 
       case '/detalhe-diagnostico':
@@ -168,7 +168,7 @@ abstract final class AppRouter {
             cultura: detDiagArgs?['cultura'] as String? ?? '',
           ),
           settings: settings,
-          showBottomNav: true,
+          showBottomNav: false,
         );
 
       case '/praga-detail':
@@ -181,7 +181,7 @@ abstract final class AppRouter {
                 pragaDetArgs?['pragaScientificName'] as String? ?? '',
           ),
           settings: settings,
-          showBottomNav: true,
+          showBottomNav: false,
         );
 
       // ========== OUTRAS PÁGINAS ==========

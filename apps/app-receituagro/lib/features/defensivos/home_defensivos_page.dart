@@ -72,16 +72,16 @@ class _HomeDefensivosPageState extends ConsumerState<HomeDefensivosPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const SizedBox(height: ReceitaAgroSpacing.xs),
+                                const SizedBox(height: ReceitaAgroSpacing.sm),
                                 DefensivosStatsGrid(
                                   onCategoryTap: (category) =>
                                       _navigateToCategory(context, category),
                                 ),
-                                const SizedBox(height: ReceitaAgroSpacing.xs),
+                                const SizedBox(height: ReceitaAgroSpacing.lg),
                                 DefensivosRecentSection(
                                   onDefensivoTap: _navigateToDefensivoDetails,
                                 ),
-                                const SizedBox(height: ReceitaAgroSpacing.xs),
+                                const SizedBox(height: ReceitaAgroSpacing.lg),
                                 DefensivosNewItemsSection(
                                   onDefensivoTap: _navigateToDefensivoDetails,
                                 ),

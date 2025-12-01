@@ -44,8 +44,25 @@ class DefensivosRecentSection extends ConsumerWidget {
                 title: defensivo.displayName,
                 subtitle: defensivo.displayIngredient,
                 category: defensivo.displayIngredient,
-                icon: FontAwesomeIcons.leaf,
-                iconColor: const Color(0xFF4CAF50),
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4CAF50).withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF4CAF50).withValues(alpha: 0.2),
+                      width: 2,
+                    ),
+                  ),
+                  child: const Center(
+                    child: FaIcon(
+                      FontAwesomeIcons.leaf,
+                      color: Color(0xFF4CAF50),
+                      size: 20,
+                    ),
+                  ),
+                ),
                 onTap: () => onDefensivoTap(
                   defensivo.displayName,
                   defensivo.displayFabricante,

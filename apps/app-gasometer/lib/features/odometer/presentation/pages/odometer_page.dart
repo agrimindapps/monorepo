@@ -251,11 +251,6 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
             ? 'Nenhum registro encontrado com os filtros aplicados.'
             : 'Adicione sua primeira leitura de odômetro para começar a acompanhar a quilometragem.',
         icon: Icons.speed_outlined,
-        actionLabel: state.hasActiveFilters ? 'Limpar filtros' : null,
-        onAction: state.hasActiveFilters
-            ? () =>
-                ref.read(odometerProvider.notifier).clearMonthFilter()
-            : null,
       );
     }
 

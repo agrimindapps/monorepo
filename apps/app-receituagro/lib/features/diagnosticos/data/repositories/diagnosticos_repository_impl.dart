@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart' hide Column;
 
+import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../database/repositories/diagnosticos_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
@@ -31,12 +32,57 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   final CulturasRepository _culturasRepository;
   final PragasRepository _pragasRepository;
 
-  const DiagnosticosRepositoryImpl(
+  // Caches para evitar queries repetidas
+  Map<int, Fitossanitario>? _fitossanitariosCache;
+  Map<int, Cultura>? _culturasCache;
+  Map<int, Praga>? _pragasCache;
+
+  DiagnosticosRepositoryImpl(
     this._repository,
     this._fitossanitariosRepository,
     this._culturasRepository,
     this._pragasRepository,
   );
+
+  /// Carrega caches de lookup tables
+  Future<void> _ensureCachesLoaded() async {
+    if (_fitossanitariosCache == null) {
+      final fitossanitarios = await _fitossanitariosRepository.findAll();
+      _fitossanitariosCache = {for (var f in fitossanitarios) f.id: f};
+    }
+    if (_culturasCache == null) {
+      final culturas = await _culturasRepository.findAll();
+      _culturasCache = {for (var c in culturas) c.id: c};
+    }
+    if (_pragasCache == null) {
+      final pragas = await _pragasRepository.findAll();
+      _pragasCache = {for (var p in pragas) p.id: p};
+    }
+  }
+
+  /// Enriquece uma entidade com nomes resolvidos
+  DiagnosticoEntity _enrichEntity(DiagnosticoEntity entity, Diagnostico drift) {
+    final defensivo = _fitossanitariosCache?[drift.defensivoId];
+    final cultura = _culturasCache?[drift.culturaId];
+    final praga = _pragasCache?[drift.pragaId];
+
+    return entity.copyWith(
+      nomeDefensivo: defensivo?.nome ?? 'Defensivo não encontrado',
+      nomeCultura: cultura?.nome ?? 'Cultura não encontrada',
+      nomePraga: praga?.nome ?? 'Praga não encontrada',
+    );
+  }
+
+  /// Converte e enriquece uma lista de diagnósticos
+  Future<List<DiagnosticoEntity>> _mapAndEnrichList(
+    List<Diagnostico> driftList,
+  ) async {
+    await _ensureCachesLoaded();
+    return driftList.map((drift) {
+      final entity = DiagnosticoMapper.fromDrift(drift);
+      return _enrichEntity(entity, drift);
+    }).toList();
+  }
 
   @override
   Future<Either<Failure, List<DiagnosticoEntity>>> getAll({
@@ -53,7 +99,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         diagnosticosDrift = diagnosticosDrift.take(limit).toList();
       }
 
-      final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
+      final entities = await _mapAndEnrichList(diagnosticosDrift);
 
       return Right(entities);
     } catch (e) {
@@ -70,9 +116,11 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         return const Right(null);
       }
 
-      final entity = DiagnosticoMapper.fromDrift(
-          diagnosticoDrift); // Changed from fromDriftData
-      return Right(entity);
+      await _ensureCachesLoaded();
+      final entity = DiagnosticoMapper.fromDrift(diagnosticoDrift);
+      final enrichedEntity = _enrichEntity(entity, diagnosticoDrift);
+
+      return Right(enrichedEntity);
     } catch (e) {
       return Left(
         CacheFailure('Erro ao buscar diagnóstico por ID: ${e.toString()}'),
@@ -121,7 +169,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         name: 'DiagnosticosRepository',
       );
 
-      final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
+      final entities = await _mapAndEnrichList(diagnosticosDrift);
 
       developer.log(
         '✅ queryByDefensivo (Repository) - ${entities.length} entities mapeadas, retornando Right()',
@@ -160,7 +208,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
       final diagnosticosDrift = await _repository.findByCultura(
         culturaId,
       );
-      final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
+      final entities = await _mapAndEnrichList(diagnosticosDrift);
 
       return Right(entities);
     } catch (e) {
@@ -173,23 +221,65 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     String idPraga,
   ) async {
     try {
+      developer.log(
+        '🔍 queryByPraga (Repository) - ID da praga recebido: "$idPraga"',
+        name: 'DiagnosticosRepository',
+      );
+
+      // Primeiro, tentar parsear como int (caso seja o ID numérico direto)
       int? pragaId = int.tryParse(idPraga);
-      if (pragaId == null) {
+      
+      if (pragaId != null) {
+        developer.log(
+          '✅ queryByPraga (Repository) - ID já é inteiro: $pragaId',
+          name: 'DiagnosticosRepository',
+        );
+      } else {
+        // ID não é inteiro, buscar pelo idPraga string na tabela de pragas
+        developer.log(
+          '🔍 queryByPraga (Repository) - ID não é int, buscando praga por idPraga string: "$idPraga"',
+          name: 'DiagnosticosRepository',
+        );
+        
         final praga = await _pragasRepository.findByIdPraga(idPraga);
+        
         if (praga != null) {
           pragaId = praga.id;
+          developer.log(
+            '✅ queryByPraga (Repository) - Praga encontrada! nome: "${praga.nome}", id (int): $pragaId, idPraga (string): ${praga.idPraga}',
+            name: 'DiagnosticosRepository',
+          );
         } else {
+          developer.log(
+            '⚠️ queryByPraga (Repository) - Praga NÃO encontrada para idPraga: "$idPraga"',
+            name: 'DiagnosticosRepository',
+          );
           return const Right([]);
         }
       }
 
-      final diagnosticosDrift = await _repository.findByPraga(
-        pragaId,
+      developer.log(
+        '🔍 queryByPraga (Repository) - Buscando diagnósticos com pragaId (int): $pragaId',
+        name: 'DiagnosticosRepository',
       );
-      final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
+      
+      final diagnosticosDrift = await _repository.findByPraga(pragaId);
+      
+      developer.log(
+        '✅ queryByPraga (Repository) - ${diagnosticosDrift.length} diagnósticos encontrados para pragaId: $pragaId',
+        name: 'DiagnosticosRepository',
+      );
+
+      final entities = await _mapAndEnrichList(diagnosticosDrift);
 
       return Right(entities);
-    } catch (e) {
+    } catch (e, stack) {
+      developer.log(
+        '❌ queryByPraga (Repository) - Erro: $e',
+        name: 'DiagnosticosRepository',
+        error: e,
+        stackTrace: stack,
+      );
       return Left(CacheFailure('Erro ao buscar por praga: ${e.toString()}'));
     }
   }
@@ -246,7 +336,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         culturaId: culturaId,
         pragaId: pragaId,
       );
-      final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
+      final entities = await _mapAndEnrichList(diagnosticosDrift);
 
       return Right(entities);
     } catch (e) {
@@ -265,18 +355,22 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         return const Right(<DiagnosticoEntity>[]);
       }
 
+      await _ensureCachesLoaded();
       final allDiagnosticos = await _repository.findAll();
+      final patternLower = pattern.toLowerCase();
 
-      final matchingDiagnosticos = allDiagnosticos
-          .where(
-            (d) =>
-                d.defensivoId.toString().contains(pattern) ||
-                d.culturaId.toString().contains(pattern) ||
-                d.pragaId.toString().contains(pattern),
-          )
-          .toList();
+      final matchingDiagnosticos = allDiagnosticos.where((d) {
+        // Buscar nos nomes resolvidos
+        final defensivo = _fitossanitariosCache?[d.defensivoId];
+        final cultura = _culturasCache?[d.culturaId];
+        final praga = _pragasCache?[d.pragaId];
 
-      final entities = DiagnosticoMapper.fromDriftList(matchingDiagnosticos);
+        return (defensivo?.nome.toLowerCase().contains(patternLower) ?? false) ||
+            (cultura?.nome.toLowerCase().contains(patternLower) ?? false) ||
+            (praga?.nome.toLowerCase().contains(patternLower) ?? false);
+      }).toList();
+
+      final entities = await _mapAndEnrichList(matchingDiagnosticos);
 
       return Right(entities);
     } catch (e) {
@@ -289,20 +383,13 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   @override
   Future<Either<Failure, List<Map<String, dynamic>>>> getAllDefensivos() async {
     try {
-      final diagnosticos = await _repository.findAll();
-      final defensivosMap = <String, Map<String, dynamic>>{};
+      await _ensureCachesLoaded();
+      final defensivosList = _fitossanitariosCache!.values.map((f) => {
+            'id': f.id.toString(),
+            'nome': f.nome,
+          }).toList();
 
-      for (final d in diagnosticos) {
-        final idStr = d.defensivoId.toString();
-        if (!defensivosMap.containsKey(idStr)) {
-          defensivosMap[idStr] = {
-            'id': idStr,
-            'nome': idStr, // Nome seria ideal vir de outra tabela
-          };
-        }
-      }
-
-      return Right(defensivosMap.values.toList());
+      return Right(defensivosList);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar defensivos: ${e.toString()}'));
     }
@@ -311,17 +398,13 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   @override
   Future<Either<Failure, List<Map<String, dynamic>>>> getAllCulturas() async {
     try {
-      final diagnosticos = await _repository.findAll();
-      final culturasMap = <String, Map<String, dynamic>>{};
+      await _ensureCachesLoaded();
+      final culturasList = _culturasCache!.values.map((c) => {
+            'id': c.id.toString(),
+            'nome': c.nome,
+          }).toList();
 
-      for (final d in diagnosticos) {
-        final idStr = d.culturaId.toString();
-        if (!culturasMap.containsKey(idStr)) {
-          culturasMap[idStr] = {'id': idStr, 'nome': idStr};
-        }
-      }
-
-      return Right(culturasMap.values.toList());
+      return Right(culturasList);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar culturas: ${e.toString()}'));
     }
@@ -330,17 +413,13 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   @override
   Future<Either<Failure, List<Map<String, dynamic>>>> getAllPragas() async {
     try {
-      final diagnosticos = await _repository.findAll();
-      final pragasMap = <String, Map<String, dynamic>>{};
+      await _ensureCachesLoaded();
+      final pragasList = _pragasCache!.values.map((p) => {
+            'id': p.id.toString(),
+            'nome': p.nome,
+          }).toList();
 
-      for (final d in diagnosticos) {
-        final idStr = d.pragaId.toString();
-        if (!pragasMap.containsKey(idStr)) {
-          pragasMap[idStr] = {'id': idStr, 'nome': idStr};
-        }
-      }
-
-      return Right(pragasMap.values.toList());
+      return Right(pragasList);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar pragas: ${e.toString()}'));
     }
@@ -377,7 +456,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         pragaId: int.tryParse(pragaId),
       );
 
-      final entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
+      final entities = await _mapAndEnrichList(diagnosticosDrift);
 
       return Right(entities);
     } catch (e) {
@@ -403,7 +482,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         pragaId: int.tryParse(praga ?? ''),
       );
 
-      var entities = DiagnosticoMapper.fromDriftList(diagnosticosDrift);
+      var entities = await _mapAndEnrichList(diagnosticosDrift);
 
       // Filter by tipo de aplicacao (terrestre/aerea)
       if (tipoAplicacao != null && tipoAplicacao.isNotEmpty) {
@@ -442,7 +521,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
 
       final similar = allDiagnosticos
           .where(
-            (d) => // Changed from DiagnosticoData to inferred type
+            (d) =>
                 d.firebaseId != diagnostico.id &&
                 d.id.toString() != diagnostico.id &&
                 (d.culturaId.toString() == diagnostico.idCultura ||
@@ -451,7 +530,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
           .take(10)
           .toList();
 
-      final entities = DiagnosticoMapper.fromDriftList(similar);
+      final entities = await _mapAndEnrichList(similar);
 
       return Right(entities);
     } catch (e) {
@@ -493,7 +572,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   }) async {
     try {
       final diagnosticos = (await _repository.findAll()).take(limit).toList();
-      final entities = DiagnosticoMapper.fromDriftList(diagnosticos);
+      final entities = await _mapAndEnrichList(diagnosticos);
 
       return Right(entities);
     } catch (e) {

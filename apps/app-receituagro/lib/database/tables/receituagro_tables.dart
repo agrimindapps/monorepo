@@ -303,16 +303,19 @@ class FitossanitariosInfo extends Table {
   TextColumn get informacoesAdicionais => text().nullable()();
 }
 
-/// Tabela de Informações de Plantas/Culturas (Dados estáticos - JSON)
+/// Tabela de Informações de Plantas Daninhas (Dados estáticos - JSON)
+/// NOTA: PlantasInf contém informações sobre plantas daninhas (pragas tipo 3),
+/// não informações sobre culturas agrícolas.
 class PlantasInf extends Table {
   IntColumn get id => integer().autoIncrement()();
 
   /// ID de registro (chave do JSON)
   TextColumn get idReg => text().unique()();
 
-  /// FK → Culturas
+  /// FK → Pragas (plantas daninhas são pragas tipo 3)
+  /// CORREÇÃO: Alterado de culturaId para pragaId para refletir a relação correta
   IntColumn get culturaId =>
-      integer().references(Culturas, #id, onDelete: KeyAction.restrict)();
+      integer().references(Pragas, #id, onDelete: KeyAction.restrict)();
 
   /// Ciclo da planta
   TextColumn get ciclo => text().nullable()();

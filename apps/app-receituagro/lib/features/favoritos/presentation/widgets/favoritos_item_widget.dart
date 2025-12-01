@@ -38,18 +38,29 @@ class FavoritosItemWidget extends StatelessWidget {
       onDismissed: (direction) {
         onRemove();
       },
-      child: Card(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        elevation: isDark ? 4 : 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+        decoration: BoxDecoration(
+          color: isDark ? Colors.grey.shade800 : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        color: isDark ? Colors.grey.shade800 : Colors.white,
         child: ListTile(
           contentPadding: const EdgeInsets.all(12),
           leading: _buildLeading(),
           title: _buildTitle(),
           subtitle: _buildSubtitle(),
+          trailing: Icon(
+            Icons.chevron_right,
+            color: isDark ? Colors.white30 : Colors.black12,
+            size: 20,
+          ),
           onTap: () => _handleTap(context),
         ),
       ),
@@ -61,39 +72,50 @@ class FavoritosItemWidget extends StatelessWidget {
     switch (tipo) {
       case TipoFavorito.defensivo:
         return Container(
-          width: 48,
-          height: 48,
+          width: 52,
+          height: 52,
           decoration: BoxDecoration(
             color: Colors.blue.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.blue.withValues(alpha: 0.2),
+              width: 1,
+            ),
           ),
           child: const Icon(
             FontAwesomeIcons.shield,
             color: Colors.blue,
-            size: 24,
+            size: 22,
           ),
         );
         
       case TipoFavorito.praga:
-        return SizedBox(
-          width: 48,
-          height: 48,
+        return Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.green.withValues(alpha: 0.2),
+              width: 1,
+            ),
+          ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(11),
             child: PragaImageWidget(
               nomeCientifico: _getNomeCientifico(),
-              width: 48,
-              height: 48,
+              width: 52,
+              height: 52,
               fit: BoxFit.cover,
               errorWidget: DecoratedBox(
                 decoration: BoxDecoration(
                   color: Colors.red.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(11),
                 ),
                 child: const Icon(
                   FontAwesomeIcons.bug,
                   color: Colors.red,
-                  size: 24,
+                  size: 22,
                 ),
               ),
             ),
@@ -102,31 +124,35 @@ class FavoritosItemWidget extends StatelessWidget {
         
       case TipoFavorito.diagnostico:
         return Container(
-          width: 48,
-          height: 48,
+          width: 52,
+          height: 52,
           decoration: BoxDecoration(
             color: Colors.green.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.green.withValues(alpha: 0.2),
+              width: 1,
+            ),
           ),
           child: const Icon(
             FontAwesomeIcons.stethoscope,
             color: Colors.green,
-            size: 24,
+            size: 22,
           ),
         );
         
       default:
         return Container(
-          width: 48,
-          height: 48,
+          width: 52,
+          height: 52,
           decoration: BoxDecoration(
             color: Colors.grey.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: const Icon(
             Icons.favorite,
             color: Colors.grey,
-            size: 24,
+            size: 22,
           ),
         );
     }

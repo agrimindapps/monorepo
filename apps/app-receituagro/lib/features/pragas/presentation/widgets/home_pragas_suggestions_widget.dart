@@ -197,11 +197,11 @@ class _HomePragasSuggestionsWidgetState
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
             colors: [
-              Colors.black.withValues(alpha: 0.8),
-              Colors.black.withValues(alpha: 0.3),
+              Colors.black.withValues(alpha: 0.9),
+              Colors.black.withValues(alpha: 0.5),
               Colors.transparent,
             ],
-            stops: const [0.0, 0.5, 1.0],
+            stops: const [0.0, 0.6, 1.0],
           ),
         ),
         padding: const EdgeInsets.all(ReceitaAgroSpacing.lg),
@@ -276,37 +276,31 @@ class _HomePragasSuggestionsWidgetState
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: ReceitaAgroSpacing.sm,
-        vertical: ReceitaAgroSpacing.xs,
+        vertical: 4,
       ),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Colors.white, size: 14),
-          const SizedBox(width: 4),
+          Icon(icon, color: Colors.white, size: 12),
+          const SizedBox(width: 6),
           Text(
             suggestion['type'] as String,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              shadows: [
-                Shadow(
-                  blurRadius: 1.0,
-                  color: Colors.black,
-                  offset: Offset(0, 0.5),
-                ),
-              ],
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
             ),
           ),
         ],

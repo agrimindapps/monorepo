@@ -77,24 +77,33 @@ class HomePragasRecentWidget extends ConsumerWidget {
       BuildContext context, String nomeCientifico, String type, String emoji) {
     final categoryColor = _getColorForType(type, context);
 
-    return PragaImageWidget(
-      nomeCientifico: nomeCientifico,
-      width: ReceitaAgroDimensions.itemImageSize,
-      height: ReceitaAgroDimensions.itemImageSize,
-      fit: BoxFit.cover,
-      borderRadius:
-          BorderRadius.circular(ReceitaAgroDimensions.itemImageSize / 2),
-      errorWidget: Container(
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: categoryColor.withValues(alpha: 0.2),
+          width: 2,
+        ),
+      ),
+      child: PragaImageWidget(
+        nomeCientifico: nomeCientifico,
         width: ReceitaAgroDimensions.itemImageSize,
         height: ReceitaAgroDimensions.itemImageSize,
-        decoration: BoxDecoration(
-          color: categoryColor.withValues(alpha: 0.1),
-          shape: BoxShape.circle,
-        ),
-        child: Center(
-          child: Text(
-            emoji,
-            style: const TextStyle(fontSize: 24),
+        fit: BoxFit.cover,
+        borderRadius:
+            BorderRadius.circular(ReceitaAgroDimensions.itemImageSize / 2),
+        errorWidget: Container(
+          width: ReceitaAgroDimensions.itemImageSize,
+          height: ReceitaAgroDimensions.itemImageSize,
+          decoration: BoxDecoration(
+            color: categoryColor.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              emoji,
+              style: const TextStyle(fontSize: 24),
+            ),
           ),
         ),
       ),

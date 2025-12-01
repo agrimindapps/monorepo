@@ -32,7 +32,7 @@ class ComentariosDesignTokens {
   static const EdgeInsets cardPadding = EdgeInsets.all(24.0);
   static const EdgeInsets pagePadding = EdgeInsets.all(8.0);
   static const EdgeInsets dialogPadding = EdgeInsets.all(24.0);
-  static const Duration debounceDelay = Duration(milliseconds: 300);
+  static const Duration debounceDelay = Duration(milliseconds: 700);
   static const Duration animationDuration = Duration(milliseconds: 200);
   static const int minCommentLength = 5;
   static const int maxCommentLength = 300; // Moved from hardcoded value

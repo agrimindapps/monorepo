@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
@@ -57,10 +59,9 @@ class _DiagnosticoDefensivoFilterWidgetState
               widget.availableCulturas!.isNotEmpty) {
             availableCulturas = ['Todas', ...widget.availableCulturas!];
           } else {
-            final diagnosticosParaCulturas =
-                diagnosticosState.searchQuery.isNotEmpty
-                    ? diagnosticosState.searchResults
-                    : diagnosticosState.filteredDiagnosticos;
+            // IMPORTANTE: Sempre usar allDiagnosticos para extrair culturas disponíveis
+            // Usar filteredDiagnosticos causaria loop infinito (ao filtrar, remove a cultura da lista)
+            final diagnosticosParaCulturas = diagnosticosState.allDiagnosticos;
 
             final culturasFromDiagnosticos =
                 diagnosticosParaCulturas
@@ -77,7 +78,11 @@ class _DiagnosticoDefensivoFilterWidgetState
                     : ['Todas', ...culturasFromDiagnosticos];
           }
 
-          final selectedCultura = diagnosticosState.contextoCultura ?? 'Todas';
+          // Garante que o valor selecionado existe na lista
+          final rawSelectedCultura = diagnosticosState.contextoCultura ?? 'Todas';
+          final selectedCultura = availableCulturas.contains(rawSelectedCultura) 
+              ? rawSelectedCultura 
+              : 'Todas';
 
           return Container(
             padding: const EdgeInsets.all(SpacingTokens.sm),
@@ -134,12 +139,19 @@ class _DiagnosticoDefensivoFilterWidgetState
   }
 }
 
-/// Campo de busca personalizado
+/// Campo de busca personalizado com debounce
 class SearchField extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final FocusNode? focusNode;
+  /// Duração do debounce em milissegundos (padrão: 300ms)
+  final int debounceDuration;
 
-  const SearchField({super.key, required this.onChanged, required this.focusNode});
+  const SearchField({
+    super.key, 
+    required this.onChanged, 
+    required this.focusNode,
+    this.debounceDuration = 300,
+  });
 
   @override
   State<SearchField> createState() => _SearchFieldState();
@@ -147,6 +159,7 @@ class SearchField extends StatefulWidget {
 
 class _SearchFieldState extends State<SearchField> {
   late final TextEditingController _controller;
+  Timer? _debounceTimer;
 
   @override
   void initState() {
@@ -156,8 +169,21 @@ class _SearchFieldState extends State<SearchField> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _controller.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(
+      Duration(milliseconds: widget.debounceDuration),
+      () {
+        if (mounted && widget.onChanged != null) {
+          widget.onChanged!(value);
+        }
+      },
+    );
   }
 
   @override
@@ -177,7 +203,7 @@ class _SearchFieldState extends State<SearchField> {
       child: TextField(
         controller: _controller,
         focusNode: widget.focusNode,
-        onChanged: widget.onChanged,
+        onChanged: _onSearchChanged,
         decoration: const InputDecoration(
           hintText: 'Localizar',
           border: InputBorder.none,
@@ -204,6 +230,12 @@ class CultureDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    
+    // Remove duplicatas e garante ordem única
+    final uniqueCultures = cultures.toSet().toList();
+    
+    // Garante que o valor selecionado existe na lista
+    final safeValue = uniqueCultures.contains(value) ? value : 'Todas';
 
     return Container(
       height: 48,
@@ -216,7 +248,7 @@ class CultureDropdown extends StatelessWidget {
         ),
       ),
       child: DropdownButton<String>(
-        value: value,
+        value: safeValue,
         onChanged: (String? newValue) {
           if (newValue != null) {
             onChanged(newValue);
@@ -229,34 +261,19 @@ class CultureDropdown extends StatelessWidget {
           color: theme.colorScheme.primary,
           size: 20,
         ),
-        items: [
-          DropdownMenuItem<String>(
-            value: 'Todas',
+        items: uniqueCultures.map<DropdownMenuItem<String>>((String culture) {
+          return DropdownMenuItem<String>(
+            value: culture,
             child: Text(
-              'Todas',
+              culture,
               style: TextStyle(
                 fontSize: 16,
                 color: theme.colorScheme.onSurface,
                 fontWeight: FontWeight.w500,
               ),
             ),
-          ),
-          ...cultures
-              .where((culture) => culture != 'Todas')
-              .map<DropdownMenuItem<String>>((String culture) {
-                return DropdownMenuItem<String>(
-                  value: culture,
-                  child: Text(
-                    culture,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: theme.colorScheme.onSurface,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                );
-              }),
-        ],
+          );
+        }).toList(),
       ),
     );
   }

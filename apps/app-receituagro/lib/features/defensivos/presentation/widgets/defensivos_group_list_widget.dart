@@ -7,7 +7,7 @@ import 'defensivos_empty_state_widget.dart';
 
 /// Widget para exibir lista de grupos de defensivos
 /// Mantém consistência visual com DefensivosListWidget
-/// Otimizado para drill-down navigation
+/// Otimizado para drill-down navigation com Virtual Scroll
 class DefensivosGroupListWidget extends StatelessWidget {
   final List<DefensivoGroupEntity> grupos;
   final void Function(DefensivoGroupEntity) onGroupTap;
@@ -40,39 +40,49 @@ class DefensivosGroupListWidget extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        child: ListView.separated(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          itemCount: grupos.length,
-          separatorBuilder: (context, index) => Divider(
-            height: 1,
-            thickness: 1,
-            indent: 64,
-            endIndent: 8,
-            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-          ),
-          itemBuilder: (context, index) {
-            final grupo = grupos[index];
-            
-            return RepaintBoundary(
-              child: ContentListItemWidget(
-                title: grupo.displayName,
-                subtitle: '', // Removido - segunda linha agora vazia
-                category: _buildCategory(grupo), // Terceira linha: mostra o count
-                icon: _getGroupIcon(grupo.tipoAgrupamento),
-                iconColor: _getGroupIconColor(grupo.tipoAgrupamento),
-                trailing: _buildTrailing(context, grupo),
-                onTap: () => onGroupTap(grupo),
-              ),
-            );
-          },
-        ),
+        child: _buildVirtualList(context),
       ),
+    );
+  }
+
+  /// Lista virtualizada - renderiza apenas itens visíveis
+  Widget _buildVirtualList(BuildContext context) {
+    const itemHeight = 72.0; // Altura aproximada do ContentListItemWidget
+    
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          sliver: SliverFixedExtentList(
+            itemExtent: itemHeight,
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final grupo = grupos[index];
+                return RepaintBoundary(
+                  child: ContentListItemWidget(
+                    key: ValueKey('grupo_${grupo.nome}_${grupo.tipoAgrupamento}'),
+                    title: grupo.displayName,
+                    subtitle: '',
+                    category: _buildCategory(grupo),
+                    icon: _getGroupIcon(grupo.tipoAgrupamento),
+                    iconColor: _getGroupIconColor(grupo.tipoAgrupamento),
+                    trailing: _buildTrailing(context, grupo),
+                    onTap: () => onGroupTap(grupo),
+                  ),
+                );
+              },
+              childCount: grupos.length,
+              addAutomaticKeepAlives: false,
+              addRepaintBoundaries: false,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   /// Constrói a categoria do grupo - agora mostra o count de itens
   String? _buildCategory(DefensivoGroupEntity grupo) {
-    // Mostra o count de itens ao invés do tipo de agrupamento
     return grupo.displayCount;
   }
 
@@ -103,20 +113,20 @@ class DefensivosGroupListWidget extends StatelessWidget {
     switch (tipoAgrupamento.toLowerCase()) {
       case 'fabricante':
       case 'fabricantes':
-        return const Color(0xFF2196F3); // Azul para fabricantes
+        return const Color(0xFF2196F3);
       case 'modo_acao':
       case 'modoacao':
-        return const Color(0xFF9C27B0); // Roxo para modo de ação
+        return const Color(0xFF9C27B0);
       case 'classe':
       case 'classe_agronomica':
-        return const Color(0xFF4CAF50); // Verde para classe
+        return const Color(0xFF4CAF50);
       case 'categoria':
-        return const Color(0xFFFF9800); // Laranja para categoria
+        return const Color(0xFFFF9800);
       case 'toxico':
       case 'toxicidade':
-        return const Color(0xFFF44336); // Vermelho para toxicidade
+        return const Color(0xFFF44336);
       default:
-        return const Color(0xFF607D8B); // Cinza azulado padrão
+        return const Color(0xFF607D8B);
     }
   }
 

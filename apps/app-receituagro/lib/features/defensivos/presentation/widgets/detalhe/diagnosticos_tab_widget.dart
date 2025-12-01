@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/providers/core_providers.dart';
 import '../../../../../core/theme/spacing_tokens.dart';
+import '../../../../../database/receituagro_database.dart';
+import '../../../../diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
 import '../../providers/detalhe_defensivo_notifier.dart';
 import 'diagnosticos_defensivos_components.dart';
@@ -218,6 +220,8 @@ class DiagnosticosTabWidget extends ConsumerWidget {
         if (diagnostic is Map<String, dynamic>) {
           nomePraga = (diagnostic['nomePraga'] ?? diagnostic['grupo'] ?? '')
               .toString();
+        } else if (diagnostic is DiagnosticoEntity) {
+          nomePraga = diagnostic.nomePraga ?? '';
         } else {
           try {
             nomePraga =
@@ -231,29 +235,57 @@ class DiagnosticosTabWidget extends ConsumerWidget {
 
         // Se nomePraga estiver vazio ou for "Não especificado", busca do repositório
         if (nomePraga.isEmpty || nomePraga == 'Não especificado') {
-          String? fkIdPraga;
-          if (diagnostic is Map<String, dynamic>) {
-            fkIdPraga = diagnostic['fkIdPraga']?.toString();
+          Praga? pragaData;
+          
+          // Para Diagnostico do Drift, usar pragaId (int)
+          if (diagnostic is Diagnostico) {
+            pragaData = await pragaRepository.findById(diagnostic.pragaId);
+          } else if (diagnostic is DiagnosticoEntity) {
+            // Para DiagnosticoEntity, idPraga é string
+            final intId = int.tryParse(diagnostic.idPraga);
+            if (intId != null) {
+              pragaData = await pragaRepository.findById(intId);
+            }
+            if (pragaData == null) {
+              pragaData = await pragaRepository.getById(diagnostic.idPraga);
+            }
           } else {
-            try {
-              fkIdPraga = diagnostic.fkIdPraga?.toString();
-            } catch (e) {
-              // ignore
+            // Para Map ou outros tipos
+            String? fkIdPraga;
+            if (diagnostic is Map<String, dynamic>) {
+              fkIdPraga = diagnostic['fkIdPraga']?.toString() ?? 
+                         diagnostic['pragaId']?.toString();
+            } else {
+              try {
+                fkIdPraga = diagnostic.fkIdPraga?.toString() ??
+                           diagnostic.pragaId?.toString();
+              } catch (e) {
+                // ignore
+              }
+            }
+
+            if (fkIdPraga != null && fkIdPraga.isNotEmpty) {
+              // Tenta primeiro como int (ID do banco)
+              final intId = int.tryParse(fkIdPraga);
+              if (intId != null) {
+                pragaData = await pragaRepository.findById(intId);
+              }
+              // Se não encontrou, tenta como string (idPraga original)
+              if (pragaData == null) {
+                pragaData = await pragaRepository.getById(fkIdPraga);
+              }
             }
           }
-
-          if (fkIdPraga != null && fkIdPraga.isNotEmpty) {
-            final pragaData = await pragaRepository.getById(fkIdPraga);
-            if (pragaData != null) {
-              final nomeComum = pragaData.nome;
-              // Extrai primeiro nome se houver vírgula ou ponto-e-vírgula
-              if (nomeComum.contains(',')) {
-                nomePraga = nomeComum.split(',').first.trim();
-              } else if (nomeComum.contains(';')) {
-                nomePraga = nomeComum.split(';').first.trim();
-              } else {
-                nomePraga = nomeComum;
-              }
+          
+          if (pragaData != null) {
+            final nomeComum = pragaData.nome;
+            // Extrai primeiro nome se houver vírgula ou ponto-e-vírgula
+            if (nomeComum.contains(',')) {
+              nomePraga = nomeComum.split(',').first.trim();
+            } else if (nomeComum.contains(';')) {
+              nomePraga = nomeComum.split(';').first.trim();
+            } else {
+              nomePraga = nomeComum;
             }
           }
         }

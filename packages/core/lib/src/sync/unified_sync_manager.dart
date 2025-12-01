@@ -940,16 +940,20 @@ class _DynamicSyncService implements ISyncRepository<BaseSyncEntity> {
       (entity) {
         // toMap is handled by the entity itself usually, but SyncFirebaseService expects a toMap function
         // We can use entity.toMap() if available or reflection/dynamic
-        // Assuming BaseSyncEntity or subclasses have toMap or similar
-        // SyncFirebaseService uses toMap passed in constructor.
-        // Wait, SyncFirebaseService constructor takes toMap.
-        // _DynamicSyncService needs to provide it.
-        // In _createGenericService, we are passing a closure for toMap.
+        // We try multiple common serialization methods: toFirebaseMap, toJson, toMap
         try {
-          // Try to call toMap dynamically
-          return (entity as dynamic).toMap() as Map<String, dynamic>;
+          final dynamic dynamicEntity = entity;
+          try {
+            return dynamicEntity.toFirebaseMap() as Map<String, dynamic>;
+          } catch (_) {
+            try {
+              return dynamicEntity.toJson() as Map<String, dynamic>;
+            } catch (_) {
+              return dynamicEntity.toMap() as Map<String, dynamic>;
+            }
+          }
         } catch (e) {
-           developer.log('Error in toMap: $e', name: 'DynamicSync');
+           developer.log('Error in serialization: $e', name: 'DynamicSync');
            return {};
         }
       },

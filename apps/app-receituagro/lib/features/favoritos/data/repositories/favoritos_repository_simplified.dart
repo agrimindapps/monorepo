@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
@@ -142,19 +143,28 @@ class FavoritosRepositorySimplified implements IFavoritosRepository {
   @override
   Future<Either<Failure, bool>> toggleFavorito(String tipo, String id) async {
     try {
+      debugPrint('🔖 [FAVORITOS_REPO] toggleFavorito: tipo=$tipo, id=$id');
+      
       final isFavResult = await isFavorito(tipo, id);
 
       final isFav = isFavResult.fold(
-        (failure) => throw Exception(failure.message),
+        (failure) {
+          debugPrint('🔖 [FAVORITOS_REPO] ❌ Erro ao verificar isFavorito: ${failure.message}');
+          throw Exception(failure.message);
+        },
         (result) => result,
       );
+
+      debugPrint('🔖 [FAVORITOS_REPO] isFavorito=$isFav, ação=${isFav ? "remover" : "adicionar"}');
 
       if (isFav) {
         return removeFavorito(tipo, id);
       } else {
         return _addFavoritoSimples(tipo, id);
       }
-    } catch (e) {
+    } catch (e, stack) {
+      debugPrint('🔖 [FAVORITOS_REPO] ❌ Exception: $e');
+      debugPrint('🔖 [FAVORITOS_REPO] Stack: $stack');
       return Left(
         CacheFailure('Erro ao alternar favorito: ${e.toString()}'),
       );

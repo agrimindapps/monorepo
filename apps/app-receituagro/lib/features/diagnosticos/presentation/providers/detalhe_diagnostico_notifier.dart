@@ -120,9 +120,30 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
               int.parse(diagnosticoId),
             );
 
+            // Fetch related data
+            final fitossanitariosRepo = ref.read(fitossanitariosRepositoryProvider);
+            final fitossanitariosInfoRepo = ref.read(fitossanitariosInfoRepositoryProvider);
+            final pragasRepo = ref.read(pragasRepositoryProvider);
+
+            Fitossanitario? defensivo;
+            FitossanitariosInfoData? defensivoInfo;
+            Praga? praga;
+
+            if (diagnosticoDrift != null) {
+               defensivo = await fitossanitariosRepo.findById(diagnosticoDrift.defensivoId);
+               if (defensivo != null) {
+                  defensivoInfo = await fitossanitariosInfoRepo.findByDefensivoId(defensivo.id);
+               }
+               praga = await pragasRepo.findById(diagnosticoDrift.pragaId);
+            }
+
             // Extensão DiagnosticoExtension já busca dados do defensivo internamente
             final diagnosticoData = diagnosticoDrift != null
-                ? await diagnosticoDrift.toDataMap()
+                ? await diagnosticoDrift.toDataMap(
+                    defensivo: defensivo,
+                    defensivoInfo: defensivoInfo,
+                    praga: praga,
+                  )
                 : <String, String>{};
 
             // Debug logs
@@ -176,8 +197,24 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
         if (diagnosticoDrift != null) {
           final diagnostico = DiagnosticoMapper.fromDrift(diagnosticoDrift);
 
+          // Fetch related data
+          final fitossanitariosRepo = ref.read(fitossanitariosRepositoryProvider);
+          final fitossanitariosInfoRepo = ref.read(fitossanitariosInfoRepositoryProvider);
+          final pragasRepo = ref.read(pragasRepositoryProvider);
+
+          final defensivo = await fitossanitariosRepo.findById(diagnosticoDrift.defensivoId);
+          FitossanitariosInfoData? defensivoInfo;
+          if (defensivo != null) {
+             defensivoInfo = await fitossanitariosInfoRepo.findByDefensivoId(defensivo.id);
+          }
+          final praga = await pragasRepo.findById(diagnosticoDrift.pragaId);
+
           // Extensão DiagnosticoExtension já busca dados do defensivo internamente
-          final diagnosticoData = await diagnosticoDrift.toDataMap();
+          final diagnosticoData = await diagnosticoDrift.toDataMap(
+            defensivo: defensivo,
+            defensivoInfo: defensivoInfo,
+            praga: praga,
+          );
 
           state = AsyncValue.data(
             currentState

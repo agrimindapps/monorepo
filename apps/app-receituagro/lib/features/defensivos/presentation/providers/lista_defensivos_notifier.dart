@@ -199,7 +199,7 @@ class ListaDefensivosNotifier extends _$ListaDefensivosNotifier {
       currentState.copyWith(searchText: searchText, isSearching: true),
     );
 
-    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+    _debounceTimer = Timer(const Duration(milliseconds: 700), () {
       _performSearch(searchText);
     });
   }

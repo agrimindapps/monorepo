@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -48,6 +50,10 @@ class _DefensivosUnificadoPageState
   String _searchText = '';
   bool _isAscending = true;
   bool _drillDownInitialized = false;
+  
+  /// Debounce timer para pesquisa
+  Timer? _debounceTimer;
+  static const _debounceDuration = Duration(milliseconds: 700);
 
   @override
   void initState() {
@@ -60,24 +66,29 @@ class _DefensivosUnificadoPageState
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _searchController.dispose();
     super.dispose();
   }
 
   void _onSearchChanged() {
-    setState(() {
-      _searchText = _searchController.text;
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(_debounceDuration, () {
+      if (!mounted) return;
+      setState(() {
+        _searchText = _searchController.text;
+      });
+      if (widget.isAgrupados && widget.tipoAgrupamento != null) {
+        ref
+            .read(defensivosDrillDownProvider.notifier)
+            .updateSearchFilter(_searchText);
+      } else {
+        // Apply text filter to unified notifier for regular list mode
+        ref
+            .read(defensivosUnificadoProvider.notifier)
+            .aplicarFiltroTexto(_searchText);
+      }
     });
-    if (widget.isAgrupados && widget.tipoAgrupamento != null) {
-      ref
-          .read(defensivosDrillDownProvider.notifier)
-          .updateSearchFilter(_searchText);
-    } else {
-      // Apply text filter to unified notifier for regular list mode
-      ref
-          .read(defensivosUnificadoProvider.notifier)
-          .aplicarFiltroTexto(_searchText);
-    }
   }
 
   void _clearSearch() {

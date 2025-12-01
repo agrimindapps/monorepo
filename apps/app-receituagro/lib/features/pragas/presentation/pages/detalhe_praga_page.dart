@@ -8,6 +8,7 @@ import '../../../favoritos/favoritos_page.dart';
 import '../providers/detalhe_praga_notifier.dart';
 import '../providers/diagnosticos_praga_notifier.dart';
 import '../widgets/comentarios_praga_widget.dart';
+import '../widgets/diagnosticos_praga_widget.dart';
 import '../widgets/praga_info_widget.dart';
 
 /// Página refatorada seguindo Clean Architecture
@@ -67,14 +68,19 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
   /// Carrega dados iniciais - operações locais sem timeout necessário
   Future<void> _loadInitialData() async {
     try {
+      debugPrint('🔍 [DETALHE_PRAGA_PAGE] _loadInitialData iniciando...');
+      debugPrint('🔍 [DETALHE_PRAGA_PAGE] pragaId: ${widget.pragaId}, pragaName: ${widget.pragaName}');
+      
       final pragaNotifier = ref.read(detalhePragaProvider.notifier);
       final diagnosticosNotifier = ref.read(
         diagnosticosPragaProvider.notifier,
       );
 
       if (widget.pragaId != null && widget.pragaId!.isNotEmpty) {
+        debugPrint('🔍 [DETALHE_PRAGA_PAGE] Inicializando por ID: ${widget.pragaId}');
         await pragaNotifier.initializeById(widget.pragaId!);
       } else {
+        debugPrint('🔍 [DETALHE_PRAGA_PAGE] Inicializando por nome: ${widget.pragaName}');
         await pragaNotifier.initializeAsync(
           widget.pragaName,
           widget.pragaScientificName,
@@ -82,16 +88,23 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
       }
 
       final pragaState = await ref.read(detalhePragaProvider.future);
+      debugPrint('🔍 [DETALHE_PRAGA_PAGE] pragaState.pragaData: ${pragaState.pragaData}');
+      debugPrint('🔍 [DETALHE_PRAGA_PAGE] pragaData.id: ${pragaState.pragaData?.id}');
+      debugPrint('🔍 [DETALHE_PRAGA_PAGE] pragaData.idPraga: ${pragaState.pragaData?.idPraga}');
 
       if (pragaState.pragaData != null &&
           pragaState.pragaData!.idPraga.isNotEmpty) {
+        debugPrint('🔍 [DETALHE_PRAGA_PAGE] Carregando diagnósticos para idPraga: ${pragaState.pragaData!.idPraga}');
         await diagnosticosNotifier.loadDiagnosticos(
           pragaState.pragaData!.idPraga,
           pragaName: widget.pragaName,
         );
+      } else {
+        debugPrint('⚠️ [DETALHE_PRAGA_PAGE] pragaData ou idPraga vazio/null');
       }
-    } catch (e) {
-      // Handle error silently or log appropriately
+    } catch (e, stack) {
+      debugPrint('❌ [DETALHE_PRAGA_PAGE] Erro em _loadInitialData: $e');
+      debugPrint('❌ [DETALHE_PRAGA_PAGE] Stack: $stack');
     }
   }
 
@@ -127,10 +140,8 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
                                   pragaScientificName:
                                       widget.pragaScientificName,
                                 ),
-                                const Center(
-                                  child: Text(
-                                    'Diagnósticos em desenvolvimento',
-                                  ),
+                                DiagnosticosPragaWidget(
+                                  pragaName: widget.pragaName,
                                 ),
                                 const ComentariosPragaWidget(),
                               ],

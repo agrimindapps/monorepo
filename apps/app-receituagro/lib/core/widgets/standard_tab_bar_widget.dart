@@ -36,11 +36,15 @@ class StandardTabBarWidget extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 8),
+      margin: margin ?? const EdgeInsets.symmetric(horizontal: 0.0, vertical: 8),
       decoration: BoxDecoration(
         color: backgroundColor ??
-            theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(20),
+            theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+          width: 1,
+        ),
       ),
       child: TabBar(
         controller: tabController,
@@ -50,8 +54,23 @@ class StandardTabBarWidget extends StatelessWidget {
         unselectedLabelColor:
             theme.colorScheme.onSurface.withValues(alpha: 0.6),
         indicator: BoxDecoration(
-          color: indicatorColor ?? const Color(0xFF4CAF50),
-          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            colors: [
+              indicatorColor ?? const Color(0xFF4CAF50),
+              (indicatorColor ?? const Color(0xFF4CAF50)).withValues(alpha: 0.8),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: (indicatorColor ?? const Color(0xFF4CAF50))
+                  .withValues(alpha: 0.4),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         indicatorSize: TabBarIndicatorSize.tab,
         labelStyle: const TextStyle(

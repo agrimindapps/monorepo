@@ -391,22 +391,37 @@ class _PragasPorCulturaDetalhadasPageState
     );
   }
 
-  /// Build pragas list
+  /// Build pragas list - Virtual Scroll para performance
   Widget _buildPragasList(List<Map<String, dynamic>> pragasList) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: pragasList.length,
-      itemBuilder: (context, index) {
-        final praga = pragasList[index];
-        return _buildPragaCard(praga);
-      },
+    const itemHeight = 120.0; // Altura aproximada do PragaPorCulturaCardWidget
+    
+    return SizedBox(
+      height: pragasList.length * itemHeight,
+      child: CustomScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        slivers: [
+          SliverFixedExtentList(
+            itemExtent: itemHeight,
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final praga = pragasList[index];
+                return _buildPragaCard(praga);
+              },
+              childCount: pragasList.length,
+              addAutomaticKeepAlives: false,
+              addRepaintBoundaries: false,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   /// Build single praga card
   Widget _buildPragaCard(Map<String, dynamic> pragaMap) {
+    final pragaId = pragaMap['objectId'] ?? pragaMap['id'] ?? '';
     return RepaintBoundary(
+      key: ValueKey('praga_cultura_$pragaId'),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: PragaPorCulturaCardWidget(

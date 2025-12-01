@@ -39,6 +39,10 @@ class _EnhancedDefensivosBottomSheetState
   List<String> _allDefensivos = [];
   final Map<String, CompatibilityValidation> _compatibilityCache = {};
   bool _isLoadingCompatibility = false;
+  
+  /// Debounce timer para pesquisa
+  Timer? _debounceTimer;
+  static const _debounceDuration = Duration(milliseconds: 700);
 
   @override
   void initState() {
@@ -79,7 +83,14 @@ class _EnhancedDefensivosBottomSheetState
     setState(() => _isLoadingCompatibility = false);
   }
 
-  void _onSearchChanged(String query) async {
+  void _onSearchChanged(String query) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(_debounceDuration, () {
+      _performSearch(query);
+    });
+  }
+  
+  Future<void> _performSearch(String query) async {
     if (query.isEmpty) {
       setState(() {
         _filteredDefensivos = List.from(_allDefensivos);
@@ -510,6 +521,7 @@ class _EnhancedDefensivosBottomSheetState
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _searchController.dispose();
     super.dispose();
   }

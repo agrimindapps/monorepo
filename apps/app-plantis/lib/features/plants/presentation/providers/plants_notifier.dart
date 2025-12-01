@@ -392,16 +392,28 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 
   Future<bool> deletePlant(String id) async {
+    // Verificar se o provider ainda está montado
+    if (!ref.mounted) return false;
+
     state = state.copyWith(isLoading: true, error: null);
 
     final result = await _deletePlantUseCase.call(id);
 
+    // Verificar novamente após operação assíncrona
+    if (!ref.mounted) return false;
+
     final success = result.fold(
       (Failure failure) {
+        // Verificar antes de atualizar state
+        if (!ref.mounted) return false;
+
         state = state.copyWith(error: failure.toString(), isLoading: false);
         return false;
       },
       (_) {
+        // Verificar antes de atualizar state
+        if (!ref.mounted) return false;
+
         state = state.copyWith(
           plants: _applyFilters(state.plants.where((p) => p.id != id).toList()),
           searchResults: state.searchResults.where((p) => p.id != id).toList(),

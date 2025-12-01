@@ -1,70 +1,121 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/spacing_tokens.dart';
 import '../providers/diagnosticos_praga_notifier.dart';
 
 /// Widget responsável por renderizar um item de diagnóstico na lista
 ///
 /// Responsabilidade única: exibir dados de um diagnóstico específico
-/// - Layout consistente com card design
-/// - Informações principais visíveis (nome, ingrediente ativo, dosagem)
+/// - Layout consistente com card design (similar ao de defensivos)
+/// - Informações principais visíveis (nome do defensivo, ingrediente ativo, dosagem)
+/// - Avatar com iniciais do defensivo
 /// - Ação de tap configurável
 /// - Performance otimizada com RepaintBoundary
 class DiagnosticoListItemWidget extends StatelessWidget {
   final DiagnosticoModel diagnostico;
   final VoidCallback onTap;
+  final bool isDense;
+  final bool hasElevation;
 
   const DiagnosticoListItemWidget({
     super.key,
     required this.diagnostico,
     required this.onTap,
+    this.isDense = false,
+    this.hasElevation = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return RepaintBoundary(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(8.0),
-          decoration: _buildCardDecoration(context),
-          child: Row(
+      child: Container(
+        margin: isDense
+            ? const EdgeInsets.symmetric(horizontal: 8)
+            : const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
+        decoration: hasElevation
+            ? BoxDecoration(
+                color: theme.cardColor,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.shadowColor.withValues(alpha: 0.1),
+                    spreadRadius: 1,
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              )
+            : null,
+        child: ListTile(
+          onTap: onTap,
+          dense: isDense,
+          contentPadding: isDense
+              ? const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.md,
+                  vertical: SpacingTokens.xs,
+                )
+              : const EdgeInsets.all(SpacingTokens.md),
+          leading: _buildAvatar(context),
+          title: Text(
+            diagnostico.nome,
+            style: TextStyle(
+              fontSize: isDense ? 15 : 16,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildIcon(context),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildContent(context),
-              ),
-              _buildTrailingActions(context),
+              if (diagnostico.ingredienteAtivo.isNotEmpty &&
+                  diagnostico.ingredienteAtivo != 'Não especificado') ...[
+                SizedBox(height: isDense ? 2 : SpacingTokens.xs),
+                Text(
+                  diagnostico.ingredienteAtivo,
+                  style: TextStyle(
+                    fontSize: isDense ? 13 : 14,
+                    fontWeight: FontWeight.w500,
+                    fontStyle: FontStyle.italic,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+              if (diagnostico.dosagem.isNotEmpty &&
+                  diagnostico.dosagem != 'Não informado') ...[
+                SizedBox(height: isDense ? 2 : SpacingTokens.xs),
+                Text(
+                  diagnostico.dosagem,
+                  style: TextStyle(
+                    fontSize: isDense ? 11 : 12,
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ],
             ],
           ),
+          trailing: Icon(
+            Icons.arrow_forward_ios,
+            size: isDense ? 14 : 16,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          shape: hasElevation
+              ? RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                )
+              : null,
         ),
       ),
     );
   }
 
-  /// Decoração do card do item
-  BoxDecoration _buildCardDecoration(BuildContext context) {
+  /// Avatar com ícone do defensivo (consistente com o visual de defensivos)
+  Widget _buildAvatar(BuildContext context) {
     final theme = Theme.of(context);
-
-    return BoxDecoration(
-      color: theme.cardColor,
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: [
-        BoxShadow(
-          color: theme.shadowColor.withValues(alpha: 0.1),
-          spreadRadius: 1,
-          blurRadius: 4,
-          offset: const Offset(0, 2),
-        ),
-      ],
-    );
-  }
-
-  /// Avatar com iniciais do nome do defensivo
-  Widget _buildIcon(BuildContext context) {
-    final theme = Theme.of(context);
-    final initials = _getInitials(diagnostico.nome);
 
     return Container(
       width: 48,
@@ -73,85 +124,11 @@ class DiagnosticoListItemWidget extends StatelessWidget {
         color: theme.colorScheme.primary,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Center(
-        child: Text(
-          initials,
-          style: TextStyle(
-            color: theme.colorScheme.onPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+      child: Icon(
+        Icons.science_outlined, // Ícone de defensivo/química
+        color: theme.colorScheme.onPrimary,
+        size: 24,
       ),
-    );
-  }
-
-  /// Extrai iniciais do nome (primeiras letras de até 2 palavras)
-  String _getInitials(String name) {
-    if (name.isEmpty) return '??';
-
-    final words = name.trim().split(' ');
-    if (words.length == 1) {
-      return words[0].substring(0, 1).toUpperCase();
-    }
-
-    return (words[0].substring(0, 1) + words[1].substring(0, 1)).toUpperCase();
-  }
-
-  /// Conteúdo principal com informações do diagnóstico
-  Widget _buildContent(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          diagnostico.nome,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          diagnostico.ingredienteAtivo,
-          style: TextStyle(
-            fontSize: 13,
-            color: theme.colorScheme.onSurfaceVariant,
-            fontStyle: FontStyle.italic,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Dosagem: ${diagnostico.dosagem}',
-          style: TextStyle(
-            fontSize: 12,
-            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Ações à direita (ícones de aviso e navegação)
-  Widget _buildTrailingActions(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Row(
-      children: [
-        Icon(
-          Icons.warning,
-          color: Colors.orange[600],
-          size: 18,
-        ),
-        const SizedBox(width: 8),
-        Icon(
-          Icons.chevron_right,
-          color: theme.colorScheme.onSurfaceVariant,
-          size: 20,
-        ),
-      ],
     );
   }
 }
@@ -159,6 +136,7 @@ class DiagnosticoListItemWidget extends StatelessWidget {
 /// Widget para seção de cultura que agrupa diagnósticos
 ///
 /// Responsabilidade única: exibir cabeçalho de agrupamento por cultura
+/// Visual similar ao DiagnosticoDefensivoCultureSectionWidget
 class DiagnosticoCultureSectionWidget extends StatelessWidget {
   final String cultura;
   final int diagnosticCount;
@@ -172,29 +150,55 @@ class DiagnosticoCultureSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final diagnosticText = '$diagnosticCount diagnóstico${diagnosticCount > 1 ? 's' : ''}';
 
     return RepaintBoundary(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(
+          horizontal: SpacingTokens.lg,
+          vertical: SpacingTokens.md,
+        ),
+        margin: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(8),
+          color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: theme.colorScheme.primary.withValues(alpha: 0.2),
+          ),
         ),
         child: Row(
           children: [
             Icon(
               Icons.eco,
               color: theme.colorScheme.primary,
-              size: 18,
+              size: 20,
             ),
-            const SizedBox(width: 12),
-            Text(
-              '$cultura ($diagnosticText)',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface,
+            const SizedBox(width: SpacingTokens.sm),
+            Expanded(
+              child: Text(
+                cultura,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: SpacingTokens.sm,
+                vertical: SpacingTokens.xs,
+              ),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '$diagnosticCount',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onPrimary,
+                ),
               ),
             ),
           ],

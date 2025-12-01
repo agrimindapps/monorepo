@@ -14,6 +14,7 @@ class FuelTypeMapper {
     'Energia Elétrica': FuelType.electric,
     'Elétrico': FuelType.electric,
     'Híbrido': FuelType.hybrid,
+    'Flex': FuelType.flex,
   };
 
   /// Mapa reverso de FuelType para string (usado na interface)
@@ -24,6 +25,7 @@ class FuelTypeMapper {
     FuelType.gas: 'GNV',
     FuelType.electric: 'Energia Elétrica',
     FuelType.hybrid: 'Híbrido',
+    FuelType.flex: 'Flex',
   };
 
   /// Converte string do interface para FuelType

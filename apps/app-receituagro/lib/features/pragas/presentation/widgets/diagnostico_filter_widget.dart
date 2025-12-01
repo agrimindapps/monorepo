@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -51,11 +53,32 @@ class DiagnosticoFilterWidget extends ConsumerWidget {
   }
 }
 
-/// Campo de busca personalizado
-class _SearchField extends StatelessWidget {
+/// Campo de busca personalizado com debounce
+class _SearchField extends StatefulWidget {
   final ValueChanged<String> onChanged;
 
   const _SearchField({required this.onChanged});
+
+  @override
+  State<_SearchField> createState() => _SearchFieldState();
+}
+
+class _SearchFieldState extends State<_SearchField> {
+  Timer? _debounceTimer;
+  static const _debounceDuration = Duration(milliseconds: 700);
+  
+  void _onSearchChanged(String value) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(_debounceDuration, () {
+      widget.onChanged(value);
+    });
+  }
+  
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +95,7 @@ class _SearchField extends StatelessWidget {
         ),
       ),
       child: TextField(
-        onChanged: onChanged,
+        onChanged: _onSearchChanged,
         decoration: const InputDecoration(
           hintText: 'Pesquisar diagnósticos...',
           border: InputBorder.none,

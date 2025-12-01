@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,7 +17,6 @@ import 'plant_care_section.dart';
 import 'plant_details_controller.dart';
 import 'plant_details_error_widgets.dart';
 import 'plant_details_invalid_state_widget.dart';
-import 'plant_details_loading_widgets.dart';
 import 'plant_info_section.dart';
 import 'plant_notes_section.dart';
 import 'plant_tasks_section.dart';
@@ -187,12 +187,19 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
             final details = plantDetailsState;
             final plant = details.plant;
 
-            if (details.isLoading && plant == null) {
-              return PlantDetailsLoadingState(
-                context: context,
-                onBack: () => Navigator.of(context).pop(),
-              );
-            }
+            // Se está carregando E não tem planta, criar planta placeholder
+            // para usar com Skeletonizer
+            final Plant displayPlant = plant ??
+                Plant(
+                  id: 'loading',
+                  name: 'Carregando nome da planta',
+                  species: 'Carregando espécie',
+                  spaceId: 'loading',
+                  notes: 'Carregando observações',
+                  plantingDate: DateTime.now(),
+                );
+
+            final bool isLoading = details.isLoading && plant == null;
 
             if (details.hasError && plant == null) {
               return PlantDetailsErrorState(
@@ -203,24 +210,16 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
               );
             }
 
-            if (plant == null) {
-              return PlantDetailsErrorState(
-                errorMessage: 'Planta não encontrada.',
-                onRetry: () => _controller?.refresh(widget.plantId),
-                onBack: () => Navigator.of(context).pop(),
-                plantId: widget.plantId,
-              );
-            }
-
-            if (!_isPlantDataValid(plant)) {
+            // Validar dados apenas se não estiver carregando
+            if (!isLoading && !_isPlantDataValid(displayPlant)) {
               return PlantDetailsInvalidDataState(
                 context: context,
-                plant: plant,
-                onEdit: () => _controller?.editPlant(plant),
+                plant: displayPlant,
+                onEdit: () => _controller?.editPlant(displayPlant),
               );
             }
 
-            return _buildMainContent(context, plant);
+            return _buildMainContent(context, displayPlant, isLoading);
           },
         ),
       ),
@@ -418,7 +417,23 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
             return TextButton(
               onPressed: () async {
                 Navigator.of(context).pop(); // Fechar diálogo primeiro
-                await _controller?.deletePlant(plant.id);
+
+                // Usar o plantsNotifierProvider para deletar
+                // Isso garante que a lista seja atualizada automaticamente
+                final success = await ref.read(plantsNotifierProvider.notifier).deletePlant(plant.id);
+
+                if (success) {
+                  _showSnackBarWithColor(
+                    AppStrings.plantDeletedSuccessfully,
+                    backgroundColor: Colors.green,
+                  );
+                  _onBack();
+                } else {
+                  _showSnackBar(
+                    AppStrings.errorDeletingPlant,
+                    'error',
+                  );
+                }
               },
               style: TextButton.styleFrom(foregroundColor: PlantisColors.error),
               child: const Text('Excluir'),
@@ -478,7 +493,7 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
   ///
   /// Returns:
   /// - A [Widget] containing the complete plant details interface
-  Widget _buildMainContent(BuildContext context, Plant plant) {
+  Widget _buildMainContent(BuildContext context, Plant plant, bool isLoading) {
     return Column(
       children: [
         _buildHeader(context, plant),
@@ -505,7 +520,7 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
                     child: TabBarView(
                       controller: _tabController,
                       children: [
-                        _buildOverviewTab(context, plant),
+                        _buildOverviewTab(context, plant, isLoading),
                         _buildTasksTab(context, plant),
                         _buildCareTab(context, plant),
                         _buildNotesTab(context, plant),
@@ -673,14 +688,18 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
     );
   }
 
-  Widget _buildOverviewTab(BuildContext context, Plant plant) {
+  Widget _buildOverviewTab(BuildContext context, Plant plant, bool isLoading) {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
       child: Column(
         children: [
           _buildPlantImageSection(context, plant),
           const SizedBox(height: AppSpacing.lg),
-          PlantInfoSection(plant: plant),
+          // Aplica Skeletonizer apenas no conteúdo dinâmico
+          Skeletonizer(
+            enabled: isLoading,
+            child: PlantInfoSection(plant: plant),
+          ),
         ],
       ),
     );

@@ -6,7 +6,8 @@ enum FuelType {
   diesel,
   gas,
   hybrid,
-  electric;
+  electric,
+  flex;
 
   String get displayName {
     switch (this) {
@@ -22,6 +23,8 @@ enum FuelType {
         return 'Híbrido';
       case FuelType.electric:
         return 'Elétrico';
+      case FuelType.flex:
+        return 'Flex';
     }
   }
 

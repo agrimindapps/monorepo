@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_receituagro/features/pragas/data/services/pragas_type_service.dart';
 import 'package:flutter/material.dart';
 
@@ -39,6 +41,10 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
   final FocusNode _focusNode = FocusNode();
   late IPragasTypeService _typeService;
   bool _isFocused = false;
+  
+  /// Debounce timer para pesquisa
+  Timer? _debounceTimer;
+  static const _debounceDuration = Duration(milliseconds: 700);
 
   @override
   void initState() {
@@ -77,6 +83,14 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
       }
     });
   }
+  
+  /// Aplica debounce na pesquisa
+  void _onSearchChanged(String value) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(_debounceDuration, () {
+      widget.onChanged(value);
+    });
+  }
 
   void _onFocusChange() {
     setState(() {
@@ -91,6 +105,7 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _animationController.dispose();
     _focusController.dispose();
     _focusNode.dispose();
@@ -182,7 +197,7 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
                           child: TextField(
                             controller: widget.controller,
                             focusNode: _focusNode,
-                            onChanged: widget.onChanged,
+                            onChanged: _onSearchChanged,
                             decoration: InputDecoration(
                               hintText: _hintText,
                               hintStyle: TextStyle(

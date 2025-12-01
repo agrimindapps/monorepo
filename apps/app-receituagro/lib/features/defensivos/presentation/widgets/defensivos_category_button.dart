@@ -48,8 +48,8 @@ class DefensivosCategoryButton extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    buttonColor.withValues(alpha: 0.7),
-                    buttonColor.withValues(alpha: 0.9),
+                    buttonColor.withValues(alpha: 0.8),
+                    buttonColor,
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -57,21 +57,21 @@ class DefensivosCategoryButton extends StatelessWidget {
                 borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.button),
                 boxShadow: [
                   BoxShadow(
-                    color: buttonColor.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
+                    color: buttonColor.withValues(alpha: 0.4),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
                   ),
                 ],
               ),
               child: Stack(
                 children: [
                   Positioned(
-                    right: -15,
-                    bottom: -15,
+                    right: -20,
+                    bottom: -20,
                     child: FaIcon(
                       icon ?? FontAwesomeIcons.circle,
-                      size: 70,
-                      color: Colors.white.withValues(alpha: 0.1),
+                      size: 90,
+                      color: Colors.white.withValues(alpha: 0.15),
                     ),
                   ),
                   Padding(

@@ -17,11 +17,15 @@ class NavigationShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final navigationState = ref.watch(navigationStateProvider);
 
+    // Se não deve mostrar bottom nav, retorna apenas o child sem Scaffold extra
+    // Isso evita Scaffolds aninhados em páginas de detalhe
+    if (!navigationState.showBottomNav) {
+      return child ?? const SizedBox.shrink();
+    }
+
     return Scaffold(
       body: child,
-      bottomNavigationBar: navigationState.showBottomNav
-          ? _buildBottomNavigationBar(context, ref, navigationState)
-          : null,
+      bottomNavigationBar: _buildBottomNavigationBar(context, ref, navigationState),
     );
   }
 
@@ -94,9 +98,11 @@ class NavigationShell extends ConsumerWidget {
 
     final navigator = Navigator.of(context);
 
-    // Limpa stack até root e navega para página principal
-    navigator.popUntil((route) => route.isFirst);
-    navigator.pushReplacementNamed(routes[index]);
+    // Usa pushNamedAndRemoveUntil para limpar stack e navegar
+    navigator.pushNamedAndRemoveUntil(
+      routes[index],
+      (route) => false, // Remove todas as rotas
+    );
   }
 }
 

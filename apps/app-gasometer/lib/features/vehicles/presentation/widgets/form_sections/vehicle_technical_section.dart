@@ -53,6 +53,9 @@ class VehicleTechnicalSection extends ConsumerWidget {
         case 'Híbrido':
           icon = Icons.ev_station;
           break;
+        case 'Flex':
+          icon = Icons.autorenew;
+          break;
         default:
           icon = Icons.local_gas_station;
       }

@@ -118,7 +118,7 @@ class VehicleDriftSyncAdapter
 
   /// Converte índice de combustível para FuelType enum
   FuelType _parseFuelTypeFromIndex(int index) {
-    // Mapeamento: 0=Gasolina, 1=Etanol, 2=Diesel, 3=GNV, 4=Flex
+    // Mapeamento: 0=Gasolina, 1=Etanol, 2=Diesel, 3=GNV, 4=Hybrid/Electric, 5=Flex
     switch (index) {
       case 0:
         return FuelType.gasoline;
@@ -129,7 +129,9 @@ class VehicleDriftSyncAdapter
       case 3:
         return FuelType.gas;
       case 4:
-        return FuelType.hybrid; // Flex = Hybrid
+        return FuelType.hybrid; // Hybrid/Electric
+      case 5:
+        return FuelType.flex; // Flex
       default:
         return FuelType.gasoline;
     }
@@ -148,7 +150,9 @@ class VehicleDriftSyncAdapter
         return 3;
       case FuelType.hybrid:
       case FuelType.electric:
-        return 4; // Flex/Hybrid
+        return 4; // Hybrid/Electric
+      case FuelType.flex:
+        return 5; // Flex
     }
   }
 

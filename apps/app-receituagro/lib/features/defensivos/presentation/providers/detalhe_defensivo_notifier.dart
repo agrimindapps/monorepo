@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_providers.dart' as core_providers;
@@ -154,10 +155,15 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
 
   /// Load favorito state using simplified consistent system
   Future<void> _loadFavoritoState(String defensivoName) async {
+    // Sempre ler o estado mais recente, pois _loadDefensivoData já pode ter atualizado
     final currentState = state.value;
     if (currentState == null) return;
 
+    // idDefensivo vem do defensivoData que foi carregado por _loadDefensivoData
     final itemId = currentState.defensivoData?.idDefensivo ?? defensivoName;
+    
+    debugPrint('🔖 [FAVORITO] _loadFavoritoState: itemId=$itemId, defensivoName=$defensivoName');
+    debugPrint('🔖 [FAVORITO] defensivoData?.idDefensivo=${currentState.defensivoData?.idDefensivo}');
 
     try {
       final result = await _favoritosRepository.isFavorito(
@@ -279,6 +285,10 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
 
     final wasAlreadyFavorited = currentState.isFavorited;
     final itemId = currentState.defensivoData?.idDefensivo ?? defensivoName;
+    
+    debugPrint('🔖 [FAVORITO] toggleFavorito: itemId=$itemId, defensivoName=$defensivoName');
+    debugPrint('🔖 [FAVORITO] defensivoData?.idDefensivo=${currentState.defensivoData?.idDefensivo}');
+    
     state = AsyncValue.data(
       currentState.copyWith(isFavorited: !wasAlreadyFavorited),
     );

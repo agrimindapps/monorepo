@@ -110,9 +110,18 @@ class VehicleFormNotifier extends _$VehicleFormNotifier {
     renavamController.text = vehicle.metadata['renavam'] as String? ?? '';
     odometerController.text = vehicle.currentOdometer.toString();
 
-    final fuelType = vehicle.supportedFuels.isNotEmpty
-        ? FuelTypeMapper.toStringFormat(vehicle.supportedFuels.first)
-        : 'Gasolina';
+    // Determinar tipo de combustível para exibição
+    // Se o veículo suporta múltiplos combustíveis (Gasolina, Etanol, GNV), é Flex
+    final String fuelType;
+    if (vehicle.supportedFuels.length > 1 &&
+        vehicle.supportedFuels.contains(FuelType.gasoline) &&
+        vehicle.supportedFuels.contains(FuelType.ethanol)) {
+      fuelType = 'Flex';
+    } else if (vehicle.supportedFuels.isNotEmpty) {
+      fuelType = FuelTypeMapper.toStringFormat(vehicle.supportedFuels.first);
+    } else {
+      fuelType = 'Gasolina';
+    }
 
     state = state.copyWith(selectedFuelType: fuelType);
 
@@ -337,6 +346,12 @@ class VehicleFormNotifier extends _$VehicleFormNotifier {
       throw const local_error.ValidationError(message: 'Placa é obrigatória');
     }
 
+    // Determinar combustíveis suportados
+    // Se for Flex, suporta Gasolina, Etanol e GNV
+    final List<FuelType> supportedFuels = fuelType == FuelType.flex
+        ? [FuelType.gasoline, FuelType.ethanol, FuelType.gas]
+        : [fuelType];
+
     return VehicleEntity(
       id:
           state.editingVehicle?.id ??
@@ -349,7 +364,7 @@ class VehicleFormNotifier extends _$VehicleFormNotifier {
       color: sanitizedColor,
       licensePlate: sanitizedPlate,
       type: VehicleType.car,
-      supportedFuels: [fuelType],
+      supportedFuels: supportedFuels,
       currentOdometer: odometerValue,
       createdAt: state.editingVehicle?.createdAt ?? DateTime.now(),
       updatedAt: DateTime.now(),

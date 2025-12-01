@@ -205,6 +205,8 @@ class VehicleFormConfig extends FormConfig<VehicleEntity> {
         return 'Híbrido';
       case FuelType.electric:
         return 'Elétrico';
+      case FuelType.flex:
+        return 'Flex';
     }
   }
   

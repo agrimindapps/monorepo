@@ -1,18 +1,20 @@
-import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/providers/core_providers.dart';
+import '../../../../database/receituagro_database.dart';
 import '../../../defensivos/presentation/pages/detalhe_defensivo_page.dart';
 import '../../../diagnosticos/presentation/pages/detalhe_diagnostico_page.dart';
 import '../providers/diagnosticos_praga_notifier.dart';
 
-/// Widget responsável pelo modal de detalhes do diagnóstico
+/// Widget responsável pelo modal de detalhes do diagnóstico (a partir de uma praga)
 ///
 /// Responsabilidade única: exibir detalhes completos de um diagnóstico em modal
-/// - Layout responsivo com constraints adequados
+/// - Layout responsivo e moderno (similar ao dialog de defensivos)
 /// - Informações detalhadas do diagnóstico
 /// - Ações para navegar para defensivo ou diagnóstico detalhado
-/// - Premium badges para features pagas
-class DiagnosticoDialogWidget extends ConsumerWidget {
+/// - Carrega dados do defensivo relacionado para exibir imagem/detalhes
+class DiagnosticoDialogWidget extends ConsumerStatefulWidget {
   final DiagnosticoModel diagnostico;
   final String pragaName;
 
@@ -39,51 +41,141 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DiagnosticoDialogWidget> createState() =>
+      _DiagnosticoDialogWidgetState();
+}
+
+class _DiagnosticoDialogWidgetState
+    extends ConsumerState<DiagnosticoDialogWidget> {
+  Fitossanitario? _defensivoData;
+  bool _isLoadingDefensivo = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDefensivoData();
+  }
+
+  /// Carrega dados do defensivo relacionado ao diagnóstico
+  Future<void> _loadDefensivoData() async {
+    try {
+      final defensivoRepository = ref.read(fitossanitariosRepositoryProvider);
+      
+      // Tenta buscar por ID do defensivo
+      if (widget.diagnostico.defensivoId.isNotEmpty) {
+        // Primeiro tenta como int (ID do banco)
+        final intId = int.tryParse(widget.diagnostico.defensivoId);
+        Fitossanitario? defensivo;
+        
+        if (intId != null) {
+          defensivo = await defensivoRepository.findById(intId);
+        }
+        
+        // Se não encontrou, tenta como string (idDefensivo original)
+        if (defensivo == null) {
+          defensivo = await defensivoRepository.getById(widget.diagnostico.defensivoId);
+        }
+        
+        if (mounted) {
+          setState(() {
+            _defensivoData = defensivo;
+            _isLoadingDefensivo = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _isLoadingDefensivo = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingDefensivo = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Dialog(
-      backgroundColor: theme.dialogTheme.backgroundColor ?? theme.cardColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxHeight: double.infinity,
-          maxWidth: 400.0, // Largura máxima de 400px
-          minWidth: 360.0, // Largura mínima de 360px
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(16),
+      child: Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
+          maxWidth: MediaQuery.of(context).size.width - 32,
         ),
-        child: IntrinsicHeight(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildHeader(context),
-              Flexible(child: _buildContent(context)),
-              _buildActions(context, ref),
-            ],
-          ),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildModernHeader(context),
+            Flexible(child: _buildModernContent(context)),
+            _buildModernActions(context),
+          ],
         ),
       ),
     );
   }
 
-  /// Cabeçalho do modal com título e botão de fechar
-  Widget _buildHeader(BuildContext context) {
+  /// Cabeçalho moderno com informações do defensivo
+  Widget _buildModernHeader(BuildContext context) {
     final theme = Theme.of(context);
+    final nomeDefensivo = widget.diagnostico.nome;
+    final ingredienteAtivo = widget.diagnostico.ingredienteAtivo.isNotEmpty
+        ? widget.diagnostico.ingredienteAtivo
+        : 'Ingrediente ativo não especificado';
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 20, 0),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
+              // Avatar do defensivo
+              _buildDefensivoAvatar(context),
+              const SizedBox(width: 16),
               Expanded(
-                child: Text(
-                  diagnostico.nome,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      nomeDefensivo,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      ingredienteAtivo,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontStyle: FontStyle.italic,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
               IconButton(
@@ -97,13 +189,79 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
+          // Card com cultura
+          _buildCulturaCard(context),
+        ],
+      ),
+    );
+  }
+
+  /// Avatar do defensivo
+  Widget _buildDefensivoAvatar(BuildContext context) {
+    final theme = Theme.of(context);
+
+    if (_isLoadingDefensivo) {
+      return Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(
+        Icons.science_outlined,
+        color: theme.colorScheme.onPrimary,
+        size: 28,
+      ),
+    );
+  }
+
+  /// Card com informação da cultura
+  Widget _buildCulturaCard(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.eco,
+            size: 16,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(width: 8),
           Text(
-            'Ingrediente Ativo: ${diagnostico.ingredienteAtivo}',
+            'Cultura: ${widget.diagnostico.cultura}',
             style: TextStyle(
-              fontSize: 14,
-              fontStyle: FontStyle.italic,
-              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: theme.colorScheme.onSurface,
             ),
           ),
         ],
@@ -111,36 +269,44 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
     );
   }
 
-  /// Conteúdo principal do modal
-  Widget _buildContent(BuildContext context) {
+  /// Conteúdo moderno com informações do diagnóstico
+  Widget _buildModernContent(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
-          const SizedBox(height: 16),
-          _DiagnosticoInfoRow(
-            label: 'Dosagem',
-            value: diagnostico.dosagem,
+          _buildModernInfoItem(
+            context,
             icon: Icons.medical_services,
-            isPremium: false, // Removido bloqueio premium
+            title: 'Dosagem',
+            value: widget.diagnostico.dosagem.isNotEmpty &&
+                    widget.diagnostico.dosagem != 'Não informado'
+                ? widget.diagnostico.dosagem
+                : 'Não disponível',
           ),
-          const _DiagnosticoInfoRow(
-            label: 'Aplicação Terrestre',
-            value: 'Não disponível',
+          _buildModernInfoItem(
+            context,
             icon: Icons.agriculture,
-            isPremium: false, // Removido bloqueio premium
+            title: 'Aplicação Terrestre',
+            value: widget.diagnostico.aplicacaoTerrestre.isNotEmpty
+                ? widget.diagnostico.aplicacaoTerrestre
+                : 'Não disponível',
           ),
-          const _DiagnosticoInfoRow(
-            label: 'Aplicação Aérea',
-            value: 'Não disponível',
+          _buildModernInfoItem(
+            context,
             icon: Icons.flight,
-            isPremium: false, // Removido bloqueio premium
+            title: 'Aplicação Aérea',
+            value: widget.diagnostico.aplicacaoAerea.isNotEmpty
+                ? widget.diagnostico.aplicacaoAerea
+                : 'Não disponível',
           ),
-          const _DiagnosticoInfoRow(
-            label: 'Intervalo de Aplicação',
-            value: 'Não disponível',
+          _buildModernInfoItem(
+            context,
             icon: Icons.schedule,
-            isPremium: false, // Removido bloqueio premium
+            title: 'Intervalo de Segurança',
+            value: widget.diagnostico.intervaloSeguranca.isNotEmpty
+                ? widget.diagnostico.intervaloSeguranca
+                : 'Não disponível',
           ),
           const SizedBox(height: 16),
         ],
@@ -148,42 +314,13 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
     );
   }
 
-  /// Ações do modal (botões defensivo e diagnóstico)
-  Widget _buildActions(BuildContext context, WidgetRef ref) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      child: Row(
-        children: [
-          Expanded(child: _DefensivoButton(diagnostico: diagnostico, ref: ref)),
-          const SizedBox(width: 16),
-          Expanded(
-            child: _DiagnosticoButton(
-              diagnostico: diagnostico,
-              pragaName: pragaName,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Widget para linha de informação no modal
-class _DiagnosticoInfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final bool isPremium;
-
-  const _DiagnosticoInfoRow({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.isPremium,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  /// Widget para item de informação moderno
+  Widget _buildModernInfoItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
     final theme = Theme.of(context);
 
     return Container(
@@ -209,7 +346,7 @@ class _DiagnosticoInfoRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  label,
+                  title,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -227,131 +364,98 @@ class _DiagnosticoInfoRow extends StatelessWidget {
               ],
             ),
           ),
-          if (isPremium) ...[
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.amber.shade100,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.amber.shade300),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.diamond, size: 12, color: Colors.amber.shade700),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Premium',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.amber.shade700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
         ],
       ),
     );
   }
-}
 
-/// Botão para navegar ao defensivo
-class _DefensivoButton extends ConsumerWidget {
-  final DiagnosticoModel diagnostico;
-  final WidgetRef ref;
-
-  const _DefensivoButton({required this.diagnostico, required this.ref});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  /// Ações modernas do modal (botões inferiores)
+  Widget _buildModernActions(BuildContext context) {
     final theme = Theme.of(context);
 
-    return OutlinedButton(
-      onPressed: () {
-        const fabricante = 'Fabricante Desconhecido';
-
-        if (context.mounted) Navigator.of(context).pop();
-        if (context.mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute<void>(
-              builder:
-                  (context) => DetalheDefensivoPage(
-                    defensivoName: diagnostico.nome,
-                    fabricante: fabricante,
-                  ),
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: () => _navigateToDefensivo(context),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                side: BorderSide(color: theme.colorScheme.outline),
+              ),
+              child: Text(
+                'Defensivo',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
             ),
-          );
-        }
-      },
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        side: BorderSide(color: theme.colorScheme.outline),
-      ),
-      child: Text(
-        'Defensivo',
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: theme.colorScheme.onSurface,
-        ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () => _navigateToDiagnostico(context),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                'Diagnóstico',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
-}
 
-/// Botão para navegar ao diagnóstico detalhado
-class _DiagnosticoButton extends ConsumerWidget {
-  final DiagnosticoModel diagnostico;
-  final String pragaName;
+  /// Navega para página de detalhes do defensivo
+  void _navigateToDefensivo(BuildContext context) {
+    final fabricante = _defensivoData?.fabricante ?? 'Fabricante Desconhecido';
 
-  const _DiagnosticoButton({
-    required this.diagnostico,
-    required this.pragaName,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-
-    return ElevatedButton(
-      onPressed: () {
-        if (context.mounted) Navigator.of(context).pop();
-        if (context.mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute<void>(
-              builder:
-                  (context) => DetalheDiagnosticoPage(
-                    diagnosticoId: diagnostico.id,
-                    nomeDefensivo: diagnostico.nome,
-                    nomePraga: pragaName,
-                    cultura: diagnostico.cultura,
-                  ),
-            ),
-          );
-        }
-      },
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: theme.colorScheme.onPrimary,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+    if (context.mounted) Navigator.of(context).pop();
+    if (context.mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(
+          builder:
+              (context) => DetalheDefensivoPage(
+                defensivoName: widget.diagnostico.nome,
+                fabricante: fabricante,
+              ),
         ),
-        elevation: 0,
-      ),
-      child: const Text(
-        'Diagnóstico',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-      ),
-    );
+      );
+    }
+  }
+
+  /// Navega para página de detalhes do diagnóstico
+  void _navigateToDiagnostico(BuildContext context) {
+    if (context.mounted) Navigator.of(context).pop();
+    if (context.mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(
+          builder:
+              (context) => DetalheDiagnosticoPage(
+                diagnosticoId: widget.diagnostico.id,
+                nomeDefensivo: widget.diagnostico.nome,
+                nomePraga: widget.pragaName,
+                cultura: widget.diagnostico.cultura,
+              ),
+        ),
+      );
+    }
   }
 }

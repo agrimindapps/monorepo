@@ -66,7 +66,7 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
       _searchText = searchText;
     });
 
-    _searchDebounceTimer = Timer(const Duration(milliseconds: 300), () {
+    _searchDebounceTimer = Timer(const Duration(milliseconds: 700), () {
       _performDebouncedSearch(searchText);
     });
   }
@@ -198,7 +198,13 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
       children: [
         const SizedBox(height: ReceitaAgroSpacing.sm),
         Expanded(
-          child: CustomScrollView(slivers: [_buildPragasSliver(isDark, state)]),
+          // CustomScrollView com slivers permite virtual scroll nativo
+          // Os itens são renderizados apenas quando visíveis na viewport
+          child: CustomScrollView(
+            // Melhora performance de scroll
+            physics: const BouncingScrollPhysics(),
+            slivers: [_buildPragasSliver(isDark, state)],
+          ),
         ),
       ],
     );
@@ -299,95 +305,76 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
     }
 
     return _viewMode.isGrid
-        ? _buildSliverGrid(isDark, state)
-        : _buildSliverList(isDark, state);
+        ? _buildVirtualGrid(isDark, state)
+        : _buildVirtualList(isDark, state);
   }
-
-  Widget _buildSliverGrid(bool isDark, PragasState state) {
-    return SliverPadding(
-      padding: const EdgeInsets.all(0),
-      sliver: SliverToBoxAdapter(
-        child: Card(
-          elevation: ReceitaAgroElevation.card,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
-          ),
-          color: isDark ? const Color(0xFF1E1E22) : Colors.white,
-          margin: EdgeInsets.zero,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final crossAxisCount = _calculateCrossAxisCount(
-                constraints.maxWidth,
-              );
-
-              return CustomScrollView(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                slivers: [
-                  SliverPadding(
-                    padding: const EdgeInsets.all(ReceitaAgroSpacing.sm),
-                    sliver: SliverGrid.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        childAspectRatio: 0.85,
-                        crossAxisSpacing: ReceitaAgroSpacing.sm,
-                        mainAxisSpacing: ReceitaAgroSpacing.sm,
-                      ),
-                      itemCount: state.pragas.length,
-                      itemBuilder: (context, index) {
-                        final praga = state.pragas[index];
-                        return PragaCardWidget(
-                          praga: praga,
-                          mode: PragaCardMode.grid,
-                          isDarkMode: isDark,
-                          onTap: () => _handleItemTap(praga),
-                        );
-                      },
-                    ),
+  
+  /// Grid virtualizado - renderiza apenas itens visíveis
+  Widget _buildVirtualGrid(bool isDark, PragasState state) {
+    return SliverLayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = _calculateCrossAxisCount(constraints.crossAxisExtent);
+        
+        return SliverPadding(
+          padding: const EdgeInsets.all(ReceitaAgroSpacing.sm),
+          sliver: SliverGrid(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              childAspectRatio: 0.85,
+              crossAxisSpacing: ReceitaAgroSpacing.sm,
+              mainAxisSpacing: ReceitaAgroSpacing.sm,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final praga = state.pragas[index];
+                return RepaintBoundary(
+                  child: PragaCardWidget(
+                    key: ValueKey('praga_${praga.idReg}_vgrid'),
+                    praga: praga,
+                    mode: PragaCardMode.grid,
+                    isDarkMode: isDark,
+                    onTap: () => _handleItemTap(praga),
                   ),
-                ],
-              );
-            },
+                );
+              },
+              childCount: state.pragas.length,
+              // Adiciona extent para otimização do layout
+              addAutomaticKeepAlives: false,
+              addRepaintBoundaries: false, // Já adicionamos manualmente
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
-
-  Widget _buildSliverList(bool isDark, PragasState state) {
+  
+  /// Lista virtualizada - renderiza apenas itens visíveis
+  Widget _buildVirtualList(bool isDark, PragasState state) {
+    const itemHeight = 96.0; // Altura aproximada do card em modo lista
+    
     return SliverPadding(
-      padding: const EdgeInsets.all(0),
-      sliver: SliverToBoxAdapter(
-        child: Card(
-          elevation: ReceitaAgroElevation.card,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
-          ),
-          color: isDark ? const Color(0xFF1E1E22) : Colors.white,
-          margin: EdgeInsets.zero,
-          child: CustomScrollView(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.all(0),
-                sliver: SliverList.separated(
-                  itemCount: state.pragas.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 4),
-                  itemBuilder: (context, index) {
-                    final praga = state.pragas[index];
-                    return PragaCardWidget(
-                      praga: praga,
-                      mode: PragaCardMode.list,
-                      isDarkMode: isDark,
-                      onTap: () => _handleItemTap(praga),
-                    );
-                  },
+      padding: const EdgeInsets.symmetric(horizontal: ReceitaAgroSpacing.sm),
+      sliver: SliverFixedExtentList(
+        itemExtent: itemHeight,
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final praga = state.pragas[index];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: RepaintBoundary(
+                child: PragaCardWidget(
+                  key: ValueKey('praga_${praga.idReg}_vlist'),
+                  praga: praga,
+                  mode: PragaCardMode.list,
+                  isDarkMode: isDark,
+                  onTap: () => _handleItemTap(praga),
                 ),
               ),
-            ],
-          ),
+            );
+          },
+          childCount: state.pragas.length,
+          addAutomaticKeepAlives: false,
+          addRepaintBoundaries: false,
         ),
       ),
     );

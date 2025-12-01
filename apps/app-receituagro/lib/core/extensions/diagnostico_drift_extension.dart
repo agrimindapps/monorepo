@@ -42,16 +42,42 @@ extension DiagnosticoDriftExtension on Diagnostico {
   }
 
   String get displayDosagem {
-    final min = double.tryParse(dsMin ?? '');
-    final max = double.tryParse(dsMax);
+    final minStr = dsMin?.trim() ?? '';
+    final maxStr = dsMax.trim();
+    final umStr = um.trim();
     
-    if (min != null && max != null && min < max) {
-      return '${min.toStringAsFixed(2)} - ${max.toStringAsFixed(2)} $um';
+    final min = double.tryParse(minStr);
+    final max = double.tryParse(maxStr);
+    
+    // Se ambos são 0 ou vazios, não há informação
+    if ((min == null || min == 0) && (max == null || max == 0)) {
+      return 'Não informado';
     }
-    if (max != null) {
-      return '${max.toStringAsFixed(2)} $um';
+    
+    // Se tem min e max diferentes e válidos
+    if (min != null && min > 0 && max != null && max > 0 && min < max) {
+      return '${_formatDose(min)} - ${_formatDose(max)} $umStr'.trim();
     }
+    
+    // Se só tem max
+    if (max != null && max > 0) {
+      return '${_formatDose(max)} $umStr'.trim();
+    }
+    
+    // Se só tem min
+    if (min != null && min > 0) {
+      return '${_formatDose(min)} $umStr'.trim();
+    }
+    
     return 'Não informado';
+  }
+  
+  /// Formata dosagem removendo decimais desnecessários
+  String _formatDose(double value) {
+    if (value == value.toInt()) {
+      return value.toInt().toString();
+    }
+    return value.toStringAsFixed(2);
   }
 
   String get displayVazaoTerrestre {
@@ -82,22 +108,29 @@ extension DiagnosticoDriftExtension on Diagnostico {
   }
 
   /// Converte para mapa de dados para exibição
-  Future<Map<String, String>> toDataMap() async {
+  Future<Map<String, String>> toDataMap({
+    Fitossanitario? defensivo,
+    FitossanitariosInfoData? defensivoInfo,
+    Praga? praga,
+  }) async {
     return {
       'dosagem': displayDosagem,
       'vazaoTerrestre': displayVazaoTerrestre,
       'vazaoAerea': displayVazaoAerea,
       'intervaloAplicacao': displayIntervaloAplicacao,
-      'intervaloSeguranca': 'Não informado', // Field not in Diagnostico table
-      'tecnologia': 'N/A', // Field not in Diagnostico table
-      'formulacao': 'N/A', // Requires join
-      'modoAcao': 'N/A', // Requires join
-      'ingredienteAtivo': 'N/A', // Requires join
-      'classificacaoToxicologica': 'N/A', // Requires join
-      'classeAgronomica': 'N/A', // Requires join
-      'classAmbiental': 'N/A', // Requires join
-      'toxico': 'N/A', // Requires join
-      'mapa': 'N/A', // Requires join
+      'intervaloSeguranca': defensivoInfo?.carencia ?? 'Não informado',
+      'tecnologia': defensivoInfo?.informacoesAdicionais ?? 'N/A',
+      'formulacao': defensivoInfo?.formulacao ?? 'N/A',
+      'modoAcao': defensivoInfo?.modoAcao ?? 'N/A',
+      'ingredienteAtivo': defensivo?.ingredienteAtivo ?? 'N/A',
+      'classificacaoToxicologica': defensivoInfo?.toxicidade ?? 'N/A',
+      'classeAgronomica': defensivo?.classeAgronomica ?? 'N/A',
+      'classificacaoAmbiental': 'N/A', // Campo não encontrado na tabela FitossanitariosInfo
+      'toxico': defensivoInfo?.toxicidade ?? 'N/A',
+      'mapa': defensivo?.registroMapa ?? 'N/A',
+      'nomeDefensivo': defensivo?.nome ?? 'N/A',
+      'fabricante': defensivo?.fabricante ?? 'N/A',
+      'nomeCientifico': praga?.nomeLatino ?? 'N/A',
     };
   }
 }

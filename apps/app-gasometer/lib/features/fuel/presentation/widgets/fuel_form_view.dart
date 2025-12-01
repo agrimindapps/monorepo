@@ -137,6 +137,9 @@ class FuelFormView extends ConsumerWidget {
     final vehicle = state.formModel.vehicle!;
     final supportedFuels = vehicle.supportedFuels;
 
+    // Se o veículo suporta apenas 1 combustível, bloquear o campo
+    final hasOnlyOneFuel = supportedFuels.length == 1;
+
     return ValidatedDropdownField<FuelType>(
       items: supportedFuels
           .map(
@@ -146,9 +149,12 @@ class FuelFormView extends ConsumerWidget {
           .toList(),
       value: state.formModel.fuelType,
       label: FuelConstants.fuelTypeLabel,
-      hint: 'Selecione o tipo de combustível',
+      hint: hasOnlyOneFuel
+          ? supportedFuels.first.displayName
+          : 'Selecione o tipo de combustível',
       prefixIcon: Icons.local_gas_station,
       required: true,
+      enabled: !hasOnlyOneFuel,
       onChanged: (fuelType) {
         if (fuelType != null) {
           notifier.updateFuelType(fuelType);

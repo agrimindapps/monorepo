@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'pragas_providers.dart';
@@ -12,6 +13,10 @@ class DiagnosticoModel {
   final String dosagem;
   final String cultura;
   final String grupo;
+  final String defensivoId;
+  final String aplicacaoTerrestre;
+  final String aplicacaoAerea;
+  final String intervaloSeguranca;
 
   const DiagnosticoModel({
     required this.id,
@@ -20,6 +25,10 @@ class DiagnosticoModel {
     required this.dosagem,
     required this.cultura,
     required this.grupo,
+    this.defensivoId = '',
+    this.aplicacaoTerrestre = '',
+    this.aplicacaoAerea = '',
+    this.intervaloSeguranca = '',
   });
 }
 
@@ -148,8 +157,11 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
 
   /// Carrega diagnósticos para uma praga específica por ID e nome
   Future<void> loadDiagnosticos(String pragaId, {String? pragaName}) async {
+    debugPrint('🔍 [DIAGNOSTICOS_PRAGA] loadDiagnosticos - pragaId: $pragaId, pragaName: $pragaName');
+    
     final currentState = state.value;
     if (currentState == null) {
+      debugPrint('⚠️ [DIAGNOSTICOS_PRAGA] currentState is null, returning');
       return;
     }
 
@@ -160,10 +172,12 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
     try {
       // Use queryByPraga instead of deprecated getByPraga
       final diagnosticosRepository = ref.read(iDiagnosticosRepositoryProvider);
+      debugPrint('🔍 [DIAGNOSTICOS_PRAGA] Chamando queryByPraga com pragaId: $pragaId');
       final result = await diagnosticosRepository.queryByPraga(pragaId);
 
       await result.fold(
         (failure) async {
+          debugPrint('❌ [DIAGNOSTICOS_PRAGA] Erro: ${failure.toString()}');
           state = AsyncValue.data(
             currentState.copyWith(
               isLoading: false,
@@ -174,6 +188,7 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
           );
         },
         (diagnosticosEntities) async {
+          debugPrint('✅ [DIAGNOSTICOS_PRAGA] ${diagnosticosEntities.length} diagnósticos encontrados');
           final diagnosticosList = <DiagnosticoModel>[];
 
           for (final entity in diagnosticosEntities) {
@@ -210,6 +225,10 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
                 dosagem: entity.dosagem.displayDosagem,
                 cultura: culturaNome,
                 grupo: pragaNome,
+                defensivoId: entity.idDefensivo,
+                aplicacaoTerrestre: entity.aplicacao.terrestre?.displayVolume ?? '',
+                aplicacaoAerea: entity.aplicacao.aerea?.displayVolume ?? '',
+                intervaloSeguranca: entity.aplicacao.intervaloReaplicacao ?? '',
               ),
             );
           }

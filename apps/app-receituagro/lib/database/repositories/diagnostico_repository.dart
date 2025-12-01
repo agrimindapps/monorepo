@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 
 import '../receituagro_database.dart';
 
@@ -63,9 +64,12 @@ class DiagnosticoRepository {
 
   /// Busca diagnósticos por praga
   Future<List<Diagnostico>> findByPraga(int pragaId) async {
-    return await (_db.select(_db.diagnosticos)
+    debugPrint('🔍 [DiagnosticoRepository] findByPraga chamado com pragaId: $pragaId');
+    final results = await (_db.select(_db.diagnosticos)
           ..where((tbl) => tbl.pragaId.equals(pragaId)))
         .get();
+    debugPrint('🔍 [DiagnosticoRepository] findByPraga retornou ${results.length} resultados');
+    return results;
   }
 
   /// Busca diagnósticos com join completo (defensivo + cultura + praga)

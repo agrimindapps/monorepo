@@ -327,20 +327,38 @@ class PlantsDriftRepository {
   }
 
   /// Helper: Converte spaceId String (firebaseId) → INTEGER (local id)
+  ///
+  /// **Comportamento:**
+  /// 1. Se spaceFirebaseId é null → retorna null
+  /// 2. Busca space no banco pelo firebaseId → retorna space.id (local)
+  /// 3. Se não encontrar, tenta int.tryParse() e VALIDA se existe com esse ID local
+  /// 4. Se não encontrar nada → retorna null (evita FK constraint violation)
   Future<int?> _resolveSpaceId(String? spaceFirebaseId) async {
     if (spaceFirebaseId == null) return null;
 
-    // Tenta interpretar como INTEGER direto (fallback)
-    final asInt = int.tryParse(spaceFirebaseId);
-    if (asInt != null) return asInt;
-
-    // Busca no banco pelo firebaseId
-    final space = await (_db.select(
+    // 1. Busca no banco pelo firebaseId (prioridade)
+    final spaceByFirebaseId = await (_db.select(
       _db.spaces,
     )..where((s) => s.firebaseId.equals(spaceFirebaseId)))
         .getSingleOrNull();
 
-    return space?.id;
+    if (spaceByFirebaseId != null) return spaceByFirebaseId.id;
+
+    // 2. Fallback: tenta interpretar como INTEGER direto (dados legados)
+    final asInt = int.tryParse(spaceFirebaseId);
+    if (asInt != null) {
+      // VALIDA se esse ID local existe antes de retornar
+      final spaceByLocalId = await (_db.select(
+        _db.spaces,
+      )..where((s) => s.id.equals(asInt)))
+          .getSingleOrNull();
+
+      // Só retorna se validado (evita FK constraint violation)
+      if (spaceByLocalId != null) return asInt;
+    }
+
+    // 3. Não encontrou: retorna null (FK aceita nullable)
+    return null;
   }
 
   /// Helper: Obter ID local da planta

@@ -45,16 +45,16 @@ class PragaInfoWidget extends ConsumerWidget {
   }
 
   /// Constrói seções de informação baseado no tipo da praga
-  List<Widget> _buildInfoSections(dynamic data) {
-    final pragaData = data.pragaData;
+  List<Widget> _buildInfoSections(DetalhePragaState data) {
+    final tipoPraga = data.tipoPraga;
     
-    if (pragaData == null) {
+    if (tipoPraga == null) {
       return [_buildLoadingWidget()];
     }
-    if (pragaData.tipoPraga == '1' || pragaData.tipoPraga == '2') {
+    if (tipoPraga == '1' || tipoPraga == '2') {
       return _buildInsectoInfoSections(data);
     }
-    if (pragaData.tipoPraga == '3') {
+    if (tipoPraga == '3') {
       return _buildPlantaInfoSections(data);
     }
 
@@ -62,40 +62,41 @@ class PragaInfoWidget extends ConsumerWidget {
   }
 
   /// Seções de informação para insetos/doenças (usa PragasInfo)
-  List<Widget> _buildInsectoInfoSections(dynamic data) {
+  List<Widget> _buildInsectoInfoSections(DetalhePragaState data) {
     final pragaInfo = data.pragaInfo;
 
-    final descricao = (pragaInfo?.descrisao ?? 'Informação não disponível') as String;
-    final sintomas = (pragaInfo?.sintomas ?? 'Informação não disponível') as String;
-    final bioecologia = (pragaInfo?.bioecologia ?? 'Informação não disponível') as String;
-    final controle = (pragaInfo?.controle ?? 'Informação não disponível') as String;
+    // Campos disponíveis em PragasInfData: sintomas, controle, danos, condicoesFavoraveis
+    final sintomas = pragaInfo?.sintomas ?? 'Informação não disponível';
+    final danos = pragaInfo?.danos ?? 'Informação não disponível';
+    final controle = pragaInfo?.controle ?? 'Informação não disponível';
+    final condicoesFavoraveis = pragaInfo?.condicoesFavoraveis ?? 'Informação não disponível';
 
     return [
-      _buildInfoSection(
-        'Descrição',
-        Icons.bug_report,
-        [
-          _buildInfoItem('Informações Gerais', descricao),
-        ],
-        sectionContent: 'Descrição: $descricao',
-      ),
-      SpacingTokens.gapMD,
       _buildInfoSection(
         'Sintomas',
         Icons.warning,
         [
-          _buildInfoItem('Danos Causados', sintomas),
+          _buildInfoItem('Sintomas', sintomas),
         ],
         sectionContent: 'Sintomas: $sintomas',
       ),
       SpacingTokens.gapMD,
       _buildInfoSection(
-        'Bioecologia',
+        'Danos',
+        Icons.bug_report,
+        [
+          _buildInfoItem('Danos Causados', danos),
+        ],
+        sectionContent: 'Danos: $danos',
+      ),
+      SpacingTokens.gapMD,
+      _buildInfoSection(
+        'Condições Favoráveis',
         Icons.science,
         [
-          _buildInfoItem('Características Biológicas', bioecologia),
+          _buildInfoItem('Condições que Favorecem', condicoesFavoraveis),
         ],
-        sectionContent: 'Bioecologia: $bioecologia',
+        sectionContent: 'Condições Favoráveis: $condicoesFavoraveis',
       ),
       SpacingTokens.gapMD,
       _buildInfoSection(
@@ -110,22 +111,25 @@ class PragaInfoWidget extends ConsumerWidget {
   }
 
   /// Seções de informação para plantas (usa PlantasInfo)
-  List<Widget> _buildPlantaInfoSections(dynamic data) {
+  List<Widget> _buildPlantaInfoSections(DetalhePragaState data) {
     final plantaInfo = data.plantaInfo;
 
-    final ciclo = (plantaInfo?.ciclo ?? '-') as String;
-    final reproducao = (plantaInfo?.reproducao ?? '-') as String;
-    final habitat = (plantaInfo?.habitat ?? '-') as String;
-    final adaptacoes = (plantaInfo?.adaptacoes ?? '-') as String;
-    final altura = (plantaInfo?.altura ?? '-') as String;
-    final inflorescencia = (plantaInfo?.inflorescencia ?? '-') as String;
-    final filotaxia = (plantaInfo?.filotaxia ?? '-') as String;
-    final formaLimbo = (plantaInfo?.formaLimbo ?? '-') as String;
-    final superficie = (plantaInfo?.superficie ?? '-') as String;
-    final consistencia = (plantaInfo?.consistencia ?? '-') as String;
-    final nervacao = (plantaInfo?.nervacao ?? '-') as String;
-    final nervacaoComprimento = (plantaInfo?.nervacaoComprimento ?? '-') as String;
-    final tipologiaFruto = (plantaInfo?.tipologiaFruto ?? '-') as String;
+    // Campos disponíveis em PlantasInfData conforme schema Drift
+    final ciclo = plantaInfo?.ciclo ?? '-';
+    final reproducao = plantaInfo?.reproducao ?? '-';
+    final habitat = plantaInfo?.habitat ?? '-';
+    final adaptacoes = plantaInfo?.adaptacoes ?? '-';
+    final altura = plantaInfo?.altura ?? '-';
+    final tipoFlor = plantaInfo?.tipoFlor ?? '-';
+    final corFlor = plantaInfo?.corFlor ?? '-';
+    final filotaxia = plantaInfo?.filotaxia ?? '-';
+    final formaLimbo = plantaInfo?.formaLimbo ?? '-';
+    final superficie = plantaInfo?.superficie ?? '-';
+    final consistencia = plantaInfo?.consistencia ?? '-';
+    final nervacao = plantaInfo?.nervacao ?? '-';
+    final nervacaoComprimento = plantaInfo?.nervacaoComprimento ?? '-';
+    final tipoFruto = plantaInfo?.tipoFruto ?? '-';
+    final corFruto = plantaInfo?.corFruto ?? '-';
 
     return [
       _buildInfoSection(
@@ -145,9 +149,10 @@ class PragaInfoWidget extends ConsumerWidget {
         'Informações das Flores',
         Icons.local_florist,
         [
-          _buildInfoItem('Inflorescência', inflorescencia),
+          _buildInfoItem('Tipo de Flor', tipoFlor),
+          _buildInfoItem('Cor da Flor', corFlor),
         ],
-        sectionContent: 'Informações das Flores: Inflorescência: $inflorescencia',
+        sectionContent: 'Informações das Flores: Tipo: $tipoFlor. Cor: $corFlor',
       ),
       SpacingTokens.gapMD,
       _buildInfoSection(
@@ -168,9 +173,10 @@ class PragaInfoWidget extends ConsumerWidget {
         'Fruto',
         null,
         [
-          _buildInfoItem('Fruto', tipologiaFruto),
+          _buildInfoItem('Tipo de Fruto', tipoFruto),
+          _buildInfoItem('Cor do Fruto', corFruto),
         ],
-        sectionContent: 'Fruto: $tipologiaFruto',
+        sectionContent: 'Fruto: Tipo: $tipoFruto. Cor: $corFruto',
       ),
     ];
   }

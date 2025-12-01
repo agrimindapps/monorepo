@@ -223,6 +223,9 @@ class PragasNotifier extends _$PragasNotifier {
           isLoading: false,
         ).clearError(),
       );
+      
+      // Ordenar alfabeticamente por padrão
+      sortPragas(true);
     } catch (e) {
       debugPrint('🐛 [PRAGAS_NOTIFIER] ❌ Erro ao filtrar pragas: $e');
       state = AsyncValue.data(
@@ -231,14 +234,13 @@ class PragasNotifier extends _$PragasNotifier {
     }
   }
 
-  /// Pesquisa pragas por nome
+  /// Pesquisa pragas por nome (busca local no array carregado)
   Future<void> searchPragas(String searchTerm) async {
     final currentState = state.value;
     if (currentState == null) return;
 
-    final trimmedTerm = searchTerm.trim();
+    final trimmedTerm = searchTerm.trim().toLowerCase();
     if (trimmedTerm.isEmpty) {
-      state = AsyncValue.data(currentState.copyWith(pragas: []));
       return;
     }
 
@@ -247,10 +249,33 @@ class PragasNotifier extends _$PragasNotifier {
     );
 
     try {
+      // Buscar no repositório e filtrar localmente
+      final pragasRepository = ref.read(pragasRepositoryProvider);
+      final pragasDrift = await pragasRepository.findAll();
+      final allPragas = PragaMapper.fromDriftToEntityList(pragasDrift);
+      
+      // Filtrar pragas que contêm o termo de busca no nome comum ou científico
+      final filteredPragas = allPragas.where((praga) {
+        final nomeComum = praga.nomeComum.toLowerCase();
+        final nomeCientifico = praga.nomeCientifico.toLowerCase();
+        return nomeComum.contains(trimmedTerm) || 
+               nomeCientifico.contains(trimmedTerm);
+      }).toList();
+      
+      // Ordenar alfabeticamente
+      filteredPragas.sort((a, b) => 
+        a.nomeComum.toLowerCase().compareTo(b.nomeComum.toLowerCase()));
+      
+      debugPrint('🔍 [PRAGAS_NOTIFIER] Pesquisa "$trimmedTerm": ${filteredPragas.length} resultados');
+      
       state = AsyncValue.data(
-        currentState.copyWith(isLoading: false).clearError(),
+        currentState.copyWith(
+          pragas: filteredPragas,
+          isLoading: false,
+        ).clearError(),
       );
     } catch (e) {
+      debugPrint('🔍 [PRAGAS_NOTIFIER] ❌ Erro na pesquisa: $e');
       state = AsyncValue.data(
         currentState.copyWith(isLoading: false, errorMessage: e.toString()),
       );

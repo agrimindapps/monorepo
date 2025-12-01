@@ -6,10 +6,10 @@ import '../../../../database/repositories/culturas_repository.dart';
 import '../../../../database/repositories/diagnosticos_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 import '../../../../database/repositories/pragas_repository.dart';
-import '../../../comentarios/domain/comentarios_service.dart';
 import '../../../diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
 import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
+import '../../../favoritos/presentation/providers/favoritos_services_providers.dart';
 import '../../data/repositories/pragas_repository_impl.dart';
 import '../../data/services/pragas_error_message_service.dart';
 import '../../data/services/pragas_query_service.dart';
@@ -79,11 +79,6 @@ CulturasRepository culturasRepository(Ref ref) {
 }
 
 @riverpod
-ComentariosService comentariosService(Ref ref) {
-  return ref.watch(comentariosServiceProvider);
-}
-
-@riverpod
 IDiagnosticosRepository iDiagnosticosRepository(Ref ref) {
   final baseRepo = ref.watch(db.diagnosticoRepositoryProvider);
   final wrapperRepo = DiagnosticosRepository(baseRepo);
@@ -104,5 +99,7 @@ FitossanitariosRepository fitossanitariosRepository(Ref ref) {
 
 @riverpod
 FavoritosRepositorySimplified favoritosRepositorySimplified(Ref ref) {
-  return ref.watch(favoritosRepositorySimplifiedProvider);
+  return FavoritosRepositorySimplified(
+    service: ref.watch(favoritosServiceProvider),
+  );
 }

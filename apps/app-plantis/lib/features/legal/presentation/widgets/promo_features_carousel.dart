@@ -197,41 +197,44 @@ class _PromoFeaturesCarouselState extends State<PromoFeaturesCarousel> {
                       : Colors.white.withValues(alpha: 0.1),
                 ),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(16),
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Icon(
+                        feature['icon'] as IconData,
+                        size: 32,
+                        color: color,
+                      ),
                     ),
-                    child: Icon(
-                      feature['icon'] as IconData,
-                      size: 32,
-                      color: color,
+                    const SizedBox(height: 24),
+                    Text(
+                      feature['title'] as String,
+                      style: GoogleFonts.inter(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    feature['title'] as String,
-                    style: GoogleFonts.inter(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                    const SizedBox(height: 12),
+                    Text(
+                      feature['description'] as String,
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        color: Colors.grey[400],
+                        height: 1.5,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    feature['description'] as String,
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      color: Colors.grey[400],
-                      height: 1.5,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

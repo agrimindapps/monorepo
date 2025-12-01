@@ -82,6 +82,8 @@ class _SolidVehicleFormWidgetState extends State<SolidVehicleFormWidget> {
         return 'Híbrido';
       case FuelType.electric:
         return 'Elétrico';
+      case FuelType.flex:
+        return 'Flex';
     }
   }
 

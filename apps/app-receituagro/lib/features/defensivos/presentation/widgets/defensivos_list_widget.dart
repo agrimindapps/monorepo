@@ -11,7 +11,7 @@ import 'defensivos_empty_state_widget.dart';
 ///
 /// Características:
 /// - Design consistente com home defensivos
-/// - Renderização otimizada com SliverList ou GridView
+/// - Virtual Scroll para renderização otimizada
 /// - Suporte a múltiplos modos de visualização (list/grid)
 /// - Items limpos e minimalistas
 /// - Estado vazio integrado
@@ -58,61 +58,79 @@ class DefensivosListWidget extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        child: viewMode.isList ? _buildListView(context) : _buildGridView(context),
+        child: viewMode.isList ? _buildVirtualList(context) : _buildVirtualGrid(context),
       ),
     );
   }
 
-  Widget _buildListView(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: defensivos.length,
-      separatorBuilder: (context, index) => Divider(
-        height: 1,
-        thickness: 1,
-        indent: 64,
-        endIndent: 8,
-        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.4),
-      ),
-      itemBuilder: (context, index) {
-        final defensivo = defensivos[index];
-
-        return RepaintBoundary(
-          child: ContentListItemWidget(
-            title: defensivo.nome,
-            subtitle: defensivo.displayIngredient,
-            category: _getCategory(defensivo),
-            icon: FontAwesomeIcons.sprayCan,
-            iconColor: const Color(0xFF4CAF50),
-            onTap: () => onTap(defensivo),
+  /// Lista virtualizada - renderiza apenas itens visíveis
+  Widget _buildVirtualList(BuildContext context) {
+    const itemHeight = 72.0; // Altura aproximada do ContentListItemWidget
+    
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          sliver: SliverFixedExtentList(
+            itemExtent: itemHeight,
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final defensivo = defensivos[index];
+                return RepaintBoundary(
+                  child: ContentListItemWidget(
+                    key: ValueKey('defensivo_${defensivo.id}_list'),
+                    title: defensivo.nome,
+                    subtitle: defensivo.displayIngredient,
+                    category: _getCategory(defensivo),
+                    icon: FontAwesomeIcons.sprayCan,
+                    iconColor: const Color(0xFF4CAF50),
+                    onTap: () => onTap(defensivo),
+                  ),
+                );
+              },
+              childCount: defensivos.length,
+              addAutomaticKeepAlives: false,
+              addRepaintBoundaries: false,
+            ),
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 
-  Widget _buildGridView(BuildContext context) {
-    return GridView.builder(
-      padding: const EdgeInsets.all(12),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.85,
-      ),
-      itemCount: defensivos.length,
-      itemBuilder: (context, index) {
-        final defensivo = defensivos[index];
-
-        return RepaintBoundary(
-          child: _buildGridCard(context, defensivo),
-        );
-      },
+  /// Grid virtualizado - renderiza apenas itens visíveis
+  Widget _buildVirtualGrid(BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(12),
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.85,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final defensivo = defensivos[index];
+                return RepaintBoundary(
+                  child: _buildGridCard(context, defensivo),
+                );
+              },
+              childCount: defensivos.length,
+              addAutomaticKeepAlives: false,
+              addRepaintBoundaries: false,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildGridCard(BuildContext context, DefensivoEntity defensivo) {
     return Card(
+      key: ValueKey('defensivo_${defensivo.id}_grid'),
       elevation: 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),

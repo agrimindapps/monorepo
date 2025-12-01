@@ -8,11 +8,15 @@ import '../../database/repositories/static_data_version_repository.dart';
 import 'culturas_data_loader.dart';
 import 'diagnosticos_data_loader.dart';
 import 'fitossanitarios_data_loader.dart';
+import 'plantas_inf_data_loader.dart';
 import 'pragas_data_loader.dart';
+import 'pragas_inf_data_loader.dart';
 
 /// Versão dos dados estáticos do JSON
 /// Incrementar quando os arquivos JSON forem atualizados
-const String kStaticDataVersion = '1.0.0';
+/// v1.0.0 - Versão inicial
+/// v1.1.0 - Adicionado PragasInf e PlantasInf
+const String kStaticDataVersion = '1.1.0';
 
 /// Serviço para gerenciar carregamento de dados estáticos com controle de versão
 ///
@@ -58,7 +62,7 @@ class StaticDataLoaderService {
       name: 'StaticDataLoaderService',
     );
 
-    // Verificar e carregar cada tipo de dado
+    // Verificar e carregar cada tipo de dado (primeira fase - tabelas base)
     await Future.wait([
       _loadIfNeeded(
         ref: ref,
@@ -95,7 +99,33 @@ class StaticDataLoaderService {
       ),
     ]);
 
-    // Diagnósticos são carregados em background (dependem das tabelas anteriores)
+    // Segunda fase - tabelas que dependem das tabelas base (pragas, culturas)
+    await Future.wait([
+      _loadIfNeeded(
+        ref: ref,
+        versionRepo: versionRepo,
+        tableName: 'pragas_inf',
+        loader: () => PragasInfDataLoader.loadPragasInfData(ref),
+        countGetter: () async {
+          final repo = ref.read(pragasInfRepositoryProvider);
+          final all = await (repo.findAll() as Future<List<dynamic>>);
+          return all.length;
+        },
+      ),
+      _loadIfNeeded(
+        ref: ref,
+        versionRepo: versionRepo,
+        tableName: 'plantas_inf',
+        loader: () => PlantasInfDataLoader.loadPlantasInfData(ref),
+        countGetter: () async {
+          final repo = ref.read(plantasInfRepositoryProvider);
+          final all = await (repo.findAll() as Future<List<dynamic>>);
+          return all.length;
+        },
+      ),
+    ]);
+
+    // Terceira fase - diagnósticos (dependem de pragas, culturas e fitossanitarios)
     await _loadIfNeeded(
       ref: ref,
       versionRepo: versionRepo,
@@ -186,6 +216,8 @@ class StaticDataLoaderService {
     CulturasDataLoader.forceReload(ref);
     PragasDataLoader.forceReload(ref);
     FitossanitariosDataLoader.forceReload(ref);
+    PragasInfDataLoader.forceReload(ref);
+    PlantasInfDataLoader.forceReload(ref);
     DiagnosticosDataLoader.forceReload(ref);
 
     // Recarrega tudo
@@ -197,7 +229,7 @@ class StaticDataLoaderService {
     final versionRepo = ref.read(staticDataVersionRepositoryProvider) 
         as StaticDataVersionRepository;
 
-    final tables = ['culturas', 'pragas', 'fitossanitarios', 'diagnosticos'];
+    final tables = ['culturas', 'pragas', 'fitossanitarios', 'pragas_inf', 'plantas_inf', 'diagnosticos'];
     
     for (final table in tables) {
       final isLoaded = await versionRepo.isTableLoaded(table);

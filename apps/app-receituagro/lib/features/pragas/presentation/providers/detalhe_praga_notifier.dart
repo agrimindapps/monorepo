@@ -4,9 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/premium_notifier.dart';
-import '../../../../database/providers/database_providers.dart';
+import '../../../../database/providers/database_providers.dart' as db;
 import '../../../../database/receituagro_database.dart';
 import '../../../comentarios/data/comentario_model.dart';
+import '../../../comentarios/presentation/providers/comentarios_providers.dart';
 import '../../domain/entities/praga_entity.dart';
 import 'pragas_providers.dart';
 
@@ -99,6 +100,10 @@ class DetalhePragaState {
   // MIGRATION TODO: Praga Drift model uses 'idPraga' not 'idReg'
   // String get itemId => pragaData?.idReg ?? pragaName;
   String get itemId => pragaData?.idPraga ?? pragaName;
+
+  /// Getter para tipoPraga (mapeia de Drift 'tipo' para 'tipoPraga')
+  /// Drift model usa 'tipo', mas a UI espera 'tipoPraga'
+  String? get tipoPraga => pragaData?.tipo;
 }
 
 /// Notifier para gerenciar estado da página de detalhes da praga
@@ -148,10 +153,26 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
     try {
+      // Buscar praga no banco Drift pelo nome para obter o ID correto
+      final pragasRepository = ref.read(db.pragasRepositoryProvider);
+      final pragaDriftList = await pragasRepository.findByNome(pragaName);
+
+      debugPrint('🔍 [DETALHE_PRAGA] initializeAsync: pragaName=$pragaName');
+      debugPrint(
+          '🔍 [DETALHE_PRAGA] pragaDrift encontrado: ${pragaDriftList.isNotEmpty}');
+
+      final praga = pragaDriftList.isNotEmpty ? pragaDriftList.first : null;
+
+      if (praga != null) {
+        debugPrint(
+            '🔍 [DETALHE_PRAGA] praga.id=${praga.id}, idPraga=${praga.idPraga}');
+      }
+
       state = AsyncValue.data(
         currentState.copyWith(
           pragaName: pragaName,
           pragaScientificName: pragaScientificName,
+          pragaData: praga, // Usa o model Drift com ID correto do banco
         ),
       );
 
@@ -174,59 +195,85 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
 
   /// Initialize usando ID da praga para melhor precisão
   Future<void> initializeById(String pragaId) async {
-    // Aguardar o estado inicial ser carregado
-    final currentState = state.requireValue;
+    // Usar o estado atual ou criar um inicial se ainda não estiver pronto
+    var currentState = state.value ?? DetalhePragaState.initial();
 
     state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
     try {
-      final pragasRepository = ref.read(iPragasRepositoryProvider);
-      final allPragasResult = await pragasRepository.getAll();
-      PragaEntity? pragaData;
+      // Buscar diretamente no repositório Drift para obter o ID correto
+      final pragasRepository = ref.read(db.pragasRepositoryProvider);
+      final pragaDrift = await pragasRepository.findByIdPraga(pragaId);
 
-      allPragasResult.fold((failure) => pragaData = null, (allPragas) {
-        final matchingPragas = allPragas.where(
-          (PragaEntity p) => p.idReg == pragaId,
-        );
-        pragaData = matchingPragas.isNotEmpty ? matchingPragas.first : null;
-      });
+      debugPrint('🔍 [DETALHE_PRAGA] initializeById: pragaId=$pragaId');
+      debugPrint(
+          '🔍 [DETALHE_PRAGA] pragaDrift encontrado: ${pragaDrift != null}');
+      if (pragaDrift != null) {
+        debugPrint(
+            '🔍 [DETALHE_PRAGA] pragaDrift.id=${pragaDrift.id}, idPraga=${pragaDrift.idPraga}, nome=${pragaDrift.nome}');
+      }
 
-      if (pragaData != null) {
-        // MIGRATION NOTE: Convert PragaEntity to Drift Praga model
-        // Drift Praga uses: id, idPraga, nome, nomeLatino, tipo, imagemUrl, descricao
-        // PragaEntity uses: idReg, nomeComum, nomeCientifico, tipoPraga, etc.
-        final pragaDrift = Praga(
-          id: 0, // Will be set by database
-          idPraga: pragaData!.idReg, // Map idReg to idPraga
-          nome: pragaData!.nomeComum, // Map nomeComum to nome
-          nomeLatino:
-              pragaData!.nomeCientifico, // Map nomeCientifico to nomeLatino
-          tipo: pragaData!.tipoPraga, // Map tipoPraga to tipo
-          // imagemUrl and descricao not available in PragaEntity
+      if (pragaDrift != null) {
+        // Atualizar currentState para manter consistência
+        currentState = currentState.copyWith(
+          pragaName: pragaDrift.nome,
+          pragaScientificName: pragaDrift.nomeLatino ?? '',
+          pragaData: pragaDrift,
         );
-
-        state = AsyncValue.data(
-          currentState.copyWith(
-            pragaName: pragaData!.nomeComum,
-            pragaScientificName: pragaData!.nomeCientifico,
-            pragaData: pragaDrift, // Use Drift model
-          ),
-        );
+        state = AsyncValue.data(currentState);
 
         await _loadFavoritoStateAsync();
         await _loadPragaSpecificInfo();
         _loadPremiumStatus();
         await _loadComentarios();
       } else {
-        state = AsyncValue.data(
-          currentState.copyWith(
+        // Fallback: tentar buscar via iPragasRepositoryProvider
+        debugPrint(
+            '⚠️ [DETALHE_PRAGA] Praga não encontrada no Drift, tentando via Entity...');
+        final entityRepository = ref.read(iPragasRepositoryProvider);
+        final allPragasResult = await entityRepository.getAll();
+        PragaEntity? pragaEntity;
+
+        allPragasResult.fold((failure) => pragaEntity = null, (allPragas) {
+          final matchingPragas = allPragas.where(
+            (PragaEntity p) => p.idReg == pragaId,
+          );
+          pragaEntity = matchingPragas.isNotEmpty ? matchingPragas.first : null;
+        });
+
+        if (pragaEntity != null) {
+          // Criar Drift model mas sem o ID real (fallback)
+          final pragaDriftFallback = Praga(
+            id: 0,
+            idPraga: pragaEntity!.idReg,
+            nome: pragaEntity!.nomeComum,
+            nomeLatino: pragaEntity!.nomeCientifico,
+            tipo: pragaEntity!.tipoPraga,
+          );
+
+          // Atualizar currentState para manter consistência
+          currentState = currentState.copyWith(
+            pragaName: pragaEntity!.nomeComum,
+            pragaScientificName: pragaEntity!.nomeCientifico,
+            pragaData: pragaDriftFallback,
+          );
+          state = AsyncValue.data(currentState);
+
+          await _loadFavoritoStateAsync();
+          await _loadPragaSpecificInfo();
+          _loadPremiumStatus();
+          await _loadComentarios();
+        } else {
+          currentState = currentState.copyWith(
             pragaName: '',
             pragaScientificName: '',
             pragaData: null,
-          ),
-        );
+          );
+          state = AsyncValue.data(currentState);
+        }
       }
     } finally {
+      // Usar o estado mais recente para finalizar
       final updatedState = state.value;
       if (updatedState != null) {
         state = AsyncValue.data(updatedState.copyWith(isLoading: false));
@@ -325,31 +372,87 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   /// MIGRATION TODO: Reimplement with Drift-based repository queries
   Future<void> _loadPragaSpecificInfo() async {
     final currentState = state.value;
-    if (currentState == null || currentState.pragaData == null) return;
+    if (currentState == null || currentState.pragaData == null) {
+      debugPrint(
+          '🐛 [DETALHE_PRAGA] _loadPragaSpecificInfo: state ou pragaData é null');
+      return;
+    }
 
     try {
       PragasInfData? pragaInfo;
       PlantasInfData? plantaInfo;
-      
+
       final pragaIdPraga = currentState.pragaData!.idPraga;
+      final pragaId = currentState.pragaData!.id; // ID int da praga
       final pragaTipo = currentState.pragaData!.tipo;
-      
+
+      debugPrint(
+          '🐛 [DETALHE_PRAGA] _loadPragaSpecificInfo: id=$pragaId, idPraga=$pragaIdPraga, tipo=$pragaTipo');
+
       if (pragaTipo == '1' || pragaTipo == '2') {
         // Tipo 1 = Inseto, Tipo 2 = Doença -> usa PragasInf
-        final pragasInfRepo = ref.read(pragasInfRepositoryProvider);
-        pragaInfo = await pragasInfRepo.findByIdReg(pragaIdPraga);
+        final pragasInfRepo = ref.read(db.pragasInfRepositoryProvider);
+
+        // Primeiro tenta por pragaId (int) que é a FK correta
+        debugPrint(
+            '🐛 [DETALHE_PRAGA] Buscando PragasInf por pragaId (int): $pragaId');
+        pragaInfo = await pragasInfRepo.findByPragaId(pragaId);
+
+        // Fallback: tenta por idReg (string)
+        if (pragaInfo == null) {
+          debugPrint(
+              '🐛 [DETALHE_PRAGA] Fallback: Buscando PragasInf por idReg: $pragaIdPraga');
+          pragaInfo = await pragasInfRepo.findByIdReg(pragaIdPraga);
+        }
+
+        debugPrint(
+            '🐛 [DETALHE_PRAGA] PragasInf encontrado: ${pragaInfo != null}');
+        if (pragaInfo != null) {
+          final sintomasPreview = pragaInfo.sintomas?.isNotEmpty == true
+              ? pragaInfo.sintomas!.substring(
+                  0,
+                  pragaInfo.sintomas!.length > 50
+                      ? 50
+                      : pragaInfo.sintomas!.length)
+              : 'null';
+          debugPrint(
+              '🐛 [DETALHE_PRAGA] PragasInf.sintomas: $sintomasPreview...');
+        }
       } else if (pragaTipo == '3') {
         // Tipo 3 = Planta Daninha -> usa PlantasInf
-        final plantasInfRepo = ref.read(plantasInfRepositoryProvider);
-        plantaInfo = await plantasInfRepo.findByIdReg(pragaIdPraga);
+        final plantasInfRepo = ref.read(db.plantasInfRepositoryProvider);
+
+        // PlantasInf.culturaId é na verdade a FK para Pragas (nome confuso na tabela)
+        // O campo culturaId aponta para Pragas.id, não Culturas.id
+        debugPrint(
+            '🐛 [DETALHE_PRAGA] Buscando PlantasInf por pragaId (via culturaId): $pragaId');
+        plantaInfo = await plantasInfRepo.findByCulturaId(pragaId);
+
+        // Fallback: tenta por idReg (string)
+        if (plantaInfo == null) {
+          debugPrint(
+              '🐛 [DETALHE_PRAGA] Fallback: Buscando PlantasInf por idReg: $pragaIdPraga');
+          plantaInfo = await plantasInfRepo.findByIdReg(pragaIdPraga);
+        }
+
+        debugPrint(
+            '🐛 [DETALHE_PRAGA] PlantasInf encontrado: ${plantaInfo != null}');
+        if (plantaInfo != null) {
+          debugPrint(
+              '🐛 [DETALHE_PRAGA] PlantasInf.ciclo: ${plantaInfo.ciclo}');
+        }
+      } else {
+        debugPrint(
+            '🐛 [DETALHE_PRAGA] Tipo de praga não reconhecido: $pragaTipo');
       }
 
       state = AsyncValue.data(
         currentState.copyWith(pragaInfo: pragaInfo, plantaInfo: plantaInfo),
       );
-    } catch (e) {
+    } catch (e, stack) {
       // Silently handle error - info is optional
       debugPrint('🐛 [DETALHE_PRAGA] Erro ao carregar info específica: $e');
+      debugPrint('🐛 [DETALHE_PRAGA] Stack: $stack');
     }
   }
 
@@ -493,10 +596,17 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   /// Alterna estado de favorito
   Future<bool> toggleFavorito() async {
     final currentState = state.value;
-    if (currentState == null) return false;
+    if (currentState == null) {
+      debugPrint('🐛 [TOGGLE_FAVORITO] Estado atual é null');
+      return false;
+    }
 
     final wasAlreadyFavorited = currentState.isFavorited;
     final itemId = currentState.itemId;
+
+    debugPrint(
+        '🐛 [TOGGLE_FAVORITO] Iniciando toggle: itemId=$itemId, wasAlreadyFavorited=$wasAlreadyFavorited');
+
     state = AsyncValue.data(
       currentState.copyWith(isFavorited: !wasAlreadyFavorited),
     );
@@ -504,25 +614,33 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     try {
       final favoritosRepository =
           ref.read(favoritosRepositorySimplifiedProvider);
+
+      debugPrint(
+          '🐛 [TOGGLE_FAVORITO] Chamando toggleFavorito no repositório...');
+
       final result = await favoritosRepository.toggleFavorito(
         'praga',
         itemId,
       );
 
+      debugPrint('🐛 [TOGGLE_FAVORITO] Resultado do repositório: $result');
+
       // Unwrap Either<Failure, bool>
       return result.fold(
         (failure) {
+          debugPrint('🐛 [TOGGLE_FAVORITO] ❌ Failure: ${failure.message}');
           // On failure, revert state
           state = AsyncValue.data(
             currentState.copyWith(
               isFavorited: wasAlreadyFavorited,
               errorMessage:
-                  'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito',
+                  'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito: ${failure.message}',
             ),
           );
           return false;
         },
         (success) {
+          debugPrint('🐛 [TOGGLE_FAVORITO] Sucesso: $success');
           if (!success) {
             state = AsyncValue.data(
               currentState.copyWith(
@@ -542,8 +660,10 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
           return true;
         },
       );
-    } catch (e) {
+    } catch (e, stack) {
       // On exception, revert state
+      debugPrint('🐛 [TOGGLE_FAVORITO] ❌ Exception: $e');
+      debugPrint('🐛 [TOGGLE_FAVORITO] Stack: $stack');
       state = AsyncValue.data(
         currentState.copyWith(
           isFavorited: wasAlreadyFavorited,

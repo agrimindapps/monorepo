@@ -96,10 +96,10 @@ class HomePragasPage extends ConsumerWidget {
               const SizedBox(height: ReceitaAgroSpacing.sm),
               HomePragasStatsWidget(state: state),
 
-              const SizedBox(height: ReceitaAgroSpacing.sm),
+              const SizedBox(height: ReceitaAgroSpacing.lg),
               HomePragasSuggestionsWidget(state: state),
 
-              const SizedBox(height: ReceitaAgroSpacing.sm),
+              const SizedBox(height: ReceitaAgroSpacing.lg),
               HomePragasRecentWidget(state: state),
 
               const SizedBox(height: ReceitaAgroSpacing.bottomSafeArea),

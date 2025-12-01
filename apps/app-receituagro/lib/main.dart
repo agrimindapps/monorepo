@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 
 import 'core/init/app_initialization.dart';
 import 'core/navigation/app_router.dart' as app_router;
+import 'core/navigation/providers/navigation_state_provider.dart';
+import 'core/navigation/widgets/navigation_shell.dart';
 import 'core/providers/theme_notifier.dart';
 import 'core/theme/receituagro_theme.dart';
 import 'core/utils/diagnostico_logger.dart';
@@ -174,9 +176,18 @@ class ReceitaAgroApp extends ConsumerStatefulWidget {
 }
 
 class _ReceitaAgroAppState extends ConsumerState<ReceitaAgroApp> {
+  late final BottomNavVisibilityObserver _bottomNavObserver;
+  
   @override
   void initState() {
     super.initState();
+    
+    // Cria o observer uma única vez para evitar recriação a cada build
+    _bottomNavObserver = BottomNavVisibilityObserver(
+      onVisibilityChanged: (visible) {
+        ref.read(navigationStateProvider.notifier).setBottomNavVisibility(visible);
+      },
+    );
     
     // 🧪 AUTO-LOGIN PARA TESTES (remover em produção)
     if (kDebugMode) {
@@ -230,12 +241,13 @@ class _ReceitaAgroAppState extends ConsumerState<ReceitaAgroApp> {
       theme: ReceitaAgroTheme.lightTheme,
       darkTheme: ReceitaAgroTheme.darkTheme,
       themeMode: themeMode,
-      // ❌ REMOVIDO: builder com NavigationShell
-      // NavigationShell precisa estar DENTRO do context do MaterialApp (após Overlay ser criado)
-      // Solução: mover NavigationShell para dentro das páginas ou usar home
       initialRoute: '/home-defensivos',
       onGenerateRoute: app_router.AppRouter.generateRoute,
       navigatorKey: NavigationService.navigatorKey,
+      navigatorObservers: [
+        // Observer para sincronizar estado do BottomNav com rotas
+        _bottomNavObserver,
+      ],
       debugShowCheckedModeBanner: false,
     );
   }

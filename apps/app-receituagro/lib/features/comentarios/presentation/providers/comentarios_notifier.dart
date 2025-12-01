@@ -484,7 +484,7 @@ class ComentariosNotifier extends _$ComentariosNotifier {
     if (immediate) {
       _performFiltering();
     } else {
-      _filterDebounceTimer = Timer(const Duration(milliseconds: 300), () {
+      _filterDebounceTimer = Timer(const Duration(milliseconds: 700), () {
         _performFiltering();
       });
     }

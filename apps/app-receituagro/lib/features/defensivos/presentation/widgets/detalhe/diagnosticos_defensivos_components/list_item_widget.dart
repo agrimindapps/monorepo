@@ -5,6 +5,7 @@ import '../../../../../../core/extensions/diagnostico_drift_extension.dart';
 import '../../../../../../core/theme/spacing_tokens.dart';
 import '../../../../../../database/providers/database_providers.dart';
 import '../../../../../../database/receituagro_database.dart';
+import '../../../../../diagnosticos/domain/entities/diagnostico_entity.dart';
 
 /// Widget responsável por renderizar um item de diagnóstico na lista
 ///
@@ -47,10 +48,33 @@ class _DiagnosticoDefensivoListItemWidgetState
   Future<void> _loadPragaData() async {
     try {
       final pragasRepository = ref.read(pragasRepositoryProvider);
-      final idPraga = _getProperty('fkIdPraga') ?? _getProperty('idPraga');
+      
+      // Para Diagnostico do Drift, pragaId é o ID inteiro da tabela Pragas
+      if (widget.diagnostico is Diagnostico) {
+        final diag = widget.diagnostico as Diagnostico;
+        final praga = await pragasRepository.findById(diag.pragaId);
 
-      if (idPraga != null) {
-        final praga = await pragasRepository.getById(idPraga);
+        if (mounted) {
+          setState(() {
+            _pragaData = praga;
+            _isLoadingPraga = false;
+          });
+        }
+      } else if (widget.diagnostico is DiagnosticoEntity) {
+        // Para DiagnosticoEntity, idPraga é string (pode ser int ou idPraga original)
+        final diag = widget.diagnostico as DiagnosticoEntity;
+        Praga? praga;
+        
+        // Tenta primeiro como int (ID do banco)
+        final intId = int.tryParse(diag.idPraga);
+        if (intId != null) {
+          praga = await pragasRepository.findById(intId);
+        }
+        
+        // Se não encontrou, tenta como string (idPraga original)
+        if (praga == null) {
+          praga = await pragasRepository.getById(diag.idPraga);
+        }
 
         if (mounted) {
           setState(() {
@@ -59,10 +83,35 @@ class _DiagnosticoDefensivoListItemWidgetState
           });
         }
       } else {
-        if (mounted) {
-          setState(() {
-            _isLoadingPraga = false;
-          });
+        // Para Map ou outros tipos, tenta buscar por idPraga string
+        final idPraga = _getProperty('fkIdPraga') ?? _getProperty('idPraga');
+
+        if (idPraga != null) {
+          // Tenta primeiro como int (ID do banco)
+          final intId = int.tryParse(idPraga);
+          Praga? praga;
+          
+          if (intId != null) {
+            praga = await pragasRepository.findById(intId);
+          }
+          
+          // Se não encontrou, tenta como string (idPraga original)
+          if (praga == null) {
+            praga = await pragasRepository.getById(idPraga);
+          }
+
+          if (mounted) {
+            setState(() {
+              _pragaData = praga;
+              _isLoadingPraga = false;
+            });
+          }
+        } else {
+          if (mounted) {
+            setState(() {
+              _isLoadingPraga = false;
+            });
+          }
         }
       }
     } catch (e) {
@@ -296,6 +345,40 @@ class _DiagnosticoDefensivoListItemWidgetState
           default:
             // Tenta acessar propriedades diretas se existirem
             return _getObjectProperty(diag, primaryKey)?.toString();
+        }
+      } else if (widget.diagnostico is DiagnosticoEntity) {
+        final diag = widget.diagnostico as DiagnosticoEntity;
+        switch (primaryKey) {
+          case 'dosagem':
+            final dosagem = diag.dosagem;
+            if (dosagem.dosagemMinima != null && dosagem.dosagemMinima! > 0 &&
+                dosagem.dosagemMaxima > 0 &&
+                dosagem.dosagemMinima! < dosagem.dosagemMaxima) {
+              return '${dosagem.dosagemMinima} - ${dosagem.dosagemMaxima} ${dosagem.unidadeMedida}'.trim();
+            }
+            if (dosagem.dosagemMaxima > 0) {
+              return '${dosagem.dosagemMaxima} ${dosagem.unidadeMedida}'.trim();
+            }
+            return 'Não informado';
+          case 'fkIdPraga':
+          case 'idPraga':
+            return diag.idPraga;
+          case 'fkIdCultura':
+          case 'idCultura':
+            return diag.idCultura;
+          case 'idDefensivo':
+            return diag.idDefensivo;
+          case 'nomePraga':
+          case 'grupo':
+            // Se nomePraga está vazio, retorna null para forçar carregamento
+            if (diag.nomePraga?.isEmpty ?? true) return null;
+            return diag.nomePraga;
+          case 'nomeCultura':
+            return diag.nomeCultura;
+          case 'nomeDefensivo':
+            return diag.nomeDefensivo;
+          default:
+            return null;
         }
       } else if (widget.diagnostico is Map<String, dynamic>) {
         final map = widget.diagnostico as Map<String, dynamic>;

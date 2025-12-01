@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../data/praga_view_mode.dart';
@@ -36,6 +38,10 @@ class _PragaCulturaSearchFieldWidgetState extends State<PragaCulturaSearchFieldW
   late Animation<double> _elevationAnimation;
   final FocusNode _focusNode = FocusNode();
   bool _isFocused = false;
+  
+  /// Debounce timer para pesquisa
+  Timer? _debounceTimer;
+  static const _debounceDuration = Duration(milliseconds: 700);
 
   @override
   void initState() {
@@ -70,6 +76,14 @@ class _PragaCulturaSearchFieldWidgetState extends State<PragaCulturaSearchFieldW
     _focusNode.addListener(_onFocusChange);
     _animationController.forward();
   }
+  
+  /// Aplica debounce na pesquisa
+  void _onSearchChanged(String value) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(_debounceDuration, () {
+      widget.onChanged(value);
+    });
+  }
 
   void _onFocusChange() {
     setState(() {
@@ -84,6 +98,7 @@ class _PragaCulturaSearchFieldWidgetState extends State<PragaCulturaSearchFieldW
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _animationController.dispose();
     _focusController.dispose();
     _focusNode.dispose();
@@ -167,7 +182,7 @@ class _PragaCulturaSearchFieldWidgetState extends State<PragaCulturaSearchFieldW
                           child: TextField(
                             controller: widget.controller,
                             focusNode: _focusNode,
-                            onChanged: widget.onChanged,
+                            onChanged: _onSearchChanged,
                             decoration: InputDecoration(
                               hintText: widget.hintText,
                               hintStyle: TextStyle(

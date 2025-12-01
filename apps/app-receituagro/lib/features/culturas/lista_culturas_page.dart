@@ -76,7 +76,7 @@ class _ListaCulturasPageState extends ConsumerState<ListaCulturasPage> {
 
     final searchText = _searchController.text;
 
-    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+    _debounceTimer = Timer(const Duration(milliseconds: 700), () {
       _performSearch(searchText.trim());
     });
   }

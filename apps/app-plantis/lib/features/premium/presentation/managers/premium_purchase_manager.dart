@@ -25,12 +25,30 @@ class PremiumPurchaseManager {
     return state.isLoading;
   }
 
-  /// Get purchase error message
+  /// Get purchase error message from state
   String? getPurchaseErrorMessage(PremiumState state) {
     if (state.error?.type == PremiumErrorType.purchase) {
       return state.error?.message;
     }
     return null;
+  }
+
+  /// Get current purchase error message (without state parameter)
+  String getPurchaseErrorMessageCurrent() {
+    final state = ref.read(premiumNotifierProvider);
+    if (state.error != null && state.error is PremiumError) {
+      return (state.error as PremiumError).message;
+    }
+    return 'Não foi possível completar a compra. Tente novamente.';
+  }
+
+  /// Get current restore error message
+  String getRestoreErrorMessage() {
+    final state = ref.read(premiumNotifierProvider);
+    if (state.error != null && state.error is PremiumError) {
+      return (state.error as PremiumError).message;
+    }
+    return 'Não foi possível restaurar as compras. Tente novamente.';
   }
 
   /// Check if purchase was successful

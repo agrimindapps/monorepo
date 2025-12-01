@@ -77,10 +77,8 @@ class NavigationShell extends ConsumerWidget {
     // Evita navegação desnecessária
     if (currentIndex == index) return;
 
-    // Atualiza estado do provider
-    ref.read(navigationStateProvider.notifier).selectTab(index);
-
     // Navega para página principal correspondente
+    // O estado do provider será atualizado pelo BottomNavVisibilityObserver
     _navigateToMainPage(context, index);
   }
 

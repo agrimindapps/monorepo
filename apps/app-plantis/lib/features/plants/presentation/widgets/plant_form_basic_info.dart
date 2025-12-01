@@ -18,6 +18,11 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
   final _speciesController = TextEditingController();
   final _notesController = TextEditingController();
 
+  // FocusNodes para navegação por Tab
+  final _nameFocusNode = FocusNode();
+  final _speciesFocusNode = FocusNode();
+  final _notesFocusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -71,6 +76,9 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     _nameController.dispose();
     _speciesController.dispose();
     _notesController.dispose();
+    _nameFocusNode.dispose();
+    _speciesFocusNode.dispose();
+    _notesFocusNode.dispose();
     super.dispose();
   }
 
@@ -240,14 +248,181 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     BuildContext context,
     PlantFormStateNotifier formNotifier,
   ) {
+    final isWebOrDesktop = MediaQuery.of(context).size.width > 600;
+    
+    if (isWebOrDesktop) {
+      _showImageOptionsDialog(context, formNotifier);
+    } else {
+      _showImageOptionsBottomSheet(context, formNotifier);
+    }
+  }
+
+  void _showImageOptionsDialog(
+    BuildContext context,
+    PlantFormStateNotifier formNotifier,
+  ) {
+    final theme = Theme.of(context);
+    final formState = ref.read(plantFormStateNotifierProvider);
+    final isDisabled =
+        formState.imageUrls.isNotEmpty || formState.isUploadingImages;
+
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.add_photo_alternate,
+                  color: theme.colorScheme.onPrimaryContainer,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Text('Adicionar Foto'),
+            ],
+          ),
+          content: SizedBox(
+            width: 400,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Escolha como deseja adicionar a foto da sua planta',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildDialogImageOption(
+                        context: dialogContext,
+                        theme: theme,
+                        icon: Icons.camera_alt,
+                        label: 'Câmera',
+                        subtitle: 'Tirar uma foto',
+                        isDisabled: isDisabled,
+                        onTap: () {
+                          Navigator.of(dialogContext).pop();
+                          formNotifier.captureImageFromCamera();
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildDialogImageOption(
+                        context: dialogContext,
+                        theme: theme,
+                        icon: Icons.photo_library,
+                        label: 'Galeria',
+                        subtitle: 'Escolher arquivo',
+                        isDisabled: isDisabled,
+                        onTap: () {
+                          Navigator.of(dialogContext).pop();
+                          formNotifier.selectImageFromGallery();
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancelar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildDialogImageOption({
+    required BuildContext context,
+    required ThemeData theme,
+    required IconData icon,
+    required String label,
+    required String subtitle,
+    required bool isDisabled,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: isDisabled ? null : onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: isDisabled
+                ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3)
+                : theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDisabled
+                  ? theme.colorScheme.outline.withValues(alpha: 0.3)
+                  : theme.colorScheme.primary.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              Icon(
+                icon,
+                size: 40,
+                color: isDisabled
+                    ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
+                    : theme.colorScheme.primary,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                label,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isDisabled
+                      ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
+                      : theme.colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showImageOptionsBottomSheet(
+    BuildContext context,
+    PlantFormStateNotifier formNotifier,
+  ) {
+    final theme = Theme.of(context);
+
     showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
-        final theme = Theme.of(context);
-
         return Container(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -415,10 +590,13 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
       children: [
         _buildTextField(
           controller: _nameController,
+          focusNode: _nameFocusNode,
           label: 'Nome da planta',
           hint: 'Ex: Minha Rosa Vermelha',
           isRequired: true,
           autofocus: true,
+          textInputAction: TextInputAction.next,
+          onFieldSubmitted: (_) => _speciesFocusNode.requestFocus(),
           errorText: fieldErrors['name'],
           onChanged: (value) {
             formNotifier.setName(value);
@@ -433,8 +611,11 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
         const SizedBox(height: 16),
         _buildTextField(
           controller: _speciesController,
+          focusNode: _speciesFocusNode,
           label: 'Espécie',
           hint: 'Ex: Rosa gallica',
+          textInputAction: TextInputAction.next,
+          onFieldSubmitted: (_) => _notesFocusNode.requestFocus(),
           onChanged: (value) {
             formNotifier.setSpecies(value);
           },
@@ -467,9 +648,11 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
         const SizedBox(height: 16),
         _buildTextField(
           controller: _notesController,
+          focusNode: _notesFocusNode,
           label: 'Observações',
           hint: 'Adicione notas sobre a planta...',
           maxLines: 4,
+          textInputAction: TextInputAction.done,
           onChanged: (value) {
             formNotifier.setNotes(value);
           },
@@ -496,11 +679,14 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     required String label,
     required String hint,
     required ValueChanged<String> onChanged,
+    FocusNode? focusNode,
     Widget? prefixIcon,
     String? errorText,
     bool isRequired = false,
     bool autofocus = false,
     int maxLines = 1,
+    TextInputAction? textInputAction,
+    ValueChanged<String>? onFieldSubmitted,
     String? Function(String?)? validator,
   }) {
     final theme = Theme.of(context);
@@ -518,10 +704,13 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
         const SizedBox(height: 2),
         TextFormField(
           controller: controller,
+          focusNode: focusNode,
           maxLines: maxLines,
           onChanged: onChanged,
           validator: validator,
           autofocus: autofocus,
+          textInputAction: textInputAction,
+          onFieldSubmitted: onFieldSubmitted,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           decoration: InputDecoration(
             hintText: hint,

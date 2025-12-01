@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:core/core.dart' hide Column, SortBy;
 import 'package:flutter/foundation.dart';
@@ -241,6 +242,9 @@ class PlantsNotifier extends _$PlantsNotifier {
   /// Loads local data immediately for instant UI response
   Future<void> _loadLocalDataFirst() async {
     try {
+      // Verificar se o provider ainda está montado
+      if (!ref.mounted) return;
+
       final shouldShowLoading = state.plants.isEmpty;
       if (shouldShowLoading) {
         state = state.copyWith(isLoading: true);
@@ -249,6 +253,9 @@ class PlantsNotifier extends _$PlantsNotifier {
       state = state.copyWith(error: null);
 
       final localResult = await _getPlantsUseCase.call(const NoParams());
+
+      // Verificar novamente após operação async
+      if (!ref.mounted) return;
 
       localResult.fold(
         (Failure failure) {
@@ -269,7 +276,13 @@ class PlantsNotifier extends _$PlantsNotifier {
   /// Syncs with remote data in background
   void _syncInBackground() {
     Future.delayed(const Duration(milliseconds: 100), () async {
+      // Verificar se o provider ainda está montado
+      if (!ref.mounted) return;
+
       final result = await _getPlantsUseCase.call(const NoParams());
+
+      // Verificar novamente após operação async
+      if (!ref.mounted) return;
 
       result.fold(
         (Failure failure) {
@@ -338,9 +351,15 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 
   Future<bool> addPlant(AddPlantParams params) async {
+    // Verificar se o provider ainda está montado
+    if (!ref.mounted) return false;
+
     state = state.copyWith(isLoading: true, error: null);
 
     final result = await _addPlantUseCase.call(params);
+
+    // Verificar novamente após operação async
+    if (!ref.mounted) return false;
 
     final success = result.fold(
       (Failure failure) {
@@ -361,9 +380,15 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 
   Future<bool> updatePlant(UpdatePlantParams params) async {
+    // Verificar se o provider ainda está montado
+    if (!ref.mounted) return false;
+
     state = state.copyWith(isLoading: true, error: null);
 
     final result = await _updatePlantUseCase.call(params);
+
+    // Verificar novamente após operação async
+    if (!ref.mounted) return false;
 
     final success = result.fold(
       (Failure failure) {

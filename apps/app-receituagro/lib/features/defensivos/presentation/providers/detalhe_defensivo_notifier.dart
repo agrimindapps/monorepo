@@ -80,7 +80,7 @@ class DetalheDefensivoState {
 ///
 /// IMPORTANTE: keepAlive mantém o state mesmo quando não há listeners
 /// Isso previne perda de dados ao navegar entre tabs ou fazer rebuilds temporários
-@Riverpod(keepAlive: true)
+@riverpod
 class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
   late final FitossanitariosRepository _fitossanitarioRepository;
   late final ComentariosService _comentariosService;
@@ -89,7 +89,8 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
   @override
   Future<DetalheDefensivoState> build() async {
     _favoritosRepository = ref.watch(favoritosRepositorySimplifiedProvider);
-    _fitossanitarioRepository = ref.watch(core_providers.fitossanitariosRepositoryProvider);
+    _fitossanitarioRepository =
+        ref.watch(core_providers.fitossanitariosRepositoryProvider);
     _comentariosService = ref.watch(comentariosServiceProvider);
     _setupPremiumStatusListener();
 
@@ -161,9 +162,11 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
 
     // idDefensivo vem do defensivoData que foi carregado por _loadDefensivoData
     final itemId = currentState.defensivoData?.idDefensivo ?? defensivoName;
-    
-    debugPrint('🔖 [FAVORITO] _loadFavoritoState: itemId=$itemId, defensivoName=$defensivoName');
-    debugPrint('🔖 [FAVORITO] defensivoData?.idDefensivo=${currentState.defensivoData?.idDefensivo}');
+
+    debugPrint(
+        '🔖 [FAVORITO] _loadFavoritoState: itemId=$itemId, defensivoName=$defensivoName');
+    debugPrint(
+        '🔖 [FAVORITO] defensivoData?.idDefensivo=${currentState.defensivoData?.idDefensivo}');
 
     try {
       final result = await _favoritosRepository.isFavorito(
@@ -265,9 +268,8 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     try {
       await _comentariosService.deleteComentario(commentId);
 
-      final updatedComentarios = currentState.comentarios
-          .where((c) => c.id != commentId)
-          .toList();
+      final updatedComentarios =
+          currentState.comentarios.where((c) => c.id != commentId).toList();
       state = AsyncValue.data(
         currentState.copyWith(comentarios: updatedComentarios),
       );
@@ -285,10 +287,12 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
 
     final wasAlreadyFavorited = currentState.isFavorited;
     final itemId = currentState.defensivoData?.idDefensivo ?? defensivoName;
-    
-    debugPrint('🔖 [FAVORITO] toggleFavorito: itemId=$itemId, defensivoName=$defensivoName');
-    debugPrint('🔖 [FAVORITO] defensivoData?.idDefensivo=${currentState.defensivoData?.idDefensivo}');
-    
+
+    debugPrint(
+        '🔖 [FAVORITO] toggleFavorito: itemId=$itemId, defensivoName=$defensivoName');
+    debugPrint(
+        '🔖 [FAVORITO] defensivoData?.idDefensivo=${currentState.defensivoData?.idDefensivo}');
+
     state = AsyncValue.data(
       currentState.copyWith(isFavorited: !wasAlreadyFavorited),
     );

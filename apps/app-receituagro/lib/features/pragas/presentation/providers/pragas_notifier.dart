@@ -1,5 +1,6 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/services/receituagro_random_extensions.dart';
 import '../../data/mappers/praga_mapper.dart';
@@ -11,7 +12,7 @@ part 'pragas_notifier.g.dart';
 
 /// Notifier para gerenciar estado das pragas (Presentation Layer)
 /// Princípios: Single Responsibility + Dependency Inversion
-@Riverpod(keepAlive: true)
+@riverpod
 class PragasNotifier extends _$PragasNotifier {
   @override
   Future<PragasState> build() async {

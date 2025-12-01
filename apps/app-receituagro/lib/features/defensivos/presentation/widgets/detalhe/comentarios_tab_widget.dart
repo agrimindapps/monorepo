@@ -307,9 +307,8 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
 
   Widget _buildFreeContent() {
     return PremiumFeatureCard(
-      title: 'Comentários Premium',
-      description:
-          'Acesse comentários da comunidade e compartilhe suas experiências',
+      title: 'Conteúdo Premium',
+      description: 'Desbloqueie recursos exclusivos e tenha acesso completo a todas as funcionalidades do aplicativo',
       onUpgradePressed: () {
         // TODO: Navigate to subscription page
       },

@@ -1,12 +1,25 @@
 import 'package:core/core.dart' hide Column;
+import 'package:flutter/foundation.dart';
 
+import '../../../../core/data/models/planta_config_model.dart';
+import '../../../tasks/domain/usecases/generate_initial_tasks_usecase.dart';
 import '../entities/plant.dart';
+import '../repositories/plant_tasks_repository.dart';
 import '../repositories/plants_repository.dart';
+import '../services/plant_task_generator.dart';
 
 class UpdatePlantUseCase implements UseCase<Plant, UpdatePlantParams> {
-  const UpdatePlantUseCase(this.repository);
+  UpdatePlantUseCase(
+    this.repository,
+    this.generateInitialTasksUseCase,
+    this.plantTaskGenerator,
+    this.plantTasksRepository,
+  );
 
   final PlantsRepository repository;
+  final GenerateInitialTasksUseCase generateInitialTasksUseCase;
+  final PlantTaskGenerator plantTaskGenerator;
+  final PlantTasksRepository plantTasksRepository;
 
   @override
   Future<Either<Failure, Plant>> call(UpdatePlantParams params) async {
@@ -16,7 +29,14 @@ class UpdatePlantUseCase implements UseCase<Plant, UpdatePlantParams> {
     }
     final existingResult = await repository.getPlantById(params.id);
 
-    return existingResult.fold((failure) => Left(failure), (existingPlant) {
+    return existingResult.fold((failure) => Left(failure), (existingPlant) async {
+      // Detectar novos cuidados habilitados
+      final newCareTypes = _detectNewCareTypes(existingPlant.config, params.config);
+      
+      if (kDebugMode && newCareTypes.isNotEmpty) {
+        print('🌱 UpdatePlantUseCase - Novos cuidados detectados: $newCareTypes');
+      }
+
       final updatedPlant = existingPlant.copyWith(
         name: params.name.trim(),
         species: params.species?.trim(),
@@ -31,8 +51,157 @@ class UpdatePlantUseCase implements UseCase<Plant, UpdatePlantParams> {
         isDirty: true,
       );
 
-      return repository.updatePlant(updatedPlant);
+      final updateResult = await repository.updatePlant(updatedPlant);
+      
+      return updateResult.fold(
+        (failure) => Left(failure),
+        (savedPlant) async {
+          // Gerar tarefas para os novos cuidados habilitados
+          if (newCareTypes.isNotEmpty && savedPlant.config != null) {
+            if (kDebugMode) {
+              print('🌱 UpdatePlantUseCase - Gerando tarefas para novos cuidados');
+            }
+            await _generateTasksForNewCareTypes(savedPlant, newCareTypes);
+          }
+          return Right(savedPlant);
+        },
+      );
     });
+  }
+
+  /// Detecta quais tipos de cuidado foram habilitados (não existiam antes)
+  List<String> _detectNewCareTypes(PlantConfig? oldConfig, PlantConfig? newConfig) {
+    final newCareTypes = <String>[];
+    
+    if (newConfig == null) return newCareTypes;
+    
+    // Verificar cada tipo de cuidado
+    if (_isNewlyEnabled(oldConfig?.wateringIntervalDays, newConfig.wateringIntervalDays)) {
+      newCareTypes.add('agua');
+    }
+    if (_isNewlyEnabled(oldConfig?.fertilizingIntervalDays, newConfig.fertilizingIntervalDays)) {
+      newCareTypes.add('adubo');
+    }
+    if (_isNewlyEnabled(oldConfig?.pruningIntervalDays, newConfig.pruningIntervalDays)) {
+      newCareTypes.add('poda');
+    }
+    if (_isNewlyEnabled(oldConfig?.sunlightCheckIntervalDays, newConfig.sunlightCheckIntervalDays)) {
+      newCareTypes.add('banhoSol');
+    }
+    if (_isNewlyEnabled(oldConfig?.pestInspectionIntervalDays, newConfig.pestInspectionIntervalDays)) {
+      newCareTypes.add('inspecaoPragas');
+    }
+    if (_isNewlyEnabled(oldConfig?.replantingIntervalDays, newConfig.replantingIntervalDays)) {
+      newCareTypes.add('replantar');
+    }
+    
+    return newCareTypes;
+  }
+  
+  /// Verifica se um cuidado foi habilitado (não tinha valor e agora tem)
+  bool _isNewlyEnabled(int? oldValue, int? newValue) {
+    return (oldValue == null || oldValue <= 0) && (newValue != null && newValue > 0);
+  }
+
+  /// Gera tarefas apenas para os novos tipos de cuidado
+  Future<void> _generateTasksForNewCareTypes(Plant plant, List<String> careTypes) async {
+    try {
+      if (kDebugMode) {
+        print('🌱 _generateTasksForNewCareTypes - plant: ${plant.name}, careTypes: $careTypes');
+      }
+      
+      // Criar um PlantaConfigModel filtrado apenas com os cuidados novos
+      final fullConfig = PlantaConfigModel.fromPlantConfig(
+        plantaId: plant.id,
+        plantConfig: plant.config,
+      );
+      
+      // Criar config filtrada apenas com os novos cuidados
+      final filteredConfig = PlantaConfigModel(
+        id: fullConfig.id,
+        plantaId: plant.id,
+        aguaAtiva: careTypes.contains('agua') && fullConfig.aguaAtiva,
+        intervaloRegaDias: careTypes.contains('agua') ? fullConfig.intervaloRegaDias : 0,
+        aduboAtivo: careTypes.contains('adubo') && fullConfig.aduboAtivo,
+        intervaloAdubacaoDias: careTypes.contains('adubo') ? fullConfig.intervaloAdubacaoDias : 0,
+        podaAtiva: careTypes.contains('poda') && fullConfig.podaAtiva,
+        intervaloPodaDias: careTypes.contains('poda') ? fullConfig.intervaloPodaDias : 0,
+        banhoSolAtivo: careTypes.contains('banhoSol') && fullConfig.banhoSolAtivo,
+        intervaloBanhoSolDias: careTypes.contains('banhoSol') ? fullConfig.intervaloBanhoSolDias : 0,
+        inspecaoPragasAtiva: careTypes.contains('inspecaoPragas') && fullConfig.inspecaoPragasAtiva,
+        intervaloInspecaoPragasDias: careTypes.contains('inspecaoPragas') ? fullConfig.intervaloInspecaoPragasDias : 0,
+        replantarAtivo: careTypes.contains('replantar') && fullConfig.replantarAtivo,
+        intervaloReplantarDias: careTypes.contains('replantar') ? fullConfig.intervaloReplantarDias : 0,
+      );
+      
+      if (kDebugMode) {
+        print('🌱 _generateTasksForNewCareTypes - filteredConfig.activeCareTypes: ${filteredConfig.activeCareTypes}');
+      }
+      
+      if (filteredConfig.activeCareTypes.isEmpty) {
+        if (kDebugMode) {
+          print('⚠️ _generateTasksForNewCareTypes - Nenhum cuidado ativo na config filtrada');
+        }
+        return;
+      }
+      
+      // Gerar PlantTasks usando o generator existente
+      final plantTasksToGenerate = plantTaskGenerator.generateTasksForPlant(
+        plant.copyWith(config: _plantConfigFromFiltered(filteredConfig, plant.config!)),
+      );
+      
+      if (plantTasksToGenerate.isNotEmpty) {
+        if (kDebugMode) {
+          print('✅ _generateTasksForNewCareTypes - ${plantTasksToGenerate.length} PlantTasks geradas');
+        }
+        
+        for (final task in plantTasksToGenerate) {
+          await plantTasksRepository.addPlantTask(task);
+        }
+      }
+      
+      // Gerar Tasks (sistema tradicional)
+      final tasksResult = await generateInitialTasksUseCase.call(
+        GenerateInitialTasksParams(
+          plantaId: plant.id,
+          config: filteredConfig,
+          plantingDate: plant.plantingDate,
+        ),
+      );
+      
+      tasksResult.fold(
+        (failure) {
+          if (kDebugMode) {
+            print('⚠️ _generateTasksForNewCareTypes - Falha ao gerar Tasks: ${failure.message}');
+          }
+        },
+        (generatedTasks) {
+          if (kDebugMode) {
+            print('✅ _generateTasksForNewCareTypes - ${generatedTasks.length} Tasks geradas');
+          }
+        },
+      );
+    } catch (e, stack) {
+      if (kDebugMode) {
+        print('❌ _generateTasksForNewCareTypes - Erro: $e');
+        print('Stack: $stack');
+      }
+    }
+  }
+  
+  /// Cria um PlantConfig filtrado a partir do PlantaConfigModel
+  PlantConfig _plantConfigFromFiltered(PlantaConfigModel filtered, PlantConfig original) {
+    return PlantConfig(
+      wateringIntervalDays: filtered.aguaAtiva ? filtered.intervaloRegaDias : null,
+      fertilizingIntervalDays: filtered.aduboAtivo ? filtered.intervaloAdubacaoDias : null,
+      pruningIntervalDays: filtered.podaAtiva ? filtered.intervaloPodaDias : null,
+      sunlightCheckIntervalDays: filtered.banhoSolAtivo ? filtered.intervaloBanhoSolDias : null,
+      pestInspectionIntervalDays: filtered.inspecaoPragasAtiva ? filtered.intervaloInspecaoPragasDias : null,
+      replantingIntervalDays: filtered.replantarAtivo ? filtered.intervaloReplantarDias : null,
+      waterAmount: original.waterAmount,
+      enableWateringCare: filtered.aguaAtiva,
+      enableFertilizerCare: filtered.aduboAtivo,
+    );
   }
 
   ValidationFailure? _validatePlant(UpdatePlantParams params) {

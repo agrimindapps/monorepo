@@ -12,6 +12,7 @@ import '../providers/tasks_state.dart';
 import '../widgets/empty_tasks_widget.dart';
 import '../widgets/task_completion_dialog.dart';
 import '../widgets/tasks_error_boundary.dart';
+import '../widgets/tasks_list_skeleton.dart';
 
 class TasksListPage extends ConsumerStatefulWidget {
   const TasksListPage({super.key});
@@ -130,16 +131,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
           ),
         );
       },
-      loading: () => const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Carregando tarefas...'),
-          ],
-        ),
-      ),
+      loading: () => const TasksListSkeleton(),
       error: (error, stack) => Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -167,7 +159,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     final tasksAsync = ref.watch(tasksNotifierProvider);
     return tasksAsync.when(
       data: (TasksState tasksState) => _buildFiltersContent(tasksState, ref),
-      loading: () => const SizedBox.shrink(),
+      loading: () => const TasksFiltersSkeleton(),
       error: (Object error, StackTrace stack) => const SizedBox.shrink(),
     );
   }

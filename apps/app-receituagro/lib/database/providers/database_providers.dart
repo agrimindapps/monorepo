@@ -19,7 +19,7 @@ part 'database_providers.g.dart';
 /// do banco de dados seja criada durante toda a vida da aplicação.
 ///
 /// Usar SEMPRE este provider ou receituagroDatabaseProvider para acessar o banco.
-@Riverpod(keepAlive: true)
+@riverpod
 ReceituagroDatabase database(Ref ref) {
   // Reutiliza a instância do receituagroDatabaseProvider (manual provider)
   // para evitar criar múltiplas instâncias do banco de dados
@@ -170,7 +170,7 @@ Future<Map<String, int>> favoritosCountByType(Ref ref, String userId) async {
 // ========== SYNC ADAPTER PROVIDERS ==========
 
 /// Provider do adapter de sincronização de favoritos
-@Riverpod(keepAlive: true)
+@riverpod
 FavoritosDriftSyncAdapter favoritosSyncAdapter(Ref ref) {
   final db = ref.watch(databaseProvider);
   final firestore = ref.watch(firebaseFirestoreProvider);
@@ -179,7 +179,7 @@ FavoritosDriftSyncAdapter favoritosSyncAdapter(Ref ref) {
 }
 
 /// Provider do adapter de sincronização de comentários
-@Riverpod(keepAlive: true)
+@riverpod
 ComentariosDriftSyncAdapter comentariosSyncAdapter(Ref ref) {
   final db = ref.watch(databaseProvider);
   final firestore = ref.watch(firebaseFirestoreProvider);

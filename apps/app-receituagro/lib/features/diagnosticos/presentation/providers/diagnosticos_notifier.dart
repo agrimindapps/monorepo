@@ -41,7 +41,7 @@ part 'diagnosticos_notifier.g.dart';
 /// - DiagnosticosStatsService: analytics and statistics (domain-specific)
 /// - RecommendationService: recommendation logic (now extracted - SRP)
 /// - FailureMessageService: error message handling
-@Riverpod(keepAlive: true)
+@riverpod
 class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   // ========== Specialized Services (New Architecture) ==========
   late final IDiagnosticosFilterService _filterService;

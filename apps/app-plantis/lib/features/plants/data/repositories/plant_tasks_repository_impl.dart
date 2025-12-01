@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide Column, Task;
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/interfaces/network_info.dart';
+import '../../../tasks/data/datasources/local/tasks_local_datasource.dart';
 import '../../../tasks/domain/entities/task.dart';
 import '../../domain/entities/plant_task.dart';
 import '../../domain/repositories/plant_tasks_repository.dart';
@@ -14,12 +15,14 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
   final PlantTasksRemoteDatasource remoteDatasource;
   final NetworkInfo networkInfo;
   final IAuthRepository authService;
+  final TasksLocalDataSource? tasksLocalDataSource;
 
   PlantTasksRepositoryImpl({
     required this.localDatasource,
     required this.remoteDatasource,
     required this.networkInfo,
     required this.authService,
+    this.tasksLocalDataSource,
   });
 
   Future<String?> get _currentUserId async {
@@ -308,9 +311,41 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
 
       if (kDebugMode) {
         print(
-          '🗑️ PlantTasksRepository: Deletando todas as tasks da planta $plantId usando UnifiedSyncManager',
+          '🗑️ PlantTasksRepository: Deletando todas as tasks da planta $plantId',
         );
       }
+
+      // 1. Deletar PlantTasks locais (sistema legado de cuidados)
+      try {
+        await localDatasource.deletePlantTasksByPlantId(plantId);
+        if (kDebugMode) {
+          print(
+            '✅ PlantTasksRepository: PlantTasks locais da planta $plantId deletadas',
+          );
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('⚠️ Erro ao deletar PlantTasks locais: $e');
+        }
+      }
+
+      // 2. Deletar Tasks locais via TasksLocalDataSource (sistema principal Drift)
+      if (tasksLocalDataSource != null) {
+        try {
+          final deletedCount = await tasksLocalDataSource!.deleteTasksByPlantId(plantId);
+          if (kDebugMode) {
+            print(
+              '✅ PlantTasksRepository: $deletedCount Tasks locais (Drift) da planta $plantId deletadas',
+            );
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('⚠️ Erro ao deletar Tasks locais (Drift): $e');
+          }
+        }
+      }
+
+      // 3. Deletar Tasks via UnifiedSyncManager (para sync com Firebase)
       final tasksResult = await UnifiedSyncManager.instance.findAll<Task>(
         'plantis',
       );
@@ -318,9 +353,10 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       return tasksResult.fold(
         (failure) {
           if (kDebugMode) {
-            print('❌ Erro ao buscar tasks: ${failure.message}');
+            print('⚠️ Erro ao buscar tasks do UnifiedSyncManager: ${failure.message}');
           }
-          return Left(failure);
+          // Não falhar se UnifiedSyncManager falhar, já deletamos as PlantTasks locais
+          return const Right(null);
         },
         (allTasks) async {
           final plantTasks =
@@ -330,7 +366,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
 
           if (kDebugMode) {
             print(
-              '🗑️ Encontradas ${plantTasks.length} tasks para deletar da planta $plantId',
+              '🗑️ Encontradas ${plantTasks.length} tasks (UnifiedSyncManager) para deletar da planta $plantId',
             );
           }
           for (final task in plantTasks) {

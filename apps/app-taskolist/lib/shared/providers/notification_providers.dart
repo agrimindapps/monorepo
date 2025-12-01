@@ -4,6 +4,7 @@ import 'package:core/core.dart' hide Column;
 import '../../core/providers/core_providers.dart';
 import '../../features/notifications/presentation/notification_stats.dart' as local_stats;
 import '../../infrastructure/services/notification_service.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'notification_providers.g.dart';
 final notificationPermissionProvider = FutureProvider<core.NotificationPermissionEntity>((ref) async {

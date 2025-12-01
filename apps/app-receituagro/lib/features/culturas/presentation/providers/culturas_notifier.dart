@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide Column;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/cultura_entity.dart';
 import '../../domain/usecases/get_culturas_params.dart';

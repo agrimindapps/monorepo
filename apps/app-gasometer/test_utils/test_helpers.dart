@@ -1,14 +1,15 @@
 import 'package:core/core.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Test helpers for app-gasometer tests
 class TestHelpers {
   /// Creates a ProviderContainer with optional overrides
   static ProviderContainer createContainer({
-    List<Override> overrides = const [],
+    List<Object> overrides = const [],
   }) {
     final container = ProviderContainer(
-      overrides: overrides,
+      overrides: overrides.cast(),
     );
     addTearDown(container.dispose);
     return container;

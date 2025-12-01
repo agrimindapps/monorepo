@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/design_tokens.dart';
 import '../../database/receituagro_database.dart';
-import '../../features/navigation/navigation_providers.dart';
 import 'presentation/providers/home_defensivos_notifier.dart';
 import 'presentation/widgets/defensivos_error_state.dart';
 import 'presentation/widgets/defensivos_new_items_section.dart';
@@ -125,42 +124,48 @@ class _HomeDefensivosPageState extends ConsumerState<HomeDefensivosPage> {
         .read(homeDefensivosProvider.notifier)
         .recordDefensivoAccess(defensivo);
 
-    final navigationService = ref.read(receitaAgroNavigationServiceProvider);
-    navigationService.navigateToDetalheDefensivo(
-      defensivoName: defensivoName,
-      extraData: {'fabricante': fabricante},
+    // Usa Navigator.of(context) diretamente ao invés do service
+    // pois o navigatorKey foi removido do MaterialApp
+    Navigator.of(context).pushNamed(
+      '/detalhe-defensivo',
+      arguments: {
+        'defensivoName': defensivoName,
+        'fabricante': fabricante,
+      },
     );
   }
 
   void _navigateToCategory(BuildContext context, String category) {
-    final navigationService = ref.read(receitaAgroNavigationServiceProvider);
-
     switch (category.toLowerCase()) {
       case 'defensivos':
-        navigationService.navigateToListaDefensivos();
+        Navigator.of(context).pushNamed('/defensivos');
         break;
       case 'fabricantes':
-        navigationService.navigateToDefensivosAgrupados(
-          extraData: {'tipoAgrupamento': 'fabricantes'},
+        Navigator.of(context).pushNamed(
+          '/defensivos-agrupados',
+          arguments: {'tipoAgrupamento': 'fabricantes'},
         );
         break;
       case 'modoacao':
-        navigationService.navigateToDefensivosAgrupados(
-          extraData: {'tipoAgrupamento': 'modoAcao'},
+        Navigator.of(context).pushNamed(
+          '/defensivos-agrupados',
+          arguments: {'tipoAgrupamento': 'modoAcao'},
         );
         break;
       case 'ingredienteativo':
-        navigationService.navigateToDefensivosAgrupados(
-          extraData: {'tipoAgrupamento': 'ingredienteAtivo'},
+        Navigator.of(context).pushNamed(
+          '/defensivos-agrupados',
+          arguments: {'tipoAgrupamento': 'ingredienteAtivo'},
         );
         break;
       case 'classeagronomica':
-        navigationService.navigateToDefensivosAgrupados(
-          extraData: {'tipoAgrupamento': 'classeAgronomica'},
+        Navigator.of(context).pushNamed(
+          '/defensivos-agrupados',
+          arguments: {'tipoAgrupamento': 'classeAgronomica'},
         );
         break;
       default:
-        navigationService.navigateToListaDefensivos();
+        Navigator.of(context).pushNamed('/defensivos');
     }
   }
 }

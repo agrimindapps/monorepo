@@ -172,7 +172,7 @@ class EnhancedDiagnosticosPragaState {
 
 /// Provider aprimorado para gerenciar diagnósticos relacionados à praga
 /// Utiliza os novos serviços centralizados
-@Riverpod(keepAlive: true)
+@riverpod
 class EnhancedDiagnosticosPragaNotifier
     extends _$EnhancedDiagnosticosPragaNotifier {
   late final DiagnosticoEntityResolver _resolver;

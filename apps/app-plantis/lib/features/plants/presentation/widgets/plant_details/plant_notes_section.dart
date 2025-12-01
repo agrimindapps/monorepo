@@ -428,7 +428,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
 
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Editar observação'),
         content: TextField(
           controller: editController,
@@ -442,7 +442,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
           TextButton(
             onPressed: () {
               editController.dispose();
-              Navigator.of(context).pop();
+              Navigator.of(dialogContext).pop();
             },
             child: const Text('Cancelar'),
           ),
@@ -454,20 +454,38 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
                     .read(commentsNotifierProvider.notifier)
                     .updateComment(comment.id, newText);
 
+                if (!dialogContext.mounted) {
+                  editController.dispose();
+                  return;
+                }
+                Navigator.of(dialogContext).pop();
+                editController.dispose();
+
                 if (success) {
-                  if (!context.mounted) return;
-                  Navigator.of(context).pop();
+                  if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Observação atualizada'),
                       backgroundColor: Colors.green,
                     ),
                   );
+                } else {
+                  if (!mounted) return;
+                  final commentsState = ref.read(commentsNotifierProvider).value;
+                  final errorMsg = commentsState?.errorMessage ??
+                      'Não foi possível atualizar a observação';
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Erro: $errorMsg'),
+                      backgroundColor: Colors.red,
+                      duration: const Duration(seconds: 4),
+                    ),
+                  );
                 }
               } else {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
+                editController.dispose();
               }
-              editController.dispose();
             },
             child: const Text('Salvar'),
           ),
@@ -479,14 +497,14 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
   void _confirmDeleteComment(ComentarioModel comment) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Excluir observação'),
         content: const Text(
           'Tem certeza que deseja excluir esta observação?',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('Cancelar'),
           ),
           TextButton(
@@ -495,13 +513,27 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
                   .read(commentsNotifierProvider.notifier)
                   .deleteComment(comment.id);
 
+              if (!dialogContext.mounted) return;
+              Navigator.of(dialogContext).pop();
+
               if (success) {
-                if (!context.mounted) return;
-                Navigator.of(context).pop();
+                if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Observação excluída'),
                     backgroundColor: Colors.green,
+                  ),
+                );
+              } else {
+                if (!mounted) return;
+                final commentsState = ref.read(commentsNotifierProvider).value;
+                final errorMsg = commentsState?.errorMessage ??
+                    'Não foi possível excluir a observação';
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Erro: $errorMsg'),
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 4),
                   ),
                 );
               }

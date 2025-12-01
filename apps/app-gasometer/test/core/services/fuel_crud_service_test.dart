@@ -7,7 +7,7 @@ import 'package:mocktail/mocktail.dart';
 
 import '../../helpers/fake_data.dart';
 import '../../helpers/mock_factories.dart';
-import '../../helpers/test_helpers.dart';
+import '../../../test_utils/test_helpers.dart';
 
 void main() {
   late FuelCrudService service;

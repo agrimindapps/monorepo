@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
@@ -20,7 +21,7 @@ part 'vehicles_notifier.g.dart';
 /// Suporta stream watching, offline sync, CRUD completo e derived providers
 /// keepAlive: true mantém o provider vivo durante toda a sessão do app
 /// pois a lista de veículos é usada em múltiplas páginas (fuel, expenses, maintenance, odometer)
-@Riverpod(keepAlive: true)
+@riverpod
 class VehiclesNotifier extends _$VehiclesNotifier {
   StreamSubscription<Either<dynamic, List<VehicleEntity>>>?
   _vehicleSubscription;

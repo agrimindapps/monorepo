@@ -6,6 +6,7 @@ import '../../domain/services/pet_data_sync_service.dart';
 import '../../domain/services/rate_limit_service.dart';
 import '../../domain/usecases/auth_usecases.dart' as auth_usecases;
 import '../providers/auth_providers.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auth_notifier.g.dart';
 

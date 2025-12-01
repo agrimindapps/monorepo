@@ -429,9 +429,12 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
                   );
                   _onBack();
                 } else {
-                  _showSnackBar(
-                    AppStrings.errorDeletingPlant,
-                    'error',
+                  // Obtém a mensagem de erro específica do provider
+                  final errorMessage = ref.read(plantsNotifierProvider).error ??
+                      AppStrings.errorDeletingPlant;
+                  _showSnackBarWithColor(
+                    errorMessage,
+                    backgroundColor: Colors.red,
                   );
                 }
               },

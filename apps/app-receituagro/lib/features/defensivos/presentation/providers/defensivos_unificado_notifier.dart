@@ -103,7 +103,7 @@ class DefensivosUnificadoState {
 ///
 /// keepAlive: true - Mantém o estado vivo durante toda a sessão do app
 /// para evitar recarregamento desnecessário dos 3148+ defensivos
-@Riverpod(keepAlive: true)
+@riverpod
 class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
   @override
   Future<DefensivosUnificadoState> build() async {

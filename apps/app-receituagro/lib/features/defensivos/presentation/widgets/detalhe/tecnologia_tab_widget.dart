@@ -88,8 +88,8 @@ class TecnologiaTabWidget extends ConsumerWidget {
 
   Widget _buildFreeContent(BuildContext context) {
     return PremiumFeatureCard(
-      title: 'Tecnologia Premium',
-      description: 'Acesse informações técnicas detalhadas sobre tecnologia, embalagens, manejo integrado e muito mais',
+      title: 'Conteúdo Premium',
+      description: 'Desbloqueie recursos exclusivos e tenha acesso completo a todas as funcionalidades do aplicativo',
       onUpgradePressed: () {
         // TODO: Navigate to subscription page
       },

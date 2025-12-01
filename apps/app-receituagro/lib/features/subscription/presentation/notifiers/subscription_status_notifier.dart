@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/usecases/get_current_subscription.dart';
 import '../services/subscription_error_message_service.dart';

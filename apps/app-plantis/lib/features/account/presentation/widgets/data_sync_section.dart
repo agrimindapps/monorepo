@@ -6,6 +6,7 @@ import '../../../../core/providers/sync_providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/base_page_scaffold.dart';
+import '../utils/widget_utils.dart';
 
 class DataSyncSection extends ConsumerWidget {
   const DataSyncSection({super.key});
@@ -20,7 +21,7 @@ class DataSyncSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(context, 'Dados e Sincronização'),
+        buildSectionHeader(context, 'Dados e Sincronização'),
         const SizedBox(height: 16),
         PlantisCard(
           child: Column(
@@ -109,17 +110,6 @@ class DataSyncSection extends ConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    final theme = Theme.of(context);
-    return Text(
-      title,
-      style: theme.textTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.bold,
-        color: theme.colorScheme.onSurface,
-      ),
     );
   }
 

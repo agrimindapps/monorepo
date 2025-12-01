@@ -31,6 +31,7 @@ class AccountInfoSection extends ConsumerWidget {
 
         return PlantisCard(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Avatar e informações básicas
               Row(

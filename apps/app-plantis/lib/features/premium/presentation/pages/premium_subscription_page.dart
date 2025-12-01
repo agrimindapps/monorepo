@@ -274,11 +274,14 @@ class _PremiumSubscriptionPageState
 
         if (success) {
           _showSuccessSnackBar(purchaseManager.getPurchaseSuccessMessage());
+        } else {
+          _showErrorSnackBar(purchaseManager.getPurchaseErrorMessageCurrent());
         }
       }
     } catch (e) {
       if (mounted) {
         stopContextualLoading(LoadingContexts.premium);
+        _showErrorSnackBar('Erro ao processar compra: ${e.toString()}');
       }
     }
   }
@@ -302,11 +305,14 @@ class _PremiumSubscriptionPageState
           _showSuccessSnackBar(purchaseManager.getRestoreSuccessMessage());
         } else if (success) {
           _showInfoSnackBar(purchaseManager.getRestoreNotFoundMessage());
+        } else {
+          _showErrorSnackBar(purchaseManager.getRestoreErrorMessage());
         }
       }
     } catch (e) {
       if (mounted) {
         stopContextualLoading(LoadingContexts.premium);
+        _showErrorSnackBar('Erro ao restaurar compras: ${e.toString()}');
       }
     }
   }

@@ -29,7 +29,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
+              padding: const EdgeInsets.fromLTRB(0, 32, 0, 0),
               child: PlantisHeader(
                 title: 'Perfil do Visitante',
                 subtitle: 'Entre em sua conta para recursos completos',
@@ -128,19 +128,19 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
                             ],
                             if (!isAnonymous) ...[
                               const AccountDetailsSection(),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 32),
                             ],
                             if (!isAnonymous) ...[
                               const DeviceManagementSection(),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 32),
                             ],
                             if (!isAnonymous) ...[
                               const DataSyncSection(),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 32),
                             ],
                             const AccountActionsSection(),
 
-                            const SizedBox(height: 40),
+                            const SizedBox(height: 100),
                           ],
                         );
                       },

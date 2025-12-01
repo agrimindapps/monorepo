@@ -20,6 +20,11 @@ class ReceitaAgroTheme {
       surfaceContainer: Colors.white,
       surfaceContainerHighest: Colors.grey.shade100,
       surfaceContainerHigh: Colors.grey.shade50,
+      // Corrige cores de texto para evitar o amarelo do Material 3
+      onSurface: const Color(0xFF212121), // Texto primário escuro
+      onSurfaceVariant: const Color(0xFF616161), // Texto secundário
+      onPrimary: Colors.white,
+      onSecondary: Colors.white,
     ),
     scaffoldBackgroundColor: const Color(0xFFF5F5F5), // Cor de fundo das páginas
   ).copyWith(
@@ -107,6 +112,11 @@ class ReceitaAgroTheme {
       surfaceContainerHighest: const Color(0xFF3A3A3C),
       surfaceContainerHigh: const Color(0xFF2C2C2E),
       surfaceContainerLow: const Color(0xFF1C1C1E),
+      // Corrige cores de texto para modo escuro
+      onSurface: const Color(0xFFE0E0E0), // Texto primário claro
+      onSurfaceVariant: const Color(0xFFBDBDBD), // Texto secundário
+      onPrimary: Colors.white,
+      onSecondary: Colors.white,
     ),
   ).copyWith(
     appBarTheme: const AppBarTheme(

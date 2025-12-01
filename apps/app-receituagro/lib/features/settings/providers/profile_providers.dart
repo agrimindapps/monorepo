@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide Column;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/providers/auth_providers.dart';
 import '../data/repositories/profile_repository_impl.dart';

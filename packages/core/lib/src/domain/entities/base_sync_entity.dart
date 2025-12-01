@@ -143,24 +143,32 @@ abstract class BaseSyncEntity extends BaseEntity {
   ) {
     return {
       'id': map['id'] as String?,
-      'createdAt':
-          map['created_at'] != null
-              ? DateTime.parse(map['created_at'] as String)
-              : null,
-      'updatedAt':
-          map['updated_at'] != null
-              ? DateTime.parse(map['updated_at'] as String)
-              : null,
-      'lastSyncAt':
-          map['last_sync_at'] != null
-              ? DateTime.parse(map['last_sync_at'] as String)
-              : null,
+      'createdAt': _parseDateTime(map['created_at']),
+      'updatedAt': _parseDateTime(map['updated_at']),
+      'lastSyncAt': _parseDateTime(map['last_sync_at']),
       'isDirty': map['is_dirty'] as bool? ?? false,
       'isDeleted': map['is_deleted'] as bool? ?? false,
       'version': map['version'] as int? ?? 1,
       'userId': map['user_id'] as String?,
       'moduleName': map['module_name'] as String?,
     };
+  }
+
+  /// Helper para converter Timestamp ou String para DateTime
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.parse(value);
+    // Handle Firestore Timestamp
+    if (value.runtimeType.toString().contains('Timestamp')) {
+      try {
+        // Firestore Timestamp has toDate() method
+        return (value as dynamic).toDate() as DateTime;
+      } catch (_) {
+        return null;
+      }
+    }
+    return null;
   }
 
   @override

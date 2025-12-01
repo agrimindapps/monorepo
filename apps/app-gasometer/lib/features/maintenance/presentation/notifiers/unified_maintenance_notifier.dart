@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../../domain/services/maintenance_filter_service.dart';
 import '../../domain/usecases/add_maintenance_record.dart';

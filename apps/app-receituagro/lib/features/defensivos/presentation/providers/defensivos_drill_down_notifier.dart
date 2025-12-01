@@ -83,7 +83,7 @@ class DefensivosDrillDownState {
 /// Integra com DefensivosUnificadoNotifier para dados
 ///
 /// keepAlive: true - Mantém o estado de navegação durante a sessão
-@Riverpod(keepAlive: true)
+@riverpod
 class DefensivosDrillDownNotifier extends _$DefensivosDrillDownNotifier {
   late final DefensivosGroupingService _groupingService;
 

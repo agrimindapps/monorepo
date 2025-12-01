@@ -1,4 +1,5 @@
 import 'package:app_receituagro/core/providers/core_providers.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:app_receituagro/core/providers/domain_providers.dart'
     as domain_providers;
 import 'package:core/core.dart' hide Column;

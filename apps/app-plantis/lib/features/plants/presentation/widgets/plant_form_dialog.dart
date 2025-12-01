@@ -425,89 +425,83 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
 
   Future<void> _handleSave() async {
     final formManager = ref.read(plantFormStateNotifierProvider.notifier);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final isEditing = widget.plantId != null;
+    final plantId = widget.plantId;
 
     try {
       final success = await formManager.savePlant();
 
-      if (mounted) {
-        if (success) {
-          try {
-            ref.read(plantsNotifierProvider.notifier).refreshPlants();
-          } catch (e) {
-            print('Aviso: Não foi possível atualizar a lista automaticamente');
-          }
-          if (widget.plantId != null && mounted) {
-            if (kDebugMode) {
-              print(
-                '🔧 PlantFormDialog._handleSave() - Tentando atualizar PlantDetailsProvider para plantId: ${widget.plantId}',
-              );
-            }
+      if (!mounted) return;
 
-            try {
-              await ref.read(plantDetailsNotifierProvider.notifier).reloadPlant(widget.plantId!);
+      if (success) {
+        // Fechar o dialog primeiro
+        navigator.pop(true);
 
-              if (kDebugMode) {
-                print(
-                  '✅ PlantFormDialog._handleSave() - PlantDetailsProvider (Riverpod) recarregado com sucesso',
-                );
-              }
-            } catch (e2) {
-              if (kDebugMode) {
-                print(
-                  '❌ PlantFormDialog._handleSave() - Falha ao atualizar PlantDetailsProvider: $e2',
-                );
-              }
-            }
-          }
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.check_circle, color: Colors.white),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        widget.plantId != null
-                            ? 'Planta atualizada com sucesso!'
-                            : 'Planta adicionada com sucesso!',
-                      ),
-                    ),
-                  ],
+        // Mostrar snackbar após fechar (usando referência capturada)
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    isEditing
+                        ? 'Planta atualizada com sucesso!'
+                        : 'Planta adicionada com sucesso!',
+                  ),
                 ),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
+              ],
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
 
-            Navigator.of(context).pop(true);
-          }
-        } else {
-          final formState = ref.read(plantFormStateNotifierProvider);
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.error, color: Colors.white),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        formState.errorMessage ?? 'Erro ao salvar planta',
-                      ),
-                    ),
-                  ],
-                ),
-                backgroundColor: Theme.of(context).colorScheme.error,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
+        // Atualizar lista em background (sem await para não bloquear)
+        try {
+          ref.read(plantsNotifierProvider.notifier).refreshPlants();
+        } catch (e) {
+          if (kDebugMode) {
+            print('Aviso: Não foi possível atualizar a lista automaticamente: $e');
           }
         }
+
+        // Recarregar detalhes se editando
+        if (plantId != null) {
+          try {
+            ref.read(plantDetailsNotifierProvider.notifier).reloadPlant(plantId);
+          } catch (e2) {
+            if (kDebugMode) {
+              print('❌ PlantFormDialog._handleSave() - Falha ao atualizar PlantDetailsProvider: $e2');
+            }
+          }
+        }
+      } else {
+        final formState = ref.read(plantFormStateNotifierProvider);
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    formState.errorMessage ?? 'Erro ao salvar planta',
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           SnackBar(
             content: Row(
               children: [
@@ -516,7 +510,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
                 Expanded(child: Text('Erro inesperado: $e')),
               ],
             ),
-            backgroundColor: Theme.of(context).colorScheme.error,
+            backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
         );

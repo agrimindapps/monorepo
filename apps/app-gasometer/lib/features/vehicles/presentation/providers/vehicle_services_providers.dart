@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/error_mapper.dart';
 import '../../../../core/providers/dependency_providers.dart' as deps;
@@ -13,13 +14,13 @@ import '../../domain/usecases/update_vehicle.dart';
 part 'vehicle_services_providers.g.dart';
 
 /// Provider para VehicleFilterService (Singleton)
-@Riverpod(keepAlive: true)
+@riverpod
 VehicleFilterService vehicleFilterService(Ref ref) {
   return VehicleFilterServiceImpl();
 }
 
 /// Provider para ErrorMapper (Singleton) - Compartilhado por todo o app
-@Riverpod(keepAlive: true)
+@riverpod
 ErrorMapper errorMapper(Ref ref) {
   return ErrorMapperImpl();
 }

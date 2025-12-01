@@ -19,7 +19,7 @@ FavoritosErrorMessageService favoritosErrorMessageService(Ref ref) {
 }
 
 // --- Cache Service ---
-@Riverpod(keepAlive: true)
+@riverpod
 FavoritosCacheServiceInline favoritosCacheService(Ref ref) {
   return FavoritosCacheServiceInline();
 }
@@ -71,7 +71,7 @@ FavoritosSyncService favoritosSyncService(Ref ref) {
 }
 
 // --- Main Favoritos Service ---
-@Riverpod(keepAlive: true)
+@riverpod
 FavoritosService favoritosService(Ref ref) {
   return FavoritosService(
     dataResolver: ref.watch(favoritosDataResolverServiceProvider),

@@ -16,7 +16,7 @@ import '../services/subscription_error_message_service.dart';
 part 'subscription_providers.g.dart';
 
 // Error Message Service Provider
-@Riverpod(keepAlive: true)
+@riverpod
 SubscriptionErrorMessageService subscriptionErrorMessageService(
   Ref ref,
 ) {
@@ -24,7 +24,7 @@ SubscriptionErrorMessageService subscriptionErrorMessageService(
 }
 
 // Repository Provider
-@Riverpod(keepAlive: true)
+@riverpod
 IAppSubscriptionRepository appSubscriptionRepository(
   Ref ref,
 ) {
@@ -36,7 +36,7 @@ IAppSubscriptionRepository appSubscriptionRepository(
 }
 
 // Use Cases Providers
-@Riverpod(keepAlive: true)
+@riverpod
 GetCurrentSubscriptionUseCase getCurrentSubscriptionUseCase(
   Ref ref,
 ) {
@@ -45,7 +45,7 @@ GetCurrentSubscriptionUseCase getCurrentSubscriptionUseCase(
   );
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 ManageSubscriptionUseCase manageSubscriptionUseCase(
   Ref ref,
 ) {
@@ -54,7 +54,7 @@ ManageSubscriptionUseCase manageSubscriptionUseCase(
   );
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 CancelSubscriptionUseCase cancelSubscriptionUseCase(
   Ref ref,
 ) {
@@ -63,7 +63,7 @@ CancelSubscriptionUseCase cancelSubscriptionUseCase(
   );
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 RefreshSubscriptionStatusUseCase refreshSubscriptionStatusUseCase(
   Ref ref,
 ) {
@@ -72,7 +72,7 @@ RefreshSubscriptionStatusUseCase refreshSubscriptionStatusUseCase(
   );
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 GetUserPremiumStatusUseCase getUserPremiumStatusUseCase(
   Ref ref,
 ) {
@@ -81,7 +81,7 @@ GetUserPremiumStatusUseCase getUserPremiumStatusUseCase(
   );
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 GetAvailableProductsUseCase getAvailableProductsUseCase(
   Ref ref,
 ) {
@@ -90,7 +90,7 @@ GetAvailableProductsUseCase getAvailableProductsUseCase(
   );
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 PurchaseProductUseCase purchaseProductUseCase(
   Ref ref,
 ) {
@@ -100,7 +100,7 @@ PurchaseProductUseCase purchaseProductUseCase(
   );
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 RestorePurchasesUseCase restorePurchasesUseCase(
   Ref ref,
 ) {

@@ -7,6 +7,7 @@ import '../../domain/usecases/restore_purchases.dart';
 import '../../domain/usecases/get_available_packages.dart';
 import '../../data/datasources/local/premium_local_datasource.dart';
 import '../../data/repositories/premium_repository_impl.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'premium_providers.g.dart';
 

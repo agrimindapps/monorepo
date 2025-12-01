@@ -44,7 +44,7 @@ dependencies:
   flutter_localization: ^0.2.1
   flutter_localizations:
     sdk: flutter
-  skeletonizer: ^1.4.2
+  skeletonizer: ^2.1.1
   flutter_staggered_grid_view: any
 
   # Navigation

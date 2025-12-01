@@ -174,8 +174,8 @@ class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent
 
         if (!isPremium) {
           return PremiumFeatureCard(
-            title: 'Comentários Premium',
-            description: 'Salve suas anotações pessoais sobre pragas, doenças e defensivos. Recurso exclusivo para assinantes.',
+            title: 'Conteúdo Premium',
+            description: 'Desbloqueie recursos exclusivos e tenha acesso completo a todas as funcionalidades do aplicativo.',
             buttonText: 'Desbloquear Agora',
             useRocketIcon: true,
             onUpgradePressed: () {

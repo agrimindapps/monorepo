@@ -4,6 +4,7 @@ import '../../core/providers/core_providers.dart';
 import '../../features/account/presentation/usage_stats.dart' as local;
 import '../../features/auth/domain/user_limits.dart' as local;
 import '../../infrastructure/services/subscription_service.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'subscription_providers.g.dart';
 

@@ -23,7 +23,7 @@ import '../../domain/usecases/get_defensivos_usecase.dart';
 part 'defensivos_providers.g.dart';
 
 /// Bridge Provider for ComentariosService
-@Riverpod(keepAlive: true)
+@riverpod
 ComentariosService comentariosService(Ref ref) {
   return ComentariosService(
     repository: ref.watch(iComentariosRepositoryProvider),
@@ -33,7 +33,7 @@ ComentariosService comentariosService(Ref ref) {
 }
 
 /// Bridge Provider for FavoritosRepositorySimplified
-@Riverpod(keepAlive: true)
+@riverpod
 FavoritosRepositorySimplified favoritosRepositorySimplified(
     Ref ref) {
   return FavoritosRepositorySimplified(
@@ -43,29 +43,29 @@ FavoritosRepositorySimplified favoritosRepositorySimplified(
 
 // --- Specialized Services ---
 
-@Riverpod(keepAlive: true)
+@riverpod
 DefensivosGroupingService defensivosGroupingService(
     Ref ref) {
   return DefensivosGroupingService();
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 IDefensivosQueryService defensivosQueryService(Ref ref) {
   return DefensivosQueryService();
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 IDefensivosSearchService defensivosSearchService(
     Ref ref) {
   return DefensivosSearchService();
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 IDefensivosStatsService defensivosStatsService(Ref ref) {
   return DefensivosStatsService();
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 IDefensivosFilterService defensivosFilterService(
     Ref ref) {
   return DefensivosFilterService();
@@ -73,7 +73,7 @@ IDefensivosFilterService defensivosFilterService(
 
 // --- Repository ---
 
-@Riverpod(keepAlive: true)
+@riverpod
 IDefensivosRepository defensivosRepository(Ref ref) {
   return DefensivosRepositoryImpl(
     ref.watch(core_providers.fitossanitariosRepositoryProvider),
@@ -87,59 +87,59 @@ IDefensivosRepository defensivosRepository(Ref ref) {
 
 // --- Use Cases ---
 
-@Riverpod(keepAlive: true)
+@riverpod
 GetDefensivosUseCase getDefensivosUseCase(Ref ref) {
   return GetDefensivosUseCase(ref.watch(defensivosRepositoryProvider));
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 GetDefensivosByClasseUseCase getDefensivosByClasseUseCase(
     Ref ref) {
   return GetDefensivosByClasseUseCase(ref.watch(defensivosRepositoryProvider));
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 SearchDefensivosUseCase searchDefensivosUseCase(
     Ref ref) {
   return SearchDefensivosUseCase(ref.watch(defensivosRepositoryProvider));
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 GetDefensivosRecentesUseCase getDefensivosRecentesUseCase(
     Ref ref) {
   return GetDefensivosRecentesUseCase(ref.watch(defensivosRepositoryProvider));
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 GetDefensivosStatsUseCase getDefensivosStatsUseCase(
     Ref ref) {
   return GetDefensivosStatsUseCase(ref.watch(defensivosRepositoryProvider));
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 GetClassesAgronomicasUseCase getClassesAgronomicasUseCase(
     Ref ref) {
   return GetClassesAgronomicasUseCase(ref.watch(defensivosRepositoryProvider));
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 GetFabricantesUseCase getFabricantesUseCase(Ref ref) {
   return GetFabricantesUseCase(ref.watch(defensivosRepositoryProvider));
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 GetDefensivosAgrupadosUseCase getDefensivosAgrupadosUseCase(
     Ref ref) {
   return GetDefensivosAgrupadosUseCase(ref.watch(defensivosRepositoryProvider));
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 GetDefensivosCompletosUseCase getDefensivosCompletosUseCase(
     Ref ref) {
   return GetDefensivosCompletosUseCase(ref.watch(defensivosRepositoryProvider));
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 GetDefensivosComFiltrosUseCase getDefensivosComFiltrosUseCase(
     Ref ref) {
   return GetDefensivosComFiltrosUseCase(

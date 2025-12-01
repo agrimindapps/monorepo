@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/sync/sync_queue_drift_service.dart';
 import '../../database/providers/database_providers.dart';
@@ -28,6 +29,7 @@ import '../../features/settings/data/datasources/settings_local_datasource.dart'
 import '../../features/settings/data/repositories/settings_repository.dart';
 import '../../features/settings/domain/repositories/i_settings_repository.dart';
 import '../../features/settings/domain/usecases/sync_settings_usecase.dart';
+import '../../features/tasks/data/datasources/local/tasks_local_datasource.dart';
 import '../config/security_config.dart';
 import '../interfaces/network_info.dart';
 import '../services/plantis_sync_service.dart';
@@ -179,12 +181,19 @@ PlantSyncService plantSyncService(Ref ref) {
 // PlantCommentsRepository moved to comments_providers.dart
 
 @riverpod
+TasksLocalDataSource tasksLocalDataSourceForPlants(Ref ref) {
+  final driftRepo = ref.watch(tasksDriftRepositoryProvider);
+  return TasksLocalDataSourceImpl(driftRepo);
+}
+
+@riverpod
 PlantTasksRepository plantTasksRepository(Ref ref) {
   return PlantTasksRepositoryImpl(
     localDatasource: ref.watch(plantTasksLocalDatasourceProvider),
     remoteDatasource: ref.watch(plantTasksRemoteDatasourceProvider),
     networkInfo: ref.watch(networkInfoProvider),
     authService: ref.watch(authRepositoryProvider),
+    tasksLocalDataSource: ref.watch(tasksLocalDataSourceForPlantsProvider),
   );
 }
 

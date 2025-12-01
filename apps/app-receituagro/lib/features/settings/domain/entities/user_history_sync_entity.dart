@@ -82,7 +82,7 @@ class UserHistorySyncEntity extends BaseSyncEntity {
       itemId: map['itemId'] as String,
       nomeItem: map['nomeItem'] as String,
       acaoTipo: map['acaoTipo'] as String,
-      dataAcao: DateTime.parse(map['dataAcao'] as String),
+      dataAcao: _parseDateTime(map['dataAcao']) ?? DateTime.now(),
       metadados: Map<String, dynamic>.from(map['metadados'] as Map),
       categoria: map['categoria'] as String?,
       cultura: map['cultura'] as String?,
@@ -105,29 +105,36 @@ class UserHistorySyncEntity extends BaseSyncEntity {
       itemId: map['itemId'] as String,
       nomeItem: map['nomeItem'] as String,
       acaoTipo: map['acaoTipo'] as String,
-      dataAcao: DateTime.parse(map['dataAcao'] as String),
+      dataAcao: _parseDateTime(map['dataAcao']) ?? DateTime.now(),
       metadados: Map<String, dynamic>.from(map['metadados'] as Map),
       categoria: map['categoria'] as String?,
       cultura: map['cultura'] as String?,
       tempoVisualizacaoSegundos: map['tempoVisualizacaoSegundos'] as int?,
-      createdAt:
-          map['createdAt'] != null
-              ? DateTime.parse(map['createdAt'] as String)
-              : null,
-      updatedAt:
-          map['updatedAt'] != null
-              ? DateTime.parse(map['updatedAt'] as String)
-              : null,
-      lastSyncAt:
-          map['lastSyncAt'] != null
-              ? DateTime.parse(map['lastSyncAt'] as String)
-              : null,
+      createdAt: _parseDateTime(map['createdAt']),
+      updatedAt: _parseDateTime(map['updatedAt']),
+      lastSyncAt: _parseDateTime(map['lastSyncAt']),
       isDirty: map['isDirty'] as bool? ?? false,
       isDeleted: map['isDeleted'] as bool? ?? false,
       version: map['version'] as int? ?? 1,
       userId: map['userId'] as String?,
       moduleName: map['moduleName'] as String?,
     );
+  }
+
+  /// Helper para converter Timestamp ou String para DateTime
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.parse(value);
+    // Handle Firestore Timestamp
+    if (value.runtimeType.toString().contains('Timestamp')) {
+      try {
+        return (value as dynamic).toDate() as DateTime;
+      } catch (_) {
+        return null;
+      }
+    }
+    return null;
   }
 
   /// Factory para criar entrada de visualização

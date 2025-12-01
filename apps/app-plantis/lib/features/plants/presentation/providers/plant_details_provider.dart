@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide Column;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../core/providers/repository_providers.dart';
@@ -6,6 +7,7 @@ import '../../domain/entities/plant.dart';
 import '../../domain/usecases/delete_plant_usecase.dart';
 import '../../domain/usecases/get_plant_by_id_usecase.dart';
 import '../../domain/usecases/update_plant_usecase.dart';
+import 'plants_providers.dart';
 
 part 'plant_details_provider.freezed.dart';
 part 'plant_details_provider.g.dart';
@@ -211,7 +213,17 @@ DeletePlantUseCase deletePlantUseCase(Ref ref) {
 
 @riverpod
 UpdatePlantUseCase updatePlantUseCase(Ref ref) {
-  return UpdatePlantUseCase(ref.watch(plantsRepositoryProvider));
+  final repository = ref.watch(plantsRepositoryProvider);
+  final generateInitialTasks = ref.watch(generateInitialTasksUseCaseProvider);
+  final plantTaskGenerator = ref.watch(plantTaskGeneratorProvider);
+  final plantTasksRepository = ref.watch(plantTasksRepositoryProvider);
+
+  return UpdatePlantUseCase(
+    repository,
+    generateInitialTasks,
+    plantTaskGenerator,
+    plantTasksRepository,
+  );
 }
 
 /// Alias for backwards compatibility with existing code

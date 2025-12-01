@@ -12,7 +12,6 @@ import '../../../../core/widgets/standard_tab_bar_widget.dart';
 import '../../../../database/providers/database_providers.dart';
 import '../../../../database/receituagro_database.dart';
 import '../../../../database/repositories/diagnostico_repository.dart';
-import '../../../../features/navigation/navigation_providers.dart';
 import '../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
 import '../../domain/entities/defensivo_details_entity.dart';
 import '../providers/detalhe_defensivo_notifier.dart';
@@ -243,8 +242,10 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
       debugPrint('Defensivo procurado:');
       debugPrint('  - ID: "$defensivoId"');
       debugPrint('  - Nome: "$defensivoNome"');
+      
+      // Usar idDefensivo (campo da entity) em vez de fkIdDefensivo
       final exactMatches = allDiagnosticos
-          .where((d) => d.fkIdDefensivo == defensivoId)
+          .where((d) => d.idDefensivo == defensivoId)
           .toList();
       debugPrint('Correspondências exatas por ID: ${exactMatches.length}');
       final nameMatches = allDiagnosticos
@@ -262,18 +263,18 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
         debugPrint('🎯 [INVESTIGAÇÃO] ENCONTRADAS correspondências por nome:');
         for (int i = 0; i < nameMatches.length && i < 5; i++) {
           final match = nameMatches[i];
-          debugPrint('  [$i] fkIdDefensivo: "${match.fkIdDefensivo}"');
+          debugPrint('  [$i] idDefensivo: "${match.idDefensivo}"');
           debugPrint('      nomeDefensivo: "${match.nomeDefensivo}"');
           debugPrint('      nomeCultura: "${match.nomeCultura}"');
         }
       }
       final allDefensivoIds = allDiagnosticos
-          .map((d) => d.fkIdDefensivo as String)
+          .map((d) => d.idDefensivo?.toString() ?? '')
           .where((id) => id.isNotEmpty)
           .toSet()
           .toList();
 
-      debugPrint('🔍 [INVESTIGAÇÃO] Padrões de fkIdDefensivo (10 primeiros):');
+      debugPrint('🔍 [INVESTIGAÇÃO] Padrões de idDefensivo (10 primeiros):');
       for (int i = 0; i < allDefensivoIds.length && i < 10; i++) {
         debugPrint(
           '  [$i] "${allDefensivoIds[i]}" (${allDefensivoIds[i].length} chars)',
@@ -355,8 +356,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
         isDark: isDark,
         showBackButton: true,
         showActions: true,
-        onBackPressed: () =>
-            ref.read(receitaAgroNavigationServiceProvider).goBack<void>(),
+        onBackPressed: () => Navigator.of(context).pop(),
         onRightIconPressed: _handleFavoriteToggle,
       ),
       loading: () => ModernHeaderWidget(
@@ -367,8 +367,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
         isDark: isDark,
         showBackButton: true,
         showActions: true,
-        onBackPressed: () =>
-            ref.read(receitaAgroNavigationServiceProvider).goBack<void>(),
+        onBackPressed: () => Navigator.of(context).pop(),
       ),
       error: (_, __) => ModernHeaderWidget(
         title: widget.defensivoName,
@@ -378,8 +377,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
         isDark: isDark,
         showBackButton: true,
         showActions: true,
-        onBackPressed: () =>
-            ref.read(receitaAgroNavigationServiceProvider).goBack<void>(),
+        onBackPressed: () => Navigator.of(context).pop(),
       ),
     );
   }
@@ -389,30 +387,19 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
 
     return state.when(
       data: (data) {
-        if (data.isLoading) {
-          return LoadingErrorWidgets.buildLoadingState(context);
-        }
-
-        if (data.hasError) {
-          return LoadingErrorWidgets.buildErrorState(
-            context,
-            data.errorMessage ?? 'Erro desconhecido',
-            () => _loadData(),
-          );
-        }
-
-        return _buildContent();
+        // Sempre mostra a estrutura de tabs, com skeleton ou conteúdo real
+        return _buildContent(isLoading: data.isLoading, hasError: data.hasError, errorMessage: data.errorMessage);
       },
-      loading: () => LoadingErrorWidgets.buildLoadingState(context),
-      error: (error, _) => LoadingErrorWidgets.buildErrorState(
-        context,
-        error.toString(),
-        () => _loadData(),
-      ),
+      loading: () => _buildContent(isLoading: true, hasError: false),
+      error: (error, _) => _buildContent(isLoading: false, hasError: true, errorMessage: error.toString()),
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent({
+    required bool isLoading,
+    required bool hasError,
+    String? errorMessage,
+  }) {
     return Column(
       children: [
         StandardTabBarWidget(
@@ -427,7 +414,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
             ),
             child: IndexedStack(
               index: _currentTabIndex,
-              children: _buildTabContents(),
+              children: _buildTabContents(isLoading: isLoading, hasError: hasError, errorMessage: errorMessage),
             ),
           ),
         ),
@@ -435,9 +422,13 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
     );
   }
 
-  List<Widget> _buildTabContents() {
+  List<Widget> _buildTabContents({
+    required bool isLoading,
+    required bool hasError,
+    String? errorMessage,
+  }) {
     return [
-      _wrapTabContent(_buildInformacoesTab(), 'informacoes'),
+      _wrapTabContent(_buildInformacoesTab(isLoading: isLoading, hasError: hasError, errorMessage: errorMessage), 'informacoes'),
       _wrapTabContent(
         DiagnosticosTabWidget(defensivoName: widget.defensivoName),
         'diagnostico',
@@ -471,16 +462,29 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
     );
   }
 
-  Widget _buildInformacoesTab() {
+  Widget _buildInformacoesTab({
+    required bool isLoading,
+    required bool hasError,
+    String? errorMessage,
+  }) {
+    // Mostra skeleton durante o loading
+    if (isLoading) {
+      return LoadingErrorWidgets.buildLoadingState(context);
+    }
+
+    // Mostra erro se houver
+    if (hasError) {
+      return LoadingErrorWidgets.buildErrorState(
+        context,
+        errorMessage ?? 'Erro desconhecido',
+        () => _loadData(),
+      );
+    }
+
     final state = ref.watch(detalheDefensivoProvider);
 
     return state.when(
       data: (data) {
-        // Mostra skeleton durante o loading
-        if (data.isLoading) {
-          return LoadingErrorWidgets.buildLoadingState(context);
-        }
-
         if (data.defensivoData == null) {
           return LoadingErrorWidgets.buildEmptyState(
             context,

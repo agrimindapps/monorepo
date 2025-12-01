@@ -1,185 +1,231 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/spacing_tokens.dart';
-
-/// Skeleton widget para a tela de detalhes do defensivo
-/// Imita a estrutura real dos cards para uma experiência de loading mais fluida
+/// Skeleton widget para conteúdo dinâmico de cards
+/// Aplicado apenas ao conteúdo interno dos cards, não à estrutura completa da página
 class DefensivoDetailsSkeletonWidget extends StatelessWidget {
   const DefensivoDetailsSkeletonWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      physics: const NeverScrollableScrollPhysics(),
-      child: Column(
-        children: [
-          _buildInfoCardSkeleton(context, 'Informações Técnicas', 5),
-          SpacingTokens.gapLG,
-          _buildInfoCardSkeleton(context, 'Classificação', 5),
-        ],
-      ),
-    );
+    return const DefensivoInfoCardsSkeleton();
   }
+}
 
-  Widget _buildInfoCardSkeleton(
-    BuildContext context,
-    String title,
-    int itemCount,
-  ) {
+/// Skeleton específico para os cards de informações do defensivo
+class DefensivoInfoCardsSkeleton extends StatelessWidget {
+  const DefensivoInfoCardsSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
+    
     return ShimmerService.fromColors(
       context: context,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: theme.shadowColor.withValues(alpha: 0.1),
-              spreadRadius: 1,
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header do card
-            Container(
-              padding: SpacingTokens.paddingSM,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    const Color(0xFF4CAF50).withValues(alpha: 0.8),
-                    const Color(0xFF4CAF50).withValues(alpha: 0.9),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Container(
-                    width: 150,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Conteúdo do card
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: List.generate(
-                  itemCount,
-                  (index) => Padding(
-                    padding: EdgeInsets.only(
-                      bottom: index < itemCount - 1 ? 12 : 0,
-                    ),
-                    child: _buildInfoItemSkeleton(context),
-                  ),
-                ),
-              ),
-            ),
+            _buildSectionSkeleton(context, 4),
+            const SizedBox(height: 20),
+            _buildSectionSkeleton(context, 4),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoItemSkeleton(BuildContext context) {
+  Widget _buildSectionSkeleton(BuildContext context, int itemCount) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final skeletonColor = isDark ? Colors.grey.shade700 : Colors.grey.shade300;
 
     return Container(
-      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(8),
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFF4CAF50).withValues(alpha: 0.2),
-          width: 1,
+          color: theme.dividerColor.withValues(alpha: 0.3),
         ),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Ícone placeholder
+          // Header skeleton
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  const Color(0xFF4CAF50).withValues(alpha: 0.15),
-                  const Color(0xFF4CAF50).withValues(alpha: 0.05),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Container(
-              width: 16,
-              height: 16,
-              decoration: BoxDecoration(
-                color: skeletonColor,
-                borderRadius: BorderRadius.circular(4),
+              color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
               ),
             ),
-          ),
-          const SizedBox(width: 12),
-          // Textos placeholder
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
                 Container(
-                  height: 14,
-                  width: 100,
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: skeletonColor,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  width: 140,
+                  height: 16,
                   decoration: BoxDecoration(
                     color: skeletonColor,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
-                const SizedBox(height: 6),
+              ],
+            ),
+          ),
+          // Items skeleton
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: List.generate(
+                itemCount,
+                (index) => Padding(
+                  padding: EdgeInsets.only(bottom: index < itemCount - 1 ? 8 : 0),
+                  child: _buildItemSkeleton(context, skeletonColor),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildItemSkeleton(BuildContext context, Color skeletonColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: skeletonColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: skeletonColor.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Container(
-                  height: 13,
-                  width: double.infinity,
+                  width: 80,
+                  height: 12,
                   decoration: BoxDecoration(
                     color: skeletonColor.withValues(alpha: 0.7),
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  width: double.infinity,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: skeletonColor,
+                    borderRadius: BorderRadius.circular(3),
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Skeleton para lista de diagnósticos
+class DiagnosticosListSkeleton extends StatelessWidget {
+  const DiagnosticosListSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final skeletonColor = isDark ? Colors.grey.shade700 : Colors.grey.shade300;
+
+    return ShimmerService.fromColors(
+      context: context,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: List.generate(
+            3,
+            (index) => Padding(
+              padding: EdgeInsets.only(bottom: index < 2 ? 12 : 0),
+              child: _buildDiagnosticoItemSkeleton(skeletonColor),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDiagnosticoItemSkeleton(Color skeletonColor) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: skeletonColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: skeletonColor.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: skeletonColor.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 120,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: skeletonColor,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  width: 80,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: skeletonColor.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: skeletonColor.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
         ],

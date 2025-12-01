@@ -9,7 +9,7 @@ import 'odometer_state.dart';
 
 part 'odometer_notifier.g.dart';
 
-@Riverpod(keepAlive: true)
+@riverpod
 class OdometerNotifier extends _$OdometerNotifier {
   late final GetOdometerReadingsByVehicleUseCase _getReadingsUseCase;
   late final GetLastOdometerReadingUseCase _getLastReadingUseCase;

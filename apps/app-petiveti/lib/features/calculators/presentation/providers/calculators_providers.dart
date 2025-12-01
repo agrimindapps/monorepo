@@ -7,6 +7,7 @@ import '../../domain/repositories/calculator_repository.dart';
 import '../../domain/usecases/get_calculators.dart';
 import '../../domain/usecases/manage_calculation_history.dart';
 import '../../domain/usecases/perform_calculation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'calculators_providers.g.dart';
 

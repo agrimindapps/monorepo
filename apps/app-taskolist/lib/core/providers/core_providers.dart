@@ -12,6 +12,7 @@ import '../../infrastructure/services/sync_service.dart';
 import '../services/auto_sync_service.dart';
 import '../services/data_integrity_service.dart';
 import '../services/taskolist_data_cleaner.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'core_providers.g.dart';
 

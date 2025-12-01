@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide Column;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/services/failure_message_service.dart';
 import '../../domain/entities/defensivo_entity.dart';

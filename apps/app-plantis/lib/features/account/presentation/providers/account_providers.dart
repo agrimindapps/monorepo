@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide Column, DeleteAccountUseCase, LogoutUseCase;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 
 import '../../../../core/providers/core_di_providers.dart';

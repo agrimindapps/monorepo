@@ -5,6 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../domain/usecases/reset_password_usecase.dart';
 import '../../domain/usecases/signup_usecase.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auth_provider.freezed.dart';
 part 'auth_provider.g.dart';

@@ -75,8 +75,8 @@ class _ComentariosPragaWidgetState extends ConsumerState<ComentariosPragaWidget>
   /// Constrói card de restrição premium
   Widget _buildPremiumRestrictionCard() {
     return PremiumFeatureCard(
-      title: 'Comentários Premium',
-      description: 'Salve suas observações sobre esta praga. Recurso exclusivo para assinantes.',
+      title: 'Conteúdo Premium',
+      description: 'Desbloqueie recursos exclusivos e tenha acesso completo a todas as funcionalidades do aplicativo.',
       buttonText: 'Desbloquear Agora',
       useRocketIcon: true,
       onUpgradePressed: () {

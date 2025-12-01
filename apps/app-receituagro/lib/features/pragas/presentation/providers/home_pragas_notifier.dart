@@ -118,7 +118,7 @@ class HomePragasState {
 }
 
 /// Notifier para gerenciamento de estado da página Home de Pragas
-@Riverpod(keepAlive: true)
+@riverpod
 class HomePragasNotifier extends _$HomePragasNotifier {
   @override
   Future<HomePragasState> build() async {

@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../database/database_provider.dart';
 import '../../../../database/repositories/rain_gauge_repository.dart';

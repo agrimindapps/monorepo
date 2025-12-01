@@ -5,6 +5,7 @@ import 'package:core/core.dart'
         RevokeAllOtherDevicesUseCase,
         GetUserDevicesUseCase,
         ValidateDeviceUseCase;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_di_providers.dart';
 import '../../../../core/providers/repository_providers.dart';

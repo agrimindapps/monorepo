@@ -1,4 +1,5 @@
 import 'package:core/core.dart' as core;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' hide AuthStatus, AuthState;
 import 'package:flutter/foundation.dart';
 
@@ -22,7 +23,7 @@ part 'profile_notifier.g.dart';
 /// - Local user data caching
 ///
 /// Separado do AuthNotifier para aplicar SRP (Single Responsibility Principle)
-@Riverpod(keepAlive: true)
+@riverpod
 class Profile extends _$Profile {
   late final UpdateProfile _updateProfile;
   late final GasometerAnalyticsService _analytics;

@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/domain/usecases/get_current_user_usecase.dart'
     as app_auth;

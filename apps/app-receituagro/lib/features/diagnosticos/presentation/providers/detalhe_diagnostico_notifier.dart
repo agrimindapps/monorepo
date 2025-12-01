@@ -85,7 +85,7 @@ class DetalheDiagnosticoState {
 ///
 /// IMPORTANTE: keepAlive mantém o state mesmo quando não há listeners
 /// Isso previne perda de dados ao navegar entre tabs ou fazer rebuilds temporários
-@Riverpod(keepAlive: true)
+@riverpod
 class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
   @override
   Future<DetalheDiagnosticoState> build() async {
@@ -130,11 +130,24 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
             Praga? praga;
 
             if (diagnosticoDrift != null) {
+               debugPrint('🔍 [DetalheDiagnosticoNotifier] Buscando dados relacionados...');
+               debugPrint('   defensivoId: ${diagnosticoDrift.defensivoId}');
+               debugPrint('   pragaId: ${diagnosticoDrift.pragaId}');
+               
                defensivo = await fitossanitariosRepo.findById(diagnosticoDrift.defensivoId);
+               debugPrint('   defensivo encontrado: ${defensivo != null ? defensivo.nome : "NULL"}');
+               
                if (defensivo != null) {
                   defensivoInfo = await fitossanitariosInfoRepo.findByDefensivoId(defensivo.id);
+                  debugPrint('   defensivoInfo encontrado: ${defensivoInfo != null ? "SIM" : "NULL"}');
+                  if (defensivoInfo != null) {
+                    debugPrint('   - formulacao: ${defensivoInfo.formulacao}');
+                    debugPrint('   - modoAcao: ${defensivoInfo.modoAcao}');
+                    debugPrint('   - toxicidade: ${defensivoInfo.toxicidade}');
+                  }
                }
                praga = await pragasRepo.findById(diagnosticoDrift.pragaId);
+               debugPrint('   praga encontrada: ${praga != null ? praga.nome : "NULL"}');
             }
 
             // Extensão DiagnosticoExtension já busca dados do defensivo internamente
@@ -203,11 +216,15 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
           final pragasRepo = ref.read(pragasRepositoryProvider);
 
           final defensivo = await fitossanitariosRepo.findById(diagnosticoDrift.defensivoId);
+          debugPrint('🔍 [Fallback] defensivo encontrado: ${defensivo != null ? defensivo.nome : "NULL"}');
+          
           FitossanitariosInfoData? defensivoInfo;
           if (defensivo != null) {
              defensivoInfo = await fitossanitariosInfoRepo.findByDefensivoId(defensivo.id);
+             debugPrint('🔍 [Fallback] defensivoInfo encontrado: ${defensivoInfo != null ? "SIM" : "NULL"}');
           }
           final praga = await pragasRepo.findById(diagnosticoDrift.pragaId);
+          debugPrint('🔍 [Fallback] praga encontrada: ${praga != null ? praga.nome : "NULL"}');
 
           // Extensão DiagnosticoExtension já busca dados do defensivo internamente
           final diagnosticoData = await diagnosticoDrift.toDataMap(

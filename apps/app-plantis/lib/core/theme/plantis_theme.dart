@@ -103,6 +103,45 @@ class PlantisTheme {
       shadowColor: Colors.transparent, // Sem sombra padrão
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      elevation: 8,
+    ),
+    datePickerTheme: DatePickerThemeData(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      headerBackgroundColor: PlantisColors.primary,
+      headerForegroundColor: Colors.white,
+      dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return PlantisColors.primary;
+        }
+        return Colors.transparent;
+      }),
+      dayForegroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.white;
+        }
+        return null;
+      }),
+      todayBackgroundColor: WidgetStateProperty.all(Colors.transparent),
+      todayForegroundColor: WidgetStateProperty.all(PlantisColors.primary),
+      todayBorder: const BorderSide(color: PlantisColors.primary, width: 1),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    ),
+    timePickerTheme: TimePickerThemeData(
+      backgroundColor: Colors.white,
+      dialBackgroundColor: PlantisColors.primaryLight.withValues(alpha: 0.2),
+      hourMinuteColor: WidgetStateColor.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return PlantisColors.primary.withValues(alpha: 0.2);
+        }
+        return Colors.grey.withValues(alpha: 0.1);
+      }),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    ),
     scaffoldBackgroundColor: const Color(0xFFF8F9FA),
   );
 
@@ -191,6 +230,45 @@ class PlantisTheme {
       color: const Color(0xFF2D2D2D),
       shadowColor: Colors.transparent, // Sem sombra padrão
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: const Color(0xFF2D2D2D),
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      elevation: 8,
+    ),
+    datePickerTheme: DatePickerThemeData(
+      backgroundColor: const Color(0xFF2D2D2D),
+      surfaceTintColor: Colors.transparent,
+      headerBackgroundColor: PlantisColors.primaryDark,
+      headerForegroundColor: Colors.white,
+      dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return PlantisColors.primary;
+        }
+        return Colors.transparent;
+      }),
+      dayForegroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.white;
+        }
+        return null;
+      }),
+      todayBackgroundColor: WidgetStateProperty.all(Colors.transparent),
+      todayForegroundColor: WidgetStateProperty.all(PlantisColors.primaryLight),
+      todayBorder: const BorderSide(color: PlantisColors.primaryLight, width: 1),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    ),
+    timePickerTheme: TimePickerThemeData(
+      backgroundColor: const Color(0xFF2D2D2D),
+      dialBackgroundColor: PlantisColors.primary.withValues(alpha: 0.2),
+      hourMinuteColor: WidgetStateColor.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return PlantisColors.primary.withValues(alpha: 0.3);
+        }
+        return Colors.grey.withValues(alpha: 0.2);
+      }),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     ),
     scaffoldBackgroundColor: const Color(0xFF1C1C1E),
   );

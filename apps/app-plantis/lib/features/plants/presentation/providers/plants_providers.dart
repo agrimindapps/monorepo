@@ -73,7 +73,16 @@ AddPlantUseCase addPlantUseCase(Ref ref) {
 @riverpod
 UpdatePlantUseCase updatePlantUseCase(Ref ref) {
   final repository = ref.watch(plantsRepositoryProvider);
-  return UpdatePlantUseCase(repository);
+  final generateInitialTasks = ref.watch(generateInitialTasksUseCaseProvider);
+  final plantTaskGenerator = ref.watch(plantTaskGeneratorProvider);
+  final plantTasksRepository = ref.watch(plantTasksRepositoryProvider);
+
+  return UpdatePlantUseCase(
+    repository,
+    generateInitialTasks,
+    plantTaskGenerator,
+    plantTasksRepository,
+  );
 }
 
 @riverpod

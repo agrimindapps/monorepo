@@ -60,7 +60,7 @@ class FavoritoSyncEntity extends BaseSyncEntity {
       tipo: map['tipo'] as String,
       itemId: map['itemId'] as String,
       itemData: Map<String, dynamic>.from(map['itemData'] as Map),
-      adicionadoEm: DateTime.parse(map['adicionadoEm'] as String),
+      adicionadoEm: _parseDateTime(map['adicionadoEm']) ?? DateTime.now(),
       createdAt: baseFields['createdAt'] as DateTime?,
       updatedAt: baseFields['updatedAt'] as DateTime?,
       lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
@@ -78,25 +78,32 @@ class FavoritoSyncEntity extends BaseSyncEntity {
       tipo: map['tipo'] as String,
       itemId: map['itemId'] as String,
       itemData: Map<String, dynamic>.from(map['itemData'] as Map),
-      adicionadoEm: DateTime.parse(map['adicionadoEm'] as String),
-      createdAt:
-          map['createdAt'] != null
-              ? DateTime.parse(map['createdAt'] as String)
-              : null,
-      updatedAt:
-          map['updatedAt'] != null
-              ? DateTime.parse(map['updatedAt'] as String)
-              : null,
-      lastSyncAt:
-          map['lastSyncAt'] != null
-              ? DateTime.parse(map['lastSyncAt'] as String)
-              : null,
+      adicionadoEm: _parseDateTime(map['adicionadoEm']) ?? DateTime.now(),
+      createdAt: _parseDateTime(map['createdAt']),
+      updatedAt: _parseDateTime(map['updatedAt']),
+      lastSyncAt: _parseDateTime(map['lastSyncAt']),
       isDirty: map['isDirty'] as bool? ?? false,
       isDeleted: map['isDeleted'] as bool? ?? false,
       version: map['version'] as int? ?? 1,
       userId: map['userId'] as String?,
       moduleName: map['moduleName'] as String?,
     );
+  }
+
+  /// Helper para converter Timestamp ou String para DateTime
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.parse(value);
+    // Handle Firestore Timestamp
+    if (value.runtimeType.toString().contains('Timestamp')) {
+      try {
+        return (value as dynamic).toDate() as DateTime;
+      } catch (_) {
+        return null;
+      }
+    }
+    return null;
   }
 
   @override

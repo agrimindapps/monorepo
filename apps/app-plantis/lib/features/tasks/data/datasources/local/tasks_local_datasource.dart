@@ -28,6 +28,7 @@ abstract class TasksLocalDataSource {
   Future<void> cacheTasks(List<TaskModel> tasks);
   Future<void> updateTask(TaskModel task);
   Future<void> deleteTask(String id);
+  Future<int> deleteTasksByPlantId(String plantId);
   Future<void> clearCache();
 }
 
@@ -181,6 +182,22 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
       await _driftRepo.deleteTask(id);
     } catch (e) {
       throw CacheFailure('Erro ao deletar tarefa: $e');
+    }
+  }
+
+  @override
+  Future<int> deleteTasksByPlantId(String plantId) async {
+    try {
+      if (kDebugMode) {
+        print('🗑️ TasksLocalDataSource: Deletando tarefas da planta $plantId');
+      }
+      final count = await _driftRepo.deleteTasksByPlantId(plantId);
+      if (kDebugMode) {
+        print('✅ TasksLocalDataSource: $count tarefas deletadas');
+      }
+      return count;
+    } catch (e) {
+      throw CacheFailure('Erro ao deletar tarefas por plantId: $e');
     }
   }
 

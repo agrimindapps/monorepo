@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:core/core.dart' as core show UserEntity, AuthProvider;
 import 'package:core/core.dart' hide AuthStatus, AuthState;
@@ -41,7 +42,7 @@ part 'auth_notifier.g.dart';
 /// - Data sync → sync_notifier.dart (background sync, UnifiedSync)
 ///
 /// Reduzido de 953 linhas para ~500 linhas (core auth apenas)
-@Riverpod(keepAlive: true)
+@riverpod
 class Auth extends _$Auth {
   late final GetCurrentUser _getCurrentUser;
   late final WatchAuthState _watchAuthState;

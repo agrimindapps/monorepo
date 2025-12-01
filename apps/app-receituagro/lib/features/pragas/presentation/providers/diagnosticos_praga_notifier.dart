@@ -148,7 +148,7 @@ class DiagnosticosPragaState {
 ///
 /// IMPORTANTE: keepAlive mantém o state mesmo quando não há listeners
 /// Isso previne perda de dados ao navegar entre tabs ou fazer rebuilds temporários
-@Riverpod(keepAlive: true)
+@riverpod
 class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
   @override
   Future<DiagnosticosPragaState> build() async {

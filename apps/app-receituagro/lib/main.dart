@@ -183,9 +183,14 @@ class _ReceitaAgroAppState extends ConsumerState<ReceitaAgroApp> {
     super.initState();
     
     // Cria o observer uma única vez para evitar recriação a cada build
+    // Usa Future.microtask para evitar modificar provider durante build
     _bottomNavObserver = BottomNavVisibilityObserver(
       onVisibilityChanged: (visible) {
-        ref.read(navigationStateProvider.notifier).setBottomNavVisibility(visible);
+        Future.microtask(() {
+          if (mounted) {
+            ref.read(navigationStateProvider.notifier).setBottomNavVisibility(visible);
+          }
+        });
       },
     );
     
@@ -243,7 +248,8 @@ class _ReceitaAgroAppState extends ConsumerState<ReceitaAgroApp> {
       themeMode: themeMode,
       initialRoute: '/home-defensivos',
       onGenerateRoute: app_router.AppRouter.generateRoute,
-      navigatorKey: NavigationService.navigatorKey,
+      // REMOVIDO: navigatorKey causava erro de GlobalKey duplicada
+      // navigatorKey: NavigationService.navigatorKey,
       navigatorObservers: [
         // Observer para sincronizar estado do BottomNav com rotas
         _bottomNavObserver,

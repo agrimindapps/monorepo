@@ -10,6 +10,7 @@ import 'package:core/core.dart'
         ValidateDeviceParams,
         DeviceValidationResult;
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/device_management/data/models/device_model.dart';

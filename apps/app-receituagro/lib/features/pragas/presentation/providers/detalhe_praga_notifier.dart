@@ -108,7 +108,7 @@ class DetalhePragaState {
 
 /// Notifier para gerenciar estado da página de detalhes da praga
 /// Responsabilidade única: coordenar dados e estado da praga
-@Riverpod(keepAlive: true)
+@riverpod
 class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   @override
   Future<DetalhePragaState> build() async {

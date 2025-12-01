@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/modern_header_widget.dart';
-import '../../../navigation/bottom_nav_wrapper.dart';
+import '../../../../core/widgets/praga_image_widget.dart';
 import '../providers/detalhe_diagnostico_notifier.dart';
-import '../widgets/aplicacao_instrucoes_widget.dart';
-import '../widgets/diagnostico_detalhes_widget.dart';
-import '../widgets/diagnostico_info_widget.dart';
 
 class DetalheDiagnosticoPage extends ConsumerStatefulWidget {
   final String diagnosticoId;
@@ -66,9 +63,7 @@ class _DetalheDiagnosticoPageState extends ConsumerState<DetalheDiagnosticoPage>
     final asyncState = ref.watch(detalheDiagnosticoProvider);
 
     return asyncState.when(
-      data: (state) => BottomNavWrapper(
-          selectedIndex: 0, // Assumindo que diagnóstico está relacionado a defensivos
-          child: ColoredBox(
+      data: (state) => ColoredBox(
             color: theme.scaffoldBackgroundColor,
             child: SafeArea(
               child: Center(
@@ -90,7 +85,6 @@ class _DetalheDiagnosticoPageState extends ConsumerState<DetalheDiagnosticoPage>
               ),
             ),
           ),
-        ),
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Center(child: Text('Erro: $error')),
     );
@@ -245,40 +239,269 @@ class _DetalheDiagnosticoPageState extends ConsumerState<DetalheDiagnosticoPage>
     final resolvedNomeDefensivo = state.diagnosticoData['nomeDefensivo'] ?? widget.nomeDefensivo;
     final resolvedCultura = state.diagnosticoData['nomeCultura'] ?? widget.cultura;
     
-    // If scientific name is available, append it to praga name for display or use it for image lookup
-    // DiagnosticoInfoWidget uses nomePraga for both image lookup and display
-    // Ideally we should pass scientific name separately, but for now let's ensure we pass the best name available
+    // Build unified list items
+    final listItems = _buildUnifiedListItems(state, resolvedNomePraga, resolvedNomeDefensivo, resolvedCultura);
     
-    return SingleChildScrollView(
+    return ListView.builder(
       padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      itemCount: listItems.length,
+      itemBuilder: (context, index) => listItems[index],
+    );
+  }
+
+  /// Build unified list of items with section headers
+  List<Widget> _buildUnifiedListItems(
+    DetalheDiagnosticoState state,
+    String nomePraga,
+    String nomeDefensivo,
+    String cultura,
+  ) {
+    final theme = Theme.of(context);
+    final items = <Widget>[];
+    final data = state.diagnosticoData;
+    
+    // === IMAGEM DO DIAGNÓSTICO ===
+    items.add(_buildImageSection(nomePraga, nomeDefensivo, cultura, data));
+    items.add(const SizedBox(height: 16));
+    
+    // === INFORMAÇÕES GERAIS ===
+    items.add(_buildSectionHeader(theme, 'Informações Gerais'));
+    items.add(_buildInfoTile(theme, Icons.science, 'Ingrediente Ativo', data['ingredienteAtivo'] ?? 'N/A'));
+    items.add(_buildInfoTile(theme, Icons.warning, 'Classificação Toxicológica', data['classificacaoToxicologica'] ?? 'N/A'));
+    items.add(_buildInfoTile(theme, Icons.eco, 'Classificação Ambiental', data['classificacaoAmbiental'] ?? 'N/A'));
+    items.add(_buildInfoTile(theme, Icons.agriculture, 'Classe Agronômica', data['classeAgronomica'] ?? 'N/A'));
+    
+    // === DETALHES DO DIAGNÓSTICO ===
+    items.add(const SizedBox(height: 8));
+    items.add(_buildSectionHeader(theme, 'Detalhes do Diagnóstico'));
+    items.add(_buildInfoTile(theme, Icons.science_outlined, 'Formulação', data['formulacao'] ?? 'N/A'));
+    items.add(_buildInfoTile(theme, Icons.bolt, 'Modo de Ação', data['modoAcao'] ?? 'N/A'));
+    items.add(_buildInfoTile(theme, Icons.verified, 'Registro MAPA', data['mapa'] ?? 'N/A'));
+    
+    // === INSTRUÇÕES DE APLICAÇÃO ===
+    items.add(const SizedBox(height: 8));
+    items.add(_buildSectionHeader(theme, 'Instruções de Aplicação'));
+    items.add(_buildInfoTile(theme, Icons.medication, 'Dosagem', data['dosagem'] ?? 'N/A'));
+    items.add(_buildInfoTile(theme, Icons.agriculture, 'Vazão Terrestre', data['vazaoTerrestre'] ?? 'N/A'));
+    items.add(_buildInfoTile(theme, Icons.flight, 'Vazão Aérea', data['vazaoAerea'] ?? 'N/A'));
+    items.add(_buildInfoTile(theme, Icons.schedule, 'Intervalo de Aplicação', data['intervaloAplicacao'] ?? 'N/A'));
+    items.add(_buildInfoTile(theme, Icons.shield, 'Intervalo de Segurança', data['intervaloSeguranca'] ?? 'N/A'));
+    
+    // === TECNOLOGIA DE APLICAÇÃO (se disponível) ===
+    if (data['tecnologia']?.isNotEmpty ?? false) {
+      items.add(const SizedBox(height: 8));
+      items.add(_buildSectionHeader(theme, 'Tecnologia de Aplicação'));
+      items.add(_buildTecnologiaCard(theme, data['tecnologia']!));
+    }
+    
+    // Espaço final
+    items.add(const SizedBox(height: 80));
+    
+    return items;
+  }
+
+  Widget _buildSectionHeader(ThemeData theme, String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: theme.colorScheme.onSurface,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoTile(ThemeData theme, IconData icon, String label, String value) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withValues(alpha: 0.08),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Row(
         children: [
-          DiagnosticoInfoWidget(
-            nomePraga: resolvedNomePraga,
-            nomeDefensivo: resolvedNomeDefensivo,
-            cultura: resolvedCultura,
-            diagnosticoData: state.diagnosticoData,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              color: theme.colorScheme.primary,
+              size: 20,
+            ),
           ),
-          const SizedBox(height: 24),
-          DiagnosticoDetalhesWidget(
-            diagnosticoData: state.diagnosticoData,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 24),
-          AplicacaoInstrucoesWidget(
-            diagnosticoData: state.diagnosticoData,
-          ),
-          const SizedBox(height: 24),
-          _buildPremiumFeatures(state),
-          
-          const SizedBox(height: 80), // Espaço para bottom navigation
         ],
       ),
     );
   }
-  
-  Widget _buildPremiumFeatures(DetalheDiagnosticoState state) {
-    return const SizedBox.shrink();
+
+  Widget _buildImageSection(String nomePraga, String nomeDefensivo, String cultura, Map<String, String> data) {
+    final theme = Theme.of(context);
+    final nomeCientifico = data['nomeCientifico'] ?? nomePraga;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withValues(alpha: 0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final availableWidth = constraints.maxWidth - 24;
+              final imageHeight = availableWidth * 0.5;
+
+              return PragaImageWidget(
+                nomeCientifico: nomeCientifico,
+                width: double.infinity,
+                height: imageHeight,
+                fit: BoxFit.cover,
+                borderRadius: BorderRadius.circular(10),
+                errorWidget: Container(
+                  width: double.infinity,
+                  height: imageHeight,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.image_not_supported_outlined,
+                    size: 48,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          Text(
+            nomePraga,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          if (data['nomeCientifico'] != null && data['nomeCientifico'] != 'N/A') ...[
+            const SizedBox(height: 2),
+            Text(
+              data['nomeCientifico']!,
+              style: TextStyle(
+                fontSize: 13,
+                fontStyle: FontStyle.italic,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+          const SizedBox(height: 4),
+          Text(
+            '$nomeDefensivo - $cultura',
+            style: TextStyle(
+              fontSize: 13,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTecnologiaCard(ThemeData theme, String tecnologia) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withValues(alpha: 0.08),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              Icons.psychology,
+              color: theme.colorScheme.primary,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              tecnologia,
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.colorScheme.onSurface,
+                height: 1.5,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _toggleFavorito() async {

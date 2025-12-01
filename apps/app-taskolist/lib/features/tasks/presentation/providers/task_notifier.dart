@@ -9,6 +9,7 @@ import '../../domain/task_entity.dart';
 import '../../domain/update_task.dart';
 import '../../domain/watch_tasks.dart';
 import '../../providers/task_providers.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'task_notifier.g.dart';
 

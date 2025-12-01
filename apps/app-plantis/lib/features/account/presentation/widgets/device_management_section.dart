@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/providers/device_management_providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../shared/widgets/base_page_scaffold.dart';
+import '../utils/widget_utils.dart';
 
 /// Seção de gerenciamento de dispositivos na página de perfil
 /// Mostra resumo e permite navegação para página completa
@@ -17,7 +18,7 @@ class DeviceManagementSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(context, 'Dispositivos Conectados'),
+        buildSectionHeader(context, 'Dispositivos Conectados'),
         const SizedBox(height: 16),
         PlantisCard(
           child: deviceManagementAsync.when(
@@ -152,17 +153,6 @@ class DeviceManagementSection extends ConsumerWidget {
             label: const Text('Tentar Novamente'),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    final theme = Theme.of(context);
-    return Text(
-      title,
-      style: theme.textTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.bold,
-        color: theme.colorScheme.onSurface,
       ),
     );
   }

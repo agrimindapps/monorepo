@@ -158,6 +158,23 @@ class TasksDriftRepository {
     return updated > 0;
   }
 
+  /// Delete all tasks by plant ID (soft delete)
+  Future<int> deleteTasksByPlantId(String plantFirebaseId) async {
+    final localPlantId = await _resolvePlantId(plantFirebaseId);
+    if (localPlantId == null) return 0;
+
+    return await (_db.update(
+      _db.tasks,
+    )..where((t) => t.plantId.equals(localPlantId)))
+        .write(
+      db.TasksCompanion(
+        isDeleted: const Value(true),
+        isDirty: const Value(true),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   Future<void> clearAll() async {
     await _db.delete(_db.tasks).go();
   }

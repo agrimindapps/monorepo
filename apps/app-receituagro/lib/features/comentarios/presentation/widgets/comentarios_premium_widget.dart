@@ -75,7 +75,7 @@ class ComentariosPremiumWidget extends StatelessWidget {
 
   Widget _buildTitle() {
     return const Text(
-      'Comentários Premium',
+      'Conteúdo Premium',
       style: TextStyle(
         fontSize: 22,
         fontWeight: FontWeight.bold,
@@ -87,7 +87,7 @@ class ComentariosPremiumWidget extends StatelessWidget {
 
   Widget _buildDescription() {
     return const Text(
-      'Salve suas anotações pessoais sobre pragas, doenças e defensivos com a assinatura premium.',
+      'Desbloqueie recursos exclusivos e tenha acesso completo a todas as funcionalidades do aplicativo.',
       style: TextStyle(
         fontSize: 16,
         color: Color(0xFFBF360C),

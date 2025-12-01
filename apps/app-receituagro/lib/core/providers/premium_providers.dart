@@ -5,7 +5,7 @@ import '../services/mock_premium_service.dart';
 
 part 'premium_providers.g.dart';
 
-@Riverpod(keepAlive: true)
+@riverpod
 IPremiumService premiumService(Ref ref) {
   return MockPremiumService();
 }

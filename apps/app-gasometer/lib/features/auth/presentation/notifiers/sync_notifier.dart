@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
@@ -18,7 +19,7 @@ part 'sync_notifier.g.dart';
 ///
 /// REFATORADO: Agora usa listener reativo (stream-based) similar ao ReceitaAgro
 /// Separado do AuthNotifier para aplicar SRP (Single Responsibility Principle)
-@Riverpod(keepAlive: true)
+@riverpod
 class Sync extends _$Sync {
   late final GasometerAnalyticsService _analytics;
 

@@ -270,92 +270,189 @@ class PlantInfoSection extends ConsumerWidget {
 
   void _showEditNotesDialog(BuildContext context, WidgetRef ref) {
     final notesController = TextEditingController(text: plant.notes ?? '');
+    final theme = Theme.of(context);
 
     showDialog<void>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.edit_note, size: 24),
-            SizedBox(width: 12),
-            Text('Editar Observações'),
-          ],
-        ),
-        content: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.8,
-          child: TextField(
-            controller: notesController,
-            maxLines: 5,
-            autofocus: true,
-            decoration: const InputDecoration(
-              hintText: 'Digite suas observações sobre a planta...',
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.all(16),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(dialogContext).pop();
-            },
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final newNotes = notesController.text.trim();
-
-              // Cria os parâmetros de atualização
-              final updateParams = UpdatePlantParams(
-                id: plant.id,
-                name: plant.name,
-                species: plant.species,
-                spaceId: plant.spaceId,
-                imageUrls: plant.imageUrls,
-                plantingDate: plant.plantingDate,
-                notes: newNotes.isEmpty ? null : newNotes,
-                config: plant.config,
-                isFavorited: plant.isFavorited,
-              );
-
-              // Chama o provider para atualizar
-              final notifier = ref.read(plantsNotifierProvider.notifier);
-              final success = await notifier.updatePlant(updateParams);
-
-              if (dialogContext.mounted) {
-                Navigator.of(dialogContext).pop();
-
-                // Atualiza o provider de detalhes para refletir as mudanças
-                if (success) {
-                  ref.read(plantDetailsNotifierProvider.notifier).loadPlant(plant.id);
-                }
-
-                // Mostra feedback
-                if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Observações atualizadas com sucesso'),
-                      backgroundColor: Colors.green,
-                      duration: Duration(seconds: 2),
+      builder: (dialogContext) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 500),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Erro ao atualizar observações'),
-                      backgroundColor: Colors.red,
-                      duration: Duration(seconds: 2),
+                    child: Icon(
+                      Icons.edit_note,
+                      size: 24,
+                      color: theme.colorScheme.onPrimaryContainer,
                     ),
-                  );
-                }
-              }
-            },
-            child: const Text('Salvar'),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Editar Observações',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Adicione notas sobre sua planta',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(),
+                    icon: const Icon(Icons.close),
+                    style: IconButton.styleFrom(
+                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              // Campo de texto
+              TextField(
+                controller: notesController,
+                maxLines: 6,
+                minLines: 4,
+                autofocus: true,
+                style: theme.textTheme.bodyLarge,
+                decoration: InputDecoration(
+                  hintText: 'Digite suas observações sobre a planta...',
+                  hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                  ),
+                  filled: true,
+                  fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: theme.colorScheme.primary,
+                      width: 2,
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.all(16),
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Botões
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(),
+                    child: const Text('Cancelar'),
+                  ),
+                  const SizedBox(width: 12),
+                  FilledButton.icon(
+                    onPressed: () async {
+                      final scaffoldMessenger = ScaffoldMessenger.of(context);
+                      final navigator = Navigator.of(dialogContext);
+                      final newNotes = notesController.text.trim();
+
+                      // Cria os parâmetros de atualização
+                      final updateParams = UpdatePlantParams(
+                        id: plant.id,
+                        name: plant.name,
+                        species: plant.species,
+                        spaceId: plant.spaceId,
+                        imageUrls: plant.imageUrls,
+                        plantingDate: plant.plantingDate,
+                        notes: newNotes.isEmpty ? null : newNotes,
+                        config: plant.config,
+                        isFavorited: plant.isFavorited,
+                      );
+
+                      // Chama o provider para atualizar
+                      final notifier = ref.read(plantsNotifierProvider.notifier);
+                      final success = await notifier.updatePlant(updateParams);
+
+                      navigator.pop();
+
+                      // Atualiza o provider de detalhes para refletir as mudanças
+                      if (success) {
+                        ref.read(plantDetailsNotifierProvider.notifier).loadPlant(plant.id);
+                        scaffoldMessenger.showSnackBar(
+                          const SnackBar(
+                            content: Row(
+                              children: [
+                                Icon(Icons.check_circle, color: Colors.white),
+                                SizedBox(width: 8),
+                                Text('Observações atualizadas com sucesso'),
+                              ],
+                            ),
+                            backgroundColor: Colors.green,
+                            behavior: SnackBarBehavior.floating,
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      } else {
+                        // Obtém a mensagem de erro específica do provider
+                        final errorMessage = ref.read(plantsNotifierProvider).error ??
+                            'Não foi possível atualizar as observações. Tente novamente.';
+                        scaffoldMessenger.showSnackBar(
+                          SnackBar(
+                            content: Row(
+                              children: [
+                                const Icon(Icons.error, color: Colors.white),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    errorMessage,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            backgroundColor: Colors.red,
+                            behavior: SnackBarBehavior.floating,
+                            duration: const Duration(seconds: 4),
+                          ),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.save_outlined, size: 18),
+                    label: const Text('Salvar'),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     ).then((_) {
-      // Dispose do controller após o dialog fechar
       notesController.dispose();
     });
   }

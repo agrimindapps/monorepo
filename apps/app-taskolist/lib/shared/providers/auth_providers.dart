@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import '../../core/providers/core_providers.dart';
 import '../../infrastructure/services/auth_service.dart';
 import '../../infrastructure/services/sync_service.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auth_providers.g.dart';
 

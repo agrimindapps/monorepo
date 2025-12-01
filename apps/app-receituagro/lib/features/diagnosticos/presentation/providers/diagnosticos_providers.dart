@@ -18,38 +18,38 @@ import '../../domain/usecases/get_diagnosticos_usecase.dart';
 part 'diagnosticos_providers.g.dart';
 
 // Services
-@Riverpod(keepAlive: true)
+@riverpod
 IDiagnosticosFilterService diagnosticosFilterService(
     Ref ref) {
   return DiagnosticosFilterService(ref.watch(iDiagnosticosRepositoryProvider));
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 IDiagnosticosSearchService diagnosticosSearchService(
     Ref ref) {
   return DiagnosticosSearchService(ref.watch(iDiagnosticosRepositoryProvider));
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 IDiagnosticosMetadataService diagnosticosMetadataService(
     Ref ref) {
   return DiagnosticosMetadataService(
       ref.watch(iDiagnosticosRepositoryProvider));
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 IDiagnosticosStatsService diagnosticosStatsService(
     Ref ref) {
   return DiagnosticosStatsService(ref.watch(iDiagnosticosRepositoryProvider));
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 FailureMessageService failureMessageService(Ref ref) {
   return FailureMessageService();
 }
 
 // Repository
-@Riverpod(keepAlive: true)
+@riverpod
 IDiagnosticosRepository iDiagnosticosRepository(
     Ref ref) {
   final baseRepo = ref.watch(diagnosticoRepositoryProvider);
@@ -64,12 +64,12 @@ IDiagnosticosRepository iDiagnosticosRepository(
 }
 
 // UseCases
-@Riverpod(keepAlive: true)
+@riverpod
 GetDiagnosticosUseCase getDiagnosticosUseCase(Ref ref) {
   return GetDiagnosticosUseCase(ref.watch(iDiagnosticosRepositoryProvider));
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 GetDiagnosticoByIdUseCase getDiagnosticoByIdUseCase(
     Ref ref) {
   return GetDiagnosticoByIdUseCase(ref.watch(iDiagnosticosRepositoryProvider));
